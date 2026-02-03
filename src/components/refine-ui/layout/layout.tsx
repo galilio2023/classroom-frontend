@@ -2,11 +2,7 @@
 
 import { Header } from "@/components/refine-ui/layout/header";
 import { ThemeProvider } from "@/components/refine-ui/theme/theme-provider";
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import type { PropsWithChildren } from "react";
 import { Sidebar } from "./sidebar";
