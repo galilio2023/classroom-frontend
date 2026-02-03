@@ -52,7 +52,7 @@ export function Sidebar() {
           {
             "px-3": open,
             "px-1": !open,
-          }
+          },
         )}
       >
         {menuItems.map((item: TreeMenuItem) => (
@@ -112,7 +112,7 @@ function SidebarItemGroup({ item, selectedKey }: MenuItemProps) {
             "opacity-100": open,
             "pointer-events-none": !open,
             "pointer-events-auto": open,
-          }
+          },
         )}
       >
         {getDisplayName(item)}
@@ -144,7 +144,7 @@ function SidebarItemCollapsible({ item, selectedKey }: MenuItemProps) {
         "text-muted-foreground",
         "transition-transform",
         "duration-200",
-        "group-data-[state=open]:rotate-90"
+        "group-data-[state=open]:rotate-90",
       )}
     />
   );
@@ -208,7 +208,6 @@ function SidebarItemLink({ item, selectedKey }: MenuItemProps) {
 
   return <SidebarButton item={item} isSelected={isSelected} asLink={true} />;
 }
-
 function SidebarHeader() {
   const { title } = useRefineOptions();
   const { open, isMobile } = useShadcnSidebar();
@@ -216,61 +215,94 @@ function SidebarHeader() {
   return (
     <ShadcnSidebarHeader
       className={cn(
-        "p-0",
-        "h-16",
-        "border-b",
-        "border-border",
-        "flex-row",
-        "items-center",
-        "justify-between",
-        "overflow-hidden"
+        "p-0 h-16 border-b border-sidebar-border flex items-center overflow-hidden bg-sidebar",
+        // Desktop collapsed: Center the button.
+        // Desktop open or Mobile: Space-between layout.
+        !open && !isMobile ? "justify-center" : "flex-row justify-between px-4",
       )}
     >
-      <div
-        className={cn(
-          "whitespace-nowrap",
-          "flex",
-          "flex-row",
-          "h-full",
-          "items-center",
-          "justify-start",
-          "gap-2",
-          "transition-discrete",
-          "duration-200",
-          {
-            "pl-3": !open,
-            "pl-5": open,
-          }
-        )}
-      >
-        <div>{title.icon}</div>
-        <h2
-          className={cn(
-            "text-sm",
-            "font-bold",
-            "transition-opacity",
-            "duration-200",
-            {
-              "opacity-0": !open,
-              "opacity-100": open,
-            }
-          )}
-        >
-          {title.text}
-        </h2>
-      </div>
+      {/* 1. Only render the logo div if the sidebar is OPEN or on MOBILE */}
+      {(open || isMobile) && (
+        <div className="flex flex-row items-center gap-2 whitespace-nowrap transition-discrete duration-200">
+          <div className="shrink-0">{title.icon}</div>
+          <h2 className="text-sm font-bold truncate text-sidebar-foreground">
+            {title.text}
+          </h2>
+        </div>
+      )}
 
+      {/* 2. The Trigger - Always visible and clickable */}
       <ShadcnSidebarTrigger
-        className={cn("text-muted-foreground", "mr-1.5", {
-          "opacity-0": !open,
-          "opacity-100": open || isMobile,
-          "pointer-events-auto": open || isMobile,
-          "pointer-events-none": !open && !isMobile,
-        })}
+        className={cn(
+          "text-sidebar-foreground shrink-0 opacity-100 pointer-events-auto",
+          { "mr-0": !open && !isMobile }, // Center perfectly when collapsed
+        )}
       />
     </ShadcnSidebarHeader>
   );
 }
+// function SidebarHeader() {
+//   const { title } = useRefineOptions();
+//   const { open, isMobile } = useShadcnSidebar();
+//
+//   return (
+//     <ShadcnSidebarHeader
+//       className={cn(
+//         "p-0",
+//         "h-16",
+//         "border-b",
+//         "border-border",
+//         "flex-row",
+//         "items-center",
+//         "justify-between",
+//         "overflow-hidden"
+//       )}
+//     >
+//       <div
+//         className={cn(
+//           "whitespace-nowrap",
+//           "flex",
+//           "flex-row",
+//           "h-full",
+//           "items-center",
+//           "justify-start",
+//           "gap-2",
+//           "transition-discrete",
+//           "duration-200",
+//           {
+//             "pl-3": !open,
+//             "pl-5": open,
+//           }
+//         )}
+//       >
+//         <div>{title.icon}</div>
+//         <h2
+//           className={cn(
+//             "text-sm",
+//             "font-bold",
+//             "transition-opacity",
+//             "duration-200",
+//             {
+//               "opacity-0": !open,
+//               "opacity-100": open,
+//             }
+//           )}
+//         >
+//           {title.text}
+//         </h2>
+//       </div>
+//
+//       <ShadcnSidebarTrigger
+//         className={cn("text-muted-foreground", "mr-1.5", {
+//           "opacity-0": !open,
+//           "opacity-100": open || isMobile,
+//           "pointer-events-auto": open || isMobile,
+//           "pointer-events-none": !open && !isMobile,
+//         })}
+//       />
+//     </ShadcnSidebarHeader>
+//   );
+// }
 
 function getDisplayName(item: TreeMenuItem) {
   return item.meta?.label ?? item.label ?? item.name;
@@ -347,7 +379,7 @@ function SidebarButton({
           "text-sidebar-primary-foreground": isSelected,
           "hover:text-sidebar-primary-foreground": isSelected,
         },
-        className
+        className,
       )}
       onClick={onClick}
       {...props}
