@@ -1,27 +1,23 @@
-<div align="center">
-
-  <br />
-  <a href="https://refine.dev">
-    <img src="https://refine.ams3.cdn.digitaloceanspaces.com/logo/refine-logo-text.png" alt="Refine Logo" width="280" />
-  </a>
-  <br />
-
-  <h1 align="center">Classroom Frontend</h1>
-
-  <p align="center">
-    The modern UI for the Classroom Management System, built with the latest web technologies.
-    <br />
-    <a href="https://github.com/galilio2023/classroom-frontend/issues">Report Bug</a>
-    ·
-    <a href="https://github.com/galilio2023/classroom-frontend/issues">Request Feature</a>
-  </p>
-
-  <p align="center">
-    <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React">
-    <img src="https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite">
-    <img src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript">
-    <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind CSS">
-  </p>
+<div align="center" style="margin-bottom: 30px;">
+    <a href="https://ibrahim-tablawy-portfolio.vercel.app/">
+        <img alt="Author Avatar" 
+             src="https://avatars.githubusercontent.com/u/110768301?s=400&u=d419091187e0ac09e080581ea5b3096623df8beb&v=4" 
+             style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; margin-bottom: 15px; box-shadow: 0 8px 24px rgba(0,0,0,0.15);">
+    </a>
+    <h1 align="center">Classroom Frontend</h1>
+    <p align="center">
+      The modern UI for the Classroom Management System.
+      <br />
+      <a href="https://github.com/galilio2023/classroom-frontend/issues">Report Bug</a>
+      ·
+      <a href="https://github.com/galilio2023/classroom-frontend/issues">Request Feature</a>
+    </p>
+    <p align="center">
+      <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React">
+      <img src="https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite">
+      <img src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript">
+      <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind CSS">
+    </p>
 </div>
 
 ---
