@@ -35,12 +35,12 @@ import { Separator } from "@/components/ui/separator";
 import { BookOpen, Code2, Building2, FileText, Lightbulb, Info } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
-// Define the validation schema
+// Define the validation schema using z.coerce for automatic type conversion
 const formSchema = z.object({
   code: z.string().min(1, "Code is required").max(50, "Code must be less than 50 characters"),
   name: z.string().min(1, "Name is required").max(255, "Name must be less than 255 characters"),
   description: z.string().max(255, "Description must be less than 255 characters").optional(),
-  departmentId: z.string().min(1, "Department is required"),
+  departmentId: z.coerce.number().positive("Department is required"),
 });
 
 const SubjectsCreate = () => {
@@ -62,22 +62,19 @@ const SubjectsCreate = () => {
     optionValue: "id",
   });
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    onFinish({
-      ...values,
-      departmentId: Number(values.departmentId),
-    });
-  };
+  // No custom onSubmit needed anymore! Zod handles the conversion.
+  // We can pass `onFinish` directly to `handleSubmit`.
 
   return (
     <div className="container mx-auto py-6 max-w-6xl">
       <CreateViewHeader />
       
       <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left Column: The Main Form (Takes up 2/3 space) */}
+        {/* Left Column: The Main Form */}
         <div className="lg:col-span-2">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)}>
+            {/* Pass `onFinish` directly to `handleSubmit` */}
+            <form onSubmit={form.handleSubmit(onFinish)}>
               <Card className="border-border/50 shadow-sm">
                 <CardHeader>
                   <CardTitle className="text-xl font-semibold flex items-center gap-2">
@@ -199,7 +196,7 @@ const SubjectsCreate = () => {
           </Form>
         </div>
 
-        {/* Right Column: Sidebar / Help (Takes up 1/3 space) */}
+        {/* Right Column: Sidebar / Help */}
         <div className="space-y-6">
           <Card className="border-border/50 shadow-sm bg-muted/10">
             <CardHeader>
@@ -214,7 +211,7 @@ const SubjectsCreate = () => {
                   <span className="text-xs font-bold text-primary">1</span>
                 </div>
                 <p>
-                  <strong>Consistent Codes:</strong> Use a standard format like "DEPT-101" (e.g., CS-101, MATH-200) to make searching easier.
+                  <strong>Consistent Codes:</strong> Use a standard format like "DEPT-101" to make searching easier.
                 </p>
               </div>
               <div className="flex gap-3">
@@ -223,14 +220,6 @@ const SubjectsCreate = () => {
                 </div>
                 <p>
                   <strong>Clear Names:</strong> Avoid abbreviations in the subject name. "Introduction to Psychology" is better than "Intro to Psych".
-                </p>
-              </div>
-              <div className="flex gap-3">
-                <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                  <span className="text-xs font-bold text-primary">3</span>
-                </div>
-                <p>
-                  <strong>Descriptions:</strong> A good description helps students understand the course content at a glance.
                 </p>
               </div>
             </CardContent>

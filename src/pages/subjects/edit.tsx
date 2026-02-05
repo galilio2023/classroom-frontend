@@ -35,12 +35,12 @@ import { Separator } from "@/components/ui/separator";
 import { BookOpen, Code2, Building2, FileText, Lightbulb, Info } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
-// The same validation schema as the create page
+// Define the validation schema using z.coerce for automatic type conversion
 const formSchema = z.object({
   code: z.string().min(1, "Code is required").max(50, "Code must be less than 50 characters"),
   name: z.string().min(1, "Name is required").max(255, "Name must be less than 255 characters"),
   description: z.string().max(255, "Description must be less than 255 characters").optional(),
-  departmentId: z.union([z.string(), z.number()]).transform(v => Number(v)).refine(v => v > 0, "Department is required"),
+  departmentId: z.coerce.number().positive("Department is required"),
 });
 
 const SubjectsEdit = () => {
@@ -64,12 +64,7 @@ const SubjectsEdit = () => {
     defaultValue: queryResult?.data?.data.departmentId,
   });
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    onFinish({
-      ...values,
-      departmentId: Number(values.departmentId),
-    });
-  };
+  // No custom onSubmit needed anymore! Zod handles the conversion.
 
   return (
     <div className="container mx-auto py-6 max-w-6xl">
@@ -79,7 +74,8 @@ const SubjectsEdit = () => {
         {/* Left Column: The Main Form */}
         <div className="lg:col-span-2">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)}>
+            {/* Pass `onFinish` directly to `handleSubmit` */}
+            <form onSubmit={form.handleSubmit(onFinish)}>
               <Card className="border-border/50 shadow-sm">
                 <CardHeader>
                   <CardTitle className="text-xl font-semibold flex items-center gap-2">
