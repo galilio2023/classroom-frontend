@@ -1,4 +1,4 @@
-import { CreateViewHeader } from "@/components/refine-ui/views/create-view";
+import { EditViewHeader } from "@/components/refine-ui/views/edit-view";
 import { useForm } from "@refinedev/react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -43,15 +43,16 @@ const formSchema = z.object({
   departmentId: z.coerce.number().positive("Department is required"),
 });
 
-const SubjectsCreate = () => {
+const SubjectsEdit = () => {
   const { 
     saveButtonProps, 
-    refineCore: { onFinish, formLoading }, 
+    refineCore: { onFinish, formLoading, queryResult }, 
     ...form 
   } = useForm({
     resolver: zodResolver(formSchema),
     refineCoreProps: {
       resource: "subjects",
+      action: "edit",
       redirect: "list",
     },
   });
@@ -60,14 +61,14 @@ const SubjectsCreate = () => {
     resource: "departments",
     optionLabel: "name",
     optionValue: "id",
+    defaultValue: queryResult?.data?.data.departmentId,
   });
 
   // No custom onSubmit needed anymore! Zod handles the conversion.
-  // We can pass `onFinish` directly to `handleSubmit`.
 
   return (
     <div className="container mx-auto py-6 max-w-6xl">
-      <CreateViewHeader />
+      <EditViewHeader />
       
       <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left Column: The Main Form */}
@@ -79,10 +80,10 @@ const SubjectsCreate = () => {
                 <CardHeader>
                   <CardTitle className="text-xl font-semibold flex items-center gap-2">
                     <BookOpen className="h-5 w-5 text-primary" />
-                    Subject Details
+                    Edit Subject
                   </CardTitle>
                   <CardDescription>
-                    Enter the core information for the new subject.
+                    Update the details for the subject "{queryResult?.data?.data.name}".
                   </CardDescription>
                 </CardHeader>
                 
@@ -137,7 +138,7 @@ const SubjectsCreate = () => {
                           <Building2 className="h-4 w-4 text-muted-foreground" />
                           Department
                         </FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select onValueChange={field.onChange} value={String(field.value ?? "")}>
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select a department" />
@@ -188,7 +189,7 @@ const SubjectsCreate = () => {
                     disabled={formLoading}
                     className="min-w-[150px]"
                   >
-                    {formLoading ? "Saving..." : "Create Subject"}
+                    {formLoading ? "Saving..." : "Save Changes"}
                   </Button>
                 </CardFooter>
               </Card>
@@ -219,7 +220,7 @@ const SubjectsCreate = () => {
                   <span className="text-xs font-bold text-primary">2</span>
                 </div>
                 <p>
-                  <strong>Clear Names:</strong> Avoid abbreviations in the subject name. "Introduction to Psychology" is better than "Intro to Psych".
+                  <strong>Clear Names:</strong> Avoid abbreviations. "Introduction to Psychology" is better than "Intro to Psych".
                 </p>
               </div>
             </CardContent>
@@ -227,9 +228,9 @@ const SubjectsCreate = () => {
 
           <Alert>
             <Info className="h-4 w-4" />
-            <AlertTitle>Did you know?</AlertTitle>
+            <AlertTitle>Editing Mode</AlertTitle>
             <AlertDescription className="text-xs text-muted-foreground mt-1">
-              Subjects created here will be immediately available for class scheduling and teacher assignment.
+              Changes made here will overwrite the existing subject data. Be sure to save your work.
             </AlertDescription>
           </Alert>
         </div>
@@ -238,4 +239,4 @@ const SubjectsCreate = () => {
   );
 };
 
-export default SubjectsCreate;
+export default SubjectsEdit;

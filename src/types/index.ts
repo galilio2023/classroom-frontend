@@ -1,11 +1,7 @@
-export type Subject = {
-  id: number;
-  name: string;
-  code: string;
-  description: string;
-  department: string;
-  createdAt?: string;
-};
+// This file defines the shape of data used throughout the application.
+// These types should ideally match the responses from your backend API.
+
+// --- Generic API Response Types ---
 
 export type ListResponse<T = unknown> = {
   data?: T[];
@@ -24,6 +20,84 @@ export type CreateResponse<T = unknown> = {
 export type GetOneResponse<T = unknown> = {
   data?: T;
 };
+
+
+// --- Core Data Models ---
+
+export type Department = {
+  id: number;
+  name: string;
+  code: string;
+  description: string;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+export type Subject = {
+  id: number;
+  name: string;
+  code: string;
+  description: string;
+  department: Department; // Correctly typed as a nested object
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+export enum UserRole {
+  STUDENT = "student",
+  TEACHER = "teacher",
+  ADMIN = "admin",
+}
+
+export type User = {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+  email: string;
+  name: string;
+  role: UserRole;
+  image?: string;
+  imageCldPubId?: string;
+  department?: Department; // Assuming the backend can return a nested department
+};
+
+export type Schedule = {
+  day: string;
+  startTime: string;
+  endTime: string;
+};
+
+export type ClassDetails = {
+  id: number;
+  name: string;
+  description: string;
+  status: "active" | "inactive";
+  capacity: number;
+  courseCode: string;
+  courseName: string;
+  bannerUrl?: string;
+  bannerCldPubId?: string;
+  subject?: Subject;
+  teacher?: User;
+  department?: Department;
+  schedules: Schedule[];
+  inviteCode?: string;
+};
+
+
+// --- API Payloads ---
+
+export type SignUpPayload = {
+  email: string;
+  name: string;
+  password: string;
+  image?: string;
+  imageCldPubId?: string;
+  role: UserRole;
+};
+
+
+// --- Cloudinary & Widget Types (for file uploads) ---
 
 declare global {
   interface CloudinaryUploadWidgetResults {
@@ -64,59 +138,3 @@ export interface UploadWidgetProps {
   onChange?: (value: UploadWidgetValue | null) => void;
   disabled?: boolean;
 }
-
-export enum UserRole {
-  STUDENT = "student",
-  TEACHER = "teacher",
-  ADMIN = "admin",
-}
-
-export type User = {
-  id: string;
-  createdAt: string;
-  updatedAt: string;
-  email: string;
-  name: string;
-  role: UserRole;
-  image?: string;
-  imageCldPubId?: string;
-  department?: string;
-};
-
-export type Schedule = {
-  day: string;
-  startTime: string;
-  endTime: string;
-};
-
-export type Department = {
-  id: number;
-  name: string;
-  description: string;
-};
-
-export type ClassDetails = {
-  id: number;
-  name: string;
-  description: string;
-  status: "active" | "inactive";
-  capacity: number;
-  courseCode: string;
-  courseName: string;
-  bannerUrl?: string;
-  bannerCldPubId?: string;
-  subject?: Subject;
-  teacher?: User;
-  department?: Department;
-  schedules: Schedule[];
-  inviteCode?: string;
-};
-
-export type SignUpPayload = {
-  email: string;
-  name: string;
-  password: string;
-  image?: string;
-  imageCldPubId?: string;
-  role: UserRole;
-};
