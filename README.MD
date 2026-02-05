@@ -1,7 +1,7 @@
 <div align="center" style="margin-bottom: 30px;">
     <a href="https://ibrahim-tablawy-portfolio.vercel.app/">
         <img alt="Author Avatar" 
-             src="https://avatars.githubusercontent.com/u/110768301?s=400&u=d419091187e0ac09e080581ea5b3096623df8beb&v=4" 
+             src="https://avatars.githubusercontent.com/u/110768301?s=400&u=a6d45b9eeaa2b43332f9159614997f2d5d746c5a&v=4"
              style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; margin-bottom: 15px; box-shadow: 0 8px 24px rgba(0,0,0,0.15);">
     </a>
     <h1 align="center">Classroom Frontend</h1>
