@@ -16,154 +16,140 @@
 
 ## 📖 1. Overview & Core Concepts
 
-This project is the frontend interface for the Classroom Management System. It's not just a collection of components; it's a **data-intensive application** built on a powerful framework designed to accelerate development.
+This project is the frontend interface for the Classroom Management System. It is a **data-intensive application** built on the **Refine** meta-framework.
 
-The core philosophy is to use **Refine** as a meta-framework to handle the repetitive and complex parts of building a CRUD (Create, Read, Update, Delete) application. This lets us focus on building a beautiful and functional UI.
-
-### Key Concepts:
-
-*   **Headless by Design:** Refine provides hooks (`useList`, `useForm`, `useOne`) that handle data fetching, state management, and business logic. It doesn't dictate your UI, giving us the freedom to use any component library we want.
-*   **Component-Driven UI:** We use **Shadcn/ui**, a collection of beautifully designed and accessible components built on Radix UI and Tailwind CSS. This gives us a professional look and feel out of the box.
-*   **Everything is a Resource:** In Refine, every data model (like "Subjects" or "Departments") is treated as a "resource." Refine automatically generates the routes and data logic needed for full CRUD operations on each resource.
+The core philosophy is to separate the **UI** (how things look) from the **Data Logic** (how things are fetched). Refine handles the heavy lifting of state management, routing, and networking, allowing us to focus on building a beautiful and responsive interface with **Shadcn/ui**.
 
 ---
 
 ## 🛠️ 2. Tech Stack
 
-This project integrates a suite of modern frontend technologies to create a fast, maintainable, and scalable application.
-
-*   **Framework:** [React](https://react.dev/) (v19) - The foundation of our UI.
-*   **Build Tool:** [Vite](https://vitejs.dev/) - For near-instant server start and lightning-fast hot-reloading.
-*   **Meta-Framework:** [Refine](https://refine.dev/) - The engine that powers our data fetching, routing, and state management.
-*   **UI Components:** [Shadcn/ui](https://ui.shadcn.com/) - Provides the building blocks for our user interface.
-*   **Routing:** [React Router](https://reactrouter.com/) - Integrated via Refine for seamless page navigation.
-*   **Form Management:** [React Hook Form](https://react-hook-form.com/) & [Zod](https://zod.dev/) - For robust, type-safe form handling and validation.
-*   **Styling:** [Tailwind CSS](https://tailwindcss.com/) - A utility-first CSS framework for rapid styling.
-
----
-
-## 📂 3. Project Structure Explained
-
-The project is organized to separate concerns and make navigation intuitive.
-
-```
-classroom-frontend/
-├── src/
-│   ├── components/         # Reusable, shared UI components (e.g., Header, Layout).
-│   │   └── ui/             # Unmodified components from the Shadcn/ui CLI.
-│   ├── pages/              # Top-level components that represent a full page.
-│   │   ├── departments/    # All pages for the "departments" resource (List, Create, Edit).
-│   │   └── subjects/       # All pages for the "subjects" resource.
-│   ├── providers/          # Refine's Data Provider configuration.
-│   ├── App.tsx             # The heart of the app: Refine setup, routing, and layout.
-│   └── index.css           # Global styles.
-├── .env.development        # Environment variables for development.
-├── package.json            # Project dependencies and scripts.
-└── vite.config.ts          # Vite build tool configuration.
-```
+*   **Framework:** [React](https://react.dev/) (v19)
+*   **Build Tool:** [Vite](https://vitejs.dev/)
+*   **Meta-Framework:** [Refine](https://refine.dev/)
+*   **UI Components:** [Shadcn/ui](https://ui.shadcn.com/)
+*   **Routing:** [React Router](https://reactrouter.com/)
+*   **HTTP Client:** [Axios](https://axios-http.com/)
+*   **Styling:** [Tailwind CSS](https://tailwindcss.com/)
+*   **Form Management:** [React Hook Form](https://react-hook-form.com/) & [Zod](https://zod.dev/)
 
 ---
 
-## 🚀 4. Getting Started: A Step-by-Step Guide
+## 📂 3. Project Structure & Key Files
 
-Follow these steps to get the project running on your local machine.
+We have organized the project to be scalable and maintainable. Here are the critical files we have implemented:
+
+### `src/config.ts` (The Configuration Hub)
+*   **Purpose:** Centralizes all environment-dependent variables (like the API URL and Cloudinary keys).
+*   **Why:** It ensures we have a single source of truth for configuration and prevents the app from running if critical variables are missing.
+
+### `src/providers/data.ts` (The Data Bridge)
+*   **Purpose:** This is the "brain" that connects Refine to our specific Backend API.
+*   **Implementation:** We extended the official `@refinedev/simple-rest` provider.
+*   **Customization:** We overrode the `getList` method to handle our backend's specific response format (nested `data` array and `pagination` object) and to correctly map search filters to query parameters.
+
+### `src/types/index.ts` (The Contract)
+*   **Purpose:** Defines the TypeScript types for our data models (e.g., `Subject`, `Department`).
+*   **Why:** It ensures our frontend code perfectly matches the shape of the data coming from the backend, preventing bugs and enabling autocomplete.
+
+### `src/pages/subjects/` (The Feature Module)
+*   **`list.tsx`**: The main page for displaying the list of subjects. Implements the data table, search, filtering, and the actions menu (Edit/Delete).
+*   **`create.tsx`**: A polished, two-column form for creating new subjects with live department data and Zod validation.
+*   **`edit.tsx`**: A consistent two-column form for editing existing subjects.
+
+---
+
+## 🔄 4. The Data Cycle: How It Works
+
+Understanding the flow of data is key to mastering this project. Here is exactly what happens when a user interacts with the application.
+
+### Scenario: A User Deletes a Subject
+
+1.  **User Action:** The user clicks the three-dots menu on a subject row and then clicks the "Delete Subject" menu item.
+2.  **State Update (`list.tsx`):**
+    *   The `onClick` handler calls `setDeleteTarget(subject.id)`.
+    *   This state change causes the `<AlertDialog>` component to become visible.
+3.  **User Confirmation:** The user sees the confirmation modal ("Are you absolutely sure?") and clicks the "Confirm" button.
+4.  **Mutation Trigger:**
+    *   The "Confirm" button's `onClick` handler calls `handleConfirmDelete`.
+    *   This function calls `deleteMutation({ resource: "subjects", id: ... })`.
+5.  **Refine Hook Action:**
+    *   The `useDelete` hook (which provided the `deleteMutation` function) takes over.
+    *   It calls the `deleteOne` method of our `dataProvider`.
+6.  **Data Provider Logic (`data.ts`):**
+    *   Our provider uses the default `deleteOne` method from `@refinedev/simple-rest`.
+    *   This method knows that a "delete" operation corresponds to a `DELETE` request.
+    *   It uses **Axios** to send a `DELETE` request.
+7.  **Network Request:**
+    *   **URL:** `http://localhost:8000/api/subjects/123` (where 123 is the subject ID).
+    *   **Method:** `DELETE`
+8.  **Backend Processing:**
+    *   The backend receives the request and routes it to the `DELETE /:id` handler.
+    *   It executes the Drizzle `db.delete()` command, which generates and runs the `DELETE FROM subjects WHERE id = 123` SQL statement.
+    *   The backend returns a success message.
+9.  **UI Update:**
+    *   The `useDelete` hook receives the successful response.
+    *   It automatically triggers a **refetch** of the data for the subjects list.
+    *   The `useTable` hook gets the new, updated list (which no longer contains the deleted subject), and the UI re-renders to show the change.
+
+---
+
+## 🚀 5. Getting Started
 
 ### Prerequisites
-*   Node.js (v18+ recommended)
-*   A running instance of the **[Classroom Backend API](<link-to-your-backend-repo>)**.
+*   Node.js (v18+)
+*   The **Classroom Backend** running on port 8000.
 
-### Step 1: Installation
-Clone the repository and install the necessary packages.
-
+### Installation
 ```bash
 git clone <repository-url>
 cd classroom-frontend
 npm install
 ```
 
-### Step 2: Environment Setup
-The frontend needs to know where to send its API requests. Create a file named `.env.development` in the root of the project and add the following:
-
+### Environment Setup
+Create a `.env.development` file in the root directory:
 ```env
-# This URL points to your running backend server.
-# The /api prefix is included because that's how our backend routes are configured.
+# Point this to your local backend
 VITE_API_URL="http://localhost:8000/api"
+
+# Placeholders for future features
+VITE_ACCESS_TOKEN_KEY="access_token"
+VITE_REFRESH_TOKEN_KEY="refresh_token"
+VITE_CLOUDINARY_UPLOAD_URL="https://api.cloudinary.com/v1_1/placeholder/image/upload"
+VITE_CLOUDINARY_CLOUD_NAME="placeholder"
+VITE_CLOUDINARY_UPLOAD_PRESET="placeholder"
 ```
 
-### Step 3: Run the Development Server
-Start the Vite development server. It will automatically open your browser.
-
+### Running the App
 ```bash
 npm run dev
 ```
-The application will be available at `http://localhost:5173`.
+Open `http://localhost:5173` in your browser.
 
 ---
 
-## ⚙️ 5. How It Works: A Deeper Look
+## ✅ 6. Implemented Features
 
-### Data Flow with Refine
-Refine simplifies data fetching. For example, on the "List Subjects" page, we don't use `fetch` or `axios` directly. Instead, we use Refine's `useList` hook:
-
-```tsx
-// Simplified example from a list page
-import { useList } from "@refinedev/core";
-
-const SubjectList = () => {
-  const { data, isLoading } = useList({ resource: "subjects" });
-
-  if (isLoading) return <div>Loading...</div>;
-
-  return (
-    <ul>
-      {data?.data.map(subject => (
-        <li key={subject.id}>{subject.name}</li>
-      ))}
-    </ul>
-  );
-};
-```
-Refine's **Data Provider** (configured in `App.tsx`) automatically translates `useList({ resource: "subjects" })` into a `GET` request to `http://localhost:8000/api/subjects`.
-
-### Routing
-In `App.tsx`, we define our resources. Refine takes this definition and automatically creates the necessary routes.
-
-```tsx
-// Simplified example from App.tsx
-<Refine
-  // ...
-  resources={[
-    {
-      name: "departments", // Corresponds to the "/api/departments" endpoint
-      list: "/departments",
-      create: "/departments/create",
-      edit: "/departments/edit/:id",
-    },
-    // ... other resources
-  ]}
->
-  {/* ... RouterProvider and components */}
-</Refine>
-```
-
-This setup means that navigating to `/departments` will render the list page for the "departments" resource.
+*   **Full Subject CRUD:**
+    *   **List View:** View all subjects in a paginated table.
+    *   **Search:** Filter subjects by Name or Code.
+    *   **Department Filter:** Filter subjects by their associated Department (fetched live from the API).
+    *   **Create:** Add new subjects via a polished, two-column form with Zod validation.
+    *   **Edit:** Update existing subjects with a consistent form design.
+    *   **Delete:** Remove subjects with a beautiful, custom confirmation modal.
+*   **Data Architecture:**
+    *   Fully typed with TypeScript.
+    *   Centralized configuration.
+    *   Custom Data Provider for seamless API integration.
 
 ---
 
-## 📜 6. Available Scripts
-
-*   `npm run dev`: Starts the development server with hot-reloading.
-*   `npm run build`: Bundles the application for production.
-*   `npm run start`: Serves the production build locally.
-*   `npm run refine`: Accesses Refine's command-line tools for code generation.
-
----
-
-## 🤝 7. Contributing
+## 🤝 Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
-## 📄 8. License
+## 📄 License
 
 This project is licensed under the MIT License.
 

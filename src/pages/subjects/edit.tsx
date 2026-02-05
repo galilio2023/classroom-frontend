@@ -1,4 +1,4 @@
-import { CreateViewHeader } from "@/components/refine-ui/views/create-view";
+import { EditViewHeader } from "@/components/refine-ui/views/edit-view";
 import { useForm } from "@refinedev/react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -35,23 +35,24 @@ import { Separator } from "@/components/ui/separator";
 import { BookOpen, Code2, Building2, FileText, Lightbulb, Info } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
-// Define the validation schema
+// The same validation schema as the create page
 const formSchema = z.object({
   code: z.string().min(1, "Code is required").max(50, "Code must be less than 50 characters"),
   name: z.string().min(1, "Name is required").max(255, "Name must be less than 255 characters"),
   description: z.string().max(255, "Description must be less than 255 characters").optional(),
-  departmentId: z.string().min(1, "Department is required"),
+  departmentId: z.union([z.string(), z.number()]).transform(v => Number(v)).refine(v => v > 0, "Department is required"),
 });
 
-const SubjectsCreate = () => {
+const SubjectsEdit = () => {
   const { 
     saveButtonProps, 
-    refineCore: { onFinish, formLoading }, 
+    refineCore: { onFinish, formLoading, queryResult }, 
     ...form 
   } = useForm({
     resolver: zodResolver(formSchema),
     refineCoreProps: {
       resource: "subjects",
+      action: "edit",
       redirect: "list",
     },
   });
@@ -60,6 +61,7 @@ const SubjectsCreate = () => {
     resource: "departments",
     optionLabel: "name",
     optionValue: "id",
+    defaultValue: queryResult?.data?.data.departmentId,
   });
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
@@ -71,10 +73,10 @@ const SubjectsCreate = () => {
 
   return (
     <div className="container mx-auto py-6 max-w-6xl">
-      <CreateViewHeader />
+      <EditViewHeader />
       
       <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left Column: The Main Form (Takes up 2/3 space) */}
+        {/* Left Column: The Main Form */}
         <div className="lg:col-span-2">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -82,10 +84,10 @@ const SubjectsCreate = () => {
                 <CardHeader>
                   <CardTitle className="text-xl font-semibold flex items-center gap-2">
                     <BookOpen className="h-5 w-5 text-primary" />
-                    Subject Details
+                    Edit Subject
                   </CardTitle>
                   <CardDescription>
-                    Enter the core information for the new subject.
+                    Update the details for the subject "{queryResult?.data?.data.name}".
                   </CardDescription>
                 </CardHeader>
                 
@@ -140,7 +142,7 @@ const SubjectsCreate = () => {
                           <Building2 className="h-4 w-4 text-muted-foreground" />
                           Department
                         </FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select onValueChange={field.onChange} value={String(field.value ?? "")}>
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select a department" />
@@ -191,7 +193,7 @@ const SubjectsCreate = () => {
                     disabled={formLoading}
                     className="min-w-[150px]"
                   >
-                    {formLoading ? "Saving..." : "Create Subject"}
+                    {formLoading ? "Saving..." : "Save Changes"}
                   </Button>
                 </CardFooter>
               </Card>
@@ -199,7 +201,7 @@ const SubjectsCreate = () => {
           </Form>
         </div>
 
-        {/* Right Column: Sidebar / Help (Takes up 1/3 space) */}
+        {/* Right Column: Sidebar / Help */}
         <div className="space-y-6">
           <Card className="border-border/50 shadow-sm bg-muted/10">
             <CardHeader>
@@ -214,7 +216,7 @@ const SubjectsCreate = () => {
                   <span className="text-xs font-bold text-primary">1</span>
                 </div>
                 <p>
-                  <strong>Consistent Codes:</strong> Use a standard format like "DEPT-101" (e.g., CS-101, MATH-200) to make searching easier.
+                  <strong>Consistent Codes:</strong> Use a standard format like "DEPT-101" to make searching easier.
                 </p>
               </div>
               <div className="flex gap-3">
@@ -222,15 +224,7 @@ const SubjectsCreate = () => {
                   <span className="text-xs font-bold text-primary">2</span>
                 </div>
                 <p>
-                  <strong>Clear Names:</strong> Avoid abbreviations in the subject name. "Introduction to Psychology" is better than "Intro to Psych".
-                </p>
-              </div>
-              <div className="flex gap-3">
-                <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                  <span className="text-xs font-bold text-primary">3</span>
-                </div>
-                <p>
-                  <strong>Descriptions:</strong> A good description helps students understand the course content at a glance.
+                  <strong>Clear Names:</strong> Avoid abbreviations. "Introduction to Psychology" is better than "Intro to Psych".
                 </p>
               </div>
             </CardContent>
@@ -238,9 +232,9 @@ const SubjectsCreate = () => {
 
           <Alert>
             <Info className="h-4 w-4" />
-            <AlertTitle>Did you know?</AlertTitle>
+            <AlertTitle>Editing Mode</AlertTitle>
             <AlertDescription className="text-xs text-muted-foreground mt-1">
-              Subjects created here will be immediately available for class scheduling and teacher assignment.
+              Changes made here will overwrite the existing subject data. Be sure to save your work.
             </AlertDescription>
           </Alert>
         </div>
@@ -249,4 +243,4 @@ const SubjectsCreate = () => {
   );
 };
 
-export default SubjectsCreate;
+export default SubjectsEdit;

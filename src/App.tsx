@@ -18,11 +18,11 @@ import { Layout } from "@/components/refine-ui/layout/layout.tsx";
 import { Outlet } from "react-router";
 import SubjectsList from "@/pages/subjects/list.tsx";
 import SubjectsCreate from "@/pages/subjects/create.tsx";
+import SubjectsEdit from "@/pages/subjects/edit.tsx";
 
 function App() {
   return (
     <BrowserRouter>
-      {/*<GitHubBanner />*/}
       <RefineKbarProvider>
         <ThemeProvider>
           <DevtoolsProvider>
@@ -32,7 +32,7 @@ function App() {
               routerProvider={routerProvider}
               options={{
                 syncWithLocation: true,
-                warnWhenUnsavedChanges: true,
+                warnWhenUnsavedChanges: false, // Disabled the annoying "Leave page" alert
                 projectId: "nDt0bx-k8buuJ-It2Nvq",
               }}
               resources={[
@@ -45,6 +45,7 @@ function App() {
                   name: "subjects",
                   list: "/subjects",
                   create: "/subjects/create",
+                  edit: "/subjects/edit/:id",
                   meta: { label: "Subjects", icon: <BookOpen /> },
                 },
               ]}
@@ -61,11 +62,13 @@ function App() {
                   <Route path="subjects">
                     <Route index element={<SubjectsList />} />
                     <Route path="create" element={<SubjectsCreate />} />
+                    <Route path="edit/:id" element={<SubjectsEdit />} />
                   </Route>
                 </Route>
               </Routes>
               <Toaster />
               <RefineKbar />
+              {/* We can keep the component but the global option will disable it */}
               <UnsavedChangesNotifier />
               <DocumentTitleHandler />
             </Refine>
