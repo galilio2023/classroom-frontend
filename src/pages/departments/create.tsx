@@ -1,7 +1,6 @@
 import { CreateViewHeader } from "@/components/refine-ui/views/create-view";
 import { useForm } from "@refinedev/react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import {
   Form,
   FormControl,
@@ -24,20 +23,14 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { BookOpen, Code2, FileText, Lightbulb, Info } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-
-const formSchema = z.object({
-  code: z.string().min(1, "Code is required").max(50, "Code must be less than 50 characters"),
-  name: z.string().min(1, "Name is required").max(255, "Name must be less than 255 characters"),
-  description: z.string().max(255, "Description must be less than 255 characters").optional(),
-});
+import { departmentFormSchema } from "@/schemas/department";
 
 const DepartmentsCreate = () => {
   const { 
-    saveButtonProps, 
     refineCore: { onFinish, formLoading }, 
     ...form 
   } = useForm({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(departmentFormSchema),
     refineCoreProps: {
       resource: "departments",
       redirect: "list",
