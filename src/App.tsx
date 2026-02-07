@@ -13,7 +13,7 @@ import { useNotificationProvider } from "./components/refine-ui/notification/use
 import { ThemeProvider } from "./components/refine-ui/theme/theme-provider";
 import { dataProvider } from "./providers/data";
 import Dashboard from "@/pages/dashboard.tsx";
-import { Home, BookOpen, Building2 } from "lucide-react";
+import { Home, BookOpen, Building2, Users } from "lucide-react";
 import { Layout } from "@/components/refine-ui/layout/layout.tsx";
 import { Outlet } from "react-router";
 import SubjectsList from "@/pages/subjects/list.tsx";
@@ -22,6 +22,9 @@ import SubjectsEdit from "@/pages/subjects/edit.tsx";
 import DepartmentsList from "@/pages/departments/list.tsx";
 import DepartmentsCreate from "@/pages/departments/create.tsx";
 import DepartmentsEdit from "@/pages/departments/edit.tsx";
+import UsersList from "@/pages/users/list.tsx";
+import UsersCreate from "@/pages/users/create.tsx";
+import UsersEdit from "@/pages/users/edit.tsx";
 
 function App() {
   return (
@@ -58,6 +61,13 @@ function App() {
                   edit: "/departments/edit/:id",
                   meta: { label: "Departments", icon: <Building2 /> },
                 },
+                {
+                  name: "users",
+                  list: "/users",
+                  create: "/users/create",
+                  edit: "/users/edit/:id",
+                  meta: { label: "Users", icon: <Users /> },
+                },
               ]}
             >
               <Routes>
@@ -78,6 +88,11 @@ function App() {
                     <Route index element={<DepartmentsList />} />
                     <Route path="create" element={<DepartmentsCreate />} />
                     <Route path="edit/:id" element={<DepartmentsEdit />} />
+                  </Route>
+                  <Route path="users">
+                    <Route index element={<UsersList />} />
+                    <Route path="create" element={<UsersCreate />} />
+                    <Route path="edit/:id" element={<UsersEdit />} />
                   </Route>
                 </Route>
               </Routes>
