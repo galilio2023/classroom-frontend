@@ -28,6 +28,7 @@ import UsersEdit from "@/pages/users/edit.tsx";
 import ClassesList from "@/pages/classes/list.tsx";
 import ClassesCreate from "@/pages/classes/create.tsx";
 import ClassesEdit from "@/pages/classes/edit.tsx";
+import ClassShow from "@/pages/classes/show.tsx";
 
 function App() {
   return (
@@ -76,6 +77,7 @@ function App() {
                   list: "/classes",
                   create: "/classes/create",
                   edit: "/classes/edit/:id",
+                  show: "/classes/show/:id",
                   meta: { label: "Classes", icon: <Calendar /> },
                 },
               ]}
@@ -108,6 +110,7 @@ function App() {
                     <Route index element={<ClassesList />} />
                     <Route path="create" element={<ClassesCreate />} />
                     <Route path="edit/:id" element={<ClassesEdit />} />
+                    <Route path="show/:id" element={<ClassShow />} />
                   </Route>
                 </Route>
               </Routes>
