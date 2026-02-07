@@ -205,6 +205,6 @@ This project is licensed under the MIT License.
 <br />
 <div align="center">
   <a href="https://ibrahim-tablawy-portfolio.vercel.app/">
-    <img src="./public/tablawy.png" alt="Tablawy Signature" width="100%" />
+    <img src="./public/tablawy.png" alt="Tablawy Signature" width="200" />
   </a>
 </div>

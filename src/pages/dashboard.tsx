@@ -2,15 +2,59 @@ import { useNavigation } from "@refinedev/core";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Building2, Users, GraduationCap, ArrowRight } from "lucide-react";
+import { BookOpen, Building2, Users, GraduationCap, ArrowRight, LucideIcon } from "lucide-react";
+
+interface DashboardCardProps {
+  title: string;
+  icon: LucideIcon;
+  heading: string;
+  description: string;
+  actionLabel: string;
+  resource?: string;
+  disabled?: boolean;
+}
 
 const Dashboard = () => {
   const { list } = useNavigation();
+
+  const cards: DashboardCardProps[] = [
+    {
+      title: "Subjects",
+      icon: BookOpen,
+      heading: "Manage Subjects",
+      description: "View, create, and organize academic subjects.",
+      actionLabel: "Go to Subjects",
+      resource: "subjects",
+    },
+    {
+      title: "Departments",
+      icon: Building2,
+      heading: "Departments",
+      description: "Oversee academic departments and faculties.",
+      actionLabel: "Go to Departments",
+      resource: "departments",
+    },
+    {
+      title: "Teachers",
+      icon: Users,
+      heading: "Faculty",
+      description: "Manage teacher profiles and assignments.",
+      actionLabel: "Coming Soon",
+      disabled: true,
+    },
+    {
+      title: "Students",
+      icon: GraduationCap,
+      heading: "Students",
+      description: "Track student enrollments and progress.",
+      actionLabel: "Coming Soon",
+      disabled: true,
+    },
+  ];
 
   return (
     <div className="container mx-auto py-10">
@@ -24,86 +68,32 @@ const Dashboard = () => {
 
       {/* Quick Actions Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        
-        {/* Subjects Card */}
-        <Card className="hover:shadow-md transition-shadow">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Subjects</CardTitle>
-            <BookOpen className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold mb-2">Manage Subjects</div>
-            <p className="text-xs text-muted-foreground mb-4">
-              View, create, and organize academic subjects.
-            </p>
-            <Button 
-              variant="outline" 
-              className="w-full justify-between"
-              onClick={() => list("subjects")}
-            >
-              Go to Subjects
-              <ArrowRight className="h-4 w-4 ml-2" />
-            </Button>
-          </CardContent>
-        </Card>
-
-        {/* Departments Card */}
-        <Card className="hover:shadow-md transition-shadow">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Departments</CardTitle>
-            <Building2 className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold mb-2">Departments</div>
-            <p className="text-xs text-muted-foreground mb-4">
-              Oversee academic departments and faculties.
-            </p>
-            <Button 
-              variant="outline" 
-              className="w-full justify-between"
-              // We haven't built the list page yet, but the route exists in the backend
-              onClick={() => list("departments")}
-            >
-              Go to Departments
-              <ArrowRight className="h-4 w-4 ml-2" />
-            </Button>
-          </CardContent>
-        </Card>
-
-        {/* Teachers Card (Placeholder) */}
-        <Card className="opacity-60">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Teachers</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold mb-2">Faculty</div>
-            <p className="text-xs text-muted-foreground mb-4">
-              Manage teacher profiles and assignments.
-            </p>
-            <Button disabled variant="secondary" className="w-full">
-              Coming Soon
-            </Button>
-          </CardContent>
-        </Card>
-
-        {/* Students Card (Placeholder) */}
-        <Card className="opacity-60">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Students</CardTitle>
-            <GraduationCap className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold mb-2">Students</div>
-            <p className="text-xs text-muted-foreground mb-4">
-              Track student enrollments and progress.
-            </p>
-            <Button disabled variant="secondary" className="w-full">
-              Coming Soon
-            </Button>
-          </CardContent>
-        </Card>
-
+        {cards.map((card) => (
+          <Card 
+            key={card.title} 
+            className={card.disabled ? "opacity-60" : "hover:shadow-md transition-shadow"}
+          >
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">{card.title}</CardTitle>
+              <card.icon className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold mb-2">{card.heading}</div>
+              <p className="text-xs text-muted-foreground mb-4 min-h-[2.5rem]">
+                {card.description}
+              </p>
+              <Button 
+                variant={card.disabled ? "secondary" : "outline"}
+                className="w-full justify-between"
+                disabled={card.disabled}
+                onClick={() => card.resource && list(card.resource)}
+              >
+                {card.actionLabel}
+                {!card.disabled && <ArrowRight className="h-4 w-4 ml-2" />}
+              </Button>
+            </CardContent>
+          </Card>
+        ))}
       </div>
     </div>
   );
