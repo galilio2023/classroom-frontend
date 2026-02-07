@@ -13,7 +13,7 @@ import { useNotificationProvider } from "./components/refine-ui/notification/use
 import { ThemeProvider } from "./components/refine-ui/theme/theme-provider";
 import { dataProvider } from "./providers/data";
 import Dashboard from "@/pages/dashboard.tsx";
-import { Home, BookOpen, Building2, Users } from "lucide-react";
+import { Home, BookOpen, Building2, Users, Calendar } from "lucide-react";
 import { Layout } from "@/components/refine-ui/layout/layout.tsx";
 import { Outlet } from "react-router";
 import SubjectsList from "@/pages/subjects/list.tsx";
@@ -25,6 +25,9 @@ import DepartmentsEdit from "@/pages/departments/edit.tsx";
 import UsersList from "@/pages/users/list.tsx";
 import UsersCreate from "@/pages/users/create.tsx";
 import UsersEdit from "@/pages/users/edit.tsx";
+import ClassesList from "@/pages/classes/list.tsx";
+import ClassesCreate from "@/pages/classes/create.tsx";
+import ClassesEdit from "@/pages/classes/edit.tsx";
 
 function App() {
   return (
@@ -68,6 +71,13 @@ function App() {
                   edit: "/users/edit/:id",
                   meta: { label: "Users", icon: <Users /> },
                 },
+                {
+                  name: "classes",
+                  list: "/classes",
+                  create: "/classes/create",
+                  edit: "/classes/edit/:id",
+                  meta: { label: "Classes", icon: <Calendar /> },
+                },
               ]}
             >
               <Routes>
@@ -93,6 +103,11 @@ function App() {
                     <Route index element={<UsersList />} />
                     <Route path="create" element={<UsersCreate />} />
                     <Route path="edit/:id" element={<UsersEdit />} />
+                  </Route>
+                  <Route path="classes">
+                    <Route index element={<ClassesList />} />
+                    <Route path="create" element={<ClassesCreate />} />
+                    <Route path="edit/:id" element={<ClassesEdit />} />
                   </Route>
                 </Route>
               </Routes>

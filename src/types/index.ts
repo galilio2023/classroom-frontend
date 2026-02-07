@@ -67,21 +67,26 @@ export type Schedule = {
   endTime: string;
 };
 
-export type ClassDetails = {
+export enum ClassStatus {
+  ACTIVE = "active",
+  INACTIVE = "inactive",
+  ARCHIVED = "archived",
+}
+
+export type Class = {
   id: number;
   name: string;
   description: string;
-  status: "active" | "inactive";
+  status: ClassStatus;
   capacity: number;
-  courseCode: string;
-  courseName: string;
+  inviteCode: string;
   bannerUrl?: string;
   bannerCldPubId?: string;
-  subject?: Subject;
-  teacher?: User;
-  department?: Department;
+  subject: Subject;
+  teacher: User;
   schedules: Schedule[];
-  inviteCode?: string;
+  createdAt: string;
+  updatedAt: string;
 };
 
 
