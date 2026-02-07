@@ -7,6 +7,7 @@ export const scheduleSchema = z.object({
   endTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format (HH:MM)"),
 });
 
+// This is the base schema including all fields
 export const classFormSchema = z.object({
   name: z.string().min(1, "Name is required").max(255, "Name must be less than 255 characters"),
   description: z.string().optional(),
@@ -16,3 +17,6 @@ export const classFormSchema = z.object({
   status: z.nativeEnum(ClassStatus).default(ClassStatus.ACTIVE),
   schedules: z.array(scheduleSchema).default([]),
 });
+
+// This is the schema for the creation form, which does not include teacherId
+export const classCreateFormSchema = classFormSchema.omit({ teacherId: true });

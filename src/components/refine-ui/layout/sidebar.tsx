@@ -30,14 +30,17 @@ import {
 import { ChevronRight, ListIcon } from "lucide-react";
 import React from "react";
 
-export function Sidebar() {
+interface SidebarProps {
+  isSheet?: boolean;
+}
+
+export function Sidebar({ isSheet = false }: SidebarProps) {
   const { open } = useShadcnSidebar();
   const { menuItems, selectedKey } = useMenu();
 
-  return (
-    <ShadcnSidebar collapsible="icon" className={cn("border-none")}>
-      <ShadcnSidebarRail />
-      <SidebarHeader />
+  const renderContent = () => (
+    <>
+      {!isSheet && <SidebarHeader />}
       <ShadcnSidebarContent
         className={cn(
           "transition-discrete",
@@ -47,11 +50,10 @@ export function Sidebar() {
           "gap-2",
           "pt-2",
           "pb-2",
-          "border-r",
-          "border-border",
           {
-            "px-3": open,
-            "px-1": !open,
+            "border-r border-border": !isSheet,
+            "px-3": open || isSheet,
+            "px-1": !open && !isSheet,
           },
         )}
       >
@@ -63,6 +65,17 @@ export function Sidebar() {
           />
         ))}
       </ShadcnSidebarContent>
+    </>
+  );
+
+  if (isSheet) {
+    return renderContent();
+  }
+
+  return (
+    <ShadcnSidebar collapsible="icon" className={cn("border-none")}>
+      <ShadcnSidebarRail />
+      {renderContent()}
     </ShadcnSidebar>
   );
 }
@@ -216,12 +229,9 @@ function SidebarHeader() {
     <ShadcnSidebarHeader
       className={cn(
         "p-0 h-16 border-b border-sidebar-border flex items-center overflow-hidden bg-sidebar",
-        // Desktop collapsed: Center the button.
-        // Desktop open or Mobile: Space-between layout.
         !open && !isMobile ? "justify-center" : "flex-row justify-between px-4",
       )}
     >
-      {/* 1. Only render the logo div if the sidebar is OPEN or on MOBILE */}
       {(open || isMobile) && (
         <div className="flex flex-row items-center gap-2 whitespace-nowrap transition-discrete duration-200">
           <div className="shrink-0">{title.icon}</div>
@@ -230,12 +240,10 @@ function SidebarHeader() {
           </h2>
         </div>
       )}
-
-      {/* 2. The Trigger - Always visible and clickable */}
       <ShadcnSidebarTrigger
         className={cn(
           "text-sidebar-foreground shrink-0 opacity-100 pointer-events-auto",
-          { "mr-0": !open && !isMobile }, // Center perfectly when collapsed
+          { "mr-0": !open && !isMobile },
         )}
       />
     </ShadcnSidebarHeader>

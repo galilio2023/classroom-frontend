@@ -131,6 +131,8 @@ const ClassesList = () => {
           header: () => null,
           cell: ({ row }) => (
             <DataTableRowActions
+              resource="classes"
+              recordId={row.original.id}
               onEdit={() => edit("classes", row.original.id)}
               onDelete={() => setDeleteTarget(row.original.id)}
               editLabel="Edit Class"
@@ -140,6 +142,7 @@ const ClassesList = () => {
                   label: "View Students",
                   icon: <Eye className="h-4 w-4" />,
                   onClick: () => show("classes", row.original.id),
+                  action: "show", // Add the action type here
                 },
               ]}
             />

@@ -1,18 +1,19 @@
-import { Authenticated, Refine } from "@refinedev/core";
+import { Authenticated, CanAccess, Refine } from "@refinedev/core";
 import { DevtoolsPanel, DevtoolsProvider } from "@refinedev/devtools";
 import { RefineKbar, RefineKbarProvider } from "@refinedev/kbar";
 import routerProvider, {
-  CatchAllNavigate,
   DocumentTitleHandler,
+  NavigateToResource,
   UnsavedChangesNotifier,
 } from "@refinedev/react-router";
-import { BrowserRouter, Outlet, Route, Routes, Navigate } from "react-router-dom";
+import { BrowserRouter, Outlet, Route, Routes } from "react-router-dom";
 import "./App.css";
 import { Toaster } from "./components/refine-ui/notification/toaster";
 import { useNotificationProvider } from "./components/refine-ui/notification/use-notification-provider";
 import { ThemeProvider } from "./components/refine-ui/theme/theme-provider";
 import { dataProvider } from "./providers/data";
 import { authProvider } from "./providers/auth";
+import { accessControlProvider } from "./providers/access-control";
 import Dashboard from "@/pages/dashboard.tsx";
 import { Home, BookOpen, Building2, Users, Calendar } from "lucide-react";
 import { Layout } from "@/components/refine-ui/layout/layout.tsx";
@@ -31,6 +32,7 @@ import ClassesEdit from "@/pages/classes/edit.tsx";
 import ClassShow from "@/pages/classes/show.tsx";
 import LoginPage from "@/pages/auth/login.tsx";
 import RegisterPage from "@/pages/auth/register.tsx";
+import UnauthorizedPage from "@/pages/unauthorized.tsx"; // Import the new page
 import { SidebarProvider } from "@/components/ui/sidebar";
 
 function App() {
@@ -44,6 +46,7 @@ function App() {
               authProvider={authProvider}
               notificationProvider={useNotificationProvider()}
               routerProvider={routerProvider}
+              accessControlProvider={accessControlProvider}
               options={{
                 syncWithLocation: true,
                 warnWhenUnsavedChanges: true,
@@ -87,17 +90,20 @@ function App() {
               ]}
             >
               <Routes>
-                {/* Public routes */}
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/register" element={<RegisterPage />} />
-
-                {/* Private routes */}
                 <Route
                   element={
-                    <Authenticated
-                      key="private-routes"
-                      fallback={<Navigate to="/login" replace />}
-                    >
+                    <Authenticated key="public-routes" fallback={<Outlet />}>
+                      <NavigateToResource resource="dashboard" />
+                    </Authenticated>
+                  }
+                >
+                  <Route path="/login" element={<LoginPage />} />
+                  <Route path="/register" element={<RegisterPage />} />
+                </Route>
+
+                <Route
+                  element={
+                    <Authenticated key="private-routes" fallback={<LoginPage />}>
                       <SidebarProvider>
                         <Layout>
                           <Outlet />
@@ -106,32 +112,36 @@ function App() {
                     </Authenticated>
                   }
                 >
-                  <Route index element={<Dashboard />} />
+                  <Route
+                    index
+                    element={
+                      <CanAccess resource="dashboard" action="list" fallback={<UnauthorizedPage />}>
+                        <Dashboard />
+                      </CanAccess>
+                    }
+                  />
                   <Route path="subjects">
-                    <Route index element={<SubjectsList />} />
-                    <Route path="create" element={<SubjectsCreate />} />
-                    <Route path="edit/:id" element={<SubjectsEdit />} />
+                    <Route index element={<CanAccess resource="subjects" action="list" fallback={<UnauthorizedPage />}><SubjectsList /></CanAccess>} />
+                    <Route path="create" element={<CanAccess resource="subjects" action="create" fallback={<UnauthorizedPage />}><SubjectsCreate /></CanAccess>} />
+                    <Route path="edit/:id" element={<CanAccess resource="subjects" action="edit" fallback={<UnauthorizedPage />}><SubjectsEdit /></CanAccess>} />
                   </Route>
                   <Route path="departments">
-                    <Route index element={<DepartmentsList />} />
-                    <Route path="create" element={<DepartmentsCreate />} />
-                    <Route path="edit/:id" element={<DepartmentsEdit />} />
+                    <Route index element={<CanAccess resource="departments" action="list" fallback={<UnauthorizedPage />}><DepartmentsList /></CanAccess>} />
+                    <Route path="create" element={<CanAccess resource="departments" action="create" fallback={<UnauthorizedPage />}><DepartmentsCreate /></CanAccess>} />
+                    <Route path="edit/:id" element={<CanAccess resource="departments" action="edit" fallback={<UnauthorizedPage />}><DepartmentsEdit /></CanAccess>} />
                   </Route>
                   <Route path="users">
-                    <Route index element={<UsersList />} />
-                    <Route path="create" element={<UsersCreate />} />
-                    <Route path="edit/:id" element={<UsersEdit />} />
+                    <Route index element={<CanAccess resource="users" action="list" fallback={<UnauthorizedPage />}><UsersList /></CanAccess>} />
+                    <Route path="create" element={<CanAccess resource="users" action="create" fallback={<UnauthorizedPage />}><UsersCreate /></CanAccess>} />
+                    <Route path="edit/:id" element={<CanAccess resource="users" action="edit" fallback={<UnauthorizedPage />}><UsersEdit /></CanAccess>} />
                   </Route>
                   <Route path="classes">
-                    <Route index element={<ClassesList />} />
-                    <Route path="create" element={<ClassesCreate />} />
-                    <Route path="edit/:id" element={<ClassesEdit />} />
-                    <Route path="show/:id" element={<ClassShow />} />
+                    <Route index element={<CanAccess resource="classes" action="list" fallback={<UnauthorizedPage />}><ClassesList /></CanAccess>} />
+                    <Route path="create" element={<CanAccess resource="classes" action="create" fallback={<UnauthorizedPage />}><ClassesCreate /></CanAccess>} />
+                    <Route path="edit/:id" element={<CanAccess resource="classes" action="edit" fallback={<UnauthorizedPage />}><ClassesEdit /></CanAccess>} />
+                    <Route path="show/:id" element={<CanAccess resource="classes" action="show" fallback={<UnauthorizedPage />}><ClassShow /></CanAccess>} />
                   </Route>
                 </Route>
-                
-                {/* Catch-all to redirect to dashboard if logged in, or login if not */}
-                <Route path="*" element={<CatchAllNavigate to="/" />} />
               </Routes>
 
               <Toaster />

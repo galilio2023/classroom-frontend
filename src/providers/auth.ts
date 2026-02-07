@@ -14,8 +14,8 @@ export const authProvider: AuthProvider = {
         },
       };
     }
-    localStorage.setItem("user", JSON.stringify(data.user));
-    return { success: true, redirectTo: "/" };
+    // Do not store user here, let login handle it.
+    return { success: true, redirectTo: "/login" };
   },
 
   login: async ({ email, password }) => {
@@ -29,6 +29,7 @@ export const authProvider: AuthProvider = {
         },
       };
     }
+    // On successful login, store the user object in localStorage.
     localStorage.setItem("user", JSON.stringify(data.user));
     return { success: true, redirectTo: "/" };
   },
@@ -39,60 +40,68 @@ export const authProvider: AuthProvider = {
     return { success: true, redirectTo: "/login" };
   },
 
-  // This is the final, correct implementation of the `check` method.
-  // It uses the authClient's own getSession method, which is designed for this purpose.
   check: async () => {
-    const session = await authClient.getSession();
-    if (session) {
+    // For the initial check, we prefer a fast, client-side check.
+    // The onError handler will catch any stale sessions on the next API call.
+    const user = localStorage.getItem("user");
+    if (user) {
       return { authenticated: true };
     }
     return {
       authenticated: false,
-      logout: true,
       redirectTo: "/login",
     };
   },
 
-  getPermissions: async () => {
-    const user = localStorage.getItem("user");
-    if (!user) return null;
-
-    try {
-      const parsedUser: User = JSON.parse(user);
-      return { role: parsedUser.role };
-    } catch (error) {
-      console.error("Error parsing user from localStorage in getPermissions:", error);
-      return null;
-    }
-  },
-
-  getIdentity: async () => {
-    const user = localStorage.getItem("user");
-    if (!user) return null;
-
-    try {
-      const parsedUser: User = JSON.parse(user);
-      return {
-        id: parsedUser.id,
-        name: parsedUser.name,
-        email: parsedUser.email,
-        image: parsedUser.image,
-        role: parsedUser.role,
-        imageCldPubId: parsedUser.imageCldPubId,
-      };
-    } catch (error) {
-      console.error("Error parsing user from localStorage in getIdentity:", error);
-      return null;
-    }
-  },
-
   onError: async (error) => {
-    if ((error as any)?.response?.status === 401) {
+    if (error?.response?.status === 401) {
       return {
         logout: true,
         redirectTo: "/login",
       };
     }
-    return { error };
+    return {};
+  },
+
+  getPermissions: async () => {
+    const user = localStorage.getItem("user");
+    if (!user) return null;
+    try {
+      const parsedUser: User = JSON.parse(user);
+      return { role: parsedUser.role };
+    } catch (e) {
+      localStorage.removeItem("user");
+      return null;
+    }
+  },
+
+  // This is the final, robust implementation of getIdentity.
+  getIdentity: async () => {
+    // 1. Try to get the user from localStorage first for speed.
+    const user = localStorage.getItem("user");
+    if (user) {
+      try {
+        return JSON.parse(user);
+      } catch (e) {
+        // If localStorage is corrupted, clear it and proceed to fetch from the API.
+        localStorage.removeItem("user");
+      }
+    }
+
+    // 2. If not in localStorage, fetch the session from the backend.
+    try {
+      const session = await authClient.getSession();
+      if (session?.user) {
+        // 3. Store the fresh user data in localStorage for the next time.
+        localStorage.setItem("user", JSON.stringify(session.user));
+        return session.user;
+      }
+    } catch (error) {
+      // This can happen if the session cookie is invalid.
+      console.error("Error fetching session in getIdentity:", error);
+    }
+
+    // 4. If all else fails, return null.
+    return null;
   },
 };
