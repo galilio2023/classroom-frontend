@@ -1,4 +1,4 @@
-import { Refine, useIsAuthenticated } from "@refinedev/core";
+import { Authenticated, Refine } from "@refinedev/core";
 import { DevtoolsPanel, DevtoolsProvider } from "@refinedev/devtools";
 import { RefineKbar, RefineKbarProvider } from "@refinedev/kbar";
 import routerProvider, {
@@ -6,7 +6,7 @@ import routerProvider, {
   DocumentTitleHandler,
   UnsavedChangesNotifier,
 } from "@refinedev/react-router";
-import { BrowserRouter, Route, Routes, Outlet, Navigate } from "react-router-dom";
+import { BrowserRouter, Outlet, Route, Routes, Navigate } from "react-router-dom";
 import "./App.css";
 import { Toaster } from "./components/refine-ui/notification/toaster";
 import { useNotificationProvider } from "./components/refine-ui/notification/use-notification-provider";
@@ -33,29 +33,6 @@ import LoginPage from "@/pages/auth/login.tsx";
 import RegisterPage from "@/pages/auth/register.tsx";
 import { SidebarProvider } from "@/components/ui/sidebar";
 
-// This component is the gatekeeper for all protected routes.
-const AuthenticatedElement = ({ children }: { children: React.ReactNode }) => {
-  const { data, isLoading } = useIsAuthenticated();
-
-  // While the authentication check is in progress, show a loading screen.
-  // This prevents the "flash" of protected content on a hard refresh.
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-
-  // If authenticated, render the requested page.
-  if (data?.authenticated) {
-    return (
-      <SidebarProvider>
-        <Layout>{children}</Layout>
-      </SidebarProvider>
-    );
-  }
-
-  // If not authenticated, redirect to the login page.
-  return <Navigate to="/login" />;
-};
-
 function App() {
   return (
     <BrowserRouter>
@@ -64,12 +41,12 @@ function App() {
           <DevtoolsProvider>
             <Refine
               dataProvider={dataProvider}
+              authProvider={authProvider}
               notificationProvider={useNotificationProvider()}
               routerProvider={routerProvider}
-              authProvider={authProvider}
               options={{
                 syncWithLocation: true,
-                warnWhenUnsavedChanges: false,
+                warnWhenUnsavedChanges: true,
                 projectId: "nDt0bx-k8buuJ-It2Nvq",
               }}
               resources={[
@@ -110,13 +87,23 @@ function App() {
               ]}
             >
               <Routes>
+                {/* Public routes */}
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
+
+                {/* Private routes */}
                 <Route
                   element={
-                    <AuthenticatedElement>
-                      <Outlet />
-                    </AuthenticatedElement>
+                    <Authenticated
+                      key="private-routes"
+                      fallback={<Navigate to="/login" replace />}
+                    >
+                      <SidebarProvider>
+                        <Layout>
+                          <Outlet />
+                        </Layout>
+                      </SidebarProvider>
+                    </Authenticated>
                   }
                 >
                   <Route index element={<Dashboard />} />
@@ -141,15 +128,17 @@ function App() {
                     <Route path="edit/:id" element={<ClassesEdit />} />
                     <Route path="show/:id" element={<ClassShow />} />
                   </Route>
-                  <Route path="*" element={<CatchAllNavigate to="/" />} />
                 </Route>
+                
+                {/* Catch-all to redirect to dashboard if logged in, or login if not */}
+                <Route path="*" element={<CatchAllNavigate to="/" />} />
               </Routes>
+
               <Toaster />
               <RefineKbar />
               <UnsavedChangesNotifier />
               <DocumentTitleHandler />
             </Refine>
-            <DevtoolsPanel />
           </DevtoolsProvider>
         </ThemeProvider>
       </RefineKbarProvider>

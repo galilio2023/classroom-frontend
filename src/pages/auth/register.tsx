@@ -48,13 +48,12 @@ const RegisterPage = () => {
         toast.success("Registration successful! Please log in.");
         navigate("/login");
       },
-      onError: (error) => {
-        console.error("Registration error:", error);
+      onError: (error: any) => {
+        const errorMessage = error?.data?.message || error.message || "An unknown error occurred.";
+        toast.error(errorMessage);
       },
     });
   };
-
-  // The manual session check is removed. Refine's authProvider handles this.
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
