@@ -3,18 +3,11 @@ import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb.tsx";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input.tsx";
 import { useMemo, useState } from "react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select.tsx";
 import { CreateButton } from "@/components/refine-ui/buttons/create.tsx";
 import { DataTable } from "@/components/refine-ui/data-table/data-table.tsx";
 import { useTable } from "@refinedev/react-table";
-import { useSelect, useNavigation, useDelete } from "@refinedev/core";
-import { Subject, Department } from "@/types";
+import { useNavigation, useDelete } from "@refinedev/core";
+import { Department } from "@/types";
 import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge.tsx";
 import {
@@ -29,48 +22,52 @@ import {
 } from "@/components/ui/alert-dialog";
 import { DataTableRowActions } from "@/components/refine-ui/data-table/row-actions";
 
-const SubjectsList = () => {
+const DepartmentsList = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedDepartment, setSelectedDepartment] = useState("all");
   const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
 
   const { edit } = useNavigation();
   const { mutate: deleteMutation } = useDelete();
-
-  const { options: departmentOptions } = useSelect<Department>({
-    resource: "departments",
-    optionLabel: "name",
-    optionValue: "name",
-  });
 
   const filters = useMemo(() => {
     const f = [];
     if (searchQuery) {
       f.push({ field: "search", operator: "contains" as const, value: searchQuery });
     }
-    if (selectedDepartment && selectedDepartment !== "all") {
-      f.push({ field: "department", operator: "eq" as const, value: selectedDepartment });
-    }
     return f;
-  }, [searchQuery, selectedDepartment]);
+  }, [searchQuery]);
 
-  const subjectTable = useTable<Subject>({
-    columns: useMemo<ColumnDef<Subject>[]>(
+  const departmentTable = useTable<Department>({
+    columns: useMemo<ColumnDef<Department>[]>(
       () => [
-        { accessorKey: "code", size: 100, header: () => <p className="column-title ml-2">Code</p>, cell: ({ getValue }) => <Badge>{getValue<string>()}</Badge> },
-        { accessorKey: "name", size: 200, header: () => <p className="column-title">Name</p>, cell: ({ getValue }) => <span className="text-foreground">{getValue<string>()}</span> },
-        { accessorKey: "department", size: 150, header: () => <p className="column-title">Department</p>, cell: ({ getValue }) => { const department = getValue<Department>(); return <Badge variant="secondary">{department?.name}</Badge>; } },
-        { accessorKey: "description", size: 300, header: () => <p className="column-title">Description</p>, cell: ({ getValue }) => <span className="truncate line-clamp-2">{getValue<string>()}</span> },
+        { 
+          accessorKey: "code", 
+          size: 100, 
+          header: () => <p className="column-title ml-2">Code</p>, 
+          cell: ({ getValue }) => <Badge>{getValue<string>()}</Badge> 
+        },
+        { 
+          accessorKey: "name", 
+          size: 200, 
+          header: () => <p className="column-title">Name</p>, 
+          cell: ({ getValue }) => <span className="text-foreground">{getValue<string>()}</span> 
+        },
+        { 
+          accessorKey: "description", 
+          size: 300, 
+          header: () => <p className="column-title">Description</p>, 
+          cell: ({ getValue }) => <span className="truncate line-clamp-2">{getValue<string>()}</span> 
+        },
         {
           id: "actions",
           size: 50,
           header: () => null,
           cell: ({ row }) => (
             <DataTableRowActions
-              onEdit={() => edit("subjects", row.original.id)}
+              onEdit={() => edit("departments", row.original.id)}
               onDelete={() => setDeleteTarget(row.original.id)}
-              editLabel="Edit Subject"
-              deleteLabel="Delete Subject"
+              editLabel="Edit Department"
+              deleteLabel="Delete Department"
             />
           ),
         },
@@ -78,7 +75,7 @@ const SubjectsList = () => {
       [edit],
     ),
     refineCoreProps: {
-      resource: "subjects",
+      resource: "departments",
       pagination: { pageSize: 10, mode: "server" },
       filters: { permanent: filters },
       sorters: { initial: [{ field: "id", order: "desc" }] },
@@ -88,7 +85,7 @@ const SubjectsList = () => {
   const handleConfirmDelete = () => {
     if (deleteTarget) {
       deleteMutation({
-        resource: "subjects",
+        resource: "departments",
         id: deleteTarget,
         mutationMode: "pessimistic",
       });
@@ -100,29 +97,18 @@ const SubjectsList = () => {
     <>
       <ListView>
         <Breadcrumb />
-        <h1 className="page-title">Subjects</h1>
+        <h1 className="page-title">Departments</h1>
         <div className="intro-row">
-          <p>Quick access to essential metrics and management tools.</p>
+          <p>Manage your academic departments and faculties.</p>
           <div className="actions-row">
             <div className="search-field">
               <Search className="search-icon" />
               <Input type="text" placeholder="Search by name or code..." className="pl-10 w-full" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
             </div>
-            <div className="flex gap-2 w-full sm:w-auto">
-              <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
-                <SelectTrigger><SelectValue placeholder="Filter by department" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Departments</SelectItem>
-                  {departmentOptions.map(({ value, label }) => (
-                    <SelectItem value={String(value)} key={value}>{label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <CreateButton />
-            </div>
+            <CreateButton />
           </div>
         </div>
-        <DataTable table={subjectTable} />
+        <DataTable table={departmentTable} />
       </ListView>
 
       <AlertDialog open={deleteTarget !== null} onOpenChange={() => setDeleteTarget(null)}>
@@ -130,7 +116,9 @@ const SubjectsList = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the subject and remove its data from our servers.
+              This action cannot be undone. This will permanently delete the department.
+              <br /><br />
+              <span className="font-semibold text-red-500">Warning:</span> You cannot delete a department if it still has subjects assigned to it.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -142,4 +130,4 @@ const SubjectsList = () => {
     </>
   );
 };
-export default SubjectsList;
+export default DepartmentsList;
