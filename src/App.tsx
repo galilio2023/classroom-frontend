@@ -1,21 +1,21 @@
-import { GitHubBanner, Refine } from "@refinedev/core";
+import { Refine, useIsAuthenticated } from "@refinedev/core";
 import { DevtoolsPanel, DevtoolsProvider } from "@refinedev/devtools";
 import { RefineKbar, RefineKbarProvider } from "@refinedev/kbar";
-
 import routerProvider, {
+  CatchAllNavigate,
   DocumentTitleHandler,
   UnsavedChangesNotifier,
 } from "@refinedev/react-router";
-import { BrowserRouter, Route, Routes } from "react-router";
+import { BrowserRouter, Route, Routes, Outlet, Navigate } from "react-router-dom";
 import "./App.css";
 import { Toaster } from "./components/refine-ui/notification/toaster";
 import { useNotificationProvider } from "./components/refine-ui/notification/use-notification-provider";
 import { ThemeProvider } from "./components/refine-ui/theme/theme-provider";
 import { dataProvider } from "./providers/data";
+import { authProvider } from "./providers/auth";
 import Dashboard from "@/pages/dashboard.tsx";
 import { Home, BookOpen, Building2, Users, Calendar } from "lucide-react";
 import { Layout } from "@/components/refine-ui/layout/layout.tsx";
-import { Outlet } from "react-router";
 import SubjectsList from "@/pages/subjects/list.tsx";
 import SubjectsCreate from "@/pages/subjects/create.tsx";
 import SubjectsEdit from "@/pages/subjects/edit.tsx";
@@ -29,6 +29,32 @@ import ClassesList from "@/pages/classes/list.tsx";
 import ClassesCreate from "@/pages/classes/create.tsx";
 import ClassesEdit from "@/pages/classes/edit.tsx";
 import ClassShow from "@/pages/classes/show.tsx";
+import LoginPage from "@/pages/auth/login.tsx";
+import RegisterPage from "@/pages/auth/register.tsx";
+import { SidebarProvider } from "@/components/ui/sidebar";
+
+// This component is the gatekeeper for all protected routes.
+const AuthenticatedElement = ({ children }: { children: React.ReactNode }) => {
+  const { data, isLoading } = useIsAuthenticated();
+
+  // While the authentication check is in progress, show a loading screen.
+  // This prevents the "flash" of protected content on a hard refresh.
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  // If authenticated, render the requested page.
+  if (data?.authenticated) {
+    return (
+      <SidebarProvider>
+        <Layout>{children}</Layout>
+      </SidebarProvider>
+    );
+  }
+
+  // If not authenticated, redirect to the login page.
+  return <Navigate to="/login" />;
+};
 
 function App() {
   return (
@@ -40,6 +66,7 @@ function App() {
               dataProvider={dataProvider}
               notificationProvider={useNotificationProvider()}
               routerProvider={routerProvider}
+              authProvider={authProvider}
               options={{
                 syncWithLocation: true,
                 warnWhenUnsavedChanges: false,
@@ -83,11 +110,13 @@ function App() {
               ]}
             >
               <Routes>
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/register" element={<RegisterPage />} />
                 <Route
                   element={
-                    <Layout>
+                    <AuthenticatedElement>
                       <Outlet />
-                    </Layout>
+                    </AuthenticatedElement>
                   }
                 >
                   <Route index element={<Dashboard />} />
@@ -112,6 +141,7 @@ function App() {
                     <Route path="edit/:id" element={<ClassesEdit />} />
                     <Route path="show/:id" element={<ClassShow />} />
                   </Route>
+                  <Route path="*" element={<CatchAllNavigate to="/" />} />
                 </Route>
               </Routes>
               <Toaster />
