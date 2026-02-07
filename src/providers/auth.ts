@@ -1,7 +1,6 @@
 import type { AuthProvider } from "@refinedev/core";
 import { User, SignUpPayload } from "@/types";
 import { authClient } from "@/lib/auth-client";
-import { dataProvider } from "./data"; // We need this for the check method
 
 export const authProvider: AuthProvider = {
   register: async (params) => {
@@ -15,8 +14,6 @@ export const authProvider: AuthProvider = {
         },
       };
     }
-    // On successful registration, better-auth automatically logs the user in
-    // and the client library stores the session. We'll store the user for getIdentity.
     localStorage.setItem("user", JSON.stringify(data.user));
     return { success: true, redirectTo: "/" };
   },
@@ -42,23 +39,18 @@ export const authProvider: AuthProvider = {
     return { success: true, redirectTo: "/login" };
   },
 
-  // This is the robust check method. It verifies the session with the backend.
+  // This is the final, correct implementation of the `check` method.
+  // It uses the authClient's own getSession method, which is designed for this purpose.
   check: async () => {
-    try {
-      // We use the dataProvider here because it's already configured with axios
-      // to handle cookies and errors, but we call the better-auth endpoint.
-      await dataProvider.custom!({
-        url: `${authClient.options.baseURL}/session`,
-        method: "get",
-      });
+    const session = await authClient.getSession();
+    if (session) {
       return { authenticated: true };
-    } catch (error) {
-      return {
-        authenticated: false,
-        logout: true,
-        redirectTo: "/login",
-      };
     }
+    return {
+      authenticated: false,
+      logout: true,
+      redirectTo: "/login",
+    };
   },
 
   getPermissions: async () => {
@@ -69,7 +61,6 @@ export const authProvider: AuthProvider = {
       const parsedUser: User = JSON.parse(user);
       return { role: parsedUser.role };
     } catch (error) {
-      // If localStorage is corrupted, return null and log the error
       console.error("Error parsing user from localStorage in getPermissions:", error);
       return null;
     }
@@ -96,7 +87,6 @@ export const authProvider: AuthProvider = {
   },
 
   onError: async (error) => {
-    // This handles the case where an API call fails with a 401
     if ((error as any)?.response?.status === 401) {
       return {
         logout: true,
