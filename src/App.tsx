@@ -1,4 +1,4 @@
-import { Refine } from "@refinedev/core";
+import { Refine, useIsAuthenticated } from "@refinedev/core";
 import { DevtoolsPanel, DevtoolsProvider } from "@refinedev/devtools";
 import { RefineKbar, RefineKbarProvider } from "@refinedev/kbar";
 import routerProvider, {
@@ -6,7 +6,7 @@ import routerProvider, {
   DocumentTitleHandler,
   UnsavedChangesNotifier,
 } from "@refinedev/react-router";
-import { BrowserRouter, Route, Routes, Outlet } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Outlet, Navigate } from "react-router-dom";
 import "./App.css";
 import { Toaster } from "./components/refine-ui/notification/toaster";
 import { useNotificationProvider } from "./components/refine-ui/notification/use-notification-provider";
@@ -31,7 +31,30 @@ import ClassesEdit from "@/pages/classes/edit.tsx";
 import ClassShow from "@/pages/classes/show.tsx";
 import LoginPage from "@/pages/auth/login.tsx";
 import RegisterPage from "@/pages/auth/register.tsx";
-import { SidebarProvider } from "@/components/ui/sidebar"; // Import the missing provider
+import { SidebarProvider } from "@/components/ui/sidebar";
+
+// This component is the gatekeeper for all protected routes.
+const AuthenticatedElement = ({ children }: { children: React.ReactNode }) => {
+  const { data, isLoading } = useIsAuthenticated();
+
+  // While the authentication check is in progress, show a loading screen.
+  // This prevents the "flash" of protected content on a hard refresh.
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  // If authenticated, render the requested page.
+  if (data?.authenticated) {
+    return (
+      <SidebarProvider>
+        <Layout>{children}</Layout>
+      </SidebarProvider>
+    );
+  }
+
+  // If not authenticated, redirect to the login page.
+  return <Navigate to="/login" />;
+};
 
 function App() {
   return (
@@ -91,11 +114,9 @@ function App() {
                 <Route path="/register" element={<RegisterPage />} />
                 <Route
                   element={
-                    <SidebarProvider> {/* Add the provider here */}
-                      <Layout>
-                        <Outlet />
-                      </Layout>
-                    </SidebarProvider>
+                    <AuthenticatedElement>
+                      <Outlet />
+                    </AuthenticatedElement>
                   }
                 >
                   <Route index element={<Dashboard />} />
