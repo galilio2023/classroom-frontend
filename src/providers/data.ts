@@ -1,63 +1,34 @@
 import simpleRestDataProvider from "@refinedev/simple-rest";
 import axios from "axios";
-import { BACKEND_URL } from "@/config";
-import { DataProvider } from "@refinedev/core";
+// We no longer need toast here, as UI components will handle showing errors.
+// import { toast } from "sonner"; 
 
-// 1. Create a custom Axios instance
+const API_URL = import.meta.env.VITE_API_URL;
+
 const axiosInstance = axios.create();
 
-axiosInstance.interceptors.request.use((config) => {
-  // Future auth token logic goes here
-  return config;
-});
+// Set withCredentials to true to automatically send cookies with each request.
+axiosInstance.defaults.withCredentials = true;
 
-// 2. Get the base provider, which we will use for non-list methods
-const baseDataProvider = simpleRestDataProvider(BACKEND_URL, axiosInstance);
-
-// 3. Create our final data provider
-export const dataProvider: DataProvider = {
-  ...baseDataProvider, // Use the default for getOne, create, update, etc.
-
-  // Override getList to handle our custom API response structure
-  getList: async ({ resource, pagination, filters, sorters }) => {
-    const url = `${BACKEND_URL}/${resource}`;
-
-    // 1. Set up query parameters for pagination
-    // Refine's pagination object has `current` and `pageSize`.
-    // We map them to what our backend expects: `page` and `limit`.
-    const queryParams: Record<string, any> = {
-      page: pagination?.currentPage || 1,
-      limit: pagination?.pageSize || 10,
-    };
-
-    // 2. Handle filters (like search)
-    if (filters) {
-      filters.forEach((filter) => {
-        if (
-          "field" in filter &&
-          (filter.operator === "eq" || filter.operator === "contains")
-        ) {
-          queryParams[filter.field] = filter.value;
-        }
-      });
-    }
-
-    // 3. Handle sorters
-    if (sorters && sorters.length > 0) {
-      // Assuming your API takes `_sort` and `_order` for sorting
-      queryParams._sort = sorters[0].field;
-      queryParams._order = sorters[0].order;
-    }
-
-    // 4. Make the API call
-    const { data } = await axiosInstance.get(url, {
-      params: queryParams,
-    });
-
-    // 5. Return the data in the format Refine's useList hook expects
-    return {
-      data: data.data, // The array of items from our backend response
-      total: Number(data.pagination.total), // The total count from our backend response
-    };
+// This interceptor will handle API errors globally.
+axiosInstance.interceptors.response.use(
+  (response) => {
+    return response;
   },
-};
+  (error) => {
+    // This interceptor's only job is to format the error object consistently.
+    // It should NOT have UI side-effects like showing toasts.
+    const customError = {
+      ...error,
+      message: error.response?.data?.message || "Something went wrong",
+      statusCode: error.response?.status,
+    };
+
+    // DO NOT show a toast here. Let the calling function decide.
+    // toast.error(customError.message);
+
+    return Promise.reject(customError);
+  }
+);
+
+export const dataProvider = simpleRestDataProvider(API_URL, axiosInstance);
