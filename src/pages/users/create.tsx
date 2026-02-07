@@ -115,7 +115,7 @@ const UsersCreate = () => {
                           <Shield className="h-4 w-4 text-muted-foreground" />
                           Role
                         </FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select a role" />

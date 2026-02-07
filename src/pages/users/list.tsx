@@ -30,6 +30,12 @@ import {
 import { DataTableRowActions } from "@/components/refine-ui/data-table/row-actions";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
+const roleVariants: Record<UserRole, "default" | "secondary" | "destructive" | "outline"> = {
+  [UserRole.ADMIN]: "destructive",
+  [UserRole.TEACHER]: "default",
+  [UserRole.STUDENT]: "secondary",
+};
+
 const UsersList = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRole, setSelectedRole] = useState("all");
@@ -84,13 +90,7 @@ const UsersList = () => {
           header: () => <p className="column-title">Role</p>, 
           cell: ({ getValue }) => {
             const role = getValue<UserRole>();
-            let variant: "default" | "secondary" | "destructive" | "outline" = "outline";
-            
-            if (role === UserRole.ADMIN) variant = "destructive";
-            if (role === UserRole.TEACHER) variant = "default";
-            if (role === UserRole.STUDENT) variant = "secondary";
-
-            return <Badge variant={variant} className="capitalize">{role}</Badge>;
+            return <Badge variant={roleVariants[role] || "outline"} className="capitalize">{role}</Badge>;
           } 
         },
         {
@@ -145,9 +145,9 @@ const UsersList = () => {
                 <SelectTrigger className="w-[150px]"><SelectValue placeholder="Filter by role" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Roles</SelectItem>
-                  <SelectItem value="admin">Admin</SelectItem>
-                  <SelectItem value="teacher">Teacher</SelectItem>
-                  <SelectItem value="student">Student</SelectItem>
+                  <SelectItem value={UserRole.ADMIN}>Admin</SelectItem>
+                  <SelectItem value={UserRole.TEACHER}>Teacher</SelectItem>
+                  <SelectItem value={UserRole.STUDENT}>Student</SelectItem>
                 </SelectContent>
               </Select>
               <CreateButton />
