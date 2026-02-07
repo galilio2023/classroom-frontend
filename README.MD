@@ -24,13 +24,34 @@
 
 ## 📖 1. About The Project
 
-This project is the frontend interface for the Classroom Management System. It is a **data-intensive application** built on the **Refine** meta-framework, designed to provide a seamless and efficient user experience for managing subjects, departments, and more.
+This project is the frontend interface for the Classroom Management System. It is a **data-intensive application** built on the **Refine** meta-framework, designed to provide a seamless and efficient user experience for managing subjects, departments, users, and classes.
 
 The core philosophy is to separate the **UI** (how things look) from the **Data Logic** (how things are fetched). Refine handles the heavy lifting of state management, routing, and networking, allowing us to focus on building a beautiful and responsive interface with **Shadcn/ui**.
 
 ---
 
-## 🛠️ 2. Tech Stack
+## 🏗️ 2. Implementation Plan
+
+We built the application in a logical, phased approach to ensure a solid foundation.
+
+### Phase 1: Core Academic Structure
+*   **Goal:** Establish the fundamental hierarchy of the school.
+*   **Implementation:** Built full CRUD functionality for **Departments** and **Subjects**.
+
+### Phase 2: User Management
+*   **Goal:** Manage all people in the system.
+*   **Implementation:** Built full CRUD for **Users**, with a `role` field to distinguish between Admins, Teachers, and Students. This includes role-based filtering on the list page.
+
+### Phase 3: The Classroom Engine
+*   **Goal:** Connect Subjects and Teachers to create actual Classes.
+*   **Implementation:** Built full CRUD for **Classes**, featuring:
+    *   Dropdowns for Subjects and Teachers (filtered by role).
+    *   A dynamic **Schedule Builder** using `react-hook-form`'s `useFieldArray`.
+    *   Auto-generated invite codes for students.
+
+---
+
+## 🛠️ 3. Tech Stack
 
 This project leverages a modern, type-safe, and performant tech stack:
 
@@ -41,22 +62,13 @@ This project leverages a modern, type-safe, and performant tech stack:
 *   **Routing:** [React Router](https://reactrouter.com/)
 *   **HTTP Client:** [Axios](https://axios-http.com/)
 *   **Styling:** [Tailwind CSS](https://tailwindcss.com/)
-*   **Form Management:** [React Hook Form](https://react-hook-form.com/) & [Zod](https://zod.dev/)
+*   **Form Management:** [React Hook Form](https://react-hook-form.com/) (including `useFieldArray`) & [Zod](https://zod.dev/)
 
 ---
 
-## 📂 3. Architecture & Key Files
+## 📂 4. Architecture & Key Files
 
 The project is organized for scalability and maintainability. Here are the critical files and their roles:
-
-<details>
-  <summary><strong><code>src/config.ts</code> (The Configuration Hub)</strong></summary>
-  <br />
-  <ul>
-    <li><strong>Purpose:</strong> Centralizes all environment-dependent variables (like the API URL and Cloudinary keys).</li>
-    <li><strong>Why:</strong> It ensures we have a single source of truth for configuration and prevents the app from running if critical variables are missing.</li>
-  </ul>
-</details>
 
 <details>
   <summary><strong><code>src/providers/data.ts</code> (The Data Bridge)</strong></summary>
@@ -69,73 +81,71 @@ The project is organized for scalability and maintainability. Here are the criti
 </details>
 
 <details>
-  <summary><strong><code>src/types/index.ts</code> (The Contract)</strong></summary>
+  <summary><strong><code>src/schemas/</code> (The Validation Hub)</strong></summary>
   <br />
   <ul>
-    <li><strong>Purpose:</strong> Defines the TypeScript types for our data models (e.g., <code>Subject</code>, <code>Department</code>).</li>
-    <li><strong>Why:</strong> It ensures our frontend code perfectly matches the shape of the data coming from the backend, preventing bugs and enabling autocomplete.</li>
+    <li><strong>Purpose:</strong> Centralizes all Zod validation schemas (e.g., <code>department.ts</code>, <code>user.ts</code>, <code>class.ts</code>).</li>
+    <li><strong>Why:</strong> Ensures that Create and Edit forms use the exact same validation rules, preventing code duplication.</li>
   </ul>
 </details>
 
 <details>
-  <summary><strong><code>src/pages/subjects/</code> (The Feature Module)</strong></summary>
+  <summary><strong><code>src/components/refine-ui/data-table/row-actions.tsx</code> (The Reusable Action Menu)</strong></summary>
   <br />
   <ul>
-    <li><strong><code>list.tsx</code></strong>: The main page for displaying the list of subjects. Implements the data table, search, filtering, and the actions menu (Edit/Delete).</li>
-    <li><strong><code>create.tsx</code></strong>: A polished, two-column form for creating new subjects with live department data and Zod validation.</li>
-    <li><strong><code>edit.tsx</code></strong>: A consistent two-column form for editing existing subjects.</li>
+    <li><strong>Purpose:</strong> A reusable component for the three-dot "Actions" menu (Edit/Delete) in data tables.</li>
+    <li><strong>Why:</strong> Ensures a consistent look and feel across all list pages and makes it easy to add new actions (like "View") in one place.</li>
   </ul>
 </details>
 
 ---
 
-## 🔄 4. The Data Cycle: How It Works
+## 🔄 5. The Data Cycle: How It Works
 
 Understanding the flow of data is key to mastering this project. Here is exactly what happens when a user interacts with the application.
 
 <details>
-  <summary><strong>Scenario: A User Deletes a Subject</strong></summary>
+  <summary><strong>Scenario: A User Creates a Class</strong></summary>
   <br />
   <ol>
-    <li><strong>User Action:</strong> The user clicks the three-dots menu on a subject row and then clicks the "Delete Subject" menu item.</li>
-    <li><strong>State Update (<code>list.tsx</code>):</strong>
+    <li><strong>User Action:</strong> The user navigates to <code>/classes/create</code>.</li>
+    <li><strong>Data Fetching (<code>create.tsx</code>):</strong>
         <ul>
-            <li>The <code>onClick</code> handler calls <code>setDeleteTarget(subject.id)</code>.</li>
-            <li>This state change causes the <code>&lt;AlertDialog&gt;</code> component to become visible.</li>
+            <li>The <code>useSelect</code> hook for "Subject" calls the Data Provider to fetch from the <code>subjects</code> resource (<code>GET /api/subjects</code>).</li>
+            <li>The <code>useSelect</code> hook for "Teacher" calls the Data Provider to fetch from the <code>users</code> resource with a filter (<code>GET /api/users?role=teacher</code>).</li>
+            <li>The dropdowns are populated with the results.</li>
         </ul>
     </li>
-    <li><strong>User Confirmation:</strong> The user sees the confirmation modal ("Are you absolutely sure?") and clicks the "Confirm" button.</li>
-    <li><strong>Mutation Trigger:</strong>
+    <li><strong>User Input:</strong> The user fills out the form, including adding schedule slots via the <code>useFieldArray</code>-powered UI.</li>
+    <li><strong>Form Submission:</strong> The user clicks "Create Class".
         <ul>
-            <li>The "Confirm" button's <code>onClick</code> handler calls <code>handleConfirmDelete</code>.</li>
-            <li>This function calls <code>deleteMutation({ resource: "subjects", id: ... })</code>.</li>
+            <li>The <code>onSubmit</code> handler calls <code>onFinish</code> (from Refine's <code>useForm</code>).</li>
+            <li><code>react-hook-form</code> validates the data against the Zod schema (<code>classFormSchema</code>).</li>
         </ul>
     </li>
     <li><strong>Refine Hook Action:</strong>
         <ul>
-            <li>The <code>useDelete</code> hook (which provided the <code>deleteMutation</code> function) takes over.</li>
-            <li>It calls the <code>deleteOne</code> method of our <code>dataProvider</code>.</li>
+            <li>Refine's <code>useForm</code> hook calls the <code>create</code> method of our <code>dataProvider</code>.</li>
         </ul>
     </li>
     <li><strong>Data Provider Logic (<code>data.ts</code>):</strong>
         <ul>
-            <li>Our provider uses the default <code>deleteOne</code> method from <code>@refinedev/simple-rest</code>.</li>
-            <li>This method knows that a "delete" operation corresponds to a <code>DELETE</code> request.</li>
-            <li>It uses <strong>Axios</strong> to send a <code>DELETE</code> request.</li>
+            <li>Our provider knows that a "create" operation corresponds to a <code>POST</code> request.</li>
+            <li>It uses <strong>Axios</strong> to send a <code>POST</code> request.</li>
         </ul>
     </li>
     <li><strong>Network Request:</strong>
         <ul>
-            <li><strong>URL:</strong> <code>http://localhost:8000/api/subjects/123</code> (where 123 is the subject ID).</li>
-            <li><strong>Method:</strong> <code>DELETE</code></li>
+            <li><strong>URL:</strong> <code>http://localhost:8000/api/classes</code></li>
+            <li><strong>Method:</strong> <code>POST</code></li>
+            <li><strong>Body:</strong> <code>{ name: "...", subjectId: 5, teacherId: "uuid-123", schedules: [...] }</code></li>
         </ul>
     </li>
-    <li><strong>Backend Processing:</strong> The backend receives the request, executes the SQL <code>DELETE</code> statement, and returns a success message.</li>
+    <li><strong>Backend Processing:</strong> The backend receives the request, validates the data, auto-generates an invite code, and inserts the new class into the database.</li>
     <li><strong>UI Update:</strong>
         <ul>
-            <li>The <code>useDelete</code> hook receives the successful response.</li>
-            <li>It automatically triggers a <strong>refetch</strong> of the data for the subjects list.</li>
-            <li>The <code>useTable</code> hook gets the new, updated list, and the UI re-renders to show the change.</li>
+            <li>The <code>useForm</code> hook receives the successful response.</li>
+            <li>It automatically redirects the user to the <code>/classes</code> list page, where the new class is now visible.</li>
         </ul>
     </li>
   </ol>
@@ -143,7 +153,7 @@ Understanding the flow of data is key to mastering this project. Here is exactly
 
 ---
 
-## 🚀 5. Getting Started
+## 🚀 6. Getting Started
 
 ### Prerequisites
 *   Node.js (v18+)
@@ -178,18 +188,18 @@ Open `http://localhost:5173` in your browser.
 
 ---
 
-## ✅ 6. Implemented Features
+## ✅ 7. Implemented Features
 
-- [x] **Full Subject CRUD:**
-    - [x] **List View:** View all subjects in a paginated table.
-    - [x] **Search:** Filter subjects by Name or Code.
-    - [x] **Department Filter:** Filter subjects by their associated Department (fetched live from the API).
-    - [x] **Create:** Add new subjects via a polished, two-column form with Zod validation.
-    - [x] **Edit:** Update existing subjects with a consistent form design.
-    - [x] **Delete:** Remove subjects with a beautiful, custom confirmation modal.
+- [x] **Dashboard:** A welcoming landing page with quick action cards.
+- [x] **Subjects CRUD:** Full create, read, update, and delete functionality.
+- [x] **Departments CRUD:** Full create, read, update, and delete functionality.
+- [x] **Users CRUD:** Full create, read, update, and delete functionality for Admins, Teachers, and Students.
+- [x] **Classes CRUD:** Full create, read, update, and delete functionality, including a dynamic schedule builder.
 - [x] **Data Architecture:**
     - [x] Fully typed with TypeScript.
     - [x] Centralized configuration.
+    *   [x] Shared Zod schemas for validation.
+    *   [x] Reusable components for common UI patterns (e.g., table actions).
     - [x] Custom Data Provider for seamless API integration.
 
 ---
