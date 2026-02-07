@@ -42,16 +42,15 @@ const LoginPage = () => {
   const onSubmit = (values: z.infer<typeof loginSchema>) => {
     login(values, {
       onSuccess: () => {
-        toast.success("Login successful!");
+        // Redirect is handled by the authProvider
       },
-      onError: (error) => {
-        console.error("Login error:", error);
+      onError: (error: any) => {
+        // The error object from better-auth might be nested
+        const errorMessage = error?.data?.message || error.message || "An unknown error occurred.";
+        toast.error(errorMessage);
       },
     });
   };
-
-  // The manual session check is removed. Refine's authProvider handles this.
-  // If a logged-in user visits this page, they will be redirected automatically.
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
