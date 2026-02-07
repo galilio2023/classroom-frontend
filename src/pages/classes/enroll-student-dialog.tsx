@@ -23,12 +23,14 @@ interface EnrollStudentDialogProps {
   classId: string;
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
+  enrolledStudentIds: string[];
 }
 
 export const EnrollStudentDialog = ({
   classId,
   isOpen,
   onOpenChange,
+  enrolledStudentIds,
 }: EnrollStudentDialogProps) => {
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
   const { mutate: createEnrollment, isLoading } = useCreate();
@@ -66,6 +68,10 @@ export const EnrollStudentDialog = ({
     );
   };
 
+  const availableStudents = studentOptions.filter(
+    (option) => !enrolledStudentIds.includes(String(option.value))
+  );
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent>
@@ -81,11 +87,17 @@ export const EnrollStudentDialog = ({
               <SelectValue placeholder="Select a student..." />
             </SelectTrigger>
             <SelectContent>
-              {studentOptions.map((option) => (
-                <SelectItem key={option.value} value={String(option.value)}>
-                  {option.label}
-                </SelectItem>
-              ))}
+              {availableStudents.length > 0 ? (
+                availableStudents.map((option) => (
+                  <SelectItem key={option.value} value={String(option.value)}>
+                    {option.label}
+                  </SelectItem>
+                ))
+              ) : (
+                <div className="p-4 text-sm text-muted-foreground">
+                  All available students are already enrolled.
+                </div>
+              )}
             </SelectContent>
           </Select>
         </div>
@@ -93,7 +105,7 @@ export const EnrollStudentDialog = ({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button onClick={handleEnroll} disabled={isLoading}>
+          <Button onClick={handleEnroll} disabled={isLoading || availableStudents.length === 0}>
             {isLoading ? "Enrolling..." : "Enroll Student"}
           </Button>
         </DialogFooter>

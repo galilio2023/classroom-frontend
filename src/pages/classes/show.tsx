@@ -49,6 +49,10 @@ const ClassShow = () => {
     syncWithLocation: false, // To prevent URL query params from changing
   });
 
+  const enrolledStudentIds = useMemo(() => {
+    return enrollmentsTable.table.getRowModel().rows.map(row => row.original.student.id);
+  }, [enrollmentsTable.table.getRowModel().rows]);
+
   const columns = useMemo<ColumnDef<Enrollment>[]>(
     () => [
       {
@@ -92,12 +96,18 @@ const ClassShow = () => {
 
   const handleConfirmUnenroll = () => {
     if (unenrollTarget) {
-      deleteMutation({
-        resource: "enrollments",
-        id: unenrollTarget,
-        mutationMode: "pessimistic",
-      });
-      setUnenrollTarget(null);
+      deleteMutation(
+        {
+          resource: "enrollments",
+          id: unenrollTarget,
+          mutationMode: "pessimistic",
+        },
+        {
+          onSuccess: () => {
+            setUnenrollTarget(null);
+          },
+        }
+      );
     }
   };
 
@@ -191,6 +201,7 @@ const ClassShow = () => {
           classId={id}
           isOpen={isEnrollDialogOpen}
           onOpenChange={setIsEnrollDialogOpen}
+          enrolledStudentIds={enrolledStudentIds}
         />
       )}
     </>
