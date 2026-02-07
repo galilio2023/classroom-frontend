@@ -1,7 +1,7 @@
 <div align="center" style="margin-bottom: 30px;">
     <a href="https://ibrahim-tablawy-portfolio.vercel.app/">
         <img alt="Author Avatar" 
-             src="https://avatars.githubusercontent.com/u/110768301?s=400&u=a6d45b9eeaa2b43332f9159614997f2d5d746c5a&v=4"
+             src="https://avatars.githubusercontent.com/u/110768301?s=400&u=a6d45b9eeaa2b43332f9159614997f2d5d746c5a&v=4" 
              style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; margin-bottom: 15px; box-shadow: 0 8px 24px rgba(0,0,0,0.15);">
     </a>
     <h1 align="center">Classroom Frontend</h1>
@@ -205,6 +205,6 @@ This project is licensed under the MIT License.
 <br />
 <div align="center">
   <a href="https://ibrahim-tablawy-portfolio.vercel.app/">
-    <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&height=100&section=footer&text=Tablawy&fontSize=50&fontColor=ffffff&fontAlign=50" alt="Tablawy Signature" width="100%" />
+    <img src="./public/tablawy.png" alt="Tablawy Signature" width="200" />
   </a>
 </div>
