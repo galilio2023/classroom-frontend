@@ -1,6 +1,6 @@
 import { ListView } from "@/components/refine-ui/views/list-view.tsx";
 import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb.tsx";
-import { Search, Copy, Check } from "lucide-react";
+import { Search, Copy, Eye } from "lucide-react";
 import { Input } from "@/components/ui/input.tsx";
 import { useMemo, useState } from "react";
 import {
@@ -43,7 +43,7 @@ const ClassesList = () => {
   const [selectedStatus, setSelectedStatus] = useState("all");
   const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
 
-  const { edit } = useNavigation();
+  const { edit, show } = useNavigation();
   const { mutate: deleteMutation } = useDelete();
 
   const filters = useMemo(() => {
@@ -135,11 +135,18 @@ const ClassesList = () => {
               onDelete={() => setDeleteTarget(row.original.id)}
               editLabel="Edit Class"
               deleteLabel="Delete Class"
+              customActions={[
+                {
+                  label: "View Students",
+                  icon: <Eye className="h-4 w-4" />,
+                  onClick: () => show("classes", row.original.id),
+                },
+              ]}
             />
           ),
         },
       ],
-      [edit],
+      [edit, show],
     ),
     refineCoreProps: {
       resource: "classes",
