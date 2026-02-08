@@ -13,14 +13,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  Sidebar as ShadingSidebar,
-  SidebarContent as ShadingSidebarContent,
-  SidebarHeader as ShadingSidebarHeader,
-  SidebarRail as ShadingSidebarRail,
-  SidebarTrigger as ShadingSidebarTrigger,
-  useSidebar as useShadingSidebar,
+  Sidebar as ShadcnSidebar,
+  SidebarContent as ShadcnSidebarContent,
+  SidebarHeader as ShadcnSidebarHeader,
+  SidebarRail as ShadcnSidebarRail,
+  SidebarTrigger as ShadcnSidebarTrigger,
+  useSidebar as useShadcnSidebar,
 } from "@/components/ui/sidebar";
-import { cn } from "@/lib/utils";
 import {
   useLink,
   useMenu,
@@ -29,16 +28,17 @@ import {
 } from "@refinedev/core";
 import { ChevronRight, ListIcon } from "lucide-react";
 import React from "react";
+import { cn } from "@/lib/utils.ts";
 
 export function Sidebar() {
-  const { open } = useShadingSidebar();
+  const { open } = useShadcnSidebar();
   const { menuItems, selectedKey } = useMenu();
 
   return (
-    <ShadingSidebar collapsible="icon" className={cn("border-none")}>
-      <ShadingSidebarRail />
+    <ShadcnSidebar collapsible="icon" className={cn("border-none")}>
+      <ShadcnSidebarRail />
       <SidebarHeader />
-      <ShadingSidebarContent
+      <ShadcnSidebarContent
         className={cn(
           "transition-discrete",
 
@@ -55,8 +55,8 @@ export function Sidebar() {
             selectedKey={selectedKey}
           />
         ))}
-      </ShadingSidebarContent>
-    </ShadingSidebar>
+      </ShadcnSidebarContent>
+    </ShadcnSidebar>
   );
 }
 
@@ -66,7 +66,7 @@ type MenuItemProps = {
 };
 
 function SidebarItem({ item, selectedKey }: MenuItemProps) {
-  const { open } = useShadingSidebar();
+  const { open } = useShadcnSidebar();
 
   if (item.meta?.group) {
     return <SidebarItemGroup item={item} selectedKey={selectedKey} />;
@@ -84,7 +84,7 @@ function SidebarItem({ item, selectedKey }: MenuItemProps) {
 
 function SidebarItemGroup({ item, selectedKey }: MenuItemProps) {
   const { children } = item;
-  const { open } = useShadingSidebar();
+  const { open } = useShadcnSidebar();
 
   return (
     <div className={cn("border-t", "border-sidebar-border", "pt-4")}>
@@ -203,10 +203,10 @@ function SidebarItemLink({ item, selectedKey }: MenuItemProps) {
 }
 function SidebarHeader() {
   const { title } = useRefineOptions();
-  const { open, isMobile } = useShadingSidebar();
+  const { open, isMobile } = useShadcnSidebar();
 
   return (
-    <ShadingSidebarHeader
+    <ShadcnSidebarHeader
       className={cn(
         "p-0 h-16 border-b border-sidebar-border flex items-center overflow-hidden bg-sidebar",
         !open && !isMobile ? "justify-center" : "flex-row justify-between px-4",
@@ -220,13 +220,13 @@ function SidebarHeader() {
           </h2>
         </div>
       )}
-      <ShadingSidebarTrigger
+      <ShadcnSidebarTrigger
         className={cn(
           "text-sidebar-foreground shrink-0 opacity-100 pointer-events-auto",
           { "mr-0": !open && !isMobile },
         )}
       />
-    </ShadingSidebarHeader>
+    </ShadcnSidebarHeader>
   );
 }
 
