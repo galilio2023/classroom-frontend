@@ -29,7 +29,7 @@ const loginSchema = z.object({
 });
 
 const LoginPage = () => {
-  const { mutate: login, isLoading } = useLogin();
+  const { mutate: login, isPending } = useLogin();
 
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -46,7 +46,8 @@ const LoginPage = () => {
       },
       onError: (error: any) => {
         // The error object from better-auth might be nested
-        const errorMessage = error?.data?.message || error.message || "An unknown error occurred.";
+        const errorMessage =
+          error?.data?.message || error.message || "An unknown error occurred.";
         toast.error(errorMessage);
       },
     });
@@ -88,14 +89,18 @@ const LoginPage = () => {
                   <FormItem>
                     <FormLabel>Password</FormLabel>
                     <FormControl>
-                      <Input type="password" placeholder="••••••••" {...field} />
+                      <Input
+                        type="password"
+                        placeholder="••••••••"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Signing In..." : "Sign In"}
+              <Button type="submit" className="w-full" disabled={isPending}>
+                {isPending ? "Signing In..." : "Sign In"}
               </Button>
             </form>
           </Form>
@@ -103,7 +108,10 @@ const LoginPage = () => {
         <CardFooter className="flex justify-center text-sm">
           <p>
             Don't have an account?&nbsp;
-            <Link to="/register" className="font-medium text-primary hover:underline">
+            <Link
+              to="/register"
+              className="font-medium text-primary hover:underline"
+            >
               Sign up
             </Link>
           </p>

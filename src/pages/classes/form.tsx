@@ -30,7 +30,6 @@ import { ClassStatus } from "@/types";
 interface ClassFormProps {
   form: UseFormReturn<any>;
   subjectOptions: { value: string | number; label: string }[];
-  // teacherOptions is no longer needed
   fields: FieldArrayWithId<any, "schedules", "id">[];
   append: UseFieldArrayAppend<any, "schedules">;
   remove: UseFieldArrayRemove;
@@ -119,7 +118,6 @@ export const ClassForm = ({
                 </FormItem>
               )}
             />
-            {/* The Teacher FormField is now removed */}
           </div>
 
           {isEdit && (
@@ -181,65 +179,67 @@ export const ClassForm = ({
           <div className="space-y-4">
             {fields.map((field, index) => (
               <div key={field.id} className="flex items-end gap-4 p-4 border rounded-lg bg-muted/5">
-                <FormField
-                  control={form.control}
-                  name={`schedules.${index}.day`}
-                  render={({ field }) => (
-                    <FormItem className="w-[120px]">
-                      <FormLabel className="text-xs">Day</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
+                <div className="grid grid-cols-3 gap-4 w-full">
+                  <FormField
+                    control={form.control}
+                    name={`schedules.${index}.day`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-xs">Day</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day) => (
+                              <SelectItem key={day} value={day}>{day}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name={`schedules.${index}.startTime`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-xs">Start Time</FormLabel>
                         <FormControl>
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
+                          <div className="relative">
+                            <Clock className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                            <Input type="time" className="pl-8" {...field} />
+                          </div>
                         </FormControl>
-                        <SelectContent>
-                          {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day) => (
-                            <SelectItem key={day} value={day}>{day}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name={`schedules.${index}.startTime`}
-                  render={({ field }) => (
-                    <FormItem className="flex-1">
-                      <FormLabel className="text-xs">Start Time</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <Clock className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                          <Input type="time" className="pl-8" {...field} />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name={`schedules.${index}.endTime`}
-                  render={({ field }) => (
-                    <FormItem className="flex-1">
-                      <FormLabel className="text-xs">End Time</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <Clock className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                          <Input type="time" className="pl-8" {...field} />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name={`schedules.${index}.endTime`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-xs">End Time</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Clock className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                            <Input type="time" className="pl-8" {...field} />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
                 <Button
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                  className="text-destructive hover:text-destructive hover:bg-destructive/10 mb-2"
                   onClick={() => remove(index)}
                 >
                   <Trash2 className="h-4 w-4" />

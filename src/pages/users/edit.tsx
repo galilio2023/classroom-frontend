@@ -33,9 +33,9 @@ import { userFormSchema } from "@/schemas/user";
 import { UserRole } from "@/types";
 
 const UsersEdit = () => {
-  const { 
-    refineCore: { onFinish, formLoading, queryResult }, 
-    ...form 
+  const {
+    refineCore: { onFinish, formLoading, query },
+    ...form
   } = useForm({
     resolver: zodResolver(userFormSchema),
     refineCoreProps: {
@@ -48,7 +48,7 @@ const UsersEdit = () => {
   return (
     <div className="container mx-auto py-6 max-w-6xl">
       <EditViewHeader />
-      
+
       <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left Column: The Main Form */}
         <div className="lg:col-span-2">
@@ -61,12 +61,12 @@ const UsersEdit = () => {
                     Edit User
                   </CardTitle>
                   <CardDescription>
-                    Update the profile for "{queryResult?.data?.data.name}".
+                    Update the profile for "{query?.data?.data.name}".
                   </CardDescription>
                 </CardHeader>
-                
+
                 <Separator />
-                
+
                 <CardContent className="space-y-6 pt-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Name Field */}
@@ -98,7 +98,10 @@ const UsersEdit = () => {
                             Email Address
                           </FormLabel>
                           <FormControl>
-                            <Input placeholder="e.g. john@school.com" {...field} />
+                            <Input
+                              placeholder="e.g. john@school.com"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -116,16 +119,25 @@ const UsersEdit = () => {
                           <Shield className="h-4 w-4 text-muted-foreground" />
                           Role
                         </FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value}
+                        >
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select a role" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value={UserRole.STUDENT}>Student</SelectItem>
-                            <SelectItem value={UserRole.TEACHER}>Teacher</SelectItem>
-                            <SelectItem value={UserRole.ADMIN}>Admin</SelectItem>
+                            <SelectItem value={UserRole.STUDENT}>
+                              Student
+                            </SelectItem>
+                            <SelectItem value={UserRole.TEACHER}>
+                              Teacher
+                            </SelectItem>
+                            <SelectItem value={UserRole.ADMIN}>
+                              Admin
+                            </SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -133,12 +145,12 @@ const UsersEdit = () => {
                     )}
                   />
                 </CardContent>
-                
+
                 <Separator />
-                
+
                 <CardFooter className="flex justify-end pt-6 pb-6 bg-muted/5">
-                  <Button 
-                    type="submit" 
+                  <Button
+                    type="submit"
                     size="lg"
                     disabled={formLoading}
                     className="min-w-[150px]"
@@ -162,7 +174,8 @@ const UsersEdit = () => {
             </CardHeader>
             <CardContent className="space-y-4 text-sm text-muted-foreground">
               <p>
-                Changing a user's role will immediately affect their permissions in the system.
+                Changing a user's role will immediately affect their
+                permissions in the system.
               </p>
             </CardContent>
           </Card>

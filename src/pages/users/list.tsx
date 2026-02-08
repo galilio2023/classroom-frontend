@@ -30,7 +30,10 @@ import {
 import { DataTableRowActions } from "@/components/refine-ui/data-table/row-actions";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-const roleVariants: Record<UserRole, "default" | "secondary" | "destructive" | "outline"> = {
+const roleVariants: Record<
+  UserRole,
+  "default" | "secondary" | "destructive" | "outline"
+> = {
   [UserRole.ADMIN]: "destructive",
   [UserRole.TEACHER]: "default",
   [UserRole.STUDENT]: "secondary",
@@ -47,7 +50,11 @@ const UsersList = () => {
   const filters = useMemo(() => {
     const f = [];
     if (searchQuery) {
-      f.push({ field: "search", operator: "contains" as const, value: searchQuery });
+      f.push({
+        field: "search",
+        operator: "contains" as const,
+        value: searchQuery,
+      });
     }
     if (selectedRole && selectedRole !== "all") {
       f.push({ field: "role", operator: "eq" as const, value: selectedRole });
@@ -66,32 +73,44 @@ const UsersList = () => {
             const user = row.original;
             return (
               <Avatar className="h-8 w-8">
-                <AvatarImage src={user.image} alt={user.name} />
-                <AvatarFallback>{user.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                <AvatarImage src={user.image ?? undefined} alt={user.name} />
+                <AvatarFallback>
+                  {user.name.substring(0, 2).toUpperCase()}
+                </AvatarFallback>
               </Avatar>
             );
           },
         },
-        { 
-          accessorKey: "name", 
-          size: 200, 
-          header: () => <p className="column-title">Name</p>, 
-          cell: ({ getValue }) => <span className="text-foreground font-medium">{getValue<string>()}</span> 
+        {
+          accessorKey: "name",
+          size: 200,
+          header: () => <p className="column-title">Name</p>,
+          cell: ({ getValue }) => (
+            <span className="text-foreground font-medium">
+              {getValue<string>()}
+            </span>
+          ),
         },
-        { 
-          accessorKey: "email", 
-          size: 250, 
-          header: () => <p className="column-title">Email</p>, 
-          cell: ({ getValue }) => <span className="text-muted-foreground">{getValue<string>()}</span> 
+        {
+          accessorKey: "email",
+          size: 250,
+          header: () => <p className="column-title">Email</p>,
+          cell: ({ getValue }) => (
+            <span className="text-muted-foreground">{getValue<string>()}</span>
+          ),
         },
-        { 
-          accessorKey: "role", 
-          size: 100, 
-          header: () => <p className="column-title">Role</p>, 
+        {
+          accessorKey: "role",
+          size: 100,
+          header: () => <p className="column-title">Role</p>,
           cell: ({ getValue }) => {
             const role = getValue<UserRole>();
-            return <Badge variant={roleVariants[role] || "outline"} className="capitalize">{role}</Badge>;
-          } 
+            return (
+              <Badge variant={roleVariants[role] || "outline"} className="capitalize">
+                {role}
+              </Badge>
+            );
+          },
         },
         {
           id: "actions",
@@ -138,11 +157,19 @@ const UsersList = () => {
           <div className="actions-row">
             <div className="search-field">
               <Search className="search-icon" />
-              <Input type="text" placeholder="Search by name or email..." className="pl-10 w-full" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+              <Input
+                type="text"
+                placeholder="Search by name or email..."
+                className="pl-10 w-full"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
             </div>
             <div className="flex gap-2 w-full sm:w-auto">
               <Select value={selectedRole} onValueChange={setSelectedRole}>
-                <SelectTrigger className="w-[150px]"><SelectValue placeholder="Filter by role" /></SelectTrigger>
+                <SelectTrigger className="w-[150px]">
+                  <SelectValue placeholder="Filter by role" />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Roles</SelectItem>
                   <SelectItem value={UserRole.ADMIN}>Admin</SelectItem>
@@ -157,17 +184,23 @@ const UsersList = () => {
         <DataTable table={userTable} />
       </ListView>
 
-      <AlertDialog open={deleteTarget !== null} onOpenChange={() => setDeleteTarget(null)}>
+      <AlertDialog
+        open={deleteTarget !== null}
+        onOpenChange={() => setDeleteTarget(null)}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the user account.
+              This action cannot be undone. This will permanently delete the
+              user account.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmDelete}>Confirm</AlertDialogAction>
+            <AlertDialogAction onClick={handleConfirmDelete}>
+              Confirm
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

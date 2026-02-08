@@ -35,7 +35,8 @@ const SubjectsList = () => {
   const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
 
   const { edit } = useNavigation();
-  const { mutate: deleteMutation, isPending: isDeleteLoading } = useDelete();
+  const { mutate: deleteMutation, mutation } = useDelete();
+  const isDeleteLoading = mutation.isPending;
 
   const { options: departmentOptions } = useSelect<Department>({
     resource: "departments",
@@ -46,10 +47,18 @@ const SubjectsList = () => {
   const filters = useMemo(() => {
     const f = [];
     if (searchQuery) {
-      f.push({ field: "search", operator: "contains" as const, value: searchQuery });
+      f.push({
+        field: "search",
+        operator: "contains" as const,
+        value: searchQuery,
+      });
     }
     if (selectedDepartment && selectedDepartment !== "all") {
-      f.push({ field: "department", operator: "eq" as const, value: selectedDepartment });
+      f.push({
+        field: "department",
+        operator: "eq" as const,
+        value: selectedDepartment,
+      });
     }
     return f;
   }, [searchQuery, selectedDepartment]);
@@ -57,10 +66,36 @@ const SubjectsList = () => {
   const subjectTable = useTable<Subject>({
     columns: useMemo<ColumnDef<Subject>[]>(
       () => [
-        { accessorKey: "code", size: 100, header: () => <p className="column-title ml-2">Code</p>, cell: ({ getValue }) => <Badge>{getValue<string>()}</Badge> },
-        { accessorKey: "name", size: 200, header: () => <p className="column-title">Name</p>, cell: ({ getValue }) => <span className="text-foreground">{getValue<string>()}</span> },
-        { accessorKey: "department.name", size: 150, header: () => <p className="column-title">Department</p>, cell: ({ getValue }) => <Badge variant="secondary">{getValue<string>()}</Badge> },
-        { accessorKey: "description", size: 300, header: () => <p className="column-title">Description</p>, cell: ({ getValue }) => <span className="truncate line-clamp-2">{getValue<string>()}</span> },
+        {
+          accessorKey: "code",
+          size: 100,
+          header: () => <p className="column-title ml-2">Code</p>,
+          cell: ({ getValue }) => <Badge>{getValue<string>()}</Badge>,
+        },
+        {
+          accessorKey: "name",
+          size: 200,
+          header: () => <p className="column-title">Name</p>,
+          cell: ({ getValue }) => (
+            <span className="text-foreground">{getValue<string>()}</span>
+          ),
+        },
+        {
+          accessorKey: "department.name",
+          size: 150,
+          header: () => <p className="column-title">Department</p>,
+          cell: ({ getValue }) => (
+            <Badge variant="secondary">{getValue<string>()}</Badge>
+          ),
+        },
+        {
+          accessorKey: "description",
+          size: 300,
+          header: () => <p className="column-title">Description</p>,
+          cell: ({ getValue }) => (
+            <span className="truncate line-clamp-2">{getValue<string>()}</span>
+          ),
+        },
         {
           id: "actions",
           size: 50,
@@ -97,7 +132,7 @@ const SubjectsList = () => {
         },
         {
           onSuccess: () => setDeleteTarget(null),
-        }
+        },
       );
     }
   };
@@ -112,15 +147,28 @@ const SubjectsList = () => {
           <div className="actions-row">
             <div className="search-field">
               <Search className="search-icon" />
-              <Input type="text" placeholder="Search by name or code..." className="pl-10 w-full" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+              <Input
+                type="text"
+                placeholder="Search by name or code..."
+                className="pl-10 w-full"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
             </div>
             <div className="flex gap-2 w-full sm:w-auto">
-              <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
-                <SelectTrigger><SelectValue placeholder="Filter by department" /></SelectTrigger>
+              <Select
+                value={selectedDepartment}
+                onValueChange={setSelectedDepartment}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Filter by department" />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Departments</SelectItem>
                   {departmentOptions.map(({ value, label }) => (
-                    <SelectItem value={String(value)} key={value}>{label}</SelectItem>
+                    <SelectItem value={String(value)} key={value}>
+                      {label}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -131,17 +179,24 @@ const SubjectsList = () => {
         <DataTable table={subjectTable} />
       </ListView>
 
-      <AlertDialog open={deleteTarget !== null} onOpenChange={() => setDeleteTarget(null)}>
+      <AlertDialog
+        open={deleteTarget !== null}
+        onOpenChange={() => setDeleteTarget(null)}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the subject and remove its data from our servers.
+              This action cannot be undone. This will permanently delete the
+              subject and remove its data from our servers.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmDelete} disabled={isDeleteLoading}>
+            <AlertDialogAction
+              onClick={handleConfirmDelete}
+              disabled={isDeleteLoading}
+            >
               {isDeleteLoading ? "Deleting..." : "Confirm"}
             </AlertDialogAction>
           </AlertDialogFooter>

@@ -1,154 +1,60 @@
-import { UserAvatar } from "@/components/refine-ui/layout/user-avatar";
-import { ThemeToggle } from "@/components/refine-ui/theme/theme-toggle";
+"use client";
+
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
-import { cn } from "@/lib/utils";
-import {
-  useActiveAuthProvider,
-  useLogout,
-  useRefineOptions,
-} from "@refinedev/core";
-import { LogOutIcon } from "lucide-react";
+import { useGetIdentity, useLogout } from "@refinedev/core";
+import { CircleUser } from "lucide-react";
+import { toast } from "sonner";
+import { User } from "@/types";
+import { ThemeToggle } from "../theme/theme-toggle";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 
-export const Header = () => {
-  const { isMobile } = useSidebar();
+export function Header() {
+  const { mutate: logout } = useLogout();
+  const { data: identity } = useGetIdentity<User>();
 
-  return <>{isMobile ? <MobileHeader /> : <DesktopHeader />}</>;
-};
-
-function DesktopHeader() {
-  return (
-    <header
-      className={cn(
-        "sticky",
-        "top-0",
-        "flex",
-        "h-16",
-        "shrink-0",
-        "items-center",
-        "gap-4",
-        "border-b",
-        "border-border",
-        "bg-sidebar",
-        "pr-3",
-        "justify-end",
-        "z-40"
-      )}
-    >
-      <ThemeToggle />
-      <UserDropdown />
-    </header>
-  );
-}
-
-function MobileHeader() {
-  const { open, isMobile } = useSidebar();
-
-  const { title } = useRefineOptions();
+  const handleLogout = () => {
+    logout(undefined, {
+      onSuccess: () => {
+        toast.success("Successfully logged out");
+      },
+    });
+  };
 
   return (
-    <header
-      className={cn(
-        "sticky",
-        "top-0",
-        "flex",
-        "h-12",
-        "shrink-0",
-        "items-center",
-        "gap-2",
-        "border-b",
-        "border-border",
-        "bg-sidebar",
-        "pr-3",
-        "justify-between",
-        "z-40"
-      )}
-    >
-      <SidebarTrigger
-        className={cn("text-muted-foreground", "rotate-180", "ml-1", {
-          "opacity-0": open,
-          "opacity-100": !open || isMobile,
-          "pointer-events-auto": !open || isMobile,
-          "pointer-events-none": open && !isMobile,
-        })}
-      />
+    <header className="flex h-15.5 items-center gap-4 border-b bg-muted/5 px-4 py-2 lg:h-15 lg:px-6">
+      {/* The mobile sidebar trigger is now part of the header */}
+      <SidebarTrigger className="md:hidden" />
 
-      <div
-        className={cn(
-          "whitespace-nowrap",
-          "flex",
-          "flex-row",
-          "h-full",
-          "items-center",
-          "justify-start",
-          "gap-2",
-          "transition-discrete",
-          "duration-200",
-          {
-            "pl-3": !open,
-            "pl-5": open,
-          }
-        )}
-      >
-        <div>{title.icon}</div>
-        <h2
-          className={cn(
-            "text-sm",
-            "font-bold",
-            "transition-opacity",
-            "duration-200",
-            {
-              "opacity-0": !open,
-              "opacity-100": open,
-            }
-          )}
-        >
-          {title.text}
-        </h2>
+      <div className="w-full flex-1">
+        {/* Optional: Add a search bar or other header content here */}
       </div>
-
-      <ThemeToggle className={cn("h-8", "w-8")} />
+      <ThemeToggle />
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="secondary" size="icon" className="rounded-full">
+            <CircleUser className="h-5 w-5" />
+            <span className="sr-only">Toggle user menu</span>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuLabel>
+            {identity?.name || "My Account"}
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem>Settings</DropdownMenuItem>
+          <DropdownMenuItem>Support</DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </header>
   );
 }
-
-const UserDropdown = () => {
-  const { mutate: logout, isPending: isLoggingOut } = useLogout();
-
-  const authProvider = useActiveAuthProvider();
-
-  if (!authProvider?.getIdentity) {
-    return null;
-  }
-
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger>
-        <UserAvatar />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuItem
-          onClick={() => {
-            logout();
-          }}
-        >
-          <LogOutIcon
-            className={cn("text-destructive", "hover:text-destructive")}
-          />
-          <span className={cn("text-destructive", "hover:text-destructive")}>
-            {isLoggingOut ? "Logging out..." : "Logout"}
-          </span>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-};
-
-Header.displayName = "Header";
-MobileHeader.displayName = "MobileHeader";
-DesktopHeader.displayName = "DesktopHeader";

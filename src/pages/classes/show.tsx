@@ -1,4 +1,4 @@
-import { useShow, useDelete, HttpError } from "@refinedev/core";
+import { useShow, useDelete } from "@refinedev/core";
 import { useTable } from "@refinedev/react-table";
 import { useParams } from "react-router-dom";
 import { ColumnDef } from "@tanstack/react-table";
@@ -41,12 +41,13 @@ const ClassesShow = () => {
   const [isEnrollDialogOpen, setIsEnrollDialogOpen] = useState(false);
 
   const {
-    result: aClass,
-    query: { isLoading: isClassLoading, isError },
+    query: { data: showData, isLoading: isClassLoading, isError },
   } = useShow<Class>({
     resource: "classes",
     id: classId,
   });
+
+  const aClass = showData?.data;
 
   const { mutate: deleteMutation, mutation } = useDelete();
 
@@ -127,7 +128,8 @@ const ClassesShow = () => {
   };
 
   // Correctly access the loading state from the nested object
-  const isLoading = isClassLoading || studentsTable.refineCore.tableQuery.isLoading;
+  const isLoading =
+    isClassLoading || studentsTable.refineCore.tableQuery.isLoading;
 
   if (isLoading) {
     return (

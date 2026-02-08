@@ -13,12 +13,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  Sidebar as ShadcnSidebar,
-  SidebarContent as ShadcnSidebarContent,
-  SidebarHeader as ShadcnSidebarHeader,
-  SidebarRail as ShadcnSidebarRail,
-  SidebarTrigger as ShadcnSidebarTrigger,
-  useSidebar as useShadcnSidebar,
+  Sidebar as ShadingSidebar,
+  SidebarContent as ShadingSidebarContent,
+  SidebarHeader as ShadingSidebarHeader,
+  SidebarRail as ShadingSidebarRail,
+  SidebarTrigger as ShadingSidebarTrigger,
+  useSidebar as useShadingSidebar,
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import {
@@ -30,30 +30,21 @@ import {
 import { ChevronRight, ListIcon } from "lucide-react";
 import React from "react";
 
-interface SidebarProps {
-  isSheet?: boolean;
-}
-
-export function Sidebar({ isSheet = false }: SidebarProps) {
-  const { open } = useShadcnSidebar();
+export function Sidebar() {
+  const { open } = useShadingSidebar();
   const { menuItems, selectedKey } = useMenu();
 
-  const renderContent = () => (
-    <>
-      {!isSheet && <SidebarHeader />}
-      <ShadcnSidebarContent
+  return (
+    <ShadingSidebar collapsible="icon" className={cn("border-none")}>
+      <ShadingSidebarRail />
+      <SidebarHeader />
+      <ShadingSidebarContent
         className={cn(
           "transition-discrete",
-          "duration-200",
-          "flex",
-          "flex-col",
-          "gap-2",
-          "pt-2",
-          "pb-2",
+
           {
-            "border-r border-border": !isSheet,
-            "px-3": open || isSheet,
-            "px-1": !open && !isSheet,
+            "px-3": open,
+            "px-1": !open,
           },
         )}
       >
@@ -64,19 +55,8 @@ export function Sidebar({ isSheet = false }: SidebarProps) {
             selectedKey={selectedKey}
           />
         ))}
-      </ShadcnSidebarContent>
-    </>
-  );
-
-  if (isSheet) {
-    return renderContent();
-  }
-
-  return (
-    <ShadcnSidebar collapsible="icon" className={cn("border-none")}>
-      <ShadcnSidebarRail />
-      {renderContent()}
-    </ShadcnSidebar>
+      </ShadingSidebarContent>
+    </ShadingSidebar>
   );
 }
 
@@ -86,7 +66,7 @@ type MenuItemProps = {
 };
 
 function SidebarItem({ item, selectedKey }: MenuItemProps) {
-  const { open } = useShadcnSidebar();
+  const { open } = useShadingSidebar();
 
   if (item.meta?.group) {
     return <SidebarItemGroup item={item} selectedKey={selectedKey} />;
@@ -104,7 +84,7 @@ function SidebarItem({ item, selectedKey }: MenuItemProps) {
 
 function SidebarItemGroup({ item, selectedKey }: MenuItemProps) {
   const { children } = item;
-  const { open } = useShadcnSidebar();
+  const { open } = useShadingSidebar();
 
   return (
     <div className={cn("border-t", "border-sidebar-border", "pt-4")}>
@@ -223,10 +203,10 @@ function SidebarItemLink({ item, selectedKey }: MenuItemProps) {
 }
 function SidebarHeader() {
   const { title } = useRefineOptions();
-  const { open, isMobile } = useShadcnSidebar();
+  const { open, isMobile } = useShadingSidebar();
 
   return (
-    <ShadcnSidebarHeader
+    <ShadingSidebarHeader
       className={cn(
         "p-0 h-16 border-b border-sidebar-border flex items-center overflow-hidden bg-sidebar",
         !open && !isMobile ? "justify-center" : "flex-row justify-between px-4",
@@ -240,13 +220,13 @@ function SidebarHeader() {
           </h2>
         </div>
       )}
-      <ShadcnSidebarTrigger
+      <ShadingSidebarTrigger
         className={cn(
           "text-sidebar-foreground shrink-0 opacity-100 pointer-events-auto",
           { "mr-0": !open && !isMobile },
         )}
       />
-    </ShadcnSidebarHeader>
+    </ShadingSidebarHeader>
   );
 }
 
@@ -318,10 +298,10 @@ function SidebarButton({
       variant="ghost"
       size="lg"
       className={cn(
-        "flex w-full items-center justify-start gap-2 py-2 !px-3 text-sm",
+        "flex w-full items-center justify-start gap-2 py-2 px-3! text-sm",
         {
           "bg-sidebar-primary": isSelected,
-          "hover:!bg-sidebar-primary/90": isSelected,
+          "hover:bg-sidebar-primary/90!": isSelected,
           "text-sidebar-primary-foreground": isSelected,
           "hover:text-sidebar-primary-foreground": isSelected,
         },

@@ -30,7 +30,7 @@ const registerSchema = z.object({
 });
 
 const RegisterPage = () => {
-  const { mutate: register, isLoading } = useRegister();
+  const { mutate: register, isPending } = useRegister();
   const navigate = useNavigate();
 
   const form = useForm<z.infer<typeof registerSchema>>({
@@ -49,7 +49,8 @@ const RegisterPage = () => {
         navigate("/login");
       },
       onError: (error: any) => {
-        const errorMessage = error?.data?.message || error.message || "An unknown error occurred.";
+        const errorMessage =
+          error?.data?.message || error.message || "An unknown error occurred.";
         toast.error(errorMessage);
       },
     });
@@ -60,9 +61,7 @@ const RegisterPage = () => {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl">Create an Account</CardTitle>
-          <CardDescription>
-            Enter your details to get started.
-          </CardDescription>
+          <CardDescription>Enter your details to get started.</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -104,14 +103,18 @@ const RegisterPage = () => {
                   <FormItem>
                     <FormLabel>Password</FormLabel>
                     <FormControl>
-                      <Input type="password" placeholder="••••••••" {...field} />
+                      <Input
+                        type="password"
+                        placeholder="••••••••"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Creating Account..." : "Sign Up"}
+              <Button type="submit" className="w-full" disabled={isPending}>
+                {isPending ? "Creating Account..." : "Sign Up"}
               </Button>
             </form>
           </Form>
@@ -119,7 +122,10 @@ const RegisterPage = () => {
         <CardFooter className="flex justify-center text-sm">
           <p>
             Already have an account?&nbsp;
-            <Link to="/login" className="font-medium text-primary hover:underline">
+            <Link
+              to="/login"
+              className="font-medium text-primary hover:underline"
+            >
               Sign in
             </Link>
           </p>
