@@ -64,6 +64,8 @@ const DepartmentsList = () => {
           header: () => null,
           cell: ({ row }) => (
             <DataTableRowActions
+              resource="departments"
+              recordId={row.original.id}
               onEdit={() => edit("departments", row.original.id)}
               onDelete={() => setDeleteTarget(row.original.id)}
               editLabel="Edit Department"

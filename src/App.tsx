@@ -1,4 +1,4 @@
-import { Authenticated, CanAccess, Refine } from "@refinedev/core";
+import { Authenticated, Refine } from "@refinedev/core";
 import { DevtoolsPanel, DevtoolsProvider } from "@refinedev/devtools";
 import { RefineKbar, RefineKbarProvider } from "@refinedev/kbar";
 import routerProvider, {
@@ -32,8 +32,8 @@ import ClassesEdit from "@/pages/classes/edit.tsx";
 import ClassShow from "@/pages/classes/show.tsx";
 import LoginPage from "@/pages/auth/login.tsx";
 import RegisterPage from "@/pages/auth/register.tsx";
-import UnauthorizedPage from "@/pages/unauthorized.tsx"; // Import the new page
 import { SidebarProvider } from "@/components/ui/sidebar";
+import { AuthorizedRoute } from "./components/authorized-route"; // Import the new component
 
 function App() {
   return (
@@ -112,34 +112,27 @@ function App() {
                     </Authenticated>
                   }
                 >
-                  <Route
-                    index
-                    element={
-                      <CanAccess resource="dashboard" action="list" fallback={<UnauthorizedPage />}>
-                        <Dashboard />
-                      </CanAccess>
-                    }
-                  />
+                  <Route index element={<AuthorizedRoute resource="dashboard" action="list"><Dashboard /></AuthorizedRoute>} />
                   <Route path="subjects">
-                    <Route index element={<CanAccess resource="subjects" action="list" fallback={<UnauthorizedPage />}><SubjectsList /></CanAccess>} />
-                    <Route path="create" element={<CanAccess resource="subjects" action="create" fallback={<UnauthorizedPage />}><SubjectsCreate /></CanAccess>} />
-                    <Route path="edit/:id" element={<CanAccess resource="subjects" action="edit" fallback={<UnauthorizedPage />}><SubjectsEdit /></CanAccess>} />
+                    <Route index element={<AuthorizedRoute resource="subjects" action="list"><SubjectsList /></AuthorizedRoute>} />
+                    <Route path="create" element={<AuthorizedRoute resource="subjects" action="create"><SubjectsCreate /></AuthorizedRoute>} />
+                    <Route path="edit/:id" element={<AuthorizedRoute resource="subjects" action="edit"><SubjectsEdit /></AuthorizedRoute>} />
                   </Route>
                   <Route path="departments">
-                    <Route index element={<CanAccess resource="departments" action="list" fallback={<UnauthorizedPage />}><DepartmentsList /></CanAccess>} />
-                    <Route path="create" element={<CanAccess resource="departments" action="create" fallback={<UnauthorizedPage />}><DepartmentsCreate /></CanAccess>} />
-                    <Route path="edit/:id" element={<CanAccess resource="departments" action="edit" fallback={<UnauthorizedPage />}><DepartmentsEdit /></CanAccess>} />
+                    <Route index element={<AuthorizedRoute resource="departments" action="list"><DepartmentsList /></AuthorizedRoute>} />
+                    <Route path="create" element={<AuthorizedRoute resource="departments" action="create"><DepartmentsCreate /></AuthorizedRoute>} />
+                    <Route path="edit/:id" element={<AuthorizedRoute resource="departments" action="edit"><DepartmentsEdit /></AuthorizedRoute>} />
                   </Route>
                   <Route path="users">
-                    <Route index element={<CanAccess resource="users" action="list" fallback={<UnauthorizedPage />}><UsersList /></CanAccess>} />
-                    <Route path="create" element={<CanAccess resource="users" action="create" fallback={<UnauthorizedPage />}><UsersCreate /></CanAccess>} />
-                    <Route path="edit/:id" element={<CanAccess resource="users" action="edit" fallback={<UnauthorizedPage />}><UsersEdit /></CanAccess>} />
+                    <Route index element={<AuthorizedRoute resource="users" action="list"><UsersList /></AuthorizedRoute>} />
+                    <Route path="create" element={<AuthorizedRoute resource="users" action="create"><UsersCreate /></AuthorizedRoute>} />
+                    <Route path="edit/:id" element={<AuthorizedRoute resource="users" action="edit"><UsersEdit /></AuthorizedRoute>} />
                   </Route>
                   <Route path="classes">
-                    <Route index element={<CanAccess resource="classes" action="list" fallback={<UnauthorizedPage />}><ClassesList /></CanAccess>} />
-                    <Route path="create" element={<CanAccess resource="classes" action="create" fallback={<UnauthorizedPage />}><ClassesCreate /></CanAccess>} />
-                    <Route path="edit/:id" element={<CanAccess resource="classes" action="edit" fallback={<UnauthorizedPage />}><ClassesEdit /></CanAccess>} />
-                    <Route path="show/:id" element={<CanAccess resource="classes" action="show" fallback={<UnauthorizedPage />}><ClassShow /></CanAccess>} />
+                    <Route index element={<AuthorizedRoute resource="classes" action="list"><ClassesList /></AuthorizedRoute>} />
+                    <Route path="create" element={<AuthorizedRoute resource="classes" action="create"><ClassesCreate /></AuthorizedRoute>} />
+                    <Route path="edit/:id" element={<AuthorizedRoute resource="classes" action="edit"><ClassesEdit /></AuthorizedRoute>} />
+                    <Route path="show/:id" element={<AuthorizedRoute resource="classes" action="show"><ClassShow /></AuthorizedRoute>} />
                   </Route>
                 </Route>
               </Routes>

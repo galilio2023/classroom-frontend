@@ -1,28 +1,34 @@
 import { EditViewHeader } from "@/components/refine-ui/views/edit-view";
 import { useForm } from "@refinedev/react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useSelect } from "@refinedev/core";
-import { useParams } from "react-router-dom"; // Corrected import
+import { useSelect, useOne } from "@refinedev/core";
+import { useParams } from "react-router-dom";
 import { useFieldArray } from "react-hook-form";
 import { Form } from "@/components/ui/form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Info } from "lucide-react";
 import { classFormSchema } from "@/schemas/class";
-import { Subject, ClassStatus } from "@/types";
+import { Subject, ClassStatus, Class } from "@/types";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ClassForm } from "./form";
 
 const ClassesEdit = () => {
   const { id } = useParams();
 
-  const { 
-    refineCore: { onFinish, formLoading, queryResult }, 
-    ...form 
+  // Fetch the class data separately to get the invite code
+  const { query: classQuery } = useOne<Class>({
+    resource: "classes",
+    id,
+  });
+
+  const {
+    refineCore: { onFinish, formLoading },
+    ...form
   } = useForm({
     resolver: zodResolver(classFormSchema),
     defaultValues: {
       name: "",
-      subjectId: "",
+      subjectId: undefined,
       capacity: 0,
       status: ClassStatus.ACTIVE,
       schedules: [],
@@ -31,7 +37,6 @@ const ClassesEdit = () => {
       resource: "classes",
       action: "edit",
       redirect: "list",
-      id: id,
     },
   });
 
@@ -49,12 +54,12 @@ const ClassesEdit = () => {
   return (
     <div className="container mx-auto py-6 max-w-6xl">
       <EditViewHeader />
-      
+
       <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onFinish)}>
-              <ClassForm 
+              <ClassForm
                 form={form}
                 subjectOptions={subjectOptions}
                 fields={fields}
@@ -77,16 +82,17 @@ const ClassesEdit = () => {
             </CardHeader>
             <CardContent className="space-y-4 text-sm text-muted-foreground">
               <p>
-                Changes to the schedule will update immediately for all enrolled students.
+                Changes to the schedule will update immediately for all enrolled
+                students.
               </p>
             </CardContent>
           </Card>
-          
+
           <Alert>
             <Info className="h-4 w-4" />
             <AlertTitle>Invite Code</AlertTitle>
             <AlertDescription className="text-xs text-muted-foreground mt-1 font-mono">
-              {queryResult?.data?.data.inviteCode}
+              {classQuery?.data?.data?.inviteCode ?? "Loading..."}
             </AlertDescription>
           </Alert>
         </div>

@@ -1,14 +1,26 @@
-import { useOne, useTable, useNavigation, useDelete } from "@refinedev/core";
+import { useShow, useDelete, HttpError } from "@refinedev/core";
+import { useTable } from "@refinedev/react-table";
 import { useParams } from "react-router-dom";
-import { Class, Enrollment, User, UserRole } from "@/types";
-import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { DataTable } from "@/components/refine-ui/data-table/data-table";
 import { ColumnDef } from "@tanstack/react-table";
 import { useMemo, useState } from "react";
-import { DataTableRowActions } from "@/components/refine-ui/data-table/row-actions";
+
+import { DataTable } from "@/components/refine-ui/data-table/data-table";
+import {
+  ShowView,
+  ShowViewHeader,
+} from "@/components/refine-ui/views/show-view";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { Class, Enrollment, User } from "@/types";
+import { Loader2, PlusCircle, Trash } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,56 +31,46 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
-import { PlusCircle } from "lucide-react";
 import { EnrollStudentDialog } from "./enroll-student-dialog";
 
-const ClassShow = () => {
+const ClassesShow = () => {
   const { id } = useParams();
+  const classId = id ?? "";
+
   const [unenrollTarget, setUnenrollTarget] = useState<number | null>(null);
   const [isEnrollDialogOpen, setIsEnrollDialogOpen] = useState(false);
 
-  const { data: classData, isLoading: isClassLoading } = useOne<Class>({
+  const {
+    result: aClass,
+    query: { isLoading: isClassLoading, isError },
+  } = useShow<Class>({
     resource: "classes",
-    id,
+    id: classId,
   });
 
-  const { mutate: deleteMutation } = useDelete();
+  const { mutate: deleteMutation, mutation } = useDelete();
 
-  const enrollmentsTable = useTable<Enrollment>({
-    resource: "enrollments",
-    filters: {
-      permanent: [{ field: "classId", operator: "eq", value: id }],
-    },
-    sorters: {
-      initial: [{ field: "createdAt", order: "desc" }],
-    },
-    pagination: {
-      pageSize: 5,
-    },
-    syncWithLocation: false, // To prevent URL query params from changing
-  });
-
-  const enrolledStudentIds = useMemo(() => {
-    return enrollmentsTable.table.getRowModel().rows.map(row => row.original.student.id);
-  }, [enrollmentsTable.table.getRowModel().rows]);
-
-  const columns = useMemo<ColumnDef<Enrollment>[]>(
+  const studentColumns = useMemo<ColumnDef<Enrollment>[]>(
     () => [
       {
         id: "student",
         header: "Student",
-        cell: ({ row }) => {
-          const student = row.original.student;
+        accessorFn: (row) => row.student,
+        cell: ({ getValue }) => {
+          const student = getValue<User>();
           return (
             <div className="flex items-center gap-2">
-              <Avatar className="h-8 w-8">
-                <AvatarImage src={student.image} alt={student.name} />
-                <AvatarFallback>{student.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+              <Avatar className="size-7">
+                {student.image && (
+                  <AvatarImage src={student.image} alt={student.name} />
+                )}
+                <AvatarFallback>{student.name?.[0]}</AvatarFallback>
               </Avatar>
-              <div>
-                <p className="font-medium">{student.name}</p>
-                <p className="text-sm text-muted-foreground">{student.email}</p>
+              <div className="flex flex-col truncate">
+                <span className="truncate">{student.name}</span>
+                <span className="text-xs text-muted-foreground truncate">
+                  {student.email}
+                </span>
               </div>
             </div>
           );
@@ -77,76 +79,101 @@ const ClassShow = () => {
       {
         accessorKey: "createdAt",
         header: "Enrolled On",
-        cell: ({ getValue }) => new Date(getValue<string>()).toLocaleDateString(),
+        cell: ({ getValue }) =>
+          new Date(getValue<string>()).toLocaleDateString(),
       },
       {
         id: "actions",
-        size: 50,
-        header: () => null,
         cell: ({ row }) => (
-          <DataTableRowActions
-            onDelete={() => setUnenrollTarget(row.original.id)}
-            deleteLabel="Unenroll Student"
-          />
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setUnenrollTarget(row.original.id)}
+          >
+            <Trash className="h-4 w-4 text-destructive" />
+          </Button>
         ),
       },
     ],
     [],
   );
 
+  const studentsTable = useTable<Enrollment>({
+    columns: studentColumns,
+    refineCoreProps: {
+      resource: "enrollments",
+      filters: {
+        permanent: [{ field: "classId", operator: "eq", value: classId }],
+      },
+      queryOptions: {
+        enabled: !!classId,
+      },
+    },
+  });
+
+  const enrolledStudentIds = useMemo(() => {
+    return studentsTable.reactTable
+      .getRowModel()
+      .rows.map((row) => row.original.student.id);
+  }, [studentsTable.reactTable.getRowModel().rows]);
+
   const handleConfirmUnenroll = () => {
     if (unenrollTarget) {
       deleteMutation(
-        {
-          resource: "enrollments",
-          id: unenrollTarget,
-          mutationMode: "pessimistic",
-        },
-        {
-          onSuccess: () => {
-            setUnenrollTarget(null);
-          },
-        }
+        { resource: "enrollments", id: unenrollTarget },
+        { onSuccess: () => setUnenrollTarget(null) },
       );
     }
   };
 
-  const aClass = classData?.data;
+  // Correctly access the loading state from the nested object
+  const isLoading = isClassLoading || studentsTable.refineCore.tableQuery.isLoading;
 
-  if (isClassLoading) {
-    return <div>Loading...</div>;
+  if (isLoading) {
+    return (
+      <ShowView>
+        <ShowViewHeader resource="classes" title="Loading..." />
+        <div className="flex justify-center items-center h-96">
+          <Loader2 className="h-12 w-12 animate-spin text-muted-foreground" />
+        </div>
+      </ShowView>
+    );
+  }
+
+  if (isError || !aClass) {
+    return (
+      <ShowView>
+        <ShowViewHeader title="Class not found" />
+      </ShowView>
+    );
   }
 
   return (
     <>
-      <div className="container mx-auto py-6">
-        <Breadcrumb />
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="page-title">{aClass?.name}</h1>
-            <p className="text-muted-foreground">Manage class details and student enrollments.</p>
-          </div>
-          <Button onClick={() => setIsEnrollDialogOpen(true)}>
-            <PlusCircle className="h-4 w-4 mr-2" />
-            Enroll Student
-          </Button>
-        </div>
-
+      <ShowView className="class-view class-show space-y-6">
+        <ShowViewHeader resource="classes" title={aClass.name} />
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column: Enrolled Students */}
           <div className="lg:col-span-2">
             <Card>
-              <CardHeader>
-                <CardTitle>Enrolled Students ({enrollmentsTable.table.getRowCount()})</CardTitle>
-                <CardDescription>The list of students currently enrolled in this class.</CardDescription>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>Enrolled Students</CardTitle>
+                  <CardDescription>
+                    {/* Correctly access the total count from the nested object */}
+                    {studentsTable.refineCore.tableQuery.data?.total ?? 0} of{" "}
+                    {aClass.capacity} spots filled
+                  </CardDescription>
+                </div>
+                <Button onClick={() => setIsEnrollDialogOpen(true)}>
+                  <PlusCircle className="h-4 w-4 mr-2" />
+                  Enroll Student
+                </Button>
               </CardHeader>
               <CardContent>
-                <DataTable table={enrollmentsTable} columns={columns} />
+                <DataTable table={studentsTable} />
               </CardContent>
             </Card>
           </div>
-
-          {/* Right Column: Class Details */}
           <div>
             <Card>
               <CardHeader>
@@ -154,58 +181,66 @@ const ClassShow = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Teacher</span>
-                  <span className="font-medium">{aClass?.teacher.name}</span>
-                </div>
-                <div className="flex justify-between">
                   <span className="text-muted-foreground">Subject</span>
-                  <span className="font-medium">{aClass?.subject.name}</span>
+                  <span className="font-medium">
+                    {aClass?.subject?.name ?? "N/A"}
+                  </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Capacity</span>
-                  <span className="font-medium">{enrollmentsTable.table.getRowCount()} / {aClass?.capacity}</span>
+                  <span className="text-muted-foreground">Teacher</span>
+                  <span className="font-medium">
+                    {aClass?.teacher?.name ?? "N/A"}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Status</span>
-                  <Badge variant="default" className="capitalize">{aClass?.status}</Badge>
+                  <Badge variant="default" className="capitalize">
+                    {aClass.status}
+                  </Badge>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Invite Code</span>
-                  <Badge variant="outline" className="font-mono">{aClass?.inviteCode}</Badge>
+                  <Badge variant="outline" className="font-mono">
+                    {aClass.inviteCode}
+                  </Badge>
                 </div>
               </CardContent>
             </Card>
           </div>
         </div>
-      </div>
+      </ShowView>
 
-      {/* Unenroll Confirmation Dialog */}
-      <AlertDialog open={unenrollTarget !== null} onOpenChange={() => setUnenrollTarget(null)}>
+      <AlertDialog
+        open={unenrollTarget !== null}
+        onOpenChange={() => setUnenrollTarget(null)}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will unenroll the student from the class. This action can be undone by enrolling them again.
+              This will unenroll the student from the class.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmUnenroll}>Confirm</AlertDialogAction>
+            <AlertDialogAction
+              onClick={handleConfirmUnenroll}
+              disabled={mutation.isPending}
+            >
+              {mutation.isPending ? "Unenrolling..." : "Confirm"}
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Enroll Student Dialog */}
-      {id && (
-        <EnrollStudentDialog
-          classId={id}
-          isOpen={isEnrollDialogOpen}
-          onOpenChange={setIsEnrollDialogOpen}
-          enrolledStudentIds={enrolledStudentIds}
-        />
-      )}
+      <EnrollStudentDialog
+        classId={classId}
+        isOpen={isEnrollDialogOpen}
+        onOpenChange={setIsEnrollDialogOpen}
+        enrolledStudentIds={enrolledStudentIds}
+      />
     </>
   );
 };
 
-export default ClassShow;
+export default ClassesShow;

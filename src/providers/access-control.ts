@@ -12,21 +12,25 @@ export const accessControlProvider: AccessControlProvider = {
     }
 
     if (role === "teacher") {
-      if ((resource === "subjects" || resource === "departments") && (action === "list" || action === "show")) {
+      // Teachers should have full access to manage departments and subjects
+      if (resource === "departments" || resource === "subjects") {
         return { can: true };
       }
 
       if (resource === "classes") {
-        if (action === "list" || action === "create") {
+        // Teachers can view the list, create new classes, and view details of ANY class.
+        if (action === "list" || action === "create" || action === "show") {
           return { can: true };
         }
-        if (action === "edit" || action === "show" || action === "delete") {
+        // For editing or deleting, we must check for ownership.
+        if (action === "edit" || action === "delete") {
           if (!params?.id) return { can: false };
           try {
             const { data: classData } = await dataProvider.getOne({
               resource: "classes",
               id: params.id,
             });
+            // Allow if the logged-in user's ID matches the class's teacherId.
             if (classData && classData.teacherId === identity?.id) {
               return { can: true };
             }
@@ -36,6 +40,7 @@ export const accessControlProvider: AccessControlProvider = {
           }
         }
       }
+      // Deny all other actions for teachers
       return { can: false };
     }
 
@@ -53,7 +58,6 @@ export const accessControlProvider: AccessControlProvider = {
 
     return { can: false };
   },
-  // Add this options block to hide unauthorized buttons
   options: {
     buttons: {
       hideIfUnauthorized: true,

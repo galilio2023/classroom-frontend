@@ -14,7 +14,9 @@ export const authProvider: AuthProvider = {
         },
       };
     }
-    // Do not store user here, let login handle it.
+    if (data?.user) {
+      localStorage.setItem("user", JSON.stringify(data.user));
+    }
     return { success: true, redirectTo: "/login" };
   },
 
@@ -29,7 +31,6 @@ export const authProvider: AuthProvider = {
         },
       };
     }
-    // On successful login, store the user object in localStorage.
     localStorage.setItem("user", JSON.stringify(data.user));
     return { success: true, redirectTo: "/" };
   },
@@ -40,9 +41,11 @@ export const authProvider: AuthProvider = {
     return { success: true, redirectTo: "/login" };
   },
 
+  // This is a fast, client-side check that improves performance.
+  // It comes with a trade-off: if a user's session is revoked on the server,
+  // the client won't know until the next API call fails.
+  // The `onError` handler is our security net for this scenario.
   check: async () => {
-    // For the initial check, we prefer a fast, client-side check.
-    // The onError handler will catch any stale sessions on the next API call.
     const user = localStorage.getItem("user");
     if (user) {
       return { authenticated: true };
@@ -75,33 +78,15 @@ export const authProvider: AuthProvider = {
     }
   },
 
-  // This is the final, robust implementation of getIdentity.
   getIdentity: async () => {
-    // 1. Try to get the user from localStorage first for speed.
     const user = localStorage.getItem("user");
-    if (user) {
-      try {
-        return JSON.parse(user);
-      } catch (e) {
-        // If localStorage is corrupted, clear it and proceed to fetch from the API.
-        localStorage.removeItem("user");
-      }
-    }
-
-    // 2. If not in localStorage, fetch the session from the backend.
+    if (!user) return null;
     try {
-      const session = await authClient.getSession();
-      if (session?.user) {
-        // 3. Store the fresh user data in localStorage for the next time.
-        localStorage.setItem("user", JSON.stringify(session.user));
-        return session.user;
-      }
-    } catch (error) {
-      // This can happen if the session cookie is invalid.
-      console.error("Error fetching session in getIdentity:", error);
+      const parsedUser: User = JSON.parse(user);
+      return parsedUser;
+    } catch (e) {
+      localStorage.removeItem("user");
+      return null;
     }
-
-    // 4. If all else fails, return null.
-    return null;
   },
 };

@@ -13,10 +13,11 @@ export const classFormSchema = z.object({
   description: z.string().optional(),
   subjectId: z.coerce.number().min(1, "Subject is required"),
   teacherId: z.string().min(1, "Teacher is required"),
-  capacity: z.coerce.number().min(1, "Capacity must be at least 1").default(50),
-  status: z.nativeEnum(ClassStatus).default(ClassStatus.ACTIVE),
-  schedules: z.array(scheduleSchema).default([]),
+  capacity: z.coerce.number().min(1, "Capacity must be at least 1"),
+  status: z.nativeEnum(ClassStatus),
+  schedules: z.array(scheduleSchema),
 });
 
-// This is the schema for the creation form, which does not include teacherId
-export const classCreateFormSchema = classFormSchema.omit({ teacherId: true });
+// This is the schema for the creation form.
+// teacherId is made optional as it's not part of the form fields but added programmatically.
+export const classCreateFormSchema = classFormSchema.partial({ teacherId: true });

@@ -7,35 +7,28 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useCan } from "@refinedev/core";
-import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
-import { ReactNode } from "react";
-
-interface CustomAction {
-  label: string;
-  icon: ReactNode;
-  onClick: () => void;
-  action: "show" | "list" | "create" | "edit" | "delete"; // Add action type
-}
+import { MoreHorizontal, Pencil, Trash2, Eye } from "lucide-react";
 
 interface DataTableRowActionsProps {
   onEdit?: () => void;
   onDelete?: () => void;
-  editLabel?: string;
-  deleteLabel?: string;
-  customActions?: CustomAction[];
+  onShow?: () => void; // Add a specific prop for the show action
   resource?: string;
   recordId?: number | string;
+  editLabel?: string;
+  deleteLabel?: string;
 }
 
 export function DataTableRowActions({
   onEdit,
   onDelete,
-  editLabel = "Edit",
-  deleteLabel = "Delete",
-  customActions,
+  onShow,
   resource,
   recordId,
+  editLabel,
+  deleteLabel,
 }: DataTableRowActionsProps) {
+  // Call all necessary hooks at the top level
   const { data: editCan } = useCan({
     resource: resource,
     action: "edit",
@@ -50,21 +43,18 @@ export function DataTableRowActions({
     queryOptions: { enabled: !!(resource && recordId && onDelete) },
   });
 
-  // We need to check permissions for custom actions as well
-  const visibleCustomActions = customActions?.filter(action => {
-    const { data: can } = useCan({
-      resource: resource,
-      action: action.action,
-      params: { id: recordId },
-      queryOptions: { enabled: !!(resource && recordId) },
-    });
-    return can?.can;
-  }) ?? [];
+  const { data: showCan } = useCan({
+    resource: resource,
+    action: "show",
+    params: { id: recordId },
+    queryOptions: { enabled: !!(resource && recordId && onShow) },
+  });
 
-  const hasActions = (onEdit && editCan?.can) || (onDelete && deleteCan?.can) || visibleCustomActions.length > 0;
+  // Determine if there are any visible actions before rendering the menu
+  const hasVisibleActions = editCan?.can || deleteCan?.can || showCan?.can;
 
-  if (!hasActions) {
-    return null;
+  if (!hasVisibleActions) {
+    return null; // If no actions are permitted, render nothing.
   }
 
   return (
@@ -77,29 +67,37 @@ export function DataTableRowActions({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          {onEdit && editCan?.can && (
-            <DropdownMenuItem onClick={onEdit} className="flex items-center gap-2 cursor-pointer">
-              <Pencil className="h-4 w-4" />
-              <span>{editLabel}</span>
+          {showCan?.can && onShow && (
+            <DropdownMenuItem
+              onClick={onShow}
+              className="flex items-center gap-2 cursor-pointer"
+            >
+              <Eye className="h-4 w-4" />
+              <span>View Students</span>
             </DropdownMenuItem>
           )}
 
-          {visibleCustomActions.map((action, index) => (
-            <DropdownMenuItem key={index} onClick={action.onClick} className="flex items-center gap-2 cursor-pointer">
-              {action.icon}
-              <span>{action.label}</span>
+          {editCan?.can && onEdit && (
+            <DropdownMenuItem
+              onClick={onEdit}
+              className="flex items-center gap-2 cursor-pointer"
+            >
+              <Pencil className="h-4 w-4" />
+              <span>{editLabel || "Edit"}</span>
             </DropdownMenuItem>
-          ))}
+          )}
 
-          {(onEdit && editCan?.can || visibleCustomActions.length > 0) && onDelete && deleteCan?.can && <DropdownMenuSeparator />}
-          
-          {onDelete && deleteCan?.can && (
+          {(showCan?.can || editCan?.can) && deleteCan?.can && (
+            <DropdownMenuSeparator />
+          )}
+
+          {deleteCan?.can && onDelete && (
             <DropdownMenuItem
               onClick={onDelete}
               className="flex items-center gap-2 text-red-500 focus:text-red-500 cursor-pointer"
             >
               <Trash2 className="h-4 w-4" />
-              <span>{deleteLabel}</span>
+              <span>{deleteLabel || "Delete"}</span>
             </DropdownMenuItem>
           )}
         </DropdownMenuContent>

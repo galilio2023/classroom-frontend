@@ -26,9 +26,9 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { departmentFormSchema } from "@/schemas/department";
 
 const DepartmentsEdit = () => {
-  const { 
-    refineCore: { onFinish, formLoading, queryResult }, 
-    ...form 
+  const {
+    refineCore: { onFinish, formLoading, query },
+    ...form
   } = useForm({
     resolver: zodResolver(departmentFormSchema),
     refineCoreProps: {
@@ -41,7 +41,7 @@ const DepartmentsEdit = () => {
   return (
     <div className="container mx-auto py-6 max-w-6xl">
       <EditViewHeader />
-      
+
       <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left Column: The Main Form */}
         <div className="lg:col-span-2">
@@ -54,12 +54,13 @@ const DepartmentsEdit = () => {
                     Edit Department
                   </CardTitle>
                   <CardDescription>
-                    Update the details for the department "{queryResult?.data?.data.name}".
+                    Update the details for the department "
+                    {query?.data?.data.name}".
                   </CardDescription>
                 </CardHeader>
-                
+
                 <Separator />
-                
+
                 <CardContent className="space-y-6 pt-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Code Field */}
@@ -73,7 +74,11 @@ const DepartmentsEdit = () => {
                             Department Code
                           </FormLabel>
                           <FormControl>
-                            <Input placeholder="e.g. CS" {...field} className="font-mono" />
+                            <Input
+                              placeholder="e.g. CS"
+                              {...field}
+                              className="font-mono"
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -91,7 +96,10 @@ const DepartmentsEdit = () => {
                             Department Name
                           </FormLabel>
                           <FormControl>
-                            <Input placeholder="e.g. Computer Science" {...field} />
+                            <Input
+                              placeholder="e.g. Computer Science"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -107,10 +115,10 @@ const DepartmentsEdit = () => {
                       <FormItem>
                         <FormLabel>Description</FormLabel>
                         <FormControl>
-                          <Textarea 
-                            placeholder="Brief description of the department..." 
-                            className="resize-none min-h-[120px]" 
-                            {...field} 
+                          <Textarea
+                            placeholder="Brief description of the department..."
+                            className="resize-none min-h-[120px]"
+                            {...field}
                           />
                         </FormControl>
                         <FormMessage />
@@ -118,12 +126,12 @@ const DepartmentsEdit = () => {
                     )}
                   />
                 </CardContent>
-                
+
                 <Separator />
-                
+
                 <CardFooter className="flex justify-end pt-6 pb-6 bg-muted/5">
-                  <Button 
-                    type="submit" 
+                  <Button
+                    type="submit"
                     size="lg"
                     disabled={formLoading}
                     className="min-w-[150px]"
@@ -151,7 +159,8 @@ const DepartmentsEdit = () => {
                   <span className="text-xs font-bold text-primary">1</span>
                 </div>
                 <p>
-                  <strong>Short Codes:</strong> Use short, uppercase codes like "CS", "MATH", or "ENG" for easy reference.
+                  <strong>Short Codes:</strong> Use short, uppercase codes like
+                  "CS", "MATH", or "ENG" for easy reference.
                 </p>
               </div>
               <div className="flex gap-3">
@@ -159,7 +168,8 @@ const DepartmentsEdit = () => {
                   <span className="text-xs font-bold text-primary">2</span>
                 </div>
                 <p>
-                  <strong>Clear Names:</strong> Use the full official name of the department.
+                  <strong>Clear Names:</strong> Use the full official name of
+                  the department.
                 </p>
               </div>
             </CardContent>

@@ -26,6 +26,35 @@
 
 This is the frontend for the Classroom application, built with React, Vite, and the Refine framework. It provides the user interface for interacting with the backend API and uses `better-auth` for authentication.
 
+## 📊 Project Status (As of Now)
+
+### ✅ Implemented Features
+
+*   **Authentication**: Full login, registration, and session management using `better-auth`.
+*   **Route Protection**: Public and private routes are correctly secured.
+*   **Departments**: Full CRUD (Create, Read, Update, Delete) functionality.
+*   **Subjects**: Full CRUD functionality, including filtering by department.
+*   **Classes**: 
+    *   Listing all classes with filtering by subject and teacher.
+    *   Creating new classes.
+    *   Viewing class details.
+*   **Enrollments**:
+    *   Listing enrolled students on the class details page.
+    *   Enrolling new students via a dialog.
+    *   Unenrolling students with a confirmation dialog.
+*   **Authorization**:
+    *   Role-based access control is implemented.
+    *   Teachers can only edit or delete classes they own.
+    *   Teachers have full control over subjects and departments.
+    *   Students have read-only access.
+
+### 🚧 Not Yet Implemented
+
+*   **Class Editing**: The "Edit Class" page and functionality are not yet implemented.
+*   **Dashboard**: The main dashboard view is a placeholder and does not yet display summary data.
+*   **Profile Management**: Users cannot yet update their own profile information (name, image, etc.).
+*   **Banner/Image Uploads**: The UI for uploading class banners is present but the feature is not fully wired up.
+
 ## 🚀 Getting Started
 
 ### 1. Installation
