@@ -32,22 +32,37 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { BookOpen, Code2, Building2, FileText, Lightbulb, Info } from "lucide-react";
+import {
+  BookOpen,
+  Code2,
+  Building2,
+  FileText,
+  Lightbulb,
+  Info,
+} from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 // Define the validation schema using z.coerce for automatic type conversion
 const formSchema = z.object({
-  code: z.string().min(1, "Code is required").max(50, "Code must be less than 50 characters"),
-  name: z.string().min(1, "Name is required").max(255, "Name must be less than 255 characters"),
-  description: z.string().max(255, "Description must be less than 255 characters").optional(),
+  code: z
+    .string()
+    .min(1, "Code is required")
+    .max(50, "Code must be less than 50 characters"),
+  name: z
+    .string()
+    .min(1, "Name is required")
+    .max(255, "Name must be less than 255 characters"),
+  description: z
+    .string()
+    .max(255, "Description must be less than 255 characters")
+    .optional(),
   departmentId: z.coerce.number().positive("Department is required"),
 });
 
 const SubjectsEdit = () => {
-  const { 
-    saveButtonProps, 
-    refineCore: { onFinish, formLoading, queryResult }, 
-    ...form 
+  const {
+    refineCore: { onFinish, formLoading, query },
+    ...form
   } = useForm({
     resolver: zodResolver(formSchema),
     refineCoreProps: {
@@ -61,20 +76,17 @@ const SubjectsEdit = () => {
     resource: "departments",
     optionLabel: "name",
     optionValue: "id",
-    defaultValue: queryResult?.data?.data.departmentId,
+    defaultValue: query?.data?.data.departmentId,
   });
-
-  // No custom onSubmit needed anymore! Zod handles the conversion.
 
   return (
     <div className="container mx-auto py-6 max-w-6xl">
       <EditViewHeader />
-      
+
       <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left Column: The Main Form */}
         <div className="lg:col-span-2">
           <Form {...form}>
-            {/* Pass `onFinish` directly to `handleSubmit` */}
             <form onSubmit={form.handleSubmit(onFinish)}>
               <Card className="border-border/50 shadow-sm">
                 <CardHeader>
@@ -83,12 +95,13 @@ const SubjectsEdit = () => {
                     Edit Subject
                   </CardTitle>
                   <CardDescription>
-                    Update the details for the subject "{queryResult?.data?.data.name}".
+                    Update the details for the subject "
+                    {query?.data?.data.name}".
                   </CardDescription>
                 </CardHeader>
-                
+
                 <Separator />
-                
+
                 <CardContent className="space-y-6 pt-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Code Field */}
@@ -102,7 +115,11 @@ const SubjectsEdit = () => {
                             Subject Code
                           </FormLabel>
                           <FormControl>
-                            <Input placeholder="e.g. CS101" {...field} className="font-mono" />
+                            <Input
+                              placeholder="e.g. CS101"
+                              {...field}
+                              className="font-mono"
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -120,7 +137,10 @@ const SubjectsEdit = () => {
                             Subject Name
                           </FormLabel>
                           <FormControl>
-                            <Input placeholder="e.g. Intro to Programming" {...field} />
+                            <Input
+                              placeholder="e.g. Intro to Programming"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -138,7 +158,10 @@ const SubjectsEdit = () => {
                           <Building2 className="h-4 w-4 text-muted-foreground" />
                           Department
                         </FormLabel>
-                        <Select onValueChange={field.onChange} value={String(field.value ?? "")}>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={String(field.value ?? "")}
+                        >
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select a department" />
@@ -146,7 +169,10 @@ const SubjectsEdit = () => {
                           </FormControl>
                           <SelectContent>
                             {departmentOptions.map((option) => (
-                              <SelectItem key={option.value} value={String(option.value)}>
+                              <SelectItem
+                                key={option.value}
+                                value={String(option.value)}
+                              >
                                 {option.label}
                               </SelectItem>
                             ))}
@@ -168,10 +194,10 @@ const SubjectsEdit = () => {
                       <FormItem>
                         <FormLabel>Description</FormLabel>
                         <FormControl>
-                          <Textarea 
-                            placeholder="Brief description of the subject..." 
-                            className="resize-none min-h-[120px]" 
-                            {...field} 
+                          <Textarea
+                            placeholder="Brief description of the subject..."
+                            className="resize-none min-h-[120px]"
+                            {...field}
                           />
                         </FormControl>
                         <FormMessage />
@@ -179,12 +205,12 @@ const SubjectsEdit = () => {
                     )}
                   />
                 </CardContent>
-                
+
                 <Separator />
-                
+
                 <CardFooter className="flex justify-end pt-6 pb-6 bg-muted/5">
-                  <Button 
-                    type="submit" 
+                  <Button
+                    type="submit"
                     size="lg"
                     disabled={formLoading}
                     className="min-w-[150px]"
@@ -212,7 +238,8 @@ const SubjectsEdit = () => {
                   <span className="text-xs font-bold text-primary">1</span>
                 </div>
                 <p>
-                  <strong>Consistent Codes:</strong> Use a standard format like "DEPT-101" to make searching easier.
+                  <strong>Consistent Codes:</strong> Use a standard format like
+                  "DEPT-101" to make searching easier.
                 </p>
               </div>
               <div className="flex gap-3">
@@ -220,7 +247,8 @@ const SubjectsEdit = () => {
                   <span className="text-xs font-bold text-primary">2</span>
                 </div>
                 <p>
-                  <strong>Clear Names:</strong> Avoid abbreviations. "Introduction to Psychology" is better than "Intro to Psych".
+                  <strong>Clear Names:</strong> Avoid abbreviations.
+                  "Introduction to Psychology" is better than "Intro to Psych".
                 </p>
               </div>
             </CardContent>
@@ -230,7 +258,8 @@ const SubjectsEdit = () => {
             <Info className="h-4 w-4" />
             <AlertTitle>Editing Mode</AlertTitle>
             <AlertDescription className="text-xs text-muted-foreground mt-1">
-              Changes made here will overwrite the existing subject data. Be sure to save your work.
+              Changes made here will overwrite the existing subject data. Be
+              sure to save your work.
             </AlertDescription>
           </Alert>
         </div>

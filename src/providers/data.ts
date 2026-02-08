@@ -39,8 +39,7 @@ const options: CreateDataProviderOptions = {
         if (resource === "classes") {
           if (field === "name") params.search = value;
           if (field === "subject") params.subject = value;
-          // The 'teacher' filter was incorrectly applied to the list view.
-          // if (field === "teacher") params.teacher = value; 
+          if (field === "teacher") params.teacher = value;
         }
         if (resource === "enrollments") {
           if (field === "classId") params.classId = value;

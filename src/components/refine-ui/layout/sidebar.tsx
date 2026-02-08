@@ -20,7 +20,6 @@ import {
   SidebarTrigger as ShadcnSidebarTrigger,
   useSidebar as useShadcnSidebar,
 } from "@/components/ui/sidebar";
-import { cn } from "@/lib/utils";
 import {
   useLink,
   useMenu,
@@ -29,31 +28,23 @@ import {
 } from "@refinedev/core";
 import { ChevronRight, ListIcon } from "lucide-react";
 import React from "react";
+import { cn } from "@/lib/utils.ts";
 
-interface SidebarProps {
-  isSheet?: boolean;
-}
-
-export function Sidebar({ isSheet = false }: SidebarProps) {
+export function Sidebar() {
   const { open } = useShadcnSidebar();
   const { menuItems, selectedKey } = useMenu();
 
-  const renderContent = () => (
-    <>
-      {!isSheet && <SidebarHeader />}
+  return (
+    <ShadcnSidebar collapsible="icon" className={cn("border-none")}>
+      <ShadcnSidebarRail />
+      <SidebarHeader />
       <ShadcnSidebarContent
         className={cn(
           "transition-discrete",
-          "duration-200",
-          "flex",
-          "flex-col",
-          "gap-2",
-          "pt-2",
-          "pb-2",
+
           {
-            "border-r border-border": !isSheet,
-            "px-3": open || isSheet,
-            "px-1": !open && !isSheet,
+            "px-3": open,
+            "px-1": !open,
           },
         )}
       >
@@ -65,17 +56,6 @@ export function Sidebar({ isSheet = false }: SidebarProps) {
           />
         ))}
       </ShadcnSidebarContent>
-    </>
-  );
-
-  if (isSheet) {
-    return renderContent();
-  }
-
-  return (
-    <ShadcnSidebar collapsible="icon" className={cn("border-none")}>
-      <ShadcnSidebarRail />
-      {renderContent()}
     </ShadcnSidebar>
   );
 }
@@ -318,10 +298,10 @@ function SidebarButton({
       variant="ghost"
       size="lg"
       className={cn(
-        "flex w-full items-center justify-start gap-2 py-2 !px-3 text-sm",
+        "flex w-full items-center justify-start gap-2 py-2 px-3! text-sm",
         {
           "bg-sidebar-primary": isSelected,
-          "hover:!bg-sidebar-primary/90": isSelected,
+          "hover:bg-sidebar-primary/90!": isSelected,
           "text-sidebar-primary-foreground": isSelected,
           "hover:text-sidebar-primary-foreground": isSelected,
         },

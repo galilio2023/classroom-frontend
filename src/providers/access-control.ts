@@ -1,10 +1,12 @@
 import { AccessControlProvider } from "@refinedev/core";
 import { authProvider } from "./auth";
 import { dataProvider } from "./data";
+import { User } from "@/types"; // Import the User type
 
 export const accessControlProvider: AccessControlProvider = {
   can: async ({ resource, action, params }) => {
-    const identity = await authProvider.getIdentity?.();
+    // Explicitly cast the identity to the User type
+    const identity = (await authProvider.getIdentity?.()) as User | null;
     const role = identity?.role;
 
     if (role === "admin") {
@@ -12,36 +14,50 @@ export const accessControlProvider: AccessControlProvider = {
     }
 
     if (role === "teacher") {
-      // Teachers should have full access to manage departments and subjects
       if (resource === "departments" || resource === "subjects") {
         return { can: true };
       }
 
       if (resource === "classes") {
-        // Teachers can view the list, create new classes, and view details of ANY class.
-        if (action === "list" || action === "create" || action === "show") {
+        if (action === "list" || action === "create") {
           return { can: true };
         }
-        // For editing or deleting, we must check for ownership.
-        if (action === "edit" || action === "delete") {
-          if (!params?.id) return { can: false };
+        if (action === "show" || action === "edit" || action === "delete") {
+          if (!params?.id) {
+            return {
+              can: false,
+              reason: "No record ID specified for authorization check.",
+            };
+          }
           try {
             const { data: classData } = await dataProvider.getOne({
               resource: "classes",
               id: params.id,
             });
-            // Allow if the logged-in user's ID matches the class's teacherId.
+            // The identity object is now correctly typed
             if (classData && classData.teacherId === identity?.id) {
               return { can: true };
             }
+            return {
+              can: false,
+              reason: "You can only manage classes that you own.",
+            };
           } catch (error) {
             console.error("Error checking access for class:", error);
-            return { can: false };
+            return {
+              can: false,
+              reason: "An error occurred while checking permissions.",
+            };
           }
         }
       }
-      // Deny all other actions for teachers
-      return { can: false };
+      // Deny access to other resources like 'users'
+      if (resource === "users") {
+        return {
+          can: false,
+          reason: "This resource is only available to administrators.",
+        };
+      }
     }
 
     if (role === "student") {
@@ -54,9 +70,17 @@ export const accessControlProvider: AccessControlProvider = {
       if (resource === "dashboard") {
         return { can: true };
       }
+      // Deny all other actions for students
+      return {
+        can: false,
+        reason: "This action is not available for your role.",
+      };
     }
 
-    return { can: false };
+    return {
+      can: false,
+      reason: "You are not authorized to perform this action.",
+    };
   },
   options: {
     buttons: {

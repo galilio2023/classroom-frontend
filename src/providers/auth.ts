@@ -3,8 +3,10 @@ import { User, SignUpPayload } from "@/types";
 import { authClient } from "@/lib/auth-client";
 
 export const authProvider: AuthProvider = {
-  register: async (params) => {
-    const { data, error } = await authClient.signUp.email(params as SignUpPayload);
+  register: async (params: any) => {
+    const { data, error } = await authClient.signUp.email(
+      params as SignUpPayload,
+    );
     if (error) {
       return {
         success: false,
@@ -20,8 +22,11 @@ export const authProvider: AuthProvider = {
     return { success: true, redirectTo: "/login" };
   },
 
-  login: async ({ email, password }) => {
-    const { data, error } = await authClient.signIn.email({ email, password });
+  login: async (params: any) => {
+    const { data, error } = await authClient.signIn.email({
+      email: params.email,
+      password: params.password,
+    });
     if (error) {
       return {
         success: false,
@@ -41,10 +46,6 @@ export const authProvider: AuthProvider = {
     return { success: true, redirectTo: "/login" };
   },
 
-  // This is a fast, client-side check that improves performance.
-  // It comes with a trade-off: if a user's session is revoked on the server,
-  // the client won't know until the next API call fails.
-  // The `onError` handler is our security net for this scenario.
   check: async () => {
     const user = localStorage.getItem("user");
     if (user) {
@@ -56,7 +57,7 @@ export const authProvider: AuthProvider = {
     };
   },
 
-  onError: async (error) => {
+  onError: async (error: any) => {
     if (error?.response?.status === 401) {
       return {
         logout: true,
