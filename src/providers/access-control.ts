@@ -5,7 +5,6 @@ import { User } from "@/types"; // Import the User type
 
 export const accessControlProvider: AccessControlProvider = {
   can: async ({ resource, action, params }) => {
-    // Explicitly cast the identity to the User type
     const identity = (await authProvider.getIdentity?.()) as User | null;
     const role = identity?.role;
 
@@ -14,6 +13,11 @@ export const accessControlProvider: AccessControlProvider = {
     }
 
     if (role === "teacher") {
+      // Teachers can access the dashboard
+      if (resource === "dashboard") {
+        return { can: true };
+      }
+
       if (resource === "departments" || resource === "subjects") {
         return { can: true };
       }
@@ -34,7 +38,6 @@ export const accessControlProvider: AccessControlProvider = {
               resource: "classes",
               id: params.id,
             });
-            // The identity object is now correctly typed
             if (classData && classData.teacherId === identity?.id) {
               return { can: true };
             }
@@ -51,13 +54,11 @@ export const accessControlProvider: AccessControlProvider = {
           }
         }
       }
-      // Deny access to other resources like 'users'
-      if (resource === "users") {
-        return {
-          can: false,
-          reason: "This resource is only available to administrators.",
-        };
-      }
+      // A more specific fallback for teachers
+      return {
+        can: false,
+        reason: "This page or action is not available for the Teacher role.",
+      };
     }
 
     if (role === "student") {
@@ -70,16 +71,18 @@ export const accessControlProvider: AccessControlProvider = {
       if (resource === "dashboard") {
         return { can: true };
       }
-      // Deny all other actions for students
+      // This is the specific fallback for students
       return {
         can: false,
-        reason: "This action is not available for your role.",
+        reason: "This page or action is not available for the Student role.",
       };
     }
 
+    // This is the final, most generic fallback
     return {
       can: false,
-      reason: "You are not authorized to perform this action.",
+      reason:
+        "You are not authorized to perform this action. Please contact an administrator if you believe this is an error.",
     };
   },
   options: {
