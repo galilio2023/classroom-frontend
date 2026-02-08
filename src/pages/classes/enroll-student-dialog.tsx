@@ -32,8 +32,13 @@ export const EnrollStudentDialog = ({
   onOpenChange,
   enrolledStudentIds,
 }: EnrollStudentDialogProps) => {
-  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
-  const { mutate: createEnrollment, isLoading } = useCreate();
+  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(
+    null,
+  );
+
+  // Correctly destructure mutation from useCreate
+  const { mutate: createEnrollment, mutation } = useCreate();
+  const isLoading = mutation.isPending;
 
   const { options: studentOptions } = useSelect<User>({
     resource: "users",
@@ -59,17 +64,18 @@ export const EnrollStudentDialog = ({
       {
         onSuccess: () => {
           toast.success("Student enrolled successfully!");
+          setSelectedStudentId(null); // Reset selection
           onOpenChange(false);
         },
         onError: (error) => {
           toast.error(error.message || "Failed to enroll student.");
         },
-      }
+      },
     );
   };
 
   const availableStudents = studentOptions.filter(
-    (option) => !enrolledStudentIds.includes(String(option.value))
+    (option) => !enrolledStudentIds.includes(String(option.value)),
   );
 
   return (
@@ -82,7 +88,10 @@ export const EnrollStudentDialog = ({
           </DialogDescription>
         </DialogHeader>
         <div className="py-4">
-          <Select onValueChange={setSelectedStudentId}>
+          <Select
+            onValueChange={setSelectedStudentId}
+            value={selectedStudentId ?? undefined}
+          >
             <SelectTrigger>
               <SelectValue placeholder="Select a student..." />
             </SelectTrigger>
@@ -105,7 +114,10 @@ export const EnrollStudentDialog = ({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button onClick={handleEnroll} disabled={isLoading || availableStudents.length === 0}>
+          <Button
+            onClick={handleEnroll}
+            disabled={isLoading || availableStudents.length === 0}
+          >
             {isLoading ? "Enrolling..." : "Enroll Student"}
           </Button>
         </DialogFooter>

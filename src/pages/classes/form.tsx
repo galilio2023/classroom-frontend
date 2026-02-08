@@ -30,7 +30,7 @@ import { ClassStatus } from "@/types";
 interface ClassFormProps {
   form: UseFormReturn<any>;
   subjectOptions: { value: string | number; label: string }[];
-  teacherOptions: { value: string | number; label: string }[];
+  // teacherOptions is no longer needed
   fields: FieldArrayWithId<any, "schedules", "id">[];
   append: UseFieldArrayAppend<any, "schedules">;
   remove: UseFieldArrayRemove;
@@ -41,7 +41,6 @@ interface ClassFormProps {
 export const ClassForm = ({ 
   form, 
   subjectOptions, 
-  teacherOptions, 
   fields, 
   append, 
   remove,
@@ -120,33 +119,7 @@ export const ClassForm = ({
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="teacherId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Teacher</FormLabel>
-                  <Select 
-                    onValueChange={field.onChange} 
-                    value={field.value ? String(field.value) : ""}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a teacher" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {teacherOptions.map((option) => (
-                        <SelectItem key={option.value} value={String(option.value)}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {/* The Teacher FormField is now removed */}
           </div>
 
           {isEdit && (

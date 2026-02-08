@@ -35,7 +35,7 @@ const SubjectsList = () => {
   const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
 
   const { edit } = useNavigation();
-  const { mutate: deleteMutation } = useDelete();
+  const { mutate: deleteMutation, isPending: isDeleteLoading } = useDelete();
 
   const { options: departmentOptions } = useSelect<Department>({
     resource: "departments",
@@ -59,7 +59,7 @@ const SubjectsList = () => {
       () => [
         { accessorKey: "code", size: 100, header: () => <p className="column-title ml-2">Code</p>, cell: ({ getValue }) => <Badge>{getValue<string>()}</Badge> },
         { accessorKey: "name", size: 200, header: () => <p className="column-title">Name</p>, cell: ({ getValue }) => <span className="text-foreground">{getValue<string>()}</span> },
-        { accessorKey: "department", size: 150, header: () => <p className="column-title">Department</p>, cell: ({ getValue }) => { const department = getValue<Department>(); return <Badge variant="secondary">{department?.name}</Badge>; } },
+        { accessorKey: "department.name", size: 150, header: () => <p className="column-title">Department</p>, cell: ({ getValue }) => <Badge variant="secondary">{getValue<string>()}</Badge> },
         { accessorKey: "description", size: 300, header: () => <p className="column-title">Description</p>, cell: ({ getValue }) => <span className="truncate line-clamp-2">{getValue<string>()}</span> },
         {
           id: "actions",
@@ -67,6 +67,8 @@ const SubjectsList = () => {
           header: () => null,
           cell: ({ row }) => (
             <DataTableRowActions
+              resource="subjects"
+              recordId={row.original.id}
               onEdit={() => edit("subjects", row.original.id)}
               onDelete={() => setDeleteTarget(row.original.id)}
               editLabel="Edit Subject"
@@ -87,12 +89,16 @@ const SubjectsList = () => {
 
   const handleConfirmDelete = () => {
     if (deleteTarget) {
-      deleteMutation({
-        resource: "subjects",
-        id: deleteTarget,
-        mutationMode: "pessimistic",
-      });
-      setDeleteTarget(null);
+      deleteMutation(
+        {
+          resource: "subjects",
+          id: deleteTarget,
+          mutationMode: "pessimistic",
+        },
+        {
+          onSuccess: () => setDeleteTarget(null),
+        }
+      );
     }
   };
 
@@ -135,7 +141,9 @@ const SubjectsList = () => {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmDelete}>Confirm</AlertDialogAction>
+            <AlertDialogAction onClick={handleConfirmDelete} disabled={isDeleteLoading}>
+              {isDeleteLoading ? "Deleting..." : "Confirm"}
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

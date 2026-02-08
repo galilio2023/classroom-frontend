@@ -14,8 +14,10 @@ export const authProvider: AuthProvider = {
         },
       };
     }
-    localStorage.setItem("user", JSON.stringify(data.user));
-    return { success: true, redirectTo: "/" };
+    if (data?.user) {
+      localStorage.setItem("user", JSON.stringify(data.user));
+    }
+    return { success: true, redirectTo: "/login" };
   },
 
   login: async ({ email, password }) => {
@@ -39,29 +41,39 @@ export const authProvider: AuthProvider = {
     return { success: true, redirectTo: "/login" };
   },
 
-  // This is the final, correct implementation of the `check` method.
-  // It uses the authClient's own getSession method, which is designed for this purpose.
+  // This is a fast, client-side check that improves performance.
+  // It comes with a trade-off: if a user's session is revoked on the server,
+  // the client won't know until the next API call fails.
+  // The `onError` handler is our security net for this scenario.
   check: async () => {
-    const session = await authClient.getSession();
-    if (session) {
+    const user = localStorage.getItem("user");
+    if (user) {
       return { authenticated: true };
     }
     return {
       authenticated: false,
-      logout: true,
       redirectTo: "/login",
     };
+  },
+
+  onError: async (error) => {
+    if (error?.response?.status === 401) {
+      return {
+        logout: true,
+        redirectTo: "/login",
+      };
+    }
+    return {};
   },
 
   getPermissions: async () => {
     const user = localStorage.getItem("user");
     if (!user) return null;
-
     try {
       const parsedUser: User = JSON.parse(user);
       return { role: parsedUser.role };
-    } catch (error) {
-      console.error("Error parsing user from localStorage in getPermissions:", error);
+    } catch (e) {
+      localStorage.removeItem("user");
       return null;
     }
   },
@@ -69,30 +81,12 @@ export const authProvider: AuthProvider = {
   getIdentity: async () => {
     const user = localStorage.getItem("user");
     if (!user) return null;
-
     try {
       const parsedUser: User = JSON.parse(user);
-      return {
-        id: parsedUser.id,
-        name: parsedUser.name,
-        email: parsedUser.email,
-        image: parsedUser.image,
-        role: parsedUser.role,
-        imageCldPubId: parsedUser.imageCldPubId,
-      };
-    } catch (error) {
-      console.error("Error parsing user from localStorage in getIdentity:", error);
+      return parsedUser;
+    } catch (e) {
+      localStorage.removeItem("user");
       return null;
     }
-  },
-
-  onError: async (error) => {
-    if ((error as any)?.response?.status === 401) {
-      return {
-        logout: true,
-        redirectTo: "/login",
-      };
-    }
-    return { error };
   },
 };

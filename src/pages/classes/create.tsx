@@ -1,99 +1,196 @@
-import { CreateViewHeader } from "@/components/refine-ui/views/create-view";
 import { useForm } from "@refinedev/react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useSelect } from "@refinedev/core";
-import { useFieldArray } from "react-hook-form";
-import { Form } from "@/components/ui/form";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users } from "lucide-react";
-import { classFormSchema } from "@/schemas/class";
-import { ClassStatus, Subject, User, UserRole } from "@/types";
-import { ClassForm } from "./form";
+import { Separator } from "@/components/ui/separator";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { CreateView } from "@/components/refine-ui/views/create-view";
+import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
+import { Textarea } from "@/components/ui/textarea";
+import { useBack, useList, useGetIdentity, HttpError, BaseRecord } from "@refinedev/core";
+import { Loader2 } from "lucide-react";
+import { classCreateFormSchema } from "@/schemas/class";
+import { Subject, User, ClassStatus } from "@/types";
+import { toast } from "sonner";
+import z from "zod";
+
+// Define a type alias for the form values based on the Zod schema
+type ClassCreateFormValues = z.infer<typeof classCreateFormSchema>;
 
 const ClassesCreate = () => {
-  const { 
-    refineCore: { onFinish, formLoading }, 
-    ...form 
-  } = useForm({
-    resolver: zodResolver(classFormSchema),
-    defaultValues: {
-      capacity: 50,
-      status: ClassStatus.ACTIVE,
-      schedules: [{ day: "Mon", startTime: "09:00", endTime: "10:30" }],
-    },
+  const back = useBack();
+  const { data: identity } = useGetIdentity<User>();
+
+  // Explicitly type the useForm hook with all necessary generic arguments
+  const form = useForm<BaseRecord, HttpError, ClassCreateFormValues>({
+    resolver: zodResolver(classCreateFormSchema),
     refineCoreProps: {
       resource: "classes",
+      action: "create",
       redirect: "list",
+    },
+    defaultValues: {
+      name: "",
+      description: "",
+      subjectId: undefined,
+      capacity: 30,
+      status: ClassStatus.ACTIVE,
+      schedules: [],
     },
   });
 
-  const { fields, append, remove } = useFieldArray({
-    control: form.control,
-    name: "schedules",
-  });
+  const {
+    refineCore: { onFinish },
+    handleSubmit,
+    formState: { isSubmitting },
+  } = form;
 
-  const { options: subjectOptions } = useSelect<Subject>({
+  // The 'values' parameter now correctly matches the type expected by handleSubmit
+  const onSubmit = async (values: ClassCreateFormValues) => {
+    if (!identity?.id) {
+      toast.error("Cannot create class: User identity not found.");
+      return;
+    }
+    await onFinish({
+      ...values,
+      teacherId: identity.id,
+    });
+  };
+
+  // Correctly use useList based on the official documentation
+  const { result: subjectsResult, query: subjectsQuery } = useList<Subject>({
     resource: "subjects",
-    optionLabel: "name",
-    optionValue: "id",
+    pagination: { pageSize: 100 },
   });
 
-  const { options: teacherOptions } = useSelect<User>({
-    resource: "users",
-    optionLabel: "name",
-    optionValue: "id",
-    filters: [
-      {
-        field: "role",
-        operator: "eq",
-        value: UserRole.TEACHER,
-      },
-    ],
-  });
+  const subjects = subjectsResult?.data ?? [];
+  const subjectsLoading = subjectsQuery.isLoading;
 
   return (
-    <div className="container mx-auto py-6 max-w-6xl">
-      <CreateViewHeader />
-      
-      <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left Column: The Main Form */}
-        <div className="lg:col-span-2 space-y-6">
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onFinish)}>
-              <ClassForm 
-                form={form}
-                subjectOptions={subjectOptions}
-                teacherOptions={teacherOptions}
-                fields={fields}
-                append={append}
-                remove={remove}
-                formLoading={formLoading}
-              />
-            </form>
-          </Form>
-        </div>
-
-        {/* Right Column: Sidebar */}
-        <div className="space-y-6">
-          <Card className="border-border/50 shadow-sm bg-muted/10">
-            <CardHeader>
-              <CardTitle className="text-lg font-medium flex items-center gap-2">
-                <Users className="h-5 w-5 text-primary" />
-                Teacher Assignment
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4 text-sm text-muted-foreground">
-              <p>
-                Only users with the <strong>Teacher</strong> role will appear in the dropdown.
-              </p>
-              <p>
-                If you don't see a teacher, go to the Users page and ensure their role is set correctly.
-              </p>
-            </CardContent>
-          </Card>
-        </div>
+    <CreateView className="class-view">
+      <Breadcrumb />
+      <h1 className="page-title">Create a Class</h1>
+      <div className="intro-row">
+        <p>Provide the required information below to add a class.</p>
+        <Button onClick={() => back()}>Go Back</Button>
       </div>
-    </div>
+      <Separator />
+      <div className="my-4 flex items-center">
+        <Card className="class-form-card">
+          <CardHeader>
+            <CardTitle className="text-2xl pb-0 font-bold">
+              Class Details
+            </CardTitle>
+          </CardHeader>
+          <Separator />
+          <CardContent className="mt-7">
+            <Form {...form}>
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Class Name <span className="text-destructive">*</span></FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g., Introduction to Biology" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="subjectId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Subject <span className="text-destructive">*</span></FormLabel>
+                        <Select
+                          onValueChange={(value) => field.onChange(Number(value))}
+                          value={field.value?.toString()}
+                          disabled={subjectsLoading}
+                        >
+                          <FormControl>
+                            <SelectTrigger><SelectValue placeholder="Select a subject" /></SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {subjects.map((subject) => (
+                              <SelectItem key={subject.id} value={subject.id.toString()}>
+                                {subject.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="capacity"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Capacity <span className="text-destructive">*</span></FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            min={1}
+                            placeholder="30"
+                            {...field}
+                            onChange={(e) => field.onChange(e.target.value === '' ? undefined : Number(e.target.value))}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Description</FormLabel>
+                      <FormControl>
+                        <Textarea placeholder="A brief description of the class." {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Separator />
+                <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
+                  {isSubmitting ? (
+                    <div className="flex gap-1 items-center">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span>Creating...</span>
+                    </div>
+                  ) : (
+                    "Create Class"
+                  )}
+                </Button>
+              </form>
+            </Form>
+          </CardContent>
+        </Card>
+      </div>
+    </CreateView>
   );
 };
 

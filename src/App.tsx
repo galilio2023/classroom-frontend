@@ -2,17 +2,18 @@ import { Authenticated, Refine } from "@refinedev/core";
 import { DevtoolsPanel, DevtoolsProvider } from "@refinedev/devtools";
 import { RefineKbar, RefineKbarProvider } from "@refinedev/kbar";
 import routerProvider, {
-  CatchAllNavigate,
   DocumentTitleHandler,
+  NavigateToResource,
   UnsavedChangesNotifier,
 } from "@refinedev/react-router";
-import { BrowserRouter, Outlet, Route, Routes, Navigate } from "react-router-dom";
+import { BrowserRouter, Outlet, Route, Routes } from "react-router-dom";
 import "./App.css";
 import { Toaster } from "./components/refine-ui/notification/toaster";
 import { useNotificationProvider } from "./components/refine-ui/notification/use-notification-provider";
 import { ThemeProvider } from "./components/refine-ui/theme/theme-provider";
 import { dataProvider } from "./providers/data";
 import { authProvider } from "./providers/auth";
+import { accessControlProvider } from "./providers/access-control";
 import Dashboard from "@/pages/dashboard.tsx";
 import { Home, BookOpen, Building2, Users, Calendar } from "lucide-react";
 import { Layout } from "@/components/refine-ui/layout/layout.tsx";
@@ -32,6 +33,7 @@ import ClassShow from "@/pages/classes/show.tsx";
 import LoginPage from "@/pages/auth/login.tsx";
 import RegisterPage from "@/pages/auth/register.tsx";
 import { SidebarProvider } from "@/components/ui/sidebar";
+import { AuthorizedRoute } from "./components/authorized-route"; // Import the new component
 
 function App() {
   return (
@@ -44,6 +46,7 @@ function App() {
               authProvider={authProvider}
               notificationProvider={useNotificationProvider()}
               routerProvider={routerProvider}
+              accessControlProvider={accessControlProvider}
               options={{
                 syncWithLocation: true,
                 warnWhenUnsavedChanges: true,
@@ -87,17 +90,20 @@ function App() {
               ]}
             >
               <Routes>
-                {/* Public routes */}
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/register" element={<RegisterPage />} />
-
-                {/* Private routes */}
                 <Route
                   element={
-                    <Authenticated
-                      key="private-routes"
-                      fallback={<Navigate to="/login" replace />}
-                    >
+                    <Authenticated key="public-routes" fallback={<Outlet />}>
+                      <NavigateToResource resource="dashboard" />
+                    </Authenticated>
+                  }
+                >
+                  <Route path="/login" element={<LoginPage />} />
+                  <Route path="/register" element={<RegisterPage />} />
+                </Route>
+
+                <Route
+                  element={
+                    <Authenticated key="private-routes" fallback={<LoginPage />}>
                       <SidebarProvider>
                         <Layout>
                           <Outlet />
@@ -106,32 +112,29 @@ function App() {
                     </Authenticated>
                   }
                 >
-                  <Route index element={<Dashboard />} />
+                  <Route index element={<AuthorizedRoute resource="dashboard" action="list"><Dashboard /></AuthorizedRoute>} />
                   <Route path="subjects">
-                    <Route index element={<SubjectsList />} />
-                    <Route path="create" element={<SubjectsCreate />} />
-                    <Route path="edit/:id" element={<SubjectsEdit />} />
+                    <Route index element={<AuthorizedRoute resource="subjects" action="list"><SubjectsList /></AuthorizedRoute>} />
+                    <Route path="create" element={<AuthorizedRoute resource="subjects" action="create"><SubjectsCreate /></AuthorizedRoute>} />
+                    <Route path="edit/:id" element={<AuthorizedRoute resource="subjects" action="edit"><SubjectsEdit /></AuthorizedRoute>} />
                   </Route>
                   <Route path="departments">
-                    <Route index element={<DepartmentsList />} />
-                    <Route path="create" element={<DepartmentsCreate />} />
-                    <Route path="edit/:id" element={<DepartmentsEdit />} />
+                    <Route index element={<AuthorizedRoute resource="departments" action="list"><DepartmentsList /></AuthorizedRoute>} />
+                    <Route path="create" element={<AuthorizedRoute resource="departments" action="create"><DepartmentsCreate /></AuthorizedRoute>} />
+                    <Route path="edit/:id" element={<AuthorizedRoute resource="departments" action="edit"><DepartmentsEdit /></AuthorizedRoute>} />
                   </Route>
                   <Route path="users">
-                    <Route index element={<UsersList />} />
-                    <Route path="create" element={<UsersCreate />} />
-                    <Route path="edit/:id" element={<UsersEdit />} />
+                    <Route index element={<AuthorizedRoute resource="users" action="list"><UsersList /></AuthorizedRoute>} />
+                    <Route path="create" element={<AuthorizedRoute resource="users" action="create"><UsersCreate /></AuthorizedRoute>} />
+                    <Route path="edit/:id" element={<AuthorizedRoute resource="users" action="edit"><UsersEdit /></AuthorizedRoute>} />
                   </Route>
                   <Route path="classes">
-                    <Route index element={<ClassesList />} />
-                    <Route path="create" element={<ClassesCreate />} />
-                    <Route path="edit/:id" element={<ClassesEdit />} />
-                    <Route path="show/:id" element={<ClassShow />} />
+                    <Route index element={<AuthorizedRoute resource="classes" action="list"><ClassesList /></AuthorizedRoute>} />
+                    <Route path="create" element={<AuthorizedRoute resource="classes" action="create"><ClassesCreate /></AuthorizedRoute>} />
+                    <Route path="edit/:id" element={<AuthorizedRoute resource="classes" action="edit"><ClassesEdit /></AuthorizedRoute>} />
+                    <Route path="show/:id" element={<AuthorizedRoute resource="classes" action="show"><ClassShow /></AuthorizedRoute>} />
                   </Route>
                 </Route>
-                
-                {/* Catch-all to redirect to dashboard if logged in, or login if not */}
-                <Route path="*" element={<CatchAllNavigate to="/" />} />
               </Routes>
 
               <Toaster />

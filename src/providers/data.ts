@@ -1,34 +1,86 @@
-import simpleRestDataProvider from "@refinedev/simple-rest";
-import axios from "axios";
-// We no longer need toast here, as UI components will handle showing errors.
-// import { toast } from "sonner"; 
+import { createDataProvider, CreateDataProviderOptions } from "@refinedev/rest";
+import { CreateResponse, GetOneResponse, ListResponse } from "@/types";
 
-const API_URL = import.meta.env.VITE_API_URL;
+const BACKEND_BASE_URL = import.meta.env.VITE_API_URL;
 
-const axiosInstance = axios.create();
+const options: CreateDataProviderOptions = {
+  getList: {
+    getEndpoint: ({ resource }) => resource,
 
-// Set withCredentials to true to automatically send cookies with each request.
-axiosInstance.defaults.withCredentials = true;
+    buildQueryParams: async ({ resource, pagination, filters }) => {
+      const params: Record<string, string | number> = {};
 
-// This interceptor will handle API errors globally.
-axiosInstance.interceptors.response.use(
-  (response) => {
-    return response;
+      if (pagination?.mode !== "off") {
+        const page = pagination?.currentPage ?? 1;
+        const pageSize = pagination?.pageSize ?? 10;
+        params.page = page;
+        params.limit = pageSize;
+      }
+
+      filters?.forEach((filter) => {
+        const field = "field" in filter ? filter.field : "";
+        const value = String(filter.value);
+
+        if (field === "role") {
+          params.role = value;
+        }
+        if (resource === "departments") {
+          if (field === "name" || field === "code") params.search = value;
+        }
+        if (resource === "users") {
+          if (field === "search" || field === "name" || field === "email") {
+            params.search = value;
+          }
+        }
+        if (resource === "subjects") {
+          if (field === "department") params.department = value;
+          if (field === "name" || field === "code") params.search = value;
+        }
+        if (resource === "classes") {
+          if (field === "name") params.search = value;
+          if (field === "subject") params.subject = value;
+          // The 'teacher' filter was incorrectly applied to the list view.
+          // if (field === "teacher") params.teacher = value; 
+        }
+        if (resource === "enrollments") {
+          if (field === "classId") params.classId = value;
+        }
+      });
+
+      return params;
+    },
+
+    mapResponse: async (response) => {
+      const payload: ListResponse = await response.json();
+      return payload.data ?? [];
+    },
+
+    getTotalCount: async (response) => {
+      const payload: ListResponse = await response.json();
+      return payload.pagination?.total ?? payload.data?.length ?? 0;
+    },
   },
-  (error) => {
-    // This interceptor's only job is to format the error object consistently.
-    // It should NOT have UI side-effects like showing toasts.
-    const customError = {
-      ...error,
-      message: error.response?.data?.message || "Something went wrong",
-      statusCode: error.response?.status,
-    };
 
-    // DO NOT show a toast here. Let the calling function decide.
-    // toast.error(customError.message);
+  create: {
+    getEndpoint: ({ resource }) => resource,
+    buildBodyParams: async ({ variables }) => variables,
+    mapResponse: async (response) => {
+      const json: CreateResponse = await response.json();
+      return json.data ?? {};
+    },
+  },
 
-    return Promise.reject(customError);
-  }
-);
+  getOne: {
+    getEndpoint: ({ resource, id }) => `${resource}/${id}`,
+    mapResponse: async (response) => {
+      const json: GetOneResponse = await response.json();
+      return json.data ?? {};
+    },
+  },
+};
 
-export const dataProvider = simpleRestDataProvider(API_URL, axiosInstance);
+const { dataProvider } = createDataProvider(BACKEND_BASE_URL, options, {
+  credentials: "include",
+});
+
+export { dataProvider };
