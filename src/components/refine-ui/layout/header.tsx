@@ -29,7 +29,7 @@ export function Header() {
   };
 
   return (
-    <header className="flex h-15.5 items-center gap-4 border-b bg-muted/5 px-4 py-2 lg:h-15 lg:px-6">
+    <header className="flex h-16 items-center gap-4 border-b bg-muted/5 px-4 py-2 lg:h-15 lg:px-6">
       {/* The mobile sidebar trigger is now part of the header */}
       <SidebarTrigger className="md:hidden" />
 

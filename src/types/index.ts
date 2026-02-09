@@ -50,14 +50,28 @@ export enum ClassStatus {
 
 export type Schedule = z.infer<typeof scheduleSchema>;
 
-export type Class = z.infer<typeof classFormSchema> & {
+export interface Submission {
   id: number;
-  inviteCode: string;
-  teacher: User;
-  subject: Subject;
+  content: string | null;
+  grade: number | null;
+  feedback: string | null;
+  assignmentId: number;
+  studentId: string;
   createdAt: string;
   updatedAt: string;
-};
+  student?: User; // Student who made the submission
+}
+
+export interface Assignment {
+  id: number;
+  title: string;
+  description: string | null;
+  dueDate: string | null;
+  classId: number;
+  createdAt: string;
+  updatedAt: string;
+  submissions?: Submission[]; // Include submissions in the assignment type
+}
 
 export type Enrollment = {
   id: number;
@@ -65,6 +79,17 @@ export type Enrollment = {
   classId: number;
   createdAt: string;
   student: User;
+};
+
+export type Class = z.infer<typeof classFormSchema> & {
+  id: number;
+  inviteCode: string;
+  teacher: User;
+  subject: Subject;
+  createdAt: string;
+  updatedAt: string;
+  enrollments: Enrollment[];
+  assignments: Assignment[];
 };
 
 export interface ListResponse<T = any> {

@@ -13,12 +13,15 @@ export const accessControlProvider: AccessControlProvider = {
     }
 
     if (role === "teacher") {
-      // Teachers can access the dashboard
       if (resource === "dashboard") {
         return { can: true };
       }
 
-      if (resource === "departments" || resource === "subjects") {
+      if (
+        resource === "departments" ||
+        resource === "subjects" ||
+        resource === "assignments"
+      ) {
         return { can: true };
       }
 
@@ -54,7 +57,6 @@ export const accessControlProvider: AccessControlProvider = {
           }
         }
       }
-      // A more specific fallback for teachers
       return {
         can: false,
         reason: "This page or action is not available for the Teacher role.",
@@ -63,7 +65,9 @@ export const accessControlProvider: AccessControlProvider = {
 
     if (role === "student") {
       if (
-        (resource === "subjects" || resource === "classes") &&
+        (resource === "subjects" ||
+          resource === "classes" ||
+          resource === "assignments") && // Students can view assignments
         (action === "list" || action === "show")
       ) {
         return { can: true };
@@ -71,14 +75,12 @@ export const accessControlProvider: AccessControlProvider = {
       if (resource === "dashboard") {
         return { can: true };
       }
-      // This is the specific fallback for students
       return {
         can: false,
         reason: "This page or action is not available for the Student role.",
       };
     }
 
-    // This is the final, most generic fallback
     return {
       can: false,
       reason:

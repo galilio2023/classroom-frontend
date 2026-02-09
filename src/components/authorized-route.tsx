@@ -1,5 +1,5 @@
-import { useCan, CanReturnType } from "@refinedev/core";
-import { Navigate } from "react-router-dom";
+import { useCan } from "@refinedev/core";
+import { Navigate, useParams } from "react-router-dom";
 import UnauthorizedPage from "@/pages/unauthorized";
 import { Loader2 } from "lucide-react";
 
@@ -7,19 +7,20 @@ interface AuthorizedRouteProps {
   resource: string;
   action: "list" | "create" | "edit" | "show" | "delete";
   children: React.ReactNode;
-  params?: { id?: string };
 }
 
 export const AuthorizedRoute = ({
   children,
   resource,
   action,
-  params,
 }: AuthorizedRouteProps) => {
+  // Get the 'id' from the URL if it exists
+  const { id } = useParams();
+
   const { data, isLoading, isError } = useCan({
     resource,
     action,
-    params,
+    params: { id }, // Pass the id to the useCan hook
   });
 
   if (isLoading) {
@@ -31,6 +32,7 @@ export const AuthorizedRoute = ({
   }
 
   if (isError) {
+    // If there's an error (e.g., user is not authenticated), redirect to login
     return <Navigate to="/login" />;
   }
 
