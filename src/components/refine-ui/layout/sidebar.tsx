@@ -39,14 +39,10 @@ export function Sidebar() {
       <ShadcnSidebarRail />
       <SidebarHeader />
       <ShadcnSidebarContent
-        className={cn(
-          "transition-discrete",
-
-          {
-            "px-3": open,
-            "px-1": !open,
-          },
-        )}
+        className={cn("transition-discrete", "pt-12", {
+          "px-3": open,
+          "px-1": !open,
+        })}
       >
         {menuItems.map((item: TreeMenuItem) => (
           <SidebarItem

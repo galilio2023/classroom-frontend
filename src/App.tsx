@@ -32,6 +32,8 @@ import ClassShow from "@/pages/classes/show.tsx";
 import LoginPage from "@/pages/auth/login.tsx";
 import RegisterPage from "@/pages/auth/register.tsx";
 import { AuthorizedRoute } from "./components/authorized-route";
+import { AssignmentCreate } from "./pages/assignments/create";
+import AssignmentShow from "./pages/assignments/show";
 
 function App() {
   return (
@@ -48,6 +50,17 @@ function App() {
               syncWithLocation: true,
               warnWhenUnsavedChanges: true,
               projectId: "nDt0bx-k8buuJ-It2Nvq",
+              // Pass the title as an object with icon and text properties
+              title: {
+                icon: (
+                  <img
+                    src="/Gemini_Generated_Image_34j2nq34j2nq34j2.png"
+                    alt="Logo"
+                    className="w-8 h-8"
+                  />
+                ),
+                text: "Learning System",
+              },
             }}
             resources={[
               {
@@ -83,6 +96,15 @@ function App() {
                 edit: "/classes/edit/:id",
                 show: "/classes/show/:id",
                 meta: { label: "Classes", icon: <Calendar /> },
+              },
+              {
+                name: "assignments",
+                create: "/assignments/create",
+                show: "/assignments/show/:id",
+              },
+              {
+                name: "submissions",
+                // No direct routes, handled within assignment context
               },
             ]}
           >
@@ -223,6 +245,24 @@ function App() {
                     element={
                       <AuthorizedRoute resource="classes" action="show">
                         <ClassShow />
+                      </AuthorizedRoute>
+                    }
+                  />
+                </Route>
+                <Route path="assignments">
+                  <Route
+                    path="create"
+                    element={
+                      <AuthorizedRoute resource="assignments" action="create">
+                        <AssignmentCreate />
+                      </AuthorizedRoute>
+                    }
+                  />
+                  <Route
+                    path="show/:id"
+                    element={
+                      <AuthorizedRoute resource="assignments" action="show">
+                        <AssignmentShow />
                       </AuthorizedRoute>
                     }
                   />

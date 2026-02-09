@@ -1,8 +1,8 @@
 import { useShow, useDelete } from "@refinedev/core";
-import { useTable } from "@refinedev/react-table";
 import { useParams } from "react-router-dom";
-import { ColumnDef } from "@tanstack/react-table";
 import { useMemo, useState } from "react";
+import { ColumnDef } from "@tanstack/react-table";
+import { useTable } from "@refinedev/react-table";
 
 import { DataTable } from "@/components/refine-ui/data-table/data-table";
 import {
@@ -19,6 +19,7 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Class, Enrollment, User } from "@/types";
 import { Loader2, PlusCircle, Trash } from "lucide-react";
 import {
@@ -32,6 +33,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { EnrollStudentDialog } from "./enroll-student-dialog";
+import { AssignmentList } from "../assignments/list";
 
 const ClassesShow = () => {
   const { id } = useParams();
@@ -40,14 +42,17 @@ const ClassesShow = () => {
   const [unenrollTarget, setUnenrollTarget] = useState<number | null>(null);
   const [isEnrollDialogOpen, setIsEnrollDialogOpen] = useState(false);
 
+  // This is the definitive fix based on the Refine v5 documentation.
   const {
-    query: { data: showData, isLoading: isClassLoading, isError },
+    result: aClass,
+    query: { isLoading, isError },
   } = useShow<Class>({
     resource: "classes",
     id: classId,
   });
 
-  const aClass = showData?.data;
+  const enrollments = aClass?.enrollments ?? [];
+  const assignments = aClass?.assignments ?? [];
 
   const { mutate: deleteMutation, mutation } = useDelete();
 
@@ -56,7 +61,7 @@ const ClassesShow = () => {
       {
         id: "student",
         header: "Student",
-        accessorFn: (row) => row.student,
+        accessorKey: "student",
         cell: ({ getValue }) => {
           const student = getValue<User>();
           return (
@@ -99,24 +104,15 @@ const ClassesShow = () => {
     [],
   );
 
-  const studentsTable = useTable<Enrollment>({
+  const enrollmentsTable = useTable<Enrollment>({
     columns: studentColumns,
-    refineCoreProps: {
-      resource: "enrollments",
-      filters: {
-        permanent: [{ field: "classId", operator: "eq", value: classId }],
-      },
-      queryOptions: {
-        enabled: !!classId,
-      },
-    },
+    data: enrollments,
   });
 
-  const enrolledStudentIds = useMemo(() => {
-    return studentsTable.reactTable
-      .getRowModel()
-      .rows.map((row) => row.original.student.id);
-  }, [studentsTable.reactTable.getRowModel().rows]);
+  const enrolledStudentIds = useMemo(
+    () => enrollments.map((e: Enrollment) => e.student.id),
+    [enrollments],
+  );
 
   const handleConfirmUnenroll = () => {
     if (unenrollTarget) {
@@ -126,10 +122,6 @@ const ClassesShow = () => {
       );
     }
   };
-
-  // Correctly access the loading state from the nested object
-  const isLoading =
-    isClassLoading || studentsTable.refineCore.tableQuery.isLoading;
 
   if (isLoading) {
     return (
@@ -154,16 +146,21 @@ const ClassesShow = () => {
     <>
       <ShowView className="class-view class-show space-y-6">
         <ShowViewHeader resource="classes" title={aClass.name} />
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
+
+        <Tabs defaultValue="students">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="students">Students</TabsTrigger>
+            <TabsTrigger value="assignments">Assignments</TabsTrigger>
+            <TabsTrigger value="details">Details</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="students">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <div>
                   <CardTitle>Enrolled Students</CardTitle>
                   <CardDescription>
-                    {/* Correctly access the total count from the nested object */}
-                    {studentsTable.refineCore.tableQuery.data?.total ?? 0} of{" "}
-                    {aClass.capacity} spots filled
+                    {enrollments.length} of {aClass.capacity} spots filled
                   </CardDescription>
                 </div>
                 <Button onClick={() => setIsEnrollDialogOpen(true)}>
@@ -172,11 +169,16 @@ const ClassesShow = () => {
                 </Button>
               </CardHeader>
               <CardContent>
-                <DataTable table={studentsTable} />
+                <DataTable table={enrollmentsTable} />
               </CardContent>
             </Card>
-          </div>
-          <div>
+          </TabsContent>
+
+          <TabsContent value="assignments">
+            <AssignmentList classId={classId} assignments={assignments} />
+          </TabsContent>
+
+          <TabsContent value="details">
             <Card>
               <CardHeader>
                 <CardTitle>Details</CardTitle>
@@ -208,8 +210,8 @@ const ClassesShow = () => {
                 </div>
               </CardContent>
             </Card>
-          </div>
-        </div>
+          </TabsContent>
+        </Tabs>
       </ShowView>
 
       <AlertDialog
