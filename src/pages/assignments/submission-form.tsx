@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { useCreate } from "@refinedev/core";
+import { useCreate, useUpdate } from "@refinedev/core"; // Import useUpdate
 import { Submission } from "@/types";
 
 const submissionSchema = z.object({
@@ -29,8 +29,11 @@ export const SubmissionForm = ({
   assignmentId,
   existingSubmission,
 }: SubmissionFormProps) => {
-  const { mutate, mutation } = useCreate();
-  const { isPending } = mutation;
+  // Conditionally use useCreate or useUpdate
+  const { mutate: createMutate, mutation: createMutation } = useCreate();
+  const { mutate: updateMutate, mutation: updateMutation } = useUpdate();
+
+  const isPending = createMutation.isPending || updateMutation.isPending;
 
   const form = useForm<SubmissionFormValues>({
     resolver: zodResolver(submissionSchema),
@@ -40,13 +43,26 @@ export const SubmissionForm = ({
   });
 
   const onSubmit: SubmitHandler<SubmissionFormValues> = (values) => {
-    mutate({
-      resource: "submissions",
-      values: {
-        ...values,
-        assignmentId,
-      },
-    });
+    if (existingSubmission) {
+      // Update existing submission
+      updateMutate({
+        resource: "submissions",
+        id: existingSubmission.id,
+        values: {
+          ...values,
+          assignmentId,
+        },
+      });
+    } else {
+      // Create new submission
+      createMutate({
+        resource: "submissions",
+        values: {
+          ...values,
+          assignmentId,
+        },
+      });
+    }
   };
 
   return (

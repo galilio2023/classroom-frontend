@@ -50,6 +50,17 @@ function App() {
               syncWithLocation: true,
               warnWhenUnsavedChanges: true,
               projectId: "nDt0bx-k8buuJ-It2Nvq",
+              // Pass the title as an object with icon and text properties
+              title: {
+                icon: (
+                  <img
+                    src="/Gemini_Generated_Image_34j2nq34j2nq34j2.png"
+                    alt="Logo"
+                    className="w-8 h-8"
+                  />
+                ),
+                text: "Learning System",
+              },
             }}
             resources={[
               {

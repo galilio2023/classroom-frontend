@@ -1,4 +1,4 @@
-import { SubmitHandler, useForm } from "react-hook-form";
+import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import {
@@ -16,15 +16,14 @@ import { CreateView } from "@/components/refine-ui/views/create-view";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSearchParams } from "react-router-dom";
 import { useGo, useCreate } from "@refinedev/core";
+import { toast } from "sonner"; // Import toast
 
-// 1. Define the form's data shape
 const assignmentSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().optional(),
   dueDate: z.string().optional(),
 });
 
-// 2. Create a TypeScript type from the schema
 type AssignmentFormValues = z.infer<typeof assignmentSchema>;
 
 export const AssignmentCreate = () => {
@@ -32,11 +31,9 @@ export const AssignmentCreate = () => {
   const classId = searchParams.get("classId");
   const go = useGo();
 
-  // 3. Use Refine's useCreate hook for submission and get the mutation object
   const { mutate, mutation } = useCreate();
   const { isPending } = mutation;
 
-  // 4. Use the standard useForm hook from react-hook-form, correctly typed
   const form = useForm<AssignmentFormValues>({
     resolver: zodResolver(assignmentSchema),
     defaultValues: {
@@ -46,10 +43,9 @@ export const AssignmentCreate = () => {
     },
   });
 
-  // 5. Create a correctly typed SubmitHandler
   const onSubmit: SubmitHandler<AssignmentFormValues> = (values) => {
     if (!classId) {
-      console.error("Class ID is missing!");
+      toast.error("Could not create assignment: Class ID is missing.");
       return;
     }
     mutate(

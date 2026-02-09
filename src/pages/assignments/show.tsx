@@ -69,7 +69,7 @@ const AssignmentShow = () => {
   // Helper to render the student's view
   const renderStudentView = () => {
     // If graded, show the results
-    if (mySubmission?.grade !== null && mySubmission?.grade !== undefined) {
+    if (mySubmission?.grade != null) {
       return (
         <div className="space-y-4">
           <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/20">
