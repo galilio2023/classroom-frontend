@@ -4,46 +4,71 @@ import { authClient } from "@/lib/auth-client";
 
 export const authProvider: AuthProvider = {
   register: async (params: any) => {
-    const { data, error } = await authClient.signUp.email(
-      params as SignUpPayload,
-    );
-    if (error) {
+    try {
+      const { data, error } = await authClient.signUp.email(
+        params as SignUpPayload,
+      );
+      if (error) {
+        return {
+          success: false,
+          error: {
+            name: "Registration failed",
+            message: error?.message || "Unable to create account.",
+          },
+        };
+      }
+      if (data?.user) {
+        localStorage.setItem("user", JSON.stringify(data.user));
+      }
+      return { success: true, redirectTo: "/login" };
+    } catch (err: any) {
       return {
         success: false,
         error: {
-          name: "Registration failed",
-          message: error?.message || "Unable to create account.",
+          name: "Registration Error",
+          message: err.message || "Network error. Please check your connection.",
         },
       };
     }
-    if (data?.user) {
-      localStorage.setItem("user", JSON.stringify(data.user));
-    }
-    return { success: true, redirectTo: "/login" };
   },
 
   login: async (params: any) => {
-    const { data, error } = await authClient.signIn.email({
-      email: params.email,
-      password: params.password,
-    });
-    if (error) {
+    try {
+      const { data, error } = await authClient.signIn.email({
+        email: params.email,
+        password: params.password,
+      });
+      if (error) {
+        return {
+          success: false,
+          error: {
+            name: "Login failed",
+            message: error?.message || "Invalid credentials.",
+          },
+        };
+      }
+      localStorage.setItem("user", JSON.stringify(data.user));
+      return { success: true, redirectTo: "/" };
+    } catch (err: any) {
       return {
         success: false,
         error: {
-          name: "Login failed",
-          message: error?.message || "Invalid credentials.",
+          name: "Login Error",
+          message: err.message || "Network error. Please check your connection.",
         },
       };
     }
-    localStorage.setItem("user", JSON.stringify(data.user));
-    return { success: true, redirectTo: "/" };
   },
 
   logout: async () => {
-    await authClient.signOut();
-    localStorage.removeItem("user");
-    return { success: true, redirectTo: "/login" };
+    try {
+      await authClient.signOut();
+      localStorage.removeItem("user");
+      return { success: true, redirectTo: "/login" };
+    } catch (error) {
+      localStorage.removeItem("user");
+      return { success: true, redirectTo: "/login" };
+    }
   },
 
   check: async () => {
