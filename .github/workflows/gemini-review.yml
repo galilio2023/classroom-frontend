@@ -1,0 +1,119 @@
+name: Gemini AI Review
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        run: npm install @google/generative-ai
+
+      - name: Run Gemini Review
+        uses: actions/github-script@v7
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        with:
+          script: |
+            const fs = require('fs');
+            const { GoogleGenerativeAI } = require("@google/generative-ai");
+
+            const geminiApiKey = process.env.GEMINI_API_KEY;
+            if (!geminiApiKey) {
+              console.log("No GEMINI_API_KEY found. Skipping review.");
+              return;
+            }
+
+            const genAI = new GoogleGenerativeAI(geminiApiKey);
+            const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+
+            // Read Rules (GEMINI.md and CODE_PATTERNS.md for Frontend)
+            let rules = "";
+            try {
+              if (fs.existsSync("GEMINI.md")) {
+                rules += fs.readFileSync("GEMINI.md", "utf8") + "\n\n";
+              }
+              if (fs.existsSync("CODE_PATTERNS.md")) {
+                rules += "--- FRONTEND SPECIFIC RULES ---\n" + fs.readFileSync("CODE_PATTERNS.md", "utf8");
+              }
+            } catch (e) {
+              console.log("Could not read rule files");
+            }
+
+            const pr = context.payload.pull_request;
+            if (!pr) {
+              console.log("Not a pull request.");
+              return;
+            }
+
+            try {
+               await exec.exec(`git fetch origin ${pr.base.ref}`);
+            } catch (e) {
+               console.log("Fetch failed", e);
+            }
+
+            let diff = "";
+            try {
+              const { stdout } = await exec.getExecOutput(`git diff origin/${pr.base.ref} HEAD`);
+              diff = stdout;
+            } catch (e) {
+              console.error("Error getting diff:", e);
+              return;
+            }
+
+            if (!diff || diff.trim().length === 0) {
+              console.log("No changes detected.");
+              return;
+            }
+
+            const MAX_DIFF_LENGTH = 30000;
+            if (diff.length > MAX_DIFF_LENGTH) {
+              diff = diff.substring(0, MAX_DIFF_LENGTH) + "\n... (Diff truncated)";
+            }
+
+            const prompt = `You are an expert code reviewer. Below are the project rules and the code changes (diff).
+            
+            RULES:
+            ${rules}
+
+            Please review the following code changes and provide feedback.
+            STRICTLY check for adherence to the "CODE_PATTERNS.md" rules (especially Refine v5 hooks and Table patterns).
+            Focus on critical issues, bugs, and security.
+            Be concise.
+
+            \`\`\`diff
+            ${diff}
+            \`\`\`
+            `;
+
+            try {
+              const result = await model.generateContent(prompt);
+              const response = await result.response;
+              const review = response.text();
+
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.number,
+                body: review,
+              });
+            } catch (error) {
+              console.error("Error generating review:", error);
+              throw error;
+            }
