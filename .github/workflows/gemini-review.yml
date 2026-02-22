@@ -17,7 +17,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      name: Setup Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
@@ -42,8 +42,8 @@ jobs:
               }
 
               const genAI = new GoogleGenerativeAI(geminiApiKey);
-              // Switched to gemini-1.5-flash for higher quota (1,500 requests/day)
-              const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+              // Using gemini-1.5-flash-latest for better compatibility
+              const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
 
               let rules = "";
               try {
