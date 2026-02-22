@@ -74,7 +74,7 @@ function App() {
                 meta: { 
                   label: "AI Assistant", 
                   icon: <Sparkles />,
-                  hide: false, // This will be handled by accessControlProvider
+                  // Visibility is handled automatically by accessControlProvider
                 },
               },
               {
