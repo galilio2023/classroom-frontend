@@ -42,15 +42,8 @@ jobs:
               }
 
               const genAI = new GoogleGenerativeAI(geminiApiKey);
-              
-              // Try gemini-1.5-flash on v1 (stable) first, then fallback to gemini-pro
-              let model;
-              try {
-                model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }, { apiVersion: 'v1' });
-              } catch (e) {
-                core.info("gemini-1.5-flash not found, falling back to gemini-pro");
-                model = genAI.getGenerativeModel({ model: "gemini-pro" });
-              }
+              // Returning to gemini-2.5-flash as requested
+              const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
               let rules = "";
               try {
