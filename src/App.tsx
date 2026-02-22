@@ -14,7 +14,7 @@ import { dataProvider } from "./providers/data";
 import { authProvider } from "./providers/auth";
 import { accessControlProvider } from "./providers/access-control";
 import Dashboard from "@/pages/dashboard.tsx";
-import { Home, BookOpen, Building2, Users, Calendar } from "lucide-react";
+import { Home, BookOpen, Building2, Users, Calendar, Sparkles } from "lucide-react";
 import { Layout } from "@/components/refine-ui/layout/layout.tsx";
 import SubjectsList from "@/pages/subjects/list.tsx";
 import SubjectsCreate from "@/pages/subjects/create.tsx";
@@ -34,6 +34,7 @@ import RegisterPage from "@/pages/auth/register.tsx";
 import { AuthorizedRoute } from "./components/authorized-route";
 import { AssignmentCreate } from "./pages/assignments/create";
 import AssignmentShow from "./pages/assignments/show";
+import AIAssistantPage from "./pages/ai-assistant";
 
 function App() {
   return (
@@ -50,7 +51,6 @@ function App() {
               syncWithLocation: true,
               warnWhenUnsavedChanges: true,
               projectId: "nDt0bx-k8buuJ-It2Nvq",
-              // Pass the title as an object with icon and text properties
               title: {
                 icon: (
                   <img
@@ -67,6 +67,11 @@ function App() {
                 name: "dashboard",
                 list: "/",
                 meta: { label: "Home", icon: <Home /> },
+              },
+              {
+                name: "ai-assistant",
+                list: "/ai-assistant",
+                meta: { label: "AI Assistant", icon: <Sparkles /> },
               },
               {
                 name: "subjects",
@@ -104,7 +109,6 @@ function App() {
               },
               {
                 name: "submissions",
-                // No direct routes, handled within assignment context
               },
             ]}
           >
@@ -137,6 +141,7 @@ function App() {
                     </AuthorizedRoute>
                   }
                 />
+                <Route path="ai-assistant" element={<AIAssistantPage />} />
                 <Route path="subjects">
                   <Route
                     index
