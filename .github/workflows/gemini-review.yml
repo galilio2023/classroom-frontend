@@ -23,7 +23,7 @@ jobs:
           node-version: '20'
 
       - name: Install Dependencies
-        run: npm install @google/generative-ai
+        run: npm install --no-save @google/generative-ai
 
       - name: Run Gemini Review
         uses: actions/github-script@v7
