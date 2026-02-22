@@ -24,7 +24,8 @@ export const AIAssignmentHelper: React.FC<AIAssignmentHelperProps> = ({ onUseCon
   const [copied, setCopied] = useState(false);
 
   const { open } = useNotification();
-  const { mutate, isLoading } = useCustomMutation<AIResponse>();
+  const { mutate, mutation } = useCustomMutation<AIResponse>();
+  const isLoading = mutation.isPending;
 
   const handleGenerate = () => {
     if (!subject || !topic) {

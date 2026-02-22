@@ -21,8 +21,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useUpdate, useCustomMutation, useNotification } from "@refinedev/core";
-import { Submission } from "@/types";
-import { useEffect, useState } from "react";
+import { Submission, Assignment } from "@/types";
+import { useEffect } from "react";
 import { Sparkles, Loader2 } from "lucide-react";
 
 const gradingSchema = z.object({
@@ -38,7 +38,7 @@ type GradingFormValues = z.infer<typeof gradingSchema>;
 interface GradingDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  submission: Submission | null;
+  submission: (Submission & { assignment?: Assignment }) | null;
 }
 
 interface AIFeedbackResponse {
@@ -56,7 +56,8 @@ export const GradingDialog = ({
   const { mutate, mutation } = useUpdate();
   const { isPending } = mutation;
 
-  const { mutate: getAIFeedback, isLoading: isAILoading } = useCustomMutation<AIFeedbackResponse>();
+  const { mutate: getAIFeedback, mutation: aiMutation } = useCustomMutation<AIFeedbackResponse>();
+  const isAILoading = aiMutation.isPending;
 
   const form = useForm<GradingFormValues>({
     resolver: zodResolver(gradingSchema),
@@ -194,9 +195,8 @@ export const GradingDialog = ({
                     />
                   </FormControl>
                   <FormMessage />
-                </Message />
-              </FormItem>
-            )}
+                </FormItem>
+              )}
             />
             <DialogFooter>
               <Button

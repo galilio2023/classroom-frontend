@@ -29,8 +29,11 @@ export const AIQuizGenerator: React.FC<AIQuizGeneratorProps> = ({ classId }) => 
   const [quiz, setQuiz] = useState<QuizQuestion[]>([]);
 
   const { open } = useNotification();
-  const { mutate, isLoading } = useCustomMutation<AIResponse>();
-  const { mutate: createAssignment, isLoading: isSaving } = useCreate();
+  const { mutate, mutation } = useCustomMutation<AIResponse>();
+  const isLoading = mutation.isPending;
+
+  const { mutate: createAssignment, mutation: createMutation } = useCreate();
+  const isSaving = createMutation.isPending;
 
   const handleGenerate = () => {
     if (!topic) {
@@ -76,7 +79,7 @@ export const AIQuizGenerator: React.FC<AIQuizGeneratorProps> = ({ classId }) => 
 
     const description = quiz.map((q, i) => {
       return `### Q${i+1}: ${q.question}\n\n` + 
-             q.options.map((opt, j) => `- ${opt}${opt === q.correctAnswer ? " (Correct)" : ""}`).join("\n") +
+             q.options.map((opt) => `- ${opt}${opt === q.correctAnswer ? " (Correct)" : ""}`).join("\n") +
              `\n\n**Explanation:** ${q.explanation}\n\n---`;
     }).join("\n\n");
 
