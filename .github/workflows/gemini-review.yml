@@ -34,86 +34,73 @@ jobs:
             const fs = require('fs');
             const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-            const geminiApiKey = process.env.GEMINI_API_KEY;
-            if (!geminiApiKey) {
-              console.log("No GEMINI_API_KEY found. Skipping review.");
-              return;
-            }
-
-            const genAI = new GoogleGenerativeAI(geminiApiKey);
-            const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-
-            // Read Rules (GEMINI.md and CODE_PATTERNS.md for Frontend)
-            let rules = "";
-            try {
-              if (fs.existsSync("GEMINI.md")) {
-                rules += fs.readFileSync("GEMINI.md", "utf8") + "\n\n";
+            async function run({ github, context, core, exec }) {
+              const geminiApiKey = process.env.GEMINI_API_KEY;
+              if (!geminiApiKey) {
+                core.warning("No GEMINI_API_KEY found. Skipping review.");
+                return;
               }
-              if (fs.existsSync("CODE_PATTERNS.md")) {
-                rules += "--- FRONTEND SPECIFIC RULES ---\n" + fs.readFileSync("CODE_PATTERNS.md", "utf8");
+
+              const genAI = new GoogleGenerativeAI(geminiApiKey);
+              const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+
+              let rules = "";
+              try {
+                if (fs.existsSync("GEMINI.md")) {
+                  rules += fs.readFileSync("GEMINI.md", "utf8") + "\n\n";
+                }
+                if (fs.existsSync("CODE_PATTERNS.md")) {
+                  rules += "--- FRONTEND SPECIFIC RULES ---\n" + fs.readFileSync("CODE_PATTERNS.md", "utf8");
+                }
+              } catch (e) {
+                core.error("Could not read rule files");
               }
-            } catch (e) {
-              console.log("Could not read rule files");
+
+              const pr = context.payload.pull_request;
+              if (!pr) return;
+
+              try {
+                await exec.exec(`git fetch origin ${pr.base.ref}`);
+              } catch (e) {
+                core.setFailed(`Fetch failed: ${e.message}`);
+                return;
+              }
+
+              let diff = "";
+              try {
+                const { stdout } = await exec.getExecOutput(`git diff origin/${pr.base.ref} HEAD`);
+                diff = stdout;
+              } catch (e) {
+                core.setFailed(`Diff failed: ${e.message}`);
+                return;
+              }
+
+              if (!diff || diff.trim().length === 0) {
+                core.info("No changes detected.");
+                return;
+              }
+
+              const MAX_DIFF_LENGTH = 30000;
+              if (diff.length > MAX_DIFF_LENGTH) {
+                diff = diff.substring(0, MAX_DIFF_LENGTH) + "\n... (Diff truncated)";
+              }
+
+              const prompt = `You are an expert code reviewer.\n\nRULES:\n${rules}\n\nPlease review these changes:\n\`\`\`diff\n${diff}\n\`\`\``;
+
+              try {
+                const result = await model.generateContent(prompt);
+                const response = await result.response;
+                const review = response.text();
+
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: pr.number,
+                  body: review,
+                });
+              } catch (error) {
+                core.setFailed(`AI Generation failed: ${error.message}`);
+              }
             }
 
-            const pr = context.payload.pull_request;
-            if (!pr) {
-              console.log("Not a pull request.");
-              return;
-            }
-
-            try {
-               await exec.exec(`git fetch origin ${pr.base.ref}`);
-            } catch (e) {
-               console.log("Fetch failed", e);
-            }
-
-            let diff = "";
-            try {
-              const { stdout } = await exec.getExecOutput(`git diff origin/${pr.base.ref} HEAD`);
-              diff = stdout;
-            } catch (e) {
-              console.error("Error getting diff:", e);
-              return;
-            }
-
-            if (!diff || diff.trim().length === 0) {
-              console.log("No changes detected.");
-              return;
-            }
-
-            const MAX_DIFF_LENGTH = 30000;
-            if (diff.length > MAX_DIFF_LENGTH) {
-              diff = diff.substring(0, MAX_DIFF_LENGTH) + "\n... (Diff truncated)";
-            }
-
-            const prompt = `You are an expert code reviewer. Below are the project rules and the code changes (diff).
-            
-            RULES:
-            ${rules}
-
-            Please review the following code changes and provide feedback.
-            STRICTLY check for adherence to the "CODE_PATTERNS.md" rules (especially Refine v5 hooks and Table patterns).
-            Focus on critical issues, bugs, and security.
-            Be concise.
-
-            \`\`\`diff
-            ${diff}
-            \`\`\`
-            `;
-
-            try {
-              const result = await model.generateContent(prompt);
-              const response = await result.response;
-              const review = response.text();
-
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: pr.number,
-                body: review,
-              });
-            } catch (error) {
-              console.error("Error generating review:", error);
-              throw error;
-            }
+            return await run({ github, context, core, exec });
