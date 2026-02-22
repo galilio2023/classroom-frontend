@@ -42,16 +42,8 @@ jobs:
               }
 
               const genAI = new GoogleGenerativeAI(geminiApiKey);
-              
-              // Using gemini-1.5-flash for higher quota. 
-              // If it fails, we catch the error to provide better debugging.
-              let model;
-              try {
-                model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-              } catch (e) {
-                core.setFailed(`Model initialization failed: ${e.message}`);
-                return;
-              }
+              // Using gemini-pro as the most stable and widely supported model name
+              const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
               let rules = "";
               try {
@@ -125,7 +117,7 @@ jobs:
                   body: review,
                 });
               } catch (error) {
-                core.setFailed(`AI Generation failed: ${error.message}. If this is a 404, try changing the model name in the workflow.`);
+                core.setFailed(`AI Generation failed: ${error.message}`);
               }
             }
 
