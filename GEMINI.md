@@ -18,46 +18,9 @@ To leverage Gemini's capabilities for:
 ### Frontend (React)
 - **Pattern:** Do not call Gemini directly from the frontend. Always route requests through your backend API (e.g., `POST /api/ai/generate`).
 
+### CI/CD & Infrastructure (Exceptions)
+- **Pattern:** GitHub Actions and other build-time tools may call the Gemini API directly using GitHub Secrets. 
+- **Reason:** These tools run in isolated, secure environments before the application is deployed, and cannot rely on a running backend service for reviews or builds.
+
 ## 3. Example Implementation
-
-### Backend Service
-```typescript
-import { GoogleGenerativeAI } from "@google/generative-ai";
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-
-export const generateContent = async (prompt: string) => {
-  const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-  const result = await model.generateContent(prompt);
-  const response = await result.response;
-  return response.text();
-};
-```
-
-### API Route
-```typescript
-// src/routes/ai.ts
-router.post("/generate", async (req, res) => {
-  const { prompt } = req.body;
-  try {
-    const content = await generateContent(prompt);
-    res.json({ content });
-  } catch (error) {
-    res.status(500).json({ error: "AI generation failed" });
-  }
-});
-```
-
-## 4. Use Cases
-
-### A. Assignment Helper
-- **Input:** Subject, Topic, Difficulty Level.
-- **Output:** A structured assignment description with learning objectives.
-
-### B. Quiz Generator
-- **Input:** Text content or topic.
-- **Output:** A JSON array of multiple-choice questions.
-
-## 5. Rate Limiting & Cost
-- Implement rate limiting on the backend to prevent abuse.
-- Cache common responses where possible to save on API calls.
+... (rest of file)
