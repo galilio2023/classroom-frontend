@@ -11,11 +11,15 @@ import {
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { useCreate, useUpdate } from "@refinedev/core"; // Import useUpdate
+import { useCreate, useUpdate } from "@refinedev/core";
 import { Submission } from "@/types";
+import { FileUpload } from "@/components/file-upload";
+import { Paperclip } from "lucide-react";
 
 const submissionSchema = z.object({
   content: z.string().min(1, "Submission content cannot be empty."),
+  fileUrl: z.string().optional(),
+  fileCldPubId: z.string().optional(),
 });
 
 type SubmissionFormValues = z.infer<typeof submissionSchema>;
@@ -29,7 +33,6 @@ export const SubmissionForm = ({
   assignmentId,
   existingSubmission,
 }: SubmissionFormProps) => {
-  // Conditionally use useCreate or useUpdate
   const { mutate: createMutate, mutation: createMutation } = useCreate();
   const { mutate: updateMutate, mutation: updateMutation } = useUpdate();
 
@@ -39,12 +42,13 @@ export const SubmissionForm = ({
     resolver: zodResolver(submissionSchema),
     defaultValues: {
       content: existingSubmission?.content ?? "",
+      fileUrl: existingSubmission?.fileUrl ?? "",
+      fileCldPubId: existingSubmission?.fileCldPubId ?? "",
     },
   });
 
   const onSubmit: SubmitHandler<SubmissionFormValues> = (values) => {
     if (existingSubmission) {
-      // Update existing submission
       updateMutate({
         resource: "submissions",
         id: existingSubmission.id,
@@ -54,7 +58,6 @@ export const SubmissionForm = ({
         },
       });
     } else {
-      // Create new submission
       createMutate({
         resource: "submissions",
         values: {
@@ -65,9 +68,14 @@ export const SubmissionForm = ({
     }
   };
 
+  const handleFileUpload = (url: string, publicId: string) => {
+    form.setValue("fileUrl", url);
+    form.setValue("fileCldPubId", publicId);
+  };
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <FormField
           control={form.control}
           name="content"
@@ -76,8 +84,8 @@ export const SubmissionForm = ({
               <FormLabel>Your Submission</FormLabel>
               <FormControl>
                 <Textarea
-                  placeholder="Enter your submission text or a link to your work..."
-                  rows={10}
+                  placeholder="Enter your submission text or a summary of your uploaded file..."
+                  rows={8}
                   {...field}
                 />
               </FormControl>
@@ -85,12 +93,27 @@ export const SubmissionForm = ({
             </FormItem>
           )}
         />
-        <Button type="submit" disabled={isPending}>
+
+        <div className="space-y-2 border-t pt-4">
+          <FileUpload 
+            label="Upload File (Optional)" 
+            folder="submissions"
+            onUploadSuccess={handleFileUpload}
+          />
+          {form.watch("fileUrl") && (
+            <div className="flex items-center gap-2 text-xs text-green-600 font-medium">
+              <Paperclip className="h-3 w-3" />
+              File uploaded and attached to submission
+            </div>
+          )}
+        </div>
+
+        <Button type="submit" disabled={isPending} className="w-full">
           {isPending
             ? "Submitting..."
             : existingSubmission
             ? "Update Submission"
-            : "Submit"}
+            : "Submit Assignment"}
         </Button>
       </form>
     </Form>

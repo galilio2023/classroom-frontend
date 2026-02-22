@@ -23,7 +23,7 @@ import { Button } from "@/components/ui/button";
 import { useUpdate, useCustomMutation, useNotification } from "@refinedev/core";
 import { Submission, Assignment } from "@/types";
 import { useEffect } from "react";
-import { Sparkles, Loader2 } from "lucide-react";
+import { Sparkles, Loader2, FileText, ExternalLink } from "lucide-react";
 
 const gradingSchema = z.object({
   grade: z.coerce
@@ -133,7 +133,7 @@ export const GradingDialog = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-center justify-between pr-6">
             <div>
@@ -159,11 +159,33 @@ export const GradingDialog = ({
           </div>
         </DialogHeader>
 
-        <div className="py-4">
-          <h4 className="mb-2 text-sm font-medium">Submission Content:</h4>
-          <div className="p-3 rounded-md bg-muted/50 text-sm whitespace-pre-wrap max-h-40 overflow-y-auto border">
-            {submission.content}
+        <div className="py-4 space-y-4">
+          <div>
+            <h4 className="mb-2 text-sm font-medium">Submission Content:</h4>
+            <div className="p-3 rounded-md bg-muted/50 text-sm whitespace-pre-wrap max-h-40 overflow-y-auto border">
+              {submission.content || "No text content provided."}
+            </div>
           </div>
+
+          {submission.fileUrl && (
+            <div className="flex items-center justify-between p-3 border rounded-lg bg-background">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-primary/10 rounded-md">
+                  <FileText className="h-5 w-5 text-primary" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-sm font-medium">Attached File</span>
+                  <span className="text-xs text-muted-foreground">Student uploaded a document</span>
+                </div>
+              </div>
+              <Button variant="outline" size="sm" asChild>
+                <a href={submission.fileUrl} target="_blank" rel="noopener noreferrer" className="gap-2">
+                  <ExternalLink className="h-4 w-4" />
+                  View File
+                </a>
+              </Button>
+            </div>
+          )}
         </div>
 
         <Form {...form}>

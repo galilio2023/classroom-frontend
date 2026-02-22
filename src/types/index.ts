@@ -55,6 +55,8 @@ export interface Submission {
   content: string | null;
   grade: number | null;
   feedback: string | null;
+  fileUrl: string | null; // Added for file uploads
+  fileCldPubId: string | null; // Added for file uploads
   assignmentId: number;
   studentId: string;
   createdAt: string;
@@ -67,6 +69,8 @@ export interface Assignment {
   title: string;
   description: string | null;
   dueDate: string | null;
+  fileUrl: string | null; // Added for attachments
+  fileCldPubId: string | null; // Added for attachments
   classId: number;
   createdAt: string;
   updatedAt: string;
