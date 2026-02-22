@@ -13,7 +13,7 @@ export const accessControlProvider: AccessControlProvider = {
     }
 
     if (role === "teacher") {
-      if (resource === "dashboard") {
+      if (resource === "dashboard" || resource === "ai-assistant") {
         return { can: true };
       }
 

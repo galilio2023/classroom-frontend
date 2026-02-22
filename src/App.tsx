@@ -71,7 +71,11 @@ function App() {
               {
                 name: "ai-assistant",
                 list: "/ai-assistant",
-                meta: { label: "AI Assistant", icon: <Sparkles /> },
+                meta: { 
+                  label: "AI Assistant", 
+                  icon: <Sparkles />,
+                  // Visibility is handled automatically by accessControlProvider
+                },
               },
               {
                 name: "subjects",
@@ -141,7 +145,14 @@ function App() {
                     </AuthorizedRoute>
                   }
                 />
-                <Route path="ai-assistant" element={<AIAssistantPage />} />
+                <Route 
+                  path="ai-assistant" 
+                  element={
+                    <AuthorizedRoute resource="ai-assistant" action="list">
+                      <AIAssistantPage />
+                    </AuthorizedRoute>
+                  } 
+                />
                 <Route path="subjects">
                   <Route
                     index

@@ -42,6 +42,7 @@ jobs:
               }
 
               const genAI = new GoogleGenerativeAI(geminiApiKey);
+              // Returning to gemini-2.5-flash as requested
               const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
               let rules = "";
@@ -85,7 +86,24 @@ jobs:
                 diff = diff.substring(0, MAX_DIFF_LENGTH) + "\n... (Diff truncated)";
               }
 
-              const prompt = `You are an expert code reviewer.\n\nRULES:\n${rules}\n\nPlease review these changes:\n\`\`\`diff\n${diff}\n\`\`\``;
+              const prompt = `
+                You are an expert code reviewer. Below are the project rules and the code changes (diff).
+                
+                ### RULES:
+                ${rules}
+
+                ### Instructions:
+                - Identify potential bugs or logical errors.
+                - Suggest improvements for readability and maintainability.
+                - Point out any security vulnerabilities.
+                - STRICTLY check for adherence to the "CODE_PATTERNS.md" rules (especially Refine v5 hooks and Table patterns).
+                - Keep feedback concise and use markdown bullet points.
+
+                ### Code Changes (diff):
+                \`\`\`diff
+                ${diff}
+                \`\`\`
+              `;
 
               try {
                 const result = await model.generateContent(prompt);
