@@ -1,0 +1,106 @@
+name: Gemini AI Review
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        run: npm install --no-save @google/generative-ai
+
+      - name: Run Gemini Review
+        uses: actions/github-script@v7
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        with:
+          script: |
+            const fs = require('fs');
+            const { GoogleGenerativeAI } = require("@google/generative-ai");
+
+            async function run({ github, context, core, exec }) {
+              const geminiApiKey = process.env.GEMINI_API_KEY;
+              if (!geminiApiKey) {
+                core.warning("No GEMINI_API_KEY found. Skipping review.");
+                return;
+              }
+
+              const genAI = new GoogleGenerativeAI(geminiApiKey);
+              const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+
+              let rules = "";
+              try {
+                if (fs.existsSync("GEMINI.md")) {
+                  rules += fs.readFileSync("GEMINI.md", "utf8") + "\n\n";
+                }
+                if (fs.existsSync("CODE_PATTERNS.md")) {
+                  rules += "--- FRONTEND SPECIFIC RULES ---\n" + fs.readFileSync("CODE_PATTERNS.md", "utf8");
+                }
+              } catch (e) {
+                core.error("Could not read rule files");
+              }
+
+              const pr = context.payload.pull_request;
+              if (!pr) return;
+
+              try {
+                await exec.exec(`git fetch origin ${pr.base.ref}`);
+              } catch (e) {
+                core.setFailed(`Fetch failed: ${e.message}`);
+                return;
+              }
+
+              let diff = "";
+              try {
+                const { stdout } = await exec.getExecOutput(`git diff origin/${pr.base.ref} HEAD`);
+                diff = stdout;
+              } catch (e) {
+                core.setFailed(`Diff failed: ${e.message}`);
+                return;
+              }
+
+              if (!diff || diff.trim().length === 0) {
+                core.info("No changes detected.");
+                return;
+              }
+
+              const MAX_DIFF_LENGTH = 30000;
+              if (diff.length > MAX_DIFF_LENGTH) {
+                diff = diff.substring(0, MAX_DIFF_LENGTH) + "\n... (Diff truncated)";
+              }
+
+              const prompt = `You are an expert code reviewer.\n\nRULES:\n${rules}\n\nPlease review these changes:\n\`\`\`diff\n${diff}\n\`\`\``;
+
+              try {
+                const result = await model.generateContent(prompt);
+                const response = await result.response;
+                const review = response.text();
+
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: pr.number,
+                  body: review,
+                });
+              } catch (error) {
+                core.setFailed(`AI Generation failed: ${error.message}`);
+              }
+            }
+
+            return await run({ github, context, core, exec });

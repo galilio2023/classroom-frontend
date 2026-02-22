@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Class, Enrollment, User } from "@/types";
-import { Loader2, PlusCircle, Trash } from "lucide-react";
+import { Loader2, PlusCircle, Trash, Sparkles } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -34,6 +34,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { EnrollStudentDialog } from "./enroll-student-dialog";
 import { AssignmentList } from "../assignments/list";
+import { AIQuizGenerator } from "@/components/ai-quiz-generator";
 
 const ClassesShow = () => {
   const { id } = useParams();
@@ -42,7 +43,6 @@ const ClassesShow = () => {
   const [unenrollTarget, setUnenrollTarget] = useState<number | null>(null);
   const [isEnrollDialogOpen, setIsEnrollDialogOpen] = useState(false);
 
-  // This is the definitive fix based on the Refine v5 documentation.
   const {
     result: aClass,
     query: { isLoading, isError },
@@ -148,9 +148,13 @@ const ClassesShow = () => {
         <ShowViewHeader resource="classes" title={aClass.name} />
 
         <Tabs defaultValue="students">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="students">Students</TabsTrigger>
             <TabsTrigger value="assignments">Assignments</TabsTrigger>
+            <TabsTrigger value="ai-quiz" className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-primary" />
+              AI Quiz
+            </TabsTrigger>
             <TabsTrigger value="details">Details</TabsTrigger>
           </TabsList>
 
@@ -176,6 +180,10 @@ const ClassesShow = () => {
 
           <TabsContent value="assignments">
             <AssignmentList classId={classId} assignments={assignments} />
+          </TabsContent>
+
+          <TabsContent value="ai-quiz">
+            <AIQuizGenerator classId={classId} />
           </TabsContent>
 
           <TabsContent value="details">

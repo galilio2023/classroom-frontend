@@ -20,9 +20,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { useUpdate } from "@refinedev/core";
-import { Submission } from "@/types";
+import { useUpdate, useCustomMutation, useNotification } from "@refinedev/core";
+import { Submission, Assignment } from "@/types";
 import { useEffect } from "react";
+import { Sparkles, Loader2 } from "lucide-react";
 
 const gradingSchema = z.object({
   grade: z.coerce
@@ -37,7 +38,13 @@ type GradingFormValues = z.infer<typeof gradingSchema>;
 interface GradingDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  submission: Submission | null;
+  submission: (Submission & { assignment?: Assignment }) | null;
+}
+
+interface AIFeedbackResponse {
+  suggestedGrade: number;
+  feedback: string;
+  summary: string;
 }
 
 export const GradingDialog = ({
@@ -45,8 +52,12 @@ export const GradingDialog = ({
   onOpenChange,
   submission,
 }: GradingDialogProps) => {
+  const { open } = useNotification();
   const { mutate, mutation } = useUpdate();
   const { isPending } = mutation;
+
+  const { mutate: getAIFeedback, mutation: aiMutation } = useCustomMutation<AIFeedbackResponse>();
+  const isAILoading = aiMutation.isPending;
 
   const form = useForm<GradingFormValues>({
     resolver: zodResolver(gradingSchema),
@@ -83,21 +94,74 @@ export const GradingDialog = ({
     );
   };
 
+  const handleAIGrade = () => {
+    if (!submission) return;
+
+    getAIFeedback(
+      {
+        url: "/ai/generate-feedback",
+        method: "post",
+        values: {
+          assignmentTitle: submission.assignment?.title,
+          assignmentDescription: submission.assignment?.description,
+          studentSubmission: submission.content,
+        },
+      },
+      {
+        onSuccess: (data) => {
+          const { suggestedGrade, feedback } = data.data;
+          form.setValue("grade", suggestedGrade);
+          form.setValue("feedback", feedback);
+          open?.({
+            type: "success",
+            message: "AI Feedback Generated!",
+            description: "Suggested grade and feedback have been applied.",
+          });
+        },
+        onError: () => {
+          open?.({
+            type: "error",
+            message: "AI Error",
+            description: "Failed to generate feedback from Gemini.",
+          });
+        },
+      }
+    );
+  };
+
   if (!submission) return null;
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Grade Submission</DialogTitle>
-          <DialogDescription>
-            Student: {submission.student?.name}
-          </DialogDescription>
+          <div className="flex items-center justify-between pr-6">
+            <div>
+              <DialogTitle>Grade Submission</DialogTitle>
+              <DialogDescription>
+                Student: {submission.student?.name}
+              </DialogDescription>
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="gap-2 text-primary border-primary/20 hover:bg-primary/5"
+              onClick={handleAIGrade}
+              disabled={isAILoading}
+            >
+              {isAILoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Sparkles className="h-4 w-4" />
+              )}
+              AI Grade Assistant
+            </Button>
+          </div>
         </DialogHeader>
 
         <div className="py-4">
           <h4 className="mb-2 text-sm font-medium">Submission Content:</h4>
-          <div className="p-3 rounded-md bg-muted/50 text-sm whitespace-pre-wrap max-h-40 overflow-y-auto">
+          <div className="p-3 rounded-md bg-muted/50 text-sm whitespace-pre-wrap max-h-40 overflow-y-auto border">
             {submission.content}
           </div>
         </div>
@@ -126,6 +190,7 @@ export const GradingDialog = ({
                   <FormControl>
                     <Textarea
                       placeholder="Great job! Just a few notes..."
+                      className="min-h-[150px]"
                       {...field}
                     />
                   </FormControl>
