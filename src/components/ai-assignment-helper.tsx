@@ -5,8 +5,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
-import { Textarea } from "./ui/textarea";
 import { Loader2, Sparkles, Copy, Check, Send } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 
 interface AIResponse {
   content: string;
@@ -159,13 +159,14 @@ export const AIAssignmentHelper: React.FC<AIAssignmentHelperProps> = ({ onUseCon
             )}
           </div>
         </CardHeader>
-        <CardContent className="flex-1">
-          <Textarea
-            className="h-full min-h-[300px] font-mono text-sm resize-none"
-            placeholder="Generated content will appear here..."
-            value={generatedContent}
-            readOnly
-          />
+        <CardContent className="flex-1 overflow-auto">
+          <div className="h-full min-h-[300px] p-4 border rounded-md bg-muted/30 prose prose-sm dark:prose-invert max-w-none">
+            {generatedContent ? (
+              <ReactMarkdown>{generatedContent}</ReactMarkdown>
+            ) : (
+              <p className="text-muted-foreground italic">Generated content will appear here...</p>
+            )}
+          </div>
         </CardContent>
       </Card>
     </div>

@@ -102,13 +102,9 @@ export const GradingDialog = ({
 
     getAIFeedback(
       {
-        url: "/ai/generate-feedback",
+        url: `/submissions/${submission.id}/ai-grade`,
         method: "post",
-        values: {
-          assignmentTitle: submission.assignment?.title,
-          assignmentDescription: submission.assignment?.description,
-          studentSubmission: submission.content,
-        },
+        values: {},
       },
       {
         onSuccess: (data) => {
