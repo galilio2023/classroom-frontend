@@ -12,7 +12,6 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Sparkles, Send, X, MessageCircle, Loader2, GraduationCap, User } from "lucide-react";
-import ReactMarkdown from "react-markdown";
 
 interface Message {
   role: "user" | "model";
@@ -140,9 +139,10 @@ export const AIStudyBuddy = ({ subject, topic, assignment }: AIStudyBuddyProps) 
                           ? "bg-primary text-primary-foreground rounded-tr-none" 
                           : "bg-muted rounded-tl-none"
                       }`}>
-                        <ReactMarkdown className="prose prose-sm dark:prose-invert max-w-none">
-                          {msg.parts[0].text}
-                        </ReactMarkdown>
+                        <div 
+                          className="prose prose-sm dark:prose-invert max-w-none"
+                          dangerouslySetInnerHTML={{ __html: msg.parts[0].text }}
+                        />
                       </div>
                     </div>
                   </div>

@@ -8,7 +8,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Bell, CheckCheck, Info, GraduationCap, ClipboardCheck, AlertCircle } from "lucide-react";
+import { Bell, CheckCheck, Info, GraduationCap, ClipboardCheck } from "lucide-react";
 import { Notification } from "@/types";
 import { formatDistanceToNow } from "date-fns";
 import { useNavigate } from "react-router-dom";
@@ -24,7 +24,7 @@ export const NotificationBell = () => {
   });
 
   const notifications = notificationsData?.data || [];
-  const unreadCount = notifications.filter((n) => !n.isRead).length;
+  const unreadCount = notifications.filter((n: Notification) => !n.isRead).length;
 
   // Mark as read mutation
   const { mutate: markAsRead } = useCustomMutation();
@@ -110,7 +110,7 @@ export const NotificationBell = () => {
             </div>
           ) : (
             <div className="flex flex-col">
-              {notifications.map((notification) => (
+              {notifications.map((notification: Notification) => (
                 <div
                   key={notification.id}
                   className={`flex gap-3 p-4 border-b last:border-0 cursor-pointer hover:bg-muted/50 transition-colors ${
