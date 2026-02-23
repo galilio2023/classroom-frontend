@@ -1,5 +1,6 @@
 import { useShow, useGetIdentity, useList, HttpError } from "@refinedev/core";
 import { useParams } from "react-router-dom";
+import { useMemo } from "react";
 import { ShowView, ShowViewHeader } from "@/components/refine-ui/views/show-view";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Loader2, FileText, ExternalLink } from "lucide-react";
@@ -33,11 +34,14 @@ const AssignmentShow = () => {
       enabled: !!assignment,
     },
   });
+  
   const submissions = submissionsResult?.data ?? [];
 
-  const mySubmission = submissions.find(
-    (s) => s.studentId === identity?.id,
-  );
+  // Use useMemo to ensure mySubmission is recalculated correctly
+  const mySubmission = useMemo(() => {
+    if (!identity?.id || !submissions.length) return null;
+    return submissions.find((s) => s.studentId === identity.id);
+  }, [submissions, identity?.id]);
 
   const isLoading =
     isIdentityLoading || assignmentQuery.isLoading || submissionsQuery.isLoading;
@@ -67,22 +71,30 @@ const AssignmentShow = () => {
     ? new Date(assignment.dueDate).toLocaleDateString()
     : "No due date";
 
-  // Helper to render the student's view
   const renderStudentView = () => {
-    if (mySubmission?.grade != null) {
+    if (mySubmission) {
       return (
         <div className="space-y-4">
-          <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/20">
-            <div>
-              <h3 className="font-semibold text-lg">Grade</h3>
-              <p className="text-sm text-muted-foreground">
-                Feedback from your teacher
+          {mySubmission.grade != null ? (
+            <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/20">
+              <div>
+                <h3 className="font-semibold text-lg">Grade</h3>
+                <p className="text-sm text-muted-foreground">
+                  Feedback from your teacher
+                </p>
+              </div>
+              <div className="text-2xl font-bold text-primary">
+                {mySubmission.grade} / 100
+              </div>
+            </div>
+          ) : (
+            <div className="p-4 border rounded-lg bg-blue-50 border-blue-100">
+              <h3 className="font-semibold text-blue-800">Submitted</h3>
+              <p className="text-sm text-blue-600">
+                Your work has been received and is waiting to be graded.
               </p>
             </div>
-            <div className="text-2xl font-bold text-primary">
-              {mySubmission.grade} / 100
-            </div>
-          </div>
+          )}
 
           {mySubmission.feedback && (
             <div className="p-4 border rounded-lg bg-muted/20">
@@ -118,6 +130,16 @@ const AssignmentShow = () => {
               </div>
             )}
           </div>
+          
+          {mySubmission.grade == null && (
+            <div className="pt-6 border-t">
+              <h4 className="font-semibold mb-4">Update Your Submission</h4>
+              <SubmissionForm
+                assignmentId={assignment.id}
+                existingSubmission={mySubmission}
+              />
+            </div>
+          )}
         </div>
       );
     }
@@ -125,7 +147,6 @@ const AssignmentShow = () => {
     return (
       <SubmissionForm
         assignmentId={assignment.id}
-        existingSubmission={mySubmission}
       />
     );
   };
