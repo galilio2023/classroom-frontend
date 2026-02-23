@@ -1,4 +1,4 @@
-import { useForm, SubmitHandler } from "react-hook-form";
+import { useForm } from "@refinedev/react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import {
@@ -11,11 +11,15 @@ import {
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { useCreate, useUpdate } from "@refinedev/core"; // Import useUpdate
 import { Submission } from "@/types";
+import { FileUpload } from "@/components/file-upload";
+import { Paperclip, Loader2 } from "lucide-react";
+import { FieldValues } from "react-hook-form";
 
 const submissionSchema = z.object({
   content: z.string().min(1, "Submission content cannot be empty."),
+  fileUrl: z.string().optional(),
+  fileCldPubId: z.string().optional(),
 });
 
 type SubmissionFormValues = z.infer<typeof submissionSchema>;
@@ -29,55 +33,54 @@ export const SubmissionForm = ({
   assignmentId,
   existingSubmission,
 }: SubmissionFormProps) => {
-  // Conditionally use useCreate or useUpdate
-  const { mutate: createMutate, mutation: createMutation } = useCreate();
-  const { mutate: updateMutate, mutation: updateMutation } = useUpdate();
-
-  const isPending = createMutation.isPending || updateMutation.isPending;
-
   const form = useForm<SubmissionFormValues>({
-    resolver: zodResolver(submissionSchema),
+    resolver: zodResolver(submissionSchema) as any, // Cast to any to resolve Refine/RHF type conflict
     defaultValues: {
       content: existingSubmission?.content ?? "",
+      fileUrl: existingSubmission?.fileUrl ?? "",
+      fileCldPubId: existingSubmission?.fileCldPubId ?? "",
+    },
+    refineCoreProps: {
+      resource: "submissions",
+      action: existingSubmission ? "edit" : "create",
+      id: existingSubmission?.id,
+      redirect: false,
     },
   });
 
-  const onSubmit: SubmitHandler<SubmissionFormValues> = (values) => {
-    if (existingSubmission) {
-      // Update existing submission
-      updateMutate({
-        resource: "submissions",
-        id: existingSubmission.id,
-        values: {
-          ...values,
-          assignmentId,
-        },
-      });
-    } else {
-      // Create new submission
-      createMutate({
-        resource: "submissions",
-        values: {
-          ...values,
-          assignmentId,
-        },
-      });
-    }
+  const {
+    handleSubmit,
+    control,
+    setValue,
+    watch,
+    refineCore: { onFinish, formLoading },
+  } = form;
+
+  const onSubmit = (values: FieldValues) => {
+    onFinish({
+      ...values,
+      assignmentId,
+    });
+  };
+
+  const handleFileUpload = (url: string, publicId: string) => {
+    setValue("fileUrl", url);
+    setValue("fileCldPubId", publicId);
   };
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <FormField
-          control={form.control}
+          control={control}
           name="content"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Your Submission</FormLabel>
               <FormControl>
                 <Textarea
-                  placeholder="Enter your submission text or a link to your work..."
-                  rows={10}
+                  placeholder="Enter your submission text or a summary of your uploaded file..."
+                  rows={8}
                   {...field}
                 />
               </FormControl>
@@ -85,12 +88,32 @@ export const SubmissionForm = ({
             </FormItem>
           )}
         />
-        <Button type="submit" disabled={isPending}>
-          {isPending
-            ? "Submitting..."
-            : existingSubmission
-            ? "Update Submission"
-            : "Submit"}
+
+        <div className="space-y-2 border-t pt-4">
+          <FileUpload 
+            label="Upload File (Optional)" 
+            folder="submissions"
+            onUploadSuccess={handleFileUpload}
+          />
+          {watch("fileUrl") && (
+            <div className="flex items-center gap-2 text-xs text-green-600 font-medium">
+              <Paperclip className="h-3 w-3" />
+              File uploaded and attached to submission
+            </div>
+          )}
+        </div>
+
+        <Button type="submit" disabled={formLoading} className="w-full">
+          {formLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Submitting...
+            </>
+          ) : existingSubmission ? (
+            "Update Submission"
+          ) : (
+            "Submit Assignment"
+          )}
         </Button>
       </form>
     </Form>

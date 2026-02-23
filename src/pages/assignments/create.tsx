@@ -1,4 +1,4 @@
-import { useForm, SubmitHandler } from "react-hook-form";
+import { useForm } from "@refinedev/react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import {
@@ -15,9 +15,10 @@ import { Button } from "@/components/ui/button";
 import { CreateView } from "@/components/refine-ui/views/create-view";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSearchParams } from "react-router-dom";
-import { useGo, useCreate } from "@refinedev/core";
+import { useGo } from "@refinedev/core";
 import { toast } from "sonner";
 import { AIAssignmentHelper } from "@/components/ai-assignment-helper";
+import { FileUpload } from "@/components/file-upload";
 import {
   Sheet,
   SheetContent,
@@ -26,12 +27,15 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Paperclip, Loader2 } from "lucide-react";
+import { FieldValues } from "react-hook-form";
 
 const assignmentSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().optional(),
   dueDate: z.string().optional(),
+  fileUrl: z.string().optional(),
+  fileCldPubId: z.string().optional(),
 });
 
 type AssignmentFormValues = z.infer<typeof assignmentSchema>;
@@ -41,42 +45,54 @@ export const AssignmentCreate = () => {
   const classId = searchParams.get("classId");
   const go = useGo();
 
-  const { mutate, mutation } = useCreate();
-  const { isPending } = mutation;
-
+  // MANDATORY: Use Refine v5 useForm pattern with refineCoreProps
   const form = useForm<AssignmentFormValues>({
-    resolver: zodResolver(assignmentSchema),
+    resolver: zodResolver(assignmentSchema) as any,
     defaultValues: {
       title: "",
       description: "",
       dueDate: "",
+      fileUrl: "",
+      fileCldPubId: "",
+    },
+    refineCoreProps: {
+      resource: "assignments",
+      action: "create",
+      onMutationSuccess: () => {
+        if (classId) {
+          go({ to: `/classes/show/${classId}`, type: "replace" });
+        }
+      },
     },
   });
 
-  const onSubmit: SubmitHandler<AssignmentFormValues> = (values) => {
+  const {
+    handleSubmit,
+    control,
+    setValue,
+    watch,
+    refineCore: { onFinish, formLoading },
+  } = form;
+
+  const onSubmit = (values: FieldValues) => {
     if (!classId) {
       toast.error("Could not create assignment: Class ID is missing.");
       return;
     }
-    mutate(
-      {
-        resource: "assignments",
-        values: {
-          ...values,
-          classId: Number(classId),
-        },
-      },
-      {
-        onSuccess: () => {
-          go({ to: `/classes/show/${classId}`, type: "replace" });
-        },
-      },
-    );
+    onFinish({
+      ...values,
+      classId: Number(classId),
+    });
   };
 
   const handleUseAIContent = (content: string) => {
-    form.setValue("description", content);
+    setValue("description", content);
     toast.success("AI content applied to description!");
+  };
+
+  const handleFileUpload = (url: string, publicId: string) => {
+    setValue("fileUrl", url);
+    setValue("fileCldPubId", publicId);
   };
 
   return (
@@ -109,11 +125,11 @@ export const AssignmentCreate = () => {
             <CardContent>
               <Form {...form}>
                 <form
-                  onSubmit={form.handleSubmit(onSubmit)}
-                  className="space-y-4"
+                  onSubmit={handleSubmit(onSubmit)}
+                  className="space-y-6"
                 >
                   <FormField
-                    control={form.control}
+                    control={control}
                     name="title"
                     render={({ field }) => (
                       <FormItem>
@@ -129,7 +145,7 @@ export const AssignmentCreate = () => {
                     )}
                   />
                   <FormField
-                    control={form.control}
+                    control={control}
                     name="description"
                     render={({ field }) => (
                       <FormItem>
@@ -145,21 +161,46 @@ export const AssignmentCreate = () => {
                       </FormItem>
                     )}
                   />
-                  <FormField
-                    control={form.control}
-                    name="dueDate"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Due Date</FormLabel>
-                        <FormControl>
-                          <Input type="date" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={control}
+                      name="dueDate"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Due Date</FormLabel>
+                          <FormControl>
+                            <Input type="date" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <div className="space-y-2">
+                      <FileUpload 
+                        label="Attachment (Optional)" 
+                        folder="assignments"
+                        onUploadSuccess={handleFileUpload}
+                      />
+                      {watch("fileUrl") && (
+                        <div className="flex items-center gap-2 text-xs text-green-600 font-medium">
+                          <Paperclip className="h-3 w-3" />
+                          File attached successfully
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <Button type="submit" disabled={formLoading} className="w-full">
+                    {formLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Creating...
+                      </>
+                    ) : (
+                      "Create Assignment"
                     )}
-                  />
-                  <Button type="submit" disabled={isPending} className="w-full">
-                    {isPending ? "Creating..." : "Create Assignment"}
                   </Button>
                 </form>
               </Form>
@@ -171,19 +212,21 @@ export const AssignmentCreate = () => {
             <CardHeader>
               <CardTitle className="text-sm font-medium">Quick Tips</CardTitle>
             </CardHeader>
-            <CardContent className="text-sm text-muted-foreground space-y-2">
-              <p>
-                • Use the <strong>AI Helper</strong> to quickly draft learning
-                objectives and instructions.
-              </p>
-              <p>
-                • Be specific with the <strong>Topic</strong> to get better AI
-                results.
-              </p>
-              <p>
-                • You can edit the AI-generated content after applying it to the
-                form.
-              </p>
+            <CardContent className="text-sm text-muted-foreground space-y-4">
+              <div className="space-y-2">
+                <p className="font-medium text-foreground flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-primary" />
+                  AI Assistant
+                </p>
+                <p>Use the AI Helper to quickly draft learning objectives and instructions.</p>
+              </div>
+              <div className="space-y-2">
+                <p className="font-medium text-foreground flex items-center gap-2">
+                  <Paperclip className="h-4 w-4 text-primary" />
+                  Attachments
+                </p>
+                <p>You can now upload PDFs, images, or documents as reference materials for your students.</p>
+              </div>
             </CardContent>
           </Card>
         </div>

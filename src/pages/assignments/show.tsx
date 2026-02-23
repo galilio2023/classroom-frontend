@@ -2,11 +2,12 @@ import { useShow, useGetIdentity, useList, HttpError } from "@refinedev/core";
 import { useParams } from "react-router-dom";
 import { ShowView, ShowViewHeader } from "@/components/refine-ui/views/show-view";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Loader2 } from "lucide-react";
+import { Loader2, FileText, ExternalLink } from "lucide-react";
 import { Assignment, User, Submission } from "@/types";
 import { SubmissionForm } from "./submission-form";
 import { SubmissionList } from "./submission-list";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 const AssignmentShow = () => {
   const { id } = useParams();
@@ -68,7 +69,6 @@ const AssignmentShow = () => {
 
   // Helper to render the student's view
   const renderStudentView = () => {
-    // If graded, show the results
     if (mySubmission?.grade != null) {
       return (
         <div className="space-y-4">
@@ -91,19 +91,37 @@ const AssignmentShow = () => {
             </div>
           )}
 
-          <div className="pt-4">
-            <h4 className="font-semibold mb-2 text-muted-foreground">
-              Your Submission
-            </h4>
-            <div className="p-3 rounded-md bg-muted/50 text-sm whitespace-pre-wrap">
-              {mySubmission.content}
+          <div className="pt-4 space-y-4">
+            <div>
+              <h4 className="font-semibold mb-2 text-muted-foreground">
+                Your Submission
+              </h4>
+              <div className="p-3 rounded-md bg-muted/50 text-sm whitespace-pre-wrap border">
+                {mySubmission.content}
+              </div>
             </div>
+
+            {mySubmission.fileUrl && (
+              <div className="flex items-center justify-between p-3 border rounded-lg bg-background">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-primary/10 rounded-md">
+                    <FileText className="h-5 w-5 text-primary" />
+                  </div>
+                  <span className="text-sm font-medium">Submitted File</span>
+                </div>
+                <Button variant="outline" size="sm" asChild>
+                  <a href={mySubmission.fileUrl} target="_blank" rel="noopener noreferrer" className="gap-2">
+                    <ExternalLink className="h-4 w-4" />
+                    View File
+                  </a>
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       );
     }
 
-    // If not graded, show the form
     return (
       <SubmissionForm
         assignmentId={assignment.id}
@@ -118,8 +136,20 @@ const AssignmentShow = () => {
       <div className="space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle>{assignment.title}</CardTitle>
-            <CardDescription>Due: {dueDate}</CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>{assignment.title}</CardTitle>
+                <CardDescription>Due: {dueDate}</CardDescription>
+              </div>
+              {assignment.fileUrl && (
+                <Button variant="outline" size="sm" asChild>
+                  <a href={assignment.fileUrl} target="_blank" rel="noopener noreferrer" className="gap-2">
+                    <FileText className="h-4 w-4" />
+                    Attachment
+                  </a>
+                </Button>
+              )}
+            </div>
           </CardHeader>
           <CardContent>
             <p className="whitespace-pre-wrap">{assignment.description}</p>
@@ -130,7 +160,6 @@ const AssignmentShow = () => {
           <CardHeader>
             <CardTitle>
               {isTeacher ? "Student Submissions" : "Your Submission"}
-              {/* Show a badge if the student has submitted but not been graded yet */}
               {!isTeacher && mySubmission && mySubmission.grade === null && (
                 <Badge variant="secondary" className="ml-3">
                   Submitted
