@@ -1,4 +1,4 @@
-import { useForm, SubmitHandler } from "react-hook-form";
+import { useForm } from "@refinedev/react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import {
@@ -20,10 +20,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { useUpdate, useCustomMutation, useNotification } from "@refinedev/core";
+import { useCustomMutation, useNotification } from "@refinedev/core";
 import { Submission, Assignment } from "@/types";
 import { useEffect } from "react";
 import { Sparkles, Loader2, FileText, ExternalLink } from "lucide-react";
+import { FieldValues } from "react-hook-form";
 
 const gradingSchema = z.object({
   grade: z.coerce
@@ -53,45 +54,47 @@ export const GradingDialog = ({
   submission,
 }: GradingDialogProps) => {
   const { open } = useNotification();
-  const { mutate, mutation } = useUpdate();
-  const { isPending } = mutation;
+
+  // MANDATORY: Use Refine v5 useForm pattern with refineCoreProps
+  const form = useForm<GradingFormValues>({
+    resolver: zodResolver(gradingSchema) as any,
+    defaultValues: {
+      grade: submission?.grade ?? 0,
+      feedback: submission?.feedback ?? "",
+    },
+    refineCoreProps: {
+      resource: "submissions",
+      action: "edit",
+      id: submission?.id,
+      queryOptions: {
+        enabled: !!submission?.id,
+      },
+      onMutationSuccess: () => {
+        onOpenChange(false);
+      },
+    },
+  });
+
+  const {
+    handleSubmit,
+    control,
+    setValue,
+    refineCore: { onFinish, formLoading },
+  } = form;
 
   const { mutate: getAIFeedback, mutation: aiMutation } = useCustomMutation<AIFeedbackResponse>();
   const isAILoading = aiMutation.isPending;
 
-  const form = useForm<GradingFormValues>({
-    resolver: zodResolver(gradingSchema),
-    defaultValues: {
-      grade: 0,
-      feedback: "",
-    },
-  });
-
   // Reset form when submission changes
   useEffect(() => {
     if (submission) {
-      form.reset({
-        grade: submission.grade ?? 0,
-        feedback: submission.feedback ?? "",
-      });
+      setValue("grade", submission.grade ?? 0);
+      setValue("feedback", submission.feedback ?? "");
     }
-  }, [submission, form]);
+  }, [submission, setValue]);
 
-  const onSubmit: SubmitHandler<GradingFormValues> = (values) => {
-    if (!submission) return;
-
-    mutate(
-      {
-        resource: "submissions",
-        id: submission.id,
-        values: values,
-      },
-      {
-        onSuccess: () => {
-          onOpenChange(false);
-        },
-      },
-    );
+  const onSubmit = (values: FieldValues) => {
+    onFinish(values);
   };
 
   const handleAIGrade = () => {
@@ -110,8 +113,8 @@ export const GradingDialog = ({
       {
         onSuccess: (data) => {
           const { suggestedGrade, feedback } = data.data;
-          form.setValue("grade", suggestedGrade);
-          form.setValue("feedback", feedback);
+          setValue("grade", suggestedGrade);
+          setValue("feedback", feedback);
           open?.({
             type: "success",
             message: "AI Feedback Generated!",
@@ -189,9 +192,9 @@ export const GradingDialog = ({
         </div>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <FormField
-              control={form.control}
+              control={control}
               name="grade"
               render={({ field }) => (
                 <FormItem>
@@ -204,7 +207,7 @@ export const GradingDialog = ({
               )}
             />
             <FormField
-              control={form.control}
+              control={control}
               name="feedback"
               render={({ field }) => (
                 <FormItem>
@@ -228,8 +231,8 @@ export const GradingDialog = ({
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={isPending}>
-                {isPending ? "Saving..." : "Save Grade"}
+              <Button type="submit" disabled={formLoading}>
+                {formLoading ? "Saving..." : "Save Grade"}
               </Button>
             </DialogFooter>
           </form>
