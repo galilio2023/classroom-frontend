@@ -14,7 +14,7 @@ import { dataProvider } from "./providers/data";
 import { authProvider } from "./providers/auth";
 import { accessControlProvider } from "./providers/access-control";
 import Dashboard from "@/pages/dashboard.tsx";
-import { Home, BookOpen, Building2, Users, Calendar, Sparkles } from "lucide-react";
+import { Home, BookOpen, Building2, Users, Calendar, Sparkles, GraduationCap } from "lucide-react";
 import { Layout } from "@/components/refine-ui/layout/layout.tsx";
 import SubjectsList from "@/pages/subjects/list.tsx";
 import SubjectsCreate from "@/pages/subjects/create.tsx";
@@ -52,13 +52,7 @@ function App() {
               warnWhenUnsavedChanges: true,
               projectId: "nDt0bx-k8buuJ-It2Nvq",
               title: {
-                icon: (
-                  <img
-                    src="/Gemini_Generated_Image_34j2nq34j2nq34j2.png"
-                    alt="Logo"
-                    className="w-8 h-8"
-                  />
-                ),
+                icon: <GraduationCap className="w-8 h-8 text-primary" />,
                 text: "Learning System",
               },
             }}
