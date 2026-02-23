@@ -11,6 +11,8 @@ interface FileUploadProps {
   label?: string;
 }
 
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+
 export const FileUpload: React.FC<FileUploadProps> = ({ 
   onUploadSuccess, 
   folder = "general",
@@ -22,7 +24,18 @@ export const FileUpload: React.FC<FileUploadProps> = ({
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0]);
+      const selectedFile = e.target.files[0];
+      
+      // Client-side size validation
+      if (selectedFile.size > MAX_FILE_SIZE) {
+        toast.error("File too large", {
+          description: "Please select a file smaller than 10MB."
+        });
+        e.target.value = ""; // Reset input
+        return;
+      }
+
+      setFile(selectedFile);
       setUploadComplete(false);
     }
   };
@@ -39,7 +52,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       const response = await fetch(`${import.meta.env.VITE_API_URL}/upload`, {
         method: "POST",
         body: formData,
-        credentials: "include", // CRITICAL: Send session cookies
+        credentials: "include",
       });
 
       if (!response.ok) {
@@ -51,9 +64,10 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       onUploadSuccess(result.data.url, result.data.publicId);
       setUploadComplete(true);
       toast.success("File uploaded successfully!");
-    } catch (error: any) {
+    } catch (error) {
       console.error("Upload Error:", error);
-      toast.error(error.message || "Failed to upload file. Please try again.");
+      const message = error instanceof Error ? error.message : "Failed to upload file. Please try again.";
+      toast.error(message);
     } finally {
       setIsUploading(false);
     }
@@ -77,10 +91,11 @@ export const FileUpload: React.FC<FileUploadProps> = ({
             type="file"
             className="absolute inset-0 opacity-0 cursor-pointer"
             onChange={handleFileChange}
+            accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.webp"
           />
           <Upload className="h-8 w-8 text-muted-foreground mb-2" />
           <p className="text-sm text-muted-foreground">Click or drag to select a file</p>
-          <p className="text-xs text-muted-foreground/60 mt-1">Max size: 10MB</p>
+          <p className="text-xs text-muted-foreground/60 mt-1">Max size: 10MB (PDF, Images, Word)</p>
         </div>
       ) : (
         <div className="flex items-center justify-between p-3 border rounded-lg bg-background">
