@@ -11,10 +11,8 @@ The application's styling was inconsistent and relied on an older color palette 
     - Removed `tw-animate-css` dependency and replaced it with native Tailwind animations where needed.
     - Adopted `[data-slot]` selectors for styling shadcn/ui components, ensuring better encapsulation and maintainability.
     - Introduced new utility classes like `.glass-shine`, `.ai-card-premium`, and `.ai-header-gradient` for consistent visual effects.
-    - Removed legacy custom component classes (e.g., `.sign-up`, `.class-view`) in favor of utility-first styling within the components themselves.
-- **Updated Components:**
-    - `AIStudyBuddy` and `AIAssignmentHelper` were updated to use the new CSS variables and utility classes.
-    - Added `.bg-dot-pattern` and `.ai-gradient-border` to `src/App.css` to support the new AI component designs.
+    - Removed legacy custom component classes (e.g., `.sign-up`, `.class-view`) in favor of utility-first styling within the components themselves. This encourages a more modular, component-centric approach and reduces global CSS bloat.
+    - Added `.prose` class with comprehensive Markdown styling to ensure AI-generated content is rendered legibly and consistently.
 
 **Summary:**
 A comprehensive overhaul of the application's CSS architecture was performed. The new system is based on HSL variables, supports dark mode natively, and leverages modern Tailwind v4 features. This establishes a solid foundation for future UI development and ensures visual consistency across the application.
