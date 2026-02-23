@@ -36,7 +36,7 @@ const Dashboard = () => {
   }>({
     url: "/stats",
     method: "get",
-  });
+  }) as any;
 
   const stats = statsData?.data;
 

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { useCustomMutation } from "@refinedev/core";
+import { useCustomMutation, useGetIdentity } from "@refinedev/core";
 import {
   Card,
   CardContent,
@@ -11,7 +11,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Sparkles, Send, X, MessageCircle, Loader2, GraduationCap, User } from "lucide-react";
+import { Sparkles, Send, X, MessageCircle, Loader2, GraduationCap, User as UserIcon } from "lucide-react";
+import { User, UserRole } from "@/types";
+import ReactMarkdown from "react-markdown";
 
 interface Message {
   role: "user" | "model";
@@ -25,6 +27,9 @@ interface AIStudyBuddyProps {
 }
 
 export const AIStudyBuddy = ({ subject, topic, assignment }: AIStudyBuddyProps) => {
+  const { data: identity } = useGetIdentity<User>();
+  const isTeacher = identity?.role === UserRole.TEACHER || identity?.role === UserRole.ADMIN;
+
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
@@ -42,6 +47,9 @@ export const AIStudyBuddy = ({ subject, topic, assignment }: AIStudyBuddyProps) 
       }
     }
   }, [messages, isLoading]);
+
+  // If not a teacher/admin, don't render the component at all
+  if (!isTeacher) return null;
 
   const handleSend = () => {
     if (!input.trim() || isLoading) return;
@@ -129,7 +137,7 @@ export const AIStudyBuddy = ({ subject, topic, assignment }: AIStudyBuddyProps) 
                         </div>
                       ) : (
                         <div className="bg-muted h-full w-full flex items-center justify-center">
-                          <User className="h-4 w-4" />
+                          <UserIcon className="h-4 w-4" />
                         </div>
                       )}
                     </Avatar>
@@ -139,10 +147,9 @@ export const AIStudyBuddy = ({ subject, topic, assignment }: AIStudyBuddyProps) 
                           ? "bg-primary text-primary-foreground rounded-tr-none" 
                           : "bg-muted rounded-tl-none"
                       }`}>
-                        <div 
-                          className="prose prose-sm dark:prose-invert max-w-none"
-                          dangerouslySetInnerHTML={{ __html: msg.parts[0].text }}
-                        />
+                        <div className="prose prose-sm dark:prose-invert max-w-none">
+                          <ReactMarkdown>{msg.parts[0].text}</ReactMarkdown>
+                        </div>
                       </div>
                     </div>
                   </div>

@@ -28,7 +28,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Enrollment, AttendanceStatus, Attendance, User, UserRole } from "@/types";
-import { Loader2, Save, Calendar as CalendarIcon, CheckCircle2, XCircle, Clock, AlertCircle, History, BarChart3 } from "lucide-react";
+import { Loader2, Save, Calendar as CalendarIcon, CheckCircle2, XCircle, Clock, AlertCircle, History } from "lucide-react";
 import { format } from "date-fns";
 
 interface AttendanceTabProps {
@@ -63,19 +63,19 @@ export const AttendanceTab = ({ classId, enrollments }: AttendanceTabProps) => {
         date: selectedDate,
       },
     },
-  });
+  }) as any;
 
   // Fetch attendance history
   const { data: historyData, isLoading: isHistoryLoading, refetch: refetchHistory } = useCustom<AttendanceHistoryGroup[]>({
     url: `/attendance/history/${classId}`,
     method: "get",
-  });
+  }) as any;
 
   // Fetch overall stats
   const { data: statsData, isLoading: isStatsLoading } = useCustom<Record<AttendanceStatus, number>>({
     url: `/attendance/stats/${classId}`,
     method: "get",
-  });
+  }) as any;
 
   // Initialize or update attendanceData when existingAttendance changes
   useMemo(() => {
@@ -88,7 +88,7 @@ export const AttendanceTab = ({ classId, enrollments }: AttendanceTabProps) => {
 
     // Overwrite with existing data if found
     if (existingAttendance?.data) {
-      existingAttendance.data.forEach((record) => {
+      existingAttendance.data.forEach((record: Attendance) => {
         if (format(new Date(record.date), "yyyy-MM-dd") === selectedDate) {
             initialData[record.studentId] = { 
                 status: record.status, 
@@ -100,7 +100,7 @@ export const AttendanceTab = ({ classId, enrollments }: AttendanceTabProps) => {
     setAttendanceData(initialData);
   }, [existingAttendance, enrollments, selectedDate]);
 
-  const { mutate: saveAttendance, mutation } = useCustomMutation();
+  const { mutate: saveAttendance, mutation } = useCustomMutation() as any;
 
   const handleStatusChange = (studentId: string, status: AttendanceStatus) => {
     setAttendanceData((prev) => ({
@@ -358,7 +358,7 @@ export const AttendanceTab = ({ classId, enrollments }: AttendanceTabProps) => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {historyData?.data?.map((group) => (
+                    {historyData?.data?.map((group: AttendanceHistoryGroup) => (
                       <TableRow key={group.date}>
                         <TableCell className="font-medium">
                           {format(new Date(group.date), "PPP")}

@@ -21,7 +21,7 @@ export const NotificationBell = () => {
   const { data: notificationsData, refetch } = useCustom<Notification[]>({
     url: "/notifications",
     method: "get",
-  });
+  }) as any;
 
   const notifications = notificationsData?.data || [];
   const unreadCount = notifications.filter((n: Notification) => !n.isRead).length;
