@@ -12,6 +12,7 @@ import { Bell, CheckCheck, Info, GraduationCap, ClipboardCheck } from "lucide-re
 import { Notification } from "@/types";
 import { formatDistanceToNow } from "date-fns";
 import { useNavigate } from "react-router-dom";
+import { cn } from "@/lib/utils";
 
 export const NotificationBell = () => {
   const navigate = useNavigate();
@@ -76,26 +77,33 @@ export const NotificationBell = () => {
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative">
-          <Bell className="h-5 w-5" />
+        <Button 
+            variant="ghost" 
+            size="icon" 
+            className={cn(
+                "relative h-10 w-10 rounded-full transition-all duration-200",
+                isOpen ? "bg-primary/10 text-primary shadow-inner" : "hover:bg-primary/5"
+            )}
+        >
+          <Bell className={cn("h-5 w-5 transition-transform", isOpen && "scale-110")} />
           {unreadCount > 0 && (
             <Badge 
               variant="destructive" 
-              className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-[10px]"
+              className="absolute -top-0.5 -right-0.5 h-5 min-w-5 flex items-center justify-center p-1 text-[10px] font-black border-2 border-background shadow-sm"
             >
               {unreadCount > 9 ? "9+" : unreadCount}
             </Badge>
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80 p-0" align="end">
-        <div className="flex items-center justify-between p-4 border-b">
-          <h4 className="font-semibold">Notifications</h4>
+      <PopoverContent className="w-80 p-0 mt-2 sidebar-glass border-border/50 shadow-2xl animate-in zoom-in-95 duration-200" align="end">
+        <div className="flex items-center justify-between p-4 border-b border-border/50 bg-muted/20">
+          <h4 className="font-bold text-sm tracking-tight">Notifications</h4>
           {unreadCount > 0 && (
             <Button 
               variant="ghost" 
               size="sm" 
-              className="text-xs h-8"
+              className="text-[10px] h-7 px-2 uppercase tracking-widest font-black hover:bg-primary/10 hover:text-primary"
               onClick={handleMarkAllAsRead}
             >
               Mark all as read
@@ -104,38 +112,46 @@ export const NotificationBell = () => {
         </div>
         <ScrollArea className="h-[400px]">
           {notifications.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full py-8 text-muted-foreground">
-              <Bell className="h-8 w-8 mb-2 opacity-20" />
-              <p className="text-sm">No notifications yet</p>
+            <div className="flex flex-col items-center justify-center h-full py-12 text-center">
+              <div className="p-4 bg-muted rounded-full mb-4 opacity-20">
+                <Bell className="h-8 w-8" />
+              </div>
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">No notifications yet</p>
             </div>
           ) : (
             <div className="flex flex-col">
               {notifications.map((notification: Notification) => (
                 <div
                   key={notification.id}
-                  className={`flex gap-3 p-4 border-b last:border-0 cursor-pointer hover:bg-muted/50 transition-colors ${
-                    !notification.isRead ? "bg-primary/5" : ""
-                  }`}
+                  className={cn(
+                    "flex gap-3 p-4 border-b border-border/50 cursor-pointer transition-all duration-200 hover:bg-muted/50",
+                    !notification.isRead ? "bg-primary/5 border-l-2 border-l-primary" : ""
+                  )}
                   onClick={() => handleMarkAsRead(notification.id, notification.link)}
                 >
-                  <div className="mt-1">
-                    {getIcon(notification.type)}
+                  <div className="mt-1 shrink-0">
+                    <div className="p-2 bg-background rounded-lg shadow-sm border border-border/50">
+                        {getIcon(notification.type)}
+                    </div>
                   </div>
-                  <div className="flex flex-col gap-1 flex-1">
+                  <div className="flex flex-col gap-1 flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
-                      <span className={`text-sm font-medium ${!notification.isRead ? "text-primary" : ""}`}>
+                      <span className={cn(
+                        "text-xs truncate",
+                        !notification.isRead ? "font-bold text-foreground" : "font-medium text-muted-foreground"
+                      )}>
                         {notification.title}
                       </span>
-                      <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                      <span className="text-[9px] font-bold text-muted-foreground/60 whitespace-nowrap uppercase">
                         {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
                       </span>
                     </div>
-                    <p className="text-xs text-muted-foreground line-clamp-2">
+                    <p className="text-[11px] text-muted-foreground line-clamp-2 leading-relaxed">
                       {notification.message}
                     </p>
                   </div>
                   {!notification.isRead && (
-                    <div className="mt-1.5 h-2 w-2 rounded-full bg-primary shrink-0" />
+                    <div className="mt-2 h-2 w-2 rounded-full bg-primary shadow-[0_0_8px_rgba(99,102,241,0.5)] shrink-0" />
                   )}
                 </div>
               ))}

@@ -11,8 +11,9 @@ import { Button } from "@/components/ui/button";
 import { EditButton } from "@/components/refine-ui/buttons/edit";
 import { ShowButton } from "@/components/refine-ui/buttons/show";
 import { useGo, HttpError } from "@refinedev/core";
-import { PlusCircle } from "lucide-react";
+import { PlusCircle, FileText } from "lucide-react";
 import { UseTableReturnType } from "@refinedev/react-table";
+import { EmptyState } from "@/components/empty-state";
 
 interface AssignmentListProps {
   classId: string;
@@ -24,6 +25,13 @@ export const AssignmentList = ({
   assignments = [],
 }: AssignmentListProps) => {
   const go = useGo();
+
+  const handleCreate = () => {
+    go({
+      to: `/assignments/create?classId=${classId}`,
+      type: "push",
+    });
+  };
 
   const assignmentColumns = useMemo<ColumnDef<Assignment>[]>(
     () => [
@@ -100,20 +108,27 @@ export const AssignmentList = ({
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Assignments</CardTitle>
-        <Button
-          onClick={() =>
-            go({
-              to: `/assignments/create?classId=${classId}`,
-              type: "push",
-            })
-          }
-        >
-          <PlusCircle className="h-4 w-4 mr-2" />
-          Create Assignment
-        </Button>
+        {assignments.length > 0 && (
+          <Button onClick={handleCreate}>
+            <PlusCircle className="h-4 w-4 mr-2" />
+            Create Assignment
+          </Button>
+        )}
       </CardHeader>
       <CardContent>
-        <DataTable table={tableAdapter} />
+        {assignments.length > 0 ? (
+          <DataTable table={tableAdapter} />
+        ) : (
+          <EmptyState
+            icon={FileText}
+            title="No assignments yet"
+            description="Create your first assignment to start tracking student progress."
+            action={{
+              label: "Create Assignment",
+              onClick: handleCreate,
+            }}
+          />
+        )}
       </CardContent>
     </Card>
   );
