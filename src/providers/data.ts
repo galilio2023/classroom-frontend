@@ -126,7 +126,7 @@ export const dataProvider: DataProvider = {
     }
 
     return {
-      data: { id },
+      data: { id } as any,
     };
   },
 
