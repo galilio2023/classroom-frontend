@@ -18,8 +18,6 @@ import {
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 
-// This is the final, correct implementation of the DataTable component,
-// following the official documentation.
 type DataTableProps<TData extends BaseRecord> = {
   table: UseTableReturnType<TData, HttpError>;
 };
@@ -27,7 +25,6 @@ type DataTableProps<TData extends BaseRecord> = {
 export function DataTable<TData extends BaseRecord>({
   table: tableResult,
 }: DataTableProps<TData>) {
-  // Guard clause for safety during initial renders.
   if (!tableResult?.refineCore || !tableResult?.reactTable) {
     return (
       <div className="flex justify-center items-center h-40">
@@ -36,7 +33,6 @@ export function DataTable<TData extends BaseRecord>({
     );
   }
 
-  // Correctly destructure the properties from the useTable hook result.
   const {
     reactTable: { getHeaderGroups, getRowModel, getAllColumns, getAllLeafColumns },
     refineCore: {
@@ -64,8 +60,8 @@ export function DataTable<TData extends BaseRecord>({
       if (tableRef.current && tableContainerRef.current) {
         const tableEl = tableRef.current;
         const container = tableContainerRef.current;
-        const horizontalOverflow = tableEl.offsetWidth > container.clientWidth;
-        const verticalOverflow = tableEl.offsetHeight > container.clientHeight;
+        const horizontalOverflow = tableEl.scrollWidth > container.clientWidth;
+        const verticalOverflow = tableEl.scrollHeight > container.clientHeight;
         setIsOverflowing({ horizontal: horizontalOverflow, vertical: verticalOverflow });
       }
     };
@@ -79,16 +75,31 @@ export function DataTable<TData extends BaseRecord>({
   }, [tableQuery.data?.data, pageSize]);
 
   return (
-    <div className={cn("flex", "flex-col", "flex-1", "gap-4")}>
-      <div ref={tableContainerRef} className={cn("rounded-md", "border")}>
-        <Table ref={tableRef} style={{ tableLayout: "fixed", width: "100%" }}>
+    <div className="flex flex-col flex-1 gap-4 w-full max-w-full overflow-hidden">
+      {/* Scrollable Container */}
+      <div 
+        ref={tableContainerRef} 
+        className={cn(
+            "rounded-md border bg-card overflow-x-auto",
+            "scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent"
+        )}
+        style={{ WebkitOverflowScrolling: 'touch' }}
+      >
+        <Table 
+            ref={tableRef} 
+            className="min-w-[1000px] w-full table-auto" // Increased min-width to 1000px to FORCE scroll
+        >
           <TableHeader>
             {getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id} style={{ ...getCommonStyles({ column: header.column, isOverflowing }) }}>
+                  <TableHead 
+                    key={header.id} 
+                    className="whitespace-nowrap font-bold bg-muted/30 h-12"
+                    style={{ ...getCommonStyles({ column: header.column, isOverflowing }) }}
+                  >
                     {header.isPlaceholder ? null : (
-                      <div className={cn("flex", "items-center", "gap-1")}>
+                      <div className="flex items-center gap-1">
                         {flexRender(header.column.columnDef.header, header.getContext())}
                       </div>
                     )}
@@ -103,15 +114,15 @@ export function DataTable<TData extends BaseRecord>({
                 {Array.from({ length: pageSize < 1 ? 1 : pageSize }).map((_, rowIndex) => (
                   <TableRow key={`skeleton-row-${rowIndex}`} aria-hidden="true">
                     {getAllLeafColumns().map((column) => (
-                      <TableCell key={`skeleton-cell-${rowIndex}-${column.id}`} style={{ ...getCommonStyles({ column, isOverflowing }) }} className={cn("truncate")}>
+                      <TableCell key={`skeleton-cell-${rowIndex}-${column.id}`} style={{ ...getCommonStyles({ column, isOverflowing }) }} className="truncate">
                         <div className="h-8" />
                       </TableCell>
                     ))}
                   </TableRow>
                 ))}
                 <TableRow>
-                  <TableCell colSpan={columns.length} className={cn("absolute", "inset-0", "pointer-events-none")}>
-                    <Loader2 className={cn("absolute", "top-1/2", "left-1/2", "animate-spin", "text-primary", "h-8", "w-8", "-translate-x-1/2", "-translate-y-1/2")} />
+                  <TableCell colSpan={columns.length} className="absolute inset-0 pointer-events-none">
+                    <Loader2 className="absolute top-1/2 left-1/2 animate-spin text-primary h-8 w-8 -translate-x-1/2 -translate-y-1/2" />
                   </TableCell>
                 </TableRow>
               </>
@@ -119,8 +130,12 @@ export function DataTable<TData extends BaseRecord>({
               getRowModel().rows.map((row) => (
                 <TableRow key={row.original?.id ?? row.id} data-state={row.getIsSelected() && "selected"}>
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} style={{ ...getCommonStyles({ column: cell.column, isOverflowing }) }}>
-                      <div className="truncate">
+                    <TableCell 
+                      key={cell.id} 
+                      className="whitespace-nowrap py-4"
+                      style={{ ...getCommonStyles({ column: cell.column, isOverflowing }) }}
+                    >
+                      <div className="max-w-[400px] truncate">
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </div>
                     </TableCell>
@@ -133,15 +148,19 @@ export function DataTable<TData extends BaseRecord>({
           </TableBody>
         </Table>
       </div>
+      
+      {/* Pagination Area */}
       {!isLoading && getRowModel().rows?.length > 0 && (
-        <DataTablePagination
-          currentPage={currentPage}
-          pageCount={pageCount}
-          setCurrentPage={setCurrentPage}
-          pageSize={pageSize}
-          setPageSize={setPageSize}
-          total={tableQuery.data?.total}
-        />
+        <div className="w-full overflow-x-auto pb-2">
+          <DataTablePagination
+            currentPage={currentPage}
+            pageCount={pageCount}
+            setCurrentPage={setCurrentPage}
+            pageSize={pageSize}
+            setPageSize={setPageSize}
+            total={tableQuery.data?.total}
+          />
+        </div>
       )}
     </div>
   );
@@ -150,10 +169,10 @@ export function DataTable<TData extends BaseRecord>({
 function DataTableNoData({ isOverflowing, columnsLength }: { isOverflowing: { horizontal: boolean; vertical: boolean }; columnsLength: number; }) {
   return (
     <TableRow className="hover:bg-transparent">
-      <TableCell colSpan={columnsLength} className={cn("relative", "text-center")} style={{ height: "490px" }}>
-        <div className={cn("absolute", "inset-0", "flex", "flex-col", "items-center", "justify-center", "gap-2", "bg-background")} style={{ position: isOverflowing.horizontal ? "sticky" : "absolute", left: "50%", transform: "translateX(-50%)", zIndex: isOverflowing.horizontal ? 2 : 1, width: isOverflowing.horizontal ? "fit-content" : "100%", minWidth: "300px" }}>
-          <div className={cn("text-lg", "font-semibold", "text-foreground")}>No data to display</div>
-          <div className={cn("text-sm", "text-muted-foreground")}>This table is empty for the time being.</div>
+      <TableCell colSpan={columnsLength} className="relative text-center" style={{ height: "200px" }}>
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-background" style={{ position: isOverflowing.horizontal ? "sticky" : "absolute", left: "50%", transform: "translateX(-50%)", zIndex: isOverflowing.horizontal ? 2 : 1, width: isOverflowing.horizontal ? "fit-content" : "100%", minWidth: "300px" }}>
+          <div className="text-lg font-semibold text-foreground">No data to display</div>
+          <div className="text-sm text-muted-foreground">This table is empty for the time being.</div>
         </div>
       </TableCell>
     </TableRow>

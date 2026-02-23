@@ -127,6 +127,18 @@ export interface Notification {
   updatedAt: string;
 }
 
+export interface Discussion {
+  id: number;
+  content: string;
+  classId: number;
+  userId: string;
+  parentId: number | null;
+  user: Pick<User, "id" | "name" | "image" | "role">;
+  replies?: Discussion[];
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface ListResponse<T = any> {
   data: T[];
   pagination: {

@@ -46,6 +46,8 @@ export const dataProvider: DataProvider = {
                 url.searchParams.append("classId", String(filter.value));
              } else if (resource === "submissions" && filter.field === "assignmentId") {
                 url.searchParams.append("assignmentId", String(filter.value));
+             } else if (resource === "discussions" && filter.field === "classId") {
+                url.searchParams.append("classId", String(filter.value));
              } else {
                  // Default behavior for other filters
                  url.searchParams.append(filter.field, String(filter.value));
