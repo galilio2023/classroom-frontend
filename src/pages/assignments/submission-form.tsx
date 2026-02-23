@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Submission } from "@/types";
 import { FileUpload } from "@/components/file-upload";
 import { Paperclip, Loader2 } from "lucide-react";
+import { FieldValues } from "react-hook-form";
 
 const submissionSchema = z.object({
   content: z.string().min(1, "Submission content cannot be empty."),
@@ -32,17 +33,8 @@ export const SubmissionForm = ({
   assignmentId,
   existingSubmission,
 }: SubmissionFormProps) => {
-  // MANDATORY: Use Refine v5 useForm pattern with refineCoreProps
-  const {
-    register,
-    control,
-    handleSubmit,
-    setValue,
-    watch,
-    formState: { errors },
-    refineCore: { onFinish, formLoading },
-  } = useForm<SubmissionFormValues>({
-    resolver: zodResolver(submissionSchema),
+  const form = useForm<SubmissionFormValues>({
+    resolver: zodResolver(submissionSchema) as any, // Cast to any to resolve Refine/RHF type conflict
     defaultValues: {
       content: existingSubmission?.content ?? "",
       fileUrl: existingSubmission?.fileUrl ?? "",
@@ -52,14 +44,19 @@ export const SubmissionForm = ({
       resource: "submissions",
       action: existingSubmission ? "edit" : "create",
       id: existingSubmission?.id,
-      redirect: false, // Stay on page after submission
-      onMutationSuccess: () => {
-        // Optional: Add custom success logic here
-      }
+      redirect: false,
     },
   });
 
-  const onSubmit = (values: SubmissionFormValues) => {
+  const {
+    handleSubmit,
+    control,
+    setValue,
+    watch,
+    refineCore: { onFinish, formLoading },
+  } = form;
+
+  const onSubmit = (values: FieldValues) => {
     onFinish({
       ...values,
       assignmentId,
@@ -72,15 +69,7 @@ export const SubmissionForm = ({
   };
 
   return (
-    <Form 
-      register={register} 
-      control={control} 
-      handleSubmit={handleSubmit} 
-      formState={{ errors }} 
-      setValue={setValue} 
-      watch={watch} 
-      {...({} as any)} // Type helper for shadcn Form wrapper
-    >
+    <Form {...form}>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <FormField
           control={control}
