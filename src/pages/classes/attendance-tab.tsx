@@ -28,8 +28,9 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Enrollment, AttendanceStatus, Attendance, User, UserRole } from "@/types";
-import { Loader2, Save, Calendar as CalendarIcon, CheckCircle2, XCircle, Clock, AlertCircle, History } from "lucide-react";
+import { Loader2, Save, Calendar as CalendarIcon, CheckCircle2, XCircle, Clock, AlertCircle, History, ClipboardCheck } from "lucide-react";
 import { format } from "date-fns";
+import { EmptyState } from "@/components/empty-state";
 
 interface AttendanceTabProps {
   classId: string;
@@ -258,7 +259,7 @@ export const AttendanceTab = ({ classId, enrollments }: AttendanceTabProps) => {
                   <div className="flex justify-center py-8">
                     <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
                   </div>
-                ) : (
+                ) : enrollments.length > 0 ? (
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -318,6 +319,12 @@ export const AttendanceTab = ({ classId, enrollments }: AttendanceTabProps) => {
                       })}
                     </TableBody>
                   </Table>
+                ) : (
+                  <EmptyState
+                    icon={ClipboardCheck}
+                    title="No students enrolled"
+                    description="You need to enroll students in this class before you can mark attendance."
+                  />
                 )}
               </CardContent>
             </Card>
@@ -337,7 +344,7 @@ export const AttendanceTab = ({ classId, enrollments }: AttendanceTabProps) => {
                 <div className="flex justify-center py-8">
                   <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
                 </div>
-              ) : (
+              ) : historyData?.data?.length > 0 ? (
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -390,15 +397,14 @@ export const AttendanceTab = ({ classId, enrollments }: AttendanceTabProps) => {
                         )}
                       </TableRow>
                     ))}
-                    {(!historyData?.data || historyData.data.length === 0) && (
-                        <TableRow>
-                            <TableCell colSpan={isTeacher ? 5 : 3} className="text-center py-8 text-muted-foreground">
-                                No attendance records found.
-                            </TableCell>
-                        </TableRow>
-                    )}
                   </TableBody>
                 </Table>
+              ) : (
+                <EmptyState
+                  icon={History}
+                  title="No attendance records"
+                  description="Attendance history will appear here once you start marking student presence."
+                />
               )}
             </CardContent>
           </Card>

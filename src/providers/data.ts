@@ -56,11 +56,24 @@ const options: CreateDataProviderOptions = {
     },
 
     mapResponse: async (response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        const text = await response.text();
+        console.error("Expected JSON but received:", text.substring(0, 100));
+        throw new Error("Received non-JSON response from server");
+      }
       const payload: ListResponse = await response.json();
       return payload.data ?? [];
     },
 
     getTotalCount: async (response) => {
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        return 0;
+      }
       const payload: ListResponse = await response.json();
       return payload.pagination?.total ?? payload.data?.length ?? 0;
     },
@@ -70,6 +83,15 @@ const options: CreateDataProviderOptions = {
     getEndpoint: ({ resource }) => resource,
     buildBodyParams: async ({ variables }) => variables,
     mapResponse: async (response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        const text = await response.text();
+        console.error("Expected JSON but received:", text.substring(0, 100));
+        throw new Error("Received non-JSON response from server");
+      }
       const json: CreateResponse = await response.json();
       return json.data ?? {};
     },
@@ -78,6 +100,15 @@ const options: CreateDataProviderOptions = {
   getOne: {
     getEndpoint: ({ resource, id }) => `${resource}/${id}`,
     mapResponse: async (response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        const text = await response.text();
+        console.error("Expected JSON but received:", text.substring(0, 100));
+        throw new Error("Received non-JSON response from server");
+      }
       const json: GetOneResponse = await response.json();
       return json.data ?? {};
     },
