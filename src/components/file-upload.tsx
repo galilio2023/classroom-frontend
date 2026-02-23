@@ -39,19 +39,21 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       const response = await fetch(`${import.meta.env.VITE_API_URL}/upload`, {
         method: "POST",
         body: formData,
-        // Note: We don't set Content-Type header, fetch does it automatically for FormData
-        // and includes the boundary string.
+        credentials: "include", // CRITICAL: Send session cookies
       });
 
-      if (!response.ok) throw new Error("Upload failed");
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Upload failed");
+      }
 
       const result = await response.json();
       onUploadSuccess(result.data.url, result.data.publicId);
       setUploadComplete(true);
       toast.success("File uploaded successfully!");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Upload Error:", error);
-      toast.error("Failed to upload file. Please try again.");
+      toast.error(error.message || "Failed to upload file. Please try again.");
     } finally {
       setIsUploading(false);
     }
