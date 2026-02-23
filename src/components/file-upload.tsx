@@ -7,6 +7,7 @@ import { toast } from "sonner";
 
 interface FileUploadProps {
   onUploadSuccess: (url: string, publicId: string) => void;
+  onClear?: () => void;
   folder?: string;
   label?: string;
 }
@@ -15,13 +16,14 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
 export const FileUpload: React.FC<FileUploadProps> = ({ 
   onUploadSuccess, 
+  onClear,
   folder = "general",
   label = "Upload File"
 }) => {
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadComplete, setUploadComplete] = useState(false);
-  const [inputKey, setInputKey] = useState(Date.now()); // Key to force re-mount
+  const [inputKey, setInputKey] = useState(Date.now());
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -31,7 +33,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
         toast.error("File too large", {
           description: "Please select a file smaller than 10MB."
         });
-        setInputKey(Date.now()); // Reset input via key
+        setInputKey(Date.now());
         return;
       }
 
@@ -77,6 +79,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     setFile(null);
     setUploadComplete(false);
     setInputKey(Date.now());
+    onClear?.();
   };
 
   return (
@@ -139,9 +142,20 @@ export const FileUpload: React.FC<FileUploadProps> = ({
                 </Button>
               </>
             ) : (
-              <div className="flex items-center gap-1 text-green-600 text-sm font-medium px-2">
-                <CheckCircle2 className="h-4 w-4" />
-                Uploaded
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1 text-green-600 text-sm font-medium px-2">
+                  <CheckCircle2 className="h-4 w-4" />
+                  Uploaded
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={clearFile} 
+                  className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                  title="Remove file"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
               </div>
             )}
           </div>
