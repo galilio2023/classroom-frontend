@@ -55,7 +55,6 @@ export const GradingDialog = ({
 }: GradingDialogProps) => {
   const { open } = useNotification();
 
-  // MANDATORY: Use Refine v5 useForm pattern with refineCoreProps
   const form = useForm<GradingFormValues>({
     resolver: zodResolver(gradingSchema) as any,
     defaultValues: {
@@ -66,8 +65,9 @@ export const GradingDialog = ({
       resource: "submissions",
       action: "edit",
       id: submission?.id,
+      // CRITICAL: Disable automatic data fetching because we don't have a GET /submissions/:id route
       queryOptions: {
-        enabled: !!submission?.id,
+        enabled: false,
       },
       onMutationSuccess: () => {
         onOpenChange(false);
