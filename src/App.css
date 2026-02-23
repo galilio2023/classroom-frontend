@@ -171,6 +171,22 @@
   background: linear-gradient(to bottom right, var(--ai-gradient-start), var(--ai-gradient-middle), var(--ai-gradient-end));
 }
 
+.ai-gradient-border {
+  position: relative;
+  border: 1px solid transparent;
+  background: linear-gradient(var(--card), var(--card)) padding-box,
+              linear-gradient(to bottom right, var(--ai-gradient-start), var(--ai-gradient-middle), var(--ai-gradient-end)) border-box;
+}
+
+.bg-dot-pattern {
+  background-image: radial-gradient(rgba(0, 0, 0, 0.1) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.dark .bg-dot-pattern {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+}
+
 /* --- BUTTON & MODAL --- */
 [data-slot="button"] {
   @apply rounded-xl font-bold tracking-tight active:scale-95 transition-all duration-200 cursor-pointer;
