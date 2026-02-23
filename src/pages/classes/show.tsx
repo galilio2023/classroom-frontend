@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Class, Enrollment, User } from "@/types";
-import { Loader2, PlusCircle, Trash, Sparkles } from "lucide-react";
+import { Loader2, PlusCircle, Trash, Sparkles, ClipboardCheck } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -35,6 +35,8 @@ import {
 import { EnrollStudentDialog } from "./enroll-student-dialog";
 import { AssignmentList } from "../assignments/list";
 import { AIQuizGenerator } from "@/components/ai-quiz-generator";
+import { AttendanceTab } from "./attendance-tab";
+import { AIStudyBuddy } from "@/components/ai-study-buddy";
 
 const ClassesShow = () => {
   const { id } = useParams();
@@ -148,9 +150,13 @@ const ClassesShow = () => {
         <ShowViewHeader resource="classes" title={aClass.name} />
 
         <Tabs defaultValue="students">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="students">Students</TabsTrigger>
             <TabsTrigger value="assignments">Assignments</TabsTrigger>
+            <TabsTrigger value="attendance" className="flex items-center gap-2">
+              <ClipboardCheck className="h-4 w-4" />
+              Attendance
+            </TabsTrigger>
             <TabsTrigger value="ai-quiz" className="flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-primary" />
               AI Quiz
@@ -180,6 +186,10 @@ const ClassesShow = () => {
 
           <TabsContent value="assignments">
             <AssignmentList classId={classId} assignments={assignments} />
+          </TabsContent>
+
+          <TabsContent value="attendance">
+            <AttendanceTab classId={classId} enrollments={enrollments} />
           </TabsContent>
 
           <TabsContent value="ai-quiz">
@@ -250,6 +260,12 @@ const ClassesShow = () => {
         isOpen={isEnrollDialogOpen}
         onOpenChange={setIsEnrollDialogOpen}
         enrolledStudentIds={enrolledStudentIds}
+      />
+
+      {/* AI Study Buddy Floating Widget */}
+      <AIStudyBuddy 
+        subject={aClass.subject?.name} 
+        topic={aClass.name}
       />
     </>
   );

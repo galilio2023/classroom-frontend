@@ -96,6 +96,37 @@ export type Class = z.infer<typeof classFormSchema> & {
   assignments: Assignment[];
 };
 
+export enum AttendanceStatus {
+  PRESENT = "present",
+  ABSENT = "absent",
+  LATE = "late",
+  EXCUSED = "excused",
+}
+
+export interface Attendance {
+  id: number;
+  classId: number;
+  studentId: string;
+  date: string;
+  status: AttendanceStatus;
+  remarks: string | null;
+  student?: User;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Notification {
+  id: number;
+  userId: string;
+  title: string;
+  message: string;
+  type: string;
+  isRead: boolean;
+  link: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface ListResponse<T = any> {
   data: T[];
   pagination: {
