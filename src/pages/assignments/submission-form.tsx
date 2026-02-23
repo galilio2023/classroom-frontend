@@ -1,4 +1,4 @@
-import { useForm, SubmitHandler } from "react-hook-form";
+import { useForm } from "@refinedev/react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import {
@@ -11,10 +11,9 @@ import {
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { useCreate, useUpdate } from "@refinedev/core";
 import { Submission } from "@/types";
 import { FileUpload } from "@/components/file-upload";
-import { Paperclip } from "lucide-react";
+import { Paperclip, Loader2 } from "lucide-react";
 
 const submissionSchema = z.object({
   content: z.string().min(1, "Submission content cannot be empty."),
@@ -33,51 +32,58 @@ export const SubmissionForm = ({
   assignmentId,
   existingSubmission,
 }: SubmissionFormProps) => {
-  const { mutate: createMutate, mutation: createMutation } = useCreate();
-  const { mutate: updateMutate, mutation: updateMutation } = useUpdate();
-
-  const isPending = createMutation.isPending || updateMutation.isPending;
-
-  const form = useForm<SubmissionFormValues>({
+  // MANDATORY: Use Refine v5 useForm pattern with refineCoreProps
+  const {
+    register,
+    control,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+    refineCore: { onFinish, formLoading },
+  } = useForm<SubmissionFormValues>({
     resolver: zodResolver(submissionSchema),
     defaultValues: {
       content: existingSubmission?.content ?? "",
       fileUrl: existingSubmission?.fileUrl ?? "",
       fileCldPubId: existingSubmission?.fileCldPubId ?? "",
     },
+    refineCoreProps: {
+      resource: "submissions",
+      action: existingSubmission ? "edit" : "create",
+      id: existingSubmission?.id,
+      redirect: false, // Stay on page after submission
+      onMutationSuccess: () => {
+        // Optional: Add custom success logic here
+      }
+    },
   });
 
-  const onSubmit: SubmitHandler<SubmissionFormValues> = (values) => {
-    if (existingSubmission) {
-      updateMutate({
-        resource: "submissions",
-        id: existingSubmission.id,
-        values: {
-          ...values,
-          assignmentId,
-        },
-      });
-    } else {
-      createMutate({
-        resource: "submissions",
-        values: {
-          ...values,
-          assignmentId,
-        },
-      });
-    }
+  const onSubmit = (values: SubmissionFormValues) => {
+    onFinish({
+      ...values,
+      assignmentId,
+    });
   };
 
   const handleFileUpload = (url: string, publicId: string) => {
-    form.setValue("fileUrl", url);
-    form.setValue("fileCldPubId", publicId);
+    setValue("fileUrl", url);
+    setValue("fileCldPubId", publicId);
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+    <Form 
+      register={register} 
+      control={control} 
+      handleSubmit={handleSubmit} 
+      formState={{ errors }} 
+      setValue={setValue} 
+      watch={watch} 
+      {...({} as any)} // Type helper for shadcn Form wrapper
+    >
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <FormField
-          control={form.control}
+          control={control}
           name="content"
           render={({ field }) => (
             <FormItem>
@@ -100,7 +106,7 @@ export const SubmissionForm = ({
             folder="submissions"
             onUploadSuccess={handleFileUpload}
           />
-          {form.watch("fileUrl") && (
+          {watch("fileUrl") && (
             <div className="flex items-center gap-2 text-xs text-green-600 font-medium">
               <Paperclip className="h-3 w-3" />
               File uploaded and attached to submission
@@ -108,12 +114,17 @@ export const SubmissionForm = ({
           )}
         </div>
 
-        <Button type="submit" disabled={isPending} className="w-full">
-          {isPending
-            ? "Submitting..."
-            : existingSubmission
-            ? "Update Submission"
-            : "Submit Assignment"}
+        <Button type="submit" disabled={formLoading} className="w-full">
+          {formLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Submitting...
+            </>
+          ) : existingSubmission ? (
+            "Update Submission"
+          ) : (
+            "Submit Assignment"
+          )}
         </Button>
       </form>
     </Form>

@@ -21,17 +21,17 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadComplete, setUploadComplete] = useState(false);
+  const [inputKey, setInputKey] = useState(Date.now()); // Key to force re-mount
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const selectedFile = e.target.files[0];
       
-      // Client-side size validation
       if (selectedFile.size > MAX_FILE_SIZE) {
         toast.error("File too large", {
           description: "Please select a file smaller than 10MB."
         });
-        e.target.value = ""; // Reset input
+        setInputKey(Date.now()); // Reset input via key
         return;
       }
 
@@ -76,6 +76,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   const clearFile = () => {
     setFile(null);
     setUploadComplete(false);
+    setInputKey(Date.now());
   };
 
   return (
@@ -87,6 +88,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       {!file ? (
         <div className="border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center bg-muted/20 hover:bg-muted/30 transition-colors cursor-pointer relative">
           <Input
+            key={inputKey}
             id="file-upload"
             type="file"
             className="absolute inset-0 opacity-0 cursor-pointer"
