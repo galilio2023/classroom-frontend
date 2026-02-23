@@ -23,6 +23,9 @@
   --input: hsl(220 13% 91%);
   --ring: hsl(250 80% 60%);
   --radius: 1rem;
+  --ai-gradient-start: #4f46e5; /* indigo-600 */
+  --ai-gradient-middle: #9333ea; /* purple-600 */
+  --ai-gradient-end: #db2777; /* pink-600 */
 }
 
 /* --- PRO MIDNIGHT DARK MODE --- */
@@ -162,6 +165,10 @@
   background: linear-gradient(var(--card), var(--card)) padding-box,
               linear-gradient(to bottom right, #818cf8, #c084fc, #f472b6) border-box;
   box-shadow: 0 0 50px -15px rgba(99, 102, 241, 0.15);
+}
+
+.ai-header-gradient {
+  background: linear-gradient(to bottom right, var(--ai-gradient-start), var(--ai-gradient-middle), var(--ai-gradient-end));
 }
 
 /* --- BUTTON & MODAL --- */

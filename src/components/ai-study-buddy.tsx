@@ -13,6 +13,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Sparkles, Send, X, MessageCircle, Loader2, GraduationCap, User as UserIcon } from "lucide-react";
 import { User, UserRole } from "@/types";
+import ReactMarkdown from "react-markdown";
 
 interface Message {
   role: "user" | "model";
@@ -85,7 +86,7 @@ export const AIStudyBuddy = ({ subject, topic, assignment }: AIStudyBuddyProps) 
     <div className="fixed bottom-6 right-6 z-50">
       {isOpen ? (
         <Card className="w-[400px] h-[600px] shadow-2xl flex flex-col ai-gradient-border animate-in zoom-in-95 duration-300">
-          <CardHeader className="p-5 border-b bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 text-primary-foreground rounded-t-[calc(var(--radius)-1px)] flex flex-row items-center justify-between space-y-0">
+          <CardHeader className="p-5 border-b ai-header-gradient text-primary-foreground rounded-t-[calc(var(--radius)-1px)] flex flex-row items-center justify-between space-y-0">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-white/20 backdrop-blur-sm rounded-xl shadow-inner">
                 <Sparkles className="h-5 w-5 animate-pulse" />
@@ -147,10 +148,9 @@ export const AIStudyBuddy = ({ subject, topic, assignment }: AIStudyBuddyProps) 
                           ? "bg-primary text-primary-foreground rounded-tr-none" 
                           : "bg-card border rounded-tl-none"
                       }`}>
-                        <div 
-                          className="prose prose-sm dark:prose-invert max-w-none"
-                          dangerouslySetInnerHTML={{ __html: msg.parts[0].text }}
-                        />
+                        <div className="prose prose-sm dark:prose-invert max-w-none">
+                          <ReactMarkdown>{msg.parts[0].text}</ReactMarkdown>
+                        </div>
                       </div>
                       <span className="text-[9px] text-muted-foreground px-1">
                         {msg.role === "model" ? "Study Buddy" : "You"}
