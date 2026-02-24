@@ -5,12 +5,12 @@ import {
 } from "@tanstack/react-table";
 import { useMemo } from "react";
 import { DataTable } from "@/components/refine-ui/data-table/data-table";
-import { Assignment } from "@/types";
+import { Assignment, User } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { EditButton } from "@/components/refine-ui/buttons/edit";
 import { ShowButton } from "@/components/refine-ui/buttons/show";
-import { useGo, HttpError } from "@refinedev/core";
+import { useGo, HttpError, useGetIdentity } from "@refinedev/core";
 import { PlusCircle, FileText } from "lucide-react";
 import { UseTableReturnType } from "@refinedev/react-table";
 import { EmptyState } from "@/components/empty-state";
@@ -25,6 +25,11 @@ export const AssignmentList = ({
   assignments = [],
 }: AssignmentListProps) => {
   const go = useGo();
+  const { data: identity } = useGetIdentity<User>();
+
+  const isAdmin = identity?.role === "admin";
+  const isTeacher = identity?.role === "teacher";
+  const isStaff = isAdmin || isTeacher;
 
   const handleCreate = () => {
     go({
@@ -61,17 +66,19 @@ export const AssignmentList = ({
               hideText
               size="sm"
             />
-            <EditButton
-              resource="assignments"
-              recordItemId={row.original.id}
-              hideText
-              size="sm"
-            />
+            {isStaff && (
+              <EditButton
+                resource="assignments"
+                recordItemId={row.original.id}
+                hideText
+                size="sm"
+              />
+            )}
           </div>
         ),
       },
     ],
-    [],
+    [isStaff],
   );
 
   // 1. Use the standard, "dumb" hook to manage table state without API calls.
@@ -108,7 +115,7 @@ export const AssignmentList = ({
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Assignments</CardTitle>
-        {assignments.length > 0 && (
+        {isStaff && assignments.length > 0 && (
           <Button onClick={handleCreate}>
             <PlusCircle className="h-4 w-4 mr-2" />
             Create Assignment
@@ -122,11 +129,11 @@ export const AssignmentList = ({
           <EmptyState
             icon={FileText}
             title="No assignments yet"
-            description="Create your first assignment to start tracking student progress."
-            action={{
+            description={isStaff ? "Create your first assignment to start tracking student progress." : "There are no assignments for this class yet."}
+            action={isStaff ? {
               label: "Create Assignment",
               onClick: handleCreate,
-            }}
+            } : undefined}
           />
         )}
       </CardContent>

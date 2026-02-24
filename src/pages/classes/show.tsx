@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Class, Enrollment, User, Discussion } from "@/types";
-import { Loader2, PlusCircle, Trash2, Sparkles, ClipboardCheck, MessageSquare, Send, Reply, RefreshCw, MoreVertical } from "lucide-react";
+import { Loader2, PlusCircle, Trash2, Sparkles, ClipboardCheck, MessageSquare, Send, Reply, RefreshCw, MoreVertical, Info } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -41,6 +41,7 @@ import { Textarea } from "@/components/ui/textarea";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 dayjs.extend(relativeTime);
 
@@ -281,6 +282,7 @@ const InternalDiscussionTab = ({ classId }: { classId: string }) => {
 const ClassesShow = () => {
   const { id } = useParams();
   const classId = id ?? "";
+  const { data: identity } = useGetIdentity<User>();
 
   const [activeTab, setActiveTab] = useState("discussions");
   const [unenrollTarget, setUnenrollTarget] = useState<number | null>(null);
@@ -298,6 +300,10 @@ const ClassesShow = () => {
   const assignments = aClass?.assignments ?? [];
 
   const { mutate: deleteMutation, mutation } = useDelete();
+
+  const isAdmin = identity?.role === "admin";
+  const isTeacher = identity?.role === "teacher";
+  const isStaff = isAdmin || isTeacher;
 
   const studentColumns = useMemo<ColumnDef<Enrollment>[]>(
     () => [
@@ -334,17 +340,19 @@ const ClassesShow = () => {
       {
         id: "actions",
         cell: ({ row }) => (
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setUnenrollTarget(row.original.id)}
-          >
-            <Trash2 className="h-4 w-4 text-destructive" />
-          </Button>
+          isStaff && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setUnenrollTarget(row.original.id)}
+            >
+              <Trash2 className="h-4 w-4 text-destructive" />
+            </Button>
+          )
         ),
       },
     ],
-    [],
+    [isStaff],
   );
 
   const enrollmentsTable = useTable<Enrollment>({
@@ -391,7 +399,7 @@ const ClassesShow = () => {
         <ShowViewHeader resource="classes" title={aClass.name} />
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className={cn("grid w-full", isStaff ? "grid-cols-6" : "grid-cols-4")}>
             <TabsTrigger value="discussions">
               <div className="flex items-center gap-2">
                 <MessageSquare className="h-4 w-4" />
@@ -406,13 +414,17 @@ const ClassesShow = () => {
                 <span>Attendance</span>
               </div>
             </TabsTrigger>
-            <TabsTrigger value="ai-quiz">
-              <div className="flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-primary" />
-                <span>AI Quiz</span>
-              </div>
-            </TabsTrigger>
-            <TabsTrigger value="details">Details</TabsTrigger>
+            {isStaff && (
+              <>
+                <TabsTrigger value="ai-quiz">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-primary" />
+                    <span>AI Quiz</span>
+                  </div>
+                </TabsTrigger>
+                <TabsTrigger value="details">Details</TabsTrigger>
+              </>
+            )}
           </TabsList>
 
           <div className="mt-6">
@@ -429,10 +441,12 @@ const ClassesShow = () => {
                       {enrollments.length} of {aClass.capacity} spots filled
                     </CardDescription>
                   </div>
-                  <Button onClick={() => setIsEnrollDialogOpen(true)}>
-                    <PlusCircle className="h-4 w-4 mr-2" />
-                    Enroll Student
-                  </Button>
+                  {isStaff && (
+                    <Button onClick={() => setIsEnrollDialogOpen(true)}>
+                      <PlusCircle className="h-4 w-4 mr-2" />
+                      Enroll Student
+                    </Button>
+                  )}
                 </CardHeader>
                 <CardContent>
                   <DataTable table={enrollmentsTable} />
@@ -448,43 +462,47 @@ const ClassesShow = () => {
               <AttendanceTab classId={classId} enrollments={enrollments} />
             </TabsContent>
 
-            <TabsContent value="ai-quiz">
-              <AIQuizGenerator classId={classId} />
-            </TabsContent>
+            {isStaff && (
+              <>
+                <TabsContent value="ai-quiz">
+                  <AIQuizGenerator classId={classId} />
+                </TabsContent>
 
-            <TabsContent value="details">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Details</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Subject</span>
-                    <span className="font-medium">
-                      {aClass?.subject?.name ?? "N/A"}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Teacher</span>
-                    <span className="font-medium">
-                      {aClass?.teacher?.name ?? "N/A"}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Status</span>
-                    <Badge variant="default" className="capitalize">
-                      {aClass.status}
-                    </Badge>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Invite Code</span>
-                    <Badge variant="outline" className="font-mono">
-                      {aClass.inviteCode}
-                    </Badge>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
+                <TabsContent value="details">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Details</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Subject</span>
+                        <span className="font-medium">
+                          {aClass?.subject?.name ?? "N/A"}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Teacher</span>
+                        <span className="font-medium">
+                          {aClass?.teacher?.name ?? "N/A"}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Status</span>
+                        <Badge variant="default" className="capitalize">
+                          {aClass.status}
+                        </Badge>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Invite Code</span>
+                        <Badge variant="outline" className="font-mono">
+                          {aClass.inviteCode}
+                        </Badge>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              </>
+            )}
           </div>
         </Tabs>
       </ShowView>
