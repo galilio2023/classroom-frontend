@@ -8,7 +8,9 @@ To leverage Gemini's capabilities for:
 - **Grading Assistance:** Providing preliminary feedback on student submissions.
 - **Personalized Learning:** Suggesting resources based on student performance.
 
-**Access Control:** AI features are restricted to **Teachers** and **Admins** to ensure responsible use of AI tools, manage API costs, and provide specialized assistance specifically for educators.
+**Access Control:** 
+- **AI Generation:** Features that call the Gemini API (e.g., generating assignments, study plans) are restricted to **Teachers** and **Admins** to manage API costs and ensure pedagogical oversight.
+- **AI Consumption:** Students can interact with AI-generated content (e.g., taking an interactive quiz generated from AI output) as long as the interaction does not involve direct, unmetered calls to the Gemini API from the frontend.
 
 ## 2. Integration Strategy
 
@@ -20,7 +22,7 @@ To leverage Gemini's capabilities for:
 
 ### Frontend (React)
 - **Pattern:** Do not call Gemini directly from the frontend. Always route requests through your backend API (e.g., `POST /api/ai/generate`).
-- **UI:** Hide AI-related components and navigation links from Students using the `accessControlProvider`.
+- **UI:** Hide AI-generation components and navigation links from Students using the `accessControlProvider`.
 
 ### CI/CD & Infrastructure (Exceptions)
 - **Pattern:** GitHub Actions and other build-time tools may call the Gemini API directly using GitHub Secrets. 

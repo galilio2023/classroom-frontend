@@ -30,3 +30,17 @@ The `AIAssignmentHelper` and `AIStudyBuddy` components were using `dangerouslySe
 
 **Summary:**
 The critical XSS vulnerability associated with rendering AI content has been resolved by switching to a safe Markdown rendering library. This protects users from potential attacks via manipulated AI responses.
+
+## 3. Interactive AI Quiz Integration
+
+**Problem:**
+Students needed a more engaging way to interact with AI-generated assignment content. Static descriptions were difficult to parse and didn't provide immediate feedback or automated grading for self-assessment.
+
+**Solution:**
+- **Developed `InteractiveQuiz` Component:** Created a specialized component that parses structured AI-generated text (using specific delimiters like `### Q1:` and `---`) into an interactive quiz interface.
+- **Automated Grading:** Integrated the quiz with Refine's `useCreate` hook to automatically submit scores to the `submissions` resource upon completion.
+- **Enhanced UI/UX:** Implemented a step-by-step quiz player with progress tracking, immediate answer validation, and AI-generated explanations for each question.
+- **Conditional Rendering:** Updated `AssignmentShow` to detect "Quiz Mode" based on content patterns and swap the standard description view for the interactive player.
+
+**Summary:**
+Transformed static AI-generated assignment descriptions into interactive learning experiences. This feature bridges the gap between AI content generation and student consumption, providing automated feedback and improving engagement while adhering to Refine v5 and shadcn/ui patterns.

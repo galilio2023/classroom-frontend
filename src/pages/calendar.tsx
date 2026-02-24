@@ -1,11 +1,11 @@
-import { useState, useEffect, useMemo } from "react";
-import { useGetIdentity, useGo } from "@refinedev/core";
+import { useState, useMemo } from "react";
+import { useGetIdentity, useGo, useList, HttpError } from "@refinedev/core";
 import { Assignment, User } from "@/types";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Calendar as CalendarIcon, Clock, BookOpen, ChevronRight, Loader2, Info, ChevronLeft } from "lucide-react";
+import { Calendar as CalendarIcon, Clock, ChevronRight, Loader2, Info } from "lucide-react";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import { cn } from "@/lib/utils";
@@ -16,27 +16,14 @@ const CalendarPage = () => {
   const go = useGo();
   const { data: identity } = useGetIdentity<User>();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
-  const [assignments, setAssignments] = useState<Assignment[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
 
-  const fetchAssignments = async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/assignments`, {
-        credentials: "include",
-      });
-      const result = await response.json();
-      setAssignments(result.data || []);
-    } catch (err) {
-      console.error("Calendar Fetch Error:", err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const { result: assignmentsResult, query: assignmentsQuery } = useList<Assignment, HttpError>({
+    resource: "assignments",
+    pagination: { mode: "off" },
+  });
 
-  useEffect(() => {
-    fetchAssignments();
-  }, []);
+  const assignments = assignmentsResult?.data ?? [];
+  const isLoading = assignmentsQuery.isLoading;
 
   const assignmentDates = useMemo(() => {
     return assignments.reduce((acc: Record<string, Assignment[]>, curr) => {
@@ -86,7 +73,6 @@ const CalendarPage = () => {
               onSelect={setSelectedDate}
               className="rounded-md border shadow-sm scale-110 origin-top"
               components={{
-                // Custom Day rendering to ensure highlights are visible
                 Day: ({ date, displayMonth }) => {
                   const d = dayjs(date).format("YYYY-MM-DD");
                   const isHighlighted = !!assignmentDates[d];
