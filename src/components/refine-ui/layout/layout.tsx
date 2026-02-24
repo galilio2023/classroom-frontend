@@ -12,7 +12,7 @@ export function Layout({ children }: PropsWithChildren) {
     <ThemeProvider>
       <SidebarProvider>
         <Sidebar />
-        <SidebarInset>
+        <SidebarInset className="overflow-hidden">
           <Header />
           <main
             className={cn(
@@ -21,6 +21,8 @@ export function Layout({ children }: PropsWithChildren) {
               "mx-auto",
               "relative",
               "w-full",
+              "max-w-full", // Ensure main never exceeds screen width
+              "overflow-hidden", // Contain the table scroll
               "flex",
               "flex-col",
               "flex-1",

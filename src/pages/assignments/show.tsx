@@ -3,12 +3,14 @@ import { useParams } from "react-router-dom";
 import { useMemo } from "react";
 import { ShowView, ShowViewHeader } from "@/components/refine-ui/views/show-view";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Loader2, FileText, ExternalLink } from "lucide-react";
+import { Loader2, FileText, ExternalLink, BrainCircuit, Users, CheckCircle2 } from "lucide-react";
 import { Assignment, User, Submission } from "@/types";
 import { SubmissionForm } from "./submission-form";
 import { SubmissionList } from "./submission-list";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { InteractiveQuiz } from "@/components/interactive-quiz";
+import { cn } from "@/lib/utils";
 
 const AssignmentShow = () => {
   const { id } = useParams();
@@ -37,11 +39,14 @@ const AssignmentShow = () => {
   
   const submissions = submissionsResult?.data ?? [];
 
-  // Use useMemo to ensure mySubmission is recalculated correctly
   const mySubmission = useMemo(() => {
     if (!identity?.id || !submissions.length) return null;
     return submissions.find((s) => s.studentId === identity.id);
   }, [submissions, identity?.id]);
+
+  const isQuiz = useMemo(() => {
+    return assignment?.description?.includes("### Q1:") && assignment?.description?.includes("---");
+  }, [assignment]);
 
   const isLoading =
     isIdentityLoading || assignmentQuery.isLoading || submissionsQuery.isLoading;
@@ -66,136 +71,109 @@ const AssignmentShow = () => {
     );
   }
 
+  const isAdmin = identity?.role === "admin";
   const isTeacher = identity?.role === "teacher";
+  const isStaff = isAdmin || isTeacher;
+  
   const dueDate = assignment.dueDate
     ? new Date(assignment.dueDate).toLocaleDateString()
     : "No due date";
 
-  const renderStudentView = () => {
-    if (mySubmission) {
-      return (
-        <div className="space-y-4">
-          {mySubmission.grade != null ? (
-            <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/20">
-              <div>
-                <h3 className="font-semibold text-lg">Grade</h3>
-                <p className="text-sm text-muted-foreground">
-                  Feedback from your teacher
-                </p>
-              </div>
-              <div className="text-2xl font-bold text-primary">
-                {mySubmission.grade} / 100
-              </div>
-            </div>
-          ) : (
-            <div className="p-4 border rounded-lg bg-blue-50 border-blue-100">
-              <h3 className="font-semibold text-blue-800">Submitted</h3>
-              <p className="text-sm text-blue-600">
-                Your work has been received and is waiting to be graded.
-              </p>
-            </div>
-          )}
-
-          {mySubmission.feedback && (
-            <div className="p-4 border rounded-lg bg-muted/20">
-              <h4 className="font-semibold mb-2">Teacher Feedback</h4>
-              <p className="text-sm">{mySubmission.feedback}</p>
-            </div>
-          )}
-
-          <div className="pt-4 space-y-4">
-            <div>
-              <h4 className="font-semibold mb-2 text-muted-foreground">
-                Your Submission
-              </h4>
-              <div className="p-3 rounded-md bg-muted/50 text-sm whitespace-pre-wrap border">
-                {mySubmission.content}
-              </div>
-            </div>
-
-            {mySubmission.fileUrl && (
-              <div className="flex items-center justify-between p-3 border rounded-lg bg-background">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-primary/10 rounded-md">
-                    <FileText className="h-5 w-5 text-primary" />
-                  </div>
-                  <span className="text-sm font-medium">Submitted File</span>
-                </div>
-                <Button variant="outline" size="sm" asChild>
-                  <a href={mySubmission.fileUrl} target="_blank" rel="noopener noreferrer" className="gap-2">
-                    <ExternalLink className="h-4 w-4" />
-                    View File
-                  </a>
-                </Button>
-              </div>
-            )}
-          </div>
-          
-          {mySubmission.grade == null && (
-            <div className="pt-6 border-t">
-              <h4 className="font-semibold mb-4">Update Your Submission</h4>
-              <SubmissionForm
-                assignmentId={assignment.id}
-                existingSubmission={mySubmission}
-              />
-            </div>
-          )}
-        </div>
-      );
-    }
-
-    return (
-      <SubmissionForm
-        assignmentId={assignment.id}
-      />
-    );
-  };
-
   return (
     <ShowView>
       <ShowViewHeader resource="assignments" title={assignment.title} />
-      <div className="space-y-6">
-        <Card>
+      <div className="space-y-8">
+        {/* Assignment Header Card */}
+        <Card className="border-none shadow-xl bg-white/50 dark:bg-black/20 backdrop-blur-xl">
           <CardHeader>
             <div className="flex items-center justify-between">
-              <div>
-                <CardTitle>{assignment.title}</CardTitle>
-                <CardDescription>Due: {dueDate}</CardDescription>
+              <div className="space-y-1">
+                <CardTitle className="text-2xl font-black">{assignment.title}</CardTitle>
+                <CardDescription className="font-bold">Due: {dueDate}</CardDescription>
               </div>
-              {assignment.fileUrl && (
-                <Button variant="outline" size="sm" asChild>
-                  <a href={assignment.fileUrl} target="_blank" rel="noopener noreferrer" className="gap-2">
-                    <FileText className="h-4 w-4" />
-                    Attachment
-                  </a>
-                </Button>
-              )}
+              <div className="flex gap-2">
+                {isQuiz && (
+                  <Badge className="bg-indigo-500 text-white border-none px-4 py-1 rounded-full font-black uppercase tracking-widest text-[10px]">
+                    <BrainCircuit className="h-3.3 w-3 mr-2" />
+                    AI Quiz Mode
+                  </Badge>
+                )}
+                {isAdmin && (
+                  <Badge className="bg-red-500 text-white border-none px-4 py-1 rounded-full font-black uppercase tracking-widest text-[10px]">
+                    Admin View
+                  </Badge>
+                )}
+              </div>
             </div>
           </CardHeader>
           <CardContent>
-            <p className="whitespace-pre-wrap">{assignment.description}</p>
+            <p className={cn("whitespace-pre-wrap text-muted-foreground leading-relaxed", isQuiz && "opacity-40 blur-[0.5px] select-none italic text-xs")}>
+              {isQuiz ? "Interactive AI quiz content is active below." : assignment.description}
+            </p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              {isTeacher ? "Student Submissions" : "Your Submission"}
-              {!isTeacher && mySubmission && mySubmission.grade === null && (
-                <Badge variant="secondary" className="ml-3">
-                  Submitted
-                </Badge>
-              )}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {isTeacher ? (
-              <SubmissionList submissions={submissions} />
-            ) : (
-              renderStudentView()
-            )}
-          </CardContent>
-        </Card>
+        {/* Main Content Area */}
+        <div className="grid gap-8">
+          {/* 1. The Quiz Player (Visible to Students AND Admins/Teachers for testing) */}
+          {isQuiz && (
+            <Card className="border-none shadow-2xl bg-white dark:bg-black/40 overflow-hidden">
+              <CardHeader className="bg-indigo-500/5 border-b border-indigo-500/10">
+                <CardTitle className="text-lg font-black uppercase tracking-widest flex items-center gap-2 text-indigo-600">
+                  <BrainCircuit className="h-5 w-5" />
+                  Interactive Quiz Player
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-8">
+                <InteractiveQuiz 
+                  assignmentId={assignment.id} 
+                  description={assignment.description || ""} 
+                />
+              </CardContent>
+            </Card>
+          )}
+
+          {/* 2. Standard Submission Form (Only for Students if not a quiz) */}
+          {!isStaff && !isQuiz && (
+            <Card className="border-none shadow-2xl bg-white dark:bg-black/40 overflow-hidden">
+              <CardHeader className="bg-muted/30 border-b border-black/5">
+                <CardTitle className="text-lg font-black uppercase tracking-widest">
+                  Your Submission
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-8">
+                {mySubmission ? (
+                   <div className="space-y-4">
+                      <div className="p-4 border rounded-xl bg-green-500/5 border-green-500/20 flex items-center gap-3">
+                        <CheckCircle2 className="text-green-500" />
+                        <span className="font-bold text-green-700">Assignment Submitted Successfully</span>
+                      </div>
+                      <div className="p-4 bg-muted/30 rounded-xl text-sm italic">
+                        {mySubmission.content}
+                      </div>
+                   </div>
+                ) : (
+                  <SubmissionForm assignmentId={assignment.id} />
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* 3. Management View (Only for Admins and Teachers) */}
+          {isStaff && (
+            <Card className="border-none shadow-2xl bg-white dark:bg-black/40 overflow-hidden">
+              <CardHeader className="bg-primary/5 border-b border-primary/10">
+                <CardTitle className="text-lg font-black uppercase tracking-widest flex items-center gap-2 text-primary">
+                  <Users className="h-5 w-5" />
+                  {isAdmin ? "Admin: Student Submissions" : "Teacher: Student Submissions"}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-8">
+                <SubmissionList submissions={submissions} />
+              </CardContent>
+            </Card>
+          )}
+        </div>
       </div>
     </ShowView>
   );

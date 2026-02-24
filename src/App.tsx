@@ -14,7 +14,7 @@ import { dataProvider } from "./providers/data";
 import { authProvider } from "./providers/auth";
 import { accessControlProvider } from "./providers/access-control";
 import Dashboard from "@/pages/dashboard.tsx";
-import { Home, BookOpen, Building2, Users, Calendar, Sparkles, GraduationCap } from "lucide-react";
+import { Home, BookOpen, Building2, Users, Calendar, Sparkles, GraduationCap, MessageSquare } from "lucide-react";
 import { Layout } from "@/components/refine-ui/layout/layout.tsx";
 import SubjectsList from "@/pages/subjects/list.tsx";
 import SubjectsCreate from "@/pages/subjects/create.tsx";
@@ -35,6 +35,7 @@ import { AuthorizedRoute } from "./components/authorized-route";
 import { AssignmentCreate } from "./pages/assignments/create";
 import AssignmentShow from "./pages/assignments/show";
 import AIAssistantPage from "./pages/ai-assistant";
+import CalendarPage from "./pages/calendar";
 
 function App() {
   return (
@@ -63,12 +64,16 @@ function App() {
                 meta: { label: "Home", icon: <Home /> },
               },
               {
+                name: "calendar",
+                list: "/calendar",
+                meta: { label: "Calendar", icon: <Calendar /> },
+              },
+              {
                 name: "ai-assistant",
                 list: "/ai-assistant",
                 meta: { 
                   label: "AI Assistant", 
                   icon: <Sparkles />,
-                  // Visibility is handled automatically by accessControlProvider
                 },
               },
               {
@@ -108,6 +113,10 @@ function App() {
               {
                 name: "submissions",
               },
+              {
+                name: "discussions",
+                meta: { label: "Discussions", icon: <MessageSquare />, hide: true },
+              },
             ]}
           >
             <Routes>
@@ -136,6 +145,14 @@ function App() {
                   element={
                     <AuthorizedRoute resource="dashboard" action="list">
                       <Dashboard />
+                    </AuthorizedRoute>
+                  }
+                />
+                <Route 
+                  path="calendar" 
+                  element={
+                    <AuthorizedRoute resource="calendar" action="list">
+                      <CalendarPage />
                     </AuthorizedRoute>
                   }
                 />

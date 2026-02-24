@@ -13,7 +13,7 @@ export const accessControlProvider: AccessControlProvider = {
     }
 
     if (role === "teacher") {
-      if (resource === "dashboard" || resource === "ai-assistant") {
+      if (resource === "dashboard" || resource === "ai-assistant" || resource === "discussions" || resource === "calendar") {
         return { can: true };
       }
 
@@ -67,7 +67,9 @@ export const accessControlProvider: AccessControlProvider = {
       if (
         (resource === "subjects" ||
           resource === "classes" ||
-          resource === "assignments") && // Students can view assignments
+          resource === "assignments" ||
+          resource === "discussions" ||
+          resource === "calendar") &&
         (action === "list" || action === "show")
       ) {
         return { can: true };
