@@ -4,7 +4,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "./ui/card"
 import { Progress } from "./ui/progress";
 import { CheckCircle2, XCircle, ArrowRight, Trophy, RefreshCw, BrainCircuit } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useCreate, useNotification } from "@refinedev/core";
+import { useCreate, useNotification, useGo } from "@refinedev/core";
 
 interface Question {
   question: string;
@@ -20,21 +20,27 @@ interface InteractiveQuizProps {
 }
 
 export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({ assignmentId, description, onComplete }) => {
+  const go = useGo();
   const { mutate: submitScore } = useCreate();
   const { open } = useNotification();
 
   const questions = useMemo(() => {
-    const qBlocks = description.split("---").filter(block => block.includes("Q"));
-    return qBlocks.map(block => {
-      const lines = block.trim().split("\n");
-      const question = lines[0].replace(/### Q\d+: /, "").trim();
-      const options = lines.filter(l => l.startsWith("- ")).map(l => l.replace("- ", "").replace(" (Correct)", "").trim());
-      const correctAnswerLine = lines.find(l => l.includes("(Correct)"));
-      const correctAnswer = correctAnswerLine ? correctAnswerLine.replace("- ", "").replace(" (Correct)", "").trim() : "";
-      const explanation = lines.find(l => l.includes("**Explanation:**"))?.replace("**Explanation:**", "").trim() || "";
-      
-      return { question, options, correctAnswer, explanation };
-    }).filter(q => q.question && q.options.length > 0);
+    try {
+      const qBlocks = description.split("---").filter(block => block.includes("Q"));
+      return qBlocks.map(block => {
+        const lines = block.trim().split("\n");
+        const question = lines[0].replace(/### Q\d+: /, "").trim();
+        const options = lines.filter(l => l.startsWith("- ")).map(l => l.replace("- ", "").replace(" (Correct)", "").trim());
+        const correctAnswerLine = lines.find(l => l.includes("(Correct)"));
+        const correctAnswer = correctAnswerLine ? correctAnswerLine.replace("- ", "").replace(" (Correct)", "").trim() : "";
+        const explanation = lines.find(l => l.includes("**Explanation:**"))?.replace("**Explanation:**", "").trim() || "";
+        
+        return { question, options, correctAnswer, explanation };
+      }).filter(q => q.question && q.options.length > 0);
+    } catch (error) {
+      console.error("Failed to parse quiz content:", error);
+      return [];
+    }
   }, [description]);
 
   const [currentStep, setCurrentStep] = useState(0);
@@ -113,9 +119,13 @@ export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({ assignmentId, 
           </p>
         </CardContent>
         <CardFooter className="justify-center">
-          <Button onClick={() => window.location.reload()} variant="outline" className="rounded-xl font-bold w-full max-w-[200px]">
+          <Button 
+            onClick={() => go({ to: "/dashboard" })} 
+            variant="outline" 
+            className="rounded-xl font-bold w-full max-w-[200px]"
+          >
             <RefreshCw className="mr-2 h-4 w-4" />
-            Finish
+            Back to Dashboard
           </Button>
         </CardFooter>
       </Card>
