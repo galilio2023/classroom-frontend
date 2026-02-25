@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar, Clock, FileText } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { EmptyState } from "@/components/empty-state";
-import { cn } from "@/lib/utils";
+import { DashboardBadge } from "./dashboard-badge";
 
 interface UpcomingAssignment {
   id: string;
@@ -17,19 +17,6 @@ interface UpcomingAssignmentsListProps {
   list: (resource: string) => void;
   show: (resource: string, id: string) => void;
 }
-
-const Badge = ({ children, variant = "default", className = "" }: { children: React.ReactNode, variant?: "default" | "outline" | "destructive", className?: string }) => {
-    const variants = {
-        default: "bg-primary text-primary-foreground shadow-md",
-        outline: "border-2 border-primary/20 bg-white/50 dark:bg-black/20 text-foreground backdrop-blur-sm",
-        destructive: "bg-destructive text-destructive-foreground shadow-lg shadow-destructive/20 animate-pulse"
-    };
-    return (
-        <div className={cn("inline-flex items-center rounded-xl px-3 py-1 text-[10px] font-black uppercase tracking-wider transition-all", variants[variant], className)}>
-            {children}
-        </div>
-    );
-};
 
 export const UpcomingAssignmentsList = ({ assignments, list, show }: UpcomingAssignmentsListProps) => (
     <Card className="border-none shadow-xl bg-white/50 dark:bg-black/20 backdrop-blur-xl group">
@@ -62,10 +49,10 @@ export const UpcomingAssignmentsList = ({ assignments, list, show }: UpcomingAss
                                     {assignment.class?.name}
                                 </div>
                             </div>
-                            <Badge variant={new Date(assignment.dueDate) < new Date(Date.now() + 86400000) ? "destructive" : "outline"} className="w-fit rounded-full px-4 py-1 text-xs">
+                            <DashboardBadge variant={new Date(assignment.dueDate) < new Date(Date.now() + 86400000) ? "destructive" : "outline"} className="w-fit rounded-full px-4 py-1 text-xs">
                                 <Clock className="h-3.5 w-3.5 mr-1.5" />
                                 {formatDistanceToNow(new Date(assignment.dueDate), { addSuffix: true })}
-                            </Badge>
+                            </DashboardBadge>
                         </div>
                     ))}
                 </div>

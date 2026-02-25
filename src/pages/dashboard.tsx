@@ -1,7 +1,7 @@
 import { useNavigation, useGetIdentity, useCustom } from "@refinedev/core";
 import { Loader2, Layout, FileText, Calendar, Users } from "lucide-react";
 import { User } from "@/types";
-import React, { useState, useEffect } from "react";
+import React from "react";
 
 import { WelcomeHeader } from "@/components/dashboard/welcome-header";
 import { EngagementChart } from "@/components/dashboard/engagement-chart";
@@ -52,71 +52,53 @@ const Dashboard = () => {
   const isStaff = role === "teacher" || role === "admin";
   const isStudent = role === "student";
   
-  const apiUrl = import.meta.env.VITE_API_URL;
-
-  // Manual fetch function for stats to guarantee a callable refresh function
-  const [stats, setStats] = useState<DashboardStats | undefined>(undefined);
-  const [isLoadingStats, setIsLoadingStats] = useState(false);
-
-  const fetchDashboardData = async () => {
-    if (!isStaff || !identity) return;
-    setIsLoadingStats(true);
-    try {
-        const response = await fetch(`${apiUrl}/stats`, {
-            headers: {
-                "Content-Type": "application/json",
-            },
-            credentials: "include"
-        });
-        if (response.ok) {
-            const json = await response.json();
-            setStats(json.data || json);
-        }
-    } catch (error) {
-        console.error("Failed to fetch stats:", error);
-    } finally {
-        setIsLoadingStats(false);
-    }
-  };
-
-  // Initial fetch
-  useEffect(() => {
-    if (isStaff && identity) {
-        void fetchDashboardData();
-    }
-  }, [isStaff, identity]);
-
-  // Use hooks for other data
-  const trendQuery = useCustom<AttendanceTrend[]>({
-    url: `${apiUrl}/stats/attendance-trend`,
+  // 2. Use Refine's `useCustom` hook. 
+  // Based on the definition, it returns { query, result, overtime }
+  const { query: statsQuery } = useCustom<DashboardStats>({
+    url: `/stats`,
     method: "get",
     queryOptions: { enabled: isStaff && !!identity },
-  }) as any;
+  });
 
-  const pendingQuery = useCustom<PendingSubmission[]>({
-    url: `${apiUrl}/submissions/pending`,
+  const { query: trendQuery } = useCustom<AttendanceTrend[]>({
+    url: `/stats/attendance-trend`,
     method: "get",
     queryOptions: { enabled: isStaff && !!identity },
-  }) as any;
+  });
 
-  const upcomingQuery = useCustom<UpcomingAssignment[]>({
-    url: `${apiUrl}/assignments/upcoming`,
+  const { query: pendingQuery } = useCustom<PendingSubmission[]>({
+    url: `/submissions/pending`,
+    method: "get",
+    queryOptions: { enabled: isStaff && !!identity },
+  });
+
+  const { query: upcomingQuery } = useCustom<UpcomingAssignment[]>({
+    url: `/assignments/upcoming`,
     method: "get",
     queryOptions: { enabled: isStudent && !!identity },
-  }) as any;
+  });
 
-  const scheduleQuery = useCustom<ScheduleItem[]>({
-    url: `${apiUrl}/classes/today`,
+  const { query: scheduleQuery } = useCustom<ScheduleItem[]>({
+    url: `/classes/today`,
     method: "get",
     queryOptions: { enabled: !!identity },
-  }) as any;
+  });
 
-  // Extract data arrays securely
+  // Extract data from the nested query object
+  // query.data is CustomResponse<T>, which is { data: T }
+  const stats = statsQuery.data?.data;
   const attendanceTrend = trendQuery.data?.data || [];
   const pendingSubmissions = pendingQuery.data?.data || [];
   const upcomingAssignments = upcomingQuery.data?.data || [];
   const todaySchedule = scheduleQuery.data?.data || [];
-  const isLoadingSchedule = scheduleQuery.isFetching;
+  
+  // Loading states from the query object
+  const isLoadingStats = statsQuery.isLoading;
+  const isLoadingSchedule = scheduleQuery.isLoading;
+
+  const handleRefresh = () => {
+    void statsQuery.refetch();
+  };
 
   const activeCards = isStudent ? [
     { title: "My Classes", icon: Layout, heading: "Enrolled Classes", description: "Access your active classrooms.", resource: "classes" },
@@ -148,20 +130,28 @@ const Dashboard = () => {
       <div className="grid gap-6 md:gap-10 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-8 md:space-y-12">
             
+            {/* STAFF ONLY: Engagement Chart */}
             {isStaff && <EngagementChart data={attendanceTrend} />}
 
+            {/* STUDENT ONLY: Upcoming Assignments */}
             {isStudent && <UpcomingAssignmentsList assignments={upcomingAssignments} list={list} show={show} />}
 
+            {/* STAFF ONLY: Pending Grading */}
             {isStaff && <PendingGradingList submissions={pendingSubmissions} show={show} />}
 
+            {/* Quick Actions Grid */}
             <QuickActions cards={activeCards} list={list} />
         </div>
 
+        {/* Sidebar Area */}
         <div className="space-y-8 md:space-y-10">
+            {/* Today's Schedule */}
             <TodaySchedule schedule={todaySchedule} show={show} />
 
-            {isStaff && <PlatformOverview stats={stats} isLoading={isLoadingStats} onRefresh={() => void fetchDashboardData()} />}
+            {/* Platform Overview */}
+            {isStaff && <PlatformOverview stats={stats} isLoading={isLoadingStats} onRefresh={handleRefresh} />}
 
+            {/* AI Assistant Promo & Student Support */}
             <PromoCards isStaff={isStaff} list={list} />
         </div>
       </div>

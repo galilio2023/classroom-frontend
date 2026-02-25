@@ -3,7 +3,7 @@ import { CheckCircle2, FileText } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatDistanceToNow } from "date-fns";
 import { EmptyState } from "@/components/empty-state";
-import { cn } from "@/lib/utils";
+import { DashboardBadge } from "./dashboard-badge";
 
 interface PendingSubmission {
   id: string;
@@ -17,19 +17,6 @@ interface PendingGradingListProps {
   submissions: PendingSubmission[];
   show: (resource: string, id: string) => void;
 }
-
-const Badge = ({ children, variant = "default", className = "" }: { children: React.ReactNode, variant?: "default" | "outline" | "destructive", className?: string }) => {
-    const variants = {
-        default: "bg-primary text-primary-foreground shadow-md",
-        outline: "border-2 border-primary/20 bg-white/50 dark:bg-black/20 text-foreground backdrop-blur-sm",
-        destructive: "bg-destructive text-destructive-foreground shadow-lg shadow-destructive/20 animate-pulse"
-    };
-    return (
-        <div className={cn("inline-flex items-center rounded-xl px-3 py-1 text-[10px] font-black uppercase tracking-wider transition-all", variants[variant], className)}>
-            {children}
-        </div>
-    );
-};
 
 export const PendingGradingList = ({ submissions, show }: PendingGradingListProps) => (
     <Card className="border-none shadow-xl bg-white/50 dark:bg-black/20 backdrop-blur-xl group">
@@ -66,9 +53,9 @@ export const PendingGradingList = ({ submissions, show }: PendingGradingListProp
                                     </span>
                                 </div>
                             </div>
-                            <Badge variant="outline" className="w-fit rounded-full px-4 py-1 bg-white/50 dark:bg-black/20 font-bold">
+                            <DashboardBadge variant="outline" className="w-fit rounded-full px-4 py-1 bg-white/50 dark:bg-black/20 font-bold">
                                 {formatDistanceToNow(new Date(submission.createdAt), { addSuffix: true })}
-                            </Badge>
+                            </DashboardBadge>
                         </div>
                     ))}
                 </div>

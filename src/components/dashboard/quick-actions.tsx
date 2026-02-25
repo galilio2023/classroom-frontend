@@ -1,10 +1,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, LucideIcon } from "lucide-react";
+import React from "react";
 
 interface QuickActionCard {
   title: string;
-  icon: any;
+  icon: LucideIcon | React.ComponentType<{ className?: string }>;
   heading: string;
   description: string;
   resource: string;

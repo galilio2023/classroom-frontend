@@ -143,22 +143,17 @@ export const dataProvider: DataProvider = {
   deleteMany: async () => { throw new Error("deleteMany not implemented"); },
   updateMany: async () => { throw new Error("updateMany not implemented"); },
   custom: async ({ url, method, payload, query, headers }) => {
-     // 1. Determine the base URL first
      let requestUrl = url.startsWith("/") ? `${BACKEND_BASE_URL}${url}` : url;
      
-     // 2. Append query parameters exactly once
      if (query) {
         const searchParams = new URLSearchParams();
         Object.entries(query).forEach(([key, value]) => {
             searchParams.append(key, String(value));
         });
-        
-        // Handle URLs that might already have query params
         const separator = requestUrl.includes("?") ? "&" : "?";
         requestUrl += `${separator}${searchParams.toString()}`;
      }
 
-     // 3. Make the request using your authenticated fetcher
      const response = await fetcher(requestUrl, {
         method: method || "GET",
         body: payload ? JSON.stringify(payload) : undefined,
@@ -170,6 +165,11 @@ export const dataProvider: DataProvider = {
      }
      
      const json = await response.json();
-     return { data: json.data || json }; // Safely handle responses that might not wrap data in a "data" property
+     
+     // Refine expects { data: T }. Handle cases where backend already wraps it.
+     if (json && typeof json === 'object' && 'data' in json) {
+         return json;
+     }
+     return { data: json };
   }
 };
