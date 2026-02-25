@@ -1,12 +1,40 @@
-import { DataProvider } from "@refinedev/core";
+import { DataProvider, HttpError } from "@refinedev/core";
 import { CreateResponse, GetOneResponse, ListResponse } from "@/types";
 
 const BACKEND_BASE_URL = import.meta.env.VITE_API_URL;
 
+/**
+ * Helper to handle API errors and return Refine-compatible HttpError
+ */
+const handleError = async (response: Response): Promise<HttpError> => {
+  try {
+    const json = await response.json();
+    
+    // If backend returned Zod validation details
+    if (json.details) {
+      return {
+        message: json.error || "Validation failed",
+        statusCode: response.status,
+        errors: json.details, // This maps to Refine's form errors
+      };
+    }
+
+    return {
+      message: json.error || json.message || `HTTP error! status: ${response.status}`,
+      statusCode: response.status,
+    };
+  } catch (e) {
+    return {
+      message: `HTTP error! status: ${response.status}`,
+      statusCode: response.status,
+    };
+  }
+};
+
 const fetcher = async (url: string, options?: RequestInit) => {
   return fetch(url, {
     ...options,
-    credentials: "include", // This is crucial for sending cookies
+    credentials: "include",
     headers: {
       ...options?.headers,
       "Content-Type": "application/json",
@@ -14,7 +42,6 @@ const fetcher = async (url: string, options?: RequestInit) => {
   });
 };
 
-// Mapping of resource fields to backend search parameters
 const resourceFilterMappings: Record<string, Record<string, string>> = {
   departments: { name: "search", code: "search" },
   users: { search: "search", name: "search", email: "search" },
@@ -47,7 +74,7 @@ export const dataProvider: DataProvider = {
     const response = await fetcher(url.toString());
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw await handleError(response);
     }
 
     const json: ListResponse = await response.json();
@@ -62,7 +89,7 @@ export const dataProvider: DataProvider = {
     const response = await fetcher(url);
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw await handleError(response);
     }
 
     const json: GetOneResponse = await response.json();
@@ -79,7 +106,7 @@ export const dataProvider: DataProvider = {
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw await handleError(response);
     }
 
     const json: CreateResponse = await response.json();
@@ -96,7 +123,7 @@ export const dataProvider: DataProvider = {
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw await handleError(response);
     }
 
     const json = await response.json();
@@ -112,7 +139,7 @@ export const dataProvider: DataProvider = {
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw await handleError(response);
     }
 
     return {
@@ -122,11 +149,11 @@ export const dataProvider: DataProvider = {
 
   getApiUrl: () => BACKEND_BASE_URL,
   
-  // Implement other required methods with basic placeholders if needed
   getMany: async () => { throw new Error("getMany not implemented"); },
   createMany: async () => { throw new Error("createMany not implemented"); },
   deleteMany: async () => { throw new Error("deleteMany not implemented"); },
   updateMany: async () => { throw new Error("updateMany not implemented"); },
+  
   custom: async ({ url, method, payload, query, headers }) => {
      let requestUrl = url.startsWith("/") ? `${BACKEND_BASE_URL}${url}` : url;
      
@@ -146,12 +173,11 @@ export const dataProvider: DataProvider = {
      });
 
      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw await handleError(response);
      }
      
      const json = await response.json();
      
-     // Refine expects { data: T }. Handle cases where backend already wraps it.
      if (json && typeof json === 'object' && 'data' in json) {
          return json;
      }
