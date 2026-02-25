@@ -13,6 +13,11 @@ import { PlatformOverview } from "@/components/dashboard/platform-overview";
 import { PromoCards } from "@/components/dashboard/promo-cards";
 import { DashboardStats, AttendanceTrend, PendingSubmission, UpcomingAssignment, ScheduleItem } from "@/types/dashboard";
 
+interface GradeDistribution {
+  range: string;
+  count: number;
+}
+
 const Dashboard = () => {
   const { list, show } = useNavigation();
   const { data: identity, isLoading: isIdentityLoading } = useGetIdentity<User>();
@@ -29,6 +34,12 @@ const Dashboard = () => {
 
   const { query: trendQuery } = useCustom<AttendanceTrend[]>({
     url: `/stats/attendance-trend`,
+    method: "get",
+    queryOptions: { enabled: isStaff && !!identity },
+  });
+
+  const { query: gradeQuery } = useCustom<GradeDistribution[]>({
+    url: `/stats/grade-distribution`,
     method: "get",
     queryOptions: { enabled: isStaff && !!identity },
   });
@@ -54,6 +65,7 @@ const Dashboard = () => {
   // Safe data extraction
   const stats = statsQuery.data?.data;
   const attendanceTrend = trendQuery.data?.data ?? [];
+  const gradeDistribution = gradeQuery.data?.data ?? [];
   const pendingSubmissions = pendingQuery.data?.data ?? [];
   const upcomingAssignments = upcomingQuery.data?.data ?? [];
   const todaySchedule = scheduleQuery.data?.data ?? [];
@@ -89,7 +101,7 @@ const Dashboard = () => {
 
       <div className="grid gap-10 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-12">
-            {isStaff && <EngagementChart data={attendanceTrend} />}
+            {isStaff && <EngagementChart attendanceData={attendanceTrend} gradeData={gradeDistribution} />}
             {isStudent && <UpcomingAssignmentsList assignments={upcomingAssignments} list={list} show={show} />}
             {isStaff && <PendingGradingList submissions={pendingSubmissions} show={show} />}
             <QuickActions cards={activeCards} list={list} />

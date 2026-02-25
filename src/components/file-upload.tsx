@@ -24,6 +24,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   const [isUploading, setIsUploading] = useState(false);
   const [uploadComplete, setUploadComplete] = useState(false);
   const [inputKey, setInputKey] = useState(Date.now());
+  const [uploadedPublicId, setUploadedPublicId] = useState<string | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -39,6 +40,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
 
       setFile(selectedFile);
       setUploadComplete(false);
+      setUploadedPublicId(null);
     }
   };
 
@@ -64,6 +66,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
 
       const result = await response.json();
       onUploadSuccess(result.data.url, result.data.publicId);
+      setUploadedPublicId(result.data.publicId);
       setUploadComplete(true);
       toast.success("File uploaded successfully!");
     } catch (error) {
@@ -75,9 +78,27 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     }
   };
 
-  const clearFile = () => {
+  const clearFile = async () => {
+    if (uploadedPublicId) {
+      try {
+        await fetch(`${import.meta.env.VITE_API_URL}/upload`, {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ publicId: uploadedPublicId }),
+          credentials: "include",
+        });
+        toast.success("File removed successfully");
+      } catch (error) {
+        console.error("Delete Error:", error);
+        toast.error("Failed to remove file from server");
+      }
+    }
+
     setFile(null);
     setUploadComplete(false);
+    setUploadedPublicId(null);
     setInputKey(Date.now());
     onClear?.();
   };
