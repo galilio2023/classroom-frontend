@@ -1,11 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Clock, MapPin, Calendar } from "lucide-react";
-
-interface ScheduleItem {
-  id: string;
-  name: string;
-  todaySchedule?: { startTime: string; endTime: string };
-}
+import { Clock, Calendar } from "lucide-react";
+import { ScheduleItem } from "@/types/dashboard";
 
 interface TodayScheduleProps {
   schedule: ScheduleItem[];
@@ -38,7 +33,7 @@ export const TodaySchedule = ({ schedule, show }: TodayScheduleProps) => (
                                 </div>
                             </div>
                             <div className="flex items-center gap-2 text-xs text-muted-foreground font-bold">
-                                <MapPin className="h-4 w-4 text-primary/60" />
+                                <Clock className="h-4 w-4 text-primary/60" />
                                 <span>{item.todaySchedule?.startTime} - {item.todaySchedule?.endTime}</span>
                             </div>
                         </div>

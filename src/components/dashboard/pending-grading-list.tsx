@@ -4,14 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatDistanceToNow } from "date-fns";
 import { EmptyState } from "@/components/empty-state";
 import { DashboardBadge } from "./dashboard-badge";
-
-interface PendingSubmission {
-  id: string;
-  assignmentId: string;
-  createdAt: string;
-  student?: { name: string; image?: string };
-  assignment?: { title: string };
-}
+import { PendingSubmission } from "@/types/dashboard";
 
 interface PendingGradingListProps {
   submissions: PendingSubmission[];

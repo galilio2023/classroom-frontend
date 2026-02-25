@@ -11,38 +11,7 @@ import { QuickActions } from "@/components/dashboard/quick-actions";
 import { TodaySchedule } from "@/components/dashboard/today-schedule";
 import { PlatformOverview } from "@/components/dashboard/platform-overview";
 import { PromoCards } from "@/components/dashboard/promo-cards";
-
-// 1. Define strict TypeScript interfaces for your data
-interface DashboardStats {
-  totalStudents: number;
-  totalTeachers: number;
-}
-
-interface AttendanceTrend {
-  date: string;
-  present: number;
-}
-
-interface ScheduleItem {
-  id: string;
-  name: string;
-  todaySchedule?: { startTime: string; endTime: string };
-}
-
-interface UpcomingAssignment {
-  id: string;
-  title: string;
-  dueDate: string;
-  class?: { name: string };
-}
-
-interface PendingSubmission {
-  id: string;
-  assignmentId: string;
-  createdAt: string;
-  student?: { name: string; image?: string };
-  assignment?: { title: string };
-}
+import { DashboardStats, AttendanceTrend, PendingSubmission, UpcomingAssignment, ScheduleItem } from "@/types/dashboard";
 
 const Dashboard = () => {
   const { list, show } = useNavigation();
@@ -52,8 +21,7 @@ const Dashboard = () => {
   const isStaff = role === "teacher" || role === "admin";
   const isStudent = role === "student";
   
-  // 2. Use Refine's `useCustom` hook. 
-  // Based on the definition, it returns { query, result, overtime }
+  // 2. Use Refine's `useCustom` hook for clean, cached data fetching
   const { query: statsQuery } = useCustom<DashboardStats>({
     url: `/stats`,
     method: "get",
@@ -85,7 +53,6 @@ const Dashboard = () => {
   });
 
   // Extract data from the nested query object
-  // query.data is CustomResponse<T>, which is { data: T }
   const stats = statsQuery.data?.data;
   const attendanceTrend = trendQuery.data?.data || [];
   const pendingSubmissions = pendingQuery.data?.data || [];

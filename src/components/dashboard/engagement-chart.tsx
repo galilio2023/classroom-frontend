@@ -1,11 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { TrendingUp } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-
-interface AttendanceTrend {
-  date: string;
-  present: number;
-}
+import { AttendanceTrend } from "@/types/dashboard";
 
 interface EngagementChartProps {
   data: AttendanceTrend[];

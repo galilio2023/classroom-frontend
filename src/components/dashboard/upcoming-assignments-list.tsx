@@ -1,16 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar, Clock, FileText } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow, isPast, isToday } from "date-fns";
 import { EmptyState } from "@/components/empty-state";
 import { DashboardBadge } from "./dashboard-badge";
-
-interface UpcomingAssignment {
-  id: string;
-  title: string;
-  dueDate: string;
-  class?: { name: string };
-}
+import { UpcomingAssignment } from "@/types/dashboard";
 
 interface UpcomingAssignmentsListProps {
   assignments: UpcomingAssignment[];
@@ -37,24 +31,29 @@ export const UpcomingAssignmentsList = ({ assignments, list, show }: UpcomingAss
         <CardContent className="pt-8">
             {assignments.length > 0 ? (
                 <div className="space-y-4">
-                    {assignments.map((assignment) => (
-                        <div 
-                            key={assignment.id} 
-                            className="group/item flex flex-col sm:flex-row sm:items-center justify-between p-5 rounded-2xl bg-white/40 dark:bg-white/5 border border-white/40 dark:border-white/10 hover:bg-white/60 dark:hover:bg-white/10 hover:scale-[1.01] transition-all cursor-pointer shadow-sm gap-4"
-                            onClick={() => show("assignments", assignment.id)}
-                        >
-                            <div className="flex flex-col gap-1.5">
-                                <span className="font-black text-lg group-hover/item:text-primary transition-colors">{assignment.title}</span>
-                                <div className="px-2 py-0.5 w-fit rounded-md bg-primary/10 text-[10px] font-bold text-primary uppercase tracking-wider">
-                                    {assignment.class?.name}
+                    {assignments.map((assignment) => {
+                        const dueDate = new Date(assignment.dueDate);
+                        const isUrgent = isPast(dueDate) || isToday(dueDate);
+                        
+                        return (
+                            <div 
+                                key={assignment.id} 
+                                className="group/item flex flex-col sm:flex-row sm:items-center justify-between p-5 rounded-2xl bg-white/40 dark:bg-white/5 border border-white/40 dark:border-white/10 hover:bg-white/60 dark:hover:bg-white/10 hover:scale-[1.01] transition-all cursor-pointer shadow-sm gap-4"
+                                onClick={() => show("assignments", assignment.id)}
+                            >
+                                <div className="flex flex-col gap-1.5">
+                                    <span className="font-black text-lg group-hover/item:text-primary transition-colors">{assignment.title}</span>
+                                    <div className="px-2 py-0.5 w-fit rounded-md bg-primary/10 text-[10px] font-bold text-primary uppercase tracking-wider">
+                                        {assignment.class?.name}
+                                    </div>
                                 </div>
+                                <DashboardBadge variant={isUrgent ? "destructive" : "outline"} className="w-fit rounded-full px-4 py-1 text-xs">
+                                    <Clock className="h-3.5 w-3.5 mr-1.5" />
+                                    {formatDistanceToNow(dueDate, { addSuffix: true })}
+                                </DashboardBadge>
                             </div>
-                            <DashboardBadge variant={new Date(assignment.dueDate) < new Date(Date.now() + 86400000) ? "destructive" : "outline"} className="w-fit rounded-full px-4 py-1 text-xs">
-                                <Clock className="h-3.5 w-3.5 mr-1.5" />
-                                {formatDistanceToNow(new Date(assignment.dueDate), { addSuffix: true })}
-                            </DashboardBadge>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
             ) : (
                 <EmptyState icon={FileText} title="All caught up!" description="No upcoming assignments due soon." />

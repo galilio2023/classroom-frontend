@@ -3,11 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { GraduationCap, Users, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-interface DashboardStats {
-  totalStudents: number;
-  totalTeachers: number;
-}
+import { DashboardStats } from "@/types/dashboard";
 
 interface PlatformOverviewProps {
   stats: DashboardStats | undefined;
