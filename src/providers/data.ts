@@ -14,6 +14,18 @@ const fetcher = async (url: string, options?: RequestInit) => {
   });
 };
 
+// Mapping of resource fields to backend search parameters
+const resourceFilterMappings: Record<string, Record<string, string>> = {
+  departments: { name: "search", code: "search" },
+  users: { search: "search", name: "search", email: "search" },
+  subjects: { name: "search", code: "search", department: "department" },
+  classes: { name: "search", subject: "subject", teacher: "teacher" },
+  enrollments: { classId: "classId" },
+  assignments: { classId: "classId" },
+  submissions: { assignmentId: "assignmentId" },
+  discussions: { classId: "classId" },
+};
+
 export const dataProvider: DataProvider = {
   getList: async ({ resource, pagination, filters }) => {
     const url = new URL(`${BACKEND_BASE_URL}/${resource}`);
@@ -26,35 +38,8 @@ export const dataProvider: DataProvider = {
     if (filters) {
       filters.forEach((filter) => {
         if ("field" in filter) {
-             // Custom filter mapping logic
-             if (filter.field === "role") {
-                url.searchParams.append("role", String(filter.value));
-             } else if (resource === "departments" && (filter.field === "name" || filter.field === "code")) {
-                url.searchParams.append("search", String(filter.value));
-             } else if (resource === "users" && (filter.field === "search" || filter.field === "name" || filter.field === "email")) {
-                url.searchParams.append("search", String(filter.value));
-             } else if (resource === "subjects") {
-                if (filter.field === "department") url.searchParams.append("department", String(filter.value));
-                if (filter.field === "name" || filter.field === "code") url.searchParams.append("search", String(filter.value));
-             } else if (resource === "classes") {
-                if (filter.field === "name") url.searchParams.append("search", String(filter.value));
-                if (filter.field === "subject") url.searchParams.append("subject", String(filter.value));
-                if (filter.field === "teacher") url.searchParams.append("teacher", String(filter.value));
-             } else if (resource === "enrollments" && filter.field === "classId") {
-                url.searchParams.append("classId", String(filter.value));
-             } else if (resource === "assignments" && filter.field === "classId") {
-                url.searchParams.append("classId", String(filter.value));
-             } else if (resource === "submissions" && filter.field === "assignmentId") {
-                url.searchParams.append("assignmentId", String(filter.value));
-             } else if (resource === "discussions" && filter.field === "classId") {
-                url.searchParams.append("classId", String(filter.value));
-             } else if (resource === "calendar") {
-                // Calendar might need specific date range filters in the future
-                url.searchParams.append(filter.field, String(filter.value));
-             } else {
-                 // Default behavior for other filters
-                 url.searchParams.append(filter.field, String(filter.value));
-             }
+          const mappedField = resourceFilterMappings[resource]?.[filter.field] || filter.field;
+          url.searchParams.append(mappedField, String(filter.value));
         }
       });
     }
