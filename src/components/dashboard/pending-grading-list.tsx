@@ -3,7 +3,7 @@ import { CheckCircle2, FileText } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatDistanceToNow } from "date-fns";
 import { EmptyState } from "@/components/empty-state";
-import { DashboardBadge } from "./dashboard-badge";
+import { Badge } from "@/components/ui/badge";
 import { PendingSubmission } from "@/types/dashboard";
 
 interface PendingGradingListProps {
@@ -46,9 +46,9 @@ export const PendingGradingList = ({ submissions, show }: PendingGradingListProp
                                     </span>
                                 </div>
                             </div>
-                            <DashboardBadge variant="outline" className="w-fit rounded-full px-4 py-1 bg-white/50 dark:bg-black/20 font-bold">
+                            <Badge variant="outline" className="rounded-full px-4 py-1 bg-white/50 dark:bg-black/20 font-bold">
                                 {formatDistanceToNow(new Date(submission.createdAt), { addSuffix: true })}
-                            </DashboardBadge>
+                            </Badge>
                         </div>
                     ))}
                 </div>

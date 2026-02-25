@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar, Clock, FileText } from "lucide-react";
 import { formatDistanceToNow, isPast, isToday } from "date-fns";
 import { EmptyState } from "@/components/empty-state";
-import { DashboardBadge } from "./dashboard-badge";
+import { Badge } from "@/components/ui/badge";
 import { UpcomingAssignment } from "@/types/dashboard";
 
 interface UpcomingAssignmentsListProps {
@@ -47,10 +47,10 @@ export const UpcomingAssignmentsList = ({ assignments, list, show }: UpcomingAss
                                         {assignment.class?.name}
                                     </div>
                                 </div>
-                                <DashboardBadge variant={isUrgent ? "destructive" : "outline"} className="w-fit rounded-full px-4 py-1 text-xs">
+                                <Badge variant={isUrgent ? "destructive" : "outline"} className="rounded-full px-4 py-1 text-xs">
                                     <Clock className="h-3.5 w-3.5 mr-1.5" />
                                     {formatDistanceToNow(dueDate, { addSuffix: true })}
-                                </DashboardBadge>
+                                </Badge>
                             </div>
                         );
                     })}
