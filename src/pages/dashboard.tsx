@@ -17,11 +17,10 @@ const Dashboard = () => {
   const { list, show } = useNavigation();
   const { data: identity, isLoading: isIdentityLoading } = useGetIdentity<User>();
   
-  const role = identity?.role;
-  const isStaff = role === "teacher" || role === "admin";
-  const isStudent = role === "student";
+  const isStaff = identity?.role === "teacher" || identity?.role === "admin";
+  const isStudent = identity?.role === "student";
   
-  // 2. Use Refine's `useCustom` hook for clean, cached data fetching
+  // UNIFIED REFINE V5 HOOKS
   const { query: statsQuery } = useCustom<DashboardStats>({
     url: `/stats`,
     method: "get",
@@ -52,73 +51,59 @@ const Dashboard = () => {
     queryOptions: { enabled: !!identity },
   });
 
-  // Extract data from the nested query object
+  // Safe data extraction
   const stats = statsQuery.data?.data;
-  const attendanceTrend = trendQuery.data?.data || [];
-  const pendingSubmissions = pendingQuery.data?.data || [];
-  const upcomingAssignments = upcomingQuery.data?.data || [];
-  const todaySchedule = scheduleQuery.data?.data || [];
+  const attendanceTrend = trendQuery.data?.data ?? [];
+  const pendingSubmissions = pendingQuery.data?.data ?? [];
+  const upcomingAssignments = upcomingQuery.data?.data ?? [];
+  const todaySchedule = scheduleQuery.data?.data ?? [];
   
-  // Loading states from the query object
-  const isLoadingStats = statsQuery.isLoading;
+  const isLoadingStats = statsQuery.isLoading || statsQuery.isFetching;
   const isLoadingSchedule = scheduleQuery.isLoading;
 
-  const handleRefresh = () => {
-    void statsQuery.refetch();
-  };
-
   const activeCards = isStudent ? [
-    { title: "My Classes", icon: Layout, heading: "Enrolled Classes", description: "Access your active classrooms.", resource: "classes" },
-    { title: "Assignments", icon: FileText, heading: "My Tasks", description: "View and submit your work.", resource: "assignments" },
-    { title: "Calendar", icon: Calendar, heading: "Schedule", description: "Track your academic deadlines.", resource: "calendar" },
+    { title: "My Classes", icon: Layout, heading: "Enrolled Classes", description: "Access active classrooms.", resource: "classes" },
+    { title: "Assignments", icon: FileText, heading: "My Tasks", description: "Submit your work.", resource: "assignments" },
+    { title: "Calendar", icon: Calendar, heading: "Schedule", description: "Deadlines & events.", resource: "calendar" },
   ] : [
-    { title: "Classes", icon: Layout, heading: "Manage Classes", description: "Create and oversee classrooms.", resource: "classes" },
-    { title: "Assignments", icon: FileText, heading: "Curriculum", description: "Manage tasks and grading.", resource: "assignments" },
+    { title: "Classes", icon: Layout, heading: "Manage Classes", description: "Oversee classrooms.", resource: "classes" },
+    { title: "Assignments", icon: FileText, heading: "Curriculum", description: "Tasks and grading.", resource: "assignments" },
     { title: "Calendar", icon: Calendar, heading: "Schedule", description: "View all academic deadlines.", resource: "calendar" },
-    { title: "Users", icon: Users, heading: "Directory", description: "Manage students and staff.", resource: "users" },
+    { title: "Users", icon: Users, heading: "Directory", description: "Students and staff.", resource: "users" },
   ];
 
   if (isIdentityLoading || (isLoadingSchedule && todaySchedule.length === 0)) {
     return (
-        <div className="flex h-[80vh] items-center justify-center">
-            <Loader2 className="h-12 w-12 animate-spin text-primary" />
-        </div>
+      <div className="flex h-dvh items-center justify-center">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+      </div>
     );
   }
 
   return (
-    <div className="container mx-auto py-6 md:py-10 px-4 md:px-6 relative z-0">
+    <div className="container mx-auto py-10 px-4 md:px-6 relative z-0">
       {/* Background Glows */}
       <div className="hidden sm:block absolute top-0 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-[120px] -z-10 animate-pulse" />
-      <div className="hidden sm:block absolute bottom-0 right-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-[120px] -z-10 animate-pulse delay-700" />
-
+      
       <WelcomeHeader name={identity?.name || "User"} isStudent={isStudent} />
 
-      <div className="grid gap-6 md:gap-10 lg:grid-cols-3">
-        <div className="lg:col-span-2 space-y-8 md:space-y-12">
-            
-            {/* STAFF ONLY: Engagement Chart */}
+      <div className="grid gap-10 lg:grid-cols-3">
+        <div className="lg:col-span-2 space-y-12">
             {isStaff && <EngagementChart data={attendanceTrend} />}
-
-            {/* STUDENT ONLY: Upcoming Assignments */}
             {isStudent && <UpcomingAssignmentsList assignments={upcomingAssignments} list={list} show={show} />}
-
-            {/* STAFF ONLY: Pending Grading */}
             {isStaff && <PendingGradingList submissions={pendingSubmissions} show={show} />}
-
-            {/* Quick Actions Grid */}
             <QuickActions cards={activeCards} list={list} />
         </div>
 
-        {/* Sidebar Area */}
-        <div className="space-y-8 md:space-y-10">
-            {/* Today's Schedule */}
+        <div className="space-y-10">
             <TodaySchedule schedule={todaySchedule} show={show} />
-
-            {/* Platform Overview */}
-            {isStaff && <PlatformOverview stats={stats} isLoading={isLoadingStats} onRefresh={handleRefresh} />}
-
-            {/* AI Assistant Promo & Student Support */}
+            {isStaff && (
+              <PlatformOverview 
+                stats={stats} 
+                isLoading={isLoadingStats} 
+                onRefresh={() => void statsQuery.refetch()} 
+              />
+            )}
             <PromoCards isStaff={isStaff} list={list} />
         </div>
       </div>
