@@ -143,25 +143,15 @@ export const dataProvider: DataProvider = {
   deleteMany: async () => { throw new Error("deleteMany not implemented"); },
   updateMany: async () => { throw new Error("updateMany not implemented"); },
   custom: async ({ url, method, payload, query, headers }) => {
-     let requestUrl = `${url}`;
+     let requestUrl = url.startsWith("/") ? `${BACKEND_BASE_URL}${url}` : url;
+     
      if (query) {
         const searchParams = new URLSearchParams();
         Object.entries(query).forEach(([key, value]) => {
             searchParams.append(key, String(value));
         });
-        requestUrl += `?${searchParams.toString()}`;
-     }
-     
-     // If the URL is relative (starts with /), prepend the backend base URL
-     if (url.startsWith("/")) {
-         requestUrl = `${BACKEND_BASE_URL}${url}`;
-         if (query) {
-            const searchParams = new URLSearchParams();
-            Object.entries(query).forEach(([key, value]) => {
-                searchParams.append(key, String(value));
-            });
-            requestUrl += `?${searchParams.toString()}`;
-         }
+        const separator = requestUrl.includes("?") ? "&" : "?";
+        requestUrl += `${separator}${searchParams.toString()}`;
      }
 
      const response = await fetcher(requestUrl, {
@@ -175,6 +165,11 @@ export const dataProvider: DataProvider = {
      }
      
      const json = await response.json();
+     
+     // Refine expects { data: T }. Handle cases where backend already wraps it.
+     if (json && typeof json === 'object' && 'data' in json) {
+         return json;
+     }
      return { data: json };
   }
 };
