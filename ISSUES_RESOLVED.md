@@ -67,3 +67,17 @@ The `Dashboard` component was a monolithic file with complex, manual data fetchi
 
 **Summary:**
 Significantly improved the maintainability and performance of the Dashboard by adopting a modular component architecture and standardized Refine v5 data fetching patterns. The refactor also cleaned up core data provider logic, ensuring a more robust and DRY foundation for custom API interactions.
+
+## 5. Standardized Error Handling and Validation Integration
+
+**Problem:**
+The application had inconsistent error handling across different routes. Frontend forms did not correctly display structured validation errors (e.g., from Zod), and API error responses were often generic "HTTP error! status: 400" messages, providing poor feedback to users.
+
+**Solution:**
+- **Centralized `handleError` in Data Provider:** Refactored `src/providers/data.ts` to include a robust `handleError` function that parses JSON error responses from the backend.
+- **Refine `HttpError` Compliance:** Updated the data provider to return errors in the format expected by Refine v5 (`HttpError`). This allows Refine's `useForm` and other hooks to automatically map backend validation errors (from `json.details`) to specific form fields.
+- **Backend Global Error Handler:** Implemented a centralized `errorHandler` middleware in the backend to ensure all errors (Zod, Database, Custom) follow a consistent JSON structure.
+- **Custom `ApiError` Class:** Introduced a type-safe `ApiError` class for explicit operational error handling.
+
+**Summary:**
+Established a unified error handling architecture between the frontend and backend. This ensures that users receive clear, actionable feedback (especially for form validation) and simplifies the developer experience by centralizing error logic.
