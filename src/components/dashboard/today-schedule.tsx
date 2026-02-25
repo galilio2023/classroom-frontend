@@ -8,7 +8,7 @@ interface TodayScheduleProps {
 }
 
 export const TodaySchedule = ({ schedule, show }: TodayScheduleProps) => (
-    <Card className="border-none shadow-xl overflow-hidden bg-white/50 dark:bg-black/20 backdrop-blur-xl">
+    <Card className="border-none shadow-xl overflow-hidden bg-white/50 dark:bg-zinc-900/50 backdrop-blur-xl">
         <CardHeader className="pb-6 border-b border-black/5 dark:border-white/5 bg-primary/5">
             <CardTitle className="text-lg flex items-center gap-3 font-black">
                 <div className="p-2 bg-primary/20 rounded-lg">

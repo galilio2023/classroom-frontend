@@ -13,7 +13,7 @@ interface UpcomingAssignmentsListProps {
 }
 
 export const UpcomingAssignmentsList = ({ assignments, list, show }: UpcomingAssignmentsListProps) => (
-    <Card className="border-none shadow-xl bg-white/50 dark:bg-black/20 backdrop-blur-xl group">
+    <Card className="border-none shadow-xl bg-white/50 dark:bg-zinc-900/50 backdrop-blur-xl group">
         <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-black/5 dark:border-white/5 pb-6 gap-4">
             <div className="space-y-1">
                 <CardTitle className="flex items-center gap-3 text-2xl font-black">

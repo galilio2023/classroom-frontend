@@ -21,7 +21,7 @@ export const QuickActions = ({ cards, list }: QuickActionsProps) => (
         {cards.map((card) => (
         <Card 
             key={card.title} 
-            className="border-none shadow-lg hover:shadow-2xl group hover:-translate-y-2 transition-all duration-500 bg-white/50 dark:bg-black/20 backdrop-blur-xl"
+            className="border-none shadow-lg hover:shadow-2xl group hover:-translate-y-2 transition-all duration-500 bg-white/50 dark:bg-zinc-900/50 backdrop-blur-xl"
         >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
                 <CardTitle className="text-xs font-black uppercase tracking-[0.2em] text-primary/60">{card.title}</CardTitle>

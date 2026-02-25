@@ -8,7 +8,7 @@ interface EngagementChartProps {
 }
 
 export const EngagementChart = ({ data }: EngagementChartProps) => (
-    <Card className="border-none shadow-xl overflow-hidden bg-white/50 dark:bg-black/20 backdrop-blur-xl">
+    <Card className="border-none shadow-xl overflow-hidden bg-white/50 dark:bg-zinc-900/50 backdrop-blur-xl">
         <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-xl font-black">
                 <TrendingUp className="h-5 w-5 text-primary" />
@@ -26,15 +26,15 @@ export const EngagementChart = ({ data }: EngagementChartProps) => (
                                 <stop offset="95%" stopColor="var(--primary)" stopOpacity={0}/>
                             </linearGradient>
                         </defs>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.05)" />
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
                         <XAxis 
                             dataKey="date" 
                             axisLine={false} 
                             tickLine={false} 
-                            tick={{ fontSize: 10, fontWeight: 'bold' }}
+                            tick={{ fontSize: 10, fontWeight: 'bold', fill: 'currentColor' }}
                             tickFormatter={(str) => new Date(str).toLocaleDateString('en-US', { weekday: 'short' })}
                         />
-                        <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 'bold' }} />
+                        <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 'bold', fill: 'currentColor' }} />
                         <Tooltip 
                             contentStyle={{ backgroundColor: 'rgba(0,0,0,0.8)', border: 'none', borderRadius: '12px', fontSize: '12px', color: '#fff' }}
                             itemStyle={{ color: '#fff' }}

@@ -30,7 +30,7 @@ export const PlatformOverview = ({ stats, isLoading, onRefresh }: PlatformOvervi
                         { label: "Total Students", value: stats.totalStudents, icon: GraduationCap, color: "text-blue-500" },
                         { label: "Total Teachers", value: stats.totalTeachers, icon: Users, color: "text-green-500" },
                     ].map((stat) => (
-                    <Card key={stat.label} className="border-none shadow-md hover:shadow-lg transition-shadow overflow-hidden group bg-white/50 dark:bg-black/20 backdrop-blur-xl">
+                    <Card key={stat.label} className="border-none shadow-md hover:shadow-lg transition-shadow overflow-hidden group bg-white/50 dark:bg-zinc-900/50 backdrop-blur-xl">
                         <CardContent className="flex items-center p-6 gap-4 relative">
                             <div className="absolute top-0 right-0 p-2 opacity-5 group-hover:opacity-10 transition-opacity">
                                 <stat.icon className="h-12 w-12" />
