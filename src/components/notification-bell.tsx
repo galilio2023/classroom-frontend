@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { useCustom, useGetIdentity } from "@refinedev/core";
-import { useQueryClient, useMutation } from "@tanstack/react-query";
+import { useCustom, useCustomMutation, useGetIdentity } from "@refinedev/core";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   Popover,
   PopoverContent,
@@ -16,7 +16,6 @@ import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { io } from "socket.io-client";
 import { toast } from "sonner";
-import { dataProvider } from "@/providers/data";
 
 export const NotificationBell = () => {
   const navigate = useNavigate();
@@ -73,96 +72,111 @@ export const NotificationBell = () => {
     };
   }, [identity?.id, refetch, navigate]);
 
-  // Mark as read mutation
-  const { mutate: markAsRead } = useMutation({
-    mutationFn: (variables: { id: number }) => {
-        return dataProvider.custom!({
-            url: `/notifications/${variables.id}/read`,
-            method: "patch",
-            payload: {},
-        });
-    },
-    onMutate: async (variables) => {
-        const queryKey = ["custom", "get", "/notifications"];
-        await queryClient.cancelQueries({ queryKey });
-        const previousNotifications = queryClient.getQueryData(queryKey);
+  // Mark as read mutation (Optimistic Update)
+  const { mutate: markAsRead } = useCustomMutation({
+    mutationOptions: {
+        onMutate: async (variables: any) => {
+            // variables is { url, method, values: { id } }? No, variables passed to mutate are passed here?
+            // useCustomMutation passes { url, method, values, meta } as variables to mutationFn.
+            // But here variables is what we pass to mutate().
+            // Wait, useCustomMutation wraps useMutation. The variables passed to onMutate are the arguments to mutate().
+            // mutate({ url: ..., values: ... })
+            
+            // We need to extract ID from the URL or values.
+            // Let's assume we pass ID in values or extract from URL.
+            // URL is `/notifications/${id}/read`.
+            
+            const id = variables.url.split('/')[2]; // Extract ID from URL string
 
-        queryClient.setQueriesData({ queryKey }, (old: any) => {
-            if (!old?.data) return old;
-            return {
-                ...old,
-                data: old.data.map((n: Notification) => 
-                    n.id === variables.id ? { ...n, isRead: true } : n
-                )
-            };
-        });
-
-        return { previousNotifications };
-    },
-    onError: (_err, _variables, context: any) => {
-        if (context?.previousNotifications) {
             const queryKey = ["custom", "get", "/notifications"];
-            queryClient.setQueriesData({ queryKey }, context.previousNotifications);
-        }
-    },
-    onSettled: () => {
-        const queryKey = ["custom", "get", "/notifications"];
-        queryClient.invalidateQueries({ queryKey });
-    },
+            await queryClient.cancelQueries({ queryKey });
+            const previousNotifications = queryClient.getQueryData(queryKey);
+
+            queryClient.setQueriesData({ queryKey }, (old: any) => {
+                if (!old?.data) return old;
+                return {
+                    ...old,
+                    data: old.data.map((n: Notification) => 
+                        n.id === Number(id) ? { ...n, isRead: true } : n
+                    )
+                };
+            });
+
+            return { previousNotifications };
+        },
+        onError: (_err, _variables, context: any) => {
+            if (context?.previousNotifications) {
+                const queryKey = ["custom", "get", "/notifications"];
+                queryClient.setQueriesData({ queryKey }, context.previousNotifications);
+            }
+        },
+        onSettled: () => {
+            const queryKey = ["custom", "get", "/notifications"];
+            queryClient.invalidateQueries({ queryKey });
+        },
+    }
   });
 
-  const { mutate: markAllAsRead } = useMutation({
-    mutationFn: () => {
-        return dataProvider.custom!({
-            url: "/notifications/read-all",
-            method: "patch",
-            payload: {},
-        });
-    },
-    onMutate: async () => {
-        const queryKey = ["custom", "get", "/notifications"];
-        await queryClient.cancelQueries({ queryKey });
-        const previousNotifications = queryClient.getQueryData(queryKey);
-
-        queryClient.setQueriesData({ queryKey }, (old: any) => {
-            if (!old?.data) return old;
-            return {
-                ...old,
-                data: old.data.map((n: Notification) => ({ ...n, isRead: true }))
-            };
-        });
-
-        return { previousNotifications };
-    },
-    onError: (_err, _variables, context: any) => {
-         if (context?.previousNotifications) {
+  // Mark all as read mutation (Optimistic Update)
+  const { mutate: markAllAsRead } = useCustomMutation({
+    mutationOptions: {
+        onMutate: async () => {
             const queryKey = ["custom", "get", "/notifications"];
-            queryClient.setQueriesData({ queryKey }, context.previousNotifications);
-        }
-    },
-    onSettled: () => {
-        const queryKey = ["custom", "get", "/notifications"];
-        queryClient.invalidateQueries({ queryKey });
-    },
+            await queryClient.cancelQueries({ queryKey });
+            const previousNotifications = queryClient.getQueryData(queryKey);
+
+            queryClient.setQueriesData({ queryKey }, (old: any) => {
+                if (!old?.data) return old;
+                return {
+                    ...old,
+                    data: old.data.map((n: Notification) => ({ ...n, isRead: true }))
+                };
+            });
+
+            return { previousNotifications };
+        },
+        onError: (_err, _variables, context: any) => {
+             if (context?.previousNotifications) {
+                const queryKey = ["custom", "get", "/notifications"];
+                queryClient.setQueriesData({ queryKey }, context.previousNotifications);
+            }
+        },
+        onSettled: () => {
+            const queryKey = ["custom", "get", "/notifications"];
+            queryClient.invalidateQueries({ queryKey });
+        },
+    }
   });
 
   const handleMarkAsRead = (id: number, link: string | null) => {
-    markAsRead({ id }, {
+    markAsRead(
+      {
+        url: `/notifications/${id}/read`,
+        method: "patch",
+        values: {},
+      },
+      {
         onSuccess: () => {
           if (link) {
             navigate(link);
             setIsOpen(false);
           }
         },
-    });
+      }
+    );
   };
 
   const handleMarkAllAsRead = () => {
-    markAllAsRead(undefined, {
-        onSuccess: () => {
-          refetch();
-        },
-    });
+    markAllAsRead(
+      {
+        url: "/notifications/read-all",
+        method: "patch",
+        values: {},
+      },
+      {
+        // No explicit refetch needed, onSettled handles it
+      }
+    );
   };
 
   const getIcon = (type: string) => {
