@@ -14,7 +14,7 @@ import { dataProvider } from "./providers/data";
 import { authProvider } from "./providers/auth";
 import { accessControlProvider } from "./providers/access-control";
 import Dashboard from "@/pages/dashboard.tsx";
-import { Home, BookOpen, Building2, Users, Calendar, Sparkles, GraduationCap, MessageSquare } from "lucide-react";
+import { Home, BookOpen, Building2, Users, Calendar, Sparkles, GraduationCap, MessageSquare, UserPlus, ClipboardCheck } from "lucide-react";
 import { Layout } from "@/components/refine-ui/layout/layout.tsx";
 import SubjectsList from "@/pages/subjects/list.tsx";
 import SubjectsCreate from "@/pages/subjects/create.tsx";
@@ -25,10 +25,13 @@ import DepartmentsEdit from "@/pages/departments/edit.tsx";
 import UsersList from "@/pages/users/list.tsx";
 import UsersCreate from "@/pages/users/create.tsx";
 import UsersEdit from "@/pages/users/edit.tsx";
+import UserShow from "@/pages/users/show.tsx";
 import ClassesList from "@/pages/classes/list.tsx";
 import ClassesCreate from "@/pages/classes/create.tsx";
 import ClassesEdit from "@/pages/classes/edit.tsx";
 import ClassShow from "@/pages/classes/show.tsx";
+import EnrollmentsList from "@/pages/enrollments/list.tsx";
+import ProfileRequestsList from "@/pages/profile-requests/list.tsx";
 import LoginPage from "@/pages/auth/login.tsx";
 import RegisterPage from "@/pages/auth/register.tsx";
 import { AuthorizedRoute } from "./components/authorized-route";
@@ -95,7 +98,13 @@ function App() {
                 list: "/users",
                 create: "/users/create",
                 edit: "/users/edit/:id",
+                show: "/users/show/:id",
                 meta: { label: "Users", icon: <Users /> },
+              },
+              {
+                name: "profile-requests",
+                list: "/profile-requests",
+                meta: { label: "Profile Requests", icon: <ClipboardCheck /> },
               },
               {
                 name: "classes",
@@ -104,6 +113,11 @@ function App() {
                 edit: "/classes/edit/:id",
                 show: "/classes/show/:id",
                 meta: { label: "Classes", icon: <Calendar /> },
+              },
+              {
+                name: "enrollments",
+                list: "/enrollments",
+                meta: { label: "Enrollments", icon: <UserPlus /> },
               },
               {
                 name: "assignments",
@@ -241,6 +255,24 @@ function App() {
                       </AuthorizedRoute>
                     }
                   />
+                  <Route
+                    path="show/:id"
+                    element={
+                      <AuthorizedRoute resource="users" action="show">
+                        <UserShow />
+                      </AuthorizedRoute>
+                    }
+                  />
+                </Route>
+                <Route path="profile-requests">
+                  <Route
+                    index
+                    element={
+                      <AuthorizedRoute resource="profile-requests" action="list">
+                        <ProfileRequestsList />
+                      </AuthorizedRoute>
+                    }
+                  />
                 </Route>
                 <Route path="classes">
                   <Route
@@ -272,6 +304,16 @@ function App() {
                     element={
                       <AuthorizedRoute resource="classes" action="show">
                         <ClassShow />
+                      </AuthorizedRoute>
+                    }
+                  />
+                </Route>
+                <Route path="enrollments">
+                  <Route
+                    index
+                    element={
+                      <AuthorizedRoute resource="enrollments" action="list">
+                        <EnrollmentsList />
                       </AuthorizedRoute>
                     }
                   />

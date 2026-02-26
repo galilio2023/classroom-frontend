@@ -7,10 +7,9 @@ export const userFormSchema = z.object({
   role: z.nativeEnum(UserRole, {
     errorMap: () => ({ message: "Role is required" }),
   }),
+  phoneNumber: z.string().max(20).optional().nullable(),
+  bio: z.string().max(500).optional().nullable(),
+  address: z.string().max(255).optional().nullable(),
 });
 
-// For creation, we might need a password (optional for now if we assume email invite flow, but let's add it)
-export const userCreateSchema = userFormSchema.extend({
-  // password: z.string().min(6, "Password must be at least 6 characters"), 
-  // We will skip password for now and assume the backend handles it or we add it later
-});
+export const userCreateSchema = userFormSchema.extend({});
