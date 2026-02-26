@@ -34,8 +34,12 @@ export const NotificationBell = () => {
   useEffect(() => {
     if (!identity?.id) return;
 
-    const socket = io(import.meta.env.VITE_API_URL.replace("/api", ""), {
+    // Use environment variable for Socket.io URL, fallback to API URL base
+    const socketUrl = import.meta.env.VITE_SOCKET_URL || import.meta.env.VITE_API_URL.replace("/api", "");
+    
+    const socket = io(socketUrl, {
       query: { userId: identity.id },
+      withCredentials: true, // Ensure cookies are sent for authentication
     });
 
     const handleNotification = (newNotification: Notification) => {
