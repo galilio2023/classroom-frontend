@@ -15,7 +15,7 @@ const EnrollmentsList = () => {
   const { create } = useNavigation();
   const { mutate: unenroll } = useDelete();
   const { mutate: updateStatus } = useCustomMutation();
-  const { invalidate } = useInvalidate();
+  const invalidate = useInvalidate();
 
   const handleStatusUpdate = (id: number, status: "approved" | "rejected") => {
     updateStatus({

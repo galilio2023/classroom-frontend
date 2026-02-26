@@ -14,7 +14,7 @@ import { ProfileChangeRequest } from "@/types";
 const ProfileRequestsList = () => {
   const { mutate: approve } = useCustomMutation();
   const { mutate: reject } = useCustomMutation();
-  const { invalidate } = useInvalidate();
+  const invalidate = useInvalidate();
 
   const handleApprove = (id: number) => {
     approve({
