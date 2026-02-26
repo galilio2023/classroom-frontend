@@ -8,13 +8,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Trash2, UserPlus, CheckCircle, XCircle, Phone } from "lucide-react";
 import { Enrollment, User } from "@/types";
-import { useDelete, useNavigation, useCustomMutation } from "@refinedev/core";
+import { useDelete, useNavigation, useCustomMutation, useInvalidate } from "@refinedev/core";
 import { toast } from "sonner";
 
 const EnrollmentsList = () => {
   const { create } = useNavigation();
   const { mutate: unenroll } = useDelete();
   const { mutate: updateStatus } = useCustomMutation();
+  const { invalidate } = useInvalidate();
 
   const handleStatusUpdate = (id: number, status: "approved" | "rejected") => {
     updateStatus({
@@ -24,6 +25,10 @@ const EnrollmentsList = () => {
     }, {
         onSuccess: () => {
             toast.success(`Enrollment ${status} successfully`);
+            invalidate({
+                resource: "enrollments",
+                invalidates: ["list"],
+            });
         }
     });
   };

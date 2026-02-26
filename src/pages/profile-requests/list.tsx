@@ -7,13 +7,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, XCircle, ArrowRight } from "lucide-react";
-import { useCustomMutation } from "@refinedev/core";
+import { useCustomMutation, useInvalidate } from "@refinedev/core";
 import { toast } from "sonner";
 import { ProfileChangeRequest } from "@/types";
 
 const ProfileRequestsList = () => {
   const { mutate: approve } = useCustomMutation();
   const { mutate: reject } = useCustomMutation();
+  const { invalidate } = useInvalidate();
 
   const handleApprove = (id: number) => {
     approve({
@@ -21,7 +22,13 @@ const ProfileRequestsList = () => {
         method: "post",
         values: {},
     }, {
-        onSuccess: () => toast.success("Changes approved and applied")
+        onSuccess: () => {
+            toast.success("Changes approved and applied");
+            invalidate({
+                resource: "profile-requests",
+                invalidates: ["list"],
+            });
+        }
     });
   };
 
@@ -31,7 +38,13 @@ const ProfileRequestsList = () => {
         method: "post",
         values: { notes: "Changes rejected by administrator" },
     }, {
-        onSuccess: () => toast.success("Changes rejected")
+        onSuccess: () => {
+            toast.success("Changes rejected");
+            invalidate({
+                resource: "profile-requests",
+                invalidates: ["list"],
+            });
+        }
     });
   };
 
