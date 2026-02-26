@@ -76,17 +76,8 @@ export const NotificationBell = () => {
   const { mutate: markAsRead } = useCustomMutation({
     mutationOptions: {
         onMutate: async (variables: any) => {
-            // variables is { url, method, values: { id } }? No, variables passed to mutate are passed here?
-            // useCustomMutation passes { url, method, values, meta } as variables to mutationFn.
-            // But here variables is what we pass to mutate().
-            // Wait, useCustomMutation wraps useMutation. The variables passed to onMutate are the arguments to mutate().
-            // mutate({ url: ..., values: ... })
-            
-            // We need to extract ID from the URL or values.
-            // Let's assume we pass ID in values or extract from URL.
-            // URL is `/notifications/${id}/read`.
-            
-            const id = variables.url.split('/')[2]; // Extract ID from URL string
+            // Robustly extract ID from values passed to mutate()
+            const id = variables.values.id;
 
             const queryKey = ["custom", "get", "/notifications"];
             await queryClient.cancelQueries({ queryKey });
@@ -153,7 +144,7 @@ export const NotificationBell = () => {
       {
         url: `/notifications/${id}/read`,
         method: "patch",
-        values: {},
+        values: { id }, // Pass ID in values for robust extraction in onMutate
       },
       {
         onSuccess: () => {
