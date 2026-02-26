@@ -22,11 +22,12 @@ export const NotificationBell = () => {
   const { data: identity } = useGetIdentity<User>();
 
   // Fetch notifications
-  const { data: notificationsData, query } = useCustom<Notification[]>({
+  const { query } = useCustom<Notification[]>({
     url: "/notifications",
     method: "get",
   });
 
+  const notificationsData = query.data;
   const refetch = query.refetch;
 
   const notifications = notificationsData?.data || [];
