@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { useCustom, useCustomMutation, useGetIdentity } from "@refinedev/core";
+import { useCustom, useGetIdentity } from "@refinedev/core";
+import { useQueryClient, useMutation } from "@tanstack/react-query";
 import {
   Popover,
   PopoverContent,
@@ -15,11 +16,13 @@ import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { io } from "socket.io-client";
 import { toast } from "sonner";
+import { dataProvider } from "@/providers/data";
 
 export const NotificationBell = () => {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const { data: identity } = useGetIdentity<User>();
+  const queryClient = useQueryClient();
 
   // Fetch notifications
   const { query } = useCustom<Notification[]>({
@@ -71,41 +74,95 @@ export const NotificationBell = () => {
   }, [identity?.id, refetch, navigate]);
 
   // Mark as read mutation
-  const { mutate: markAsRead } = useCustomMutation();
-  const { mutate: markAllAsRead } = useCustomMutation();
+  const { mutate: markAsRead } = useMutation({
+    mutationFn: (variables: { id: number }) => {
+        return dataProvider.custom!({
+            url: `/notifications/${variables.id}/read`,
+            method: "patch",
+            payload: {},
+        });
+    },
+    onMutate: async (variables) => {
+        const queryKey = ["custom", "get", "/notifications"];
+        await queryClient.cancelQueries({ queryKey });
+        const previousNotifications = queryClient.getQueryData(queryKey);
+
+        queryClient.setQueriesData({ queryKey }, (old: any) => {
+            if (!old?.data) return old;
+            return {
+                ...old,
+                data: old.data.map((n: Notification) => 
+                    n.id === variables.id ? { ...n, isRead: true } : n
+                )
+            };
+        });
+
+        return { previousNotifications };
+    },
+    onError: (_err, _variables, context: any) => {
+        if (context?.previousNotifications) {
+            const queryKey = ["custom", "get", "/notifications"];
+            queryClient.setQueriesData({ queryKey }, context.previousNotifications);
+        }
+    },
+    onSettled: () => {
+        const queryKey = ["custom", "get", "/notifications"];
+        queryClient.invalidateQueries({ queryKey });
+    },
+  });
+
+  const { mutate: markAllAsRead } = useMutation({
+    mutationFn: () => {
+        return dataProvider.custom!({
+            url: "/notifications/read-all",
+            method: "patch",
+            payload: {},
+        });
+    },
+    onMutate: async () => {
+        const queryKey = ["custom", "get", "/notifications"];
+        await queryClient.cancelQueries({ queryKey });
+        const previousNotifications = queryClient.getQueryData(queryKey);
+
+        queryClient.setQueriesData({ queryKey }, (old: any) => {
+            if (!old?.data) return old;
+            return {
+                ...old,
+                data: old.data.map((n: Notification) => ({ ...n, isRead: true }))
+            };
+        });
+
+        return { previousNotifications };
+    },
+    onError: (_err, _variables, context: any) => {
+         if (context?.previousNotifications) {
+            const queryKey = ["custom", "get", "/notifications"];
+            queryClient.setQueriesData({ queryKey }, context.previousNotifications);
+        }
+    },
+    onSettled: () => {
+        const queryKey = ["custom", "get", "/notifications"];
+        queryClient.invalidateQueries({ queryKey });
+    },
+  });
 
   const handleMarkAsRead = (id: number, link: string | null) => {
-    markAsRead(
-      {
-        url: `/notifications/${id}/read`,
-        method: "patch",
-        values: {},
-      },
-      {
+    markAsRead({ id }, {
         onSuccess: () => {
-          refetch();
           if (link) {
             navigate(link);
             setIsOpen(false);
           }
         },
-      }
-    );
+    });
   };
 
   const handleMarkAllAsRead = () => {
-    markAllAsRead(
-      {
-        url: "/notifications/read-all",
-        method: "patch",
-        values: {},
-      },
-      {
+    markAllAsRead(undefined, {
         onSuccess: () => {
           refetch();
         },
-      }
-    );
+    });
   };
 
   const getIcon = (type: string) => {
