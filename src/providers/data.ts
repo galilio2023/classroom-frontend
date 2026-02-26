@@ -10,15 +10,16 @@ const handleError = async (response: Response): Promise<HttpError> => {
   try {
     const json = await response.json();
     
-    // If backend returned Zod validation details
+    // If backend returned Zod validation details (Layer 3)
     if (json.details) {
       return {
         message: json.error || "Validation failed",
         statusCode: response.status,
-        errors: json.details, // This maps to Refine's form errors
+        errors: json.details, // Maps to Refine's form errors
       };
     }
 
+    // Standardized error message from Layer 1/3
     return {
       message: json.error || json.message || `HTTP error! status: ${response.status}`,
       statusCode: response.status,
@@ -78,6 +79,8 @@ export const dataProvider: DataProvider = {
     }
 
     const json: ListResponse = await response.json();
+    
+    // Layer 3: Backend now returns { success: true, data: [], pagination: {} }
     return {
       data: json.data ?? [],
       total: json.pagination?.total ?? json.data?.length ?? 0,
@@ -142,8 +145,11 @@ export const dataProvider: DataProvider = {
       throw await handleError(response);
     }
 
+    const json = await response.json();
+    
+    // Layer 5: Backend returns the soft-deleted object
     return {
-      data: { id } as any,
+      data: json.data || { id },
     };
   },
 
@@ -178,6 +184,7 @@ export const dataProvider: DataProvider = {
      
      const json = await response.json();
      
+     // Layer 3: Standardized response check
      if (json && typeof json === 'object' && 'data' in json) {
          return json;
      }
