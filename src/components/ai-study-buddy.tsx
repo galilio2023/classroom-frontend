@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { useCustomMutation, useGetIdentity } from "@refinedev/core";
+import { useCustomMutation } from "@refinedev/core";
 import {
   Card,
   CardContent,
@@ -10,9 +10,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Sparkles, Send, X, MessageCircle, Loader2, GraduationCap, User as UserIcon } from "lucide-react";
-import { User, UserRole } from "@/types";
+import { Avatar } from "@/components/ui/avatar";
+import { Sparkles, Send, X, MessageCircle, GraduationCap, User as UserIcon } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 
 interface Message {
@@ -27,9 +26,6 @@ interface AIStudyBuddyProps {
 }
 
 export const AIStudyBuddy = ({ subject, topic, assignment }: AIStudyBuddyProps) => {
-  const { data: identity } = useGetIdentity<User>();
-  const isTeacher = identity?.role === UserRole.TEACHER || identity?.role === UserRole.ADMIN;
-
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
@@ -46,8 +42,6 @@ export const AIStudyBuddy = ({ subject, topic, assignment }: AIStudyBuddyProps) 
       }
     }
   }, [messages, isLoading]);
-
-  if (!isTeacher) return null;
 
   const handleSend = () => {
     if (!input.trim() || isLoading) return;
