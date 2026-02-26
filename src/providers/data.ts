@@ -10,15 +10,16 @@ const handleError = async (response: Response): Promise<HttpError> => {
   try {
     const json = await response.json();
     
-    // If backend returned Zod validation details
+    // If backend returned Zod validation details (Layer 3)
     if (json.details) {
       return {
         message: json.error || "Validation failed",
         statusCode: response.status,
-        errors: json.details, // This maps to Refine's form errors
+        errors: json.details, // Maps to Refine's form errors
       };
     }
 
+    // Standardized error message from Layer 1/3
     return {
       message: json.error || json.message || `HTTP error! status: ${response.status}`,
       statusCode: response.status,
@@ -42,15 +43,20 @@ const fetcher = async (url: string, options?: RequestInit) => {
   });
 };
 
+/**
+ * Resource Filter Mappings (Rule 5 of CODE_PATTERNS.md)
+ * Explicitly defines how frontend filters map to backend query parameters.
+ */
 const resourceFilterMappings: Record<string, Record<string, string>> = {
   departments: { name: "search", code: "search" },
-  users: { search: "search", name: "search", email: "search" },
+  users: { search: "search", name: "search", email: "search", role: "role" },
   subjects: { name: "search", code: "search", department: "department" },
   classes: { name: "search", subject: "subject", teacher: "teacher" },
-  enrollments: { classId: "classId" },
+  enrollments: { classId: "classId", studentId: "studentId" },
   assignments: { classId: "classId" },
-  submissions: { assignmentId: "assignmentId" },
+  submissions: { assignmentId: "assignmentId", studentId: "studentId" },
   discussions: { classId: "classId" },
+  attendance: { classId: "classId", date: "date" },
 };
 
 export const dataProvider: DataProvider = {
@@ -78,6 +84,8 @@ export const dataProvider: DataProvider = {
     }
 
     const json: ListResponse = await response.json();
+    
+    // Layer 3: Backend now returns { success: true, data: [], pagination: {} }
     return {
       data: json.data ?? [],
       total: json.pagination?.total ?? json.data?.length ?? 0,
@@ -142,8 +150,11 @@ export const dataProvider: DataProvider = {
       throw await handleError(response);
     }
 
+    const json = await response.json();
+    
+    // Layer 5: Backend returns the soft-deleted object
     return {
-      data: { id } as any,
+      data: json.data || { id },
     };
   },
 
@@ -178,6 +189,7 @@ export const dataProvider: DataProvider = {
      
      const json = await response.json();
      
+     // Layer 3: Standardized response check
      if (json && typeof json === 'object' && 'data' in json) {
          return json;
      }

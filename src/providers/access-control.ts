@@ -1,93 +1,79 @@
 import { AccessControlProvider } from "@refinedev/core";
 import { authProvider } from "./auth";
 import { dataProvider } from "./data";
-import { User } from "@/types"; // Import the User type
+import { User } from "@/types";
 
 export const accessControlProvider: AccessControlProvider = {
   can: async ({ resource, action, params }) => {
     const identity = (await authProvider.getIdentity?.()) as User | null;
     const role = identity?.role;
+    
+    const resourceName = resource || "";
 
+    // 1. Admins have full access
     if (role === "admin") {
       return { can: true };
     }
 
+    // 2. Teacher Permissions
     if (role === "teacher") {
-      if (resource === "dashboard" || resource === "ai-assistant" || resource === "discussions" || resource === "calendar") {
+      if (["dashboard", "ai-assistant", "discussions", "calendar", "departments", "subjects", "attendance"].includes(resourceName)) {
         return { can: true };
       }
 
-      if (
-        resource === "departments" ||
-        resource === "subjects" ||
-        resource === "assignments"
-      ) {
-        return { can: true };
-      }
-
-      if (resource === "classes") {
+      if (resourceName === "classes" || resourceName === "assignments") {
         if (action === "list" || action === "create") {
           return { can: true };
         }
-        if (action === "show" || action === "edit" || action === "delete") {
-          if (!params?.id) {
-            return {
-              can: false,
-              reason: "No record ID specified for authorization check.",
-            };
-          }
+
+        if (["show", "edit", "delete"].includes(action)) {
+          if (!params?.id) return { can: false, reason: "No record ID provided." };
+
           try {
-            const { data: classData } = await dataProvider.getOne({
-              resource: "classes",
-              id: params.id,
-            });
-            if (classData && classData.teacherId === identity?.id) {
-              return { can: true };
+            const { data } = await dataProvider.getOne({ resource: resourceName, id: params.id });
+            
+            // Strict Ownership Check for Classes
+            if (resourceName === "classes") {
+              if (data?.teacherId === identity?.id) return { can: true };
             }
-            return {
-              can: false,
-              reason: "You can only manage classes that you own.",
-            };
+            
+            // Strict Ownership Check for Assignments
+            // Backend GET /assignments/:id includes { class: { teacherId: ... } }
+            if (resourceName === "assignments") {
+              if (data?.class?.teacherId === identity?.id) return { can: true };
+            }
+            
+            return { can: false, reason: "You do not own this resource." }; 
           } catch (error) {
-            console.error("Error checking access for class:", error);
-            return {
-              can: false,
-              reason: "An error occurred while checking permissions.",
-            };
+            return { can: false, reason: "Error checking ownership." };
           }
         }
       }
-      return {
-        can: false,
-        reason: "This page or action is not available for the Teacher role.",
-      };
+      
+      if (resourceName === "submissions") {
+          return { can: true }; // Teachers can view/grade submissions
+      }
+
+      return { can: false, reason: "Access denied for Teacher role." };
     }
 
+    // 3. Student Permissions
     if (role === "student") {
-      if (
-        (resource === "subjects" ||
-          resource === "classes" ||
-          resource === "assignments" ||
-          resource === "discussions" ||
-          resource === "calendar") &&
-        (action === "list" || action === "show")
-      ) {
+      const allowedResources = ["subjects", "classes", "assignments", "discussions", "calendar", "dashboard", "attendance"];
+      const allowedActions = ["list", "show"];
+
+      if (allowedResources.includes(resourceName) && allowedActions.includes(action)) {
         return { can: true };
       }
-      if (resource === "dashboard") {
-        return { can: true };
+      
+      if (resourceName === "submissions" && (action === "list" || action === "create" || action === "show")) {
+          return { can: true };
       }
-      return {
-        can: false,
-        reason: "This page or action is not available for the Student role.",
-      };
+
+      return { can: false, reason: "Access denied for Student role." };
     }
 
-    return {
-      can: false,
-      reason:
-        "You are not authorized to perform this action. Please contact an administrator if you believe this is an error.",
-    };
+    return { can: false, reason: "Unauthorized." };
   },
   options: {
     buttons: {
