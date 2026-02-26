@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useCustom, useCustomMutation, useGetIdentity } from "@refinedev/core";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   Popover,
   PopoverContent,
@@ -20,6 +21,7 @@ export const NotificationBell = () => {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const { data: identity } = useGetIdentity<User>();
+  const queryClient = useQueryClient();
 
   // Fetch notifications
   const { query } = useCustom<Notification[]>({
@@ -70,20 +72,82 @@ export const NotificationBell = () => {
     };
   }, [identity?.id, refetch, navigate]);
 
-  // Mark as read mutation
-  const { mutate: markAsRead } = useCustomMutation();
-  const { mutate: markAllAsRead } = useCustomMutation();
+  // Mark as read mutation (Optimistic Update)
+  const { mutate: markAsRead } = useCustomMutation({
+    mutationOptions: {
+        onMutate: async (variables: any) => {
+            // Robustly extract ID from values passed to mutate()
+            const id = variables.values.id;
+
+            const queryKey = ["custom", "get", "/notifications"];
+            await queryClient.cancelQueries({ queryKey });
+            const previousNotifications = queryClient.getQueryData(queryKey);
+
+            queryClient.setQueriesData({ queryKey }, (old: any) => {
+                if (!old?.data) return old;
+                return {
+                    ...old,
+                    data: old.data.map((n: Notification) => 
+                        n.id === Number(id) ? { ...n, isRead: true } : n
+                    )
+                };
+            });
+
+            return { previousNotifications };
+        },
+        onError: (_err, _variables, context: any) => {
+            if (context?.previousNotifications) {
+                const queryKey = ["custom", "get", "/notifications"];
+                queryClient.setQueriesData({ queryKey }, context.previousNotifications);
+            }
+        },
+        onSettled: () => {
+            const queryKey = ["custom", "get", "/notifications"];
+            queryClient.invalidateQueries({ queryKey });
+        },
+    }
+  });
+
+  // Mark all as read mutation (Optimistic Update)
+  const { mutate: markAllAsRead } = useCustomMutation({
+    mutationOptions: {
+        onMutate: async () => {
+            const queryKey = ["custom", "get", "/notifications"];
+            await queryClient.cancelQueries({ queryKey });
+            const previousNotifications = queryClient.getQueryData(queryKey);
+
+            queryClient.setQueriesData({ queryKey }, (old: any) => {
+                if (!old?.data) return old;
+                return {
+                    ...old,
+                    data: old.data.map((n: Notification) => ({ ...n, isRead: true }))
+                };
+            });
+
+            return { previousNotifications };
+        },
+        onError: (_err, _variables, context: any) => {
+             if (context?.previousNotifications) {
+                const queryKey = ["custom", "get", "/notifications"];
+                queryClient.setQueriesData({ queryKey }, context.previousNotifications);
+            }
+        },
+        onSettled: () => {
+            const queryKey = ["custom", "get", "/notifications"];
+            queryClient.invalidateQueries({ queryKey });
+        },
+    }
+  });
 
   const handleMarkAsRead = (id: number, link: string | null) => {
     markAsRead(
       {
         url: `/notifications/${id}/read`,
         method: "patch",
-        values: {},
+        values: { id }, // Pass ID in values for robust extraction in onMutate
       },
       {
         onSuccess: () => {
-          refetch();
           if (link) {
             navigate(link);
             setIsOpen(false);
@@ -101,9 +165,7 @@ export const NotificationBell = () => {
         values: {},
       },
       {
-        onSuccess: () => {
-          refetch();
-        },
+        // No explicit refetch needed, onSettled handles it
       }
     );
   };

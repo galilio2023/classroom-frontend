@@ -14,6 +14,7 @@ import { PromoCards } from "@/components/dashboard/promo-cards";
 import { AtRiskStudents } from "@/components/dashboard/at-risk-students";
 import { StudentAcademicJourney } from "@/components/dashboard/student-academic-journey";
 import { DashboardStats, AttendanceTrend, PendingSubmission, UpcomingAssignment, ScheduleItem } from "@/types/dashboard";
+import { ErrorBoundary } from "@/components/error-boundary";
 
 interface GradeDistribution {
   range: string;
@@ -100,30 +101,56 @@ const Dashboard = () => {
 
       <div className="grid gap-10 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-12">
-            {isStaff && <EngagementChart attendanceData={attendanceTrend} gradeData={gradeDistribution} />}
-            {isStudent && (
-              <StudentAcademicJourney 
-                gradeTrends={gradeTrends} 
-                subjectMastery={subjectMastery} 
-                attendanceSummary={attendanceSummary} 
-              />
+            {isStaff && (
+              <ErrorBoundary>
+                <EngagementChart attendanceData={attendanceTrend} gradeData={gradeDistribution} />
+              </ErrorBoundary>
             )}
-            {isStudent && <UpcomingAssignmentsList assignments={upcomingAssignments} list={list} show={show} />}
-            {isStaff && <PendingGradingList submissions={pendingSubmissions} show={show} />}
-            <QuickActions cards={activeCards} list={list} />
+            {isStudent && (
+              <ErrorBoundary>
+                <StudentAcademicJourney 
+                  gradeTrends={gradeTrends} 
+                  subjectMastery={subjectMastery} 
+                  attendanceSummary={attendanceSummary} 
+                />
+              </ErrorBoundary>
+            )}
+            {isStudent && (
+              <ErrorBoundary>
+                <UpcomingAssignmentsList assignments={upcomingAssignments} list={list} show={show} />
+              </ErrorBoundary>
+            )}
+            {isStaff && (
+              <ErrorBoundary>
+                <PendingGradingList submissions={pendingSubmissions} show={show} />
+              </ErrorBoundary>
+            )}
+            <ErrorBoundary>
+              <QuickActions cards={activeCards} list={list} />
+            </ErrorBoundary>
         </div>
 
         <div className="space-y-10">
-            <TodaySchedule schedule={todaySchedule} show={show} />
-            {isStaff && <AtRiskStudents students={atRiskStudents} />}
+            <ErrorBoundary>
+              <TodaySchedule schedule={todaySchedule} show={show} />
+            </ErrorBoundary>
             {isStaff && (
-              <PlatformOverview 
-                stats={stats} 
-                isLoading={isLoading} 
-                onRefresh={() => void dashboardQuery.refetch()}
-              />
+              <ErrorBoundary>
+                <AtRiskStudents students={atRiskStudents} />
+              </ErrorBoundary>
             )}
-            <PromoCards isStaff={isStaff} list={list} />
+            {isStaff && (
+              <ErrorBoundary>
+                <PlatformOverview 
+                  stats={stats} 
+                  isLoading={isLoading} 
+                  onRefresh={() => void dashboardQuery.refetch()}
+                />
+              </ErrorBoundary>
+            )}
+            <ErrorBoundary>
+              <PromoCards isStaff={isStaff} list={list} />
+            </ErrorBoundary>
         </div>
       </div>
     </div>
