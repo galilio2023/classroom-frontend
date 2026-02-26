@@ -17,7 +17,7 @@ export const accessControlProvider: AccessControlProvider = {
 
     // 2. Teacher Permissions
     if (role === "teacher") {
-      if (["dashboard", "ai-assistant", "discussions", "calendar", "departments", "subjects"].includes(resourceName)) {
+      if (["dashboard", "ai-assistant", "discussions", "calendar", "departments", "subjects", "attendance"].includes(resourceName)) {
         return { can: true };
       }
 
@@ -38,7 +38,7 @@ export const accessControlProvider: AccessControlProvider = {
             }
             
             // Strict Ownership Check for Assignments
-            // The backend now returns the 'class' object with assignments
+            // Backend GET /assignments/:id includes { class: { teacherId: ... } }
             if (resourceName === "assignments") {
               if (data?.class?.teacherId === identity?.id) return { can: true };
             }
@@ -59,7 +59,7 @@ export const accessControlProvider: AccessControlProvider = {
 
     // 3. Student Permissions
     if (role === "student") {
-      const allowedResources = ["subjects", "classes", "assignments", "discussions", "calendar", "dashboard"];
+      const allowedResources = ["subjects", "classes", "assignments", "discussions", "calendar", "dashboard", "attendance"];
       const allowedActions = ["list", "show"];
 
       if (allowedResources.includes(resourceName) && allowedActions.includes(action)) {
