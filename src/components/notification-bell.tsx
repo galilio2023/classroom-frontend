@@ -38,7 +38,7 @@ export const NotificationBell = () => {
       query: { userId: identity.id },
     });
 
-    socket.on("notification", (newNotification: Notification) => {
+    const handleNotification = (newNotification: Notification) => {
       refetch();
       toast.info(newNotification.title, {
         description: newNotification.message,
@@ -47,9 +47,12 @@ export const NotificationBell = () => {
           onClick: () => navigate(newNotification.link!),
         } : undefined,
       });
-    });
+    };
+
+    socket.on("notification", handleNotification);
 
     return () => {
+      socket.off("notification", handleNotification);
       socket.disconnect();
     };
   }, [identity?.id, refetch, navigate]);
