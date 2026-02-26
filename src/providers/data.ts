@@ -43,15 +43,20 @@ const fetcher = async (url: string, options?: RequestInit) => {
   });
 };
 
+/**
+ * Resource Filter Mappings (Rule 5 of CODE_PATTERNS.md)
+ * Explicitly defines how frontend filters map to backend query parameters.
+ */
 const resourceFilterMappings: Record<string, Record<string, string>> = {
   departments: { name: "search", code: "search" },
-  users: { search: "search", name: "search", email: "search" },
+  users: { search: "search", name: "search", email: "search", role: "role" },
   subjects: { name: "search", code: "search", department: "department" },
   classes: { name: "search", subject: "subject", teacher: "teacher" },
-  enrollments: { classId: "classId" },
+  enrollments: { classId: "classId", studentId: "studentId" },
   assignments: { classId: "classId" },
-  submissions: { assignmentId: "assignmentId" },
+  submissions: { assignmentId: "assignmentId", studentId: "studentId" },
   discussions: { classId: "classId" },
+  attendance: { classId: "classId", date: "date" },
 };
 
 export const dataProvider: DataProvider = {
