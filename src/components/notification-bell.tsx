@@ -22,10 +22,12 @@ export const NotificationBell = () => {
   const { data: identity } = useGetIdentity<User>();
 
   // Fetch notifications
-  const { data: notificationsData, refetch } = useCustom<Notification[]>({
+  const { data: notificationsData, query } = useCustom<Notification[]>({
     url: "/notifications",
     method: "get",
-  }) as any;
+  });
+
+  const refetch = query.refetch;
 
   const notifications = notificationsData?.data || [];
   const unreadCount = notifications.filter((n: Notification) => !n.isRead).length;
@@ -55,8 +57,14 @@ export const NotificationBell = () => {
 
     socket.on("notification", handleNotification);
 
+    // Reconnection Logic: Fetch notifications when socket reconnects
+    socket.on("connect", () => {
+      refetch();
+    });
+
     return () => {
       socket.off("notification", handleNotification);
+      socket.off("connect"); // Clean up connect listener
       socket.disconnect();
     };
   }, [identity?.id, refetch, navigate]);
