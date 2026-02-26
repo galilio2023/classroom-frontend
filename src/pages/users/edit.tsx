@@ -27,7 +27,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { User, Mail, Shield, Lightbulb, Info } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { User, Mail, Shield, Lightbulb, Info, Phone, MapPin, FileText } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { userFormSchema } from "@/schemas/user";
 import { UserRole } from "@/types";
@@ -58,10 +59,10 @@ const UsersEdit = () => {
                 <CardHeader>
                   <CardTitle className="text-xl font-semibold flex items-center gap-2">
                     <User className="h-5 w-5 text-primary" />
-                    Edit User
+                    Edit User Profile
                   </CardTitle>
                   <CardDescription>
-                    Update the profile for "{query?.data?.data.name}".
+                    Update the profile and contact information for "{query?.data?.data.name}".
                   </CardDescription>
                 </CardHeader>
 
@@ -109,37 +110,98 @@ const UsersEdit = () => {
                     />
                   </div>
 
-                  {/* Role Dropdown */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Role Dropdown */}
+                    <FormField
+                      control={form.control}
+                      name="role"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center gap-2">
+                            <Shield className="h-4 w-4 text-muted-foreground" />
+                            Role
+                          </FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            value={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select a role" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value={UserRole.STUDENT}>
+                                Student
+                              </SelectItem>
+                              <SelectItem value={UserRole.TEACHER}>
+                                Teacher
+                              </SelectItem>
+                              <SelectItem value={UserRole.ADMIN}>
+                                Admin
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Phone Number */}
+                    <FormField
+                      control={form.control}
+                      name="phoneNumber"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center gap-2">
+                            <Phone className="h-4 w-4 text-muted-foreground" />
+                            Phone Number
+                          </FormLabel>
+                          <FormControl>
+                            <Input placeholder="+1 234 567 890" {...field} value={field.value || ""} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  {/* Address */}
                   <FormField
                     control={form.control}
-                    name="role"
+                    name="address"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="flex items-center gap-2">
-                          <Shield className="h-4 w-4 text-muted-foreground" />
-                          Role
+                          <MapPin className="h-4 w-4 text-muted-foreground" />
+                          Physical Address
                         </FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          value={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select a role" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value={UserRole.STUDENT}>
-                              Student
-                            </SelectItem>
-                            <SelectItem value={UserRole.TEACHER}>
-                              Teacher
-                            </SelectItem>
-                            <SelectItem value={UserRole.ADMIN}>
-                              Admin
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <FormControl>
+                          <Input placeholder="123 Education St, City, Country" {...field} value={field.value || ""} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Bio */}
+                  <FormField
+                    control={form.control}
+                    name="bio"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center gap-2">
+                          <FileText className="h-4 w-4 text-muted-foreground" />
+                          Biography
+                        </FormLabel>
+                        <FormControl>
+                          <Textarea 
+                            placeholder="Tell us a bit about this user..." 
+                            className="min-h-[100px] resize-none"
+                            {...field} 
+                            value={field.value || ""}
+                          />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -174,17 +236,19 @@ const UsersEdit = () => {
             </CardHeader>
             <CardContent className="space-y-4 text-sm text-muted-foreground">
               <p>
-                Changing a user's role will immediately affect their
-                permissions in the system.
+                <strong>Contact Data:</strong> Providing a phone number and address helps administrators reach out in case of emergencies.
+              </p>
+              <p>
+                <strong>Biography:</strong> This is a great place to list academic interests or teaching specialties.
               </p>
             </CardContent>
           </Card>
 
           <Alert>
             <Info className="h-4 w-4" />
-            <AlertTitle>Editing Mode</AlertTitle>
+            <AlertTitle>Privacy Note</AlertTitle>
             <AlertDescription className="text-xs text-muted-foreground mt-1">
-              Changes made here will overwrite the existing user data.
+              Contact information is only visible to administrators and the user themselves.
             </AlertDescription>
           </Alert>
         </div>

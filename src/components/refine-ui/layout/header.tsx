@@ -1,5 +1,3 @@
-"use client";
-
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -9,8 +7,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useGetIdentity, useLogout } from "@refinedev/core";
-import { CircleUser, LogOut, Settings, LifeBuoy } from "lucide-react";
+import { useGetIdentity, useLogout, useNavigation } from "@refinedev/core";
+import { CircleUser, LogOut, User as UserIcon, LifeBuoy } from "lucide-react";
 import { toast } from "sonner";
 import { User } from "@/types";
 import { ThemeToggle } from "../theme/theme-toggle";
@@ -21,6 +19,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 export function Header() {
   const { mutate: logout } = useLogout();
   const { data: identity } = useGetIdentity<User>();
+  const { show, edit } = useNavigation();
 
   const handleLogout = () => {
     logout(undefined, {
@@ -65,9 +64,19 @@ export function Header() {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator className="bg-border/50" />
-            <DropdownMenuItem className="gap-2 cursor-pointer">
-              <Settings className="h-4 w-4" />
-              <span>Settings</span>
+            <DropdownMenuItem 
+                className="gap-2 cursor-pointer"
+                onClick={() => identity?.id && show("users", identity.id)}
+            >
+              <UserIcon className="h-4 w-4" />
+              <span>My Profile</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+                className="gap-2 cursor-pointer"
+                onClick={() => identity?.id && edit("users", identity.id)}
+            >
+              <CircleUser className="h-4 w-4" />
+              <span>Edit Profile</span>
             </DropdownMenuItem>
             <DropdownMenuItem className="gap-2 cursor-pointer">
               <LifeBuoy className="h-4 w-4" />

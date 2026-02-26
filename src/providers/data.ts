@@ -52,11 +52,13 @@ const resourceFilterMappings: Record<string, Record<string, string>> = {
   users: { search: "search", name: "search", email: "search", role: "role" },
   subjects: { name: "search", code: "search", department: "department" },
   classes: { name: "search", subject: "subject", teacher: "teacher" },
-  enrollments: { classId: "classId", studentId: "studentId" },
+  enrollments: { classId: "classId", studentId: "studentId", status: "status" },
   assignments: { classId: "classId" },
   submissions: { assignmentId: "assignmentId", studentId: "studentId" },
-  discussions: { classId: "classId" },
+  discussions: { classId: "classId", parentId: "parentId" },
   attendance: { classId: "classId", date: "date" },
+  resources: { classId: "classId", search: "search" },
+  "profile-requests": { status: "status", userId: "userId" },
 };
 
 export const dataProvider: DataProvider = {

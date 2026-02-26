@@ -81,3 +81,19 @@ The application had inconsistent error handling across different routes. Fronten
 
 **Summary:**
 Established a unified error handling architecture between the frontend and backend. This ensures that users receive clear, actionable feedback (especially for form validation) and simplifies the developer experience by centralizing error logic.
+
+## 6. Real-time Notifications and Advanced Analytics Architecture
+
+**Problem:**
+The platform lacked real-time feedback for users (e.g., when an assignment is graded or a profile request is approved). Additionally, the dashboard needed more advanced, data-driven insights like "At-Risk Students" and "Academic Journey" visualizations, which required a more robust component architecture and real-time data synchronization.
+
+**Solution:**
+- **Socket.io Integration:** Implemented a real-time notification system using `socket.io-client` on the frontend and `socket.io` on the backend.
+    - **Backend:** Created a `socket.ts` utility to manage connections, rooms (user-specific and class-specific), and event emission.
+    - **Frontend:** Developed a `NotificationBell` component that maintains a socket connection, listens for `notification` events, and provides instant feedback via `sonner` toasts and a persistent notification list.
+- **Advanced Analytics Components:** Created specialized dashboard components (`AtRiskStudents`, `StudentAcademicJourney`) using `recharts` and `shadcn/ui`. These components are designed to be presentational, receiving data via props to maintain a clean separation of concerns.
+- **Resource Expansion:** Added new resources and routes for `profile-requests` and `enrollments`, including a dedicated `UserShow` page to provide a comprehensive view of user profiles and related activity.
+- **CORS & Security Hardening:** Updated backend CORS configuration to explicitly allow multiple local development ports (5173-5175) and 127.0.0.1 addresses, ensuring reliable socket connections and API requests during development (adhering to Rule 8).
+
+**Summary:**
+Enhanced the platform's interactivity and analytical capabilities by integrating real-time communication and advanced data visualizations. This update also expanded the core resource model and hardened the security configuration, providing a more professional and responsive user experience.

@@ -18,6 +18,12 @@ export interface User {
   image: string | null;
   role: UserRole;
   imageCldPubId: string | null;
+  phoneNumber: string | null;
+  bio: string | null;
+  address: string | null;
+  dateOfBirth: string | null;
+  parentName: string | null;
+  parentPhone: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -55,13 +61,14 @@ export interface Submission {
   content: string | null;
   grade: number | null;
   feedback: string | null;
-  fileUrl: string | null; // Added for file uploads
-  fileCldPubId: string | null; // Added for file uploads
+  fileUrl: string | null;
+  fileCldPubId: string | null;
+  isLate: boolean;
   assignmentId: number;
   studentId: string;
   createdAt: string;
   updatedAt: string;
-  student?: User; // Student who made the submission
+  student?: User;
 }
 
 export interface Assignment {
@@ -69,20 +76,25 @@ export interface Assignment {
   title: string;
   description: string | null;
   dueDate: string | null;
-  fileUrl: string | null; // Added for attachments
-  fileCldPubId: string | null; // Added for attachments
+  fileUrl: string | null;
+  fileCldPubId: string | null;
   classId: number;
   createdAt: string;
   updatedAt: string;
-  submissions?: Submission[]; // Include submissions in the assignment type
+  submissions?: Submission[];
 }
 
 export type Enrollment = {
   id: number;
   studentId: string;
   classId: number;
+  status: "pending" | "approved" | "rejected";
   createdAt: string;
   student: User;
+  class: {
+    id: number;
+    name: string;
+  };
 };
 
 export type Class = z.infer<typeof classFormSchema> & {
@@ -135,6 +147,30 @@ export interface Discussion {
   parentId: number | null;
   user: Pick<User, "id" | "name" | "image" | "role">;
   replies?: Discussion[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Resource {
+  id: number;
+  title: string;
+  description: string | null;
+  type: "file" | "link" | "video" | "other";
+  url: string;
+  cldPubId: string | null;
+  classId: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ProfileChangeRequest {
+  id: number;
+  userId: string;
+  oldData: any;
+  newData: any;
+  status: "pending" | "approved" | "rejected";
+  adminNotes: string | null;
+  user: User;
   createdAt: string;
   updatedAt: string;
 }

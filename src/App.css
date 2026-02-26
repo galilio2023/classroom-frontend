@@ -26,6 +26,12 @@
   --ai-gradient-start: #4f46e5; /* indigo-600 */
   --ai-gradient-middle: #9333ea; /* purple-600 */
   --ai-gradient-end: #db2777; /* pink-600 */
+
+  /* Semantic Colors */
+  --success: hsl(142.1 70.6% 45.3%);
+  --success-foreground: hsl(144.1 70.6% 96.1%);
+  --warning: hsl(37.7 92.1% 50.2%);
+  --warning-foreground: hsl(38 92% 95%);
 }
 
 /* --- PRO MIDNIGHT DARK MODE --- */
@@ -49,6 +55,9 @@
   --border: hsl(240 5% 15%);
   --input: hsl(240 5% 15%);
   --ring: hsl(240 4.9% 83.9%);
+
+  --success: hsl(142.1 70.6% 45.3%);
+  --warning: hsl(37.7 92.1% 50.2%);
 }
 
 @theme inline {
@@ -71,6 +80,11 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
 
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 4px);

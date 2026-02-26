@@ -11,11 +11,34 @@ import { QuickActions } from "@/components/dashboard/quick-actions";
 import { TodaySchedule } from "@/components/dashboard/today-schedule";
 import { PlatformOverview } from "@/components/dashboard/platform-overview";
 import { PromoCards } from "@/components/dashboard/promo-cards";
+import { AtRiskStudents } from "@/components/dashboard/at-risk-students";
+import { StudentAcademicJourney } from "@/components/dashboard/student-academic-journey";
 import { DashboardStats, AttendanceTrend, PendingSubmission, UpcomingAssignment, ScheduleItem } from "@/types/dashboard";
 
 interface GradeDistribution {
   range: string;
   count: number;
+}
+
+interface AtRiskStudent {
+  id: string;
+  name: string;
+  image?: string;
+  reason: string;
+  value: string;
+}
+
+interface DashboardData {
+  todaySchedule: ScheduleItem[];
+  stats?: DashboardStats;
+  attendanceTrend?: AttendanceTrend[];
+  gradeDistribution?: GradeDistribution[];
+  pendingSubmissions?: PendingSubmission[];
+  upcomingAssignments?: UpcomingAssignment[];
+  atRiskStudents?: AtRiskStudent[];
+  gradeTrends?: any[];
+  subjectMastery?: any[];
+  attendanceSummary?: any;
 }
 
 const Dashboard = () => {
@@ -25,53 +48,29 @@ const Dashboard = () => {
   const isStaff = identity?.role === "teacher" || identity?.role === "admin";
   const isStudent = identity?.role === "student";
   
-  // UNIFIED REFINE V5 HOOKS
-  const { query: statsQuery } = useCustom<DashboardStats>({
-    url: `/stats`,
-    method: "get",
-    queryOptions: { enabled: isStaff && !!identity },
-  });
-
-  const { query: trendQuery } = useCustom<AttendanceTrend[]>({
-    url: `/stats/attendance-trend`,
-    method: "get",
-    queryOptions: { enabled: isStaff && !!identity },
-  });
-
-  const { query: gradeQuery } = useCustom<GradeDistribution[]>({
-    url: `/stats/grade-distribution`,
-    method: "get",
-    queryOptions: { enabled: isStaff && !!identity },
-  });
-
-  const { query: pendingQuery } = useCustom<PendingSubmission[]>({
-    url: `/submissions/pending`,
-    method: "get",
-    queryOptions: { enabled: isStaff && !!identity },
-  });
-
-  const { query: upcomingQuery } = useCustom<UpcomingAssignment[]>({
-    url: `/assignments/upcoming`,
-    method: "get",
-    queryOptions: { enabled: isStudent && !!identity },
-  });
-
-  const { query: scheduleQuery } = useCustom<ScheduleItem[]>({
-    url: `/classes/today`,
+  // UNIFIED DASHBOARD FETCH
+  const { query: dashboardQuery } = useCustom<DashboardData>({
+    url: `/dashboard`,
     method: "get",
     queryOptions: { enabled: !!identity },
   });
 
   // Safe data extraction
-  const stats = statsQuery.data?.data;
-  const attendanceTrend = trendQuery.data?.data ?? [];
-  const gradeDistribution = gradeQuery.data?.data ?? [];
-  const pendingSubmissions = pendingQuery.data?.data ?? [];
-  const upcomingAssignments = upcomingQuery.data?.data ?? [];
-  const todaySchedule = scheduleQuery.data?.data ?? [];
+  const data = dashboardQuery.data?.data;
   
-  const isLoadingStats = statsQuery.isLoading || statsQuery.isFetching;
-  const isLoadingSchedule = scheduleQuery.isLoading;
+  const stats = data?.stats;
+  const attendanceTrend = data?.attendanceTrend ?? [];
+  const gradeDistribution = data?.gradeDistribution ?? [];
+  const pendingSubmissions = data?.pendingSubmissions ?? [];
+  const upcomingAssignments = data?.upcomingAssignments ?? [];
+  const todaySchedule = data?.todaySchedule ?? [];
+  const atRiskStudents = data?.atRiskStudents ?? [];
+  
+  const gradeTrends = data?.gradeTrends ?? [];
+  const subjectMastery = data?.subjectMastery ?? [];
+  const attendanceSummary = data?.attendanceSummary ?? { present: 0, absent: 0, late: 0, total: 0 };
+  
+  const isLoading = dashboardQuery.isLoading || dashboardQuery.isFetching;
 
   const activeCards = isStudent ? [
     { title: "My Classes", icon: Layout, heading: "Enrolled Classes", description: "Access active classrooms.", resource: "classes" },
@@ -84,7 +83,7 @@ const Dashboard = () => {
     { title: "Users", icon: Users, heading: "Directory", description: "Students and staff.", resource: "users" },
   ];
 
-  if (isIdentityLoading || (isLoadingSchedule && todaySchedule.length === 0)) {
+  if (isIdentityLoading || (isLoading && todaySchedule.length === 0)) {
     return (
       <div className="flex h-dvh items-center justify-center">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
@@ -102,6 +101,13 @@ const Dashboard = () => {
       <div className="grid gap-10 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-12">
             {isStaff && <EngagementChart attendanceData={attendanceTrend} gradeData={gradeDistribution} />}
+            {isStudent && (
+              <StudentAcademicJourney 
+                gradeTrends={gradeTrends} 
+                subjectMastery={subjectMastery} 
+                attendanceSummary={attendanceSummary} 
+              />
+            )}
             {isStudent && <UpcomingAssignmentsList assignments={upcomingAssignments} list={list} show={show} />}
             {isStaff && <PendingGradingList submissions={pendingSubmissions} show={show} />}
             <QuickActions cards={activeCards} list={list} />
@@ -109,11 +115,12 @@ const Dashboard = () => {
 
         <div className="space-y-10">
             <TodaySchedule schedule={todaySchedule} show={show} />
+            {isStaff && <AtRiskStudents students={atRiskStudents} />}
             {isStaff && (
               <PlatformOverview 
                 stats={stats} 
-                isLoading={isLoadingStats} 
-                onRefresh={() => void statsQuery.refetch()} 
+                isLoading={isLoading} 
+                onRefresh={() => void dashboardQuery.refetch()}
               />
             )}
             <PromoCards isStaff={isStaff} list={list} />

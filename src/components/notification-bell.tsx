@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useCustom, useCustomMutation } from "@refinedev/core";
+import { useState, useEffect } from "react";
+import { useCustom, useCustomMutation, useGetIdentity } from "@refinedev/core";
 import {
   Popover,
   PopoverContent,
@@ -9,14 +9,17 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Bell, CheckCheck, Info, GraduationCap, ClipboardCheck } from "lucide-react";
-import { Notification } from "@/types";
+import { Notification, User } from "@/types";
 import { formatDistanceToNow } from "date-fns";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { io } from "socket.io-client";
+import { toast } from "sonner";
 
 export const NotificationBell = () => {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
+  const { data: identity } = useGetIdentity<User>();
 
   // Fetch notifications
   const { data: notificationsData, refetch } = useCustom<Notification[]>({
@@ -26,6 +29,37 @@ export const NotificationBell = () => {
 
   const notifications = notificationsData?.data || [];
   const unreadCount = notifications.filter((n: Notification) => !n.isRead).length;
+
+  // --- SOCKET.IO INTEGRATION ---
+  useEffect(() => {
+    if (!identity?.id) return;
+
+    // Use environment variable for Socket.io URL, fallback to API URL base
+    const socketUrl = import.meta.env.VITE_SOCKET_URL || import.meta.env.VITE_API_URL.replace("/api", "");
+    
+    const socket = io(socketUrl, {
+      query: { userId: identity.id },
+      withCredentials: true, // Ensure cookies are sent for authentication
+    });
+
+    const handleNotification = (newNotification: Notification) => {
+      refetch();
+      toast.info(newNotification.title, {
+        description: newNotification.message,
+        action: newNotification.link ? {
+          label: "View",
+          onClick: () => navigate(newNotification.link!),
+        } : undefined,
+      });
+    };
+
+    socket.on("notification", handleNotification);
+
+    return () => {
+      socket.off("notification", handleNotification);
+      socket.disconnect();
+    };
+  }, [identity?.id, refetch, navigate]);
 
   // Mark as read mutation
   const { mutate: markAsRead } = useCustomMutation();

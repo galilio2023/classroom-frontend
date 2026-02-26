@@ -25,9 +25,10 @@ type DataTableProps<TData extends BaseRecord> = {
 export function DataTable<TData extends BaseRecord>({
   table: tableResult,
 }: DataTableProps<TData>) {
-  if (!tableResult?.refineCore || !tableResult?.reactTable) {
+  // --- SAFETY GUARD ---
+  if (!tableResult?.refineCore || !tableResult?.reactTable || !tableResult.reactTable.getHeaderGroups) {
     return (
-      <div className="flex justify-center items-center h-40">
+      <div className="flex justify-center items-center h-40 border rounded-md bg-muted/5">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     );
@@ -74,6 +75,9 @@ export function DataTable<TData extends BaseRecord>({
     };
   }, [tableQuery.data?.data, pageSize]);
 
+  // Ensure headerGroups exists before mapping
+  const headerGroups = getHeaderGroups() || [];
+
   return (
     <div className="flex flex-col flex-1 gap-4 w-full max-w-full overflow-hidden">
       {/* Scrollable Container */}
@@ -87,10 +91,10 @@ export function DataTable<TData extends BaseRecord>({
       >
         <Table 
             ref={tableRef} 
-            className="min-w-[1000px] w-full table-auto" // Increased min-width to 1000px to FORCE scroll
+            className="min-w-[1000px] w-full table-auto"
         >
           <TableHeader>
-            {getHeaderGroups().map((headerGroup) => (
+            {headerGroups.map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
                   <TableHead 

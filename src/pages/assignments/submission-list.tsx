@@ -8,7 +8,8 @@ import { DataTable } from "@/components/refine-ui/data-table/data-table";
 import { Submission, User } from "@/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Eye } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Eye, Clock } from "lucide-react";
 import { UseTableReturnType } from "@refinedev/react-table";
 import { HttpError } from "@refinedev/core";
 import { GradingDialog } from "./grading-dialog"; // Import the dialog
@@ -52,7 +53,21 @@ export const SubmissionList = ({ submissions = [] }: SubmissionListProps) => {
       {
         accessorKey: "updatedAt",
         header: "Submitted On",
-        cell: ({ getValue }) => new Date(getValue<string>()).toLocaleString(),
+        cell: ({ row }) => {
+          const date = new Date(row.original.updatedAt).toLocaleString();
+          const isLate = row.original.isLate;
+          return (
+            <div className="flex flex-col gap-1">
+              <span>{date}</span>
+              {isLate && (
+                <Badge variant="destructive" className="w-fit text-[9px] h-4 px-1.5 uppercase font-black">
+                  <Clock className="h-2.5 w-2.5 mr-1" />
+                  Late
+                </Badge>
+              )}
+            </div>
+          );
+        },
       },
       {
         accessorKey: "grade",
