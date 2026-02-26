@@ -19,7 +19,7 @@ export const StudentAcademicJourney = ({ gradeTrends, subjectMastery, attendance
               <TrendingUp className="h-5 w-5 text-primary" />
               <CardTitle className="text-lg">Grade Progress</CardTitle>
             </div>
-            <CardDescription>Your performance over time.</CardDescription>
+            <CardDescription>Your grade performance over time across assignments.</CardDescription>
           </CardHeader>
           <CardContent className="h-[250px] pt-4">
             <ResponsiveContainer width="100%" height="100%">
@@ -78,25 +78,25 @@ export const StudentAcademicJourney = ({ gradeTrends, subjectMastery, attendance
 
       {/* Attendance Summary Cards */}
       <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
-        <Card className="bg-emerald-500/5 border-emerald-500/20">
+        <Card className="bg-success/5 border-success/20">
           <CardContent className="p-4 flex flex-col items-center justify-center text-center">
-            <CheckCircle2 className="h-5 w-5 text-emerald-500 mb-2" />
-            <span className="text-2xl font-black text-emerald-600">{attendanceSummary?.present || 0}</span>
-            <span className="text-[10px] font-bold text-emerald-600/70 uppercase tracking-widest">Present</span>
+            <CheckCircle2 className="h-5 w-5 text-success mb-2" />
+            <span className="text-2xl font-black text-success">{attendanceSummary?.present || 0}</span>
+            <span className="text-[10px] font-bold text-success/70 uppercase tracking-widest">Present</span>
           </CardContent>
         </Card>
-        <Card className="bg-rose-500/5 border-rose-500/20">
+        <Card className="bg-destructive/5 border-destructive/20">
           <CardContent className="p-4 flex flex-col items-center justify-center text-center">
-            <XCircle className="h-5 w-5 text-rose-500 mb-2" />
-            <span className="text-2xl font-black text-rose-600">{attendanceSummary?.absent || 0}</span>
-            <span className="text-[10px] font-bold text-rose-600/70 uppercase tracking-widest">Absent</span>
+            <XCircle className="h-5 w-5 text-destructive mb-2" />
+            <span className="text-2xl font-black text-destructive">{attendanceSummary?.absent || 0}</span>
+            <span className="text-[10px] font-bold text-destructive/70 uppercase tracking-widest">Absent</span>
           </CardContent>
         </Card>
-        <Card className="bg-amber-500/5 border-amber-500/20">
+        <Card className="bg-warning/5 border-warning/20">
           <CardContent className="p-4 flex flex-col items-center justify-center text-center">
-            <Clock className="h-5 w-5 text-amber-500 mb-2" />
-            <span className="text-2xl font-black text-amber-600">{attendanceSummary?.late || 0}</span>
-            <span className="text-[10px] font-bold text-amber-600/70 uppercase tracking-widest">Late</span>
+            <Clock className="h-5 w-5 text-warning mb-2" />
+            <span className="text-2xl font-black text-warning">{attendanceSummary?.late || 0}</span>
+            <span className="text-[10px] font-bold text-warning/70 uppercase tracking-widest">Late</span>
           </CardContent>
         </Card>
         <Card className="bg-primary/5 border-primary/20">
