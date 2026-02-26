@@ -58,7 +58,7 @@ const resourceFilterMappings: Record<string, Record<string, string>> = {
   discussions: { classId: "classId", parentId: "parentId" },
   attendance: { classId: "classId", date: "date" },
   resources: { classId: "classId", search: "search" },
-  "profile-requests": { status: "status" },
+  "profile-requests": { status: "status", userId: "userId" },
 };
 
 export const dataProvider: DataProvider = {
