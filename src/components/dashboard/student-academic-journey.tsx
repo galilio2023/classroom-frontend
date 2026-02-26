@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, PieChart, Pie, Cell } from "recharts";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from "recharts";
 import { TrendingUp, BookOpen, CheckCircle2, Clock, XCircle } from "lucide-react";
 
 interface StudentAcademicJourneyProps {
@@ -9,14 +9,6 @@ interface StudentAcademicJourneyProps {
 }
 
 export const StudentAcademicJourney = ({ gradeTrends, subjectMastery, attendanceSummary }: StudentAcademicJourneyProps) => {
-  const COLORS = ["#10b981", "#f43f5e", "#f59e0b"];
-  
-  const attendanceData = [
-    { name: "Present", value: attendanceSummary?.present || 0 },
-    { name: "Absent", value: attendanceSummary?.absent || 0 },
-    { name: "Late", value: attendanceSummary?.late || 0 },
-  ].filter(d => d.value > 0);
-
   return (
     <div className="space-y-8">
       <div className="grid gap-6 md:grid-cols-2">
