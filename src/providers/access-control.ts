@@ -7,6 +7,8 @@ export const accessControlProvider: AccessControlProvider = {
   can: async ({ resource, action, params }) => {
     const identity = (await authProvider.getIdentity?.()) as User | null;
     const role = identity?.role;
+    
+    const resourceName = resource || "";
 
     // 1. Admins have full access
     if (role === "admin") {
@@ -15,41 +17,40 @@ export const accessControlProvider: AccessControlProvider = {
 
     // 2. Teacher Permissions
     if (role === "teacher") {
-      // General access
-      if (["dashboard", "ai-assistant", "discussions", "calendar", "departments", "subjects"].includes(resource)) {
+      if (["dashboard", "ai-assistant", "discussions", "calendar", "departments", "subjects"].includes(resourceName)) {
         return { can: true };
       }
 
-      // Resource-specific logic
-      if (resource === "classes" || resource === "assignments") {
+      if (resourceName === "classes" || resourceName === "assignments") {
         if (action === "list" || action === "create") {
           return { can: true };
         }
 
-        // Ownership check for show, edit, delete
         if (["show", "edit", "delete"].includes(action)) {
           if (!params?.id) return { can: false, reason: "No record ID provided." };
 
           try {
-            const { data } = await dataProvider.getOne({ resource, id: params.id });
+            const { data } = await dataProvider.getOne({ resource: resourceName, id: params.id });
             
-            // For classes, check teacherId. For assignments, we'd need to check the class's teacherId.
-            // Simplified for now: assume the backend handles the strict enforcement, 
-            // and we just do a basic check here.
-            if (resource === "classes" && data?.teacherId === identity?.id) {
-              return { can: true };
+            // Strict Ownership Check for Classes
+            if (resourceName === "classes") {
+              if (data?.teacherId === identity?.id) return { can: true };
             }
             
-            // If it's an assignment, we'd ideally check the parent class ownership.
-            // For now, let's allow teachers to see/edit assignments if they can access the class.
-            return { can: true }; 
+            // Strict Ownership Check for Assignments
+            // The backend now returns the 'class' object with assignments
+            if (resourceName === "assignments") {
+              if (data?.class?.teacherId === identity?.id) return { can: true };
+            }
+            
+            return { can: false, reason: "You do not own this resource." }; 
           } catch (error) {
             return { can: false, reason: "Error checking ownership." };
           }
         }
       }
       
-      if (resource === "submissions") {
+      if (resourceName === "submissions") {
           return { can: true }; // Teachers can view/grade submissions
       }
 
@@ -61,11 +62,11 @@ export const accessControlProvider: AccessControlProvider = {
       const allowedResources = ["subjects", "classes", "assignments", "discussions", "calendar", "dashboard"];
       const allowedActions = ["list", "show"];
 
-      if (allowedResources.includes(resource) && allowedActions.includes(action)) {
+      if (allowedResources.includes(resourceName) && allowedActions.includes(action)) {
         return { can: true };
       }
       
-      if (resource === "submissions" && (action === "list" || action === "create" || action === "show")) {
+      if (resourceName === "submissions" && (action === "list" || action === "create" || action === "show")) {
           return { can: true };
       }
 
