@@ -17,60 +17,59 @@ export const accessControlProvider: AccessControlProvider = {
 
     // 2. Teacher Permissions
     if (role === "teacher") {
-      if (["dashboard", "ai-assistant", "discussions", "calendar", "departments", "subjects", "attendance"].includes(resourceName)) {
+      const teacherSidebarResources = ["dashboard", "ai-assistant", "discussions", "calendar", "departments", "subjects", "attendance", "submissions"];
+      
+      if (teacherSidebarResources.includes(resourceName)) {
         return { can: true };
       }
 
+      // Teachers can view profiles and edit their OWN profile
+      if (resourceName === "users") {
+          if (action === "show") return { can: true };
+          if (action === "edit" && params?.id === identity?.id) return { can: true };
+      }
+
       if (resourceName === "classes" || resourceName === "assignments") {
-        if (action === "list" || action === "create") {
-          return { can: true };
-        }
+        if (action === "list" || action === "create") return { can: true };
 
         if (["show", "edit", "delete"].includes(action)) {
           if (!params?.id) return { can: false, reason: "No record ID provided." };
-
+          if (params?.userData) {
+              const data = params.userData;
+              if (resourceName === "classes" && data.teacherId === identity?.id) return { can: true };
+              if (resourceName === "assignments" && data.class?.teacherId === identity?.id) return { can: true };
+          }
           try {
             const { data } = await dataProvider.getOne({ resource: resourceName, id: params.id });
-            
-            // Strict Ownership Check for Classes
-            if (resourceName === "classes") {
-              if (data?.teacherId === identity?.id) return { can: true };
-            }
-            
-            // Strict Ownership Check for Assignments
-            // Backend GET /assignments/:id includes { class: { teacherId: ... } }
-            if (resourceName === "assignments") {
-              if (data?.class?.teacherId === identity?.id) return { can: true };
-            }
-            
-            return { can: false, reason: "You do not own this resource." }; 
+            if (resourceName === "classes" && data?.teacherId === identity?.id) return { can: true };
+            if (resourceName === "assignments" && data?.class?.teacherId === identity?.id) return { can: true };
           } catch (error) {
-            return { can: false, reason: "Error checking ownership." };
+            return { can: false, reason: "Access denied." };
           }
         }
       }
-      
-      if (resourceName === "submissions") {
-          return { can: true }; // Teachers can view/grade submissions
-      }
-
-      return { can: false, reason: "Access denied for Teacher role." };
+      return { can: false, reason: "Access denied." };
     }
 
     // 3. Student Permissions
     if (role === "student") {
-      const allowedResources = ["subjects", "classes", "assignments", "discussions", "calendar", "dashboard", "attendance"];
+      const allowedResources = ["subjects", "classes", "assignments", "discussions", "calendar", "dashboard", "attendance", "submissions"];
       const allowedActions = ["list", "show"];
 
       if (allowedResources.includes(resourceName) && allowedActions.includes(action)) {
         return { can: true };
       }
       
-      if (resourceName === "submissions" && (action === "list" || action === "create" || action === "show")) {
+      // Students can EDIT their OWN profile
+      if (resourceName === "users" && action === "edit" && params?.id === identity?.id) {
           return { can: true };
       }
 
-      return { can: false, reason: "Access denied for Student role." };
+      if (resourceName === "submissions" && action === "create") {
+          return { can: true };
+      }
+
+      return { can: false, reason: "Access denied." };
     }
 
     return { can: false, reason: "Unauthorized." };

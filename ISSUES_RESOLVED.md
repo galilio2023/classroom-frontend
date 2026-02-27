@@ -97,3 +97,23 @@ The platform lacked real-time feedback for users (e.g., when an assignment is gr
 
 **Summary:**
 Enhanced the platform's interactivity and analytical capabilities by integrating real-time communication and advanced data visualizations. This update also expanded the core resource model and hardened the security configuration, providing a more professional and responsive user experience.
+
+---
+
+## 7. Secure User Profile Management & PII Protection
+**Problem:**
+- **Unauthorized Role Elevation:** Users could potentially change their own roles (e.g., Student to Admin) via profile update requests.
+- **PII Exposure:** Sensitive user data like email and address were visible to unauthorized users in public profile views.
+- **Restrictive Workflows:** Teachers were unable to update their own profiles directly, and students were blocked from making even minor contact info changes without admin approval.
+- **Performance Issues:** Redundant API calls and infinite redirect loops occurred during access control checks for resource ownership.
+
+**Solution:**
+- **Strict Role Control:** Implemented backend-enforced role protection. The `role` field is now explicitly excluded from user-initiated updates (`PATCH /users/me`) and is read-only in the UI for non-admins.
+- **Tiered Visibility (PII):** Hardened the `GET /users/:id` route to hide emails and addresses from public view. This data is now only visible to the user themselves, Admins, or Teachers with an active educational relationship (enrolled students).
+- **Hybrid Update Workflow:** 
+    - **Teachers/Admins:** Can now update all profile fields directly.
+    - **Students:** Can update "safe" fields (Bio, Phone, Address) immediately, while sensitive identity changes (Name, DOB) are queued for Admin approval.
+- **Frontend Access Control Optimization:** Refined `accessControlProvider.ts` to support these granular rules and optimized it to use cached data (`params.userData`), preventing redundant API calls and infinite redirect loops.
+
+**Summary:**
+The system now balances user convenience with high-level security and privacy standards, ensuring that identity data is protected while allowing users to maintain their own contact information.
