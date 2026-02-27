@@ -1,6 +1,7 @@
 import { EditViewHeader } from "@/components/refine-ui/views/edit-view";
 import { useForm } from "@refinedev/react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useGetIdentity } from "@refinedev/core";
 import {
   Form,
   FormControl,
@@ -28,12 +29,15 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
-import { User, Mail, Shield, Lightbulb, Info, Phone, MapPin, FileText } from "lucide-react";
+import { User as UserIcon, Mail, Shield, Lightbulb, Info, Phone, MapPin, FileText } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { userFormSchema } from "@/schemas/user";
-import { UserRole } from "@/types";
+import { UserRole, User } from "@/types";
 
 const UsersEdit = () => {
+  const { data: identity } = useGetIdentity<User>();
+  const isAdmin = identity?.role === "admin";
+
   const {
     refineCore: { onFinish, formLoading, query },
     ...form
@@ -58,7 +62,7 @@ const UsersEdit = () => {
               <Card className="border-border/50 shadow-sm">
                 <CardHeader>
                   <CardTitle className="text-xl font-semibold flex items-center gap-2">
-                    <User className="h-5 w-5 text-primary" />
+                    <UserIcon className="h-5 w-5 text-primary" />
                     Edit User Profile
                   </CardTitle>
                   <CardDescription>
@@ -77,7 +81,7 @@ const UsersEdit = () => {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="flex items-center gap-2">
-                            <User className="h-4 w-4 text-muted-foreground" />
+                            <UserIcon className="h-4 w-4 text-muted-foreground" />
                             Full Name
                           </FormLabel>
                           <FormControl>
@@ -102,6 +106,7 @@ const UsersEdit = () => {
                             <Input
                               placeholder="e.g. john@school.com"
                               {...field}
+                              disabled={!isAdmin} // Only admins can change emails
                             />
                           </FormControl>
                           <FormMessage />
@@ -124,9 +129,10 @@ const UsersEdit = () => {
                           <Select
                             onValueChange={field.onChange}
                             value={field.value}
+                            disabled={!isAdmin} // ONLY Admins can change roles
                           >
                             <FormControl>
-                              <SelectTrigger>
+                              <SelectTrigger className={!isAdmin ? "bg-muted cursor-not-allowed" : ""}>
                                 <SelectValue placeholder="Select a role" />
                               </SelectTrigger>
                             </FormControl>
@@ -142,6 +148,11 @@ const UsersEdit = () => {
                               </SelectItem>
                             </SelectContent>
                           </Select>
+                          {!isAdmin && (
+                            <p className="text-[0.7rem] text-muted-foreground mt-1">
+                              Only administrators can modify user roles.
+                            </p>
+                          )}
                           <FormMessage />
                         </FormItem>
                       )}
