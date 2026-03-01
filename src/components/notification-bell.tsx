@@ -175,7 +175,7 @@ export const NotificationBell = () => {
     markAsRead(
       {
         url: `/notifications/${id}/read`,
-        method: "PATCH",
+        method: "patch",
         values: { id }, // Pass ID in values for robust extraction in onMutate
       },
       {
@@ -193,7 +193,7 @@ export const NotificationBell = () => {
     markAllAsRead(
       {
         url: "/notifications/read-all",
-        method: "PATCH",
+        method: "patch",
         values: {},
       },
       {
