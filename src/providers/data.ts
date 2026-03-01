@@ -180,7 +180,7 @@ export const dataProvider: DataProvider = {
      }
 
      const response = await fetcher(requestUrl, {
-        method: method || "GET",
+        method: method ? method.toUpperCase() : "GET",
         body: payload ? JSON.stringify(payload) : undefined,
         headers: headers as any
      });
