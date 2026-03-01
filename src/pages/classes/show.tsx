@@ -279,35 +279,39 @@ const ClassesShow = () => {
         </Tabs>
       </ShowView>
 
-      <AlertDialog
-        open={unenrollTarget !== null}
-        onOpenChange={() => setUnenrollTarget(null)}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will unenroll the student from the class.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleConfirmUnenroll}
-              disabled={mutation.isPending}
-            >
-              {mutation.isPending ? "Unenrolling..." : "Confirm"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {isStaff && (
+        <>
+          <AlertDialog
+            open={unenrollTarget !== null}
+            onOpenChange={() => setUnenrollTarget(null)}
+          >
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will unenroll the student from the class.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleConfirmUnenroll}
+                  disabled={mutation.isPending}
+                >
+                  {mutation.isPending ? "Unenrolling..." : "Confirm"}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
 
-      <EnrollStudentDialog
-        classId={classId}
-        isOpen={isEnrollDialogOpen}
-        onOpenChange={setIsEnrollDialogOpen}
-        enrolledStudentIds={enrolledStudentIds}
-      />
+          <EnrollStudentDialog
+            classId={classId}
+            isOpen={isEnrollDialogOpen}
+            onOpenChange={setIsEnrollDialogOpen}
+            enrolledStudentIds={enrolledStudentIds}
+          />
+        </>
+      )}
 
       {/* AI Study Buddy Floating Widget */}
       <AIStudyBuddy 

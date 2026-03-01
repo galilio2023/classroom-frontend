@@ -17,6 +17,24 @@ import { cn } from "@/lib/utils";
 import { io } from "socket.io-client";
 import { toast } from "sonner";
 
+/**
+ * Safely formats notification links to match frontend route structure.
+ * e.g., /classes/1 -> /classes/show/1
+ */
+const formatNotificationLink = (link: string | null) => {
+  if (!link) return null;
+  
+  const parts = link.split("/").filter(Boolean);
+  const resourcesWithShow = ["classes", "users", "assignments"];
+
+  // If link is exactly /resource/id and resource has a show route
+  if (parts.length === 2 && resourcesWithShow.includes(parts[0])) {
+    return `/${parts[0]}/show/${parts[1]}`;
+  }
+
+  return link;
+};
+
 export const NotificationBell = () => {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
@@ -49,11 +67,12 @@ export const NotificationBell = () => {
 
     const handleNotification = (newNotification: Notification) => {
       refetch();
+      const link = formatNotificationLink(newNotification.link);
       toast.info(newNotification.title, {
         description: newNotification.message,
-        action: newNotification.link ? {
+        action: link ? {
           label: "View",
-          onClick: () => navigate(newNotification.link!),
+          onClick: () => navigate(link),
         } : undefined,
       });
     };
@@ -139,7 +158,20 @@ export const NotificationBell = () => {
     }
   });
 
-  const handleMarkAsRead = (id: number, link: string | null) => {
+  const handleMarkAsRead = (notification: Notification) => {
+    const { id, isRead } = notification;
+    const link = formatNotificationLink(notification.link);
+
+    // If already read, just navigate
+    if (isRead) {
+      if (link) {
+        navigate(link);
+        setIsOpen(false);
+      }
+      return;
+    }
+
+    // If unread, mark as read then navigate
     markAsRead(
       {
         url: `/notifications/${id}/read`,
@@ -232,7 +264,7 @@ export const NotificationBell = () => {
                     "flex gap-3 p-4 border-b border-border/50 cursor-pointer transition-all duration-200 hover:bg-muted/50",
                     !notification.isRead ? "bg-primary/5 border-l-2 border-l-primary" : ""
                   )}
-                  onClick={() => handleMarkAsRead(notification.id, notification.link)}
+                  onClick={() => handleMarkAsRead(notification)}
                 >
                   <div className="mt-1 shrink-0">
                     <div className="p-2 bg-background rounded-lg shadow-sm border border-border/50">
