@@ -13,7 +13,7 @@ import { useNotificationProvider } from "./components/refine-ui/notification/use
 import { dataProvider } from "./providers/data";
 import { authProvider } from "./providers/auth";
 import { accessControlProvider } from "./providers/access-control";
-import { Home, BookOpen, Building2, Users, Calendar, Sparkles, GraduationCap, MessageSquare, UserPlus, ClipboardCheck, Loader2 } from "lucide-react";
+import { Home, BookOpen, Building2, Users, Calendar, Sparkles, GraduationCap, MessageSquare, UserPlus, ClipboardCheck, Loader2, FileQuestion } from "lucide-react";
 import { Layout } from "@/components/refine-ui/layout/layout.tsx";
 import { AuthorizedRoute } from "./components/authorized-route";
 import React, { Suspense } from "react";
@@ -42,6 +42,11 @@ const AssignmentCreate = React.lazy(() => import("./pages/assignments/create").t
 const AssignmentShow = React.lazy(() => import("./pages/assignments/show"));
 const AIAssistantPage = React.lazy(() => import("./pages/ai-assistant"));
 const CalendarPage = React.lazy(() => import("./pages/calendar"));
+
+// Quiz Pages
+const QuizCreate = React.lazy(() => import("./pages/quizzes/create"));
+const QuizShow = React.lazy(() => import("./pages/quizzes/show"));
+const QuizResults = React.lazy(() => import("./pages/quizzes/results"));
 
 const Loading = () => (
   <div className="flex h-dvh items-center justify-center">
@@ -132,6 +137,12 @@ function App() {
                 name: "assignments",
                 create: "/assignments/create",
                 show: "/assignments/show/:id",
+              },
+              {
+                name: "quizzes",
+                create: "/quizzes/create",
+                show: "/quizzes/show/:id",
+                meta: { label: "Quizzes", icon: <FileQuestion /> },
               },
               {
                 name: "submissions",
@@ -342,6 +353,32 @@ function App() {
                       element={
                         <AuthorizedRoute resource="assignments" action="show">
                           <AssignmentShow />
+                        </AuthorizedRoute>
+                      }
+                    />
+                  </Route>
+                  <Route path="quizzes">
+                    <Route
+                      path="create"
+                      element={
+                        <AuthorizedRoute resource="quizzes" action="create">
+                          <QuizCreate />
+                        </AuthorizedRoute>
+                      }
+                    />
+                    <Route
+                      path="show/:id"
+                      element={
+                        <AuthorizedRoute resource="quizzes" action="show">
+                          <QuizShow />
+                        </AuthorizedRoute>
+                      }
+                    />
+                    <Route
+                      path="results/:id"
+                      element={
+                        <AuthorizedRoute resource="quizzes" action="show">
+                          <QuizResults />
                         </AuthorizedRoute>
                       }
                     />

@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Class, Enrollment, User } from "@/types";
-import { Loader2, PlusCircle, Trash2, Sparkles, ClipboardCheck, MessageSquare, Library } from "lucide-react";
+import { Loader2, PlusCircle, Trash2, ClipboardCheck, MessageSquare, Library, FileQuestion } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -34,11 +34,11 @@ import {
 } from "@/components/ui/alert-dialog";
 import { EnrollStudentDialog } from "./enroll-student-dialog";
 import { AssignmentList } from "../assignments/list";
-import { AIQuizGenerator } from "@/components/ai-quiz-generator";
 import { AttendanceTab } from "./attendance-tab";
 import { AIStudyBuddy } from "@/components/ai-study-buddy";
 import { DiscussionTab } from "./discussion-tab";
 import { ResourceTab } from "./resource-tab";
+import { QuizTab } from "./quiz-tab";
 import { cn } from "@/lib/utils";
 
 const ClassesShow = () => {
@@ -161,7 +161,7 @@ const ClassesShow = () => {
         <ShowViewHeader resource="classes" title={aClass.name} />
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className={cn("grid w-full", isStaff ? "grid-cols-7" : "grid-cols-5")}>
+          <TabsList className={cn("grid w-full", isStaff ? "grid-cols-7" : "grid-cols-6")}>
             <TabsTrigger value="discussions">
               <div className="flex items-center gap-2">
                 <MessageSquare className="h-4 w-4" />
@@ -176,6 +176,12 @@ const ClassesShow = () => {
             </TabsTrigger>
             <TabsTrigger value="students">Students</TabsTrigger>
             <TabsTrigger value="assignments">Assignments</TabsTrigger>
+            <TabsTrigger value="quizzes">
+              <div className="flex items-center gap-2">
+                <FileQuestion className="h-4 w-4" />
+                <span>Quizzes</span>
+              </div>
+            </TabsTrigger>
             <TabsTrigger value="attendance">
               <div className="flex items-center gap-2">
                 <ClipboardCheck className="h-4 w-4" />
@@ -183,15 +189,7 @@ const ClassesShow = () => {
               </div>
             </TabsTrigger>
             {isStaff && (
-              <>
-                <TabsTrigger value="ai-quiz">
-                  <div className="flex items-center gap-2">
-                    <Sparkles className="h-4 w-4 text-primary" />
-                    <span>AI Quiz</span>
-                  </div>
-                </TabsTrigger>
-                <TabsTrigger value="details">Details</TabsTrigger>
-              </>
+              <TabsTrigger value="details">Details</TabsTrigger>
             )}
           </TabsList>
 
@@ -230,50 +228,48 @@ const ClassesShow = () => {
               <AssignmentList classId={classId} assignments={assignments} />
             </TabsContent>
 
+            <TabsContent value="quizzes">
+              <QuizTab classId={classId} />
+            </TabsContent>
+
             <TabsContent value="attendance">
               <AttendanceTab classId={classId} enrollments={enrollments} />
             </TabsContent>
 
             {isStaff && (
-              <>
-                <TabsContent value="ai-quiz">
-                  <AIQuizGenerator classId={classId} />
-                </TabsContent>
-
-                <TabsContent value="details">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Details</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Subject</span>
-                        <span className="font-medium">
-                          {aClass?.subject?.name ?? "N/A"}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Teacher</span>
-                        <span className="font-medium">
-                          {aClass?.teacher?.name ?? "N/A"}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Status</span>
-                        <Badge variant="default" className="capitalize">
-                          {aClass.status}
-                        </Badge>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Invite Code</span>
-                        <Badge variant="outline" className="font-mono">
-                          {aClass.inviteCode}
-                        </Badge>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </TabsContent>
-              </>
+              <TabsContent value="details">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Details</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Subject</span>
+                      <span className="font-medium">
+                        {aClass?.subject?.name ?? "N/A"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Teacher</span>
+                      <span className="font-medium">
+                        {aClass?.teacher?.name ?? "N/A"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Status</span>
+                      <Badge variant="default" className="capitalize">
+                        {aClass.status}
+                      </Badge>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Invite Code</span>
+                      <Badge variant="outline" className="font-mono">
+                        {aClass.inviteCode}
+                      </Badge>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
             )}
           </div>
         </Tabs>
