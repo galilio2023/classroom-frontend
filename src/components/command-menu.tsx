@@ -9,13 +9,8 @@ import {
 import {
   Calculator,
   Calendar,
-  CreditCard,
-  Settings,
-  Smile,
   User as UserIcon,
   BookOpen,
-  Building2,
-  Users,
   Sparkles,
   Home,
   LogOut,
@@ -41,22 +36,25 @@ export function CommandMenu() {
   const [open, setOpen] = React.useState(false);
   const navigate = useNavigate();
   const { data: identity } = useGetIdentity<User>();
-  const { list, show } = useNavigation();
+  const { show } = useNavigation();
   const { mutate: logout } = useLogout();
   const { theme, setTheme } = useTheme();
 
   // Fetch dynamic data for search
-  const { data: classesData } = useCustom<Class[]>({
+  const { query: classesQuery } = useCustom<Class[]>({
     url: "/classes",
     method: "get",
     queryOptions: { enabled: open },
   });
 
-  const { data: assignmentsData } = useCustom<Assignment[]>({
+  const { query: assignmentsQuery } = useCustom<Assignment[]>({
     url: "/assignments",
     method: "get",
     queryOptions: { enabled: open },
   });
+
+  const classes = classesQuery.data?.data || [];
+  const assignments = assignmentsQuery.data?.data || [];
 
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -106,9 +104,9 @@ export function CommandMenu() {
             </CommandItem>
           </CommandGroup>
           
-          {classesData?.data && classesData.data.length > 0 && (
+          {classes.length > 0 && (
             <CommandGroup heading="Classes">
-              {classesData.data.slice(0, 5).map((c) => (
+              {classes.slice(0, 5).map((c: Class) => (
                 <CommandItem key={c.id} onSelect={() => runCommand(() => show("classes", c.id.toString()))}>
                   <BookOpen className="mr-2 h-4 w-4" />
                   <span>{c.name}</span>
@@ -117,9 +115,9 @@ export function CommandMenu() {
             </CommandGroup>
           )}
 
-          {assignmentsData?.data && assignmentsData.data.length > 0 && (
+          {assignments.length > 0 && (
             <CommandGroup heading="Assignments">
-              {assignmentsData.data.slice(0, 5).map((a) => (
+              {assignments.slice(0, 5).map((a: Assignment) => (
                 <CommandItem key={a.id} onSelect={() => runCommand(() => show("assignments", a.id.toString()))}>
                   <Calculator className="mr-2 h-4 w-4" />
                   <span>{a.title}</span>
