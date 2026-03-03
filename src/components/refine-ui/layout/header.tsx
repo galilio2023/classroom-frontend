@@ -15,6 +15,7 @@ import { ThemeToggle } from "../theme/theme-toggle";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { NotificationBell } from "@/components/notification-bell";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { CommandMenu } from "@/components/command-menu";
 
 export function Header() {
   const { mutate: logout } = useLogout();
@@ -33,8 +34,8 @@ export function Header() {
     <header className="flex h-20 items-center gap-4 border-b border-border/40 bg-background/60 backdrop-blur-xl px-6 sticky top-0 z-50">
       <SidebarTrigger className="md:hidden" />
 
-      <div className="w-full flex-1">
-        {/* Optional: Add a search bar or other header content here */}
+      <div className="w-full flex-1 flex items-center">
+        <CommandMenu />
       </div>
       
       <div className="flex items-center gap-4">
