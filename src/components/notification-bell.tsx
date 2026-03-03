@@ -40,6 +40,7 @@ export const NotificationBell = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { data: identity } = useGetIdentity<User>();
   const queryClient = useQueryClient();
+  const [socketUnreadCount, setSocketUnreadCount] = useState<number | null>(null);
 
   // Fetch notifications
   const { query } = useCustom<Notification[]>({
@@ -51,7 +52,11 @@ export const NotificationBell = () => {
   const refetch = query.refetch;
 
   const notifications = notificationsData?.data || [];
-  const unreadCount = notifications.filter((n: Notification) => !n.isRead).length;
+  
+  // Use socket count if available, otherwise calculate from fetched data
+  const unreadCount = socketUnreadCount !== null 
+    ? socketUnreadCount 
+    : notifications.filter((n: Notification) => !n.isRead).length;
 
   // --- SOCKET.IO INTEGRATION ---
   useEffect(() => {
@@ -77,7 +82,12 @@ export const NotificationBell = () => {
       });
     };
 
+    const handleUnreadCount = (data: { count: number }) => {
+      setSocketUnreadCount(data.count);
+    };
+
     socket.on("notification", handleNotification);
+    socket.on("unread_count", handleUnreadCount);
 
     // Reconnection Logic: Fetch notifications when socket reconnects
     socket.on("connect", () => {
@@ -86,7 +96,8 @@ export const NotificationBell = () => {
 
     return () => {
       socket.off("notification", handleNotification);
-      socket.off("connect"); // Clean up connect listener
+      socket.off("unread_count", handleUnreadCount);
+      socket.off("connect");
       socket.disconnect();
     };
   }, [identity?.id, refetch, navigate]);
@@ -95,9 +106,7 @@ export const NotificationBell = () => {
   const { mutate: markAsRead } = useCustomMutation({
     mutationOptions: {
         onMutate: async (variables: any) => {
-            // Robustly extract ID from values passed to mutate()
             const id = variables.values.id;
-
             const queryKey = ["custom", "get", "/notifications"];
             await queryClient.cancelQueries({ queryKey });
             const previousNotifications = queryClient.getQueryData(queryKey);
@@ -111,6 +120,9 @@ export const NotificationBell = () => {
                     )
                 };
             });
+
+            // Optimistically decrement unread count
+            setSocketUnreadCount(prev => prev !== null ? Math.max(0, prev - 1) : null);
 
             return { previousNotifications };
         },
@@ -143,6 +155,9 @@ export const NotificationBell = () => {
                 };
             });
 
+            // Optimistically clear unread count
+            setSocketUnreadCount(0);
+
             return { previousNotifications };
         },
         onError: (_err, _variables, context: any) => {
@@ -162,7 +177,6 @@ export const NotificationBell = () => {
     const { id, isRead } = notification;
     const link = formatNotificationLink(notification.link);
 
-    // If already read, just navigate
     if (isRead) {
       if (link) {
         navigate(link);
@@ -171,12 +185,11 @@ export const NotificationBell = () => {
       return;
     }
 
-    // If unread, mark as read then navigate
     markAsRead(
       {
         url: `/notifications/${id}/read`,
         method: "patch",
-        values: { id }, // Pass ID in values for robust extraction in onMutate
+        values: { id },
       },
       {
         onSuccess: () => {
@@ -195,9 +208,6 @@ export const NotificationBell = () => {
         url: "/notifications/read-all",
         method: "patch",
         values: {},
-      },
-      {
-        // No explicit refetch needed, onSettled handles it
       }
     );
   };
