@@ -2,6 +2,10 @@ import { UndoableNotification } from "@/components/refine-ui/notification/undoab
 import type { NotificationProvider } from "@refinedev/core";
 import { toast } from "sonner";
 
+/**
+ * Refine Notification Provider using Sonner.
+ * Optimized for the new Service Layer backend.
+ */
 export function useNotificationProvider(): NotificationProvider {
   return {
     open: ({
@@ -12,26 +16,33 @@ export function useNotificationProvider(): NotificationProvider {
       undoableTimeout,
       cancelMutation,
     }) => {
+      const toastId = key || Date.now().toString();
+
       switch (type) {
         case "success":
           toast.success(message, {
-            id: key,
+            id: toastId,
             description,
             richColors: true,
+            duration: 4000,
           });
           return;
 
         case "error":
+          // Fixed: Changed syntax error '|' to '??' for fallback description
           toast.error(message, {
-            id: key,
-            description,
+            id: toastId,
+            description: description ?? "An unexpected error occurred. Please try again.",
             richColors: true,
+            duration: 6000, // Errors stay longer
+            action: {
+              label: "Dismiss",
+              onClick: () => toast.dismiss(toastId),
+            },
           });
           return;
 
         case "progress": {
-          const toastId = key || Date.now();
-
           toast(
             () => (
               <UndoableNotification
@@ -52,6 +63,11 @@ export function useNotificationProvider(): NotificationProvider {
         }
 
         default:
+          toast(message, {
+            id: toastId,
+            description,
+            richColors: true,
+          });
           return;
       }
     },

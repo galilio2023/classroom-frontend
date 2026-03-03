@@ -192,3 +192,6 @@ export interface CreateResponse<T = any> {
 export interface GetOneResponse<T = any> {
   data: T;
 }
+
+export * from "./quiz";
+export * from "./dashboard";

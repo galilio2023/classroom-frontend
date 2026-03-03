@@ -11,15 +11,17 @@ const handleError = async (response: Response): Promise<HttpError> => {
     const json = await response.json();
     
     // If backend returned Zod validation details (Layer 3)
+    // Backend format: { error: "Validation failed", details: { field: "message" } }
     if (json.details) {
       return {
         message: json.error || "Validation failed",
         statusCode: response.status,
-        errors: json.details, // Maps to Refine's form errors
+        errors: json.details, // Maps to Refine's form errors automatically
       };
     }
 
     // Standardized error message from Layer 1/3
+    // Backend format: { error: "Specific error message" }
     return {
       message: json.error || json.message || `HTTP error! status: ${response.status}`,
       statusCode: response.status,
@@ -59,6 +61,7 @@ const resourceFilterMappings: Record<string, Record<string, string>> = {
   attendance: { classId: "classId", date: "date" },
   resources: { classId: "classId", search: "search" },
   "profile-requests": { status: "status", userId: "userId" },
+  quizzes: { classId: "classId" }, // Added: Explicit filter mapping for quizzes
 };
 
 export const dataProvider: DataProvider = {

@@ -1,5 +1,5 @@
 import { useNavigation, useGetIdentity, useCustom } from "@refinedev/core";
-import { Loader2, Layout, FileText, Calendar, Users } from "lucide-react";
+import { Loader2, Layout, FileText, Calendar, Users, AlertCircle } from "lucide-react";
 import { User } from "@/types";
 import React from "react";
 
@@ -13,34 +13,9 @@ import { PlatformOverview } from "@/components/dashboard/platform-overview";
 import { PromoCards } from "@/components/dashboard/promo-cards";
 import { AtRiskStudents } from "@/components/dashboard/at-risk-students";
 import { StudentAcademicJourney } from "@/components/dashboard/student-academic-journey";
-import { DashboardStats, AttendanceTrend, PendingSubmission, UpcomingAssignment, ScheduleItem } from "@/types/dashboard";
+import { DashboardData } from "@/types/dashboard";
 import { ErrorBoundary } from "@/components/error-boundary";
-
-interface GradeDistribution {
-  range: string;
-  count: number;
-}
-
-interface AtRiskStudent {
-  id: string;
-  name: string;
-  image?: string;
-  reason: string;
-  value: string;
-}
-
-interface DashboardData {
-  todaySchedule: ScheduleItem[];
-  stats?: DashboardStats;
-  attendanceTrend?: AttendanceTrend[];
-  gradeDistribution?: GradeDistribution[];
-  pendingSubmissions?: PendingSubmission[];
-  upcomingAssignments?: UpcomingAssignment[];
-  atRiskStudents?: AtRiskStudent[];
-  gradeTrends?: any[];
-  subjectMastery?: any[];
-  attendanceSummary?: any;
-}
+import { Button } from "@/components/ui/button";
 
 const Dashboard = () => {
   const { list, show } = useNavigation();
@@ -53,11 +28,17 @@ const Dashboard = () => {
   const { query: dashboardQuery } = useCustom<DashboardData>({
     url: `/dashboard`,
     method: "get",
-    queryOptions: { enabled: !!identity },
+    queryOptions: { 
+      enabled: !!identity,
+      staleTime: 5 * 60 * 1000, // 5 minutes cache
+    },
   });
 
-  // Safe data extraction
-  const data = dashboardQuery.data?.data;
+  // Extract query states
+  const { data: dashboardResponse, isLoading: isDashboardLoading, isFetching, isError, refetch } = dashboardQuery;
+
+  // Safe data extraction with full type safety
+  const data = dashboardResponse?.data;
   
   const stats = data?.stats;
   const attendanceTrend = data?.attendanceTrend ?? [];
@@ -71,7 +52,7 @@ const Dashboard = () => {
   const subjectMastery = data?.subjectMastery ?? [];
   const attendanceSummary = data?.attendanceSummary ?? { present: 0, absent: 0, late: 0, total: 0 };
   
-  const isLoading = dashboardQuery.isLoading || dashboardQuery.isFetching;
+  const isLoading = isDashboardLoading || isFetching;
 
   const activeCards = isStudent ? [
     { title: "My Classes", icon: Layout, heading: "Enrolled Classes", description: "Access active classrooms.", resource: "classes" },
@@ -84,6 +65,19 @@ const Dashboard = () => {
     { title: "Users", icon: Users, heading: "Directory", description: "Students and staff.", resource: "users" },
   ];
 
+  // --- ERROR STATE ---
+  if (isError) {
+    return (
+      <div className="flex h-dvh flex-col items-center justify-center space-y-4">
+        <AlertCircle className="h-12 w-12 text-destructive" />
+        <h2 className="text-xl font-semibold">Failed to load dashboard</h2>
+        <p className="text-muted-foreground">There was an error fetching your dashboard data.</p>
+        <Button onClick={() => void refetch()}>Try Again</Button>
+      </div>
+    );
+  }
+
+  // --- LOADING STATE ---
   if (isIdentityLoading || (isLoading && todaySchedule.length === 0)) {
     return (
       <div className="flex h-dvh items-center justify-center">
@@ -144,7 +138,7 @@ const Dashboard = () => {
                 <PlatformOverview 
                   stats={stats} 
                   isLoading={isLoading} 
-                  onRefresh={() => void dashboardQuery.refetch()}
+                  onRefresh={() => void refetch()}
                 />
               </ErrorBoundary>
             )}

@@ -1,11 +1,38 @@
+/**
+ * Dashboard API Response Types
+ * Mirrored from backend DashboardService.
+ */
+
+export interface ScheduleItem {
+  id: number;
+  name: string;
+  description?: string;
+  bannerUrl?: string;
+  bannerCldPubId?: string;
+  capacity?: number;
+  status: "active" | "inactive" | "archived";
+  subject?: {
+    id: number;
+    name: string;
+  };
+  teacher?: {
+    id: string;
+    name: string;
+  };
+  todaySchedule?: {
+    day: string;
+    startTime: string;
+    endTime: string;
+    room?: string;
+  };
+}
+
 export interface DashboardStats {
+  totalUsers: number;
   totalStudents: number;
   totalTeachers: number;
-  totalUsers: number;
   totalClasses: number;
   totalAssignments: number;
-  totalSubjects: number;
-  totalDepartments: number;
 }
 
 export interface AttendanceTrend {
@@ -14,23 +41,90 @@ export interface AttendanceTrend {
   absent: number;
 }
 
-export interface ScheduleItem {
-  id: string;
-  name: string;
-  todaySchedule?: { startTime: string; endTime: string };
-}
-
-export interface UpcomingAssignment {
-  id: string;
-  title: string;
-  dueDate: string;
-  class?: { name: string };
+export interface GradeDistribution {
+  range: string;
+  count: number;
 }
 
 export interface PendingSubmission {
-  id: string;
-  assignmentId: string;
+  id: number;
+  content?: string;
+  fileUrl?: string;
+  fileCldPubId?: string;
+  isLate: boolean;
+  assignmentId: number;
+  studentId: string;
   createdAt: string;
-  student?: { name: string; image?: string };
-  assignment?: { title: string };
+  updatedAt: string;
+  student: {
+    id: string;
+    name: string;
+    email: string;
+    image?: string;
+    phoneNumber?: string;
+  };
+  assignment: {
+    id: number;
+    title: string;
+    description?: string;
+    dueDate?: string;
+    classId: number;
+    class: {
+      id: number;
+      name: string;
+    };
+  };
+}
+
+export interface AtRiskStudent {
+  id: string;
+  name: string;
+  image?: string;
+  avgGrade?: string;
+  absentCount?: number;
+  reason: string;
+  value: string;
+}
+
+export interface UpcomingAssignment {
+  id: number;
+  title: string;
+  description?: string;
+  dueDate: string;
+  classId: number;
+  class: {
+    id: number;
+    name: string;
+  };
+}
+
+export interface GradeTrend {
+  date: string;
+  grade: number;
+  title: string;
+}
+
+export interface SubjectMastery {
+  subject: string;
+  avgGrade: string;
+}
+
+export interface AttendanceSummary {
+  present: number;
+  absent: number;
+  late: number;
+  total: number;
+}
+
+export interface DashboardData {
+  todaySchedule: ScheduleItem[];
+  stats?: DashboardStats;
+  attendanceTrend?: AttendanceTrend[];
+  gradeDistribution?: GradeDistribution[];
+  pendingSubmissions?: PendingSubmission[];
+  atRiskStudents?: AtRiskStudent[];
+  upcomingAssignments?: UpcomingAssignment[];
+  gradeTrends?: GradeTrend[];
+  subjectMastery?: SubjectMastery[];
+  attendanceSummary?: AttendanceSummary;
 }
