@@ -4,7 +4,7 @@ import { Button } from "./ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "./ui/card";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
-import { Loader2, Sparkles, Send, PlusCircle } from "lucide-react";
+import { Loader2, Sparkles, Send } from "lucide-react";
 
 interface AIQuizQuestion {
   question: string;
@@ -24,7 +24,7 @@ interface AIQuizHelperProps {
 
 export const AIQuizHelper: React.FC<AIQuizHelperProps> = ({ onUseQuestions }) => {
   const [topic, setTopic] = useState("");
-  const [count, setCount] = useState("5");
+  const [count, setCount] = useState(5); // Improved: Using number state
   const [generatedQuestions, setGeneratedQuestions] = useState<AIQuizQuestion[]>([]);
 
   const { open } = useNotification();
@@ -47,7 +47,7 @@ export const AIQuizHelper: React.FC<AIQuizHelperProps> = ({ onUseQuestions }) =>
         method: "post",
         values: {
           topic,
-          count: Number(count),
+          count,
         },
       },
       {
@@ -100,7 +100,7 @@ export const AIQuizHelper: React.FC<AIQuizHelperProps> = ({ onUseQuestions }) =>
               min="1"
               max="20"
               value={count}
-              onChange={(e) => setCount(e.target.value)}
+              onChange={(e) => setCount(Number(e.target.value))}
             />
           </div>
         </CardContent>

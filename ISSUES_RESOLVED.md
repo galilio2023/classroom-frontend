@@ -105,3 +105,24 @@ The system now balances user convenience with high-level security and privacy st
 
 **Summary:**
 The notification system is now more robust, with guaranteed navigation to the correct pages and a cleaner, error-free experience for students.
+
+---
+
+## 8. Service Layer Architecture & Persistent Quiz System
+**Problem:**
+- **Business Logic Leakage:** Routes were becoming bloated with complex logic, making them hard to test and maintain.
+- **Atomic Failures:** Operations involving multiple tables (like enrolling a student and sending a notification) were not transactional, leading to data inconsistencies.
+- **Stateless AI Features:** The quiz system was only a content generator; it didn't store quizzes or track student performance.
+- **Fragile Error Handling:** A syntax error in the notification provider (`|` instead of `??`) caused runtime crashes during error states.
+
+**Solution:**
+- **Service Layer Pattern:** Refactored the entire backend to use a Service Layer (`src/services`). Routes now only handle HTTP concerns, while services handle business logic and database queries.
+- **Transactional Integrity:** Wrapped all multi-step operations in `db.transaction` to ensure atomicity.
+- **Persistent Quiz Module:** Implemented a full quiz system with database storage for quizzes, questions, and attempts, including automatic grading.
+- **Frontend Hardening:** 
+    - Fixed the syntax error in `use-notification-provider.tsx`.
+    - Improved `AIQuizHelper` with better state management (number-based count).
+    - Implemented full type safety for the new quiz and dashboard services.
+
+**Summary:**
+The application now boasts a production-grade architecture that is robust, transactional, and highly maintainable, with a fully integrated AI-assisted quiz system.

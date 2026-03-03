@@ -29,10 +29,10 @@ export function useNotificationProvider(): NotificationProvider {
           return;
 
         case "error":
-          // If the error message is too long, we use the description for details
+          // Fixed: Changed syntax error '|' to '??' for fallback description
           toast.error(message, {
             id: toastId,
-            description: description || "An unexpected error occurred. Please try again.",
+            description: description ?? "An unexpected error occurred. Please try again.",
             richColors: true,
             duration: 6000, // Errors stay longer
             action: {
