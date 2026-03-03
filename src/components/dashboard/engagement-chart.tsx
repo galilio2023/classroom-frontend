@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { TrendingUp, BarChart } from "lucide-react";
+import { TrendingUp, BarChart, LucideIcon } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart as RechartsBarChart, Bar } from 'recharts';
 import { AttendanceTrend } from "@/types/dashboard";
 
@@ -13,10 +13,18 @@ interface EngagementChartProps {
   gradeData?: GradeDistribution[];
 }
 
+const NoChartData = ({ icon: Icon, message }: { icon: LucideIcon, message: string }) => (
+    <div className="flex flex-col items-center justify-center h-full text-muted-foreground opacity-50">
+        <Icon className="h-10 w-10 mb-2" />
+        <p className="text-sm font-bold uppercase tracking-widest">{message}</p>
+    </div>
+);
+
 export const EngagementChart = ({ attendanceData, gradeData }: EngagementChartProps) => {
-    // Robust color handling for Recharts
-    const primaryColor = "#6366f1"; // Indigo-500 (Standard Primary)
-    const gridColor = "rgba(156, 163, 175, 0.2)"; // Muted gray with opacity
+    // CSS Variable based colors (Rule 6 compliance)
+    const primaryColor = "hsl(var(--primary))";
+    const mutedColor = "hsl(var(--muted-foreground))";
+    const borderColor = "hsl(var(--border))";
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -36,29 +44,29 @@ export const EngagementChart = ({ attendanceData, gradeData }: EngagementChartPr
                             <AreaChart data={attendanceData}>
                                 <defs>
                                     <linearGradient id="colorPresent" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor={primaryColor} stopOpacity={0.3}/>
-                                        <stop offset="95%" stopColor={primaryColor} stopOpacity={0}/>
+                                        <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.3}/>
+                                        <stop offset="95%" stopColor="var(--primary)" stopOpacity={0}/>
                                     </linearGradient>
                                 </defs>
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={gridColor} />
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={borderColor} opacity={0.5} />
                                 <XAxis 
                                     dataKey="date" 
                                     axisLine={false} 
                                     tickLine={false} 
-                                    tick={{ fontSize: 10, fontWeight: 'bold', fill: '#888888' }}
+                                    tick={{ fontSize: 10, fontWeight: 'bold', fill: mutedColor }}
                                     tickFormatter={(str) => new Date(str).toLocaleDateString('en-US', { weekday: 'short' })}
                                 />
-                                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 'bold', fill: '#888888' }} />
+                                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 'bold', fill: mutedColor }} />
                                 <Tooltip 
                                     contentStyle={{ 
-                                        backgroundColor: 'rgba(0, 0, 0, 0.8)', 
-                                        border: 'none', 
+                                        backgroundColor: 'hsl(var(--popover))', 
+                                        border: '1px solid hsl(var(--border))', 
                                         borderRadius: '12px', 
                                         fontSize: '12px',
-                                        boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.3)'
+                                        boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)'
                                     }}
-                                    itemStyle={{ color: '#fff', fontWeight: 'bold' }}
-                                    labelStyle={{ color: '#aaa', marginBottom: '4px', fontWeight: 'bold' }}
+                                    itemStyle={{ color: 'hsl(var(--foreground))', fontWeight: 'bold' }}
+                                    labelStyle={{ color: 'hsl(var(--muted-foreground))', marginBottom: '4px', fontWeight: 'bold' }}
                                 />
                                 <Area 
                                     type="monotone" 
@@ -72,10 +80,7 @@ export const EngagementChart = ({ attendanceData, gradeData }: EngagementChartPr
                             </AreaChart>
                         </ResponsiveContainer>
                     ) : (
-                        <div className="flex flex-col items-center justify-center h-full text-muted-foreground opacity-50">
-                            <TrendingUp className="h-10 w-10 mb-2" />
-                            <p className="text-sm font-bold">No attendance data yet</p>
-                        </div>
+                        <NoChartData icon={TrendingUp} message="No attendance data yet" />
                     )}
                 </CardContent>
             </Card>
@@ -95,25 +100,25 @@ export const EngagementChart = ({ attendanceData, gradeData }: EngagementChartPr
                         {gradeData.length > 0 ? (
                             <ResponsiveContainer width="100%" height="100%">
                                 <RechartsBarChart data={gradeData}>
-                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={gridColor} />
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={borderColor} opacity={0.5} />
                                     <XAxis 
                                         dataKey="range" 
                                         axisLine={false} 
                                         tickLine={false} 
-                                        tick={{ fontSize: 10, fontWeight: 'bold', fill: '#888888' }}
+                                        tick={{ fontSize: 10, fontWeight: 'bold', fill: mutedColor }}
                                     />
-                                    <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 'bold', fill: '#888888' }} />
+                                    <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 'bold', fill: mutedColor }} />
                                     <Tooltip 
-                                        cursor={{ fill: 'rgba(99, 102, 241, 0.1)' }}
+                                        cursor={{ fill: 'hsl(var(--primary))', opacity: 0.05 }}
                                         contentStyle={{ 
-                                            backgroundColor: 'rgba(0, 0, 0, 0.8)', 
-                                            border: 'none', 
+                                            backgroundColor: 'hsl(var(--popover))', 
+                                            border: '1px solid hsl(var(--border))', 
                                             borderRadius: '12px', 
                                             fontSize: '12px',
-                                            boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.3)'
+                                            boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)'
                                         }}
-                                        itemStyle={{ color: '#fff', fontWeight: 'bold' }}
-                                        labelStyle={{ color: '#aaa', marginBottom: '4px', fontWeight: 'bold' }}
+                                        itemStyle={{ color: 'hsl(var(--foreground))', fontWeight: 'bold' }}
+                                        labelStyle={{ color: 'hsl(var(--muted-foreground))', marginBottom: '4px', fontWeight: 'bold' }}
                                     />
                                     <Bar 
                                         dataKey="count" 
@@ -125,10 +130,7 @@ export const EngagementChart = ({ attendanceData, gradeData }: EngagementChartPr
                                 </RechartsBarChart>
                             </ResponsiveContainer>
                         ) : (
-                            <div className="flex flex-col items-center justify-center h-full text-muted-foreground opacity-50">
-                                <BarChart className="h-10 w-10 mb-2" />
-                                <p className="text-sm font-bold">No grade data yet</p>
-                            </div>
+                            <NoChartData icon={BarChart} message="No grade data yet" />
                         )}
                     </CardContent>
                 </Card>

@@ -4,7 +4,7 @@ import {
   useGetIdentity,
   useNavigation,
   useLogout,
-  useCustom,
+  useList,
 } from "@refinedev/core";
 import {
   Calculator,
@@ -40,21 +40,24 @@ export function CommandMenu() {
   const { mutate: logout } = useLogout();
   const { theme, setTheme } = useTheme();
 
-  // Fetch dynamic data for search
-  const { query: classesQuery } = useCustom<Class[]>({
-    url: "/classes",
-    method: "get",
+  const isStaff = identity?.role === "teacher" || identity?.role === "admin";
+
+  // Fetch dynamic data for search using useList (Rule 3 compliance)
+  // useList returns { query, result }, we use result for direct access to data
+  const { result: classesResult } = useList<Class>({
+    resource: "classes",
     queryOptions: { enabled: open },
+    pagination: { pageSize: 5 },
   });
 
-  const { query: assignmentsQuery } = useCustom<Assignment[]>({
-    url: "/assignments",
-    method: "get",
+  const { result: assignmentsResult } = useList<Assignment>({
+    resource: "assignments",
     queryOptions: { enabled: open },
+    pagination: { pageSize: 5 },
   });
 
-  const classes = classesQuery.data?.data || [];
-  const assignments = assignmentsQuery.data?.data || [];
+  const classes = classesResult?.data || [];
+  const assignments = assignmentsResult?.data || [];
 
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -77,7 +80,7 @@ export function CommandMenu() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="flex items-center gap-2 px-3 py-1.5 text-sm text-muted-foreground border rounded-md bg-muted/50 hover:bg-muted transition-colors w-full max-w-[200px]"
+        className="flex items-center gap-2 px-3 py-1.5 text-sm text-muted-foreground border rounded-md bg-muted/50 hover:bg-muted transition-colors w-full max-w-50"
       >
         <Search className="h-4 w-4" />
         <span>Search...</span>
@@ -94,20 +97,34 @@ export function CommandMenu() {
               <Home className="mr-2 h-4 w-4" />
               <span>Dashboard</span>
             </CommandItem>
-            <CommandItem onSelect={() => runCommand(() => navigate("/ai-assistant"))}>
-              <Sparkles className="mr-2 h-4 w-4 text-primary" />
-              <span>AI Assistant</span>
-            </CommandItem>
-            <CommandItem onSelect={() => runCommand(() => navigate("/calendar"))}>
+
+            {/* AI Assistant Access Control (GEMINI.md compliance) */}
+            {isStaff && (
+              <CommandItem
+                onSelect={() => runCommand(() => navigate("/ai-assistant"))}
+              >
+                <Sparkles className="mr-2 h-4 w-4 text-primary" />
+                <span>AI Assistant</span>
+              </CommandItem>
+            )}
+
+            <CommandItem
+              onSelect={() => runCommand(() => navigate("/calendar"))}
+            >
               <Calendar className="mr-2 h-4 w-4" />
               <span>Calendar</span>
             </CommandItem>
           </CommandGroup>
-          
+
           {classes.length > 0 && (
             <CommandGroup heading="Classes">
-              {classes.slice(0, 5).map((c: Class) => (
-                <CommandItem key={c.id} onSelect={() => runCommand(() => show("classes", c.id.toString()))}>
+              {classes.map((c: Class) => (
+                <CommandItem
+                  key={c.id}
+                  onSelect={() =>
+                    runCommand(() => show("classes", c.id.toString()))
+                  }
+                >
                   <BookOpen className="mr-2 h-4 w-4" />
                   <span>{c.name}</span>
                 </CommandItem>
@@ -117,8 +134,13 @@ export function CommandMenu() {
 
           {assignments.length > 0 && (
             <CommandGroup heading="Assignments">
-              {assignments.slice(0, 5).map((a: Assignment) => (
-                <CommandItem key={a.id} onSelect={() => runCommand(() => show("assignments", a.id.toString()))}>
+              {assignments.map((a: Assignment) => (
+                <CommandItem
+                  key={a.id}
+                  onSelect={() =>
+                    runCommand(() => show("assignments", a.id.toString()))
+                  }
+                >
                   <Calculator className="mr-2 h-4 w-4" />
                   <span>{a.title}</span>
                 </CommandItem>
@@ -128,13 +150,25 @@ export function CommandMenu() {
 
           <CommandSeparator />
           <CommandGroup heading="Settings">
-            <CommandItem onSelect={() => runCommand(() => identity?.id && show("users", identity.id))}>
+            <CommandItem
+              onSelect={() =>
+                runCommand(() => identity?.id && show("users", identity.id))
+              }
+            >
               <UserIcon className="mr-2 h-4 w-4" />
               <span>Profile</span>
               <CommandShortcut>⌘P</CommandShortcut>
             </CommandItem>
-            <CommandItem onSelect={() => runCommand(() => setTheme(theme === "dark" ? "light" : "dark"))}>
-              {theme === "dark" ? <Sun className="mr-2 h-4 w-4" /> : <Moon className="mr-2 h-4 w-4" />}
+            <CommandItem
+              onSelect={() =>
+                runCommand(() => setTheme(theme === "dark" ? "light" : "dark"))
+              }
+            >
+              {theme === "dark" ? (
+                <Sun className="mr-2 h-4 w-4" />
+              ) : (
+                <Moon className="mr-2 h-4 w-4" />
+              )}
               <span>Toggle Theme</span>
               <CommandShortcut>⌘T</CommandShortcut>
             </CommandItem>

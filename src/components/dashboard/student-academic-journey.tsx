@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from "recharts";
-import { TrendingUp, BookOpen, CheckCircle2, Clock, XCircle } from "lucide-react";
+import { TrendingUp, BookOpen, CheckCircle2, Clock, XCircle, LucideIcon } from "lucide-react";
 
 interface StudentAcademicJourneyProps {
   gradeTrends: any[];
@@ -8,11 +8,18 @@ interface StudentAcademicJourneyProps {
   attendanceSummary: any;
 }
 
+const NoChartData = ({ icon: Icon, message }: { icon: LucideIcon, message: string }) => (
+    <div className="flex flex-col items-center justify-center h-full text-muted-foreground opacity-50">
+        <Icon className="h-10 w-10 mb-2" />
+        <p className="text-sm font-bold uppercase tracking-widest">{message}</p>
+    </div>
+);
+
 export const StudentAcademicJourney = ({ gradeTrends, subjectMastery, attendanceSummary }: StudentAcademicJourneyProps) => {
-  // Explicit colors for maximum visibility in both themes
-  const primaryColor = "#6366f1"; // Indigo-500
-  const gridColor = "rgba(156, 163, 175, 0.3)"; // Stronger grid
-  const labelColor = "#94a3b8"; // Slate-400
+  // CSS Variable based colors (Rule 6 compliance)
+  const primaryColor = "hsl(var(--primary))";
+  const mutedColor = "hsl(var(--muted-foreground))";
+  const borderColor = "hsl(var(--border))";
 
   return (
     <div className="space-y-8">
@@ -32,46 +39,43 @@ export const StudentAcademicJourney = ({ gradeTrends, subjectMastery, attendance
             {gradeTrends.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={gradeTrends} margin={{ top: 5, right: 20, left: -20, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={gridColor} />
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={borderColor} opacity={0.5} />
                   <XAxis 
                     dataKey="title" 
                     axisLine={false} 
                     tickLine={false} 
-                    tick={{ fontSize: 10, fontWeight: 'bold', fill: labelColor }}
+                    tick={{ fontSize: 10, fontWeight: 'bold', fill: mutedColor }}
                   />
                   <YAxis 
                     domain={[0, 100]} 
                     axisLine={false} 
                     tickLine={false} 
-                    tick={{ fontSize: 10, fontWeight: 'bold', fill: labelColor }}
+                    tick={{ fontSize: 10, fontWeight: 'bold', fill: mutedColor }}
                   />
                   <Tooltip 
                     contentStyle={{ 
-                        backgroundColor: "rgba(15, 23, 42, 0.9)", 
-                        border: "1px solid rgba(255, 255, 255, 0.1)", 
-                        borderRadius: "12px", 
-                        fontSize: "12px",
-                        boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.5)"
+                        backgroundColor: 'hsl(var(--popover))', 
+                        border: '1px solid hsl(var(--border))', 
+                        borderRadius: '12px', 
+                        fontSize: '12px',
+                        boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)'
                     }}
-                    itemStyle={{ color: "#fff", fontWeight: "bold" }}
-                    labelStyle={{ color: "#94a3b8", marginBottom: "4px" }}
+                    itemStyle={{ color: 'hsl(var(--foreground))', fontWeight: 'bold' }}
+                    labelStyle={{ color: 'hsl(var(--muted-foreground))', marginBottom: '4px', fontWeight: 'bold' }}
                   />
                   <Line 
                     type="monotone" 
                     dataKey="grade" 
                     stroke={primaryColor} 
                     strokeWidth={4} 
-                    dot={{ r: 5, fill: primaryColor, strokeWidth: 2, stroke: "#fff" }} 
+                    dot={{ r: 5, fill: primaryColor, strokeWidth: 2, stroke: "hsl(var(--background))" }} 
                     activeDot={{ r: 7, strokeWidth: 0 }}
                     animationDuration={1500}
                   />
                 </LineChart>
               </ResponsiveContainer>
             ) : (
-              <div className="flex flex-col items-center justify-center h-full text-muted-foreground opacity-50">
-                <TrendingUp className="h-10 w-10 mb-2" />
-                <p className="text-sm font-bold uppercase tracking-widest">No grade data yet</p>
-              </div>
+              <NoChartData icon={TrendingUp} message="No grade data yet" />
             )}
           </CardContent>
         </Card>
@@ -91,10 +95,10 @@ export const StudentAcademicJourney = ({ gradeTrends, subjectMastery, attendance
             {subjectMastery.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <RadarChart cx="50%" cy="50%" outerRadius="80%" data={subjectMastery}>
-                  <PolarGrid stroke={gridColor} strokeWidth={1} />
+                  <PolarGrid stroke={borderColor} opacity={0.5} />
                   <PolarAngleAxis 
                     dataKey="subject" 
-                    tick={{ fontSize: 10, fontWeight: 'bold', fill: labelColor }} 
+                    tick={{ fontSize: 10, fontWeight: 'bold', fill: mutedColor }} 
                   />
                   <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
                   <Radar
@@ -103,24 +107,21 @@ export const StudentAcademicJourney = ({ gradeTrends, subjectMastery, attendance
                     stroke={primaryColor}
                     strokeWidth={3}
                     fill={primaryColor}
-                    fillOpacity={0.5}
+                    fillOpacity={0.3}
                     animationDuration={1500}
                   />
                   <Tooltip 
                     contentStyle={{ 
-                        backgroundColor: "rgba(15, 23, 42, 0.9)", 
-                        border: "1px solid rgba(255, 255, 255, 0.1)", 
-                        borderRadius: "12px"
+                        backgroundColor: 'hsl(var(--popover))', 
+                        border: '1px solid hsl(var(--border))', 
+                        borderRadius: '12px'
                     }}
-                    itemStyle={{ color: "#fff" }}
+                    itemStyle={{ color: 'hsl(var(--foreground))', fontWeight: 'bold' }}
                   />
                 </RadarChart>
               </ResponsiveContainer>
             ) : (
-              <div className="flex flex-col items-center justify-center h-full text-muted-foreground opacity-50">
-                <BookOpen className="h-10 w-10 mb-2" />
-                <p className="text-sm font-bold uppercase tracking-widest">No graded work yet</p>
-              </div>
+              <NoChartData icon={BookOpen} message="No graded work yet" />
             )}
           </CardContent>
         </Card>
