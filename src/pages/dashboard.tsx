@@ -1,7 +1,8 @@
 import { useNavigation, useGetIdentity, useCustom } from "@refinedev/core";
-import { Loader2, Layout, FileText, Calendar, Users, AlertCircle } from "lucide-react";
+import { Layout, FileText, Calendar, Users, AlertCircle } from "lucide-react";
 import { User } from "@/types";
-import React from "react";
+import React, { useEffect } from "react";
+import { io } from "socket.io-client";
 
 import { WelcomeHeader } from "@/components/dashboard/welcome-header";
 import { EngagementChart } from "@/components/dashboard/engagement-chart";
@@ -16,6 +17,13 @@ import { StudentAcademicJourney } from "@/components/dashboard/student-academic-
 import { DashboardData } from "@/types/dashboard";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { Button } from "@/components/ui/button";
+import { 
+  WelcomeHeaderSkeleton, 
+  ChartSkeleton, 
+  ListSkeleton, 
+  ScheduleSkeleton, 
+  StatsSkeleton 
+} from "@/components/dashboard/dashboard-skeletons";
 
 const Dashboard = () => {
   const { list, show } = useNavigation();
@@ -54,6 +62,31 @@ const Dashboard = () => {
   
   const isLoading = isDashboardLoading || isFetching;
 
+  // --- REAL-TIME DASHBOARD UPDATES ---
+  useEffect(() => {
+    if (!identity?.id) return;
+
+    const socketUrl = import.meta.env.VITE_SOCKET_URL || import.meta.env.VITE_API_URL.replace("/api", "");
+    const socket = io(socketUrl, {
+      query: { userId: identity.id },
+      withCredentials: true,
+    });
+
+    // Refresh dashboard data when relevant events occur
+    const handleRefresh = () => {
+      void refetch();
+    };
+
+    socket.on("notification", handleRefresh); // New grade, assignment, etc.
+    socket.on("new_discussion", handleRefresh); // New activity in class
+
+    return () => {
+      socket.off("notification", handleRefresh);
+      socket.off("new_discussion", handleRefresh);
+      socket.disconnect();
+    };
+  }, [identity?.id, refetch]);
+
   const activeCards = isStudent ? [
     { title: "My Classes", icon: Layout, heading: "Enrolled Classes", description: "Access active classrooms.", resource: "classes" },
     { title: "Assignments", icon: FileText, heading: "My Tasks", description: "Submit your work.", resource: "assignments" },
@@ -77,11 +110,21 @@ const Dashboard = () => {
     );
   }
 
-  // --- LOADING STATE ---
-  if (isIdentityLoading || (isLoading && todaySchedule.length === 0)) {
+  // --- LOADING STATE (SKELETONS) ---
+  if (isIdentityLoading || (isLoading && !data)) {
     return (
-      <div className="flex h-dvh items-center justify-center">
-        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+      <div className="container mx-auto py-10 px-4 md:px-6">
+        <WelcomeHeaderSkeleton />
+        <div className="grid gap-10 lg:grid-cols-3">
+          <div className="lg:col-span-2 space-y-12">
+            <ChartSkeleton />
+            <ListSkeleton />
+          </div>
+          <div className="space-y-10">
+            <ScheduleSkeleton />
+            <StatsSkeleton />
+          </div>
+        </div>
       </div>
     );
   }
