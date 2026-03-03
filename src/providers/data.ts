@@ -61,6 +61,7 @@ const resourceFilterMappings: Record<string, Record<string, string>> = {
   attendance: { classId: "classId", date: "date" },
   resources: { classId: "classId", search: "search" },
   "profile-requests": { status: "status", userId: "userId" },
+  quizzes: { classId: "classId" }, // Added: Explicit filter mapping for quizzes
 };
 
 export const dataProvider: DataProvider = {
