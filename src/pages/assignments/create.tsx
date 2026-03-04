@@ -35,6 +35,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Label } from "@/components/ui/label";
 import { Sparkles, Paperclip, Loader2, LayoutGrid, HelpCircle } from "lucide-react";
 import { FieldValues } from "react-hook-form";
 import { Module } from "@/types";
@@ -70,16 +71,15 @@ export const AssignmentCreate = () => {
   const initialModuleId = searchParams.get("moduleId");
   const go = useGo();
 
-  // Fetch modules for this class to populate the dropdown
-  const { data: modulesData, isLoading: modulesLoading } = useList<Module>({
+  const { query: modulesQuery } = useList<Module>({
     resource: "modules",
     filters: [{ field: "classId", operator: "eq", value: classId }],
     queryOptions: { enabled: !!classId },
   });
 
-  const modules = modulesData?.data || [];
+  const modules = modulesQuery.data?.data || [];
+  const modulesLoading = modulesQuery.isLoading;
 
-  // MANDATORY: Use Refine v5 useForm pattern with refineCoreProps
   const form = useForm<AssignmentFormValues>({
     resolver: zodResolver(assignmentSchema) as any,
     defaultValues: {
@@ -109,7 +109,6 @@ export const AssignmentCreate = () => {
     refineCore: { onFinish, formLoading },
   } = form;
 
-  // Sync moduleId if it comes from URL after initial load
   useEffect(() => {
     if (initialModuleId) {
       setValue("moduleId", Number(initialModuleId));
@@ -214,7 +213,7 @@ export const AssignmentCreate = () => {
                           </FormControl>
                           <SelectContent>
                             <SelectItem value="0">None (Global Assignment)</SelectItem>
-                            {modules.map((m) => (
+                            {modules.map((m: Module) => (
                               <SelectItem key={m.id} value={m.id.toString()}>{m.name}</SelectItem>
                             ))}
                           </SelectContent>

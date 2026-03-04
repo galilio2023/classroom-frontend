@@ -9,12 +9,9 @@ import {
   Sparkles, 
   Send, 
   BookOpen,
-  Maximize2,
-  Minimize2,
   X
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
 import ReactMarkdown from "react-markdown";
@@ -22,7 +19,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
 export const LessonReader = () => {
-  const { classId, resourceId } = useParams();
+  const { resourceId } = useParams();
   const navigate = useNavigate();
   const { data: identity } = useGetIdentity<User>();
   
@@ -32,13 +29,15 @@ export const LessonReader = () => {
   const [isTyping, setIsTyping] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const { data: resourceData, isLoading } = useOne<Resource>({
+  const { query } = useOne<Resource>({
     resource: "resources",
     id: resourceId,
     queryOptions: { enabled: !!resourceId }
   });
 
-  const resource = resourceData?.data;
+  const resource = query.data?.data;
+  const isLoading = query.isLoading;
+
   const { mutate: chatMutation } = useCustomMutation();
 
   useEffect(() => {
@@ -65,7 +64,7 @@ export const LessonReader = () => {
           context: {
             subject: "Lesson Content",
             topic: resource.title,
-            assignment: resource.content // Use lesson content as context
+            assignment: resource.content
           }
         },
       },
@@ -107,7 +106,7 @@ export const LessonReader = () => {
       {/* Main Content Area */}
       <div className={cn(
         "flex-1 flex flex-col transition-all duration-300",
-        isChatOpen ? "mr-0 lg:mr-[400px]" : "mr-0"
+        isChatOpen ? "mr-0 lg:mr-100" : "mr-0"
       )}>
         {/* Header */}
         <header className="h-16 border-b flex items-center justify-between px-6 bg-card/50 backdrop-blur-md sticky top-0 z-10">
@@ -117,7 +116,7 @@ export const LessonReader = () => {
             </Button>
             <div className="flex items-center gap-2">
               <BookOpen className="h-5 w-5 text-primary" />
-              <h1 className="font-bold truncate max-w-[200px] sm:max-w-md">{resource.title}</h1>
+              <h1 className="font-bold truncate max-w-50 sm:max-w-md">{resource.title}</h1>
             </div>
           </div>
           <Button 
@@ -149,7 +148,7 @@ export const LessonReader = () => {
 
       {/* AI Tutor Sidebar */}
       <aside className={cn(
-        "fixed right-0 top-0 h-full w-full lg:w-[400px] border-l bg-card transition-transform duration-300 z-20 shadow-2xl flex flex-col",
+        "fixed right-0 top-0 h-full w-full lg:w-100 border-l bg-card transition-transform duration-300 z-20 shadow-2xl flex flex-col",
         isChatOpen ? "translate-x-0" : "translate-x-full"
       )}>
         <div className="p-4 border-b flex items-center justify-between bg-primary/5">
@@ -167,7 +166,7 @@ export const LessonReader = () => {
           </Button>
         </div>
 
-        <ScrollArea className="flex-1 p-4" viewportRef={scrollRef}>
+        <ScrollArea className="flex-1 p-4">
           <div className="space-y-4">
             <div className="bg-muted/50 p-3 rounded-lg text-xs leading-relaxed">
                 Hi {identity?.name}! I've read through <strong>{resource.title}</strong>. 
@@ -185,9 +184,9 @@ export const LessonReader = () => {
                     ? "bg-primary text-primary-foreground rounded-tr-none" 
                     : "bg-muted rounded-tl-none"
                 )}>
-                  <ReactMarkdown className="prose prose-sm dark:prose-invert max-w-none">
-                    {msg.parts[0].text}
-                  </ReactMarkdown>
+                  <div className="prose prose-sm dark:prose-invert max-w-none">
+                    <ReactMarkdown>{msg.parts[0].text}</ReactMarkdown>
+                  </div>
                 </div>
               </div>
             ))}
@@ -213,7 +212,7 @@ export const LessonReader = () => {
                   handleSendMessage();
                 }
               }}
-              className="min-h-[80px] pr-12 resize-none"
+              className="min-h-20 pr-12 resize-none"
             />
             <Button 
               size="icon" 

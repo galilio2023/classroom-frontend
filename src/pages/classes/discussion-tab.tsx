@@ -1,7 +1,6 @@
 import { useList, useCreate, useDelete, useGetIdentity, useCustomMutation } from "@refinedev/core";
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Discussion, User } from "@/types";
 import { Loader2, Send, Sparkles, X, MessageCircle } from "lucide-react";
@@ -22,12 +21,10 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
   const [replyTo, setReplyTo] = useState<number | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   
-  // AI Summary State
   const [summary, setSummary] = useState<string | null>(null);
   const [isSummarizing, setIsSummarizing] = useState(false);
 
-  // --- REFINE HOOKS ---
-  const { result, query } = useList<Discussion>({
+  const { query } = useList<Discussion>({
     resource: "discussions",
     filters: [
       { field: "classId", operator: "eq", value: classId },
@@ -37,7 +34,7 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
     queryOptions: { enabled: !!classId },
   });
 
-  const discussions = result?.data || [];
+  const discussions = query.data?.data || [];
   const isLoading = query.isLoading;
   const refetch = query.refetch;
 
@@ -45,7 +42,6 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
   const { mutate: deletePost } = useDelete();
   const { mutate: generateSummary } = useCustomMutation();
 
-  // --- AUTO SCROLL ---
   useEffect(() => {
     if (scrollRef.current) {
       const viewport = scrollRef.current.querySelector('[data-radix-scroll-area-viewport]');
@@ -53,14 +49,13 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
     }
   }, [discussions]);
 
-  // --- REAL-TIME SOCKET ---
   useEffect(() => {
     if (!identity?.id || !classId) return;
     const socket = io(import.meta.env.VITE_API_URL.replace("/api", ""), {
       query: { userId: identity.id, classId },
     });
-    socket.on("new_discussion", () => refetch());
-    socket.on("delete_discussion", () => refetch());
+    socket.on("new_discussion", () => { void refetch(); });
+    socket.on("delete_discussion", () => { void refetch(); });
     return () => { socket.disconnect(); };
   }, [identity?.id, classId, refetch]);
 
@@ -72,7 +67,7 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
         values: { 
           content: newPost, 
           classId: Number(classId),
-          parentId: replyTo // If replyTo is set, it becomes a reply
+          parentId: replyTo
         },
       },
       {
@@ -103,7 +98,6 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
 
   return (
     <div className="flex flex-col h-[calc(100vh-300px)] min-h-[500px] bg-muted/20 rounded-2xl border border-border/50 overflow-hidden">
-      {/* Chat Header */}
       <div className="p-4 border-b bg-background/50 backdrop-blur-md flex justify-between items-center">
         <div className="flex items-center gap-2">
           <div className="p-2 bg-primary/10 rounded-lg">
@@ -126,7 +120,6 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
         </Button>
       </div>
 
-      {/* AI Summary Overlay */}
       {summary && (
         <div className="p-4 bg-primary/5 border-b border-primary/10 animate-in slide-in-from-top duration-300 relative">
           <Button variant="ghost" size="icon" onClick={() => setSummary(null)} className="absolute top-2 right-2 h-6 w-6">
@@ -138,7 +131,6 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
         </div>
       )}
 
-      {/* Chat Messages */}
       <ScrollArea ref={scrollRef} className="flex-1 p-4">
         {isLoading ? (
           <div className="flex flex-col items-center justify-center h-full space-y-2">
@@ -167,7 +159,6 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
         )}
       </ScrollArea>
 
-      {/* Chat Input Area */}
       <div className="p-4 bg-background border-t">
         {replyTo && (
           <div className="mb-2 p-2 bg-muted rounded-lg flex justify-between items-center animate-in slide-in-from-bottom-2 duration-200">

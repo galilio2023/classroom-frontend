@@ -28,12 +28,15 @@ interface AtRiskStudentItemProps {
   student: AtRiskStudent;
 }
 
-export const AtRiskStudentItem: React.FC<AtRiskStudentItemProps> = ({ student }) => {
+export const AtRiskStudentItem: React.FC<AtRiskStudentItemProps> = ({
+  student,
+}) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
-  
-  const { mutate: sendNotification, isLoading: isSending } = useCreate();
+
+  const { mutate: sendNotification, mutation } = useCreate();
+  const isSending = mutation.isPending;
 
   const generateEncouragement = async () => {
     setIsGenerating(true);
@@ -41,37 +44,43 @@ export const AtRiskStudentItem: React.FC<AtRiskStudentItemProps> = ({ student })
       const response = await axios.post("/api/ai/generate-encouragement", {
         studentName: student.name,
         reason: student.reason,
-        value: student.value
+        value: student.value,
       });
       setMessage(response.data.message);
     } catch (error) {
-      // Fallback messages
       const fallbacks: Record<string, string> = {
         "Low Grades": `Hi ${student.name}, I noticed your recent grades have been a bit lower than usual. I know you can do better! Is there anything I can help you with?`,
         "High Absences": `Hello ${student.name}, we've missed you in class lately! Regular attendance is key to success. Hope everything is okay.`,
-        "Inactivity": `Hi ${student.name}, I noticed you haven't logged in for a few days. Don't fall behind on the latest modules! Let me know if you're stuck.`
+        Inactivity: `Hi ${student.name}, I noticed you haven't logged in for a few days. Don't fall behind on the latest modules! Let me know if you're stuck.`,
       };
-      setMessage(fallbacks[student.reason] || `Hi ${student.name}, just checking in to see how you're doing with your studies.`);
+      setMessage(
+        fallbacks[student.reason] ||
+          `Hi ${student.name}, just checking in to see how you're doing with your studies.`,
+      );
     } finally {
       setIsGenerating(false);
     }
   };
 
   const handleSend = () => {
-    sendNotification({
-      resource: "notifications",
-      values: {
-        userId: student.id,
-        title: "Message from your Teacher",
-        message: message,
-        type: "achievement", // Using achievement type for positive reinforcement
+    sendNotification(
+      {
+        resource: "notifications",
+        values: {
+          userId: student.id,
+          title: "Message from your Teacher",
+          message: message,
+          type: "achievement",
+        },
       },
-      onSuccess: () => {
-        toast.success(`Encouragement sent to ${student.name}!`);
-        setIsModalOpen(false);
-        setMessage("");
-      }
-    });
+      {
+        onSuccess: () => {
+          toast.success(`Encouragement sent to ${student.name}!`);
+          setIsModalOpen(false);
+          setMessage("");
+        },
+      },
+    );
   };
 
   return (
@@ -96,14 +105,17 @@ export const AtRiskStudentItem: React.FC<AtRiskStudentItemProps> = ({ student })
             </div>
           </div>
         </div>
-        
+
         <div className="flex items-center gap-2">
-          <Badge variant="destructive" className="text-[10px] font-black px-2 py-0.5">
+          <Badge
+            variant="destructive"
+            className="text-[10px] font-black px-2 py-0.5"
+          >
             {student.value}
           </Badge>
-          <Button 
-            variant="ghost" 
-            size="icon" 
+          <Button
+            variant="ghost"
+            size="icon"
             className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity text-primary hover:text-primary hover:bg-primary/10"
             onClick={() => setIsModalOpen(true)}
           >
@@ -123,32 +135,43 @@ export const AtRiskStudentItem: React.FC<AtRiskStudentItemProps> = ({ student })
               Send a supportive message to help them get back on track.
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="space-y-4 py-4">
             <div className="flex justify-between items-center">
-              <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Message</span>
-              <Button 
-                variant="ghost" 
-                size="sm" 
+              <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
+                Message
+              </span>
+              <Button
+                variant="ghost"
+                size="sm"
                 className="h-7 text-xs gap-1.5 text-primary hover:text-primary hover:bg-primary/10"
                 onClick={generateEncouragement}
                 disabled={isGenerating}
               >
-                {isGenerating ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
+                {isGenerating ? (
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                ) : (
+                  <Sparkles className="h-3 w-3" />
+                )}
                 AI Suggest
               </Button>
             </div>
-            <Textarea 
-              placeholder="Type your message here..." 
-              className="min-h-[120px] resize-none"
+            <Textarea
+              placeholder="Type your message here..."
+              className="min-h-30 resize-none"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
             />
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsModalOpen(false)}>Cancel</Button>
-            <Button onClick={handleSend} disabled={isSending || !message.trim()}>
+            <Button variant="outline" onClick={() => setIsModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSend}
+              disabled={isSending || !message.trim()}
+            >
               {isSending ? "Sending..." : "Send Message"}
             </Button>
           </DialogFooter>

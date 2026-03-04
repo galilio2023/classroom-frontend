@@ -3,12 +3,11 @@ import { useParams } from "react-router-dom";
 import { useMemo } from "react";
 import { ShowView, ShowViewHeader } from "@/components/refine-ui/views/show-view";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Loader2, FileText, ExternalLink, BrainCircuit, Users, CheckCircle2 } from "lucide-react";
+import { Loader2, BrainCircuit, Users, CheckCircle2 } from "lucide-react";
 import { Assignment, User, Submission } from "@/types";
 import { SubmissionForm } from "./submission-form";
 import { SubmissionList } from "./submission-list";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { InteractiveQuiz } from "@/components/interactive-quiz";
 import { cn } from "@/lib/utils";
 
@@ -16,40 +15,31 @@ const AssignmentShow = () => {
   const { id } = useParams();
   const { data: identity, isLoading: isIdentityLoading } = useGetIdentity<User>();
 
-  const { result: assignment, query: assignmentQuery } = useShow<
-    Assignment,
-    HttpError
-  >({
+  const { query: assignmentQuery } = useShow<Assignment, HttpError>({
     resource: "assignments",
     id,
   });
 
-  const { result: submissionsResult, query: submissionsQuery } = useList<
-    Submission,
-    HttpError
-  >({
+  const assignment = assignmentQuery.data?.data;
+
+  const { query: submissionsQuery } = useList<Submission, HttpError>({
     resource: "submissions",
-    filters: id
-      ? [{ field: "assignmentId", operator: "eq", value: id }]
-      : [],
-    queryOptions: {
-      enabled: !!assignment,
-    },
+    filters: id ? [{ field: "assignmentId", operator: "eq", value: id }] : [],
+    queryOptions: { enabled: !!assignment },
   });
   
-  const submissions = submissionsResult?.data ?? [];
+  const submissions = submissionsQuery.data?.data ?? [];
 
   const mySubmission = useMemo(() => {
     if (!identity?.id || !submissions.length) return null;
-    return submissions.find((s) => s.studentId === identity.id);
+    return submissions.find((s: Submission) => s.studentId === identity.id);
   }, [submissions, identity?.id]);
 
   const isQuiz = useMemo(() => {
     return assignment?.description?.includes("### Q1:") && assignment?.description?.includes("---");
   }, [assignment]);
 
-  const isLoading =
-    isIdentityLoading || assignmentQuery.isLoading || submissionsQuery.isLoading;
+  const isLoading = isIdentityLoading || assignmentQuery.isLoading || submissionsQuery.isLoading;
   const isError = assignmentQuery.isError || submissionsQuery.isError;
 
   if (isLoading) {
@@ -83,7 +73,6 @@ const AssignmentShow = () => {
     <ShowView>
       <ShowViewHeader resource="assignments" title={assignment.title} />
       <div className="space-y-8">
-        {/* Assignment Header Card */}
         <Card className="border-none shadow-xl bg-white/50 dark:bg-black/20 backdrop-blur-xl">
           <CardHeader>
             <div className="flex items-center justify-between">
@@ -94,7 +83,7 @@ const AssignmentShow = () => {
               <div className="flex gap-2">
                 {isQuiz && (
                   <Badge className="bg-indigo-500 text-white border-none px-4 py-1 rounded-full font-black uppercase tracking-widest text-[10px]">
-                    <BrainCircuit className="h-3.3 w-3 mr-2" />
+                    <BrainCircuit className="h-3 w-3 mr-2" />
                     AI Quiz Mode
                   </Badge>
                 )}
@@ -113,9 +102,7 @@ const AssignmentShow = () => {
           </CardContent>
         </Card>
 
-        {/* Main Content Area */}
         <div className="grid gap-8">
-          {/* 1. The Quiz Player (Visible to Students AND Admins/Teachers for testing) */}
           {isQuiz && (
             <Card className="border-none shadow-2xl bg-white dark:bg-black/40 overflow-hidden">
               <CardHeader className="bg-indigo-500/5 border-b border-indigo-500/10">
@@ -133,7 +120,6 @@ const AssignmentShow = () => {
             </Card>
           )}
 
-          {/* 2. Standard Submission Form (Only for Students if not a quiz) */}
           {!isStaff && !isQuiz && (
             <Card className="border-none shadow-2xl bg-white dark:bg-black/40 overflow-hidden">
               <CardHeader className="bg-muted/30 border-b border-black/5">
@@ -159,7 +145,6 @@ const AssignmentShow = () => {
             </Card>
           )}
 
-          {/* 3. Management View (Only for Admins and Teachers) */}
           {isStaff && (
             <Card className="border-none shadow-2xl bg-white dark:bg-black/40 overflow-hidden">
               <CardHeader className="bg-primary/5 border-b border-primary/10">

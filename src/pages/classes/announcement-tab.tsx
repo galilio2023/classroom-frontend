@@ -13,7 +13,6 @@ import {
   Plus, 
   MoreVertical, 
   Trash2, 
-  Edit2, 
   Loader2,
   Calendar
 } from "lucide-react";
@@ -45,7 +44,7 @@ export const AnnouncementTab = ({ classId }: AnnouncementTabProps) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [newAnnouncement, setNewAnnouncement] = useState({ title: "", content: "", isPinned: false });
 
-  const { data: announcementsData, isLoading, refetch } = useList<Announcement>({
+  const { query } = useList<Announcement>({
     resource: "announcements",
     filters: [
       {
@@ -60,7 +59,12 @@ export const AnnouncementTab = ({ classId }: AnnouncementTabProps) => {
     ],
   });
 
-  const { mutate: createAnnouncement, isLoading: isCreating } = useCreate();
+  const announcements = query.data?.data ?? [];
+  const isLoading = query.isLoading;
+  const refetch = query.refetch;
+
+  const { mutate: createAnnouncement, mutation: createMutation } = useCreate();
+  const isCreating = createMutation.isPending;
   const { mutate: updateAnnouncement } = useUpdate();
   const { mutate: deleteAnnouncement } = useDelete();
 
@@ -78,7 +82,7 @@ export const AnnouncementTab = ({ classId }: AnnouncementTabProps) => {
         onSuccess: () => {
           setIsCreateOpen(false);
           setNewAnnouncement({ title: "", content: "", isPinned: false });
-          refetch();
+          void refetch();
         },
       }
     );
@@ -89,7 +93,10 @@ export const AnnouncementTab = ({ classId }: AnnouncementTabProps) => {
       resource: "announcements",
       id: announcement.id,
       values: { isPinned: !announcement.isPinned },
-      onSuccess: () => refetch(),
+    }, {
+      onSuccess: () => {
+        void refetch();
+      },
     });
   };
 
@@ -97,7 +104,10 @@ export const AnnouncementTab = ({ classId }: AnnouncementTabProps) => {
     deleteAnnouncement({
       resource: "announcements",
       id,
-      onSuccess: () => refetch(),
+    }, {
+      onSuccess: () => {
+        void refetch();
+      },
     });
   };
 
@@ -108,8 +118,6 @@ export const AnnouncementTab = ({ classId }: AnnouncementTabProps) => {
       </div>
     );
   }
-
-  const announcements = announcementsData?.data ?? [];
 
   return (
     <div className="space-y-6">
@@ -184,13 +192,13 @@ export const AnnouncementTab = ({ classId }: AnnouncementTabProps) => {
         </Card>
       ) : (
         <div className="space-y-4">
-          {announcements.map((announcement) => (
+          {announcements.map((announcement: Announcement) => (
             <Card key={announcement.id} className={announcement.isPinned ? "border-primary/20 bg-primary/5" : ""}>
               <CardHeader className="pb-3">
                 <div className="flex justify-between items-start">
                   <div className="flex items-center gap-3">
                     <Avatar className="h-10 w-10">
-                      <AvatarImage src={announcement.author?.image} />
+                      <AvatarImage src={announcement.author?.image ?? ""} />
                       <AvatarFallback>{announcement.author?.name?.[0]}</AvatarFallback>
                     </Avatar>
                     <div>

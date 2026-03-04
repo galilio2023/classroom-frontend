@@ -72,7 +72,6 @@ const ClassesShow = () => {
   const [isEnrollDialogOpen, setIsEnrollDialogOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   
-  // AI Insight State
   const [insightTarget, setInsightTarget] = useState<{ id: string; name: string } | null>(null);
 
   const {
@@ -99,7 +98,7 @@ const ClassesShow = () => {
 
   const handleCopyInviteCode = () => {
     if (aClass?.inviteCode) {
-      navigator.clipboard.writeText(aClass.inviteCode);
+      void navigator.clipboard.writeText(aClass.inviteCode);
       setCopied(true);
       toast.success("Invite code copied to clipboard");
       setTimeout(() => setCopied(false), 2000);
@@ -111,9 +110,10 @@ const ClassesShow = () => {
       resource: "classes/enrollments",
       id,
       values: { status },
+    }, {
       onSuccess: () => {
         toast.success(`Student enrollment ${status}`);
-        refetch();
+        void refetch();
       }
     });
   };
@@ -323,7 +323,7 @@ const ClassesShow = () => {
                         <div key={enrollment.id} className="flex items-center justify-between p-3 bg-background rounded-lg border">
                           <div className="flex items-center gap-3">
                             <Avatar className="h-10 w-10">
-                              <AvatarImage src={enrollment.student.image} />
+                              <AvatarImage src={enrollment.student.image ?? ""} />
                               <AvatarFallback>{enrollment.student.name?.[0]}</AvatarFallback>
                             </Avatar>
                             <div>
@@ -450,7 +450,7 @@ const ClassesShow = () => {
                           {aClass.teachers?.map((tc) => (
                             <div key={tc.teacher.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted transition-colors">
                               <Avatar className="h-8 w-8">
-                                <AvatarImage src={tc.teacher.image} />
+                                <AvatarImage src={tc.teacher.image ?? ""} />
                                 <AvatarFallback>{tc.teacher.name?.[0]}</AvatarFallback>
                               </Avatar>
                               <div className="flex-1">
@@ -503,7 +503,6 @@ const ClassesShow = () => {
             enrolledStudentIds={enrolledStudentIds}
           />
 
-          {/* AI Student Insight Modal */}
           <AIStudentInsightModal
             isOpen={insightTarget !== null}
             onClose={() => setInsightTarget(null)}
@@ -514,7 +513,6 @@ const ClassesShow = () => {
         </>
       )}
 
-      {/* AI Study Buddy Floating Widget */}
       <AIStudyBuddy 
         subject={aClass.subject?.name} 
         topic={aClass.name}

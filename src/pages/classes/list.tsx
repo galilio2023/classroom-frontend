@@ -1,4 +1,4 @@
-import { Search, Plus, Key, LayoutGrid, Globe } from "lucide-react";
+import { Search, Key, LayoutGrid, Globe } from "lucide-react";
 import { useMemo, useState } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { useTable } from "@refinedev/react-table";
@@ -29,23 +29,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-import { Subject, User, UserRole } from "@/types";
+import { Subject, User, UserRole, ClassListItem } from "@/types";
 import { toast } from "sonner";
-
-type ClassListItem = {
-  id: number;
-  name: string;
-  status: "active" | "inactive";
-  bannerUrl?: string;
-  subject?: {
-    name: string;
-  };
-  teachers?: {
-    teacher: { name: string };
-    isPrimary: boolean;
-  }[];
-  capacity: number;
-};
 
 const ClassesList = () => {
   const { data: identity } = useGetIdentity<User>();
@@ -57,7 +42,8 @@ const ClassesList = () => {
   const [inviteCode, setInviteCode] = useState("");
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
 
-  const { mutate: joinClass, isLoading: isJoining } = useCustomMutation();
+  const { mutate: joinClass, mutation } = useCustomMutation();
+  const isJoining = mutation.isPending;
 
   const handleJoinByCode = () => {
     if (!inviteCode.trim()) return;

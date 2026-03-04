@@ -60,7 +60,8 @@ const UsersList = () => {
 
   const { edit } = useNavigation();
   const { mutate: deleteMutation } = useDelete();
-  const { mutate: updateMutation, isLoading: isUpdating } = useUpdate();
+  const { mutate: updateMutation, mutation } = useUpdate();
+  const isUpdating = mutation.isPending;
 
   const filters = useMemo(() => {
     const f = [];
@@ -86,6 +87,7 @@ const UsersList = () => {
       resource: "users",
       id,
       values: { isVerified },
+    }, {
       onSuccess: () => {
         toast.success(isVerified ? "Teacher verified successfully!" : "Verification rejected.");
         setVerificationTarget(null);
@@ -144,9 +146,9 @@ const UsersList = () => {
                 </Badge>
                 {role === UserRole.TEACHER && (
                   isVerified ? (
-                    <ShieldCheck className="h-4 w-4 text-green-500" title="Verified Teacher" />
+                    <ShieldCheck className="h-4 w-4 text-green-500" />
                   ) : (
-                    <ShieldAlert className="h-4 w-4 text-amber-500" title="Pending Verification" />
+                    <ShieldAlert className="h-4 w-4 text-amber-500" />
                   )
                 )}
               </div>

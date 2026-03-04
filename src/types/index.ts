@@ -73,6 +73,8 @@ export interface Submission {
   createdAt: string;
   updatedAt: string;
   student?: User;
+  gradedBy?: User;
+  gradedAt?: string | null;
 }
 
 export interface Assignment {
@@ -100,6 +102,8 @@ export type Enrollment = {
     id: number;
     name: string;
   };
+  approvedBy?: User;
+  lastAccessedAt?: string | null;
 };
 
 export interface Module {
@@ -127,9 +131,25 @@ export interface Announcement {
   updatedAt: string;
 }
 
+export interface Progress {
+  id: number;
+  userId: string;
+  classId: number;
+  moduleId: number | null;
+  resourceId: number | null;
+  assignmentId: number | null;
+  quizId: number | null;
+  isCompleted: boolean;
+  completedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export type Class = z.infer<typeof classFormSchema> & {
   id: number;
   inviteCode: string;
+  bannerUrl?: string | null;
+  bannerCldPubId?: string | null;
   teachers: {
     teacher: User;
     isPrimary: boolean;
@@ -140,6 +160,12 @@ export type Class = z.infer<typeof classFormSchema> & {
   enrollments: Enrollment[];
   assignments: Assignment[];
   modules?: Module[];
+};
+
+export type ClassListItem = Pick<Class, "id" | "name" | "status" | "capacity" | "bannerUrl" | "teachers"> & {
+  subject?: {
+    name: string;
+  };
 };
 
 export enum AttendanceStatus {
@@ -157,6 +183,7 @@ export interface Attendance {
   status: AttendanceStatus;
   remarks: string | null;
   student?: User;
+  recordedBy?: User;
   createdAt: string;
   updatedAt: string;
 }
@@ -211,23 +238,10 @@ export interface ProfileChangeRequest {
   updatedAt: string;
 }
 
-export interface Badge {
-  id: number;
-  name: string;
-  description: string | null;
-  iconUrl: string;
-  cldPubId: string | null;
-  criteria: any;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface UserBadge {
-  id: number;
-  userId: string;
-  badgeId: number;
-  earnedAt: string;
-  badge: Badge;
+export interface AIFeedbackResponse {
+  suggestedGrade: number;
+  feedback: string;
+  summary: string;
 }
 
 export interface ListResponse<T = any> {

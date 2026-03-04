@@ -1,35 +1,36 @@
 import { useState } from "react";
-import { 
-  Card, 
-  CardContent, 
-  CardHeader, 
-  CardTitle, 
-  CardDescription 
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { 
-  Sparkles, 
-  BookOpen, 
-  FileQuestion, 
-  BrainCircuit, 
+import {
+  Sparkles,
+  BookOpen,
+  FileQuestion,
+  BrainCircuit,
   Loader2,
   History,
-  ArrowRight
 } from "lucide-react";
 import { toast } from "sonner";
 import axios from "axios";
 import ReactMarkdown from "react-markdown";
 import { PracticeModal } from "@/components/practice/practice-modal";
+import { cn } from "@/lib/utils";
 
 const AIStudyLab = () => {
-  const [activeTool, setActiveTool] = useState<"explain" | "quiz" | "summary">("explain");
+  const [activeTool, setActiveTool] = useState<"explain" | "quiz" | "summary">(
+    "explain",
+  );
   const [input, setInput] = useState("");
   const [result, setResult] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  
-  // Practice Quiz State
+
   const [practiceTopic, setPracticeTopic] = useState<string | null>(null);
 
   const handleToolAction = async () => {
@@ -47,9 +48,10 @@ const AIStudyLab = () => {
     setResult("");
 
     try {
-      const prompt = activeTool === "explain" 
-        ? `Explain the following concept in simple terms for a student: ${input}`
-        : `Summarize the following text into key bullet points: ${input}`;
+      const prompt =
+        activeTool === "explain"
+          ? `Explain the following concept in simple terms for a student: ${input}`
+          : `Summarize the following text into key bullet points: ${input}`;
 
       const response = await axios.post("/api/ai/generate-content", { prompt });
       setResult(response.data.content);
@@ -82,103 +84,146 @@ const AIStudyLab = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Sidebar Tools */}
         <div className="space-y-4">
-          <Card 
+          <Card
             className={cn(
               "cursor-pointer transition-all hover:border-primary/50",
-              activeTool === "explain" ? "border-primary bg-primary/5 shadow-md" : ""
+              activeTool === "explain"
+                ? "border-primary bg-primary/5 shadow-md"
+                : "",
             )}
             onClick={() => setActiveTool("explain")}
           >
             <CardHeader className="p-4">
               <div className="flex items-center gap-3">
-                <div className={cn("p-2 rounded-lg", activeTool === "explain" ? "bg-primary text-primary-foreground" : "bg-muted")}>
+                <div
+                  className={cn(
+                    "p-2 rounded-lg",
+                    activeTool === "explain"
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted",
+                  )}
+                >
                   <BookOpen className="h-5 w-5" />
                 </div>
                 <div>
                   <CardTitle className="text-base">Concept Explainer</CardTitle>
-                  <CardDescription className="text-xs text-balance">Simplify difficult topics instantly.</CardDescription>
+                  <CardDescription className="text-xs text-balance">
+                    Simplify difficult topics instantly.
+                  </CardDescription>
                 </div>
               </div>
             </CardHeader>
           </Card>
 
-          <Card 
+          <Card
             className={cn(
               "cursor-pointer transition-all hover:border-primary/50",
-              activeTool === "quiz" ? "border-primary bg-primary/5 shadow-md" : ""
+              activeTool === "quiz"
+                ? "border-primary bg-primary/5 shadow-md"
+                : "",
             )}
             onClick={() => setActiveTool("quiz")}
           >
             <CardHeader className="p-4">
               <div className="flex items-center gap-3">
-                <div className={cn("p-2 rounded-lg", activeTool === "quiz" ? "bg-primary text-primary-foreground" : "bg-muted")}>
+                <div
+                  className={cn(
+                    "p-2 rounded-lg",
+                    activeTool === "quiz"
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted",
+                  )}
+                >
                   <FileQuestion className="h-5 w-5" />
                 </div>
                 <div>
                   <CardTitle className="text-base">Practice Quiz</CardTitle>
-                  <CardDescription className="text-xs text-balance">Test your knowledge privately.</CardDescription>
+                  <CardDescription className="text-xs text-balance">
+                    Test your knowledge privately.
+                  </CardDescription>
                 </div>
               </div>
             </CardHeader>
           </Card>
 
-          <Card 
+          <Card
             className={cn(
               "cursor-pointer transition-all hover:border-primary/50",
-              activeTool === "summary" ? "border-primary bg-primary/5 shadow-md" : ""
+              activeTool === "summary"
+                ? "border-primary bg-primary/5 shadow-md"
+                : "",
             )}
             onClick={() => setActiveTool("summary")}
           >
             <CardHeader className="p-4">
               <div className="flex items-center gap-3">
-                <div className={cn("p-2 rounded-lg", activeTool === "summary" ? "bg-primary text-primary-foreground" : "bg-muted")}>
+                <div
+                  className={cn(
+                    "p-2 rounded-lg",
+                    activeTool === "summary"
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted",
+                  )}
+                >
                   <Sparkles className="h-5 w-5" />
                 </div>
                 <div>
                   <CardTitle className="text-base">Smart Summarizer</CardTitle>
-                  <CardDescription className="text-xs text-balance">Turn long notes into key points.</CardDescription>
+                  <CardDescription className="text-xs text-balance">
+                    Turn long notes into key points.
+                  </CardDescription>
                 </div>
               </div>
             </CardHeader>
           </Card>
         </div>
 
-        {/* Main Workspace */}
         <div className="lg:col-span-2 space-y-6">
           <Card className="shadow-xl border-none bg-card/50 backdrop-blur-xl">
             <CardHeader>
               <CardTitle>
-                {activeTool === "explain" && "What would you like to understand?"}
+                {activeTool === "explain" &&
+                  "What would you like to understand?"}
                 {activeTool === "quiz" && "What topic should we test?"}
-                {activeTool === "summary" && "Paste the text you want to summarize"}
+                {activeTool === "summary" &&
+                  "Paste the text you want to summarize"}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {activeTool === "quiz" || activeTool === "explain" ? (
-                <Input 
-                  placeholder={activeTool === "quiz" ? "e.g., Photosynthesis, Quantum Physics..." : "e.g., How do black holes work?"}
+                <Input
+                  placeholder={
+                    activeTool === "quiz"
+                      ? "e.g., Photosynthesis, Quantum Physics..."
+                      : "e.g., How do black holes work?"
+                  }
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   className="h-12 text-lg"
                 />
               ) : (
-                <Textarea 
+                <Textarea
                   placeholder="Paste your notes or textbook content here..."
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  className="min-h-[200px] text-base"
+                  className="min-h-50 text-base"
                 />
               )}
-              
-              <Button 
-                onClick={handleToolAction} 
+
+              <Button
+                onClick={handleToolAction}
                 disabled={isLoading}
                 className="w-full h-12 text-lg font-bold gap-2 shadow-lg shadow-primary/20"
               >
-                {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Sparkles className="h-5 w-5" />}
-                {activeTool === "quiz" ? "Start Practice Quiz" : "Generate with AI"}
+                {isLoading ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : (
+                  <Sparkles className="h-5 w-5" />
+                )}
+                {activeTool === "quiz"
+                  ? "Start Practice Quiz"
+                  : "Generate with AI"}
               </Button>
             </CardContent>
           </Card>
@@ -186,9 +231,11 @@ const AIStudyLab = () => {
           {result && (
             <Card className="animate-in fade-in slide-in-from-bottom-4 duration-500 border-primary/20 bg-primary/5">
               <CardHeader className="border-b border-primary/10">
-                <CardTitle className="text-sm font-black uppercase tracking-widest text-primary">AI Response</CardTitle>
+                <CardTitle className="text-sm font-black uppercase tracking-widest text-primary">
+                  AI Response
+                </CardTitle>
               </CardHeader>
-              <CardContent className="pt-6 prose dark:prose-invert max-w-none">
+              <CardContent className="pt-6 prose dark:prose-invert max-w-none pb-6">
                 <ReactMarkdown>{result}</ReactMarkdown>
               </CardContent>
             </Card>
@@ -197,18 +244,14 @@ const AIStudyLab = () => {
       </div>
 
       {practiceTopic && (
-        <PracticeModal 
-          topic={practiceTopic} 
-          onClose={() => setPracticeTopic(null)} 
+        <PracticeModal
+          topic={practiceTopic}
+          subjectId={0} // Default to 0 for general practice
+          onClose={() => setPracticeTopic(null)}
         />
       )}
     </div>
   );
 };
-
-// Helper for conditional classes
-function cn(...inputs: any[]) {
-  return inputs.filter(Boolean).join(" ");
-}
 
 export default AIStudyLab;

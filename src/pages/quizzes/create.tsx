@@ -60,14 +60,14 @@ const QuizCreate = () => {
   const classId = searchParams.get("classId");
   const go = useGo();
 
-  // Fetch modules for this class
-  const { data: modulesData, isLoading: modulesLoading } = useList<Module>({
+  const { query } = useList<Module>({
     resource: "modules",
     filters: [{ field: "classId", operator: "eq", value: classId }],
     queryOptions: { enabled: !!classId },
   });
 
-  const modules = modulesData?.data || [];
+  const modules = query.data?.data || [];
+  const modulesLoading = query.isLoading;
 
   const form = useForm<QuizFormValues>({
     resolver: zodResolver(quizSchema) as any,
@@ -121,7 +121,6 @@ const QuizCreate = () => {
   };
 
   const handleUseAIQuestions = (questions: any[]) => {
-    // Replace existing questions with AI ones
     setValue("questions", questions);
     toast.success("AI questions applied to quiz!");
   };
@@ -191,7 +190,7 @@ const QuizCreate = () => {
                             </FormControl>
                             <SelectContent>
                               <SelectItem value="0">None (Global Quiz)</SelectItem>
-                              {modules.map((m) => (
+                              {modules.map((m: Module) => (
                                 <SelectItem key={m.id} value={m.id.toString()}>{m.name}</SelectItem>
                               ))}
                             </SelectContent>

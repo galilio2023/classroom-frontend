@@ -8,19 +8,14 @@ import {
   PlusCircle, 
   Loader2,
   LayoutGrid,
-  Sparkles,
-  Wand2,
-  Zap,
-  HelpCircle
+  Zap
 } from "lucide-react";
 import { 
   Dialog, 
   DialogContent, 
   DialogHeader, 
   DialogTitle, 
-  DialogTrigger,
   DialogFooter,
-  DialogDescription
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,25 +23,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { FileUpload } from "@/components/file-upload";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { ModuleItem } from "@/components/classes/curriculum/module-item";
 
 interface CurriculumTabProps {
   classId: string;
 }
-
-const FieldHelper = ({ content }: { content: string }) => (
-  <TooltipProvider>
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <HelpCircle className="h-3.5 w-3.5 text-muted-foreground cursor-help hover:text-primary transition-colors" />
-      </TooltipTrigger>
-      <TooltipContent side="right" className="max-w-[200px]">
-        <p>{content}</p>
-      </TooltipContent>
-    </Tooltip>
-  </TooltipProvider>
-);
 
 export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
   const { data: identity } = useGetIdentity<User>();
@@ -57,19 +38,16 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [newModuleName, setNewModuleName] = useState("");
   const [newModuleDesc, setNewModuleDesc] = useState("");
-  const [isGeneratingAI, setIsGeneratingAI] = useState(false);
 
-  // Unified Magic Builder State
   const [isMagicModalOpen, setIsMagicModalOpen] = useState(false);
   const [isMagicCreating, setIsMagicCreating] = useState(false);
   const [magicConfig, setMagicConfig] = useState({
     topic: "",
-    type: "package", 
+    type: "package" as "package" | "note" | "quiz" | "assignment", 
     level: "high_school",
     moduleId: null as number | null,
   });
 
-  // Resource Modal State
   const [isAddResourceOpen, setIsAddResourceOpen] = useState(false);
   const [activeModuleId, setActiveModuleId] = useState<number | null>(null);
   const [newResource, setNewResource] = useState({
@@ -81,34 +59,29 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
     cldPubId: "",
   });
 
-  const [isGeneratingNote, setIsGeneratingNote] = useState(false);
-  const [noteBuilder, setNoteBuilder] = useState({ topic: "", type: "lesson", level: "high_school", tone: "engaging" });
-
-  // --- DATA FETCHING ---
-  const { result, query } = useList<Module>({
+  const { query: modulesQuery } = useList<Module>({
     resource: "modules",
     filters: [{ field: "classId", operator: "eq", value: classId }],
     queryOptions: { enabled: !!classId },
   });
 
-  const { data: progressData, query: progressQuery } = useList<Progress>({
+  const { query: progressQuery } = useList<Progress>({
     resource: "progress",
     filters: [{ field: "classId", operator: "eq", value: classId }],
     queryOptions: { enabled: !!classId && isStudent },
   });
 
-  const modules = result?.data || [];
-  const userProgress = progressData?.data || [];
-  const isLoading = query.isLoading;
+  const modules = modulesQuery.data?.data || [];
+  const userProgress = progressQuery.data?.data || [];
+  const isLoading = modulesQuery.isLoading;
 
-  const { mutate: createModule, mutation } = useCreate();
-  const { mutate: createResource, mutation: resourceMutation } = useCreate<Resource>();
+  const { mutate: createModule } = useCreate();
+  const { mutate: createResource } = useCreate<Resource>();
   const { mutate: deleteModule } = useDelete();
   const { mutate: customMutation } = useCustomMutation();
 
-  // --- HELPERS ---
   const isItemCompleted = (type: 'resource' | 'assignment' | 'quiz', id: number) => {
-    return userProgress.some(p => 
+    return userProgress.some((p: Progress) =>
         p.isCompleted && (
             (type === 'resource' && p.resourceId === id) ||
             (type === 'assignment' && p.assignmentId === id) ||
@@ -132,7 +105,7 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
           isCompleted: !currentStatus
         },
       },
-      { onSuccess: () => { progressQuery.refetch(); toast.success(!currentStatus ? "Marked as completed!" : "Marked as incomplete"); } }
+      { onSuccess: () => { void progressQuery.refetch(); toast.success(!currentStatus ? "Marked as completed!" : "Marked as incomplete"); } }
     );
   };
 
@@ -140,7 +113,7 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
     if (!newModuleName.trim()) return;
     createModule(
       { resource: "modules", values: { name: newModuleName, description: newModuleDesc, classId: Number(classId), order: modules.length } },
-      { onSuccess: () => { setIsCreateModalOpen(false); setNewModuleName(""); setNewModuleDesc(""); query.refetch(); } }
+      { onSuccess: () => { setIsCreateModalOpen(false); setNewModuleName(""); setNewModuleDesc(""); void modulesQuery.refetch(); } }
     );
   };
 
@@ -149,7 +122,7 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
     setIsMagicCreating(true);
     customMutation(
       { url: "modules/magic-create", method: "post", values: { classId: Number(classId), ...magicConfig } },
-      { onSuccess: () => { setIsMagicCreating(false); setIsMagicModalOpen(false); query.refetch(); }, onError: () => setIsMagicCreating(false) }
+      { onSuccess: () => { setIsMagicCreating(false); setIsMagicModalOpen(false); void modulesQuery.refetch(); }, onError: () => setIsMagicCreating(false) }
     );
   };
 
@@ -157,15 +130,7 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
     if (!newResource.title || !activeModuleId) return;
     createResource(
       { resource: "resources", values: { ...newResource, classId: Number(classId), moduleId: activeModuleId } },
-      { onSuccess: () => { setIsAddResourceOpen(false); setNewResource({ title: "", description: "", type: "file", url: "", content: "", cldPubId: "" }); query.refetch(); } }
-    );
-  };
-
-  const handleAIGenerateNote = () => {
-    setIsGeneratingNote(true);
-    customMutation(
-      { url: "ai/generate-content", method: "post", values: { prompt: `Generate ${noteBuilder.type} about ${noteBuilder.topic}`, context: `Class ID: ${classId}` } },
-      { onSuccess: (data: any) => { setNewResource({ ...newResource, title: noteBuilder.topic, content: data.data.content }); setIsGeneratingNote(false); }, onError: () => setIsGeneratingNote(false) }
+      { onSuccess: () => { setIsAddResourceOpen(false); setNewResource({ title: "", description: "", type: "file", url: "", content: "", cldPubId: "" }); void modulesQuery.refetch(); } }
     );
   };
 
@@ -207,7 +172,7 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
               classId={classId}
               isItemCompleted={isItemCompleted}
               onToggleProgress={handleToggleProgress}
-              onDeleteModule={(id) => deleteModule({ resource: "modules", id }, { onSuccess: () => query.refetch() })}
+              onDeleteModule={(id) => deleteModule({ resource: "modules", id }, { onSuccess: () => { void modulesQuery.refetch(); } })}
               onMagicAction={(moduleId, type) => { setMagicConfig({ ...magicConfig, moduleId, type: type as any }); setIsMagicModalOpen(true); }}
               onAddMaterial={(moduleId) => { setActiveModuleId(moduleId); setIsAddResourceOpen(true); }}
               onAddTask={(moduleId) => go({ to: `/assignments/create?classId=${classId}&moduleId=${moduleId}` })}
@@ -216,7 +181,6 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
         </Accordion>
       )}
 
-      {/* DIALOGS (Magic Builder, Add Resource, etc.) */}
       <Dialog open={isMagicModalOpen} onOpenChange={setIsMagicModalOpen}>
         <DialogContent>
           <DialogHeader><DialogTitle>AI Magic Builder</DialogTitle></DialogHeader>
@@ -232,14 +196,14 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
       </Dialog>
 
       <Dialog open={isAddResourceOpen} onOpenChange={setIsAddResourceOpen}>
-        <DialogContent className="sm:max-w-[600px]">
+        <DialogContent className="sm:max-w-150">
           <DialogHeader><DialogTitle>Add Material</DialogTitle></DialogHeader>
           <div className="space-y-4 py-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2"><Label>Title</Label><Input value={newResource.title} onChange={(e) => setNewResource({ ...newResource, title: e.target.value })} /></div>
               <div className="space-y-2"><Label>Type</Label><Select value={newResource.type} onValueChange={(v: any) => setNewResource({ ...newResource, type: v })}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="note">Note</SelectItem><SelectItem value="file">File</SelectItem><SelectItem value="link">Link</SelectItem></SelectContent></Select></div>
             </div>
-            {newResource.type === "note" && <Textarea className="min-h-[200px]" value={newResource.content} onChange={(e) => setNewResource({ ...newResource, content: e.target.value })} />}
+            {newResource.type === "note" && <Textarea className="min-h-50" value={newResource.content} onChange={(e) => setNewResource({ ...newResource, content: e.target.value })} />}
             {newResource.type === "file" && <FileUpload onUploadSuccess={(url, pubId) => setNewResource({ ...newResource, url, cldPubId: pubId })} />}
           </div>
           <DialogFooter><Button onClick={handleAddResource}>Save</Button></DialogFooter>
@@ -250,8 +214,8 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
         <DialogContent>
           <DialogHeader><DialogTitle>New Module</DialogTitle></DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="space-y-2"><Label>Name</Label><Input value={newModuleName} onChange={(e) => setNewModuleName(e.target.value)} /></div>
-            <div className="space-y-2"><Label>Description</Label><Textarea value={newModuleDesc} onChange={(e) => setNewModuleDesc(e.target.value)} /></div>
+            <div className="grid gap-2"><Label>Name</Label><Input value={newModuleName} onChange={(e) => setNewModuleName(e.target.value)} /></div>
+            <div className="grid gap-2"><Label>Description</Label><Textarea value={newModuleDesc} onChange={(e) => setNewModuleDesc(e.target.value)} /></div>
           </div>
           <DialogFooter><Button onClick={handleCreateModule}>Create</Button></DialogFooter>
         </DialogContent>
