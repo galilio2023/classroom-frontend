@@ -22,22 +22,22 @@ export const accessControlProvider: AccessControlProvider = {
         "ai-assistant", 
         "discussions", 
         "calendar", 
-        "departments", 
         "subjects", 
         "attendance", 
         "submissions",
-        "quizzes", // Added: Teachers can access quizzes
-        "resources" // Added: Teachers can access resources
+        "quizzes", 
+        "resources",
+        "users",
+        "classes"
       ];
       
       if (teacherSidebarResources.includes(resourceName)) {
-        return { can: true };
+        if (action === "list" || action === "show") return { can: true };
       }
 
-      // Teachers can view profiles and edit their OWN profile
-      if (resourceName === "users") {
-          if (action === "show") return { can: true };
-          if (action === "edit" && params?.id === identity?.id) return { can: true };
+      // Teachers can edit their OWN profile
+      if (resourceName === "users" && action === "edit" && params?.id === identity?.id) {
+          return { can: true };
       }
 
       if (["classes", "assignments", "quizzes", "resources"].includes(resourceName)) {
@@ -46,7 +46,6 @@ export const accessControlProvider: AccessControlProvider = {
         if (["show", "edit", "delete"].includes(action)) {
           if (!params?.id) return { can: false, reason: "No record ID provided." };
           
-          // Optimization: If userData is already provided in params, use it
           if (params?.userData) {
               const data = params.userData;
               if (resourceName === "classes" && data.teacherId === identity?.id) return { can: true };
@@ -66,6 +65,12 @@ export const accessControlProvider: AccessControlProvider = {
           }
         }
       }
+      
+      // Explicitly deny other administrative resources for teachers
+      if (["departments", "enrollments", "profile-requests", "ai-study-lab"].includes(resourceName)) {
+          return { can: false, reason: "Access denied." };
+      }
+
       return { can: false, reason: "Access denied." };
     }
 
@@ -80,18 +85,28 @@ export const accessControlProvider: AccessControlProvider = {
         "dashboard", 
         "attendance", 
         "submissions",
-        "quizzes", // Added: Students can view quizzes
-        "resources" // Added: Students can view resources
+        "quizzes", 
+        "resources",
+        "ai-study-lab"
       ];
       const allowedActions = ["list", "show"];
 
+      // Deny administrative resources for students
+      if (["users", "departments", "enrollments", "profile-requests", "ai-assistant"].includes(resourceName)) {
+        // Special case: Students can 'show' users (to see teacher profiles)
+        if (resourceName === "users" && action === "show") {
+            return { can: true };
+        }
+        // Special case: Students can 'edit' their own profile
+        if (resourceName === "users" && action === "edit" && params?.id === identity?.id) {
+            return { can: true };
+        }
+        
+        return { can: false, reason: "Access denied." };
+      }
+
       if (allowedResources.includes(resourceName) && allowedActions.includes(action)) {
         return { can: true };
-      }
-      
-      // Students can EDIT their OWN profile
-      if (resourceName === "users" && action === "edit" && params?.id === identity?.id) {
-          return { can: true };
       }
 
       if (resourceName === "submissions" && action === "create") {

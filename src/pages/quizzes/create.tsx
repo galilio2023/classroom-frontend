@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { CreateView } from "@/components/refine-ui/views/create-view";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSearchParams } from "react-router-dom";
-import { useGo } from "@refinedev/core";
+import { useGo, useList } from "@refinedev/core";
 import { toast } from "sonner";
 import { AIQuizHelper } from "@/components/ai-quiz-helper";
 import {
@@ -26,14 +26,23 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { Sparkles, Loader2, Plus, Trash2, CheckCircle2 } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Sparkles, Loader2, Plus, Trash2, CheckCircle2, LayoutGrid } from "lucide-react";
 import { useFieldArray } from "react-hook-form";
+import { Module } from "@/types";
 
 const quizSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().optional(),
   dueDate: z.string().optional(),
   timeLimit: z.coerce.number().min(1).optional(),
+  moduleId: z.coerce.number().optional().nullable(),
   questions: z.array(
     z.object({
       question: z.string().min(1, "Question text is required"),
@@ -51,6 +60,15 @@ const QuizCreate = () => {
   const classId = searchParams.get("classId");
   const go = useGo();
 
+  const { query } = useList<Module>({
+    resource: "modules",
+    filters: [{ field: "classId", operator: "eq", value: classId }],
+    queryOptions: { enabled: !!classId },
+  });
+
+  const modules = query.data?.data || [];
+  const modulesLoading = query.isLoading;
+
   const form = useForm<QuizFormValues>({
     resolver: zodResolver(quizSchema) as any,
     defaultValues: {
@@ -58,6 +76,7 @@ const QuizCreate = () => {
       description: "",
       dueDate: "",
       timeLimit: 15,
+      moduleId: null,
       questions: [
         {
           question: "",
@@ -102,7 +121,6 @@ const QuizCreate = () => {
   };
 
   const handleUseAIQuestions = (questions: any[]) => {
-    // Replace existing questions with AI ones
     setValue("questions", questions);
     toast.success("AI questions applied to quiz!");
   };
@@ -151,6 +169,37 @@ const QuizCreate = () => {
                         </FormItem>
                       )}
                     />
+
+                    <FormField
+                      control={control}
+                      name="moduleId"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center gap-2">
+                            <LayoutGrid className="h-3.5 w-3.5 text-muted-foreground" />
+                            Curriculum Module (Optional)
+                          </FormLabel>
+                          <Select 
+                            onValueChange={field.onChange} 
+                            defaultValue={field.value?.toString()}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder={modulesLoading ? "Loading modules..." : "Select a module"} />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="0">None (Global Quiz)</SelectItem>
+                              {modules.map((m: Module) => (
+                                <SelectItem key={m.id} value={m.id.toString()}>{m.name}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
                     <FormField
                       control={control}
                       name="description"
@@ -302,17 +351,17 @@ const QuizCreate = () => {
             <CardContent className="text-sm text-muted-foreground space-y-4">
               <div className="space-y-2">
                 <p className="font-medium text-foreground flex items-center gap-2">
+                  <LayoutGrid className="h-4 w-4 text-primary" />
+                  Curriculum Organization
+                </p>
+                <p>Assigning this quiz to a module helps students find it within their structured learning path.</p>
+              </div>
+              <div className="space-y-2">
+                <p className="font-medium text-foreground flex items-center gap-2">
                   <Sparkles className="h-4 w-4 text-primary" />
                   AI Generation
                 </p>
                 <p>Use the AI Quiz Helper to generate a full set of questions in seconds. You can edit them after applying.</p>
-              </div>
-              <div className="space-y-2">
-                <p className="font-medium text-foreground flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-primary" />
-                  Correct Answers
-                </p>
-                <p>Click the checkmark icon next to an option to mark it as the correct answer.</p>
               </div>
             </CardContent>
           </Card>

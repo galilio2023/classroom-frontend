@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { classFormSchema, scheduleSchema } from "@/schemas/class";
 import { signUpFormSchema } from "@/schemas/auth";
+import { Quiz } from "./quiz";
 
 export type SignUpPayload = z.infer<typeof signUpFormSchema>;
 
@@ -24,6 +25,9 @@ export interface User {
   dateOfBirth: string | null;
   parentName: string | null;
   parentPhone: string | null;
+  isVerified: boolean;
+  verificationDocumentUrl: string | null;
+  verificationDocumentCldPubId: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -69,6 +73,8 @@ export interface Submission {
   createdAt: string;
   updatedAt: string;
   student?: User;
+  gradedBy?: User;
+  gradedAt?: string | null;
 }
 
 export interface Assignment {
@@ -79,6 +85,7 @@ export interface Assignment {
   fileUrl: string | null;
   fileCldPubId: string | null;
   classId: number;
+  moduleId: number | null;
   createdAt: string;
   updatedAt: string;
   submissions?: Submission[];
@@ -95,17 +102,70 @@ export type Enrollment = {
     id: number;
     name: string;
   };
+  approvedBy?: User;
+  lastAccessedAt?: string | null;
 };
+
+export interface Module {
+  id: number;
+  classId: number;
+  name: string;
+  description: string | null;
+  order: number;
+  assignments?: Assignment[];
+  resources?: Resource[];
+  quizzes?: Quiz[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Announcement {
+  id: number;
+  title: string;
+  content: string;
+  classId: number;
+  authorId: string;
+  isPinned: boolean;
+  author?: User;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Progress {
+  id: number;
+  userId: string;
+  classId: number;
+  moduleId: number | null;
+  resourceId: number | null;
+  assignmentId: number | null;
+  quizId: number | null;
+  isCompleted: boolean;
+  completedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
 
 export type Class = z.infer<typeof classFormSchema> & {
   id: number;
   inviteCode: string;
-  teacher: User;
+  bannerUrl?: string | null;
+  bannerCldPubId?: string | null;
+  teachers: {
+    teacher: User;
+    isPrimary: boolean;
+  }[];
   subject: Subject;
   createdAt: string;
   updatedAt: string;
   enrollments: Enrollment[];
   assignments: Assignment[];
+  modules?: Module[];
+};
+
+export type ClassListItem = Pick<Class, "id" | "name" | "status" | "capacity" | "bannerUrl" | "teachers"> & {
+  subject?: {
+    name: string;
+  };
 };
 
 export enum AttendanceStatus {
@@ -123,6 +183,7 @@ export interface Attendance {
   status: AttendanceStatus;
   remarks: string | null;
   student?: User;
+  recordedBy?: User;
   createdAt: string;
   updatedAt: string;
 }
@@ -155,10 +216,12 @@ export interface Resource {
   id: number;
   title: string;
   description: string | null;
-  type: "file" | "link" | "video" | "other";
+  type: "file" | "link" | "video" | "note" | "other";
   url: string;
+  content: string | null;
   cldPubId: string | null;
   classId: number;
+  moduleId: number | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -173,6 +236,12 @@ export interface ProfileChangeRequest {
   user: User;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface AIFeedbackResponse {
+  suggestedGrade: number;
+  feedback: string;
+  summary: string;
 }
 
 export interface ListResponse<T = any> {

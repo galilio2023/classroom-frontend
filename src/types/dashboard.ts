@@ -106,7 +106,8 @@ export interface GradeTrend {
 
 export interface SubjectMastery {
   subject: string;
-  avgGrade: string;
+  subjectId?: number;
+  avgGrade: number;
 }
 
 export interface AttendanceSummary {

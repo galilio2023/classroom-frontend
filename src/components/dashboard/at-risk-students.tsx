@@ -1,7 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { AlertTriangle, TrendingDown, UserX } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
+import { AtRiskStudentItem } from "./at-risk-student-item";
 
 interface AtRiskStudent {
   id: string;
@@ -31,30 +30,7 @@ export const AtRiskStudents = ({ students }: AtRiskStudentsProps) => {
       </CardHeader>
       <CardContent className="grid gap-4">
         {students.map((student) => (
-          <div key={student.id} className="flex items-center justify-between p-2 rounded-lg bg-background/50 border border-destructive/10">
-            <div className="flex items-center gap-3">
-              <Avatar className="h-9 w-9 border border-destructive/20">
-                <AvatarImage src={student.image} />
-                <AvatarFallback>{student.name[0]}</AvatarFallback>
-              </Avatar>
-              <div>
-                <p className="text-sm font-semibold leading-none">{student.name}</p>
-                <div className="flex items-center gap-1 mt-1">
-                  {student.reason === "Low Grades" ? (
-                    <TrendingDown className="h-3 w-3 text-destructive" />
-                  ) : (
-                    <UserX className="h-3 w-3 text-destructive" />
-                  )}
-                  <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">
-                    {student.reason}
-                  </span>
-                </div>
-              </div>
-            </div>
-            <Badge variant="destructive" className="text-[10px] font-black px-2 py-0.5">
-              {student.value}
-            </Badge>
-          </div>
+          <AtRiskStudentItem key={student.id} student={student} />
         ))}
       </CardContent>
     </Card>

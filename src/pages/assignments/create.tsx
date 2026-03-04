@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { CreateView } from "@/components/refine-ui/views/create-view";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSearchParams } from "react-router-dom";
-import { useGo } from "@refinedev/core";
+import { useGo, useList } from "@refinedev/core";
 import { toast } from "sonner";
 import { AIAssignmentHelper } from "@/components/ai-assignment-helper";
 import { FileUpload } from "@/components/file-upload";
@@ -27,8 +27,19 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { Sparkles, Paperclip, Loader2 } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Label } from "@/components/ui/label";
+import { Sparkles, Paperclip, Loader2, LayoutGrid, HelpCircle } from "lucide-react";
 import { FieldValues } from "react-hook-form";
+import { Module } from "@/types";
+import { useEffect } from "react";
 
 const assignmentSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -36,16 +47,39 @@ const assignmentSchema = z.object({
   dueDate: z.string().optional(),
   fileUrl: z.string().optional(),
   fileCldPubId: z.string().optional(),
+  moduleId: z.coerce.number().optional().nullable(),
 });
 
 type AssignmentFormValues = z.infer<typeof assignmentSchema>;
 
+const FieldHelper = ({ content }: { content: string }) => (
+  <TooltipProvider>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <HelpCircle className="h-3.5 w-3.5 text-muted-foreground cursor-help hover:text-primary transition-colors" />
+      </TooltipTrigger>
+      <TooltipContent side="right" className="max-w-[200px]">
+        <p>{content}</p>
+      </TooltipContent>
+    </Tooltip>
+  </TooltipProvider>
+);
+
 export const AssignmentCreate = () => {
   const [searchParams] = useSearchParams();
   const classId = searchParams.get("classId");
+  const initialModuleId = searchParams.get("moduleId");
   const go = useGo();
 
-  // MANDATORY: Use Refine v5 useForm pattern with refineCoreProps
+  const { query: modulesQuery } = useList<Module>({
+    resource: "modules",
+    filters: [{ field: "classId", operator: "eq", value: classId }],
+    queryOptions: { enabled: !!classId },
+  });
+
+  const modules = modulesQuery.data?.data || [];
+  const modulesLoading = modulesQuery.isLoading;
+
   const form = useForm<AssignmentFormValues>({
     resolver: zodResolver(assignmentSchema) as any,
     defaultValues: {
@@ -54,6 +88,7 @@ export const AssignmentCreate = () => {
       dueDate: "",
       fileUrl: "",
       fileCldPubId: "",
+      moduleId: initialModuleId ? Number(initialModuleId) : null,
     },
     refineCoreProps: {
       resource: "assignments",
@@ -74,6 +109,12 @@ export const AssignmentCreate = () => {
     refineCore: { onFinish, formLoading },
   } = form;
 
+  useEffect(() => {
+    if (initialModuleId) {
+      setValue("moduleId", Number(initialModuleId));
+    }
+  }, [initialModuleId, setValue]);
+
   const onSubmit = (values: FieldValues) => {
     if (!classId) {
       toast.error("Could not create assignment: Class ID is missing.");
@@ -82,6 +123,7 @@ export const AssignmentCreate = () => {
     onFinish({
       ...values,
       classId: Number(classId),
+      moduleId: values.moduleId === 0 ? null : values.moduleId,
     });
   };
 
@@ -133,7 +175,10 @@ export const AssignmentCreate = () => {
                     name="title"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Title</FormLabel>
+                        <div className="flex items-center gap-2">
+                            <FormLabel>Title</FormLabel>
+                            <FieldHelper content="A clear, concise name for the assignment." />
+                        </div>
                         <FormControl>
                           <Input
                             placeholder="e.g., Chapter 5 Reading"
@@ -144,12 +189,49 @@ export const AssignmentCreate = () => {
                       </FormItem>
                     )}
                   />
+
+                  <FormField
+                    control={control}
+                    name="moduleId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <div className="flex items-center gap-2">
+                            <FormLabel className="flex items-center gap-2">
+                                <LayoutGrid className="h-3.5 w-3.5 text-muted-foreground" />
+                                Curriculum Module (Optional)
+                            </FormLabel>
+                            <FieldHelper content="Link this assignment to a specific lesson or week in your curriculum." />
+                        </div>
+                        <Select 
+                          onValueChange={field.onChange} 
+                          value={field.value?.toString() || "0"}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder={modulesLoading ? "Loading modules..." : "Select a module"} />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="0">None (Global Assignment)</SelectItem>
+                            {modules.map((m: Module) => (
+                              <SelectItem key={m.id} value={m.id.toString()}>{m.name}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
                   <FormField
                     control={control}
                     name="description"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Description</FormLabel>
+                        <div className="flex items-center gap-2">
+                            <FormLabel>Description</FormLabel>
+                            <FieldHelper content="Detailed instructions, learning objectives, and grading criteria. You can use Markdown here." />
+                        </div>
                         <FormControl>
                           <Textarea
                             placeholder="Instructions for the assignment..."
@@ -168,7 +250,10 @@ export const AssignmentCreate = () => {
                       name="dueDate"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Due Date</FormLabel>
+                          <div className="flex items-center gap-2">
+                            <FormLabel>Due Date</FormLabel>
+                            <FieldHelper content="The deadline for students to submit their work. Late submissions will be flagged." />
+                          </div>
                           <FormControl>
                             <Input type="date" {...field} />
                           </FormControl>
@@ -178,8 +263,12 @@ export const AssignmentCreate = () => {
                     />
 
                     <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <Label>Attachment (Optional)</Label>
+                        <FieldHelper content="Upload a PDF, document, or image that students need to complete the assignment." />
+                      </div>
                       <FileUpload 
-                        label="Attachment (Optional)" 
+                        label="Upload File"
                         folder="assignments"
                         onUploadSuccess={handleFileUpload}
                       />
@@ -215,17 +304,17 @@ export const AssignmentCreate = () => {
             <CardContent className="text-sm text-muted-foreground space-y-4">
               <div className="space-y-2">
                 <p className="font-medium text-foreground flex items-center gap-2">
+                  <LayoutGrid className="h-4 w-4 text-primary" />
+                  Curriculum Organization
+                </p>
+                <p>Assigning this to a module will place it directly in the structured curriculum view for students.</p>
+              </div>
+              <div className="space-y-2">
+                <p className="font-medium text-foreground flex items-center gap-2">
                   <Sparkles className="h-4 w-4 text-primary" />
                   AI Assistant
                 </p>
                 <p>Use the AI Helper to quickly draft learning objectives and instructions.</p>
-              </div>
-              <div className="space-y-2">
-                <p className="font-medium text-foreground flex items-center gap-2">
-                  <Paperclip className="h-4 w-4 text-primary" />
-                  Attachments
-                </p>
-                <p>You can now upload PDFs, images, or documents as reference materials for your students.</p>
               </div>
             </CardContent>
           </Card>

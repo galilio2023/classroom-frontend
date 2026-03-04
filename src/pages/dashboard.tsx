@@ -5,15 +5,11 @@ import React, { useEffect } from "react";
 import { io } from "socket.io-client";
 
 import { WelcomeHeader } from "@/components/dashboard/welcome-header";
-import { EngagementChart } from "@/components/dashboard/engagement-chart";
-import { UpcomingAssignmentsList } from "@/components/dashboard/upcoming-assignments-list";
-import { PendingGradingList } from "@/components/dashboard/pending-grading-list";
 import { QuickActions } from "@/components/dashboard/quick-actions";
 import { TodaySchedule } from "@/components/dashboard/today-schedule";
-import { PlatformOverview } from "@/components/dashboard/platform-overview";
 import { PromoCards } from "@/components/dashboard/promo-cards";
-import { AtRiskStudents } from "@/components/dashboard/at-risk-students";
-import { StudentAcademicJourney } from "@/components/dashboard/student-academic-journey";
+import { StaffDashboard } from "@/components/dashboard/staff-dashboard";
+import { StudentDashboard } from "@/components/dashboard/student-dashboard";
 import { DashboardData } from "@/types/dashboard";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { Button } from "@/components/ui/button";
@@ -32,54 +28,27 @@ const Dashboard = () => {
   const isStaff = identity?.role === "teacher" || identity?.role === "admin";
   const isStudent = identity?.role === "student";
   
-  // UNIFIED DASHBOARD FETCH
   const { query: dashboardQuery } = useCustom<DashboardData>({
     url: `/dashboard`,
     method: "get",
     queryOptions: { 
       enabled: !!identity,
-      staleTime: 5 * 60 * 1000, // 5 minutes cache
+      staleTime: 5 * 60 * 1000,
     },
   });
 
-  // Extract query states
   const { data: dashboardResponse, isLoading: isDashboardLoading, isFetching, isError, refetch } = dashboardQuery;
-
-  // Safe data extraction with full type safety
   const data = dashboardResponse?.data;
-  
-  const stats = data?.stats;
-  const attendanceTrend = data?.attendanceTrend ?? [];
-  const gradeDistribution = data?.gradeDistribution ?? [];
-  const pendingSubmissions = data?.pendingSubmissions ?? [];
-  const upcomingAssignments = data?.upcomingAssignments ?? [];
-  const todaySchedule = data?.todaySchedule ?? [];
-  const atRiskStudents = data?.atRiskStudents ?? [];
-  
-  const gradeTrends = data?.gradeTrends ?? [];
-  const subjectMastery = data?.subjectMastery ?? [];
-  const attendanceSummary = data?.attendanceSummary ?? { present: 0, absent: 0, late: 0, total: 0 };
-  
   const isLoading = isDashboardLoading || isFetching;
 
-  // --- REAL-TIME DASHBOARD UPDATES ---
+  // --- REAL-TIME UPDATES ---
   useEffect(() => {
     if (!identity?.id) return;
-
     const socketUrl = import.meta.env.VITE_SOCKET_URL || import.meta.env.VITE_API_URL.replace("/api", "");
-    const socket = io(socketUrl, {
-      query: { userId: identity.id },
-      withCredentials: true,
-    });
-
-    // Refresh dashboard data when relevant events occur
-    const handleRefresh = () => {
-      void refetch();
-    };
-
-    socket.on("notification", handleRefresh); // New grade, assignment, etc.
-    socket.on("new_discussion", handleRefresh); // New activity in class
-
+    const socket = io(socketUrl, { query: { userId: identity.id }, withCredentials: true });
+    const handleRefresh = () => void refetch();
+    socket.on("notification", handleRefresh);
+    socket.on("new_discussion", handleRefresh);
     return () => {
       socket.off("notification", handleRefresh);
       socket.off("new_discussion", handleRefresh);
@@ -98,32 +67,23 @@ const Dashboard = () => {
     { title: "Users", icon: Users, heading: "Directory", description: "Students and staff.", resource: "users" },
   ];
 
-  // --- ERROR STATE ---
   if (isError) {
     return (
       <div className="flex h-dvh flex-col items-center justify-center space-y-4">
         <AlertCircle className="h-12 w-12 text-destructive" />
         <h2 className="text-xl font-semibold">Failed to load dashboard</h2>
-        <p className="text-muted-foreground">There was an error fetching your dashboard data.</p>
         <Button onClick={() => void refetch()}>Try Again</Button>
       </div>
     );
   }
 
-  // --- LOADING STATE (SKELETONS) ---
   if (isIdentityLoading || (isLoading && !data)) {
     return (
       <div className="container mx-auto py-10 px-4 md:px-6">
         <WelcomeHeaderSkeleton />
         <div className="grid gap-10 lg:grid-cols-3">
-          <div className="lg:col-span-2 space-y-12">
-            <ChartSkeleton />
-            <ListSkeleton />
-          </div>
-          <div className="space-y-10">
-            <ScheduleSkeleton />
-            <StatsSkeleton />
-          </div>
+          <div className="lg:col-span-2 space-y-12"><ChartSkeleton /><ListSkeleton /></div>
+          <div className="space-y-10"><ScheduleSkeleton /><StatsSkeleton /></div>
         </div>
       </div>
     );
@@ -131,63 +91,33 @@ const Dashboard = () => {
 
   return (
     <div className="container mx-auto py-10 px-4 md:px-6 relative z-0">
-      {/* Background Glows */}
       <div className="hidden sm:block absolute top-0 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-[120px] -z-10 animate-pulse" />
       
       <WelcomeHeader name={identity?.name || "User"} isStudent={isStudent} />
 
-      <div className="grid gap-10 lg:grid-cols-3">
-        <div className="lg:col-span-2 space-y-12">
-            {isStaff && (
-              <ErrorBoundary>
-                <EngagementChart attendanceData={attendanceTrend} gradeData={gradeDistribution} />
-              </ErrorBoundary>
-            )}
-            {isStudent && (
-              <ErrorBoundary>
-                <StudentAcademicJourney 
-                  gradeTrends={gradeTrends} 
-                  subjectMastery={subjectMastery} 
-                  attendanceSummary={attendanceSummary} 
-                />
-              </ErrorBoundary>
-            )}
-            {isStudent && (
-              <ErrorBoundary>
-                <UpcomingAssignmentsList assignments={upcomingAssignments} list={list} show={show} />
-              </ErrorBoundary>
-            )}
-            {isStaff && (
-              <ErrorBoundary>
-                <PendingGradingList submissions={pendingSubmissions} show={show} />
-              </ErrorBoundary>
-            )}
+      <div className="space-y-12">
+        {isStaff && data && (
+          <StaffDashboard data={data} isLoading={isLoading} onRefresh={() => void refetch()} show={show} />
+        )}
+        
+        {isStudent && data && (
+          <StudentDashboard data={data} list={list} show={show} />
+        )}
+
+        <div className="grid gap-10 lg:grid-cols-3">
+          <div className="lg:col-span-2">
             <ErrorBoundary>
               <QuickActions cards={activeCards} list={list} />
             </ErrorBoundary>
-        </div>
-
-        <div className="space-y-10">
+          </div>
+          <div className="space-y-10">
             <ErrorBoundary>
-              <TodaySchedule schedule={todaySchedule} show={show} />
+              <TodaySchedule schedule={data?.todaySchedule ?? []} show={show} />
             </ErrorBoundary>
-            {isStaff && (
-              <ErrorBoundary>
-                <AtRiskStudents students={atRiskStudents} />
-              </ErrorBoundary>
-            )}
-            {isStaff && (
-              <ErrorBoundary>
-                <PlatformOverview 
-                  stats={stats} 
-                  isLoading={isLoading} 
-                  onRefresh={() => void refetch()}
-                />
-              </ErrorBoundary>
-            )}
             <ErrorBoundary>
               <PromoCards isStaff={isStaff} list={list} />
             </ErrorBoundary>
+          </div>
         </div>
       </div>
     </div>

@@ -21,7 +21,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useCustomMutation, useNotification } from "@refinedev/core";
-import { Submission, Assignment } from "@/types";
+import { Submission, Assignment, AIFeedbackResponse } from "@/types";
 import { useEffect } from "react";
 import { Sparkles, Loader2, FileText, ExternalLink } from "lucide-react";
 import { FieldValues } from "react-hook-form";
@@ -42,12 +42,6 @@ interface GradingDialogProps {
   submission: (Submission & { assignment?: Assignment }) | null;
 }
 
-interface AIFeedbackResponse {
-  suggestedGrade: number;
-  feedback: string;
-  summary: string;
-}
-
 export const GradingDialog = ({
   isOpen,
   onOpenChange,
@@ -65,7 +59,6 @@ export const GradingDialog = ({
       resource: "submissions",
       action: "edit",
       id: submission?.id,
-      // CRITICAL: Disable automatic data fetching because we don't have a GET /submissions/:id route
       queryOptions: {
         enabled: false,
       },
@@ -85,7 +78,6 @@ export const GradingDialog = ({
   const { mutate: getAIFeedback, mutation: aiMutation } = useCustomMutation<AIFeedbackResponse>();
   const isAILoading = aiMutation.isPending;
 
-  // Reset form when submission changes
   useEffect(() => {
     if (submission) {
       setValue("grade", submission.grade ?? 0);
@@ -132,7 +124,7 @@ export const GradingDialog = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-150 max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-center justify-between pr-6">
             <div>
@@ -211,7 +203,7 @@ export const GradingDialog = ({
                   <FormControl>
                     <Textarea
                       placeholder="Great job! Just a few notes..."
-                      className="min-h-[150px]"
+                      className="min-h-37.5"
                       {...field}
                     />
                   </FormControl>
