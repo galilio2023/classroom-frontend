@@ -1,4 +1,4 @@
-import { Authenticated, Refine } from "@refinedev/core";
+import { Authenticated, Refine, useGetIdentity } from "@refinedev/core";
 import { DevtoolsPanel, DevtoolsProvider } from "@refinedev/devtools";
 import { RefineKbar, RefineKbarProvider } from "@refinedev/kbar";
 import routerProvider, {
@@ -32,7 +32,7 @@ import {
 } from "lucide-react";
 import { Layout } from "@/components/refine-ui/layout/layout.tsx";
 import { AuthorizedRoute } from "./components/authorized-route";
-import React, { Suspense, useEffect, useState } from "react";
+import React, { Suspense } from "react";
 import { User, UserRole } from "@/types";
 
 // Lazy Load Pages
@@ -74,17 +74,7 @@ const Loading = () => (
 );
 
 function App() {
-  const [user, setUser] = useState<User | null>(null);
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      const identity = await authProvider.getIdentity?.();
-      if (identity) {
-        setUser(identity as User);
-      }
-    };
-    fetchUser();
-  }, []);
+  const { data: user } = useGetIdentity<User>();
   
   const userRole = user?.role;
   const isStudent = userRole === UserRole.STUDENT;

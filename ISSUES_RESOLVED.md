@@ -126,3 +126,23 @@ The notification system is now more robust, with guaranteed navigation to the co
 
 **Summary:**
 The application now boasts a production-grade architecture that is robust, transactional, and highly maintainable, with a fully integrated AI-assisted quiz system.
+
+---
+
+## 9. Robust Role-Based Access Control for AI & Admin Features
+**Problem:**
+- **Security & Cost Risk:** AI generation features (Gemini) were potentially accessible to students, leading to high costs and potential misuse.
+- **Inconsistent Authorization:** Navigation links and routes for administrative features (Departments, Users, AI Assistant) were not strictly restricted based on user roles.
+- **Fragile Role Determination:** The frontend was relying on direct `localStorage` reads for role-based UI logic, which is insecure and prone to desynchronization.
+
+**Solution:**
+- **Idiomatic Identity Management:** Refactored `App.tsx` to use Refine's `useGetIdentity` hook. This ensures role determination is consistent with the application's authenticated state and follows Refine v5 best practices.
+- **Granular Resource Hiding:** Implemented `meta.hide` logic in the Refine `resources` configuration.
+    - `ai-study-lab`: Hidden from non-students.
+    - `ai-assistant`, `subjects`: Hidden from students.
+    - `departments`, `users`, `enrollments`: Restricted to Admins.
+- **Explicit Route Protection:** Updated `AuthorizedRoute` for `AI Study Lab` to use a specific `ai-study-lab` resource, and updated `accessControlProvider.ts` to enforce these granular permissions on both the UI and route levels.
+- **Backend-Only AI Integration:** Verified that all AI features (Assignment Helper, Quiz Generator, Study Lab) route requests through the backend API, adhering to the `GEMINI.md` security guidelines.
+
+**Summary:**
+The application now features a robust, role-based access control system that protects sensitive AI features and administrative resources, ensuring security, cost-efficiency, and a tailored user experience.
