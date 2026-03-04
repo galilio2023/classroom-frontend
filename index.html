@@ -22,11 +22,29 @@
     <title>
       Refine - Build your React-based CRUD applications, without constraints.
     </title>
+    <script>
+      // Prevent Flash of Unstyled Content (FOUC) for Dark Mode
+      (function() {
+        try {
+          const storageKey = "vite-ui-theme";
+          const theme = localStorage.getItem(storageKey);
+          const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+
+          if (theme === "dark" || (!theme && systemTheme === "dark")) {
+            document.documentElement.classList.add("dark");
+          } else {
+            document.documentElement.classList.remove("dark");
+          }
+        } catch (e) {
+          console.error("Theme script error:", e);
+        }
+      })();
+    </script>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
-    <script type="module" src="/src/index.tsx"></script>
+    <script type="module" src="./src/index.tsx"></script>
     <!--
       This HTML file is a template.
       If you open it directly in the browser, you will see an empty page.

@@ -9,7 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Bell, CheckCheck, Info, GraduationCap, ClipboardCheck, Trophy } from "lucide-react";
+import { Bell, CheckCheck, Info, GraduationCap, ClipboardCheck, Trophy, BrainCircuit } from "lucide-react";
 import { Notification, User } from "@/types";
 import { formatDistanceToNow } from "date-fns";
 import { useNavigate } from "react-router-dom";
@@ -106,10 +106,23 @@ export const NotificationBell = () => {
       });
     };
 
+    const handleAgentAlert = (data: any) => {
+      toast(data.title, {
+        icon: <BrainCircuit className="h-5 w-5 text-primary animate-pulse" />,
+        description: data.message,
+        duration: 8000,
+        action: data.classId ? {
+          label: "View Class",
+          onClick: () => navigate(`/classes/show/${data.classId}`),
+        } : undefined,
+      });
+    };
+
     socket.on("notification", handleNotification);
     socket.on("unread_count", handleUnreadCount);
     socket.on("badge_earned", handleBadgeEarned);
     socket.on("student_badge_earned", handleStudentBadgeEarned);
+    socket.on("agent_alert", handleAgentAlert);
 
     // Reconnection Logic: Fetch notifications when socket reconnects
     socket.on("connect", () => {
@@ -121,6 +134,7 @@ export const NotificationBell = () => {
       socket.off("unread_count", handleUnreadCount);
       socket.off("badge_earned", handleBadgeEarned);
       socket.off("student_badge_earned", handleStudentBadgeEarned);
+      socket.off("agent_alert", handleAgentAlert);
       socket.off("connect");
       socket.disconnect();
     };
@@ -242,6 +256,7 @@ export const NotificationBell = () => {
       case "grade": return <CheckCheck className="h-4 w-4 text-green-500" />;
       case "attendance": return <ClipboardCheck className="h-4 w-4 text-orange-500" />;
       case "achievement": return <Trophy className="h-4 w-4 text-yellow-500" />;
+      case "agent_alert": return <BrainCircuit className="h-4 w-4 text-purple-500" />;
       default: return <Info className="h-4 w-4 text-muted-foreground" />;
     }
   };

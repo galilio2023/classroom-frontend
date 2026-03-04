@@ -1,4 +1,4 @@
-import { Authenticated, Refine, useGetIdentity } from "@refinedev/core";
+import { Authenticated, Refine } from "@refinedev/core";
 import { DevtoolsPanel, DevtoolsProvider } from "@refinedev/devtools";
 import { RefineKbar, RefineKbarProvider } from "@refinedev/kbar";
 import routerProvider, {
@@ -32,7 +32,7 @@ import {
 } from "lucide-react";
 import { Layout } from "@/components/refine-ui/layout/layout.tsx";
 import { AuthorizedRoute } from "./components/authorized-route";
-import React, { Suspense } from "react";
+import React, { Suspense, useMemo } from "react";
 import { User, UserRole } from "@/types";
 
 // Lazy Load Pages
@@ -74,9 +74,19 @@ const Loading = () => (
 );
 
 function App() {
-  const { data: user } = useGetIdentity<User>();
-  
-  const userRole = user?.role;
+  // Use useMemo to get the role from localStorage for initial resource definition
+  // This avoids the "chicken-and-egg" problem with Refine context while keeping UI responsive
+  const userRole = useMemo(() => {
+    const userJson = localStorage.getItem("user");
+    if (!userJson) return null;
+    try {
+      const user = JSON.parse(userJson) as User;
+      return user.role;
+    } catch (e) {
+      return null;
+    }
+  }, []);
+
   const isStudent = userRole === UserRole.STUDENT;
   const isAdmin = userRole === UserRole.ADMIN;
 

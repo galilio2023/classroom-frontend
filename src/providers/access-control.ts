@@ -46,20 +46,38 @@ export const accessControlProvider: AccessControlProvider = {
         if (["show", "edit", "delete"].includes(action)) {
           if (!params?.id) return { can: false, reason: "No record ID provided." };
           
-          if (params?.userData) {
-              const data = params.userData;
-              if (resourceName === "classes" && data.teacherId === identity?.id) return { can: true };
-              if (resourceName === "assignments" && data.class?.teacherId === identity?.id) return { can: true };
-              if (resourceName === "quizzes" && data.class?.teacherId === identity?.id) return { can: true };
-              if (resourceName === "resources" && data.class?.teacherId === identity?.id) return { can: true };
-          }
+          // Helper to check if user is a teacher of the class
+          const isTeacherOfClass = (classData: any) => {
+            if (!classData) return false;
+            // Check if teachers array exists (many-to-many)
+            if (Array.isArray(classData.teachers)) {
+                return classData.teachers.some((t: any) => t.teacherId === identity?.id);
+            }
+            // Fallback if backend returns a flattened structure (unlikely but safe)
+            return classData.teacherId === identity?.id;
+          };
 
           try {
+            // If we have the data already (e.g. from a list view), use it
+            if (params?.userData) {
+                const data = params.userData;
+                if (resourceName === "classes" && isTeacherOfClass(data)) return { can: true };
+                if (resourceName === "assignments" && isTeacherOfClass(data.class)) return { can: true };
+                if (resourceName === "quizzes" && isTeacherOfClass(data.class)) return { can: true };
+                if (resourceName === "resources" && isTeacherOfClass(data.class)) return { can: true };
+            }
+
+            // Otherwise, fetch it
             const { data } = await dataProvider.getOne({ resource: resourceName, id: params.id });
-            if (resourceName === "classes" && data?.teacherId === identity?.id) return { can: true };
-            if (resourceName === "assignments" && data?.class?.teacherId === identity?.id) return { can: true };
-            if (resourceName === "quizzes" && data?.class?.teacherId === identity?.id) return { can: true };
-            if (resourceName === "resources" && data?.class?.teacherId === identity?.id) return { can: true };
+            
+            if (resourceName === "classes") {
+                if (isTeacherOfClass(data)) return { can: true };
+            } else {
+                // For related resources, we need the class data.
+                // Ensure the backend returns 'class' relation with 'teachers'.
+                if (data?.class && isTeacherOfClass(data.class)) return { can: true };
+            }
+
           } catch (error) {
             return { can: false, reason: "Access denied." };
           }

@@ -165,7 +165,27 @@ export const dataProvider: DataProvider = {
 
   getApiUrl: () => BACKEND_BASE_URL,
   
-  getMany: async () => { throw new Error("getMany not implemented"); },
+  getMany: async ({ resource, ids }) => {
+    const url = new URL(`${BACKEND_BASE_URL}/${resource}`);
+    
+    // Append each ID as a query parameter (e.g., ?id=1&id=2)
+    // Note: Backend must support array query params or comma-separated values
+    ids.forEach((id) => {
+      url.searchParams.append("id", String(id));
+    });
+
+    const response = await fetcher(url.toString());
+
+    if (!response.ok) {
+      throw await handleError(response);
+    }
+
+    const json: ListResponse = await response.json();
+    return {
+      data: json.data ?? [],
+    };
+  },
+
   createMany: async () => { throw new Error("createMany not implemented"); },
   deleteMany: async () => { throw new Error("deleteMany not implemented"); },
   updateMany: async () => { throw new Error("updateMany not implemented"); },
