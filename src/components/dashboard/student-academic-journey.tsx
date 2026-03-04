@@ -1,6 +1,17 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from "recharts";
-import { TrendingUp, BookOpen, CheckCircle2, Clock, XCircle, LucideIcon } from "lucide-react";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from "recharts";
+import { TrendingUp, BookOpen, CheckCircle2, Clock, XCircle, Target, Trophy } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { PracticeModal } from "@/components/practice/practice-modal";
+import { NoChartData } from "./no-chart-data";
+import { AttendanceStatCard } from "./attendance-stat-card";
+import { 
+  ChartContainer, 
+  ChartTooltip, 
+  ChartTooltipContent, 
+  ChartConfig 
+} from "@/components/ui/chart";
 
 interface StudentAcademicJourneyProps {
   gradeTrends: any[];
@@ -8,24 +19,57 @@ interface StudentAcademicJourneyProps {
   attendanceSummary: any;
 }
 
-const NoChartData = ({ icon: Icon, message }: { icon: LucideIcon, message: string }) => (
-    <div className="flex flex-col items-center justify-center h-full text-muted-foreground opacity-50">
-        <Icon className="h-10 w-10 mb-2" />
-        <p className="text-sm font-bold uppercase tracking-widest">{message}</p>
-    </div>
-);
+const gradeConfig = {
+  grade: {
+    label: "Grade",
+    color: "hsl(var(--primary))",
+  },
+} satisfies ChartConfig;
+
+const masteryConfig = {
+  avgGrade: {
+    label: "Average Grade",
+    color: "hsl(var(--primary))",
+  },
+} satisfies ChartConfig;
 
 export const StudentAcademicJourney = ({ gradeTrends, subjectMastery, attendanceSummary }: StudentAcademicJourneyProps) => {
-  // CSS Variable based colors (Rule 6 compliance)
-  const primaryColor = "hsl(var(--primary))";
-  const mutedColor = "hsl(var(--muted-foreground))";
-  const borderColor = "hsl(var(--border))";
+  const [practiceTopic, setPracticeTopic] = useState<string | null>(null);
+  const [practiceSubjectId, setPracticeSubjectId] = useState<number | null>(null);
+
+  const weakSubjects = subjectMastery.filter(s => s.avgGrade < 70);
 
   return (
     <div className="space-y-8">
+      {weakSubjects.length > 0 && (
+        <Card className="border-l-4 border-l-orange-500 bg-orange-500/5 shadow-md">
+          <CardHeader className="pb-2">
+            <div className="flex items-center gap-2">
+              <Target className="h-5 w-5 text-orange-600" />
+              <CardTitle className="text-lg font-bold text-orange-700">Focus Area Identified</CardTitle>
+            </div>
+            <CardDescription className="text-orange-600/80">
+              We noticed you might be struggling with <strong>{weakSubjects[0].subject}</strong>. 
+              Practice now to earn a mastery badge!
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button 
+              onClick={() => {
+                setPracticeTopic(weakSubjects[0].subject);
+                setPracticeSubjectId(weakSubjects[0].subjectId); 
+              }}
+              className="bg-orange-600 hover:bg-orange-700 text-white gap-2"
+            >
+              <Trophy className="h-4 w-4" />
+              Practice & Level Up
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
       <div className="grid gap-6 md:grid-cols-2">
-        {/* Grade Trends Line Chart */}
-        <Card className="border-none shadow-xl overflow-hidden bg-card/50 backdrop-blur-xl border-border/50">
+        <Card className="border shadow-xl overflow-hidden bg-card/50 backdrop-blur-xl border-border/50">
           <CardHeader className="pb-2">
             <div className="flex items-center gap-2">
               <div className="p-2 bg-primary/10 rounded-lg">
@@ -37,51 +81,41 @@ export const StudentAcademicJourney = ({ gradeTrends, subjectMastery, attendance
           </CardHeader>
           <CardContent className="h-[250px] pt-6">
             {gradeTrends.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
+              <ChartContainer config={gradeConfig} className="h-full w-full">
                 <LineChart data={gradeTrends} margin={{ top: 5, right: 20, left: -20, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={borderColor} opacity={0.5} />
+                  <CartesianGrid vertical={false} strokeDasharray="3 3" className="stroke-border/50" />
                   <XAxis 
                     dataKey="title" 
                     axisLine={false} 
                     tickLine={false} 
-                    tick={{ fontSize: 10, fontWeight: 'bold', fill: mutedColor }}
+                    tickMargin={8}
+                    className="fill-muted-foreground font-semibold"
                   />
                   <YAxis 
                     domain={[0, 100]} 
                     axisLine={false} 
                     tickLine={false} 
-                    tick={{ fontSize: 10, fontWeight: 'bold', fill: mutedColor }}
+                    tickMargin={8}
+                    className="fill-muted-foreground font-semibold"
                   />
-                  <Tooltip 
-                    contentStyle={{ 
-                        backgroundColor: 'hsl(var(--popover))', 
-                        border: '1px solid hsl(var(--border))', 
-                        borderRadius: '12px', 
-                        fontSize: '12px',
-                        boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)'
-                    }}
-                    itemStyle={{ color: 'hsl(var(--foreground))', fontWeight: 'bold' }}
-                    labelStyle={{ color: 'hsl(var(--muted-foreground))', marginBottom: '4px', fontWeight: 'bold' }}
-                  />
+                  <ChartTooltip cursor={{ stroke: 'hsl(var(--primary))', strokeWidth: 1, strokeDasharray: '4 4' }} content={<ChartTooltipContent />} />
                   <Line 
                     type="monotone" 
                     dataKey="grade" 
-                    stroke={primaryColor} 
-                    strokeWidth={4} 
-                    dot={{ r: 5, fill: primaryColor, strokeWidth: 2, stroke: "hsl(var(--background))" }} 
-                    activeDot={{ r: 7, strokeWidth: 0 }}
-                    animationDuration={1500}
+                    className="stroke-primary"
+                    strokeWidth={3} 
+                    dot={{ r: 4, className: "fill-primary stroke-background", strokeWidth: 2 }} 
+                    activeDot={{ r: 6, strokeWidth: 0 }}
                   />
                 </LineChart>
-              </ResponsiveContainer>
+              </ChartContainer>
             ) : (
               <NoChartData icon={TrendingUp} message="No grade data yet" />
             )}
           </CardContent>
         </Card>
 
-        {/* Subject Mastery Radar Chart */}
-        <Card className="border-none shadow-xl overflow-hidden bg-card/50 backdrop-blur-xl border-border/50">
+        <Card className="border shadow-xl overflow-hidden bg-card/50 backdrop-blur-xl border-border/50">
           <CardHeader className="pb-2">
             <div className="flex items-center gap-2">
               <div className="p-2 bg-primary/10 rounded-lg">
@@ -93,33 +127,24 @@ export const StudentAcademicJourney = ({ gradeTrends, subjectMastery, attendance
           </CardHeader>
           <CardContent className="h-[250px] flex items-center justify-center pt-6">
             {subjectMastery.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
+              <ChartContainer config={masteryConfig} className="h-full w-full">
                 <RadarChart cx="50%" cy="50%" outerRadius="80%" data={subjectMastery}>
-                  <PolarGrid stroke={borderColor} opacity={0.5} />
+                  <PolarGrid className="stroke-border/50" />
                   <PolarAngleAxis 
                     dataKey="subject" 
-                    tick={{ fontSize: 10, fontWeight: 'bold', fill: mutedColor }} 
+                    className="fill-muted-foreground font-semibold text-[10px]"
                   />
                   <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
                   <Radar
                     name="Avg Grade"
                     dataKey="avgGrade"
-                    stroke={primaryColor}
-                    strokeWidth={3}
-                    fill={primaryColor}
-                    fillOpacity={0.3}
-                    animationDuration={1500}
+                    className="stroke-primary fill-primary"
+                    strokeWidth={2}
+                    fillOpacity={0.2}
                   />
-                  <Tooltip 
-                    contentStyle={{ 
-                        backgroundColor: 'hsl(var(--popover))', 
-                        border: '1px solid hsl(var(--border))', 
-                        borderRadius: '12px'
-                    }}
-                    itemStyle={{ color: 'hsl(var(--foreground))', fontWeight: 'bold' }}
-                  />
+                  <ChartTooltip content={<ChartTooltipContent />} />
                 </RadarChart>
-              </ResponsiveContainer>
+              </ChartContainer>
             ) : (
               <NoChartData icon={BookOpen} message="No graded work yet" />
             )}
@@ -127,47 +152,44 @@ export const StudentAcademicJourney = ({ gradeTrends, subjectMastery, attendance
         </Card>
       </div>
 
-      {/* Attendance Summary Cards */}
       <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
-        <Card className="bg-card/50 backdrop-blur-sm border-border/50 hover:border-green-500/30 transition-colors group">
-          <CardContent className="p-4 flex flex-col items-center justify-center text-center">
-            <div className="p-2 bg-green-500/10 rounded-full mb-2 group-hover:scale-110 transition-transform">
-                <CheckCircle2 className="h-5 w-5 text-green-500" />
-            </div>
-            <span className="text-2xl font-black text-foreground">{attendanceSummary?.present || 0}</span>
-            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Present</span>
-          </CardContent>
-        </Card>
-        <Card className="bg-card/50 backdrop-blur-sm border-border/50 hover:border-destructive/30 transition-colors group">
-          <CardContent className="p-4 flex flex-col items-center justify-center text-center">
-            <div className="p-2 bg-destructive/10 rounded-full mb-2 group-hover:scale-110 transition-transform">
-                <XCircle className="h-5 w-5 text-destructive" />
-            </div>
-            <span className="text-2xl font-black text-foreground">{attendanceSummary?.absent || 0}</span>
-            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Absent</span>
-          </CardContent>
-        </Card>
-        <Card className="bg-card/50 backdrop-blur-sm border-border/50 hover:border-orange-500/30 transition-colors group">
-          <CardContent className="p-4 flex flex-col items-center justify-center text-center">
-            <div className="p-2 bg-orange-500/10 rounded-full mb-2 group-hover:scale-110 transition-transform">
-                <Clock className="h-5 w-5 text-orange-500" />
-            </div>
-            <span className="text-2xl font-black text-foreground">{attendanceSummary?.late || 0}</span>
-            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Late</span>
-          </CardContent>
-        </Card>
-        <Card className="bg-card/50 backdrop-blur-sm border-border/50 hover:border-primary/30 transition-colors group">
-          <CardContent className="p-4 flex flex-col items-center justify-center text-center">
-            <div className="p-2 bg-primary/10 rounded-full mb-2 group-hover:scale-110 transition-transform">
-                <TrendingUp className="h-5 w-5 text-primary" />
-            </div>
-            <span className="text-2xl font-black text-foreground">
-              {attendanceSummary?.total > 0 ? Math.round((attendanceSummary.present / attendanceSummary.total) * 100) : 0}%
-            </span>
-            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Attendance Rate</span>
-          </CardContent>
-        </Card>
+        <AttendanceStatCard 
+          icon={CheckCircle2} 
+          value={attendanceSummary?.present || 0} 
+          label="Present" 
+          colorClass="bg-green-500/10 text-green-500" 
+          hoverBorderClass="hover:border-green-500/30" 
+        />
+        <AttendanceStatCard 
+          icon={XCircle} 
+          value={attendanceSummary?.absent || 0} 
+          label="Absent" 
+          colorClass="bg-destructive/10 text-destructive" 
+          hoverBorderClass="hover:border-destructive/30" 
+        />
+        <AttendanceStatCard 
+          icon={Clock} 
+          value={attendanceSummary?.late || 0} 
+          label="Late" 
+          colorClass="bg-orange-500/10 text-orange-500" 
+          hoverBorderClass="hover:border-orange-500/30" 
+        />
+        <AttendanceStatCard 
+          icon={TrendingUp} 
+          value={`${attendanceSummary?.total > 0 ? Math.round((attendanceSummary.present / attendanceSummary.total) * 100) : 0}%`} 
+          label="Attendance Rate" 
+          colorClass="bg-primary/10 text-primary" 
+          hoverBorderClass="hover:border-primary/30" 
+        />
       </div>
+
+      {practiceTopic && (
+        <PracticeModal 
+          topic={practiceTopic} 
+          subjectId={practiceSubjectId}
+          onClose={() => setPracticeTopic(null)} 
+        />
+      )}
     </div>
   );
 };

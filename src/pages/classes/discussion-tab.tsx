@@ -1,18 +1,16 @@
-import { useList, useCreate, useDelete, useGetIdentity } from "@refinedev/core";
-import { useState, useEffect } from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
+import { useList, useCreate, useDelete, useGetIdentity, useCustomMutation } from "@refinedev/core";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Discussion, User } from "@/types";
-import { Loader2, MessageSquare, Send, Reply, Trash2, RefreshCw } from "lucide-react";
-import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
+import { Loader2, Send, Sparkles, X, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 import { io } from "socket.io-client";
-
-dayjs.extend(relativeTime);
+import ReactMarkdown from "react-markdown";
+import { ChatBubble } from "@/components/classes/chat-bubble";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { cn } from "@/lib/utils";
 
 interface DiscussionTabProps {
   classId: string;
@@ -22,7 +20,11 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
   const { data: identity } = useGetIdentity<User>();
   const [newPost, setNewPost] = useState("");
   const [replyTo, setReplyTo] = useState<number | null>(null);
-  const [replyContent, setReplyContent] = useState("");
+  const scrollRef = useRef<HTMLDivElement>(null);
+  
+  // AI Summary State
+  const [summary, setSummary] = useState<string | null>(null);
+  const [isSummarizing, setIsSummarizing] = useState(false);
 
   // --- REFINE HOOKS ---
   const { result, query } = useList<Discussion>({
@@ -37,235 +39,172 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
 
   const discussions = result?.data || [];
   const isLoading = query.isLoading;
-  const isFetching = query.isFetching;
   const refetch = query.refetch;
 
-  // --- REAL-TIME SOCKET INTEGRATION ---
+  const { mutate: createPost, mutation } = useCreate<Discussion, any, any>();
+  const { mutate: deletePost } = useDelete();
+  const { mutate: generateSummary } = useCustomMutation();
+
+  // --- AUTO SCROLL ---
+  useEffect(() => {
+    if (scrollRef.current) {
+      const viewport = scrollRef.current.querySelector('[data-radix-scroll-area-viewport]');
+      if (viewport) viewport.scrollTop = viewport.scrollHeight;
+    }
+  }, [discussions]);
+
+  // --- REAL-TIME SOCKET ---
   useEffect(() => {
     if (!identity?.id || !classId) return;
-
     const socket = io(import.meta.env.VITE_API_URL.replace("/api", ""), {
       query: { userId: identity.id, classId },
     });
-
-    socket.on("new_discussion", (post: Discussion) => {
-      // We refetch to keep everything in sync with the DB
-      // But we could also manually update the cache for "instant" feel
-      refetch();
-      if (post.userId !== identity.id) {
-        toast.info(`New post from ${post.user.name}`);
-      }
-    });
-
-    socket.on("delete_discussion", () => {
-      refetch();
-    });
-
-    return () => {
-      socket.disconnect();
-    };
+    socket.on("new_discussion", () => refetch());
+    socket.on("delete_discussion", () => refetch());
+    return () => { socket.disconnect(); };
   }, [identity?.id, classId, refetch]);
-
-  const { mutate: createPost, mutation } = useCreate<Discussion, any, any>();
-  const isCreating = mutation.isPending;
-
-  const { mutate: deletePost } = useDelete();
 
   const handlePost = () => {
     if (!newPost.trim()) return;
     createPost(
       {
         resource: "discussions",
-        values: { content: newPost, classId: Number(classId) },
+        values: { 
+          content: newPost, 
+          classId: Number(classId),
+          parentId: replyTo // If replyTo is set, it becomes a reply
+        },
       },
       {
         onSuccess: () => {
           setNewPost("");
-          toast.success("Post shared with class");
-        },
-      }
-    );
-  };
-
-  const handleReply = (parentId: number) => {
-    if (!replyContent.trim()) return;
-    createPost(
-      {
-        resource: "discussions",
-        values: { content: replyContent, classId: Number(classId), parentId },
-      },
-      {
-        onSuccess: () => {
           setReplyTo(null);
-          setReplyContent("");
-          toast.success("Reply sent");
+          toast.success(replyTo ? "Reply sent" : "Message posted");
         },
       }
     );
   };
 
-  const handleDelete = (id: number) => {
-    deletePost(
-      { resource: "discussions", id },
+  const handleGenerateSummary = () => {
+    setIsSummarizing(true);
+    generateSummary(
+      { url: `classes/${classId}/generate-summary`, method: "post", values: {} },
       {
-        onSuccess: () => {
-          toast.success("Message deleted");
+        onSuccess: (data: any) => {
+          setSummary(data.data.summary);
+          setIsSummarizing(false);
         },
+        onError: () => setIsSummarizing(false)
       }
     );
   };
+
+  const replyingToPost = discussions.find(d => d.id === replyTo);
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h3 className="text-lg font-semibold">Classroom Feed</h3>
-          <p className="text-sm text-muted-foreground">Share updates and ask questions with your class.</p>
+    <div className="flex flex-col h-[calc(100vh-300px)] min-h-[500px] bg-muted/20 rounded-2xl border border-border/50 overflow-hidden">
+      {/* Chat Header */}
+      <div className="p-4 border-b bg-background/50 backdrop-blur-md flex justify-between items-center">
+        <div className="flex items-center gap-2">
+          <div className="p-2 bg-primary/10 rounded-lg">
+            <MessageCircle className="h-4 w-4 text-primary" />
+          </div>
+          <div>
+            <h3 className="text-sm font-bold leading-none">Class Stream</h3>
+            <p className="text-[10px] text-muted-foreground mt-1">Real-time discussion with your class</p>
+          </div>
         </div>
-        <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isLoading || isFetching}>
-          <RefreshCw className={`h-4 w-4 mr-2 ${isFetching ? "animate-spin" : ""}`} />
-          Refresh
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={handleGenerateSummary} 
+          disabled={isSummarizing}
+          className="h-8 text-xs gap-2 border-primary/20 hover:bg-primary/5 text-primary"
+        >
+          {isSummarizing ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
+          AI Catch-up
         </Button>
       </div>
 
-      {/* Create Post Card */}
-      <Card className="border-primary/20 bg-primary/5">
-        <CardContent className="pt-6 space-y-4">
-          <div className="flex gap-3">
-            <Avatar className="h-10 w-10 border-2 border-background shadow-sm">
-              <AvatarImage src={identity?.image ?? ""} />
-              <AvatarFallback className="bg-primary text-primary-foreground">{identity?.name?.[0]}</AvatarFallback>
-            </Avatar>
-            <div className="flex-1 space-y-4">
-              <Textarea 
-                placeholder="Write a message to the class..." 
-                value={newPost} 
-                onChange={(e) => setNewPost(e.target.value)} 
-                className="min-h-[100px] bg-background resize-none focus-visible:ring-primary"
-              />
-              <div className="flex justify-end">
-                <Button onClick={handlePost} disabled={!newPost.trim() || isCreating} className="px-8">
-                  <Send className="h-4 w-4 mr-2" />
-                  Post
-                </Button>
-              </div>
-            </div>
+      {/* AI Summary Overlay */}
+      {summary && (
+        <div className="p-4 bg-primary/5 border-b border-primary/10 animate-in slide-in-from-top duration-300 relative">
+          <Button variant="ghost" size="icon" onClick={() => setSummary(null)} className="absolute top-2 right-2 h-6 w-6">
+            <X className="h-3 w-3" />
+          </Button>
+          <div className="prose prose-xs dark:prose-invert max-w-none">
+            <ReactMarkdown>{summary}</ReactMarkdown>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      )}
 
-      {/* Discussion List */}
-      <div className="space-y-4">
+      {/* Chat Messages */}
+      <ScrollArea ref={scrollRef} className="flex-1 p-4">
         {isLoading ? (
-          <div className="flex flex-col items-center justify-center py-20 space-y-4">
-            <Loader2 className="h-10 w-10 animate-spin text-primary" />
-            <p className="text-sm text-muted-foreground">Loading discussions...</p>
+          <div className="flex flex-col items-center justify-center h-full space-y-2">
+            <Loader2 className="h-6 w-6 animate-spin text-primary/40" />
+            <p className="text-xs text-muted-foreground">Loading messages...</p>
           </div>
         ) : discussions.length === 0 ? (
-          <div className="text-center py-20 text-muted-foreground border-2 border-dashed rounded-xl bg-muted/30">
-            <MessageSquare className="h-12 w-12 mx-auto mb-4 opacity-20" />
-            <p className="font-medium">No messages yet.</p>
-            <p className="text-sm">Be the first to start a conversation!</p>
+          <div className="flex flex-col items-center justify-center h-full text-center opacity-40">
+            <MessageCircle className="h-12 w-12 mb-2" />
+            <p className="text-sm font-medium">No messages yet</p>
+            <p className="text-xs">Start the conversation!</p>
           </div>
         ) : (
-          discussions.map((post: Discussion) => (
-            <Card key={post.id} className="group transition-all hover:shadow-md">
-              <CardContent className="pt-6">
-                <div className="flex gap-4">
-                  <Avatar className="h-10 w-10 shadow-sm">
-                    <AvatarImage src={post.user?.image ?? ""} />
-                    <AvatarFallback>{post.user?.name?.[0]}</AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1">
-                    <div className="flex justify-between items-start mb-2">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="font-bold text-sm">{post.user?.name}</span>
-                          <Badge variant="secondary" className="text-[10px] h-4 px-1.5 capitalize">
-                            {post.user?.role}
-                          </Badge>
-                        </div>
-                        <span className="text-[11px] text-muted-foreground">{dayjs(post.createdAt).fromNow()}</span>
-                      </div>
-                      {(identity?.id === post.userId || identity?.role === "admin") && (
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive hover:bg-destructive/10"
-                          onClick={() => handleDelete(post.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      )}
-                    </div>
-                    <p className="text-sm leading-relaxed whitespace-pre-wrap">{post.content}</p>
-                    
-                    <div className="flex items-center gap-4 mt-3">
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        className="h-7 px-2 text-xs text-muted-foreground hover:text-primary" 
-                        onClick={() => setReplyTo(replyTo === post.id ? null : post.id)}
-                      >
-                        <Reply className="h-3 w-3 mr-1.5" />
-                        {replyTo === post.id ? "Cancel" : "Reply"}
-                      </Button>
-                    </div>
-                    
-                    {replyTo === post.id && (
-                      <div className="mt-4 space-y-3 bg-muted/50 p-3 rounded-lg border border-border animate-in fade-in slide-in-from-top-2 duration-200">
-                        <Textarea 
-                          placeholder="Write a reply..." 
-                          value={replyContent} 
-                          onChange={(e) => setReplyContent(e.target.value)} 
-                          className="min-h-[80px] bg-background text-sm"
-                          autoFocus
-                        />
-                        <div className="flex justify-end gap-2">
-                          <Button variant="ghost" size="sm" onClick={() => setReplyTo(null)}>Cancel</Button>
-                          <Button size="sm" onClick={() => handleReply(post.id)} disabled={!replyContent.trim()}>Send Reply</Button>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Replies */}
-                    {post.replies && post.replies.length > 0 && (
-                      <div className="mt-4 space-y-4 border-l-2 border-muted pl-4 ml-1">
-                        {post.replies.map((reply: Discussion) => (
-                          <div key={reply.id} className="group/reply flex gap-3 relative">
-                            <Avatar className="h-7 w-7 shadow-xs">
-                              <AvatarImage src={reply.user?.image ?? ""} />
-                              <AvatarFallback className="text-[10px]">{reply.user?.name?.[0]}</AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1">
-                              <div className="flex justify-between items-start">
-                                <div className="flex items-center gap-2">
-                                  <span className="font-semibold text-xs">{reply.user?.name}</span>
-                                  <span className="text-[10px] text-muted-foreground">{dayjs(reply.createdAt).fromNow()}</span>
-                                </div>
-                                {(identity?.id === reply.userId || identity?.role === "admin") && (
-                                  <Button 
-                                    variant="ghost" 
-                                    size="icon" 
-                                    className="h-6 w-6 opacity-0 group-hover/reply:opacity-100 transition-opacity text-destructive hover:text-destructive hover:bg-destructive/10"
-                                    onClick={() => handleDelete(reply.id)}
-                                  >
-                                    <Trash2 className="h-3 w-3" />
-                                  </Button>
-                                )}
-                              </div>
-                              <p className="text-xs mt-1 leading-relaxed whitespace-pre-wrap">{reply.content}</p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))
+          <div className="space-y-2">
+            {discussions.map((post) => (
+              <ChatBubble 
+                key={post.id} 
+                post={post} 
+                isOwn={post.userId === identity?.id}
+                isAdmin={identity?.role === "admin"}
+                onDelete={(id) => deletePost({ resource: "discussions", id })}
+                onReply={(id) => setReplyTo(id)}
+              />
+            ))}
+          </div>
         )}
+      </ScrollArea>
+
+      {/* Chat Input Area */}
+      <div className="p-4 bg-background border-t">
+        {replyTo && (
+          <div className="mb-2 p-2 bg-muted rounded-lg flex justify-between items-center animate-in slide-in-from-bottom-2 duration-200">
+            <div className="flex items-center gap-2 overflow-hidden">
+              <div className="w-1 h-6 bg-primary rounded-full shrink-0" />
+              <p className="text-[10px] truncate italic text-muted-foreground">
+                Replying to <span className="font-bold text-foreground">{replyingToPost?.user.name}</span>: "{replyingToPost?.content}"
+              </p>
+            </div>
+            <Button variant="ghost" size="icon" onClick={() => setReplyTo(null)} className="h-5 w-5">
+              <X className="h-3 w-3" />
+            </Button>
+          </div>
+        )}
+        
+        <div className="flex gap-2 items-end">
+          <Textarea 
+            placeholder={replyTo ? "Write your reply..." : "Message your class..."}
+            value={newPost}
+            onChange={(e) => setNewPost(e.target.value)}
+            className="min-h-[44px] max-h-[120px] bg-muted/50 border-none focus-visible:ring-1 focus-visible:ring-primary/30 resize-none py-3 rounded-xl text-sm"
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                handlePost();
+              }
+            }}
+          />
+          <Button 
+            size="icon" 
+            onClick={handlePost} 
+            disabled={!newPost.trim() || mutation.isPending}
+            className="h-11 w-11 shrink-0 rounded-xl shadow-lg shadow-primary/20"
+          >
+            <Send className="h-5 w-5" />
+          </Button>
+        </div>
       </div>
     </div>
   );

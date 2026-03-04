@@ -6,8 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
-import { Resource, User } from "@/types";
-import { FileText, Link as LinkIcon, Video, Trash2, Plus, ExternalLink, Download, Loader2 } from "lucide-react";
+import { Resource, User, Module } from "@/types";
+import { FileText, Link as LinkIcon, Video, Trash2, Plus, ExternalLink, Download, Loader2, LayoutGrid } from "lucide-react";
 import { toast } from "sonner";
 import { FileUpload } from "@/components/file-upload";
 
@@ -26,6 +26,7 @@ export const ResourceTab = ({ classId }: ResourceTabProps) => {
     type: "file" as "file" | "link" | "video" | "other",
     url: "",
     cldPubId: "",
+    moduleId: null as number | null,
   });
 
   // --- REFINE HOOKS ---
@@ -35,7 +36,14 @@ export const ResourceTab = ({ classId }: ResourceTabProps) => {
     pagination: { mode: "off" },
   });
 
+  const { data: modulesData } = useList<Module>({
+    resource: "modules",
+    filters: [{ field: "classId", operator: "eq", value: classId }],
+    queryOptions: { enabled: !!classId },
+  });
+
   const resources = result?.data || [];
+  const modules = modulesData?.data || [];
   const isLoading = query.isLoading;
   const refetch = query.refetch;
 
@@ -58,7 +66,7 @@ export const ResourceTab = ({ classId }: ResourceTabProps) => {
       {
         onSuccess: () => {
           setIsAddOpen(false);
-          setNewResource({ title: "", description: "", type: "file", url: "", cldPubId: "" });
+          setNewResource({ title: "", description: "", type: "file", url: "", cldPubId: "", moduleId: null });
           refetch();
           toast.success("Resource added successfully");
         },
@@ -116,6 +124,28 @@ export const ResourceTab = ({ classId }: ResourceTabProps) => {
                     onChange={(e) => setNewResource({ ...newResource, title: e.target.value })}
                   />
                 </div>
+
+                <div className="grid gap-2">
+                  <Label className="flex items-center gap-2">
+                    <LayoutGrid className="h-3.5 w-3.5 text-muted-foreground" />
+                    Curriculum Module (Optional)
+                  </Label>
+                  <Select 
+                    value={newResource.moduleId?.toString() || "0"} 
+                    onValueChange={(v) => setNewResource({ ...newResource, moduleId: v === "0" ? null : Number(v) })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a module" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="0">None (Global Resource)</SelectItem>
+                      {modules.map((m) => (
+                        <SelectItem key={m.id} value={m.id.toString()}>{m.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
                 <div className="grid gap-2">
                   <Label htmlFor="type">Type</Label>
                   <Select 

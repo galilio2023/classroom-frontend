@@ -1,8 +1,8 @@
-import { Search } from "lucide-react";
+import { Search, Plus, Key, LayoutGrid, Globe } from "lucide-react";
 import { useMemo, useState } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { useTable } from "@refinedev/react-table";
-import { useList, HttpError } from "@refinedev/core";
+import { useList, HttpError, useGetIdentity, useCustomMutation } from "@refinedev/core";
 import { Link } from "react-router-dom";
 
 import {
@@ -19,8 +19,18 @@ import { CreateButton } from "@/components/refine-ui/buttons/create";
 import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
 import { DataTable } from "@/components/refine-ui/data-table/data-table";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
-import { Subject, User } from "@/types";
+import { Subject, User, UserRole } from "@/types";
+import { toast } from "sonner";
 
 type ClassListItem = {
   id: number;
@@ -30,67 +40,88 @@ type ClassListItem = {
   subject?: {
     name: string;
   };
-  teacher?: {
-    name: string;
-  };
+  teachers?: {
+    teacher: { name: string };
+    isPrimary: boolean;
+  }[];
   capacity: number;
 };
 
 const ClassesList = () => {
+  const { data: identity } = useGetIdentity<User>();
+  const isStudent = identity?.role === UserRole.STUDENT;
+  const isTeacher = identity?.role === UserRole.TEACHER;
+
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSubject, setSelectedSubject] = useState<string>("all");
-  const [selectedTeacher, setSelectedTeacher] = useState<string>("all");
+  const [inviteCode, setInviteCode] = useState("");
+  const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
+
+  const { mutate: joinClass, isLoading: isJoining } = useCustomMutation();
+
+  const handleJoinByCode = () => {
+    if (!inviteCode.trim()) return;
+
+    joinClass(
+      {
+        url: "/classes/join",
+        method: "post",
+        values: { inviteCode },
+      },
+      {
+        onSuccess: (data: any) => {
+          toast.success(data.data.message || "Request sent!");
+          setIsJoinModalOpen(false);
+          setInviteCode("");
+        },
+        onError: (error: any) => {
+          toast.error(error?.data?.message || "Invalid invite code");
+        }
+      }
+    );
+  };
 
   const classColumns = useMemo<ColumnDef<ClassListItem>[]>(
     () => [
       {
         id: "banner",
         accessorKey: "bannerUrl",
-        size: 120,
-        header: () => <p className="column-title ml-2">Banner</p>,
+        size: 80,
+        header: () => null,
         cell: ({ getValue }) => {
           const bannerUrl = getValue<string>();
           return bannerUrl ? (
             <img
               src={bannerUrl}
               alt="Class banner"
-              className="ml-2 h-10 w-10 rounded-md object-cover"
+              className="h-10 w-10 rounded-lg object-cover border shadow-sm"
               loading="lazy"
             />
           ) : (
-            <span className="text-muted-foreground ml-2">No image</span>
+            <div className="h-10 w-10 rounded-lg bg-primary/5 border border-primary/10 flex items-center justify-center">
+              <LayoutGrid className="h-5 w-5 text-primary/40" />
+            </div>
           );
         },
       },
       {
         id: "name",
         accessorKey: "name",
-        size: 220,
+        size: 250,
         header: () => <p className="column-title">Class Name</p>,
         cell: ({ getValue }) => (
-          <span className="text-foreground">{getValue<string>()}</span>
+          <span className="text-foreground font-bold">{getValue<string>()}</span>
         ),
-      },
-      {
-        id: "status",
-        accessorKey: "status",
-        size: 140,
-        header: () => <p className="column-title">Status</p>,
-        cell: ({ getValue }) => {
-          const status = getValue<"active" | "inactive">();
-          const variant = status === "active" ? "default" : "secondary";
-          return <Badge variant={variant}>{status}</Badge>;
-        },
       },
       {
         id: "subject",
         accessorKey: "subject.name",
-        size: 200,
+        size: 150,
         header: () => <p className="column-title">Subject</p>,
         cell: ({ getValue }) => {
           const subjectName = getValue<string>();
           return subjectName ? (
-            <Badge variant="secondary">{subjectName}</Badge>
+            <Badge variant="secondary" className="font-medium">{subjectName}</Badge>
           ) : (
             <span className="text-muted-foreground">Not set</span>
           );
@@ -98,36 +129,40 @@ const ClassesList = () => {
       },
       {
         id: "teacher",
-        accessorKey: "teacher.name",
-        size: 200,
-        header: () => <p className="column-title">Teacher</p>,
-        cell: ({ getValue }) => {
-          const teacherName = getValue<string>();
-          return teacherName ? (
-            <span className="text-foreground">{teacherName}</span>
-          ) : (
-            <span className="text-muted-foreground">Not assigned</span>
+        header: () => <p className="column-title">Primary Teacher</p>,
+        cell: ({ row }) => {
+          const primaryTeacher = row.original.teachers?.find(t => t.isPrimary)?.teacher;
+          return (
+            <span className="text-foreground font-medium">
+              {primaryTeacher?.name || "Not assigned"}
+            </span>
           );
         },
       },
       {
-        id: "capacity",
-        accessorKey: "capacity",
-        size: 120,
-        header: () => <p className="column-title">Capacity</p>,
-        cell: ({ getValue }) => (
-          <span className="text-foreground">{getValue<number>()}</span>
-        ),
+        id: "status",
+        accessorKey: "status",
+        size: 100,
+        header: () => <p className="column-title">Status</p>,
+        cell: ({ getValue }) => {
+          const status = getValue<"active" | "inactive">();
+          return (
+            <Badge variant={status === "active" ? "default" : "secondary"} className="capitalize">
+              {status}
+            </Badge>
+          );
+        },
       },
       {
         id: "details",
-        size: 140,
-        header: () => <p className="column-title">Details</p>,
+        size: 100,
+        header: () => null,
         cell: ({ row }) => (
-          <Button asChild variant="outline" size="sm">
-            {/* Explicitly use the object form to ensure query params are cleared */}
-            <Link to={{ pathname: `/classes/show/${row.original.id}` }}>View</Link>
-          </Button>
+          <div className="flex justify-end pr-4">
+            <Button asChild variant="outline" size="sm" className="rounded-full px-4">
+              <Link to={`/classes/show/${row.original.id}`}>Enter Class</Link>
+            </Button>
+          </div>
         ),
       },
     ],
@@ -139,37 +174,16 @@ const ClassesList = () => {
     pagination: { pageSize: 100 },
   });
 
-  const { result: teachersResult } = useList<User, HttpError>({
-    resource: "users",
-    filters: [{ field: "role", operator: "eq", value: "teacher" }],
-    pagination: { pageSize: 100 },
-  });
-
   const subjects = subjectsResult?.data ?? [];
-  const teachers = teachersResult?.data ?? [];
 
   const filters = useMemo(() => {
     const f = [];
     if (selectedSubject !== "all")
-      f.push({
-        field: "subject",
-        operator: "eq" as const,
-        value: selectedSubject,
-      });
-    if (selectedTeacher !== "all")
-      f.push({
-        field: "teacher",
-        operator: "eq" as const,
-        value: selectedTeacher,
-      });
+      f.push({ field: "subject", operator: "eq" as const, value: selectedSubject });
     if (searchQuery)
-      f.push({
-        field: "name",
-        operator: "contains" as const,
-        value: searchQuery,
-      });
+      f.push({ field: "name", operator: "contains" as const, value: searchQuery });
     return f;
-  }, [selectedSubject, selectedTeacher, searchQuery]);
+  }, [selectedSubject, searchQuery]);
 
   const classesTable = useTable<ClassListItem>({
     columns: classColumns,
@@ -178,33 +192,81 @@ const ClassesList = () => {
       pagination: { pageSize: 10, mode: "server" },
       filters: { permanent: filters },
       sorters: { initial: [{ field: "id", order: "desc" }] },
-      queryOptions: {
-        enabled: true,
-      },
     },
   });
 
   return (
     <ListView>
       <Breadcrumb />
-      <h1 className="page-title">Classes</h1>
-      <div className="intro-row">
-        <p>Quick access to essential metrics and management tools.</p>
-        <div className="actions-row">
-          <div className="search-field">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+        <div>
+          <h1 className="text-3xl font-black tracking-tight">
+            {isStudent ? "Discover Classes" : "My Classrooms"}
+          </h1>
+          <p className="text-muted-foreground">
+            {isStudent 
+              ? "Find and join new classes to expand your knowledge." 
+              : "Manage your students, curriculum, and class activities."}
+          </p>
+        </div>
+        
+        <div className="flex gap-2">
+          {isStudent && (
+            <Dialog open={isJoinModalOpen} onOpenChange={setIsJoinModalOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="gap-2 rounded-xl h-11 px-6 border-primary/20 hover:bg-primary/5 text-primary">
+                  <Key className="h-4 w-4" />
+                  Join by Code
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Join a Class</DialogTitle>
+                  <DialogDescription>
+                    Enter the 8-character invite code provided by your teacher.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="py-4">
+                  <Input 
+                    placeholder="e.g. ABC123XY" 
+                    value={inviteCode}
+                    onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
+                    className="h-12 text-center text-2xl font-bold font-mono tracking-widest"
+                    maxLength={8}
+                  />
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setIsJoinModalOpen(false)}>Cancel</Button>
+                  <Button onClick={handleJoinByCode} disabled={isJoining || inviteCode.length !== 8}>
+                    {isJoining ? "Joining..." : "Join Class"}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          )}
+          {isTeacher && <CreateButton resource="classes" className="h-11 rounded-xl px-6" />}
+        </div>
+      </div>
+
+      <div className="intro-row bg-muted/30 p-4 rounded-2xl mb-6">
+        <div className="actions-row w-full flex flex-col sm:flex-row gap-4">
+          <div className="search-field flex-1">
             <Search className="search-icon" />
             <Input
               type="text"
-              placeholder="Search by name..."
-              className="pl-10 w-full"
+              placeholder="Search classes by name..."
+              className="pl-10 w-full h-11 rounded-xl bg-background"
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
             />
           </div>
-          <div className="flex gap-2 w-full sm:w-auto">
+          <div className="flex gap-2">
             <Select value={selectedSubject} onValueChange={setSelectedSubject}>
-              <SelectTrigger>
-                <SelectValue placeholder="Filter by subject" />
+              <SelectTrigger className="w-[200px] h-11 rounded-xl bg-background">
+                <div className="flex items-center gap-2">
+                  <Globe className="h-4 w-4 text-muted-foreground" />
+                  <SelectValue placeholder="All Subjects" />
+                </div>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Subjects</SelectItem>
@@ -215,23 +277,10 @@ const ClassesList = () => {
                 ))}
               </SelectContent>
             </Select>
-            <Select value={selectedTeacher} onValueChange={setSelectedTeacher}>
-              <SelectTrigger>
-                <SelectValue placeholder="Filter by teacher" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Teachers</SelectItem>
-                {teachers.map((teacher: User) => (
-                  <SelectItem key={teacher.id} value={teacher.name}>
-                    {teacher.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <CreateButton resource="classes" />
           </div>
         </div>
       </div>
+
       <DataTable table={classesTable} />
     </ListView>
   );

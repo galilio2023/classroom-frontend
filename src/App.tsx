@@ -13,10 +13,27 @@ import { useNotificationProvider } from "./components/refine-ui/notification/use
 import { dataProvider } from "./providers/data";
 import { authProvider } from "./providers/auth";
 import { accessControlProvider } from "./providers/access-control";
-import { Home, BookOpen, Building2, Users, Calendar, Sparkles, GraduationCap, MessageSquare, UserPlus, ClipboardCheck, Loader2, FileQuestion } from "lucide-react";
+import { 
+  Home, 
+  BookOpen, 
+  Building2, 
+  Users, 
+  Calendar, 
+  Sparkles, 
+  GraduationCap, 
+  MessageSquare, 
+  UserPlus, 
+  ClipboardCheck, 
+  Loader2, 
+  FileQuestion,
+  BrainCircuit,
+  ShieldCheck,
+  LayoutGrid
+} from "lucide-react";
 import { Layout } from "@/components/refine-ui/layout/layout.tsx";
 import { AuthorizedRoute } from "./components/authorized-route";
-import React, { Suspense } from "react";
+import React, { Suspense, useMemo } from "react";
+import { User, UserRole } from "@/types";
 
 // Lazy Load Pages
 const Dashboard = React.lazy(() => import("@/pages/dashboard.tsx"));
@@ -34,6 +51,7 @@ const ClassesList = React.lazy(() => import("@/pages/classes/list.tsx"));
 const ClassesCreate = React.lazy(() => import("@/pages/classes/create.tsx"));
 const ClassesEdit = React.lazy(() => import("@/pages/classes/edit.tsx"));
 const ClassShow = React.lazy(() => import("@/pages/classes/show.tsx"));
+const LessonReader = React.lazy(() => import("@/pages/classes/lesson-reader.tsx"));
 const EnrollmentsList = React.lazy(() => import("@/pages/enrollments/list.tsx"));
 const ProfileRequestsList = React.lazy(() => import("@/pages/profile-requests/list.tsx"));
 const LoginPage = React.lazy(() => import("@/pages/auth/login.tsx"));
@@ -41,6 +59,7 @@ const RegisterPage = React.lazy(() => import("@/pages/auth/register.tsx"));
 const AssignmentCreate = React.lazy(() => import("./pages/assignments/create").then(module => ({ default: module.AssignmentCreate })));
 const AssignmentShow = React.lazy(() => import("./pages/assignments/show"));
 const AIAssistantPage = React.lazy(() => import("./pages/ai-assistant"));
+const AIStudyLab = React.lazy(() => import("./pages/ai-study-lab"));
 const CalendarPage = React.lazy(() => import("./pages/calendar"));
 
 // Quiz Pages
@@ -55,6 +74,21 @@ const Loading = () => (
 );
 
 function App() {
+  const userRole = useMemo(() => {
+    const userJson = localStorage.getItem("user");
+    if (!userJson) return null;
+    try {
+      const user = JSON.parse(userJson) as User;
+      return user.role;
+    } catch (e) {
+      return null;
+    }
+  }, []);
+
+  const isStudent = userRole === UserRole.STUDENT;
+  const isTeacher = userRole === UserRole.TEACHER;
+  const isAdmin = userRole === UserRole.ADMIN;
+
   return (
     <BrowserRouter>
       <RefineKbarProvider>
@@ -71,54 +105,14 @@ function App() {
               projectId: "nDt0bx-k8buuJ-It2Nvq",
               title: {
                 icon: <GraduationCap className="w-8 h-8 text-primary" />,
-                text: "Learning System",
+                text: "Classroom AI",
               },
             }}
             resources={[
               {
                 name: "dashboard",
                 list: "/",
-                meta: { label: "Home", icon: <Home /> },
-              },
-              {
-                name: "calendar",
-                list: "/calendar",
-                meta: { label: "Calendar", icon: <Calendar /> },
-              },
-              {
-                name: "ai-assistant",
-                list: "/ai-assistant",
-                meta: { 
-                  label: "AI Assistant", 
-                  icon: <Sparkles />,
-                },
-              },
-              {
-                name: "subjects",
-                list: "/subjects",
-                create: "/subjects/create",
-                edit: "/subjects/edit/:id",
-                meta: { label: "Subjects", icon: <BookOpen /> },
-              },
-              {
-                name: "departments",
-                list: "/departments",
-                create: "/departments/create",
-                edit: "/departments/edit/:id",
-                meta: { label: "Departments", icon: <Building2 /> },
-              },
-              {
-                name: "users",
-                list: "/users",
-                create: "/users/create",
-                edit: "/users/edit/:id",
-                show: "/users/show/:id",
-                meta: { label: "Users", icon: <Users /> },
-              },
-              {
-                name: "profile-requests",
-                list: "/profile-requests",
-                meta: { label: "Profile Requests", icon: <ClipboardCheck /> },
+                meta: { label: "Dashboard", icon: <Home /> },
               },
               {
                 name: "classes",
@@ -126,30 +120,98 @@ function App() {
                 create: "/classes/create",
                 edit: "/classes/edit/:id",
                 show: "/classes/show/:id",
-                meta: { label: "Classes", icon: <Calendar /> },
+                meta: { label: "My Classes", icon: <LayoutGrid /> },
+              },
+              {
+                name: "ai-study-lab",
+                list: "/ai-study-lab",
+                meta: { 
+                  label: "AI Study Lab", 
+                  icon: <BrainCircuit />,
+                  hide: !isStudent // Only Students see AI Study Lab
+                },
+              },
+              {
+                name: "ai-assistant",
+                list: "/ai-assistant",
+                meta: { 
+                  label: "AI Assistant", 
+                  icon: <Sparkles />,
+                  hide: isStudent, // Teachers/Admins see AI Assistant
+                },
+              },
+              {
+                name: "calendar",
+                list: "/calendar",
+                meta: { label: "Calendar", icon: <Calendar /> },
+              },
+              {
+                name: "subjects",
+                list: "/subjects",
+                create: "/subjects/create",
+                edit: "/subjects/edit/:id",
+                meta: { 
+                    label: "Subjects", 
+                    icon: <BookOpen />,
+                    hide: isStudent // Students don't manage subjects
+                },
+              },
+              {
+                name: "departments",
+                list: "/departments",
+                create: "/departments/create",
+                edit: "/departments/edit/:id",
+                meta: { 
+                    label: "Departments", 
+                    icon: <Building2 />,
+                    hide: !isAdmin // Only Admins see Departments
+                },
+              },
+              {
+                name: "users",
+                list: "/users",
+                create: "/users/create",
+                edit: "/users/edit/:id",
+                show: "/users/show/:id",
+                meta: { 
+                    label: "Users & Verification", 
+                    icon: <ShieldCheck />,
+                    hide: !isAdmin // Only Admins see Users list
+                },
+              },
+              {
+                name: "profile-requests",
+                list: "/profile-requests",
+                meta: { 
+                    label: "Profile Requests", 
+                    icon: <ClipboardCheck />,
+                    hide: !isAdmin // Only Admins see Profile Requests
+                },
               },
               {
                 name: "enrollments",
                 list: "/enrollments",
-                meta: { label: "Enrollments", icon: <UserPlus /> },
-              },
-              {
-                name: "assignments",
-                create: "/assignments/create",
-                show: "/assignments/show/:id",
+                meta: { 
+                    label: "Enrollments", 
+                    icon: <UserPlus />,
+                    hide: !isAdmin // Only Admins see Global Enrollments
+                },
               },
               {
                 name: "quizzes",
-                create: "/quizzes/create",
-                show: "/quizzes/show/:id",
-                meta: { label: "Quizzes", icon: <FileQuestion /> },
+                meta: { label: "Quizzes", icon: <FileQuestion />, hide: true },
+              },
+              {
+                name: "assignments",
+                meta: { hide: true },
               },
               {
                 name: "submissions",
+                meta: { hide: true },
               },
               {
                 name: "discussions",
-                meta: { label: "Discussions", icon: <MessageSquare />, hide: true },
+                meta: { hide: true },
               },
             ]}
           >
@@ -196,6 +258,14 @@ function App() {
                     element={
                       <AuthorizedRoute resource="ai-assistant" action="list">
                         <AIAssistantPage />
+                      </AuthorizedRoute>
+                    } 
+                  />
+                  <Route 
+                    path="ai-study-lab" 
+                    element={
+                      <AuthorizedRoute resource="dashboard" action="list">
+                        <AIStudyLab />
                       </AuthorizedRoute>
                     } 
                   />
@@ -325,6 +395,14 @@ function App() {
                       element={
                         <AuthorizedRoute resource="classes" action="show">
                           <ClassShow />
+                        </AuthorizedRoute>
+                      }
+                    />
+                    <Route
+                      path=":classId/lessons/:resourceId"
+                      element={
+                        <AuthorizedRoute resource="classes" action="show">
+                          <LessonReader />
                         </AuthorizedRoute>
                       }
                     />

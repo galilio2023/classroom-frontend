@@ -1,0 +1,83 @@
+import React from "react";
+import { Button } from "@/components/ui/button";
+import { ArrowRight, Loader2 } from "lucide-react";
+
+interface Question {
+  question: string;
+  options: string[];
+  correctAnswer: string;
+  explanation: string;
+}
+
+interface PracticeQuizStepProps {
+  currentQuestion: Question;
+  currentQuestionIndex: number;
+  totalQuestions: number;
+  progress: number;
+  selectedOption?: string;
+  onOptionSelect: (option: string) => void;
+  onNext: () => void;
+  isSubmitting: boolean;
+}
+
+export const PracticeQuizStep: React.FC<PracticeQuizStepProps> = ({
+  currentQuestion,
+  currentQuestionIndex,
+  totalQuestions,
+  progress,
+  selectedOption,
+  onOptionSelect,
+  onNext,
+  isSubmitting,
+}) => {
+  return (
+    <div className="space-y-6">
+      {/* Progress Bar */}
+      <div className="w-full bg-secondary h-2 rounded-full overflow-hidden">
+        <div
+          className="bg-primary h-full transition-all duration-500 ease-out"
+          style={{ width: `${progress}%` }}
+        />
+      </div>
+
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold leading-relaxed">
+          {currentQuestion.question}
+        </h3>
+        <div className="grid gap-3">
+          {currentQuestion.options.map((option, idx) => (
+            <button
+              key={idx}
+              onClick={() => onOptionSelect(option)}
+              className={`p-4 rounded-xl border-2 text-left transition-all hover:bg-accent ${
+                selectedOption === option
+                  ? "border-primary bg-primary/5 ring-2 ring-primary/20"
+                  : "border-border bg-card"
+              }`}
+            >
+              <span className="font-medium">{option}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="flex justify-end pt-4">
+        <Button
+          onClick={onNext}
+          disabled={!selectedOption || isSubmitting}
+          className="w-full sm:w-auto"
+        >
+          {isSubmitting ? (
+            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+          ) : currentQuestionIndex === totalQuestions - 1 ? (
+            "Submit Quiz"
+          ) : (
+            <>
+              Next Question <ArrowRight className="h-4 w-4 ml-2" />
+            </>
+          )}
+        </Button>
+      </div>
+    </div>
+  );
+};
