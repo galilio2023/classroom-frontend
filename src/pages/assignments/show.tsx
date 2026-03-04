@@ -1,6 +1,6 @@
 import { useShow, useGetIdentity, useList, HttpError } from "@refinedev/core";
 import { useParams } from "react-router-dom";
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
 import { ShowView, ShowViewHeader } from "@/components/refine-ui/views/show-view";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Loader2, BrainCircuit, Users, CheckCircle2 } from "lucide-react";
@@ -10,6 +10,7 @@ import { SubmissionList } from "./submission-list";
 import { Badge } from "@/components/ui/badge";
 import { InteractiveQuiz } from "@/components/interactive-quiz";
 import { cn } from "@/lib/utils";
+import { io } from "socket.io-client";
 
 const AssignmentShow = () => {
   const { id } = useParams();
@@ -29,6 +30,29 @@ const AssignmentShow = () => {
   });
   
   const submissions = submissionsQuery.data?.data ?? [];
+  const refetchSubmissions = submissionsQuery.refetch;
+
+  // --- LIVE UPDATES FOR TEACHERS ---
+  useEffect(() => {
+    if (!identity?.id || identity.role === "student") return;
+
+    const socketUrl = import.meta.env.VITE_SOCKET_URL || import.meta.env.VITE_API_URL.replace("/api", "");
+    const socket = io(socketUrl, {
+      query: { userId: identity.id },
+      withCredentials: true,
+    });
+
+    socket.on("agent_alert", (data: any) => {
+      // Only refetch if the alert is for this specific assignment/class
+      if (data.classId === assignment?.classId) {
+        void refetchSubmissions();
+      }
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [identity?.id, identity?.role, assignment?.classId, refetchSubmissions]);
 
   const mySubmission = useMemo(() => {
     if (!identity?.id || !submissions.length) return null;

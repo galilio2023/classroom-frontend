@@ -37,6 +37,7 @@ import axios from "axios";
 import { RoleSelector } from "@/components/auth/role-selector";
 import { VerificationUpload } from "@/components/auth/verification-upload";
 
+// Enhanced Schema with Conditional Validation
 const registerSchema = z.object({
   name: z.string().min(1, "Name is required"),
   email: z.string().email("Invalid email address"),
@@ -49,6 +50,18 @@ const registerSchema = z.object({
   parentPhone: z.string().optional(),
   verificationDocumentUrl: z.string().optional(),
   verificationDocumentCldPubId: z.string().optional(),
+}).superRefine((data, ctx) => {
+  if (data.role === "teacher" && !data.verificationDocumentUrl) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Verification document is required for teachers",
+      path: ["verificationDocumentUrl"],
+    });
+  }
+  if (data.role === "student") {
+      // Optional: Enforce parent info for students if needed, 
+      // but keeping it optional for now as per original logic.
+  }
 });
 
 const RegisterPage = () => {
@@ -86,19 +99,21 @@ const RegisterPage = () => {
 
     setIsGeneratingBio(true);
     try {
-      const response = await axios.post("/api/ai/generate-bio", {
-        name,
-        role,
-        keywords: "passionate, experienced, dedicated"
+      // Corrected API Endpoint
+      const response = await axios.post("/api/ai/generate-content", {
+        prompt: `Generate a professional bio for a ${role} named ${name}. Keywords: passionate, experienced, dedicated. Keep it under 50 words.`,
+        context: "User Registration Bio"
       });
-      form.setValue("bio", response.data.bio);
+      
+      // The backend returns { content: "..." }
+      form.setValue("bio", response.data.content);
       toast.success("AI Bio generated!");
     } catch (error) {
       const fallbackBio = role === "teacher" 
         ? `Hello, I'm ${name}. I am a dedicated educator committed to fostering a positive and engaging learning environment for all my students.`
         : `Hi, I'm ${name}. I'm an enthusiastic student eager to learn and grow in my academic journey.`;
       form.setValue("bio", fallbackBio);
-      toast.info("Generated a standard bio for you.");
+      toast.info("Generated a standard bio for you (AI service unavailable).");
     } finally {
       setIsGeneratingBio(false);
     }
@@ -112,11 +127,6 @@ const RegisterPage = () => {
 
   const handleFinalSubmit = () => {
     form.handleSubmit((values) => {
-      if (values.role === "teacher" && !values.verificationDocumentUrl) {
-        toast.error("Please upload a verification document to prove you are a teacher.");
-        return;
-      }
-
       register(values, {
         onSuccess: () => {
           toast.success("Registration successful! Please wait for admin verification.");
@@ -298,12 +308,20 @@ const RegisterPage = () => {
                       onUpload={(url, publicId) => {
                         form.setValue("verificationDocumentUrl", url);
                         form.setValue("verificationDocumentCldPubId", publicId);
+                        // Trigger validation to clear error if any
+                        form.trigger("verificationDocumentUrl");
                       }}
                       onClear={() => {
                         form.setValue("verificationDocumentUrl", "");
                         form.setValue("verificationDocumentCldPubId", "");
                       }}
                     />
+                    {/* Explicit error message for verification document */}
+                    {form.formState.errors.verificationDocumentUrl && (
+                        <p className="text-sm font-medium text-destructive">
+                            {form.formState.errors.verificationDocumentUrl.message}
+                        </p>
+                    )}
                   </div>
                 )}
               </div>

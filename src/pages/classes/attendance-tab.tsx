@@ -85,7 +85,8 @@ export const AttendanceTab = ({ classId, enrollments }: AttendanceTabProps) => {
   }) as any;
 
   // Initialize or update attendanceData when existingAttendance changes
-  useMemo(() => {
+  // Fixed: Use useEffect instead of useMemo to avoid React warnings and ensure state sync
+  useEffect(() => {
     const initialData: Record<string, { status: AttendanceStatus; remarks: string }> = {};
     
     // Default all to present
@@ -96,7 +97,9 @@ export const AttendanceTab = ({ classId, enrollments }: AttendanceTabProps) => {
     // Overwrite with existing data if found
     if (existingAttendance?.data) {
       existingAttendance.data.forEach((record: Attendance) => {
-        if (format(new Date(record.date), "yyyy-MM-dd") === selectedDate) {
+        // Ensure we only map records for the currently selected date
+        const recordDate = format(new Date(record.date), "yyyy-MM-dd");
+        if (recordDate === selectedDate) {
             initialData[record.studentId] = { 
                 status: record.status, 
                 remarks: record.remarks || "" 

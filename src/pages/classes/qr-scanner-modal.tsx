@@ -54,7 +54,9 @@ export const QRScannerModal = ({ isOpen, onClose, classId }: QRScannerModalProps
         // Success callback
         try {
           const data = JSON.parse(decodedText);
-          if (data.classId === classId && data.token) {
+          
+          // Robust comparison for classId (string vs number)
+          if (String(data.classId) === String(classId) && data.token) {
             handleScanSuccess(data.token);
             scanner.clear();
           } else {
@@ -104,7 +106,7 @@ export const QRScannerModal = ({ isOpen, onClose, classId }: QRScannerModalProps
         onError: (error: any) => {
           setScanResult({ 
             success: false, 
-            message: error?.message || "Failed to mark attendance. The code might have expired." 
+            message: error?.response?.data?.message || error?.message || "Failed to mark attendance. The code might have expired."
           });
         },
       }
