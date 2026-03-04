@@ -67,8 +67,8 @@ export const accessControlProvider: AccessControlProvider = {
       }
       
       // Explicitly deny other administrative resources for teachers
-      if (["departments", "enrollments", "profile-requests"].includes(resourceName)) {
-          return { can: false, reason: "Teachers cannot access administrative resources." };
+      if (["departments", "enrollments", "profile-requests", "ai-study-lab"].includes(resourceName)) {
+          return { can: false, reason: "Access denied." };
       }
 
       return { can: false, reason: "Access denied." };
@@ -86,12 +86,13 @@ export const accessControlProvider: AccessControlProvider = {
         "attendance", 
         "submissions",
         "quizzes", 
-        "resources"
+        "resources",
+        "ai-study-lab"
       ];
       const allowedActions = ["list", "show"];
 
       // Deny administrative resources for students
-      if (["users", "departments", "enrollments", "profile-requests"].includes(resourceName)) {
+      if (["users", "departments", "enrollments", "profile-requests", "ai-assistant"].includes(resourceName)) {
         // Special case: Students can 'show' users (to see teacher profiles)
         if (resourceName === "users" && action === "show") {
             return { can: true };
@@ -101,7 +102,7 @@ export const accessControlProvider: AccessControlProvider = {
             return { can: true };
         }
         
-        return { can: false, reason: "Students cannot access this resource." };
+        return { can: false, reason: "Access denied." };
       }
 
       if (allowedResources.includes(resourceName) && allowedActions.includes(action)) {

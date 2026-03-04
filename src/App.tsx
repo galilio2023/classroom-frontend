@@ -32,7 +32,7 @@ import {
 } from "lucide-react";
 import { Layout } from "@/components/refine-ui/layout/layout.tsx";
 import { AuthorizedRoute } from "./components/authorized-route";
-import React, { Suspense, useMemo } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import { User, UserRole } from "@/types";
 
 // Lazy Load Pages
@@ -74,19 +74,20 @@ const Loading = () => (
 );
 
 function App() {
-  const userRole = useMemo(() => {
-    const userJson = localStorage.getItem("user");
-    if (!userJson) return null;
-    try {
-      const user = JSON.parse(userJson) as User;
-      return user.role;
-    } catch (e) {
-      return null;
-    }
-  }, []);
+  const [user, setUser] = useState<User | null>(null);
 
+  useEffect(() => {
+    const fetchUser = async () => {
+      const identity = await authProvider.getIdentity?.();
+      if (identity) {
+        setUser(identity as User);
+      }
+    };
+    fetchUser();
+  }, []);
+  
+  const userRole = user?.role;
   const isStudent = userRole === UserRole.STUDENT;
-  const isTeacher = userRole === UserRole.TEACHER;
   const isAdmin = userRole === UserRole.ADMIN;
 
   return (
@@ -264,7 +265,7 @@ function App() {
                   <Route 
                     path="ai-study-lab" 
                     element={
-                      <AuthorizedRoute resource="dashboard" action="list">
+                      <AuthorizedRoute resource="ai-study-lab" action="list">
                         <AIStudyLab />
                       </AuthorizedRoute>
                     } 
