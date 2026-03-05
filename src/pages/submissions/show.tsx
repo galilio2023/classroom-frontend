@@ -1,7 +1,7 @@
 import { useShow, useUpdate, useGetIdentity, useCustomMutation } from "@refinedev/core";
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { ShowView, ShowViewHeader } from "@/components/refine-ui/views/show-view";
+import { ShowView } from "@/components/refine-ui/views/show-view";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -11,17 +11,15 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
   Loader2, 
-  CheckCircle2, 
-  Sparkles, 
   FileText, 
-  User, 
   Calendar, 
   AlertCircle,
   ArrowLeft,
   Save,
-  Wand2
+  Wand2,
+  Sparkles
 } from "lucide-react";
-import { Submission, User as UserType } from "@/types";
+import { Submission, User as UserType, Assignment } from "@/types";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 
@@ -34,7 +32,7 @@ const SubmissionShow = () => {
   const [feedback, setFeedback] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
-  const { query: submissionQuery, query: { refetch } } = useShow<Submission>({
+  const { query: submissionQuery } = useShow<Submission & { assignment?: Assignment }>({
     resource: "submissions",
     id,
   });
@@ -205,7 +203,7 @@ const SubmissionShow = () => {
                             />
                         </div>
 
-                        {submission.suggestedGrade !== null && !submission.grade && (
+                        {submission.suggestedGrade !== undefined && submission.suggestedGrade !== null && !submission.grade && (
                             <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-xl border border-purple-100 dark:border-purple-800/30 space-y-2">
                                 <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-purple-600">
                                     <Wand2 className="h-3 w-3" />

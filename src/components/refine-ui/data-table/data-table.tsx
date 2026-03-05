@@ -185,8 +185,8 @@ function DataTableNoData({ isOverflowing, columnsLength }: { isOverflowing: { ho
 
 export function getCommonStyles<TData>({ column, isOverflowing }: { column: Column<TData>; isOverflowing: { horizontal: boolean; vertical: boolean; }; }): React.CSSProperties {
   const isPinned = column.getIsPinned();
-  const isLastLeftPinnedColumn = isPinned === "left" && column.getLastColumn("left");
-  const isFirstRightPinnedColumn = isPinned === "right" && column.getFirstColumn("right");
+  const isLastLeftPinnedColumn = isPinned === "left" && column.getIsLastColumn("left");
+  const isFirstRightPinnedColumn = isPinned === "right" && column.getIsFirstColumn("right");
   return {
     boxShadow: isOverflowing.horizontal && isLastLeftPinnedColumn ? "-4px 0 4px -4px var(--border) inset" : isOverflowing.horizontal && isFirstRightPinnedColumn ? "4px 0 4px -4px var(--border) inset" : undefined,
     left: isOverflowing.horizontal && isPinned === "left" ? `${column.getStart("left")}px` : undefined,

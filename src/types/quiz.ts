@@ -21,6 +21,7 @@ export interface Quiz {
   dueDate?: string;
   timeLimit?: number;
   classId: number;
+  totalMarks?: number;
   createdAt: string;
   updatedAt: string;
   questions?: QuizQuestion[];

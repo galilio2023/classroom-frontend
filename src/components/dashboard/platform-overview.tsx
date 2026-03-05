@@ -31,7 +31,7 @@ export const PlatformOverview = ({ stats, isLoading, onRefresh }: PlatformOvervi
                     {stats.pendingVerifications !== undefined && stats.pendingVerifications > 0 && (
                         <div 
                             className="cursor-pointer group"
-                            onClick={() => list("users", { filters: [{ field: "role", operator: "eq", value: "teacher" }, { field: "isVerified", operator: "eq", value: false }] })}
+                            onClick={() => list("users")}
                         >
                             <StatCard 
                                 label="Pending Verifications" 

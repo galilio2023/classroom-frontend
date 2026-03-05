@@ -7,7 +7,6 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-  DialogFooter,
 } from "@/components/ui/dialog";
 import {
   Form,
@@ -24,7 +23,7 @@ import { Label } from "@/components/ui/label";
 import { useCustomMutation, useNotification, useGetIdentity } from "@refinedev/core";
 import { Submission, Assignment, AIFeedbackResponse, User, UserRole } from "@/types";
 import { useEffect, useState } from "react";
-import { Sparkles, Loader2, FileText, ExternalLink, Wand2 } from "lucide-react";
+import { Sparkles, Loader2, FileText } from "lucide-react";
 import { FieldValues } from "react-hook-form";
 import { cn } from "@/lib/utils";
 

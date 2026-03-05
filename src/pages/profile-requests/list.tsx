@@ -23,9 +23,12 @@ import { Textarea } from "@/components/ui/textarea";
 const ProfileRequestsList = () => {
   const [rejectTarget, setRejectTarget] = useState<number | null>(null);
   const [rejectReason, setRejectReason] = useState("");
-  const { mutate: approve, isLoading: isApproving } = useCustomMutation();
-  const { mutate: reject, isLoading: isRejecting } = useCustomMutation();
+  const { mutate: approve, mutation: approveMutation } = useCustomMutation();
+  const { mutate: reject, mutation: rejectMutation } = useCustomMutation();
   const invalidate = useInvalidate();
+
+  const isApproving = approveMutation.isPending;
+  const isRejecting = rejectMutation.isPending;
 
   const handleApprove = (id: number) => {
     approve({

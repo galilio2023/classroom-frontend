@@ -8,11 +8,12 @@ interface StatCardProps {
   value: number | string;
   icon: LucideIcon;
   color: string;
+  className?: string;
 }
 
-export const StatCard: React.FC<StatCardProps> = ({ label, value, icon: Icon, color }) => {
+export const StatCard: React.FC<StatCardProps> = ({ label, value, icon: Icon, color, className }) => {
   return (
-    <Card className="border-none shadow-md hover:shadow-lg transition-shadow overflow-hidden group bg-white/50 dark:bg-zinc-900/50 backdrop-blur-xl">
+    <Card className={cn("border-none shadow-md hover:shadow-lg transition-shadow overflow-hidden group bg-white/50 dark:bg-zinc-900/50 backdrop-blur-xl", className)}>
       <CardContent className="flex items-center p-6 gap-4 relative">
         <div className="absolute top-0 right-0 p-2 opacity-5 group-hover:opacity-10 transition-opacity">
           <Icon className="h-12 w-12" />

@@ -1,4 +1,4 @@
-import { useCustom } from "@refinedev/core";
+import { useCustom, HttpError } from "@refinedev/core";
 import { Bell, CheckCheck, Info, GraduationCap, ClipboardCheck, Trophy, BrainCircuit, ArrowRight } from "lucide-react";
 import { Notification } from "@/types";
 import { formatDistanceToNow } from "date-fns";
@@ -12,7 +12,7 @@ interface RecentActivityProps {
 }
 
 export const RecentActivity = ({ limit = 5 }: RecentActivityProps) => {
-  const { data, isLoading } = useCustom<Notification[]>({
+  const { query } = useCustom<Notification[], HttpError>({
     url: "/notifications",
     method: "get",
     config: {
@@ -24,7 +24,8 @@ export const RecentActivity = ({ limit = 5 }: RecentActivityProps) => {
     }
   });
 
-  const notifications = data?.data || [];
+  const notifications = query.data?.data || [];
+  const isLoading = query.isLoading;
 
   const getIcon = (type: string) => {
     switch (type) {
@@ -69,7 +70,7 @@ export const RecentActivity = ({ limit = 5 }: RecentActivityProps) => {
             </div>
           ) : (
             <div className="flex flex-col">
-              {notifications.map((notification, index) => (
+              {notifications.map((notification: Notification, index: number) => (
                 <div
                   key={notification.id}
                   className={cn(

@@ -1,12 +1,12 @@
 import { ListView } from "@/components/refine-ui/views/list-view.tsx";
 import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb.tsx";
-import { Search, TrendingUp, LayoutGrid, User, BookOpen, CheckCircle2, AlertCircle, Award } from "lucide-react";
+import { Search, TrendingUp, LayoutGrid, Award } from "lucide-react";
 import { Input } from "@/components/ui/input.tsx";
 import { useMemo, useState } from "react";
 import { DataTable } from "@/components/refine-ui/data-table/data-table.tsx";
 import { useTable } from "@refinedev/react-table";
 import { useNavigation, useGetIdentity } from "@refinedev/core";
-import { Progress, User as UserType, UserRole } from "@/types";
+import { User as UserType, UserRole } from "@/types";
 import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge.tsx";
 import { Button } from "@/components/ui/button.tsx";
@@ -62,7 +62,7 @@ const ProgressListPage = () => {
         {
           id: "completion",
           header: () => <p className="column-title">Completion</p>,
-          cell: ({ row }) => {
+          cell: () => {
             // Mock completion percentage
             const completion = Math.floor(Math.random() * 100);
             return (
@@ -78,7 +78,7 @@ const ProgressListPage = () => {
         {
           id: "grade",
           header: () => <p className="column-title">Overall Grade</p>,
-          cell: ({ row }) => {
+          cell: () => {
             // Mock overall grade
             const grade = 65 + Math.floor(Math.random() * 30);
             const isAtRisk = grade < 70;

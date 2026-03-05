@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { QrCode, StopCircle, PlayCircle, Clock, Users, CheckCircle2 } from "lucide-react";
+import { QrCode, StopCircle, PlayCircle, Clock, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
@@ -57,7 +57,7 @@ export const QRAttendance = ({ classId, className }: QRAttendanceProps) => {
     setIsActive(true);
     setTimeLeft(DURATION);
     setScannedCount(0);
-    toast.success("Attendance session started!");
+    toast.success(`Attendance session started for ${className}!`);
   };
 
   const stopSession = () => {

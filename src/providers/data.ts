@@ -1,5 +1,4 @@
 import { DataProvider, HttpError } from "@refinedev/core";
-import { CreateResponse, GetOneResponse, ListResponse } from "@/types";
 
 const BACKEND_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -38,8 +37,8 @@ const handleError = async (response: Response): Promise<HttpError> => {
  */
 const fetcher = async (url: string, options?: RequestInit) => {
   const method = options?.method?.toUpperCase() || "GET";
-  const headers: HeadersInit = {
-    ...options?.headers,
+  const headers: Record<string, string> = {
+    ...(options?.headers as Record<string, string>),
   };
 
   // Only add Content-Type for methods that typically send a body

@@ -26,9 +26,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Label } from "@/components/ui/label";
-import { Sparkles, Paperclip, Loader2, LayoutGrid, HelpCircle, Wand2, X, BookOpen } from "lucide-react";
+import { Sparkles, Paperclip, Loader2, Wand2, X, BookOpen } from "lucide-react";
 import { FieldValues } from "react-hook-form";
 import { Module, Class } from "@/types";
 import { useEffect, useState } from "react";
@@ -76,7 +75,7 @@ export const AssignmentCreate = () => {
     refineCoreProps: {
       resource: "assignments",
       action: "create",
-      onMutationSuccess: (data) => {
+      onMutationSuccess: () => {
         const targetClassId = form.getValues("classId");
         go({ to: `/classes/show/${targetClassId}`, type: "replace" });
       },

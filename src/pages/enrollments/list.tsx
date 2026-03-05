@@ -6,7 +6,7 @@ import { ListView, ListViewHeader } from "@/components/refine-ui/views/list-view
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Trash2, UserPlus, CheckCircle, XCircle, Phone, Filter, CheckSquare, Square, Loader2 } from "lucide-react";
+import { Trash2, UserPlus, CheckCircle, XCircle, Phone, Filter, CheckSquare, Square } from "lucide-react";
 import { Enrollment, User, UserRole } from "@/types";
 import { useDelete, useNavigation, useCustomMutation, useInvalidate, useGetIdentity } from "@refinedev/core";
 import { toast } from "sonner";
@@ -23,8 +23,10 @@ const EnrollmentsList = () => {
   
   const { create } = useNavigation();
   const { mutate: unenroll } = useDelete();
-  const { mutate: updateStatus, isLoading: isUpdating } = useCustomMutation();
+  const { mutate: updateStatus, mutation: updateMutation } = useCustomMutation();
   const invalidate = useInvalidate();
+
+  const isUpdating = updateMutation.isPending;
 
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [statusFilter, setStatusFilter] = useState<string>("all");

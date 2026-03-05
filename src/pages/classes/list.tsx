@@ -43,9 +43,12 @@ const ClassesList = () => {
   const [inviteCode, setInviteCode] = useState("");
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
 
-  const { mutate: joinClass, isPending: isJoining } = useCustomMutation();
-  const { mutate: cloneClass, isPending: isCloning } = useCustomMutation();
+  const { mutate: joinClass, mutation: joinMutation } = useCustomMutation();
+  const { mutate: cloneClass, mutation: cloneMutation } = useCustomMutation();
   const invalidate = useInvalidate();
+
+  const isJoining = joinMutation.isPending;
+  const isCloning = cloneMutation.isPending;
 
   const handleJoinByCode = () => {
     if (!inviteCode.trim()) return;
@@ -159,17 +162,17 @@ const ClassesList = () => {
       },
       {
         id: "schedule",
-        accessorKey: "schedule",
+        accessorKey: "schedules",
         header: () => <p className="column-title">Schedule</p>,
         cell: ({ getValue }) => {
-          const schedule = getValue<any[]>();
-          if (!schedule || schedule.length === 0) return <span className="text-[10px] text-muted-foreground italic">No schedule</span>;
-          const first = schedule[0];
+          const schedules = getValue<any[]>();
+          if (!schedules || schedules.length === 0) return <span className="text-[10px] text-muted-foreground italic">No schedule</span>;
+          const first = schedules[0];
           return (
             <div className="flex items-center gap-1.5 text-[10px] font-medium text-muted-foreground">
               <Calendar className="h-3 w-3" />
               <span>{first.day}: {first.startTime}-{first.endTime}</span>
-              {schedule.length > 1 && <Badge variant="outline" className="h-4 px-1 text-[8px]">+{schedule.length - 1}</Badge>}
+              {schedules.length > 1 && <Badge variant="outline" className="h-4 px-1 text-[8px]">+{schedules.length - 1}</Badge>}
             </div>
           );
         }

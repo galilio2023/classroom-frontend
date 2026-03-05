@@ -87,6 +87,9 @@ export interface Submission {
   student?: User;
   gradedBy?: User;
   gradedAt?: string | null;
+  suggestedGrade?: number;
+  suggestedFeedback?: string;
+  assignment?: Assignment;
 }
 
 export interface Assignment {
@@ -174,7 +177,7 @@ export type Class = z.infer<typeof classFormSchema> & {
   modules?: Module[];
 };
 
-export type ClassListItem = Pick<Class, "id" | "name" | "status" | "capacity" | "bannerUrl" | "teachers" | "schedule"> & {
+export type ClassListItem = Pick<Class, "id" | "name" | "status" | "capacity" | "bannerUrl" | "teachers" | "schedules"> & {
   subject?: {
     name: string;
     department?: {
@@ -278,6 +281,18 @@ export interface CreateResponse<T = any> {
 
 export interface GetOneResponse<T = any> {
   data: T;
+}
+
+export interface AiLog {
+  id: number;
+  userId: string;
+  action: string;
+  prompt: string;
+  response: string;
+  tokensUsed: number;
+  model: string;
+  createdAt: string;
+  user?: User;
 }
 
 export * from "./quiz";
