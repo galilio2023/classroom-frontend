@@ -17,6 +17,7 @@ export const authProvider: AuthProvider = {
           },
         };
       }
+      // Note: Better Auth handles session state, but we sync to localStorage for Refine's getIdentity
       if (data?.user) {
         localStorage.setItem("user", JSON.stringify(data.user));
       }
@@ -72,18 +73,33 @@ export const authProvider: AuthProvider = {
   },
 
   check: async () => {
-    const user = localStorage.getItem("user");
-    if (user) {
-      return { authenticated: true };
+    try {
+      // Verify session with Better Auth client (checks cookies/tokens)
+      const { data: session } = await authClient.getSession();
+      
+      if (session?.user) {
+        // Sync localStorage with the latest user data from the server (handles role changes)
+        localStorage.setItem("user", JSON.stringify(session.user));
+        return { authenticated: true };
+      }
+      
+      localStorage.removeItem("user");
+      return {
+        authenticated: false,
+        redirectTo: "/login",
+      };
+    } catch (error) {
+      localStorage.removeItem("user");
+      return {
+        authenticated: false,
+        redirectTo: "/login",
+      };
     }
-    return {
-      authenticated: false,
-      redirectTo: "/login",
-    };
   },
 
   onError: async (error: any) => {
-    if (error?.response?.status === 401) {
+    if (error?.response?.status === 401 || error?.status === 401) {
+      localStorage.removeItem("user");
       return {
         logout: true,
         redirectTo: "/login",

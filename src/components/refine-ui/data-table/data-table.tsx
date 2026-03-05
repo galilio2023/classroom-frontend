@@ -16,14 +16,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
 type DataTableProps<TData extends BaseRecord> = {
   table: UseTableReturnType<TData, HttpError>;
+  onRowClick?: (record: TData) => void;
 };
 
 export function DataTable<TData extends BaseRecord>({
   table: tableResult,
+  onRowClick,
 }: DataTableProps<TData>) {
   // --- SAFETY GUARD ---
   if (!tableResult?.refineCore || !tableResult?.reactTable || !tableResult.reactTable.getHeaderGroups) {
@@ -75,12 +78,10 @@ export function DataTable<TData extends BaseRecord>({
     };
   }, [tableQuery.data?.data, pageSize]);
 
-  // Ensure headerGroups exists before mapping
   const headerGroups = getHeaderGroups() || [];
 
   return (
     <div className="flex flex-col flex-1 gap-4 w-full max-w-full overflow-hidden">
-      {/* Scrollable Container */}
       <div 
         ref={tableContainerRef} 
         className={cn(
@@ -115,24 +116,24 @@ export function DataTable<TData extends BaseRecord>({
           <TableBody className="relative">
             {isLoading ? (
               <>
-                {Array.from({ length: pageSize < 1 ? 1 : pageSize }).map((_, rowIndex) => (
+                {Array.from({ length: pageSize < 1 ? 5 : Math.min(pageSize, 10) }).map((_, rowIndex) => (
                   <TableRow key={`skeleton-row-${rowIndex}`} aria-hidden="true">
                     {getAllLeafColumns().map((column) => (
-                      <TableCell key={`skeleton-cell-${rowIndex}-${column.id}`} style={{ ...getCommonStyles({ column, isOverflowing }) }} className="truncate">
-                        <div className="h-8" />
+                      <TableCell key={`skeleton-cell-${rowIndex}-${column.id}`} style={{ ...getCommonStyles({ column, isOverflowing }) }} className="py-4">
+                        <Skeleton className="h-5 w-full max-w-[150px]" />
                       </TableCell>
                     ))}
                   </TableRow>
                 ))}
-                <TableRow>
-                  <TableCell colSpan={columns.length} className="absolute inset-0 pointer-events-none">
-                    <Loader2 className="absolute top-1/2 left-1/2 animate-spin text-primary h-8 w-8 -translate-x-1/2 -translate-y-1/2" />
-                  </TableCell>
-                </TableRow>
               </>
             ) : getRowModel().rows?.length ? (
               getRowModel().rows.map((row) => (
-                <TableRow key={row.original?.id ?? row.id} data-state={row.getIsSelected() && "selected"}>
+                <TableRow 
+                    key={row.original?.id ?? row.id} 
+                    data-state={row.getIsSelected() && "selected"}
+                    onClick={() => onRowClick?.(row.original)}
+                    isClickable={!!onRowClick}
+                >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell 
                       key={cell.id} 
@@ -153,7 +154,6 @@ export function DataTable<TData extends BaseRecord>({
         </Table>
       </div>
       
-      {/* Pagination Area */}
       {!isLoading && getRowModel().rows?.length > 0 && (
         <div className="w-full overflow-x-auto pb-2">
           <DataTablePagination
@@ -185,8 +185,8 @@ function DataTableNoData({ isOverflowing, columnsLength }: { isOverflowing: { ho
 
 export function getCommonStyles<TData>({ column, isOverflowing }: { column: Column<TData>; isOverflowing: { horizontal: boolean; vertical: boolean; }; }): React.CSSProperties {
   const isPinned = column.getIsPinned();
-  const isLastLeftPinnedColumn = isPinned === "left" && column.getIsLastColumn("left");
-  const isFirstRightPinnedColumn = isPinned === "right" && column.getIsFirstColumn("right");
+  const isLastLeftPinnedColumn = isPinned === "left" && column.getLastColumn("left");
+  const isFirstRightPinnedColumn = isPinned === "right" && column.getFirstColumn("right");
   return {
     boxShadow: isOverflowing.horizontal && isLastLeftPinnedColumn ? "-4px 0 4px -4px var(--border) inset" : isOverflowing.horizontal && isFirstRightPinnedColumn ? "4px 0 4px -4px var(--border) inset" : undefined,
     left: isOverflowing.horizontal && isPinned === "left" ? `${column.getStart("left")}px` : undefined,

@@ -1,6 +1,6 @@
 import { ListView } from "@/components/refine-ui/views/list-view.tsx";
 import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb.tsx";
-import { Search } from "lucide-react";
+import { Search, GraduationCap } from "lucide-react";
 import { Input } from "@/components/ui/input.tsx";
 import { useMemo, useState } from "react";
 import {
@@ -70,14 +70,14 @@ const SubjectsList = () => {
           accessorKey: "code",
           size: 100,
           header: () => <p className="column-title ml-2">Code</p>,
-          cell: ({ getValue }) => <Badge>{getValue<string>()}</Badge>,
+          cell: ({ getValue }) => <Badge variant="outline" className="font-black">{getValue<string>()}</Badge>,
         },
         {
           accessorKey: "name",
           size: 200,
           header: () => <p className="column-title">Name</p>,
           cell: ({ getValue }) => (
-            <span className="text-foreground">{getValue<string>()}</span>
+            <span className="text-foreground font-medium">{getValue<string>()}</span>
           ),
         },
         {
@@ -85,15 +85,25 @@ const SubjectsList = () => {
           size: 150,
           header: () => <p className="column-title">Department</p>,
           cell: ({ getValue }) => (
-            <Badge variant="secondary">{getValue<string>()}</Badge>
+            <Badge variant="secondary" className="text-[10px]">{getValue<string>()}</Badge>
           ),
+        },
+        {
+          accessorKey: "credits",
+          header: () => <p className="column-title">Credits</p>,
+          cell: ({ getValue }) => (
+            <div className="flex items-center gap-1.5">
+              <GraduationCap className="h-3.5 w-3.5 text-muted-foreground" />
+              <span className="text-xs font-bold">{getValue<number>() || 0}</span>
+            </div>
+          )
         },
         {
           accessorKey: "description",
           size: 300,
           header: () => <p className="column-title">Description</p>,
           cell: ({ getValue }) => (
-            <span className="truncate line-clamp-2">{getValue<string>()}</span>
+            <span className="truncate line-clamp-1 text-xs text-muted-foreground">{getValue<string>()}</span>
           ),
         },
         {
@@ -119,6 +129,9 @@ const SubjectsList = () => {
       pagination: { pageSize: 10, mode: "server" },
       filters: { permanent: filters },
       sorters: { initial: [{ field: "id", order: "desc" }] },
+      meta: {
+        populate: ["department"]
+      }
     },
   });
 
@@ -143,7 +156,7 @@ const SubjectsList = () => {
         <Breadcrumb />
         <h1 className="page-title">Subjects</h1>
         <div className="intro-row">
-          <p>Quick access to essential metrics and management tools.</p>
+          <p>Manage the academic subjects and curriculum.</p>
           <div className="actions-row">
             <div className="search-field">
               <Search className="search-icon" />
@@ -160,7 +173,7 @@ const SubjectsList = () => {
                 value={selectedDepartment}
                 onValueChange={setSelectedDepartment}
               >
-                <SelectTrigger>
+                <SelectTrigger className="w-[200px]">
                   <SelectValue placeholder="Filter by department" />
                 </SelectTrigger>
                 <SelectContent>

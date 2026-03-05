@@ -1,5 +1,5 @@
 import * as z from "zod";
-import { UserRole } from "@/types";
+import { UserRole, UserStatus } from "@/types";
 
 const phoneRegex = /^\+?[\d\s-()]{7,20}$/;
 
@@ -10,6 +10,8 @@ export const baseUserSchema = z.object({
   role: z.nativeEnum(UserRole, {
     errorMap: () => ({ message: "Role is required" }),
   }),
+  status: z.nativeEnum(UserStatus).default(UserStatus.ACTIVE),
+  departmentId: z.number().optional().nullable(),
   phoneNumber: z.string().regex(phoneRegex, "Invalid phone number format").max(20).optional().nullable(),
   bio: z.string().max(500).optional().nullable(),
   address: z.string().max(255).optional().nullable(),
@@ -53,6 +55,4 @@ export const userFormSchema = baseUserSchema.superRefine((data, ctx) => {
 });
 
 // 3. Extend the base schema for creation if needed (or just use the refined one)
-// Since userCreateSchema was just extending with {}, we can just use the refined schema
-// But if you intended to add password, etc., do it on baseUserSchema
 export const userCreateSchema = userFormSchema;

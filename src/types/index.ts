@@ -11,6 +11,12 @@ export enum UserRole {
   STUDENT = "student",
 }
 
+export enum UserStatus {
+  ACTIVE = "active",
+  INACTIVE = "inactive",
+  SUSPENDED = "suspended",
+}
+
 export interface User {
   id: string;
   name: string;
@@ -18,6 +24,9 @@ export interface User {
   emailVerified: boolean;
   image: string | null;
   role: UserRole;
+  status: UserStatus;
+  departmentId: number | null;
+  department?: Department;
   imageCldPubId: string | null;
   phoneNumber: string | null;
   bio: string | null;
@@ -37,6 +46,8 @@ export interface Department {
   name: string;
   code: string;
   description: string | null;
+  headId: string | null;
+  head?: User;
   createdAt: string;
   updatedAt: string;
 }
@@ -46,6 +57,7 @@ export interface Subject {
   name: string;
   code: string;
   description: string | null;
+  credits: number;
   departmentId: number;
   department: Department;
   createdAt: string;
@@ -162,9 +174,15 @@ export type Class = z.infer<typeof classFormSchema> & {
   modules?: Module[];
 };
 
-export type ClassListItem = Pick<Class, "id" | "name" | "status" | "capacity" | "bannerUrl" | "teachers"> & {
+export type ClassListItem = Pick<Class, "id" | "name" | "status" | "capacity" | "bannerUrl" | "teachers" | "schedule"> & {
   subject?: {
     name: string;
+    department?: {
+      name: string;
+    };
+  };
+  _count?: {
+    enrollments: number;
   };
 };
 

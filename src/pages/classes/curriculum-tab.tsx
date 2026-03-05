@@ -8,7 +8,10 @@ import {
   PlusCircle, 
   Loader2,
   LayoutGrid,
-  Zap
+  Zap,
+  Target,
+  MessageSquare,
+  GraduationCap
 } from "lucide-react";
 import { 
   Dialog, 
@@ -16,6 +19,7 @@ import {
   DialogHeader, 
   DialogTitle, 
   DialogFooter,
+  DialogDescription
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -45,6 +49,8 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
     topic: "",
     type: "package" as "package" | "note" | "quiz" | "assignment", 
     level: "high_school",
+    tone: "academic",
+    objectives: "",
     moduleId: null as number | null,
   });
 
@@ -182,16 +188,101 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
       )}
 
       <Dialog open={isMagicModalOpen} onOpenChange={setIsMagicModalOpen}>
-        <DialogContent>
-          <DialogHeader><DialogTitle>AI Magic Builder</DialogTitle></DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2"><Label>Topic</Label><Input placeholder="e.g. Photosynthesis" value={magicConfig.topic} onChange={(e) => setMagicConfig({ ...magicConfig, topic: e.target.value })} /></div>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+                <Zap className="h-5 w-5 text-purple-500" />
+                AI Magic Builder
+            </DialogTitle>
+            <DialogDescription>
+                Generate a complete lesson package or specific materials using Gemini AI.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-5 py-4">
+            <div className="space-y-2">
+                <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Topic</Label>
+                <Input placeholder="e.g. Photosynthesis, Quantum Mechanics" value={magicConfig.topic} onChange={(e) => setMagicConfig({ ...magicConfig, topic: e.target.value })} />
+            </div>
+            
             <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2"><Label>Type</Label><Select value={magicConfig.type} onValueChange={(v: any) => setMagicConfig({ ...magicConfig, type: v })}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="package">Full Package</SelectItem><SelectItem value="note">Lesson Notes</SelectItem><SelectItem value="quiz">Quiz</SelectItem><SelectItem value="assignment">Assignment</SelectItem></SelectContent></Select></div>
-                <div className="space-y-2"><Label>Level</Label><Select value={magicConfig.level} onValueChange={(v: any) => setMagicConfig({ ...magicConfig, level: v })}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="primary">Primary</SelectItem><SelectItem value="high_school">High School</SelectItem><SelectItem value="university">University</SelectItem></SelectContent></Select></div>
+                <div className="space-y-2">
+                    <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Content Type</Label>
+                    <Select value={magicConfig.type} onValueChange={(v: any) => setMagicConfig({ ...magicConfig, type: v })}>
+                        <SelectTrigger>
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="package">Full Package</SelectItem>
+                            <SelectItem value="note">Lesson Notes</SelectItem>
+                            <SelectItem value="quiz">Quiz</SelectItem>
+                            <SelectItem value="assignment">Assignment</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+                <div className="space-y-2">
+                    <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Grade Level</Label>
+                    <Select value={magicConfig.level} onValueChange={(v: any) => setMagicConfig({ ...magicConfig, level: v })}>
+                        <SelectTrigger>
+                            <div className="flex items-center gap-2">
+                                <GraduationCap className="h-3.5 w-3.5 text-primary" />
+                                <SelectValue />
+                            </div>
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="primary">Primary School</SelectItem>
+                            <SelectItem value="high_school">High School</SelectItem>
+                            <SelectItem value="university">University</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+            </div>
+
+            <div className="space-y-2">
+                <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Tone & Style</Label>
+                <Select value={magicConfig.tone} onValueChange={(v: any) => setMagicConfig({ ...magicConfig, tone: v })}>
+                    <SelectTrigger>
+                        <div className="flex items-center gap-2">
+                            <MessageSquare className="h-3.5 w-3.5 text-primary" />
+                            <SelectValue />
+                        </div>
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="academic">Academic & Formal</SelectItem>
+                        <SelectItem value="creative">Creative & Engaging</SelectItem>
+                        <SelectItem value="practical">Practical & Hands-on</SelectItem>
+                    </SelectContent>
+                </Select>
+            </div>
+
+            <div className="space-y-2">
+                <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
+                    <Target className="h-3.5 w-3.5 text-primary" />
+                    Learning Objectives (Optional)
+                </Label>
+                <Textarea 
+                    placeholder="e.g. Focus on chemical equations, or historical context..." 
+                    value={magicConfig.objectives} 
+                    onChange={(e) => setMagicConfig({ ...magicConfig, objectives: e.target.value })}
+                    className="resize-none h-20 text-xs"
+                />
             </div>
           </div>
-          <DialogFooter><Button onClick={handleMagicCreate} disabled={isMagicCreating}>{isMagicCreating ? "Generating..." : "Generate"}</Button></DialogFooter>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsMagicModalOpen(false)}>Cancel</Button>
+            <Button onClick={handleMagicCreate} disabled={isMagicCreating} className="bg-purple-600 hover:bg-purple-700">
+                {isMagicCreating ? (
+                    <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Generating...
+                    </>
+                ) : (
+                    <>
+                        <Zap className="h-4 w-4 mr-2" />
+                        Generate
+                    </>
+                )}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 

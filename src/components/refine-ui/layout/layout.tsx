@@ -6,8 +6,11 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import type { PropsWithChildren } from "react";
 import { Sidebar } from "./sidebar";
+import { useLocation } from "react-router-dom";
 
 export function Layout({ children }: PropsWithChildren) {
+  const { pathname } = useLocation();
+
   return (
     <ThemeProvider>
       <SidebarProvider>
@@ -15,14 +18,15 @@ export function Layout({ children }: PropsWithChildren) {
         <SidebarInset className="overflow-hidden">
           <Header />
           <main
+            key={pathname} // Key forces re-mount for animation on route change
             className={cn(
               "@container/main",
               "container",
               "mx-auto",
               "relative",
               "w-full",
-              "max-w-full", // Ensure main never exceeds screen width
-              "overflow-hidden", // Contain the table scroll
+              "max-w-full",
+              "overflow-hidden",
               "flex",
               "flex-col",
               "flex-1",
@@ -31,6 +35,7 @@ export function Layout({ children }: PropsWithChildren) {
               "md:p-4",
               "lg:px-6",
               "lg:pt-6",
+              "page-transition" // Apply the animation class
             )}
           >
             {children}

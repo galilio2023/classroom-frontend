@@ -1,6 +1,6 @@
 import { ListView } from "@/components/refine-ui/views/list-view.tsx";
 import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb.tsx";
-import { Search } from "lucide-react";
+import { Search, UserCircle } from "lucide-react";
 import { Input } from "@/components/ui/input.tsx";
 import { useMemo, useState } from "react";
 import { CreateButton } from "@/components/refine-ui/buttons/create.tsx";
@@ -21,6 +21,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { DataTableRowActions } from "@/components/refine-ui/data-table/row-actions";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const DepartmentsList = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -44,19 +45,36 @@ const DepartmentsList = () => {
           accessorKey: "code", 
           size: 100, 
           header: () => <p className="column-title ml-2">Code</p>, 
-          cell: ({ getValue }) => <Badge>{getValue<string>()}</Badge> 
+          cell: ({ getValue }) => <Badge variant="outline" className="font-black">{getValue<string>()}</Badge> 
         },
         { 
           accessorKey: "name", 
           size: 200, 
           header: () => <p className="column-title">Name</p>, 
-          cell: ({ getValue }) => <span className="text-foreground">{getValue<string>()}</span> 
+          cell: ({ getValue }) => <span className="text-foreground font-medium">{getValue<string>()}</span> 
+        },
+        {
+          accessorKey: "head",
+          header: () => <p className="column-title">Head of Dept</p>,
+          cell: ({ getValue }) => {
+            const head = getValue<Department["head"]>();
+            if (!head) return <span className="text-xs text-muted-foreground italic">Not assigned</span>;
+            return (
+              <div className="flex items-center gap-2">
+                <Avatar className="h-6 w-6">
+                  <AvatarImage src={head.image ?? undefined} />
+                  <AvatarFallback className="text-[10px]">{head.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                </Avatar>
+                <span className="text-xs font-medium">{head.name}</span>
+              </div>
+            );
+          }
         },
         { 
           accessorKey: "description", 
           size: 300, 
           header: () => <p className="column-title">Description</p>, 
-          cell: ({ getValue }) => <span className="truncate line-clamp-2">{getValue<string>()}</span> 
+          cell: ({ getValue }) => <span className="truncate line-clamp-1 text-xs text-muted-foreground">{getValue<string>()}</span> 
         },
         {
           id: "actions",
@@ -81,6 +99,9 @@ const DepartmentsList = () => {
       pagination: { pageSize: 10, mode: "server" },
       filters: { permanent: filters },
       sorters: { initial: [{ field: "id", order: "desc" }] },
+      meta: {
+        populate: ["head"]
+      }
     },
   });
 

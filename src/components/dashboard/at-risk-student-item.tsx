@@ -12,9 +12,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { useCreate } from "@refinedev/core";
+import { useCreate, useCustom } from "@refinedev/core";
 import { toast } from "sonner";
-import axios from "axios";
 
 interface AtRiskStudent {
   id: string;
@@ -38,15 +37,31 @@ export const AtRiskStudentItem: React.FC<AtRiskStudentItemProps> = ({
   const { mutate: sendNotification, mutation } = useCreate();
   const isSending = mutation.isPending;
 
-  const generateEncouragement = async () => {
-    setIsGenerating(true);
-    try {
-      const response = await axios.post("/api/ai/generate-encouragement", {
+  const { query: encouragementQuery } = useCustom({
+    url: "/ai/generate-encouragement",
+    method: "post",
+    config: {
+      payload: {
         studentName: student.name,
         reason: student.reason,
         value: student.value,
-      });
-      setMessage(response.data.message);
+      },
+    },
+    queryOptions: {
+      enabled: false,
+    },
+  });
+
+  const generateEncouragement = async () => {
+    setIsGenerating(true);
+    try {
+      const { data } = await encouragementQuery.refetch();
+      // Refine's useCustom returns data wrapped in { data: { ... } }
+      if (data?.data?.message) {
+        setMessage(data.data.message);
+      } else {
+        throw new Error("No message returned");
+      }
     } catch (error) {
       const fallbacks: Record<string, string> = {
         "Low Grades": `Hi ${student.name}, I noticed your recent grades have been a bit lower than usual. I know you can do better! Is there anything I can help you with?`,

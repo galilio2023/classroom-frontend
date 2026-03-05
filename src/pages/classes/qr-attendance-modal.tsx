@@ -11,7 +11,7 @@ import { QRCodeSVG } from "qrcode.react";
 import { io, Socket } from "socket.io-client";
 import { BACKEND_URL } from "@/config";
 import { User, Attendance } from "@/types";
-import { Loader2, CheckCircle2, Users, RefreshCw } from "lucide-react";
+import { Loader2, CheckCircle2, Users, RefreshCw, Key } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
@@ -30,7 +30,7 @@ export const QRAttendanceModal = ({ isOpen, onClose, classId }: QRAttendanceModa
   const socketRef = useRef<Socket | null>(null);
 
   // Fetch initial token
-  const { data: tokenData, refetch: refreshToken, isLoading } = useCustom<{ token: string }>({
+  const { query } = useCustom<{ token: string }>({
     url: `/attendance/qr-token/${classId}`,
     method: "get",
     config: {
@@ -41,7 +41,9 @@ export const QRAttendanceModal = ({ isOpen, onClose, classId }: QRAttendanceModa
     queryOptions: {
       enabled: isOpen,
     },
-  }) as any;
+  });
+
+  const { data: tokenData, refetch, isLoading } = query;
 
   useEffect(() => {
     if (tokenData?.data?.token) {
@@ -57,7 +59,9 @@ export const QRAttendanceModal = ({ isOpen, onClose, classId }: QRAttendanceModa
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
-          refreshToken();
+          if (typeof refetch === 'function') {
+            void refetch();
+          }
           return 10;
         }
         return prev - 1;
@@ -65,7 +69,7 @@ export const QRAttendanceModal = ({ isOpen, onClose, classId }: QRAttendanceModa
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [isOpen, refreshToken]);
+  }, [isOpen, refetch]);
 
   // Socket.io for real-time updates
   useEffect(() => {
@@ -109,7 +113,7 @@ export const QRAttendanceModal = ({ isOpen, onClose, classId }: QRAttendanceModa
             Live QR Attendance
           </DialogTitle>
           <DialogDescription>
-            Students can scan this code to mark themselves present. The code refreshes every 10 seconds for security.
+            Students can scan this code or enter the manual token below.
           </DialogDescription>
         </DialogHeader>
 
@@ -136,6 +140,20 @@ export const QRAttendanceModal = ({ isOpen, onClose, classId }: QRAttendanceModa
               <RefreshCw className={`h-3 w-3 ${timeLeft === 10 ? 'animate-spin' : ''}`} />
               Refreshing in {timeLeft}s
             </div>
+          </div>
+
+          {/* Manual Code Display for Teacher */}
+          <div className="w-full bg-muted/50 p-4 rounded-xl border border-dashed flex flex-col items-center gap-2">
+            <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                <Key className="h-3 w-3" />
+                Manual Entry Token
+            </div>
+            <div className="text-3xl font-black tracking-[0.3em] text-primary font-mono">
+                {token ? token.substring(0, 8).toUpperCase() : "--------"}
+            </div>
+            <p className="text-[10px] text-muted-foreground text-center">
+                Tell students to type this code if their camera isn't working.
+            </p>
           </div>
 
           {/* Scanned Students List */}

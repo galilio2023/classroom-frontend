@@ -1,6 +1,6 @@
 import { useShow, useDelete, useGetIdentity, useUpdate } from "@refinedev/core";
-import { useParams } from "react-router-dom";
-import { useMemo, useState } from "react";
+import { useParams, useSearchParams } from "react-router-dom";
+import { useMemo, useState, useEffect } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { useTable } from "@refinedev/react-table";
 
@@ -64,15 +64,22 @@ import { toast } from "sonner";
 
 const ClassesShow = () => {
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
   const classId = id ?? "";
   const { data: identity } = useGetIdentity<User>();
 
-  const [activeTab, setActiveTab] = useState("curriculum");
+  const [activeTab, setActiveTab] = useState(searchParams.get("tab") || "curriculum");
   const [unenrollTarget, setUnenrollTarget] = useState<number | null>(null);
   const [isEnrollDialogOpen, setIsEnrollDialogOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   
   const [insightTarget, setInsightTarget] = useState<{ id: string; name: string } | null>(null);
+
+  // Sync tab if URL changes
+  useEffect(() => {
+    const tab = searchParams.get("tab");
+    if (tab) setActiveTab(tab);
+  }, [searchParams]);
 
   const {
     query: { data: aClassData, isLoading, isError, refetch }
@@ -107,13 +114,16 @@ const ClassesShow = () => {
 
   const handleEnrollmentAction = (id: number, status: "approved" | "rejected") => {
     updateEnrollment({
-      resource: "classes/enrollments",
-      id,
+      resource: "enrollments",
+      id: `${id}/status`,
       values: { status },
     }, {
       onSuccess: () => {
         toast.success(`Student enrollment ${status}`);
         void refetch();
+      },
+      onError: (error: any) => {
+        toast.error(error?.data?.message || "Failed to update enrollment");
       }
     });
   };

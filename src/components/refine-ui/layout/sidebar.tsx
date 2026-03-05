@@ -29,6 +29,7 @@ import {
 import { ChevronRight, ListIcon } from "lucide-react";
 import React from "react";
 import { cn } from "@/lib/utils.ts";
+import { Link as RouterLink } from "react-router-dom";
 
 export function Sidebar() {
   const { open } = useShadcnSidebar();
@@ -210,12 +211,12 @@ function SidebarHeader() {
       )}
     >
       {(open || isMobile) && (
-        <div className="flex flex-row items-center gap-3 whitespace-nowrap transition-discrete duration-200">
+        <RouterLink to="/" className="flex flex-row items-center gap-3 whitespace-nowrap transition-discrete duration-200 hover:opacity-80">
           <div className="shrink-0 p-2 bg-primary/10 rounded-xl">{title.icon}</div>
           <h2 className="text-base font-black tracking-tight text-foreground">
             {title.text}
           </h2>
-        </div>
+        </RouterLink>
       )}
       <ShadcnSidebarTrigger
         className={cn(

@@ -1,7 +1,7 @@
 import { EditViewHeader } from "@/components/refine-ui/views/edit-view";
 import { useForm } from "@refinedev/react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useGetIdentity } from "@refinedev/core";
+import { useGetIdentity, useSelect } from "@refinedev/core";
 import {
   Form,
   FormControl,
@@ -29,10 +29,10 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
-import { User as UserIcon, Mail, Shield, Lightbulb, Info, Phone, MapPin, FileText } from "lucide-react";
+import { User as UserIcon, Mail, Shield, Lightbulb, Info, Phone, MapPin, FileText, Building2, Activity } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { userFormSchema } from "@/schemas/user";
-import { UserRole, User } from "@/types";
+import { UserRole, User, UserStatus, Department } from "@/types";
 
 const UsersEdit = () => {
   const { data: identity } = useGetIdentity<User>();
@@ -48,6 +48,12 @@ const UsersEdit = () => {
       action: "edit",
       redirect: "list",
     },
+  });
+
+  const { options: departmentOptions } = useSelect<Department>({
+    resource: "departments",
+    optionLabel: "name",
+    optionValue: "id",
   });
 
   return (
@@ -153,6 +159,72 @@ const UsersEdit = () => {
                               Only administrators can modify user roles.
                             </p>
                           )}
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Status Dropdown */}
+                    <FormField
+                      control={form.control}
+                      name="status"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center gap-2">
+                            <Activity className="h-4 w-4 text-muted-foreground" />
+                            Account Status
+                          </FormLabel>
+                          <Select 
+                            onValueChange={field.onChange} 
+                            value={field.value}
+                            disabled={!isAdmin}
+                          >
+                            <FormControl>
+                              <SelectTrigger className={!isAdmin ? "bg-muted cursor-not-allowed" : ""}>
+                                <SelectValue placeholder="Select status" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value={UserStatus.ACTIVE}>Active</SelectItem>
+                              <SelectItem value={UserStatus.INACTIVE}>Inactive</SelectItem>
+                              <SelectItem value={UserStatus.SUSPENDED}>Suspended</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Department Dropdown */}
+                    <FormField
+                      control={form.control}
+                      name="departmentId"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center gap-2">
+                            <Building2 className="h-4 w-4 text-muted-foreground" />
+                            Department
+                          </FormLabel>
+                          <Select 
+                            onValueChange={(val) => field.onChange(val ? Number(val) : null)} 
+                            value={field.value?.toString()}
+                            disabled={!isAdmin}
+                          >
+                            <FormControl>
+                              <SelectTrigger className={!isAdmin ? "bg-muted cursor-not-allowed" : ""}>
+                                <SelectValue placeholder="Select a department" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {departmentOptions.map((option) => (
+                                <SelectItem key={option.value} value={option.value.toString()}>
+                                  {option.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                           <FormMessage />
                         </FormItem>
                       )}

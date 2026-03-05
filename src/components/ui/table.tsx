@@ -50,12 +50,20 @@ function TableFooter({ className, ...props }: React.ComponentProps<"tfoot">) {
   );
 }
 
-function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
+interface TableRowProps extends React.ComponentProps<"tr"> {
+    isClickable?: boolean;
+}
+
+function TableRow({ className, isClickable, ...props }: TableRowProps) {
+  // Automatically determine if clickable if an onClick is provided
+  const clickable = isClickable || !!props.onClick;
+
   return (
     <tr
       data-slot="table-row"
       className={cn(
-        "hover:bg-primary/[0.04] data-[state=selected]:bg-muted border-b transition-colors group cursor-pointer",
+        "border-b transition-colors group",
+        clickable ? "hover:bg-primary/[0.04] cursor-pointer" : "cursor-default",
         className
       )}
       {...props}
@@ -81,8 +89,9 @@ function TableCell({ className, ...props }: React.ComponentProps<"td">) {
     <td
       data-slot="table-cell"
       className={cn(
-        "p-4 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] transition-colors group-hover:text-primary font-medium",
-        "first:border-l-2 first:border-l-transparent group-hover:first:border-l-primary",
+        "p-4 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] transition-colors font-medium",
+        "group-hover:text-primary",
+        "first:border-l-2 first:border-l-transparent group-data-[clickable=true]:group-hover:first:border-l-primary",
         className
       )}
       {...props}

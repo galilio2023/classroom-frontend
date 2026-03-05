@@ -28,9 +28,15 @@ export const accessControlProvider: AccessControlProvider = {
         "quizzes", 
         "resources",
         "users",
-        "classes"
+        "classes",
+        "modules",
+        "notifications",
+        "progress",
+        "enrollments",
+        "classes/enrollments"
       ];
       
+      // Basic list/show access for sidebar items
       if (teacherSidebarResources.includes(resourceName)) {
         if (action === "list" || action === "show") return { can: true };
       }
@@ -40,56 +46,34 @@ export const accessControlProvider: AccessControlProvider = {
           return { can: true };
       }
 
-      if (["classes", "assignments", "quizzes", "resources"].includes(resourceName)) {
+      // CRUD access for teaching materials and enrollments
+      if ([
+        "classes", 
+        "assignments", 
+        "quizzes", 
+        "resources", 
+        "modules", 
+        "announcements", 
+        "enrollments", 
+        "classes/enrollments"
+      ].includes(resourceName)) {
         if (action === "list" || action === "create") return { can: true };
 
+        // For show/edit/delete, we allow it in the UI and let the backend enforce ownership
         if (["show", "edit", "delete"].includes(action)) {
-          if (!params?.id) return { can: false, reason: "No record ID provided." };
-          
-          // Helper to check if user is a teacher of the class
-          const isTeacherOfClass = (classData: any) => {
-            if (!classData) return false;
-            // Check if teachers array exists (many-to-many)
-            if (Array.isArray(classData.teachers)) {
-                return classData.teachers.some((t: any) => t.teacherId === identity?.id);
-            }
-            // Fallback if backend returns a flattened structure (unlikely but safe)
-            return classData.teacherId === identity?.id;
-          };
-
-          try {
-            // If we have the data already (e.g. from a list view), use it
-            if (params?.userData) {
-                const data = params.userData;
-                if (resourceName === "classes" && isTeacherOfClass(data)) return { can: true };
-                if (resourceName === "assignments" && isTeacherOfClass(data.class)) return { can: true };
-                if (resourceName === "quizzes" && isTeacherOfClass(data.class)) return { can: true };
-                if (resourceName === "resources" && isTeacherOfClass(data.class)) return { can: true };
-            }
-
-            // Otherwise, fetch it
-            const { data } = await dataProvider.getOne({ resource: resourceName, id: params.id });
-            
-            if (resourceName === "classes") {
-                if (isTeacherOfClass(data)) return { can: true };
-            } else {
-                // For related resources, we need the class data.
-                // Ensure the backend returns 'class' relation with 'teachers'.
-                if (data?.class && isTeacherOfClass(data.class)) return { can: true };
-            }
-
-          } catch (error) {
-            return { can: false, reason: "Access denied." };
-          }
+            return { can: true };
         }
       }
       
       // Explicitly deny other administrative resources for teachers
-      if (["departments", "enrollments", "profile-requests", "ai-study-lab"].includes(resourceName)) {
+      if (["departments", "profile-requests", "ai-study-lab", "activity-log"].includes(resourceName)) {
           return { can: false, reason: "Access denied." };
       }
 
-      return { can: false, reason: "Access denied." };
+      // Default for other teacher actions
+      if (action === "list" || action === "show") return { can: true };
+
+      return { can: true };
     }
 
     // 3. Student Permissions
@@ -105,26 +89,23 @@ export const accessControlProvider: AccessControlProvider = {
         "submissions",
         "quizzes", 
         "resources",
-        "ai-study-lab"
+        "ai-study-lab",
+        "notifications",
+        "progress"
       ];
       const allowedActions = ["list", "show"];
 
-      // Deny administrative resources for students
-      if (["users", "departments", "enrollments", "profile-requests", "ai-assistant"].includes(resourceName)) {
-        // Special case: Students can 'show' users (to see teacher profiles)
-        if (resourceName === "users" && action === "show") {
-            return { can: true };
-        }
-        // Special case: Students can 'edit' their own profile
-        if (resourceName === "users" && action === "edit" && params?.id === identity?.id) {
-            return { can: true };
-        }
-        
-        return { can: false, reason: "Access denied." };
-      }
-
       if (allowedResources.includes(resourceName) && allowedActions.includes(action)) {
         return { can: true };
+      }
+
+      // Special case: Students can 'show' users (to see teacher profiles)
+      if (resourceName === "users" && action === "show") {
+          return { can: true };
+      }
+      // Special case: Students can 'edit' their own profile
+      if (resourceName === "users" && action === "edit" && params?.id === identity?.id) {
+          return { can: true };
       }
 
       if (resourceName === "submissions" && action === "create") {
