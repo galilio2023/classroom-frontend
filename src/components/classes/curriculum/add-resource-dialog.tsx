@@ -42,14 +42,22 @@ export const AddResourceDialog = ({
         <DialogHeader><DialogTitle>Add Material</DialogTitle></DialogHeader>
         <div className="space-y-4 py-4">
           <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2"><Label>Title</Label><Input value={resource.title} onChange={(e) => setResource({ ...resource, title: e.target.value })} /></div>
+            <div className="space-y-2">
+              <Label>Title</Label>
+              <Input 
+                value={resource.title} 
+                onChange={(e) => setResource({ ...resource, title: e.target.value })} 
+              />
+            </div>
             <div className="space-y-2">
               <Label>Type</Label>
               <Select 
                 value={resource.type} 
                 onValueChange={(v: ResourceState["type"]) => setResource({ ...resource, type: v })}
               >
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="note">Note</SelectItem>
                   <SelectItem value="file">File</SelectItem>
@@ -73,20 +81,29 @@ export const AddResourceDialog = ({
           )}
 
           {resource.type === "note" && (
-            <Textarea 
-              className="min-h-[200px]" 
-              value={resource.content} 
-              onChange={(e) => setResource({ ...resource, content: e.target.value })} 
-            />
+            <div className="space-y-2">
+              <Label>Content</Label>
+              <Textarea 
+                className="min-h-[200px]" 
+                value={resource.content} 
+                onChange={(e) => setResource({ ...resource, content: e.target.value })} 
+              />
+            </div>
           )}
           
           {resource.type === "file" && (
-            <FileUpload 
-              onUploadSuccess={(url, pubId) => setResource({ ...resource, url, cldPubId: pubId })} 
-            />
+            <div className="space-y-2">
+              <Label>Upload File</Label>
+              <FileUpload 
+                onUploadSuccess={(url, pubId) => setResource({ ...resource, url, cldPubId: pubId })} 
+              />
+            </div>
           )}
         </div>
-        <DialogFooter><Button onClick={onSave}>Save</Button></DialogFooter>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button onClick={onSave}>Save</Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

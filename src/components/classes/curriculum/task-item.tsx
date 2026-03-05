@@ -1,5 +1,4 @@
-import { Assignment, Quiz, UserRole } from "@/types";
-import { Button } from "@/components/ui/button";
+import { Assignment, Quiz } from "@/types";
 import { Badge } from "@/components/ui/badge";
 import { FileText, FileQuestion, CheckCircle2, Circle } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -23,41 +22,53 @@ export const TaskItem = ({
   
   return (
     <div className={cn(
-        "flex items-center justify-between p-2 rounded-md border transition-colors",
-        completed ? "bg-green-50/50 border-green-100 dark:bg-green-950/10 dark:border-green-900/30" : 
-        isQuiz ? "border-orange-200 bg-orange-50 dark:bg-orange-950/20 dark:border-orange-900/30" : "border-primary/10 bg-primary/5"
+        "flex items-center justify-between p-3 rounded-md border transition-colors",
+        completed ? "bg-green-50/50 border-green-200 dark:bg-green-950/20 dark:border-green-900/50" : 
+        isQuiz ? "bg-orange-50/50 border-orange-200 dark:bg-orange-950/20 dark:border-orange-900/30" : 
+        "bg-blue-50/50 border-blue-200 dark:bg-blue-950/20 dark:border-blue-900/30"
     )}>
-        <div className="flex items-center gap-2 overflow-hidden">
+        <div className="flex items-center gap-3 overflow-hidden flex-1">
             {isStudent && (
-                <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-6 w-6 shrink-0"
+                <button 
                     onClick={() => onToggleProgress(item.id)}
+                    className="shrink-0 focus:outline-none"
                 >
-                    {completed ? <CheckCircle2 className="h-4 w-4 text-green-600" /> : <Circle className="h-4 w-4 text-muted-foreground" />}
-                </Button>
+                    {completed ? (
+                        <CheckCircle2 className="h-5 w-5 text-green-600" />
+                    ) : (
+                        <Circle className="h-5 w-5 text-muted-foreground hover:text-primary transition-colors" />
+                    )}
+                </button>
             )}
-            {isQuiz ? (
-                <FileQuestion className={cn("h-4 w-4 shrink-0", completed ? "text-green-600" : "text-orange-500")} />
-            ) : (
-                <FileText className={cn("h-4 w-4 shrink-0", completed ? "text-green-600" : "text-primary")} />
-            )}
-            <div className="flex flex-col overflow-hidden">
-                <span className={cn("text-sm font-medium truncate", completed && "text-green-700 dark:text-green-400")}>
-                    {item.title}
-                </span>
-                {type === 'assignment' && (item as Assignment).dueDate && (
-                    <span className="text-[10px] text-muted-foreground">
-                        Due: {new Date((item as Assignment).dueDate!).toLocaleDateString()}
-                    </span>
+            
+            <div className="flex items-center gap-2 min-w-0">
+                {isQuiz ? (
+                    <FileQuestion className={cn("h-4 w-4 shrink-0", completed ? "text-green-600" : "text-orange-500")} />
+                ) : (
+                    <FileText className={cn("h-4 w-4 shrink-0", completed ? "text-green-600" : "text-blue-500")} />
                 )}
+                
+                <div className="flex flex-col min-w-0">
+                    <span className={cn(
+                        "text-sm font-medium truncate",
+                        completed && "text-green-700 dark:text-green-400 line-through decoration-green-500/50"
+                    )}>
+                        {item.title}
+                    </span>
+                    {type === 'assignment' && (item as Assignment).dueDate && (
+                        <span className="text-[10px] text-muted-foreground truncate">
+                            Due: {new Date((item as Assignment).dueDate!).toLocaleDateString()}
+                        </span>
+                    )}
+                </div>
             </div>
         </div>
+        
         <Badge variant="outline" className={cn(
-            "text-[10px]", 
-            completed ? "border-green-200 text-green-600" : 
-            isQuiz ? "border-orange-200 text-orange-600" : ""
+            "text-[10px] ml-2 shrink-0", 
+            completed ? "border-green-200 text-green-600 bg-green-50" : 
+            isQuiz ? "border-orange-200 text-orange-600 bg-orange-50" : 
+            "border-blue-200 text-blue-600 bg-blue-50"
         )}>
             {isQuiz ? "Quiz" : "Assignment"}
         </Badge>

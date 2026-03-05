@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { PlusCircle, Loader2, LayoutGrid, Zap } from "lucide-react";
 import { toast } from "sonner";
 import { ModuleItem } from "@/components/classes/curriculum/module-item";
-import { MagicBuilderDialog } from "@/components/classes/curriculum/magic-builder-dialog";
+import { MagicBuilderDialog, MagicBuilderConfig } from "@/components/classes/curriculum/magic-builder-dialog";
 import { CreateModuleDialog } from "@/components/classes/curriculum/create-module-dialog";
 import { AddResourceDialog } from "@/components/classes/curriculum/add-resource-dialog";
 
@@ -27,13 +27,13 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
 
   const [isMagicModalOpen, setIsMagicModalOpen] = useState(false);
   const [isMagicCreating, setIsMagicCreating] = useState(false);
-  const [magicConfig, setMagicConfig] = useState({
+  const [magicConfig, setMagicConfig] = useState<MagicBuilderConfig>({
     topic: "",
-    type: "package" as "package" | "note" | "quiz" | "assignment", 
+    type: "package", 
     level: "high_school",
     tone: "academic",
     objectives: "",
-    moduleId: null as number | null,
+    moduleId: null,
   });
 
   const [isAddResourceOpen, setIsAddResourceOpen] = useState(false);

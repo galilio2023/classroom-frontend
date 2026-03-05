@@ -1,4 +1,4 @@
-import { Module, UserRole } from "@/types";
+import { Module } from "@/types";
 import { 
   AccordionContent, 
   AccordionItem, 
@@ -52,7 +52,7 @@ export const ModuleItem = ({
 }: ModuleItemProps) => {
   return (
     <AccordionItem value={`module-${module.id}`} className="border rounded-lg bg-card px-4">
-      <div className="flex items-center">
+      <div className="flex items-center justify-between w-full">
         <AccordionTrigger className="hover:no-underline py-4 flex-1">
           <div className="flex items-center gap-3 text-left">
             <div className="p-2 bg-primary/10 rounded-md">
@@ -150,26 +150,26 @@ export const ModuleItem = ({
         {isTeacher && (
           <div className="mt-6 pt-4 border-t flex gap-2">
             <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm" className="h-8 text-xs border-purple-500/30 text-purple-600">
-                        <Sparkles className="h-3 w-3 mr-1.5" />
-                        AI Magic
-                    </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                    <DropdownMenuItem onClick={() => onMagicAction(module.id, "note")}>
-                        <PenLine className="h-4 w-4 mr-2" />
-                        Generate Lesson Notes
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => onMagicAction(module.id, "quiz")}>
-                        <FileQuestion className="h-4 w-4 mr-2" />
-                        Generate Quiz
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => onMagicAction(module.id, "assignment")}>
-                        <FileText className="h-4 w-4 mr-2" />
-                        Generate Assignment
-                    </DropdownMenuItem>
-                </DropdownMenuContent>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="h-8 text-xs border-purple-500/30 text-purple-600">
+                  <Sparkles className="h-3 w-3 mr-1.5" />
+                  AI Magic
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem onClick={() => onMagicAction(module.id, "note")}>
+                  <PenLine className="h-4 w-4 mr-2" />
+                  Generate Lesson Notes
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onMagicAction(module.id, "quiz")}>
+                  <FileQuestion className="h-4 w-4 mr-2" />
+                  Generate Quiz
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onMagicAction(module.id, "assignment")}>
+                  <FileText className="h-4 w-4 mr-2" />
+                  Generate Assignment
+                </DropdownMenuItem>
+              </DropdownMenuContent>
             </DropdownMenu>
 
             <Button 

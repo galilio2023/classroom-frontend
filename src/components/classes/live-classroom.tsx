@@ -52,7 +52,7 @@ export const LiveClassroom = ({ classId }: LiveClassroomProps) => {
 
     // Fetch a secure, signed room token from the backend
     getRoomToken({
-        url: "/live-session/token",
+        url: "live-session/token",
         method: "post",
         values: { classId: Number(classId) }
     }, {
@@ -110,7 +110,7 @@ export const LiveClassroom = ({ classId }: LiveClassroomProps) => {
           // --- SMART ATTENDANCE TRIGGER ---
           if (identity.role === UserRole.STUDENT) {
               markLiveAttendance({
-                  url: "/attendance/live",
+                  url: "attendance/live",
                   method: "post",
                   values: { classId: Number(classId) }
               }, {

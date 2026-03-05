@@ -34,10 +34,19 @@ export const CreateModuleDialog = ({
       <DialogContent>
         <DialogHeader><DialogTitle>New Module</DialogTitle></DialogHeader>
         <div className="space-y-4 py-4">
-          <div className="grid gap-2"><Label>Name</Label><Input value={name} onChange={(e) => setName(e.target.value)} /></div>
-          <div className="grid gap-2"><Label>Description</Label><Textarea value={description} onChange={(e) => setDescription(e.target.value)} /></div>
+          <div className="grid gap-2">
+            <Label>Name</Label>
+            <Input value={name} onChange={(e) => setName(e.target.value)} />
+          </div>
+          <div className="grid gap-2">
+            <Label>Description</Label>
+            <Textarea value={description} onChange={(e) => setDescription(e.target.value)} />
+          </div>
         </div>
-        <DialogFooter><Button onClick={onCreate}>Create</Button></DialogFooter>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button onClick={onCreate}>Create</Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
