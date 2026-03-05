@@ -4,7 +4,7 @@ import { useMemo, useEffect } from "react";
 import { ShowView, ShowViewHeader } from "@/components/refine-ui/views/show-view";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Loader2, BrainCircuit, Users, CheckCircle2 } from "lucide-react";
-import { Assignment, User, Submission } from "@/types";
+import { Assignment, User, Submission, UserRole } from "@/types";
 import { SubmissionForm } from "./submission-form";
 import { SubmissionList } from "./submission-list";
 import { Badge } from "@/components/ui/badge";
@@ -34,7 +34,7 @@ const AssignmentShow = () => {
 
   // --- LIVE UPDATES FOR TEACHERS ---
   useEffect(() => {
-    if (!identity?.id || identity.role === "student") return;
+    if (!identity?.id || identity.role === UserRole.STUDENT) return;
 
     const socketUrl = import.meta.env.VITE_SOCKET_URL || import.meta.env.VITE_API_URL.replace("/api", "");
     const socket = io(socketUrl, {
@@ -85,8 +85,8 @@ const AssignmentShow = () => {
     );
   }
 
-  const isAdmin = identity?.role === "admin";
-  const isTeacher = identity?.role === "teacher";
+  const isAdmin = identity?.role === UserRole.ADMIN;
+  const isTeacher = identity?.role === UserRole.TEACHER;
   const isStaff = isAdmin || isTeacher;
   
   const dueDate = assignment.dueDate

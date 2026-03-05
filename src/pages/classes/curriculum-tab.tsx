@@ -4,30 +4,12 @@ import { Module, User, UserRole, Resource, Progress } from "@/types";
 import { Accordion } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { 
-  PlusCircle, 
-  Loader2,
-  LayoutGrid,
-  Zap,
-  Target,
-  MessageSquare,
-  GraduationCap
-} from "lucide-react";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogFooter,
-  DialogDescription
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { PlusCircle, Loader2, LayoutGrid, Zap } from "lucide-react";
 import { toast } from "sonner";
-import { FileUpload } from "@/components/file-upload";
 import { ModuleItem } from "@/components/classes/curriculum/module-item";
+import { MagicBuilderDialog } from "@/components/classes/curriculum/magic-builder-dialog";
+import { CreateModuleDialog } from "@/components/classes/curriculum/create-module-dialog";
+import { AddResourceDialog } from "@/components/classes/curriculum/add-resource-dialog";
 
 interface CurriculumTabProps {
   classId: string;
@@ -187,130 +169,32 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
         </Accordion>
       )}
 
-      <Dialog open={isMagicModalOpen} onOpenChange={setIsMagicModalOpen}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-                <Zap className="h-5 w-5 text-purple-500" />
-                AI Magic Builder
-            </DialogTitle>
-            <DialogDescription>
-                Generate a complete lesson package or specific materials using Gemini AI.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-5 py-4">
-            <div className="space-y-2">
-                <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Topic</Label>
-                <Input placeholder="e.g. Photosynthesis, Quantum Mechanics" value={magicConfig.topic} onChange={(e) => setMagicConfig({ ...magicConfig, topic: e.target.value })} />
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                    <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Content Type</Label>
-                    <Select value={magicConfig.type} onValueChange={(v: any) => setMagicConfig({ ...magicConfig, type: v })}>
-                        <SelectTrigger>
-                            <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="package">Full Package</SelectItem>
-                            <SelectItem value="note">Lesson Notes</SelectItem>
-                            <SelectItem value="quiz">Quiz</SelectItem>
-                            <SelectItem value="assignment">Assignment</SelectItem>
-                        </SelectContent>
-                    </Select>
-                </div>
-                <div className="space-y-2">
-                    <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Grade Level</Label>
-                    <Select value={magicConfig.level} onValueChange={(v: any) => setMagicConfig({ ...magicConfig, level: v })}>
-                        <SelectTrigger>
-                            <div className="flex items-center gap-2">
-                                <GraduationCap className="h-3.5 w-3.5 text-primary" />
-                                <SelectValue />
-                            </div>
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="primary">Primary School</SelectItem>
-                            <SelectItem value="high_school">High School</SelectItem>
-                            <SelectItem value="university">University</SelectItem>
-                        </SelectContent>
-                    </Select>
-                </div>
-            </div>
+      <MagicBuilderDialog 
+        isOpen={isMagicModalOpen}
+        onOpenChange={setIsMagicModalOpen}
+        config={magicConfig}
+        setConfig={setMagicConfig}
+        onGenerate={handleMagicCreate}
+        isGenerating={isMagicCreating}
+      />
 
-            <div className="space-y-2">
-                <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Tone & Style</Label>
-                <Select value={magicConfig.tone} onValueChange={(v: any) => setMagicConfig({ ...magicConfig, tone: v })}>
-                    <SelectTrigger>
-                        <div className="flex items-center gap-2">
-                            <MessageSquare className="h-3.5 w-3.5 text-primary" />
-                            <SelectValue />
-                        </div>
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="academic">Academic & Formal</SelectItem>
-                        <SelectItem value="creative">Creative & Engaging</SelectItem>
-                        <SelectItem value="practical">Practical & Hands-on</SelectItem>
-                    </SelectContent>
-                </Select>
-            </div>
+      <AddResourceDialog 
+        isOpen={isAddResourceOpen}
+        onOpenChange={setIsAddResourceOpen}
+        resource={newResource}
+        setResource={setNewResource}
+        onSave={handleAddResource}
+      />
 
-            <div className="space-y-2">
-                <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
-                    <Target className="h-3.5 w-3.5 text-primary" />
-                    Learning Objectives (Optional)
-                </Label>
-                <Textarea 
-                    placeholder="e.g. Focus on chemical equations, or historical context..." 
-                    value={magicConfig.objectives} 
-                    onChange={(e) => setMagicConfig({ ...magicConfig, objectives: e.target.value })}
-                    className="resize-none h-20 text-xs"
-                />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsMagicModalOpen(false)}>Cancel</Button>
-            <Button onClick={handleMagicCreate} disabled={isMagicCreating} className="bg-purple-600 hover:bg-purple-700">
-                {isMagicCreating ? (
-                    <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Generating...
-                    </>
-                ) : (
-                    <>
-                        <Zap className="h-4 w-4 mr-2" />
-                        Generate
-                    </>
-                )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={isAddResourceOpen} onOpenChange={setIsAddResourceOpen}>
-        <DialogContent className="sm:max-w-150">
-          <DialogHeader><DialogTitle>Add Material</DialogTitle></DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2"><Label>Title</Label><Input value={newResource.title} onChange={(e) => setNewResource({ ...newResource, title: e.target.value })} /></div>
-              <div className="space-y-2"><Label>Type</Label><Select value={newResource.type} onValueChange={(v: any) => setNewResource({ ...newResource, type: v })}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="note">Note</SelectItem><SelectItem value="file">File</SelectItem><SelectItem value="link">Link</SelectItem></SelectContent></Select></div>
-            </div>
-            {newResource.type === "note" && <Textarea className="min-h-50" value={newResource.content} onChange={(e) => setNewResource({ ...newResource, content: e.target.value })} />}
-            {newResource.type === "file" && <FileUpload onUploadSuccess={(url, pubId) => setNewResource({ ...newResource, url, cldPubId: pubId })} />}
-          </div>
-          <DialogFooter><Button onClick={handleAddResource}>Save</Button></DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-        <DialogContent>
-          <DialogHeader><DialogTitle>New Module</DialogTitle></DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="grid gap-2"><Label>Name</Label><Input value={newModuleName} onChange={(e) => setNewModuleName(e.target.value)} /></div>
-            <div className="grid gap-2"><Label>Description</Label><Textarea value={newModuleDesc} onChange={(e) => setNewModuleDesc(e.target.value)} /></div>
-          </div>
-          <DialogFooter><Button onClick={handleCreateModule}>Create</Button></DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <CreateModuleDialog 
+        isOpen={isCreateModalOpen}
+        onOpenChange={setIsCreateModalOpen}
+        name={newModuleName}
+        setName={setNewModuleName}
+        description={newModuleDesc}
+        setDescription={setNewModuleDesc}
+        onCreate={handleCreateModule}
+      />
     </div>
   );
 };

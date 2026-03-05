@@ -39,6 +39,8 @@ export interface User {
   verificationDocumentCldPubId: string | null;
   createdAt: string;
   updatedAt: string;
+  level?: number;
+  xp?: number;
 }
 
 export interface Department {
@@ -175,6 +177,7 @@ export type Class = z.infer<typeof classFormSchema> & {
   enrollments: Enrollment[];
   assignments: Assignment[];
   modules?: Module[];
+  isLive?: boolean;
 };
 
 export type ClassListItem = Pick<Class, "id" | "name" | "status" | "capacity" | "bannerUrl" | "teachers" | "schedules"> & {
@@ -291,6 +294,19 @@ export interface AiLog {
   response: string;
   tokensUsed: number;
   model: string;
+  createdAt: string;
+  user?: User;
+}
+
+export interface ActivityLog {
+  id: number;
+  userId: string;
+  action: string;
+  details: any;
+  ipAddress: string | null;
+  userAgent: string | null;
+  entityType?: string;
+  entityId?: string;
   createdAt: string;
   user?: User;
 }
