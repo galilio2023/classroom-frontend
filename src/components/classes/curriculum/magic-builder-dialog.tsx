@@ -13,17 +13,19 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Zap, Loader2, GraduationCap, MessageSquare, Target } from "lucide-react";
 
+interface MagicBuilderConfig {
+  topic: string;
+  type: "package" | "note" | "quiz" | "assignment";
+  level: string;
+  tone: string;
+  objectives: string;
+}
+
 interface MagicBuilderDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  config: {
-    topic: string;
-    type: "package" | "note" | "quiz" | "assignment";
-    level: string;
-    tone: string;
-    objectives: string;
-  };
-  setConfig: (config: any) => void;
+  config: MagicBuilderConfig;
+  setConfig: (config: MagicBuilderConfig) => void;
   onGenerate: () => void;
   isGenerating: boolean;
 }
@@ -57,7 +59,10 @@ export const MagicBuilderDialog = ({
           <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                   <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Content Type</Label>
-                  <Select value={config.type} onValueChange={(v: any) => setConfig({ ...config, type: v })}>
+                  <Select 
+                    value={config.type} 
+                    onValueChange={(v: MagicBuilderConfig["type"]) => setConfig({ ...config, type: v })}
+                  >
                       <SelectTrigger>
                           <SelectValue />
                       </SelectTrigger>
@@ -71,7 +76,10 @@ export const MagicBuilderDialog = ({
               </div>
               <div className="space-y-2">
                   <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Grade Level</Label>
-                  <Select value={config.level} onValueChange={(v: any) => setConfig({ ...config, level: v })}>
+                  <Select 
+                    value={config.level} 
+                    onValueChange={(v: string) => setConfig({ ...config, level: v })}
+                  >
                       <SelectTrigger>
                           <div className="flex items-center gap-2">
                               <GraduationCap className="h-3.5 w-3.5 text-primary" />
@@ -89,7 +97,10 @@ export const MagicBuilderDialog = ({
 
           <div className="space-y-2">
               <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Tone & Style</Label>
-              <Select value={config.tone} onValueChange={(v: any) => setConfig({ ...config, tone: v })}>
+              <Select 
+                value={config.tone} 
+                onValueChange={(v: string) => setConfig({ ...config, tone: v })}
+              >
                   <SelectTrigger>
                       <div className="flex items-center gap-2">
                           <MessageSquare className="h-3.5 w-3.5 text-primary" />

@@ -25,13 +25,10 @@ export const LiveClassroom = ({ classId }: LiveClassroomProps) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const { mutate: markLiveAttendance } = useCustomMutation();
+  const { mutate: getRoomToken } = useCustomMutation();
 
   const isTeacher = identity?.role === UserRole.TEACHER || identity?.role === UserRole.ADMIN;
   
-  // TODO: In a production environment, this room name should be generated and signed by the backend
-  // to prevent unauthorized access. For now, we use a predictable format for demonstration.
-  const roomName = `ClassroomAI-Class-${classId}-Live`;
-
   useEffect(() => {
     // Load Jitsi Script
     if (!window.JitsiMeetExternalAPI) {
@@ -53,63 +50,88 @@ export const LiveClassroom = ({ classId }: LiveClassroomProps) => {
 
     setIsLoading(true);
 
-    const domain = "meet.jit.si";
-    const options = {
-      roomName: roomName,
-      width: "100%",
-      height: 600,
-      parentNode: jitsiContainerRef.current,
-      userInfo: {
-        displayName: identity.name,
-        email: identity.email,
-      },
-      configOverwrite: {
-        startWithAudioMuted: true,
-        startWithVideoMuted: true,
-        prejoinPageEnabled: false,
-      },
-      interfaceConfigOverwrite: {
-        TOOLBAR_BUTTONS: [
-          "microphone", "camera", "closedcaptions", "desktop", "fullscreen",
-          "fodeviceselection", "hangup", "profile", "chat", "recording",
-          "livestreaming", "etherpad", "sharedvideo", "settings", "raisehand",
-          "videoquality", "filmstrip", "invite", "feedback", "stats", "shortcuts",
-          "tileview", "videobackgroundblur", "download", "help", "mute-everyone",
-          "security"
-        ],
-      },
-    };
-
-    const newApi = new window.JitsiMeetExternalAPI(domain, options);
-    setApi(newApi);
-
-    newApi.addEventListeners({
-      videoConferenceJoined: () => {
-        setIsLoading(false);
-        setIsJoined(true);
-        
-        // --- SMART ATTENDANCE TRIGGER ---
-        if (identity.role === UserRole.STUDENT) {
-            markLiveAttendance({
-                url: "/attendance/live",
-                method: "post",
-                values: { classId: Number(classId) }
-            }, {
-                onSuccess: () => {
-                    toast.success("Attendance marked automatically!");
-                }
-            });
+    // Fetch a secure, signed room token from the backend
+    getRoomToken({
+        url: "/live-session/token",
+        method: "post",
+        values: { classId: Number(classId) }
+    }, {
+        onSuccess: (data: any) => {
+            const { roomName, token } = data.data;
+            initializeJitsi(roomName, token);
+        },
+        onError: (error) => {
+            setIsLoading(false);
+            toast.error("Failed to join live session. Please try again.");
+            console.error("Live session error:", error);
         }
-      },
-      videoConferenceLeft: () => {
-        setIsJoined(false);
-        setApi(null);
-        // Clean up the container
-        if (jitsiContainerRef.current) {
-            jitsiContainerRef.current.innerHTML = "";
-        }
-      },
     });
+  };
+
+  const initializeJitsi = (roomName: string, token?: string) => {
+      if (!window.JitsiMeetExternalAPI || !jitsiContainerRef.current || !identity) return;
+
+      const domain = "meet.jit.si";
+      const options = {
+        roomName: roomName,
+        jwt: token, // Pass the JWT token for authentication/moderation
+        width: "100%",
+        height: 600,
+        parentNode: jitsiContainerRef.current,
+        userInfo: {
+          displayName: identity.name,
+          email: identity.email,
+        },
+        configOverwrite: {
+          startWithAudioMuted: true,
+          startWithVideoMuted: true,
+          prejoinPageEnabled: false,
+        },
+        interfaceConfigOverwrite: {
+          TOOLBAR_BUTTONS: [
+            "microphone", "camera", "closedcaptions", "desktop", "fullscreen",
+            "fodeviceselection", "hangup", "profile", "chat", "recording",
+            "livestreaming", "etherpad", "sharedvideo", "settings", "raisehand",
+            "videoquality", "filmstrip", "invite", "feedback", "stats", "shortcuts",
+            "tileview", "videobackgroundblur", "download", "help", "mute-everyone",
+            "security"
+          ],
+        },
+      };
+
+      const newApi = new window.JitsiMeetExternalAPI(domain, options);
+      setApi(newApi);
+
+      newApi.addEventListeners({
+        videoConferenceJoined: () => {
+          setIsLoading(false);
+          setIsJoined(true);
+          
+          // --- SMART ATTENDANCE TRIGGER ---
+          if (identity.role === UserRole.STUDENT) {
+              markLiveAttendance({
+                  url: "/attendance/live",
+                  method: "post",
+                  values: { classId: Number(classId) }
+              }, {
+                  onSuccess: () => {
+                      toast.success("Attendance marked automatically!");
+                  },
+                  onError: () => {
+                      toast.error("Failed to mark attendance. Please notify your teacher.");
+                  }
+              });
+          }
+        },
+        videoConferenceLeft: () => {
+          setIsJoined(false);
+          setApi(null);
+          // Clean up the container
+          if (jitsiContainerRef.current) {
+              jitsiContainerRef.current.innerHTML = "";
+          }
+        },
+      });
   };
 
   return (

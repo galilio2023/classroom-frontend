@@ -63,7 +63,7 @@ export const StudentDashboard = ({ data, isLoading, list, show }: StudentDashboa
             
             <div className="flex-1 w-full space-y-3 text-center sm:text-left">
               <div>
-                <h2 className="text-2xl font-black tracking-tight">Keep it up, {identity?.name?.split(' ')[0]}!</h2>
+                <h2 className="text-2xl font-black tracking-tight">Keep it up, {identity?.name?.split(' ')[0] || "Student"}!</h2>
                 <p className="text-white/80 text-sm font-medium flex items-center justify-center sm:justify-start gap-2">
                   <Zap className="h-4 w-4 text-gold-primary" />
                   You are {Math.round(xpNeeded - xpProgress)} XP away from Level {currentLevel + 1}
