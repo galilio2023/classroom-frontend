@@ -41,7 +41,7 @@ export const MagicBuilderDialog = ({
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-              <Zap className="h-5 w-5 text-purple-500" />
+              <Zap className="h-5 w-5 text-ai-primary" />
               AI Magic Builder
           </DialogTitle>
           <DialogDescription>
@@ -119,7 +119,7 @@ export const MagicBuilderDialog = ({
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button onClick={onGenerate} disabled={isGenerating} className="bg-purple-600 hover:bg-purple-700">
+          <Button onClick={onGenerate} disabled={isGenerating} className="bg-ai-primary hover:bg-ai-primary/90 text-ai-primary-foreground">
               {isGenerating ? (
                   <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />

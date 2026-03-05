@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { AlertTriangle, TrendingDown, Clock, Activity } from "lucide-react";
+import { AlertTriangle, Activity } from "lucide-react";
 import { AtRiskStudentItem } from "./at-risk-student-item";
 import { Badge } from "@/components/ui/badge";
 
@@ -20,13 +20,13 @@ interface AtRiskStudentsProps {
 export const AtRiskStudents = ({ students }: AtRiskStudentsProps) => {
   if (students.length === 0) {
     return (
-        <Card className="border-green-500/20 bg-green-500/5">
+        <Card className="border-success/20 bg-success/5">
             <CardHeader className="pb-3">
                 <div className="flex items-center gap-2">
-                    <Activity className="h-5 w-5 text-green-600" />
-                    <CardTitle className="text-lg text-green-700">All Clear</CardTitle>
+                    <Activity className="h-5 w-5 text-success" />
+                    <CardTitle className="text-lg text-success">All Clear</CardTitle>
                 </div>
-                <CardDescription className="text-green-600/80">
+                <CardDescription className="text-success/80">
                     No students are currently flagged as at-risk. Great job!
                 </CardDescription>
             </CardHeader>

@@ -169,14 +169,16 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
         </Accordion>
       )}
 
-      <MagicBuilderDialog 
-        isOpen={isMagicModalOpen}
-        onOpenChange={setIsMagicModalOpen}
-        config={magicConfig}
-        setConfig={setMagicConfig}
-        onGenerate={handleMagicCreate}
-        isGenerating={isMagicCreating}
-      />
+      {isTeacher && (
+        <MagicBuilderDialog 
+          isOpen={isMagicModalOpen}
+          onOpenChange={setIsMagicModalOpen}
+          config={magicConfig}
+          setConfig={setMagicConfig}
+          onGenerate={handleMagicCreate}
+          isGenerating={isMagicCreating}
+        />
+      )}
 
       <AddResourceDialog 
         isOpen={isAddResourceOpen}

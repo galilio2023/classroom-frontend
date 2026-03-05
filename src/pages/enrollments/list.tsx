@@ -148,10 +148,10 @@ const EnrollmentsList = () => {
       {
         id: "class",
         header: "Class",
-        accessorKey: "class",
-        cell: ({ getValue }: any) => {
-          const classData = getValue();
-          return <span className="font-semibold">{classData?.name}</span>;
+        accessorKey: "class.name", // Changed from "class" to "class.name"
+        cell: ({ getValue }) => {
+          const className = getValue<string>();
+          return <span className="font-semibold">{className}</span>;
         },
       },
       {

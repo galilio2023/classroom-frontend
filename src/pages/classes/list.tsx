@@ -119,10 +119,10 @@ const ClassesList = () => {
       },
       {
         id: "department",
-        accessorKey: "subject.department.name",
+        accessorFn: (row) => row.subject?.department?.name, // Use accessorFn to safely access nested property
         header: () => <p className="column-title">Department</p>,
-        cell: ({ row }) => {
-          const deptName = row.original.subject?.department?.name;
+        cell: ({ getValue }) => {
+          const deptName = getValue<string>();
           return deptName ? (
             <div className="flex items-center gap-1.5 text-muted-foreground">
               <Building2 className="h-3.5 w-3.5" />

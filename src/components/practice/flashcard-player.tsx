@@ -39,10 +39,10 @@ export const FlashcardPlayer = ({ cards, onComplete }: FlashcardPlayerProps) => 
 
   if (isFinished) {
     return (
-      <Card className="border-none bg-green-500/5 py-12 text-center animate-in zoom-in-95 duration-500">
+      <Card className="border-none bg-success/5 py-12 text-center animate-in zoom-in-95 duration-500">
         <CardContent className="space-y-6">
-          <div className="mx-auto w-20 h-20 bg-green-500 rounded-full flex items-center justify-center shadow-lg shadow-green-500/20">
-            <CheckCircle2 className="h-10 w-10 text-white" />
+          <div className="mx-auto w-20 h-20 bg-success rounded-full flex items-center justify-center shadow-lg shadow-success/20">
+            <CheckCircle2 className="h-10 w-10 text-success-foreground" />
           </div>
           <div className="space-y-2">
             <h3 className="text-2xl font-black">Session Complete!</h3>
@@ -80,7 +80,7 @@ export const FlashcardPlayer = ({ cards, onComplete }: FlashcardPlayerProps) => 
             isFlipped ? "rotate-y-180" : ""
         )}>
           {/* Front */}
-          <Card className="absolute inset-0 backface-hidden border-2 border-primary/10 shadow-xl flex items-center justify-center p-8 text-center bg-white dark:bg-zinc-900">
+          <Card className="absolute inset-0 backface-hidden border-2 border-primary/10 shadow-xl flex items-center justify-center p-8 text-center bg-card">
             <CardContent className="p-0">
                 <p className="text-xl font-bold leading-relaxed">{currentCard.front}</p>
                 <p className="absolute bottom-4 left-0 right-0 text-[10px] uppercase font-black tracking-tighter opacity-30">Click to flip</p>

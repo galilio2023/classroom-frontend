@@ -28,8 +28,8 @@ export const LiveClassroom = ({ classId }: LiveClassroomProps) => {
 
   const isTeacher = identity?.role === UserRole.TEACHER || identity?.role === UserRole.ADMIN;
   
-  // Generate a secure room name: AppName + ClassID + SimpleHash
-  // In a real app, this might be signed by the backend, but this is secure enough for now.
+  // TODO: In a production environment, this room name should be generated and signed by the backend
+  // to prevent unauthorized access. For now, we use a predictable format for demonstration.
   const roomName = `ClassroomAI-Class-${classId}-Live`;
 
   useEffect(() => {
@@ -117,7 +117,7 @@ export const LiveClassroom = ({ classId }: LiveClassroomProps) => {
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-lg font-semibold flex items-center gap-2">
-            <Video className="h-5 w-5 text-red-500" />
+            <Video className="h-5 w-5 text-live-primary" />
             Live Classroom
           </h3>
           <p className="text-sm text-muted-foreground">
@@ -131,8 +131,8 @@ export const LiveClassroom = ({ classId }: LiveClassroomProps) => {
       {!isJoined ? (
         <Card className="border-dashed py-12 text-center bg-muted/10">
           <CardContent className="flex flex-col items-center gap-4">
-            <div className="p-4 bg-red-100 dark:bg-red-900/20 rounded-full">
-                <Users className="h-8 w-8 text-red-600 dark:text-red-400" />
+            <div className="p-4 bg-live-secondary rounded-full">
+                <Users className="h-8 w-8 text-live-primary" />
             </div>
             <div className="space-y-2">
                 <h4 className="text-xl font-bold">Ready to join?</h4>
@@ -145,7 +145,7 @@ export const LiveClassroom = ({ classId }: LiveClassroomProps) => {
                 size="lg" 
                 onClick={startMeeting} 
                 disabled={isLoading}
-                className="bg-red-600 hover:bg-red-700 text-white shadow-lg shadow-red-500/20"
+                className="bg-live-primary hover:bg-live-primary/90 text-white shadow-lg shadow-live-primary/20"
             >
                 {isLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Video className="h-4 w-4 mr-2" />}
                 {isTeacher ? "Start Live Session" : "Join Class Now"}
