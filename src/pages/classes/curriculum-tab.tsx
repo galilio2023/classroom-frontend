@@ -136,7 +136,11 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
             <Button variant="outline" className="border-ai-primary/30 text-ai-primary" onClick={() => { setMagicConfig({ ...magicConfig, moduleId: null, type: "package" }); setIsMagicModalOpen(true); }}>
               <Zap className="h-4 w-4 mr-2" /> Magic Builder
             </Button>
-            <Button onClick={() => setIsCreateModalOpen(true)}><PlusCircle className="h-4 w-4 mr-2" /> Add Module</Button>
+            <Button onClick={() => {
+              setNewModuleName("");
+              setNewModuleDesc("");
+              setIsCreateModalOpen(true);
+            }}><PlusCircle className="h-4 w-4 mr-2" /> Add Module</Button>
           </div>
         )}
       </div>
@@ -146,7 +150,11 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
           <CardContent>
             <LayoutGrid className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-20" />
             <h4 className="font-medium">No modules yet</h4>
-            {isTeacher && <Button onClick={() => setIsCreateModalOpen(true)} className="mt-4">Manual Create</Button>}
+            {isTeacher && <Button onClick={() => {
+              setNewModuleName("");
+              setNewModuleDesc("");
+              setIsCreateModalOpen(true);
+            }} className="mt-4">Manual Create</Button>}
           </CardContent>
         </Card>
       ) : (
@@ -162,7 +170,18 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
               onToggleProgress={handleToggleProgress}
               onDeleteModule={(id) => deleteModule({ resource: "modules", id }, { onSuccess: () => { void modulesQuery.refetch(); } })}
               onMagicAction={(moduleId, type) => { setMagicConfig({ ...magicConfig, moduleId, type: type as any }); setIsMagicModalOpen(true); }}
-              onAddMaterial={(moduleId) => { setActiveModuleId(moduleId); setIsAddResourceOpen(true); }}
+              onAddMaterial={(moduleId) => { 
+                setActiveModuleId(moduleId); 
+                setNewResource({
+                  title: "",
+                  description: "",
+                  type: "file",
+                  url: "",
+                  content: "",
+                  cldPubId: "",
+                });
+                setIsAddResourceOpen(true); 
+              }}
               onAddTask={(moduleId) => go({ to: `/assignments/create?classId=${classId}&moduleId=${moduleId}` })}
             />
           ))}
