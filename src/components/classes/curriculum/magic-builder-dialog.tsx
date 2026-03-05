@@ -13,11 +13,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Zap, Loader2, GraduationCap, MessageSquare, Target } from "lucide-react";
 
+export type MagicBuilderLevel = "primary" | "high_school" | "university";
+export type MagicBuilderTone = "academic" | "creative" | "practical";
+
 export interface MagicBuilderConfig {
   topic: string;
   type: "package" | "note" | "quiz" | "assignment";
-  level: string;
-  tone: string;
+  level: MagicBuilderLevel;
+  tone: MagicBuilderTone;
   objectives: string;
   moduleId: number | null;
 }
@@ -64,60 +67,66 @@ export const MagicBuilderDialog = ({
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Content Type</Label>
-              <Select 
-                value={config.type} 
-                onValueChange={(v: "package" | "note" | "quiz" | "assignment") => setConfig({ ...config, type: v })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="package">Full Package</SelectItem>
-                  <SelectItem value="note">Lesson Notes</SelectItem>
-                  <SelectItem value="quiz">Quiz</SelectItem>
-                  <SelectItem value="assignment">Assignment</SelectItem>
-                </SelectContent>
-              </Select>
+              <span className="block">
+                <Select 
+                  value={config.type} 
+                  onValueChange={(v: "package" | "note" | "quiz" | "assignment") => setConfig({ ...config, type: v })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="package">Full Package</SelectItem>
+                    <SelectItem value="note">Lesson Notes</SelectItem>
+                    <SelectItem value="quiz">Quiz</SelectItem>
+                    <SelectItem value="assignment">Assignment</SelectItem>
+                  </SelectContent>
+                </Select>
+              </span>
             </div>
             <div className="space-y-2">
               <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Grade Level</Label>
-              <Select 
-                value={config.level} 
-                onValueChange={(v: string) => setConfig({ ...config, level: v })}
-              >
-                <SelectTrigger>
-                  <div className="flex items-center gap-2">
-                    <GraduationCap className="h-3.5 w-3.5 text-primary" />
-                    <SelectValue placeholder="Select level" />
-                  </div>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="primary">Primary School</SelectItem>
-                  <SelectItem value="high_school">High School</SelectItem>
-                  <SelectItem value="university">University</SelectItem>
-                </SelectContent>
-              </Select>
+              <span className="block">
+                <Select 
+                  value={config.level} 
+                  onValueChange={(v: MagicBuilderLevel) => setConfig({ ...config, level: v })}
+                >
+                  <SelectTrigger>
+                    <div className="flex items-center gap-2">
+                      <GraduationCap className="h-3.5 w-3.5 text-primary" />
+                      <SelectValue placeholder="Select level" />
+                    </div>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="primary">Primary School</SelectItem>
+                    <SelectItem value="high_school">High School</SelectItem>
+                    <SelectItem value="university">University</SelectItem>
+                  </SelectContent>
+                </Select>
+              </span>
             </div>
           </div>
 
           <div className="space-y-2">
             <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Tone & Style</Label>
-            <Select 
-              value={config.tone} 
-              onValueChange={(v: string) => setConfig({ ...config, tone: v })}
-            >
-              <SelectTrigger>
-                <div className="flex items-center gap-2">
-                  <MessageSquare className="h-3.5 w-3.5 text-primary" />
-                  <SelectValue placeholder="Select tone" />
-                </div>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="academic">Academic & Formal</SelectItem>
-                <SelectItem value="creative">Creative & Engaging</SelectItem>
-                <SelectItem value="practical">Practical & Hands-on</SelectItem>
-              </SelectContent>
-            </Select>
+            <span className="block">
+              <Select 
+                value={config.tone} 
+                onValueChange={(v: MagicBuilderTone) => setConfig({ ...config, tone: v })}
+              >
+                <SelectTrigger>
+                  <div className="flex items-center gap-2">
+                    <MessageSquare className="h-3.5 w-3.5 text-primary" />
+                    <SelectValue placeholder="Select tone" />
+                  </div>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="academic">Academic & Formal</SelectItem>
+                  <SelectItem value="creative">Creative & Engaging</SelectItem>
+                  <SelectItem value="practical">Practical & Hands-on</SelectItem>
+                </SelectContent>
+              </Select>
+            </span>
           </div>
 
           <div className="space-y-2">
