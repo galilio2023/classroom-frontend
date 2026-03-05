@@ -23,7 +23,7 @@ export const TaskItem = ({
   return (
     <div className={cn(
         "flex items-center justify-between p-3 rounded-md border transition-colors",
-        completed ? "bg-green-50/50 border-green-200 dark:bg-green-950/20 dark:border-green-900/50" : 
+        completed ? "bg-success/10 border-success/20 dark:bg-success/5 dark:border-success/30" : 
         isQuiz ? "bg-orange-50/50 border-orange-200 dark:bg-orange-950/20 dark:border-orange-900/30" : 
         "bg-blue-50/50 border-blue-200 dark:bg-blue-950/20 dark:border-blue-900/30"
     )}>
@@ -34,7 +34,7 @@ export const TaskItem = ({
                     className="shrink-0 focus:outline-none"
                 >
                     {completed ? (
-                        <CheckCircle2 className="h-5 w-5 text-green-600" />
+                        <CheckCircle2 className="h-5 w-5 text-success" />
                     ) : (
                         <Circle className="h-5 w-5 text-muted-foreground hover:text-primary transition-colors" />
                     )}
@@ -43,15 +43,15 @@ export const TaskItem = ({
             
             <div className="flex items-center gap-2 min-w-0">
                 {isQuiz ? (
-                    <FileQuestion className={cn("h-4 w-4 shrink-0", completed ? "text-green-600" : "text-orange-500")} />
+                    <FileQuestion className={cn("h-4 w-4 shrink-0", completed ? "text-success" : "text-orange-500")} />
                 ) : (
-                    <FileText className={cn("h-4 w-4 shrink-0", completed ? "text-green-600" : "text-blue-500")} />
+                    <FileText className={cn("h-4 w-4 shrink-0", completed ? "text-success" : "text-blue-500")} />
                 )}
                 
                 <div className="flex flex-col min-w-0">
                     <span className={cn(
                         "text-sm font-medium truncate",
-                        completed && "text-green-700 dark:text-green-400 line-through decoration-green-500/50"
+                        completed && "text-success/80 dark:text-success/60 line-through decoration-success/50"
                     )}>
                         {item.title}
                     </span>
@@ -66,7 +66,7 @@ export const TaskItem = ({
         
         <Badge variant="outline" className={cn(
             "text-[10px] ml-2 shrink-0", 
-            completed ? "border-green-200 text-green-600 bg-green-50" : 
+            completed ? "border-success/20 text-success bg-success/10" :
             isQuiz ? "border-orange-200 text-orange-600 bg-orange-50" : 
             "border-blue-200 text-blue-600 bg-blue-50"
         )}>

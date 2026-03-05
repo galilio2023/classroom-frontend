@@ -151,7 +151,7 @@ export const ModuleItem = ({
           <div className="mt-6 pt-4 border-t flex gap-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="h-8 text-xs border-purple-500/30 text-purple-600">
+                <Button variant="outline" size="sm" className="h-8 text-xs border-ai-primary/30 text-ai-primary">
                   <Sparkles className="h-3 w-3 mr-1.5" />
                   AI Magic
                 </Button>

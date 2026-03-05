@@ -133,7 +133,7 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
         </div>
         {isTeacher && (
           <div className="flex gap-2">
-            <Button variant="outline" className="border-purple-500/30 text-purple-600" onClick={() => { setMagicConfig({ ...magicConfig, moduleId: null, type: "package" }); setIsMagicModalOpen(true); }}>
+            <Button variant="outline" className="border-ai-primary/30 text-ai-primary" onClick={() => { setMagicConfig({ ...magicConfig, moduleId: null, type: "package" }); setIsMagicModalOpen(true); }}>
               <Zap className="h-4 w-4 mr-2" /> Magic Builder
             </Button>
             <Button onClick={() => setIsCreateModalOpen(true)}><PlusCircle className="h-4 w-4 mr-2" /> Add Module</Button>

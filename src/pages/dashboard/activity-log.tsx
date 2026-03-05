@@ -17,7 +17,7 @@ const actionVariants: Record<string, string> = {
   DELETE_CLASS: "bg-red-500/10 text-red-600 border-red-200",
   JOIN_CLASS: "bg-blue-500/10 text-blue-600 border-blue-200",
   APPROVE_ENROLLMENT: "bg-indigo-500/10 text-indigo-600 border-indigo-200",
-  SUBMIT_ASSIGNMENT: "bg-purple-500/10 text-purple-600 border-purple-200",
+  SUBMIT_ASSIGNMENT: "bg-ai-primary/10 text-ai-primary border-ai-primary/20",
   GRADE_SUBMISSION: "bg-amber-500/10 text-amber-600 border-amber-200",
   USER_LOGIN: "bg-slate-500/10 text-slate-600 border-slate-200",
 };

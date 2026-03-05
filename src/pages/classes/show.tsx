@@ -170,7 +170,7 @@ const ClassesShow = () => {
               <Button
                 variant="outline"
                 size="sm"
-                className="h-8 gap-2 border-primary/20 hover:bg-primary/5 text-primary"
+                className="h-8 gap-2 border-ai-primary/20 hover:bg-ai-primary/5 text-ai-primary"
                 onClick={() => setInsightTarget({ id: row.original.student.id, name: row.original.student.name })}
               >
                 <Sparkles className="h-3.5 w-3.5" />
@@ -250,10 +250,10 @@ const ClassesShow = () => {
             </TabsTrigger>
             <TabsTrigger value="live">
               <div className="flex items-center gap-2">
-                <Video className="h-4 w-4 text-red-500" />
+                <Video className="h-4 w-4 text-live-primary" />
                 <span className="hidden sm:inline">Live</span>
                 {aClass.isLive && (
-                    <span className="flex h-2 w-2 rounded-full bg-red-500 animate-pulse" />
+                    <span className="flex h-2 w-2 rounded-full bg-live-primary animate-pulse" />
                 )}
               </div>
             </TabsTrigger>
@@ -465,7 +465,7 @@ const ClassesShow = () => {
                           className="h-12 w-12 rounded-full"
                           onClick={handleCopyInviteCode}
                         >
-                          {copied ? <Check className="h-5 w-5 text-green-500" /> : <Copy className="h-5 w-5" />}
+                          {copied ? <Check className="h-5 w-5 text-success" /> : <Copy className="h-5 w-5" />}
                         </Button>
                       </div>
                       

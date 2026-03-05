@@ -132,7 +132,7 @@ export const GradingDialog = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto border-none shadow-2xl p-0 overflow-hidden text-left">
+      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto border-none shadow-2xl p-0 overflow-hidden text-left">
         <div className="h-1.5 bg-primary w-full" />
         
         <div className="p-6 space-y-6">
@@ -152,7 +152,7 @@ export const GradingDialog = ({
                             size="sm" 
                             className={cn(
                                 "gap-2 rounded-xl transition-all",
-                                isAILoading ? "border-purple-500 bg-purple-50" : "border-purple-500/20 text-purple-600 hover:bg-purple-50"
+                                isAILoading ? "border-ai-primary bg-ai-primary/5" : "border-ai-primary/20 text-ai-primary hover:bg-ai-primary/5"
                             )}
                             onClick={handleAIGrade}
                             disabled={isAILoading}
