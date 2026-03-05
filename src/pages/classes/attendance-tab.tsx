@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { useCustom, useCustomMutation, useNotification, useGetIdentity } from "@refinedev/core";
+import { useSearchParams } from "react-router-dom";
 import {
   Card,
   CardContent,
@@ -51,17 +52,17 @@ interface AttendanceHistoryGroup {
 export const AttendanceTab = ({ classId, enrollments }: AttendanceTabProps) => {
   const { data: identity } = useGetIdentity<User>();
   const isTeacher = identity?.role === UserRole.TEACHER || identity?.role === UserRole.ADMIN;
+  const [searchParams] = useSearchParams();
 
   const { open } = useNotification();
-  const [selectedDate, setSelectedDate] = useState(format(new Date(), "yyyy-MM-dd"));
+  const [selectedDate, setSelectedDate] = useState(searchParams.get("date") || format(new Date(), "yyyy-MM-dd"));
   const [attendanceData, setAttendanceData] = useState<Record<string, { status: AttendanceStatus; remarks: string }>>({});
   
-  // QR Modals State
   const [isQRModalOpen, setIsQRModalOpen] = useState(false);
   const [isScannerModalOpen, setIsScannerModalOpen] = useState(false);
 
   // Fetch existing attendance for the selected date
-  const { data: existingAttendance, isLoading: isFetching, refetch: refetchDaily } = useCustom<Attendance[]>({
+  const { query: dailyQuery } = useCustom<Attendance[]>({
     url: `/attendance`,
     method: "get",
     config: {
@@ -70,36 +71,44 @@ export const AttendanceTab = ({ classId, enrollments }: AttendanceTabProps) => {
         date: selectedDate,
       },
     },
-  }) as any;
+  });
+
+  const existingAttendance = dailyQuery.data;
+  const isFetching = dailyQuery.isLoading;
+  const refetchDaily = dailyQuery.refetch;
 
   // Fetch attendance history
-  const { data: historyData, isLoading: isHistoryLoading, refetch: refetchHistory } = useCustom<AttendanceHistoryGroup[]>({
+  const { query: historyQuery } = useCustom<AttendanceHistoryGroup[]>({
     url: `/attendance/history/${classId}`,
     method: "get",
-  }) as any;
+  });
+  const historyData = historyQuery.data;
+  const isHistoryLoading = historyQuery.isLoading;
+  const refetchHistory = historyQuery.refetch;
 
-  // Fetch overall stats
-  const { data: statsData, isLoading: isStatsLoading, refetch: refetchStats } = useCustom<Record<AttendanceStatus, number>>({
+  // Fetch stats for the SELECTED date
+  const { query: statsQuery } = useCustom<Record<AttendanceStatus, number>>({
     url: `/attendance/stats/${classId}`,
     method: "get",
-  }) as any;
+    config: {
+        query: { date: selectedDate }
+    }
+  });
+  const statsData = statsQuery.data;
+  const refetchStats = statsQuery.refetch;
 
-  // Initialize or update attendanceData when existingAttendance changes
-  // Fixed: Use useEffect instead of useMemo to avoid React warnings and ensure state sync
   useEffect(() => {
     const initialData: Record<string, { status: AttendanceStatus; remarks: string }> = {};
     
-    // Default all to present
     enrollments.forEach((e) => {
-      initialData[e.studentId] = { status: AttendanceStatus.PRESENT, remarks: "" };
+      initialData[e.studentId] = { status: AttendanceStatus.ABSENT, remarks: "" };
     });
 
-    // Overwrite with existing data if found
     if (existingAttendance?.data) {
       existingAttendance.data.forEach((record: Attendance) => {
-        // Ensure we only map records for the currently selected date
-        const recordDate = format(new Date(record.date), "yyyy-MM-dd");
-        if (recordDate === selectedDate) {
+        const recordDateStr = typeof record.date === 'string' ? record.date.split('T')[0] : format(new Date(record.date), "yyyy-MM-dd");
+        
+        if (recordDateStr === selectedDate) {
             initialData[record.studentId] = { 
                 status: record.status, 
                 remarks: record.remarks || "" 
@@ -150,9 +159,9 @@ export const AttendanceTab = ({ classId, enrollments }: AttendanceTabProps) => {
             message: "Attendance Saved",
             description: `Attendance for ${selectedDate} has been updated successfully.`,
           });
-          refetchDaily();
-          refetchHistory();
-          refetchStats();
+          void refetchDaily();
+          void refetchHistory();
+          void refetchStats();
         },
       }
     );
@@ -178,49 +187,56 @@ export const AttendanceTab = ({ classId, enrollments }: AttendanceTabProps) => {
 
   return (
     <div className="space-y-6">
-      {/* Stats Overview */}
       <div className="grid gap-4 md:grid-cols-4">
-        <Card>
+        <Card className="border-green-500/20 bg-green-500/[0.02]">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div className="space-y-1">
-                <p className="text-sm font-medium text-muted-foreground">Present</p>
-                <p className="text-2xl font-bold text-green-500">{statsData?.data?.present || 0}</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-green-600/60">Present</p>
+                <p className="text-3xl font-black text-green-600">{statsData?.data?.present || 0}</p>
               </div>
-              <CheckCircle2 className="h-8 w-8 text-green-500/20" />
+              <div className="p-2 bg-green-500/10 rounded-lg">
+                <CheckCircle2 className="h-5 w-5 text-green-600" />
+              </div>
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="border-destructive/20 bg-destructive/[0.02]">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div className="space-y-1">
-                <p className="text-sm font-medium text-muted-foreground">Absent</p>
-                <p className="text-2xl font-bold text-destructive">{statsData?.data?.absent || 0}</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-destructive/60">Absent</p>
+                <p className="text-3xl font-black text-destructive">{statsData?.data?.absent || 0}</p>
               </div>
-              <XCircle className="h-8 w-8 text-destructive/20" />
+              <div className="p-2 bg-destructive/10 rounded-lg">
+                <XCircle className="h-5 w-5 text-destructive" />
+              </div>
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="border-yellow-500/20 bg-yellow-500/[0.02]">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div className="space-y-1">
-                <p className="text-sm font-medium text-muted-foreground">Late</p>
-                <p className="text-2xl font-bold text-yellow-500">{statsData?.data?.late || 0}</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-yellow-600/60">Late</p>
+                <p className="text-3xl font-black text-yellow-600">{statsData?.data?.late || 0}</p>
               </div>
-              <Clock className="h-8 w-8 text-yellow-500/20" />
+              <div className="p-2 bg-yellow-500/10 rounded-lg">
+                <Clock className="h-5 w-5 text-yellow-600" />
+              </div>
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="border-blue-500/20 bg-blue-500/[0.02]">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div className="space-y-1">
-                <p className="text-sm font-medium text-muted-foreground">Excused</p>
-                <p className="text-2xl font-bold text-blue-500">{statsData?.data?.excused || 0}</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-blue-600/60">Excused</p>
+                <p className="text-3xl font-black text-blue-600">{statsData?.data?.excused || 0}</p>
               </div>
-              <AlertCircle className="h-8 w-8 text-blue-500/20" />
+              <div className="p-2 bg-blue-500/10 rounded-lg">
+                <AlertCircle className="h-5 w-5 text-blue-600" />
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -306,7 +322,7 @@ export const AttendanceTab = ({ classId, enrollments }: AttendanceTabProps) => {
                       <TableBody>
                         {enrollments.map((enrollment) => {
                           const student = enrollment.student;
-                          const data = attendanceData[student.id] || { status: AttendanceStatus.PRESENT, remarks: "" };
+                          const data = attendanceData[student.id] || { status: AttendanceStatus.ABSENT, remarks: "" };
 
                           return (
                             <TableRow key={student.id}>
@@ -379,7 +395,7 @@ export const AttendanceTab = ({ classId, enrollments }: AttendanceTabProps) => {
                   <div className="flex justify-center py-8">
                     <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
                   </div>
-                ) : historyData?.data?.length > 0 ? (
+                ) : (historyData?.data?.length ?? 0) > 0 ? (
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -452,9 +468,9 @@ export const AttendanceTab = ({ classId, enrollments }: AttendanceTabProps) => {
         isOpen={isQRModalOpen} 
         onClose={() => {
           setIsQRModalOpen(false);
-          refetchDaily();
-          refetchHistory();
-          refetchStats();
+          void refetchDaily();
+          void refetchHistory();
+          void refetchStats();
         }} 
         classId={classId} 
       />
@@ -463,9 +479,9 @@ export const AttendanceTab = ({ classId, enrollments }: AttendanceTabProps) => {
         isOpen={isScannerModalOpen} 
         onClose={() => {
           setIsScannerModalOpen(false);
-          refetchDaily();
-          refetchHistory();
-          refetchStats();
+          void refetchDaily();
+          void refetchHistory();
+          void refetchStats();
         }} 
         classId={classId} 
       />

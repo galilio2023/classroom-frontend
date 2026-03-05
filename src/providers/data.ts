@@ -1,5 +1,4 @@
 import { DataProvider, HttpError } from "@refinedev/core";
-import { CreateResponse, GetOneResponse, ListResponse } from "@/types";
 
 const BACKEND_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -7,47 +6,55 @@ const BACKEND_BASE_URL = import.meta.env.VITE_API_URL;
  * Helper to handle API errors and return Refine-compatible HttpError
  */
 const handleError = async (response: Response): Promise<HttpError> => {
+  let json: any = {};
   try {
-    const json = await response.json();
-    
-    // If backend returned Zod validation details (Layer 3)
-    // Backend format: { error: "Validation failed", details: { field: "message" } }
-    if (json.details) {
-      return {
-        message: json.error || "Validation failed",
-        statusCode: response.status,
-        errors: json.details, // Maps to Refine's form errors automatically
-      };
+    const text = await response.text();
+    if (text) {
+      json = JSON.parse(text);
     }
-
-    // Standardized error message from Layer 1/3
-    // Backend format: { error: "Specific error message" }
-    return {
-      message: json.error || json.message || `HTTP error! status: ${response.status}`,
-      statusCode: response.status,
-    };
   } catch (e) {
+    // Not JSON or empty
+  }
+
+  // If backend returned Zod validation details (Layer 3)
+  if (json.details) {
     return {
-      message: `HTTP error! status: ${response.status}`,
+      message: json.error || "Validation failed",
       statusCode: response.status,
+      errors: json.details,
     };
   }
+
+  // Standardized error message
+  return {
+    message: json.error || json.message || `HTTP error! status: ${response.status}`,
+    statusCode: response.status,
+  };
 };
 
+/**
+ * Smart Fetcher: Only adds Content-Type for methods with a body.
+ */
 const fetcher = async (url: string, options?: RequestInit) => {
+  const method = options?.method?.toUpperCase() || "GET";
+  const headers: Record<string, string> = {
+    ...(options?.headers as Record<string, string>),
+  };
+
+  // Only add Content-Type for methods that typically send a body
+  if (["POST", "PUT", "PATCH"].includes(method)) {
+    headers["Content-Type"] = "application/json";
+  }
+
   return fetch(url, {
     ...options,
     credentials: "include",
-    headers: {
-      ...options?.headers,
-      "Content-Type": "application/json",
-    },
+    headers: headers,
   });
 };
 
 /**
- * Resource Filter Mappings (Rule 5 of CODE_PATTERNS.md)
- * Explicitly defines how frontend filters map to backend query parameters.
+ * Resource Filter Mappings
  */
 const resourceFilterMappings: Record<string, Record<string, string>> = {
   departments: { name: "search", code: "search" },
@@ -61,7 +68,7 @@ const resourceFilterMappings: Record<string, Record<string, string>> = {
   attendance: { classId: "classId", date: "date" },
   resources: { classId: "classId", search: "search" },
   "profile-requests": { status: "status", userId: "userId" },
-  quizzes: { classId: "classId" }, // Added: Explicit filter mapping for quizzes
+  quizzes: { classId: "classId" },
 };
 
 export const dataProvider: DataProvider = {
@@ -88,13 +95,13 @@ export const dataProvider: DataProvider = {
       throw await handleError(response);
     }
 
-    const json: ListResponse = await response.json();
+    const json = await response.json();
     
-    // Layer 3: Backend now returns { success: true, data: [], pagination: {} }
-    return {
-      data: json.data ?? [],
-      total: json.pagination?.total ?? json.data?.length ?? 0,
-    };
+    // Handle both { data: [], pagination: {} } and direct array responses
+    const data = json.data ?? (Array.isArray(json) ? json : []);
+    const total = json.pagination?.total ?? data.length;
+
+    return { data, total };
   },
 
   getOne: async ({ resource, id }) => {
@@ -105,9 +112,10 @@ export const dataProvider: DataProvider = {
       throw await handleError(response);
     }
 
-    const json: GetOneResponse = await response.json();
+    const json = await response.json();
+    // Handle both { data: {} } and direct object responses
     return {
-      data: json.data,
+      data: json.data ?? json,
     };
   },
 
@@ -122,9 +130,9 @@ export const dataProvider: DataProvider = {
       throw await handleError(response);
     }
 
-    const json: CreateResponse = await response.json();
+    const json = await response.json();
     return {
-      data: json.data,
+      data: json.data ?? json,
     };
   },
 
@@ -141,7 +149,7 @@ export const dataProvider: DataProvider = {
 
     const json = await response.json();
     return {
-      data: json.data,
+      data: json.data ?? json,
     };
   },
 
@@ -156,8 +164,6 @@ export const dataProvider: DataProvider = {
     }
 
     const json = await response.json();
-    
-    // Layer 5: Backend returns the soft-deleted object
     return {
       data: json.data || { id },
     };
@@ -167,9 +173,6 @@ export const dataProvider: DataProvider = {
   
   getMany: async ({ resource, ids }) => {
     const url = new URL(`${BACKEND_BASE_URL}/${resource}`);
-    
-    // Append each ID as a query parameter (e.g., ?id=1&id=2)
-    // Note: Backend must support array query params or comma-separated values
     ids.forEach((id) => {
       url.searchParams.append("id", String(id));
     });
@@ -180,10 +183,9 @@ export const dataProvider: DataProvider = {
       throw await handleError(response);
     }
 
-    const json: ListResponse = await response.json();
-    return {
-      data: json.data ?? [],
-    };
+    const json = await response.json();
+    const data = json.data ?? (Array.isArray(json) ? json : []);
+    return { data };
   },
 
   createMany: async () => { throw new Error("createMany not implemented"); },
@@ -213,8 +215,6 @@ export const dataProvider: DataProvider = {
      }
      
      const json = await response.json();
-     
-     // Layer 3: Standardized response check
      if (json && typeof json === 'object' && 'data' in json) {
          return json;
      }

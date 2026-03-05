@@ -15,6 +15,10 @@ export const AIAssignmentHelper: React.FC<AIAssignmentHelperProps> = ({ onUseCon
     setTopic,
     difficulty,
     setDifficulty,
+    tone,
+    setTone,
+    objectives,
+    setObjectives,
     generatedContent,
     handleGenerate,
     isLoading,
@@ -29,6 +33,10 @@ export const AIAssignmentHelper: React.FC<AIAssignmentHelperProps> = ({ onUseCon
         setTopic={setTopic}
         difficulty={difficulty}
         setDifficulty={setDifficulty}
+        tone={tone}
+        setTone={setTone}
+        objectives={objectives}
+        setObjectives={setObjectives}
         handleGenerate={handleGenerate}
         isLoading={isLoading}
       />

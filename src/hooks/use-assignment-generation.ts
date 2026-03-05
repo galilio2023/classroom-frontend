@@ -9,6 +9,8 @@ export const useAssignmentGeneration = () => {
   const [subject, setSubject] = useState("");
   const [topic, setTopic] = useState("");
   const [difficulty, setDifficulty] = useState("intermediate");
+  const [tone, setTone] = useState("academic");
+  const [objectives, setObjectives] = useState("");
   const [generatedContent, setGeneratedContent] = useState("");
 
   const { open } = useNotification();
@@ -29,7 +31,7 @@ export const useAssignmentGeneration = () => {
       {
         url: "/ai/generate-assignment",
         method: "post",
-        values: { subject, topic, difficulty },
+        values: { subject, topic, difficulty, tone, objectives },
       },
       {
         onSuccess: (data) => {
@@ -58,6 +60,10 @@ export const useAssignmentGeneration = () => {
     setTopic,
     difficulty,
     setDifficulty,
+    tone,
+    setTone,
+    objectives,
+    setObjectives,
     generatedContent,
     setGeneratedContent,
     handleGenerate,

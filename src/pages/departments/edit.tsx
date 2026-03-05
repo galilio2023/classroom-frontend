@@ -1,6 +1,7 @@
 import { EditViewHeader } from "@/components/refine-ui/views/edit-view";
 import { useForm } from "@refinedev/react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useSelect } from "@refinedev/core";
 import {
   Form,
   FormControl,
@@ -11,6 +12,13 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -21,9 +29,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { BookOpen, Code2, FileText, Lightbulb, Info } from "lucide-react";
+import { BookOpen, Code2, FileText, Lightbulb, Info, UserCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { departmentFormSchema } from "@/schemas/department";
+import { User, UserRole } from "@/types";
 
 const DepartmentsEdit = () => {
   const {
@@ -36,6 +45,19 @@ const DepartmentsEdit = () => {
       action: "edit",
       redirect: "list",
     },
+  });
+
+  const { options: teacherOptions } = useSelect<User>({
+    resource: "users",
+    optionLabel: "name",
+    optionValue: "id",
+    filters: [
+      {
+        field: "role",
+        operator: "eq",
+        value: UserRole.TEACHER,
+      },
+    ],
   });
 
   return (
@@ -107,6 +129,35 @@ const DepartmentsEdit = () => {
                     />
                   </div>
 
+                  {/* Head of Department Field */}
+                  <FormField
+                    control={form.control}
+                    name="headId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center gap-2">
+                          <UserCircle className="h-4 w-4 text-muted-foreground" />
+                          Head of Department
+                        </FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value || undefined}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select a teacher to lead this department" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {teacherOptions.map((option) => (
+                              <SelectItem key={option.value} value={option.value.toString()}>
+                                {option.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
                   {/* Description Field */}
                   <FormField
                     control={form.control}
@@ -119,6 +170,7 @@ const DepartmentsEdit = () => {
                             placeholder="Brief description of the department..."
                             className="resize-none min-h-[120px]"
                             {...field}
+                            value={field.value || ""}
                           />
                         </FormControl>
                         <FormMessage />

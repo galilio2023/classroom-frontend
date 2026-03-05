@@ -1,9 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { GraduationCap, Users, RefreshCw } from "lucide-react";
+import { GraduationCap, Users, RefreshCw, LayoutGrid, FileText, ShieldAlert } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { DashboardStats } from "@/types/dashboard";
 import { StatCard } from "./stat-card";
+import { useNavigation } from "@refinedev/core";
 
 interface PlatformOverviewProps {
   stats: DashboardStats | undefined;
@@ -12,6 +13,7 @@ interface PlatformOverviewProps {
 }
 
 export const PlatformOverview = ({ stats, isLoading, onRefresh }: PlatformOverviewProps) => {
+    const { list } = useNavigation();
     // Show skeletons if loading and no data yet
     const showSkeletons = isLoading && !stats;
 
@@ -26,6 +28,20 @@ export const PlatformOverview = ({ stats, isLoading, onRefresh }: PlatformOvervi
             
             {!showSkeletons && stats ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4">
+                    {stats.pendingVerifications !== undefined && stats.pendingVerifications > 0 && (
+                        <div 
+                            className="cursor-pointer group"
+                            onClick={() => list("users")}
+                        >
+                            <StatCard 
+                                label="Pending Verifications" 
+                                value={stats.pendingVerifications} 
+                                icon={ShieldAlert} 
+                                color="text-amber-500" 
+                                className="border-amber-200 bg-amber-50/50 dark:bg-amber-900/10 group-hover:border-amber-400 transition-colors"
+                            />
+                        </div>
+                    )}
                     <StatCard 
                         label="Total Students" 
                         value={stats.totalStudents} 
@@ -38,9 +54,23 @@ export const PlatformOverview = ({ stats, isLoading, onRefresh }: PlatformOvervi
                         icon={Users} 
                         color="text-green-500" 
                     />
+                    <StatCard 
+                        label="Total Classes" 
+                        value={stats.totalClasses} 
+                        icon={LayoutGrid} 
+                        color="text-purple-500" 
+                    />
+                    <StatCard 
+                        label="Total Assignments" 
+                        value={stats.totalAssignments} 
+                        icon={FileText} 
+                        color="text-orange-500" 
+                    />
                 </div>
             ) : (
                 <div className="space-y-4">
+                    <Skeleton className="h-24 w-full rounded-2xl" />
+                    <Skeleton className="h-24 w-full rounded-2xl" />
                     <Skeleton className="h-24 w-full rounded-2xl" />
                     <Skeleton className="h-24 w-full rounded-2xl" />
                 </div>

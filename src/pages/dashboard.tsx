@@ -28,33 +28,63 @@ const Dashboard = () => {
   const isStaff = identity?.role === "teacher" || identity?.role === "admin";
   const isStudent = identity?.role === "student";
   
-  const { query: dashboardQuery } = useCustom<DashboardData>({
+  // 1. Fetch "Fast" Core Data (Schedule)
+  const { query: coreQuery } = useCustom<DashboardData>({
     url: `/dashboard`,
     method: "get",
     queryOptions: { 
       enabled: !!identity,
       staleTime: 5 * 60 * 1000,
     },
+    config: {
+      query: { sections: "schedule" }
+    }
   });
 
-  const { data: dashboardResponse, isLoading: isDashboardLoading, isFetching, isError, refetch } = dashboardQuery;
-  const data = dashboardResponse?.data;
-  const isLoading = isDashboardLoading || isFetching;
+  // 2. Fetch "Slow" Analytics Data (Stats, Trends, At-Risk)
+  const { query: analyticsQuery } = useCustom<DashboardData>({
+    url: `/dashboard`,
+    method: "get",
+    queryOptions: { 
+      enabled: !!identity,
+      staleTime: 5 * 60 * 1000,
+    },
+    config: {
+      query: { 
+        sections: isStaff 
+          ? "stats,attendanceTrend,gradeDistribution,pendingSubmissions,atRiskStudents" 
+          : "upcomingAssignments,gradeTrends,subjectMastery,attendanceSummary" 
+      }
+    }
+  });
+
+  const { data: coreResponse, isLoading: isCoreLoading, refetch: refetchCore } = coreQuery;
+  const { data: analyticsResponse, isLoading: isAnalyticsLoading, isError, refetch: refetchAnalytics } = analyticsQuery;
+
+  const coreData = coreResponse?.data;
+  // Ensure analyticsData always has todaySchedule to satisfy TypeScript, even if empty
+  const analyticsData: DashboardData = analyticsResponse?.data || { todaySchedule: [] };
 
   // --- REAL-TIME UPDATES ---
   useEffect(() => {
     if (!identity?.id) return;
     const socketUrl = import.meta.env.VITE_SOCKET_URL || import.meta.env.VITE_API_URL.replace("/api", "");
     const socket = io(socketUrl, { query: { userId: identity.id }, withCredentials: true });
-    const handleRefresh = () => void refetch();
+    
+    const handleRefresh = () => {
+      void refetchCore();
+      void refetchAnalytics();
+    };
+
     socket.on("notification", handleRefresh);
     socket.on("new_discussion", handleRefresh);
+    
     return () => {
       socket.off("notification", handleRefresh);
       socket.off("new_discussion", handleRefresh);
       socket.disconnect();
     };
-  }, [identity?.id, refetch]);
+  }, [identity?.id, refetchCore, refetchAnalytics]);
 
   const activeCards = isStudent ? [
     { title: "My Classes", icon: Layout, heading: "Enrolled Classes", description: "Access active classrooms.", resource: "classes" },
@@ -72,12 +102,12 @@ const Dashboard = () => {
       <div className="flex h-dvh flex-col items-center justify-center space-y-4">
         <AlertCircle className="h-12 w-12 text-destructive" />
         <h2 className="text-xl font-semibold">Failed to load dashboard</h2>
-        <Button onClick={() => void refetch()}>Try Again</Button>
+        <Button onClick={() => { void refetchCore(); void refetchAnalytics(); }}>Try Again</Button>
       </div>
     );
   }
 
-  if (isIdentityLoading || (isLoading && !data)) {
+  if (isIdentityLoading || (isCoreLoading && !coreData)) {
     return (
       <div className="container mx-auto py-10 px-4 md:px-6">
         <WelcomeHeaderSkeleton />
@@ -96,12 +126,22 @@ const Dashboard = () => {
       <WelcomeHeader name={identity?.name || "User"} isStudent={isStudent} />
 
       <div className="space-y-12">
-        {isStaff && data && (
-          <StaffDashboard data={data} isLoading={isLoading} onRefresh={() => void refetch()} show={show} />
+        {isStaff && (
+          <StaffDashboard 
+            data={analyticsData} 
+            isLoading={isAnalyticsLoading} 
+            onRefresh={() => void refetchAnalytics()} 
+            show={show} 
+          />
         )}
         
-        {isStudent && data && (
-          <StudentDashboard data={data} list={list} show={show} />
+        {isStudent && (
+          <StudentDashboard 
+            data={analyticsData} 
+            isLoading={isAnalyticsLoading}
+            list={list} 
+            show={show} 
+          />
         )}
 
         <div className="grid gap-10 lg:grid-cols-3">
@@ -112,7 +152,10 @@ const Dashboard = () => {
           </div>
           <div className="space-y-10">
             <ErrorBoundary>
-              <TodaySchedule schedule={data?.todaySchedule ?? []} show={show} />
+              <TodaySchedule 
+                schedule={coreData?.todaySchedule ?? []} 
+                show={show} 
+              />
             </ErrorBoundary>
             <ErrorBoundary>
               <PromoCards isStaff={isStaff} list={list} />

@@ -94,6 +94,11 @@
     from { transform: translateX(-100%); }
     to { transform: translateX(100%); }
   }
+
+  @keyframes fade-in-up {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
 }
 
 @layer base {
@@ -107,6 +112,11 @@
       radial-gradient(at 0% 0%, hsla(250, 100%, 75%, 0.02) 0px, transparent 50%),
       radial-gradient(at 100% 100%, hsla(280, 100%, 75%, 0.02) 0px, transparent 50%);
   }
+}
+
+/* --- PAGE TRANSITIONS --- */
+.page-transition {
+  animation: fade-in-up 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* --- PRO SHINE UTILITIES --- */
@@ -280,10 +290,11 @@
 }
 
 [data-slot="table-row"] {
-  @apply border-black/[0.05] dark:border-white/[0.05] transition-all duration-200 cursor-pointer;
+  @apply border-black/[0.05] dark:border-white/[0.05] transition-all duration-200;
 }
 
-[data-slot="table-row"]:hover {
+/* Only apply hover effects to clickable rows */
+[data-slot="table-row"].cursor-pointer:hover {
   @apply bg-primary/[0.04] dark:bg-primary/[0.08]! translate-x-1;
 }
 

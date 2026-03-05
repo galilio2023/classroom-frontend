@@ -1,6 +1,7 @@
 import { CreateViewHeader } from "@/components/refine-ui/views/create-view";
 import { useForm } from "@refinedev/react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useSelect } from "@refinedev/core";
 import {
   Form,
   FormControl,
@@ -27,10 +28,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { User, Mail, Shield, Lightbulb, Info } from "lucide-react";
+import { User, Mail, Shield, Lightbulb, Info, Building2, Activity } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { userFormSchema } from "@/schemas/user";
-import { UserRole } from "@/types";
+import { UserRole, UserStatus, Department } from "@/types";
 
 const UsersCreate = () => {
   const { 
@@ -42,6 +43,15 @@ const UsersCreate = () => {
       resource: "users",
       redirect: "list",
     },
+    defaultValues: {
+      status: UserStatus.ACTIVE,
+    }
+  });
+
+  const { options: departmentOptions } = useSelect<Department>({
+    resource: "departments",
+    optionLabel: "name",
+    optionValue: "id",
   });
 
   return (
@@ -105,26 +115,87 @@ const UsersCreate = () => {
                     />
                   </div>
 
-                  {/* Role Dropdown */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Role Dropdown */}
+                    <FormField
+                      control={form.control}
+                      name="role"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center gap-2">
+                            <Shield className="h-4 w-4 text-muted-foreground" />
+                            Role
+                          </FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select a role" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value={UserRole.STUDENT}>Student</SelectItem>
+                              <SelectItem value={UserRole.TEACHER}>Teacher</SelectItem>
+                              <SelectItem value={UserRole.ADMIN}>Admin</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Status Dropdown */}
+                    <FormField
+                      control={form.control}
+                      name="status"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center gap-2">
+                            <Activity className="h-4 w-4 text-muted-foreground" />
+                            Account Status
+                          </FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select status" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value={UserStatus.ACTIVE}>Active</SelectItem>
+                              <SelectItem value={UserStatus.INACTIVE}>Inactive</SelectItem>
+                              <SelectItem value={UserStatus.SUSPENDED}>Suspended</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  {/* Department Dropdown */}
                   <FormField
                     control={form.control}
-                    name="role"
+                    name="departmentId"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="flex items-center gap-2">
-                          <Shield className="h-4 w-4 text-muted-foreground" />
-                          Role
+                          <Building2 className="h-4 w-4 text-muted-foreground" />
+                          Department
                         </FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
+                        <Select 
+                          onValueChange={(val) => field.onChange(val ? Number(val) : null)} 
+                          value={field.value?.toString()}
+                        >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select a role" />
+                              <SelectValue placeholder="Select a department (optional)" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value={UserRole.STUDENT}>Student</SelectItem>
-                            <SelectItem value={UserRole.TEACHER}>Teacher</SelectItem>
-                            <SelectItem value={UserRole.ADMIN}>Admin</SelectItem>
+                            {departmentOptions.map((option) => (
+                              <SelectItem key={option.value} value={option.value.toString()}>
+                                {option.label}
+                              </SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                         <FormMessage />

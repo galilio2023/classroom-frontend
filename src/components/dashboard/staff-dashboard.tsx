@@ -2,6 +2,7 @@ import { EngagementChart } from "./engagement-chart";
 import { PendingGradingList } from "./pending-grading-list";
 import { AtRiskStudents } from "./at-risk-students";
 import { PlatformOverview } from "./platform-overview";
+import { RecentActivity } from "./recent-activity";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { DashboardData } from "@/types/dashboard";
 
@@ -43,6 +44,10 @@ export const StaffDashboard = ({ data, isLoading, onRefresh, show }: StaffDashbo
               isLoading={isLoading} 
               onRefresh={onRefresh}
             />
+          </ErrorBoundary>
+
+          <ErrorBoundary>
+            <RecentActivity limit={5} />
           </ErrorBoundary>
         </div>
       </div>

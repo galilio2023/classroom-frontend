@@ -7,7 +7,6 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-  DialogFooter,
 } from "@/components/ui/dialog";
 import {
   Form,
@@ -20,11 +19,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { useCustomMutation, useNotification } from "@refinedev/core";
-import { Submission, Assignment, AIFeedbackResponse } from "@/types";
-import { useEffect } from "react";
-import { Sparkles, Loader2, FileText, ExternalLink } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { useCustomMutation, useNotification, useGetIdentity } from "@refinedev/core";
+import { Submission, Assignment, AIFeedbackResponse, User, UserRole } from "@/types";
+import { useEffect, useState } from "react";
+import { Sparkles, Loader2, FileText } from "lucide-react";
 import { FieldValues } from "react-hook-form";
+import { cn } from "@/lib/utils";
 
 const gradingSchema = z.object({
   grade: z.coerce
@@ -48,6 +49,9 @@ export const GradingDialog = ({
   submission,
 }: GradingDialogProps) => {
   const { open } = useNotification();
+  const { data: identity } = useGetIdentity<User>();
+  const isStaff = identity?.role === UserRole.TEACHER || identity?.role === UserRole.ADMIN;
+  const [hasAutoAnalyzed, setHasAutoAnalyzed] = useState(false);
 
   const form = useForm<GradingFormValues>({
     resolver: zodResolver(gradingSchema) as any,
@@ -59,9 +63,7 @@ export const GradingDialog = ({
       resource: "submissions",
       action: "edit",
       id: submission?.id,
-      queryOptions: {
-        enabled: false,
-      },
+      queryOptions: { enabled: false },
       onMutationSuccess: () => {
         onOpenChange(false);
       },
@@ -79,18 +81,31 @@ export const GradingDialog = ({
   const isAILoading = aiMutation.isPending;
 
   useEffect(() => {
-    if (submission) {
-      setValue("grade", submission.grade ?? 0);
-      setValue("feedback", submission.feedback ?? "");
+    if (isOpen) {
+        setHasAutoAnalyzed(false);
     }
-  }, [submission, setValue]);
+  }, [isOpen, submission?.id]);
+
+  useEffect(() => {
+    if (submission) {
+      setValue("grade", submission.grade ?? submission.suggestedGrade ?? 0);
+      setValue("feedback", submission.feedback ?? submission.suggestedFeedback ?? "");
+      
+      // Auto-trigger AI if no grade exists and we haven't analyzed yet (STAFF ONLY)
+      if (isStaff && isOpen && !submission.grade && !submission.suggestedGrade && !hasAutoAnalyzed && !isAILoading) {
+          handleAIGrade();
+          setHasAutoAnalyzed(true);
+      }
+    }
+  }, [submission, setValue, isOpen, isStaff]);
 
   const onSubmit = (values: FieldValues) => {
+    if (!isStaff) return;
     onFinish(values);
   };
 
   const handleAIGrade = () => {
-    if (!submission) return;
+    if (!submission || !isStaff) return;
 
     getAIFeedback(
       {
@@ -105,15 +120,8 @@ export const GradingDialog = ({
           setValue("feedback", feedback);
           open?.({
             type: "success",
-            message: "AI Feedback Generated!",
-            description: "Suggested grade and feedback have been applied.",
-          });
-        },
-        onError: () => {
-          open?.({
-            type: "error",
-            message: "AI Error",
-            description: "Failed to generate feedback from Gemini.",
+            message: "AI Analysis Complete",
+            description: "Suggested grade and feedback applied.",
           });
         },
       }
@@ -124,107 +132,129 @@ export const GradingDialog = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-150 max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <div className="flex items-center justify-between pr-6">
-            <div>
-              <DialogTitle>Grade Submission</DialogTitle>
-              <DialogDescription>
-                Student: {submission.student?.name}
-              </DialogDescription>
-            </div>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="gap-2 text-primary border-primary/20 hover:bg-primary/5"
-              onClick={handleAIGrade}
-              disabled={isAILoading}
-            >
-              {isAILoading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Sparkles className="h-4 w-4" />
-              )}
-              AI Grade Assistant
-            </Button>
-          </div>
-        </DialogHeader>
-
-        <div className="py-4 space-y-4">
-          <div>
-            <h4 className="mb-2 text-sm font-medium">Submission Content:</h4>
-            <div className="p-3 rounded-md bg-muted/50 text-sm whitespace-pre-wrap max-h-40 overflow-y-auto border">
-              {submission.content || "No text content provided."}
-            </div>
-          </div>
-
-          {submission.fileUrl && (
-            <div className="flex items-center justify-between p-3 border rounded-lg bg-background">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-primary/10 rounded-md">
-                  <FileText className="h-5 w-5 text-primary" />
+      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto border-none shadow-2xl p-0 overflow-hidden text-left">
+        <div className="h-1.5 bg-primary w-full" />
+        
+        <div className="p-6 space-y-6">
+            <DialogHeader>
+                <div className="flex items-center justify-between">
+                    <div>
+                        <DialogTitle className="text-2xl font-black tracking-tight">
+                            {isStaff ? "Grade Submission" : "Submission Details"}
+                        </DialogTitle>
+                        <DialogDescription className="font-medium">
+                            Student: <span className="text-foreground font-bold">{submission.student?.name}</span>
+                        </DialogDescription>
+                    </div>
+                    {isStaff && (
+                        <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className={cn(
+                                "gap-2 rounded-xl transition-all",
+                                isAILoading ? "border-purple-500 bg-purple-50" : "border-purple-500/20 text-purple-600 hover:bg-purple-50"
+                            )}
+                            onClick={handleAIGrade}
+                            disabled={isAILoading}
+                        >
+                            {isAILoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                            {isAILoading ? "AI Analyzing..." : "AI Re-Analyze"}
+                        </Button>
+                    )}
                 </div>
-                <div className="flex flex-col">
-                  <span className="text-sm font-medium">Attached File</span>
-                  <span className="text-xs text-muted-foreground">Student uploaded a document</span>
+            </DialogHeader>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Left: Content */}
+                <div className="space-y-4">
+                    <div className="space-y-2">
+                        <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Student Work</Label>
+                        <div className="p-4 rounded-2xl bg-muted/30 text-sm whitespace-pre-wrap min-h-[200px] max-h-[400px] overflow-y-auto border border-dashed leading-relaxed italic">
+                            {submission.content || "No text content provided."}
+                        </div>
+                    </div>
+
+                    {submission.fileUrl && (
+                        <div className="flex items-center justify-between p-3 border rounded-xl bg-primary/5 border-primary/10">
+                            <div className="flex items-center gap-3">
+                                <FileText className="h-5 w-5 text-primary" />
+                                <span className="text-xs font-bold">Attached Document</span>
+                            </div>
+                            <Button variant="ghost" size="sm" className="h-8 text-[10px] font-black uppercase tracking-widest" asChild>
+                                <a href={submission.fileUrl} target="_blank" rel="noopener noreferrer">View File</a>
+                            </Button>
+                        </div>
+                    )}
                 </div>
-              </div>
-              <Button variant="outline" size="sm" asChild>
-                <a href={submission.fileUrl} target="_blank" rel="noopener noreferrer" className="gap-2">
-                  <ExternalLink className="h-4 w-4" />
-                  View File
-                </a>
-              </Button>
+
+                {/* Right: Form or Result */}
+                <div className="space-y-4">
+                    {isStaff ? (
+                        <Form {...form}>
+                            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                                <FormField
+                                    control={control}
+                                    name="grade"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Final Score (%)</FormLabel>
+                                            <FormControl>
+                                                <div className="relative">
+                                                    <Input type="number" {...field} className="h-14 text-3xl font-black text-center rounded-2xl bg-muted/20 border-none focus-visible:ring-primary" />
+                                                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xl font-black opacity-20">%</span>
+                                                </div>
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={control}
+                                    name="feedback"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Feedback</FormLabel>
+                                            <FormControl>
+                                                <Textarea
+                                                    placeholder="Provide feedback..."
+                                                    className="min-h-[180px] rounded-2xl resize-none bg-muted/10 border-none p-4 text-sm leading-relaxed"
+                                                    {...field}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <div className="flex gap-3 pt-2">
+                                    <Button type="button" variant="ghost" className="flex-1 rounded-xl font-bold" onClick={() => onOpenChange(false)}>Cancel</Button>
+                                    <Button type="submit" disabled={formLoading || isAILoading} className="flex-[2] rounded-xl font-black uppercase tracking-widest shadow-lg shadow-primary/20">
+                                        {formLoading ? "Saving..." : "Save Grade"}
+                                    </Button>
+                                </div>
+                            </form>
+                        </Form>
+                    ) : (
+                        <div className="space-y-6">
+                            <div className="space-y-2">
+                                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Your Score</Label>
+                                <div className="h-24 flex items-center justify-center rounded-2xl bg-primary/5 border border-primary/10">
+                                    <span className="text-5xl font-black text-primary">{submission.grade ?? "--"}</span>
+                                    <span className="text-xl font-black text-primary/40 ml-1">%</span>
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Teacher Feedback</Label>
+                                <div className="p-6 rounded-2xl bg-muted/20 border min-h-[150px] text-sm leading-relaxed">
+                                    {submission.feedback || "No feedback provided yet."}
+                                </div>
+                            </div>
+                            <Button className="w-full rounded-xl font-bold" onClick={() => onOpenChange(false)}>Close</Button>
+                        </div>
+                    )}
+                </div>
             </div>
-          )}
         </div>
-
-        <Form {...form}>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={control}
-              name="grade"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Grade (0-100)</FormLabel>
-                  <FormControl>
-                    <Input type="number" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={control}
-              name="feedback"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Feedback</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Great job! Just a few notes..."
-                      className="min-h-37.5"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" disabled={formLoading}>
-                {formLoading ? "Saving..." : "Save Grade"}
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
       </DialogContent>
     </Dialog>
   );

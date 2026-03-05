@@ -1,8 +1,8 @@
-import { Search, Key, LayoutGrid, Globe } from "lucide-react";
+import { Search, Key, LayoutGrid, Globe, Users, Calendar, Building2, Copy } from "lucide-react";
 import { useMemo, useState } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { useTable } from "@refinedev/react-table";
-import { useList, HttpError, useGetIdentity, useCustomMutation } from "@refinedev/core";
+import { useList, HttpError, useGetIdentity, useCustomMutation, useInvalidate } from "@refinedev/core";
 import { Link } from "react-router-dom";
 
 import {
@@ -36,14 +36,19 @@ const ClassesList = () => {
   const { data: identity } = useGetIdentity<User>();
   const isStudent = identity?.role === UserRole.STUDENT;
   const isTeacher = identity?.role === UserRole.TEACHER;
+  const isAdmin = identity?.role === UserRole.ADMIN;
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSubject, setSelectedSubject] = useState<string>("all");
   const [inviteCode, setInviteCode] = useState("");
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
 
-  const { mutate: joinClass, mutation } = useCustomMutation();
-  const isJoining = mutation.isPending;
+  const { mutate: joinClass, mutation: joinMutation } = useCustomMutation();
+  const { mutate: cloneClass, mutation: cloneMutation } = useCustomMutation();
+  const invalidate = useInvalidate();
+
+  const isJoining = joinMutation.isPending;
+  const isCloning = cloneMutation.isPending;
 
   const handleJoinByCode = () => {
     if (!inviteCode.trim()) return;
@@ -65,6 +70,19 @@ const ClassesList = () => {
         }
       }
     );
+  };
+
+  const handleClone = (id: number) => {
+    cloneClass({
+        url: `/classes/${id}/clone`,
+        method: "post",
+        values: {},
+    }, {
+        onSuccess: () => {
+            toast.success("Class curriculum cloned successfully!");
+            invalidate({ resource: "classes", invalidates: ["list"] });
+        }
+    });
   };
 
   const classColumns = useMemo<ColumnDef<ClassListItem>[]>(
@@ -93,66 +111,111 @@ const ClassesList = () => {
       {
         id: "name",
         accessorKey: "name",
-        size: 250,
+        size: 200,
         header: () => <p className="column-title">Class Name</p>,
         cell: ({ getValue }) => (
           <span className="text-foreground font-bold">{getValue<string>()}</span>
         ),
       },
       {
-        id: "subject",
-        accessorKey: "subject.name",
-        size: 150,
-        header: () => <p className="column-title">Subject</p>,
-        cell: ({ getValue }) => {
-          const subjectName = getValue<string>();
-          return subjectName ? (
-            <Badge variant="secondary" className="font-medium">{subjectName}</Badge>
+        id: "department",
+        accessorKey: "subject.department.name",
+        header: () => <p className="column-title">Department</p>,
+        cell: ({ row }) => {
+          const deptName = row.original.subject?.department?.name;
+          return deptName ? (
+            <div className="flex items-center gap-1.5 text-muted-foreground">
+              <Building2 className="h-3.5 w-3.5" />
+              <span className="text-xs">{deptName}</span>
+            </div>
           ) : (
-            <span className="text-muted-foreground">Not set</span>
+            <span className="text-xs text-muted-foreground/50 italic">None</span>
           );
-        },
+        }
       },
       {
         id: "teacher",
-        header: () => <p className="column-title">Primary Teacher</p>,
+        header: () => <p className="column-title">Teacher</p>,
         cell: ({ row }) => {
           const primaryTeacher = row.original.teachers?.find(t => t.isPrimary)?.teacher;
           return (
-            <span className="text-foreground font-medium">
+            <span className="text-foreground font-medium text-xs">
               {primaryTeacher?.name || "Not assigned"}
             </span>
           );
         },
       },
       {
+        id: "students",
+        accessorKey: "_count.enrollments",
+        header: () => <p className="column-title">Students</p>,
+        cell: ({ row }) => {
+          const count = row.original._count?.enrollments || 0;
+          return (
+            <div className="flex items-center gap-1.5">
+              <Users className="h-3.5 w-3.5 text-muted-foreground" />
+              <span className="text-xs font-bold">{count}</span>
+              <span className="text-[10px] text-muted-foreground">/ {row.original.capacity || "∞"}</span>
+            </div>
+          );
+        }
+      },
+      {
+        id: "schedule",
+        accessorKey: "schedules",
+        header: () => <p className="column-title">Schedule</p>,
+        cell: ({ getValue }) => {
+          const schedules = getValue<any[]>();
+          if (!schedules || schedules.length === 0) return <span className="text-[10px] text-muted-foreground italic">No schedule</span>;
+          const first = schedules[0];
+          return (
+            <div className="flex items-center gap-1.5 text-[10px] font-medium text-muted-foreground">
+              <Calendar className="h-3 w-3" />
+              <span>{first.day}: {first.startTime}-{first.endTime}</span>
+              {schedules.length > 1 && <Badge variant="outline" className="h-4 px-1 text-[8px]">+{schedules.length - 1}</Badge>}
+            </div>
+          );
+        }
+      },
+      {
         id: "status",
         accessorKey: "status",
-        size: 100,
+        size: 80,
         header: () => <p className="column-title">Status</p>,
         cell: ({ getValue }) => {
           const status = getValue<"active" | "inactive">();
           return (
-            <Badge variant={status === "active" ? "default" : "secondary"} className="capitalize">
+            <Badge variant={status === "active" ? "default" : "secondary"} className="capitalize text-[10px] h-5">
               {status}
             </Badge>
           );
         },
       },
       {
-        id: "details",
-        size: 100,
+        id: "actions",
+        size: 150,
         header: () => null,
         cell: ({ row }) => (
-          <div className="flex justify-end pr-4">
-            <Button asChild variant="outline" size="sm" className="rounded-full px-4">
+          <div className="flex justify-end gap-2 pr-4">
+            {(isTeacher || isAdmin) && (
+                <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-8 w-8 text-muted-foreground hover:text-primary"
+                    onClick={() => handleClone(row.original.id)}
+                    disabled={isCloning}
+                >
+                    <Copy className="h-4 w-4" />
+                </Button>
+            )}
+            <Button asChild variant="outline" size="sm" className="rounded-full px-4 h-8 text-xs">
               <Link to={`/classes/show/${row.original.id}`}>Enter Class</Link>
             </Button>
           </div>
         ),
       },
     ],
-    [],
+    [isTeacher, isAdmin, isCloning],
   );
 
   const { result: subjectsResult } = useList<Subject, HttpError>({
@@ -178,6 +241,9 @@ const ClassesList = () => {
       pagination: { pageSize: 10, mode: "server" },
       filters: { permanent: filters },
       sorters: { initial: [{ field: "id", order: "desc" }] },
+      meta: {
+        populate: ["subject", "subject.department", "teachers", "teachers.teacher", "_count"]
+      }
     },
   });
 
@@ -230,7 +296,7 @@ const ClassesList = () => {
               </DialogContent>
             </Dialog>
           )}
-          {isTeacher && <CreateButton resource="classes" className="h-11 rounded-xl px-6" />}
+          {(isTeacher || isAdmin) && <CreateButton resource="classes" className="h-11 rounded-xl px-6" />}
         </div>
       </div>
 

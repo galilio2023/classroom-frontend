@@ -1,6 +1,6 @@
 import { ListView } from "@/components/refine-ui/views/list-view.tsx";
 import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb.tsx";
-import { Search, ShieldCheck, ShieldAlert, FileText, CheckCircle2, XCircle, ExternalLink, Loader2, Trash2, Pencil } from "lucide-react";
+import { Search, ShieldCheck, ShieldAlert, FileText, CheckCircle2, XCircle, ExternalLink, Loader2, Trash2, Pencil, Building2, UserCircle } from "lucide-react";
 import { Input } from "@/components/ui/input.tsx";
 import { useMemo, useState } from "react";
 import {
@@ -14,7 +14,7 @@ import { CreateButton } from "@/components/refine-ui/buttons/create.tsx";
 import { DataTable } from "@/components/refine-ui/data-table/data-table.tsx";
 import { useTable } from "@refinedev/react-table";
 import { useNavigation, useDelete, useGetIdentity, useUpdate } from "@refinedev/core";
-import { User, UserRole } from "@/types";
+import { User, UserRole, UserStatus } from "@/types";
 import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge.tsx";
 import { Button } from "@/components/ui/button.tsx";
@@ -46,6 +46,15 @@ const roleVariants: Record<
   [UserRole.ADMIN]: "destructive",
   [UserRole.TEACHER]: "default",
   [UserRole.STUDENT]: "secondary",
+};
+
+const statusVariants: Record<
+  UserStatus,
+  "default" | "secondary" | "destructive" | "outline"
+> = {
+  [UserStatus.ACTIVE]: "default",
+  [UserStatus.INACTIVE]: "secondary",
+  [UserStatus.SUSPENDED]: "destructive",
 };
 
 const UsersList = () => {
@@ -156,6 +165,33 @@ const UsersList = () => {
           },
         },
         {
+          accessorKey: "department.name",
+          header: () => <p className="column-title">Department</p>,
+          cell: ({ getValue }) => {
+            const dept = getValue<string>();
+            return dept ? (
+              <div className="flex items-center gap-1.5 text-muted-foreground">
+                <Building2 className="h-3.5 w-3.5" />
+                <span className="text-xs">{dept}</span>
+              </div>
+            ) : (
+              <span className="text-xs text-muted-foreground/50 italic">None</span>
+            );
+          }
+        },
+        {
+          accessorKey: "status",
+          header: () => <p className="column-title">Status</p>,
+          cell: ({ getValue }) => {
+            const status = getValue<UserStatus>() || UserStatus.ACTIVE;
+            return (
+              <Badge variant={statusVariants[status]} className="capitalize text-[10px] h-5">
+                {status}
+              </Badge>
+            );
+          }
+        },
+        {
           id: "verification",
           header: () => <p className="column-title">Verification</p>,
           cell: ({ row }) => {
@@ -209,6 +245,9 @@ const UsersList = () => {
       pagination: { pageSize: 10, mode: "server" },
       filters: { permanent: filters },
       sorters: { initial: [{ field: "createdAt", order: "desc" }] },
+      meta: {
+        populate: ["department"]
+      }
     },
   });
 
@@ -344,7 +383,7 @@ const UsersList = () => {
             </Button>
             <Button 
               onClick={() => handleVerify(verificationTarget!.id, true)}
-              disabled={isUpdating || !verificationTarget?.verificationDocumentUrl}
+              disabled={isUpdating}
             >
               {isUpdating ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <CheckCircle2 className="h-4 w-4 mr-2" />}
               Approve & Verify Teacher

@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from "recharts";
-import { TrendingUp, BookOpen, CheckCircle2, Clock, XCircle, Target, Trophy } from "lucide-react";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from "recharts";
+import { TrendingUp, BookOpen, CheckCircle2, Clock, XCircle, Target, Trophy, Sparkles, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { PracticeModal } from "@/components/practice/practice-modal";
@@ -12,6 +12,7 @@ import {
   ChartTooltipContent, 
   ChartConfig 
 } from "@/components/ui/chart";
+import { useNavigation } from "@refinedev/core";
 
 interface StudentAcademicJourneyProps {
   gradeTrends: any[];
@@ -36,13 +37,48 @@ const masteryConfig = {
 export const StudentAcademicJourney = ({ gradeTrends, subjectMastery, attendanceSummary }: StudentAcademicJourneyProps) => {
   const [practiceTopic, setPracticeTopic] = useState<string | null>(null);
   const [practiceSubjectId, setPracticeSubjectId] = useState<number | null>(null);
+  const { list } = useNavigation();
 
   const weakSubjects = subjectMastery.filter(s => s.avgGrade < 70);
+  const hasData = gradeTrends.length > 0 || subjectMastery.length > 0 || (attendanceSummary?.total || 0) > 0;
+
+  // Attendance Rate: (Present + Late) / Total
+  const attendedCount = (attendanceSummary?.present || 0) + (attendanceSummary?.late || 0);
+  const attendanceRate = attendanceSummary?.total > 0 
+    ? Math.round((attendedCount / attendanceSummary.total) * 100) 
+    : 0;
 
   return (
     <div className="space-y-8">
+      {/* 1. Onboarding / Welcome State for New Students */}
+      {!hasData && (
+        <Card className="border-2 border-dashed border-primary/20 bg-primary/5 shadow-none">
+          <CardHeader className="text-center pb-2">
+            <div className="mx-auto p-3 bg-primary/10 rounded-full w-fit mb-4">
+              <Sparkles className="h-8 w-8 text-primary animate-pulse" />
+            </div>
+            <CardTitle className="text-2xl font-bold">Welcome to Your Learning Journey!</CardTitle>
+            <CardDescription className="text-base max-w-md mx-auto">
+              You haven't started any classes or assignments yet. Your academic progress, 
+              subject mastery, and attendance will appear here once you begin.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex justify-center pb-8">
+            <Button 
+              onClick={() => list("classes")}
+              className="gap-2"
+              size="lg"
+            >
+              Explore Your Classes
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* 2. AI Intervention / Practice Suggestion */}
       {weakSubjects.length > 0 && (
-        <Card className="border-l-4 border-l-orange-500 bg-orange-500/5 shadow-md">
+        <Card className="border-l-4 border-l-orange-500 bg-orange-500/5 shadow-md animate-in fade-in slide-in-from-top-4 duration-500">
           <CardHeader className="pb-2">
             <div className="flex items-center gap-2">
               <Target className="h-5 w-5 text-orange-600" />
@@ -50,7 +86,7 @@ export const StudentAcademicJourney = ({ gradeTrends, subjectMastery, attendance
             </div>
             <CardDescription className="text-orange-600/80">
               We noticed you might be struggling with <strong>{weakSubjects[0].subject}</strong>. 
-              Practice now to earn a mastery badge!
+              Practice now to earn a mastery badge and boost your grade!
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -68,6 +104,7 @@ export const StudentAcademicJourney = ({ gradeTrends, subjectMastery, attendance
         </Card>
       )}
 
+      {/* 3. Performance Charts */}
       <div className="grid gap-6 md:grid-cols-2">
         <Card className="border shadow-xl overflow-hidden bg-card/50 backdrop-blur-xl border-border/50">
           <CardHeader className="pb-2">
@@ -110,7 +147,7 @@ export const StudentAcademicJourney = ({ gradeTrends, subjectMastery, attendance
                 </LineChart>
               </ChartContainer>
             ) : (
-              <NoChartData icon={TrendingUp} message="No grade data yet" />
+              <NoChartData icon={TrendingUp} message="No grade data yet. Complete assignments to see your progress!" />
             )}
           </CardContent>
         </Card>
@@ -146,12 +183,13 @@ export const StudentAcademicJourney = ({ gradeTrends, subjectMastery, attendance
                 </RadarChart>
               </ChartContainer>
             ) : (
-              <NoChartData icon={BookOpen} message="No graded work yet" />
+              <NoChartData icon={BookOpen} message="No subject data yet. Your mastery radar will appear here." />
             )}
           </CardContent>
         </Card>
       </div>
 
+      {/* 4. Attendance Stats */}
       <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
         <AttendanceStatCard 
           icon={CheckCircle2} 
@@ -176,7 +214,7 @@ export const StudentAcademicJourney = ({ gradeTrends, subjectMastery, attendance
         />
         <AttendanceStatCard 
           icon={TrendingUp} 
-          value={`${attendanceSummary?.total > 0 ? Math.round((attendanceSummary.present / attendanceSummary.total) * 100) : 0}%`} 
+          value={`${attendanceRate}%`}
           label="Attendance Rate" 
           colorClass="bg-primary/10 text-primary" 
           hoverBorderClass="hover:border-primary/30" 

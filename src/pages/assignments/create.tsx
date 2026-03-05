@@ -13,20 +13,12 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { CreateView } from "@/components/refine-ui/views/create-view";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useSearchParams } from "react-router-dom";
 import { useGo, useList } from "@refinedev/core";
 import { toast } from "sonner";
 import { AIAssignmentHelper } from "@/components/ai-assignment-helper";
 import { FileUpload } from "@/components/file-upload";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
 import {
   Select,
   SelectContent,
@@ -34,12 +26,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Label } from "@/components/ui/label";
-import { Sparkles, Paperclip, Loader2, LayoutGrid, HelpCircle } from "lucide-react";
+import { Sparkles, Paperclip, Loader2, Wand2, X, BookOpen } from "lucide-react";
 import { FieldValues } from "react-hook-form";
-import { Module } from "@/types";
-import { useEffect } from "react";
+import { Module, Class } from "@/types";
+import { useEffect, useState } from "react";
+import { cn } from "@/lib/utils";
 
 const assignmentSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -48,37 +40,26 @@ const assignmentSchema = z.object({
   fileUrl: z.string().optional(),
   fileCldPubId: z.string().optional(),
   moduleId: z.coerce.number().optional().nullable(),
+  classId: z.coerce.number().min(1, "Class is required"),
 });
 
 type AssignmentFormValues = z.infer<typeof assignmentSchema>;
 
-const FieldHelper = ({ content }: { content: string }) => (
-  <TooltipProvider>
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <HelpCircle className="h-3.5 w-3.5 text-muted-foreground cursor-help hover:text-primary transition-colors" />
-      </TooltipTrigger>
-      <TooltipContent side="right" className="max-w-[200px]">
-        <p>{content}</p>
-      </TooltipContent>
-    </Tooltip>
-  </TooltipProvider>
-);
-
 export const AssignmentCreate = () => {
   const [searchParams] = useSearchParams();
-  const classId = searchParams.get("classId");
+  const urlClassId = searchParams.get("classId");
   const initialModuleId = searchParams.get("moduleId");
   const go = useGo();
+  const [showAI, setShowAI] = useState(false);
 
-  const { query: modulesQuery } = useList<Module>({
-    resource: "modules",
-    filters: [{ field: "classId", operator: "eq", value: classId }],
-    queryOptions: { enabled: !!classId },
+  // Fetch all classes for the teacher (in case they came from the global AI assistant)
+  const { query: classesQuery } = useList<Class>({
+    resource: "classes",
+    pagination: { mode: "off" },
   });
 
-  const modules = modulesQuery.data?.data || [];
-  const modulesLoading = modulesQuery.isLoading;
+  const classes = classesQuery.data?.data || [];
+  const classesLoading = classesQuery.isLoading;
 
   const form = useForm<AssignmentFormValues>({
     resolver: zodResolver(assignmentSchema) as any,
@@ -89,14 +70,14 @@ export const AssignmentCreate = () => {
       fileUrl: "",
       fileCldPubId: "",
       moduleId: initialModuleId ? Number(initialModuleId) : null,
+      classId: urlClassId ? Number(urlClassId) : undefined as any,
     },
     refineCoreProps: {
       resource: "assignments",
       action: "create",
       onMutationSuccess: () => {
-        if (classId) {
-          go({ to: `/classes/show/${classId}`, type: "replace" });
-        }
+        const targetClassId = form.getValues("classId");
+        go({ to: `/classes/show/${targetClassId}`, type: "replace" });
       },
     },
   });
@@ -109,27 +90,40 @@ export const AssignmentCreate = () => {
     refineCore: { onFinish, formLoading },
   } = form;
 
+  const selectedClassId = watch("classId");
+
+  // Fetch modules for the SELECTED class
+  const { query: modulesQuery } = useList<Module>({
+    resource: "modules",
+    filters: [{ field: "classId", operator: "eq", value: selectedClassId }],
+    queryOptions: { enabled: !!selectedClassId },
+  });
+
+  const modules = modulesQuery.data?.data || [];
+  const modulesLoading = modulesQuery.isLoading;
+
   useEffect(() => {
     if (initialModuleId) {
       setValue("moduleId", Number(initialModuleId));
     }
+    
+    const pendingContent = sessionStorage.getItem("pending_ai_assignment");
+    if (pendingContent) {
+        setValue("description", pendingContent);
+        sessionStorage.removeItem("pending_ai_assignment");
+        toast.info("AI draft applied from Assistant.");
+        setShowAI(false);
+    }
   }, [initialModuleId, setValue]);
 
   const onSubmit = (values: FieldValues) => {
-    if (!classId) {
-      toast.error("Could not create assignment: Class ID is missing.");
-      return;
-    }
-    onFinish({
-      ...values,
-      classId: Number(classId),
-      moduleId: values.moduleId === 0 ? null : values.moduleId,
-    });
+    onFinish(values);
   };
 
   const handleUseAIContent = (content: string) => {
     setValue("description", content);
-    toast.success("AI content applied to description!");
+    toast.success("AI content applied!");
+    document.getElementById("description")?.scrollIntoView({ behavior: "smooth" });
   };
 
   const handleFileUpload = (url: string, publicId: string) => {
@@ -138,186 +132,194 @@ export const AssignmentCreate = () => {
   };
 
   return (
-    <CreateView>
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>New Assignment</CardTitle>
-              <Sheet>
-                <SheetTrigger asChild>
-                  <Button variant="outline" size="sm" className="gap-2">
-                    <Sparkles className="h-4 w-4 text-primary" />
-                    AI Helper
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side="bottom" className="h-[80vh] sm:h-[90vh]">
-                  <SheetHeader>
-                    <SheetTitle>AI Assignment Helper</SheetTitle>
-                    <SheetDescription>
-                      Generate a draft and click "Use Content" to fill the form.
-                    </SheetDescription>
-                  </SheetHeader>
-                  <div className="mt-6 overflow-y-auto h-full pb-20">
-                    <AIAssignmentHelper onUseContent={handleUseAIContent} />
-                  </div>
-                </SheetContent>
-              </Sheet>
-            </CardHeader>
-            <CardContent>
-              <Form {...form}>
-                <form
-                  onSubmit={handleSubmit(onSubmit)}
-                  className="space-y-6"
+    <CreateView className="max-w-full">
+      <div className="flex flex-col gap-6">
+        <div className="flex items-center justify-between">
+            <div>
+                <h1 className="text-3xl font-black tracking-tight">New Assignment</h1>
+                <p className="text-muted-foreground text-sm">Fill in the details below to publish your task.</p>
+            </div>
+            {!showAI && (
+                <Button 
+                    variant="outline" 
+                    onClick={() => setShowAI(true)}
+                    className="gap-2 rounded-xl h-11 px-6 border-purple-500/20 text-purple-600 hover:bg-purple-50 transition-all animate-in fade-in zoom-in-95"
                 >
-                  <FormField
-                    control={control}
-                    name="title"
-                    render={({ field }) => (
-                      <FormItem>
-                        <div className="flex items-center gap-2">
-                            <FormLabel>Title</FormLabel>
-                            <FieldHelper content="A clear, concise name for the assignment." />
-                        </div>
-                        <FormControl>
-                          <Input
-                            placeholder="e.g., Chapter 5 Reading"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={control}
-                    name="moduleId"
-                    render={({ field }) => (
-                      <FormItem>
-                        <div className="flex items-center gap-2">
-                            <FormLabel className="flex items-center gap-2">
-                                <LayoutGrid className="h-3.5 w-3.5 text-muted-foreground" />
-                                Curriculum Module (Optional)
-                            </FormLabel>
-                            <FieldHelper content="Link this assignment to a specific lesson or week in your curriculum." />
-                        </div>
-                        <Select 
-                          onValueChange={field.onChange} 
-                          value={field.value?.toString() || "0"}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder={modulesLoading ? "Loading modules..." : "Select a module"} />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="0">None (Global Assignment)</SelectItem>
-                            {modules.map((m: Module) => (
-                              <SelectItem key={m.id} value={m.id.toString()}>{m.name}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={control}
-                    name="description"
-                    render={({ field }) => (
-                      <FormItem>
-                        <div className="flex items-center gap-2">
-                            <FormLabel>Description</FormLabel>
-                            <FieldHelper content="Detailed instructions, learning objectives, and grading criteria. You can use Markdown here." />
-                        </div>
-                        <FormControl>
-                          <Textarea
-                            placeholder="Instructions for the assignment..."
-                            className="min-h-[200px]"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField
-                      control={control}
-                      name="dueDate"
-                      render={({ field }) => (
-                        <FormItem>
-                          <div className="flex items-center gap-2">
-                            <FormLabel>Due Date</FormLabel>
-                            <FieldHelper content="The deadline for students to submit their work. Late submissions will be flagged." />
-                          </div>
-                          <FormControl>
-                            <Input type="date" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <Label>Attachment (Optional)</Label>
-                        <FieldHelper content="Upload a PDF, document, or image that students need to complete the assignment." />
-                      </div>
-                      <FileUpload 
-                        label="Upload File"
-                        folder="assignments"
-                        onUploadSuccess={handleFileUpload}
-                      />
-                      {watch("fileUrl") && (
-                        <div className="flex items-center gap-2 text-xs text-green-600 font-medium">
-                          <Paperclip className="h-3 w-3" />
-                          File attached successfully
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <Button type="submit" disabled={formLoading} className="w-full">
-                    {formLoading ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Creating...
-                      </>
-                    ) : (
-                      "Create Assignment"
-                    )}
-                  </Button>
-                </form>
-              </Form>
-            </CardContent>
-          </Card>
+                    <Sparkles className="h-4 w-4" />
+                    AI Assistant
+                </Button>
+            )}
         </div>
-        <div className="hidden lg:block">
-          <Card className="h-full">
-            <CardHeader>
-              <CardTitle className="text-sm font-medium">Quick Tips</CardTitle>
-            </CardHeader>
-            <CardContent className="text-sm text-muted-foreground space-y-4">
-              <div className="space-y-2">
-                <p className="font-medium text-foreground flex items-center gap-2">
-                  <LayoutGrid className="h-4 w-4 text-primary" />
-                  Curriculum Organization
-                </p>
-                <p>Assigning this to a module will place it directly in the structured curriculum view for students.</p>
-              </div>
-              <div className="space-y-2">
-                <p className="font-medium text-foreground flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 text-primary" />
-                  AI Assistant
-                </p>
-                <p>Use the AI Helper to quickly draft learning objectives and instructions.</p>
-              </div>
-            </CardContent>
-          </Card>
+
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
+            {/* Main Form */}
+            <div className={cn(
+                "transition-all duration-500 ease-in-out",
+                showAI ? "xl:col-span-7" : "xl:col-span-8 xl:col-start-3"
+            )}>
+                <Card className="shadow-xl border-primary/10 overflow-hidden">
+                    <div className="h-1.5 bg-primary/10 w-full" />
+                    <CardHeader>
+                        <CardTitle>Assignment Details</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <Form {...form}>
+                            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <FormField
+                                        control={control}
+                                        name="classId"
+                                        render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2">
+                                                <BookOpen className="h-3 w-3" />
+                                                Target Class
+                                            </FormLabel>
+                                            <Select 
+                                                onValueChange={(val) => {
+                                                    field.onChange(Number(val));
+                                                    setValue("moduleId", null); // Reset module when class changes
+                                                }} 
+                                                value={field.value?.toString()}
+                                                disabled={!!urlClassId} // Lock if we came from a specific class
+                                            >
+                                                <FormControl>
+                                                    <SelectTrigger className="h-12 rounded-xl bg-muted/20 border-none">
+                                                        <SelectValue placeholder={classesLoading ? "Loading classes..." : "Select a class"} />
+                                                    </SelectTrigger>
+                                                </FormControl>
+                                                <SelectContent>
+                                                    {classes.map((c: Class) => (
+                                                        <SelectItem key={c.id} value={c.id.toString()}>{c.name}</SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                            <FormMessage />
+                                        </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={control}
+                                        name="title"
+                                        render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Assignment Title</FormLabel>
+                                            <FormControl>
+                                            <Input placeholder="e.g., Physics Lab Report" {...field} className="h-12 rounded-xl bg-muted/20 border-none focus-visible:ring-primary" />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                        )}
+                                    />
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <FormField
+                                        control={control}
+                                        name="moduleId"
+                                        render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Curriculum Module</FormLabel>
+                                            <Select 
+                                                onValueChange={field.onChange} 
+                                                value={field.value?.toString() || "0"}
+                                                disabled={!selectedClassId}
+                                            >
+                                                <FormControl>
+                                                    <SelectTrigger className="h-12 rounded-xl bg-muted/20 border-none">
+                                                        <SelectValue placeholder={!selectedClassId ? "Select a class first" : modulesLoading ? "Loading..." : "Select module"} />
+                                                    </SelectTrigger>
+                                                </FormControl>
+                                                <SelectContent>
+                                                    <SelectItem value="0">None (Global)</SelectItem>
+                                                    {modules.map((m: Module) => (
+                                                        <SelectItem key={m.id} value={m.id.toString()}>{m.name}</SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                            <FormMessage />
+                                        </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={control}
+                                        name="dueDate"
+                                        render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Submission Deadline</FormLabel>
+                                            <FormControl>
+                                                <Input type="date" {...field} className="h-12 rounded-xl bg-muted/20 border-none" />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                        )}
+                                    />
+                                </div>
+
+                                <FormField
+                                    control={control}
+                                    name="description"
+                                    render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Instructions & Content</FormLabel>
+                                        <FormControl>
+                                        <Textarea
+                                            id="description"
+                                            placeholder="Type your instructions here or use the AI Assistant..."
+                                            className="min-h-[400px] rounded-2xl resize-none p-6 leading-relaxed bg-muted/10 border-dashed border-2 border-border/50 focus-visible:border-primary/50 transition-colors"
+                                            {...field}
+                                        />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                    )}
+                                />
+
+                                <div className="p-6 bg-muted/30 rounded-2xl border border-dashed border-border/50">
+                                    <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-4 block">Reference Materials (Optional)</Label>
+                                    <FileUpload 
+                                        label="Upload PDF or Document"
+                                        folder="assignments"
+                                        onUploadSuccess={handleFileUpload}
+                                    />
+                                    {watch("fileUrl") && (
+                                        <div className="mt-4 flex items-center gap-2 text-xs text-green-600 font-bold bg-green-50 dark:bg-green-900/20 p-3 rounded-xl w-fit border border-green-100">
+                                            <Paperclip className="h-3.5 w-3.5" />
+                                            File attached successfully
+                                        </div>
+                                    )}
+                                </div>
+
+                                <Button type="submit" disabled={formLoading} size="lg" className="w-full h-14 rounded-2xl font-black uppercase tracking-[0.2em] shadow-2xl shadow-primary/20 transition-all hover:scale-[1.01] active:scale-[0.99]">
+                                    {formLoading ? <Loader2 className="mr-2 h-6 w-6 animate-spin" /> : <Wand2 className="mr-2 h-6 w-6" />}
+                                    {formLoading ? "Publishing..." : "Publish Assignment"}
+                                </Button>
+                            </form>
+                        </Form>
+                    </CardContent>
+                </Card>
+            </div>
+
+            {/* AI Assistant Side Panel */}
+            {showAI && (
+                <div className="xl:col-span-5 animate-in slide-in-from-right-12 duration-700 sticky top-24">
+                    <Card className="border-purple-500/20 shadow-2xl shadow-purple-500/10 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl overflow-hidden">
+                        <div className="h-1.5 bg-purple-600 w-full" />
+                        <CardHeader className="bg-purple-500/5 border-b border-purple-500/10 flex flex-row items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <Sparkles className="h-5 w-5 text-purple-600" />
+                                <CardTitle className="text-purple-900 dark:text-purple-300 text-sm font-black uppercase tracking-widest">AI Writing Assistant</CardTitle>
+                            </div>
+                            <Button variant="ghost" size="icon" onClick={() => setShowAI(false)} className="h-8 w-8 rounded-full hover:bg-purple-100">
+                                <X className="h-4 w-4 text-purple-600" />
+                            </Button>
+                        </CardHeader>
+                        <CardContent className="pt-6 max-h-[75vh] overflow-y-auto custom-scrollbar">
+                            <AIAssignmentHelper onUseContent={handleUseAIContent} />
+                        </CardContent>
+                    </Card>
+                </div>
+            )}
         </div>
       </div>
     </CreateView>

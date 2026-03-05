@@ -33,6 +33,7 @@ export interface DashboardStats {
   totalTeachers: number;
   totalClasses: number;
   totalAssignments: number;
+  pendingVerifications?: number;
 }
 
 export interface AttendanceTrend {

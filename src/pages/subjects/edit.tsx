@@ -39,6 +39,7 @@ import {
   FileText,
   Lightbulb,
   Info,
+  GraduationCap
 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
@@ -55,7 +56,9 @@ const formSchema = z.object({
   description: z
     .string()
     .max(255, "Description must be less than 255 characters")
-    .optional(),
+    .optional()
+    .nullable(),
+  credits: z.coerce.number().min(0, "Credits cannot be negative").default(0),
   departmentId: z.coerce.number().positive("Department is required"),
 });
 
@@ -148,43 +151,64 @@ const SubjectsEdit = () => {
                     />
                   </div>
 
-                  {/* Department Dropdown */}
-                  <FormField
-                    control={form.control}
-                    name="departmentId"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center gap-2">
-                          <Building2 className="h-4 w-4 text-muted-foreground" />
-                          Department
-                        </FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          value={String(field.value ?? "")}
-                        >
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Department Dropdown */}
+                    <FormField
+                      control={form.control}
+                      name="departmentId"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center gap-2">
+                            <Building2 className="h-4 w-4 text-muted-foreground" />
+                            Department
+                          </FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            value={String(field.value ?? "")}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select a department" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {departmentOptions.map((option) => (
+                                <SelectItem
+                                  key={option.value}
+                                  value={String(option.value)}
+                                >
+                                  {option.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Credits Field */}
+                    <FormField
+                      control={form.control}
+                      name="credits"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center gap-2">
+                            <GraduationCap className="h-4 w-4 text-muted-foreground" />
+                            Credits
+                          </FormLabel>
                           <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select a department" />
-                            </SelectTrigger>
+                            <Input
+                              type="number"
+                              placeholder="e.g. 3"
+                              {...field}
+                            />
                           </FormControl>
-                          <SelectContent>
-                            {departmentOptions.map((option) => (
-                              <SelectItem
-                                key={option.value}
-                                value={String(option.value)}
-                              >
-                                {option.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormDescription>
-                          The academic department this subject belongs to.
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
 
                   {/* Description Field */}
                   <FormField
@@ -198,6 +222,7 @@ const SubjectsEdit = () => {
                             placeholder="Brief description of the subject..."
                             className="resize-none min-h-[120px]"
                             {...field}
+                            value={field.value || ""}
                           />
                         </FormControl>
                         <FormMessage />
@@ -247,8 +272,7 @@ const SubjectsEdit = () => {
                   <span className="text-xs font-bold text-primary">2</span>
                 </div>
                 <p>
-                  <strong>Clear Names:</strong> Avoid abbreviations.
-                  "Introduction to Psychology" is better than "Intro to Psych".
+                  <strong>Credits:</strong> Assign credits based on the workload and importance of the subject.
                 </p>
               </div>
             </CardContent>
