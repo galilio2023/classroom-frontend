@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui
 import { Button } from "../ui/button";
 import { Copy, Check, Send, PlusCircle, BookOpen, FileText, HelpCircle } from "lucide-react";
 import ReactMarkdown from "react-markdown";
-import { useNavigation } from "@refinedev/core";
+import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 interface AssignmentPreviewProps {
@@ -13,7 +13,7 @@ interface AssignmentPreviewProps {
 
 export const AssignmentPreview: React.FC<AssignmentPreviewProps> = ({ content, onUseContent }) => {
   const [copied, setCopied] = useState(false);
-  const { create } = useNavigation();
+  const navigate = useNavigate();
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(content);
@@ -22,9 +22,7 @@ export const AssignmentPreview: React.FC<AssignmentPreviewProps> = ({ content, o
   };
 
   const handleGlobalCreate = () => {
-    // TODO: Consider replacing sessionStorage with a more robust state management solution (e.g., Refine Context or Redux)
-    sessionStorage.setItem("pending_ai_assignment", content);
-    create("assignments");
+    navigate("/assignments/create", { state: { pendingContent: content } });
   };
 
   // Helper to render structured content

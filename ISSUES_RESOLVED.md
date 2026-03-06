@@ -181,3 +181,19 @@ These changes address a critical security vulnerability in the live classroom fe
 
 **Summary:**
 These refactorings ensure strict adherence to the project's `CODE_PATTERNS.md`, improving code maintainability, consistency, and architectural cleanliness.
+
+---
+
+## 12. AI Assignment Workflow Integration
+**Problem:**
+- **Disconnected AI Workflow:** The AI Assignment Helper generated content but didn't seamlessly transfer it to the assignment creation form. Users had to manually copy-paste.
+- **State Persistence:** If a user navigated away from the AI helper to the create page, the generated content was lost or relied on fragile `sessionStorage`.
+- **Missing Backend Fields:** The backend `generateAssignment` service didn't accept `tone` or `objectives`, limiting the customization of AI-generated assignments.
+
+**Solution:**
+- **Seamless Navigation:** Updated `AssignmentPreview` to use `navigate` with state (`location.state`) to pass generated content directly to the `AssignmentCreate` page.
+- **Robust Form Hydration:** Updated `AssignmentCreate` to check both `location.state` (primary) and `sessionStorage` (fallback) for pending content, automatically populating the description field.
+- **Enhanced AI Service:** Updated the backend `generateAssignment` function and route to accept and utilize `tone` and `objectives` parameters, producing more tailored results.
+
+**Summary:**
+The AI-assisted assignment creation workflow is now seamless and robust, allowing teachers to generate, customize, and publish assignments in a single, fluid experience.

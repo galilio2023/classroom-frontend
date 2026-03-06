@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import { io } from "socket.io-client";
+import { useCustomMutation } from "@refinedev/core";
 
 interface QRAttendanceProps {
   classId: number;
@@ -20,6 +21,7 @@ export const QRAttendance = ({ classId, className }: QRAttendanceProps) => {
   const [qrValue, setQrValue] = useState("");
 
   const DURATION = 300; // 5 minutes in seconds
+  const { mutate: generateQR } = useCustomMutation();
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -51,13 +53,24 @@ export const QRAttendance = ({ classId, className }: QRAttendanceProps) => {
   }, [isActive, classId]);
 
   const startSession = () => {
-    // In a real app, this would call the backend to generate a secure, time-limited token
-    const sessionToken = btoa(`attendance-${classId}-${Date.now()}`);
-    setQrValue(`${window.location.origin}/attendance/scan?token=${sessionToken}`);
-    setIsActive(true);
-    setTimeLeft(DURATION);
-    setScannedCount(0);
-    toast.success(`Attendance session started for ${className}!`);
+    // Call backend to generate a secure, time-limited token
+    generateQR({
+        url: "/attendance/qr",
+        method: "post",
+        values: { classId }
+    }, {
+        onSuccess: (data: any) => {
+            const token = data.data.token;
+            setQrValue(`${window.location.origin}/attendance/scan?token=${token}`);
+            setIsActive(true);
+            setTimeLeft(DURATION);
+            setScannedCount(0);
+            toast.success(`Attendance session started for ${className}!`);
+        },
+        onError: () => {
+            toast.error("Failed to start attendance session.");
+        }
+    });
   };
 
   const stopSession = () => {

@@ -14,7 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { CreateView } from "@/components/refine-ui/views/create-view";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useLocation } from "react-router-dom";
 import { useGo, useList } from "@refinedev/core";
 import { toast } from "sonner";
 import { AIAssignmentHelper } from "@/components/ai-assignment-helper";
@@ -47,6 +47,7 @@ type AssignmentFormValues = z.infer<typeof assignmentSchema>;
 
 export const AssignmentCreate = () => {
   const [searchParams] = useSearchParams();
+  const location = useLocation();
   const urlClassId = searchParams.get("classId");
   const initialModuleId = searchParams.get("moduleId");
   const go = useGo();
@@ -107,14 +108,18 @@ export const AssignmentCreate = () => {
       setValue("moduleId", Number(initialModuleId));
     }
     
-    const pendingContent = sessionStorage.getItem("pending_ai_assignment");
+    // Check for pending content from navigation state (preferred) or sessionStorage (fallback)
+    const stateContent = location.state?.pendingContent;
+    const sessionContent = sessionStorage.getItem("pending_ai_assignment");
+    const pendingContent = stateContent || sessionContent;
+
     if (pendingContent) {
         setValue("description", pendingContent);
-        sessionStorage.removeItem("pending_ai_assignment");
+        if (sessionContent) sessionStorage.removeItem("pending_ai_assignment");
         toast.info("AI draft applied from Assistant.");
         setShowAI(false);
     }
-  }, [initialModuleId, setValue]);
+  }, [initialModuleId, setValue, location.state]);
 
   const onSubmit = (values: FieldValues) => {
     onFinish(values);
