@@ -16,15 +16,18 @@ import {
   BrainCircuit,
   Loader2,
   History,
+  Layers,
+  X
 } from "lucide-react";
 import { toast } from "sonner";
 import axios from "axios";
 import ReactMarkdown from "react-markdown";
 import { PracticeModal } from "@/components/practice/practice-modal";
+import { FlashcardPlayer } from "@/components/practice/flashcard-player";
 import { cn } from "@/lib/utils";
 
 const AIStudyLab = () => {
-  const [activeTool, setActiveTool] = useState<"explain" | "quiz" | "summary">(
+  const [activeTool, setActiveTool] = useState<"explain" | "quiz" | "summary" | "flashcards">(
     "explain",
   );
   const [input, setInput] = useState("");
@@ -32,6 +35,7 @@ const AIStudyLab = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const [practiceTopic, setPracticeTopic] = useState<string | null>(null);
+  const [flashcards, setFlashcards] = useState<any[] | null>(null);
 
   const handleToolAction = async () => {
     if (!input.trim()) {
@@ -46,16 +50,23 @@ const AIStudyLab = () => {
 
     setIsLoading(true);
     setResult("");
+    setFlashcards(null);
 
     try {
-      const prompt =
-        activeTool === "explain"
-          ? `Explain the following concept in simple terms for a student: ${input}`
-          : `Summarize the following text into key bullet points: ${input}`;
+      if (activeTool === "flashcards") {
+        const response = await axios.post("/api/ai/generate-flashcards", { input });
+        setFlashcards(response.data.flashcards);
+        toast.success("Flashcards generated!");
+      } else {
+        const prompt =
+          activeTool === "explain"
+            ? `Explain the following concept in simple terms for a student: ${input}`
+            : `Summarize the following text into key bullet points: ${input}`;
 
-      const response = await axios.post("/api/ai/generate-content", { prompt });
-      setResult(response.data.content);
-      toast.success("AI has finished processing!");
+        const response = await axios.post("/api/ai/generate-content", { prompt });
+        setResult(response.data.content);
+        toast.success("AI has finished processing!");
+      }
     } catch (error) {
       toast.error("Failed to generate content. Please try again.");
     } finally {
@@ -177,56 +188,112 @@ const AIStudyLab = () => {
               </div>
             </CardHeader>
           </Card>
+
+          <Card
+            className={cn(
+              "cursor-pointer transition-all hover:border-primary/50",
+              activeTool === "flashcards"
+                ? "border-primary bg-primary/5 shadow-md"
+                : "",
+            )}
+            onClick={() => setActiveTool("flashcards")}
+          >
+            <CardHeader className="p-4">
+              <div className="flex items-center gap-3">
+                <div
+                  className={cn(
+                    "p-2 rounded-lg",
+                    activeTool === "flashcards"
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted",
+                  )}
+                >
+                  <Layers className="h-5 w-5" />
+                </div>
+                <div>
+                  <CardTitle className="text-base">Flashcard Maker</CardTitle>
+                  <CardDescription className="text-xs text-balance">
+                    Generate cards for active recall.
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+          </Card>
         </div>
 
         <div className="lg:col-span-2 space-y-6">
-          <Card className="shadow-xl border-none bg-card/50 backdrop-blur-xl">
-            <CardHeader>
-              <CardTitle>
-                {activeTool === "explain" &&
-                  "What would you like to understand?"}
-                {activeTool === "quiz" && "What topic should we test?"}
-                {activeTool === "summary" &&
-                  "Paste the text you want to summarize"}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {activeTool === "quiz" || activeTool === "explain" ? (
-                <Input
-                  placeholder={
-                    activeTool === "quiz"
-                      ? "e.g., Photosynthesis, Quantum Physics..."
-                      : "e.g., How do black holes work?"
-                  }
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  className="h-12 text-lg"
-                />
-              ) : (
-                <Textarea
-                  placeholder="Paste your notes or textbook content here..."
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  className="min-h-50 text-base"
-                />
-              )}
-
-              <Button
-                onClick={handleToolAction}
-                disabled={isLoading}
-                className="w-full h-12 text-lg font-bold gap-2 shadow-lg shadow-primary/20"
-              >
-                {isLoading ? (
-                  <Loader2 className="h-5 w-5 animate-spin" />
+          {!flashcards ? (
+            <Card className="shadow-xl border-none bg-card/50 backdrop-blur-xl">
+                <CardHeader>
+                <CardTitle>
+                    {activeTool === "explain" && "What would you like to understand?"}
+                    {activeTool === "quiz" && "What topic should we test?"}
+                    {activeTool === "summary" && "Paste the text you want to summarize"}
+                    {activeTool === "flashcards" && "What topic or text should we turn into cards?"}
+                </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                {activeTool === "quiz" || activeTool === "explain" || activeTool === "flashcards" ? (
+                    <Input
+                    placeholder={
+                        activeTool === "quiz"
+                        ? "e.g., Photosynthesis, Quantum Physics..."
+                        : activeTool === "flashcards"
+                        ? "e.g., French Revolution, Human Anatomy..."
+                        : "e.g., How do black holes work?"
+                    }
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    className="h-12 text-lg"
+                    />
                 ) : (
-                  <Sparkles className="h-5 w-5" />
+                    <Textarea
+                    placeholder="Paste your notes or textbook content here..."
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    className="min-h-50 text-base"
+                    />
                 )}
-                {activeTool === "quiz"
-                  ? "Start Practice Quiz"
-                  : "Generate with AI"}
-              </Button>
-            </CardContent>
-          </Card>
+
+                <Button
+                    onClick={handleToolAction}
+                    disabled={isLoading}
+                    className="w-full h-12 text-lg font-bold gap-2 shadow-lg shadow-primary/20"
+                >
+                    {isLoading ? (
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    ) : (
+                    <Sparkles className="h-5 w-5" />
+                    )}
+                    {activeTool === "quiz"
+                    ? "Start Practice Quiz"
+                    : activeTool === "flashcards"
+                    ? "Generate Flashcards"
+                    : "Generate with AI"}
+                </Button>
+                </CardContent>
+            </Card>
+          ) : (
+            <Card className="shadow-2xl border-none bg-card/50 backdrop-blur-xl overflow-hidden">
+                <CardHeader className="bg-primary/5 border-b border-primary/10 flex flex-row items-center justify-between">
+                    <div>
+                        <CardTitle className="text-lg font-black uppercase tracking-widest flex items-center gap-2">
+                            <Layers className="h-5 w-5 text-primary" />
+                            Flashcard Session
+                        </CardTitle>
+                    </div>
+                    <Button variant="ghost" size="icon" onClick={() => setFlashcards(null)}>
+                        <X className="h-4 w-4" />
+                    </Button>
+                </CardHeader>
+                <CardContent className="pt-10 pb-10">
+                    <FlashcardPlayer 
+                        cards={flashcards} 
+                        onComplete={() => setFlashcards(null)} 
+                    />
+                </CardContent>
+            </Card>
+          )}
 
           {result && (
             <Card className="animate-in fade-in slide-in-from-bottom-4 duration-500 border-primary/20 bg-primary/5">

@@ -37,7 +37,7 @@ export const AssignmentPreview: React.FC<AssignmentPreviewProps> = ({ content, o
           {content && (
             <>
               {onUseContent ? (
-                <Button variant="default" size="sm" onClick={() => onUseContent(content)} className="gap-2 bg-purple-600 hover:bg-purple-700 h-8 text-xs">
+                <Button variant="default" size="sm" onClick={() => onUseContent(content)} className="gap-2 bg-ai-primary hover:bg-ai-primary/90 h-8 text-xs text-ai-primary-foreground">
                   <Send className="h-3.5 w-3.5" />
                   Use Content
                 </Button>
@@ -48,7 +48,7 @@ export const AssignmentPreview: React.FC<AssignmentPreviewProps> = ({ content, o
                 </Button>
               )}
               <Button variant="outline" size="icon" onClick={copyToClipboard} className="h-8 w-8">
-                {copied ? <Check className="h-3.5 w-3.5 text-green-500" /> : <Copy className="h-3.5 w-3.5" />}
+                {copied ? <Check className="h-3.5 w-3.5 text-success" /> : <Copy className="h-3.5 w-3.5" />}
               </Button>
             </>
           )}

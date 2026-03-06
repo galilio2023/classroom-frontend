@@ -1,16 +1,26 @@
 import { ListView } from "@/components/refine-ui/views/list-view.tsx";
 import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb.tsx";
-import { Search, Activity, User, ShieldCheck, ShieldAlert, Building2, BookOpen, GraduationCap, FileText, CheckCircle2, XCircle, Clock } from "lucide-react";
+import { Search, Activity, User as UserIcon, Clock, Shield, Database, Globe } from "lucide-react";
 import { Input } from "@/components/ui/input.tsx";
 import { useMemo, useState } from "react";
 import { DataTable } from "@/components/refine-ui/data-table/data-table.tsx";
 import { useTable } from "@refinedev/react-table";
-import { AiLog, UserRole } from "@/types";
+import { ActivityLog, User } from "@/types";
 import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge.tsx";
-import { format } from "date-fns";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
+
+const actionVariants: Record<string, string> = {
+  CREATE_CLASS: "bg-green-500/10 text-green-600 border-green-200",
+  DELETE_CLASS: "bg-red-500/10 text-red-600 border-red-200",
+  JOIN_CLASS: "bg-blue-500/10 text-blue-600 border-blue-200",
+  APPROVE_ENROLLMENT: "bg-indigo-500/10 text-indigo-600 border-indigo-200",
+  SUBMIT_ASSIGNMENT: "bg-ai-primary/10 text-ai-primary border-ai-primary/20",
+  GRADE_SUBMISSION: "bg-amber-500/10 text-amber-600 border-amber-200",
+  USER_LOGIN: "bg-slate-500/10 text-slate-600 border-slate-200",
+};
 
 const ActivityLogPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -23,89 +33,82 @@ const ActivityLogPage = () => {
     return f;
   }, [searchQuery]);
 
-  const getActionIcon = (action: string) => {
-    const a = action.toLowerCase();
-    if (a.includes("verify") || a.includes("approve")) return <ShieldCheck className="h-4 w-4 text-green-500" />;
-    if (a.includes("reject") || a.includes("delete")) return <ShieldAlert className="h-4 w-4 text-destructive" />;
-    if (a.includes("user")) return <User className="h-4 w-4 text-blue-500" />;
-    if (a.includes("dept") || a.includes("department")) return <Building2 className="h-4 w-4 text-purple-500" />;
-    if (a.includes("class")) return <GraduationCap className="h-4 w-4 text-orange-500" />;
-    if (a.includes("subject")) return <BookOpen className="h-4 w-4 text-indigo-500" />;
-    if (a.includes("assignment") || a.includes("grade")) return <FileText className="h-4 w-4 text-emerald-500" />;
-    return <Activity className="h-4 w-4 text-muted-foreground" />;
-  };
-
-  const activityTable = useTable<AiLog>({
-    columns: useMemo<ColumnDef<AiLog>[]>(
+  const table = useTable<ActivityLog>({
+    columns: useMemo<ColumnDef<ActivityLog>[]>(
       () => [
         {
-          accessorKey: "user",
-          header: () => <p className="column-title">Admin / User</p>,
+          id: "user",
+          header: () => <p className="column-title">User</p>,
           cell: ({ row }) => {
             const user = row.original.user;
-            if (!user) return <span className="text-xs text-muted-foreground italic">System</span>;
             return (
               <div className="flex items-center gap-2">
                 <Avatar className="h-7 w-7">
-                  <AvatarImage src={user.image ?? undefined} />
-                  <AvatarFallback className="text-[10px]">{user.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                  <AvatarImage src={user?.image ?? ""} />
+                  <AvatarFallback>{user?.name?.[0] || "U"}</AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col">
-                  <span className="text-xs font-bold">{user.name}</span>
-                  <span className="text-[10px] text-muted-foreground uppercase tracking-tighter">{user.role}</span>
+                    <span className="text-xs font-bold">{user?.name || "System"}</span>
+                    <span className="text-[10px] text-muted-foreground">{user?.email}</span>
                 </div>
               </div>
             );
-          }
+          },
         },
         {
           accessorKey: "action",
           header: () => <p className="column-title">Action</p>,
-          cell: ({ getValue }) => (
-            <div className="flex items-center gap-2">
-              <div className="p-1.5 rounded-md bg-muted/50 border border-border/50">
-                {getActionIcon(getValue<string>())}
-              </div>
-              <Badge variant="outline" className="capitalize text-[10px] font-black tracking-tight bg-background">
-                {getValue<string>().replace(/_/g, " ")}
+          cell: ({ getValue }) => {
+            const action = getValue<string>();
+            return (
+              <Badge variant="outline" className={cn("text-[10px] font-black uppercase tracking-wider border-none", actionVariants[action])}>
+                {action.replace("_", " ")}
               </Badge>
+            );
+          },
+        },
+        {
+          id: "details",
+          header: () => <p className="column-title">Entity Details</p>,
+          cell: ({ row }) => (
+            <div className="flex items-center gap-2 text-[10px] font-medium text-muted-foreground">
+              <Database className="h-3 w-3" />
+              <span className="capitalize">{row.original.entityType || "N/A"}</span>
+              <span className="opacity-40">ID: {row.original.entityId || "-"}</span>
             </div>
           )
         },
         {
-          accessorKey: "metadata",
-          header: () => <p className="column-title">Details</p>,
-          cell: ({ getValue }) => {
-            const metadata = getValue<any>();
-            if (!metadata) return <span className="text-xs text-muted-foreground">-</span>;
-            
-            // Try to extract a human-readable summary from metadata
-            const details = metadata.name || metadata.title || metadata.email || JSON.stringify(metadata).substring(0, 50) + "...";
-            
-            return (
-              <div className="flex flex-col gap-1 max-w-[300px]">
-                <span className="text-xs font-medium truncate">{details}</span>
-                {metadata.reason && <span className="text-[10px] text-destructive italic">Reason: {metadata.reason}</span>}
-              </div>
-            );
-          }
+          id: "network",
+          header: () => <p className="column-title">Network</p>,
+          cell: ({ row }) => (
+            <div className="flex flex-col gap-0.5">
+                <div className="flex items-center gap-1.5 text-[9px] font-bold text-muted-foreground">
+                    <Globe className="h-2.5 w-2.5" />
+                    {row.original.ipAddress || "Local"}
+                </div>
+                <div className="text-[8px] text-muted-foreground/60 truncate max-w-[150px]">
+                    {row.original.userAgent}
+                </div>
+            </div>
+          )
         },
         {
           accessorKey: "createdAt",
-          header: () => <p className="column-title">Timestamp</p>,
+          header: () => <p className="column-title">Time</p>,
           cell: ({ getValue }) => (
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
-              <Clock className="h-3 w-3" />
-              {format(new Date(getValue<string>()), "MMM d, HH:mm:ss")}
+            <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+              <Clock className="h-3.5 w-3.5" />
+              <span>{formatDistanceToNow(new Date(getValue<string>()), { addSuffix: true })}</span>
             </div>
-          )
-        }
+          ),
+        },
       ],
-      []
+      [],
     ),
     refineCoreProps: {
-      resource: "ai-logs", // Reusing ai-logs for general activity tracking
-      pagination: { pageSize: 15, mode: "server" },
+      resource: "activity-log",
+      pagination: { pageSize: 20, mode: "server" },
       filters: { permanent: filters },
       sorters: { initial: [{ field: "createdAt", order: "desc" }] },
       meta: {
@@ -117,28 +120,30 @@ const ActivityLogPage = () => {
   return (
     <ListView>
       <Breadcrumb />
-      <div className="flex items-center gap-3 mb-2">
-        <div className="p-2 bg-primary/10 rounded-xl">
-          <Activity className="h-6 w-6 text-primary" />
-        </div>
-        <h1 className="page-title mb-0">Admin Activity Log</h1>
-      </div>
-      <div className="intro-row">
-        <p>Audit trail of all administrative actions, verifications, and system changes.</p>
-        <div className="actions-row">
-          <div className="search-field">
-            <Search className="search-icon" />
-            <Input
-              type="text"
-              placeholder="Filter by action (e.g. verify, delete)..."
-              className="pl-10 w-full"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-3xl font-black tracking-tight flex items-center gap-3">
+            <Shield className="h-8 w-8 text-primary" />
+            System Audit Log
+          </h1>
+          <p className="text-muted-foreground">Monitor all administrative and user actions across the platform.</p>
         </div>
       </div>
-      <DataTable table={activityTable} />
+
+      <div className="intro-row bg-muted/30 p-4 rounded-2xl mb-6">
+        <div className="search-field max-w-md">
+          <Search className="search-icon" />
+          <Input
+            type="text"
+            placeholder="Filter by action (e.g. CREATE_CLASS)..."
+            className="pl-10 w-full h-11 rounded-xl bg-background"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+      </div>
+
+      <DataTable table={table} />
     </ListView>
   );
 };

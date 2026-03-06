@@ -19,8 +19,8 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
     <div className={`flex gap-3 ${!isModel ? "flex-row-reverse" : ""}`}>
       <Avatar className="h-9 w-9 shrink-0 border-2 border-background shadow-sm">
         {isModel ? (
-          <div className="bg-gradient-to-br from-indigo-500 to-purple-600 h-full w-full flex items-center justify-center">
-            <Sparkles className="h-4 w-4 text-primary-foreground" />
+          <div className="bg-ai-primary h-full w-full flex items-center justify-center">
+            <Sparkles className="h-4 w-4 text-ai-primary-foreground" />
           </div>
         ) : (
           <div className="bg-muted h-full w-full flex items-center justify-center">

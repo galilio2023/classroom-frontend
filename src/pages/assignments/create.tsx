@@ -143,7 +143,7 @@ export const AssignmentCreate = () => {
                 <Button 
                     variant="outline" 
                     onClick={() => setShowAI(true)}
-                    className="gap-2 rounded-xl h-11 px-6 border-purple-500/20 text-purple-600 hover:bg-purple-50 transition-all animate-in fade-in zoom-in-95"
+                    className="gap-2 rounded-xl h-11 px-6 border-ai-primary/20 text-ai-primary hover:bg-ai-primary/5 transition-all animate-in fade-in zoom-in-95"
                 >
                     <Sparkles className="h-4 w-4" />
                     AI Assistant
@@ -283,7 +283,7 @@ export const AssignmentCreate = () => {
                                         onUploadSuccess={handleFileUpload}
                                     />
                                     {watch("fileUrl") && (
-                                        <div className="mt-4 flex items-center gap-2 text-xs text-green-600 font-bold bg-green-50 dark:bg-green-900/20 p-3 rounded-xl w-fit border border-green-100">
+                                        <div className="mt-4 flex items-center gap-2 text-xs text-success font-bold bg-success/5 dark:bg-success/10 p-3 rounded-xl w-fit border border-success/20">
                                             <Paperclip className="h-3.5 w-3.5" />
                                             File attached successfully
                                         </div>
@@ -303,15 +303,15 @@ export const AssignmentCreate = () => {
             {/* AI Assistant Side Panel */}
             {showAI && (
                 <div className="xl:col-span-5 animate-in slide-in-from-right-12 duration-700 sticky top-24">
-                    <Card className="border-purple-500/20 shadow-2xl shadow-purple-500/10 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl overflow-hidden">
-                        <div className="h-1.5 bg-purple-600 w-full" />
-                        <CardHeader className="bg-purple-500/5 border-b border-purple-500/10 flex flex-row items-center justify-between">
+                    <Card className="border-ai-primary/20 shadow-2xl shadow-ai-primary/10 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl overflow-hidden">
+                        <div className="h-1.5 bg-ai-primary w-full" />
+                        <CardHeader className="bg-ai-primary/5 border-b border-ai-primary/10 flex flex-row items-center justify-between">
                             <div className="flex items-center gap-2">
-                                <Sparkles className="h-5 w-5 text-purple-600" />
-                                <CardTitle className="text-purple-900 dark:text-purple-300 text-sm font-black uppercase tracking-widest">AI Writing Assistant</CardTitle>
+                                <Sparkles className="h-5 w-5 text-ai-primary" />
+                                <CardTitle className="text-ai-primary text-sm font-black uppercase tracking-widest">AI Writing Assistant</CardTitle>
                             </div>
-                            <Button variant="ghost" size="icon" onClick={() => setShowAI(false)} className="h-8 w-8 rounded-full hover:bg-purple-100">
-                                <X className="h-4 w-4 text-purple-600" />
+                            <Button variant="ghost" size="icon" onClick={() => setShowAI(false)} className="h-8 w-8 rounded-full hover:bg-ai-primary/10">
+                                <X className="h-4 w-4 text-ai-primary" />
                             </Button>
                         </CardHeader>
                         <CardContent className="pt-6 max-h-[75vh] overflow-y-auto custom-scrollbar">

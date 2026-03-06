@@ -108,7 +108,7 @@ const SubmissionShow = () => {
             </Button>
             <div className="flex items-center gap-3">
                 {submission.grade !== null ? (
-                    <Badge className="bg-green-500 text-white px-4 py-1 rounded-full font-black uppercase tracking-widest text-[10px]">
+                    <Badge className="bg-success text-success-foreground px-4 py-1 rounded-full font-black uppercase tracking-widest text-[10px]">
                         Graded
                     </Badge>
                 ) : (
@@ -170,7 +170,7 @@ const SubmissionShow = () => {
                                 size="sm" 
                                 onClick={handleAiAnalyze}
                                 disabled={isAnalyzing}
-                                className="h-7 text-[10px] gap-1.5 border-purple-500/20 text-purple-600 hover:bg-purple-50"
+                                className="h-7 text-[10px] gap-1.5 border-ai-primary/20 text-ai-primary hover:bg-ai-primary/5"
                             >
                                 {isAnalyzing ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
                                 AI Analyze
@@ -204,12 +204,12 @@ const SubmissionShow = () => {
                         </div>
 
                         {submission.suggestedGrade !== undefined && submission.suggestedGrade !== null && !submission.grade && (
-                            <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-xl border border-purple-100 dark:border-purple-800/30 space-y-2">
-                                <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-purple-600">
+                            <div className="p-4 bg-ai-secondary/30 rounded-xl border border-ai-primary/10 space-y-2">
+                                <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-ai-primary">
                                     <Wand2 className="h-3 w-3" />
                                     AI Suggestion
                                 </div>
-                                <p className="text-xs text-purple-900/70 dark:text-purple-300 leading-relaxed italic">
+                                <p className="text-xs text-ai-primary/70 leading-relaxed italic">
                                     "AI suggests a grade of {submission.suggestedGrade}% based on the content quality and alignment with objectives."
                                 </p>
                             </div>

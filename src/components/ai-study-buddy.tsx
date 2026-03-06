@@ -52,14 +52,14 @@ export const AIStudyBuddy = ({ subject, topic, assignment, classId }: AIStudyBud
                 ))}
                 {isLoading && (
                   <div className="flex gap-3">
-                    <div className="bg-gradient-to-br from-indigo-500 to-purple-600 h-9 w-9 shrink-0 rounded-full flex items-center justify-center border-2 border-background shadow-sm">
-                      <Sparkles className="h-4 w-4 text-primary-foreground" />
+                    <div className="bg-ai-primary h-9 w-9 shrink-0 rounded-full flex items-center justify-center border-2 border-background shadow-sm">
+                      <Sparkles className="h-4 w-4 text-ai-primary-foreground" />
                     </div>
                     <div className="bg-card border p-4 rounded-2xl rounded-tl-none shadow-sm">
                       <div className="flex gap-1">
-                        <span className="h-1.5 w-1.5 bg-primary/40 rounded-full animate-bounce" />
-                        <span className="h-1.5 w-1.5 bg-primary/40 rounded-full animate-bounce [animation-delay:0.2s]" />
-                        <span className="h-1.5 w-1.5 bg-primary/40 rounded-full animate-bounce [animation-delay:0.4s]" />
+                        <span className="h-1.5 w-1.5 bg-ai-primary/40 rounded-full animate-bounce" />
+                        <span className="h-1.5 w-1.5 bg-ai-primary/40 rounded-full animate-bounce [animation-delay:0.2s]" />
+                        <span className="h-1.5 w-1.5 bg-ai-primary/40 rounded-full animate-bounce [animation-delay:0.4s]" />
                       </div>
                     </div>
                   </div>
@@ -78,7 +78,7 @@ export const AIStudyBuddy = ({ subject, topic, assignment, classId }: AIStudyBud
       ) : (
         <Button 
           size="lg" 
-          className="rounded-2xl h-16 w-16 shadow-2xl shadow-primary/40 hover:scale-110 transition-all duration-300 bg-gradient-to-br from-indigo-600 to-purple-700 border-0"
+          className="rounded-2xl h-16 w-16 shadow-2xl shadow-ai-primary/40 hover:scale-110 transition-all duration-300 bg-ai-primary border-0"
           onClick={() => setIsOpen(true)}
         >
           <MessageCircle className="h-7 w-7" />

@@ -146,3 +146,22 @@ The application now boasts a production-grade architecture that is robust, trans
 
 **Summary:**
 The application now features a robust, role-based access control system that protects sensitive AI features and administrative resources, ensuring security, cost-efficiency, and a tailored user experience.
+
+---
+
+## 10. Live Classroom Security & AI/Gamification Enhancements
+**Problem:**
+- **Critical Security Vulnerability:** The Jitsi room name was being generated client-side using a predictable format (`ClassroomAI-Class-${classId}-Live`), allowing unauthorized users to potentially guess room names and join sessions.
+- **Incomplete UI Logic:** The "Add Resource" dialog was missing input fields for URLs when selecting "Link" or "Video" types, and the dropdown options didn't match the full type definition.
+- **Fragile Gamification UI:** The student dashboard banner could display "Keep it up, !" if the user's name was empty, and lacked robustness.
+
+**Solution:**
+- **Secure Room Token Generation:** Refactored `LiveClassroom.tsx` to fetch a signed JWT token and room name from a new backend endpoint (`/live-session/token`) instead of generating them client-side. This ensures only authorized participants can join.
+- **Enhanced Resource Dialog:** Updated `AddResourceDialog.tsx` to include the missing URL input fields and ensure all resource types (`video`, `other`) are selectable and handled correctly.
+- **Robust Gamification & AI UI:** 
+    - Improved `StudentDashboard.tsx` with a fallback name display ("Student") and better type safety.
+    - Refined `MagicBuilderDialog.tsx` with stricter typing for configuration objects.
+    - Verified that all new AI and Gamification components use the standardized CSS variables (`--ai-primary`, `--gold-primary`) for consistent theming.
+
+**Summary:**
+These changes address a critical security vulnerability in the live classroom feature and polish the user experience for the new AI and gamification modules, ensuring the application is secure, robust, and visually consistent.

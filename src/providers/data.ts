@@ -66,9 +66,11 @@ const resourceFilterMappings: Record<string, Record<string, string>> = {
   submissions: { assignmentId: "assignmentId", studentId: "studentId" },
   discussions: { classId: "classId", parentId: "parentId" },
   attendance: { classId: "classId", date: "date" },
-  resources: { classId: "classId", search: "search" },
+  resources: { classId: "classId", moduleId: "moduleId", search: "search" },
   "profile-requests": { status: "status", userId: "userId" },
-  quizzes: { classId: "classId" },
+  quizzes: { classId: "classId", moduleId: "moduleId" },
+  modules: { classId: "classId" },
+  progress: { classId: "classId", userId: "userId" },
 };
 
 export const dataProvider: DataProvider = {

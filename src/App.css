@@ -32,6 +32,15 @@
   --success-foreground: hsl(144.1 70.6% 96.1%);
   --warning: hsl(37.7 92.1% 50.2%);
   --warning-foreground: hsl(38 92% 95%);
+
+  /* AI & Gamification Accents */
+  --ai-primary: hsl(270 95% 60%); /* Purple */
+  --ai-primary-foreground: hsl(0 0% 100%);
+  --ai-secondary: hsl(270 95% 95%); /* Light Purple */
+  --live-primary: hsl(0 84.2% 60.2%); /* Red */
+  --live-secondary: hsl(0 84.2% 95%); /* Light Red */
+  --gold-primary: hsl(45 93% 47%); /* Gold */
+  --gold-secondary: hsl(45 93% 95%); /* Light Gold */
 }
 
 /* --- PRO MIDNIGHT DARK MODE --- */
@@ -58,6 +67,14 @@
 
   --success: hsl(142.1 70.6% 45.3%);
   --warning: hsl(37.7 92.1% 50.2%);
+
+  /* AI & Gamification Accents (Dark Mode) */
+  --ai-primary: hsl(270 95% 75%);
+  --ai-secondary: hsl(270 50% 20%);
+  --live-primary: hsl(0 84.2% 70%);
+  --live-secondary: hsl(0 50% 20%);
+  --gold-primary: hsl(45 93% 60%);
+  --gold-secondary: hsl(45 50% 20%);
 }
 
 @theme inline {
@@ -85,6 +102,14 @@
   --color-success-foreground: var(--success-foreground);
   --color-warning: var(--warning);
   --color-warning-foreground: var(--warning-foreground);
+
+  --color-ai-primary: var(--ai-primary);
+  --color-ai-primary-foreground: var(--ai-primary-foreground);
+  --color-ai-secondary: var(--ai-secondary);
+  --color-live-primary: var(--live-primary);
+  --color-live-secondary: var(--live-secondary);
+  --color-gold-primary: var(--gold-primary);
+  --color-gold-secondary: var(--gold-secondary);
 
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 4px);

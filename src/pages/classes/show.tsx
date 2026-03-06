@@ -20,7 +20,7 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Class, Enrollment, User } from "@/types";
+import { Class, Enrollment, User, UserRole } from "@/types";
 import { 
   Loader2, 
   PlusCircle, 
@@ -37,7 +37,8 @@ import {
   Users, 
   Info,
   Copy,
-  Check
+  Check,
+  Video
 } from "lucide-react";
 import {
   AlertDialog,
@@ -59,6 +60,7 @@ import { QuizTab } from "./quiz-tab";
 import { CurriculumTab } from "./curriculum-tab";
 import { AnnouncementTab } from "./announcement-tab";
 import { AIStudentInsightModal } from "@/components/ai-student-insight-modal";
+import { LiveClassroom } from "@/components/classes/live-classroom";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -99,8 +101,8 @@ const ClassesShow = () => {
   const { mutate: updateEnrollment } = useUpdate();
   const isDeleting = deleteMutationResult.isPending;
 
-  const isAdmin = identity?.role === "admin";
-  const isTeacher = identity?.role === "teacher";
+  const isAdmin = identity?.role === UserRole.ADMIN;
+  const isTeacher = identity?.role === UserRole.TEACHER;
   const isStaff = isAdmin || isTeacher;
 
   const handleCopyInviteCode = () => {
@@ -168,7 +170,7 @@ const ClassesShow = () => {
               <Button
                 variant="outline"
                 size="sm"
-                className="h-8 gap-2 border-primary/20 hover:bg-primary/5 text-primary"
+                className="h-8 gap-2 border-ai-primary/20 hover:bg-ai-primary/5 text-ai-primary"
                 onClick={() => setInsightTarget({ id: row.original.student.id, name: row.original.student.name })}
               >
                 <Sparkles className="h-3.5 w-3.5" />
@@ -239,11 +241,20 @@ const ClassesShow = () => {
         <ShowViewHeader resource="classes" title={aClass.name} />
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className={cn("grid w-full", isStaff ? "grid-cols-9" : "grid-cols-8")}>
+          <TabsList className={cn("grid w-full", isStaff ? "grid-cols-10" : "grid-cols-9")}>
             <TabsTrigger value="curriculum">
               <div className="flex items-center gap-2">
                 <LayoutGrid className="h-4 w-4" />
                 <span className="hidden sm:inline">Curriculum</span>
+              </div>
+            </TabsTrigger>
+            <TabsTrigger value="live">
+              <div className="flex items-center gap-2">
+                <Video className="h-4 w-4 text-live-primary" />
+                <span className="hidden sm:inline">Live</span>
+                {aClass.isLive && (
+                    <span className="flex h-2 w-2 rounded-full bg-live-primary animate-pulse" />
+                )}
               </div>
             </TabsTrigger>
             <TabsTrigger value="announcements">
@@ -301,6 +312,10 @@ const ClassesShow = () => {
           <div className="mt-6">
             <TabsContent value="curriculum">
               <CurriculumTab classId={classId} />
+            </TabsContent>
+
+            <TabsContent value="live">
+              <LiveClassroom classId={classId} className="w-full" />
             </TabsContent>
 
             <TabsContent value="announcements">
@@ -450,7 +465,7 @@ const ClassesShow = () => {
                           className="h-12 w-12 rounded-full"
                           onClick={handleCopyInviteCode}
                         >
-                          {copied ? <Check className="h-5 w-5 text-green-500" /> : <Copy className="h-5 w-5" />}
+                          {copied ? <Check className="h-5 w-5 text-success" /> : <Copy className="h-5 w-5" />}
                         </Button>
                       </div>
                       
