@@ -41,6 +41,13 @@
   --live-secondary: hsl(0 84.2% 95%); /* Light Red */
   --gold-primary: hsl(45 93% 47%); /* Gold */
   --gold-secondary: hsl(45 93% 95%); /* Light Gold */
+
+  /* Badge Colors */
+  --badge-blue: hsl(221.2 83.2% 53.3%);
+  --badge-orange: hsl(24.6 95% 53.1%);
+  --badge-purple: hsl(262.1 83.3% 57.8%);
+  --badge-yellow: hsl(47.9 95.8% 53.1%);
+  --badge-pink: hsl(330 80% 60%);
 }
 
 /* --- PRO MIDNIGHT DARK MODE --- */
@@ -75,6 +82,13 @@
   --live-secondary: hsl(0 50% 20%);
   --gold-primary: hsl(45 93% 60%);
   --gold-secondary: hsl(45 50% 20%);
+
+  /* Badge Colors (Dark Mode) */
+  --badge-blue: hsl(217.2 91.2% 59.8%);
+  --badge-orange: hsl(20.5 90.2% 48.2%);
+  --badge-purple: hsl(270 95% 75%);
+  --badge-yellow: hsl(47.9 95.8% 53.1%);
+  --badge-pink: hsl(330 80% 70%);
 }
 
 @theme inline {
@@ -110,6 +124,12 @@
   --color-live-secondary: var(--live-secondary);
   --color-gold-primary: var(--gold-primary);
   --color-gold-secondary: var(--gold-secondary);
+
+  --color-badge-blue: var(--badge-blue);
+  --color-badge-orange: var(--badge-orange);
+  --color-badge-purple: var(--badge-purple);
+  --color-badge-yellow: var(--badge-yellow);
+  --color-badge-pink: var(--badge-pink);
 
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 4px);

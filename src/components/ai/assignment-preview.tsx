@@ -22,6 +22,7 @@ export const AssignmentPreview: React.FC<AssignmentPreviewProps> = ({ content, o
   };
 
   const handleGlobalCreate = () => {
+    // TODO: Consider replacing sessionStorage with a more robust state management solution (e.g., Refine Context or Redux)
     sessionStorage.setItem("pending_ai_assignment", content);
     create("assignments");
   };
@@ -43,14 +44,14 @@ export const AssignmentPreview: React.FC<AssignmentPreviewProps> = ({ content, o
           return (
             <Card key={idx} className={cn(
               "border-l-4 overflow-hidden transition-all hover:shadow-md",
-              isLesson ? "border-l-blue-500 bg-blue-500/5" : 
-              isAssignment ? "border-l-purple-500 bg-purple-500/5" : 
-              isQuiz ? "border-l-pink-500 bg-pink-500/5" : "border-l-primary/20"
+              isLesson ? "border-l-badge-blue bg-badge-blue/5" : 
+              isAssignment ? "border-l-badge-purple bg-badge-purple/5" : 
+              isQuiz ? "border-l-badge-pink bg-badge-pink/5" : "border-l-primary/20"
             )}>
               <CardHeader className="py-3 px-4 border-b border-black/5 dark:border-white/5 flex flex-row items-center gap-2">
-                {isLesson && <BookOpen className="h-4 w-4 text-blue-500" />}
-                {isAssignment && <FileText className="h-4 w-4 text-purple-500" />}
-                {isQuiz && <HelpCircle className="h-4 w-4 text-pink-500" />}
+                {isLesson && <BookOpen className="h-4 w-4 text-badge-blue" />}
+                {isAssignment && <FileText className="h-4 w-4 text-badge-purple" />}
+                {isQuiz && <HelpCircle className="h-4 w-4 text-badge-pink" />}
                 <span className="text-[10px] font-black uppercase tracking-widest opacity-50">
                   {isLesson ? "Lesson Material" : isAssignment ? "Assignment Task" : isQuiz ? "Quiz Section" : "Content Section"}
                 </span>

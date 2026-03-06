@@ -165,3 +165,19 @@ The application now features a robust, role-based access control system that pro
 
 **Summary:**
 These changes address a critical security vulnerability in the live classroom feature and polish the user experience for the new AI and gamification modules, ensuring the application is secure, robust, and visually consistent.
+
+---
+
+## 11. Strict Styling & Component Architecture Compliance
+**Problem:**
+- **Tailwind CSS Violations:** Several components (`AssignmentPreview`, `BadgeCard`) were using direct Tailwind color classes (e.g., `bg-blue-500`, `text-purple-500`) instead of the mandated CSS variables, violating the project's strict styling rules.
+- **Component Misplacement:** The `BadgeCard` component was incorrectly placed in the root `src/components` directory instead of `src/components/ui`.
+- **Deeply Nested Data:** The `LiveClassroom` component was accessing data via `data.data.data`, indicating a redundant wrapper in the backend response or frontend handling.
+
+**Solution:**
+- **CSS Variable Standardization:** Defined new semantic CSS variables (e.g., `--badge-blue`, `--badge-purple`) in `App.css` and updated `AssignmentPreview` and `BadgeCard` to use them. This ensures consistent theming and easier maintenance.
+- **Component Relocation:** Moved `BadgeCard` to `src/components/ui/badge-card.tsx` to align with the project's component architecture.
+- **Data Access Simplification:** Updated `LiveClassroom.tsx` to access data via `data.data`, assuming the backend response structure has been flattened or the double-wrapping was resolved.
+
+**Summary:**
+These refactorings ensure strict adherence to the project's `CODE_PATTERNS.md`, improving code maintainability, consistency, and architectural cleanliness.

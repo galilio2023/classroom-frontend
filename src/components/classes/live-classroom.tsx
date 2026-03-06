@@ -57,7 +57,8 @@ export const LiveClassroom = ({ classId: classIdString }: LiveClassroomProps) =>
         values: { classId: numericClassId }
     }, {
         onSuccess: (data: any) => {
-            const { roomName, token } = data.data.data;
+            // Flattened response structure
+            const { roomName, token } = data.data;
             console.log(`[LiveClassroom] Joining room: ${roomName}`);
             initializeJitsi(roomName, token);
         },
