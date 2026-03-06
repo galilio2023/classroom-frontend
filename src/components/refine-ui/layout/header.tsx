@@ -8,14 +8,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useGetIdentity, useLogout, useNavigation } from "@refinedev/core";
-import { CircleUser, LogOut, User as UserIcon, LifeBuoy } from "lucide-react";
+import { CircleUser, LogOut, User as UserIcon, LifeBuoy, Zap } from "lucide-react";
 import { toast } from "sonner";
-import { User } from "@/types";
+import { User, UserRole } from "@/types";
 import { ThemeToggle } from "../theme/theme-toggle";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { NotificationBell } from "@/components/notification-bell";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { CommandMenu } from "@/components/command-menu";
+import { XPProgressBar } from "@/components/xp-progress-bar";
 
 export function Header() {
   const { mutate: logout } = useLogout();
@@ -30,12 +31,20 @@ export function Header() {
     });
   };
 
+  const isStudent = identity?.role === UserRole.STUDENT;
+
   return (
     <header className="flex h-20 items-center gap-4 border-b border-border/40 bg-background/60 backdrop-blur-xl px-6 sticky top-0 z-50">
       <SidebarTrigger className="md:hidden" />
 
-      <div className="w-full flex-1 flex items-center">
+      <div className="w-full flex-1 flex items-center gap-6">
         <CommandMenu />
+        
+        {isStudent && (
+          <div className="hidden lg:flex items-center gap-4 max-w-xs w-full">
+            <XPProgressBar xp={identity?.xp || 0} className="w-full" />
+          </div>
+        )}
       </div>
       
       <div className="flex items-center gap-4">
@@ -64,6 +73,16 @@ export function Header() {
                 </p>
               </div>
             </DropdownMenuLabel>
+            
+            {isStudent && (
+              <>
+                <DropdownMenuSeparator className="bg-border/50" />
+                <div className="px-2 py-2">
+                  <XPProgressBar xp={identity?.xp || 0} />
+                </div>
+              </>
+            )}
+
             <DropdownMenuSeparator className="bg-border/50" />
             <DropdownMenuItem 
                 className="gap-2 cursor-pointer"

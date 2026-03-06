@@ -17,7 +17,7 @@ declare global {
   }
 }
 
-export const LiveClassroom = ({ classId }: LiveClassroomProps) => {
+export const LiveClassroom = ({ classId: classIdString }: LiveClassroomProps) => {
   const { data: identity } = useGetIdentity<User>();
   const jitsiContainerRef = useRef<HTMLDivElement>(null);
   const [api, setApi] = useState<any>(null);
@@ -26,11 +26,12 @@ export const LiveClassroom = ({ classId }: LiveClassroomProps) => {
 
   const { mutate: markLiveAttendance } = useCustomMutation();
   const { mutate: getRoomToken } = useCustomMutation();
+  const { mutate: endLiveSession } = useCustomMutation();
 
   const isTeacher = identity?.role === UserRole.TEACHER || identity?.role === UserRole.ADMIN;
+  const numericClassId = Number(classIdString);
   
   useEffect(() => {
-    // Load Jitsi Script
     if (!window.JitsiMeetExternalAPI) {
       const script = document.createElement("script");
       script.src = "https://meet.jit.si/external_api.js";
@@ -43,24 +44,24 @@ export const LiveClassroom = ({ classId }: LiveClassroomProps) => {
             api.dispose();
         }
     };
-  }, []);
+  }, [api]); 
 
   const startMeeting = () => {
-    if (!window.JitsiMeetExternalAPI || !jitsiContainerRef.current || !identity) return;
+    if (!window.JitsiMeetExternalAPI || !identity || isNaN(numericClassId)) return;
 
     setIsLoading(true);
 
-    // Fetch a secure, signed room token from the backend
     getRoomToken({
-        url: "live-session/token",
+        url: "/live-session/token",
         method: "post",
-        values: { classId: Number(classId) }
+        values: { classId: numericClassId }
     }, {
         onSuccess: (data: any) => {
             const { roomName, token } = data.data;
+            console.log(`[LiveClassroom] Joining room: ${roomName}`);
             initializeJitsi(roomName, token);
         },
-        onError: (error) => {
+        onError: (error: any) => {
             setIsLoading(false);
             toast.error("Failed to join live session. Please try again.");
             console.error("Live session error:", error);
@@ -69,69 +70,106 @@ export const LiveClassroom = ({ classId }: LiveClassroomProps) => {
   };
 
   const initializeJitsi = (roomName: string, token?: string) => {
-      if (!window.JitsiMeetExternalAPI || !jitsiContainerRef.current || !identity) return;
+      if (!window.JitsiMeetExternalAPI || !identity) return;
 
-      const domain = "meet.jit.si";
-      const options = {
-        roomName: roomName,
-        jwt: token, // Pass the JWT token for authentication/moderation
-        width: "100%",
-        height: 600,
-        parentNode: jitsiContainerRef.current,
-        userInfo: {
-          displayName: identity.name,
-          email: identity.email,
-        },
-        configOverwrite: {
-          startWithAudioMuted: true,
-          startWithVideoMuted: true,
-          prejoinPageEnabled: false,
-        },
-        interfaceConfigOverwrite: {
-          TOOLBAR_BUTTONS: [
-            "microphone", "camera", "closedcaptions", "desktop", "fullscreen",
-            "fodeviceselection", "hangup", "profile", "chat", "recording",
-            "livestreaming", "etherpad", "sharedvideo", "settings", "raisehand",
-            "videoquality", "filmstrip", "invite", "feedback", "stats", "shortcuts",
-            "tileview", "videobackgroundblur", "download", "help", "mute-everyone",
-            "security"
-          ],
-        },
-      };
+      setIsJoined(true);
 
-      const newApi = new window.JitsiMeetExternalAPI(domain, options);
-      setApi(newApi);
+      setTimeout(() => {
+          if (!jitsiContainerRef.current) {
+              setIsLoading(false);
+              setIsJoined(false);
+              return;
+          }
 
-      newApi.addEventListeners({
-        videoConferenceJoined: () => {
-          setIsLoading(false);
-          setIsJoined(true);
-          
-          // --- SMART ATTENDANCE TRIGGER ---
-          if (identity.role === UserRole.STUDENT) {
-              markLiveAttendance({
-                  url: "attendance/live",
-                  method: "post",
-                  values: { classId: Number(classId) }
-              }, {
-                  onSuccess: () => {
-                      toast.success("Attendance marked automatically!");
-                  },
-                  onError: () => {
-                      toast.error("Failed to mark attendance. Please notify your teacher.");
+          // Clear container before starting
+          jitsiContainerRef.current.innerHTML = "";
+
+          const domain = "meet.jit.si";
+          const options = {
+            roomName: roomName,
+            jwt: token, 
+            width: "100%",
+            height: 600,
+            parentNode: jitsiContainerRef.current,
+            userInfo: {
+              displayName: identity.name,
+              email: identity.email,
+            },
+            configOverwrite: {
+              startWithAudioMuted: !isTeacher,
+              startWithVideoMuted: false, // Force video on to trigger permissions
+              prejoinPageEnabled: false,
+              enableLobby: false,
+              enableNoAudioDetection: true,
+              enableNoisyMicDetection: true,
+              p2p: { enabled: true }, // Re-enable P2P for better direct connection in small groups
+              disableAudioLevels: false,
+              disableRemoteMute: false,
+            },
+            interfaceConfigOverwrite: {
+              TOOLBAR_BUTTONS: [
+                "microphone", "camera", "closedcaptions", "desktop", "fullscreen",
+                "fodeviceselection", "hangup", "profile", "chat", "recording",
+                "livestreaming", "etherpad", "sharedvideo", "settings", "raisehand",
+                "videoquality", "filmstrip", "invite", "feedback", "stats", "shortcuts",
+                "tileview", "videobackgroundblur", "download", "help", "mute-everyone",
+                "security"
+              ],
+              SETTINGS_SECTIONS: [ 'devices', 'language', 'moderator', 'profile', 'calendar' ],
+            },
+          };
+
+          try {
+              const newApi = new window.JitsiMeetExternalAPI(domain, options);
+              setApi(newApi);
+
+              newApi.addEventListeners({
+                videoConferenceJoined: () => {
+                  setIsLoading(false);
+                  if (identity.role === UserRole.STUDENT) {
+                      markLiveAttendance({
+                          url: "/attendance/live",
+                          method: "post",
+                          values: { classId: numericClassId }
+                      });
                   }
+                },
+                videoConferenceLeft: () => {
+                  setIsJoined(false);
+                  setApi(null);
+                  if (jitsiContainerRef.current) {
+                      jitsiContainerRef.current.innerHTML = "";
+                  }
+                  if (isTeacher) {
+                      endLiveSession({
+                          url: "/live-session/end",
+                          method: "post",
+                          values: { classId: numericClassId }
+                      });
+                  }
+                },
+                readyToClose: () => {
+                    setIsJoined(false);
+                    setApi(null);
+                    if (jitsiContainerRef.current) {
+                        jitsiContainerRef.current.innerHTML = "";
+                    }
+                    if (isTeacher) {
+                        endLiveSession({
+                            url: "/live-session/end",
+                            method: "post",
+                            values: { classId: numericClassId }
+                        });
+                    }
+                }
               });
+          } catch (err) {
+              console.error("Error initializing Jitsi:", err);
+              setIsLoading(false);
+              setIsJoined(false);
+              toast.error("Failed to initialize video conference.");
           }
-        },
-        videoConferenceLeft: () => {
-          setIsJoined(false);
-          setApi(null);
-          // Clean up the container
-          if (jitsiContainerRef.current) {
-              jitsiContainerRef.current.innerHTML = "";
-          }
-        },
-      });
+      }, 100);
   };
 
   return (

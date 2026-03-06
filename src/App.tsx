@@ -35,7 +35,8 @@ import {
   FolderOpen,
   Bell,
   TrendingUp,
-  Activity
+  Activity,
+  UserCircle
 } from "lucide-react";
 import { Layout } from "@/components/refine-ui/layout/layout.tsx";
 import { AuthorizedRoute } from "./components/authorized-route";
@@ -55,6 +56,7 @@ const UsersList = React.lazy(() => import("@/pages/users/list.tsx"));
 const UsersCreate = React.lazy(() => import("@/pages/users/create.tsx"));
 const UsersEdit = React.lazy(() => import("@/pages/users/edit.tsx"));
 const UserShow = React.lazy(() => import("@/pages/users/show.tsx"));
+const StudentPortfolio = React.lazy(() => import("@/pages/users/portfolio.tsx"));
 const ClassesList = React.lazy(() => import("@/pages/classes/list.tsx"));
 const ClassesCreate = React.lazy(() => import("@/pages/classes/create.tsx"));
 const ClassesEdit = React.lazy(() => import("@/pages/classes/edit.tsx"));
@@ -263,6 +265,15 @@ function App() {
                       icon: <ShieldCheck />,
                       hide: !isAdmin 
                   },
+                },
+                {
+                  name: "portfolio",
+                  list: "/portfolio/:id",
+                  meta: {
+                    label: "My Portfolio",
+                    icon: <UserCircle />,
+                    hide: !isStudent
+                  }
                 },
                 {
                   name: "profile-requests",
@@ -484,6 +495,7 @@ function App() {
                         }
                       />
                     </Route>
+                    <Route path="portfolio/:id" element={<StudentPortfolio />} />
                     <Route path="profile-requests">
                       <Route
                         index

@@ -38,7 +38,9 @@ import {
   Info,
   Copy,
   Check,
-  Video
+  Video,
+  Trophy,
+  BarChart3
 } from "lucide-react";
 import {
   AlertDialog,
@@ -61,8 +63,12 @@ import { CurriculumTab } from "./curriculum-tab";
 import { AnnouncementTab } from "./announcement-tab";
 import { AIStudentInsightModal } from "@/components/ai-student-insight-modal";
 import { LiveClassroom } from "@/components/classes/live-classroom";
+import { LeaderboardTab } from "./leaderboard-tab";
+import { AnalyticsTab } from "./analytics-tab";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { io } from "socket.io-client";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 const ClassesShow = () => {
   const { id } = useParams();
@@ -74,6 +80,7 @@ const ClassesShow = () => {
   const [unenrollTarget, setUnenrollTarget] = useState<number | null>(null);
   const [isEnrollDialogOpen, setIsEnrollDialogOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [isLiveIndicator, setIsLiveIndicator] = useState(false);
   
   const [insightTarget, setInsightTarget] = useState<{ id: string; name: string } | null>(null);
 
@@ -91,6 +98,40 @@ const ClassesShow = () => {
   });
 
   const aClass = aClassData?.data;
+
+  // Initialize live indicator from DB
+  useEffect(() => {
+      if (aClass) {
+          setIsLiveIndicator(!!aClass.isLive);
+      }
+  }, [aClass]);
+
+  // --- REAL-TIME LIVE INDICATOR ---
+  useEffect(() => {
+    if (!identity?.id || !classId) return;
+
+    const socketUrl = import.meta.env.VITE_SOCKET_URL || import.meta.env.VITE_API_URL.replace("/api", "");
+    const socket = io(socketUrl, {
+      query: { userId: identity.id },
+      withCredentials: true,
+    });
+
+    socket.on("live_session_started", (data: any) => {
+      if (Number(data.classId) === Number(classId)) {
+        setIsLiveIndicator(true);
+      }
+    });
+
+    socket.on("live_session_ended", (data: any) => {
+      if (Number(data.classId) === Number(classId)) {
+        setIsLiveIndicator(false);
+      }
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [identity?.id, classId]);
 
   const allEnrollments = aClass?.enrollments ?? [];
   const approvedEnrollments = allEnrollments.filter(e => e.status === "approved");
@@ -241,81 +282,108 @@ const ClassesShow = () => {
         <ShowViewHeader resource="classes" title={aClass.name} />
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className={cn("grid w-full", isStaff ? "grid-cols-10" : "grid-cols-9")}>
-            <TabsTrigger value="curriculum">
-              <div className="flex items-center gap-2">
-                <LayoutGrid className="h-4 w-4" />
-                <span className="hidden sm:inline">Curriculum</span>
-              </div>
-            </TabsTrigger>
-            <TabsTrigger value="live">
-              <div className="flex items-center gap-2">
-                <Video className="h-4 w-4 text-live-primary" />
-                <span className="hidden sm:inline">Live</span>
-                {aClass.isLive && (
-                    <span className="flex h-2 w-2 rounded-full bg-live-primary animate-pulse" />
-                )}
-              </div>
-            </TabsTrigger>
-            <TabsTrigger value="announcements">
-              <div className="flex items-center gap-2">
-                <Megaphone className="h-4 w-4" />
-                <span className="hidden sm:inline">Announcements</span>
-              </div>
-            </TabsTrigger>
-            <TabsTrigger value="discussions">
-              <div className="flex items-center gap-2">
-                <MessageSquare className="h-4 w-4" />
-                <span className="hidden sm:inline">Discussions</span>
-              </div>
-            </TabsTrigger>
-            <TabsTrigger value="resources">
-              <div className="flex items-center gap-2">
-                <Library className="h-4 w-4" />
-                <span className="hidden sm:inline">Resources</span>
-              </div>
-            </TabsTrigger>
-            <TabsTrigger value="students">
-              <div className="flex items-center gap-2">
-                <Users className="h-4 w-4" />
-                <span className="hidden sm:inline">Students</span>
-                {isStaff && pendingEnrollments.length > 0 && (
-                  <Badge variant="destructive" className="h-4 w-4 p-0 flex items-center justify-center text-[10px]">
-                    {pendingEnrollments.length}
-                  </Badge>
-                )}
-              </div>
-            </TabsTrigger>
-            <TabsTrigger value="assignments">Assignments</TabsTrigger>
-            <TabsTrigger value="quizzes">
-              <div className="flex items-center gap-2">
-                <FileQuestion className="h-4 w-4" />
-                <span className="hidden sm:inline">Quizzes</span>
-              </div>
-            </TabsTrigger>
-            <TabsTrigger value="attendance">
-              <div className="flex items-center gap-2">
-                <ClipboardCheck className="h-4 w-4" />
-                <span className="hidden sm:inline">Attendance</span>
-              </div>
-            </TabsTrigger>
-            {isStaff && (
-              <TabsTrigger value="details">
+          <ScrollArea className="w-full whitespace-nowrap rounded-md border bg-muted/50 p-1">
+            <TabsList className="inline-flex h-9 w-max items-center justify-center rounded-lg p-1 text-muted-foreground">
+              <TabsTrigger value="curriculum" className="px-3 py-1.5">
                 <div className="flex items-center gap-2">
-                  <Info className="h-4 w-4" />
-                  <span className="hidden sm:inline">Details</span>
+                  <LayoutGrid className="h-4 w-4" />
+                  <span>Curriculum</span>
                 </div>
               </TabsTrigger>
-            )}
-          </TabsList>
+              {isStaff && (
+                <TabsTrigger value="analytics" className="px-3 py-1.5">
+                  <div className="flex items-center gap-2">
+                    <BarChart3 className="h-4 w-4 text-primary" />
+                    <span>Analytics</span>
+                  </div>
+                </TabsTrigger>
+              )}
+              <TabsTrigger value="live" className="px-3 py-1.5">
+                <div className="flex items-center gap-2">
+                  <Video className="h-4 w-4 text-live-primary" />
+                  <span>Live</span>
+                  {isLiveIndicator && (
+                      <span className="flex h-2 w-2 rounded-full bg-live-primary animate-pulse" />
+                  )}
+                </div>
+              </TabsTrigger>
+              <TabsTrigger value="leaderboard" className="px-3 py-1.5">
+                <div className="flex items-center gap-2">
+                  <Trophy className="h-4 w-4 text-gold-primary" />
+                  <span>Leaderboard</span>
+                </div>
+              </TabsTrigger>
+              <TabsTrigger value="announcements" className="px-3 py-1.5">
+                <div className="flex items-center gap-2">
+                  <Megaphone className="h-4 w-4" />
+                  <span>Announcements</span>
+                </div>
+              </TabsTrigger>
+              <TabsTrigger value="discussions" className="px-3 py-1.5">
+                <div className="flex items-center gap-2">
+                  <MessageSquare className="h-4 w-4" />
+                  <span>Discussions</span>
+                </div>
+              </TabsTrigger>
+              <TabsTrigger value="resources" className="px-3 py-1.5">
+                <div className="flex items-center gap-2">
+                  <Library className="h-4 w-4" />
+                  <span>Resources</span>
+                </div>
+              </TabsTrigger>
+              <TabsTrigger value="students" className="px-3 py-1.5">
+                <div className="flex items-center gap-2">
+                  <Users className="h-4 w-4" />
+                  <span>Students</span>
+                  {isStaff && pendingEnrollments.length > 0 && (
+                    <Badge variant="destructive" className="h-4 w-4 p-0 flex items-center justify-center text-[10px]">
+                      {pendingEnrollments.length}
+                    </Badge>
+                  )}
+                </div>
+              </TabsTrigger>
+              <TabsTrigger value="assignments" className="px-3 py-1.5">Assignments</TabsTrigger>
+              <TabsTrigger value="quizzes" className="px-3 py-1.5">
+                <div className="flex items-center gap-2">
+                  <FileQuestion className="h-4 w-4" />
+                  <span>Quizzes</span>
+                </div>
+              </TabsTrigger>
+              <TabsTrigger value="attendance" className="px-3 py-1.5">
+                <div className="flex items-center gap-2">
+                  <ClipboardCheck className="h-4 w-4" />
+                  <span>Attendance</span>
+                </div>
+              </TabsTrigger>
+              {isStaff && (
+                <TabsTrigger value="details" className="px-3 py-1.5">
+                  <div className="flex items-center gap-2">
+                    <Info className="h-4 w-4" />
+                    <span>Details</span>
+                  </div>
+                </TabsTrigger>
+              )}
+            </TabsList>
+            <ScrollBar orientation="horizontal" />
+          </ScrollArea>
 
           <div className="mt-6">
             <TabsContent value="curriculum">
               <CurriculumTab classId={classId} />
             </TabsContent>
 
+            {isStaff && (
+              <TabsContent value="analytics">
+                <AnalyticsTab classId={classId} />
+              </TabsContent>
+            )}
+
             <TabsContent value="live">
               <LiveClassroom classId={classId} className="w-full" />
+            </TabsContent>
+
+            <TabsContent value="leaderboard">
+              <LeaderboardTab classId={classId} />
             </TabsContent>
 
             <TabsContent value="announcements">

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, RotateCcw, CheckCircle2 } from "lucide-react";
@@ -36,6 +36,24 @@ export const FlashcardPlayer = ({ cards, onComplete }: FlashcardPlayerProps) => 
       setIsFlipped(false);
     }
   };
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (isFinished) return;
+      
+      if (e.key === "ArrowRight") {
+        handleNext();
+      } else if (e.key === "ArrowLeft") {
+        handlePrev();
+      } else if (e.key === " " || e.key === "Enter") {
+        setIsFlipped(prev => !prev);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [currentIndex, isFinished]);
 
   if (isFinished) {
     return (
@@ -83,7 +101,7 @@ export const FlashcardPlayer = ({ cards, onComplete }: FlashcardPlayerProps) => 
           <Card className="absolute inset-0 backface-hidden border-2 border-primary/10 shadow-xl flex items-center justify-center p-8 text-center bg-card">
             <CardContent className="p-0">
                 <p className="text-xl font-bold leading-relaxed">{currentCard.front}</p>
-                <p className="absolute bottom-4 left-0 right-0 text-[10px] uppercase font-black tracking-tighter opacity-30">Click to flip</p>
+                <p className="absolute bottom-4 left-0 right-0 text-[10px] uppercase font-black tracking-tighter opacity-30">Click or Space to flip</p>
             </CardContent>
           </Card>
 
@@ -91,7 +109,7 @@ export const FlashcardPlayer = ({ cards, onComplete }: FlashcardPlayerProps) => 
           <Card className="absolute inset-0 backface-hidden rotate-y-180 border-2 border-primary/20 shadow-2xl flex items-center justify-center p-8 text-center bg-primary/5 dark:bg-primary/10">
             <CardContent className="p-0">
                 <p className="text-lg font-medium text-primary leading-relaxed">{currentCard.back}</p>
-                <p className="absolute bottom-4 left-0 right-0 text-[10px] uppercase font-black tracking-tighter text-primary/40">Click to flip back</p>
+                <p className="absolute bottom-4 left-0 right-0 text-[10px] uppercase font-black tracking-tighter text-primary/40">Click or Space to flip back</p>
             </CardContent>
           </Card>
         </div>
@@ -115,6 +133,9 @@ export const FlashcardPlayer = ({ cards, onComplete }: FlashcardPlayerProps) => 
           <ChevronRight className="h-5 w-5 ml-2" />
         </Button>
       </div>
+      <p className="text-center text-[10px] text-muted-foreground font-medium uppercase tracking-widest">
+        Use arrow keys to navigate
+      </p>
     </div>
   );
 };

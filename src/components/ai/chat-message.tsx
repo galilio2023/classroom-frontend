@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Avatar } from "@/components/ui/avatar";
 import { Sparkles, User as UserIcon } from "lucide-react";
 import ReactMarkdown from "react-markdown";
@@ -14,6 +14,28 @@ interface ChatMessageProps {
 
 export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
   const isModel = message.role === "model";
+  const fullText = message.parts[0].text;
+  const [displayedText, setDisplayedText] = useState(isModel ? "" : fullText);
+  const [isTyping, setIsTyping] = useState(isModel);
+
+  useEffect(() => {
+    if (!isModel) return;
+
+    let index = 0;
+    const words = fullText.split(" ");
+    
+    const timer = setInterval(() => {
+      if (index < words.length) {
+        setDisplayedText((prev) => (prev ? prev + " " + words[index] : words[index]));
+        index++;
+      } else {
+        setIsTyping(false);
+        clearInterval(timer);
+      }
+    }, 30); // Adjust speed here
+
+    return () => clearInterval(timer);
+  }, [fullText, isModel]);
 
   return (
     <div className={`flex gap-3 ${!isModel ? "flex-row-reverse" : ""}`}>
@@ -35,7 +57,8 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
             : "bg-card border rounded-tl-none"
         }`}>
           <div className="prose prose-sm dark:prose-invert max-w-none">
-            <ReactMarkdown>{message.parts[0].text}</ReactMarkdown>
+            <ReactMarkdown>{displayedText}</ReactMarkdown>
+            {isTyping && <span className="inline-block w-1.5 h-4 ml-1 bg-primary/40 animate-pulse align-middle" />}
           </div>
         </div>
         <span className="text-[9px] text-muted-foreground px-1">

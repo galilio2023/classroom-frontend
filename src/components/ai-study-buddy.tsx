@@ -5,12 +5,13 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Sparkles, MessageCircle } from "lucide-react";
+import { Sparkles, MessageCircle, X } from "lucide-react";
 import { ChatMessage } from "./ai/chat-message";
 import { useAIChat } from "@/hooks/use-ai-chat";
 import { ChatHeader } from "./ai/chat-header";
 import { ChatEmptyState } from "./ai/chat-empty-state";
 import { ChatInput } from "./ai/chat-input";
+import { cn } from "@/lib/utils";
 
 interface AIStudyBuddyProps {
   subject?: string;
@@ -35,13 +36,21 @@ export const AIStudyBuddy = ({ subject, topic, assignment, classId }: AIStudyBud
   });
 
   return (
-    <div className="fixed bottom-6 right-6 z-50">
+    <div className={cn(
+      "fixed z-50 transition-all duration-300",
+      isOpen 
+        ? "inset-0 md:inset-auto md:bottom-6 md:right-6" 
+        : "bottom-20 md:bottom-6 right-6"
+    )}>
       {isOpen ? (
-        <Card className="w-[400px] h-[600px] shadow-2xl flex flex-col ai-gradient-border animate-in zoom-in-95 duration-300">
+        <Card className={cn(
+          "shadow-2xl flex flex-col ai-gradient-border animate-in zoom-in-95 duration-300 overflow-hidden",
+          "w-full h-full md:w-[400px] md:h-[600px] rounded-none md:rounded-xl"
+        )}>
           <ChatHeader onClose={() => setIsOpen(false)} />
           
           <CardContent className="flex-1 p-0 overflow-hidden bg-dot-pattern">
-            <ScrollArea ref={scrollAreaRef} className="h-full p-6">
+            <ScrollArea ref={scrollAreaRef} className="h-full p-4 md:p-6">
               {messages.length === 0 && (
                 <ChatEmptyState subject={subject} />
               )}
@@ -78,10 +87,10 @@ export const AIStudyBuddy = ({ subject, topic, assignment, classId }: AIStudyBud
       ) : (
         <Button 
           size="lg" 
-          className="rounded-2xl h-16 w-16 shadow-2xl shadow-ai-primary/40 hover:scale-110 transition-all duration-300 bg-ai-primary border-0"
+          className="rounded-2xl h-14 w-14 md:h-16 md:w-16 shadow-2xl shadow-ai-primary/40 hover:scale-110 transition-all duration-300 bg-ai-primary border-0"
           onClick={() => setIsOpen(true)}
         >
-          <MessageCircle className="h-7 w-7" />
+          <MessageCircle className="h-6 w-6 md:h-7 md:w-7" />
         </Button>
       )}
     </div>

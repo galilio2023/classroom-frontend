@@ -1,8 +1,8 @@
-import { Search, Key, LayoutGrid, Globe, Users, Calendar, Building2, Copy } from "lucide-react";
+import { Search, Key, LayoutGrid, Globe, Users, Calendar, Building2, Copy, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { useTable } from "@refinedev/react-table";
-import { useList, HttpError, useGetIdentity, useCustomMutation, useInvalidate } from "@refinedev/core";
+import { useList, HttpError, useGetIdentity, useCustomMutation, useInvalidate, useDelete, useNavigation } from "@refinedev/core";
 import { Link } from "react-router-dom";
 
 import {
@@ -28,12 +28,24 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 import { Subject, User, UserRole, ClassListItem } from "@/types";
 import { toast } from "sonner";
+import { EmptyState } from "@/components/empty-state";
 
 const ClassesList = () => {
   const { data: identity } = useGetIdentity<User>();
+  const { create } = useNavigation();
   const isStudent = identity?.role === UserRole.STUDENT;
   const isTeacher = identity?.role === UserRole.TEACHER;
   const isAdmin = identity?.role === UserRole.ADMIN;
@@ -42,9 +54,11 @@ const ClassesList = () => {
   const [selectedSubject, setSelectedSubject] = useState<string>("all");
   const [inviteCode, setInviteCode] = useState("");
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
 
   const { mutate: joinClass, mutation: joinMutation } = useCustomMutation();
   const { mutate: cloneClass, mutation: cloneMutation } = useCustomMutation();
+  const { mutate: deleteClass } = useDelete();
   const invalidate = useInvalidate();
 
   const isJoining = joinMutation.isPending;
@@ -85,6 +99,20 @@ const ClassesList = () => {
     });
   };
 
+  const handleConfirmDelete = () => {
+      if (deleteTarget) {
+          deleteClass({
+              resource: "classes",
+              id: deleteTarget,
+          }, {
+              onSuccess: () => {
+                  toast.success("Class deleted successfully");
+                  setDeleteTarget(null);
+              }
+          });
+      }
+  };
+
   const classColumns = useMemo<ColumnDef<ClassListItem>[]>(
     () => [
       {
@@ -119,7 +147,7 @@ const ClassesList = () => {
       },
       {
         id: "department",
-        accessorFn: (row) => row.subject?.department?.name, // Use accessorFn to safely access nested property
+        accessorFn: (row) => row.subject?.department?.name, 
         header: () => <p className="column-title">Department</p>,
         cell: ({ getValue }) => {
           const deptName = getValue<string>();
@@ -193,20 +221,32 @@ const ClassesList = () => {
       },
       {
         id: "actions",
-        size: 150,
+        size: 180,
         header: () => null,
         cell: ({ row }) => (
           <div className="flex justify-end gap-2 pr-4">
             {(isTeacher || isAdmin) && (
-                <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-8 w-8 text-muted-foreground hover:text-primary"
-                    onClick={() => handleClone(row.original.id)}
-                    disabled={isCloning}
-                >
-                    <Copy className="h-4 w-4" />
-                </Button>
+                <>
+                    <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-8 w-8 text-muted-foreground hover:text-primary"
+                        onClick={() => handleClone(row.original.id)}
+                        disabled={isCloning}
+                        title="Duplicate Class"
+                    >
+                        <Copy className="h-4 w-4" />
+                    </Button>
+                    <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                        onClick={() => setDeleteTarget(row.original.id)}
+                        title="Delete Class"
+                    >
+                        <Trash2 className="h-4 w-4" />
+                    </Button>
+                </>
             )}
             <Button asChild variant="outline" size="sm" className="rounded-full px-4 h-8 text-xs">
               <Link to={`/classes/show/${row.original.id}`}>Enter Class</Link>
@@ -218,12 +258,12 @@ const ClassesList = () => {
     [isTeacher, isAdmin, isCloning],
   );
 
-  const { result: subjectsResult } = useList<Subject, HttpError>({
+  const { query: subjectsQuery } = useList<Subject, HttpError>({
     resource: "subjects",
     pagination: { pageSize: 100 },
   });
 
-  const subjects = subjectsResult?.data ?? [];
+  const subjects = subjectsQuery.data?.data ?? [];
 
   const filters = useMemo(() => {
     const f = [];
@@ -246,6 +286,9 @@ const ClassesList = () => {
       }
     },
   });
+
+  const hasData = (classesTable.refineCore.tableQuery.data?.data?.length || 0) > 0;
+  const isLoading = classesTable.refineCore.tableQuery.isLoading;
 
   return (
     <ListView>
@@ -333,7 +376,41 @@ const ClassesList = () => {
         </div>
       </div>
 
-      <DataTable table={classesTable} />
+      {!isLoading && !hasData ? (
+        <div className="mt-8">
+          <EmptyState
+            icon={LayoutGrid}
+            title="No classes found"
+            description={isStudent ? "You haven't joined any classes yet. Use an invite code to get started." : "You haven't created any classes yet."}
+            action={isStudent ? {
+              label: "Join a Class",
+              onClick: () => setIsJoinModalOpen(true),
+            } : {
+              label: "Create Class",
+              onClick: () => create("classes"),
+            }}
+          />
+        </div>
+      ) : (
+        <DataTable table={classesTable} />
+      )}
+
+      <AlertDialog open={deleteTarget !== null} onOpenChange={() => setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete the class and all its curriculum data. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete Class
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </ListView>
   );
 };

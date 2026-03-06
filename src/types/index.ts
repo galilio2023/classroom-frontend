@@ -41,6 +41,7 @@ export interface User {
   updatedAt: string;
   level?: number;
   xp?: number;
+  enrollments?: Enrollment[];
 }
 
 export interface Department {

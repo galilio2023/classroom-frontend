@@ -13,13 +13,14 @@ import { Badge } from "@/components/ui/badge.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import { format } from "date-fns";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { EmptyState } from "@/components/empty-state";
 
 const DiscussionsListPage = () => {
   const { data: identity } = useGetIdentity<UserType>();
   const isStaff = identity?.role === UserRole.ADMIN || identity?.role === UserRole.TEACHER;
 
   const [searchQuery, setSearchQuery] = useState("");
-  const { show } = useNavigation();
+  const { show, create } = useNavigation();
 
   const filters = useMemo(() => {
     const f = [];
@@ -119,6 +120,9 @@ const DiscussionsListPage = () => {
     },
   });
 
+  const hasData = (discussionTable.refineCore.tableQuery.data?.data?.length || 0) > 0;
+  const isLoading = discussionTable.refineCore.tableQuery.isLoading;
+
   return (
     <ListView>
       <Breadcrumb />
@@ -139,7 +143,22 @@ const DiscussionsListPage = () => {
           <CreateButton />
         </div>
       </div>
-      <DataTable table={discussionTable} />
+      
+      {!isLoading && !hasData ? (
+        <div className="mt-8">
+          <EmptyState
+            icon={MessageSquare}
+            title="No discussions found"
+            description="Start a new conversation to engage with your class."
+            action={{
+              label: "Start Discussion",
+              onClick: () => create("discussions"),
+            }}
+          />
+        </div>
+      ) : (
+        <DataTable table={discussionTable} />
+      )}
     </ListView>
   );
 };

@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
-import { Copy, Check, Send, PlusCircle } from "lucide-react";
+import { Copy, Check, Send, PlusCircle, BookOpen, FileText, HelpCircle } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { useNavigation } from "@refinedev/core";
+import { cn } from "@/lib/utils";
 
 interface AssignmentPreviewProps {
   content: string;
@@ -21,17 +22,55 @@ export const AssignmentPreview: React.FC<AssignmentPreviewProps> = ({ content, o
   };
 
   const handleGlobalCreate = () => {
-    // Store content in session storage so the create page can pick it up
     sessionStorage.setItem("pending_ai_assignment", content);
     create("assignments");
   };
 
+  // Helper to render structured content
+  const renderStructuredContent = (text: string) => {
+    if (!text) return null;
+
+    // Simple heuristic to detect sections
+    const sections = text.split(/(?=#{1,3}\s)/);
+    
+    return (
+      <div className="space-y-6">
+        {sections.map((section, idx) => {
+          const isLesson = section.toLowerCase().includes("lesson") || section.toLowerCase().includes("introduction");
+          const isAssignment = section.toLowerCase().includes("assignment") || section.toLowerCase().includes("task");
+          const isQuiz = section.toLowerCase().includes("quiz") || section.toLowerCase().includes("test");
+
+          return (
+            <Card key={idx} className={cn(
+              "border-l-4 overflow-hidden transition-all hover:shadow-md",
+              isLesson ? "border-l-blue-500 bg-blue-500/5" : 
+              isAssignment ? "border-l-purple-500 bg-purple-500/5" : 
+              isQuiz ? "border-l-pink-500 bg-pink-500/5" : "border-l-primary/20"
+            )}>
+              <CardHeader className="py-3 px-4 border-b border-black/5 dark:border-white/5 flex flex-row items-center gap-2">
+                {isLesson && <BookOpen className="h-4 w-4 text-blue-500" />}
+                {isAssignment && <FileText className="h-4 w-4 text-purple-500" />}
+                {isQuiz && <HelpCircle className="h-4 w-4 text-pink-500" />}
+                <span className="text-[10px] font-black uppercase tracking-widest opacity-50">
+                  {isLesson ? "Lesson Material" : isAssignment ? "Assignment Task" : isQuiz ? "Quiz Section" : "Content Section"}
+                </span>
+              </CardHeader>
+              <CardContent className="p-6 prose prose-sm dark:prose-invert max-w-none">
+                <ReactMarkdown>{section}</ReactMarkdown>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+    );
+  };
+
   return (
-    <Card className="flex flex-col h-full border-primary/10 shadow-xl">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 border-b bg-muted/20">
+    <Card className="flex flex-col h-full border-primary/10 shadow-xl bg-muted/5">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 border-b bg-card">
         <div className="space-y-1">
-          <CardTitle className="text-sm font-bold uppercase tracking-wider">Generated Draft</CardTitle>
-          <CardDescription className="text-[10px]">Review and apply this content.</CardDescription>
+          <CardTitle className="text-sm font-bold uppercase tracking-wider">Magic Builder Output</CardTitle>
+          <CardDescription className="text-[10px]">Beautifully structured educational content.</CardDescription>
         </div>
         <div className="flex gap-2">
           {content && (
@@ -54,17 +93,17 @@ export const AssignmentPreview: React.FC<AssignmentPreviewProps> = ({ content, o
           )}
         </div>
       </CardHeader>
-      <CardContent className="flex-1 overflow-auto pt-6">
-        <div className="h-full min-h-[400px] p-6 rounded-2xl bg-background border shadow-inner prose prose-sm dark:prose-invert max-w-none">
-          {content ? (
-            <ReactMarkdown>{content}</ReactMarkdown>
-          ) : (
-            <div className="flex flex-col items-center justify-center h-full text-muted-foreground space-y-4 opacity-50">
-                <Send className="h-12 w-12" />
-                <p className="italic font-medium">Your AI-generated draft will appear here...</p>
-            </div>
-          )}
-        </div>
+      <CardContent className="flex-1 overflow-auto pt-6 px-6 pb-8">
+        {content ? (
+          renderStructuredContent(content)
+        ) : (
+          <div className="flex flex-col items-center justify-center h-full min-h-[400px] text-muted-foreground space-y-4 opacity-50 bg-card rounded-2xl border border-dashed">
+              <div className="p-4 bg-muted rounded-full animate-pulse">
+                <PlusCircle className="h-8 w-8" />
+              </div>
+              <p className="italic font-medium">Your AI-generated content will appear here...</p>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

@@ -15,6 +15,7 @@ This project contains the user interface for the classroom application, built wi
   <img src="https://img.shields.io/badge/shadcn%2Fui-000000?style=for-the-badge&logo=shadcnui&logoColor=white" alt="Shadcn UI" />
   <img src="https://img.shields.io/badge/Socket.io-010101?style=for-the-badge&logo=socket.io&logoColor=white" alt="Socket.io" />
   <img src="https://img.shields.io/badge/Google_Gemini-8E75B2?style=for-the-badge&logo=google-gemini&logoColor=white" alt="Google Gemini" />
+  <img src="https://img.shields.io/badge/Jitsi_Meet-0052CC?style=for-the-badge&logo=jitsi&logoColor=white" alt="Jitsi Meet" />
 </div>
 
 ---
@@ -42,33 +43,38 @@ We chose a **Headless Architecture** powered by **Refine** to decouple the UI fr
 ## 🚀 Advanced Features (Latest Updates)
 
 ### 📊 Deep Analytics Dashboard
+*   **Dual-Speed Loading:** Optimized data fetching splits "Fast" (Schedule) and "Slow" (Analytics) data for a snappier UI.
 *   **Teacher Insights:** Automated **At-Risk Student Detection**. Flags students with low average grades (<60%) or high absences (>3) for immediate intervention.
 *   **Student Portfolio:** **Academic Journey** visualization. Includes a **Progress Line Chart** for grades and a **Subject Mastery Radar Chart** to track strengths across the curriculum.
+
+### 🎥 Live Classroom & Auto-Attendance
+*   **Jitsi Meet Integration:** Fully embedded virtual classroom for every class.
+*   **Automatic Credit:** Students are automatically marked "Present" when they join a live session.
+*   **Real-time Status:** Live indicators show when a session is active across the platform.
+
+### 🏆 Gamified Learning
+*   **XP & Leveling System:** Students earn experience points for attending classes, completing assignments, and passing quizzes.
+*   **Class Leaderboards:** Real-time rankings within each class to foster healthy competition.
+*   **Dynamic Levels:** Visual level badges and progress bars based on total XP.
+
+### 🤖 AI Study Lab & Assistant
+*   **AI Study Lab:** A private space for students to use the **Explainer**, **Summarizer**, and **Flashcard Generator**.
+*   **AI Assistant:** A teacher-facing tool to generate high-quality **Assignments** and **Quizzes** in seconds using Gemini AI.
+*   **AI Study Buddy:** A persistent, context-aware chat assistant available in every classroom.
 
 ### 📚 Classroom Resource Library
 *   A dedicated space for persistent learning materials.
 *   Supports **PDFs, external links, and video URLs**.
 *   Integrated with Cloudinary for secure file storage.
 
-### ⏰ Automated Deadline Enforcement
-*   Submissions are automatically analyzed against assignment due dates.
-*   **Late Badges** are displayed to teachers for any work submitted past the deadline.
-
-### 🔔 Real-time Notifications
+### 🔔 Real-time Engine
 *   **Socket.io Integration:** Instant updates for grades, assignments, and attendance.
 *   **Toast Alerts:** Real-time feedback via Sonner toasts with direct action links.
-
-### 💬 Class Discussions
-*   **Threaded Feed:** A modern, social-media style feed for every classroom.
-*   **Nested Replies:** Support for deep conversations and teacher-student interaction.
-
-### 🤖 AI Magic Builder
-*   **One-Click Curriculum:** Generate entire lesson plans, quizzes, and assignments from a single prompt.
-*   **AI Study Buddy:** A persistent chat assistant for students, context-aware of class materials.
+*   **Threaded Discussions:** A modern, social-media style feed for every classroom.
 
 ### 📅 Master Calendar
-*   **Unified View:** Students see all their classes in one color-coded calendar.
-*   **Teacher Planner:** Teachers can generate monthly schedules and manage individual sessions.
+*   **Unified View:** Students see all their classes, deadlines, and live sessions in one color-coded calendar.
+*   **Teacher Planner:** Teachers can manage individual sessions and view academic deadlines.
 
 ---
 

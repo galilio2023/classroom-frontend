@@ -23,7 +23,7 @@ import {
 
 const Dashboard = () => {
   const { list, show } = useNavigation();
-  const { data: identity, isLoading: isIdentityLoading } = useGetIdentity<User>();
+  const { data: identity, isLoading: isIdentityLoading, refetch: refetchIdentity } = useGetIdentity<User>();
   
   const isStaff = identity?.role === "teacher" || identity?.role === "admin";
   const isStudent = identity?.role === "student";
@@ -74,6 +74,7 @@ const Dashboard = () => {
     const handleRefresh = () => {
       void refetchCore();
       void refetchAnalytics();
+      void refetchIdentity();
     };
 
     socket.on("notification", handleRefresh);
@@ -84,7 +85,7 @@ const Dashboard = () => {
       socket.off("new_discussion", handleRefresh);
       socket.disconnect();
     };
-  }, [identity?.id, refetchCore, refetchAnalytics]);
+  }, [identity?.id, refetchCore, refetchAnalytics, refetchIdentity]);
 
   const activeCards = isStudent ? [
     { title: "My Classes", icon: Layout, heading: "Enrolled Classes", description: "Access active classrooms.", resource: "classes" },
@@ -123,7 +124,7 @@ const Dashboard = () => {
     <div className="container mx-auto py-10 px-4 md:px-6 relative z-0">
       <div className="hidden sm:block absolute top-0 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-[120px] -z-10 animate-pulse" />
       
-      <WelcomeHeader name={identity?.name || "User"} isStudent={isStudent} />
+      <WelcomeHeader name={identity?.name || "User"} isStudent={isStudent} user={identity} />
 
       <div className="space-y-12">
         {isStaff && (

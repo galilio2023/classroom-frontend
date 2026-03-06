@@ -7,9 +7,15 @@ import { cn } from "@/lib/utils";
 import type { PropsWithChildren } from "react";
 import { Sidebar } from "./sidebar";
 import { useLocation } from "react-router-dom";
+import { XPGainPopup } from "@/components/xp-gain-popup";
+import { useGetIdentity } from "@refinedev/core";
+import { User, UserRole } from "@/types";
+import { MobileNav } from "./mobile-nav";
 
 export function Layout({ children }: PropsWithChildren) {
   const { pathname } = useLocation();
+  const { data: identity } = useGetIdentity<User>();
+  const isStudent = identity?.role === UserRole.STUDENT;
 
   return (
     <ThemeProvider>
@@ -35,11 +41,14 @@ export function Layout({ children }: PropsWithChildren) {
               "md:p-4",
               "lg:px-6",
               "lg:pt-6",
+              "pb-20 md:pb-4", // Add padding for mobile nav
               "page-transition" // Apply the animation class
             )}
           >
             {children}
           </main>
+          {isStudent && <XPGainPopup />}
+          {isStudent && <MobileNav />}
         </SidebarInset>
       </SidebarProvider>
     </ThemeProvider>

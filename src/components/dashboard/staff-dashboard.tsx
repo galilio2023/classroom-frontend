@@ -5,6 +5,7 @@ import { PlatformOverview } from "./platform-overview";
 import { RecentActivity } from "./recent-activity";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { DashboardData } from "@/types/dashboard";
+import { TeacherOnboarding } from "./teacher-onboarding";
 
 interface StaffDashboardProps {
   data: DashboardData;
@@ -16,6 +17,8 @@ interface StaffDashboardProps {
 export const StaffDashboard = ({ data, isLoading, onRefresh, show }: StaffDashboardProps) => {
   return (
     <div className="space-y-12">
+      <TeacherOnboarding stats={data.stats} />
+
       <div className="grid gap-10 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-12">
           <ErrorBoundary>
