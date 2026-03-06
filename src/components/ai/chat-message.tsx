@@ -21,9 +21,16 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
   useEffect(() => {
     if (!isModel) return;
 
-    let index = 0;
     const words = fullText.split(" ");
+    let index = 0;
     
+    // Optimization: If text is very long, show it immediately to avoid performance issues
+    if (words.length > 100) {
+        setDisplayedText(fullText);
+        setIsTyping(false);
+        return;
+    }
+
     const timer = setInterval(() => {
       if (index < words.length) {
         setDisplayedText((prev) => (prev ? prev + " " + words[index] : words[index]));
@@ -57,7 +64,12 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
             : "bg-card border rounded-tl-none"
         }`}>
           <div className="prose prose-sm dark:prose-invert max-w-none">
-            <ReactMarkdown>{displayedText}</ReactMarkdown>
+            {/* Optimization: Only render Markdown when typing is finished or for short texts */}
+            {isTyping ? (
+                <div className="whitespace-pre-wrap">{displayedText}</div>
+            ) : (
+                <ReactMarkdown>{displayedText}</ReactMarkdown>
+            )}
             {isTyping && <span className="inline-block w-1.5 h-4 ml-1 bg-primary/40 animate-pulse align-middle" />}
           </div>
         </div>

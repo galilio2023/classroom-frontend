@@ -268,7 +268,7 @@ function App() {
                 },
                 {
                   name: "portfolio",
-                  list: "/portfolio/:id",
+                  list: "/portfolio",
                   meta: {
                     label: "My Portfolio",
                     icon: <UserCircle />,
@@ -495,7 +495,7 @@ function App() {
                         }
                       />
                     </Route>
-                    <Route path="portfolio/:id" element={<StudentPortfolio />} />
+                    <Route path="portfolio" element={<StudentPortfolio />} />
                     <Route path="profile-requests">
                       <Route
                         index

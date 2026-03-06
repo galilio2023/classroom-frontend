@@ -28,7 +28,7 @@ export const LiveClassroom = ({ classId: classIdString }: LiveClassroomProps) =>
   const { mutate: getRoomToken } = useCustomMutation();
   const { mutate: endLiveSession } = useCustomMutation();
 
-  const isTeacher = identity?.role === UserRole.TEACHER || identity?.role === UserRole.ADMIN;
+  const isTeacher = identity?.role === "teacher" || identity?.role === "admin";
   const numericClassId = Number(classIdString);
   
   useEffect(() => {
@@ -57,7 +57,7 @@ export const LiveClassroom = ({ classId: classIdString }: LiveClassroomProps) =>
         values: { classId: numericClassId }
     }, {
         onSuccess: (data: any) => {
-            const { roomName, token } = data.data;
+            const { roomName, token } = data.data.data;
             console.log(`[LiveClassroom] Joining room: ${roomName}`);
             initializeJitsi(roomName, token);
         },
@@ -126,7 +126,7 @@ export const LiveClassroom = ({ classId: classIdString }: LiveClassroomProps) =>
               newApi.addEventListeners({
                 videoConferenceJoined: () => {
                   setIsLoading(false);
-                  if (identity.role === UserRole.STUDENT) {
+                  if (identity.role === "student") {
                       markLiveAttendance({
                           url: "/attendance/live",
                           method: "post",
@@ -198,7 +198,7 @@ export const LiveClassroom = ({ classId: classIdString }: LiveClassroomProps) =>
                 <h4 className="text-xl font-bold">Ready to join?</h4>
                 <p className="text-muted-foreground max-w-md mx-auto">
                     Click below to enter the virtual classroom. 
-                    {identity?.role === UserRole.STUDENT && " Your attendance will be recorded automatically."}
+                    {identity?.role === "student" && " Your attendance will be recorded automatically."}
                 </p>
             </div>
             <Button 
