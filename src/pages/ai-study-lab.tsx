@@ -75,27 +75,27 @@ const AIStudyLab = () => {
   };
 
   return (
-    <div className="container mx-auto py-10 px-4 md:px-6 space-y-8">
+    <div className="container mx-auto py-6 md:py-10 px-4 md:px-6 space-y-6 md:space-y-8">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-black tracking-tight flex items-center gap-3">
+          <h1 className="text-2xl md:text-3xl font-black tracking-tight flex items-center gap-3">
             <div className="p-2 bg-primary/10 rounded-xl">
-              <BrainCircuit className="h-8 w-8 text-primary" />
+              <BrainCircuit className="h-6 w-6 md:h-8 md:w-8 text-primary" />
             </div>
             AI Study Lab
           </h1>
-          <p className="text-muted-foreground mt-1">
+          <p className="text-sm text-muted-foreground mt-1">
             Your private space to practice, learn, and master any topic.
           </p>
         </div>
-        <Button variant="outline" className="gap-2">
+        <Button variant="outline" className="gap-2 w-full md:w-auto">
           <History className="h-4 w-4" />
           Study History
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="space-y-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
+        <div className="grid grid-cols-2 lg:grid-cols-1 gap-3 md:gap-4">
           <Card
             className={cn(
               "cursor-pointer transition-all hover:border-primary/50",
@@ -105,21 +105,21 @@ const AIStudyLab = () => {
             )}
             onClick={() => setActiveTool("explain")}
           >
-            <CardHeader className="p-4">
-              <div className="flex items-center gap-3">
+            <CardHeader className="p-3 md:p-4">
+              <div className="flex items-center gap-2 md:gap-3">
                 <div
                   className={cn(
-                    "p-2 rounded-lg",
+                    "p-1.5 md:p-2 rounded-lg shrink-0",
                     activeTool === "explain"
                       ? "bg-primary text-primary-foreground"
                       : "bg-muted",
                   )}
                 >
-                  <BookOpen className="h-5 w-5" />
+                  <BookOpen className="h-4 w-4 md:h-5 md:w-5" />
                 </div>
                 <div>
-                  <CardTitle className="text-base">Concept Explainer</CardTitle>
-                  <CardDescription className="text-xs text-balance">
+                  <CardTitle className="text-sm md:text-base">Explainer</CardTitle>
+                  <CardDescription className="text-[10px] md:text-xs hidden sm:block">
                     Simplify difficult topics instantly.
                   </CardDescription>
                 </div>
@@ -136,21 +136,21 @@ const AIStudyLab = () => {
             )}
             onClick={() => setActiveTool("quiz")}
           >
-            <CardHeader className="p-4">
-              <div className="flex items-center gap-3">
+            <CardHeader className="p-3 md:p-4">
+              <div className="flex items-center gap-2 md:gap-3">
                 <div
                   className={cn(
-                    "p-2 rounded-lg",
+                    "p-1.5 md:p-2 rounded-lg shrink-0",
                     activeTool === "quiz"
                       ? "bg-primary text-primary-foreground"
                       : "bg-muted",
                   )}
                 >
-                  <FileQuestion className="h-5 w-5" />
+                  <FileQuestion className="h-4 w-4 md:h-5 md:w-5" />
                 </div>
                 <div>
-                  <CardTitle className="text-base">Practice Quiz</CardTitle>
-                  <CardDescription className="text-xs text-balance">
+                  <CardTitle className="text-sm md:text-base">Quiz</CardTitle>
+                  <CardDescription className="text-[10px] md:text-xs hidden sm:block">
                     Test your knowledge privately.
                   </CardDescription>
                 </div>
@@ -167,21 +167,21 @@ const AIStudyLab = () => {
             )}
             onClick={() => setActiveTool("summary")}
           >
-            <CardHeader className="p-4">
-              <div className="flex items-center gap-3">
+            <CardHeader className="p-3 md:p-4">
+              <div className="flex items-center gap-2 md:gap-3">
                 <div
                   className={cn(
-                    "p-2 rounded-lg",
+                    "p-1.5 md:p-2 rounded-lg shrink-0",
                     activeTool === "summary"
                       ? "bg-primary text-primary-foreground"
                       : "bg-muted",
                   )}
                 >
-                  <Sparkles className="h-5 w-5" />
+                  <Sparkles className="h-4 w-4 md:h-5 md:w-5" />
                 </div>
                 <div>
-                  <CardTitle className="text-base">Smart Summarizer</CardTitle>
-                  <CardDescription className="text-xs text-balance">
+                  <CardTitle className="text-sm md:text-base">Summarizer</CardTitle>
+                  <CardDescription className="text-[10px] md:text-xs hidden sm:block">
                     Turn long notes into key points.
                   </CardDescription>
                 </div>
@@ -198,21 +198,21 @@ const AIStudyLab = () => {
             )}
             onClick={() => setActiveTool("flashcards")}
           >
-            <CardHeader className="p-4">
-              <div className="flex items-center gap-3">
+            <CardHeader className="p-3 md:p-4">
+              <div className="flex items-center gap-2 md:gap-3">
                 <div
                   className={cn(
-                    "p-2 rounded-lg",
+                    "p-1.5 md:p-2 rounded-lg shrink-0",
                     activeTool === "flashcards"
                       ? "bg-primary text-primary-foreground"
                       : "bg-muted",
                   )}
                 >
-                  <Layers className="h-5 w-5" />
+                  <Layers className="h-4 w-4 md:h-5 md:w-5" />
                 </div>
                 <div>
-                  <CardTitle className="text-base">Flashcard Maker</CardTitle>
-                  <CardDescription className="text-xs text-balance">
+                  <CardTitle className="text-sm md:text-base">Flashcards</CardTitle>
+                  <CardDescription className="text-[10px] md:text-xs hidden sm:block">
                     Generate cards for active recall.
                   </CardDescription>
                 </div>
@@ -224,15 +224,15 @@ const AIStudyLab = () => {
         <div className="lg:col-span-2 space-y-6">
           {!flashcards ? (
             <Card className="shadow-xl border-none bg-card/50 backdrop-blur-xl">
-                <CardHeader>
-                <CardTitle>
+                <CardHeader className="p-4 md:p-6">
+                <CardTitle className="text-base md:text-lg">
                     {activeTool === "explain" && "What would you like to understand?"}
                     {activeTool === "quiz" && "What topic should we test?"}
                     {activeTool === "summary" && "Paste the text you want to summarize"}
                     {activeTool === "flashcards" && "What topic or text should we turn into cards?"}
                 </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-4 p-4 md:p-6">
                 {activeTool === "quiz" || activeTool === "explain" || activeTool === "flashcards" ? (
                     <Input
                     placeholder={
@@ -244,21 +244,21 @@ const AIStudyLab = () => {
                     }
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
-                    className="h-12 text-lg"
+                    className="h-10 md:h-12 text-base md:text-lg"
                     />
                 ) : (
                     <Textarea
                     placeholder="Paste your notes or textbook content here..."
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
-                    className="min-h-50 text-base"
+                    className="min-h-[150px] md:min-h-50 text-sm md:text-base"
                     />
                 )}
 
                 <Button
                     onClick={handleToolAction}
                     disabled={isLoading}
-                    className="w-full h-12 text-lg font-bold gap-2 shadow-lg shadow-primary/20"
+                    className="w-full h-10 md:h-12 text-base md:text-lg font-bold gap-2 shadow-lg shadow-primary/20"
                 >
                     {isLoading ? (
                     <Loader2 className="h-5 w-5 animate-spin" />
@@ -275,9 +275,9 @@ const AIStudyLab = () => {
             </Card>
           ) : (
             <Card className="shadow-2xl border-none bg-card/50 backdrop-blur-xl overflow-hidden">
-                <CardHeader className="bg-primary/5 border-b border-primary/10 flex flex-row items-center justify-between">
+                <CardHeader className="bg-primary/5 border-b border-primary/10 flex flex-row items-center justify-between p-4 md:p-6">
                     <div>
-                        <CardTitle className="text-lg font-black uppercase tracking-widest flex items-center gap-2">
+                        <CardTitle className="text-base md:text-lg font-black uppercase tracking-widest flex items-center gap-2">
                             <Layers className="h-5 w-5 text-primary" />
                             Flashcard Session
                         </CardTitle>
@@ -286,7 +286,7 @@ const AIStudyLab = () => {
                         <X className="h-4 w-4" />
                     </Button>
                 </CardHeader>
-                <CardContent className="pt-10 pb-10">
+                <CardContent className="pt-6 md:pt-10 pb-6 md:pb-10">
                     <FlashcardPlayer 
                         cards={flashcards} 
                         onComplete={() => setFlashcards(null)} 
@@ -297,12 +297,12 @@ const AIStudyLab = () => {
 
           {result && (
             <Card className="animate-in fade-in slide-in-from-bottom-4 duration-500 border-primary/20 bg-primary/5">
-              <CardHeader className="border-b border-primary/10">
-                <CardTitle className="text-sm font-black uppercase tracking-widest text-primary">
+              <CardHeader className="border-b border-primary/10 p-4 md:p-6">
+                <CardTitle className="text-xs md:text-sm font-black uppercase tracking-widest text-primary">
                   AI Response
                 </CardTitle>
               </CardHeader>
-              <CardContent className="pt-6 prose dark:prose-invert max-w-none pb-6">
+              <CardContent className="pt-4 md:pt-6 prose dark:prose-invert max-w-none pb-4 md:pb-6 px-4 md:px-6">
                 <ReactMarkdown>{result}</ReactMarkdown>
               </CardContent>
             </Card>

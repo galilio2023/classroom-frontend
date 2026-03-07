@@ -18,6 +18,7 @@ import { useSelect, useCreate } from "@refinedev/core";
 import { User, UserRole } from "@/types";
 import { useState } from "react";
 import { toast } from "sonner";
+import { LoadingButton } from "@/components/ui/loading-button";
 
 interface EnrollStudentDialogProps {
   classId: string;
@@ -35,6 +36,7 @@ export const EnrollStudentDialog = ({
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(
     null,
   );
+  const [isSuccess, setIsSuccess] = useState(false);
 
   // Correctly destructure mutation from useCreate
   const { mutate: createEnrollment, mutation } = useCreate();
@@ -63,9 +65,13 @@ export const EnrollStudentDialog = ({
       },
       {
         onSuccess: () => {
+          setIsSuccess(true);
           toast.success("Student enrolled successfully!");
-          setSelectedStudentId(null); // Reset selection
-          onOpenChange(false);
+          setTimeout(() => {
+            setSelectedStudentId(null); // Reset selection
+            setIsSuccess(false);
+            onOpenChange(false);
+          }, 1000);
         },
         onError: (error) => {
           toast.error(error.message || "Failed to enroll student.");
@@ -114,12 +120,14 @@ export const EnrollStudentDialog = ({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button
+          <LoadingButton
             onClick={handleEnroll}
-            disabled={isLoading || availableStudents.length === 0}
+            isLoading={isLoading}
+            isSuccess={isSuccess}
+            disabled={availableStudents.length === 0}
           >
-            {isLoading ? "Enrolling..." : "Enroll Student"}
-          </Button>
+            Enroll Student
+          </LoadingButton>
         </DialogFooter>
       </DialogContent>
     </Dialog>

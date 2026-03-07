@@ -5,10 +5,10 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { cn } from "@/lib/utils";
 import { useResourceParams, useTranslate } from "@refinedev/core";
 import { ChevronLeft, InfoIcon, Home } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 /**
  * Enhanced Error Component with forced navigation to break out of 404 states.
@@ -16,6 +16,7 @@ import { useEffect, useState } from "react";
 export function ErrorComponent() {
   const [errorMessage, setErrorMessage] = useState<string>();
   const translate = useTranslate();
+  const navigate = useNavigate();
   const { resource, action } = useResourceParams();
 
   useEffect(() => {
@@ -34,8 +35,12 @@ export function ErrorComponent() {
   }, [resource, action, translate]);
 
   const handleBackToDashboard = () => {
-    // Forced navigation to ensure the app re-renders the dashboard correctly
-    window.location.href = "/";
+    // Use React Router for smooth navigation, fallback to window.location if needed
+    navigate("/");
+  };
+
+  const handleGoBack = () => {
+    navigate(-1);
   };
 
   return (
@@ -92,7 +97,7 @@ export function ErrorComponent() {
                 variant="ghost" 
                 size="sm" 
                 className="text-muted-foreground hover:text-foreground"
-                onClick={() => window.history.back()}
+                onClick={handleGoBack}
             >
                 <ChevronLeft className="h-4 w-4 mr-1" />
                 Go Back

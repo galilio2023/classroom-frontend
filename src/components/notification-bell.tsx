@@ -9,7 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Bell, CheckCheck, Info, GraduationCap, ClipboardCheck, Trophy, BrainCircuit } from "lucide-react";
+import { Bell, CheckCheck, Info, GraduationCap, ClipboardCheck, Trophy, BrainCircuit, Video } from "lucide-react";
 import { Notification, User } from "@/types";
 import { formatDistanceToNow } from "date-fns";
 import { useNavigate } from "react-router-dom";
@@ -18,6 +18,7 @@ import { io } from "socket.io-client";
 import { toast } from "sonner";
 import Confetti from "react-confetti";
 import { useWindowSize } from "react-use";
+import { SOCKET_URL } from "@/config";
 
 /**
  * Safely formats notification links to match frontend route structure.
@@ -66,10 +67,7 @@ export const NotificationBell = () => {
   useEffect(() => {
     if (!identity?.id) return;
 
-    // Use environment variable for Socket.io URL, fallback to API URL base
-    const socketUrl = import.meta.env.VITE_SOCKET_URL || import.meta.env.VITE_API_URL.replace("/api", "");
-    
-    const socket = io(socketUrl, {
+    const socket = io(SOCKET_URL, {
       query: { userId: identity.id },
       withCredentials: true, // Ensure cookies are sent for authentication
     });
@@ -118,11 +116,24 @@ export const NotificationBell = () => {
       });
     };
 
+    const handleLiveSessionStarted = (data: any) => {
+        toast.info("Live Session Started!", {
+            icon: <Video className="h-5 w-5 text-live-primary animate-pulse" />,
+            description: `${data.startedBy} has started a live session. Join now!`,
+            duration: 10000,
+            action: {
+                label: "Join Now",
+                onClick: () => navigate(`/classes/show/${data.classId}?tab=live`),
+            },
+        });
+    };
+
     socket.on("notification", handleNotification);
     socket.on("unread_count", handleUnreadCount);
     socket.on("badge_earned", handleBadgeEarned);
     socket.on("student_badge_earned", handleStudentBadgeEarned);
     socket.on("agent_alert", handleAgentAlert);
+    socket.on("live_session_started", handleLiveSessionStarted);
 
     // Reconnection Logic: Fetch notifications when socket reconnects
     socket.on("connect", () => {
@@ -135,6 +146,7 @@ export const NotificationBell = () => {
       socket.off("badge_earned", handleBadgeEarned);
       socket.off("student_badge_earned", handleStudentBadgeEarned);
       socket.off("agent_alert", handleAgentAlert);
+      socket.off("live_session_started", handleLiveSessionStarted);
       socket.off("connect");
       socket.disconnect();
     };

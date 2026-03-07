@@ -8,14 +8,17 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useGetIdentity, useLogout, useNavigation } from "@refinedev/core";
-import { CircleUser, LogOut, User as UserIcon, LifeBuoy } from "lucide-react";
+import { CircleUser, LogOut, User as UserIcon, LifeBuoy, BellRing } from "lucide-react";
 import { toast } from "sonner";
-import { User } from "@/types";
+import { User, UserRole } from "@/types";
 import { ThemeToggle } from "../theme/theme-toggle";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { NotificationBell } from "@/components/notification-bell";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { CommandMenu } from "@/components/command-menu";
+import { XPProgressBar } from "@/components/xp-progress-bar";
+import { cn } from "@/lib/utils";
+import { subscribeToPush } from "@/lib/push-notifications";
 
 export function Header() {
   const { mutate: logout } = useLogout();
@@ -30,12 +33,69 @@ export function Header() {
     });
   };
 
+  const handleEnablePush = async () => {
+    const permission = await Notification.requestPermission();
+    if (permission === "granted") {
+      await subscribeToPush();
+      toast.success("Push notifications enabled!");
+    } else {
+      toast.error("Notification permission denied");
+    }
+  };
+
+  const isStudent = identity?.role === UserRole.STUDENT;
+
+  // Generate a consistent background color based on the user's name
+  const getBackgroundColor = (name: string) => {
+    const colors = [
+      "bg-red-500",
+      "bg-orange-500",
+      "bg-amber-500",
+      "bg-yellow-500",
+      "bg-lime-500",
+      "bg-green-500",
+      "bg-emerald-500",
+      "bg-teal-500",
+      "bg-cyan-500",
+      "bg-sky-500",
+      "bg-blue-500",
+      "bg-indigo-500",
+      "bg-violet-500",
+      "bg-purple-500",
+      "bg-fuchsia-500",
+      "bg-pink-500",
+      "bg-rose-500",
+    ];
+    if (!name) return colors[0];
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) {
+      hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return colors[Math.abs(hash) % colors.length];
+  };
+
+  const getInitials = (name = "") => {
+    if (!name) return "?";
+    const names = name.trim().split(" ");
+    let initials = names[0].substring(0, 1).toUpperCase();
+    if (names.length > 1) {
+      initials += names[names.length - 1].substring(0, 1).toUpperCase();
+    }
+    return initials;
+  };
+
   return (
     <header className="flex h-20 items-center gap-4 border-b border-border/40 bg-background/60 backdrop-blur-xl px-6 sticky top-0 z-50">
       <SidebarTrigger className="md:hidden" />
 
-      <div className="w-full flex-1 flex items-center">
+      <div className="w-full flex-1 flex items-center gap-6">
         <CommandMenu />
+        
+        {isStudent && (
+          <div className="hidden lg:flex items-center gap-4 max-w-xs w-full">
+            <XPProgressBar xp={identity?.xp || 0} className="w-full" />
+          </div>
+        )}
       </div>
       
       <div className="flex items-center gap-4">
@@ -49,8 +109,8 @@ export function Header() {
             <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0 hover:bg-primary/10 transition-colors">
               <Avatar className="h-10 w-10 border-2 border-background shadow-sm">
                 <AvatarImage src={identity?.image || ""} alt={identity?.name} />
-                <AvatarFallback className="bg-primary/10 text-primary font-bold">
-                    {identity?.name?.[0] || <CircleUser className="h-5 w-5" />}
+                <AvatarFallback className={cn("text-white font-bold", getBackgroundColor(identity?.name || ""))}>
+                    {getInitials(identity?.name)}
                 </AvatarFallback>
               </Avatar>
             </Button>
@@ -64,6 +124,16 @@ export function Header() {
                 </p>
               </div>
             </DropdownMenuLabel>
+            
+            {isStudent && (
+              <>
+                <DropdownMenuSeparator className="bg-border/50" />
+                <div className="px-2 py-2">
+                  <XPProgressBar xp={identity?.xp || 0} />
+                </div>
+              </>
+            )}
+
             <DropdownMenuSeparator className="bg-border/50" />
             <DropdownMenuItem 
                 className="gap-2 cursor-pointer"
@@ -78,6 +148,13 @@ export function Header() {
             >
               <CircleUser className="h-4 w-4" />
               <span>Edit Profile</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+                className="gap-2 cursor-pointer"
+                onClick={handleEnablePush}
+            >
+              <BellRing className="h-4 w-4" />
+              <span>Enable Push Alerts</span>
             </DropdownMenuItem>
             <DropdownMenuItem className="gap-2 cursor-pointer">
               <LifeBuoy className="h-4 w-4" />
@@ -94,3 +171,5 @@ export function Header() {
     </header>
   );
 }
+
+Header.displayName = "Header";

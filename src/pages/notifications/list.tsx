@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button.tsx";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { EmptyState } from "@/components/empty-state";
 
 const NotificationsListPage = () => {
   const { data: identity } = useGetIdentity<User>();
@@ -157,6 +158,9 @@ const NotificationsListPage = () => {
     },
   });
 
+  const hasData = (notificationTable.refineCore.tableQuery.data?.data?.length || 0) > 0;
+  const isLoading = notificationTable.refineCore.tableQuery.isLoading;
+
   return (
     <ListView>
       <Breadcrumb />
@@ -177,7 +181,18 @@ const NotificationsListPage = () => {
           {isAdmin && <CreateButton />}
         </div>
       </div>
-      <DataTable table={notificationTable} />
+      
+      {!isLoading && !hasData ? (
+        <div className="mt-8">
+          <EmptyState
+            icon={Bell}
+            title="All caught up!"
+            description="You don't have any notifications at the moment."
+          />
+        </div>
+      ) : (
+        <DataTable table={notificationTable} />
+      )}
     </ListView>
   );
 };

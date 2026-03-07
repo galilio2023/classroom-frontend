@@ -28,13 +28,15 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { DataTableRowActions } from "@/components/refine-ui/data-table/row-actions";
+import usePageTitle from "@/hooks/use-page-title";
 
 const SubjectsList = () => {
+  usePageTitle("Subjects");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState("all");
   const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
 
-  const { edit } = useNavigation();
+  const { edit, show } = useNavigation();
   const { mutate: deleteMutation, mutation } = useDelete();
   const isDeleteLoading = mutation.isPending;
 
@@ -116,13 +118,15 @@ const SubjectsList = () => {
               recordId={row.original.id}
               onEdit={() => edit("subjects", row.original.id)}
               onDelete={() => setDeleteTarget(row.original.id)}
-              editLabel="Edit Subject"
-              deleteLabel="Delete Subject"
+              onShow={() => show("subjects", row.original.id)}
+              editLabel={`Edit ${row.original.name} subject`}
+              deleteLabel={`Delete ${row.original.name} subject`}
+              showLabel={`View ${row.original.name} subject`}
             />
           ),
         },
       ],
-      [edit],
+      [edit, show],
     ),
     refineCoreProps: {
       resource: "subjects",

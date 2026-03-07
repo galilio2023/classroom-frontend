@@ -1,6 +1,6 @@
 import { ListView } from "@/components/refine-ui/views/list-view.tsx";
 import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb.tsx";
-import { Search, TrendingUp, LayoutGrid, Award } from "lucide-react";
+import { Search, TrendingUp, LayoutGrid, Award, UserCircle } from "lucide-react";
 import { Input } from "@/components/ui/input.tsx";
 import { useMemo, useState } from "react";
 import { DataTable } from "@/components/refine-ui/data-table/data-table.tsx";
@@ -12,10 +12,12 @@ import { Badge } from "@/components/ui/badge.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import { Progress as ProgressBar } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useNavigate } from "react-router-dom";
 
 const ProgressListPage = () => {
   const { data: identity } = useGetIdentity<UserType>();
   const isStaff = identity?.role === UserRole.ADMIN || identity?.role === UserRole.TEACHER;
+  const navigate = useNavigate();
 
   const [searchQuery, setSearchQuery] = useState("");
   const { show } = useNavigation();
@@ -94,10 +96,24 @@ const ProgressListPage = () => {
         },
         {
           id: "actions",
-          size: 100,
+          size: 150,
           header: () => <p className="column-title text-right pr-4">Actions</p>,
           cell: ({ row }) => (
             <div className="flex items-center justify-end gap-2 pr-2">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-8 text-xs gap-1.5"
+                onClick={(e) => {
+                    e.stopPropagation();
+                    if (row.original?.user?.id) {
+                        navigate(`/portfolio/${row.original.user.id}`);
+                    }
+                }}
+              >
+                <UserCircle className="h-3.5 w-3.5" />
+                Portfolio
+              </Button>
               <Button 
                 variant="ghost" 
                 size="sm" 
@@ -110,13 +126,13 @@ const ProgressListPage = () => {
                 }}
               >
                 <TrendingUp className="h-3.5 w-3.5" />
-                Analytics
+                Profile
               </Button>
             </div>
           ),
         },
       ],
-      [show],
+      [show, navigate],
     ),
     refineCoreProps: {
       resource: "enrollments", // Using enrollments as a base for progress
@@ -155,7 +171,7 @@ const ProgressListPage = () => {
         table={progressTable} 
         onRowClick={(record) => {
             if (record?.user?.id) {
-                show("users", record.user.id);
+                navigate(`/portfolio/${record.user.id}`);
             }
         }}
       />

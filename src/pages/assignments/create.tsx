@@ -10,11 +10,10 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { CreateView } from "@/components/refine-ui/views/create-view";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { useSearchParams } from "react-router-dom";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useSearchParams, useLocation } from "react-router-dom";
 import { useGo, useList } from "@refinedev/core";
 import { toast } from "sonner";
 import { AIAssignmentHelper } from "@/components/ai-assignment-helper";
@@ -32,6 +31,7 @@ import { FieldValues } from "react-hook-form";
 import { Module, Class } from "@/types";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
+import { RichTextEditor } from "@/components/ui/rich-text-editor";
 
 const assignmentSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -47,6 +47,7 @@ type AssignmentFormValues = z.infer<typeof assignmentSchema>;
 
 export const AssignmentCreate = () => {
   const [searchParams] = useSearchParams();
+  const location = useLocation();
   const urlClassId = searchParams.get("classId");
   const initialModuleId = searchParams.get("moduleId");
   const go = useGo();
@@ -107,14 +108,18 @@ export const AssignmentCreate = () => {
       setValue("moduleId", Number(initialModuleId));
     }
     
-    const pendingContent = sessionStorage.getItem("pending_ai_assignment");
+    // Check for pending content from navigation state (preferred) or sessionStorage (fallback)
+    const stateContent = location.state?.pendingContent;
+    const sessionContent = sessionStorage.getItem("pending_ai_assignment");
+    const pendingContent = stateContent || sessionContent;
+
     if (pendingContent) {
         setValue("description", pendingContent);
-        sessionStorage.removeItem("pending_ai_assignment");
+        if (sessionContent) sessionStorage.removeItem("pending_ai_assignment");
         toast.info("AI draft applied from Assistant.");
         setShowAI(false);
     }
-  }, [initialModuleId, setValue]);
+  }, [initialModuleId, setValue, location.state]);
 
   const onSubmit = (values: FieldValues) => {
     onFinish(values);
@@ -263,12 +268,12 @@ export const AssignmentCreate = () => {
                                     <FormItem>
                                         <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Instructions & Content</FormLabel>
                                         <FormControl>
-                                        <Textarea
-                                            id="description"
-                                            placeholder="Type your instructions here or use the AI Assistant..."
-                                            className="min-h-[400px] rounded-2xl resize-none p-6 leading-relaxed bg-muted/10 border-dashed border-2 border-border/50 focus-visible:border-primary/50 transition-colors"
-                                            {...field}
-                                        />
+                                            <RichTextEditor 
+                                                value={field.value || ""} 
+                                                onChange={field.onChange}
+                                                placeholder="Type your instructions here or use the AI Assistant..."
+                                                className="min-h-[300px]"
+                                            />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>

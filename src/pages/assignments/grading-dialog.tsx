@@ -26,6 +26,7 @@ import { useEffect, useState } from "react";
 import { Sparkles, Loader2, FileText } from "lucide-react";
 import { FieldValues } from "react-hook-form";
 import { cn } from "@/lib/utils";
+import { LoadingButton } from "@/components/ui/loading-button";
 
 const gradingSchema = z.object({
   grade: z.coerce
@@ -52,6 +53,7 @@ export const GradingDialog = ({
   const { data: identity } = useGetIdentity<User>();
   const isStaff = identity?.role === UserRole.TEACHER || identity?.role === UserRole.ADMIN;
   const [hasAutoAnalyzed, setHasAutoAnalyzed] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
 
   const form = useForm<GradingFormValues>({
     resolver: zodResolver(gradingSchema) as any,
@@ -65,7 +67,11 @@ export const GradingDialog = ({
       id: submission?.id,
       queryOptions: { enabled: false },
       onMutationSuccess: () => {
-        onOpenChange(false);
+        setIsSuccess(true);
+        setTimeout(() => {
+          setIsSuccess(false);
+          onOpenChange(false);
+        }, 1000);
       },
     },
   });
@@ -228,9 +234,15 @@ export const GradingDialog = ({
 
                                 <div className="flex gap-3 pt-2">
                                     <Button type="button" variant="ghost" className="flex-1 rounded-xl font-bold" onClick={() => onOpenChange(false)}>Cancel</Button>
-                                    <Button type="submit" disabled={formLoading || isAILoading} className="flex-[2] rounded-xl font-black uppercase tracking-widest shadow-lg shadow-primary/20">
-                                        {formLoading ? "Saving..." : "Save Grade"}
-                                    </Button>
+                                    <LoadingButton 
+                                        type="submit" 
+                                        isLoading={formLoading} 
+                                        isSuccess={isSuccess}
+                                        disabled={isAILoading}
+                                        className="flex-[2] rounded-xl font-black uppercase tracking-widest shadow-lg shadow-primary/20"
+                                    >
+                                        Save Grade
+                                    </LoadingButton>
                                 </div>
                             </form>
                         </Form>

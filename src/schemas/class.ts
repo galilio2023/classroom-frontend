@@ -16,6 +16,7 @@ export const classFormSchema = z.object({
   capacity: z.coerce.number().min(1, "Capacity must be at least 1"),
   status: z.nativeEnum(ClassStatus),
   schedules: z.array(scheduleSchema),
+  color: z.string().optional().default("#3b82f6"), // Default to a blue color
 });
 
 // This is the schema for the creation form.

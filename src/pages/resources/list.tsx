@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import { format } from "date-fns";
 import { DataTableRowActions } from "@/components/refine-ui/data-table/row-actions";
+import { EmptyState } from "@/components/empty-state";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,7 +32,7 @@ const ResourcesListPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
 
-  const { edit } = useNavigation();
+  const { edit, create } = useNavigation();
   const { mutate: deleteMutation } = useDelete();
 
   const filters = useMemo(() => {
@@ -141,6 +142,9 @@ const ResourcesListPage = () => {
     }
   };
 
+  const hasData = (resourceTable.refineCore.tableQuery.data?.data?.length || 0) > 0;
+  const isLoading = resourceTable.refineCore.tableQuery.isLoading;
+
   return (
     <>
       <ListView>
@@ -162,7 +166,22 @@ const ResourcesListPage = () => {
             {isStaff && <CreateButton />}
           </div>
         </div>
-        <DataTable table={resourceTable} />
+        
+        {!isLoading && !hasData ? (
+          <div className="mt-8">
+            <EmptyState
+              icon={FolderOpen}
+              title="No resources found"
+              description={isStaff ? "Upload your first resource to share it with your students." : "There are no resources available yet."}
+              action={isStaff ? {
+                label: "Upload Resource",
+                onClick: () => create("resources"),
+              } : undefined}
+            />
+          </div>
+        ) : (
+          <DataTable table={resourceTable} />
+        )}
       </ListView>
 
       <AlertDialog open={deleteTarget !== null} onOpenChange={() => setDeleteTarget(null)}>

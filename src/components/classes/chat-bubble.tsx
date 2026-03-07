@@ -2,9 +2,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Discussion } from "@/types";
-import { Trash2, Reply, Pin } from "lucide-react";
+import { Trash2, Reply } from "lucide-react";
 import dayjs from "dayjs";
 import { cn } from "@/lib/utils";
+import { MarkdownRenderer } from "@/components/ui/markdown-renderer";
 
 interface ChatBubbleProps {
   post: Discussion;
@@ -49,7 +50,9 @@ export const ChatBubble = ({ post, isOwn, onDelete, onReply, isAdmin }: ChatBubb
             ? "bg-primary text-primary-foreground rounded-tr-none border-primary/20" 
             : "bg-card rounded-tl-none border-border/50"
         )}>
-          <p className="text-sm leading-relaxed whitespace-pre-wrap">{post.content}</p>
+          <div className="text-sm leading-relaxed">
+            <MarkdownRenderer content={post.content} />
+          </div>
           
           {/* Actions Overlay */}
           <div className={cn(

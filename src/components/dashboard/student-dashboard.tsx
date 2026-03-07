@@ -7,8 +7,10 @@ import { StatsSkeleton } from "./dashboard-skeletons";
 import { useGetIdentity } from "@refinedev/core";
 import { User } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { Trophy, Star, Zap } from "lucide-react";
+import { XPProgressBar } from "@/components/xp-progress-bar";
+import { getLevelProgress } from "@/lib/xp";
+import { StudentOnboarding } from "./student-onboarding";
 
 interface StudentDashboardProps {
   data: DashboardData;
@@ -20,17 +22,11 @@ interface StudentDashboardProps {
 export const StudentDashboard = ({ data, isLoading, list, show }: StudentDashboardProps) => {
   const { data: identity } = useGetIdentity<User>();
 
-  // Calculate Level Progress
-  // Formula inverse: XP needed for next level = ((Level)^2) * 100
-  const currentLevel = identity?.level || 1;
   const currentXP = identity?.xp || 0;
-  
-  const xpForCurrentLevel = Math.pow(currentLevel - 1, 2) * 100;
-  const xpForNextLevel = Math.pow(currentLevel, 2) * 100;
-  
-  const xpProgress = currentXP - xpForCurrentLevel;
-  const xpNeeded = xpForNextLevel - xpForCurrentLevel;
-  const progressPercentage = Math.min(100, Math.max(0, (xpProgress / xpNeeded) * 100));
+  const { currentLevel, xpRequiredForNextLevel, xpInCurrentLevel } = getLevelProgress(currentXP);
+  const xpNeeded = xpRequiredForNextLevel - xpInCurrentLevel;
+
+  const hasClasses = (identity?.enrollments?.length || 0) > 0;
 
   // Use isLoading to show a skeleton while analytics are fetching in the background
   if (isLoading && (!data.gradeTrends || data.gradeTrends.length === 0)) {
@@ -47,6 +43,8 @@ export const StudentDashboard = ({ data, isLoading, list, show }: StudentDashboa
 
   return (
     <div className="space-y-12">
+      {!hasClasses && <StudentOnboarding />}
+
       {/* Gamification Banner */}
       <Card className="border-none bg-gradient-to-r from-ai-primary to-ai-secondary text-ai-primary-foreground shadow-xl overflow-hidden relative">
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
@@ -66,17 +64,15 @@ export const StudentDashboard = ({ data, isLoading, list, show }: StudentDashboa
                 <h2 className="text-2xl font-black tracking-tight">Keep it up, {identity?.name?.split(' ')[0] || "Student"}!</h2>
                 <p className="text-white/80 text-sm font-medium flex items-center justify-center sm:justify-start gap-2">
                   <Zap className="h-4 w-4 text-gold-primary" />
-                  You are {Math.round(xpNeeded - xpProgress)} XP away from Level {currentLevel + 1}
+                  You are {Math.round(xpNeeded)} XP away from Level {currentLevel + 1}
                 </p>
               </div>
               
-              <div className="space-y-1">
-                <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest text-white/60">
-                  <span>Level {currentLevel}</span>
-                  <span>{currentXP} / {xpForNextLevel} XP</span>
-                </div>
-                <Progress value={progressPercentage} className="h-3 bg-black/20" indicatorClassName="bg-gradient-to-r from-gold-primary to-gold-secondary" />
-              </div>
+              <XPProgressBar 
+                xp={currentXP} 
+                className="w-full" 
+                indicatorClassName="bg-gradient-to-r from-gold-primary to-gold-secondary"
+              />
             </div>
 
             <div className="hidden md:flex flex-col gap-2">

@@ -36,6 +36,7 @@ const ClassesEdit = () => {
     refineCoreProps: {
       resource: "classes",
       action: "edit",
+      id, // Correctly pass the id inside refineCoreProps
       redirect: "list",
     },
   });

@@ -1,15 +1,15 @@
 import { useList, useCreate, useDelete, useGetIdentity, useCustomMutation } from "@refinedev/core";
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { Discussion, User } from "@/types";
 import { Loader2, Send, Sparkles, X, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 import { io } from "socket.io-client";
-import ReactMarkdown from "react-markdown";
 import { ChatBubble } from "@/components/classes/chat-bubble";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { cn } from "@/lib/utils";
+import { MarkdownRenderer } from "@/components/ui/markdown-renderer";
+import { RichTextEditor } from "@/components/ui/rich-text-editor";
+import { SOCKET_URL } from "@/config";
 
 interface DiscussionTabProps {
   classId: string;
@@ -51,7 +51,7 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
 
   useEffect(() => {
     if (!identity?.id || !classId) return;
-    const socket = io(import.meta.env.VITE_API_URL.replace("/api", ""), {
+    const socket = io(SOCKET_URL, {
       query: { userId: identity.id, classId },
     });
     socket.on("new_discussion", () => { void refetch(); });
@@ -60,7 +60,7 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
   }, [identity?.id, classId, refetch]);
 
   const handlePost = () => {
-    if (!newPost.trim()) return;
+    if (!newPost.trim() || newPost === "<p></p>") return;
     createPost(
       {
         resource: "discussions",
@@ -97,15 +97,15 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
   const replyingToPost = discussions.find(d => d.id === replyTo);
 
   return (
-    <div className="flex flex-col h-[calc(100vh-300px)] min-h-[500px] bg-muted/20 rounded-2xl border border-border/50 overflow-hidden">
-      <div className="p-4 border-b bg-background/50 backdrop-blur-md flex justify-between items-center">
+    <div className="flex flex-col h-[calc(100vh-200px)] md:h-[calc(100vh-300px)] min-h-[400px] md:min-h-[500px] bg-muted/20 rounded-xl md:rounded-2xl border border-border/50 overflow-hidden">
+      <div className="p-3 md:p-4 border-b bg-background/50 backdrop-blur-md flex justify-between items-center">
         <div className="flex items-center gap-2">
-          <div className="p-2 bg-primary/10 rounded-lg">
+          <div className="p-1.5 md:p-2 bg-primary/10 rounded-lg">
             <MessageCircle className="h-4 w-4 text-primary" />
           </div>
           <div>
-            <h3 className="text-sm font-bold leading-none">Class Stream</h3>
-            <p className="text-[10px] text-muted-foreground mt-1">Real-time discussion with your class</p>
+            <h3 className="text-xs md:text-sm font-bold leading-none">Class Stream</h3>
+            <p className="text-[9px] md:text-[10px] text-muted-foreground mt-1">Real-time discussion with your class</p>
           </div>
         </div>
         <Button 
@@ -113,25 +113,24 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
           size="sm" 
           onClick={handleGenerateSummary} 
           disabled={isSummarizing}
-          className="h-8 text-xs gap-2 border-primary/20 hover:bg-primary/5 text-primary"
+          className="h-7 md:h-8 text-[10px] md:text-xs gap-1.5 md:gap-2 border-primary/20 hover:bg-primary/5 text-primary"
         >
           {isSummarizing ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
-          AI Catch-up
+          <span className="hidden sm:inline">AI Catch-up</span>
+          <span className="sm:hidden">Catch-up</span>
         </Button>
       </div>
 
       {summary && (
-        <div className="p-4 bg-primary/5 border-b border-primary/10 animate-in slide-in-from-top duration-300 relative">
+        <div className="p-3 md:p-4 bg-primary/5 border-b border-primary/10 animate-in slide-in-from-top duration-300 relative">
           <Button variant="ghost" size="icon" onClick={() => setSummary(null)} className="absolute top-2 right-2 h-6 w-6">
             <X className="h-3 w-3" />
           </Button>
-          <div className="prose prose-xs dark:prose-invert max-w-none">
-            <ReactMarkdown>{summary}</ReactMarkdown>
-          </div>
+          <MarkdownRenderer content={summary} />
         </div>
       )}
 
-      <ScrollArea ref={scrollRef} className="flex-1 p-4">
+      <ScrollArea ref={scrollRef} className="flex-1 p-3 md:p-4">
         {isLoading ? (
           <div className="flex flex-col items-center justify-center h-full space-y-2">
             <Loader2 className="h-6 w-6 animate-spin text-primary/40" />
@@ -139,7 +138,7 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
           </div>
         ) : discussions.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center opacity-40">
-            <MessageCircle className="h-12 w-12 mb-2" />
+            <MessageCircle className="h-10 w-10 md:h-12 md:w-12 mb-2" />
             <p className="text-sm font-medium">No messages yet</p>
             <p className="text-xs">Start the conversation!</p>
           </div>
@@ -159,13 +158,13 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
         )}
       </ScrollArea>
 
-      <div className="p-4 bg-background border-t">
+      <div className="p-3 md:p-4 bg-background border-t">
         {replyTo && (
           <div className="mb-2 p-2 bg-muted rounded-lg flex justify-between items-center animate-in slide-in-from-bottom-2 duration-200">
             <div className="flex items-center gap-2 overflow-hidden">
               <div className="w-1 h-6 bg-primary rounded-full shrink-0" />
               <p className="text-[10px] truncate italic text-muted-foreground">
-                Replying to <span className="font-bold text-foreground">{replyingToPost?.user.name}</span>: "{replyingToPost?.content}"
+                Replying to <span className="font-bold text-foreground">{replyingToPost?.user.name}</span>: "{replyingToPost?.content.replace(/<[^>]*>/g, '')}"
               </p>
             </div>
             <Button variant="ghost" size="icon" onClick={() => setReplyTo(null)} className="h-5 w-5">
@@ -175,25 +174,21 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
         )}
         
         <div className="flex gap-2 items-end">
-          <Textarea 
-            placeholder={replyTo ? "Write your reply..." : "Message your class..."}
-            value={newPost}
-            onChange={(e) => setNewPost(e.target.value)}
-            className="min-h-[44px] max-h-[120px] bg-muted/50 border-none focus-visible:ring-1 focus-visible:ring-primary/30 resize-none py-3 rounded-xl text-sm"
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                handlePost();
-              }
-            }}
-          />
+          <div className="flex-1">
+            <RichTextEditor 
+              value={newPost}
+              onChange={setNewPost}
+              placeholder={replyTo ? "Write your reply..." : "Message your class..."}
+              className="min-h-[80px]"
+            />
+          </div>
           <Button 
             size="icon" 
             onClick={handlePost} 
-            disabled={!newPost.trim() || mutation.isPending}
-            className="h-11 w-11 shrink-0 rounded-xl shadow-lg shadow-primary/20"
+            disabled={!newPost.trim() || newPost === "<p></p>" || mutation.isPending}
+            className="h-10 w-10 md:h-11 md:w-11 shrink-0 rounded-xl shadow-lg shadow-primary/20 mb-1"
           >
-            <Send className="h-5 w-5" />
+            <Send className="h-4 w-4 md:h-5 md:w-5" />
           </Button>
         </div>
       </div>

@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { DataTableRowActions } from "@/components/refine-ui/data-table/row-actions";
 import { format } from "date-fns";
+import { EmptyState } from "@/components/empty-state";
 
 const AssignmentsListPage = () => {
   const { data: identity } = useGetIdentity<User>();
@@ -31,7 +32,7 @@ const AssignmentsListPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
 
-  const { edit, show } = useNavigation();
+  const { edit, show, create } = useNavigation();
   const { mutate: deleteMutation } = useDelete();
 
   const filters = useMemo(() => {
@@ -149,6 +150,9 @@ const AssignmentsListPage = () => {
     }
   };
 
+  const hasData = (assignmentTable.refineCore.tableQuery.data?.data?.length || 0) > 0;
+  const isLoading = assignmentTable.refineCore.tableQuery.isLoading;
+
   return (
     <>
       <ListView>
@@ -170,10 +174,25 @@ const AssignmentsListPage = () => {
             {isStaff && <CreateButton />}
           </div>
         </div>
-        <DataTable 
-            table={assignmentTable} 
-            onRowClick={(record) => show("assignments", record.id)}
-        />
+        
+        {!isLoading && !hasData ? (
+          <div className="mt-8">
+            <EmptyState
+              icon={FileText}
+              title="No assignments found"
+              description={isStaff ? "Create your first assignment to start tracking student progress." : "You don't have any assignments yet."}
+              action={isStaff ? {
+                label: "Create Assignment",
+                onClick: () => create("assignments"),
+              } : undefined}
+            />
+          </div>
+        ) : (
+          <DataTable 
+              table={assignmentTable} 
+              onRowClick={(record) => show("assignments", record.id)}
+          />
+        )}
       </ListView>
 
       <AlertDialog open={deleteTarget !== null} onOpenChange={() => setDeleteTarget(null)}>

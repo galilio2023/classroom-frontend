@@ -22,8 +22,10 @@ import {
 } from "@/components/ui/alert-dialog";
 import { DataTableRowActions } from "@/components/refine-ui/data-table/row-actions";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import usePageTitle from "@/hooks/use-page-title";
 
 const DepartmentsList = () => {
+  usePageTitle("Departments");
   const [searchQuery, setSearchQuery] = useState("");
   const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
 

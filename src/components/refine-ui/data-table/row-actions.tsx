@@ -17,6 +17,7 @@ interface DataTableRowActionsProps {
   recordId?: number | string;
   editLabel?: string;
   deleteLabel?: string;
+  showLabel?: string;
 }
 
 export function DataTableRowActions({
@@ -27,6 +28,7 @@ export function DataTableRowActions({
   recordId,
   editLabel,
   deleteLabel,
+  showLabel,
 }: DataTableRowActionsProps) {
   // Call all necessary hooks at the top level
   const { data: editCan } = useCan({
@@ -61,8 +63,7 @@ export function DataTableRowActions({
     <div className="flex justify-end">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="h-8 w-8 p-0">
-            <span className="sr-only">Open menu</span>
+          <Button variant="ghost" className="h-8 w-8 p-0" aria-label="Open row actions menu">
             <MoreHorizontal className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
@@ -71,9 +72,10 @@ export function DataTableRowActions({
             <DropdownMenuItem
               onClick={onShow}
               className="flex items-center gap-2 cursor-pointer"
+              aria-label={showLabel || "View details"}
             >
               <Eye className="h-4 w-4" />
-              <span>View Students</span>
+              <span>{showLabel || "View"}</span>
             </DropdownMenuItem>
           )}
 
@@ -81,6 +83,7 @@ export function DataTableRowActions({
             <DropdownMenuItem
               onClick={onEdit}
               className="flex items-center gap-2 cursor-pointer"
+              aria-label={editLabel || "Edit item"}
             >
               <Pencil className="h-4 w-4" />
               <span>{editLabel || "Edit"}</span>
@@ -95,6 +98,7 @@ export function DataTableRowActions({
             <DropdownMenuItem
               onClick={onDelete}
               className="flex items-center gap-2 text-red-500 focus:text-red-500 cursor-pointer"
+              aria-label={deleteLabel || "Delete item"}
             >
               <Trash2 className="h-4 w-4" />
               <span>{deleteLabel || "Delete"}</span>

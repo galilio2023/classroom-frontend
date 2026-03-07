@@ -23,14 +23,26 @@ import { CreateView } from "@/components/refine-ui/views/create-view";
 import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
 import { Textarea } from "@/components/ui/textarea";
 import { useBack, useList, useGetIdentity, HttpError, BaseRecord } from "@refinedev/core";
-import { Loader2 } from "lucide-react";
+import { Loader2, Check } from "lucide-react";
 import { classCreateFormSchema } from "@/schemas/class";
 import { Subject, User, ClassStatus } from "@/types";
 import { toast } from "sonner";
 import z from "zod";
+import { cn } from "@/lib/utils";
 
 // Define a type alias for the form values based on the Zod schema
 type ClassCreateFormValues = z.infer<typeof classCreateFormSchema>;
+
+const PRESET_COLORS = [
+  "#3b82f6", // Blue
+  "#ef4444", // Red
+  "#10b981", // Emerald
+  "#f59e0b", // Amber
+  "#8b5cf6", // Violet
+  "#ec4899", // Pink
+  "#06b6d4", // Cyan
+  "#71717a", // Zinc
+];
 
 const ClassesCreate = () => {
   const back = useBack();
@@ -38,7 +50,7 @@ const ClassesCreate = () => {
 
   // Explicitly type the useForm hook with all necessary generic arguments
   const form = useForm<BaseRecord, HttpError, ClassCreateFormValues>({
-    resolver: zodResolver(classCreateFormSchema),
+    resolver: zodResolver(classCreateFormSchema) as any,
     refineCoreProps: {
       resource: "classes",
       action: "create",
@@ -51,6 +63,7 @@ const ClassesCreate = () => {
       capacity: 30,
       status: ClassStatus.ACTIVE,
       schedules: [],
+      color: PRESET_COLORS[0],
     },
   });
 
@@ -69,7 +82,7 @@ const ClassesCreate = () => {
     await onFinish({
       ...values,
       teacherId: identity.id,
-    });
+    } as any);
   };
 
   // Correctly use useList based on the official documentation
@@ -161,6 +174,36 @@ const ClassesCreate = () => {
                     )}
                   />
                 </div>
+
+                <FormField
+                  control={form.control}
+                  name="color"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Class Theme Color</FormLabel>
+                      <FormControl>
+                        <div className="flex flex-wrap gap-2 pt-1">
+                          {PRESET_COLORS.map((color) => (
+                            <button
+                              key={color}
+                              type="button"
+                              className={cn(
+                                "h-8 w-8 rounded-full border-2 transition-all hover:scale-110 flex items-center justify-center",
+                                field.value === color ? "border-foreground scale-110" : "border-transparent"
+                              )}
+                              style={{ backgroundColor: color }}
+                              onClick={() => field.onChange(color)}
+                            >
+                              {field.value === color && <Check className="h-4 w-4 text-white" />}
+                            </button>
+                          ))}
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
                 <FormField
                   control={form.control}
                   name="description"
