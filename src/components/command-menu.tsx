@@ -5,6 +5,7 @@ import {
   useNavigation,
   useLogout,
   useList,
+  CrudFilter,
 } from "@refinedev/core";
 import {
   Calculator,
@@ -90,41 +91,41 @@ export function CommandMenu() {
   };
 
   // Fetch dynamic data for search
-  const { data: classesData } = useList<Class>({
+  const { result: classesResult } = useList<Class>({
     resource: "classes",
     filters: debouncedSearch ? [{ field: "name", operator: "contains", value: debouncedSearch }] : [],
     queryOptions: { enabled: open && !!debouncedSearch },
     pagination: { pageSize: 5 },
   });
 
-  const { data: assignmentsData } = useList<Assignment>({
+  const { result: assignmentsResult } = useList<Assignment>({
     resource: "assignments",
     filters: debouncedSearch ? [{ field: "title", operator: "contains", value: debouncedSearch }] : [],
     queryOptions: { enabled: open && !!debouncedSearch },
     pagination: { pageSize: 5 },
   });
 
-  const { data: studentsData } = useList<User>({
+  const { result: studentsResult } = useList<User>({
     resource: "users",
     filters: [
-      ...(debouncedSearch ? [{ field: "name", operator: "contains", value: debouncedSearch }] : []),
+      ...(debouncedSearch ? [{ field: "name", operator: "contains", value: debouncedSearch } as CrudFilter] : []),
       { field: "role", operator: "eq", value: "student" }
     ],
     queryOptions: { enabled: open && !!debouncedSearch },
     pagination: { pageSize: 5 },
   });
 
-  const { data: resourcesData } = useList<Resource>({
+  const { result: resourcesResult } = useList<Resource>({
     resource: "resources",
     filters: debouncedSearch ? [{ field: "title", operator: "contains", value: debouncedSearch }] : [],
     queryOptions: { enabled: open && !!debouncedSearch },
     pagination: { pageSize: 5 },
   });
 
-  const classes = classesData?.data || [];
-  const assignments = assignmentsData?.data || [];
-  const students = studentsData?.data || [];
-  const resources = resourcesData?.data || [];
+  const classes = classesResult?.data || [];
+  const assignments = assignmentsResult?.data || [];
+  const students = studentsResult?.data || [];
+  const resources = resourcesResult?.data || [];
 
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -217,7 +218,7 @@ export function CommandMenu() {
 
           {classes.length > 0 && (
             <CommandGroup heading="Classes">
-              {classes.map((c) => (
+              {classes.map((c: Class) => (
                 <CommandItem
                   key={c.id}
                   onSelect={() => runCommand(() => show("classes", c.id.toString()), c.name)}
@@ -231,7 +232,7 @@ export function CommandMenu() {
 
           {students.length > 0 && (
             <CommandGroup heading="Students">
-              {students.map((s) => (
+              {students.map((s: User) => (
                 <CommandItem
                   key={s.id}
                   onSelect={() => runCommand(() => show("users", s.id), s.name)}
@@ -245,7 +246,7 @@ export function CommandMenu() {
 
           {assignments.length > 0 && (
             <CommandGroup heading="Assignments">
-              {assignments.map((a) => (
+              {assignments.map((a: Assignment) => (
                 <CommandItem
                   key={a.id}
                   onSelect={() => runCommand(() => show("assignments", a.id.toString()), a.title)}
@@ -259,7 +260,7 @@ export function CommandMenu() {
 
           {resources.length > 0 && (
             <CommandGroup heading="Resources">
-              {resources.map((r) => (
+              {resources.map((r: Resource) => (
                 <CommandItem
                   key={r.id}
                   onSelect={() => runCommand(() => navigate(`/classes/${r.classId}/lessons/${r.id}`), r.title)}

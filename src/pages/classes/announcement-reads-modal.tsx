@@ -31,7 +31,7 @@ export const AnnouncementReadsModal = ({
   open,
   onOpenChange,
 }: AnnouncementReadsModalProps) => {
-  const { data, isLoading } = useCustom<ReadReceipt[]>({
+  const { result, query } = useCustom<ReadReceipt[]>({
     url: `${import.meta.env.VITE_API_URL}/announcements/${announcementId}/reads`,
     method: "get",
     queryOptions: {
@@ -39,7 +39,8 @@ export const AnnouncementReadsModal = ({
     },
   });
 
-  const reads = data?.data ?? [];
+  const reads = result?.data ?? [];
+  const isLoading = query.isLoading;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -66,7 +67,7 @@ export const AnnouncementReadsModal = ({
           ) : (
             <ScrollArea className="h-[300px] pr-4">
               <div className="space-y-4">
-                {reads.map((read) => (
+                {reads.map((read: ReadReceipt) => (
                   <div
                     key={read.id}
                     className="flex items-center justify-between gap-3"

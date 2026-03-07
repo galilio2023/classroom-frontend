@@ -136,7 +136,7 @@ const EditorToolbar = ({ editor }: { editor: Editor | null }) => {
   );
 };
 
-export const RichTextEditor = ({ value, onChange, placeholder, className }: RichTextEditorProps) => {
+export const RichTextEditor = ({ value, onChange, className }: RichTextEditorProps) => {
   const editor = useEditor({
     extensions: [
       StarterKit,

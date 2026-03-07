@@ -50,7 +50,7 @@ const ClassesCreate = () => {
 
   // Explicitly type the useForm hook with all necessary generic arguments
   const form = useForm<BaseRecord, HttpError, ClassCreateFormValues>({
-    resolver: zodResolver(classCreateFormSchema),
+    resolver: zodResolver(classCreateFormSchema) as any,
     refineCoreProps: {
       resource: "classes",
       action: "create",
@@ -82,7 +82,7 @@ const ClassesCreate = () => {
     await onFinish({
       ...values,
       teacherId: identity.id,
-    });
+    } as any);
   };
 
   // Correctly use useList based on the official documentation

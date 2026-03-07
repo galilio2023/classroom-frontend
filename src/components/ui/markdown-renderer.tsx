@@ -44,7 +44,7 @@ export const MarkdownRenderer = ({ content, className }: MarkdownRendererProps) 
       <ReactMarkdown
         rehypePlugins={[rehypeHighlight]}
         components={{
-          pre: ({ node, ...props }) => <div {...props} />,
+          pre: ({ node, ...props }) => <div {...(props as any)} />,
           code: ({ node, inline, className, children, ...props }: any) => {
             if (inline) {
               return (

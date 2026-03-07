@@ -139,7 +139,7 @@ const ClassesShow = () => {
   const isOwner = isAdmin || aClass?.teachers?.find(t => t.teacher.id === identity?.id)?.isPrimary;
 
   // Fetch shared teacher notes from DB
-  const { data: notesData, isLoading: isLoadingNotes } = useOne({
+  const { result: notesResult, query: notesQuery } = useOne({
     resource: `classes/${classId}/notes`,
     id: "current", // Dummy ID for the singleton note
     queryOptions: {
@@ -147,11 +147,14 @@ const ClassesShow = () => {
     }
   });
 
+  const notesData = notesResult;
+  const isLoadingNotes = notesQuery.isLoading;
+
   const { mutate: updateNote } = useUpdate();
 
   useEffect(() => {
-    if (notesData?.data?.content !== undefined) {
-      setTeacherNotes(notesData.data.content);
+    if ((notesData as any)?.content !== undefined) {
+      setTeacherNotes((notesData as any).content);
     }
   }, [notesData]);
 
@@ -173,7 +176,7 @@ const ClassesShow = () => {
   };
 
   // Fetch announcements for the pinned banner
-  const { data: announcementsData } = useList<Announcement>({
+  const { result: announcementsResult } = useList<Announcement>({
     resource: "announcements",
     filters: [{ field: "classId", operator: "eq", value: classId }],
     sorters: [{ field: "isPinned", order: "desc" }],
@@ -182,7 +185,7 @@ const ClassesShow = () => {
     }
   });
 
-  const announcements = announcementsData?.data ?? [];
+  const announcements = announcementsResult?.data ?? [];
 
   // Initialize live indicator from DB
   useEffect(() => {
@@ -417,7 +420,7 @@ const ClassesShow = () => {
   const classColor = (aClass as any).color || "#3b82f6";
 
   const pinnedAnnouncements = announcements.filter(
-    (a) => a.isPinned && !dismissedAnnouncements.includes(a.id),
+    (a: Announcement) => a.isPinned && !dismissedAnnouncements.includes(a.id),
   );
 
   return (
@@ -425,7 +428,7 @@ const ClassesShow = () => {
       <ShowView className="class-view class-show space-y-6">
         {pinnedAnnouncements.length > 0 && (
           <div className="space-y-3">
-            {pinnedAnnouncements.map((announcement) => (
+            {pinnedAnnouncements.map((announcement: Announcement) => (
               <div
                 key={announcement.id}
                 className="relative bg-primary/10 border border-primary/20 rounded-lg p-4 pr-12 animate-in fade-in slide-in-from-top-2"

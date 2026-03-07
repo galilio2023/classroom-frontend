@@ -14,8 +14,8 @@ dist-ssr
 
 # Environment variables
 # Ignore all .env files but allow .env.example
-#.env*
-#!.env.example
+.env*
+!.env.example
 
 # Editor directories and files
 .vscode/

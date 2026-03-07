@@ -91,7 +91,7 @@ const UsersList = () => {
     return f;
   }, [searchQuery, selectedRole, selectedStatus, verificationFilter]);
 
-  const { data: users, isLoading } = useList<User>({
+  const { result: usersResult, query: usersQuery } = useList<User>({
     resource: "users",
     pagination: { pageSize: 1000, mode: "server" },
     filters,
@@ -100,6 +100,9 @@ const UsersList = () => {
       populate: ["department"]
     }
   });
+
+  const users = usersResult;
+  const isLoading = usersQuery.isLoading;
 
   const parentRef = useRef<HTMLDivElement>(null);
 
