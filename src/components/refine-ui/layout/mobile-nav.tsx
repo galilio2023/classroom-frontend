@@ -2,6 +2,7 @@ import React from "react";
 import { Home, LayoutGrid, BrainCircuit, Bell } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 
 const navItems = [
   { label: "Home", icon: Home, path: "/" },
@@ -14,7 +15,12 @@ export const MobileNav = () => {
   const location = useLocation();
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border px-6 py-3 flex justify-between items-center shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
+    <motion.div 
+      initial={{ y: 100 }}
+      animate={{ y: 0 }}
+      transition={{ type: "spring", stiffness: 260, damping: 20 }}
+      className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-t border-border px-6 py-3 flex justify-between items-center shadow-[0_-4px_12px_rgba(0,0,0,0.05)]"
+    >
       {navItems.map((item) => {
         const isActive = location.pathname === item.path;
         return (
@@ -22,15 +28,27 @@ export const MobileNav = () => {
             key={item.path}
             to={item.path}
             className={cn(
-              "flex flex-col items-center gap-1 transition-colors",
+              "flex flex-col items-center gap-1 transition-colors relative",
               isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
             )}
           >
-            <item.icon className={cn("h-5 w-5", isActive && "fill-primary/10")} />
+            <motion.div
+              whileTap={{ scale: 0.8 }}
+              className="relative"
+            >
+              <item.icon className={cn("h-5 w-5", isActive && "fill-primary/10")} />
+              {isActive && (
+                <motion.div
+                  layoutId="mobile-nav-indicator"
+                  className="absolute -top-1 -right-1 w-1.5 h-1.5 bg-primary rounded-full"
+                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                />
+              )}
+            </motion.div>
             <span className="text-[10px] font-medium">{item.label}</span>
           </Link>
         );
       })}
-    </div>
+    </motion.div>
   );
 };

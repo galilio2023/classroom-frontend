@@ -30,6 +30,7 @@ import { ChevronRight, ListIcon } from "lucide-react";
 import React from "react";
 import { cn } from "@/lib/utils.ts";
 import { Link as RouterLink } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 
 export function Sidebar() {
   const { open } = useShadcnSidebar();
@@ -85,29 +86,27 @@ function SidebarItemGroup({ item, selectedKey }: MenuItemProps) {
 
   return (
     <div className={cn("border-t", "border-sidebar-border/50", "pt-4", "mt-4")}>
-      <span
-        className={cn(
-          "ml-3",
-          "block",
-          "text-[10px]",
-          "font-bold",
-          "uppercase",
-          "tracking-widest",
-          "text-muted-foreground/60",
-          "transition-all",
-          "duration-200",
-          {
-            "h-8": open,
-            "h-0": !open,
-            "opacity-0": !open,
-            "opacity-100": open,
-            "pointer-events-none": !open,
-            "pointer-events-auto": open,
-          },
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.span
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className={cn(
+              "ml-3",
+              "block",
+              "text-[10px]",
+              "font-bold",
+              "uppercase",
+              "tracking-widest",
+              "text-muted-foreground/60",
+              "mb-2"
+            )}
+          >
+            {getDisplayName(item)}
+          </motion.span>
         )}
-      >
-        {getDisplayName(item)}
-      </span>
+      </AnimatePresence>
       {children && children.length > 0 && (
         <div className={cn("flex", "flex-col", "gap-1")}>
           {children.map((child: TreeMenuItem) => (
@@ -210,14 +209,24 @@ function SidebarHeader() {
         !open && !isMobile ? "justify-center" : "flex-row justify-between px-6",
       )}
     >
-      {(open || isMobile) && (
-        <RouterLink to="/" className="flex flex-row items-center gap-3 whitespace-nowrap transition-discrete duration-200 hover:opacity-80">
-          <div className="shrink-0 p-2 bg-primary/10 rounded-xl">{title.icon}</div>
-          <h2 className="text-base font-black tracking-tight text-foreground">
-            {title.text}
-          </h2>
-        </RouterLink>
-      )}
+      <AnimatePresence mode="wait">
+        {(open || isMobile) && (
+          <motion.div
+            key="logo-full"
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -10 }}
+            transition={{ duration: 0.2 }}
+          >
+            <RouterLink to="/" className="flex flex-row items-center gap-3 whitespace-nowrap hover:opacity-80">
+              <div className="shrink-0 p-2 bg-primary/10 rounded-xl">{title.icon}</div>
+              <h2 className="text-base font-black tracking-tight text-foreground">
+                {title.text}
+              </h2>
+            </RouterLink>
+          </motion.div>
+        )}
+      </AnimatePresence>
       <ShadcnSidebarTrigger
         className={cn(
           "text-muted-foreground hover:text-foreground transition-colors shrink-0 opacity-100 pointer-events-auto",
@@ -268,24 +277,33 @@ function SidebarButton({
   ...props
 }: SidebarButtonProps) {
   const Link = useLink();
+  const { open } = useShadcnSidebar();
 
   const buttonContent = (
     <>
       <ItemIcon icon={item.meta?.icon ?? item.icon} isSelected={isSelected} />
-      <span
-        className={cn("tracking-tight transition-all", {
-          "flex-1": rightIcon,
-          "text-left": rightIcon,
-          "line-clamp-1": !rightIcon,
-          truncate: !rightIcon,
-          "font-medium": !isSelected,
-          "font-bold": isSelected,
-          "text-primary": isSelected,
-          "text-muted-foreground group-hover:text-foreground": !isSelected,
-        })}
-      >
-        {getDisplayName(item)}
-      </span>
+      <AnimatePresence mode="wait">
+        {open && (
+          <motion.span
+            initial={{ opacity: 0, x: -5 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -5 }}
+            transition={{ duration: 0.15 }}
+            className={cn("tracking-tight transition-all", {
+              "flex-1": rightIcon,
+              "text-left": rightIcon,
+              "line-clamp-1": !rightIcon,
+              truncate: !rightIcon,
+              "font-medium": !isSelected,
+              "font-bold": isSelected,
+              "text-primary": isSelected,
+              "text-muted-foreground group-hover:text-foreground": !isSelected,
+            })}
+          >
+            {getDisplayName(item)}
+          </motion.span>
+        )}
+      </AnimatePresence>
       {rightIcon}
     </>
   );

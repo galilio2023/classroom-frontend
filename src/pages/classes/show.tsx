@@ -1,6 +1,6 @@
-import { useShow, useDelete, useGetIdentity, useUpdate } from "@refinedev/core";
+import { useShow, useDelete, useGetIdentity, useUpdate, useCreate, useList, useOne } from "@refinedev/core";
 import { useParams, useSearchParams } from "react-router-dom";
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useCallback } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { useTable } from "@refinedev/react-table";
 
@@ -20,27 +20,33 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Class, Enrollment, User, UserRole } from "@/types";
-import { 
-  Loader2, 
-  PlusCircle, 
-  Trash2, 
-  ClipboardCheck, 
-  MessageSquare, 
-  Library, 
-  FileQuestion, 
-  Sparkles, 
-  LayoutGrid, 
-  Megaphone, 
-  CheckCircle2, 
-  XCircle, 
-  Users, 
+import { Class, Enrollment, User, UserRole, Announcement } from "@/types";
+import {
+  Loader2,
+  PlusCircle,
+  Trash2,
+  ClipboardCheck,
+  MessageSquare,
+  Library,
+  FileQuestion,
+  Sparkles,
+  LayoutGrid,
+  Megaphone,
+  CheckCircle2,
+  XCircle,
+  Users,
   Info,
   Copy,
   Check,
   Video,
   Trophy,
-  BarChart3
+  BarChart3,
+  StickyNote,
+  Send,
+  UserPlus,
+  Pin,
+  X,
+  Paperclip,
 } from "lucide-react";
 import {
   AlertDialog,
@@ -53,6 +59,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { EnrollStudentDialog } from "./enroll-student-dialog";
+import { InviteTeacherDialog } from "./invite-teacher-dialog";
 import { AssignmentList } from "../assignments/list";
 import { AttendanceTab } from "./attendance-tab";
 import { AIStudyBuddy } from "@/components/ai-study-buddy";
@@ -69,6 +76,19 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { io } from "socket.io-client";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { SOCKET_URL } from "@/config";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import debounce from "lodash/debounce";
 
 const ClassesShow = () => {
   const { id } = useParams();
@@ -76,13 +96,27 @@ const ClassesShow = () => {
   const classId = id ?? "";
   const { data: identity } = useGetIdentity<User>();
 
-  const [activeTab, setActiveTab] = useState(searchParams.get("tab") || "curriculum");
+  const [activeTab, setActiveTab] = useState(
+    searchParams.get("tab") || "curriculum",
+  );
   const [unenrollTarget, setUnenrollTarget] = useState<number | null>(null);
   const [isEnrollDialogOpen, setIsEnrollDialogOpen] = useState(false);
+  const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [isLiveIndicator, setIsLiveIndicator] = useState(false);
-  
-  const [insightTarget, setInsightTarget] = useState<{ id: string; name: string } | null>(null);
+
+  const [teacherNotes, setTeacherNotes] = useState("");
+  const [isMessageAllOpen, setIsMessageAllOpen] = useState(false);
+  const [bulkMessage, setBulkMessage] = useState({ title: "", message: "" });
+
+  const [dismissedAnnouncements, setDismissedAnnouncements] = useState<number[]>(
+    [],
+  );
+
+  const [insightTarget, setInsightTarget] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
 
   // Sync tab if URL changes
   useEffect(() => {
@@ -91,7 +125,7 @@ const ClassesShow = () => {
   }, [searchParams]);
 
   const {
-    query: { data: aClassData, isLoading, isError, refetch }
+    query: { data: aClassData, isLoading, isError, refetch },
   } = useShow<Class>({
     resource: "classes",
     id: classId,
@@ -99,19 +133,86 @@ const ClassesShow = () => {
 
   const aClass = aClassData?.data;
 
+  const isAdmin = identity?.role === UserRole.ADMIN;
+  const isTeacher = identity?.role === UserRole.TEACHER;
+  const isStaff = isAdmin || isTeacher;
+  const isOwner = isAdmin || aClass?.teachers?.find(t => t.teacher.id === identity?.id)?.isPrimary;
+
+  // Fetch shared teacher notes from DB
+  const { data: notesData, isLoading: isLoadingNotes } = useOne({
+    resource: `classes/${classId}/notes`,
+    id: "current", // Dummy ID for the singleton note
+    queryOptions: {
+      enabled: !!classId && isStaff,
+    }
+  });
+
+  const { mutate: updateNote } = useUpdate();
+
+  useEffect(() => {
+    if (notesData?.data?.content !== undefined) {
+      setTeacherNotes(notesData.data.content);
+    }
+  }, [notesData]);
+
+  // Debounced save to DB
+  const debouncedSaveNotes = useCallback(
+    debounce((content: string) => {
+      updateNote({
+        resource: `classes/${classId}/notes`,
+        id: "current",
+        values: { content },
+      });
+    }, 1000),
+    [classId, updateNote]
+  );
+
+  const handleNoteChange = (val: string) => {
+    setTeacherNotes(val);
+    debouncedSaveNotes(val);
+  };
+
+  // Fetch announcements for the pinned banner
+  const { data: announcementsData } = useList<Announcement>({
+    resource: "announcements",
+    filters: [{ field: "classId", operator: "eq", value: classId }],
+    sorters: [{ field: "isPinned", order: "desc" }],
+    queryOptions: {
+      enabled: !!classId,
+    }
+  });
+
+  const announcements = announcementsData?.data ?? [];
+
   // Initialize live indicator from DB
   useEffect(() => {
-      if (aClass) {
-          setIsLiveIndicator(!!aClass.isLive);
-      }
+    if (aClass) {
+      setIsLiveIndicator(!!aClass.isLive);
+    }
   }, [aClass]);
+
+  // Load dismissed announcements from localStorage
+  useEffect(() => {
+    if (identity?.id) {
+      const dismissed = localStorage.getItem(`dismissed_announcements_${identity.id}`);
+      if (dismissed) setDismissedAnnouncements(JSON.parse(dismissed));
+    }
+  }, [identity?.id]);
+
+  const handleDismissAnnouncement = (id: number) => {
+    const updated = [...dismissedAnnouncements, id];
+    setDismissedAnnouncements(updated);
+    localStorage.setItem(
+      `dismissed_announcements_${identity?.id}`,
+      JSON.stringify(updated),
+    );
+  };
 
   // --- REAL-TIME LIVE INDICATOR ---
   useEffect(() => {
     if (!identity?.id || !classId) return;
 
-    const socketUrl = import.meta.env.VITE_SOCKET_URL || import.meta.env.VITE_API_URL.replace("/api", "");
-    const socket = io(socketUrl, {
+    const socket = io(SOCKET_URL, {
       query: { userId: identity.id },
       withCredentials: true,
     });
@@ -134,17 +235,19 @@ const ClassesShow = () => {
   }, [identity?.id, classId]);
 
   const allEnrollments = aClass?.enrollments ?? [];
-  const approvedEnrollments = allEnrollments.filter(e => e.status === "approved");
-  const pendingEnrollments = allEnrollments.filter(e => e.status === "pending");
+  const approvedEnrollments = allEnrollments.filter(
+    (e) => e.status === "approved",
+  );
+  const pendingEnrollments = allEnrollments.filter(
+    (e) => e.status === "pending",
+  );
   const assignments = aClass?.assignments ?? [];
 
-  const { mutate: deleteMutation, mutation: deleteMutationResult } = useDelete();
+  const { mutate: deleteMutation, mutation: deleteMutationResult } =
+    useDelete();
   const { mutate: updateEnrollment } = useUpdate();
+  const { mutate: createMutation } = useCreate();
   const isDeleting = deleteMutationResult.isPending;
-
-  const isAdmin = identity?.role === UserRole.ADMIN;
-  const isTeacher = identity?.role === UserRole.TEACHER;
-  const isStaff = isAdmin || isTeacher;
 
   const handleCopyInviteCode = () => {
     if (aClass?.inviteCode) {
@@ -155,20 +258,45 @@ const ClassesShow = () => {
     }
   };
 
-  const handleEnrollmentAction = (id: number, status: "approved" | "rejected") => {
-    updateEnrollment({
-      resource: "enrollments",
-      id: `${id}/status`,
-      values: { status },
-    }, {
-      onSuccess: () => {
-        toast.success(`Student enrollment ${status}`);
-        void refetch();
+  const handleEnrollmentAction = (
+    id: number,
+    status: "approved" | "rejected",
+  ) => {
+    updateEnrollment(
+      {
+        resource: "enrollments",
+        id: `${id}/status`,
+        values: { status },
       },
-      onError: (error: any) => {
-        toast.error(error?.data?.message || "Failed to update enrollment");
-      }
-    });
+      {
+        onSuccess: () => {
+          toast.success(`Student enrollment ${status}`);
+          void refetch();
+        },
+        onError: (error: any) => {
+          toast.error(error?.data?.message || "Failed to update enrollment");
+        },
+      },
+    );
+  };
+
+  const handleMessageAll = () => {
+    createMutation(
+      {
+        resource: `classes/${classId}/message-all`,
+        values: bulkMessage,
+      },
+      {
+        onSuccess: () => {
+          toast.success("Bulk message processing started in background");
+          setIsMessageAllOpen(false);
+          setBulkMessage({ title: "", message: "" });
+        },
+        onError: (error: any) => {
+          toast.error(error?.data?.message || "Failed to send message");
+        },
+      },
+    );
   };
 
   const columns = useMemo<ColumnDef<Enrollment>[]>(
@@ -212,7 +340,12 @@ const ClassesShow = () => {
                 variant="outline"
                 size="sm"
                 className="h-8 gap-2 border-ai-primary/20 hover:bg-ai-primary/5 text-ai-primary"
-                onClick={() => setInsightTarget({ id: row.original.student.id, name: row.original.student.name })}
+                onClick={() =>
+                  setInsightTarget({
+                    id: row.original.student.id,
+                    name: row.original.student.name,
+                  })
+                }
               >
                 <Sparkles className="h-3.5 w-3.5" />
                 AI Insight
@@ -243,6 +376,11 @@ const ClassesShow = () => {
   const enrolledStudentIds = useMemo(
     () => approvedEnrollments.map((e: Enrollment) => e.student.id),
     [approvedEnrollments],
+  );
+
+  const existingTeacherIds = useMemo(
+    () => aClass?.teachers?.map((t) => t.teacher.id) ?? [],
+    [aClass?.teachers],
   );
 
   const handleConfirmUnenroll = () => {
@@ -276,87 +414,274 @@ const ClassesShow = () => {
     );
   }
 
+  const classColor = (aClass as any).color || "#3b82f6";
+
+  const pinnedAnnouncements = announcements.filter(
+    (a) => a.isPinned && !dismissedAnnouncements.includes(a.id),
+  );
+
   return (
     <>
       <ShowView className="class-view class-show space-y-6">
-        <ShowViewHeader resource="classes" title={aClass.name} />
+        {pinnedAnnouncements.length > 0 && (
+          <div className="space-y-3">
+            {pinnedAnnouncements.map((announcement) => (
+              <div
+                key={announcement.id}
+                className="relative bg-primary/10 border border-primary/20 rounded-lg p-4 pr-12 animate-in fade-in slide-in-from-top-2"
+              >
+                <div className="flex items-center gap-2 mb-1">
+                  <Pin className="h-4 w-4 text-primary" />
+                  <span className="font-semibold text-sm text-primary uppercase tracking-wider">
+                    Pinned Announcement
+                  </span>
+                </div>
+                <h4 className="font-bold text-lg">{announcement.title}</h4>
+                <p className="text-sm mt-1 line-clamp-2">{announcement.content}</p>
+                {announcement.fileUrl && (
+                  <a
+                    href={announcement.fileUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 mt-2 text-xs text-primary hover:underline"
+                  >
+                    <Paperclip className="h-3 w-3" />
+                    View Attachment
+                  </a>
+                )}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute top-2 right-2 h-8 w-8"
+                  onClick={() => handleDismissAnnouncement(announcement.id)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div
+          className="h-32 w-full rounded-2xl mb-6 flex items-end p-6 relative overflow-hidden"
+          style={{ backgroundColor: classColor }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+          <div className="relative z-10">
+            <h1 className="text-3xl font-bold text-white">{aClass.name}</h1>
+            <p className="text-white/80 text-sm">{aClass.subject?.name}</p>
+          </div>
+        </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <ScrollArea className="w-full whitespace-nowrap rounded-md border bg-muted/50 p-1">
             <TabsList className="inline-flex h-9 w-max items-center justify-center rounded-lg p-1 text-muted-foreground">
-              <TabsTrigger value="curriculum" className="px-3 py-1.5">
+              <TabsTrigger
+                value="curriculum"
+                className={cn(
+                  "px-3 py-1.5",
+                  activeTab === "curriculum" && "text-white",
+                )}
+                style={
+                  activeTab === "curriculum"
+                    ? { backgroundColor: classColor }
+                    : {}
+                }
+              >
                 <div className="flex items-center gap-2">
                   <LayoutGrid className="h-4 w-4" />
                   <span>Curriculum</span>
                 </div>
               </TabsTrigger>
               {isStaff && (
-                <TabsTrigger value="analytics" className="px-3 py-1.5">
+                <TabsTrigger
+                  value="analytics"
+                  className={cn(
+                    "px-3 py-1.5",
+                    activeTab === "analytics" && "text-white",
+                  )}
+                  style={
+                    activeTab === "analytics"
+                      ? { backgroundColor: classColor }
+                      : {}
+                  }
+                >
                   <div className="flex items-center gap-2">
-                    <BarChart3 className="h-4 w-4 text-primary" />
+                    <BarChart3 className="h-4 w-4" />
                     <span>Analytics</span>
                   </div>
                 </TabsTrigger>
               )}
-              <TabsTrigger value="live" className="px-3 py-1.5">
+              <TabsTrigger
+                value="live"
+                className={cn(
+                  "px-3 py-1.5",
+                  activeTab === "live" && "text-white",
+                )}
+                style={
+                  activeTab === "live" ? { backgroundColor: classColor } : {}
+                }
+              >
                 <div className="flex items-center gap-2">
-                  <Video className="h-4 w-4 text-live-primary" />
+                  <Video className="h-4 w-4" />
                   <span>Live</span>
                   {isLiveIndicator && (
-                      <span className="flex h-2 w-2 rounded-full bg-live-primary animate-pulse" />
+                    <span className="flex h-2 w-2 rounded-full bg-white animate-pulse" />
                   )}
                 </div>
               </TabsTrigger>
-              <TabsTrigger value="leaderboard" className="px-3 py-1.5">
+              <TabsTrigger
+                value="leaderboard"
+                className={cn(
+                  "px-3 py-1.5",
+                  activeTab === "leaderboard" && "text-white",
+                )}
+                style={
+                  activeTab === "leaderboard"
+                    ? { backgroundColor: classColor }
+                    : {}
+                }
+              >
                 <div className="flex items-center gap-2">
-                  <Trophy className="h-4 w-4 text-gold-primary" />
+                  <Trophy className="h-4 w-4" />
                   <span>Leaderboard</span>
                 </div>
               </TabsTrigger>
-              <TabsTrigger value="announcements" className="px-3 py-1.5">
+              <TabsTrigger
+                value="announcements"
+                className={cn(
+                  "px-3 py-1.5",
+                  activeTab === "announcements" && "text-white",
+                )}
+                style={
+                  activeTab === "announcements"
+                    ? { backgroundColor: classColor }
+                    : {}
+                }
+              >
                 <div className="flex items-center gap-2">
                   <Megaphone className="h-4 w-4" />
                   <span>Announcements</span>
                 </div>
               </TabsTrigger>
-              <TabsTrigger value="discussions" className="px-3 py-1.5">
+              <TabsTrigger
+                value="discussions"
+                className={cn(
+                  "px-3 py-1.5",
+                  activeTab === "discussions" && "text-white",
+                )}
+                style={
+                  activeTab === "discussions"
+                    ? { backgroundColor: classColor }
+                    : {}
+                }
+              >
                 <div className="flex items-center gap-2">
                   <MessageSquare className="h-4 w-4" />
                   <span>Discussions</span>
                 </div>
               </TabsTrigger>
-              <TabsTrigger value="resources" className="px-3 py-1.5">
+              <TabsTrigger
+                value="resources"
+                className={cn(
+                  "px-3 py-1.5",
+                  activeTab === "resources" && "text-white",
+                )}
+                style={
+                  activeTab === "resources"
+                    ? { backgroundColor: classColor }
+                    : {}
+                }
+              >
                 <div className="flex items-center gap-2">
                   <Library className="h-4 w-4" />
                   <span>Resources</span>
                 </div>
               </TabsTrigger>
-              <TabsTrigger value="students" className="px-3 py-1.5">
+              <TabsTrigger
+                value="students"
+                className={cn(
+                  "px-3 py-1.5",
+                  activeTab === "students" && "text-white",
+                )}
+                style={
+                  activeTab === "students"
+                    ? { backgroundColor: classColor }
+                    : {}
+                }
+              >
                 <div className="flex items-center gap-2">
                   <Users className="h-4 w-4" />
                   <span>Students</span>
                   {isStaff && pendingEnrollments.length > 0 && (
-                    <Badge variant="destructive" className="h-4 w-4 p-0 flex items-center justify-center text-[10px]">
+                    <Badge
+                      variant="destructive"
+                      className="h-4 w-4 p-0 flex items-center justify-center text-[10px]"
+                    >
                       {pendingEnrollments.length}
                     </Badge>
                   )}
                 </div>
               </TabsTrigger>
-              <TabsTrigger value="assignments" className="px-3 py-1.5">Assignments</TabsTrigger>
-              <TabsTrigger value="quizzes" className="px-3 py-1.5">
+              <TabsTrigger
+                value="assignments"
+                className={cn(
+                  "px-3 py-1.5",
+                  activeTab === "assignments" && "text-white",
+                )}
+                style={
+                  activeTab === "assignments"
+                    ? { backgroundColor: classColor }
+                    : {}
+                }
+              >
+                Assignments
+              </TabsTrigger>
+              <TabsTrigger
+                value="quizzes"
+                className={cn(
+                  "px-3 py-1.5",
+                  activeTab === "quizzes" && "text-white",
+                )}
+                style={
+                  activeTab === "quizzes" ? { backgroundColor: classColor } : {}
+                }
+              >
                 <div className="flex items-center gap-2">
                   <FileQuestion className="h-4 w-4" />
                   <span>Quizzes</span>
                 </div>
               </TabsTrigger>
-              <TabsTrigger value="attendance" className="px-3 py-1.5">
+              <TabsTrigger
+                value="attendance"
+                className={cn(
+                  "px-3 py-1.5",
+                  activeTab === "attendance" && "text-white",
+                )}
+                style={
+                  activeTab === "attendance"
+                    ? { backgroundColor: classColor }
+                    : {}
+                }
+              >
                 <div className="flex items-center gap-2">
                   <ClipboardCheck className="h-4 w-4" />
                   <span>Attendance</span>
                 </div>
               </TabsTrigger>
               {isStaff && (
-                <TabsTrigger value="details" className="px-3 py-1.5">
+                <TabsTrigger
+                  value="details"
+                  className={cn(
+                    "px-3 py-1.5",
+                    activeTab === "details" && "text-white",
+                  )}
+                  style={
+                    activeTab === "details"
+                      ? { backgroundColor: classColor }
+                      : {}
+                  }
+                >
                   <div className="flex items-center gap-2">
                     <Info className="h-4 w-4" />
                     <span>Details</span>
@@ -413,30 +738,52 @@ const ClassesShow = () => {
                   <CardContent>
                     <div className="space-y-4">
                       {pendingEnrollments.map((enrollment) => (
-                        <div key={enrollment.id} className="flex items-center justify-between p-3 bg-background rounded-lg border">
+                        <div
+                          key={enrollment.id}
+                          className="flex items-center justify-between p-3 bg-background rounded-lg border"
+                        >
                           <div className="flex items-center gap-3">
                             <Avatar className="h-10 w-10">
-                              <AvatarImage src={enrollment.student.image ?? ""} />
-                              <AvatarFallback>{enrollment.student.name?.[0]}</AvatarFallback>
+                              <AvatarImage
+                                src={enrollment.student.image ?? ""}
+                              />
+                              <AvatarFallback>
+                                {enrollment.student.name?.[0]}
+                              </AvatarFallback>
                             </Avatar>
                             <div>
-                              <p className="font-medium">{enrollment.student.name}</p>
-                              <p className="text-xs text-muted-foreground">{enrollment.student.email}</p>
+                              <p className="font-medium">
+                                {enrollment.student.name}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {enrollment.student.email}
+                              </p>
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
-                            <Button 
-                              size="sm" 
-                              variant="outline" 
+                            <Button
+                              size="sm"
+                              variant="outline"
                               className="text-destructive hover:bg-destructive/5"
-                              onClick={() => handleEnrollmentAction(enrollment.id, "rejected")}
+                              onClick={() =>
+                                handleEnrollmentAction(
+                                  enrollment.id,
+                                  "rejected",
+                                )
+                              }
                             >
                               <XCircle className="h-4 w-4 mr-2" />
                               Reject
                             </Button>
-                            <Button 
-                              size="sm" 
-                              onClick={() => handleEnrollmentAction(enrollment.id, "approved")}
+                            <Button
+                              size="sm"
+                              onClick={() =>
+                                handleEnrollmentAction(
+                                  enrollment.id,
+                                  "approved",
+                                )
+                              }
+                              style={{ backgroundColor: classColor }}
                             >
                               <CheckCircle2 className="h-4 w-4 mr-2" />
                               Approve
@@ -454,14 +801,58 @@ const ClassesShow = () => {
                   <div>
                     <CardTitle>Enrolled Students</CardTitle>
                     <CardDescription>
-                      {approvedEnrollments.length} of {aClass.capacity} spots filled
+                      {approvedEnrollments.length} of {aClass.capacity} spots
+                      filled
                     </CardDescription>
                   </div>
                   {isStaff && (
-                    <Button onClick={() => setIsEnrollDialogOpen(true)}>
-                      <PlusCircle className="h-4 w-4 mr-2" />
-                      Enroll Student
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <Dialog open={isMessageAllOpen} onOpenChange={setIsMessageAllOpen}>
+                        <DialogTrigger asChild>
+                          <Button variant="outline">
+                            <Send className="h-4 w-4 mr-2" />
+                            Message All
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Message All Students</DialogTitle>
+                            <DialogDescription>
+                              Send a notification to all enrolled students in this class.
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div className="space-y-4 py-4">
+                            <div className="space-y-2">
+                              <label className="text-sm font-medium">Title</label>
+                              <Input
+                                placeholder="Notification Title"
+                                value={bulkMessage.title}
+                                onChange={(e) => setBulkMessage({ ...bulkMessage, title: e.target.value })}
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <label className="text-sm font-medium">Message</label>
+                              <Textarea
+                                placeholder="Type your message here..."
+                                value={bulkMessage.message}
+                                onChange={(e) => setBulkMessage({ ...bulkMessage, message: e.target.value })}
+                              />
+                            </div>
+                          </div>
+                          <DialogFooter>
+                            <Button variant="outline" onClick={() => setIsMessageAllOpen(false)}>Cancel</Button>
+                            <Button onClick={handleMessageAll} disabled={!bulkMessage.title || !bulkMessage.message}>Send Message</Button>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
+                      <Button
+                        onClick={() => setIsEnrollDialogOpen(true)}
+                        style={{ backgroundColor: classColor }}
+                      >
+                        <PlusCircle className="h-4 w-4 mr-2" />
+                        Enroll Student
+                      </Button>
+                    </div>
                   )}
                 </CardHeader>
                 <CardContent>
@@ -479,78 +870,164 @@ const ClassesShow = () => {
             </TabsContent>
 
             <TabsContent value="attendance">
-              <AttendanceTab classId={classId} enrollments={approvedEnrollments} />
+              <AttendanceTab
+                classId={classId}
+                enrollments={approvedEnrollments}
+              />
             </TabsContent>
 
             {isStaff && (
               <TabsContent value="details">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Class Information</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Subject</span>
-                        <span className="font-medium">
-                          {aClass?.subject?.name ?? "N/A"}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Status</span>
-                        <Badge variant="default" className="capitalize">
-                          {aClass.status}
-                        </Badge>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Capacity</span>
-                        <span className="font-medium">
-                          {aClass.capacity} Students
-                        </span>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Class Information</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Subject</span>
+                          <span className="font-medium">
+                            {aClass?.subject?.name ?? "N/A"}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Status</span>
+                          <Badge
+                            variant="default"
+                            className="capitalize"
+                            style={{ backgroundColor: classColor }}
+                          >
+                            {aClass.status}
+                          </Badge>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Capacity</span>
+                          <span className="font-medium">
+                            {aClass.capacity} Students
+                          </span>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-ai-primary/20 bg-ai-primary/5">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <StickyNote className="h-5 w-5 text-ai-primary" />
+                          Teacher Notes (Shared)
+                        </CardTitle>
+                        <CardDescription>
+                          Private scratchpad for staff. Visible to all teachers in this class.
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        {isLoadingNotes ? (
+                          <div className="flex justify-center py-8">
+                            <Loader2 className="h-6 w-6 animate-spin text-ai-primary" />
+                          </div>
+                        ) : (
+                          <Textarea
+                            placeholder="Jot down reminders, lesson ideas, or student observations..."
+                            className="min-h-[200px] bg-background/50"
+                            value={teacherNotes}
+                            onChange={(e) => handleNoteChange(e.target.value)}
+                          />
+                        )}
+                      </CardContent>
+                    </Card>
+                  </div>
 
                   <Card className="border-primary/20">
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Megaphone className="h-5 w-5 text-primary" />
-                        Student Access
-                      </CardTitle>
-                      <CardDescription>
-                        Share this code with students so they can join the class.
-                      </CardDescription>
+                    <CardHeader className="flex flex-row items-center justify-between">
+                      <div className="space-y-1">
+                        <CardTitle className="flex items-center gap-2">
+                          <Megaphone
+                            className="h-5 w-5"
+                            style={{ color: classColor }}
+                          />
+                          Student Access
+                        </CardTitle>
+                        <CardDescription>
+                          Share this code with students so they can join the
+                          class.
+                        </CardDescription>
+                      </div>
+                      {isOwner && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setIsInviteDialogOpen(true)}
+                        >
+                          <UserPlus className="h-4 w-4 mr-2" />
+                          Invite Co-Teacher
+                        </Button>
+                      )}
                     </CardHeader>
                     <CardContent className="space-y-6">
-                      <div className="flex items-center justify-between p-4 bg-primary/5 rounded-xl border border-primary/10">
+                      <div
+                        className="flex items-center justify-between p-4 rounded-xl border"
+                        style={{
+                          backgroundColor: `${classColor}10`,
+                          borderColor: `${classColor}30`,
+                        }}
+                      >
                         <div className="space-y-1">
-                          <p className="text-xs font-medium text-primary uppercase tracking-wider">Invite Code</p>
-                          <p className="text-2xl font-bold font-mono tracking-widest">{aClass.inviteCode}</p>
+                          <p
+                            className="text-xs font-medium uppercase tracking-wider"
+                            style={{ color: classColor }}
+                          >
+                            Invite Code
+                          </p>
+                          <p className="text-2xl font-bold font-mono tracking-widest">
+                            {aClass.inviteCode}
+                          </p>
                         </div>
-                        <Button 
-                          variant="outline" 
-                          size="icon" 
+                        <Button
+                          variant="outline"
+                          size="icon"
                           className="h-12 w-12 rounded-full"
                           onClick={handleCopyInviteCode}
                         >
-                          {copied ? <Check className="h-5 w-5 text-success" /> : <Copy className="h-5 w-5" />}
+                          {copied ? (
+                            <Check className="h-5 w-5 text-success" />
+                          ) : (
+                            <Copy className="h-5 w-5" />
+                          )}
                         </Button>
                       </div>
-                      
+
                       <div className="space-y-2">
                         <p className="text-sm font-medium">Teachers</p>
                         <div className="space-y-2">
                           {aClass.teachers?.map((tc) => (
-                            <div key={tc.teacher.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted transition-colors">
+                            <div
+                              key={tc.teacher.id}
+                              className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted transition-colors"
+                            >
                               <Avatar className="h-8 w-8">
                                 <AvatarImage src={tc.teacher.image ?? ""} />
-                                <AvatarFallback>{tc.teacher.name?.[0]}</AvatarFallback>
+                                <AvatarFallback>
+                                  {tc.teacher.name?.[0]}
+                                </AvatarFallback>
                               </Avatar>
                               <div className="flex-1">
-                                <p className="text-sm font-medium">{tc.teacher.name}</p>
-                                <p className="text-[10px] text-muted-foreground">{tc.isPrimary ? "Primary Teacher" : "Co-Teacher"}</p>
+                                <p className="text-sm font-medium">
+                                  {tc.teacher.name}
+                                </p>
+                                <p className="text-[10px] text-muted-foreground">
+                                  {tc.isPrimary
+                                    ? "Primary Teacher"
+                                    : "Co-Teacher"}
+                                </p>
                               </div>
-                              {tc.isPrimary && <Badge variant="secondary" className="text-[10px]">Primary</Badge>}
+                              {tc.isPrimary && (
+                                <Badge
+                                  variant="secondary"
+                                  className="text-[10px]"
+                                >
+                                  Primary
+                                </Badge>
+                              )}
                             </div>
                           ))}
                         </div>
@@ -596,6 +1073,13 @@ const ClassesShow = () => {
             enrolledStudentIds={enrolledStudentIds}
           />
 
+          <InviteTeacherDialog
+            classId={classId}
+            isOpen={isInviteDialogOpen}
+            onOpenChange={setIsInviteDialogOpen}
+            existingTeacherIds={existingTeacherIds}
+          />
+
           <AIStudentInsightModal
             isOpen={insightTarget !== null}
             onClose={() => setInsightTarget(null)}
@@ -606,8 +1090,8 @@ const ClassesShow = () => {
         </>
       )}
 
-      <AIStudyBuddy 
-        subject={aClass.subject?.name} 
+      <AIStudyBuddy
+        subject={aClass.subject?.name}
         topic={aClass.name}
         classId={classId}
       />

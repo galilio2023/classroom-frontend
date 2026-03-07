@@ -144,9 +144,12 @@ export interface Announcement {
   classId: number;
   authorId: string;
   isPinned: boolean;
+  fileUrl?: string | null;
+  fileCldPubId?: string | null;
   author?: User;
   createdAt: string;
   updatedAt: string;
+  isRead?: boolean;
 }
 
 export interface Progress {
@@ -181,7 +184,17 @@ export type Class = z.infer<typeof classFormSchema> & {
   isLive?: boolean;
 };
 
-export type ClassListItem = Pick<Class, "id" | "name" | "status" | "capacity" | "bannerUrl" | "teachers" | "schedules"> & {
+export type ClassListItem = Pick<
+  Class,
+  | "id"
+  | "name"
+  | "status"
+  | "capacity"
+  | "bannerUrl"
+  | "teachers"
+  | "schedules"
+  | "isLive"
+> & {
   subject?: {
     name: string;
     department?: {

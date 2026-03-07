@@ -1,15 +1,15 @@
 import { useList, useCreate, useDelete, useGetIdentity, useCustomMutation } from "@refinedev/core";
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { Discussion, User } from "@/types";
 import { Loader2, Send, Sparkles, X, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 import { io } from "socket.io-client";
-import ReactMarkdown from "react-markdown";
 import { ChatBubble } from "@/components/classes/chat-bubble";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { cn } from "@/lib/utils";
+import { MarkdownRenderer } from "@/components/ui/markdown-renderer";
+import { RichTextEditor } from "@/components/ui/rich-text-editor";
+import { SOCKET_URL } from "@/config";
 
 interface DiscussionTabProps {
   classId: string;
@@ -51,7 +51,7 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
 
   useEffect(() => {
     if (!identity?.id || !classId) return;
-    const socket = io(import.meta.env.VITE_API_URL.replace("/api", ""), {
+    const socket = io(SOCKET_URL, {
       query: { userId: identity.id, classId },
     });
     socket.on("new_discussion", () => { void refetch(); });
@@ -60,7 +60,7 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
   }, [identity?.id, classId, refetch]);
 
   const handlePost = () => {
-    if (!newPost.trim()) return;
+    if (!newPost.trim() || newPost === "<p></p>") return;
     createPost(
       {
         resource: "discussions",
@@ -126,9 +126,7 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
           <Button variant="ghost" size="icon" onClick={() => setSummary(null)} className="absolute top-2 right-2 h-6 w-6">
             <X className="h-3 w-3" />
           </Button>
-          <div className="prose prose-xs dark:prose-invert max-w-none">
-            <ReactMarkdown>{summary}</ReactMarkdown>
-          </div>
+          <MarkdownRenderer content={summary} />
         </div>
       )}
 
@@ -166,7 +164,7 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
             <div className="flex items-center gap-2 overflow-hidden">
               <div className="w-1 h-6 bg-primary rounded-full shrink-0" />
               <p className="text-[10px] truncate italic text-muted-foreground">
-                Replying to <span className="font-bold text-foreground">{replyingToPost?.user.name}</span>: "{replyingToPost?.content}"
+                Replying to <span className="font-bold text-foreground">{replyingToPost?.user.name}</span>: "{replyingToPost?.content.replace(/<[^>]*>/g, '')}"
               </p>
             </div>
             <Button variant="ghost" size="icon" onClick={() => setReplyTo(null)} className="h-5 w-5">
@@ -176,23 +174,19 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
         )}
         
         <div className="flex gap-2 items-end">
-          <Textarea 
-            placeholder={replyTo ? "Write your reply..." : "Message your class..."}
-            value={newPost}
-            onChange={(e) => setNewPost(e.target.value)}
-            className="min-h-[40px] md:min-h-[44px] max-h-[100px] md:max-h-[120px] bg-muted/50 border-none focus-visible:ring-1 focus-visible:ring-primary/30 resize-none py-2.5 md:py-3 rounded-xl text-sm"
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                handlePost();
-              }
-            }}
-          />
+          <div className="flex-1">
+            <RichTextEditor 
+              value={newPost}
+              onChange={setNewPost}
+              placeholder={replyTo ? "Write your reply..." : "Message your class..."}
+              className="min-h-[80px]"
+            />
+          </div>
           <Button 
             size="icon" 
             onClick={handlePost} 
-            disabled={!newPost.trim() || mutation.isPending}
-            className="h-10 w-10 md:h-11 md:w-11 shrink-0 rounded-xl shadow-lg shadow-primary/20"
+            disabled={!newPost.trim() || newPost === "<p></p>" || mutation.isPending}
+            className="h-10 w-10 md:h-11 md:w-11 shrink-0 rounded-xl shadow-lg shadow-primary/20 mb-1"
           >
             <Send className="h-4 w-4 md:h-5 md:w-5" />
           </Button>

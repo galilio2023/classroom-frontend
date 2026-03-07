@@ -36,13 +36,15 @@ import {
   Bell,
   TrendingUp,
   Activity,
-  UserCircle
+  UserCircle,
+  CalendarDays
 } from "lucide-react";
 import { Layout } from "@/components/refine-ui/layout/layout.tsx";
 import { AuthorizedRoute } from "./components/authorized-route";
 import React, { Suspense, useEffect, useState } from "react";
 import { User, UserRole } from "@/types";
 import { ErrorComponent } from "./components/refine-ui/layout/error-component";
+import { OfflineBanner } from "./components/offline-banner";
 
 // Lazy Load Pages
 const Dashboard = React.lazy(() => import("@/pages/dashboard.tsx"));
@@ -71,6 +73,7 @@ const AssignmentsList = React.lazy(() => import("@/pages/assignments/list-page.t
 const AssignmentCreate = React.lazy(() => import("./pages/assignments/create").then(module => ({ default: module.AssignmentCreate })));
 const AssignmentShow = React.lazy(() => import("./pages/assignments/show"));
 const SubmissionsList = React.lazy(() => import("@/pages/submissions/list-page.tsx"));
+const SubmissionShow = React.lazy(() => import("@/pages/submissions/show.tsx"));
 const AttendanceList = React.lazy(() => import("@/pages/attendance/list.tsx"));
 const QuizzesList = React.lazy(() => import("@/pages/quizzes/list.tsx"));
 const ModulesList = React.lazy(() => import("@/pages/modules/list.tsx"));
@@ -82,6 +85,7 @@ const AIAssistantPage = React.lazy(() => import("./pages/ai-assistant"));
 const AIStudyLab = React.lazy(() => import("./pages/ai-study-lab"));
 const CalendarPage = React.lazy(() => import("./pages/calendar"));
 const ActivityLogPage = React.lazy(() => import("@/pages/dashboard/activity-log.tsx"));
+const StudyPlanner = React.lazy(() => import("@/pages/study-planner.tsx"));
 
 // Quiz Pages
 const QuizCreate = React.lazy(() => import("./pages/quizzes/create"));
@@ -219,6 +223,15 @@ function App() {
                   },
                 },
                 {
+                  name: "study-planner",
+                  list: "/study-planner",
+                  meta: { 
+                    label: "Study Planner", 
+                    icon: <CalendarDays />,
+                    hide: !isStudent 
+                  },
+                },
+                {
                   name: "ai-assistant",
                   list: "/ai-assistant",
                   meta: { 
@@ -312,6 +325,7 @@ function App() {
                 {
                   name: "submissions",
                   list: "/submissions",
+                  show: "/submissions/show/:id",
                   meta: { label: "Submissions", icon: <Send /> },
                 },
                 {
@@ -353,6 +367,7 @@ function App() {
                 },
               ]}
             >
+              <OfflineBanner />
               <Suspense fallback={<Loading />}>
                 <Routes>
                   <Route
@@ -406,6 +421,14 @@ function App() {
                       element={
                         <AuthorizedRoute resource="ai-study-lab" action="list">
                           <AIStudyLab />
+                        </AuthorizedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="study-planner" 
+                      element={
+                        <AuthorizedRoute resource="study-planner" action="list">
+                          <StudyPlanner />
                         </AuthorizedRoute>
                       } 
                     />
@@ -600,6 +623,14 @@ function App() {
                         element={
                           <AuthorizedRoute resource="submissions" action="list">
                             <SubmissionsList />
+                          </AuthorizedRoute>
+                        }
+                      />
+                      <Route
+                        path="show/:id"
+                        element={
+                          <AuthorizedRoute resource="submissions" action="show">
+                            <SubmissionShow />
                           </AuthorizedRoute>
                         }
                       />

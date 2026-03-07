@@ -10,12 +10,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
 import { Submission } from "@/types";
 import { FileUpload } from "@/components/file-upload";
-import { Paperclip, Loader2 } from "lucide-react";
+import { Paperclip } from "lucide-react";
 import { FieldValues } from "react-hook-form";
 import { useGo, useInvalidate } from "@refinedev/core";
+import { LoadingButton } from "@/components/ui/loading-button";
+import { useState } from "react";
 
 const submissionSchema = z.object({
   content: z.string().min(1, "Submission content cannot be empty."),
@@ -36,6 +37,7 @@ export const SubmissionForm = ({
 }: SubmissionFormProps) => {
   const go = useGo();
   const invalidate = useInvalidate();
+  const [isSuccess, setIsSuccess] = useState(false);
 
   const form = useForm<SubmissionFormValues>({
     resolver: zodResolver(submissionSchema) as any,
@@ -47,19 +49,21 @@ export const SubmissionForm = ({
     refineCoreProps: {
       resource: "submissions",
       action: "create",
-      redirect: false, // Stop Refine from trying to find a non-existent list page
+      redirect: false,
       onMutationSuccess: () => {
-        // 1. Invalidate the cache so the UI knows data has changed
+        setIsSuccess(true);
         invalidate({
           resource: "submissions",
           invalidates: ["list"],
         });
         
-        // 2. Explicitly navigate to the current page to trigger a re-render
-        go({
-          to: `/assignments/show/${assignmentId}`,
-          type: "replace",
-        });
+        setTimeout(() => {
+          setIsSuccess(false);
+          go({
+            to: `/assignments/show/${assignmentId}`,
+            type: "replace",
+          });
+        }, 1000);
       },
     },
   });
@@ -125,18 +129,14 @@ export const SubmissionForm = ({
           )}
         </div>
 
-        <Button type="submit" disabled={formLoading} className="w-full">
-          {formLoading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Submitting...
-            </>
-          ) : existingSubmission ? (
-            "Update Submission"
-          ) : (
-            "Submit Assignment"
-          )}
-        </Button>
+        <LoadingButton 
+          type="submit" 
+          isLoading={formLoading} 
+          isSuccess={isSuccess}
+          className="w-full"
+        >
+          {existingSubmission ? "Update Submission" : "Submit Assignment"}
+        </LoadingButton>
       </form>
     </Form>
   );

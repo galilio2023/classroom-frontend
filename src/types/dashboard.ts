@@ -109,6 +109,7 @@ export interface SubjectMastery {
   subject: string;
   subjectId?: number;
   avgGrade: number;
+  trend?: number;
 }
 
 export interface AttendanceSummary {
@@ -116,6 +117,35 @@ export interface AttendanceSummary {
   absent: number;
   late: number;
   total: number;
+}
+
+export interface AssignmentCompletionTrend {
+  date: string;
+  completionRate: number; // 0-100
+  assignmentTitle: string;
+}
+
+export interface SubmissionTiming {
+  dayOfWeek: number; // 0-6 (Sun-Sat)
+  hour: number; // 0-23
+  count: number;
+}
+
+export interface StudentTrajectory {
+  studentId: string;
+  studentName: string;
+  currentGrade: number;
+  predictedGrade: number;
+  trend: { date: string; grade: number }[];
+}
+
+export interface ClassComparison {
+  classId: string;
+  className: string;
+  averageGrade: number;
+  attendanceRate: number;
+  completionRate: number;
+  studentCount: number;
 }
 
 export interface DashboardData {
@@ -129,4 +159,8 @@ export interface DashboardData {
   gradeTrends?: GradeTrend[];
   subjectMastery?: SubjectMastery[];
   attendanceSummary?: AttendanceSummary;
+  assignmentCompletionTrend?: AssignmentCompletionTrend[];
+  submissionTiming?: SubmissionTiming[];
+  studentTrajectories?: StudentTrajectory[];
+  classComparison?: ClassComparison[];
 }

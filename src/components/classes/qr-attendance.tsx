@@ -8,6 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import { io } from "socket.io-client";
 import { useCustomMutation } from "@refinedev/core";
+import { SOCKET_URL } from "@/config";
 
 interface QRAttendanceProps {
   classId: number;
@@ -39,8 +40,7 @@ export const QRAttendance = ({ classId, className }: QRAttendanceProps) => {
   useEffect(() => {
     if (!isActive) return;
 
-    const socketUrl = import.meta.env.VITE_SOCKET_URL || import.meta.env.VITE_API_URL.replace("/api", "");
-    const socket = io(socketUrl, { query: { classId }, withCredentials: true });
+    const socket = io(SOCKET_URL, { query: { classId }, withCredentials: true });
 
     socket.on("attendance_scanned", (data) => {
       setScannedCount((prev) => prev + 1);

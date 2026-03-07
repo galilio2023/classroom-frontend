@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Avatar } from "@/components/ui/avatar";
 import { Sparkles, User as UserIcon } from "lucide-react";
-import ReactMarkdown from "react-markdown";
+import { MarkdownRenderer } from "@/components/ui/markdown-renderer";
 
 interface Message {
   role: "user" | "model";
@@ -60,15 +60,15 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
       <div className={`flex flex-col gap-1.5 max-w-[85%] ${!isModel ? "items-end" : ""}`}>
         <div className={`p-4 rounded-2xl text-sm leading-relaxed shadow-sm ${
           !isModel 
-            ? "bg-primary text-primary-foreground rounded-tr-none" 
-            : "bg-card border rounded-tl-none"
+            ? "bg-card border rounded-tl-none" 
+            : "bg-primary text-primary-foreground rounded-tr-none"
         }`}>
-          <div className="prose prose-sm dark:prose-invert max-w-none">
+          <div className="max-w-none">
             {/* Optimization: Only render Markdown when typing is finished or for short texts */}
             {isTyping ? (
                 <div className="whitespace-pre-wrap">{displayedText}</div>
             ) : (
-                <ReactMarkdown>{displayedText}</ReactMarkdown>
+                <MarkdownRenderer content={displayedText} />
             )}
             {isTyping && <span className="inline-block w-1.5 h-4 ml-1 bg-primary/40 animate-pulse align-middle" />}
           </div>

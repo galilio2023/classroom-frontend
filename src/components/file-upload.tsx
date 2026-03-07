@@ -4,6 +4,7 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Loader2, Upload, File, X, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
+import { BACKEND_URL } from "@/config";
 
 interface FileUploadProps {
   onUploadSuccess: (url: string, publicId: string) => void;
@@ -53,7 +54,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     formData.append("folder", folder);
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/upload`, {
+      const response = await fetch(`${BACKEND_URL}/upload`, {
         method: "POST",
         body: formData,
         credentials: "include",
@@ -81,7 +82,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   const clearFile = async () => {
     if (uploadedPublicId) {
       try {
-        await fetch(`${import.meta.env.VITE_API_URL}/upload`, {
+        await fetch(`${BACKEND_URL}/upload`, {
           method: "DELETE",
           headers: {
             "Content-Type": "application/json",

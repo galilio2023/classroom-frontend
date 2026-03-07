@@ -20,8 +20,11 @@ import {
   ScheduleSkeleton, 
   StatsSkeleton 
 } from "@/components/dashboard/dashboard-skeletons";
+import { SOCKET_URL } from "@/config";
+import usePageTitle from "@/hooks/use-page-title";
 
 const Dashboard = () => {
+  usePageTitle("Dashboard");
   const { list, show } = useNavigation();
   const { data: identity, isLoading: isIdentityLoading, refetch: refetchIdentity } = useGetIdentity<User>();
   
@@ -68,8 +71,7 @@ const Dashboard = () => {
   // --- REAL-TIME UPDATES ---
   useEffect(() => {
     if (!identity?.id) return;
-    const socketUrl = import.meta.env.VITE_SOCKET_URL || import.meta.env.VITE_API_URL.replace("/api", "");
-    const socket = io(socketUrl, { query: { userId: identity.id }, withCredentials: true });
+    const socket = io(SOCKET_URL, { query: { userId: identity.id }, withCredentials: true });
     
     const handleRefresh = () => {
       void refetchCore();

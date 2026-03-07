@@ -1,6 +1,7 @@
 import { DataProvider, HttpError } from "@refinedev/core";
+import { BACKEND_URL } from "@/config";
 
-const BACKEND_BASE_URL = import.meta.env.VITE_API_URL;
+const BACKEND_BASE_URL = BACKEND_URL;
 
 /**
  * Helper to handle API errors and return Refine-compatible HttpError
@@ -195,8 +196,18 @@ export const dataProvider: DataProvider = {
   updateMany: async () => { throw new Error("updateMany not implemented"); },
   
   custom: async ({ url, method, payload, query, headers }) => {
-     let requestUrl = url.startsWith("/") ? `${BACKEND_BASE_URL}${url}` : url;
+     let requestUrl = url;
      
+     // If url is absolute (starts with http), use it directly
+     if (!url.startsWith("http")) {
+        // Handle relative paths
+        if (url.startsWith("/")) {
+            requestUrl = `${BACKEND_BASE_URL}${url}`;
+        } else {
+            requestUrl = `${BACKEND_BASE_URL}/${url}`;
+        }
+     }
+
      if (query) {
         const searchParams = new URLSearchParams();
         Object.entries(query).forEach(([key, value]) => {

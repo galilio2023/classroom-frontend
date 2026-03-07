@@ -1,6 +1,5 @@
 import { AccessControlProvider } from "@refinedev/core";
 import { authProvider } from "./auth";
-import { dataProvider } from "./data";
 import { User } from "@/types";
 
 export const accessControlProvider: AccessControlProvider = {
@@ -66,13 +65,11 @@ export const accessControlProvider: AccessControlProvider = {
       }
       
       // Explicitly deny other administrative resources for teachers
-      if (["departments", "profile-requests", "ai-study-lab", "activity-log"].includes(resourceName)) {
+      if (["departments", "profile-requests", "ai-study-lab", "study-planner", "activity-log"].includes(resourceName)) {
           return { can: false, reason: "Access denied." };
       }
 
       // Default for other teacher actions
-      if (action === "list" || action === "show") return { can: true };
-
       return { can: true };
     }
 
@@ -90,6 +87,7 @@ export const accessControlProvider: AccessControlProvider = {
         "quizzes", 
         "resources",
         "ai-study-lab",
+        "study-planner",
         "notifications",
         "progress"
       ];

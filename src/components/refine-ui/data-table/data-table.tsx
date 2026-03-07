@@ -6,6 +6,7 @@ import type { Column } from "@tanstack/react-table";
 import { flexRender } from "@tanstack/react-table";
 import { Loader2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 import { DataTablePagination } from "@/components/refine-ui/data-table/data-table-pagination";
 import {
@@ -114,42 +115,59 @@ export function DataTable<TData extends BaseRecord>({
             ))}
           </TableHeader>
           <TableBody className="relative">
-            {isLoading ? (
-              <>
-                {Array.from({ length: pageSize < 1 ? 5 : Math.min(pageSize, 10) }).map((_, rowIndex) => (
-                  <TableRow key={`skeleton-row-${rowIndex}`} aria-hidden="true">
-                    {getAllLeafColumns().map((column) => (
-                      <TableCell key={`skeleton-cell-${rowIndex}-${column.id}`} style={{ ...getCommonStyles({ column, isOverflowing }) }} className="py-4">
-                        <Skeleton className="h-5 w-full max-w-[150px]" />
+            <AnimatePresence mode="popLayout">
+              {isLoading ? (
+                <motion.tr
+                  key="loading-skeleton"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                >
+                  <td colSpan={columns.length}>
+                    {Array.from({ length: pageSize < 1 ? 5 : Math.min(pageSize, 10) }).map((_, rowIndex) => (
+                      <div key={`skeleton-row-${rowIndex}`} className="flex border-b last:border-0">
+                        {getAllLeafColumns().map((column) => (
+                          <div key={`skeleton-cell-${rowIndex}-${column.id}`} style={{ width: column.getSize() }} className="py-4 px-4">
+                            <Skeleton className="h-5 w-full max-w-[150px]" />
+                          </div>
+                        ))}
+                      </div>
+                    ))}
+                  </td>
+                </motion.tr>
+              ) : getRowModel().rows?.length ? (
+                getRowModel().rows.map((row, index) => (
+                  <motion.tr
+                    key={row.original?.id ?? row.id}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.03, duration: 0.2 }}
+                    className={cn(
+                      "group border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted",
+                      onRowClick && "cursor-pointer"
+                    )}
+                    onClick={() => onRowClick?.(row.original)}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell 
+                        key={cell.id} 
+                        className="whitespace-nowrap py-4"
+                        style={{ ...getCommonStyles({ column: cell.column, isOverflowing }) }}
+                      >
+                        <motion.div 
+                          whileHover={onRowClick ? { x: 4 } : {}}
+                          className="max-w-[400px] truncate"
+                        >
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </motion.div>
                       </TableCell>
                     ))}
-                  </TableRow>
-                ))}
-              </>
-            ) : getRowModel().rows?.length ? (
-              getRowModel().rows.map((row) => (
-                <TableRow 
-                    key={row.original?.id ?? row.id} 
-                    data-state={row.getIsSelected() && "selected"}
-                    onClick={() => onRowClick?.(row.original)}
-                    isClickable={!!onRowClick}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell 
-                      key={cell.id} 
-                      className="whitespace-nowrap py-4"
-                      style={{ ...getCommonStyles({ column: cell.column, isOverflowing }) }}
-                    >
-                      <div className="max-w-[400px] truncate">
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </div>
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
-              <DataTableNoData isOverflowing={isOverflowing} columnsLength={columns.length} />
-            )}
+                  </motion.tr>
+                ))
+              ) : (
+                <DataTableNoData isOverflowing={isOverflowing} columnsLength={columns.length} />
+              )}
+            </AnimatePresence>
           </TableBody>
         </Table>
       </div>

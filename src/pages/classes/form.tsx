@@ -23,9 +23,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { BookOpen, Calendar, Plus, Trash2, Clock } from "lucide-react";
+import { BookOpen, Calendar, Plus, Trash2, Clock, Check } from "lucide-react";
 import { UseFormReturn, FieldArrayWithId, UseFieldArrayAppend, UseFieldArrayRemove } from "react-hook-form";
 import { ClassStatus } from "@/types";
+import { cn } from "@/lib/utils";
 
 interface ClassFormProps {
   form: UseFormReturn<any>;
@@ -36,6 +37,17 @@ interface ClassFormProps {
   formLoading: boolean;
   isEdit?: boolean;
 }
+
+const PRESET_COLORS = [
+  "#3b82f6", // Blue
+  "#ef4444", // Red
+  "#10b981", // Emerald
+  "#f59e0b", // Amber
+  "#8b5cf6", // Violet
+  "#ec4899", // Pink
+  "#06b6d4", // Cyan
+  "#71717a", // Zinc
+];
 
 export const ClassForm = ({ 
   form, 
@@ -114,6 +126,35 @@ export const ClassForm = ({
                       ))}
                     </SelectContent>
                   </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="color"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Class Theme Color</FormLabel>
+                  <FormControl>
+                    <div className="flex flex-wrap gap-2 pt-1">
+                      {PRESET_COLORS.map((color) => (
+                        <button
+                          key={color}
+                          type="button"
+                          className={cn(
+                            "h-8 w-8 rounded-full border-2 transition-all hover:scale-110 flex items-center justify-center",
+                            field.value === color ? "border-foreground scale-110" : "border-transparent"
+                          )}
+                          style={{ backgroundColor: color }}
+                          onClick={() => field.onChange(color)}
+                        >
+                          {field.value === color && <Check className="h-4 w-4 text-white" />}
+                        </button>
+                      ))}
+                    </div>
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}

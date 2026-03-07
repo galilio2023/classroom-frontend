@@ -10,10 +10,9 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { CreateView } from "@/components/refine-ui/views/create-view";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSearchParams, useLocation } from "react-router-dom";
 import { useGo, useList } from "@refinedev/core";
 import { toast } from "sonner";
@@ -32,6 +31,7 @@ import { FieldValues } from "react-hook-form";
 import { Module, Class } from "@/types";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
+import { RichTextEditor } from "@/components/ui/rich-text-editor";
 
 const assignmentSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -268,12 +268,12 @@ export const AssignmentCreate = () => {
                                     <FormItem>
                                         <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Instructions & Content</FormLabel>
                                         <FormControl>
-                                        <Textarea
-                                            id="description"
-                                            placeholder="Type your instructions here or use the AI Assistant..."
-                                            className="min-h-[400px] rounded-2xl resize-none p-6 leading-relaxed bg-muted/10 border-dashed border-2 border-border/50 focus-visible:border-primary/50 transition-colors"
-                                            {...field}
-                                        />
+                                            <RichTextEditor 
+                                                value={field.value || ""} 
+                                                onChange={field.onChange}
+                                                placeholder="Type your instructions here or use the AI Assistant..."
+                                                className="min-h-[300px]"
+                                            />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>

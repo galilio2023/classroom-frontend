@@ -2,7 +2,7 @@ import { ListView } from "@/components/refine-ui/views/list-view.tsx";
 import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb.tsx";
 import { Search, ShieldCheck, ShieldAlert, FileText, CheckCircle2, XCircle, ExternalLink, Loader2, Trash2, Pencil, Building2, UserCircle, Activity, Ban, UserCheck } from "lucide-react";
 import { Input } from "@/components/ui/input.tsx";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef } from "react";
 import {
   Select,
   SelectContent,
@@ -11,11 +11,8 @@ import {
   SelectValue,
 } from "@/components/ui/select.tsx";
 import { CreateButton } from "@/components/refine-ui/buttons/create.tsx";
-import { DataTable } from "@/components/refine-ui/data-table/data-table.tsx";
-import { useTable } from "@refinedev/react-table";
-import { useNavigation, useDelete, useGetIdentity, useUpdate } from "@refinedev/core";
+import { useNavigation, useDelete, useGetIdentity, useUpdate, useList } from "@refinedev/core";
 import { User, UserRole, UserStatus } from "@/types";
-import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import {
@@ -39,6 +36,8 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { useVirtualizer } from "@tanstack/react-virtual";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const roleVariants: Record<
   UserRole,
@@ -92,6 +91,25 @@ const UsersList = () => {
     return f;
   }, [searchQuery, selectedRole, selectedStatus, verificationFilter]);
 
+  const { data: users, isLoading } = useList<User>({
+    resource: "users",
+    pagination: { pageSize: 1000, mode: "server" },
+    filters,
+    sorters: [{ field: "createdAt", order: "desc" }],
+    meta: {
+      populate: ["department"]
+    }
+  });
+
+  const parentRef = useRef<HTMLDivElement>(null);
+
+  const rowVirtualizer = useVirtualizer({
+    count: users?.data.length || 0,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 64,
+    overscan: 5,
+  });
+
   const handleVerify = (id: string, isVerified: boolean) => {
     updateMutation({
       resource: "users",
@@ -116,193 +134,6 @@ const UsersList = () => {
       }
     });
   };
-
-  const userTable = useTable<User>({
-    columns: useMemo<ColumnDef<User>[]>(
-      () => [
-        {
-          id: "avatar",
-          size: 50,
-          header: () => null,
-          cell: ({ row }) => {
-            const user = row.original;
-            return (
-              <Avatar className="h-9 w-9 border-2 border-primary/10">
-                <AvatarImage src={user.image ?? undefined} alt={user.name} />
-                <AvatarFallback className="bg-primary/5 text-primary font-bold">
-                  {user.name.substring(0, 2).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-            );
-          },
-        },
-        {
-          accessorKey: "name",
-          size: 200,
-          header: () => <p className="column-title">Name</p>,
-          cell: ({ getValue }) => (
-            <span className="text-foreground font-bold">
-              {getValue<string>()}
-            </span>
-          ),
-        },
-        {
-          accessorKey: "email",
-          size: 250,
-          header: () => <p className="column-title">Email</p>,
-          cell: ({ getValue }) => (
-            <span className="text-muted-foreground text-xs font-medium">{getValue<string>()}</span>
-          ),
-        },
-        {
-          accessorKey: "role",
-          size: 100,
-          header: () => <p className="column-title">Role</p>,
-          cell: ({ getValue, row }) => {
-            const role = getValue<UserRole>();
-            const isVerified = row.original.isVerified;
-            return (
-              <div className="flex items-center gap-2">
-                <Badge variant={roleVariants[role] || "outline"} className="capitalize text-[10px] font-black tracking-widest px-2 h-5">
-                  {role}
-                </Badge>
-                {role === UserRole.TEACHER && (
-                  isVerified ? (
-                    <ShieldCheck className="h-4 w-4 text-green-500" />
-                  ) : (
-                    <ShieldAlert className="h-4 w-4 text-amber-500" />
-                  )
-                )}
-              </div>
-            );
-          },
-        },
-        {
-          accessorKey: "department.name",
-          header: () => <p className="column-title">Department</p>,
-          cell: ({ getValue }) => {
-            const dept = getValue<string>();
-            return dept ? (
-              <div className="flex items-center gap-1.5 text-muted-foreground">
-                <Building2 className="h-3.5 w-3.5" />
-                <span className="text-xs font-medium">{dept}</span>
-              </div>
-            ) : (
-              <span className="text-xs text-muted-foreground/50 italic">None</span>
-            );
-          }
-        },
-        {
-          accessorKey: "status",
-          header: () => <p className="column-title">Status</p>,
-          cell: ({ getValue, row }) => {
-            const status = getValue<UserStatus>() || UserStatus.ACTIVE;
-            if (!isAdmin || row.original.id === identity?.id) {
-                return (
-                    <Badge variant={statusVariants[status]} className="capitalize text-[10px] h-5 font-black tracking-widest">
-                        {status}
-                    </Badge>
-                );
-            }
-            return (
-                <Select 
-                    value={status} 
-                    onValueChange={(val) => handleStatusChange(row.original.id, val as UserStatus)}
-                    disabled={isUpdating}
-                >
-                    <SelectTrigger className={cn(
-                        "h-7 w-[110px] text-[10px] font-black uppercase tracking-widest border-none shadow-none focus:ring-0",
-                        status === UserStatus.ACTIVE ? "bg-green-500/10 text-green-600" : 
-                        status === UserStatus.SUSPENDED ? "bg-destructive/10 text-destructive" : "bg-muted text-muted-foreground"
-                    )}>
-                        <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value={UserStatus.ACTIVE} className="text-[10px] font-black uppercase tracking-widest">
-                            <div className="flex items-center gap-2">
-                                <UserCheck className="h-3 w-3" />
-                                Active
-                            </div>
-                        </SelectItem>
-                        <SelectItem value={UserStatus.SUSPENDED} className="text-[10px] font-black uppercase tracking-widest">
-                            <div className="flex items-center gap-2">
-                                <Ban className="h-3 w-3" />
-                                Suspended
-                            </div>
-                        </SelectItem>
-                        <SelectItem value={UserStatus.INACTIVE} className="text-[10px] font-black uppercase tracking-widest">
-                            <div className="flex items-center gap-2">
-                                <Activity className="h-3 w-3" />
-                                Inactive
-                            </div>
-                        </SelectItem>
-                    </SelectContent>
-                </Select>
-            );
-          }
-        },
-        {
-          id: "verification",
-          header: () => <p className="column-title">Verification</p>,
-          cell: ({ row }) => {
-            const user = row.original;
-            if (user.role !== UserRole.TEACHER) return null;
-            
-            return (
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className={cn(
-                    "h-7 text-[10px] font-black uppercase tracking-widest",
-                    user.isVerified ? "text-green-600" : "text-amber-600 bg-amber-500/5 hover:bg-amber-500/10"
-                )}
-                onClick={() => setVerificationTarget(user)}
-              >
-                {user.isVerified ? "Verified" : "Review Proof"}
-              </Button>
-            );
-          }
-        },
-        {
-          id: "actions",
-          size: 100,
-          header: () => <p className="column-title text-right pr-4">Actions</p>,
-          cell: ({ row }) => (
-            <div className="flex items-center justify-end gap-2 pr-2">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="h-8 w-8"
-                onClick={() => edit("users", row.original.id)}
-              >
-                <Pencil className="h-4 w-4" />
-              </Button>
-              {isAdmin && row.original.id !== identity?.id && (
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-                  onClick={() => setDeleteTarget(row.original.id)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              )}
-            </div>
-          ),
-        },
-      ],
-      [edit, isAdmin, identity?.id, isUpdating],
-    ),
-    refineCoreProps: {
-      resource: "users",
-      pagination: { pageSize: 10, mode: "server" },
-      filters: { permanent: filters },
-      sorters: { initial: [{ field: "createdAt", order: "desc" }] },
-      meta: {
-        populate: ["department"]
-      }
-    },
-  });
 
   const handleConfirmDelete = () => {
     if (deleteTarget) {
@@ -369,7 +200,112 @@ const UsersList = () => {
             </div>
           </div>
         </div>
-        <DataTable table={userTable} />
+        <div ref={parentRef} className="h-[600px] overflow-auto">
+          <div style={{ height: `${rowVirtualizer.getTotalSize()}px`, width: '100%', position: 'relative' }}>
+            {isLoading ? (
+              Array.from({ length: 10 }).map((_, i) => (
+                <div key={i} className="flex items-center p-4 border-b">
+                  <Skeleton className="h-9 w-9 rounded-full" />
+                  <div className="ml-4 space-y-2">
+                    <Skeleton className="h-4 w-[250px]" />
+                    <Skeleton className="h-4 w-[200px]" />
+                  </div>
+                </div>
+              ))
+            ) : (
+              rowVirtualizer.getVirtualItems().map((virtualItem) => {
+                const user = users!.data[virtualItem.index];
+                return (
+                  <div
+                    key={virtualItem.key}
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: `${virtualItem.size}px`,
+                      transform: `translateY(${virtualItem.start}px)`,
+                    }}
+                    className="flex items-center p-4 border-b"
+                  >
+                    <Avatar className="h-9 w-9 border-2 border-primary/10">
+                      <AvatarImage src={user.image ?? undefined} alt={user.name} />
+                      <AvatarFallback className="bg-primary/5 text-primary font-bold">
+                        {user.name.substring(0, 2).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="ml-4 flex-1">
+                      <span className="text-foreground font-bold">{user.name}</span>
+                      <span className="text-muted-foreground text-xs font-medium ml-4">{user.email}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge variant={roleVariants[user.role] || "outline"} className="capitalize text-[10px] font-black tracking-widest px-2 h-5">
+                        {user.role}
+                      </Badge>
+                      {user.role === UserRole.TEACHER && (
+                        user.isVerified ? (
+                          <ShieldCheck className="h-4 w-4 text-green-500" />
+                        ) : (
+                          <ShieldAlert className="h-4 w-4 text-amber-500" />
+                        )
+                      )}
+                    </div>
+                    <div className="ml-4">
+                      {user.department?.name ? (
+                        <div className="flex items-center gap-1.5 text-muted-foreground">
+                          <Building2 className="h-3.5 w-3.5" />
+                          <span className="text-xs font-medium">{user.department.name}</span>
+                        </div>
+                      ) : (
+                        <span className="text-xs text-muted-foreground/50 italic">None</span>
+                      )}
+                    </div>
+                    <div className="ml-4">
+                      <Badge variant={statusVariants[user.status]} className="capitalize text-[10px] h-5 font-black tracking-widest">
+                        {user.status}
+                      </Badge>
+                    </div>
+                    <div className="ml-4">
+                      {user.role === UserRole.TEACHER && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className={cn(
+                            "h-7 text-[10px] font-black uppercase tracking-widest",
+                            user.isVerified ? "text-green-600" : "text-amber-600 bg-amber-500/5 hover:bg-amber-500/10"
+                          )}
+                          onClick={() => setVerificationTarget(user)}
+                        >
+                          {user.isVerified ? "Verified" : "Review Proof"}
+                        </Button>
+                      )}
+                    </div>
+                    <div className="ml-4 flex items-center justify-end gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => edit("users", user.id)}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      {isAdmin && user.id !== identity?.id && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                          onClick={() => setDeleteTarget(user.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </div>
       </ListView>
 
       {/* Verification Dialog */}

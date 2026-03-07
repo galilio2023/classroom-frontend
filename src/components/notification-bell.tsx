@@ -18,6 +18,7 @@ import { io } from "socket.io-client";
 import { toast } from "sonner";
 import Confetti from "react-confetti";
 import { useWindowSize } from "react-use";
+import { SOCKET_URL } from "@/config";
 
 /**
  * Safely formats notification links to match frontend route structure.
@@ -66,10 +67,7 @@ export const NotificationBell = () => {
   useEffect(() => {
     if (!identity?.id) return;
 
-    // Use environment variable for Socket.io URL, fallback to API URL base
-    const socketUrl = import.meta.env.VITE_SOCKET_URL || import.meta.env.VITE_API_URL.replace("/api", "");
-    
-    const socket = io(socketUrl, {
+    const socket = io(SOCKET_URL, {
       query: { userId: identity.id },
       withCredentials: true, // Ensure cookies are sent for authentication
     });

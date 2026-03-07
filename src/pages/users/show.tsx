@@ -4,12 +4,15 @@ import { ShowView, ShowViewHeader } from "@/components/refine-ui/views/show-view
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { User, Mail, Phone, MapPin, Calendar, Shield, FileText, Loader2, Trophy, Zap, Award, Star, Flame, Target } from "lucide-react";
+import { User, Mail, Phone, MapPin, Calendar, Shield, FileText, Loader2, Trophy, Zap, Award, Star, Flame, Target, Share2 } from "lucide-react";
 import { User as UserType, UserRole } from "@/types";
 import { XPProgressBar } from "@/components/xp-progress-bar";
 import { getLevelProgress } from "@/lib/xp";
 import { BadgeCard, MOCK_BADGES } from "@/components/badge-card";
+import { CertificateGallery } from "@/components/certificate-gallery";
+import { toast } from "sonner";
 
 const UserShow = () => {
   const { id } = useParams();
@@ -65,6 +68,19 @@ const UserShow = () => {
                   {user.role}
                 </Badge>
               </div>
+
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="mt-4 gap-2 rounded-full"
+                onClick={() => {
+                  navigator.clipboard.writeText(window.location.href);
+                  toast.success("Profile link copied!");
+                }}
+              >
+                <Share2 className="w-3 h-3" />
+                Share Profile
+              </Button>
               
               {isStudent && (
                 <div className="w-full mt-6 space-y-4">
@@ -146,24 +162,38 @@ const UserShow = () => {
           </Card>
 
           {isStudent && (
-            <Card className="border-primary/10 shadow-md">
-              <CardHeader className="flex flex-row items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Trophy className="h-5 w-5 text-gold-primary" />
-                  <CardTitle>Badges & Achievements</CardTitle>
-                </div>
-                <Badge variant="outline" className="font-black text-[10px] uppercase tracking-widest">
-                  {MOCK_BADGES.filter(b => b.unlocked).length} / {MOCK_BADGES.length} Earned
-                </Badge>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {MOCK_BADGES.map((badge) => (
-                    <BadgeCard key={badge.id} badge={badge} />
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+            <>
+              <Card className="border-primary/10 shadow-md">
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Trophy className="h-5 w-5 text-gold-primary" />
+                    <CardTitle>Badges & Achievements</CardTitle>
+                  </div>
+                  <Badge variant="outline" className="font-black text-[10px] uppercase tracking-widest">
+                    {MOCK_BADGES.filter(b => b.unlocked).length} / {MOCK_BADGES.length} Earned
+                  </Badge>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {MOCK_BADGES.map((badge) => (
+                      <BadgeCard key={badge.id} badge={badge} />
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-primary/10 shadow-md">
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Award className="h-5 w-5 text-primary" />
+                    <CardTitle>Certificates</CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <CertificateGallery studentName={user.name} isOwner={isSelf} />
+                </CardContent>
+              </Card>
+            </>
           )}
 
           {(isSelf || isAdmin) && (

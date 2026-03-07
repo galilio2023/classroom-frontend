@@ -11,6 +11,8 @@ import { Badge } from "@/components/ui/badge";
 import { InteractiveQuiz } from "@/components/interactive-quiz";
 import { cn } from "@/lib/utils";
 import { io } from "socket.io-client";
+import { MarkdownRenderer } from "@/components/ui/markdown-renderer";
+import { SOCKET_URL } from "@/config";
 
 const AssignmentShow = () => {
   const { id } = useParams();
@@ -36,8 +38,7 @@ const AssignmentShow = () => {
   useEffect(() => {
     if (!identity?.id || identity.role === UserRole.STUDENT) return;
 
-    const socketUrl = import.meta.env.VITE_SOCKET_URL || import.meta.env.VITE_API_URL.replace("/api", "");
-    const socket = io(socketUrl, {
+    const socket = io(SOCKET_URL, {
       query: { userId: identity.id },
       withCredentials: true,
     });
@@ -120,9 +121,13 @@ const AssignmentShow = () => {
             </div>
           </CardHeader>
           <CardContent>
-            <p className={cn("whitespace-pre-wrap text-muted-foreground leading-relaxed", isQuiz && "opacity-40 blur-[0.5px] select-none italic text-xs")}>
-              {isQuiz ? "Interactive AI quiz content is active below." : assignment.description}
-            </p>
+            <div className={cn("text-muted-foreground leading-relaxed", isQuiz && "opacity-40 blur-[0.5px] select-none italic text-xs")}>
+              {isQuiz ? (
+                "Interactive AI quiz content is active below."
+              ) : (
+                <MarkdownRenderer content={assignment.description || ""} />
+              )}
+            </div>
           </CardContent>
         </Card>
 

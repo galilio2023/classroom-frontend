@@ -25,10 +25,16 @@ export function XPGainPopup() {
       }, 3000);
     };
 
+    const handleLocalXPGained = (event: any) => {
+      handleXPGained(event.detail);
+    };
+
     socket.on("xp_gained", handleXPGained);
+    window.addEventListener("xp_gained_local", handleLocalXPGained);
 
     return () => {
       socket.off("xp_gained", handleXPGained);
+      window.removeEventListener("xp_gained_local", handleLocalXPGained);
       socket.disconnect();
     };
   }, []);
