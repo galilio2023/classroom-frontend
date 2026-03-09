@@ -29,12 +29,34 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
-import { User as UserIcon, Mail, Shield, Lightbulb, Info, Phone, MapPin, FileText, Building2, Activity } from "lucide-react";
+import { 
+  User as UserIcon, 
+  Mail, 
+  Shield, 
+  Lightbulb, 
+  Info, 
+  Phone, 
+  MapPin, 
+  FileText, 
+  Building2, 
+  Activity, 
+  Pencil, 
+  Sparkles, 
+  Loader2, 
+  Save, 
+  ArrowRight,
+  UserCheck
+} from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { userFormSchema } from "@/schemas/user";
 import { UserRole, User, UserStatus, Department } from "@/types";
+import usePageTitle from "@/hooks/use-page-title";
+import { motion } from "framer-motion";
+import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const UsersEdit = () => {
+  usePageTitle("Edit User");
   const { data: identity } = useGetIdentity<User>();
   const isAdmin = identity?.role === "admin";
 
@@ -56,285 +78,383 @@ const UsersEdit = () => {
     optionValue: "id",
   });
 
-  return (
-    <div className="container mx-auto py-6 max-w-6xl">
-      <EditViewHeader />
+  const user = query?.data?.data;
 
-      <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+  return (
+    <div className="container mx-auto py-10 max-w-6xl space-y-10">
+      <motion.div 
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="space-y-4"
+      >
+        <Breadcrumb />
+        <div className="flex items-center gap-4">
+          <div className="p-3 rounded-2xl bg-primary/10 text-primary shadow-sm">
+            <Pencil className="h-8 w-8" />
+          </div>
+          <div>
+            <h1 className="text-4xl font-black tracking-tight">Edit Profile</h1>
+            <p className="text-muted-foreground font-medium">Update account details and contact information for {user?.name || "User"}.</p>
+          </div>
+        </div>
+      </motion.div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
         {/* Left Column: The Main Form */}
-        <div className="lg:col-span-2">
+        <motion.div 
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.1 }}
+          className="lg:col-span-2"
+        >
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onFinish)}>
-              <Card className="border-border/50 shadow-sm">
-                <CardHeader>
-                  <CardTitle className="text-xl font-semibold flex items-center gap-2">
-                    <UserIcon className="h-5 w-5 text-primary" />
-                    Edit User Profile
-                  </CardTitle>
-                  <CardDescription>
-                    Update the profile and contact information for "{query?.data?.data.name}".
-                  </CardDescription>
+              <Card className="border-primary/10 shadow-xl shadow-primary/5 rounded-[2.5rem] overflow-hidden bg-card/50 backdrop-blur-sm">
+                <CardHeader className="p-8 pb-4 flex flex-row items-center gap-6">
+                  <Avatar className="h-20 w-20 rounded-2xl border-4 border-background shadow-lg">
+                    <AvatarImage src={user?.image ?? undefined} />
+                    <AvatarFallback className="bg-primary/5 text-primary font-black text-2xl">
+                      {user?.name?.substring(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="space-y-1">
+                    <CardTitle className="text-2xl font-black tracking-tight">{user?.name}</CardTitle>
+                    <CardDescription className="font-medium">
+                      System ID: <span className="font-bold text-primary">{user?.id}</span>
+                    </CardDescription>
+                  </div>
                 </CardHeader>
 
-                <Separator />
+                <CardContent className="p-8 space-y-10">
+                  <div className="space-y-6">
+                    <div className="flex items-center gap-2 px-1">
+                      <UserIcon className="h-4 w-4 text-primary" />
+                      <h3 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Core Information</h3>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                      {/* Name Field */}
+                      <FormField
+                        control={form.control}
+                        name="name"
+                        render={({ field }) => (
+                          <FormItem className="space-y-3">
+                            <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                              Full Name
+                            </FormLabel>
+                            <FormControl>
+                              <Input 
+                                placeholder="e.g. John Doe" 
+                                {...field} 
+                                className="h-12 rounded-2xl border-primary/10 bg-background/50 focus:bg-background transition-all font-bold"
+                              />
+                            </FormControl>
+                            <FormMessage className="text-xs font-bold" />
+                          </FormItem>
+                        )}
+                      />
 
-                <CardContent className="space-y-6 pt-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Name Field */}
+                      {/* Email Field */}
+                      <FormField
+                        control={form.control}
+                        name="email"
+                        render={({ field }) => (
+                          <FormItem className="space-y-3">
+                            <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                              Email Address
+                            </FormLabel>
+                            <FormControl>
+                              <div className="relative group">
+                                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                                <Input
+                                  placeholder="e.g. john@school.com"
+                                  {...field}
+                                  disabled={!isAdmin}
+                                  className="pl-11 h-12 rounded-2xl border-primary/10 bg-background/50 focus:bg-background transition-all font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+                                />
+                              </div>
+                            </FormControl>
+                            <FormMessage className="text-xs font-bold" />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                      {/* Role Dropdown */}
+                      <FormField
+                        control={form.control}
+                        name="role"
+                        render={({ field }) => (
+                          <FormItem className="space-y-3">
+                            <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                              System Role
+                            </FormLabel>
+                            <Select
+                              onValueChange={field.onChange}
+                              value={field.value}
+                              disabled={!isAdmin}
+                            >
+                              <FormControl>
+                                <SelectTrigger className="h-12 rounded-2xl border-primary/10 bg-background/50 font-bold text-sm disabled:opacity-50 disabled:cursor-not-allowed">
+                                  <div className="flex items-center gap-2">
+                                    <Shield className="h-4 w-4 text-primary" />
+                                    <SelectValue placeholder="Select a role" />
+                                  </div>
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent className="rounded-2xl">
+                                <SelectItem value={UserRole.STUDENT} className="rounded-xl font-bold">Student</SelectItem>
+                                <SelectItem value={UserRole.TEACHER} className="rounded-xl font-bold">Teacher</SelectItem>
+                                <SelectItem value={UserRole.ADMIN} className="rounded-xl font-bold">Admin</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            {!isAdmin && (
+                              <p className="text-[10px] font-bold text-muted-foreground/60 mt-1 ml-1">
+                                Only administrators can modify user roles.
+                              </p>
+                            )}
+                            <FormMessage className="text-xs font-bold" />
+                          </FormItem>
+                        )}
+                      />
+
+                      {/* Status Dropdown */}
+                      <FormField
+                        control={form.control}
+                        name="status"
+                        render={({ field }) => (
+                          <FormItem className="space-y-3">
+                            <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                              Account Status
+                            </FormLabel>
+                            <Select 
+                              onValueChange={field.onChange} 
+                              value={field.value}
+                              disabled={!isAdmin}
+                            >
+                              <FormControl>
+                                <SelectTrigger className="h-12 rounded-2xl border-primary/10 bg-background/50 font-bold text-sm disabled:opacity-50 disabled:cursor-not-allowed">
+                                  <div className="flex items-center gap-2">
+                                    <Activity className="h-4 w-4 text-primary" />
+                                    <SelectValue placeholder="Select status" />
+                                  </div>
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent className="rounded-2xl">
+                                <SelectItem value={UserStatus.ACTIVE} className="rounded-xl font-bold">Active</SelectItem>
+                                <SelectItem value={UserStatus.INACTIVE} className="rounded-xl font-bold">Inactive</SelectItem>
+                                <SelectItem value={UserStatus.SUSPENDED} className="rounded-xl font-bold">Suspended</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage className="text-xs font-bold" />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-6">
+                    <div className="flex items-center gap-2 px-1">
+                      <Phone className="h-4 w-4 text-primary" />
+                      <h3 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Contact & Bio</h3>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                      {/* Department Dropdown */}
+                      <FormField
+                        control={form.control}
+                        name="departmentId"
+                        render={({ field }) => (
+                          <FormItem className="space-y-3">
+                            <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                              Department Assignment
+                            </FormLabel>
+                            <Select 
+                              onValueChange={(val) => field.onChange(val ? Number(val) : null)} 
+                              value={field.value?.toString()}
+                              disabled={!isAdmin}
+                            >
+                              <FormControl>
+                                <SelectTrigger className="h-12 rounded-2xl border-primary/10 bg-background/50 font-bold text-sm disabled:opacity-50 disabled:cursor-not-allowed">
+                                  <div className="flex items-center gap-2">
+                                    <Building2 className="h-4 w-4 text-primary" />
+                                    <SelectValue placeholder="Select a department" />
+                                  </div>
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent className="rounded-2xl">
+                                {departmentOptions.map((option) => (
+                                  <SelectItem key={option.value} value={option.value.toString()} className="rounded-xl font-bold">
+                                    {option.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage className="text-xs font-bold" />
+                          </FormItem>
+                        )}
+                      />
+
+                      {/* Phone Number */}
+                      <FormField
+                        control={form.control}
+                        name="phoneNumber"
+                        render={({ field }) => (
+                          <FormItem className="space-y-3">
+                            <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                              Phone Number
+                            </FormLabel>
+                            <FormControl>
+                              <div className="relative group">
+                                <Phone className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                                <Input 
+                                  placeholder="+1 234 567 890" 
+                                  {...field} 
+                                  value={field.value || ""} 
+                                  className="pl-11 h-12 rounded-2xl border-primary/10 bg-background/50 focus:bg-background transition-all font-bold"
+                                />
+                              </div>
+                            </FormControl>
+                            <FormMessage className="text-xs font-bold" />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    {/* Address */}
                     <FormField
                       control={form.control}
-                      name="name"
+                      name="address"
                       render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="flex items-center gap-2">
-                            <UserIcon className="h-4 w-4 text-muted-foreground" />
-                            Full Name
+                        <FormItem className="space-y-3">
+                          <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                            Physical Address
                           </FormLabel>
                           <FormControl>
-                            <Input placeholder="e.g. John Doe" {...field} />
+                            <div className="relative group">
+                              <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                              <Input 
+                                placeholder="123 Education St, City, Country" 
+                                {...field} 
+                                value={field.value || ""} 
+                                className="pl-11 h-12 rounded-2xl border-primary/10 bg-background/50 focus:bg-background transition-all font-bold"
+                              />
+                            </div>
                           </FormControl>
-                          <FormMessage />
+                          <FormMessage className="text-xs font-bold" />
                         </FormItem>
                       )}
                     />
 
-                    {/* Email Field */}
+                    {/* Bio */}
                     <FormField
                       control={form.control}
-                      name="email"
+                      name="bio"
                       render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="flex items-center gap-2">
-                            <Mail className="h-4 w-4 text-muted-foreground" />
-                            Email Address
+                        <FormItem className="space-y-3">
+                          <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                            Biography
                           </FormLabel>
                           <FormControl>
-                            <Input
-                              placeholder="e.g. john@school.com"
-                              {...field}
-                              disabled={!isAdmin} // Only admins can change emails
+                            <Textarea 
+                              placeholder="Tell us a bit about this user..." 
+                              className="min-h-[120px] rounded-2xl border-primary/10 bg-background/50 focus:bg-background transition-all font-medium resize-none p-4"
+                              {...field} 
+                              value={field.value || ""}
                             />
                           </FormControl>
-                          <FormMessage />
+                          <FormMessage className="text-xs font-bold" />
                         </FormItem>
                       )}
                     />
                   </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Role Dropdown */}
-                    <FormField
-                      control={form.control}
-                      name="role"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="flex items-center gap-2">
-                            <Shield className="h-4 w-4 text-muted-foreground" />
-                            Role
-                          </FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            value={field.value}
-                            disabled={!isAdmin} // ONLY Admins can change roles
-                          >
-                            <FormControl>
-                              <SelectTrigger className={!isAdmin ? "bg-muted cursor-not-allowed" : ""}>
-                                <SelectValue placeholder="Select a role" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value={UserRole.STUDENT}>
-                                Student
-                              </SelectItem>
-                              <SelectItem value={UserRole.TEACHER}>
-                                Teacher
-                              </SelectItem>
-                              <SelectItem value={UserRole.ADMIN}>
-                                Admin
-                              </SelectItem>
-                            </SelectContent>
-                          </Select>
-                          {!isAdmin && (
-                            <p className="text-[0.7rem] text-muted-foreground mt-1">
-                              Only administrators can modify user roles.
-                            </p>
-                          )}
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    {/* Status Dropdown */}
-                    <FormField
-                      control={form.control}
-                      name="status"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="flex items-center gap-2">
-                            <Activity className="h-4 w-4 text-muted-foreground" />
-                            Account Status
-                          </FormLabel>
-                          <Select 
-                            onValueChange={field.onChange} 
-                            value={field.value}
-                            disabled={!isAdmin}
-                          >
-                            <FormControl>
-                              <SelectTrigger className={!isAdmin ? "bg-muted cursor-not-allowed" : ""}>
-                                <SelectValue placeholder="Select status" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value={UserStatus.ACTIVE}>Active</SelectItem>
-                              <SelectItem value={UserStatus.INACTIVE}>Inactive</SelectItem>
-                              <SelectItem value={UserStatus.SUSPENDED}>Suspended</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Department Dropdown */}
-                    <FormField
-                      control={form.control}
-                      name="departmentId"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="flex items-center gap-2">
-                            <Building2 className="h-4 w-4 text-muted-foreground" />
-                            Department
-                          </FormLabel>
-                          <Select 
-                            onValueChange={(val) => field.onChange(val ? Number(val) : null)} 
-                            value={field.value?.toString()}
-                            disabled={!isAdmin}
-                          >
-                            <FormControl>
-                              <SelectTrigger className={!isAdmin ? "bg-muted cursor-not-allowed" : ""}>
-                                <SelectValue placeholder="Select a department" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {departmentOptions.map((option) => (
-                                <SelectItem key={option.value} value={option.value.toString()}>
-                                  {option.label}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    {/* Phone Number */}
-                    <FormField
-                      control={form.control}
-                      name="phoneNumber"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="flex items-center gap-2">
-                            <Phone className="h-4 w-4 text-muted-foreground" />
-                            Phone Number
-                          </FormLabel>
-                          <FormControl>
-                            <Input placeholder="+1 234 567 890" {...field} value={field.value || ""} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  {/* Address */}
-                  <FormField
-                    control={form.control}
-                    name="address"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center gap-2">
-                          <MapPin className="h-4 w-4 text-muted-foreground" />
-                          Physical Address
-                        </FormLabel>
-                        <FormControl>
-                          <Input placeholder="123 Education St, City, Country" {...field} value={field.value || ""} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {/* Bio */}
-                  <FormField
-                    control={form.control}
-                    name="bio"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center gap-2">
-                          <FileText className="h-4 w-4 text-muted-foreground" />
-                          Biography
-                        </FormLabel>
-                        <FormControl>
-                          <Textarea 
-                            placeholder="Tell us a bit about this user..." 
-                            className="min-h-[100px] resize-none"
-                            {...field} 
-                            value={field.value || ""}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
                 </CardContent>
 
-                <Separator />
-
-                <CardFooter className="flex justify-end pt-6 pb-6 bg-muted/5">
+                <CardFooter className="p-8 bg-primary/[0.02] border-t border-primary/5 flex justify-end">
                   <Button
                     type="submit"
                     size="lg"
                     disabled={formLoading}
-                    className="min-w-[150px]"
+                    className="h-14 px-10 rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl shadow-primary/20 group"
                   >
-                    {formLoading ? "Saving..." : "Save Changes"}
+                    {formLoading ? (
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    ) : (
+                      <Save className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform" />
+                    )}
+                    {formLoading ? "Saving Changes..." : "Save Profile Changes"}
+                    {!formLoading && <ArrowRight className="h-4 w-4 ml-2 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />}
                   </Button>
                 </CardFooter>
               </Card>
             </form>
           </Form>
-        </div>
+        </motion.div>
 
         {/* Right Column: Sidebar / Help */}
-        <div className="space-y-6">
-          <Card className="border-border/50 shadow-sm bg-muted/10">
-            <CardHeader>
-              <CardTitle className="text-lg font-medium flex items-center gap-2">
-                <Lightbulb className="h-5 w-5 text-yellow-500" />
-                Tips
-              </CardTitle>
+        <motion.div 
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.2 }}
+          className="space-y-8"
+        >
+          <Card className="border-primary/10 shadow-lg rounded-[2rem] overflow-hidden bg-card/50 backdrop-blur-sm">
+            <CardHeader className="bg-primary/5 pb-6">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-xl bg-primary/10 text-primary">
+                  <Lightbulb className="h-5 w-5" />
+                </div>
+                <CardTitle className="text-lg font-black tracking-tight">Profile Tips</CardTitle>
+              </div>
             </CardHeader>
-            <CardContent className="space-y-4 text-sm text-muted-foreground">
-              <p>
-                <strong>Contact Data:</strong> Providing a phone number and address helps administrators reach out in case of emergencies.
-              </p>
-              <p>
-                <strong>Biography:</strong> This is a great place to list academic interests or teaching specialties.
-              </p>
+            <CardContent className="p-6 space-y-6">
+              <div className="flex gap-4">
+                <div className="h-10 w-10 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
+                  <Phone className="h-5 w-5 text-primary" />
+                </div>
+                <div className="space-y-1">
+                  <p className="font-black text-xs uppercase tracking-widest text-primary">Contact Data</p>
+                  <p className="text-sm text-muted-foreground font-medium leading-relaxed">
+                    Providing a phone number and address helps administrators reach out in case of emergencies.
+                  </p>
+                </div>
+              </div>
+              
+              <div className="flex gap-4">
+                <div className="h-10 w-10 rounded-2xl bg-amber-500/10 flex items-center justify-center shrink-0">
+                  <FileText className="h-5 w-5 text-amber-600" />
+                </div>
+                <div className="space-y-1">
+                  <p className="font-black text-xs uppercase tracking-widest text-amber-600">Biography</p>
+                  <p className="text-sm text-muted-foreground font-medium leading-relaxed">
+                    This is a great place to list academic interests, teaching specialties, or personal achievements.
+                  </p>
+                </div>
+              </div>
             </CardContent>
           </Card>
 
-          <Alert>
-            <Info className="h-4 w-4" />
-            <AlertTitle>Privacy Note</AlertTitle>
-            <AlertDescription className="text-xs text-muted-foreground mt-1">
-              Contact information is only visible to administrators and the user themselves.
-            </AlertDescription>
+          <Alert className="rounded-[2rem] border-primary/10 bg-primary/5 p-6">
+            <Info className="h-5 w-5 text-primary" />
+            <div className="ml-2">
+              <AlertTitle className="font-black text-sm uppercase tracking-widest mb-2">Privacy Note</AlertTitle>
+              <AlertDescription className="text-sm text-muted-foreground font-medium leading-relaxed">
+                Contact information and physical addresses are only visible to administrators and the user themselves.
+              </AlertDescription>
+            </div>
           </Alert>
-        </div>
+
+          {user?.status === UserStatus.ACTIVE && (
+            <Card className="border-green-500/10 bg-green-500/5 rounded-[2rem] p-6 flex items-center gap-4">
+              <div className="p-3 rounded-2xl bg-green-500/10 text-green-600">
+                <UserCheck className="h-6 w-6" />
+              </div>
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-widest text-green-600">Account Status</p>
+                <p className="text-lg font-black text-green-700">Verified & Active</p>
+              </div>
+            </Card>
+          )}
+        </motion.div>
       </div>
     </div>
   );

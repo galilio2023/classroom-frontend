@@ -1,7 +1,9 @@
 import { Assignment, Quiz } from "@/types";
 import { Badge } from "@/components/ui/badge";
-import { FileText, FileQuestion, CheckCircle2, Circle } from "lucide-react";
+import { FileText, FileQuestion, CheckCircle2, Circle, Calendar, Clock, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { motion, AnimatePresence } from "framer-motion";
+import dayjs from "dayjs";
 
 interface TaskItemProps {
   item: Assignment | Quiz;
@@ -20,58 +22,108 @@ export const TaskItem = ({
 }: TaskItemProps) => {
   const isQuiz = type === 'quiz';
   
+  const getTaskStyles = () => {
+    if (completed) return { bg: 'bg-success/5', border: 'border-success/20', iconColor: 'text-success', iconBg: 'bg-success/10' };
+    if (isQuiz) return { bg: 'bg-orange-500/[0.03]', border: 'border-orange-500/10', iconColor: 'text-orange-500', iconBg: 'bg-orange-500/10' };
+    return { bg: 'bg-blue-500/[0.03]', border: 'border-blue-500/10', iconColor: 'text-blue-500', iconBg: 'bg-blue-500/10' };
+  };
+
+  const styles = getTaskStyles();
+  const dueDate = type === 'assignment' ? (item as Assignment).dueDate : null;
+  const isOverdue = dueDate ? dayjs(dueDate).isBefore(dayjs()) : false;
+
   return (
-    <div className={cn(
-        "flex items-center justify-between p-3 rounded-md border transition-colors",
-        completed ? "bg-success/10 border-success/20 dark:bg-success/5 dark:border-success/30" : 
-        isQuiz ? "bg-orange-50/50 border-orange-200 dark:bg-orange-950/20 dark:border-orange-900/30" : 
-        "bg-blue-50/50 border-blue-200 dark:bg-blue-950/20 dark:border-blue-900/30"
-    )}>
-        <div className="flex items-center gap-3 overflow-hidden flex-1">
+    <motion.div 
+      layout
+      className={cn(
+        "group flex items-center justify-between p-4 rounded-2xl border transition-all duration-300",
+        styles.bg,
+        styles.border,
+        !completed && "hover:border-primary/20 hover:bg-card hover:shadow-md"
+      )}
+    >
+        <div className="flex items-center gap-4 overflow-hidden flex-1">
             {isStudent && (
                 <button 
                     onClick={() => onToggleProgress(item.id)}
-                    className="shrink-0 focus:outline-none"
+                    className="shrink-0 focus:outline-none group/check"
                 >
-                    {completed ? (
-                        <CheckCircle2 className="h-5 w-5 text-success" />
-                    ) : (
-                        <Circle className="h-5 w-5 text-muted-foreground hover:text-primary transition-colors" />
-                    )}
+                    <AnimatePresence mode="wait">
+                      {completed ? (
+                          <motion.div
+                            key="completed"
+                            initial={{ scale: 0.5, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.5, opacity: 0 }}
+                          >
+                            <CheckCircle2 className="h-5 w-5 text-success" />
+                          </motion.div>
+                      ) : (
+                          <motion.div
+                            key="pending"
+                            initial={{ scale: 0.5, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.5, opacity: 0 }}
+                          >
+                            <Circle className="h-5 w-5 text-muted-foreground/40 group-hover/check:text-primary transition-colors" />
+                          </motion.div>
+                      )}
+                    </AnimatePresence>
                 </button>
             )}
             
-            <div className="flex items-center gap-2 min-w-0">
-                {isQuiz ? (
-                    <FileQuestion className={cn("h-4 w-4 shrink-0", completed ? "text-success" : "text-orange-500")} />
-                ) : (
-                    <FileText className={cn("h-4 w-4 shrink-0", completed ? "text-success" : "text-blue-500")} />
-                )}
+            <div className="flex items-center gap-3 min-w-0">
+                <div className={cn("p-2 rounded-xl shrink-0 transition-transform group-hover:scale-110", styles.iconBg)}>
+                    {isQuiz ? (
+                        <FileQuestion className={cn("h-4 w-4", styles.iconColor)} />
+                    ) : (
+                        <FileText className={cn("h-4 w-4", styles.iconColor)} />
+                    )}
+                </div>
                 
                 <div className="flex flex-col min-w-0">
                     <span className={cn(
-                        "text-sm font-medium truncate",
-                        completed && "text-success/80 dark:text-success/60 line-through decoration-success/50"
+                        "text-sm font-black tracking-tight truncate transition-all",
+                        completed ? "text-success/60 line-through decoration-success/30" : "text-foreground group-hover:text-primary"
                     )}>
                         {item.title}
                     </span>
-                    {type === 'assignment' && (item as Assignment).dueDate && (
-                        <span className="text-[10px] text-muted-foreground truncate">
-                            Due: {new Date((item as Assignment).dueDate!).toLocaleDateString()}
-                        </span>
-                    )}
+                    <div className="flex items-center gap-2 mt-0.5">
+                      {dueDate && (
+                          <div className={cn(
+                            "flex items-center gap-1 text-[9px] font-black uppercase tracking-widest",
+                            isOverdue && !completed ? "text-destructive" : "text-muted-foreground/40"
+                          )}>
+                              <Calendar className="h-2.5 w-2.5" />
+                              <span>Due {dayjs(dueDate).format("MMM D")}</span>
+                          </div>
+                      )}
+                      {isQuiz && !completed && (
+                        <div className="flex items-center gap-1 text-[9px] font-black uppercase tracking-widest text-orange-500/60">
+                          <Clock className="h-2.5 w-2.5" />
+                          <span>15 Mins</span>
+                        </div>
+                      )}
+                    </div>
                 </div>
             </div>
         </div>
         
-        <Badge variant="outline" className={cn(
-            "text-[10px] ml-2 shrink-0", 
-            completed ? "border-success/20 text-success bg-success/10" :
-            isQuiz ? "border-orange-200 text-orange-600 bg-orange-50" : 
-            "border-blue-200 text-blue-600 bg-blue-50"
-        )}>
-            {isQuiz ? "Quiz" : "Assignment"}
-        </Badge>
-    </div>
+        <div className="flex items-center gap-3 shrink-0">
+          <Badge variant="secondary" className={cn(
+              "text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border-none", 
+              completed ? "bg-success/10 text-success" :
+              isQuiz ? "bg-orange-500/10 text-orange-600" : 
+              "bg-blue-500/10 text-blue-600"
+          )}>
+              {isQuiz ? "Quiz" : "Assignment"}
+          </Badge>
+          {!completed && (
+            <div className="p-1.5 rounded-full bg-muted/50 group-hover:bg-primary group-hover:text-primary-foreground transition-all">
+              <Sparkles className="h-3 w-3" />
+            </div>
+          )}
+        </div>
+    </motion.div>
   );
 };

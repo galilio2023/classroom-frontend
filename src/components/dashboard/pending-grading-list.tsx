@@ -1,8 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, ClipboardCheck, Sparkles, ArrowRight } from "lucide-react";
 import { PendingSubmission } from "@/types/dashboard";
 import { PendingSubmissionCard } from "./pending-submission-card";
+import { motion, AnimatePresence } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 interface PendingGradingListProps {
   submissions: PendingSubmission[];
@@ -11,36 +13,64 @@ interface PendingGradingListProps {
 
 export const PendingGradingList = ({ submissions, show }: PendingGradingListProps) => {
   return (
-    <Card className="border-none shadow-none bg-transparent">
-      <CardHeader className="px-0 flex flex-row items-center justify-between">
-        <div className="space-y-1">
-          <CardTitle className="text-2xl font-bold">Pending Grading</CardTitle>
-          <p className="text-sm text-muted-foreground">Submissions awaiting your feedback.</p>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between px-2">
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-xl bg-primary/10 text-primary">
+            <ClipboardCheck className="h-5 w-5" />
+          </div>
+          <div>
+            <h3 className="text-xl font-black tracking-tight">Pending Grading</h3>
+            <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">Submissions awaiting feedback</p>
+          </div>
         </div>
-        <Badge variant="secondary" className="rounded-full px-3 bg-primary/10 text-primary border-primary/20 font-bold">
+        <Badge variant="secondary" className="rounded-full px-3 py-1 font-black text-[10px] uppercase tracking-widest bg-primary/10 text-primary border-none animate-pulse">
           {submissions.length} New
         </Badge>
-      </CardHeader>
-      <CardContent className="px-0">
-        <div className="grid gap-4">
+      </div>
+
+      <div className="grid gap-4">
+        <AnimatePresence mode="popLayout">
           {submissions.length > 0 ? (
-            submissions.map((submission) => (
-              <PendingSubmissionCard 
-                key={submission.id} 
-                submission={submission} 
-                onGrade={(id) => show("assignments", id)} 
-              />
+            submissions.map((submission, idx) => (
+              <motion.div
+                key={submission.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ delay: idx * 0.05 }}
+              >
+                <PendingSubmissionCard 
+                  submission={submission} 
+                  onGrade={(id) => show("assignments", id)} 
+                />
+              </motion.div>
             ))
           ) : (
-            <div className="text-center py-12 border-2 border-dashed rounded-2xl bg-muted/20 backdrop-blur-sm flex flex-col items-center gap-3">
-              <div className="p-3 bg-primary/10 rounded-full">
-                <CheckCircle2 className="h-6 w-6 text-primary" />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="text-center py-16 border-none shadow-2xl bg-card/50 backdrop-blur-xl rounded-[2rem] flex flex-col items-center gap-4 group overflow-hidden relative"
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-success/5 to-transparent pointer-events-none" />
+              <div className="relative">
+                <div className="absolute inset-0 bg-success/20 rounded-full blur-2xl animate-pulse" />
+                <div className="relative p-5 rounded-full bg-success/10 text-success group-hover:scale-110 transition-transform duration-500">
+                  <CheckCircle2 className="h-10 w-10" />
+                </div>
               </div>
-              <p className="text-muted-foreground font-bold text-sm uppercase tracking-widest">All caught up!</p>
-            </div>
+              <div className="space-y-1 relative z-10">
+                <p className="text-xl font-black tracking-tight text-foreground">All caught up!</p>
+                <p className="text-sm font-medium text-muted-foreground/60">You've graded all recent submissions.</p>
+              </div>
+              <div className="mt-2 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-success/60 relative z-10">
+                <Sparkles className="h-3 w-3" />
+                <span>Great job, Teacher!</span>
+              </div>
+            </motion.div>
           )}
-        </div>
-      </CardContent>
-    </Card>
+        </AnimatePresence>
+      </div>
+    </div>
   );
 };

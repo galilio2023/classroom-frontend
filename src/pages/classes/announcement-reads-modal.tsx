@@ -32,15 +32,17 @@ export const AnnouncementReadsModal = ({
   onOpenChange,
 }: AnnouncementReadsModalProps) => {
   const { result, query } = useCustom<ReadReceipt[]>({
-    url: `${import.meta.env.VITE_API_URL}/announcements/${announcementId}/reads`,
+    url: `announcements/${announcementId}/reads`,
     method: "get",
     queryOptions: {
       enabled: !!announcementId && open,
     },
   });
 
-  const reads = result?.data ?? [];
-  const isLoading = query.isLoading;
+  // Ensure reads is always an array
+  const rawData = result?.data;
+  const reads = Array.isArray(rawData) ? rawData : [];
+  const isLoading = query?.isLoading;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

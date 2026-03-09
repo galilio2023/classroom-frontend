@@ -26,7 +26,6 @@ export const accessControlProvider: AccessControlProvider = {
         "submissions",
         "quizzes", 
         "resources",
-        "users",
         "classes",
         "modules",
         "notifications",
@@ -38,6 +37,11 @@ export const accessControlProvider: AccessControlProvider = {
       // Basic list/show access for sidebar items
       if (teacherSidebarResources.includes(resourceName)) {
         if (action === "list" || action === "show") return { can: true };
+      }
+
+      // Teachers can show users (e.g. to see student profiles) but NOT list them
+      if (resourceName === "users" && action === "show") {
+          return { can: true };
       }
 
       // Teachers can edit their OWN profile
@@ -86,6 +90,7 @@ export const accessControlProvider: AccessControlProvider = {
         "submissions",
         "quizzes", 
         "resources",
+        "modules", // Added modules for students
         "ai-study-lab",
         "study-planner",
         "notifications",

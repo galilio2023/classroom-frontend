@@ -59,7 +59,9 @@ export const WelcomeHeader = ({ name, isStudent, user }: WelcomeHeaderProps) => 
     input.click();
   };
 
-  const isUnverifiedTeacher = user?.role === UserRole.TEACHER && !user?.isVerified;
+  // Check if user is a teacher and not verified.
+  // We use optional chaining and default to false if properties are missing.
+  const isUnverifiedTeacher = user?.role === UserRole.TEACHER && user?.verificationStatus !== "verified";
 
   return (
     <div className="mb-8 md:mb-12 space-y-6">
@@ -99,7 +101,7 @@ export const WelcomeHeader = ({ name, isStudent, user }: WelcomeHeaderProps) => 
         </Alert>
       )}
 
-      {user?.role === UserRole.TEACHER && user?.isVerified && (
+      {user?.role === UserRole.TEACHER && user?.verificationStatus === "verified" && (
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-500/10 border border-green-500/20 text-green-600 text-[10px] font-black uppercase tracking-widest">
             <CheckCircle2 className="h-3 w-3" />
             Verified Educator

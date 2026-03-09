@@ -1,7 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { AlertTriangle, Activity } from "lucide-react";
+import { AlertTriangle, Activity, Sparkles, ShieldCheck, Info, ArrowRight } from "lucide-react";
 import { AtRiskStudentItem } from "./at-risk-student-item";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface AtRiskStudent {
   id: string;
@@ -20,41 +22,78 @@ interface AtRiskStudentsProps {
 export const AtRiskStudents = ({ students }: AtRiskStudentsProps) => {
   if (students.length === 0) {
     return (
-        <Card className="border-success/20 bg-success/5">
-            <CardHeader className="pb-3">
-                <div className="flex items-center gap-2">
-                    <Activity className="h-5 w-5 text-success" />
-                    <CardTitle className="text-lg text-success">All Clear</CardTitle>
-                </div>
-                <CardDescription className="text-success/80">
-                    No students are currently flagged as at-risk. Great job!
+      <motion.div
+        initial={{ opacity: 0, scale: 0.98 }}
+        animate={{ opacity: 1, scale: 1 }}
+      >
+        <Card className="border-none shadow-2xl bg-success/[0.02] backdrop-blur-xl rounded-[2rem] overflow-hidden group">
+          <div className="h-1.5 bg-success/20 w-full" />
+          <CardHeader className="p-8">
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-2xl bg-success/10 text-success group-hover:scale-110 transition-transform duration-500">
+                <ShieldCheck className="h-6 w-6" />
+              </div>
+              <div className="space-y-1">
+                <CardTitle className="text-xl font-black tracking-tight text-success">All Clear</CardTitle>
+                <CardDescription className="font-medium text-success/60">
+                  No students are currently flagged as at-risk. Great job!
                 </CardDescription>
-            </CardHeader>
+              </div>
+            </div>
+          </CardHeader>
         </Card>
+      </motion.div>
     );
   }
 
   return (
-    <Card className="border-destructive/20 bg-destructive/5 shadow-sm">
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-                <AlertTriangle className="h-5 w-5 text-destructive" />
-                <CardTitle className="text-lg text-destructive">At-Risk Students</CardTitle>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+    >
+      <Card className="border-none shadow-2xl bg-destructive/[0.02] backdrop-blur-xl rounded-[2rem] overflow-hidden group">
+        <div className="h-1.5 bg-destructive/20 w-full animate-pulse" />
+        <CardHeader className="p-8 pb-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-2xl bg-destructive/10 text-destructive group-hover:scale-110 transition-transform duration-500">
+                <AlertTriangle className="h-6 w-6" />
+              </div>
+              <div className="space-y-1">
+                <CardTitle className="text-xl font-black tracking-tight text-destructive">At-Risk Students</CardTitle>
+                <div className="flex items-center gap-2">
+                  <Sparkles className="h-3 w-3 text-ai-primary opacity-40" />
+                  <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">AI-Detected Intervention</span>
+                </div>
+              </div>
             </div>
-            <Badge variant="destructive" className="animate-pulse">
-                {students.length} Critical
+            <Badge variant="destructive" className="rounded-full px-3 py-1 font-black text-[10px] uppercase tracking-widest animate-pulse border-none shadow-lg shadow-destructive/20">
+              {students.length} Critical
             </Badge>
-        </div>
-        <CardDescription>
-          AI-detected students requiring immediate intervention.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="grid gap-3">
-        {students.map((student) => (
-          <AtRiskStudentItem key={student.id} student={student} />
-        ))}
-      </CardContent>
-    </Card>
+          </div>
+        </CardHeader>
+        <CardContent className="p-8 pt-4 space-y-4">
+          <div className="grid gap-3">
+            <AnimatePresence mode="popLayout">
+              {students.map((student, idx) => (
+                <motion.div
+                  key={student.id}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: idx * 0.05 }}
+                >
+                  <AtRiskStudentItem student={student} />
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
+          
+          <div className="pt-4 border-t border-black/[0.03] dark:border-white/[0.03] flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">
+            <Info className="h-3 w-3" />
+            <span>Immediate intervention recommended</span>
+          </div>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 };

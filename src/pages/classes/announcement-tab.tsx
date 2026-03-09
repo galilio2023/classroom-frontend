@@ -32,6 +32,13 @@ import {
   Paperclip,
   FileText,
   Eye,
+  LayoutDashboard,
+  Sparkles,
+  Info,
+  PlusCircle,
+  ArrowRight,
+  CheckCircle2,
+  Send,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -52,6 +59,9 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { AnnouncementReadsModal } from "./announcement-reads-modal";
+import { motion, AnimatePresence } from "framer-motion";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface AnnouncementTabProps {
   classId: string;
@@ -96,107 +106,149 @@ const AnnouncementItem = ({
   }, [announcement.id, isRead, isStaff, onMarkAsRead]);
 
   return (
-    <Card
-      ref={itemRef}
-      className={cn(
-        "relative transition-all duration-200",
-        announcement.isPinned ? "border-primary/20 bg-primary/5" : "",
-        isRead === false && !isStaff ? "ring-1 ring-primary/30" : "opacity-90",
-      )}
+    <motion.div
+      layout
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
     >
-      {isRead === false && !isStaff && (
-        <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-8 bg-primary rounded-r-full shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
-      )}
-      <CardHeader className="pb-3">
-        <div className="flex justify-between items-start">
-          <div className="flex items-center gap-3">
-            <Avatar className="h-10 w-10">
-              <AvatarImage src={announcement.author?.image ?? ""} />
-              <AvatarFallback>{announcement.author?.name?.[0]}</AvatarFallback>
-            </Avatar>
-            <div>
-              <div className="flex items-center gap-2">
-                <CardTitle className="text-base">{announcement.title}</CardTitle>
-                {announcement.isPinned && (
-                  <Badge variant="secondary" className="h-5 gap-1 px-1.5">
-                    <Pin className="h-3 w-3" />
-                    Pinned
-                  </Badge>
-                )}
-                {isRead === false && !isStaff && (
-                  <Badge
-                    variant="default"
-                    className="h-5 px-1.5 bg-primary text-[10px] uppercase font-bold"
-                  >
-                    New
-                  </Badge>
-                )}
+      <Card
+        ref={itemRef}
+        className={cn(
+          "relative transition-all duration-300 border-none shadow-xl bg-card/50 backdrop-blur-xl rounded-[2rem] overflow-hidden group",
+          announcement.isPinned
+            ? "border-2 border-primary/20 bg-primary/[0.02]"
+            : "hover:shadow-2xl hover:-translate-y-1",
+          isRead === false && !isStaff
+            ? "ring-2 ring-primary/20"
+            : "opacity-90",
+        )}
+      >
+        {isRead === false && !isStaff && (
+          <div className="absolute left-0 top-0 w-1.5 h-full bg-primary shadow-[0_0_15px_rgba(59,130,246,0.5)]" />
+        )}
+        <CardHeader className="p-8 pb-4">
+          <div className="flex justify-between items-start">
+            <div className="flex items-center gap-4">
+              <Avatar className="h-12 w-12 border-2 border-background shadow-sm group-hover:scale-110 transition-transform">
+                <AvatarImage
+                  src={announcement.author?.image ?? ""}
+                  className="object-cover"
+                />
+                <AvatarFallback className="bg-primary/5 text-primary font-bold">
+                  {announcement.author?.name?.[0]}
+                </AvatarFallback>
+              </Avatar>
+              <div className="space-y-1">
+                <div className="flex items-center gap-3">
+                  <CardTitle className="text-lg font-black tracking-tight group-hover:text-primary transition-colors">
+                    {announcement.title}
+                  </CardTitle>
+                  {announcement.isPinned && (
+                    <Badge
+                      variant="secondary"
+                      className="h-6 gap-1.5 px-3 rounded-full font-black text-[9px] uppercase tracking-widest bg-primary/10 text-primary border-none"
+                    >
+                      <Pin className="h-3 w-3" />
+                      Pinned
+                    </Badge>
+                  )}
+                  {isRead === false && !isStaff && (
+                    <Badge
+                      variant="default"
+                      className="h-6 px-3 rounded-full bg-primary text-[9px] uppercase font-black tracking-widest animate-pulse"
+                    >
+                      New Update
+                    </Badge>
+                  )}
+                </div>
+                <CardDescription className="flex items-center gap-3 font-bold text-[10px] uppercase tracking-widest text-muted-foreground/60">
+                  <span className="text-foreground">
+                    {announcement.author?.name}
+                  </span>
+                  <div className="w-1 h-1 rounded-full bg-muted-foreground/20" />
+                  <span className="flex items-center gap-1.5">
+                    <Calendar className="h-3 w-3" />
+                    {format(new Date(announcement.createdAt), "MMM d, yyyy")}
+                  </span>
+                </CardDescription>
               </div>
-              <CardDescription className="flex items-center gap-2 mt-1">
-                <span>{announcement.author?.name}</span>
-                <span>•</span>
-                <span className="flex items-center gap-1">
-                  <Calendar className="h-3 w-3" />
-                  {format(new Date(announcement.createdAt), "MMM d, yyyy h:mm a")}
-                </span>
-              </CardDescription>
+            </div>
+            <div className="flex items-center gap-2">
+              {isStaff && (
+                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-10 w-10 rounded-xl text-muted-foreground hover:text-primary hover:bg-primary/5"
+                    onClick={() => onViewReads(announcement.id)}
+                    title="View Read Status"
+                  >
+                    <Eye className="h-5 w-5" />
+                  </Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-10 w-10 rounded-xl text-muted-foreground hover:text-primary hover:bg-primary/5"
+                      >
+                        <MoreVertical className="h-5 w-5" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      align="end"
+                      className="rounded-xl border-none shadow-2xl p-2"
+                    >
+                      <DropdownMenuItem
+                        onClick={() => onTogglePin(announcement)}
+                        className="rounded-lg font-bold gap-2 py-2.5"
+                      >
+                        <Pin className="h-4 w-4" />
+                        {announcement.isPinned
+                          ? "Unpin Announcement"
+                          : "Pin to Top"}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className="text-destructive focus:text-destructive rounded-lg font-bold gap-2 py-2.5"
+                        onClick={() => onDelete(announcement.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        Delete Announcement
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              )}
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            {isStaff && (
-              <div className="flex items-center gap-1">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 text-muted-foreground hover:text-primary"
-                  onClick={() => onViewReads(announcement.id)}
+        </CardHeader>
+        <CardContent className="p-8 pt-4 space-y-6">
+          <p className="text-sm font-medium text-muted-foreground leading-relaxed whitespace-pre-wrap">
+            {announcement.content}
+          </p>
+          {announcement.fileUrl && (
+            <div className="pt-4 border-t border-black/[0.03] dark:border-white/[0.03]">
+              <Button
+                variant="outline"
+                size="sm"
+                asChild
+                className="h-10 rounded-xl px-5 text-[10px] font-black uppercase tracking-widest gap-2 border-primary/20 text-primary hover:bg-primary/5 transition-all"
+              >
+                <a
+                  href={announcement.fileUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
                 >
-                  <Eye className="h-4 w-4" />
-                </Button>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <MoreVertical className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => onTogglePin(announcement)}>
-                      <Pin className="h-4 w-4 mr-2" />
-                      {announcement.isPinned ? "Unpin" : "Pin to top"}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      className="text-destructive"
-                      onClick={() => onDelete(announcement.id)}
-                    >
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Delete
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            )}
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <p className="text-sm whitespace-pre-wrap leading-relaxed">
-          {announcement.content}
-        </p>
-        {announcement.fileUrl && (
-          <div className="pt-2">
-            <a
-              href={announcement.fileUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 p-2 rounded-md border bg-muted/50 hover:bg-muted transition-colors text-sm"
-            >
-              <FileText className="h-4 w-4 text-primary" />
-              <span>View Attachment</span>
-            </a>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+                  <FileText className="h-4 w-4" />
+                  View Attachment
+                  <ArrowRight className="h-3 w-3 ml-1" />
+                </a>
+              </Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 };
 
@@ -214,11 +266,13 @@ export const AnnouncementTab = ({ classId }: AnnouncementTabProps) => {
   });
 
   const [isUploading, setIsUploading] = useState(false);
-  const [dismissedAnnouncements, setDismissedAnnouncements] = useState<number[]>(
-    [],
-  );
+  const [dismissedAnnouncements, setDismissedAnnouncements] = useState<
+    number[]
+  >([]);
 
-  const [selectedAnnouncementId, setSelectedAnnouncementId] = useState<number | null>(null);
+  const [selectedAnnouncementId, setSelectedAnnouncementId] = useState<
+    number | null
+  >(null);
   const [isReadsModalOpen, setIsReadsModalOpen] = useState(false);
 
   useEffect(() => {
@@ -240,7 +294,7 @@ export const AnnouncementTab = ({ classId }: AnnouncementTabProps) => {
     );
   };
 
-  const { query } = useList<Announcement>({
+  const { result, query } = useList<Announcement>({
     resource: "announcements",
     filters: [
       {
@@ -255,12 +309,12 @@ export const AnnouncementTab = ({ classId }: AnnouncementTabProps) => {
     ],
   });
 
-  const announcements = query.data?.data ?? [];
-  const isLoading = query.isLoading;
-  const refetch = query.refetch;
+  const announcements = result?.data ?? [];
+  const isLoading = query?.isLoading;
+  const refetch = query?.refetch;
 
   const { mutate: createAnnouncement, mutation: createMutation } = useCreate();
-  const isCreating = createMutation.isPending;
+  const isCreating = createMutation?.isPending;
   const { mutate: updateAnnouncement } = useUpdate();
   const { mutate: deleteAnnouncement } = useDelete();
   const { mutate: markAsRead } = useCustomMutation();
@@ -268,14 +322,13 @@ export const AnnouncementTab = ({ classId }: AnnouncementTabProps) => {
   const handleMarkAsRead = (id: number) => {
     markAsRead(
       {
-        url: `${import.meta.env.VITE_API_URL}/announcements/${id}/read`,
+        url: `announcements/${id}/read`,
         method: "post",
         values: {},
       },
       {
         onSuccess: () => {
-          // Update local state to show as read immediately
-          void refetch();
+          void refetch?.();
         },
       },
     );
@@ -288,7 +341,6 @@ export const AnnouncementTab = ({ classId }: AnnouncementTabProps) => {
     setIsUploading(true);
 
     try {
-      // 1. Get secure signature from backend
       const sigResponse = await fetch(
         `${import.meta.env.VITE_API_URL}/upload/signature?folder=announcements`,
         {
@@ -299,7 +351,6 @@ export const AnnouncementTab = ({ classId }: AnnouncementTabProps) => {
       );
       const { data: sigData } = await sigResponse.json();
 
-      // 2. Upload directly to Cloudinary using the signature
       const formData = new FormData();
       formData.append("file", file);
       formData.append("api_key", sigData.apiKey);
@@ -352,7 +403,7 @@ export const AnnouncementTab = ({ classId }: AnnouncementTabProps) => {
             fileUrl: null,
             fileCldPubId: null,
           });
-          void refetch();
+          void refetch?.();
         },
       },
     );
@@ -367,7 +418,7 @@ export const AnnouncementTab = ({ classId }: AnnouncementTabProps) => {
       },
       {
         onSuccess: () => {
-          void refetch();
+          void refetch?.();
         },
       },
     );
@@ -381,7 +432,7 @@ export const AnnouncementTab = ({ classId }: AnnouncementTabProps) => {
       },
       {
         onSuccess: () => {
-          void refetch();
+          void refetch?.();
         },
       },
     );
@@ -394,8 +445,11 @@ export const AnnouncementTab = ({ classId }: AnnouncementTabProps) => {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-48">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      <div className="flex flex-col items-center justify-center py-20 gap-4">
+        <Loader2 className="h-10 w-10 animate-spin text-primary/20" />
+        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">
+          Loading Announcements...
+        </p>
       </div>
     );
   }
@@ -405,71 +459,106 @@ export const AnnouncementTab = ({ classId }: AnnouncementTabProps) => {
   );
 
   return (
-    <div className="space-y-6">
-      {pinnedAnnouncements.length > 0 && (
-        <div className="space-y-3">
-          {pinnedAnnouncements.map((announcement) => (
-            <div
-              key={announcement.id}
-              className="relative bg-primary/10 border border-primary/20 rounded-lg p-4 pr-12 animate-in fade-in slide-in-from-top-2"
-            >
-              <div className="flex items-center gap-2 mb-1">
-                <Pin className="h-4 w-4 text-primary" />
-                <span className="font-semibold text-sm text-primary uppercase tracking-wider">
-                  Pinned Announcement
-                </span>
-              </div>
-              <h4 className="font-bold text-lg">{announcement.title}</h4>
-              <p className="text-sm mt-1 line-clamp-2">{announcement.content}</p>
-              {announcement.fileUrl && (
-                <a
-                  href={announcement.fileUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 mt-2 text-xs text-primary hover:underline"
-                >
-                  <Paperclip className="h-3 w-3" />
-                  View Attachment
-                </a>
-              )}
-              <Button
-                variant="ghost"
-                size="icon"
-                className="absolute top-2 right-2 h-8 w-8"
-                onClick={() => handleDismiss(announcement.id)}
+    <div className="space-y-10 pb-20">
+      {/* Pinned Section */}
+      <AnimatePresence>
+        {pinnedAnnouncements.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="space-y-4"
+          >
+            {pinnedAnnouncements.map((announcement) => (
+              <div
+                key={announcement.id}
+                className="relative overflow-hidden rounded-[2rem] border border-primary/20 bg-primary/5 backdrop-blur-xl p-8 pr-14 shadow-xl shadow-primary/5 group"
               >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-          ))}
-        </div>
-      )}
+                <div className="absolute top-0 left-0 w-1.5 h-full bg-primary" />
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2 rounded-xl bg-primary/10 text-primary">
+                    <Pin className="h-4 w-4" />
+                  </div>
+                  <span className="font-black text-[10px] text-primary uppercase tracking-widest">
+                    Pinned Announcement
+                  </span>
+                </div>
+                <h4 className="font-black text-2xl tracking-tight">
+                  {announcement.title}
+                </h4>
+                <p className="text-sm mt-3 text-muted-foreground font-medium leading-relaxed line-clamp-2">
+                  {announcement.content}
+                </p>
+                {announcement.fileUrl && (
+                  <Button
+                    variant="link"
+                    className="p-0 h-auto mt-4 text-xs font-black uppercase tracking-widest text-primary gap-2"
+                    asChild
+                  >
+                    <a
+                      href={announcement.fileUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Paperclip className="h-4 w-4" />
+                      View Attachment
+                    </a>
+                  </Button>
+                )}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute top-6 right-6 h-10 w-10 rounded-full hover:bg-primary/10 text-primary/40 hover:text-primary transition-all"
+                  onClick={() => handleDismiss(announcement.id)}
+                >
+                  <X className="h-6 w-6" />
+                </Button>
+              </div>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      <div className="flex justify-between items-center">
-        <div>
-          <h3 className="text-lg font-medium">Announcement History</h3>
-          <p className="text-sm text-muted-foreground">
+      {/* Header & History */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <div className="p-1.5 rounded-lg bg-primary/10 text-primary">
+              <Megaphone className="h-4 w-4" />
+            </div>
+            <h3 className="text-xl font-black tracking-tight">
+              Announcement History
+            </h3>
+          </div>
+          <p className="text-sm text-muted-foreground font-medium">
             Official updates and news for this class.
           </p>
         </div>
         {isStaff && (
           <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
             <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
+              <Button className="rounded-xl h-11 px-6 font-black uppercase tracking-widest text-[10px] gap-2 shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95">
+                <PlusCircle className="h-4 w-4" />
                 New Announcement
               </Button>
             </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Create Announcement</DialogTitle>
-                <DialogDescription>
+            <DialogContent className="sm:max-w-[600px] rounded-[2rem] border-none shadow-2xl bg-card/95 backdrop-blur-xl">
+              <DialogHeader className="space-y-3">
+                <div className="p-3 rounded-2xl bg-primary/10 text-primary w-fit">
+                  <Megaphone className="h-6 w-6" />
+                </div>
+                <DialogTitle className="text-2xl font-black tracking-tight">
+                  Create Announcement
+                </DialogTitle>
+                <DialogDescription className="font-medium">
                   Post an official update for all students in this class.
                 </DialogDescription>
               </DialogHeader>
-              <div className="space-y-4 py-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Title</label>
+              <div className="space-y-6 py-6">
+                <div className="space-y-2.5">
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                    Announcement Title
+                  </Label>
                   <Input
                     placeholder="e.g., Upcoming Midterm Exam"
                     value={newAnnouncement.title}
@@ -479,12 +568,15 @@ export const AnnouncementTab = ({ classId }: AnnouncementTabProps) => {
                         title: e.target.value,
                       })
                     }
+                    className="h-12 rounded-xl bg-muted/20 border-none focus-visible:ring-primary font-bold"
                   />
                 </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Content</label>
+                <div className="space-y-2.5">
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                    Detailed Content
+                  </Label>
                   <Textarea
-                    placeholder="Provide details here..."
+                    placeholder="Provide all necessary details here..."
                     rows={5}
                     value={newAnnouncement.content}
                     onChange={(e) =>
@@ -493,52 +585,76 @@ export const AnnouncementTab = ({ classId }: AnnouncementTabProps) => {
                         content: e.target.value,
                       })
                     }
+                    className="min-h-[150px] rounded-2xl bg-muted/20 border-none focus-visible:ring-primary p-5 text-sm leading-relaxed"
                   />
                 </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Attachment (Optional)</label>
-                  <div className="flex items-center gap-2">
-                    <Input
-                      type="file"
-                      onChange={handleFileUpload}
-                      disabled={isUploading}
-                      className="cursor-pointer"
-                    />
-                    {isUploading && <Loader2 className="h-4 w-4 animate-spin" />}
-                  </div>
-                  {newAnnouncement.fileUrl && (
-                    <div className="flex items-center gap-2 text-xs text-success">
-                      <FileText className="h-3 w-3" />
-                      File uploaded
+                <div className="space-y-2.5">
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                    Attachment (Optional)
+                  </Label>
+                  <div className="flex items-center gap-3 p-4 rounded-2xl border-2 border-dashed border-muted-foreground/10 bg-muted/10">
+                    <div className="relative flex-1">
+                      <Input
+                        type="file"
+                        onChange={handleFileUpload}
+                        disabled={isUploading}
+                        className="opacity-0 absolute inset-0 w-full h-full cursor-pointer z-10"
+                      />
+                      <div className="flex items-center gap-3 text-muted-foreground/60">
+                        <div className="p-2 rounded-lg bg-background shadow-sm">
+                          <Paperclip className="h-4 w-4" />
+                        </div>
+                        <span className="text-xs font-bold uppercase tracking-widest">
+                          {isUploading ? "Uploading..." : "Choose File"}
+                        </span>
+                      </div>
                     </div>
-                  )}
+                    {isUploading && (
+                      <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                    )}
+                    {newAnnouncement.fileUrl && (
+                      <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-success bg-success/10 px-3 py-1.5 rounded-full">
+                        <CheckCircle2 className="h-3 w-3" />
+                        Attached
+                      </div>
+                    )}
+                  </div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
+                <div className="flex items-center space-x-3 p-4 rounded-2xl bg-primary/5 border border-primary/10">
+                  <Checkbox
                     id="pin"
                     checked={newAnnouncement.isPinned}
-                    onChange={(e) =>
+                    onCheckedChange={(checked) =>
                       setNewAnnouncement({
                         ...newAnnouncement,
-                        isPinned: e.target.checked,
+                        isPinned: checked as boolean,
                       })
                     }
-                    className="rounded border-gray-300 text-primary focus:ring-primary"
+                    className="data-[state=checked]:bg-primary"
                   />
-                  <label htmlFor="pin" className="text-sm font-medium">
-                    Pin to top
-                  </label>
+                  <div className="space-y-0.5">
+                    <Label
+                      htmlFor="pin"
+                      className="text-sm font-black tracking-tight cursor-pointer"
+                    >
+                      Pin to top
+                    </Label>
+                    <p className="text-[10px] text-muted-foreground font-medium">
+                      This announcement will stay at the top of the feed.
+                    </p>
+                  </div>
                 </div>
               </div>
-              <DialogFooter>
+              <DialogFooter className="gap-3">
                 <Button
-                  variant="outline"
+                  variant="ghost"
+                  className="rounded-xl font-bold h-12"
                   onClick={() => setIsCreateOpen(false)}
                 >
                   Cancel
                 </Button>
                 <Button
+                  className="rounded-xl font-black uppercase tracking-widest h-12 px-8 shadow-lg shadow-primary/20"
                   onClick={handleCreate}
                   disabled={
                     isCreating ||
@@ -547,7 +663,12 @@ export const AnnouncementTab = ({ classId }: AnnouncementTabProps) => {
                     !newAnnouncement.content
                   }
                 >
-                  {isCreating ? "Posting..." : "Post Announcement"}
+                  {isCreating ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <Send className="h-4 w-4 mr-2" />
+                  )}
+                  Post Announcement
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -556,25 +677,44 @@ export const AnnouncementTab = ({ classId }: AnnouncementTabProps) => {
       </div>
 
       {announcements.length === 0 ? (
-        <Card className="border-dashed">
-          <CardContent className="flex flex-col items-center justify-center h-48 text-muted-foreground">
-            <Megaphone className="h-12 w-12 mb-4 opacity-20" />
-            <p>No announcements yet.</p>
-          </CardContent>
-        </Card>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+        >
+          <Card className="border-none shadow-2xl bg-card/50 backdrop-blur-xl rounded-[2rem] overflow-hidden py-20 text-center">
+            <CardContent className="space-y-6">
+              <div className="relative mx-auto w-fit">
+                <div className="absolute inset-0 bg-primary/20 rounded-full blur-2xl animate-pulse" />
+                <div className="relative p-6 rounded-full bg-primary/10 text-primary">
+                  <Megaphone className="h-12 w-12 opacity-40" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <h4 className="text-2xl font-black tracking-tight">
+                  No announcements yet
+                </h4>
+                <p className="text-muted-foreground font-medium max-w-xs mx-auto">
+                  Official updates and news for this class will appear here.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
       ) : (
-        <div className="space-y-4">
-          {announcements.map((announcement: Announcement) => (
-            <AnnouncementItem
-              key={announcement.id}
-              announcement={announcement}
-              isStaff={isStaff}
-              onTogglePin={togglePin}
-              onDelete={handleDelete}
-              onMarkAsRead={handleMarkAsRead}
-              onViewReads={handleViewReads}
-            />
-          ))}
+        <div className="grid gap-6">
+          <AnimatePresence mode="popLayout">
+            {announcements.map((announcement: Announcement) => (
+              <AnnouncementItem
+                key={announcement.id}
+                announcement={announcement}
+                isStaff={isStaff}
+                onTogglePin={togglePin}
+                onDelete={handleDelete}
+                onMarkAsRead={handleMarkAsRead}
+                onViewReads={handleViewReads}
+              />
+            ))}
+          </AnimatePresence>
         </div>
       )}
 

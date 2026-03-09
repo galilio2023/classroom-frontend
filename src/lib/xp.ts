@@ -31,7 +31,12 @@ export const getLevelProgress = (totalXp: number = 0) => {
   
   const xpInCurrentLevel = totalXp - xpAtCurrentLevelStart;
   const xpRequiredForNextLevel = xpAtNextLevelStart - xpAtCurrentLevelStart;
-  const progressPercentage = (xpInCurrentLevel / xpRequiredForNextLevel) * 100;
+  
+  // Calculate percentage, handling the case where xpRequiredForNextLevel is 0 (shouldn't happen with this formula but good for safety)
+  let progressPercentage = 0;
+  if (xpRequiredForNextLevel > 0) {
+      progressPercentage = (xpInCurrentLevel / xpRequiredForNextLevel) * 100;
+  }
 
   return {
     currentLevel,

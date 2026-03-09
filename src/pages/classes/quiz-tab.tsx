@@ -2,9 +2,12 @@ import { useCustom, useNavigation, useGetIdentity } from "@refinedev/core";
 import { Quiz, User } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, FileQuestion, PlusCircle, ArrowRight, Trophy, Clock } from "lucide-react";
+import { Loader2, FileQuestion, PlusCircle, ArrowRight, Trophy, Clock, Calendar, LayoutDashboard, Sparkles, Info } from "lucide-react";
 import React from "react";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+import { motion, AnimatePresence } from "framer-motion";
+import dayjs from "dayjs";
 
 interface QuizTabProps {
   classId: string;
@@ -28,100 +31,151 @@ export const QuizTab = ({ classId }: QuizTabProps) => {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      <div className="flex flex-col items-center justify-center py-20 gap-4">
+        <Loader2 className="h-10 w-10 animate-spin text-primary/20" />
+        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">Loading Quizzes...</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h3 className="text-lg font-semibold">Class Quizzes</h3>
-          <p className="text-sm text-muted-foreground">
-            {quizzes.length} quizzes available for this class.
+    <div className="space-y-8 pb-20">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <div className="p-1.5 rounded-lg bg-primary/10 text-primary">
+              <FileQuestion className="h-4 w-4" />
+            </div>
+            <h3 className="text-xl font-black tracking-tight">Class Quizzes</h3>
+          </div>
+          <p className="text-sm text-muted-foreground font-medium">
+            {quizzes.length} assessments available for this class.
           </p>
         </div>
         {isStaff && (
-          <Button onClick={() => create("quizzes", "push", { query: { classId } })}>
-            <PlusCircle className="h-4 w-4 mr-2" />
+          <Button 
+            onClick={() => create("quizzes", "push", { query: { classId } })}
+            className="rounded-xl h-11 px-6 font-black uppercase tracking-widest text-[10px] gap-2 shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95"
+          >
+            <PlusCircle className="h-4 w-4" />
             Create Quiz
           </Button>
         )}
       </div>
 
       {quizzes.length > 0 ? (
-        <div className="grid gap-4 md:grid-cols-2">
-          {quizzes.map((quiz: Quiz) => (
-            <Card key={quiz.id} className="overflow-hidden transition-all hover:border-primary/50">
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                  <div className="bg-primary/10 p-2 rounded-lg">
-                    <FileQuestion className="h-5 w-5 text-primary" />
-                  </div>
-                  <div className="flex flex-col items-end gap-2">
-                    {quiz.timeLimit && (
-                      <Badge variant="secondary" className="flex items-center gap-1">
-                        <Clock className="h-3 w-3" />
-                        {quiz.timeLimit}m
-                      </Badge>
-                    )}
-                    {quiz.dueDate && (
-                      <span className="text-[10px] text-muted-foreground uppercase font-bold">
-                        Due: {new Date(quiz.dueDate).toLocaleDateString()}
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <CardTitle className="mt-4">{quiz.title}</CardTitle>
-                <CardDescription className="line-clamp-2">
-                  {quiz.description || "No description provided."}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-between mt-2">
-                  <div className="text-xs text-muted-foreground">
-                    {quiz.questions?.length || 0} Questions
-                  </div>
-                  <div className="flex gap-2">
-                    {isStaff ? (
-                      <Button variant="outline" size="sm" onClick={() => show("quizzes", quiz.id.toString(), "push", { query: { action: "results" } })}>
-                        <Trophy className="h-4 w-4 mr-2" />
-                        Results
-                      </Button>
-                    ) : (
-                      <Button size="sm" onClick={() => show("quizzes", quiz.id.toString())}>
-                        Take Quiz
-                        <ArrowRight className="h-4 w-4 ml-2" />
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+        <div className="grid gap-8 md:grid-cols-2">
+          {quizzes.map((quiz: Quiz) => {
+            const isOverdue = quiz.dueDate && dayjs(quiz.dueDate).isBefore(dayjs());
+            
+            return (
+              <motion.div
+                key={quiz.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <Card className="border-none shadow-2xl bg-card/50 backdrop-blur-xl rounded-[2rem] overflow-hidden group hover:shadow-2xl transition-all hover:-translate-y-1">
+                  <CardHeader className="p-8 pb-4">
+                    <div className="flex items-start justify-between">
+                      <div className="p-3 rounded-2xl bg-primary/10 text-primary group-hover:scale-110 transition-transform">
+                        <FileQuestion className="h-6 w-6" />
+                      </div>
+                      <div className="flex flex-col items-end gap-2">
+                        {quiz.timeLimit && (
+                          <Badge variant="secondary" className="flex items-center gap-1.5 font-black text-[9px] uppercase tracking-widest bg-orange-500/10 text-orange-600 border-none px-3 py-1">
+                            <Clock className="h-3 w-3" />
+                            {quiz.timeLimit} Mins
+                          </Badge>
+                        )}
+                        {quiz.dueDate && (
+                          <div className={cn(
+                            "flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest",
+                            isOverdue ? "text-destructive" : "text-muted-foreground/40"
+                          )}>
+                            <Calendar className="h-3 w-3" />
+                            <span>Due {dayjs(quiz.dueDate).format("MMM D")}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <CardTitle className="mt-6 text-xl font-black tracking-tight group-hover:text-primary transition-colors">{quiz.title}</CardTitle>
+                    <CardDescription className="line-clamp-2 font-medium leading-relaxed mt-2">
+                      {quiz.description || "No description provided."}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="p-8 pt-4">
+                    <div className="flex items-center justify-between pt-6 border-t border-black/[0.03] dark:border-white/[0.03]">
+                      <div className="flex items-center gap-2">
+                        <div className="p-1.5 rounded-lg bg-muted/50 text-muted-foreground">
+                          <LayoutDashboard className="h-3.5 w-3.5" />
+                        </div>
+                        <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
+                          {quiz.questions?.length || 0} Questions
+                        </span>
+                      </div>
+                      <div className="flex gap-3">
+                        {isStaff ? (
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={() => show("quizzes", quiz.id.toString(), "push", { query: { action: "results" } })}
+                            className="h-10 rounded-xl font-black uppercase tracking-widest text-[9px] gap-2 border-primary/20 text-primary hover:bg-primary/5"
+                          >
+                            <Trophy className="h-3.5 w-3.5" />
+                            Results
+                          </Button>
+                        ) : (
+                          <Button 
+                            size="sm" 
+                            onClick={() => show("quizzes", quiz.id.toString())}
+                            className="h-10 rounded-xl font-black uppercase tracking-widest text-[9px] gap-2 shadow-lg shadow-primary/20 px-6"
+                          >
+                            Take Quiz
+                            <ArrowRight className="h-3.5 w-3.5" />
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            );
+          })}
         </div>
       ) : (
-        <Card className="border-dashed">
-          <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-            <div className="bg-muted p-4 rounded-full mb-4">
-              <FileQuestion className="h-8 w-8 text-muted-foreground" />
-            </div>
-            <CardTitle>No quizzes yet</CardTitle>
-            <CardDescription className="max-w-xs mx-auto mt-2">
-              {isStaff 
-                ? "Create your first quiz to test your students' knowledge." 
-                : "Your teacher hasn't posted any quizzes for this class yet."}
-            </CardDescription>
-            {isStaff && (
-              <Button className="mt-6" onClick={() => create("quizzes", "push", { query: { classId } })}>
-                <PlusCircle className="h-4 w-4 mr-2" />
-                Create Quiz
-              </Button>
-            )}
-          </CardContent>
-        </Card>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+        >
+          <Card className="border-none shadow-2xl bg-card/50 backdrop-blur-xl rounded-[2rem] overflow-hidden py-20 text-center">
+            <CardContent className="space-y-6">
+              <div className="relative mx-auto w-fit">
+                <div className="absolute inset-0 bg-primary/20 rounded-full blur-2xl animate-pulse" />
+                <div className="relative p-6 rounded-full bg-primary/10 text-primary">
+                  <FileQuestion className="h-12 w-12 opacity-40" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <CardTitle className="text-2xl font-black tracking-tight">No quizzes yet</CardTitle>
+                <CardDescription className="max-w-xs mx-auto mt-2 font-medium">
+                  {isStaff 
+                    ? "Create your first quiz to test your students' knowledge and track their progress." 
+                    : "Your teacher hasn't posted any quizzes for this class yet. Check back later!"}
+                </CardDescription>
+              </div>
+              {isStaff && (
+                <Button 
+                  className="mt-6 rounded-xl h-12 px-8 font-black uppercase tracking-widest text-[10px] gap-2 shadow-lg shadow-primary/20" 
+                  onClick={() => create("quizzes", "push", { query: { classId } })}
+                >
+                  <PlusCircle className="h-4 w-4" />
+                  Create Quiz
+                </Button>
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
       )}
     </div>
   );

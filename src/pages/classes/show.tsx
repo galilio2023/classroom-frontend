@@ -1,14 +1,10 @@
 import { useShow, useDelete, useGetIdentity, useUpdate, useCreate, useList, useOne } from "@refinedev/core";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams, Link } from "react-router-dom";
 import { useMemo, useState, useEffect, useCallback } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { useTable } from "@refinedev/react-table";
 
 import { DataTable } from "@/components/refine-ui/data-table/data-table";
-import {
-  ShowView,
-  ShowViewHeader,
-} from "@/components/refine-ui/views/show-view";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -47,6 +43,16 @@ import {
   Pin,
   X,
   Paperclip,
+  LayoutDashboard,
+  Clock,
+  ShieldCheck,
+  BookOpen,
+  Building2,
+  Pencil,
+  Share2,
+  Globe,
+  Timer,
+  Calendar
 } from "lucide-react";
 import {
   AlertDialog,
@@ -89,16 +95,21 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import debounce from "lodash/debounce";
+import { motion, AnimatePresence } from "framer-motion";
+import { Label } from "@/components/ui/label";
+import usePageTitle from "@/hooks/use-page-title";
+import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
 
 const ClassesShow = () => {
   const { id } = useParams();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const classId = id ?? "";
   const { data: identity } = useGetIdentity<User>();
 
-  const [activeTab, setActiveTab] = useState(
-    searchParams.get("tab") || "curriculum",
-  );
+  const [activeTab, setActiveTab] = useState<string>(() => {
+    return searchParams.get("tab") || "curriculum";
+  });
+  
   const [unenrollTarget, setUnenrollTarget] = useState<number | null>(null);
   const [isEnrollDialogOpen, setIsEnrollDialogOpen] = useState(false);
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
@@ -118,37 +129,55 @@ const ClassesShow = () => {
     name: string;
   } | null>(null);
 
-  // Sync tab if URL changes
+  // Sync state with URL
   useEffect(() => {
     const tab = searchParams.get("tab");
-    if (tab) setActiveTab(tab);
+    if (tab && tab !== activeTab) {
+      setActiveTab(tab);
+    }
   }, [searchParams]);
 
-  const {
-    query: { data: aClassData, isLoading, isError, refetch },
-  } = useShow<Class>({
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    setSearchParams((prev) => {
+      const newParams = new URLSearchParams(prev);
+      newParams.set("tab", value);
+      return newParams;
+    }, { replace: true });
+  };
+
+  const showResult = useShow<Class>({
     resource: "classes",
     id: classId,
+    meta: {
+        syncWithLocation: false
+    }
   });
 
+  const query = showResult?.query;
+  const aClassData = query?.data ?? (showResult as any)?.data;
+  const isLoading = query?.isLoading ?? (showResult as any)?.isLoading;
+  const isError = query?.isError ?? (showResult as any)?.isError;
+  const refetch = query?.refetch ?? (showResult as any)?.refetch;
+
   const aClass = aClassData?.data;
+  usePageTitle(aClass?.name ? `${aClass.name} Classroom` : "Classroom");
 
   const isAdmin = identity?.role === UserRole.ADMIN;
   const isTeacher = identity?.role === UserRole.TEACHER;
   const isStaff = isAdmin || isTeacher;
-  const isOwner = isAdmin || aClass?.teachers?.find(t => t.teacher.id === identity?.id)?.isPrimary;
+  const isOwner = isAdmin || aClass?.teachers?.find((t: any) => t.teacher.id === identity?.id)?.isPrimary;
 
-  // Fetch shared teacher notes from DB
   const { result: notesResult, query: notesQuery } = useOne({
     resource: `classes/${classId}/notes`,
-    id: "current", // Dummy ID for the singleton note
+    id: "current",
     queryOptions: {
       enabled: !!classId && isStaff,
     }
   });
 
-  const notesData = notesResult;
-  const isLoadingNotes = notesQuery.isLoading;
+  const notesData = notesResult?.data;
+  const isLoadingNotes = notesQuery?.isLoading;
 
   const { mutate: updateNote } = useUpdate();
 
@@ -158,7 +187,6 @@ const ClassesShow = () => {
     }
   }, [notesData]);
 
-  // Debounced save to DB
   const debouncedSaveNotes = useCallback(
     debounce((content: string) => {
       updateNote({
@@ -175,7 +203,6 @@ const ClassesShow = () => {
     debouncedSaveNotes(val);
   };
 
-  // Fetch announcements for the pinned banner
   const { result: announcementsResult } = useList<Announcement>({
     resource: "announcements",
     filters: [{ field: "classId", operator: "eq", value: classId }],
@@ -187,14 +214,12 @@ const ClassesShow = () => {
 
   const announcements = announcementsResult?.data ?? [];
 
-  // Initialize live indicator from DB
   useEffect(() => {
     if (aClass) {
       setIsLiveIndicator(!!aClass.isLive);
     }
   }, [aClass]);
 
-  // Load dismissed announcements from localStorage
   useEffect(() => {
     if (identity?.id) {
       const dismissed = localStorage.getItem(`dismissed_announcements_${identity.id}`);
@@ -211,7 +236,6 @@ const ClassesShow = () => {
     );
   };
 
-  // --- REAL-TIME LIVE INDICATOR ---
   useEffect(() => {
     if (!identity?.id || !classId) return;
 
@@ -239,18 +263,21 @@ const ClassesShow = () => {
 
   const allEnrollments = aClass?.enrollments ?? [];
   const approvedEnrollments = allEnrollments.filter(
-    (e) => e.status === "approved",
+    (e: any) => e.status === "approved",
   );
   const pendingEnrollments = allEnrollments.filter(
-    (e) => e.status === "pending",
+    (e: any) => e.status === "pending",
+  );
+  const waitlistedEnrollments = allEnrollments.filter(
+    (e: any) => e.status === "waitlisted",
   );
   const assignments = aClass?.assignments ?? [];
 
   const { mutate: deleteMutation, mutation: deleteMutationResult } =
     useDelete();
+  const isDeleting = deleteMutationResult?.isPending;
   const { mutate: updateEnrollment } = useUpdate();
   const { mutate: createMutation } = useCreate();
-  const isDeleting = deleteMutationResult.isPending;
 
   const handleCopyInviteCode = () => {
     if (aClass?.inviteCode) {
@@ -274,7 +301,7 @@ const ClassesShow = () => {
       {
         onSuccess: () => {
           toast.success(`Student enrollment ${status}`);
-          void refetch();
+          void refetch?.();
         },
         onError: (error: any) => {
           toast.error(error?.data?.message || "Failed to update enrollment");
@@ -306,21 +333,31 @@ const ClassesShow = () => {
     () => [
       {
         id: "student",
-        header: "Student",
+        header: () => <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Student</p>,
         accessorKey: "student",
-        cell: ({ getValue }) => {
+        cell: ({ getValue, row }) => {
           const student = getValue<User>();
+          const isWaitlisted = row.original.status === "waitlisted";
           return (
-            <div className="flex items-center gap-2">
-              <Avatar className="size-7">
+            <div className="flex items-center gap-3 py-1">
+              <Avatar className="size-10 border-2 border-background shadow-sm rounded-xl">
                 {student.image && (
-                  <AvatarImage src={student.image} alt={student.name} />
+                  <AvatarImage src={student.image} alt={student.name} className="object-cover" />
                 )}
-                <AvatarFallback>{student.name?.[0]}</AvatarFallback>
+                <AvatarFallback className="bg-primary/5 text-primary font-black text-xs">
+                  {student.name?.[0]}
+                </AvatarFallback>
               </Avatar>
               <div className="flex flex-col truncate">
-                <span className="truncate">{student.name}</span>
-                <span className="text-xs text-muted-foreground truncate">
+                <div className="flex items-center gap-2">
+                  <span className="font-black text-sm tracking-tight">{student.name}</span>
+                  {isWaitlisted && (
+                    <Badge variant="outline" className="bg-orange-500/10 text-orange-600 border-none text-[8px] font-black uppercase tracking-tighter px-2 py-0 h-4">
+                      Waitlist #{row.original.waitlistPosition}
+                    </Badge>
+                  )}
+                </div>
+                <span className="text-[10px] text-muted-foreground font-bold truncate">
                   {student.email}
                 </span>
               </div>
@@ -330,19 +367,24 @@ const ClassesShow = () => {
       },
       {
         accessorKey: "createdAt",
-        header: "Enrolled On",
-        cell: ({ getValue }) =>
-          new Date(getValue<string>()).toLocaleDateString(),
+        header: () => <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Enrolled On</p>,
+        cell: ({ getValue }) => (
+          <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground">
+            <Calendar className="h-3.5 w-3.5 opacity-40" />
+            <span>{new Date(getValue<string>()).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+          </div>
+        ),
       },
       {
         id: "actions",
+        header: "",
         cell: ({ row }) => (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-end gap-2">
             {isStaff && (
               <Button
                 variant="outline"
                 size="sm"
-                className="h-8 gap-2 border-ai-primary/20 hover:bg-ai-primary/5 text-ai-primary"
+                className="h-9 rounded-xl font-black text-[10px] uppercase tracking-widest gap-2 border-ai-primary/20 hover:bg-ai-primary/5 text-ai-primary transition-all shadow-sm"
                 onClick={() =>
                   setInsightTarget({
                     id: row.original.student.id,
@@ -358,10 +400,10 @@ const ClassesShow = () => {
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8"
+                className="h-9 w-9 rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/5"
                 onClick={() => setUnenrollTarget(row.original.id)}
               >
-                <Trash2 className="h-4 w-4 text-destructive" />
+                <Trash2 className="h-4 w-4" />
               </Button>
             )}
           </div>
@@ -373,7 +415,7 @@ const ClassesShow = () => {
 
   const enrollmentsTable = useTable<Enrollment>({
     columns,
-    data: approvedEnrollments,
+    data: [...approvedEnrollments, ...waitlistedEnrollments],
   });
 
   const enrolledStudentIds = useMemo(
@@ -382,7 +424,7 @@ const ClassesShow = () => {
   );
 
   const existingTeacherIds = useMemo(
-    () => aClass?.teachers?.map((t) => t.teacher.id) ?? [],
+    () => aClass?.teachers?.map((t: any) => t.teacher.id) ?? [],
     [aClass?.teachers],
   );
 
@@ -395,25 +437,49 @@ const ClassesShow = () => {
     }
   };
 
+  const tabs = useMemo(() => [
+    { id: "curriculum", label: "Curriculum", icon: LayoutGrid },
+    { id: "analytics", label: "Analytics", icon: BarChart3, staffOnly: true },
+    { id: "live", label: "Live", icon: Video, indicator: isLiveIndicator },
+    { id: "leaderboard", label: "Leaderboard", icon: Trophy },
+    { id: "announcements", label: "Announcements", icon: Megaphone },
+    { id: "discussions", label: "Discussions", icon: MessageSquare },
+    { id: "resources", label: "Resources", icon: Library },
+    { id: "students", label: "Students", icon: Users, badge: isStaff && (pendingEnrollments.length + waitlistedEnrollments.length) > 0 ? (pendingEnrollments.length + waitlistedEnrollments.length) : null },
+    { id: "assignments", label: "Assignments", icon: ClipboardCheck },
+    { id: "quizzes", label: "Quizzes", icon: FileQuestion },
+    { id: "attendance", label: "Attendance", icon: CheckCircle2 },
+    { id: "details", label: "Details", icon: Info, staffOnly: true },
+  ].filter(t => !t.staffOnly || isStaff), [isLiveIndicator, isStaff, pendingEnrollments.length, waitlistedEnrollments.length]);
+
   if (isLoading) {
     return (
-      <ShowView>
-        <ShowViewHeader resource="classes" />
-        <div className="flex justify-center items-center h-96">
-          <Loader2 className="h-12 w-12 animate-spin text-muted-foreground" />
+      <div className="flex flex-col items-center justify-center h-[80vh] gap-6">
+        <div className="relative">
+            <Loader2 className="h-16 w-16 animate-spin text-primary/20" />
+            <div className="absolute inset-0 flex items-center justify-center">
+                <BookOpen className="h-6 w-6 text-primary/40" />
+            </div>
         </div>
-      </ShowView>
+        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground animate-pulse">Assembling Classroom...</p>
+      </div>
     );
   }
 
   if (isError || !aClass) {
     return (
-      <ShowView>
-        <ShowViewHeader resource="classes" />
-        <div className="flex justify-center items-center h-96">
-          <p>Class not found</p>
+      <div className="container mx-auto py-20 text-center space-y-6">
+        <div className="p-6 rounded-full bg-destructive/10 text-destructive w-fit mx-auto">
+          <XCircle className="h-16 w-16" />
         </div>
-      </ShowView>
+        <div className="space-y-2">
+            <h2 className="text-3xl font-black tracking-tight">Classroom not found</h2>
+            <p className="text-muted-foreground font-medium max-w-md mx-auto">The classroom you are looking for does not exist or has been removed from the system.</p>
+        </div>
+        <Button asChild className="rounded-2xl h-12 px-8 font-black uppercase tracking-widest text-[10px]">
+            <Link to="/classes">Back to Classes</Link>
+        </Button>
+      </div>
     );
   }
 
@@ -423,626 +489,615 @@ const ClassesShow = () => {
     (a: Announcement) => a.isPinned && !dismissedAnnouncements.includes(a.id),
   );
 
+  const isFull = aClass.capacity && approvedEnrollments.length >= aClass.capacity;
+
   return (
     <>
-      <ShowView className="class-view class-show space-y-6">
-        {pinnedAnnouncements.length > 0 && (
-          <div className="space-y-3">
-            {pinnedAnnouncements.map((announcement: Announcement) => (
-              <div
-                key={announcement.id}
-                className="relative bg-primary/10 border border-primary/20 rounded-lg p-4 pr-12 animate-in fade-in slide-in-from-top-2"
-              >
-                <div className="flex items-center gap-2 mb-1">
-                  <Pin className="h-4 w-4 text-primary" />
-                  <span className="font-semibold text-sm text-primary uppercase tracking-wider">
-                    Pinned Announcement
-                  </span>
+      <div className="container mx-auto py-10 max-w-7xl space-y-10">
+        {/* Header & Breadcrumb */}
+        <motion.div 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="space-y-4"
+        >
+            <Breadcrumb />
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div className="flex items-center gap-4">
+                    <div className="p-3 rounded-2xl bg-primary/10 text-primary shadow-sm">
+                        <LayoutDashboard className="h-8 w-8" />
+                    </div>
+                    <div>
+                        <h1 className="text-4xl font-black tracking-tight">Classroom Hub</h1>
+                        <p className="text-muted-foreground font-medium">Manage curriculum, students, and live sessions.</p>
+                    </div>
                 </div>
-                <h4 className="font-bold text-lg">{announcement.title}</h4>
-                <p className="text-sm mt-1 line-clamp-2">{announcement.content}</p>
-                {announcement.fileUrl && (
-                  <a
-                    href={announcement.fileUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 mt-2 text-xs text-primary hover:underline"
-                  >
-                    <Paperclip className="h-3 w-3" />
-                    View Attachment
-                  </a>
-                )}
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="absolute top-2 right-2 h-8 w-8"
-                  onClick={() => handleDismissAnnouncement(announcement.id)}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-            ))}
-          </div>
-        )}
+                <div className="flex items-center gap-3">
+                    <Button 
+                        variant="outline" 
+                        className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-12 px-6 gap-2 border-primary/10 bg-card/50 backdrop-blur-sm"
+                        onClick={() => {
+                            navigator.clipboard.writeText(window.location.href);
+                            toast.success("Classroom link copied!");
+                        }}
+                    >
+                        <Share2 className="w-4 h-4" />
+                        Share
+                    </Button>
+                    {isOwner && (
+                        <Button 
+                            className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-12 px-8 shadow-xl shadow-primary/20"
+                            asChild
+                        >
+                            <Link to={`/classes/edit/${aClass.id}`}>
+                                <Pencil className="w-4 h-4 mr-2" />
+                                Edit Class
+                            </Link>
+                        </Button>
+                    )}
+                </div>
+            </div>
+        </motion.div>
 
-        <div
-          className="h-32 w-full rounded-2xl mb-6 flex items-end p-6 relative overflow-hidden"
+        {/* Pinned Announcements Section */}
+        <AnimatePresence>
+          {pinnedAnnouncements.length > 0 && (
+            <motion.div 
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="space-y-4"
+            >
+              {pinnedAnnouncements.map((announcement: Announcement) => (
+                <div
+                  key={announcement.id}
+                  className="relative overflow-hidden rounded-[2rem] border border-primary/20 bg-primary/5 backdrop-blur-xl p-8 pr-16 shadow-xl shadow-primary/5 group"
+                >
+                  <div className="absolute top-0 left-0 w-1.5 h-full bg-primary" />
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="p-2 rounded-xl bg-primary/10 text-primary">
+                      <Pin className="h-4 w-4" />
+                    </div>
+                    <span className="font-black text-[10px] text-primary uppercase tracking-widest">
+                      Priority Announcement
+                    </span>
+                  </div>
+                  <h4 className="font-black text-2xl tracking-tight">{announcement.title}</h4>
+                  <p className="text-base mt-3 text-muted-foreground leading-relaxed line-clamp-2 font-medium">{announcement.content}</p>
+                  {announcement.fileUrl && (
+                    <Button variant="link" className="p-0 h-auto mt-4 text-sm font-black text-primary gap-2 uppercase tracking-widest" asChild>
+                      <a href={announcement.fileUrl} target="_blank" rel="noopener noreferrer">
+                        <Paperclip className="h-4 w-4" />
+                        View Attachment
+                      </a>
+                    </Button>
+                  )}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute top-6 right-6 h-12 w-12 rounded-full hover:bg-primary/10 text-primary/40 hover:text-primary transition-all"
+                    onClick={() => handleDismissAnnouncement(announcement.id)}
+                  >
+                    <X className="h-6 w-6" />
+                  </Button>
+                </div>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Premium Class Banner */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="relative h-64 w-full rounded-[3rem] overflow-hidden shadow-2xl group"
           style={{ backgroundColor: classColor }}
         >
-          <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-          <div className="relative z-10">
-            <h1 className="text-3xl font-bold text-white">{aClass.name}</h1>
-            <p className="text-white/80 text-sm">{aClass.subject?.name}</p>
-          </div>
-        </div>
-
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <ScrollArea className="w-full whitespace-nowrap rounded-md border bg-muted/50 p-1">
-            <TabsList className="inline-flex h-9 w-max items-center justify-center rounded-lg p-1 text-muted-foreground">
-              <TabsTrigger
-                value="curriculum"
-                className={cn(
-                  "px-3 py-1.5",
-                  activeTab === "curriculum" && "text-white",
-                )}
-                style={
-                  activeTab === "curriculum"
-                    ? { backgroundColor: classColor }
-                    : {}
-                }
-              >
-                <div className="flex items-center gap-2">
-                  <LayoutGrid className="h-4 w-4" />
-                  <span>Curriculum</span>
+          {/* Background Patterns */}
+          <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10" />
+          
+          <div className="absolute bottom-0 left-0 w-full p-10 md:p-12 flex flex-col md:flex-row md:items-end justify-between gap-8">
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="p-3 rounded-2xl bg-white/20 backdrop-blur-md text-white shadow-lg">
+                  <BookOpen className="h-8 w-8" />
                 </div>
-              </TabsTrigger>
-              {isStaff && (
-                <TabsTrigger
-                  value="analytics"
-                  className={cn(
-                    "px-3 py-1.5",
-                    activeTab === "analytics" && "text-white",
-                  )}
-                  style={
-                    activeTab === "analytics"
-                      ? { backgroundColor: classColor }
-                      : {}
-                  }
-                >
-                  <div className="flex items-center gap-2">
-                    <BarChart3 className="h-4 w-4" />
-                    <span>Analytics</span>
-                  </div>
-                </TabsTrigger>
-              )}
-              <TabsTrigger
-                value="live"
-                className={cn(
-                  "px-3 py-1.5",
-                  activeTab === "live" && "text-white",
+                <Badge variant="secondary" className="bg-white/20 text-white border-none backdrop-blur-md font-black text-[10px] uppercase tracking-widest px-4 py-1.5 rounded-xl">
+                  {aClass.subject?.department?.name || "Academic"}
+                </Badge>
+                {isFull && (
+                  <Badge className="bg-orange-500 text-white border-none font-black text-[10px] uppercase tracking-widest px-4 py-1.5 rounded-xl shadow-lg">
+                    <Timer className="w-3 h-3 mr-1" />
+                    Waitlist Active
+                  </Badge>
                 )}
-                style={
-                  activeTab === "live" ? { backgroundColor: classColor } : {}
-                }
-              >
+              </div>
+              <h1 className="text-5xl md:text-6xl font-black text-white tracking-tighter leading-none">{aClass.name}</h1>
+              <div className="flex flex-wrap items-center gap-6 text-white/80 font-black text-xs uppercase tracking-widest">
                 <div className="flex items-center gap-2">
-                  <Video className="h-4 w-4" />
-                  <span>Live</span>
-                  {isLiveIndicator && (
-                    <span className="flex h-2 w-2 rounded-full bg-white animate-pulse" />
-                  )}
+                  <Globe className="h-4 w-4" />
+                  <span>{aClass.subject?.name}</span>
                 </div>
-              </TabsTrigger>
-              <TabsTrigger
-                value="leaderboard"
-                className={cn(
-                  "px-3 py-1.5",
-                  activeTab === "leaderboard" && "text-white",
-                )}
-                style={
-                  activeTab === "leaderboard"
-                    ? { backgroundColor: classColor }
-                    : {}
-                }
-              >
-                <div className="flex items-center gap-2">
-                  <Trophy className="h-4 w-4" />
-                  <span>Leaderboard</span>
-                </div>
-              </TabsTrigger>
-              <TabsTrigger
-                value="announcements"
-                className={cn(
-                  "px-3 py-1.5",
-                  activeTab === "announcements" && "text-white",
-                )}
-                style={
-                  activeTab === "announcements"
-                    ? { backgroundColor: classColor }
-                    : {}
-                }
-              >
-                <div className="flex items-center gap-2">
-                  <Megaphone className="h-4 w-4" />
-                  <span>Announcements</span>
-                </div>
-              </TabsTrigger>
-              <TabsTrigger
-                value="discussions"
-                className={cn(
-                  "px-3 py-1.5",
-                  activeTab === "discussions" && "text-white",
-                )}
-                style={
-                  activeTab === "discussions"
-                    ? { backgroundColor: classColor }
-                    : {}
-                }
-              >
-                <div className="flex items-center gap-2">
-                  <MessageSquare className="h-4 w-4" />
-                  <span>Discussions</span>
-                </div>
-              </TabsTrigger>
-              <TabsTrigger
-                value="resources"
-                className={cn(
-                  "px-3 py-1.5",
-                  activeTab === "resources" && "text-white",
-                )}
-                style={
-                  activeTab === "resources"
-                    ? { backgroundColor: classColor }
-                    : {}
-                }
-              >
-                <div className="flex items-center gap-2">
-                  <Library className="h-4 w-4" />
-                  <span>Resources</span>
-                </div>
-              </TabsTrigger>
-              <TabsTrigger
-                value="students"
-                className={cn(
-                  "px-3 py-1.5",
-                  activeTab === "students" && "text-white",
-                )}
-                style={
-                  activeTab === "students"
-                    ? { backgroundColor: classColor }
-                    : {}
-                }
-              >
+                <div className="w-1.5 h-1.5 rounded-full bg-white/30" />
                 <div className="flex items-center gap-2">
                   <Users className="h-4 w-4" />
-                  <span>Students</span>
-                  {isStaff && pendingEnrollments.length > 0 && (
-                    <Badge
-                      variant="destructive"
-                      className="h-4 w-4 p-0 flex items-center justify-center text-[10px]"
-                    >
-                      {pendingEnrollments.length}
-                    </Badge>
-                  )}
+                  <span>{approvedEnrollments.length} Students Enrolled</span>
                 </div>
-              </TabsTrigger>
-              <TabsTrigger
-                value="assignments"
-                className={cn(
-                  "px-3 py-1.5",
-                  activeTab === "assignments" && "text-white",
-                )}
-                style={
-                  activeTab === "assignments"
-                    ? { backgroundColor: classColor }
-                    : {}
-                }
-              >
-                Assignments
-              </TabsTrigger>
-              <TabsTrigger
-                value="quizzes"
-                className={cn(
-                  "px-3 py-1.5",
-                  activeTab === "quizzes" && "text-white",
-                )}
-                style={
-                  activeTab === "quizzes" ? { backgroundColor: classColor } : {}
-                }
-              >
-                <div className="flex items-center gap-2">
-                  <FileQuestion className="h-4 w-4" />
-                  <span>Quizzes</span>
-                </div>
-              </TabsTrigger>
-              <TabsTrigger
-                value="attendance"
-                className={cn(
-                  "px-3 py-1.5",
-                  activeTab === "attendance" && "text-white",
-                )}
-                style={
-                  activeTab === "attendance"
-                    ? { backgroundColor: classColor }
-                    : {}
-                }
-              >
-                <div className="flex items-center gap-2">
-                  <ClipboardCheck className="h-4 w-4" />
-                  <span>Attendance</span>
-                </div>
-              </TabsTrigger>
-              {isStaff && (
-                <TabsTrigger
-                  value="details"
-                  className={cn(
-                    "px-3 py-1.5",
-                    activeTab === "details" && "text-white",
-                  )}
-                  style={
-                    activeTab === "details"
-                      ? { backgroundColor: classColor }
-                      : {}
-                  }
-                >
-                  <div className="flex items-center gap-2">
-                    <Info className="h-4 w-4" />
-                    <span>Details</span>
-                  </div>
-                </TabsTrigger>
-              )}
-            </TabsList>
-            <ScrollBar orientation="horizontal" />
-          </ScrollArea>
-
-          <div className="mt-6">
-            <TabsContent value="curriculum">
-              <CurriculumTab classId={classId} />
-            </TabsContent>
-
-            {isStaff && (
-              <TabsContent value="analytics">
-                <AnalyticsTab classId={classId} />
-              </TabsContent>
-            )}
-
-            <TabsContent value="live">
-              <LiveClassroom classId={classId} className="w-full" />
-            </TabsContent>
-
-            <TabsContent value="leaderboard">
-              <LeaderboardTab classId={classId} />
-            </TabsContent>
-
-            <TabsContent value="announcements">
-              <AnnouncementTab classId={classId} />
-            </TabsContent>
-
-            <TabsContent value="discussions">
-              <DiscussionTab classId={classId} />
-            </TabsContent>
-
-            <TabsContent value="resources">
-              <ResourceTab classId={classId} />
-            </TabsContent>
-
-            <TabsContent value="students" className="space-y-6">
-              {isStaff && pendingEnrollments.length > 0 && (
-                <Card className="border-primary/20 bg-primary/5">
-                  <CardHeader>
-                    <CardTitle className="text-lg flex items-center gap-2">
-                      <Users className="h-5 w-5 text-primary" />
-                      Pending Requests
-                    </CardTitle>
-                    <CardDescription>
-                      Students waiting for approval to join this class.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {pendingEnrollments.map((enrollment) => (
-                        <div
-                          key={enrollment.id}
-                          className="flex items-center justify-between p-3 bg-background rounded-lg border"
-                        >
-                          <div className="flex items-center gap-3">
-                            <Avatar className="h-10 w-10">
-                              <AvatarImage
-                                src={enrollment.student.image ?? ""}
-                              />
-                              <AvatarFallback>
-                                {enrollment.student.name?.[0]}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <p className="font-medium">
-                                {enrollment.student.name}
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                {enrollment.student.email}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="text-destructive hover:bg-destructive/5"
-                              onClick={() =>
-                                handleEnrollmentAction(
-                                  enrollment.id,
-                                  "rejected",
-                                )
-                              }
-                            >
-                              <XCircle className="h-4 w-4 mr-2" />
-                              Reject
-                            </Button>
-                            <Button
-                              size="sm"
-                              onClick={() =>
-                                handleEnrollmentAction(
-                                  enrollment.id,
-                                  "approved",
-                                )
-                              }
-                              style={{ backgroundColor: classColor }}
-                            >
-                              <CheckCircle2 className="h-4 w-4 mr-2" />
-                              Approve
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
-                  <div>
-                    <CardTitle>Enrolled Students</CardTitle>
-                    <CardDescription>
-                      {approvedEnrollments.length} of {aClass.capacity} spots
-                      filled
-                    </CardDescription>
-                  </div>
-                  {isStaff && (
+                {waitlistedEnrollments.length > 0 && (
+                  <>
+                    <div className="w-1.5 h-1.5 rounded-full bg-white/30" />
                     <div className="flex items-center gap-2">
-                      <Dialog open={isMessageAllOpen} onOpenChange={setIsMessageAllOpen}>
-                        <DialogTrigger asChild>
-                          <Button variant="outline">
-                            <Send className="h-4 w-4 mr-2" />
-                            Message All
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                          <DialogHeader>
-                            <DialogTitle>Message All Students</DialogTitle>
-                            <DialogDescription>
-                              Send a notification to all enrolled students in this class.
-                            </DialogDescription>
-                          </DialogHeader>
-                          <div className="space-y-4 py-4">
-                            <div className="space-y-2">
-                              <label className="text-sm font-medium">Title</label>
-                              <Input
-                                placeholder="Notification Title"
-                                value={bulkMessage.title}
-                                onChange={(e) => setBulkMessage({ ...bulkMessage, title: e.target.value })}
-                              />
-                            </div>
-                            <div className="space-y-2">
-                              <label className="text-sm font-medium">Message</label>
-                              <Textarea
-                                placeholder="Type your message here..."
-                                value={bulkMessage.message}
-                                onChange={(e) => setBulkMessage({ ...bulkMessage, message: e.target.value })}
-                              />
-                            </div>
-                          </div>
-                          <DialogFooter>
-                            <Button variant="outline" onClick={() => setIsMessageAllOpen(false)}>Cancel</Button>
-                            <Button onClick={handleMessageAll} disabled={!bulkMessage.title || !bulkMessage.message}>Send Message</Button>
-                          </DialogFooter>
-                        </DialogContent>
-                      </Dialog>
-                      <Button
-                        onClick={() => setIsEnrollDialogOpen(true)}
-                        style={{ backgroundColor: classColor }}
-                      >
-                        <PlusCircle className="h-4 w-4 mr-2" />
-                        Enroll Student
-                      </Button>
+                      <Timer className="h-4 w-4" />
+                      <span>{waitlistedEnrollments.length} on Waitlist</span>
                     </div>
-                  )}
-                </CardHeader>
-                <CardContent>
-                  <DataTable table={enrollmentsTable} />
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="assignments">
-              <AssignmentList classId={classId} assignments={assignments} />
-            </TabsContent>
-
-            <TabsContent value="quizzes">
-              <QuizTab classId={classId} />
-            </TabsContent>
-
-            <TabsContent value="attendance">
-              <AttendanceTab
-                classId={classId}
-                enrollments={approvedEnrollments}
-              />
-            </TabsContent>
-
-            {isStaff && (
-              <TabsContent value="details">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-6">
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>Class Information</CardTitle>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Subject</span>
-                          <span className="font-medium">
-                            {aClass?.subject?.name ?? "N/A"}
-                          </span>
+                  </>
+                )}
+                {aClass.schedules?.[0] && (
+                    <>
+                        <div className="w-1.5 h-1.5 rounded-full bg-white/30" />
+                        <div className="flex items-center gap-2">
+                            <Clock className="h-4 w-4" />
+                            <span>{aClass.schedules[0].day} • {aClass.schedules[0].startTime}</span>
                         </div>
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Status</span>
-                          <Badge
-                            variant="default"
-                            className="capitalize"
-                            style={{ backgroundColor: classColor }}
-                          >
-                            {aClass.status}
-                          </Badge>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Capacity</span>
-                          <span className="font-medium">
-                            {aClass.capacity} Students
-                          </span>
-                        </div>
-                      </CardContent>
-                    </Card>
+                    </>
+                )}
+              </div>
+            </div>
 
-                    <Card className="border-ai-primary/20 bg-ai-primary/5">
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                          <StickyNote className="h-5 w-5 text-ai-primary" />
-                          Teacher Notes (Shared)
-                        </CardTitle>
-                        <CardDescription>
-                          Private scratchpad for staff. Visible to all teachers in this class.
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        {isLoadingNotes ? (
-                          <div className="flex justify-center py-8">
-                            <Loader2 className="h-6 w-6 animate-spin text-ai-primary" />
-                          </div>
-                        ) : (
-                          <Textarea
-                            placeholder="Jot down reminders, lesson ideas, or student observations..."
-                            className="min-h-[200px] bg-background/50"
-                            value={teacherNotes}
-                            onChange={(e) => handleNoteChange(e.target.value)}
-                          />
-                        )}
-                      </CardContent>
-                    </Card>
-                  </div>
-
-                  <Card className="border-primary/20">
-                    <CardHeader className="flex flex-row items-center justify-between">
-                      <div className="space-y-1">
-                        <CardTitle className="flex items-center gap-2">
-                          <Megaphone
-                            className="h-5 w-5"
-                            style={{ color: classColor }}
-                          />
-                          Student Access
-                        </CardTitle>
-                        <CardDescription>
-                          Share this code with students so they can join the
-                          class.
-                        </CardDescription>
-                      </div>
-                      {isOwner && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setIsInviteDialogOpen(true)}
-                        >
-                          <UserPlus className="h-4 w-4 mr-2" />
-                          Invite Co-Teacher
-                        </Button>
-                      )}
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                      <div
-                        className="flex items-center justify-between p-4 rounded-xl border"
-                        style={{
-                          backgroundColor: `${classColor}10`,
-                          borderColor: `${classColor}30`,
-                        }}
-                      >
-                        <div className="space-y-1">
-                          <p
-                            className="text-xs font-medium uppercase tracking-wider"
-                            style={{ color: classColor }}
-                          >
-                            Invite Code
-                          </p>
-                          <p className="text-2xl font-bold font-mono tracking-widest">
-                            {aClass.inviteCode}
-                          </p>
-                        </div>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="h-12 w-12 rounded-full"
-                          onClick={handleCopyInviteCode}
-                        >
-                          {copied ? (
-                            <Check className="h-5 w-5 text-success" />
-                          ) : (
-                            <Copy className="h-5 w-5" />
-                          )}
-                        </Button>
-                      </div>
-
-                      <div className="space-y-2">
-                        <p className="text-sm font-medium">Teachers</p>
-                        <div className="space-y-2">
-                          {aClass.teachers?.map((tc) => (
-                            <div
-                              key={tc.teacher.id}
-                              className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted transition-colors"
-                            >
-                              <Avatar className="h-8 w-8">
-                                <AvatarImage src={tc.teacher.image ?? ""} />
-                                <AvatarFallback>
-                                  {tc.teacher.name?.[0]}
-                                </AvatarFallback>
-                              </Avatar>
-                              <div className="flex-1">
-                                <p className="text-sm font-medium">
-                                  {tc.teacher.name}
-                                </p>
-                                <p className="text-[10px] text-muted-foreground">
-                                  {tc.isPrimary
-                                    ? "Primary Teacher"
-                                    : "Co-Teacher"}
-                                </p>
-                              </div>
-                              {tc.isPrimary && (
-                                <Badge
-                                  variant="secondary"
-                                  className="text-[10px]"
-                                >
-                                  Primary
-                                </Badge>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              </TabsContent>
+            {isLiveIndicator && (
+              <motion.div 
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="flex items-center gap-4 bg-red-500 text-white px-8 py-4 rounded-[2rem] shadow-2xl shadow-red-500/40 animate-pulse border-4 border-white/20"
+              >
+                <Video className="h-6 w-6" />
+                <span className="font-black uppercase tracking-widest text-sm">Live Session Active</span>
+              </motion.div>
             )}
           </div>
+        </motion.div>
+
+        {/* Main Navigation Tabs */}
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full space-y-10">
+          <div className="sticky top-6 z-40">
+            <ScrollArea className="w-full whitespace-nowrap rounded-[2rem] border border-black/[0.05] dark:border-white/[0.05] bg-card/80 backdrop-blur-2xl p-2 shadow-2xl">
+              <TabsList className="flex h-14 items-center justify-start rounded-2xl p-1 text-muted-foreground bg-transparent">
+                {tabs.map((tab) => {
+                  const Icon = tab.icon;
+                  const isActive = activeTab === tab.id;
+                  return (
+                    <TabsTrigger
+                      key={tab.id}
+                      value={tab.id}
+                      className={cn(
+                        "px-8 py-2 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all gap-3 h-11",
+                        isActive ? "text-white shadow-xl" : "hover:bg-primary/5 hover:text-primary"
+                      )}
+                      style={isActive ? { backgroundColor: classColor, boxShadow: `0 10px 25px -5px ${classColor}50` } : {}}
+                    >
+                      <Icon className="h-4 w-4" />
+                      <span>{tab.label}</span>
+                      {tab.indicator && (
+                        <span className="flex h-2 w-2 rounded-full bg-white animate-pulse" />
+                      )}
+                      {tab.badge && (
+                        <Badge variant="destructive" className="h-5 min-w-5 p-0 flex items-center justify-center text-[9px] rounded-full border-none font-black">
+                          {tab.badge}
+                        </Badge>
+                      )}
+                    </TabsTrigger>
+                  );
+                })}
+              </TabsList>
+              <ScrollBar orientation="horizontal" className="hidden" />
+            </ScrollArea>
+          </div>
+
+          <div className="mt-10">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeTab}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+              >
+                <TabsContent value="curriculum" className="mt-0">
+                  {activeTab === "curriculum" && <CurriculumTab classId={classId} />}
+                </TabsContent>
+
+                {isStaff && (
+                  <TabsContent value="analytics" className="mt-0">
+                    {activeTab === "analytics" && <AnalyticsTab classId={classId} />}
+                  </TabsContent>
+                )}
+
+                <TabsContent value="live" className="mt-0">
+                  {activeTab === "live" && <LiveClassroom classId={classId} className="w-full" />}
+                </TabsContent>
+
+                <TabsContent value="leaderboard" className="mt-0">
+                  {activeTab === "leaderboard" && <LeaderboardTab classId={classId} />}
+                </TabsContent>
+
+                <TabsContent value="announcements" className="mt-0">
+                  {activeTab === "announcements" && <AnnouncementTab classId={classId} />}
+                </TabsContent>
+
+                <TabsContent value="discussions" className="mt-0">
+                  {activeTab === "discussions" && <DiscussionTab classId={classId} />}
+                </TabsContent>
+
+                <TabsContent value="resources" className="mt-0">
+                  {activeTab === "resources" && <ResourceTab classId={classId} />}
+                </TabsContent>
+
+                <TabsContent value="students" className="mt-0 space-y-10">
+                  {activeTab === "students" && (
+                    <>
+                      {isStaff && (pendingEnrollments.length > 0 || waitlistedEnrollments.length > 0) && (
+                        <Card className="border-none shadow-2xl bg-primary/5 rounded-[2.5rem] overflow-hidden">
+                          <CardHeader className="p-10 pb-6">
+                            <div className="flex items-center gap-4">
+                              <div className="p-3 rounded-2xl bg-primary/10 text-primary">
+                                <Users className="h-8 w-8" />
+                              </div>
+                              <div>
+                                <CardTitle className="text-2xl font-black tracking-tight">Pending & Waitlisted</CardTitle>
+                                <CardDescription className="font-medium text-base">Students waiting for approval or a spot to open.</CardDescription>
+                              </div>
+                            </div>
+                          </CardHeader>
+                          <CardContent className="p-10 pt-4">
+                            <div className="grid gap-4">
+                              {[...pendingEnrollments, ...waitlistedEnrollments].map((enrollment: any) => (
+                                <div
+                                  key={enrollment.id}
+                                  className="flex items-center justify-between p-6 bg-card rounded-[1.5rem] border border-black/[0.03] dark:border-white/[0.03] shadow-sm group hover:border-primary/20 transition-all"
+                                >
+                                  <div className="flex items-center gap-5">
+                                    <Avatar className="h-14 w-14 border-4 border-background shadow-lg rounded-2xl">
+                                      <AvatarImage src={enrollment.student.image ?? ""} className="object-cover" />
+                                      <AvatarFallback className="bg-primary/5 text-primary font-black text-lg">{enrollment.student.name?.[0]}</AvatarFallback>
+                                    </Avatar>
+                                    <div>
+                                      <div className="flex items-center gap-2">
+                                        <p className="font-black text-lg tracking-tight">{enrollment.student.name}</p>
+                                        <Badge variant="secondary" className="text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md">
+                                          {enrollment.status}
+                                          {enrollment.status === "waitlisted" && ` #${enrollment.waitlistPosition}`}
+                                        </Badge>
+                                      </div>
+                                      <p className="text-sm text-muted-foreground font-bold">{enrollment.student.email}</p>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-4">
+                                    <Button
+                                      size="lg"
+                                      variant="ghost"
+                                      className="h-12 rounded-2xl font-black uppercase tracking-widest text-[10px] text-destructive hover:bg-destructive/5 px-6"
+                                      onClick={() => handleEnrollmentAction(enrollment.id, "rejected")}
+                                    >
+                                      <XCircle className="h-4 w-4 mr-2" />
+                                      Reject
+                                    </Button>
+                                    <Button
+                                      size="lg"
+                                      className="h-12 rounded-2xl font-black uppercase tracking-widest text-[10px] px-8 shadow-xl shadow-primary/20"
+                                      onClick={() => handleEnrollmentAction(enrollment.id, "approved")}
+                                      style={{ backgroundColor: classColor }}
+                                    >
+                                      <CheckCircle2 className="h-4 w-4 mr-2" />
+                                      Approve Student
+                                    </Button>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      )}
+
+                      <Card className="border-none shadow-2xl bg-card/50 backdrop-blur-xl rounded-[2.5rem] overflow-hidden">
+                        <CardHeader className="p-10 pb-6 flex flex-col md:flex-row md:items-center justify-between border-b border-black/[0.03] dark:border-white/[0.03] gap-6">
+                          <div className="space-y-2">
+                            <CardTitle className="text-2xl font-black tracking-tight">Enrolled Students</CardTitle>
+                            <CardDescription className="font-bold flex items-center gap-2 text-primary">
+                              <Users className="h-4 w-4" />
+                              {approvedEnrollments.length} of {aClass.capacity} spots filled
+                            </CardDescription>
+                          </div>
+                          {isStaff && (
+                            <div className="flex flex-wrap items-center gap-3">
+                              <Dialog open={isMessageAllOpen} onOpenChange={setIsMessageAllOpen}>
+                                <DialogTrigger asChild>
+                                  <Button variant="outline" className="h-12 rounded-2xl font-black uppercase tracking-widest text-[10px] px-6 border-primary/10 bg-card/50 backdrop-blur-sm hover:bg-primary/5 text-primary">
+                                    <Send className="h-4 w-4 mr-2" />
+                                    Message All
+                                  </Button>
+                                </DialogTrigger>
+                                <DialogContent className="rounded-[2.5rem] border-none shadow-2xl bg-card/95 backdrop-blur-xl max-w-lg">
+                                  <DialogHeader className="space-y-4">
+                                    <div className="p-4 rounded-2xl bg-primary/10 text-primary w-fit">
+                                      <Send className="h-8 w-8" />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <DialogTitle className="text-3xl font-black tracking-tight">Broadcast Message</DialogTitle>
+                                        <DialogDescription className="font-medium text-base">Send a priority notification to all enrolled students.</DialogDescription>
+                                    </div>
+                                  </DialogHeader>
+                                  <div className="space-y-8 py-8">
+                                    <div className="space-y-3">
+                                      <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Notification Title</Label>
+                                      <Input
+                                        placeholder="e.g., Important Update Regarding Tomorrow's Lesson"
+                                        value={bulkMessage.title}
+                                        onChange={(e) => setBulkMessage({ ...bulkMessage, title: e.target.value })}
+                                        className="h-14 rounded-2xl bg-muted/30 border-none focus-visible:ring-primary font-black text-sm"
+                                      />
+                                    </div>
+                                    <div className="space-y-3">
+                                      <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Message Content</Label>
+                                      <Textarea
+                                        placeholder="Type your message here..."
+                                        value={bulkMessage.message}
+                                        onChange={(e) => setBulkMessage({ ...bulkMessage, message: e.target.value })}
+                                        className="min-h-[200px] rounded-[2rem] bg-muted/30 border-none focus-visible:ring-primary p-6 text-base leading-relaxed font-medium resize-none"
+                                      />
+                                    </div>
+                                  </div>
+                                  <DialogFooter className="gap-3">
+                                    <Button variant="ghost" className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-8" onClick={() => setIsMessageAllOpen(false)}>Cancel</Button>
+                                    <Button 
+                                      className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-12 shadow-xl shadow-primary/20" 
+                                      onClick={handleMessageAll} 
+                                      disabled={!bulkMessage.title || !bulkMessage.message}
+                                      style={{ backgroundColor: classColor }}
+                                    >
+                                      Send Broadcast
+                                    </Button>
+                                  </DialogFooter>
+                                </DialogContent>
+                              </Dialog>
+                              <Button
+                                onClick={() => setIsEnrollDialogOpen(true)}
+                                className="h-12 rounded-2xl font-black uppercase tracking-widest text-[10px] px-8 shadow-xl shadow-primary/20"
+                                style={{ backgroundColor: classColor }}
+                              >
+                                <PlusCircle className="h-4 w-4 mr-2" />
+                                Enroll Student
+                              </Button>
+                            </div>
+                          )}
+                        </CardHeader>
+                        <CardContent className="p-10">
+                          <DataTable table={enrollmentsTable} />
+                        </CardContent>
+                      </Card>
+                    </>
+                  )}
+                </TabsContent>
+
+                <TabsContent value="assignments" className="mt-0">
+                  {activeTab === "assignments" && <AssignmentList classId={classId} assignments={assignments} />}
+                </TabsContent>
+
+                <TabsContent value="quizzes" className="mt-0">
+                  {activeTab === "quizzes" && <QuizTab classId={classId} />}
+                </TabsContent>
+
+                <TabsContent value="attendance" className="mt-0">
+                  {activeTab === "attendance" && <AttendanceTab
+                    classId={classId}
+                    enrollments={approvedEnrollments}
+                  />}
+                </TabsContent>
+
+                {isStaff && (
+                  <TabsContent value="details" className="mt-0">
+                    {activeTab === "details" && (
+                      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+                        <div className="lg:col-span-2 space-y-10">
+                          <Card className="border-none shadow-2xl bg-card/50 backdrop-blur-xl rounded-[2.5rem] overflow-hidden">
+                            <CardHeader className="p-10 pb-6 border-b border-black/[0.03] dark:border-white/[0.03]">
+                              <CardTitle className="text-2xl font-black tracking-tight flex items-center gap-4">
+                                <div className="p-3 rounded-2xl bg-primary/10 text-primary">
+                                  <Info className="h-6 w-6" />
+                                </div>
+                                Class Information
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent className="p-10 space-y-8">
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                                <div className="space-y-3">
+                                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Subject Area</Label>
+                                  <div className="p-5 rounded-[1.5rem] bg-muted/30 flex items-center gap-4 border border-primary/5">
+                                    <div className="p-2 rounded-xl bg-primary/10 text-primary"><BookOpen className="h-5 w-5" /></div>
+                                    <span className="font-black text-base">{aClass?.subject?.name ?? "N/A"}</span>
+                                  </div>
+                                </div>
+                                <div className="space-y-3">
+                                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Class Status</Label>
+                                  <div className="p-5 rounded-[1.5rem] bg-muted/30 flex items-center gap-4 border border-primary/5">
+                                    <div className="p-2 rounded-xl bg-green-500/10 text-green-600"><ShieldCheck className="h-5 w-5" /></div>
+                                    <Badge
+                                      variant="default"
+                                      className="capitalize font-black text-[10px] uppercase tracking-widest border-none px-4 py-1 rounded-lg"
+                                      style={{ backgroundColor: classColor }}
+                                    >
+                                      {aClass.status}
+                                    </Badge>
+                                  </div>
+                                </div>
+                                <div className="space-y-3">
+                                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Student Capacity</Label>
+                                  <div className="p-5 rounded-[1.5rem] bg-muted/30 flex items-center gap-4 border border-primary/5">
+                                    <div className="p-2 rounded-xl bg-primary/10 text-primary"><Users className="h-5 w-5" /></div>
+                                    <span className="font-black text-base">{aClass.capacity} Students Max</span>
+                                  </div>
+                                </div>
+                                <div className="space-y-3">
+                                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Department</Label>
+                                  <div className="p-5 rounded-[1.5rem] bg-muted/30 flex items-center gap-4 border border-primary/5">
+                                    <div className="p-2 rounded-xl bg-primary/10 text-primary"><Building2 className="h-5 w-5" /></div>
+                                    <span className="font-black text-base">{aClass.subject?.department?.name || "Academic"}</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+
+                          <Card className="border-none shadow-2xl bg-ai-primary/[0.02] backdrop-blur-xl rounded-[2.5rem] overflow-hidden border border-ai-primary/10">
+                            <CardHeader className="p-10 pb-6 border-b border-ai-primary/10">
+                              <div className="flex items-center justify-between">
+                                <div className="space-y-1">
+                                  <CardTitle className="text-2xl font-black tracking-tight flex items-center gap-4 text-ai-primary">
+                                    <div className="p-3 rounded-2xl bg-ai-primary/10">
+                                      <StickyNote className="h-8 w-8" />
+                                    </div>
+                                    Teacher Notes (Shared)
+                                  </CardTitle>
+                                  <CardDescription className="font-bold text-ai-primary/60">Private scratchpad for staff. Visible to all teachers in this class.</CardDescription>
+                                </div>
+                                <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-ai-primary/60 bg-ai-primary/5 px-4 py-2 rounded-full border border-ai-primary/10 animate-pulse">
+                                  <Sparkles className="h-4 w-4" />
+                                  Auto-saving
+                                </div>
+                              </div>
+                            </CardHeader>
+                            <CardContent className="p-10">
+                              {isLoadingNotes ? (
+                                <div className="flex justify-center py-20">
+                                  <Loader2 className="h-12 w-12 animate-spin text-ai-primary/20" />
+                                </div>
+                              ) : (
+                                <div className="relative group">
+                                  <Textarea
+                                    placeholder="Jot down reminders, lesson ideas, or student observations..."
+                                    className="min-h-[400px] rounded-[2rem] bg-white/50 dark:bg-zinc-950/50 border-none focus-visible:ring-ai-primary p-8 text-base leading-relaxed shadow-inner transition-all font-medium resize-none"
+                                    value={teacherNotes}
+                                    onChange={(e) => handleNoteChange(e.target.value)}
+                                  />
+                                  <div className="absolute bottom-8 right-8 opacity-10 group-focus-within:opacity-40 transition-opacity">
+                                    <StickyNote className="h-12 w-12 text-ai-primary" />
+                                  </div>
+                                </div>
+                              )}
+                            </CardContent>
+                          </Card>
+                        </div>
+
+                        <div className="space-y-10">
+                          <Card className="border-none shadow-2xl bg-card/50 backdrop-blur-xl rounded-[2.5rem] overflow-hidden">
+                            <CardHeader className="p-10 pb-6 border-b border-black/[0.03] dark:border-white/[0.03]">
+                              <div className="flex items-center justify-between">
+                                <CardTitle className="text-2xl font-black tracking-tight flex items-center gap-4">
+                                  <div className="p-3 rounded-2xl bg-primary/10 text-primary">
+                                    <Megaphone className="h-8 w-8" />
+                                  </div>
+                                  Access Control
+                                </CardTitle>
+                                {isOwner && (
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-10 rounded-xl font-black uppercase tracking-widest text-[10px] border-primary/10 text-primary hover:bg-primary/5 px-4"
+                                    onClick={() => setIsInviteDialogOpen(true)}
+                                  >
+                                    <UserPlus className="h-4 w-4 mr-2" />
+                                    Invite
+                                  </Button>
+                                )}
+                              </div>
+                            </CardHeader>
+                            <CardContent className="p-10 space-y-10">
+                              <div
+                                className="flex flex-col items-center justify-center p-10 rounded-[2.5rem] border-4 border-dashed transition-all group hover:bg-primary/[0.02] text-center space-y-4"
+                                style={{
+                                  backgroundColor: `${classColor}05`,
+                                  borderColor: `${classColor}20`,
+                                }}
+                              >
+                                <div className="space-y-1">
+                                  <p
+                                    className="text-[10px] font-black uppercase tracking-widest opacity-60"
+                                    style={{ color: classColor }}
+                                  >
+                                    Class Invite Code
+                                  </p>
+                                  <p className="text-5xl font-black font-mono tracking-[0.3em] ml-[0.3em]">
+                                    {aClass.inviteCode}
+                                  </p>
+                                </div>
+                                <Button
+                                  variant="outline"
+                                  size="lg"
+                                  className="rounded-2xl border-none bg-white dark:bg-zinc-900 shadow-xl group-hover:scale-105 transition-transform font-black uppercase tracking-widest text-[10px] h-12 px-8 gap-2"
+                                  onClick={handleCopyInviteCode}
+                                >
+                                  {copied ? (
+                                    <>
+                                      <Check className="h-4 w-4 text-success" />
+                                      Copied!
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Copy className="h-4 w-4 text-primary" />
+                                      Copy Code
+                                    </>
+                                  )}
+                                </Button>
+                              </div>
+
+                              <div className="space-y-6">
+                                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Teaching Staff</Label>
+                                <div className="grid gap-4">
+                                  {aClass.teachers?.map((tc: any) => (
+                                    <div
+                                      key={tc.teacher.id}
+                                      className="flex items-center gap-5 p-5 rounded-[1.5rem] bg-muted/30 border border-transparent hover:border-primary/10 transition-all group"
+                                    >
+                                      <Avatar className="h-12 w-12 border-4 border-background shadow-lg group-hover:scale-110 transition-transform rounded-2xl">
+                                        <AvatarImage src={tc.teacher.image ?? ""} className="object-cover" />
+                                        <AvatarFallback className="bg-primary/5 text-primary font-black">
+                                          {tc.teacher.name?.[0]}
+                                        </AvatarFallback>
+                                      </Avatar>
+                                      <div className="flex-1">
+                                        <p className="text-base font-black tracking-tight">
+                                          {tc.teacher.name}
+                                        </p>
+                                        <p className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-widest">
+                                          {tc.isPrimary
+                                            ? "Primary Instructor"
+                                            : "Co-Instructor"}
+                                        </p>
+                                      </div>
+                                      {tc.isPrimary && (
+                                        <Badge
+                                          variant="secondary"
+                                          className="text-[9px] font-black uppercase tracking-widest bg-primary/10 text-primary border-none px-3 py-1 rounded-lg"
+                                        >
+                                          Lead
+                                        </Badge>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </div>
+                      </div>
+                    )}
+                  </TabsContent>
+                )}
+              </motion.div>
+            </AnimatePresence>
+          </div>
         </Tabs>
-      </ShowView>
+      </div>
 
       {isStaff && (
         <>
@@ -1050,20 +1105,26 @@ const ClassesShow = () => {
             open={unenrollTarget !== null}
             onOpenChange={() => setUnenrollTarget(null)}
           >
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This will unenroll the student from the class.
-                </AlertDialogDescription>
+            <AlertDialogContent className="rounded-[2.5rem] border-none shadow-2xl bg-card/95 backdrop-blur-xl">
+              <AlertDialogHeader className="space-y-4">
+                <div className="p-4 rounded-2xl bg-destructive/10 text-destructive w-fit">
+                  <Trash2 className="h-8 w-8" />
+                </div>
+                <div className="space-y-1">
+                    <AlertDialogTitle className="text-3xl font-black tracking-tight">Confirm Unenrollment</AlertDialogTitle>
+                    <AlertDialogDescription className="font-medium text-base">
+                    This will permanently remove the student from this classroom. They will lose access to all curriculum, assignments, and grades.
+                    </AlertDialogDescription>
+                </div>
               </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogFooter className="gap-3 pt-6">
+                <AlertDialogCancel className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-8">Cancel</AlertDialogCancel>
                 <AlertDialogAction
                   onClick={handleConfirmUnenroll}
                   disabled={isDeleting}
+                  className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-12 bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-xl shadow-destructive/20"
                 >
-                  {isDeleting ? "Unenrolling..." : "Confirm"}
+                  {isDeleting ? "Processing..." : "Confirm Unenroll"}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>

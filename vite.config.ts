@@ -71,4 +71,9 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  define: {
+    "process.env": {},
+    "process.env.IS_PREACT": JSON.stringify("true"),
+    global: "window",
+  },
 });

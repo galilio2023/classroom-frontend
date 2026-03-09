@@ -1,5 +1,10 @@
 import { useState, useMemo, useEffect } from "react";
-import { useCustom, useCustomMutation, useNotification, useGetIdentity } from "@refinedev/core";
+import {
+  useCustom,
+  useCustomMutation,
+  useNotification,
+  useGetIdentity,
+} from "@refinedev/core";
 import { useSearchParams } from "react-router-dom";
 import {
   Card,
@@ -28,12 +33,39 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Enrollment, AttendanceStatus, Attendance, User, UserRole } from "@/types";
-import { Loader2, Save, Calendar as CalendarIcon, CheckCircle2, XCircle, Clock, AlertCircle, History, ClipboardCheck, QrCode, Camera } from "lucide-react";
+import {
+  Enrollment,
+  AttendanceStatus,
+  Attendance,
+  User,
+  UserRole,
+} from "@/types";
+import {
+  Loader2,
+  Save,
+  Calendar as CalendarIcon,
+  CheckCircle2,
+  XCircle,
+  Clock,
+  AlertCircle,
+  History,
+  ClipboardCheck,
+  QrCode,
+  Camera,
+  LayoutDashboard,
+  Info,
+  ArrowRight,
+  Sparkles,
+  Timer,
+  Zap
+} from "lucide-react";
 import { format } from "date-fns";
 import { EmptyState } from "@/components/empty-state";
 import { QRAttendanceModal } from "./qr-attendance-modal";
 import { QRScannerModal } from "./qr-scanner-modal";
+import { cn } from "@/lib/utils";
+import { motion, AnimatePresence } from "framer-motion";
+import { Label } from "@/components/ui/label";
 
 interface AttendanceTabProps {
   classId: string;
@@ -41,27 +73,31 @@ interface AttendanceTabProps {
 }
 
 interface AttendanceHistoryGroup {
-    date: string;
-    present: number;
-    absent: number;
-    late: number;
-    excused: number;
-    records: Attendance[];
+  date: string;
+  present: number;
+  absent: number;
+  late: number;
+  excused: number;
+  records: Attendance[];
 }
 
 export const AttendanceTab = ({ classId, enrollments }: AttendanceTabProps) => {
   const { data: identity } = useGetIdentity<User>();
-  const isTeacher = identity?.role === UserRole.TEACHER || identity?.role === UserRole.ADMIN;
+  const isTeacher =
+    identity?.role === UserRole.TEACHER || identity?.role === UserRole.ADMIN;
   const [searchParams] = useSearchParams();
 
   const { open } = useNotification();
-  const [selectedDate, setSelectedDate] = useState(searchParams.get("date") || format(new Date(), "yyyy-MM-dd"));
-  const [attendanceData, setAttendanceData] = useState<Record<string, { status: AttendanceStatus; remarks: string }>>({});
-  
+  const [selectedDate, setSelectedDate] = useState(
+    searchParams.get("date") || format(new Date(), "yyyy-MM-dd"),
+  );
+  const [attendanceData, setAttendanceData] = useState<
+    Record<string, { status: AttendanceStatus; remarks: string; minutesPresent: number; participationScore: number }>
+  >({});
+
   const [isQRModalOpen, setIsQRModalOpen] = useState(false);
   const [isScannerModalOpen, setIsScannerModalOpen] = useState(false);
 
-  // Fetch existing attendance for the selected date
   const { query: dailyQuery } = useCustom<Attendance[]>({
     url: `/attendance`,
     method: "get",
@@ -77,7 +113,6 @@ export const AttendanceTab = ({ classId, enrollments }: AttendanceTabProps) => {
   const isFetching = dailyQuery.isLoading;
   const refetchDaily = dailyQuery.refetch;
 
-  // Fetch attendance history
   const { query: historyQuery } = useCustom<AttendanceHistoryGroup[]>({
     url: `/attendance/history/${classId}`,
     method: "get",
@@ -86,33 +121,45 @@ export const AttendanceTab = ({ classId, enrollments }: AttendanceTabProps) => {
   const isHistoryLoading = historyQuery.isLoading;
   const refetchHistory = historyQuery.refetch;
 
-  // Fetch stats for the SELECTED date
   const { query: statsQuery } = useCustom<Record<AttendanceStatus, number>>({
     url: `/attendance/stats/${classId}`,
     method: "get",
     config: {
-        query: { date: selectedDate }
-    }
+      query: { date: selectedDate },
+    },
   });
   const statsData = statsQuery.data;
   const refetchStats = statsQuery.refetch;
 
   useEffect(() => {
-    const initialData: Record<string, { status: AttendanceStatus; remarks: string }> = {};
-    
+    const initialData: Record<
+      string,
+      { status: AttendanceStatus; remarks: string; minutesPresent: number; participationScore: number }
+    > = {};
+
     enrollments.forEach((e) => {
-      initialData[e.studentId] = { status: AttendanceStatus.ABSENT, remarks: "" };
+      initialData[e.studentId] = {
+        status: AttendanceStatus.ABSENT,
+        remarks: "",
+        minutesPresent: 0,
+        participationScore: 0,
+      };
     });
 
     if (existingAttendance?.data) {
       existingAttendance.data.forEach((record: Attendance) => {
-        const recordDateStr = typeof record.date === 'string' ? record.date.split('T')[0] : format(new Date(record.date), "yyyy-MM-dd");
-        
+        const recordDateStr =
+          typeof record.date === "string"
+            ? record.date.split("T")[0]
+            : format(new Date(record.date), "yyyy-MM-dd");
+
         if (recordDateStr === selectedDate) {
-            initialData[record.studentId] = { 
-                status: record.status, 
-                remarks: record.remarks || "" 
-            };
+          initialData[record.studentId] = {
+            status: record.status,
+            remarks: record.remarks || "",
+            minutesPresent: record.minutesPresent || 0,
+            participationScore: record.participationScore || 0,
+          };
         }
       });
     }
@@ -128,10 +175,10 @@ export const AttendanceTab = ({ classId, enrollments }: AttendanceTabProps) => {
     }));
   };
 
-  const handleRemarksChange = (studentId: string, remarks: string) => {
+  const handleValueChange = (studentId: string, field: "minutesPresent" | "participationScore" | "remarks", value: any) => {
     setAttendanceData((prev) => ({
       ...prev,
-      [studentId]: { ...prev[studentId], remarks },
+      [studentId]: { ...prev[studentId], [field]: value },
     }));
   };
 
@@ -140,6 +187,8 @@ export const AttendanceTab = ({ classId, enrollments }: AttendanceTabProps) => {
       studentId,
       status: data.status,
       remarks: data.remarks,
+      minutesPresent: data.minutesPresent,
+      participationScore: data.participationScore,
     }));
 
     saveAttendance(
@@ -163,115 +212,174 @@ export const AttendanceTab = ({ classId, enrollments }: AttendanceTabProps) => {
           void refetchHistory();
           void refetchStats();
         },
-      }
+      },
     );
   };
 
   const getStatusIcon = (status: AttendanceStatus) => {
     switch (status) {
-      case AttendanceStatus.PRESENT: return <CheckCircle2 className="h-4 w-4 text-green-500" />;
-      case AttendanceStatus.ABSENT: return <XCircle className="h-4 w-4 text-destructive" />;
-      case AttendanceStatus.LATE: return <Clock className="h-4 w-4 text-yellow-500" />;
-      case AttendanceStatus.EXCUSED: return <AlertCircle className="h-4 w-4 text-blue-500" />;
+      case AttendanceStatus.PRESENT:
+        return <CheckCircle2 className="h-4 w-4 text-green-500" />;
+      case AttendanceStatus.ABSENT:
+        return <XCircle className="h-4 w-4 text-destructive" />;
+      case AttendanceStatus.LATE:
+        return <Clock className="h-4 w-4 text-yellow-500" />;
+      case AttendanceStatus.EXCUSED:
+        return <AlertCircle className="h-4 w-4 text-blue-500" />;
     }
   };
 
   const getStatusBadge = (status: AttendanceStatus) => {
     switch (status) {
-      case AttendanceStatus.PRESENT: return <Badge className="bg-green-500/10 text-green-500 hover:bg-green-500/20 border-green-500/20">Present</Badge>;
-      case AttendanceStatus.ABSENT: return <Badge variant="destructive" className="bg-destructive/10 text-destructive hover:bg-destructive/20 border-destructive/20">Absent</Badge>;
-      case AttendanceStatus.LATE: return <Badge className="bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500/20 border-yellow-500/20">Late</Badge>;
-      case AttendanceStatus.EXCUSED: return <Badge className="bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 border-blue-500/20">Excused</Badge>;
+      case AttendanceStatus.PRESENT:
+        return (
+          <Badge className="bg-success/10 text-success border-none font-black text-[9px] uppercase tracking-widest">
+            Present
+          </Badge>
+        );
+      case AttendanceStatus.ABSENT:
+        return (
+          <Badge
+            variant="destructive"
+            className="bg-destructive/10 text-destructive border-none font-black text-[9px] uppercase tracking-widest"
+          >
+            Absent
+          </Badge>
+        );
+      case AttendanceStatus.LATE:
+        return (
+          <Badge className="bg-yellow-500/10 text-yellow-600 border-none font-black text-[9px] uppercase tracking-widest">
+            Late
+          </Badge>
+        );
+      case AttendanceStatus.EXCUSED:
+        return (
+          <Badge className="bg-blue-500/10 text-blue-600 border-none font-black text-[9px] uppercase tracking-widest">
+            Excused
+          </Badge>
+        );
     }
   };
 
   return (
-    <div className="space-y-6">
-      <div className="grid gap-4 md:grid-cols-4">
-        <Card className="border-green-500/20 bg-green-500/[0.02]">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <p className="text-[10px] font-black uppercase tracking-widest text-green-600/60">Present</p>
-                <p className="text-3xl font-black text-green-600">{statsData?.data?.present || 0}</p>
-              </div>
-              <div className="p-2 bg-green-500/10 rounded-lg">
-                <CheckCircle2 className="h-5 w-5 text-green-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="border-destructive/20 bg-destructive/[0.02]">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <p className="text-[10px] font-black uppercase tracking-widest text-destructive/60">Absent</p>
-                <p className="text-3xl font-black text-destructive">{statsData?.data?.absent || 0}</p>
-              </div>
-              <div className="p-2 bg-destructive/10 rounded-lg">
-                <XCircle className="h-5 w-5 text-destructive" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="border-yellow-500/20 bg-yellow-500/[0.02]">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <p className="text-[10px] font-black uppercase tracking-widest text-yellow-600/60">Late</p>
-                <p className="text-3xl font-black text-yellow-600">{statsData?.data?.late || 0}</p>
-              </div>
-              <div className="p-2 bg-yellow-500/10 rounded-lg">
-                <Clock className="h-5 w-5 text-yellow-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="border-blue-500/20 bg-blue-500/[0.02]">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <p className="text-[10px] font-black uppercase tracking-widest text-blue-600/60">Excused</p>
-                <p className="text-3xl font-black text-blue-600">{statsData?.data?.excused || 0}</p>
-              </div>
-              <div className="p-2 bg-blue-500/10 rounded-lg">
-                <AlertCircle className="h-5 w-5 text-blue-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+    <div className="space-y-10 pb-20">
+      {/* Stats Grid */}
+      <div className="grid gap-6 md:grid-cols-4">
+        {[
+          {
+            label: "Present",
+            value: statsData?.data?.present || 0,
+            icon: CheckCircle2,
+            color: "text-success",
+            bg: "bg-success/10",
+            border: "border-success/20",
+          },
+          {
+            label: "Absent",
+            value: statsData?.data?.absent || 0,
+            icon: XCircle,
+            color: "text-destructive",
+            bg: "bg-destructive/10",
+            border: "border-destructive/20",
+          },
+          {
+            label: "Late",
+            value: statsData?.data?.late || 0,
+            icon: Clock,
+            color: "text-yellow-600",
+            bg: "bg-yellow-500/10",
+            border: "border-yellow-500/20",
+          },
+          {
+            label: "Excused",
+            value: statsData?.data?.excused || 0,
+            icon: AlertCircle,
+            color: "text-blue-600",
+            bg: "bg-blue-500/10",
+            border: "border-blue-500/20",
+          },
+        ].map((stat) => (
+          <motion.div
+            key={stat.label}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <Card
+              className={cn(
+                "border-none shadow-xl bg-card/50 backdrop-blur-xl rounded-[1.5rem] overflow-hidden group hover:shadow-2xl transition-all",
+                stat.bg,
+              )}
+            >
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-black uppercase tracking-widest opacity-60">
+                      {stat.label}
+                    </p>
+                    <p
+                      className={cn(
+                        "text-4xl font-black tracking-tighter",
+                        stat.color,
+                      )}
+                    >
+                      {stat.value}
+                    </p>
+                  </div>
+                  <div
+                    className={cn(
+                      "p-3 rounded-2xl transition-transform group-hover:scale-110",
+                      stat.bg,
+                    )}
+                  >
+                    <stat.icon className={cn("h-6 w-6", stat.color)} />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        ))}
       </div>
 
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <Tabs defaultValue={isTeacher ? "mark" : "history"} className="w-full">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
-            <TabsList>
+      <div className="space-y-8">
+        <Tabs
+          defaultValue={isTeacher ? "mark" : "history"}
+          className="w-full space-y-8"
+        >
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <TabsList className="bg-card/50 backdrop-blur-xl border border-black/[0.05] dark:border-white/[0.05] p-1.5 rounded-2xl h-12 shadow-sm">
               {isTeacher && (
-                <TabsTrigger value="mark" className="gap-2">
-                  <CalendarIcon className="h-4 w-4" />
+                <TabsTrigger
+                  value="mark"
+                  className="rounded-xl font-black uppercase tracking-widest text-[10px] px-6 gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
+                >
+                  <CalendarIcon className="h-3.5 w-3.5" />
                   Mark Attendance
                 </TabsTrigger>
               )}
-              <TabsTrigger value="history" className="gap-2">
-                <History className="h-4 w-4" />
+              <TabsTrigger
+                value="history"
+                className="rounded-xl font-black uppercase tracking-widest text-[10px] px-6 gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
+              >
+                <History className="h-3.5 w-3.5" />
                 History
               </TabsTrigger>
             </TabsList>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               {isTeacher ? (
-                <Button 
-                  variant="outline" 
-                  className="gap-2 border-primary/20 hover:bg-primary/5 text-primary"
+                <Button
+                  variant="outline"
+                  className="h-12 rounded-2xl px-6 font-black uppercase tracking-widest text-[10px] gap-2 border-primary/20 hover:bg-primary/5 text-primary relative overflow-hidden group shadow-sm"
                   onClick={() => setIsQRModalOpen(true)}
                 >
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shine_1.5s_ease-in-out] pointer-events-none" />
                   <QrCode className="h-4 w-4" />
                   Start QR Attendance
                 </Button>
               ) : (
-                <Button 
-                  variant="default" 
-                  className="gap-2 shadow-lg shadow-primary/20"
+                <Button
+                  className="h-12 rounded-2xl px-6 font-black uppercase tracking-widest text-[10px] gap-2 shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95"
                   onClick={() => setIsScannerModalOpen(true)}
                 >
                   <Camera className="h-4 w-4" />
@@ -282,180 +390,374 @@ export const AttendanceTab = ({ classId, enrollments }: AttendanceTabProps) => {
           </div>
 
           {isTeacher && (
-            <TabsContent value="mark">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-                  <div>
-                    <CardTitle>Daily Attendance</CardTitle>
-                    <CardDescription>Mark student presence for {format(new Date(selectedDate), "PPP")}</CardDescription>
+            <TabsContent value="mark" className="mt-0">
+              <Card className="border-none shadow-2xl bg-card/50 backdrop-blur-xl rounded-[2rem] overflow-hidden">
+                <CardHeader className="p-8 pb-4 flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-black/[0.03] dark:border-white/[0.03]">
+                  <div className="space-y-1">
+                    <CardTitle className="text-xl font-black tracking-tight flex items-center gap-3">
+                      <div className="p-2 rounded-xl bg-primary/10 text-primary">
+                        <ClipboardCheck className="h-6 w-6" />
+                      </div>
+                      Daily Attendance
+                    </CardTitle>
+                    <CardDescription className="font-medium">
+                      Mark student presence for{" "}
+                      {format(new Date(selectedDate), "PPP")}
+                    </CardDescription>
                   </div>
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2 bg-muted px-3 py-1 rounded-md">
-                      <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+                  <div className="flex flex-wrap items-center gap-4">
+                    <div className="flex items-center gap-3 bg-muted/30 px-4 py-2 rounded-2xl border border-black/[0.03] dark:border-white/[0.03]">
+                      <CalendarIcon className="h-4 w-4 text-primary/60" />
                       <Input
                         type="date"
                         value={selectedDate}
                         onChange={(e) => setSelectedDate(e.target.value)}
-                        className="border-none bg-transparent h-8 focus-visible:ring-0 w-32"
+                        className="border-none bg-transparent h-8 focus-visible:ring-0 w-36 font-bold p-0"
                       />
                     </div>
-                    <Button onClick={handleSave} disabled={mutation.isPending} className="gap-2">
-                      {mutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                    <Button
+                      onClick={handleSave}
+                      disabled={mutation.isPending}
+                      className="h-12 rounded-2xl px-8 font-black uppercase tracking-widest text-[10px] gap-2 shadow-lg shadow-primary/20"
+                    >
+                      {mutation.isPending ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Save className="h-4 w-4" />
+                      )}
                       Save Changes
                     </Button>
                   </div>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="p-0">
                   {isFetching ? (
-                    <div className="flex justify-center py-8">
-                      <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                    <div className="flex flex-col items-center justify-center py-20 gap-4">
+                      <Loader2 className="h-10 w-10 animate-spin text-primary/20" />
+                      <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">
+                        Fetching Records...
+                      </p>
                     </div>
                   ) : enrollments.length > 0 ? (
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Student</TableHead>
-                          <TableHead>Status</TableHead>
-                          <TableHead>Remarks</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {enrollments.map((enrollment) => {
-                          const student = enrollment.student;
-                          const data = attendanceData[student.id] || { status: AttendanceStatus.ABSENT, remarks: "" };
+                    <div className="px-4 pb-4 overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow className="hover:bg-transparent border-none">
+                            <TableHead className="text-[10px] font-black uppercase tracking-widest py-6">
+                              Student
+                            </TableHead>
+                            <TableHead className="text-[10px] font-black uppercase tracking-widest py-6">
+                              Status
+                            </TableHead>
+                            <TableHead className="text-[10px] font-black uppercase tracking-widest py-6">
+                              Minutes
+                            </TableHead>
+                            <TableHead className="text-[10px] font-black uppercase tracking-widest py-6">
+                              Participation
+                            </TableHead>
+                            <TableHead className="text-[10px] font-black uppercase tracking-widest py-6">
+                              Remarks
+                            </TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {enrollments.map((enrollment) => {
+                            const student = enrollment.student;
+                            const data = attendanceData[student.id] || {
+                              status: AttendanceStatus.ABSENT,
+                              remarks: "",
+                              minutesPresent: 0,
+                              participationScore: 0,
+                            };
 
-                          return (
-                            <TableRow key={student.id}>
-                              <TableCell>
-                                <div className="flex items-center gap-3">
-                                  <Avatar className="h-8 w-8">
-                                    <AvatarImage src={student.image || ""} />
-                                    <AvatarFallback>{student.name[0]}</AvatarFallback>
-                                  </Avatar>
-                                  <div className="flex flex-col">
-                                    <span className="text-sm font-medium">{student.name}</span>
-                                    <span className="text-xs text-muted-foreground">{student.email}</span>
-                                  </div>
-                                </div>
-                              </TableCell>
-                              <TableCell>
-                                <Select
-                                  value={data.status}
-                                  onValueChange={(value) => handleStatusChange(student.id, value as AttendanceStatus)}
-                                >
-                                  <SelectTrigger className="w-[130px] h-9">
-                                    <div className="flex items-center gap-2">
-                                      {getStatusIcon(data.status)}
-                                      <SelectValue />
+                            return (
+                              <motion.tr
+                                key={student.id}
+                                initial={{ opacity: 0, x: -5 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ duration: 0.15 }}
+                                className="group hover:bg-primary/[0.02] transition-colors border-b border-black/[0.03] dark:border-white/[0.03]"
+                              >
+                                <TableCell className="py-4">
+                                  <div className="flex items-center gap-4">
+                                    <Avatar className="h-10 w-10 border-2 border-background shadow-sm group-hover:scale-110 transition-transform text-xs">
+                                      <AvatarImage
+                                        src={student.image || ""}
+                                        className="object-cover"
+                                      />
+                                      <AvatarFallback className="bg-primary/5 text-primary font-bold">
+                                        {student.name[0]}
+                                      </AvatarFallback>
+                                    </Avatar>
+                                    <div className="flex flex-col">
+                                      <span className="font-black text-sm tracking-tight group-hover:text-primary transition-colors">
+                                        {student.name}
+                                      </span>
+                                      <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest">
+                                        {student.email}
+                                      </span>
                                     </div>
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value={AttendanceStatus.PRESENT}>Present</SelectItem>
-                                    <SelectItem value={AttendanceStatus.ABSENT}>Absent</SelectItem>
-                                    <SelectItem value={AttendanceStatus.LATE}>Late</SelectItem>
-                                    <SelectItem value={AttendanceStatus.EXCUSED}>Excused</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                              </TableCell>
-                              <TableCell>
-                                <Input
-                                  placeholder="Optional remarks..."
-                                  value={data.remarks}
-                                  onChange={(e) => handleRemarksChange(student.id, e.target.value)}
-                                  className="h-9"
-                                />
-                              </TableCell>
-                            </TableRow>
-                          );
-                        })}
-                      </TableBody>
-                    </Table>
+                                  </div>
+                                </TableCell>
+                                <TableCell className="py-4">
+                                  <Select
+                                    value={data.status}
+                                    onValueChange={(value) =>
+                                      handleStatusChange(
+                                        student.id,
+                                        value as AttendanceStatus,
+                                      )
+                                    }
+                                  >
+                                    <SelectTrigger className="w-[130px] h-11 rounded-xl bg-muted/20 border-none focus:ring-primary transition-all font-bold text-xs">
+                                      <div className="flex items-center gap-2">
+                                        {getStatusIcon(data.status)}
+                                        <SelectValue />
+                                      </div>
+                                    </SelectTrigger>
+                                    <SelectContent className="rounded-xl border-none shadow-2xl">
+                                      <SelectItem
+                                        value={AttendanceStatus.PRESENT}
+                                        className="rounded-lg font-bold"
+                                      >
+                                        Present
+                                      </SelectItem>
+                                      <SelectItem
+                                        value={AttendanceStatus.ABSENT}
+                                        className="rounded-lg font-bold"
+                                      >
+                                        Absent
+                                      </SelectItem>
+                                      <SelectItem
+                                        value={AttendanceStatus.LATE}
+                                        className="rounded-lg font-bold"
+                                      >
+                                        Late
+                                      </SelectItem>
+                                      <SelectItem
+                                        value={AttendanceStatus.EXCUSED}
+                                        className="rounded-lg font-bold"
+                                      >
+                                        Excused
+                                      </SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </TableCell>
+                                <TableCell className="py-4">
+                                  <div className="relative w-24">
+                                    <Input
+                                      type="number"
+                                      placeholder="0"
+                                      value={data.minutesPresent}
+                                      onChange={(e) => handleValueChange(student.id, "minutesPresent", Number(e.target.value))}
+                                      className="h-11 rounded-xl bg-muted/10 border-none focus-visible:ring-primary transition-all font-black text-center pr-8"
+                                    />
+                                    <Timer className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/40" />
+                                  </div>
+                                </TableCell>
+                                <TableCell className="py-4">
+                                  <div className="relative w-24">
+                                    <Input
+                                      type="number"
+                                      placeholder="0"
+                                      min={0}
+                                      max={10}
+                                      value={data.participationScore}
+                                      onChange={(e) => handleValueChange(student.id, "participationScore", Number(e.target.value))}
+                                      className="h-11 rounded-xl bg-muted/10 border-none focus-visible:ring-primary transition-all font-black text-center pr-8"
+                                    />
+                                    <Zap className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-yellow-500/40" />
+                                  </div>
+                                </TableCell>
+                                <TableCell className="py-4">
+                                  <div className="relative group/input">
+                                    <Input
+                                      placeholder="Optional remarks..."
+                                      value={data.remarks}
+                                      onChange={(e) =>
+                                        handleValueChange(
+                                          student.id,
+                                          "remarks",
+                                          e.target.value,
+                                        )
+                                      }
+                                      className="h-11 rounded-xl bg-muted/10 border-none focus-visible:ring-primary transition-all font-medium min-w-[150px]"
+                                    />
+                                    <div className="absolute right-3 top-1/2 -translate-y-1/2 opacity-0 group-focus-within/input:opacity-20 transition-opacity">
+                                      <Sparkles className="h-4 w-4" />
+                                    </div>
+                                  </div>
+                                </TableCell>
+                              </motion.tr>
+                            );
+                          })}
+                        </TableBody>
+                      </Table>
+                    </div>
                   ) : (
-                    <EmptyState
-                      icon={ClipboardCheck}
-                      title="No students enrolled"
-                      description="You need to enroll students in this class before you can mark attendance."
-                    />
+                    <div className="py-20">
+                      <EmptyState
+                        icon={ClipboardCheck}
+                        title="No students enrolled"
+                        description="You need to enroll students in this class before you can mark attendance."
+                      />
+                    </div>
                   )}
                 </CardContent>
               </Card>
             </TabsContent>
           )}
 
-          <TabsContent value="history">
-            <Card>
-              <CardHeader>
-                <CardTitle>Attendance History</CardTitle>
-                <CardDescription>
-                  {isTeacher ? "View daily attendance summaries for the entire class." : "Your personal attendance record for this class."}
-                </CardDescription>
+          <TabsContent value="history" className="mt-0">
+            <Card className="border-none shadow-2xl bg-card/50 backdrop-blur-xl rounded-[2rem] overflow-hidden">
+              <CardHeader className="p-8 pb-4 border-b border-black/[0.03] dark:border-white/[0.03]">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-xl bg-primary/10 text-primary">
+                    <History className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-xl font-black tracking-tight">
+                      Attendance History
+                    </CardTitle>
+                    <CardDescription className="font-medium">
+                      {isTeacher
+                        ? "View daily attendance summaries for the entire class."
+                        : "Your personal attendance record for this class."}
+                    </CardDescription>
+                  </div>
+                </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-0">
                 {isHistoryLoading ? (
-                  <div className="flex justify-center py-8">
-                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                  <div className="flex flex-col items-center justify-center py-20 gap-4">
+                    <Loader2 className="h-10 w-10 animate-spin text-primary/20" />
+                    <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">
+                      Loading History...
+                    </p>
                   </div>
                 ) : (historyData?.data?.length ?? 0) > 0 ? (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Date</TableHead>
-                        {isTeacher ? (
-                          <>
-                            <TableHead>Present</TableHead>
-                            <TableHead>Absent</TableHead>
-                            <TableHead>Late</TableHead>
-                            <TableHead>Excused</TableHead>
-                          </>
-                        ) : (
-                          <>
-                            <TableHead>Status</TableHead>
-                            <TableHead>Remarks</TableHead>
-                          </>
-                        )}
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {historyData?.data?.map((group: AttendanceHistoryGroup) => (
-                        <TableRow key={group.date}>
-                          <TableCell className="font-medium">
-                            {format(new Date(group.date), "PPP")}
-                          </TableCell>
+                  <div className="px-4 pb-4">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="hover:bg-transparent border-none">
+                          <TableHead className="text-[10px] font-black uppercase tracking-widest py-6">
+                            Date
+                          </TableHead>
                           {isTeacher ? (
                             <>
-                              <TableCell>
-                                <Badge variant="outline" className="text-green-500 border-green-500/20">{group.present}</Badge>
-                              </TableCell>
-                              <TableCell>
-                                <Badge variant="outline" className="text-destructive border-destructive/20">{group.absent}</Badge>
-                              </TableCell>
-                              <TableCell>
-                                <Badge variant="outline" className="text-yellow-500 border-yellow-500/20">{group.late}</Badge>
-                              </TableCell>
-                              <TableCell>
-                                <Badge variant="outline" className="text-blue-500 border-blue-500/20">{group.excused}</Badge>
-                              </TableCell>
+                              <TableHead className="text-[10px] font-black uppercase tracking-widest py-6">
+                                Present
+                              </TableHead>
+                              <TableHead className="text-[10px] font-black uppercase tracking-widest py-6">
+                                Absent
+                              </TableHead>
+                              <TableHead className="text-[10px] font-black uppercase tracking-widest py-6">
+                                Late
+                              </TableHead>
+                              <TableHead className="text-[10px] font-black uppercase tracking-widest py-6">
+                                Excused
+                              </TableHead>
                             </>
                           ) : (
                             <>
-                              <TableCell>
-                                {getStatusBadge(group.records[0].status)}
-                              </TableCell>
-                              <TableCell className="text-muted-foreground italic text-sm">
-                                {group.records[0].remarks || "-"}
-                              </TableCell>
+                              <TableHead className="text-[10px] font-black uppercase tracking-widest py-6">
+                                Status
+                              </TableHead>
+                              <TableHead className="text-[10px] font-black uppercase tracking-widest py-6">
+                                Participation
+                              </TableHead>
+                              <TableHead className="text-[10px] font-black uppercase tracking-widest py-6">
+                                Remarks
+                              </TableHead>
                             </>
                           )}
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                      </TableHeader>
+                      <TableBody>
+                        {historyData?.data?.map(
+                          (group: AttendanceHistoryGroup) => (
+                            <motion.tr
+                              key={group.date}
+                              initial={{ opacity: 0, x: -5 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ duration: 0.15 }}
+                              className="group hover:bg-primary/[0.02] transition-colors border-b border-black/[0.03] dark:border-white/[0.03]"
+                            >
+                              <TableCell className="py-6 font-black text-sm tracking-tight">
+                                <div className="flex items-center gap-3">
+                                  <div className="p-2 rounded-lg bg-muted/50 text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-all">
+                                    <CalendarIcon className="h-4 w-4" />
+                                  </div>
+                                  {format(new Date(group.date), "PPP")}
+                                </div>
+                              </TableCell>
+                              {isTeacher ? (
+                                <>
+                                  <TableCell className="py-6">
+                                    <Badge
+                                      variant="outline"
+                                      className="font-black text-[10px] uppercase tracking-widest text-success border-success/20 bg-success/5 h-6 px-3 rounded-full"
+                                    >
+                                      {group.present}
+                                    </Badge>
+                                  </TableCell>
+                                  <TableCell className="py-6">
+                                    <Badge
+                                      variant="outline"
+                                      className="font-black text-[10px] uppercase tracking-widest text-destructive border-destructive/20 bg-destructive/5 h-6 px-3 rounded-full"
+                                    >
+                                      {group.absent}
+                                    </Badge>
+                                  </TableCell>
+                                  <TableCell className="py-6">
+                                    <Badge
+                                      variant="outline"
+                                      className="font-black text-[10px] uppercase tracking-widest text-yellow-600 border-yellow-500/20 bg-yellow-500/5 h-6 px-3 rounded-full"
+                                    >
+                                      {group.late}
+                                    </Badge>
+                                  </TableCell>
+                                  <TableCell className="py-6">
+                                    <Badge
+                                      variant="outline"
+                                      className="font-black text-[10px] uppercase tracking-widest text-blue-600 border-blue-500/20 bg-blue-500/5 h-6 px-3 rounded-full"
+                                    >
+                                      {group.excused}
+                                    </Badge>
+                                  </TableCell>
+                                </>
+                              ) : (
+                                <>
+                                  <TableCell className="py-6">
+                                    {getStatusBadge(group.records[0].status)}
+                                  </TableCell>
+                                  <TableCell className="py-6">
+                                    <div className="flex items-center gap-2">
+                                      <Zap className="h-3 w-3 text-yellow-500" />
+                                      <span className="font-black text-xs">{group.records[0].participationScore}/10</span>
+                                    </div>
+                                  </TableCell>
+                                  <TableCell className="py-6">
+                                    <div className="flex items-center gap-2 text-muted-foreground/60 italic text-xs font-medium">
+                                      <Info className="h-3.5 w-3.5 opacity-40" />
+                                      {group.records[0].remarks || "No remarks"}
+                                    </div>
+                                  </TableCell>
+                                </>
+                              )}
+                            </motion.tr>
+                          ),
+                        )}
+                      </TableBody>
+                    </Table>
+                  </div>
                 ) : (
-                  <EmptyState
-                    icon={History}
-                    title="No attendance records"
-                    description="Attendance history will appear here once you start marking student presence."
-                  />
+                  <div className="py-20">
+                    <EmptyState
+                      icon={History}
+                      title="No attendance records"
+                      description="Attendance history will appear here once you start marking student presence."
+                    />
+                  </div>
                 )}
               </CardContent>
             </Card>
@@ -464,26 +766,26 @@ export const AttendanceTab = ({ classId, enrollments }: AttendanceTabProps) => {
       </div>
 
       {/* QR Modals */}
-      <QRAttendanceModal 
-        isOpen={isQRModalOpen} 
+      <QRAttendanceModal
+        isOpen={isQRModalOpen}
         onClose={() => {
           setIsQRModalOpen(false);
           void refetchDaily();
           void refetchHistory();
           void refetchStats();
-        }} 
-        classId={classId} 
+        }}
+        classId={classId}
       />
-      
-      <QRScannerModal 
-        isOpen={isScannerModalOpen} 
+
+      <QRScannerModal
+        isOpen={isScannerModalOpen}
         onClose={() => {
           setIsScannerModalOpen(false);
           void refetchDaily();
           void refetchHistory();
           void refetchStats();
-        }} 
-        classId={classId} 
+        }}
+        classId={classId}
       />
     </div>
   );

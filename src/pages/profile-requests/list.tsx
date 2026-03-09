@@ -1,15 +1,47 @@
-import { useTable } from "@refinedev/react-table";
-import { ColumnDef } from "@tanstack/react-table";
-import { useMemo, useState } from "react";
-import { DataTable } from "@/components/refine-ui/data-table/data-table";
-import { ListView, ListViewHeader } from "@/components/refine-ui/views/list-view";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { CheckCircle, XCircle, ArrowRight, MessageSquare, Loader2, FileText, ExternalLink, Eye } from "lucide-react";
-import { useCustomMutation, useInvalidate } from "@refinedev/core";
-import { toast } from "sonner";
+import { ListView } from "@/components/refine-ui/views/list-view.tsx";
+import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb.tsx";
+import { 
+  Search, 
+  CheckCircle2, 
+  XCircle, 
+  Filter, 
+  MoreHorizontal, 
+  Eye, 
+  Mail, 
+  Activity,
+  ShieldCheck,
+  Loader2,
+  ArrowRight,
+  UserCheck,
+  Clock,
+  FileText,
+  ExternalLink,
+  MessageSquare
+} from "lucide-react";
+import { Input } from "@/components/ui/input.tsx";
+import { useMemo, useState, useRef, useCallback } from "react";
+import { useList, useNavigation, useCustomMutation, useInvalidate } from "@refinedev/core";
 import { ProfileChangeRequest } from "@/types";
+import { Badge } from "@/components/ui/badge.tsx";
+import { Button } from "@/components/ui/button.tsx";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Card } from "@/components/ui/card";
+import { motion } from "framer-motion";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+import usePageTitle from "@/hooks/use-page-title";
+import { useVirtualizer } from "@tanstack/react-virtual";
+import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/empty-state";
+import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -19,19 +51,56 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { cn } from "@/lib/utils";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+dayjs.extend(relativeTime);
 
 const ProfileRequestsList = () => {
+  usePageTitle("Profile Approvals");
+
+  const [searchQuery, setSearchQuery] = useState("");
   const [rejectTarget, setRejectTarget] = useState<number | null>(null);
   const [rejectReason, setRejectReason] = useState("");
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+
+  const { show } = useNavigation();
   const { mutate: approve, mutation: approveMutation } = useCustomMutation();
   const { mutate: reject, mutation: rejectMutation } = useCustomMutation();
   const invalidate = useInvalidate();
 
   const isApproving = approveMutation.isPending;
   const isRejecting = rejectMutation.isPending;
+
+  const filters = useMemo(() => {
+    const f = [];
+    if (statusFilter !== "all") {
+        f.push({ field: "status", operator: "eq" as const, value: statusFilter });
+    }
+    if (searchQuery) {
+        f.push({ field: "user.name", operator: "contains" as const, value: searchQuery });
+    }
+    return f;
+  }, [statusFilter, searchQuery]);
+
+  const { query } = useList<ProfileChangeRequest>({
+    resource: "profile-requests",
+    pagination: { pageSize: 1000, mode: "server" },
+    filters,
+    sorters: [{ field: "createdAt", order: "desc" }],
+    meta: { populate: ["user"] }
+  });
+
+  const requests = useMemo(() => query.data?.data || [], [query.data?.data]);
+  const isLoading = query.isLoading;
+  const hasData = requests.length > 0;
 
   const handleApprove = (id: number) => {
     approve({
@@ -41,10 +110,7 @@ const ProfileRequestsList = () => {
     }, {
         onSuccess: () => {
             toast.success("Changes approved and applied");
-            invalidate({
-                resource: "profile-requests",
-                invalidates: ["list"],
-            });
+            invalidate({ resource: "profile-requests", invalidates: ["list"] });
         }
     });
   };
@@ -61,226 +127,371 @@ const ProfileRequestsList = () => {
             toast.success("Changes rejected");
             setRejectTarget(null);
             setRejectReason("");
-            invalidate({
-                resource: "profile-requests",
-                invalidates: ["list"],
-            });
+            invalidate({ resource: "profile-requests", invalidates: ["list"] });
         }
     });
   };
 
-  const columns = useMemo<ColumnDef<ProfileChangeRequest>[]>(
-    () => [
-      {
-        id: "user",
-        header: "User",
-        accessorKey: "user",
-        cell: ({ getValue }) => {
-          const user = getValue<ProfileChangeRequest["user"]>();
-          if (!user) return null;
-          return (
-            <div className="flex items-center gap-3">
-              <Avatar className="size-9 border-2 border-primary/10">
-                <AvatarImage src={user.image ?? ""} />
-                <AvatarFallback className="bg-primary/5 text-primary font-bold">{user.name?.[0]}</AvatarFallback>
-              </Avatar>
-              <div className="flex flex-col">
-                <span className="font-bold text-sm leading-tight">{user.name}</span>
-                <span className="text-[10px] text-muted-foreground font-medium">{user.email}</span>
-              </div>
-            </div>
-          );
-        },
-      },
-      {
-        id: "changes",
-        header: "Requested Changes",
-        cell: ({ row }) => {
-            const oldData = row.original.oldData || {};
-            const newData = row.original.newData || {};
-            const changedKeys = Object.keys(newData).filter(k => newData[k] !== oldData[k]);
+  const parentRef = useRef<HTMLDivElement>(null);
 
-            return (
-                <div className="flex flex-col gap-2">
-                    {changedKeys.map(key => {
-                        const isDoc = key === "verificationDocumentUrl";
-                        return (
-                            <div key={key} className="flex items-center gap-2">
-                                <Badge variant="outline" className="h-5 px-1.5 uppercase font-black text-[8px] tracking-tighter">
-                                    {key.replace("Url", "").replace(/([A-Z])/g, ' $1')}
-                                </Badge>
-                                {isDoc ? (
-                                    <Button 
-                                        variant="link" 
-                                        size="sm" 
-                                        className="h-auto p-0 text-[10px] font-bold gap-1"
-                                        onClick={() => setPreviewUrl(String(newData[key]))}
-                                    >
-                                        <FileText className="h-3 w-3" />
-                                        View Document
-                                        <Eye className="h-3 w-3" />
-                                    </Button>
-                                ) : (
-                                    <div className="flex items-center gap-1.5 text-[10px] font-medium">
-                                        <span className="text-muted-foreground line-through truncate max-w-[100px]">{String(oldData[key] || "empty")}</span>
-                                        <ArrowRight className="h-2.5 w-2.5 text-primary/40" />
-                                        <span className="font-bold text-primary truncate max-w-[100px]">{String(newData[key])}</span>
-                                    </div>
-                                )}
-                            </div>
-                        );
-                    })}
-                </div>
-            );
-        }
-      },
-      {
-        accessorKey: "status",
-        header: "Status",
-        cell: ({ getValue }) => {
-            const status = getValue<string>();
-            return (
-                <Badge 
-                    variant={status === "pending" ? "secondary" : status === "approved" ? "default" : "destructive"}
-                    className={cn(
-                        "capitalize text-[10px] font-black tracking-widest px-2 h-5",
-                        status === "pending" && "bg-amber-500/10 text-amber-600 border-amber-500/20"
-                    )}
-                >
-                    {status}
-                </Badge>
-            );
-        }
-      },
-      {
-        accessorKey: "createdAt",
-        header: "Requested On",
-        cell: ({ getValue }) => (
-            <div className="flex flex-col">
-                <span className="text-xs font-bold">{new Date(getValue<string>()).toLocaleDateString()}</span>
-                <span className="text-[10px] text-muted-foreground">{new Date(getValue<string>()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-            </div>
-        ),
-      },
-      {
-        id: "actions",
-        header: () => <p className="text-right pr-4">Actions</p>,
-        cell: ({ row }) => {
-            if (row.original.status !== "pending") return null;
-            return (
-                <div className="flex items-center justify-end gap-2 pr-2">
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        className="h-8 px-3 text-xs font-bold text-green-600 border-green-500/20 hover:bg-green-500/5 gap-1.5"
-                        onClick={() => handleApprove(row.original.id)}
-                        disabled={isApproving}
-                    >
-                        {isApproving ? <Loader2 className="h-3 w-3 animate-spin" /> : <CheckCircle className="h-3.5 w-3.5" />}
-                        Approve
-                    </Button>
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        className="h-8 px-3 text-xs font-bold text-destructive border-destructive/20 hover:bg-destructive/5 gap-1.5"
-                        onClick={() => setRejectTarget(row.original.id)}
-                        disabled={isRejecting}
-                    >
-                        <XCircle className="h-3.5 w-3.5" />
-                        Reject
-                    </Button>
-                </div>
-            );
-        },
-      },
-    ],
-    [isApproving, isRejecting]
-  );
+  const estimateSize = useCallback(() => 160, []);
 
-  const table = useTable({
-    columns,
-    refineCoreProps: {
-        resource: "profile-requests",
-        pagination: { pageSize: 10 },
-        sorters: { initial: [{ field: "createdAt", order: "desc" }] },
-        meta: { populate: ["user"] }
-    }
+  const rowVirtualizer = useVirtualizer({
+    count: requests.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize,
+    overscan: 5,
   });
 
+  // Stats calculation
+  const stats = useMemo(() => {
+    if (!requests.length) return { total: 0, pending: 0, approved: 0 };
+    return {
+      total: requests.length,
+      pending: requests.filter((r: ProfileChangeRequest) => r.status === 'pending').length,
+      approved: requests.filter((r: ProfileChangeRequest) => r.status === 'approved').length
+    };
+  }, [requests]);
+
   return (
-    <>
-        <ListView>
-            <ListViewHeader 
-                title="Pending Approvals" 
-            />
-            <DataTable table={table} />
-        </ListView>
+    <div className="space-y-10 pb-20">
+      <ListView>
+        <div className="space-y-10">
+          <motion.div 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="space-y-4"
+          >
+            <Breadcrumb />
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+              <div>
+                <h1 className="text-4xl font-black tracking-tight">Profile Governance</h1>
+                <p className="text-muted-foreground font-medium mt-1">Review and approve sensitive profile changes and verification documents.</p>
+              </div>
+            </div>
+          </motion.div>
 
-        {/* Document Preview Dialog */}
-        <Dialog open={previewUrl !== null} onOpenChange={() => setPreviewUrl(null)}>
-            <DialogContent className="max-w-3xl h-[80vh] flex flex-col">
-                <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2">
-                        <FileText className="h-5 w-5 text-primary" />
-                        Document Preview
-                    </DialogTitle>
-                </DialogHeader>
-                <div className="flex-1 bg-muted rounded-xl overflow-hidden border mt-4">
-                    {previewUrl?.endsWith(".pdf") ? (
-                        <iframe src={previewUrl} className="w-full h-full" title="PDF Preview" />
-                    ) : (
-                        <div className="w-full h-full flex items-center justify-center p-4">
-                            <img src={previewUrl || ""} alt="Preview" className="max-w-full max-h-full object-contain shadow-2xl rounded-lg" />
-                        </div>
-                    )}
-                </div>
-                <DialogFooter className="mt-4">
-                    <Button variant="outline" onClick={() => setPreviewUrl(null)}>Close Preview</Button>
-                    <Button asChild>
-                        <a href={previewUrl || ""} target="_blank" rel="noreferrer">
-                            <ExternalLink className="h-4 w-4 mr-2" />
-                            Open in New Tab
-                        </a>
-                    </Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
+          {/* Stats Row */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <Card className="p-6 border-primary/10 bg-card/50 backdrop-blur-sm flex items-center gap-4 rounded-4xl shadow-lg shadow-primary/5">
+              <div className="p-3 rounded-2xl bg-primary/10 text-primary">
+                <Activity className="h-6 w-6" />
+              </div>
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Total Requests</p>
+                <p className="text-2xl font-black">{isLoading ? "..." : stats.total}</p>
+              </div>
+            </Card>
+            <Card className="p-6 border-amber-500/10 bg-card/50 backdrop-blur-sm flex items-center gap-4 rounded-4xl shadow-lg shadow-amber-500/5">
+              <div className="p-3 rounded-2xl bg-amber-500/10 text-amber-600">
+                <Clock className="h-6 w-6" />
+              </div>
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Pending Review</p>
+                <p className="text-2xl font-black text-amber-600">{isLoading ? "..." : stats.pending}</p>
+              </div>
+            </Card>
+            <Card className="p-6 border-green-500/10 bg-card/50 backdrop-blur-sm flex items-center gap-4 rounded-4xl shadow-lg shadow-green-500/5">
+              <div className="p-3 rounded-2xl bg-green-500/10 text-green-600">
+                <UserCheck className="h-6 w-6" />
+              </div>
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Approved</p>
+                <p className="text-2xl font-black text-green-600">{isLoading ? "..." : stats.approved}</p>
+              </div>
+            </Card>
+          </div>
+          
+          {/* Filters & Search */}
+          <Card className="p-4 border-primary/5 bg-muted/30 rounded-4xl backdrop-blur-sm">
+            <div className="flex flex-col lg:flex-row gap-4">
+              <div className="relative flex-1 group">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                <Input
+                  type="text"
+                  placeholder="Search by user name or email..."
+                  className="pl-11 h-14 rounded-2xl border-none bg-background shadow-sm font-medium"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+              <div className="flex items-center gap-2 bg-background px-4 rounded-2xl shadow-sm border border-primary/5">
+                <Filter className="h-4 w-4 text-muted-foreground" />
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger className="w-40 border-none h-10 focus:ring-0 shadow-none font-black text-[10px] uppercase tracking-widest">
+                    <SelectValue placeholder="All Status" />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-2xl border-none shadow-2xl">
+                    <SelectItem value="all" className="rounded-xl font-bold">All Status</SelectItem>
+                    <SelectItem value="pending" className="rounded-xl font-bold">Pending</SelectItem>
+                    <SelectItem value="approved" className="rounded-xl font-bold">Approved</SelectItem>
+                    <SelectItem value="rejected" className="rounded-xl font-bold">Rejected</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </Card>
 
-        {/* Rejection Dialog */}
-        <Dialog open={rejectTarget !== null} onOpenChange={() => setRejectTarget(null)}>
-            <DialogContent>
-                <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2">
-                        <MessageSquare className="h-5 w-5 text-destructive" />
-                        Reject Request
-                    </DialogTitle>
-                    <DialogDescription>
-                        Please provide a reason for rejecting these changes. This will be sent as a notification to the user.
-                    </DialogDescription>
-                </DialogHeader>
-                <div className="py-4">
-                    <Textarea 
-                        placeholder="e.g. The uploaded document is blurry or invalid. Please re-upload a clear copy of your teaching certificate."
-                        value={rejectReason}
-                        onChange={(e) => setRejectReason(e.target.value)}
-                        className="min-h-[120px] rounded-xl focus-visible:ring-destructive/30"
-                    />
-                </div>
-                <DialogFooter>
-                    <Button variant="outline" onClick={() => setRejectTarget(null)}>Cancel</Button>
-                    <Button 
-                        variant="destructive" 
-                        onClick={handleReject}
-                        disabled={isRejecting || !rejectReason.trim()}
-                        className="font-bold"
+          {/* Virtualized List Container */}
+          <div 
+            ref={parentRef} 
+            className="h-150 overflow-auto pr-2 custom-scrollbar rounded-[2.5rem] border border-primary/5 bg-card/30 backdrop-blur-sm relative"
+          >
+            {isLoading ? (
+              <div style={{ height: '100%', width: '100%', position: 'relative' }}>
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="flex flex-col md:flex-row items-center p-8 border-b border-primary/5 gap-6">
+                    <Skeleton className="h-14 w-14 rounded-2xl shrink-0" />
+                    <div className="flex-1 space-y-3 w-full">
+                      <Skeleton className="h-6 w-62.5" />
+                      <Skeleton className="h-4 w-45" />
+                    </div>
+                    <Skeleton className="h-10 w-24 rounded-xl" />
+                  </div>
+                ))}
+              </div>
+            ) : !hasData ? (
+              <div className="h-full w-full flex items-center justify-center p-12">
+                <EmptyState
+                  icon={ShieldCheck}
+                  title="No pending requests"
+                  description="All profile change requests have been processed. You're all caught up!"
+                  className="border-none bg-transparent min-h-0"
+                />
+              </div>
+            ) : (
+              <div style={{ height: `${rowVirtualizer.getTotalSize()}px`, width: '100%', position: 'relative' }}>
+                {rowVirtualizer.getVirtualItems().map((virtualItem) => {
+                  const request = requests[virtualItem.index];
+                  if (!request) return null;
+
+                  const requestDate = dayjs(request.createdAt);
+                  const oldData = request.oldData || {};
+                  const newData = request.newData || {};
+                  const changedKeys = Object.keys(newData).filter(k => newData[k] !== oldData[k]);
+                  
+                  return (
+                    <div
+                      key={virtualItem.key}
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: `${virtualItem.size}px`,
+                        transform: `translateY(${virtualItem.start}px)`,
+                      }}
+                      className="px-8 py-4"
                     >
-                        {isRejecting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <XCircle className="h-4 w-4 mr-2" />}
-                        Confirm Rejection
-                    </Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
-    </>
+                      <motion.div
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        className="flex flex-col md:flex-row items-center h-full border border-primary/5 bg-background/50 rounded-3xl px-6 hover:bg-primary/2 transition-all group shadow-sm"
+                      >
+                        {/* User Avatar */}
+                        <div className="relative shrink-0 mb-4 md:mb-0">
+                          <Avatar className="h-14 w-14 rounded-xl border-2 border-background shadow-md group-hover:scale-110 transition-transform">
+                            <AvatarImage src={request.user.image ?? undefined} className="object-cover" />
+                            <AvatarFallback className="bg-primary/5 text-primary font-black text-lg">
+                              {request.user.name[0]}
+                            </AvatarFallback>
+                          </Avatar>
+                        </div>
+
+                        {/* Info */}
+                        <div className="flex-1 md:ml-6 text-center md:text-left min-w-0 w-full">
+                          <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-3">
+                            <h3 className="text-lg font-black tracking-tight truncate group-hover:text-primary transition-colors">
+                              {request.user.name}
+                            </h3>
+                            <div className="flex items-center justify-center md:justify-start gap-2">
+                              <Badge 
+                                  variant={request.status === 'approved' ? 'default' : request.status === 'pending' ? 'secondary' : 'destructive'}
+                                  className={cn(
+                                      "text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md border-none",
+                                      request.status === 'pending' && "bg-amber-500/10 text-amber-600"
+                                  )}
+                              >
+                                  {request.status}
+                              </Badge>
+                              <Badge variant="outline" className="text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md border-primary/10">
+                                  {changedKeys.length} Changes
+                              </Badge>
+                            </div>
+                          </div>
+                          
+                          <div className="flex flex-wrap items-center justify-center md:justify-start gap-x-4 gap-y-1 mt-2">
+                            <div className="flex items-center gap-1.5 text-muted-foreground">
+                              <Mail className="h-3 w-3 text-primary" />
+                              <span className="text-[11px] font-bold">{request.user.email}</span>
+                            </div>
+
+                            <div className="flex items-center gap-1.5 text-muted-foreground">
+                              <Clock className="h-3 w-3 text-primary" />
+                              <span className="text-[11px] font-bold uppercase tracking-tight">
+                                  Requested {requestDate.fromNow()}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Changes Preview */}
+                          <div className="mt-3 flex flex-wrap gap-2">
+                              {changedKeys.map(key => {
+                                  const isDoc = key === "verificationDocumentUrl";
+                                  return (
+                                      <div key={key} className="flex items-center gap-1.5 bg-muted/30 px-2 py-1 rounded-lg border border-primary/5">
+                                          <span className="text-[7px] font-black uppercase tracking-widest text-muted-foreground/60">{key.replace("Url", "").replace(/([A-Z])/g, ' $1')}</span>
+                                          {isDoc ? (
+                                              <Button 
+                                                  variant="link" 
+                                                  size="sm" 
+                                                  className="h-auto p-0 text-[9px] font-black gap-1 text-primary"
+                                                  onClick={() => setPreviewUrl(String(newData[key]))}
+                                              >
+                                                  <FileText className="h-2.5 w-2.5" />
+                                                  View Proof
+                                              </Button>
+                                          ) : (
+                                              <div className="flex items-center gap-1 text-[9px] font-bold">
+                                                  <span className="text-muted-foreground/40 line-through truncate max-w-15">{String(oldData[key] || "empty")}</span>
+                                                  <ArrowRight className="h-2 w-2 text-primary/40" />
+                                                  <span className="text-primary truncate max-w-15">{String(newData[key])}</span>
+                                              </div>
+                                          )}
+                                      </div>
+                                  );
+                              })}
+                          </div>
+                        </div>
+
+                        {/* Actions */}
+                        <div className="flex items-center gap-2 mt-4 md:mt-0 shrink-0">
+                          {request.status === 'pending' && (
+                              <div className="flex items-center gap-2">
+                                  <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className="h-9 rounded-lg font-black uppercase tracking-widest text-[9px] border-green-500/20 text-green-600 bg-green-500/5 hover:bg-green-500/10 px-3"
+                                      onClick={() => handleApprove(request.id)}
+                                      disabled={isApproving}
+                                  >
+                                      {isApproving ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" /> : <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />}
+                                      Approve
+                                  </Button>
+                                  <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className="h-9 rounded-lg font-black uppercase tracking-widest text-[9px] border-destructive/20 text-destructive bg-destructive/5 hover:bg-destructive/10 px-3"
+                                      onClick={() => setRejectTarget(request.id)}
+                                      disabled={isRejecting}
+                                  >
+                                      <XCircle className="h-3.5 w-3.5 mr-1.5" />
+                                      Reject
+                                  </Button>
+                              </div>
+                          )}
+
+                          <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="icon" className="h-9 w-9 rounded-lg">
+                                      <MoreHorizontal className="h-4 w-4" />
+                                  </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="w-48 rounded-xl p-1">
+                                  <DropdownMenuLabel className="text-[9px] font-black uppercase tracking-widest text-muted-foreground px-2 py-1.5">Options</DropdownMenuLabel>
+                                  <DropdownMenuItem onClick={() => show("users", request.user.id)} className="rounded-lg gap-2 py-2 cursor-pointer">
+                                      <Eye className="h-3.5 w-3.5 text-primary" />
+                                      <span className="font-bold text-xs">View User Profile</span>
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem className="rounded-lg gap-2 py-2 cursor-pointer">
+                                      <MessageSquare className="h-3.5 w-3.5 text-primary" />
+                                      <span className="font-bold text-xs">Contact User</span>
+                                  </DropdownMenuItem>
+                              </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                      </motion.div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+      </ListView>
+
+      {/* Document Preview Dialog */}
+      <Dialog open={previewUrl !== null} onOpenChange={() => setPreviewUrl(null)}>
+          <DialogContent className="max-w-4xl h-[85vh] flex flex-col rounded-[2.5rem] border-none shadow-2xl bg-card/95 backdrop-blur-xl">
+              <DialogHeader className="p-6 pb-0">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-xl bg-primary/10 text-primary">
+                            <FileText className="h-6 w-6" />
+                        </div>
+                        <DialogTitle className="text-2xl font-black tracking-tight">Verification Document</DialogTitle>
+                    </div>
+                  </div>
+              </DialogHeader>
+              <div className="flex-1 bg-muted/30 rounded-4xl overflow-hidden border border-primary/5 mt-6 relative group">
+                  {previewUrl?.endsWith(".pdf") ? (
+                      <iframe src={previewUrl} className="w-full h-full" title="PDF Preview" />
+                  ) : (
+                      <div className="w-full h-full flex items-center justify-center p-8">
+                          <img src={previewUrl || ""} alt="Preview" className="max-w-full max-h-full object-contain shadow-2xl rounded-2xl transition-transform duration-500 group-hover:scale-[1.02]" />
+                      </div>
+                  )}
+              </div>
+              <DialogFooter className="p-6 pt-4 gap-3">
+                  <Button variant="ghost" className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-12 px-6" onClick={() => setPreviewUrl(null)}>Close Preview</Button>
+                  <Button className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-12 px-8 shadow-xl shadow-primary/20" asChild>
+                      <a href={previewUrl || ""} target="_blank" rel="noreferrer">
+                          <ExternalLink className="h-4 w-4 mr-2" />
+                          Open Full Resolution
+                      </a>
+                  </Button>
+              </DialogFooter>
+          </DialogContent>
+      </Dialog>
+
+      {/* Rejection Dialog */}
+      <Dialog open={rejectTarget !== null} onOpenChange={() => setRejectTarget(null)}>
+          <DialogContent className="rounded-[2.5rem] border-none shadow-2xl bg-card/95 backdrop-blur-xl max-w-md">
+              <DialogHeader className="space-y-4">
+                  <div className="p-4 rounded-2xl bg-destructive/10 text-destructive w-fit">
+                    <XCircle className="h-8 w-8" />
+                  </div>
+                  <div className="space-y-1">
+                    <DialogTitle className="text-3xl font-black tracking-tight">Reject Changes</DialogTitle>
+                    <DialogDescription className="font-medium text-base">
+                        Please provide a specific reason for rejecting these profile updates.
+                    </DialogDescription>
+                  </div>
+              </DialogHeader>
+              <div className="py-8 space-y-3">
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Rejection Feedback</Label>
+                  <Textarea 
+                      placeholder="e.g. The uploaded document is blurry or invalid. Please re-upload a clear copy of your teaching certificate."
+                      value={rejectReason}
+                      onChange={(e) => setRejectReason(e.target.value)}
+                      className="min-h-37.5 rounded-4xl bg-muted/30 border-none focus-visible:ring-destructive/30 p-6 text-base leading-relaxed font-medium resize-none"
+                  />
+              </div>
+              <DialogFooter className="gap-3">
+                  <Button variant="ghost" className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-8" onClick={() => setRejectTarget(null)}>Cancel</Button>
+                  <Button 
+                      variant="destructive" 
+                      onClick={handleReject}
+                      disabled={isRejecting || !rejectReason.trim()}
+                      className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-12 shadow-xl shadow-destructive/20"
+                  >
+                      {isRejecting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <XCircle className="h-4 w-4 mr-2" />}
+                      Confirm Rejection
+                  </Button>
+              </DialogFooter>
+          </DialogContent>
+      </Dialog>
+    </div>
   );
 };
 

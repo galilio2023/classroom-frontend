@@ -139,7 +139,10 @@ const EditorToolbar = ({ editor }: { editor: Editor | null }) => {
 export const RichTextEditor = ({ value, onChange, className }: RichTextEditorProps) => {
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      StarterKit.configure({
+        // Disable the default link extension to avoid duplicate name warning
+        link: false,
+      }),
       Image.configure({
         HTMLAttributes: {
           class: "rounded-lg border shadow-sm max-w-full h-auto",

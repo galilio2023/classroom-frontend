@@ -1,0 +1,249 @@
+import { useEffect, useState, useCallback, useRef, Suspense, lazy } from "react";
+import { socket } from "@/lib/socket";
+import { useGetIdentity, useCustomMutation } from "@refinedev/core";
+import { User, UserRole } from "@/types";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Save, Trash2, Lock, Unlock, Loader2 } from "lucide-react";
+import { toast } from "sonner";
+
+// Lazy load Excalidraw to avoid SSR/Vite bundling issues
+const Excalidraw = lazy(async () => {
+  const module = await import("@excalidraw/excalidraw");
+  return { default: module.Excalidraw };
+});
+
+// Helper for exporting (needs to be imported dynamically too)
+let exportToBlob: any;
+
+interface WhiteboardProps {
+  classId: string;
+}
+
+export const Whiteboard = ({ classId }: WhiteboardProps) => {
+  const { data: identity } = useGetIdentity<User>();
+  const [excalidrawAPI, setExcalidrawAPI] = useState<any>(null);
+  const [isLocked, setIsLocked] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const lastUpdateRef = useRef<number>(0);
+  const isTeacher = identity?.role === UserRole.TEACHER || identity?.role === UserRole.ADMIN;
+
+  const { mutate: uploadFile } = useCustomMutation();
+
+  useEffect(() => {
+    // Load helper functions dynamically
+    const loadHelpers = async () => {
+      const module = await import("@excalidraw/excalidraw");
+      exportToBlob = module.exportToBlob;
+    };
+    loadHelpers();
+  }, []);
+
+  useEffect(() => {
+    if (!socket.connected) socket.connect();
+
+    socket.emit("whiteboard:join", classId);
+
+    socket.on("whiteboard:init", (data) => {
+      if (excalidrawAPI && data.elements) {
+        excalidrawAPI.updateScene({
+          elements: data.elements,
+          appState: { ...data.appState, collaborators: [] },
+        });
+        setIsLocked(data.isLocked);
+      }
+    });
+
+    socket.on("whiteboard:update", (data) => {
+      if (excalidrawAPI) {
+        excalidrawAPI.updateScene({
+          elements: data.elements,
+          appState: { ...data.appState, collaborators: [] },
+        });
+      }
+    });
+
+    socket.on("whiteboard:lock-status", (data) => {
+      setIsLocked(data.isLocked);
+    });
+
+    socket.on("whiteboard:clear", () => {
+      if (excalidrawAPI) {
+        excalidrawAPI.updateScene({ elements: [] });
+      }
+    });
+
+    return () => {
+      socket.off("whiteboard:init");
+      socket.off("whiteboard:update");
+      socket.off("whiteboard:lock-status");
+      socket.off("whiteboard:clear");
+    };
+  }, [classId, excalidrawAPI]);
+
+  const onChange = useCallback(
+    (elements: readonly any[], appState: any) => {
+      if (!excalidrawAPI) return;
+      
+      // Only broadcast if not locked or if user is teacher
+      if (isLocked && !isTeacher) return;
+
+      const now = Date.now();
+      if (now - lastUpdateRef.current > 100) { // Throttle updates
+        socket.emit("whiteboard:update", {
+          classId,
+          elements,
+          appState,
+        });
+        lastUpdateRef.current = now;
+      }
+    },
+    [classId, excalidrawAPI, isLocked, isTeacher]
+  );
+
+  const toggleLock = () => {
+    const newLockedState = !isLocked;
+    setIsLocked(newLockedState);
+    socket.emit("whiteboard:toggle-lock", { classId, isLocked: newLockedState });
+  };
+
+  const clearWhiteboard = () => {
+    if (window.confirm("Are you sure you want to clear the whiteboard?")) {
+      socket.emit("whiteboard:clear", classId);
+    }
+  };
+
+  const saveSnapshot = async () => {
+    if (!excalidrawAPI || !exportToBlob) return;
+    setIsSaving(true);
+
+    try {
+      const elements = excalidrawAPI.getSceneElements();
+      if (!elements || elements.length === 0) {
+        toast.error("Whiteboard is empty");
+        setIsSaving(false);
+        return;
+      }
+
+      const blob = await exportToBlob({
+        elements,
+        mimeType: "image/png",
+        appState: excalidrawAPI.getAppState(),
+        files: excalidrawAPI.getFiles(),
+      });
+
+      const file = new File([blob], `whiteboard-${classId}-${Date.now()}.png`, { type: "image/png" });
+      
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("folder", "resources");
+
+      uploadFile({
+        url: "/upload",
+        method: "post",
+        values: formData,
+        meta: {
+          headers: { "Content-Type": "multipart/form-data" },
+        },
+      }, {
+        onSuccess: (data: any) => {
+          const fileUrl = data.data.url;
+          // Now create a resource entry
+          uploadFile({
+            url: "/resources",
+            method: "post",
+            values: {
+              title: `Whiteboard Snapshot - ${new Date().toLocaleString()}`,
+              type: "image",
+              url: fileUrl,
+              classId: Number(classId),
+              description: "Automatically saved whiteboard snapshot",
+            }
+          }, {
+            onSuccess: () => {
+              toast.success("Whiteboard snapshot saved to resources");
+              setIsSaving(false);
+            },
+            onError: () => {
+              toast.error("Failed to save resource entry");
+              setIsSaving(false);
+            }
+          });
+        },
+        onError: () => {
+          toast.error("Failed to upload image");
+          setIsSaving(false);
+        }
+      });
+    } catch (error) {
+      console.error("Save snapshot error:", error);
+      toast.error("Failed to save snapshot");
+      setIsSaving(false);
+    }
+  };
+
+  return (
+    <div className="flex flex-col h-full border rounded-xl overflow-hidden bg-background">
+      <div className="flex items-center justify-between p-2 border-b bg-muted/30">
+        <div className="flex items-center gap-4">
+          <h4 className="text-sm font-semibold px-2">Collaborative Whiteboard</h4>
+          {isTeacher && (
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="lock-mode"
+                checked={isLocked}
+                onCheckedChange={toggleLock}
+              />
+              <Label htmlFor="lock-mode" className="text-xs flex items-center gap-1">
+                {isLocked ? <Lock className="h-3 w-3" /> : <Unlock className="h-3 w-3" />}
+                {isLocked ? "Students Locked" : "Students Can Draw"}
+              </Label>
+            </div>
+          )}
+          {!isTeacher && isLocked && (
+            <div className="flex items-center gap-1 text-xs text-destructive font-medium">
+              <Lock className="h-3 w-3" />
+              Drawing is currently disabled by teacher
+            </div>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
+          {isTeacher && (
+            <Button variant="outline" size="sm" onClick={clearWhiteboard} className="h-8">
+              <Trash2 className="h-4 w-4 mr-1" />
+              Clear
+            </Button>
+          )}
+          <Button 
+            variant="default" 
+            size="sm" 
+            onClick={saveSnapshot} 
+            disabled={isSaving}
+            className="h-8 bg-live-primary hover:bg-live-primary/90"
+          >
+            {isSaving ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Save className="h-4 w-4 mr-1" />}
+            Save Snapshot
+          </Button>
+        </div>
+      </div>
+      <div className="flex-1 relative min-h-[500px]">
+        <Suspense fallback={<div className="flex items-center justify-center h-full"><Loader2 className="h-8 w-8 animate-spin" /></div>}>
+          <Excalidraw
+            excalidrawAPI={(api) => setExcalidrawAPI(api)}
+            onChange={onChange}
+            viewModeEnabled={isLocked && !isTeacher}
+            theme="light"
+            UIOptions={{
+              canvasActions: {
+                loadScene: false,
+                saveAsImage: true,
+                export: false,
+              }
+            }}
+          />
+        </Suspense>
+      </div>
+    </div>
+  );
+};
