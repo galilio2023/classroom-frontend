@@ -34,8 +34,8 @@ We chose a **Headless Architecture** powered by **Refine v5** to achieve maximum
 
 ### The Layers
 
-*   **Data Provider (`src/providers/dataProvider.ts`)**: The **Translator**. This is the core of our headless setup. It maps Refine's data operations (`getList`, `create`, `update`) to our specific backend API endpoints and data structures. It handles all API communication, including adding authentication tokens and normalizing responses.
-*   **Auth Provider (`src/providers/authProvider.ts`)**: The **Gatekeeper**. It manages the entire authentication lifecycle, including login, logout, checking for active sessions, and retrieving user permissions. It integrates seamlessly with the Data Provider to secure all API requests.
+*   **Data Provider (`src/providers/data.ts`)**: The **Translator**. This is the core of our headless setup. It maps Refine's data operations (`getList`, `create`, `update`) to our specific backend API endpoints and data structures. It handles all API communication, including adding authentication tokens and normalizing responses.
+*   **Auth Provider (`src/providers/auth.ts`)**: The **Gatekeeper**. It manages the entire authentication lifecycle, including login, logout, checking for active sessions, and retrieving user permissions. It integrates seamlessly with the Data Provider to secure all API requests.
 *   **Logic Layer (Refine Hooks)**: The **Brain**. We leverage Refine's comprehensive suite of hooks (`useList`, `useForm`, `useOne`, `useCustom`) to manage all server state, including caching, optimistic updates, and real-time invalidation. We **never** write raw `fetch` or `axios` calls directly in our UI components.
 *   **UI Layer (`src/components/` & `src/pages/`)**: The **Face**. We use **shadcn/ui** for its accessible, unstyled component primitives, which we then style with **Tailwind CSS**. This gives us complete control over our design system, enabling a unique look and feel, dark mode, and fluid animations.
 
@@ -73,8 +73,8 @@ We chose a **Headless Architecture** powered by **Refine v5** to achieve maximum
 
 The frontend is connected to the backend's **Socket.io** server to create a live, interactive experience.
 
-*   **Global Socket Client (`src/socket.ts`)**: A single, memoized Socket.io client is initialized and used throughout the application.
-*   **Real-time Hooks (`src/hooks/useSocket.ts`)**: A custom hook simplifies subscribing to and handling real-time events within components.
+*   **Global Socket Client (`src/lib/socket.ts`)**: A single, memoized Socket.io client is initialized and used throughout the application.
+*   **Real-time Hooks (`src/hooks/use-socket.ts`)**: A custom hook simplifies subscribing to and handling real-time events within components.
 *   **Refine Invalidation**: When a relevant event is received (e.g., `discussion:new`), we call Refine's `invalidate` function. This intelligently re-fetches only the necessary data, keeping the UI perfectly in sync with the backend state.
 *   **Live Toasts (`sonner`)**: We use toast notifications to provide immediate, actionable feedback for events like `notification:new` and `agent:alert`.
 
