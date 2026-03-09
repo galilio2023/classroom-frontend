@@ -30,6 +30,8 @@ import { ClassStatus } from "@/types";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { Label } from "@/components/ui/label";
+import { useList } from "@refinedev/core";
+import { AcademicTerm } from "@/types";
 
 interface ClassFormProps {
   form: UseFormReturn<any>;
@@ -62,6 +64,20 @@ export const ClassForm = ({
   isEdit = false
 }: ClassFormProps) => {
   const selectedColor = form.watch("color");
+
+  const { data: termsData, isLoading: termsLoading } = useList<AcademicTerm>({
+    resource: "academic-terms",
+    pagination: { pageSize: 100 },
+    filters: [
+      {
+        field: "status",
+        operator: "in",
+        value: ["active", "upcoming"],
+      },
+    ],
+  });
+
+  const terms = termsData?.data || [];
 
   return (
     <div className="space-y-10">
@@ -152,6 +168,40 @@ export const ClassForm = ({
             
             <FormField
               control={form.control}
+              name="termId"
+              render={({ field }) => (
+                <FormItem className="space-y-3">
+                  <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2">
+                    <Calendar className="h-3 w-3" />
+                    Academic Term
+                  </FormLabel>
+                  <Select 
+                    onValueChange={(value) => field.onChange(Number(value))}
+                    value={field.value ? String(field.value) : ""}
+                    disabled={termsLoading}
+                  >
+                    <FormControl>
+                      <SelectTrigger className="h-14 rounded-2xl bg-muted/20 border-none focus:ring-primary transition-all font-bold">
+                        <SelectValue placeholder="Select a term" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent className="rounded-xl border-none shadow-2xl">
+                      {terms.map((term) => (
+                        <SelectItem key={term.id} value={String(term.id)} className="rounded-lg font-bold">
+                          {term.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <FormField
+              control={form.control}
               name="color"
               render={({ field }) => (
                 <FormItem className="space-y-4">
@@ -181,10 +231,8 @@ export const ClassForm = ({
                 </FormItem>
               )}
             />
-          </div>
 
-          {isEdit && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {isEdit && (
                 <FormField
                 control={form.control}
                 name="status"
@@ -210,8 +258,8 @@ export const ClassForm = ({
                     </FormItem>
                 )}
                 />
-            </div>
-          )}
+            )}
+          </div>
 
           <FormField
             control={form.control}

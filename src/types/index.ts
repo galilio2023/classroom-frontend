@@ -53,7 +53,6 @@ export interface User {
   longestStreak: number;
   lastActiveAt: string | null;
   enrollments?: Enrollment[];
-  isVerified?: boolean;
 }
 
 export interface Department {

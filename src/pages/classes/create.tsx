@@ -23,9 +23,9 @@ import { CreateView } from "@/components/refine-ui/views/create-view";
 import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
 import { Textarea } from "@/components/ui/textarea";
 import { useBack, useList, useGetIdentity, HttpError, BaseRecord } from "@refinedev/core";
-import { Loader2, Check, ChevronLeft, LayoutDashboard, BookOpen, Users, Palette, FileText, Sparkles, PlusCircle, Info } from "lucide-react";
+import { Loader2, Check, ChevronLeft, LayoutDashboard, BookOpen, Users, Palette, FileText, Sparkles, PlusCircle, Info, Calendar } from "lucide-react";
 import { classCreateFormSchema } from "@/schemas/class";
-import { Subject, User, ClassStatus } from "@/types";
+import { Subject, User, ClassStatus, AcademicTerm } from "@/types";
 import { toast } from "sonner";
 import z from "zod";
 import { cn } from "@/lib/utils";
@@ -60,6 +60,7 @@ const ClassesCreate = () => {
       name: "",
       description: "",
       subjectId: undefined,
+      termId: undefined,
       capacity: 30,
       status: ClassStatus.ACTIVE,
       schedules: [],
@@ -92,8 +93,23 @@ const ClassesCreate = () => {
     pagination: { pageSize: 100 },
   });
 
+  const { query: termsQuery } = useList<AcademicTerm>({
+    resource: "academic-terms",
+    pagination: { pageSize: 100 },
+    filters: [
+      {
+        field: "status",
+        operator: "in",
+        value: ["active", "upcoming"],
+      },
+    ],
+  });
+
   const subjects = subjectsQuery.data?.data ?? [];
   const subjectsLoading = subjectsQuery.isLoading;
+
+  const terms = termsQuery.data?.data ?? [];
+  const termsLoading = termsQuery.isLoading;
 
   return (
     <CreateView className="class-view pb-20">
@@ -182,6 +198,40 @@ const ClassesCreate = () => {
                         />
                         <FormField
                           control={form.control}
+                          name="termId"
+                          render={({ field }) => (
+                            <FormItem className="space-y-3">
+                              <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2">
+                                <Calendar className="h-3 w-3" />
+                                Academic Term <span className="text-destructive">*</span>
+                              </FormLabel>
+                              <Select
+                                onValueChange={(value) => field.onChange(Number(value))}
+                                value={field.value?.toString()}
+                                disabled={termsLoading}
+                              >
+                                <FormControl>
+                                  <SelectTrigger className="h-14 rounded-2xl bg-muted/20 border-none focus:ring-primary transition-all font-bold">
+                                    <SelectValue placeholder="Select a term" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent className="rounded-xl border-none shadow-2xl">
+                                  {terms.map((term) => (
+                                    <SelectItem key={term.id} value={term.id.toString()} className="rounded-lg font-bold">
+                                      {term.name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <FormField
+                          control={form.control}
                           name="capacity"
                           render={({ field }) => (
                             <FormItem className="space-y-3">
@@ -206,9 +256,7 @@ const ClassesCreate = () => {
                             </FormItem>
                           )}
                         />
-                      </div>
-
-                      <FormField
+                         <FormField
                         control={form.control}
                         name="color"
                         render={({ field }) => (
@@ -239,6 +287,9 @@ const ClassesCreate = () => {
                           </FormItem>
                         )}
                       />
+                      </div>
+
+
                     </div>
 
                     <div className="space-y-8">
