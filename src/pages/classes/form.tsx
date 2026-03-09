@@ -65,7 +65,7 @@ export const ClassForm = ({
 }: ClassFormProps) => {
   const selectedColor = form.watch("color");
 
-  const { data: termsData, isLoading: termsLoading } = useList<AcademicTerm>({
+  const { query: termsQuery } = useList<AcademicTerm>({
     resource: "academic-terms",
     pagination: { pageSize: 100 },
     filters: [
@@ -76,6 +76,9 @@ export const ClassForm = ({
       },
     ],
   });
+
+  const termsData = termsQuery.data;
+  const termsLoading = termsQuery.isLoading;
 
   const terms = termsData?.data || [];
 
@@ -186,7 +189,7 @@ export const ClassForm = ({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent className="rounded-xl border-none shadow-2xl">
-                      {terms.map((term) => (
+                      {terms.map((term: AcademicTerm) => (
                         <SelectItem key={term.id} value={String(term.id)} className="rounded-lg font-bold">
                           {term.name}
                         </SelectItem>

@@ -121,7 +121,7 @@ const VerificationGuard = ({ children }: { children: React.ReactNode }) => {
   if (isLoading) return <Loading />;
   if (!user) return <>{children}</>;
   
-  const isVerified = user.isVerified || user.verificationStatus === VerificationStatus.VERIFIED;
+  const isVerified = user.verificationStatus === VerificationStatus.VERIFIED;
   const isUnverifiedTeacher = user.role === UserRole.TEACHER && !isVerified;
   
   if (isUnverifiedTeacher) {

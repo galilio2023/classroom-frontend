@@ -31,7 +31,7 @@ const PendingVerificationPage = () => {
   // Auto-redirect if verified
   useEffect(() => {
     if (!isLoading && identity) {
-      const isVerified = identity.isVerified || identity.verificationStatus === VerificationStatus.VERIFIED;
+      const isVerified = identity.verificationStatus === VerificationStatus.VERIFIED;
       const isAdmin = identity.role === UserRole.ADMIN;
       const isStudent = identity.role === UserRole.STUDENT;
 
@@ -45,7 +45,7 @@ const PendingVerificationPage = () => {
   const handleCheckStatus = async () => {
     const { data } = await refetch();
     if (data) {
-      const isVerified = data.isVerified || data.verificationStatus === VerificationStatus.VERIFIED;
+      const isVerified = data.verificationStatus === VerificationStatus.VERIFIED;
       if (isVerified) {
         toast.success("Account verified! Redirecting...");
         push("/");
