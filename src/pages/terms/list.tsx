@@ -559,9 +559,9 @@ export default function TermsList() {
                       </motion.div>
                     </div>
                   );
-                })
-              )}
-            </div>
+                })}
+              </div>
+            )}
           </div>
         </div>
       </ListView>

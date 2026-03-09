@@ -26,7 +26,7 @@ import { toast } from "sonner";
 const PendingVerificationPage = () => {
   const { data: identity, refetch, isLoading } = useGetIdentity<User>();
   const { mutate: logout } = useLogout();
-  const { push } = useNavigation();
+  const { push } = useNavigation() as any;
 
   // Auto-redirect if verified
   useEffect(() => {

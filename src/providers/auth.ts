@@ -68,9 +68,10 @@ export const authProvider: AuthProvider = {
       }
       
       if (data?.user) {
+        const user = data.user as any;
         const userWithVerified = {
-            ...data.user,
-            isVerified: (data.user as any).verificationStatus === "verified" || data.user.role === "admin" || data.user.role === "student"
+            ...user,
+            isVerified: user.verificationStatus === "verified" || user.role === "admin" || user.role === "student"
         };
         localStorage.setItem("user", JSON.stringify(userWithVerified));
       }
@@ -103,9 +104,10 @@ export const authProvider: AuthProvider = {
       const { data: session } = await authClient.getSession();
       
       if (session?.user) {
+        const user = session.user as any;
         const userWithVerified = {
-            ...session.user,
-            isVerified: (session.user as any).verificationStatus === "verified" || session.user.role === "admin" || session.user.role === "student"
+            ...user,
+            isVerified: user.verificationStatus === "verified" || user.role === "admin" || user.role === "student"
         };
         localStorage.setItem("user", JSON.stringify(userWithVerified));
         return { authenticated: true };
