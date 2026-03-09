@@ -17,7 +17,11 @@ import {
   Loader2,
   History,
   Layers,
-  X
+  X,
+  ArrowRight,
+  Zap,
+  Lightbulb,
+  Info
 } from "lucide-react";
 import { toast } from "sonner";
 import axios from "axios";
@@ -25,8 +29,13 @@ import ReactMarkdown from "react-markdown";
 import { PracticeModal } from "@/components/practice/practice-modal";
 import { FlashcardPlayer } from "@/components/practice/flashcard-player";
 import { cn } from "@/lib/utils";
+import { motion, AnimatePresence } from "framer-motion";
+import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
+import usePageTitle from "@/hooks/use-page-title";
+import { Label } from "@/components/ui/label";
 
 const AIStudyLab = () => {
+  usePageTitle("AI Study Lab");
   const [activeTool, setActiveTool] = useState<"explain" | "quiz" | "summary" | "flashcards">(
     "explain",
   );
@@ -75,245 +84,233 @@ const AIStudyLab = () => {
   };
 
   return (
-    <div className="container mx-auto py-6 md:py-10 px-4 md:px-6 space-y-6 md:space-y-8">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-black tracking-tight flex items-center gap-3">
-            <div className="p-2 bg-primary/10 rounded-xl">
-              <BrainCircuit className="h-6 w-6 md:h-8 md:w-8 text-primary" />
+    <div className="container mx-auto py-10 max-w-6xl space-y-10">
+      <motion.div 
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="space-y-4"
+      >
+        <Breadcrumb />
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="flex items-center gap-4">
+                <div className="p-3 rounded-2xl bg-primary/10 text-primary shadow-sm">
+                    <BrainCircuit className="h-8 w-8" />
+                </div>
+                <div>
+                    <h1 className="text-4xl font-black tracking-tight">AI Study Lab</h1>
+                    <p className="text-muted-foreground font-medium mt-1">Your private space to practice, learn, and master any topic with AI assistance.</p>
+                </div>
             </div>
-            AI Study Lab
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Your private space to practice, learn, and master any topic.
-          </p>
+            <Button variant="outline" className="rounded-2xl h-12 px-6 font-black uppercase tracking-widest text-[10px] gap-2 border-primary/10 bg-card/50 backdrop-blur-sm">
+                <History className="h-4 w-4" />
+                Study History
+            </Button>
         </div>
-        <Button variant="outline" className="gap-2 w-full md:w-auto">
-          <History className="h-4 w-4" />
-          Study History
-        </Button>
-      </div>
+      </motion.div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
-        <div className="grid grid-cols-2 lg:grid-cols-1 gap-3 md:gap-4">
-          <Card
-            className={cn(
-              "cursor-pointer transition-all hover:border-primary/50",
-              activeTool === "explain"
-                ? "border-primary bg-primary/5 shadow-md"
-                : "",
-            )}
-            onClick={() => setActiveTool("explain")}
-          >
-            <CardHeader className="p-3 md:p-4">
-              <div className="flex items-center gap-2 md:gap-3">
-                <div
-                  className={cn(
-                    "p-1.5 md:p-2 rounded-lg shrink-0",
-                    activeTool === "explain"
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted",
-                  )}
-                >
-                  <BookOpen className="h-4 w-4 md:h-5 md:w-5" />
-                </div>
-                <div>
-                  <CardTitle className="text-sm md:text-base">Explainer</CardTitle>
-                  <CardDescription className="text-[10px] md:text-xs hidden sm:block">
-                    Simplify difficult topics instantly.
-                  </CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-          </Card>
-
-          <Card
-            className={cn(
-              "cursor-pointer transition-all hover:border-primary/50",
-              activeTool === "quiz"
-                ? "border-primary bg-primary/5 shadow-md"
-                : "",
-            )}
-            onClick={() => setActiveTool("quiz")}
-          >
-            <CardHeader className="p-3 md:p-4">
-              <div className="flex items-center gap-2 md:gap-3">
-                <div
-                  className={cn(
-                    "p-1.5 md:p-2 rounded-lg shrink-0",
-                    activeTool === "quiz"
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted",
-                  )}
-                >
-                  <FileQuestion className="h-4 w-4 md:h-5 md:w-5" />
-                </div>
-                <div>
-                  <CardTitle className="text-sm md:text-base">Quiz</CardTitle>
-                  <CardDescription className="text-[10px] md:text-xs hidden sm:block">
-                    Test your knowledge privately.
-                  </CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-          </Card>
-
-          <Card
-            className={cn(
-              "cursor-pointer transition-all hover:border-primary/50",
-              activeTool === "summary"
-                ? "border-primary bg-primary/5 shadow-md"
-                : "",
-            )}
-            onClick={() => setActiveTool("summary")}
-          >
-            <CardHeader className="p-3 md:p-4">
-              <div className="flex items-center gap-2 md:gap-3">
-                <div
-                  className={cn(
-                    "p-1.5 md:p-2 rounded-lg shrink-0",
-                    activeTool === "summary"
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted",
-                  )}
-                >
-                  <Sparkles className="h-4 w-4 md:h-5 md:w-5" />
-                </div>
-                <div>
-                  <CardTitle className="text-sm md:text-base">Summarizer</CardTitle>
-                  <CardDescription className="text-[10px] md:text-xs hidden sm:block">
-                    Turn long notes into key points.
-                  </CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-          </Card>
-
-          <Card
-            className={cn(
-              "cursor-pointer transition-all hover:border-primary/50",
-              activeTool === "flashcards"
-                ? "border-primary bg-primary/5 shadow-md"
-                : "",
-            )}
-            onClick={() => setActiveTool("flashcards")}
-          >
-            <CardHeader className="p-3 md:p-4">
-              <div className="flex items-center gap-2 md:gap-3">
-                <div
-                  className={cn(
-                    "p-1.5 md:p-2 rounded-lg shrink-0",
-                    activeTool === "flashcards"
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted",
-                  )}
-                >
-                  <Layers className="h-4 w-4 md:h-5 md:w-5" />
-                </div>
-                <div>
-                  <CardTitle className="text-sm md:text-base">Flashcards</CardTitle>
-                  <CardDescription className="text-[10px] md:text-xs hidden sm:block">
-                    Generate cards for active recall.
-                  </CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-          </Card>
-        </div>
-
-        <div className="lg:col-span-2 space-y-6">
-          {!flashcards ? (
-            <Card className="shadow-xl border-none bg-card/50 backdrop-blur-xl">
-                <CardHeader className="p-4 md:p-6">
-                <CardTitle className="text-base md:text-lg">
-                    {activeTool === "explain" && "What would you like to understand?"}
-                    {activeTool === "quiz" && "What topic should we test?"}
-                    {activeTool === "summary" && "Paste the text you want to summarize"}
-                    {activeTool === "flashcards" && "What topic or text should we turn into cards?"}
-                </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4 p-4 md:p-6">
-                {activeTool === "quiz" || activeTool === "explain" || activeTool === "flashcards" ? (
-                    <Input
-                    placeholder={
-                        activeTool === "quiz"
-                        ? "e.g., Photosynthesis, Quantum Physics..."
-                        : activeTool === "flashcards"
-                        ? "e.g., French Revolution, Human Anatomy..."
-                        : "e.g., How do black holes work?"
-                    }
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    className="h-10 md:h-12 text-base md:text-lg"
-                    />
-                ) : (
-                    <Textarea
-                    placeholder="Paste your notes or textbook content here..."
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    className="min-h-[150px] md:min-h-50 text-sm md:text-base"
-                    />
-                )}
-
-                <Button
-                    onClick={handleToolAction}
-                    disabled={isLoading}
-                    className="w-full h-10 md:h-12 text-base md:text-lg font-bold gap-2 shadow-lg shadow-primary/20"
-                >
-                    {isLoading ? (
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                    ) : (
-                    <Sparkles className="h-5 w-5" />
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+        {/* Tool Selection Sidebar */}
+        <div className="lg:col-span-4 space-y-4">
+          {[
+            { id: "explain", title: "Concept Explainer", desc: "Simplify difficult topics instantly.", icon: BookOpen, color: "text-blue-500", bg: "bg-blue-500/10" },
+            { id: "quiz", title: "Practice Quiz", desc: "Test your knowledge privately.", icon: FileQuestion, color: "text-purple-500", bg: "bg-purple-500/10" },
+            { id: "summary", title: "Smart Summarizer", desc: "Turn long notes into key points.", icon: Sparkles, color: "text-green-500", bg: "bg-green-500/10" },
+            { id: "flashcards", title: "Flashcard Gen", desc: "Generate cards for active recall.", icon: Layers, color: "text-orange-500", bg: "bg-orange-500/10" },
+          ].map((tool) => (
+            <motion.div
+                key={tool.id}
+                whileHover={{ x: 4 }}
+                whileTap={{ scale: 0.98 }}
+            >
+                <Card
+                    className={cn(
+                        "cursor-pointer transition-all border-none shadow-lg rounded-2xl overflow-hidden group",
+                        activeTool === tool.id
+                            ? "bg-primary text-primary-foreground shadow-primary/20"
+                            : "bg-card/50 backdrop-blur-sm hover:bg-primary/5"
                     )}
-                    {activeTool === "quiz"
-                    ? "Start Practice Quiz"
-                    : activeTool === "flashcards"
-                    ? "Generate Flashcards"
-                    : "Generate with AI"}
-                </Button>
-                </CardContent>
-            </Card>
-          ) : (
-            <Card className="shadow-2xl border-none bg-card/50 backdrop-blur-xl overflow-hidden">
-                <CardHeader className="bg-primary/5 border-b border-primary/10 flex flex-row items-center justify-between p-4 md:p-6">
-                    <div>
-                        <CardTitle className="text-base md:text-lg font-black uppercase tracking-widest flex items-center gap-2">
-                            <Layers className="h-5 w-5 text-primary" />
-                            Flashcard Session
-                        </CardTitle>
-                    </div>
-                    <Button variant="ghost" size="icon" onClick={() => setFlashcards(null)}>
-                        <X className="h-4 w-4" />
-                    </Button>
-                </CardHeader>
-                <CardContent className="pt-6 md:pt-10 pb-6 md:pb-10">
-                    <FlashcardPlayer 
-                        cards={flashcards} 
-                        onComplete={() => setFlashcards(null)} 
-                    />
-                </CardContent>
-            </Card>
-          )}
+                    onClick={() => setActiveTool(tool.id as any)}
+                >
+                    <CardHeader className="p-5">
+                        <div className="flex items-center gap-4">
+                            <div className={cn(
+                                "p-3 rounded-xl transition-colors",
+                                activeTool === tool.id ? "bg-white/20 text-white" : tool.bg + " " + tool.color
+                            )}>
+                                <tool.icon className="h-6 w-6" />
+                            </div>
+                            <div className="space-y-0.5">
+                                <CardTitle className="text-base font-black tracking-tight">{tool.title}</CardTitle>
+                                <CardDescription className={cn(
+                                    "text-xs font-medium",
+                                    activeTool === tool.id ? "text-white/70" : "text-muted-foreground"
+                                )}>
+                                    {tool.desc}
+                                </CardDescription>
+                            </div>
+                        </div>
+                    </CardHeader>
+                </Card>
+            </motion.div>
+          ))}
 
-          {result && (
-            <Card className="animate-in fade-in slide-in-from-bottom-4 duration-500 border-primary/20 bg-primary/5">
-              <CardHeader className="border-b border-primary/10 p-4 md:p-6">
-                <CardTitle className="text-xs md:text-sm font-black uppercase tracking-widest text-primary">
-                  AI Response
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pt-4 md:pt-6 prose dark:prose-invert max-w-none pb-4 md:pb-6 px-4 md:px-6">
-                <ReactMarkdown>{result}</ReactMarkdown>
-              </CardContent>
-            </Card>
-          )}
+          <Card className="mt-8 border-primary/10 bg-primary/5 rounded-[2rem] p-6">
+            <div className="flex gap-4">
+                <div className="p-2 rounded-xl bg-primary/10 text-primary h-fit">
+                    <Lightbulb className="h-5 w-5" />
+                </div>
+                <div className="space-y-1">
+                    <p className="font-black text-xs uppercase tracking-widest text-primary">Study Tip</p>
+                    <p className="text-xs text-muted-foreground font-medium leading-relaxed">
+                        Use the **Summarizer** first to get key points, then generate **Flashcards** from those points for the best retention.
+                    </p>
+                </div>
+            </div>
+          </Card>
+        </div>
+
+        {/* Main Interaction Area */}
+        <div className="lg:col-span-8 space-y-8">
+          <AnimatePresence mode="wait">
+            {!flashcards ? (
+                <motion.div
+                    key="input-area"
+                    initial={{ opacity: 0, scale: 0.98 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.98 }}
+                >
+                    <Card className="border-none shadow-2xl bg-card/50 backdrop-blur-xl rounded-[2.5rem] overflow-hidden">
+                        <CardHeader className="p-10 pb-6">
+                            <div className="flex items-center gap-3 mb-2">
+                                <Zap className="h-5 w-5 text-primary animate-pulse" />
+                                <CardTitle className="text-2xl font-black tracking-tight">
+                                    {activeTool === "explain" && "What would you like to understand?"}
+                                    {activeTool === "quiz" && "What topic should we test?"}
+                                    {activeTool === "summary" && "Paste the text you want to summarize"}
+                                    {activeTool === "flashcards" && "What topic or text should we turn into cards?"}
+                                </CardTitle>
+                            </div>
+                            <CardDescription className="font-medium text-base">
+                                Provide the subject or content below and our AI will handle the rest.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="p-10 pt-4 space-y-8">
+                            <div className="space-y-3">
+                                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Input Content</Label>
+                                {activeTool === "quiz" || activeTool === "explain" || activeTool === "flashcards" ? (
+                                    <Input
+                                        placeholder={
+                                            activeTool === "quiz"
+                                            ? "e.g., Photosynthesis, Quantum Physics..."
+                                            : activeTool === "flashcards"
+                                            ? "e.g., French Revolution, Human Anatomy..."
+                                            : "e.g., How do black holes work?"
+                                        }
+                                        value={input}
+                                        onChange={(e) => setInput(e.target.value)}
+                                        className="h-16 rounded-2xl bg-muted/30 border-none focus-visible:ring-primary font-black text-lg px-6"
+                                    />
+                                ) : (
+                                    <Textarea
+                                        placeholder="Paste your notes or textbook content here..."
+                                        value={input}
+                                        onChange={(e) => setInput(e.target.value)}
+                                        className="min-h-[250px] rounded-[2rem] bg-muted/30 border-none focus-visible:ring-primary p-8 text-base leading-relaxed font-medium resize-none"
+                                    />
+                                )}
+                            </div>
+
+                            <Button
+                                onClick={handleToolAction}
+                                disabled={isLoading}
+                                className="w-full h-16 rounded-2xl font-black uppercase tracking-widest text-xs gap-3 shadow-2xl shadow-primary/20 group"
+                            >
+                                {isLoading ? (
+                                    <Loader2 className="h-5 w-5 animate-spin" />
+                                ) : (
+                                    <Sparkles className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                                )}
+                                {activeTool === "quiz"
+                                    ? "Start Practice Quiz"
+                                    : activeTool === "flashcards"
+                                    ? "Generate Flashcards"
+                                    : "Generate with AI"}
+                                {!isLoading && <ArrowRight className="h-4 w-4 ml-2 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />}
+                            </Button>
+                        </CardContent>
+                    </Card>
+                </motion.div>
+            ) : (
+                <motion.div
+                    key="flashcard-area"
+                    initial={{ opacity: 0, scale: 0.98 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.98 }}
+                >
+                    <Card className="shadow-2xl border-none bg-card/50 backdrop-blur-xl rounded-[3rem] overflow-hidden">
+                        <CardHeader className="bg-primary/5 border-b border-primary/10 flex flex-row items-center justify-between p-8">
+                            <div className="flex items-center gap-4">
+                                <div className="p-3 rounded-2xl bg-primary/10 text-primary">
+                                    <Layers className="h-8 w-8" />
+                                </div>
+                                <div>
+                                    <CardTitle className="text-2xl font-black tracking-tight">Flashcard Session</CardTitle>
+                                    <CardDescription className="font-bold text-primary/60 uppercase tracking-widest text-[10px]">Active Recall Mode</CardDescription>
+                                </div>
+                            </div>
+                            <Button variant="ghost" size="icon" className="h-12 w-12 rounded-full hover:bg-destructive/5 hover:text-destructive" onClick={() => setFlashcards(null)}>
+                                <X className="h-6 w-6" />
+                            </Button>
+                        </CardHeader>
+                        <CardContent className="p-12">
+                            <FlashcardPlayer 
+                                cards={flashcards} 
+                                onComplete={() => setFlashcards(null)} 
+                            />
+                        </CardContent>
+                    </Card>
+                </motion.div>
+            )}
+          </AnimatePresence>
+
+          <AnimatePresence>
+            {result && (
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 20 }}
+                >
+                    <Card className="border-none shadow-2xl bg-indigo-500/[0.02] backdrop-blur-xl rounded-[2.5rem] overflow-hidden border border-indigo-500/10">
+                        <CardHeader className="p-10 pb-6 border-b border-indigo-500/10">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-600">
+                                    <Sparkles className="h-5 w-5" />
+                                </div>
+                                <CardTitle className="text-[10px] font-black uppercase tracking-widest text-indigo-600">
+                                    AI Response
+                                </CardTitle>
+                            </div>
+                        </CardHeader>
+                        <CardContent className="p-10 prose prose-lg dark:prose-invert max-w-none font-medium leading-relaxed">
+                            <ReactMarkdown>{result}</ReactMarkdown>
+                        </CardContent>
+                        <div className="p-8 bg-indigo-500/5 border-t border-indigo-500/10 flex justify-end">
+                            <Button variant="ghost" className="rounded-xl font-black uppercase tracking-widest text-[10px] gap-2 text-indigo-600 hover:bg-indigo-500/10">
+                                <History className="h-4 w-4" />
+                                Save to History
+                            </Button>
+                        </div>
+                    </Card>
+                </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
 
       {practiceTopic && (
         <PracticeModal
           topic={practiceTopic}
-          subjectId={0} // Default to 0 for general practice
+          subjectId={0}
           onClose={() => setPracticeTopic(null)}
         />
       )}

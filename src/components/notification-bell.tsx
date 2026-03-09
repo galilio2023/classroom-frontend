@@ -14,15 +14,13 @@ import { Notification, User } from "@/types";
 import { formatDistanceToNow } from "date-fns";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { io } from "socket.io-client";
+import { socket, connectSocket } from "@/lib/socket";
 import { toast } from "sonner";
 import Confetti from "react-confetti";
 import { useWindowSize } from "react-use";
-import { SOCKET_URL } from "@/config";
 
 /**
  * Safely formats notification links to match frontend route structure.
- * e.g., /classes/1 -> /classes/show/1
  */
 const formatNotificationLink = (link: string | null) => {
   if (!link) return null;
@@ -30,7 +28,6 @@ const formatNotificationLink = (link: string | null) => {
   const parts = link.split("/").filter(Boolean);
   const resourcesWithShow = ["classes", "users", "assignments"];
 
-  // If link is exactly /resource/id and resource has a show route
   if (parts.length === 2 && resourcesWithShow.includes(parts[0])) {
     return `/${parts[0]}/show/${parts[1]}`;
   }
@@ -47,18 +44,20 @@ export const NotificationBell = () => {
   const [showConfetti, setShowConfetti] = useState(false);
   const { width, height } = useWindowSize();
 
-  // Fetch notifications
+  // Fetch notifications with aggressive caching
   const { query } = useCustom<Notification[]>({
     url: "/notifications",
     method: "get",
+    queryOptions: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      refetchOnWindowFocus: false,
+    }
   });
 
   const notificationsData = query.data;
   const refetch = query.refetch;
-
   const notifications = notificationsData?.data || [];
   
-  // Use socket count if available, otherwise calculate from fetched data
   const unreadCount = socketUnreadCount !== null 
     ? socketUnreadCount 
     : notifications.filter((n: Notification) => !n.isRead).length;
@@ -67,13 +66,11 @@ export const NotificationBell = () => {
   useEffect(() => {
     if (!identity?.id) return;
 
-    const socket = io(SOCKET_URL, {
-      query: { userId: identity.id },
-      withCredentials: true, // Ensure cookies are sent for authentication
-    });
+    // Use Singleton Socket
+    connectSocket(identity.id);
 
     const handleNotification = (newNotification: Notification) => {
-      refetch();
+      void refetch();
       const link = formatNotificationLink(newNotification.link);
       toast.info(newNotification.title, {
         description: newNotification.message,
@@ -95,13 +92,6 @@ export const NotificationBell = () => {
         duration: 5000,
       });
       setTimeout(() => setShowConfetti(false), 5000);
-    };
-
-    const handleStudentBadgeEarned = (data: any) => {
-      toast.success(data.message, {
-        icon: <Trophy className="h-5 w-5 text-yellow-500" />,
-        description: `In ${data.className}`,
-      });
     };
 
     const handleAgentAlert = (data: any) => {
@@ -131,24 +121,21 @@ export const NotificationBell = () => {
     socket.on("notification", handleNotification);
     socket.on("unread_count", handleUnreadCount);
     socket.on("badge_earned", handleBadgeEarned);
-    socket.on("student_badge_earned", handleStudentBadgeEarned);
     socket.on("agent_alert", handleAgentAlert);
     socket.on("live_session_started", handleLiveSessionStarted);
 
-    // Reconnection Logic: Fetch notifications when socket reconnects
     socket.on("connect", () => {
-      refetch();
+      void refetch();
     });
 
     return () => {
       socket.off("notification", handleNotification);
       socket.off("unread_count", handleUnreadCount);
       socket.off("badge_earned", handleBadgeEarned);
-      socket.off("student_badge_earned", handleStudentBadgeEarned);
       socket.off("agent_alert", handleAgentAlert);
       socket.off("live_session_started", handleLiveSessionStarted);
       socket.off("connect");
-      socket.disconnect();
+      // Do NOT disconnect singleton socket here
     };
   }, [identity?.id, refetch, navigate]);
 
@@ -171,9 +158,7 @@ export const NotificationBell = () => {
                 };
             });
 
-            // Optimistically decrement unread count
             setSocketUnreadCount(prev => prev !== null ? Math.max(0, prev - 1) : null);
-
             return { previousNotifications };
         },
         onError: (_err, _variables, context: any) => {
@@ -205,9 +190,7 @@ export const NotificationBell = () => {
                 };
             });
 
-            // Optimistically clear unread count
             setSocketUnreadCount(0);
-
             return { previousNotifications };
         },
         onError: (_err, _variables, context: any) => {

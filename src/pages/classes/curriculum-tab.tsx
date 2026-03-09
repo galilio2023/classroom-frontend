@@ -4,12 +4,15 @@ import { Module, User, UserRole, Resource, Progress } from "@/types";
 import { Accordion } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { PlusCircle, Loader2, LayoutGrid, Zap } from "lucide-react";
+import { PlusCircle, Loader2, LayoutGrid, Zap, Sparkles, BookOpen, LayoutDashboard, Info, Plus, Wand2 } from "lucide-react";
 import { toast } from "sonner";
 import { ModuleItem } from "@/components/classes/curriculum/module-item";
 import { MagicBuilderDialog, MagicBuilderConfig } from "@/components/classes/curriculum/magic-builder-dialog";
 import { CreateModuleDialog } from "@/components/classes/curriculum/create-module-dialog";
 import { AddResourceDialog } from "@/components/classes/curriculum/add-resource-dialog";
+import { cn } from "@/lib/utils";
+import { motion, AnimatePresence } from "framer-motion";
+import { Badge } from "@/components/ui/badge";
 
 interface CurriculumTabProps {
   classId: string;
@@ -122,70 +125,142 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
     );
   };
 
-  if (isLoading) return <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
+  if (isLoading) return (
+    <div className="flex flex-col items-center justify-center py-20 gap-4">
+      <Loader2 className="h-10 w-10 animate-spin text-primary/20" />
+      <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">Loading Curriculum...</p>
+    </div>
+  );
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h3 className="text-lg font-semibold">Course Curriculum</h3>
-          <p className="text-sm text-muted-foreground">Structured lessons and materials for this class.</p>
+    <div className="space-y-8">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <div className="p-1.5 rounded-lg bg-primary/10 text-primary">
+              <BookOpen className="h-4 w-4" />
+            </div>
+            <h3 className="text-xl font-black tracking-tight">Course Curriculum</h3>
+          </div>
+          <p className="text-sm text-muted-foreground font-medium">Structured lessons and materials for this class.</p>
         </div>
         {isTeacher && (
-          <div className="flex gap-2">
-            <Button variant="outline" className="border-ai-primary/30 text-ai-primary" onClick={() => { setMagicConfig({ ...magicConfig, moduleId: null, type: "package" }); setIsMagicModalOpen(true); }}>
-              <Zap className="h-4 w-4 mr-2" /> Magic Builder
+          <div className="flex items-center gap-3">
+            <Button 
+              variant="outline" 
+              className="rounded-xl h-11 px-6 border-ai-primary/20 text-ai-primary hover:bg-ai-primary/5 font-black uppercase tracking-widest text-[10px] gap-2 relative overflow-hidden group shadow-sm"
+              onClick={() => { setMagicConfig({ ...magicConfig, moduleId: null, type: "package" }); setIsMagicModalOpen(true); }}
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shine_1.5s_ease-in-out] pointer-events-none" />
+              <Sparkles className="h-4 w-4" />
+              Magic Builder
             </Button>
-            <Button onClick={() => {
-              setNewModuleName("");
-              setNewModuleDesc("");
-              setIsCreateModalOpen(true);
-            }}><PlusCircle className="h-4 w-4 mr-2" /> Add Module</Button>
+            <Button 
+              onClick={() => {
+                setNewModuleName("");
+                setNewModuleDesc("");
+                setIsCreateModalOpen(true);
+              }}
+              className="rounded-xl h-11 px-6 font-black uppercase tracking-widest text-[10px] gap-2 shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95"
+            >
+              <PlusCircle className="h-4 w-4" />
+              Add Module
+            </Button>
           </div>
         )}
       </div>
 
       {modules.length === 0 ? (
-        <Card className="border-dashed py-12 text-center">
-          <CardContent>
-            <LayoutGrid className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-20" />
-            <h4 className="font-medium">No modules yet</h4>
-            {isTeacher && <Button onClick={() => {
-              setNewModuleName("");
-              setNewModuleDesc("");
-              setIsCreateModalOpen(true);
-            }} className="mt-4">Manual Create</Button>}
-          </CardContent>
-        </Card>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+        >
+          <Card className="border-none shadow-2xl bg-card/50 backdrop-blur-xl rounded-[2rem] overflow-hidden py-20 text-center">
+            <CardContent className="space-y-6">
+              <div className="relative mx-auto w-fit">
+                <div className="absolute inset-0 bg-primary/20 rounded-full blur-2xl animate-pulse" />
+                <div className="relative p-6 rounded-full bg-primary/10 text-primary">
+                  <LayoutGrid className="h-12 w-12 opacity-40" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <h4 className="text-2xl font-black tracking-tight">No modules yet</h4>
+                <p className="text-muted-foreground font-medium max-w-xs mx-auto">Start building your curriculum by adding your first module or using the AI Magic Builder.</p>
+              </div>
+              {isTeacher && (
+                <div className="flex items-center justify-center gap-3 pt-4">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setIsMagicModalOpen(true)}
+                    className="rounded-xl h-12 px-8 border-ai-primary/20 text-ai-primary hover:bg-ai-primary/5 font-black uppercase tracking-widest text-[10px] gap-2"
+                  >
+                    <Wand2 className="h-4 w-4" />
+                    AI Magic Builder
+                  </Button>
+                  <Button 
+                    onClick={() => setIsCreateModalOpen(true)}
+                    className="rounded-xl h-12 px-8 font-black uppercase tracking-widest text-[10px] gap-2 shadow-lg shadow-primary/20"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Manual Create
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
       ) : (
-        <Accordion type="multiple" className="w-full space-y-4">
-          {modules.map((module) => (
-            <ModuleItem 
-              key={module.id}
-              module={module}
-              isTeacher={isTeacher}
-              isStudent={isStudent}
-              classId={classId}
-              isItemCompleted={isItemCompleted}
-              onToggleProgress={handleToggleProgress}
-              onDeleteModule={(id) => deleteModule({ resource: "modules", id }, { onSuccess: () => { void modulesQuery.refetch(); } })}
-              onMagicAction={(moduleId, type) => { setMagicConfig({ ...magicConfig, moduleId, type: type as any }); setIsMagicModalOpen(true); }}
-              onAddMaterial={(moduleId) => { 
-                setActiveModuleId(moduleId); 
-                setNewResource({
-                  title: "",
-                  description: "",
-                  type: "file",
-                  url: "",
-                  content: "",
-                  cldPubId: "",
-                });
-                setIsAddResourceOpen(true); 
-              }}
-              onAddTask={(moduleId) => go({ to: `/assignments/create?classId=${classId}&moduleId=${moduleId}` })}
-            />
-          ))}
-        </Accordion>
+        <div className="space-y-6">
+          <div className="flex items-center justify-between px-2">
+            <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
+              <LayoutDashboard className="h-3 w-3" />
+              {modules.length} Modules Published
+            </div>
+            {isStudent && (
+              <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary">
+                <Zap className="h-3 w-3" />
+                {userProgress.filter(p => p.isCompleted).length} Items Completed
+              </div>
+            )}
+          </div>
+          
+          <Accordion type="multiple" className="w-full space-y-6">
+            <AnimatePresence mode="popLayout">
+              {modules.map((module, idx) => (
+                <motion.div
+                  key={module.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.05 }}
+                >
+                  <ModuleItem 
+                    module={module}
+                    isTeacher={isTeacher}
+                    isStudent={isStudent}
+                    classId={classId}
+                    isItemCompleted={isItemCompleted}
+                    onToggleProgress={handleToggleProgress}
+                    onDeleteModule={(id) => deleteModule({ resource: "modules", id }, { onSuccess: () => { void modulesQuery.refetch(); } })}
+                    onMagicAction={(moduleId, type) => { setMagicConfig({ ...magicConfig, moduleId, type: type as any }); setIsMagicModalOpen(true); }}
+                    onAddMaterial={(moduleId) => { 
+                      setActiveModuleId(moduleId); 
+                      setNewResource({
+                        title: "",
+                        description: "",
+                        type: "file",
+                        url: "",
+                        content: "",
+                        cldPubId: "",
+                      });
+                      setIsAddResourceOpen(true); 
+                    }}
+                    onAddTask={(moduleId) => go({ to: `/assignments/create?classId=${classId}&moduleId=${moduleId}` })}
+                  />
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </Accordion>
+        </div>
       )}
 
       {isTeacher && (

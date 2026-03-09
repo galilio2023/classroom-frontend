@@ -4,13 +4,34 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Loader2, Trophy, Award, Star, Flame, Target, TrendingUp, BookOpen, Calendar, Mail, Phone, MapPin } from "lucide-react";
+import { 
+  Loader2, 
+  Trophy, 
+  Award, 
+  Star, 
+  Flame, 
+  Target, 
+  TrendingUp, 
+  BookOpen, 
+  Calendar, 
+  Mail, 
+  Phone, 
+  MapPin,
+  Sparkles,
+  Zap,
+  Activity,
+  GraduationCap
+} from "lucide-react";
 import { User as UserType, UserRole } from "@/types";
 import { XPProgressBar } from "@/components/xp-progress-bar";
 import { getLevelProgress } from "@/lib/xp";
 import { BadgeCard, MOCK_BADGES } from "@/components/badge-card";
 import { StudentAcademicJourney } from "@/components/dashboard/student-academic-journey";
 import { SubmissionHeatmap } from "@/components/dashboard/submission-heatmap";
+import { motion } from "framer-motion";
+import usePageTitle from "@/hooks/use-page-title";
+import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
+import { cn } from "@/lib/utils";
 
 const StudentPortfolio = () => {
   const { id } = useParams();
@@ -38,18 +59,24 @@ const StudentPortfolio = () => {
   const user = userData?.data;
   const analytics = analyticsData?.data;
 
+  usePageTitle(user?.name ? `${user.name}'s Portfolio` : "Student Portfolio");
+
   if (isUserLoading || isAnalyticsLoading) {
     return (
-      <div className="flex h-96 items-center justify-center">
-        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+      <div className="flex h-[80vh] items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+            <Loader2 className="h-12 w-12 animate-spin text-primary" />
+            <p className="text-muted-foreground font-black uppercase tracking-widest text-[10px]">Assembling Portfolio...</p>
+        </div>
       </div>
     );
   }
 
   if (!user) {
     return (
-      <div className="flex h-96 items-center justify-center">
-        <p className="text-muted-foreground text-lg">Student not found</p>
+      <div className="container mx-auto py-20 text-center">
+        <h2 className="text-2xl font-black">Student not found</h2>
+        <p className="text-muted-foreground">The portfolio you are looking for is unavailable.</p>
       </div>
     );
   }
@@ -57,84 +84,140 @@ const StudentPortfolio = () => {
   const { currentLevel } = getLevelProgress(user.xp || 0);
 
   return (
-    <div className="container mx-auto py-10 max-w-6xl space-y-8">
-      {/* Header Section */}
-      <div className="flex flex-col md:flex-row gap-8 items-start">
-        <Card className="w-full md:w-1/3 overflow-hidden border-primary/10 shadow-lg">
-          <div className="h-24 bg-gradient-to-br from-primary/20 to-primary/5" />
-          <CardContent className="relative pt-0 flex flex-col items-center text-center">
-            <Avatar className="h-24 w-24 border-4 border-background -mt-12 shadow-xl">
-              <AvatarImage src={user.image ?? ""} />
-              <AvatarFallback className="text-2xl font-bold bg-primary text-primary-foreground">
-                {user.name[0]}
-              </AvatarFallback>
-            </Avatar>
-            <div className="mt-4 space-y-1">
-              <h2 className="text-2xl font-black tracking-tight">{user.name}</h2>
-              <div className="flex items-center justify-center gap-2">
-                <Badge variant="secondary" className="capitalize font-bold px-3">
-                  Level {currentLevel}
-                </Badge>
-                <Badge variant="outline" className="font-bold px-3">
-                  {user.xp || 0} XP
-                </Badge>
-              </div>
-            </div>
-            
-            <div className="w-full mt-6">
-              <XPProgressBar xp={user.xp || 0} />
-            </div>
-            
-            <Separator className="my-6" />
-            
-            <div className="w-full space-y-3 text-left">
-              <div className="flex items-center gap-3 text-sm">
-                <Mail className="h-4 w-4 text-primary" />
-                <span className="font-medium truncate">{user.email}</span>
-              </div>
-              {user.phoneNumber && (
-                <div className="flex items-center gap-3 text-sm">
-                  <Phone className="h-4 w-4 text-primary" />
-                  <span className="font-medium">{user.phoneNumber}</span>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+    <div className="container mx-auto py-10 max-w-6xl space-y-12">
+      <motion.div 
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="space-y-4"
+      >
+        <Breadcrumb />
+        <div className="flex items-center gap-4">
+          <div className="p-3 rounded-2xl bg-primary/10 text-primary shadow-sm">
+            <GraduationCap className="h-8 w-8" />
+          </div>
+          <div>
+            <h1 className="text-4xl font-black tracking-tight">Academic Portfolio</h1>
+            <p className="text-muted-foreground font-medium">A comprehensive showcase of learning progress, achievements, and skills.</p>
+          </div>
+        </div>
+      </motion.div>
 
-        <div className="w-full md:w-2/3 space-y-6">
+      {/* Header Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+        <motion.div 
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.1 }}
+          className="lg:col-span-4"
+        >
+          <Card className="overflow-hidden border-primary/10 shadow-2xl rounded-[2.5rem] bg-card/50 backdrop-blur-sm">
+            <div className="h-32 bg-gradient-to-br from-primary/20 via-primary/10 to-transparent relative">
+                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10" />
+            </div>
+            <CardContent className="relative pt-0 flex flex-col items-center text-center px-8 pb-10">
+              <Avatar className="h-32 w-32 border-8 border-background -mt-16 shadow-2xl rounded-[2rem]">
+                <AvatarImage src={user.image ?? ""} className="object-cover" />
+                <AvatarFallback className="text-4xl font-black bg-primary text-primary-foreground">
+                  {user.name[0]}
+                </AvatarFallback>
+              </Avatar>
+              
+              <div className="mt-6 space-y-3">
+                <h2 className="text-3xl font-black tracking-tight">{user.name}</h2>
+                <div className="flex items-center justify-center gap-2">
+                  <Badge variant="secondary" className="font-black px-4 py-1 rounded-lg text-[10px] tracking-widest uppercase">
+                    Level {currentLevel}
+                  </Badge>
+                  <Badge className="bg-primary/10 text-primary border-none font-black px-4 py-1 rounded-lg text-[10px] tracking-widest uppercase">
+                    {user.xp || 0} XP
+                  </Badge>
+                </div>
+              </div>
+              
+              <div className="w-full mt-8 space-y-4">
+                <div className="flex justify-between items-end px-1">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Progress to Level {currentLevel + 1}</span>
+                    <span className="text-xs font-black text-primary">{Math.round(((user.xp || 0) % 1000) / 10)}%</span>
+                </div>
+                <XPProgressBar xp={user.xp || 0} />
+              </div>
+              
+              <Separator className="my-8 opacity-50" />
+              
+              <div className="w-full space-y-4 text-left">
+                <div className="flex items-center gap-4 p-4 rounded-2xl bg-background/50 border border-primary/5">
+                  <div className="p-2.5 bg-primary/10 rounded-xl text-primary"><Mail className="h-5 w-5" /></div>
+                  <div className="flex flex-col min-w-0">
+                    <span className="text-[10px] uppercase font-black text-muted-foreground tracking-widest">Email</span>
+                    <span className="font-bold truncate text-sm">{user.email}</span>
+                  </div>
+                </div>
+                {user.phoneNumber && (
+                  <div className="flex items-center gap-4 p-4 rounded-2xl bg-background/50 border border-primary/5">
+                    <div className="p-2.5 bg-primary/10 rounded-xl text-primary"><Phone className="h-5 w-5" /></div>
+                    <div className="flex flex-col">
+                      <span className="text-[10px] uppercase font-black text-muted-foreground tracking-widest">Phone</span>
+                      <span className="font-bold text-sm">{user.phoneNumber}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        <motion.div 
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.2 }}
+          className="lg:col-span-8 space-y-8"
+        >
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <Card className="p-4 flex flex-col items-center justify-center text-center border-primary/10">
-              <Trophy className="h-6 w-6 text-gold-primary mb-2" />
-              <span className="text-2xl font-black">{analytics?.totalBadges || 0}</span>
-              <span className="text-[10px] uppercase font-bold text-muted-foreground">Badges</span>
-            </Card>
-            <Card className="p-4 flex flex-col items-center justify-center text-center border-primary/10">
-              <Target className="h-6 w-6 text-primary mb-2" />
-              <span className="text-2xl font-black">{analytics?.avgGrade || 0}%</span>
-              <span className="text-[10px] uppercase font-bold text-muted-foreground">Avg Grade</span>
-            </Card>
-            <Card className="p-4 flex flex-col items-center justify-center text-center border-primary/10">
-              <Flame className="h-6 w-6 text-orange-500 mb-2" />
-              <span className="text-2xl font-black">{analytics?.streak || 0}</span>
-              <span className="text-[10px] uppercase font-bold text-muted-foreground">Day Streak</span>
-            </Card>
-            <Card className="p-4 flex flex-col items-center justify-center text-center border-primary/10">
-              <Star className="h-6 w-6 text-yellow-500 mb-2" />
-              <span className="text-2xl font-black">{analytics?.rank || "N/A"}</span>
-              <span className="text-[10px] uppercase font-bold text-muted-foreground">Global Rank</span>
-            </Card>
+            {[
+                { label: "Badges", value: analytics?.totalBadges || 0, icon: Trophy, color: "text-amber-500", bg: "bg-amber-500/10" },
+                { label: "Avg Grade", value: `${analytics?.avgGrade || 0}%`, icon: Target, color: "text-primary", bg: "bg-primary/10" },
+                { label: "Day Streak", value: analytics?.streak || 0, icon: Flame, color: "text-orange-500", bg: "bg-orange-500/10" },
+                { label: "Global Rank", value: analytics?.rank || "N/A", icon: Star, color: "text-yellow-500", bg: "bg-yellow-500/10" },
+            ].map((stat, i) => (
+                <Card key={i} className="p-6 flex flex-col items-center justify-center text-center border-primary/5 bg-card/50 backdrop-blur-sm rounded-[2rem] shadow-lg shadow-primary/5">
+                    <div className={cn("p-3 rounded-2xl mb-3", stat.bg, stat.color)}>
+                        <stat.icon className="h-6 w-6" />
+                    </div>
+                    <span className="text-3xl font-black tracking-tight">{stat.value}</span>
+                    <span className="text-[10px] uppercase font-black text-muted-foreground tracking-widest mt-1">{stat.label}</span>
+                </Card>
+            ))}
           </div>
 
-          <SubmissionHeatmap data={analytics?.submissionHeatmap || []} />
-        </div>
+          <Card className="border-primary/10 shadow-xl rounded-[2.5rem] bg-card/50 backdrop-blur-sm overflow-hidden">
+            <CardHeader className="p-8 pb-4">
+                <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-xl bg-primary/10 text-primary">
+                        <Activity className="h-5 w-5" />
+                    </div>
+                    <CardTitle className="text-2xl font-black tracking-tight">Learning Consistency</CardTitle>
+                </div>
+            </CardHeader>
+            <CardContent className="p-8 pt-4">
+                <SubmissionHeatmap data={analytics?.submissionHeatmap || []} />
+            </CardContent>
+          </Card>
+        </motion.div>
       </div>
 
       {/* Analytics Section */}
-      <div className="space-y-8">
-        <div className="flex items-center gap-2">
-          <TrendingUp className="h-6 w-6 text-primary" />
-          <h3 className="text-xl font-bold">Academic Journey</h3>
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        className="space-y-8"
+      >
+        <div className="flex items-center gap-3 px-2">
+          <div className="p-2 rounded-xl bg-primary/10 text-primary">
+            <TrendingUp className="h-6 w-6" />
+          </div>
+          <h3 className="text-3xl font-black tracking-tight">Academic Journey</h3>
+          <div className="h-px flex-1 bg-gradient-to-r from-primary/20 to-transparent ml-4" />
         </div>
         
         <StudentAcademicJourney 
@@ -142,25 +225,34 @@ const StudentPortfolio = () => {
           subjectMastery={analytics?.subjectMastery || []}
           attendanceSummary={analytics?.attendanceSummary || {}}
         />
-      </div>
+      </motion.div>
 
       {/* Badges Section */}
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Award className="h-6 w-6 text-gold-primary" />
-            <h3 className="text-xl font-bold">Unlocked Achievements</h3>
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        className="space-y-8"
+      >
+        <div className="flex items-center justify-between px-2">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-xl bg-amber-500/10 text-amber-600">
+                <Award className="h-6 w-6" />
+            </div>
+            <h3 className="text-3xl font-black tracking-tight">Unlocked Achievements</h3>
           </div>
-          <Badge variant="outline" className="font-black text-[10px] uppercase tracking-widest">
+          <Badge variant="outline" className="font-black text-[10px] uppercase tracking-widest px-4 py-2 rounded-xl border-primary/10">
             {MOCK_BADGES.filter(b => b.unlocked).length} / {MOCK_BADGES.length} Earned
           </Badge>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-          {MOCK_BADGES.map((badge) => (
-            <BadgeCard key={badge.id} badge={badge} />
-          ))}
-        </div>
-      </div>
+        <Card className="p-10 border-primary/10 shadow-xl rounded-[3rem] bg-card/50 backdrop-blur-sm">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-8">
+            {MOCK_BADGES.map((badge) => (
+                <BadgeCard key={badge.id} badge={badge} />
+            ))}
+            </div>
+        </Card>
+      </motion.div>
     </div>
   );
 };

@@ -3,9 +3,12 @@ import { useCustomMutation, useGetIdentity } from "@refinedev/core";
 import { User, UserRole } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, Video, Users } from "lucide-react";
+import { Loader2, Video, Users, Presentation, Layout } from "lucide-react";
 import { toast } from "sonner";
 import { socket } from "@/lib/socket";
+import { Whiteboard } from "./whiteboard";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { cn } from "@/lib/utils";
 
 interface LiveClassroomProps {
   classId: string;
@@ -26,6 +29,7 @@ export const LiveClassroom = ({
   const [api, setApi] = useState<any>(null);
   const [isJoined, setIsJoined] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState("video");
 
   const { mutate: markLiveAttendance } = useCustomMutation();
   const { mutate: getRoomToken } = useCustomMutation();
@@ -128,12 +132,12 @@ export const LiveClassroom = ({
         },
         configOverwrite: {
           startWithAudioMuted: !isTeacher,
-          startWithVideoMuted: false, // Force video on to trigger permissions
+          startWithVideoMuted: false,
           prejoinPageEnabled: false,
           enableLobby: false,
           enableNoAudioDetection: true,
           enableNoisyMicDetection: true,
-          p2p: { enabled: true }, // Re-enable P2P for better direct connection in small groups
+          p2p: { enabled: true },
           disableAudioLevels: false,
           disableRemoteMute: false,
         },
@@ -276,8 +280,41 @@ export const LiveClassroom = ({
           </CardContent>
         </Card>
       ) : (
-        <div className="rounded-xl overflow-hidden border shadow-2xl bg-black">
-          <div ref={jitsiContainerRef} className="w-full h-[600px]" />
+        <div className="space-y-4">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-2 max-w-[400px]">
+              <TabsTrigger value="video" className="flex items-center gap-2">
+                <Video className="h-4 w-4" />
+                Video Session
+              </TabsTrigger>
+              <TabsTrigger value="whiteboard" className="flex items-center gap-2">
+                <Presentation className="h-4 w-4" />
+                Whiteboard
+              </TabsTrigger>
+            </TabsList>
+            
+            <div className="mt-4">
+              <TabsContent 
+                value="video" 
+                forceMount 
+                className={cn("m-0", activeTab !== "video" && "hidden")}
+              >
+                <div className="rounded-xl overflow-hidden border shadow-2xl bg-black">
+                  <div ref={jitsiContainerRef} className="w-full h-[600px]" />
+                </div>
+              </TabsContent>
+              
+              <TabsContent 
+                value="whiteboard" 
+                forceMount 
+                className={cn("m-0", activeTab !== "whiteboard" && "hidden")}
+              >
+                <div className="h-[650px]">
+                  <Whiteboard classId={classIdString} />
+                </div>
+              </TabsContent>
+            </div>
+          </Tabs>
         </div>
       )}
     </div>

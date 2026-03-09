@@ -7,11 +7,15 @@ import {
   File, 
   Eye, 
   CheckCircle2, 
-  Circle 
+  Circle,
+  ExternalLink,
+  ArrowRight,
+  Sparkles
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import { cn } from "@/lib/utils";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface ResourceItemProps {
   resource: Resource;
@@ -28,66 +32,110 @@ export const ResourceItem = ({
   classId, 
   onToggleProgress 
 }: ResourceItemProps) => {
+  const getResourceIcon = () => {
+    switch (resource.type) {
+      case 'video':
+        return { icon: Video, color: 'text-blue-500', bg: 'bg-blue-500/10' };
+      case 'link':
+        return { icon: LinkIcon, color: 'text-success', bg: 'bg-success/10' };
+      case 'note':
+        return { icon: PenLine, color: 'text-ai-primary', bg: 'bg-ai-primary/10' };
+      default:
+        return { icon: File, color: 'text-orange-500', bg: 'bg-orange-500/10' };
+    }
+  };
+
+  const { icon: Icon, color, bg } = getResourceIcon();
+
   return (
-    <div className={cn(
-        "flex flex-col p-3 rounded-md border transition-colors",
-        completed ? "bg-success/10 border-success/20 dark:bg-success/5 dark:border-success/30" : "bg-muted/30 hover:bg-muted/50"
-    )}>
-        <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3 overflow-hidden flex-1">
+    <motion.div 
+      layout
+      className={cn(
+        "group flex flex-col p-4 rounded-2xl border transition-all duration-300",
+        completed 
+          ? "bg-success/5 border-success/20 shadow-sm" 
+          : "bg-card/50 border-black/[0.03] dark:border-white/[0.03] hover:border-primary/20 hover:bg-card hover:shadow-md"
+      )}
+    >
+        <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-4 overflow-hidden flex-1">
                 {isStudent && (
                     <button 
                         onClick={() => onToggleProgress(resource.id)}
-                        className="shrink-0 focus:outline-none"
+                        className="shrink-0 focus:outline-none group/check"
                     >
-                        {completed ? (
-                            <CheckCircle2 className="h-5 w-5 text-success" />
-                        ) : (
-                            <Circle className="h-5 w-5 text-muted-foreground hover:text-primary transition-colors" />
-                        )}
+                        <AnimatePresence mode="wait">
+                          {completed ? (
+                              <motion.div
+                                key="completed"
+                                initial={{ scale: 0.5, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                exit={{ scale: 0.5, opacity: 0 }}
+                              >
+                                <CheckCircle2 className="h-5 w-5 text-success" />
+                              </motion.div>
+                          ) : (
+                              <motion.div
+                                key="pending"
+                                initial={{ scale: 0.5, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                exit={{ scale: 0.5, opacity: 0 }}
+                              >
+                                <Circle className="h-5 w-5 text-muted-foreground/40 group-hover/check:text-primary transition-colors" />
+                              </motion.div>
+                          )}
+                        </AnimatePresence>
                     </button>
                 )}
                 
-                <div className="flex items-center gap-2 min-w-0">
-                    {resource.type === 'video' ? <Video className="h-4 w-4 shrink-0 text-blue-500" /> : 
-                     resource.type === 'link' ? <LinkIcon className="h-4 w-4 shrink-0 text-success" /> : 
-                     resource.type === 'note' ? <PenLine className="h-4 w-4 shrink-0 text-ai-primary" /> :
-                     <File className="h-4 w-4 shrink-0 text-orange-500" />}
+                <div className="flex items-center gap-3 min-w-0">
+                    <div className={cn("p-2 rounded-xl shrink-0 transition-transform group-hover:scale-110", bg)}>
+                        <Icon className={cn("h-4 w-4", color)} />
+                    </div>
                     
-                    <span className={cn(
-                        "text-sm font-medium truncate",
-                        completed && "text-success/80 dark:text-success/60 line-through decoration-success/50"
-                    )}>
-                        {resource.title}
-                    </span>
+                    <div className="flex flex-col min-w-0">
+                      <span className={cn(
+                          "text-sm font-black tracking-tight truncate transition-all",
+                          completed ? "text-success/60 line-through decoration-success/30" : "text-foreground group-hover:text-primary"
+                      )}>
+                          {resource.title}
+                      </span>
+                      <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/40">
+                        {resource.type} {resource.type === 'note' && '• AI Generated'}
+                      </span>
+                    </div>
                 </div>
             </div>
 
             <div className="flex items-center gap-2 shrink-0">
                 {resource.type === 'note' ? (
-                    <Button variant="ghost" size="sm" asChild className="h-7 px-2 text-xs gap-1.5 text-primary hover:bg-primary/10">
+                    <Button variant="ghost" size="sm" asChild className="h-9 rounded-xl px-4 text-[10px] font-black uppercase tracking-widest gap-2 text-primary hover:bg-primary/5 transition-all">
                         <Link to={`/classes/${classId}/lessons/${resource.id}`}>
                             <Eye className="h-3.5 w-3.5" />
-                            Read
+                            Read Lesson
+                            <ArrowRight className="h-3 w-3 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
                         </Link>
                     </Button>
                 ) : (
-                    <Button variant="ghost" size="sm" asChild className="h-7 px-2 text-xs">
-                        <a href={resource.url} target="_blank" rel="noreferrer">View</a>
+                    <Button variant="ghost" size="sm" asChild className="h-9 rounded-xl px-4 text-[10px] font-black uppercase tracking-widest gap-2 hover:bg-muted transition-all">
+                        <a href={resource.url} target="_blank" rel="noreferrer">
+                            <ExternalLink className="h-3.5 w-3.5" />
+                            View
+                        </a>
                     </Button>
                 )}
             </div>
         </div>
         
         {resource.type === 'note' && resource.content && (
-            <div className="mt-2 pl-8 text-xs text-muted-foreground line-clamp-2">
-                <div className="prose prose-xs dark:prose-invert max-w-none">
+            <div className="mt-3 pl-12 text-[11px] text-muted-foreground/60 line-clamp-1 italic font-medium">
+                <div className="prose prose-xs dark:prose-invert max-w-none pointer-events-none">
                     <ReactMarkdown>
                         {resource.content}
                     </ReactMarkdown>
                 </div>
             </div>
         )}
-    </div>
+    </motion.div>
   );
 };

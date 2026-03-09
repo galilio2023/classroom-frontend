@@ -8,7 +8,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useGetIdentity, useLogout, useNavigation } from "@refinedev/core";
-import { CircleUser, LogOut, User as UserIcon, LifeBuoy, BellRing } from "lucide-react";
+import {
+  CircleUser,
+  LogOut,
+  User as UserIcon,
+  LifeBuoy,
+  BellRing,
+  CalendarClock,
+} from "lucide-react";
 import { toast } from "sonner";
 import { User, UserRole } from "@/types";
 import { ThemeToggle } from "../theme/theme-toggle";
@@ -19,11 +26,20 @@ import { CommandMenu } from "@/components/command-menu";
 import { XPProgressBar } from "@/components/xp-progress-bar";
 import { cn } from "@/lib/utils";
 import { subscribeToPush } from "@/lib/push-notifications";
+import { useTerm } from "@/contexts/term-context";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export function Header() {
   const { mutate: logout } = useLogout();
   const { data: identity } = useGetIdentity<User>();
   const { show, edit } = useNavigation();
+  const { selectedTerm, setSelectedTerm, terms } = useTerm();
 
   const handleLogout = () => {
     logout(undefined, {
@@ -90,41 +106,79 @@ export function Header() {
 
       <div className="w-full flex-1 flex items-center gap-6">
         <CommandMenu />
-        
+
+        {/* Term Switcher */}
+        {terms.length > 0 && (
+          <div className="hidden md:flex items-center gap-2">
+            <CalendarClock className="h-4 w-4 text-muted-foreground" />
+            <Select
+              value={selectedTerm?.id?.toString() || ""}
+              onValueChange={(val) => {
+                const term = terms.find((t) => t.id.toString() === val);
+                if (term) setSelectedTerm(term);
+              }}
+            >
+              <SelectTrigger className="w-[180px] h-9 bg-muted/30 border-border/50">
+                <SelectValue placeholder="Select Term" />
+              </SelectTrigger>
+              <SelectContent>
+                {terms.map((term) => (
+                  <SelectItem key={term.id} value={term.id.toString()}>
+                    {term.name} {term.status === "active" && "(Current)"}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+
         {isStudent && (
           <div className="hidden lg:flex items-center gap-4 max-w-xs w-full">
             <XPProgressBar xp={identity?.xp || 0} className="w-full" />
           </div>
         )}
       </div>
-      
+
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2 bg-muted/30 p-1 rounded-full border border-border/50">
-            <NotificationBell />
-            <ThemeToggle />
+          <NotificationBell />
+          <ThemeToggle />
         </div>
-        
+
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0 hover:bg-primary/10 transition-colors">
+            <Button
+              variant="ghost"
+              className="relative h-10 w-10 rounded-full p-0 hover:bg-primary/10 transition-colors"
+            >
               <Avatar className="h-10 w-10 border-2 border-background shadow-sm">
                 <AvatarImage src={identity?.image || ""} alt={identity?.name} />
-                <AvatarFallback className={cn("text-white font-bold", getBackgroundColor(identity?.name || ""))}>
-                    {getInitials(identity?.name)}
+                <AvatarFallback
+                  className={cn(
+                    "text-white font-bold",
+                    getBackgroundColor(identity?.name || ""),
+                  )}
+                >
+                  {getInitials(identity?.name)}
                 </AvatarFallback>
               </Avatar>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56 mt-2 sidebar-glass border-border/50">
+          <DropdownMenuContent
+            align="end"
+            className="w-56 mt-2 sidebar-glass border-border/50"
+          >
             <DropdownMenuLabel className="font-normal">
               <div className="flex flex-col space-y-1">
-                <p className="text-sm font-bold leading-none">{identity?.name}</p>
+                <p className="text-sm font-bold leading-none">
+                  {identity?.name}
+                </p>
                 <p className="text-xs leading-none text-muted-foreground">
                   {identity?.email}
                 </p>
               </div>
             </DropdownMenuLabel>
-            
+
             {isStudent && (
               <>
                 <DropdownMenuSeparator className="bg-border/50" />
@@ -135,23 +189,23 @@ export function Header() {
             )}
 
             <DropdownMenuSeparator className="bg-border/50" />
-            <DropdownMenuItem 
-                className="gap-2 cursor-pointer"
-                onClick={() => identity?.id && show("users", identity.id)}
+            <DropdownMenuItem
+              className="gap-2 cursor-pointer"
+              onClick={() => identity?.id && show("users", identity.id)}
             >
               <UserIcon className="h-4 w-4" />
               <span>My Profile</span>
             </DropdownMenuItem>
-            <DropdownMenuItem 
-                className="gap-2 cursor-pointer"
-                onClick={() => identity?.id && edit("users", identity.id)}
+            <DropdownMenuItem
+              className="gap-2 cursor-pointer"
+              onClick={() => identity?.id && edit("users", identity.id)}
             >
               <CircleUser className="h-4 w-4" />
               <span>Edit Profile</span>
             </DropdownMenuItem>
-            <DropdownMenuItem 
-                className="gap-2 cursor-pointer"
-                onClick={handleEnablePush}
+            <DropdownMenuItem
+              className="gap-2 cursor-pointer"
+              onClick={handleEnablePush}
             >
               <BellRing className="h-4 w-4" />
               <span>Enable Push Alerts</span>
@@ -161,7 +215,10 @@ export function Header() {
               <span>Support</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator className="bg-border/50" />
-            <DropdownMenuItem onClick={handleLogout} className="gap-2 cursor-pointer text-destructive focus:text-destructive">
+            <DropdownMenuItem
+              onClick={handleLogout}
+              className="gap-2 cursor-pointer text-destructive focus:text-destructive"
+            >
               <LogOut className="h-4 w-4" />
               <span>Logout</span>
             </DropdownMenuItem>

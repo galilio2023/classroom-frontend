@@ -1,19 +1,18 @@
-import {
-  useReactTable,
-  getCoreRowModel,
-  ColumnDef,
-} from "@tanstack/react-table";
-import { useMemo } from "react";
-import { DataTable } from "@/components/refine-ui/data-table/data-table";
+import { useMemo, useRef } from "react";
 import { Assignment, User } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { EditButton } from "@/components/refine-ui/buttons/edit";
-import { ShowButton } from "@/components/refine-ui/buttons/show";
-import { useGo, HttpError, useGetIdentity } from "@refinedev/core";
-import { PlusCircle, FileText } from "lucide-react";
-import { UseTableReturnType } from "@refinedev/react-table";
+import { useGo, useGetIdentity } from "@refinedev/core";
+import { PlusCircle, FileText, Calendar, Clock, ChevronRight, Edit3, Eye, ArrowRight } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
+import { Badge } from "@/components/ui/badge";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+import { cn } from "@/lib/utils";
+import { useVirtualizer } from "@tanstack/react-virtual";
+import { motion } from "framer-motion";
+
+dayjs.extend(relativeTime);
 
 interface AssignmentListProps {
   classId: string;
@@ -38,103 +37,146 @@ export const AssignmentList = ({
     });
   };
 
-  const assignmentColumns = useMemo<ColumnDef<Assignment>[]>(
-    () => [
-      {
-        accessorKey: "title",
-        header: "Title",
-        cell: ({ getValue }) => (
-          <span className="font-medium">{getValue<string>()}</span>
-        ),
-      },
-      {
-        accessorKey: "dueDate",
-        header: "Due Date",
-        cell: ({ getValue }) => {
-          const date = getValue<string>();
-          return date ? new Date(date).toLocaleDateString() : "No Due Date";
-        },
-      },
-      {
-        id: "actions",
-        header: "Actions",
-        cell: ({ row }) => (
-          <div className="flex gap-2">
-            <ShowButton
-              resource="assignments"
-              recordItemId={row.original.id}
-              hideText
-              size="sm"
-            />
-            {isStaff && (
-              <EditButton
-                resource="assignments"
-                recordItemId={row.original.id}
-                hideText
-                size="sm"
-              />
-            )}
-          </div>
-        ),
-      },
-    ],
-    [isStaff],
-  );
+  const parentRef = useRef<HTMLDivElement>(null);
 
-  // 1. Use the standard, "dumb" hook to manage table state without API calls.
-  const reactTable = useReactTable({
-    columns: assignmentColumns,
-    data: assignments,
-    getCoreRowModel: getCoreRowModel(),
+  const rowVirtualizer = useVirtualizer({
+    count: assignments.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 90,
+    overscan: 5,
   });
 
-  // 2. Create an adapter object that matches the UseTableReturnType expected by DataTable.
-  // We mock the refineCore properties since we are handling data manually.
-  const tableAdapter: UseTableReturnType<Assignment, HttpError> = {
-    reactTable: reactTable,
-    refineCore: {
-      // Mock the tableQuery to show we are not loading and have data
-      tableQuery: {
-        isLoading: false,
-        data: { data: assignments, total: assignments.length },
-        isError: false,
-      } as any,
-      currentPage: 1,
-      pageCount: 1,
-      pageSize: assignments.length,
-      setCurrentPage: () => {},
-      setPageSize: () => {},
-      filters: [],
-      setFilters: () => {},
-      sorters: [],
-      setSorters: () => {},
-    } as any,
-  };
-
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>Assignments</CardTitle>
-        {isStaff && assignments.length > 0 && (
-          <Button onClick={handleCreate}>
-            <PlusCircle className="h-4 w-4 mr-2" />
+    <Card className="border-none shadow-2xl bg-card/50 backdrop-blur-xl overflow-hidden rounded-[2rem]">
+      <CardHeader className="p-8 pb-4 flex flex-row items-center justify-between border-b border-black/[0.03] dark:border-white/[0.03]">
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-xl bg-primary/10 text-primary">
+            <FileText className="h-5 w-5" />
+          </div>
+          <CardTitle className="text-xl font-black uppercase tracking-widest">Assignments</CardTitle>
+          <Badge variant="secondary" className="rounded-full px-2 py-0 h-5 text-[10px] font-bold">
+            {assignments.length}
+          </Badge>
+        </div>
+        {isStaff && (
+          <Button 
+            onClick={handleCreate}
+            className="rounded-xl font-black uppercase tracking-widest text-[10px] h-10 px-4 gap-2 shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95"
+          >
+            <PlusCircle className="h-4 w-4" />
             Create Assignment
           </Button>
         )}
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-0">
         {assignments.length > 0 ? (
-          <DataTable table={tableAdapter} />
+          <div 
+            ref={parentRef}
+            className="h-[500px] overflow-auto pr-2 custom-scrollbar"
+          >
+            <div style={{ height: `${rowVirtualizer.getTotalSize()}px`, width: '100%', position: 'relative' }}>
+              {rowVirtualizer.getVirtualItems().map((virtualItem) => {
+                const assignment = assignments[virtualItem.index];
+                const date = assignment.dueDate ? dayjs(assignment.dueDate) : null;
+                const isOverdue = date ? dayjs().isAfter(date) : false;
+                const isSoon = date ? dayjs().add(2, 'day').isAfter(date) && !isOverdue : false;
+
+                return (
+                  <motion.div
+                    key={virtualItem.key}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: virtualItem.index * 0.02 }}
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: `${virtualItem.size}px`,
+                      transform: `translateY(${virtualItem.start}px)`,
+                    }}
+                    className="flex items-center px-8 py-4 border-b border-primary/5 hover:bg-primary/[0.02] transition-colors group cursor-pointer"
+                    onClick={() => go({ to: `/assignments/show/${assignment.id}`, type: "push" })}
+                  >
+                    <div className="flex items-center gap-4 flex-1 min-w-0">
+                      <div className="p-3 rounded-2xl bg-primary/10 text-primary group-hover:scale-110 transition-transform shrink-0">
+                        <FileText className="h-5 w-5" />
+                      </div>
+                      <div className="flex flex-col min-w-0">
+                        <span className="font-black text-base tracking-tight truncate group-hover:text-primary transition-colors">
+                          {assignment.title}
+                        </span>
+                        <div className="flex items-center gap-3 mt-1">
+                          {date ? (
+                            <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">
+                              <Calendar className={cn("h-3 w-3", isOverdue ? "text-destructive" : "text-primary")} />
+                              <span className={cn(isOverdue && "text-destructive")}>{date.format("MMM D, YYYY")}</span>
+                              <span className="mx-1 opacity-20">•</span>
+                              <Clock className="h-3 w-3 opacity-40" />
+                              <span className={cn(
+                                isOverdue ? "text-destructive" : isSoon ? "text-amber-600" : "text-muted-foreground/40"
+                              )}>
+                                {date.fromNow()}
+                              </span>
+                            </div>
+                          ) : (
+                            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/30 italic">No Deadline</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-6 ml-4">
+                      <Badge 
+                        variant={isOverdue ? "destructive" : "secondary"} 
+                        className={cn(
+                          "hidden sm:flex text-[9px] font-black uppercase tracking-widest px-3 h-6 rounded-lg border-none",
+                          !isOverdue && "bg-green-500/10 text-green-600"
+                        )}
+                      >
+                        {isOverdue ? "Closed" : "Active"}
+                      </Badge>
+
+                      <div className="flex items-center gap-2">
+                        {isStaff && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-9 w-9 rounded-xl opacity-0 group-hover:opacity-100 transition-all hover:bg-primary/5 hover:text-primary"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              go({ to: `/assignments/edit/${assignment.id}`, type: "push" });
+                            }}
+                          >
+                            <Edit3 className="h-4 w-4" />
+                          </Button>
+                        )}
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-9 w-9 rounded-xl text-muted-foreground group-hover:text-primary"
+                        >
+                          <ArrowRight className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </div>
         ) : (
-          <EmptyState
-            icon={FileText}
-            title="No assignments yet"
-            description={isStaff ? "Create your first assignment to start tracking student progress." : "There are no assignments for this class yet."}
-            action={isStaff ? {
-              label: "Create Assignment",
-              onClick: handleCreate,
-            } : undefined}
-          />
+          <div className="py-20">
+            <EmptyState
+              icon={FileText}
+              title="No assignments yet"
+              description={isStaff ? "Create your first assignment to start tracking student progress." : "There are no assignments for this class yet."}
+              action={isStaff ? {
+                label: "Create Assignment",
+                onClick: handleCreate,
+              } : undefined}
+            />
+          </div>
         )}
       </CardContent>
     </Card>

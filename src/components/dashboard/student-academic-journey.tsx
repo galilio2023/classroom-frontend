@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from "recharts";
-import { TrendingUp, BookOpen, CheckCircle2, Clock, XCircle, Target, Trophy, Sparkles, ArrowRight } from "lucide-react";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer } from "recharts";
+import { TrendingUp, BookOpen, CheckCircle2, Clock, XCircle, Target, Trophy, Sparkles, ArrowRight, LayoutDashboard, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { PracticeModal } from "@/components/practice/practice-modal";
@@ -13,6 +13,9 @@ import {
   ChartConfig 
 } from "@/components/ui/chart";
 import { useNavigation } from "@refinedev/core";
+import { cn } from "@/lib/utils";
+import { motion, AnimatePresence } from "framer-motion";
+import { Badge } from "@/components/ui/badge";
 
 interface StudentAcademicJourneyProps {
   gradeTrends: any[];
@@ -42,183 +45,231 @@ export const StudentAcademicJourney = ({ gradeTrends, subjectMastery, attendance
   const weakSubjects = subjectMastery.filter(s => s.avgGrade < 70);
   const hasData = gradeTrends.length > 0 || subjectMastery.length > 0 || (attendanceSummary?.total || 0) > 0;
 
-  // Attendance Rate: (Present + Late) / Total
   const attendedCount = (attendanceSummary?.present || 0) + (attendanceSummary?.late || 0);
   const attendanceRate = attendanceSummary?.total > 0 
     ? Math.round((attendedCount / attendanceSummary.total) * 100) 
     : 0;
 
   return (
-    <div className="space-y-8">
-      {/* 1. Onboarding / Welcome State for New Students */}
+    <div className="space-y-10">
+      {/* 1. Onboarding / Welcome State */}
       {!hasData && (
-        <Card className="border-2 border-dashed border-primary/20 bg-primary/5 shadow-none">
-          <CardHeader className="text-center pb-2">
-            <div className="mx-auto p-3 bg-primary/10 rounded-full w-fit mb-4">
-              <Sparkles className="h-8 w-8 text-primary animate-pulse" />
-            </div>
-            <CardTitle className="text-2xl font-bold">Welcome to Your Learning Journey!</CardTitle>
-            <CardDescription className="text-base max-w-md mx-auto">
-              You haven't started any classes or assignments yet. Your academic progress, 
-              subject mastery, and attendance will appear here once you begin.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="flex justify-center pb-8">
-            <Button 
-              onClick={() => list("classes")}
-              className="gap-2"
-              size="lg"
-            >
-              Explore Your Classes
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-          </CardContent>
-        </Card>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+        >
+          <Card className="border-none shadow-2xl bg-card/50 backdrop-blur-xl rounded-[2rem] overflow-hidden py-16 text-center group">
+            <CardContent className="space-y-6">
+              <div className="relative mx-auto w-fit">
+                <div className="absolute inset-0 bg-primary/20 rounded-full blur-2xl animate-pulse" />
+                <div className="relative p-6 rounded-full bg-primary/10 text-primary group-hover:scale-110 transition-transform duration-500">
+                  <Sparkles className="h-12 w-12 opacity-40" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <h4 className="text-2xl font-black tracking-tight">Welcome to Your Learning Journey!</h4>
+                <p className="text-muted-foreground font-medium max-w-md mx-auto">You haven't started any classes or assignments yet. Your academic progress will appear here once you begin.</p>
+              </div>
+              <Button 
+                onClick={() => list("classes")}
+                className="mt-4 rounded-xl h-12 px-8 font-black uppercase tracking-widest text-[10px] gap-2 shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95"
+              >
+                Explore Your Classes
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </CardContent>
+          </Card>
+        </motion.div>
       )}
 
       {/* 2. AI Intervention / Practice Suggestion */}
-      {weakSubjects.length > 0 && (
-        <Card className="border-l-4 border-l-orange-500 bg-orange-500/5 shadow-md animate-in fade-in slide-in-from-top-4 duration-500">
-          <CardHeader className="pb-2">
-            <div className="flex items-center gap-2">
-              <Target className="h-5 w-5 text-orange-600" />
-              <CardTitle className="text-lg font-bold text-orange-700">Focus Area Identified</CardTitle>
-            </div>
-            <CardDescription className="text-orange-600/80">
-              We noticed you might be struggling with <strong>{weakSubjects[0].subject}</strong>. 
-              Practice now to earn a mastery badge and boost your grade!
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button 
-              onClick={() => {
-                setPracticeTopic(weakSubjects[0].subject);
-                setPracticeSubjectId(weakSubjects[0].subjectId); 
-              }}
-              className="bg-orange-600 hover:bg-orange-700 text-white gap-2"
-            >
-              <Trophy className="h-4 w-4" />
-              Practice & Level Up
-            </Button>
-          </CardContent>
-        </Card>
-      )}
+      <AnimatePresence>
+        {weakSubjects.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+          >
+            <Card className="border-none shadow-2xl bg-orange-500/[0.03] backdrop-blur-xl rounded-[2rem] overflow-hidden border border-orange-500/10 group">
+              <div className="h-1.5 bg-orange-500/20 w-full animate-pulse" />
+              <CardHeader className="p-8 pb-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 rounded-2xl bg-orange-500/10 text-orange-600 group-hover:scale-110 transition-transform duration-500">
+                      <Target className="h-6 w-6" />
+                    </div>
+                    <div className="space-y-1">
+                      <CardTitle className="text-xl font-black tracking-tight text-orange-700">Focus Area Identified</CardTitle>
+                      <div className="flex items-center gap-2">
+                        <Sparkles className="h-3 w-3 text-ai-primary opacity-40" />
+                        <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">AI-Powered Recommendation</span>
+                      </div>
+                    </div>
+                  </div>
+                  <Badge variant="secondary" className="rounded-full px-3 py-1 font-black text-[9px] uppercase tracking-widest bg-orange-500/10 text-orange-600 border-none">
+                    Action Required
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent className="p-8 pt-2 space-y-6">
+                <p className="text-sm font-medium text-orange-600/80 leading-relaxed">
+                  We noticed you might be struggling with <span className="font-black text-orange-700">{weakSubjects[0].subject}</span>. 
+                  Practice now to earn a mastery badge and boost your grade!
+                </p>
+                <Button 
+                  onClick={() => {
+                    setPracticeTopic(weakSubjects[0].subject);
+                    setPracticeSubjectId(weakSubjects[0].subjectId); 
+                  }}
+                  className="h-12 rounded-xl px-8 font-black uppercase tracking-widest text-[10px] gap-2 bg-orange-600 hover:bg-orange-700 text-white shadow-lg shadow-orange-600/20 transition-all hover:scale-105 active:scale-95"
+                >
+                  <Trophy className="h-4 w-4" />
+                  Practice & Level Up
+                </Button>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* 3. Performance Charts */}
-      <div className="grid gap-6 md:grid-cols-2">
-        <Card className="border shadow-xl overflow-hidden bg-card/50 backdrop-blur-xl border-border/50">
-          <CardHeader className="pb-2">
-            <div className="flex items-center gap-2">
-              <div className="p-2 bg-primary/10 rounded-lg">
-                <TrendingUp className="h-5 w-5 text-primary" />
+      <div className="grid gap-8 md:grid-cols-2">
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.1 }}
+        >
+          <Card className="border-none shadow-2xl overflow-hidden bg-card/50 backdrop-blur-xl rounded-[2rem] group h-full">
+            <div className="h-1.5 bg-primary/10 w-full" />
+            <CardHeader className="p-8 pb-2">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <CardTitle className="flex items-center gap-3 text-2xl font-black tracking-tighter">
+                    <div className="p-2.5 rounded-xl bg-primary/10 text-primary group-hover:scale-110 transition-transform duration-500">
+                      <TrendingUp className="h-6 w-6" />
+                    </div>
+                    Grade Progress
+                  </CardTitle>
+                  <CardDescription className="font-medium text-muted-foreground/60">Your grade performance over time.</CardDescription>
+                </div>
               </div>
-              <CardTitle className="text-xl font-black tracking-tight">Grade Progress</CardTitle>
-            </div>
-            <CardDescription className="font-medium">Your grade performance over time.</CardDescription>
-          </CardHeader>
-          <CardContent className="h-[250px] pt-6">
-            {gradeTrends.length > 0 ? (
-              <ChartContainer config={gradeConfig} className="h-full w-full">
-                <LineChart data={gradeTrends} margin={{ top: 5, right: 20, left: -20, bottom: 5 }}>
-                  <CartesianGrid vertical={false} strokeDasharray="3 3" className="stroke-border/50" />
-                  <XAxis 
-                    dataKey="title" 
-                    axisLine={false} 
-                    tickLine={false} 
-                    tickMargin={8}
-                    className="fill-muted-foreground font-semibold"
-                  />
-                  <YAxis 
-                    domain={[0, 100]} 
-                    axisLine={false} 
-                    tickLine={false} 
-                    tickMargin={8}
-                    className="fill-muted-foreground font-semibold"
-                  />
-                  <ChartTooltip cursor={{ stroke: 'hsl(var(--primary))', strokeWidth: 1, strokeDasharray: '4 4' }} content={<ChartTooltipContent />} />
-                  <Line 
-                    type="monotone" 
-                    dataKey="grade" 
-                    className="stroke-primary"
-                    strokeWidth={3} 
-                    dot={{ r: 4, className: "fill-primary stroke-background", strokeWidth: 2 }} 
-                    activeDot={{ r: 6, strokeWidth: 0 }}
-                  />
-                </LineChart>
-              </ChartContainer>
-            ) : (
-              <NoChartData icon={TrendingUp} message="No grade data yet. Complete assignments to see your progress!" />
-            )}
-          </CardContent>
-        </Card>
+            </CardHeader>
+            <CardContent className="h-[300px] p-8 pt-6">
+              {gradeTrends.length > 0 ? (
+                <ChartContainer config={gradeConfig} className="h-full w-full">
+                    <LineChart data={gradeTrends} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                      <CartesianGrid vertical={false} strokeDasharray="3 3" className="stroke-muted-foreground/10" />
+                      <XAxis 
+                        dataKey="title" 
+                        axisLine={false} 
+                        tickLine={false} 
+                        tickMargin={12}
+                        className="fill-muted-foreground/60 text-[10px] font-black uppercase tracking-widest"
+                      />
+                      <YAxis 
+                        domain={[0, 100]} 
+                        axisLine={false} 
+                        tickLine={false} 
+                        tickMargin={12}
+                        className="fill-muted-foreground/60 text-[10px] font-black uppercase tracking-widest" 
+                      />
+                      <ChartTooltip 
+                        cursor={{ stroke: 'hsl(var(--primary))', strokeWidth: 2, strokeDasharray: '4 4' }} 
+                        content={<ChartTooltipContent className="rounded-2xl border-none shadow-2xl bg-card/95 backdrop-blur-xl p-4 font-bold" />} 
+                      />
+                      <Line 
+                        type="monotone" 
+                        dataKey="grade" 
+                        stroke="hsl(var(--primary))"
+                        strokeWidth={4} 
+                        dot={{ r: 6, className: "fill-primary stroke-background", strokeWidth: 3 }} 
+                        activeDot={{ r: 8, strokeWidth: 0, className: "fill-primary shadow-xl" }}
+                        animationDuration={2000}
+                        animationEasing="ease-out"
+                      />
+                    </LineChart>
+                </ChartContainer>
+              ) : (
+                <NoChartData icon={TrendingUp} message="No grade data yet. Complete assignments to see your progress!" />
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
 
-        <Card className="border shadow-xl overflow-hidden bg-card/50 backdrop-blur-xl border-border/50">
-          <CardHeader className="pb-2">
-            <div className="flex items-center gap-2">
-              <div className="p-2 bg-primary/10 rounded-lg">
-                <BookOpen className="h-5 w-5 text-primary" />
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.2 }}
+        >
+          <Card className="border-none shadow-2xl overflow-hidden bg-card/50 backdrop-blur-xl rounded-[2rem] group h-full">
+            <div className="h-1.5 bg-primary/10 w-full" />
+            <CardHeader className="p-8 pb-2">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <CardTitle className="flex items-center gap-3 text-2xl font-black tracking-tighter">
+                    <div className="p-2.5 rounded-xl bg-primary/10 text-primary group-hover:scale-110 transition-transform duration-500">
+                      <BookOpen className="h-6 w-6" />
+                    </div>
+                    Subject Mastery
+                  </CardTitle>
+                  <CardDescription className="font-medium text-muted-foreground/60">Average performance per subject.</CardDescription>
+                </div>
               </div>
-              <CardTitle className="text-xl font-black tracking-tight">Subject Mastery</CardTitle>
-            </div>
-            <CardDescription className="font-medium">Average performance per subject.</CardDescription>
-          </CardHeader>
-          <CardContent className="h-[250px] flex items-center justify-center pt-6">
-            {subjectMastery.length > 0 ? (
-              <ChartContainer config={masteryConfig} className="h-full w-full">
-                <RadarChart cx="50%" cy="50%" outerRadius="80%" data={subjectMastery}>
-                  <PolarGrid className="stroke-border/50" />
-                  <PolarAngleAxis 
-                    dataKey="subject" 
-                    className="fill-muted-foreground font-semibold text-[10px]"
-                  />
-                  <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
-                  <Radar
-                    name="Avg Grade"
-                    dataKey="avgGrade"
-                    className="stroke-primary fill-primary"
-                    strokeWidth={2}
-                    fillOpacity={0.2}
-                  />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                </RadarChart>
-              </ChartContainer>
-            ) : (
-              <NoChartData icon={BookOpen} message="No subject data yet. Your mastery radar will appear here." />
-            )}
-          </CardContent>
-        </Card>
+            </CardHeader>
+            <CardContent className="h-[300px] p-8 pt-6">
+              {subjectMastery.length > 0 ? (
+                <ChartContainer config={masteryConfig} className="h-full w-full">
+                    <RadarChart cx="50%" cy="50%" outerRadius="80%" data={subjectMastery}>
+                      <PolarGrid className="stroke-muted-foreground/10" />
+                      <PolarAngleAxis 
+                        dataKey="subject" 
+                        className="fill-muted-foreground/60 text-[9px] font-black uppercase tracking-widest"
+                      />
+                      <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
+                      <Radar
+                        name="Avg Grade"
+                        dataKey="avgGrade"
+                        stroke="hsl(var(--primary))"
+                        fill="hsl(var(--primary))"
+                        strokeWidth={3}
+                        fillOpacity={0.15}
+                        animationDuration={2000}
+                        animationEasing="ease-out"
+                      />
+                      <ChartTooltip content={<ChartTooltipContent className="rounded-2xl border-none shadow-2xl bg-card/95 backdrop-blur-xl p-4 font-bold" />} />
+                    </RadarChart>
+                </ChartContainer>
+              ) : (
+                <NoChartData icon={BookOpen} message="No subject data yet. Your mastery radar will appear here." />
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
       </div>
 
       {/* 4. Attendance Stats */}
-      <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
-        <AttendanceStatCard 
-          icon={CheckCircle2} 
-          value={attendanceSummary?.present || 0} 
-          label="Present" 
-          colorClass="bg-green-500/10 text-green-500" 
-          hoverBorderClass="hover:border-green-500/30" 
-        />
-        <AttendanceStatCard 
-          icon={XCircle} 
-          value={attendanceSummary?.absent || 0} 
-          label="Absent" 
-          colorClass="bg-destructive/10 text-destructive" 
-          hoverBorderClass="hover:border-destructive/30" 
-        />
-        <AttendanceStatCard 
-          icon={Clock} 
-          value={attendanceSummary?.late || 0} 
-          label="Late" 
-          colorClass="bg-orange-500/10 text-orange-500" 
-          hoverBorderClass="hover:border-orange-500/30" 
-        />
-        <AttendanceStatCard 
-          icon={TrendingUp} 
-          value={`${attendanceRate}%`}
-          label="Attendance Rate" 
-          colorClass="bg-primary/10 text-primary" 
-          hoverBorderClass="hover:border-primary/30" 
-        />
+      <div className="grid gap-6 grid-cols-2 md:grid-cols-4">
+        {[
+          { label: "Present", value: attendanceSummary?.present || 0, icon: CheckCircle2, color: "text-success", bg: "bg-success/10" },
+          { label: "Absent", value: attendanceSummary?.absent || 0, icon: XCircle, color: "text-destructive", bg: "bg-destructive/10" },
+          { label: "Late", value: attendanceSummary?.late || 0, icon: Clock, color: "text-orange-500", bg: "bg-orange-500/10" },
+          { label: "Rate", value: `${attendanceRate}%`, icon: TrendingUp, color: "text-primary", bg: "bg-primary/10" },
+        ].map((stat, idx) => (
+          <motion.div
+            key={stat.label}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 + (idx * 0.05) }}
+          >
+            <AttendanceStatCard 
+              icon={stat.icon} 
+              value={stat.value} 
+              label={stat.label} 
+              colorClass={cn(stat.bg, stat.color)} 
+              hoverBorderClass="hover:border-primary/20" 
+            />
+          </motion.div>
+        ))}
       </div>
 
       {practiceTopic && (

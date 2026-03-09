@@ -2,13 +2,32 @@ import type { AuthProvider } from "@refinedev/core";
 import { User, SignUpPayload } from "@/types";
 import { authClient } from "@/lib/auth-client";
 
+/**
+ * Sanitizes the payload by converting empty strings to null.
+ * This prevents PostgreSQL "invalid input syntax for type date" errors.
+ */
+const sanitizePayload = (params: any) => {
+  const sanitized = { ...params };
+  Object.keys(sanitized).forEach((key) => {
+    if (sanitized[key] === "") {
+      sanitized[key] = null;
+    }
+  });
+  return sanitized;
+};
+
 export const authProvider: AuthProvider = {
   register: async (params: any) => {
     try {
+      const sanitizedParams = sanitizePayload(params);
+      console.log("Attempting registration for:", sanitizedParams.email);
+      
       const { data, error } = await authClient.signUp.email(
-        params as SignUpPayload,
+        sanitizedParams as SignUpPayload,
       );
+      
       if (error) {
+        console.error("Registration error from Better Auth:", error);
         return {
           success: false,
           error: {
@@ -17,12 +36,11 @@ export const authProvider: AuthProvider = {
           },
         };
       }
-      // Note: Better Auth handles session state, but we sync to localStorage for Refine's getIdentity
-      if (data?.user) {
-        localStorage.setItem("user", JSON.stringify(data.user));
-      }
+      
+      console.log("Registration successful for:", sanitizedParams.email);
       return { success: true, redirectTo: "/login" };
     } catch (err: any) {
+      console.error("Unexpected registration error:", err);
       return {
         success: false,
         error: {
@@ -48,7 +66,16 @@ export const authProvider: AuthProvider = {
           },
         };
       }
-      localStorage.setItem("user", JSON.stringify(data.user));
+      
+      if (data?.user) {
+        const user = data.user as any;
+        const userWithVerified = {
+            ...user,
+            isVerified: user.verificationStatus === "verified" || user.role === "admin" || user.role === "student"
+        };
+        localStorage.setItem("user", JSON.stringify(userWithVerified));
+      }
+      
       return { success: true, redirectTo: "/" };
     } catch (err: any) {
       return {
@@ -74,12 +101,15 @@ export const authProvider: AuthProvider = {
 
   check: async () => {
     try {
-      // Verify session with Better Auth client (checks cookies/tokens)
       const { data: session } = await authClient.getSession();
       
       if (session?.user) {
-        // Sync localStorage with the latest user data from the server (handles role changes)
-        localStorage.setItem("user", JSON.stringify(session.user));
+        const user = session.user as any;
+        const userWithVerified = {
+            ...user,
+            isVerified: user.verificationStatus === "verified" || user.role === "admin" || user.role === "student"
+        };
+        localStorage.setItem("user", JSON.stringify(userWithVerified));
         return { authenticated: true };
       }
       
@@ -115,7 +145,6 @@ export const authProvider: AuthProvider = {
       const parsedUser: User = JSON.parse(user);
       return { role: parsedUser.role };
     } catch (e) {
-      localStorage.removeItem("user");
       return null;
     }
   },
@@ -124,10 +153,8 @@ export const authProvider: AuthProvider = {
     const user = localStorage.getItem("user");
     if (!user) return null;
     try {
-      const parsedUser: User = JSON.parse(user);
-      return parsedUser;
+      return JSON.parse(user);
     } catch (e) {
-      localStorage.removeItem("user");
       return null;
     }
   },

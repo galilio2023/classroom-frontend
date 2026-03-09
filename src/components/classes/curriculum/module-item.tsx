@@ -14,7 +14,13 @@ import {
   Sparkles, 
   PenLine, 
   FileQuestion, 
-  PlusCircle 
+  PlusCircle,
+  LayoutDashboard,
+  ChevronRight,
+  Plus,
+  Wand2,
+  Library,
+  ClipboardCheck
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -24,6 +30,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ResourceItem } from "./resource-item";
 import { TaskItem } from "./task-item";
+import { cn } from "@/lib/utils";
+import { motion, AnimatePresence } from "framer-motion";
+import { Badge } from "@/components/ui/badge";
 
 interface ModuleItemProps {
   module: Module;
@@ -50,52 +59,71 @@ export const ModuleItem = ({
   onAddMaterial,
   onAddTask
 }: ModuleItemProps) => {
+  const totalItems = (module.resources?.length || 0) + (module.assignments?.length || 0) + (module.quizzes?.length || 0);
+  
   return (
-    <AccordionItem value={`module-${module.id}`} className="border rounded-lg bg-card px-4">
-      <div className="flex items-center justify-between w-full">
-        <AccordionTrigger className="hover:no-underline py-4 flex-1">
-          <div className="flex items-center gap-3 text-left">
-            <div className="p-2 bg-primary/10 rounded-md">
-              <BookOpen className="h-5 w-5 text-primary" />
+    <AccordionItem 
+      value={`module-${module.id}`} 
+      className="border-none shadow-xl bg-card/50 backdrop-blur-xl rounded-[2rem] overflow-hidden group transition-all hover:shadow-2xl hover:bg-card/80"
+    >
+      <div className="flex items-center justify-between w-full px-6">
+        <AccordionTrigger className="hover:no-underline py-6 flex-1 group/trigger">
+          <div className="flex items-center gap-4 text-left">
+            <div className="p-3 rounded-2xl bg-primary/10 text-primary group-hover/trigger:scale-110 transition-transform">
+              <BookOpen className="h-6 w-6" />
             </div>
-            <div>
-              <div className="font-bold">{module.name}</div>
-              {module.description && (
-                <div className="text-xs text-muted-foreground font-normal line-clamp-1">
-                  {module.description}
+            <div className="space-y-1">
+              <div className="font-black text-lg tracking-tight group-hover/trigger:text-primary transition-colors">{module.name}</div>
+              <div className="flex items-center gap-3">
+                {module.description && (
+                  <div className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest line-clamp-1 max-w-[300px]">
+                    {module.description}
+                  </div>
+                )}
+                <div className="flex items-center gap-1.5">
+                  <div className="w-1 h-1 rounded-full bg-muted-foreground/30" />
+                  <span className="text-[10px] font-black text-primary uppercase tracking-widest">{totalItems} Items</span>
                 </div>
-              )}
+              </div>
             </div>
           </div>
         </AccordionTrigger>
-        {isTeacher && (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <MoreVertical className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem 
-                className="text-destructive focus:text-destructive"
-                onClick={() => onDeleteModule(module.id)}
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                Delete Module
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )}
+        <div className="flex items-center gap-2">
+          {isTeacher && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl hover:bg-primary/5 text-muted-foreground hover:text-primary transition-all">
+                  <MoreVertical className="h-5 w-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="rounded-xl border-none shadow-2xl">
+                <DropdownMenuItem 
+                  className="text-destructive focus:text-destructive font-bold rounded-lg"
+                  onClick={() => onDeleteModule(module.id)}
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete Module
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+        </div>
       </div>
-      <AccordionContent className="pb-6 pt-2">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      
+      <AccordionContent className="pb-8 pt-2 px-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
           {/* Resources Section */}
-          <div className="space-y-3">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
-              <LinkIcon className="h-3 w-3" />
-              Learning Materials
-            </h4>
-            <div className="space-y-2">
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2">
+                <Library className="h-3.5 w-3.5 text-primary" />
+                Learning Materials
+              </h4>
+              <Badge variant="secondary" className="rounded-full px-2 py-0 h-5 text-[9px] font-black bg-primary/5 text-primary border-none">
+                {module.resources?.length || 0}
+              </Badge>
+            </div>
+            <div className="grid gap-3">
               {module.resources && module.resources.length > 0 ? (
                 module.resources.map((res) => (
                   <ResourceItem 
@@ -108,18 +136,26 @@ export const ModuleItem = ({
                   />
                 ))
               ) : (
-                <p className="text-xs text-muted-foreground italic">No materials added.</p>
+                <div className="p-6 rounded-2xl border-2 border-dashed border-muted-foreground/10 flex flex-col items-center justify-center gap-2 text-muted-foreground/40">
+                  <Library className="h-6 w-6 opacity-20" />
+                  <p className="text-[10px] font-black uppercase tracking-widest">No materials added</p>
+                </div>
               )}
             </div>
           </div>
 
           {/* Assignments & Quizzes Section */}
-          <div className="space-y-3">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
-              <FileText className="h-3 w-3" />
-              Tasks & Assessments
-            </h4>
-            <div className="space-y-2">
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2">
+                <ClipboardCheck className="h-3.5 w-3.5 text-primary" />
+                Tasks & Assessments
+              </h4>
+              <Badge variant="secondary" className="rounded-full px-2 py-0 h-5 text-[9px] font-black bg-primary/5 text-primary border-none">
+                {(module.assignments?.length || 0) + (module.quizzes?.length || 0)}
+              </Badge>
+            </div>
+            <div className="grid gap-3">
               {module.assignments?.map((asn) => (
                 <TaskItem 
                   key={asn.id}
@@ -141,32 +177,50 @@ export const ModuleItem = ({
                 />
               ))}
               {(!module.assignments?.length && !module.quizzes?.length) && (
-                <p className="text-xs text-muted-foreground italic">No tasks assigned.</p>
+                <div className="p-6 rounded-2xl border-2 border-dashed border-muted-foreground/10 flex flex-col items-center justify-center gap-2 text-muted-foreground/40">
+                  <ClipboardCheck className="h-6 w-6 opacity-20" />
+                  <p className="text-[10px] font-black uppercase tracking-widest">No tasks assigned</p>
+                </div>
               )}
             </div>
           </div>
         </div>
         
         {isTeacher && (
-          <div className="mt-6 pt-4 border-t flex gap-2">
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-10 pt-6 border-t border-black/[0.03] dark:border-white/[0.03] flex flex-wrap gap-3"
+          >
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="h-8 text-xs border-ai-primary/30 text-ai-primary">
-                  <Sparkles className="h-3 w-3 mr-1.5" />
-                  AI Magic
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="h-10 rounded-xl font-black uppercase tracking-widest text-[9px] border-ai-primary/20 text-ai-primary hover:bg-ai-primary/5 gap-2 relative overflow-hidden group"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shine_1.5s_ease-in-out] pointer-events-none" />
+                  <Sparkles className="h-3.5 w-3.5" />
+                  AI Magic Builder
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuItem onClick={() => onMagicAction(module.id, "note")}>
-                  <PenLine className="h-4 w-4 mr-2" />
+              <DropdownMenuContent align="start" className="rounded-xl border-none shadow-2xl p-2 min-w-[200px]">
+                <DropdownMenuItem onClick={() => onMagicAction(module.id, "note")} className="rounded-lg font-bold gap-2 py-2.5">
+                  <div className="p-1.5 rounded-md bg-ai-primary/10 text-ai-primary">
+                    <PenLine className="h-3.5 w-3.5" />
+                  </div>
                   Generate Lesson Notes
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => onMagicAction(module.id, "quiz")}>
-                  <FileQuestion className="h-4 w-4 mr-2" />
+                <DropdownMenuItem onClick={() => onMagicAction(module.id, "quiz")} className="rounded-lg font-bold gap-2 py-2.5">
+                  <div className="p-1.5 rounded-md bg-ai-primary/10 text-ai-primary">
+                    <FileQuestion className="h-3.5 w-3.5" />
+                  </div>
                   Generate Quiz
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => onMagicAction(module.id, "assignment")}>
-                  <FileText className="h-4 w-4 mr-2" />
+                <DropdownMenuItem onClick={() => onMagicAction(module.id, "assignment")} className="rounded-lg font-bold gap-2 py-2.5">
+                  <div className="p-1.5 rounded-md bg-ai-primary/10 text-ai-primary">
+                    <FileText className="h-3.5 w-3.5" />
+                  </div>
                   Generate Assignment
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -175,22 +229,22 @@ export const ModuleItem = ({
             <Button 
               variant="outline" 
               size="sm" 
-              className="h-8 text-xs"
+              className="h-10 rounded-xl font-black uppercase tracking-widest text-[9px] gap-2 border-primary/20 text-primary hover:bg-primary/5"
               onClick={() => onAddMaterial(module.id)}
             >
-              <PlusCircle className="h-3 w-3 mr-1.5" />
+              <Plus className="h-3.5 w-3.5" />
               Add Material
             </Button>
             <Button 
               variant="outline" 
               size="sm" 
-              className="h-8 text-xs"
+              className="h-10 rounded-xl font-black uppercase tracking-widest text-[9px] gap-2 border-primary/20 text-primary hover:bg-primary/5"
               onClick={() => onAddTask(module.id)}
             >
-              <PlusCircle className="h-3 w-3 mr-1.5" />
+              <Plus className="h-3.5 w-3.5" />
               Add Task
             </Button>
-          </div>
+          </motion.div>
         )}
       </AccordionContent>
     </AccordionItem>

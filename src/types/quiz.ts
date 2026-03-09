@@ -21,6 +21,12 @@ export interface Quiz {
   dueDate?: string;
   timeLimit?: number;
   classId: number;
+  moduleId?: number | null;
+  categoryId?: number | null;
+  maxAttempts?: number;
+  gradingPolicy?: "highest" | "latest" | "average";
+  shuffleQuestions?: boolean;
+  showCorrectAnswers?: boolean;
   totalMarks?: number;
   createdAt: string;
   updatedAt: string;
@@ -53,6 +59,12 @@ export interface CreateQuizInput {
   dueDate?: string | null;
   timeLimit?: number;
   classId: number;
+  moduleId?: number;
+  categoryId?: number;
+  maxAttempts?: number;
+  gradingPolicy?: "highest" | "latest" | "average";
+  shuffleQuestions?: boolean;
+  showCorrectAnswers?: boolean;
   questions: {
     question: string;
     options: string[];

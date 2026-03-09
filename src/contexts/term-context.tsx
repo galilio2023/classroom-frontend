@@ -1,0 +1,70 @@
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { useList, useIsAuthenticated } from "@refinedev/core";
+import { AcademicTerm } from "@/types";
+
+interface TermContextType {
+  currentTerm: AcademicTerm | null;
+  selectedTerm: AcademicTerm | null;
+  setSelectedTerm: (term: AcademicTerm) => void;
+  terms: AcademicTerm[];
+  isLoading: boolean;
+}
+
+const TermContext = createContext<TermContextType | undefined>(undefined);
+
+export const TermProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  const [selectedTerm, setSelectedTerm] = useState<AcademicTerm | null>(null);
+  
+  // Check if user is authenticated before fetching
+  const { data: authData } = useIsAuthenticated();
+  const isAuthenticated = authData?.authenticated;
+
+  const { result, query } = useList<AcademicTerm>({
+    resource: "academic-terms",
+    sorters: [
+      {
+        field: "startDate",
+        order: "desc",
+      },
+    ],
+    queryOptions: {
+      // ONLY run the query if the user is authenticated
+      enabled: !!isAuthenticated,
+    }
+  });
+
+  const terms = result?.data || [];
+  const isLoading = query.isLoading;
+  const currentTerm =
+    terms.find((t: AcademicTerm) => t.status === "active") || null;
+
+  useEffect(() => {
+    if (currentTerm && !selectedTerm) {
+      setSelectedTerm(currentTerm);
+    }
+  }, [currentTerm, selectedTerm]);
+
+  return (
+    <TermContext.Provider
+      value={{
+        currentTerm,
+        selectedTerm,
+        setSelectedTerm,
+        terms,
+        isLoading,
+      }}
+    >
+      {children}
+    </TermContext.Provider>
+  );
+};
+
+export const useTerm = () => {
+  const context = useContext(TermContext);
+  if (context === undefined) {
+    throw new Error("useTerm must be used within a TermProvider");
+  }
+  return context;
+};

@@ -9,12 +9,20 @@ export enum UserRole {
   ADMIN = "admin",
   TEACHER = "teacher",
   STUDENT = "student",
+  PARENT = "parent",
 }
 
 export enum UserStatus {
   ACTIVE = "active",
   INACTIVE = "inactive",
   SUSPENDED = "suspended",
+}
+
+export enum VerificationStatus {
+  UNVERIFIED = "unverified",
+  PENDING = "pending",
+  VERIFIED = "verified",
+  REJECTED = "rejected",
 }
 
 export interface User {
@@ -34,13 +42,16 @@ export interface User {
   dateOfBirth: string | null;
   parentName: string | null;
   parentPhone: string | null;
-  isVerified: boolean;
+  verificationStatus: VerificationStatus;
   verificationDocumentUrl: string | null;
   verificationDocumentCldPubId: string | null;
   createdAt: string;
   updatedAt: string;
   level?: number;
   xp?: number;
+  currentStreak: number;
+  longestStreak: number;
+  lastActiveAt: string | null;
   enrollments?: Enrollment[];
 }
 
@@ -49,8 +60,8 @@ export interface Department {
   name: string;
   code: string;
   description: string | null;
-  headId: string | null;
-  head?: User;
+  headOfDepartmentId: string | null;
+  headOfDepartment?: User;
   createdAt: string;
   updatedAt: string;
 }
@@ -63,6 +74,8 @@ export interface Subject {
   credits: number;
   departmentId: number;
   department: Department;
+  prerequisiteSubjectId: number | null;
+  prerequisite?: Subject;
   createdAt: string;
   updatedAt: string;
 }
@@ -73,7 +86,22 @@ export enum ClassStatus {
   ARCHIVED = "archived",
 }
 
+export enum GradingStatus {
+  OPEN = "open",
+  LOCKED = "locked",
+  FINALIZED = "finalized",
+}
+
 export type Schedule = z.infer<typeof scheduleSchema>;
+
+export interface GradeCategory {
+  id: number;
+  classId: number;
+  name: string;
+  weight: number;
+  createdAt: string;
+  updatedAt: string;
+}
 
 export interface Submission {
   id: number;
@@ -83,6 +111,10 @@ export interface Submission {
   fileUrl: string | null;
   fileCldPubId: string | null;
   isLate: boolean;
+  isDraft: boolean;
+  requiresResubmission: boolean;
+  teacherPrivateNotes: string | null;
+  attemptNumber: number;
   assignmentId: number;
   studentId: string;
   createdAt: string;
@@ -93,6 +125,12 @@ export interface Submission {
   suggestedGrade?: number;
   suggestedFeedback?: string;
   assignment?: Assignment;
+  peerReviews?: PeerReview[];
+}
+
+export interface RubricItem {
+  criteria: string;
+  maxPoints: number;
 }
 
 export interface Assignment {
@@ -103,17 +141,40 @@ export interface Assignment {
   fileUrl: string | null;
   fileCldPubId: string | null;
   classId: number;
+  class?: Class;
   moduleId: number | null;
+  categoryId: number | null;
+  category?: GradeCategory;
+  allowLateSubmissions: boolean;
+  latePenaltyPercentage: number;
   createdAt: string;
   updatedAt: string;
   submissions?: Submission[];
+  hasPeerReview: boolean;
+  peerReviewWeight: number;
+  rubric: RubricItem[];
+}
+
+export interface PeerReview {
+  id: number;
+  assignmentId: number;
+  reviewerId: string;
+  submissionId: number;
+  scores: Record<string, number>;
+  feedback: string | null;
+  createdAt: string;
+  updatedAt: string;
+  assignment?: Assignment;
+  reviewer?: User;
+  submission?: Submission;
 }
 
 export type Enrollment = {
   id: number;
   studentId: string;
   classId: number;
-  status: "pending" | "approved" | "rejected";
+  status: "pending" | "approved" | "rejected" | "waitlisted" | "dropped";
+  waitlistPosition: number | null;
   createdAt: string;
   student: User;
   class: {
@@ -127,14 +188,26 @@ export type Enrollment = {
 export interface Module {
   id: number;
   classId: number;
+  class?: Class;
   name: string;
   description: string | null;
   order: number;
+  isPublished: boolean;
+  publishedAt: string | null;
+  prerequisiteModuleId: number | null;
+  prerequisite?: Module;
   assignments?: Assignment[];
   resources?: Resource[];
   quizzes?: Quiz[];
   createdAt: string;
   updatedAt: string;
+}
+
+export enum AnnouncementPriority {
+  LOW = "low",
+  NORMAL = "normal",
+  HIGH = "high",
+  URGENT = "urgent",
 }
 
 export interface Announcement {
@@ -144,6 +217,9 @@ export interface Announcement {
   classId: number;
   authorId: string;
   isPinned: boolean;
+  priority: AnnouncementPriority;
+  expiresAt: string | null;
+  allowComments: boolean;
   fileUrl?: string | null;
   fileCldPubId?: string | null;
   author?: User;
@@ -171,6 +247,9 @@ export type Class = z.infer<typeof classFormSchema> & {
   inviteCode: string;
   bannerUrl?: string | null;
   bannerCldPubId?: string | null;
+  gradingStatus: GradingStatus;
+  allowParentAccess: boolean;
+  archivedAt: string | null;
   teachers: {
     teacher: User;
     isPrimary: boolean;
@@ -181,7 +260,10 @@ export type Class = z.infer<typeof classFormSchema> & {
   enrollments: Enrollment[];
   assignments: Assignment[];
   modules?: Module[];
+  gradeCategories?: GradeCategory[];
   isLive?: boolean;
+  termId?: number;
+  term?: AcademicTerm;
 };
 
 export type ClassListItem = Pick<
@@ -219,6 +301,9 @@ export interface Attendance {
   studentId: string;
   date: string;
   status: AttendanceStatus;
+  minutesPresent: number;
+  participationScore: number;
+  isExcused: boolean;
   remarks: string | null;
   student?: User;
   recordedBy?: User;
@@ -244,6 +329,8 @@ export interface Discussion {
   classId: number;
   userId: string;
   parentId: number | null;
+  isEdited: boolean;
+  lastEditedAt: string | null;
   user: Pick<User, "id" | "name" | "image" | "role">;
   replies?: Discussion[];
   createdAt: string;
@@ -254,12 +341,14 @@ export interface Resource {
   id: number;
   title: string;
   description: string | null;
-  type: "file" | "link" | "video" | "note" | "other";
+  type: "file" | "link" | "video" | "note" | "image" | "other";
   url: string;
   content: string | null;
   cldPubId: string | null;
   classId: number;
   moduleId: number | null;
+  isInternal: boolean;
+  isRequired: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -323,6 +412,16 @@ export interface ActivityLog {
   entityId?: string;
   createdAt: string;
   user?: User;
+}
+
+export interface AcademicTerm {
+  id: number;
+  name: string;
+  startDate: string;
+  endDate: string;
+  status: "active" | "upcoming" | "archived";
+  createdAt: string;
+  updatedAt: string;
 }
 
 export * from "./quiz";

@@ -24,38 +24,26 @@ export function Layout({ children }: PropsWithChildren) {
     <ThemeProvider>
       <SidebarProvider>
         <Sidebar />
-        <SidebarInset className="overflow-hidden">
+        <SidebarInset className="flex flex-col min-h-screen">
           <OfflineBanner />
           <Header />
-          <AnimatePresence mode="wait">
-            <motion.main
-              key={pathname}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.2, ease: "easeInOut" }}
-              className={cn(
-                "@container/main",
-                "container",
-                "mx-auto",
-                "relative",
-                "w-full",
-                "max-w-full",
-                "overflow-hidden",
-                "flex",
-                "flex-col",
-                "flex-1",
-                "px-2",
-                "pt-4",
-                "md:p-4",
-                "lg:px-6",
-                "lg:pt-6",
-                "pb-20 md:pb-4"
-              )}
-            >
-              {children}
-            </motion.main>
-          </AnimatePresence>
+          <main className="flex-1 flex flex-col relative">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={pathname}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2, ease: "easeInOut" }}
+                className={cn(
+                  "flex-1 flex flex-col w-full",
+                  "px-4 py-6 md:px-8 md:py-8 lg:px-10"
+                )}
+              >
+                {children}
+              </motion.div>
+            </AnimatePresence>
+          </main>
           {isStudent && <XPGainPopup />}
           {isStudent && <MobileNav />}
           <PWAInstaller />

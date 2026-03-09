@@ -1,5 +1,5 @@
 import { useCan } from "@refinedev/core";
-import { Navigate, useParams } from "react-router-dom";
+import { Navigate, useParams, useLocation } from "react-router-dom";
 import UnauthorizedPage from "@/pages/unauthorized";
 import { Loader2 } from "lucide-react";
 
@@ -14,30 +14,33 @@ export const AuthorizedRoute = ({
   resource,
   action,
 }: AuthorizedRouteProps) => {
-  // Get the 'id' from the URL if it exists
   const { id } = useParams();
+  const location = useLocation();
 
   const { data, isLoading, isError } = useCan({
     resource,
     action,
-    params: { id }, // Pass the id to the useCan hook
+    params: { id, location },
   });
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-full">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      <div className="flex flex-1 items-center justify-center w-full h-full min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
   if (isError) {
-    // If there's an error (e.g., user is not authenticated), redirect to login
-    return <Navigate to="/login" />;
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   if (data?.can) {
-    return <>{children}</>;
+    return (
+      <div className="flex flex-1 flex-col w-full h-full">
+        {children}
+      </div>
+    );
   }
 
   return <UnauthorizedPage reason={data?.reason} />;

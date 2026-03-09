@@ -2,6 +2,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { UpcomingAssignment } from "@/types/dashboard";
 import { AssignmentItemCard } from "./assignment-item-card";
+import { motion, AnimatePresence } from "framer-motion";
+import { ClipboardCheck, Sparkles, ArrowRight, Calendar, Info } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
 
 interface UpcomingAssignmentsListProps {
   assignments: UpcomingAssignment[];
@@ -11,33 +15,82 @@ interface UpcomingAssignmentsListProps {
 
 export const UpcomingAssignmentsList = ({ assignments, list, show }: UpcomingAssignmentsListProps) => {
   return (
-    <Card className="border-none shadow-none bg-transparent">
-      <CardHeader className="px-0 flex flex-row items-center justify-between">
-        <div className="space-y-1">
-          <CardTitle className="text-2xl font-bold">Upcoming Tasks</CardTitle>
-          <p className="text-sm text-muted-foreground">Don't miss your deadlines.</p>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between px-2">
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-xl bg-primary/10 text-primary">
+            <ClipboardCheck className="h-5 w-5" />
+          </div>
+          <div>
+            <h3 className="text-xl font-black tracking-tight">Upcoming Tasks</h3>
+            <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">Don't miss your deadlines</p>
+          </div>
         </div>
-        <Button variant="ghost" size="sm" onClick={() => list("assignments")} className="text-primary font-bold hover:bg-primary/10">
-          View All
-        </Button>
-      </CardHeader>
-      <CardContent className="px-0">
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="flex items-center gap-3">
+          <Badge variant="secondary" className="hidden sm:flex rounded-full px-3 py-1 font-black text-[10px] uppercase tracking-widest bg-muted/50 border-none">
+            {assignments.length} Pending
+          </Badge>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => list("assignments")} 
+            className="h-8 rounded-xl px-4 text-[10px] font-black uppercase tracking-widest text-primary hover:bg-primary/5 gap-2 group transition-all"
+          >
+            View All 
+            <ArrowRight className="h-3 w-3 group-hover:translate-x-1 transition-transform" />
+          </Button>
+        </div>
+      </div>
+
+      <div className="grid gap-6 sm:grid-cols-2">
+        <AnimatePresence mode="popLayout">
           {assignments.length > 0 ? (
-            assignments.map((assignment) => (
-              <AssignmentItemCard 
-                key={assignment.id} 
-                assignment={assignment} 
-                onOpen={(id) => show("assignments", id)} 
-              />
+            assignments.map((assignment, idx) => (
+              <motion.div
+                key={assignment.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ delay: idx * 0.05 }}
+              >
+                <AssignmentItemCard 
+                  assignment={assignment} 
+                  onOpen={(id) => show("assignments", id)} 
+                />
+              </motion.div>
             ))
           ) : (
-            <div className="col-span-full text-center py-12 border-2 border-dashed rounded-2xl bg-muted/20 backdrop-blur-sm">
-              <p className="text-muted-foreground font-medium">No upcoming assignments. Enjoy your time!</p>
-            </div>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="col-span-full text-center py-16 border-none shadow-2xl bg-card/50 backdrop-blur-xl rounded-[2rem] flex flex-col items-center gap-4 group overflow-hidden relative"
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
+              <div className="relative">
+                <div className="absolute inset-0 bg-primary/20 rounded-full blur-2xl animate-pulse" />
+                <div className="relative p-5 rounded-full bg-primary/10 text-primary group-hover:scale-110 transition-transform duration-500">
+                  <Calendar className="h-10 w-10" />
+                </div>
+              </div>
+              <div className="space-y-1 relative z-10">
+                <p className="text-xl font-black tracking-tight text-foreground">All caught up!</p>
+                <p className="text-sm font-medium text-muted-foreground/60">No upcoming assignments. Enjoy your time!</p>
+              </div>
+              <div className="mt-2 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary/60 relative z-10">
+                <Sparkles className="h-3 w-3" />
+                <span>Great job, Student!</span>
+              </div>
+            </motion.div>
           )}
+        </AnimatePresence>
+      </div>
+      
+      {assignments.length > 0 && (
+        <div className="pt-4 flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">
+          <Info className="h-3 w-3" />
+          <span>Click a task to view details and submit</span>
         </div>
-      </CardContent>
-    </Card>
+      )}
+    </div>
   );
 };

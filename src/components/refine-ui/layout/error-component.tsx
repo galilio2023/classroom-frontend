@@ -6,7 +6,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useResourceParams, useTranslate } from "@refinedev/core";
-import { ChevronLeft, InfoIcon, Home } from "lucide-react";
+import { ChevronLeft, InfoIcon, Home, RefreshCw } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -17,7 +17,16 @@ export function ErrorComponent() {
   const [errorMessage, setErrorMessage] = useState<string>();
   const translate = useTranslate();
   const navigate = useNavigate();
-  const { resource, action } = useResourceParams();
+  
+  // Safely handle resource params
+  let resourceParams: any = {};
+  try {
+    resourceParams = useResourceParams();
+  } catch (e) {
+    console.error("Error getting resource params", e);
+  }
+  
+  const { resource, action } = resourceParams;
 
   useEffect(() => {
     if (resource && action) {
@@ -35,12 +44,23 @@ export function ErrorComponent() {
   }, [resource, action, translate]);
 
   const handleBackToDashboard = () => {
-    // Use React Router for smooth navigation, fallback to window.location if needed
-    navigate("/");
+    try {
+        navigate("/");
+    } catch (e) {
+        window.location.href = "/";
+    }
   };
 
   const handleGoBack = () => {
-    navigate(-1);
+    try {
+        navigate(-1);
+    } catch (e) {
+        window.history.back();
+    }
+  };
+
+  const handleHardRefresh = () => {
+    window.location.reload();
   };
 
   return (
@@ -93,15 +113,27 @@ export function ErrorComponent() {
                 {translate("pages.error.backHome", "Return to Dashboard")}
             </Button>
             
-            <Button 
-                variant="ghost" 
-                size="sm" 
-                className="text-muted-foreground hover:text-foreground"
-                onClick={handleGoBack}
-            >
-                <ChevronLeft className="h-4 w-4 mr-1" />
-                Go Back
-            </Button>
+            <div className="flex gap-2 justify-center">
+                <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="text-muted-foreground hover:text-foreground"
+                    onClick={handleGoBack}
+                >
+                    <ChevronLeft className="h-4 w-4 mr-1" />
+                    Go Back
+                </Button>
+
+                <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="text-muted-foreground hover:text-foreground"
+                    onClick={handleHardRefresh}
+                >
+                    <RefreshCw className="h-4 w-4 mr-1" />
+                    Refresh Page
+                </Button>
+            </div>
         </div>
       </div>
     </div>

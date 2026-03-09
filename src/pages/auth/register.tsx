@@ -30,19 +30,20 @@ import {
   ArrowRight, 
   ArrowLeft, 
   Sparkles,
-  Loader2
+  Loader2,
+  Heart
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import axios from "axios";
 import { RoleSelector } from "@/components/auth/role-selector";
 import { VerificationUpload } from "@/components/auth/verification-upload";
 
-// Enhanced Schema with Conditional Validation
+// Enhanced Schema with Conditional Validation (Made more flexible for initial setup)
 const registerSchema = z.object({
   name: z.string().min(1, "Name is required"),
   email: z.string().email("Invalid email address"),
   password: z.string().min(8, "Password must be at least 8 characters"),
-  role: z.enum(["student", "teacher"]),
+  role: z.enum(["student", "teacher", "parent"]),
   phoneNumber: z.string().optional(),
   bio: z.string().optional(),
   dateOfBirth: z.string().optional(),
@@ -50,18 +51,6 @@ const registerSchema = z.object({
   parentPhone: z.string().optional(),
   verificationDocumentUrl: z.string().optional(),
   verificationDocumentCldPubId: z.string().optional(),
-}).superRefine((data, ctx) => {
-  if (data.role === "teacher" && !data.verificationDocumentUrl) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: "Verification document is required for teachers",
-      path: ["verificationDocumentUrl"],
-    });
-  }
-  if (data.role === "student") {
-      // Optional: Enforce parent info for students if needed, 
-      // but keeping it optional for now as per original logic.
-  }
 });
 
 const RegisterPage = () => {
@@ -99,20 +88,20 @@ const RegisterPage = () => {
 
     setIsGeneratingBio(true);
     try {
-      // Corrected API Endpoint
       const response = await axios.post("/api/ai/generate-content", {
         prompt: `Generate a professional bio for a ${role} named ${name}. Keywords: passionate, experienced, dedicated. Keep it under 50 words.`,
         context: "User Registration Bio"
       });
       
-      // The backend returns { content: "..." }
       form.setValue("bio", response.data.content);
       toast.success("AI Bio generated!");
     } catch (error) {
-      const fallbackBio = role === "teacher" 
-        ? `Hello, I'm ${name}. I am a dedicated educator committed to fostering a positive and engaging learning environment for all my students.`
-        : `Hi, I'm ${name}. I'm an enthusiastic student eager to learn and grow in my academic journey.`;
-      form.setValue("bio", fallbackBio);
+      const fallbacks: Record<string, string> = {
+        teacher: `Hello, I'm ${name}. I am a dedicated educator committed to fostering a positive and engaging learning environment for all my students.`,
+        student: `Hi, I'm ${name}. I'm an enthusiastic student eager to learn and grow in my academic journey.`,
+        parent: `Hello, I'm ${name}. I am a supportive parent dedicated to my child's educational success and well-being.`,
+      };
+      form.setValue("bio", fallbacks[role as keyof typeof fallbacks] || `Hi, I'm ${name}.`);
       toast.info("Generated a standard bio for you (AI service unavailable).");
     } finally {
       setIsGeneratingBio(false);
@@ -129,7 +118,10 @@ const RegisterPage = () => {
     form.handleSubmit((values) => {
       register(values, {
         onSuccess: () => {
-          toast.success("Registration successful! Please wait for admin verification.");
+          const successMsg = values.role === "teacher" 
+            ? "Registration successful! Please wait for admin verification."
+            : "Registration successful! Welcome to the classroom.";
+          toast.success(successMsg);
           navigate("/login");
         },
         onError: (error: any) => {
@@ -168,8 +160,8 @@ const RegisterPage = () => {
               {/* STEP 1 */}
               <div className={cn("space-y-4 animate-in fade-in duration-300", step !== 1 && "hidden")}>
                 <RoleSelector 
-                  value={role} 
-                  onChange={(val) => form.setValue("role", val)} 
+                  value={role as "student" | "teacher" | "parent"}
+                  onChange={(val) => form.setValue("role", val as any)} 
                 />
 
                 <FormField
@@ -216,12 +208,18 @@ const RegisterPage = () => {
 
               {/* STEP 2 */}
               <div className={cn("space-y-4 animate-in fade-in duration-300", step !== 2 && "hidden")}>
+                <div className="p-4 rounded-2xl bg-primary/5 border border-primary/10 mb-4">
+                  <p className="text-xs text-muted-foreground font-medium leading-relaxed">
+                    You can skip these details for now and complete your profile later from the dashboard.
+                  </p>
+                </div>
+
                 <FormField
                   control={form.control}
                   name="phoneNumber"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Phone Number</FormLabel>
+                      <FormLabel>Phone Number (Optional)</FormLabel>
                       <FormControl>
                         <Input placeholder="+1 (555) 000-0000" {...field} className="h-11" />
                       </FormControl>
@@ -230,14 +228,14 @@ const RegisterPage = () => {
                   )}
                 />
 
-                {role === "student" ? (
+                {role === "student" && (
                   <div className="space-y-4">
                     <FormField
                       control={form.control}
                       name="dateOfBirth"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Date of Birth</FormLabel>
+                          <FormLabel>Date of Birth (Optional)</FormLabel>
                           <FormControl>
                             <Input type="date" {...field} className="h-11" />
                           </FormControl>
@@ -245,36 +243,10 @@ const RegisterPage = () => {
                         </FormItem>
                       )}
                     />
-                    <div className="grid grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="parentName"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Parent/Guardian Name</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Jane Doe" {...field} className="h-11" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="parentPhone"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Parent Phone</FormLabel>
-                            <FormControl>
-                              <Input placeholder="+1 (555) 000-0000" {...field} className="h-11" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
                   </div>
-                ) : (
+                )}
+
+                {role === "teacher" && (
                   <div className="space-y-4">
                     <FormField
                       control={form.control}
@@ -308,7 +280,6 @@ const RegisterPage = () => {
                       onUpload={(url, publicId) => {
                         form.setValue("verificationDocumentUrl", url);
                         form.setValue("verificationDocumentCldPubId", publicId);
-                        // Trigger validation to clear error if any
                         form.trigger("verificationDocumentUrl");
                       }}
                       onClear={() => {
@@ -316,12 +287,6 @@ const RegisterPage = () => {
                         form.setValue("verificationDocumentCldPubId", "");
                       }}
                     />
-                    {/* Explicit error message for verification document */}
-                    {form.formState.errors.verificationDocumentUrl && (
-                        <p className="text-sm font-medium text-destructive">
-                            {form.formState.errors.verificationDocumentUrl.message}
-                        </p>
-                    )}
                   </div>
                 )}
               </div>

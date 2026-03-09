@@ -4,8 +4,7 @@ import {
   useGetIdentity,
   useNavigation,
   useLogout,
-  useList,
-  CrudFilter,
+  useCustom,
 } from "@refinedev/core";
 import {
   Calculator,
@@ -19,11 +18,11 @@ import {
   Sun,
   Search,
   PlusCircle,
-  Users,
-  FileText,
   History,
   GraduationCap,
   ClipboardCheck,
+  FileText,
+  Loader2,
 } from "lucide-react";
 
 import {
@@ -36,12 +35,21 @@ import {
   CommandSeparator,
   CommandShortcut,
 } from "@/components/ui/command";
-import { User, Class, Assignment, Resource, UserRole } from "@/types";
+import { User, UserRole } from "@/types";
 import { useTheme } from "@/components/refine-ui/theme/theme-provider";
 import { useDebounce } from "react-use";
 
 const RECENT_SEARCHES_KEY = "classroom_recent_searches";
 const MAX_RECENT_SEARCHES = 5;
+
+interface SearchResult {
+  id: number | string;
+  type: "class" | "subject" | "assignment" | "resource";
+  title: string;
+  description?: string | null;
+  link: string;
+  metadata?: any;
+}
 
 export function CommandMenu() {
   const [open, setOpen] = React.useState(false);
@@ -90,42 +98,22 @@ export function CommandMenu() {
     localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(updated));
   };
 
-  // Fetch dynamic data for search
-  const { result: classesResult } = useList<Class>({
-    resource: "classes",
-    filters: debouncedSearch ? [{ field: "name", operator: "contains", value: debouncedSearch }] : [],
-    queryOptions: { enabled: open && !!debouncedSearch },
-    pagination: { pageSize: 5 },
+  // --- UNIFIED GLOBAL SEARCH ---
+  const { result: searchResult, query: searchQuery } = useCustom<SearchResult[]>({
+    url: "/search",
+    method: "get",
+    config: {
+        query: { q: debouncedSearch }
+    },
+    queryOptions: { 
+        enabled: open && debouncedSearch.length >= 2,
+        // Keep previous data while fetching new results for smoother UX
+        placeholderData: (previousData) => previousData,
+    },
   });
 
-  const { result: assignmentsResult } = useList<Assignment>({
-    resource: "assignments",
-    filters: debouncedSearch ? [{ field: "title", operator: "contains", value: debouncedSearch }] : [],
-    queryOptions: { enabled: open && !!debouncedSearch },
-    pagination: { pageSize: 5 },
-  });
-
-  const { result: studentsResult } = useList<User>({
-    resource: "users",
-    filters: [
-      ...(debouncedSearch ? [{ field: "name", operator: "contains", value: debouncedSearch } as CrudFilter] : []),
-      { field: "role", operator: "eq", value: "student" }
-    ],
-    queryOptions: { enabled: open && !!debouncedSearch },
-    pagination: { pageSize: 5 },
-  });
-
-  const { result: resourcesResult } = useList<Resource>({
-    resource: "resources",
-    filters: debouncedSearch ? [{ field: "title", operator: "contains", value: debouncedSearch }] : [],
-    queryOptions: { enabled: open && !!debouncedSearch },
-    pagination: { pageSize: 5 },
-  });
-
-  const classes = classesResult?.data || [];
-  const assignments = assignmentsResult?.data || [];
-  const students = studentsResult?.data || [];
-  const resources = resourcesResult?.data || [];
+  const results = searchResult?.data || [];
+  const isSearching = searchQuery.isFetching;
 
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -145,6 +133,16 @@ export function CommandMenu() {
     command();
   }, [recentSearches]);
 
+  const getIcon = (type: string) => {
+    switch (type) {
+        case "class": return <BookOpen className="mr-2 h-4 w-4 text-blue-500" />;
+        case "assignment": return <Calculator className="mr-2 h-4 w-4 text-orange-500" />;
+        case "resource": return <FileText className="mr-2 h-4 w-4 text-emerald-500" />;
+        case "subject": return <GraduationCap className="mr-2 h-4 w-4 text-purple-500" />;
+        default: return <Search className="mr-2 h-4 w-4" />;
+    }
+  };
+
   return (
     <>
       <button
@@ -158,13 +156,22 @@ export function CommandMenu() {
         </kbd>
       </button>
       <CommandDialog open={open} onOpenChange={setOpen}>
-        <CommandInput 
-          placeholder="Type a command or search..." 
-          value={search}
-          onValueChange={setSearch}
-        />
+        <div className="relative">
+            <CommandInput 
+                placeholder="Type a command or search..." 
+                value={search}
+                onValueChange={setSearch}
+            />
+            {isSearching && (
+                <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                    <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                </div>
+            )}
+        </div>
         <CommandList>
-          <CommandEmpty>No results found.</CommandEmpty>
+          <CommandEmpty>
+            {isSearching ? "Searching..." : "No results found."}
+          </CommandEmpty>
           
           {!search && recentSearches.length > 0 && (
             <CommandGroup heading="Recent Searches">
@@ -216,57 +223,20 @@ export function CommandMenu() {
             </CommandItem>
           </CommandGroup>
 
-          {classes.length > 0 && (
-            <CommandGroup heading="Classes">
-              {classes.map((c: Class) => (
+          {results.length > 0 && (
+            <CommandGroup heading="Search Results">
+              {results.map((res) => (
                 <CommandItem
-                  key={c.id}
-                  onSelect={() => runCommand(() => show("classes", c.id.toString()), c.name)}
+                  key={`${res.type}-${res.id}`}
+                  onSelect={() => runCommand(() => navigate(res.link), res.title)}
                 >
-                  <BookOpen className="mr-2 h-4 w-4" />
-                  <span>{c.name}</span>
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          )}
-
-          {students.length > 0 && (
-            <CommandGroup heading="Students">
-              {students.map((s: User) => (
-                <CommandItem
-                  key={s.id}
-                  onSelect={() => runCommand(() => show("users", s.id), s.name)}
-                >
-                  <Users className="mr-2 h-4 w-4" />
-                  <span>{s.name}</span>
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          )}
-
-          {assignments.length > 0 && (
-            <CommandGroup heading="Assignments">
-              {assignments.map((a: Assignment) => (
-                <CommandItem
-                  key={a.id}
-                  onSelect={() => runCommand(() => show("assignments", a.id.toString()), a.title)}
-                >
-                  <Calculator className="mr-2 h-4 w-4" />
-                  <span>{a.title}</span>
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          )}
-
-          {resources.length > 0 && (
-            <CommandGroup heading="Resources">
-              {resources.map((r: Resource) => (
-                <CommandItem
-                  key={r.id}
-                  onSelect={() => runCommand(() => navigate(`/classes/${r.classId}/lessons/${r.id}`), r.title)}
-                >
-                  <FileText className="mr-2 h-4 w-4" />
-                  <span>{r.title}</span>
+                  {getIcon(res.type)}
+                  <div className="flex flex-col">
+                    <span>{res.title}</span>
+                    {res.description && (
+                        <span className="text-[10px] text-muted-foreground line-clamp-1">{res.description}</span>
+                    )}
+                  </div>
                 </CommandItem>
               ))}
             </CommandGroup>
