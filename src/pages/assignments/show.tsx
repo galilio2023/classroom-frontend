@@ -1,6 +1,6 @@
 import { useShow, useGetIdentity, useList, HttpError, useCustom } from "@refinedev/core";
 import { useParams, Link } from "react-router-dom";
-import { useMemo, useEffect } from "react";
+import { useMemo, useEffect, useState } from "react";
 import { ShowView, ShowViewHeader } from "@/components/refine-ui/views/show-view";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { 
@@ -24,7 +24,9 @@ import {
   Loader2,
   Share2,
   Pencil,
-  Timer
+  Timer,
+  AlertTriangle,
+  RotateCcw
 } from "lucide-react";
 import { Assignment, User, Submission, UserRole, PeerReview } from "@/types";
 import { SubmissionForm } from "./submission-form";
@@ -52,6 +54,7 @@ dayjs.extend(relativeTime);
 const AssignmentShow = () => {
   const { id } = useParams();
   const { data: identity, isLoading: isIdentityLoading } = useGetIdentity<User>();
+  const [isResubmitting, setIsResubmitting] = useState(false);
 
   const { query: assignmentQuery } = useShow<Assignment, HttpError>({
     resource: "assignments",
@@ -264,6 +267,12 @@ const AssignmentShow = () => {
                   AI Quiz Mode
                 </Badge>
               )}
+              {assignment.isGroupAssignment && (
+                <Badge className="bg-blue-500/10 text-blue-600 border-blue-500/20 px-4 py-1.5 rounded-xl font-black uppercase tracking-widest text-[10px] flex items-center gap-2">
+                  <Users className="h-4 w-4" />
+                  Group Assignment
+                </Badge>
+              )}
               <Badge className="bg-primary/10 text-primary border-primary/20 px-4 py-1.5 rounded-xl font-black uppercase tracking-widest text-[10px] flex items-center gap-2">
                 <LayoutDashboard className="h-4 w-4" />
                 {(assignment as any).class?.name || "General Class"}
@@ -383,7 +392,32 @@ const AssignmentShow = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-10">
-                  {mySubmission ? (
+                  {!mySubmission || isResubmitting ? (
+                    <div className="space-y-6">
+                        {mySubmission?.requiresResubmission && (
+                            <div className="p-6 rounded-[1.5rem] bg-destructive/10 border border-destructive/20 flex items-start gap-4">
+                                <div className="p-2 rounded-xl bg-destructive/10 text-destructive">
+                                    <AlertTriangle className="h-6 w-6" />
+                                </div>
+                                <div className="space-y-1">
+                                    <h4 className="text-lg font-black text-destructive tracking-tight">Resubmission Required</h4>
+                                    <p className="text-muted-foreground font-medium">Your instructor has requested changes to your assignment. Please review the feedback below and submit a new version.</p>
+                                    {mySubmission.feedback && (
+                                        <div className="mt-4 p-4 rounded-xl bg-white dark:bg-zinc-900 shadow-sm border border-destructive/10 text-destructive italic font-medium">
+                                            "{mySubmission.feedback}"
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                        <SubmissionForm 
+                            assignmentId={Number(assignment.id)} 
+                            assignment={assignment}
+                            existingSubmission={mySubmission || undefined}
+                            onCancel={mySubmission ? () => setIsResubmitting(false) : undefined}
+                        />
+                    </div>
+                  ) : (
                     <div className="space-y-10">
                         <div className="p-6 border-2 border-dashed rounded-[2rem] bg-success/5 border-success/20 flex items-center gap-5 shadow-sm">
                           <div className="p-3 rounded-2xl bg-success/10 text-success">
@@ -405,11 +439,63 @@ const AssignmentShow = () => {
                           </div>
                         </div>
 
+                        {/* --- FEEDBACK SECTION (NEW) --- */}
+                        {(mySubmission.feedback || mySubmission.suggestedFeedback) && (
+                            <div className="space-y-6 pt-6 border-t border-black/[0.05] dark:border-white/[0.05]">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2 rounded-xl bg-primary/10 text-primary">
+                                        <MessageSquare className="h-5 w-5" />
+                                    </div>
+                                    <h3 className="text-xl font-black uppercase tracking-widest">Feedback & Review</h3>
+                                </div>
+
+                                {mySubmission.feedback && (
+                                    <div className="p-8 bg-primary/5 rounded-[2rem] border border-primary/10 relative group hover:bg-primary/10 transition-all shadow-sm">
+                                        <div className="flex items-center gap-3 mb-4">
+                                            <Badge className="bg-primary text-primary-foreground">Instructor Feedback</Badge>
+                                            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                                                {dayjs(mySubmission.gradedAt).fromNow()}
+                                            </span>
+                                        </div>
+                                        <p className="text-lg italic text-muted-foreground leading-relaxed font-medium">
+                                            "{mySubmission.feedback}"
+                                        </p>
+                                    </div>
+                                )}
+
+                                {mySubmission.suggestedFeedback && (
+                                    <div className="p-8 bg-indigo-500/5 rounded-[2rem] border border-indigo-500/10 relative">
+                                        <div className="flex items-center gap-3 mb-4">
+                                            <Badge variant="outline" className="text-indigo-600 border-indigo-200 bg-indigo-50">AI Coach</Badge>
+                                            <Sparkles className="h-4 w-4 text-indigo-400" />
+                                        </div>
+                                        <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground">
+                                            <MarkdownRenderer content={mySubmission.suggestedFeedback} />
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* --- RESUBMIT BUTTON (NEW) --- */}
+                        <div className="flex justify-end pt-4">
+                             <Button 
+                                variant="outline" 
+                                size="lg" 
+                                className="rounded-2xl font-black uppercase tracking-widest gap-2"
+                                onClick={() => setIsResubmitting(true)}
+                             >
+                                <RotateCcw className="h-4 w-4" />
+                                Resubmit Assignment
+                             </Button>
+                        </div>
+
+
                         {receivedReviews.length > 0 && (
-                          <div className="space-y-8 pt-6">
+                          <div className="space-y-8 pt-6 border-t border-black/[0.05] dark:border-white/[0.05]">
                             <div className="flex items-center gap-3">
                                 <div className="p-2 rounded-xl bg-primary/10 text-primary">
-                                    <MessageSquare className="h-5 w-5" />
+                                    <Users className="h-5 w-5" />
                                 </div>
                                 <h3 className="text-xl font-black uppercase tracking-widest">Peer Feedback</h3>
                             </div>
@@ -438,8 +524,6 @@ const AssignmentShow = () => {
                           </div>
                         )}
                     </div>
-                  ) : (
-                    <SubmissionForm assignmentId={assignment.id} />
                   )}
                 </CardContent>
               </Card>
@@ -600,7 +684,7 @@ const AssignmentShow = () => {
                 </div>
               </CardHeader>
               <CardContent className="p-10">
-                <SubmissionList submissions={submissions} assignmentId={assignment.id} />
+                <SubmissionList submissions={submissions} assignmentId={Number(assignment.id)} />
               </CardContent>
             </Card>
           </motion.div>

@@ -10,11 +10,11 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
-import { Submission } from "@/types";
+import { Submission, User, Assignment } from "@/types"; // Ensure Assignment is imported
 import { FileUpload } from "@/components/file-upload";
-import { Paperclip, FileText, CheckCircle2, Info, Sparkles, Send, Save, History } from "lucide-react";
+import { Paperclip, FileText, CheckCircle2, Info, Sparkles, Send, Save, History, Users, X } from "lucide-react";
 import { FieldValues } from "react-hook-form";
-import { useGo, useInvalidate } from "@refinedev/core";
+import { useGo, useInvalidate, useGetIdentity, useList } from "@refinedev/core";
 import { LoadingButton } from "@/components/ui/loading-button";
 import { useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
@@ -22,12 +22,20 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const submissionSchema = z.object({
   content: z.string().min(1, "Submission content cannot be empty."),
   fileUrl: z.string().optional(),
   fileCldPubId: z.string().optional(),
   isDraft: z.boolean().default(false),
+  groupId: z.coerce.number().optional().nullable(), // Added group ID
 });
 
 type SubmissionFormValues = z.infer<typeof submissionSchema>;
@@ -36,17 +44,35 @@ interface SubmissionFormProps {
   assignmentId: number;
   existingSubmission?: Submission;
   latestAttemptNumber?: number;
+  assignment?: Assignment; // Added assignment prop
+  onCancel?: () => void;
 }
 
 export const SubmissionForm = ({
   assignmentId,
   existingSubmission,
   latestAttemptNumber = 0,
+  assignment, // Added assignment prop
+  onCancel,
 }: SubmissionFormProps) => {
   const go = useGo();
   const invalidate = useInvalidate();
+  const { data: identity } = useGetIdentity<User>();
   const [isSuccess, setIsSuccess] = useState(false);
   const [successMessage, setSuccessMessage] = useState("Submission Received!");
+
+  // Fetch groups for the class if it's a group assignment
+  const { result: groupsResult } = useList({
+    resource: "project-groups",
+    filters: [{ field: "classId", operator: "eq", value: assignment?.classId }],
+    queryOptions: { enabled: !!assignment?.isGroupAssignment && !!assignment?.classId },
+  });
+
+  const groups = groupsResult?.data || [];
+
+  // Filter groups to find the one the user belongs to (optional, but good UX)
+  // For now, we'll list all groups in the class and let them pick (or auto-select if possible)
+  // In a stricter system, we'd force the user's group.
 
   const form = useForm<SubmissionFormValues>({
     resolver: zodResolver(submissionSchema) as any,
@@ -55,6 +81,7 @@ export const SubmissionForm = ({
       fileUrl: existingSubmission?.fileUrl ?? "",
       fileCldPubId: existingSubmission?.fileCldPubId ?? "",
       isDraft: false,
+      groupId: existingSubmission?.groupId ?? null, // Pre-fill if editing
     },
     refineCoreProps: {
       resource: "submissions",
@@ -71,10 +98,14 @@ export const SubmissionForm = ({
         
         setTimeout(() => {
           setIsSuccess(false);
-          go({
-            to: `/assignments/show/${assignmentId}`,
-            type: "replace",
-          });
+          if (onCancel) {
+             onCancel();
+          } else {
+             go({
+                to: `/assignments/show/${assignmentId}`,
+                type: "replace",
+              });
+          }
         }, 1500);
       },
     },
@@ -96,6 +127,11 @@ export const SubmissionForm = ({
   }, [content]);
 
   const onSubmit = (values: FieldValues) => {
+    if (assignment?.isGroupAssignment && !values.groupId) {
+        // This should be caught by Zod if we made it required, but custom logic is safer here
+        // toast.error("Please select a group"); // Handled by optional?
+    }
+    
     onFinish({
       ...values,
       assignmentId,
@@ -167,6 +203,46 @@ export const SubmissionForm = ({
                 </Badge>
               )}
             </div>
+
+            {/* Group Selection for Group Assignments */}
+            {assignment?.isGroupAssignment && (
+                <div className="p-6 bg-card rounded-[1.5rem] border border-border shadow-sm">
+                    <FormField
+                        control={control}
+                        name="groupId"
+                        render={({ field }) => (
+                            <FormItem className="space-y-3">
+                                <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2">
+                                    <Users className="h-3 w-3" />
+                                    Select Your Group
+                                </FormLabel>
+                                <Select 
+                                    onValueChange={(val) => field.onChange(Number(val))}
+                                    value={field.value?.toString()}
+                                    disabled={!!existingSubmission} // Cannot change group after first save/submit for consistency
+                                >
+                                    <FormControl>
+                                        <SelectTrigger className="h-12 rounded-xl bg-muted/20 border-none focus:ring-primary">
+                                            <SelectValue placeholder="Which group are you submitting for?" />
+                                        </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                        {groups.map((group: any) => (
+                                            <SelectItem key={group.id} value={group.id.toString()}>
+                                                {group.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                <p className="text-[10px] text-muted-foreground">
+                                    This submission will count for all members of the selected group.
+                                </p>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                </div>
+            )}
 
             <FormField
               control={control}
@@ -288,8 +364,21 @@ export const SubmissionForm = ({
                 className="w-full h-14 rounded-2xl font-black uppercase tracking-widest shadow-xl shadow-primary/20 gap-2"
               >
                 <Send className="h-4 w-4" />
-                {existingSubmission ? "Update & Turn In" : "Turn In Now"}
+                {existingSubmission && !existingSubmission.isDraft ? "Resubmit Work" : "Turn In Now"}
               </LoadingButton>
+
+               {onCancel && (
+                <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={onCancel}
+                    disabled={formLoading}
+                    className="w-full h-14 rounded-2xl font-black uppercase tracking-widest text-muted-foreground hover:bg-destructive/5 hover:text-destructive gap-2"
+                >
+                    <X className="h-4 w-4" />
+                    Cancel
+                </Button>
+              )}
             </div>
           </div>
         </div>

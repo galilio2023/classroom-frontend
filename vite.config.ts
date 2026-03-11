@@ -46,6 +46,7 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ["**/*.{js,css,html,ico,png,svg,jpg}"],
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // Increase limit to 5MiB
         runtimeCaching: [
           {
             // Cache both localhost and production API calls
@@ -70,6 +71,27 @@ export default defineConfig({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: (id) => {
+          if (id.includes("node_modules")) {
+            if (id.includes("@refinedev")) {
+              return "vendor-refine";
+            }
+            if (id.includes("lucide-react") || id.includes("@radix-ui")) {
+              return "vendor-ui";
+            }
+            if (id.includes("framer-motion") || id.includes("recharts")) {
+                return "vendor-viz";
+            }
+            return "vendor";
+          }
+        },
+      },
+    },
+    chunkSizeWarningLimit: 1000,
   },
   define: {
     "process.env": {},

@@ -1,5 +1,5 @@
 import { DashboardData } from "@/types/dashboard";
-import { useGetIdentity, useList, useCustomMutation } from "@refinedev/core";
+import { useGetIdentity, useList, useCustomMutation, useGo } from "@refinedev/core";
 import { User } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -44,11 +44,11 @@ export const ParentDashboard = ({ isLoading, show }: ParentDashboardProps) => {
   const { data: identity } = useGetIdentity<User>();
   const [isLinkDialogOpen, setIsLinkDialogOpen] = useState(false);
   const [studentEmail, setStudentEmail] = useState("");
+  const go = useGo();
 
-  // 1. The 100% correct Refine v5 destructuring based on the source code
   const {
-    result: { data: children }, // Safely extracts the array
-    query: { isLoading: isLoadingChildren, refetch }, // Extracts TanStack states
+    result: { data: children },
+    query: { isLoading: isLoadingChildren, refetch },
   } = useList<User>({
     resource: "users/children",
     queryOptions: {
@@ -87,6 +87,13 @@ export const ParentDashboard = ({ isLoading, show }: ParentDashboardProps) => {
         },
       },
     );
+  };
+
+  const handleContactTeachers = (_childId: string) => {
+      // Navigate to messages page. 
+      // In a real implementation, we would pass the childId to filter conversations or start a new one with the teachers.
+      // For now, we'll just go to the messages page.
+      go({ to: "/messages" });
   };
 
   if (isLoading || isLoadingChildren) {
@@ -168,7 +175,6 @@ export const ParentDashboard = ({ isLoading, show }: ParentDashboardProps) => {
           </div>
         </Card>
       ) : (
-        /* 2. Added ScrollArea to wrap the grid with a custom scrollbar */
         <ScrollArea className="h-[calc(100vh-280px)] min-h-[500px] w-full pr-4">
           <div className="grid gap-8 md:grid-cols-2 pb-6">
             {children.map((child: User, index: number) => (
@@ -267,6 +273,7 @@ export const ParentDashboard = ({ isLoading, show }: ParentDashboardProps) => {
                       <Button
                         variant="outline"
                         className="flex-1 rounded-xl font-black uppercase tracking-widest text-[9px] h-11 border-primary/10 hover:bg-primary/5 text-primary gap-2"
+                        onClick={() => handleContactTeachers(child.id)}
                       >
                         <MessageSquare className="h-3.5 w-3.5" />
                         Contact Teachers

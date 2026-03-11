@@ -23,15 +23,19 @@ import {
   CalendarClock,
   CalendarDays,
   Briefcase,
-  GraduationCap
+  GraduationCap,
+  MessageCircle,
+  Users,
+  Files
 } from "lucide-react";
 import { ResourceProps } from "@refinedev/core";
 
 export const resources: ResourceProps[] = [
   // --- MAIN ---
-  { name: "dashboard", list: "/", meta: { label: "Dashboard", icon: <Home /> } },
+  { name: "dashboard", list: "/dashboard", meta: { label: "Dashboard", icon: <Home /> } },
   { name: "calendar", list: "/calendar", meta: { label: "Calendar", icon: <Calendar /> } },
   { name: "notifications", list: "/notifications", meta: { label: "Notifications", icon: <Bell /> } },
+  { name: "messages", list: "/messages", meta: { label: "Messages", icon: <MessageCircle /> } },
 
   // --- AI HUB ---
   { name: "ai-assistant", list: "/ai-assistant", meta: { group: "AI Lab", label: "AI Assistant", icon: <Sparkles /> } },
@@ -43,6 +47,7 @@ export const resources: ResourceProps[] = [
   { name: "subjects", list: "/subjects", create: "/subjects/create", edit: "/subjects/edit/:id", meta: { group: "Academic", label: "Subjects", icon: <BookOpen /> } },
   { name: "enrollments", list: "/enrollments", meta: { group: "Academic", label: "Enrollments", icon: <UserPlus />, hide: false } },
   { name: "attendance", list: "/attendance", meta: { group: "Academic", label: "Attendance", icon: <CheckSquare /> } },
+  { name: "project-groups", list: "/project-groups", meta: { group: "Academic", label: "Project Groups", icon: <Users /> } },
 
   // --- CURRICULUM ---
   { name: "assignments", list: "/assignments", create: "/assignments/create", show: "/assignments/show/:id", meta: { group: "Curriculum", label: "Assignments", icon: <FileText /> } },
@@ -50,6 +55,7 @@ export const resources: ResourceProps[] = [
   { name: "submissions", list: "/submissions", show: "/submissions/show/:id", meta: { group: "Curriculum", label: "Submissions", icon: <Send /> } },
   { name: "modules", list: "/modules", meta: { group: "Curriculum", label: "Modules", icon: <Library /> } },
   { name: "resources", list: "/resources", meta: { group: "Curriculum", label: "Resources", icon: <FolderOpen /> } },
+  { name: "library", list: "/library", meta: { group: "Curriculum", label: "Global Library", icon: <Files /> } },
   { name: "discussions", list: "/discussions", meta: { group: "Curriculum", label: "Discussions", icon: <MessageSquare /> } },
 
   // --- PROGRESS ---

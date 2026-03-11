@@ -1,114 +1,101 @@
-import { Authenticated, Refine, useGetIdentity } from "@refinedev/core";
-import { DevtoolsProvider } from "@refinedev/devtools";
+import React, { Suspense } from "react";
+import { Authenticated, Refine } from "@refinedev/core";
 import { RefineKbar, RefineKbarProvider } from "@refinedev/kbar";
-import routerProvider, {
+import { DevtoolsProvider } from "@refinedev/devtools";
+
+import { useNotificationProvider } from "./components/refine-ui/notification/use-notification-provider";
+
+import routerBindings, {
+  CatchAllNavigate,
   DocumentTitleHandler,
   NavigateToResource,
   UnsavedChangesNotifier,
 } from "@refinedev/react-router";
-import { BrowserRouter, Outlet, Route, Routes, Navigate } from "react-router-dom";
+import { BrowserRouter, Outlet, Route, Routes } from "react-router-dom";
 import "./App.css";
-import { Toaster } from "./components/refine-ui/notification/toaster";
-import { useNotificationProvider } from "./components/refine-ui/notification/use-notification-provider";
-import { dataProvider } from "./providers/data";
 import { authProvider } from "./providers/auth";
 import { accessControlProvider } from "./providers/access-control";
+import { Layout } from "./components/refine-ui/layout/layout";
+import { resources } from "./config/resources";
+import { dataProvider } from "./providers/data";
+import { Toaster } from "./components/ui/sonner";
 import { TermProvider } from "./contexts/term-context";
 import { SocketProvider } from "./contexts/socket-context";
-import { resources } from "./config/resources";
-import { 
-  GraduationCap, 
-  Loader2
-} from "lucide-react";
-import { Layout } from "@/components/refine-ui/layout/layout.tsx";
+import { Loader2, GraduationCap } from "lucide-react";
+import { ErrorBoundary } from "./components/error-boundary";
 import { AuthorizedRoute } from "./components/authorized-route";
-import React, { Suspense } from "react";
-import { User, UserRole, VerificationStatus } from "@/types";
-import { ErrorComponent } from "./components/refine-ui/layout/error-component";
-import { OfflineBanner } from "./components/offline-banner";
+import { VerificationGuard } from "./components/verification-guard";
 
 // Lazy Load Pages
-const Dashboard = React.lazy(() => import("@/pages/dashboard.tsx"));
-const SubjectsList = React.lazy(() => import("@/pages/subjects/list.tsx"));
-const SubjectsCreate = React.lazy(() => import("@/pages/subjects/create.tsx"));
-const SubjectsEdit = React.lazy(() => import("@/pages/subjects/edit.tsx"));
-const DepartmentsList = React.lazy(() => import("@/pages/departments/list.tsx"));
-const DepartmentsCreate = React.lazy(() => import("@/pages/departments/create.tsx"));
-const DepartmentsEdit = React.lazy(() => import("@/pages/departments/edit.tsx"));
-const UsersList = React.lazy(() => import("@/pages/users/list.tsx"));
-const UsersCreate = React.lazy(() => import("@/pages/users/create.tsx"));
-const UsersEdit = React.lazy(() => import("@/pages/users/edit.tsx"));
-const UserShow = React.lazy(() => import("@/pages/users/show.tsx"));
-const StudentPortfolio = React.lazy(() => import("@/pages/users/portfolio.tsx"));
-const ClassesList = React.lazy(() => import("@/pages/classes/list.tsx"));
-const ClassesCreate = React.lazy(() => import("@/pages/classes/create.tsx"));
-const ClassesEdit = React.lazy(() => import("@/pages/classes/edit.tsx"));
-const ClassShow = React.lazy(() => import("@/pages/classes/show.tsx"));
-const LessonReader = React.lazy(() => import("@/pages/classes/lesson-reader.tsx"));
-const EnrollmentsList = React.lazy(() => import("@/pages/enrollments/list.tsx"));
-const ProfileRequestsList = React.lazy(() => import("@/pages/profile-requests/list.tsx"));
-const LoginPage = React.lazy(() => import("@/pages/auth/login.tsx"));
-const RegisterPage = React.lazy(() => import("@/pages/auth/register.tsx"));
-const PendingVerificationPage = React.lazy(() => import("@/pages/auth/pending-verification.tsx"));
-const AssignmentsList = React.lazy(() => import("@/pages/assignments/list-page.tsx"));
-const AssignmentCreate = React.lazy(() => import("./pages/assignments/create").then(module => ({ default: module.AssignmentCreate })));
-const AssignmentShow = React.lazy(() => import("./pages/assignments/show"));
-const SubmissionsList = React.lazy(() => import("@/pages/submissions/list-page.tsx"));
-const SubmissionShow = React.lazy(() => import("@/pages/submissions/show.tsx"));
-const AttendanceList = React.lazy(() => import("@/pages/attendance/list.tsx"));
-const QuizzesList = React.lazy(() => import("@/pages/quizzes/list.tsx"));
-const ModulesList = React.lazy(() => import("@/pages/modules/list.tsx"));
-const ResourcesList = React.lazy(() => import("@/pages/resources/list.tsx"));
-const DiscussionsList = React.lazy(() => import("@/pages/discussions/list.tsx"));
-const NotificationsList = React.lazy(() => import("@/pages/notifications/list.tsx"));
-const ProgressList = React.lazy(() => import("@/pages/progress/list.tsx"));
-const AIAssistantPage = React.lazy(() => import("./pages/ai-assistant"));
-const AIStudyLab = React.lazy(() => import("./pages/ai-study-lab"));
-const CalendarPage = React.lazy(() => import("./pages/calendar"));
-const ActivityLogPage = React.lazy(() => import("@/pages/dashboard/activity-log.tsx"));
-const StudyPlanner = React.lazy(() => import("@/pages/study-planner.tsx"));
-const TermsList = React.lazy(() => import("@/pages/terms/list.tsx"));
-const ReportCard = React.lazy(() => import("@/pages/student/report-card.tsx"));
-const TeacherApplicationsList = React.lazy(() => import("@/pages/teacher-applications/list.tsx"));
+const Dashboard = React.lazy(() => import("./pages/dashboard"));
+const LoginPage = React.lazy(() => import("./pages/auth/login"));
+const RegisterPage = React.lazy(() => import("./pages/auth/register"));
+const PendingVerification = React.lazy(() => import("./pages/auth/pending-verification"));
+const UnauthorizedPage = React.lazy(() => import("./pages/unauthorized"));
 
-// Quiz Pages
-const QuizCreate = React.lazy(() => import("./pages/quizzes/create"));
+const ClassesList = React.lazy(() => import("./pages/classes/list"));
+const ClassShow = React.lazy(() => import("./pages/classes/show"));
+const CreateClass = React.lazy(() => import("./pages/classes/create"));
+const EditClass = React.lazy(() => import("./pages/classes/edit"));
+const LessonReader = React.lazy(() => import("./pages/classes/lesson-reader"));
+
+const UsersList = React.lazy(() => import("./pages/users/list"));
+const ShowUser = React.lazy(() => import("./pages/users/show"));
+const CreateUser = React.lazy(() => import("./pages/users/create"));
+const EditUser = React.lazy(() => import("./pages/users/edit"));
+
+const AssignmentsList = React.lazy(() => import("./pages/assignments/list-page"));
+const CreateAssignment = React.lazy(() => import("./pages/assignments/create").then(m => ({ default: m.AssignmentCreate })));
+const AssignmentShow = React.lazy(() => import("./pages/assignments/show"));
+
+const SubmissionsList = React.lazy(() => import("./pages/submissions/list-page"));
+const SubmissionShow = React.lazy(() => import("./pages/submissions/show"));
+
+const AttendanceList = React.lazy(() => import("./pages/attendance/list"));
+const EnrollmentList = React.lazy(() => import("./pages/enrollments/list"));
+const DiscussionsList = React.lazy(() => import("./pages/discussions/list"));
+
+const QuizzesList = React.lazy(() => import("./pages/quizzes/list"));
+const CreateQuiz = React.lazy(() => import("./pages/quizzes/create"));
 const QuizShow = React.lazy(() => import("./pages/quizzes/show"));
-const QuizResults = React.lazy(() => import("./pages/quizzes/results"));
+
+const ModulesList = React.lazy(() => import("./pages/modules/list"));
+const ResourcesList = React.lazy(() => import("./pages/resources/list"));
+
+const DepartmentsList = React.lazy(() => import("./pages/departments/list"));
+const CreateDepartment = React.lazy(() => import("./pages/departments/create"));
+const EditDepartment = React.lazy(() => import("./pages/departments/edit"));
+
+const SubjectsList = React.lazy(() => import("./pages/subjects/list"));
+const CreateSubject = React.lazy(() => import("./pages/subjects/create"));
+const EditSubject = React.lazy(() => import("./pages/subjects/edit"));
+
+const CalendarPage = React.lazy(() => import("./pages/calendar"));
+const NotificationsPage = React.lazy(() => import("./pages/notifications/list"));
+const AiAssistantPage = React.lazy(() => import("./pages/ai-assistant"));
+const AiStudyLabPage = React.lazy(() => import("./pages/ai-study-lab"));
+const MessagesPage = React.lazy(() => import("./pages/messages/index"));
+const ProjectGroupsPage = React.lazy(() => import("./pages/project-groups/index"));
+const ShowProjectGroup = React.lazy(() => import("./pages/project-groups/show"));
+const GlobalLibraryPage = React.lazy(() => import("./pages/library/index"));
+const TermsList = React.lazy(() => import("./pages/terms/list"));
+const ProfileRequestsList = React.lazy(() => import("./pages/profile-requests/list"));
+const StudyPlanner = React.lazy(() => import("./pages/study-planner"));
+const TeacherApplicationsList = React.lazy(() => import("./pages/teacher-applications/list"));
+const ActivityLogPage = React.lazy(() => import("./pages/dashboard/activity-log"));
+const StudentReportCard = React.lazy(() => import("./pages/student/report-card"));
+const StudentProgress = React.lazy(() => import("./pages/progress/list"));
+
+// PUBLIC PAGES
+const LandingPage = React.lazy(() => import("./pages/landing"));
+const PricingPage = React.lazy(() => import("./pages/pricing"));
+const PublicLayout = React.lazy(() => import("./components/public-ui/layout").then(m => ({ default: m.PublicLayout })));
 
 const Loading = () => (
   <div className="flex h-dvh items-center justify-center">
     <Loader2 className="h-12 w-12 animate-spin text-primary" />
   </div>
 );
-
-class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
-  constructor(props: { children: React.ReactNode }) {
-    super(props);
-    this.state = { hasError: false };
-  }
-  static getDerivedStateFromError() { return { hasError: true }; }
-  render() {
-    if (this.state.hasError) return <ErrorComponent />;
-    return this.props.children;
-  }
-}
-
-const VerificationGuard = ({ children }: { children: React.ReactNode }) => {
-  const { data: user, isLoading } = useGetIdentity<User>();
-  
-  if (isLoading) return <Loading />;
-  if (!user) return <>{children}</>;
-  
-  const isVerified = user.verificationStatus === VerificationStatus.VERIFIED;
-  const isUnverifiedTeacher = user.role === UserRole.TEACHER && !isVerified;
-  
-  if (isUnverifiedTeacher) {
-    return <Navigate to="/pending-verification" replace />;
-  }
-  
-  return <>{children}</>;
-};
 
 function App() {
   return (
@@ -119,126 +106,249 @@ function App() {
             <Refine
               dataProvider={dataProvider}
               authProvider={authProvider}
-              notificationProvider={useNotificationProvider()}
-              routerProvider={routerProvider}
               accessControlProvider={accessControlProvider}
+              routerProvider={routerBindings}
+              notificationProvider={useNotificationProvider}
+              resources={resources}
               options={{
                 syncWithLocation: true,
                 warnWhenUnsavedChanges: true,
-                projectId: "nDt0bx-k8buuJ-It2Nvq",
+                projectId: "classroom-refine",
                 title: {
                   icon: <GraduationCap className="w-8 h-8 text-primary" />,
                   text: "Classroom AI",
                 },
               }}
-              resources={resources}
             >
-              <OfflineBanner />
               <Suspense fallback={<Loading />}>
                 <SocketProvider>
                   <TermProvider>
                     <Routes>
-                      {/* Public Routes */}
-                      <Route
-                        element={
-                          <Authenticated key="public-routes" fallback={<Outlet />}>
-                            <NavigateToResource resource="dashboard" />
-                          </Authenticated>
-                        }
-                      >
-                        <Route path="/login" element={<LoginPage />} />
-                        <Route path="/register" element={<RegisterPage />} />
+                      {/* PUBLIC ROUTES */}
+                      <Route element={<PublicLayout />}>
+                        <Route path="/" element={<LandingPage />} />
+                        <Route path="/pricing" element={<PricingPage />} />
                       </Route>
 
-                      {/* Authenticated but Unguarded Routes (e.g. Pending Verification) */}
+                      <Route path="/login" element={<LoginPage />} />
+                      <Route path="/register" element={<RegisterPage />} />
+                      <Route path="/unauthorized" element={<UnauthorizedPage />} />
+
+                      {/* PROTECTED ROUTES */}
                       <Route
                         element={
-                          <Authenticated key="auth-unguarded" fallback={<LoginPage />}>
+                          <Authenticated
+                            key="authenticated-layout"
+                            fallback={<CatchAllNavigate to="/login" />}
+                          >
                             <Outlet />
                           </Authenticated>
                         }
                       >
-                        <Route path="/pending-verification" element={<PendingVerificationPage />} />
+                        <Route 
+                            path="/pending-verification" 
+                            element={<PendingVerification />} 
+                        />
+                        
+                        <Route
+                            element={
+                                <VerificationGuard>
+                                    <Layout>
+                                        <Outlet />
+                                    </Layout>
+                                </VerificationGuard>
+                            }
+                        >
+                            <Route 
+                            path="/dashboard" 
+                            element={
+                                <AuthorizedRoute resource="dashboard" action="list">
+                                <Dashboard />
+                                </AuthorizedRoute>
+                            } 
+                            />
+                            <Route 
+                            path="/calendar" 
+                            element={
+                                <AuthorizedRoute resource="calendar" action="list">
+                                <CalendarPage />
+                                </AuthorizedRoute>
+                            } 
+                            />
+                            <Route 
+                            path="/notifications" 
+                            element={
+                                <AuthorizedRoute resource="notifications" action="list">
+                                <NotificationsPage />
+                                </AuthorizedRoute>
+                            } 
+                            />
+                            <Route 
+                                path="/messages" 
+                                element={
+                                    <AuthorizedRoute resource="messages" action="list">
+                                        <MessagesPage />
+                                    </AuthorizedRoute>
+                                } 
+                            /> 
+                            <Route path="/project-groups">
+                                <Route 
+                                    index 
+                                    element={
+                                        <AuthorizedRoute resource="project-groups" action="list">
+                                            <ProjectGroupsPage />
+                                        </AuthorizedRoute>
+                                    } 
+                                />
+                                <Route 
+                                    path="show/:id" 
+                                    element={
+                                        <AuthorizedRoute resource="project-groups" action="show">
+                                            <ShowProjectGroup />
+                                        </AuthorizedRoute>
+                                    } 
+                                />
+                            </Route>
+                            <Route 
+                                path="/library" 
+                                element={
+                                    <AuthorizedRoute resource="library" action="list">
+                                        <GlobalLibraryPage />
+                                    </AuthorizedRoute>
+                                } 
+                            />
+
+                            {/* AI */}
+                            <Route 
+                            path="/ai-assistant" 
+                            element={
+                                <AuthorizedRoute resource="ai-assistant" action="list">
+                                <AiAssistantPage />
+                                </AuthorizedRoute>
+                            } 
+                            />
+                            <Route 
+                            path="/ai-study-lab" 
+                            element={
+                                <AuthorizedRoute resource="ai-study-lab" action="list">
+                                <AiStudyLabPage />
+                                </AuthorizedRoute>
+                            } 
+                            />
+                            <Route 
+                            path="/study-planner" 
+                            element={
+                                <AuthorizedRoute resource="study-planner" action="list">
+                                <StudyPlanner />
+                                </AuthorizedRoute>
+                            } 
+                            />
+
+                            {/* CLASSES */}
+                            <Route path="/classes">
+                                <Route index element={<AuthorizedRoute resource="classes" action="list"><ClassesList /></AuthorizedRoute>} />
+                                <Route path="create" element={<AuthorizedRoute resource="classes" action="create"><CreateClass /></AuthorizedRoute>} />
+                                <Route path="edit/:id" element={<AuthorizedRoute resource="classes" action="edit"><EditClass /></AuthorizedRoute>} />
+                                <Route path="show/:id" element={<AuthorizedRoute resource="classes" action="show"><ClassShow /></AuthorizedRoute>} />
+                                <Route path=":classId/lessons/:resourceId" element={<AuthorizedRoute resource="resources" action="show"><LessonReader /></AuthorizedRoute>} />
+                            </Route>
+
+                            {/* ASSIGNMENTS */}
+                            <Route path="/assignments">
+                                <Route index element={<AuthorizedRoute resource="assignments" action="list"><AssignmentsList /></AuthorizedRoute>} />
+                                <Route path="create" element={<AuthorizedRoute resource="assignments" action="create"><CreateAssignment /></AuthorizedRoute>} />
+                                <Route path="show/:id" element={<AuthorizedRoute resource="assignments" action="show"><AssignmentShow /></AuthorizedRoute>} />
+                            </Route>
+
+                            {/* SUBMISSIONS */}
+                            <Route path="/submissions">
+                                <Route index element={<AuthorizedRoute resource="submissions" action="list"><SubmissionsList /></AuthorizedRoute>} />
+                                <Route path="show/:id" element={<AuthorizedRoute resource="submissions" action="show"><SubmissionShow /></AuthorizedRoute>} />
+                            </Route>
+
+                            {/* QUIZZES */}
+                            <Route path="/quizzes">
+                                <Route index element={<AuthorizedRoute resource="quizzes" action="list"><QuizzesList /></AuthorizedRoute>} />
+                                <Route path="create" element={<AuthorizedRoute resource="quizzes" action="create"><CreateQuiz /></AuthorizedRoute>} />
+                                <Route path="show/:id" element={<AuthorizedRoute resource="quizzes" action="show"><QuizShow /></AuthorizedRoute>} />
+                            </Route>
+
+                            {/* OTHERS */}
+                            <Route path="/attendance" element={<AuthorizedRoute resource="attendance" action="list"><AttendanceList /></AuthorizedRoute>} />
+                            <Route path="/enrollments" element={<AuthorizedRoute resource="enrollments" action="list"><EnrollmentList /></AuthorizedRoute>} />
+                            <Route path="/discussions" element={<AuthorizedRoute resource="discussions" action="list"><DiscussionsList /></AuthorizedRoute>} />
+                            <Route path="/modules" element={<AuthorizedRoute resource="modules" action="list"><ModulesList /></AuthorizedRoute>} />
+                            <Route path="/resources" element={<AuthorizedRoute resource="resources" action="list"><ResourcesList /></AuthorizedRoute>} />
+
+                            {/* ADMIN */}
+                            <Route path="/users">
+                                <Route index element={<AuthorizedRoute resource="users" action="list"><UsersList /></AuthorizedRoute>} />
+                                <Route path="create" element={<AuthorizedRoute resource="users" action="create"><CreateUser /></AuthorizedRoute>} />
+                                <Route path="edit/:id" element={<AuthorizedRoute resource="users" action="edit"><EditUser /></AuthorizedRoute>} />
+                                <Route path="show/:id" element={<AuthorizedRoute resource="users" action="show"><ShowUser /></AuthorizedRoute>} />
+                            </Route>
+                            <Route path="/departments">
+                                <Route index element={<AuthorizedRoute resource="departments" action="list"><DepartmentsList /></AuthorizedRoute>} />
+                                <Route path="create" element={<AuthorizedRoute resource="departments" action="create"><CreateDepartment /></AuthorizedRoute>} />
+                                <Route path="edit/:id" element={<AuthorizedRoute resource="departments" action="edit"><EditDepartment /></AuthorizedRoute>} />
+                            </Route>
+                            <Route path="/subjects">
+                                <Route index element={<AuthorizedRoute resource="subjects" action="list"><SubjectsList /></AuthorizedRoute>} />
+                                <Route path="create" element={<AuthorizedRoute resource="subjects" action="create"><CreateSubject /></AuthorizedRoute>} />
+                                <Route path="edit/:id" element={<AuthorizedRoute resource="subjects" action="edit"><EditSubject /></AuthorizedRoute>} />
+                            </Route>
+                            <Route path="/admin/terms" element={<AuthorizedRoute resource="academic-terms" action="list"><TermsList /></AuthorizedRoute>} />
+                            <Route
+                                path="/profile-requests"
+                                element={<AuthorizedRoute resource="profile-requests" action="list"><ProfileRequestsList /></AuthorizedRoute>}
+                            />
+                            <Route
+                                path="/teacher-applications"
+                                element={<AuthorizedRoute resource="teacher-applications" action="list"><TeacherApplicationsList /></AuthorizedRoute>}
+                            />
+                            <Route path="/activity-log" element={<AuthorizedRoute resource="activity-log" action="list"><ActivityLogPage /></AuthorizedRoute>} />
+                            <Route
+                                path="/student/report-card"
+                                element={<AuthorizedRoute resource="report-card" action="list"><StudentReportCard /></AuthorizedRoute>}
+                            />
+                            <Route path="/progress" element={<AuthorizedRoute resource="progress" action="list"><StudentProgress /></AuthorizedRoute>} />
+                        </Route>
                       </Route>
 
-                      {/* Private & Guarded Routes */}
+                      {/* LOGGED IN REDIRECTS */}
                       <Route
                         element={
-                          <Authenticated key="private-routes" fallback={<LoginPage />}>
-                            <VerificationGuard>
-                              <Layout>
-                                <Outlet />
-                              </Layout>
-                            </VerificationGuard>
+                          <Authenticated
+                            key="authenticated-redirect"
+                            fallback={<Outlet />}
+                          >
+                            <NavigateToResource resource="dashboard" />
                           </Authenticated>
                         }
                       >
-                        <Route index element={<AuthorizedRoute resource="dashboard" action="list"><Dashboard /></AuthorizedRoute>} />
-                        <Route path="calendar" element={<AuthorizedRoute resource="calendar" action="list"><CalendarPage /></AuthorizedRoute>} />
-                        <Route path="ai-assistant" element={<AuthorizedRoute resource="ai-assistant" action="list"><AIAssistantPage /></AuthorizedRoute>} />
-                        <Route path="ai-study-lab" element={<AuthorizedRoute resource="ai-study-lab" action="list"><AIStudyLab /></AuthorizedRoute>} />
-                        <Route path="study-planner" element={<AuthorizedRoute resource="study-planner" action="list"><StudyPlanner /></AuthorizedRoute>} />
-                        <Route path="admin/terms"><Route index element={<AuthorizedRoute resource="academic-terms" action="list"><TermsList /></AuthorizedRoute>} /></Route>
-                        <Route path="subjects">
-                          <Route index element={<AuthorizedRoute resource="subjects" action="list"><SubjectsList /></AuthorizedRoute>} />
-                          <Route path="create" element={<AuthorizedRoute resource="subjects" action="create"><SubjectsCreate /></AuthorizedRoute>} />
-                          <Route path="edit/:id" element={<AuthorizedRoute resource="subjects" action="edit"><SubjectsEdit /></AuthorizedRoute>} />
-                        </Route>
-                        <Route path="departments">
-                          <Route index element={<AuthorizedRoute resource="departments" action="list"><DepartmentsList /></AuthorizedRoute>} />
-                          <Route path="create" element={<AuthorizedRoute resource="departments" action="create"><DepartmentsCreate /></AuthorizedRoute>} />
-                          <Route path="edit/:id" element={<AuthorizedRoute resource="departments" action="edit"><DepartmentsEdit /></AuthorizedRoute>} />
-                        </Route>
-                        <Route path="users">
-                          <Route index element={<AuthorizedRoute resource="users" action="list"><UsersList /></AuthorizedRoute>} />
-                          <Route path="create" element={<AuthorizedRoute resource="users" action="create"><UsersCreate /></AuthorizedRoute>} />
-                          <Route path="edit/:id" element={<AuthorizedRoute resource="users" action="edit"><UsersEdit /></AuthorizedRoute>} />
-                          <Route path="show/:id" element={<AuthorizedRoute resource="users" action="show"><UserShow /></AuthorizedRoute>} />
-                        </Route>
-                        <Route path="portfolio" element={<StudentPortfolio />} />
-                        <Route path="student/report-card"><Route index element={<AuthorizedRoute resource="report-card" action="list"><ReportCard /></AuthorizedRoute>} /></Route>
-                        <Route path="profile-requests"><Route index element={<AuthorizedRoute resource="profile-requests" action="list"><ProfileRequestsList /></AuthorizedRoute>} /></Route>
-                        <Route path="activity-log"><Route index element={<AuthorizedRoute resource="activity-log" action="list"><ActivityLogPage /></AuthorizedRoute>} /></Route>
-                        <Route path="teacher-applications"><Route index element={<AuthorizedRoute resource="teacher-applications" action="list"><TeacherApplicationsList /></AuthorizedRoute>} /></Route>
-                        <Route path="classes">
-                          <Route index element={<AuthorizedRoute resource="classes" action="list"><ClassesList /></AuthorizedRoute>} />
-                          <Route path="create" element={<AuthorizedRoute resource="classes" action="create"><ClassesCreate /></AuthorizedRoute>} />
-                          <Route path="edit/:id" element={<AuthorizedRoute resource="classes" action="edit"><ClassesEdit /></AuthorizedRoute>} />
-                          <Route path="show/:id" element={<AuthorizedRoute resource="classes" action="show"><ClassShow /></AuthorizedRoute>} />
-                          <Route path=":classId/lessons/:resourceId" element={<AuthorizedRoute resource="classes" action="show"><LessonReader /></AuthorizedRoute>} />
-                        </Route>
-                        <Route path="enrollments"><Route index element={<AuthorizedRoute resource="enrollments" action="list"><EnrollmentsList /></AuthorizedRoute>} /></Route>
-                        <Route path="assignments">
-                          <Route index element={<AuthorizedRoute resource="assignments" action="list"><AssignmentsList /></AuthorizedRoute>} />
-                          <Route path="create" element={<AuthorizedRoute resource="assignments" action="create"><AssignmentCreate /></AuthorizedRoute>} />
-                          <Route path="show/:id" element={<AuthorizedRoute resource="assignments" action="show"><AssignmentShow /></AuthorizedRoute>} />
-                        </Route>
-                        <Route path="submissions">
-                          <Route index element={<AuthorizedRoute resource="submissions" action="list"><SubmissionsList /></AuthorizedRoute>} />
-                          <Route path="show/:id" element={<AuthorizedRoute resource="submissions" action="show"><SubmissionShow /></AuthorizedRoute>} />
-                        </Route>
-                        <Route path="attendance"><Route index element={<AuthorizedRoute resource="attendance" action="list"><AttendanceList /></AuthorizedRoute>} /></Route>
-                        <Route path="quizzes">
-                          <Route index element={<AuthorizedRoute resource="quizzes" action="list"><QuizzesList /></AuthorizedRoute>} />
-                          <Route path="create" element={<AuthorizedRoute resource="quizzes" action="create"><QuizCreate /></AuthorizedRoute>} />
-                          <Route path="show/:id" element={<AuthorizedRoute resource="quizzes" action="show"><QuizShow /></AuthorizedRoute>} />
-                          <Route path="results/:id" element={<AuthorizedRoute resource="quizzes" action="show"><QuizResults /></AuthorizedRoute>} />
-                        </Route>
-                        <Route path="modules"><Route index element={<AuthorizedRoute resource="modules" action="list"><ModulesList /></AuthorizedRoute>} /></Route>
-                        <Route path="resources"><Route index element={<AuthorizedRoute resource="resources" action="list"><ResourcesList /></AuthorizedRoute>} /></Route>
-                        <Route path="discussions"><Route index element={<AuthorizedRoute resource="discussions" action="list"><DiscussionsList /></AuthorizedRoute>} /></Route>
-                        <Route path="notifications"><Route index element={<AuthorizedRoute resource="notifications" action="list"><NotificationsList /></AuthorizedRoute>} /></Route>
-                        <Route path="progress"><Route index element={<AuthorizedRoute resource="progress" action="list"><ProgressList /></AuthorizedRoute>} /></Route>
-                        <Route path="*" element={<ErrorComponent />} />
+                        <Route path="/" element={<LandingPage />} />
+                      </Route>
+
+                      <Route
+                        element={
+                          <Authenticated
+                            key="authenticated-outer"
+                            fallback={<Outlet />}
+                          >
+                            <NavigateToResource />
+                          </Authenticated>
+                        }
+                      >
+                        <Route path="*" element={<CatchAllNavigate to="/login" />} />
                       </Route>
                     </Routes>
                   </TermProvider>
                 </SocketProvider>
               </Suspense>
-              <Toaster />
-              <RefineKbar />
               <UnsavedChangesNotifier />
               <DocumentTitleHandler />
+              <Toaster />
+              <RefineKbar />
             </Refine>
           </ErrorBoundary>
         </DevtoolsProvider>

@@ -62,6 +62,7 @@ const assignmentSchema = z.object({
   moduleId: z.coerce.number().optional().nullable(),
   classId: z.coerce.number().min(1, "Class is required"),
   hasPeerReview: z.boolean().default(false),
+  isGroupAssignment: z.boolean().default(false), // Added for group assignments
   peerReviewWeight: z.coerce.number().min(0).max(100).default(20),
   rubric: z.array(z.object({
     criteria: z.string().min(1, "Criteria is required"),
@@ -98,6 +99,7 @@ export const AssignmentCreate = () => {
       moduleId: initialModuleId ? Number(initialModuleId) : null,
       classId: urlClassId ? Number(urlClassId) : undefined as any,
       hasPeerReview: false,
+      isGroupAssignment: false, // Default to individual
       peerReviewWeight: 20,
       rubric: [{ criteria: "Accuracy", maxPoints: 10 }, { criteria: "Clarity", maxPoints: 10 }],
     },
@@ -347,46 +349,78 @@ export const AssignmentCreate = () => {
                                     )}
                                 />
 
-                                {/* Peer Review Section */}
-                                <div className="p-8 bg-primary/5 rounded-[2rem] border border-primary/10 space-y-8 relative overflow-hidden">
-                                    <div className="absolute -right-8 -top-8 opacity-5 rotate-12">
-                                      <Users className="h-32 w-32 text-primary" />
-                                    </div>
-                                    <div className="flex items-center justify-between relative z-10">
-                                        <div className="space-y-1">
-                                            <FormLabel className="text-lg font-black flex items-center gap-2">
-                                                <Users className="h-5 w-5 text-primary" />
-                                                Enable Peer Review
-                                            </FormLabel>
-                                            <FormDescription className="text-xs font-medium text-muted-foreground/60">
-                                                Students will grade each other based on a custom rubric.
-                                            </FormDescription>
+                                {/* Settings Section: Peer Review & Group Assignment */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {/* Group Assignment Toggle */}
+                                    <div className="p-6 bg-card rounded-[2rem] border border-border shadow-sm space-y-4">
+                                        <div className="flex items-center justify-between">
+                                            <div className="space-y-1">
+                                                <FormLabel className="text-base font-bold flex items-center gap-2">
+                                                    <Users className="h-5 w-5 text-primary" />
+                                                    Group Assignment
+                                                </FormLabel>
+                                                <FormDescription className="text-xs">
+                                                    One submission per group. All members get the same grade.
+                                                </FormDescription>
+                                            </div>
+                                            <FormField
+                                                control={control}
+                                                name="isGroupAssignment"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormControl>
+                                                            <Switch
+                                                                checked={field.value}
+                                                                onCheckedChange={field.onChange}
+                                                                className="data-[state=checked]:bg-primary"
+                                                            />
+                                                        </FormControl>
+                                                    </FormItem>
+                                                )}
+                                            />
                                         </div>
-                                        <FormField
-                                            control={control}
-                                            name="hasPeerReview"
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <FormControl>
-                                                        <Switch
-                                                            checked={field.value}
-                                                            onCheckedChange={field.onChange}
-                                                            className="data-[state=checked]:bg-primary"
-                                                        />
-                                                    </FormControl>
-                                                </FormItem>
-                                            )}
-                                        />
                                     </div>
 
-                                    <AnimatePresence>
-                                      {hasPeerReview && (
-                                          <motion.div 
-                                            initial={{ opacity: 0, height: 0 }}
-                                            animate={{ opacity: 1, height: "auto" }}
-                                            exit={{ opacity: 0, height: 0 }}
-                                            className="space-y-8 relative z-10 overflow-hidden"
-                                          >
+                                    {/* Peer Review Toggle */}
+                                    <div className="p-6 bg-card rounded-[2rem] border border-border shadow-sm space-y-4">
+                                        <div className="flex items-center justify-between">
+                                            <div className="space-y-1">
+                                                <FormLabel className="text-base font-bold flex items-center gap-2">
+                                                    <Users className="h-5 w-5 text-primary" />
+                                                    Peer Review
+                                                </FormLabel>
+                                                <FormDescription className="text-xs">
+                                                    Students grade each other based on a rubric.
+                                                </FormDescription>
+                                            </div>
+                                            <FormField
+                                                control={control}
+                                                name="hasPeerReview"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormControl>
+                                                            <Switch
+                                                                checked={field.value}
+                                                                onCheckedChange={field.onChange}
+                                                                className="data-[state=checked]:bg-primary"
+                                                            />
+                                                        </FormControl>
+                                                    </FormItem>
+                                                )}
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <AnimatePresence>
+                                  {hasPeerReview && (
+                                      <motion.div 
+                                        initial={{ opacity: 0, height: 0 }}
+                                        animate={{ opacity: 1, height: "auto" }}
+                                        exit={{ opacity: 0, height: 0 }}
+                                        className="space-y-8 relative z-10 overflow-hidden"
+                                      >
+                                          <div className="p-8 bg-primary/5 rounded-[2rem] border border-primary/10 space-y-8 relative overflow-hidden">
                                               <FormField
                                                   control={control}
                                                   name="peerReviewWeight"
@@ -469,10 +503,10 @@ export const AssignmentCreate = () => {
                                                       ))}
                                                   </div>
                                               </div>
-                                          </motion.div>
-                                      )}
-                                    </AnimatePresence>
-                                </div>
+                                          </div>
+                                      </motion.div>
+                                  )}
+                                </AnimatePresence>
 
                                 <div className="p-8 bg-muted/30 rounded-[2rem] border-2 border-dashed border-muted-foreground/10 space-y-4">
                                     <div className="flex items-center gap-2">
