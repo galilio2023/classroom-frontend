@@ -183,12 +183,40 @@ function App() {
                                 </AuthorizedRoute>
                             } 
                             />
-                            <Route path="/messages" element={<MessagesPage />} /> 
+                            <Route 
+                                path="/messages" 
+                                element={
+                                    <AuthorizedRoute resource="messages" action="list">
+                                        <MessagesPage />
+                                    </AuthorizedRoute>
+                                } 
+                            /> 
                             <Route path="/project-groups">
-                                <Route index element={<ProjectGroupsPage />} />
-                                <Route path="show/:id" element={<ShowProjectGroup />} />
+                                <Route 
+                                    index 
+                                    element={
+                                        <AuthorizedRoute resource="project-groups" action="list">
+                                            <ProjectGroupsPage />
+                                        </AuthorizedRoute>
+                                    } 
+                                />
+                                <Route 
+                                    path="show/:id" 
+                                    element={
+                                        <AuthorizedRoute resource="project-groups" action="show">
+                                            <ShowProjectGroup />
+                                        </AuthorizedRoute>
+                                    } 
+                                />
                             </Route>
-                            <Route path="/library" element={<GlobalLibraryPage />} />
+                            <Route 
+                                path="/library" 
+                                element={
+                                    <AuthorizedRoute resource="library" action="list">
+                                        <GlobalLibraryPage />
+                                    </AuthorizedRoute>
+                                } 
+                            />
 
                             {/* AI */}
                             <Route 
