@@ -1,6 +1,6 @@
-import { useList } from "@refinedev/core";
-import { Enrollment } from "@/types";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { useCustom } from "@refinedev/core";
+import { User } from "@/types";
+import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Trophy, Medal, Crown, Zap, Loader2, Star, TrendingUp, ChevronRight } from "lucide-react";
@@ -13,20 +13,14 @@ interface LeaderboardTabProps {
 }
 
 export function LeaderboardTab({ classId }: LeaderboardTabProps) {
-  const { query } = useList<Enrollment>({
-    resource: "enrollments",
-    filters: [
-      { field: "classId", operator: "eq", value: classId },
-      { field: "status", operator: "eq", value: "approved" }
-    ],
-    pagination: { mode: "off" }
+  // Use the new optimized custom endpoint
+  const { query } = useCustom<User[]>({
+    url: `classes/${classId}/leaderboard`,
+    method: "get",
   });
 
   const { data, isLoading } = query;
-
-  const students = data?.data.map((e: Enrollment) => e.student) || [];
-  
-  const rankedStudents = [...students].sort((a, b) => (b.xp || 0) - (a.xp || 0));
+  const rankedStudents = data?.data || [];
 
   if (isLoading) {
     return (
@@ -41,7 +35,7 @@ export function LeaderboardTab({ classId }: LeaderboardTabProps) {
     switch (index) {
       case 0: return <Crown className="h-8 w-8 text-yellow-500 fill-yellow-500 drop-shadow-[0_0_10px_rgba(234,179,8,0.5)]" />;
       case 1: return <Medal className="h-8 w-8 text-slate-400 fill-slate-400 drop-shadow-[0_0_10px_rgba(148,163,184,0.5)]" />;
-      case 2: return <Medal className="h-8 w-8 text-amber-600 fill-amber-600 drop-shadow-[0_0_10px_rgba(217,119,6,0.5)]" />;
+      case 2: return <Medal className="h-8 w-8 text-amber-600 fill-amber-600 drop-shadow-[0_0_10_rgba(217,119,6,0.5)]" />;
       default: return <span className="text-lg font-black text-muted-foreground/20">#{index + 1}</span>;
     }
   };
@@ -58,7 +52,7 @@ export function LeaderboardTab({ classId }: LeaderboardTabProps) {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-end max-w-4xl mx-auto px-4">
           <AnimatePresence mode="popLayout">
             {podiumOrder.map((student, pIndex) => {
-              const originalIndex = rankedStudents.findIndex(s => s.id === student.id);
+              const originalIndex = rankedStudents.findIndex((s: User) => s.id === student.id);
               const { currentLevel } = getLevelProgress(student.xp || 0);
               const isFirst = originalIndex === 0;
               
@@ -150,7 +144,7 @@ export function LeaderboardTab({ classId }: LeaderboardTabProps) {
           <CardContent className="p-4">
             <div className="grid gap-2">
               <AnimatePresence mode="popLayout">
-                {rankedStudents.map((student, index) => {
+                {rankedStudents.map((student: User, index: number) => {
                   const { currentLevel } = getLevelProgress(student.xp || 0);
                   const isTopThree = index < 3;
                   

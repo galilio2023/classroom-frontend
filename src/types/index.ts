@@ -424,5 +424,17 @@ export interface AcademicTerm {
   updatedAt: string;
 }
 
+export interface TeacherApplication {
+  id: number;
+  teacherId: string;
+  classId: number;
+  status: "pending" | "approved" | "rejected";
+  message: string | null;
+  createdAt: string;
+  updatedAt: string;
+  teacher: User;
+  class: Class;
+}
+
 export * from "./quiz";
 export * from "./dashboard";

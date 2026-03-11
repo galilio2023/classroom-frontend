@@ -1,21 +1,28 @@
 import { AccessControlProvider } from "@refinedev/core";
 import { authProvider } from "./auth";
-import { User } from "@/types";
+import { User, UserRole } from "@/types";
 
 export const accessControlProvider: AccessControlProvider = {
   can: async ({ resource, action, params }) => {
     const identity = (await authProvider.getIdentity?.()) as User | null;
-    const role = identity?.role;
-    
+    if (!identity) return { can: false, reason: "Unauthorized." };
+
+    const role = identity.role?.toLowerCase();
     const resourceName = resource || "";
 
     // 1. Admins have full access
-    if (role === "admin") {
+    if (role === UserRole.ADMIN) {
       return { can: true };
     }
 
     // 2. Teacher Permissions
-    if (role === "teacher") {
+    if (role === UserRole.TEACHER) {
+      if (resourceName === "teacher-applications") {
+        // Teachers can only view the list and create new applications
+        if (["list", "create", "show"].includes(action)) return { can: true };
+        return { can: false, reason: "You cannot edit or delete applications." };
+      }
+
       const teacherSidebarResources = [
         "dashboard", 
         "ai-assistant", 
@@ -34,22 +41,13 @@ export const accessControlProvider: AccessControlProvider = {
         "classes/enrollments"
       ];
       
-      // Basic list/show access for sidebar items
       if (teacherSidebarResources.includes(resourceName)) {
         if (action === "list" || action === "show") return { can: true };
       }
 
-      // Teachers can show users (e.g. to see student profiles) but NOT list them
-      if (resourceName === "users" && action === "show") {
-          return { can: true };
-      }
+      if (resourceName === "users" && action === "show") return { can: true };
+      if (resourceName === "users" && action === "edit" && params?.id === identity?.id) return { can: true };
 
-      // Teachers can edit their OWN profile
-      if (resourceName === "users" && action === "edit" && params?.id === identity?.id) {
-          return { can: true };
-      }
-
-      // CRUD access for teaching materials and enrollments
       if ([
         "classes", 
         "assignments", 
@@ -61,64 +59,28 @@ export const accessControlProvider: AccessControlProvider = {
         "classes/enrollments"
       ].includes(resourceName)) {
         if (action === "list" || action === "create") return { can: true };
-
-        // For show/edit/delete, we allow it in the UI and let the backend enforce ownership
-        if (["show", "edit", "delete"].includes(action)) {
-            return { can: true };
-        }
+        if (["show", "edit", "delete"].includes(action)) return { can: true };
       }
       
-      // Explicitly deny other administrative resources for teachers
       if (["departments", "profile-requests", "ai-study-lab", "study-planner", "activity-log"].includes(resourceName)) {
           return { can: false, reason: "Access denied." };
       }
 
-      // Default for other teacher actions
       return { can: true };
     }
 
     // 3. Student Permissions
-    if (role === "student") {
+    if (role === UserRole.STUDENT) {
       const allowedResources = [
-        "subjects", 
-        "classes", 
-        "assignments", 
-        "discussions", 
-        "calendar", 
-        "dashboard", 
-        "attendance", 
-        "submissions",
-        "quizzes", 
-        "resources",
-        "modules", // Added modules for students
-        "ai-study-lab",
-        "study-planner",
-        "notifications",
-        "progress"
+        "subjects", "classes", "assignments", "discussions", "calendar", 
+        "dashboard", "attendance", "submissions", "quizzes", "resources", 
+        "modules", "ai-study-lab", "study-planner", "notifications", "progress"
       ];
-      const allowedActions = ["list", "show"];
-
-      if (allowedResources.includes(resourceName) && allowedActions.includes(action)) {
-        return { can: true };
-      }
-
-      // Special case: Students can 'show' users (to see teacher profiles)
-      if (resourceName === "users" && action === "show") {
-          return { can: true };
-      }
-      // Special case: Students can 'edit' their own profile
-      if (resourceName === "users" && action === "edit" && params?.id === identity?.id) {
-          return { can: true };
-      }
-
-      if (resourceName === "submissions" && action === "create") {
-          return { can: true };
-      }
-
-      // Students can SUBMIT quiz attempts
-      if (resourceName === "quizzes" && action === "create") {
-          return { can: true };
-      }
+      if (allowedResources.includes(resourceName) && ["list", "show"].includes(action)) return { can: true };
+      if (resourceName === "users" && action === "show") return { can: true };
+      if (resourceName === "users" && action === "edit" && params?.id === identity?.id) return { can: true };
+      if (resourceName === "submissions" && action === "create") return { can: true };
+      if (resourceName === "quizzes" && action === "create") return { can: true };
 
       return { can: false, reason: "Access denied." };
     }
