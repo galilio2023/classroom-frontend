@@ -117,6 +117,7 @@ export interface Submission {
   attemptNumber: number;
   assignmentId: number;
   studentId: string;
+  groupId?: number | null;
   createdAt: string;
   updatedAt: string;
   student?: User;
@@ -147,6 +148,7 @@ export interface Assignment {
   category?: GradeCategory;
   allowLateSubmissions: boolean;
   latePenaltyPercentage: number;
+  isGroupAssignment: boolean;
   createdAt: string;
   updatedAt: string;
   submissions?: Submission[];
@@ -262,6 +264,7 @@ export type Class = z.infer<typeof classFormSchema> & {
   modules?: Module[];
   gradeCategories?: GradeCategory[];
   isLive?: boolean;
+  isBreakoutActive?: boolean;
   termId?: number;
   term?: AcademicTerm;
 };
@@ -276,6 +279,7 @@ export type ClassListItem = Pick<
   | "teachers"
   | "schedules"
   | "isLive"
+  | "isBreakoutActive"
 > & {
   subject?: {
     name: string;

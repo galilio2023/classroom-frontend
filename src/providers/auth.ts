@@ -116,13 +116,12 @@ export const authProvider: AuthProvider = {
       localStorage.removeItem("user");
       return {
         authenticated: false,
-        redirectTo: "/login",
+        // Removed global redirectTo to allow public access to the landing page
       };
     } catch (error) {
       localStorage.removeItem("user");
       return {
         authenticated: false,
-        redirectTo: "/login",
       };
     }
   },

@@ -31,14 +31,16 @@ import {
   ArrowLeft, 
   Sparkles,
   Loader2,
-  Heart
+  BookOpen,
+  Zap,
+  ShieldCheck
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import axios from "axios";
 import { RoleSelector } from "@/components/auth/role-selector";
 import { VerificationUpload } from "@/components/auth/verification-upload";
+import { motion, AnimatePresence } from "framer-motion";
 
-// Enhanced Schema with Conditional Validation (Made more flexible for initial setup)
 const registerSchema = z.object({
   name: z.string().min(1, "Name is required"),
   email: z.string().email("Invalid email address"),
@@ -133,192 +135,218 @@ const RegisterPage = () => {
     })();
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      if (step === 1) nextStep();
-    }
-  };
-
   return (
-    <div className="flex items-center justify-center min-h-screen bg-slate-50 dark:bg-slate-950 p-4">
-      <Card className="w-full max-w-lg shadow-xl border-t-4 border-t-primary">
-        <CardHeader className="text-center space-y-1">
-          <div className="flex justify-center mb-2">
-            <div className="p-3 bg-primary/10 rounded-full">
-              <School className="h-8 w-8 text-primary" />
-            </div>
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 relative overflow-hidden">
+      {/* Background elements */}
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/5 blur-[120px] rounded-full" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-500/5 blur-[120px] rounded-full" />
+
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="w-full max-w-xl z-10"
+      >
+        <Link to="/" className="flex items-center justify-center gap-2 mb-8 group">
+          <div className="bg-primary p-2 rounded-xl group-hover:rotate-12 transition-transform duration-300">
+            <BookOpen className="h-6 w-6 text-primary-foreground" />
           </div>
-          <CardTitle className="text-2xl font-bold tracking-tight">Join Our Classroom</CardTitle>
-          <CardDescription>
-            Step {step} of 2: {step === 1 ? "Account Details" : "Complete Your Profile"}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <div onKeyDown={handleKeyDown} className="space-y-6">
-              {/* STEP 1 */}
-              <div className={cn("space-y-4 animate-in fade-in duration-300", step !== 1 && "hidden")}>
-                <RoleSelector 
-                  value={role as "student" | "teacher" | "parent"}
-                  onChange={(val) => form.setValue("role", val as any)} 
-                />
+          <span className="text-2xl font-black tracking-tighter uppercase">
+            Class<span className="text-primary">Room</span>
+          </span>
+        </Link>
 
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Full Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="John Doe" {...field} className="h-11" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email Address</FormLabel>
-                      <FormControl>
-                        <Input type="email" placeholder="john.doe@example.com" {...field} className="h-11" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Password</FormLabel>
-                      <FormControl>
-                        <Input type="password" placeholder="••••••••" {...field} className="h-11" />
-                      </FormControl>
-                      <FormDescription>Must be at least 8 characters.</FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              {/* STEP 2 */}
-              <div className={cn("space-y-4 animate-in fade-in duration-300", step !== 2 && "hidden")}>
-                <div className="p-4 rounded-2xl bg-primary/5 border border-primary/10 mb-4">
-                  <p className="text-xs text-muted-foreground font-medium leading-relaxed">
-                    You can skip these details for now and complete your profile later from the dashboard.
-                  </p>
-                </div>
-
-                <FormField
-                  control={form.control}
-                  name="phoneNumber"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Phone Number (Optional)</FormLabel>
-                      <FormControl>
-                        <Input placeholder="+1 (555) 000-0000" {...field} className="h-11" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {role === "student" && (
-                  <div className="space-y-4">
-                    <FormField
-                      control={form.control}
-                      name="dateOfBirth"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Date of Birth (Optional)</FormLabel>
-                          <FormControl>
-                            <Input type="date" {...field} className="h-11" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                )}
-
-                {role === "teacher" && (
-                  <div className="space-y-4">
-                    <FormField
-                      control={form.control}
-                      name="bio"
-                      render={({ field }) => (
-                        <FormItem>
-                          <div className="flex justify-between items-center">
-                            <FormLabel>Professional Bio</FormLabel>
-                            <Button 
-                              type="button" 
-                              variant="ghost" 
-                              size="sm" 
-                              className="h-7 text-xs gap-1.5 text-primary hover:text-primary hover:bg-primary/10"
-                              onClick={generateAIBio}
-                              disabled={isGeneratingBio}
-                            >
-                              {isGeneratingBio ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
-                              AI Generate
-                            </Button>
-                          </div>
-                          <FormControl>
-                            <Textarea placeholder="Tell us about your teaching experience..." className="resize-none" rows={3} {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <VerificationUpload 
-                      url={form.watch("verificationDocumentUrl") || ""}
-                      onUpload={(url, publicId) => {
-                        form.setValue("verificationDocumentUrl", url);
-                        form.setValue("verificationDocumentCldPubId", publicId);
-                        form.trigger("verificationDocumentUrl");
-                      }}
-                      onClear={() => {
-                        form.setValue("verificationDocumentUrl", "");
-                        form.setValue("verificationDocumentCldPubId", "");
-                      }}
-                    />
-                  </div>
-                )}
-              </div>
-
-              <div className="flex gap-3 pt-2">
-                {step > 1 && (
-                  <Button type="button" variant="outline" className="flex-1 h-11" onClick={() => setStep(1)}>
-                    <ArrowLeft className="h-4 w-4 mr-2" />
-                    Back
-                  </Button>
-                )}
-                {step < 2 ? (
-                  <Button type="button" className="flex-1 h-11" onClick={nextStep}>
-                    Continue
-                    <ArrowRight className="h-4 w-4 ml-2" />
-                  </Button>
-                ) : (
-                  <Button type="button" className="flex-1 h-11" disabled={isPending} onClick={handleFinalSubmit}>
-                    {isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : "Complete Registration"}
-                  </Button>
-                )}
-              </div>
+        <Card className="border-none shadow-2xl rounded-[3rem] bg-card/50 backdrop-blur-xl overflow-hidden">
+          <CardHeader className="text-center pt-10 pb-6 space-y-4">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-[10px] font-black uppercase tracking-widest text-primary mx-auto">
+                <Sparkles className="h-3 w-3" />
+                Step {step} of 2: {step === 1 ? "Account Setup" : "Profile Details"}
             </div>
-          </Form>
-        </CardContent>
-        <CardFooter className="flex justify-center text-sm border-t bg-slate-50/50 dark:bg-slate-950/50 py-4 rounded-b-xl">
-          <p className="text-muted-foreground">
-            Already have an account?&nbsp;
-            <Link to="/login" className="font-semibold text-primary hover:underline">Sign in</Link>
-          </p>
-        </CardFooter>
-      </Card>
+            <CardTitle className="text-4xl font-black tracking-tighter uppercase">Join Our Classroom</CardTitle>
+            <CardDescription className="font-medium text-muted-foreground/80">
+              Complete your registration to get started.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="px-10">
+            <Form {...form}>
+              <div className="space-y-6">
+                <AnimatePresence mode="wait">
+                  {step === 1 ? (
+                    <motion.div
+                      key="step1"
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 20 }}
+                      className="space-y-6"
+                    >
+                      <RoleSelector 
+                        value={role as "student" | "teacher" | "parent"}
+                        onChange={(val) => form.setValue("role", val as any)} 
+                      />
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <FormField
+                          control={form.control}
+                          name="name"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="font-black uppercase text-[10px] tracking-widest text-muted-foreground/80">Full Name</FormLabel>
+                              <FormControl>
+                                <Input placeholder="John Doe" className="h-14 rounded-2xl bg-muted/30 border-none focus-visible:ring-primary/20 font-bold" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="email"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="font-black uppercase text-[10px] tracking-widest text-muted-foreground/80">Email Address</FormLabel>
+                              <FormControl>
+                                <Input type="email" placeholder="john.doe@example.com" className="h-14 rounded-2xl bg-muted/30 border-none focus-visible:ring-primary/20 font-bold" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      <FormField
+                        control={form.control}
+                        name="password"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="font-black uppercase text-[10px] tracking-widest text-muted-foreground/80">Password</FormLabel>
+                            <FormControl>
+                              <Input type="password" placeholder="••••••••" className="h-14 rounded-2xl bg-muted/30 border-none focus-visible:ring-primary/20 font-bold" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="step2"
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      className="space-y-6"
+                    >
+                      <div className="p-4 rounded-2xl bg-primary/5 border border-primary/10">
+                        <p className="text-xs text-muted-foreground font-black uppercase tracking-widest leading-relaxed">
+                          ⚡ Complete your profile for better experience.
+                        </p>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <FormField
+                          control={form.control}
+                          name="phoneNumber"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="font-black uppercase text-[10px] tracking-widest text-muted-foreground/80">Phone Number</FormLabel>
+                              <FormControl>
+                                <Input placeholder="+1 (555) 000-0000" className="h-14 rounded-2xl bg-muted/30 border-none focus-visible:ring-primary/20 font-bold" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        {role === "student" && (
+                          <FormField
+                            control={form.control}
+                            name="dateOfBirth"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="font-black uppercase text-[10px] tracking-widest text-muted-foreground/80">Date of Birth</FormLabel>
+                                <FormControl>
+                                  <Input type="date" className="h-14 rounded-2xl bg-muted/30 border-none focus-visible:ring-primary/20 font-bold" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        )}
+                      </div>
+
+                      {role === "teacher" && (
+                        <div className="space-y-4">
+                          <FormField
+                            control={form.control}
+                            name="bio"
+                            render={({ field }) => (
+                              <FormItem>
+                                <div className="flex justify-between items-center mb-1">
+                                  <FormLabel className="font-black uppercase text-[10px] tracking-widest text-muted-foreground/80">Professional Bio</FormLabel>
+                                  <Button 
+                                    type="button" 
+                                    variant="ghost" 
+                                    size="sm" 
+                                    className="h-8 text-[10px] font-black uppercase tracking-widest text-primary hover:text-primary hover:bg-primary/10 rounded-lg gap-2"
+                                    onClick={generateAIBio}
+                                    disabled={isGeneratingBio}
+                                  >
+                                    {isGeneratingBio ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
+                                    AI Assist
+                                  </Button>
+                                </div>
+                                <FormControl>
+                                  <Textarea placeholder="Tell us about your teaching experience..." className="rounded-2xl bg-muted/30 border-none focus-visible:ring-primary/20 font-bold resize-none" rows={3} {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          
+                          <VerificationUpload 
+                            url={form.watch("verificationDocumentUrl") || ""}
+                            onUpload={(url, publicId) => {
+                              form.setValue("verificationDocumentUrl", url);
+                              form.setValue("verificationDocumentCldPubId", publicId);
+                              form.trigger("verificationDocumentUrl");
+                            }}
+                            onClear={() => {
+                              form.setValue("verificationDocumentUrl", "");
+                              form.setValue("verificationDocumentCldPubId", "");
+                            }}
+                          />
+                        </div>
+                      )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                <div className="flex gap-4 pt-4">
+                  {step > 1 && (
+                    <Button type="button" variant="outline" className="flex-1 h-14 rounded-2xl font-black uppercase tracking-widest text-xs border-2 border-muted" onClick={() => setStep(1)}>
+                      <ArrowLeft className="h-4 w-4 mr-2" />
+                      Back
+                    </Button>
+                  )}
+                  {step < 2 ? (
+                    <Button type="button" className="flex-1 h-14 rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl shadow-primary/20 group" onClick={nextStep}>
+                      Continue
+                      <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                    </Button>
+                  ) : (
+                    <Button type="button" className="flex-1 h-14 rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl shadow-primary/20 group" disabled={isPending} onClick={handleFinalSubmit}>
+                      {isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : "Complete Join"}
+                      <Zap className="ml-2 h-4 w-4 fill-current group-hover:scale-125 transition-transform" />
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </Form>
+          </CardContent>
+          <CardFooter className="flex justify-center py-8 bg-muted/10 border-t border-muted">
+            <p className="text-sm font-medium text-muted-foreground">
+              Already have an account?&nbsp;
+              <Link to="/login" className="font-black text-primary hover:underline uppercase tracking-widest text-xs">Sign In</Link>
+            </p>
+          </CardFooter>
+        </Card>
+      </motion.div>
     </div>
   );
 };

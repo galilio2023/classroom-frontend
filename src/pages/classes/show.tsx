@@ -135,7 +135,7 @@ const ClassesShow = () => {
     if (tab && tab !== activeTab) {
       setActiveTab(tab);
     }
-  }, [searchParams]);
+  }, [searchParams, activeTab]);
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);

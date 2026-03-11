@@ -1,5 +1,6 @@
-import { useShow, useGetIdentity } from "@refinedev/core";
+import { useShow, useGetIdentity, useList } from "@refinedev/core";
 import { useParams } from "react-router-dom";
+import { useMemo } from "react";
 import { ShowView, ShowViewHeader } from "@/components/refine-ui/views/show-view";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -29,12 +30,13 @@ import {
   Clock,
   AlertCircle,
   CheckCircle2,
-  XCircle
+  XCircle,
+  LucideIcon
 } from "lucide-react";
 import { User as UserType, UserRole, VerificationStatus } from "@/types";
 import { XPProgressBar } from "@/components/xp-progress-bar";
 import { getLevelProgress } from "@/lib/xp";
-import { BadgeCard, MOCK_BADGES } from "@/components/badge-card";
+import { BadgeCard, BadgeData } from "@/components/badge-card";
 import { CertificateGallery } from "@/components/certificate-gallery";
 import { toast } from "sonner";
 import ReportCard from "@/pages/student/report-card";
@@ -54,9 +56,48 @@ const UserShow = () => {
     }
   });
 
+  // Fetch all available badges to calculate "unearned" badges for the UI
+  const { data: allBadgesData } = useList({
+    resource: "badges",
+    queryOptions: {
+        enabled: !!query.data?.data
+    }
+  });
+
   const { data, isLoading, isError } = query;
   const user = data?.data;
   usePageTitle(user?.name ? `${user.name}'s Profile` : "User Profile");
+
+  const displayBadges = useMemo(() => {
+    if (!user || !allBadgesData?.data) return [];
+
+    const earnedBadgeIds = new Set(user.userBadges?.map((ub: any) => ub.badgeId));
+    
+    // Map earned badges
+    const earned = (user.userBadges || []).map((ub: any) => ({
+        id: ub.badge.id.toString(),
+        name: ub.badge.name,
+        description: ub.badge.description || "",
+        icon: Trophy, // Default icon, could map specific ones if needed
+        color: "bg-gold-primary text-white", // Default earned color
+        unlocked: true,
+        // Could parse iconUrl string to select Lucide icon if needed, or update BadgeCard to accept URL
+    }));
+
+    // Map unearned badges (from all badges list)
+    const unearned = allBadgesData.data
+        .filter((b: any) => !earnedBadgeIds.has(b.id))
+        .map((b: any) => ({
+            id: b.id.toString(),
+            name: b.name,
+            description: b.description || "Locked",
+            icon: Target,
+            color: "bg-muted text-muted-foreground",
+            unlocked: false,
+        }));
+
+    return [...earned, ...unearned];
+  }, [user, allBadgesData]);
 
   if (isLoading) {
     return (
@@ -347,13 +388,13 @@ const UserShow = () => {
                             <CardTitle className="text-2xl font-black tracking-tight">Achievements</CardTitle>
                         </div>
                         <Badge variant="outline" className="font-black text-[10px] uppercase tracking-widest px-4 py-1.5 rounded-xl border-primary/10">
-                            {MOCK_BADGES.filter(b => b.unlocked).length} / {MOCK_BADGES.length} Earned
+                            {displayBadges.filter(b => b.unlocked).length} / {displayBadges.length} Earned
                         </Badge>
                     </div>
                     </CardHeader>
                     <CardContent className="p-8">
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
-                        {MOCK_BADGES.map((badge) => (
+                        {displayBadges.map((badge: BadgeData) => (
                         <BadgeCard key={badge.id} badge={badge} />
                         ))}
                     </div>
