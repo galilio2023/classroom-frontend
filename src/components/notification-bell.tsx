@@ -9,7 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Bell, CheckCheck, Info, GraduationCap, ClipboardCheck, Trophy, BrainCircuit, Video } from "lucide-react";
+import { Bell, CheckCheck, Info, GraduationCap, ClipboardCheck, Trophy, BrainCircuit, Video, MessageSquare } from "lucide-react";
 import { Notification, User } from "@/types";
 import { formatDistanceToNow } from "date-fns";
 import { useNavigate } from "react-router-dom";
@@ -252,6 +252,7 @@ export const NotificationBell = () => {
       case "attendance": return <ClipboardCheck className="h-4 w-4 text-orange-500" />;
       case "achievement": return <Trophy className="h-4 w-4 text-yellow-500" />;
       case "agent_alert": return <BrainCircuit className="h-4 w-4 text-purple-500" />;
+      case "message": return <MessageSquare className="h-4 w-4 text-pink-500" />;
       default: return <Info className="h-4 w-4 text-muted-foreground" />;
     }
   };

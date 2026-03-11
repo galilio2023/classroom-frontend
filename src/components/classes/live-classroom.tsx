@@ -3,7 +3,7 @@ import { useCustomMutation, useGetIdentity, useList, useOne } from "@refinedev/c
 import { User, UserRole } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, Video, Users, Presentation, Layout, Grid, LogOut } from "lucide-react";
+import { Loader2, Video, Users, Presentation, Grid } from "lucide-react";
 import { toast } from "sonner";
 import { socket } from "@/lib/socket";
 import { Whiteboard } from "./whiteboard";
@@ -42,41 +42,59 @@ export const LiveClassroom = ({
   const { mutate: saveRecording } = useCustomMutation();
   const { mutate: manageBreakout } = useCustomMutation();
 
-  const isTeacher = identity?.role === "teacher" || identity?.role === "admin";
+  const isTeacher = identity?.role === UserRole.TEACHER || identity?.role === UserRole.ADMIN;
   const numericClassId = Number(classIdString);
 
   // Sync Class State (for persistence)
   const { query: classQuery } = useOne({
       resource: "classes",
       id: classIdString,
-      queryOptions: { enabled: !!numericClassId }
+      queryOptions: { 
+        enabled: !!numericClassId,
+      }
   });
 
-  const classData = classQuery.data;
+  const classData = classQuery.data?.data;
 
   useEffect(() => {
-      if (classData?.data?.isBreakoutActive) {
+    if (classQuery.isError) {
+      console.error("Error fetching class data:", classQuery.error);
+    }
+  }, [classQuery.isError, classQuery.error]);
+
+  useEffect(() => {
+      if (classData?.isBreakoutActive) {
           setIsBreakoutActive(true);
       }
   }, [classData]);
 
   // Fetch groups to determine student's group or list for teacher
-  const { result: groupsData } = useList({
+  const { query: groupsQuery } = useList({
     resource: "project-groups",
     filters: [{ field: "classId", operator: "eq", value: numericClassId }],
-    queryOptions: { enabled: !!numericClassId },
+    queryOptions: { 
+      enabled: !!numericClassId,
+    },
     pagination: { mode: "off" }
   });
 
   useEffect(() => {
-    if (groupsData?.data && identity && !isTeacher) {
+    if (groupsQuery.isError) {
+      console.error("Error fetching project groups:", groupsQuery.error);
+    }
+  }, [groupsQuery.isError, groupsQuery.error]);
+
+  const groups = groupsQuery.data?.data || [];
+
+  useEffect(() => {
+    if (groups.length > 0 && identity && !isTeacher) {
       // Find the group the student belongs to
-      const group = groupsData.data.find((g: any) => 
+      const group = groups.find((g: any) => 
         g.members?.some((m: any) => m.studentId === identity.id)
       );
       setMyGroup(group);
     }
-  }, [groupsData, identity, isTeacher]);
+  }, [groups, identity, isTeacher]);
 
   useEffect(() => {
     if (!window.JitsiMeetExternalAPI) {
@@ -164,7 +182,6 @@ export const LiveClassroom = ({
       {
         onSuccess: (data: any) => {
           const { roomName, token } = data.data;
-          console.log(`[LiveClassroom] Joining room: ${roomName}`);
           initializeJitsi(roomName, token, groupId);
         },
         onError: (error: any) => {
@@ -208,16 +225,13 @@ export const LiveClassroom = ({
           email: identity.email,
         },
         configOverwrite: {
-          startWithAudioMuted: !isTeacher, // Mute students initially in main hall, maybe not in breakout?
+          startWithAudioMuted: !isTeacher,
           startWithVideoMuted: false,
           prejoinPageEnabled: false,
           enableLobby: false,
-          // Disable recording in breakout rooms for now unless teacher
           disableRecording: !!groupId && !isTeacher, 
         },
-        interfaceConfigOverwrite: {
-          // Customized toolbar
-        },
+        interfaceConfigOverwrite: {},
       };
 
       try {
@@ -227,7 +241,7 @@ export const LiveClassroom = ({
         newApi.addEventListeners({
           videoConferenceJoined: () => {
             setIsLoading(false);
-            if (identity.role === "student" && !groupId) {
+            if (identity.role === UserRole.STUDENT && !groupId) {
               markLiveAttendance({
                 url: "/attendance/live",
                 method: "post",
@@ -236,11 +250,8 @@ export const LiveClassroom = ({
             }
           },
           videoConferenceLeft: () => {
-             // Handle leaving
-             // If in breakout, maybe return to main?
              if (groupId) {
                  setCurrentGroupId(null);
-                 // Optional: Auto-rejoin main?
              } else {
                 setIsJoined(false);
                 setApi(null);
@@ -258,8 +269,7 @@ export const LiveClassroom = ({
              setApi(null);
           },
           recordingStatusChanged: (payload: { on: boolean; link?: string; error?: string }) => {
-            if (!payload.on && payload.link && isTeacher && !groupId) { // Only save main session recordings
-              console.log("[LiveClassroom] Recording stopped. Link:", payload.link);
+            if (!payload.on && payload.link && isTeacher && !groupId) {
               saveRecording({
                 url: "/resources",
                 method: "post",
@@ -326,7 +336,6 @@ export const LiveClassroom = ({
         )}
       </div>
 
-      {/* Teacher Breakout Controls */}
       {isTeacher && isBreakoutActive && isJoined && (
           <div className="flex gap-2 overflow-x-auto pb-2">
               <Button 
@@ -336,7 +345,7 @@ export const LiveClassroom = ({
               >
                 Main Hall
               </Button>
-              {groupsData?.data.map((group: any) => (
+              {groups.map((group: any) => (
                   <Button
                     key={group.id}
                     variant={currentGroupId === group.id ? "default" : "outline"}
@@ -413,7 +422,6 @@ export const LiveClassroom = ({
                 className={cn("m-0", activeTab !== "whiteboard" && "hidden")}
               >
                 <div className="h-[650px]">
-                   {/* If in breakout, show group whiteboard. Else class whiteboard. */}
                   <Whiteboard 
                     classId={classIdString} 
                     roomId={currentGroupId ? `group-${currentGroupId}` : classIdString}

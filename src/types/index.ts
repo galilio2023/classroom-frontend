@@ -349,8 +349,9 @@ export interface Resource {
   url: string;
   content: string | null;
   cldPubId: string | null;
-  classId: number;
+  classId: number | null;
   moduleId: number | null;
+  ownerId: string | null;
   isInternal: boolean;
   isRequired: boolean;
   createdAt: string;
