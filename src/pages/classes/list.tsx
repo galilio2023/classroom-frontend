@@ -17,7 +17,10 @@ import {
   Pencil,
   Loader2,
   AlertCircle,
-  LayoutDashboard
+  LayoutDashboard,
+  Send,
+  Compass,
+  Briefcase
 } from "lucide-react";
 import { useMemo, useState, useEffect, useRef, useCallback } from "react";
 import {
@@ -72,8 +75,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import { Subject, User, UserRole, ClassListItem } from "@/types";
+import { Subject, User, UserRole, ClassListItem, TeacherApplication } from "@/types";
 import { toast } from "sonner";
 import { EmptyState } from "@/components/empty-state";
 import { cn } from "@/lib/utils";
@@ -82,6 +86,7 @@ import { useTerm } from "@/contexts/term-context";
 import { motion, AnimatePresence } from "framer-motion";
 import usePageTitle from "@/hooks/use-page-title";
 import { useVirtualizer } from "@tanstack/react-virtual";
+import { ApplyTeacherDialog } from "./apply-teacher-dialog";
 
 const ClassesList = () => {
   usePageTitle("Classrooms");
@@ -97,6 +102,9 @@ const ClassesList = () => {
   const [inviteCode, setInviteCode] = useState("");
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
+  
+  const [applyTarget, setApplyTarget] = useState<{ id: number; name: string } | null>(null);
+  const [viewMode, setViewMode] = useState<"mine" | "browse">(isTeacher ? "mine" : "browse");
 
   const { mutate: joinClass, mutation: joinMutation } = useCustomMutation();
   const { mutate: cloneClass, mutation: cloneMutation } = useCustomMutation();
@@ -205,10 +213,20 @@ const ClassesList = () => {
         value: selectedTerm.id,
       });
     }
+    
+    // Senior Engineer Logic: Apply teacherUid filter only in "mine" mode
+    if (isTeacher && viewMode === "mine") {
+        f.push({
+            field: "teacherUid",
+            operator: "eq" as const,
+            value: identity?.id
+        });
+    }
+    
     return f;
-  }, [selectedSubject, searchQuery, selectedTerm]);
+  }, [selectedSubject, searchQuery, selectedTerm, viewMode, isTeacher, identity?.id]);
 
-  const { query: { data: classesData, isLoading } } = useList<ClassListItem>({
+  const { query: { data: classesData, isLoading, refetch: refetchClasses } } = useList<ClassListItem>({
     resource: "classes",
     pagination: { pageSize: 1000, mode: "server" },
     filters,
@@ -224,7 +242,15 @@ const ClassesList = () => {
     },
   });
 
+  const { query: { data: applicationsData } } = useList<TeacherApplication>({
+    resource: "teacher-applications",
+    queryOptions: {
+        enabled: isTeacher
+    }
+  });
+
   const classes = classesData?.data || [];
+  const applications = applicationsData?.data || [];
   const hasData = classes.length > 0;
 
   const parentRef = useRef<HTMLDivElement>(null);
@@ -251,17 +277,34 @@ const ClassesList = () => {
               <Breadcrumb />
               <div>
                 <h1 className="text-4xl font-black tracking-tight">
-                  {isStudent ? "Discover Classes" : "My Classrooms"}
+                  {isStudent ? "Discover Classes" : viewMode === "mine" ? "My Classrooms" : "Browse Catalog"}
                 </h1>
                 <p className="text-muted-foreground font-medium mt-1">
                   {isStudent
                     ? "Find and join new classes to expand your knowledge."
-                    : "Manage your students, curriculum, and class activities."}
+                    : viewMode === "mine" 
+                        ? "Manage your students, curriculum, and class activities."
+                        : "Explore available classes and apply to teach them."}
                 </p>
               </div>
             </div>
 
             <div className="flex gap-3 w-full md:w-auto">
+              {isTeacher && (
+                <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as any)} className="bg-muted/20 p-1 rounded-2xl border border-primary/5">
+                    <TabsList className="bg-transparent h-12 gap-1">
+                        <TabsTrigger value="mine" className="rounded-xl font-black uppercase tracking-widest text-[9px] gap-2 px-6 data-[state=active]:bg-primary data-[state=active]:text-white shadow-sm transition-all">
+                            <Briefcase className="h-3.5 w-3.5" />
+                            My Classes
+                        </TabsTrigger>
+                        <TabsTrigger value="browse" className="rounded-xl font-black uppercase tracking-widest text-[9px] gap-2 px-6 data-[state=active]:bg-primary data-[state=active]:text-white shadow-sm transition-all">
+                            <Compass className="h-3.5 w-3.5" />
+                            Browse
+                        </TabsTrigger>
+                    </TabsList>
+                </Tabs>
+              )}
+
               {isStudent && (
                 <Dialog
                   open={isJoinModalOpen}
@@ -442,7 +485,9 @@ const ClassesList = () => {
                   description={
                     isStudent
                       ? "You haven't joined any classes yet. Use an invite code to get started."
-                      : "You haven't created any classes yet."
+                      : viewMode === "mine" 
+                        ? "You haven't been assigned to any classes yet."
+                        : "No classes match your search criteria."
                   }
                   className="border-none bg-transparent min-h-0"
                   action={
@@ -451,10 +496,15 @@ const ClassesList = () => {
                           label: "Join a Class",
                           onClick: () => setIsJoinModalOpen(true),
                         }
-                      : {
-                          label: "Create Class",
-                          onClick: () => create("classes"),
-                        }
+                      : viewMode === "mine" && isTeacher
+                        ? {
+                            label: "Browse Catalog",
+                            onClick: () => setViewMode("browse"),
+                          }
+                        : {
+                            label: "Create Class",
+                            onClick: () => create("classes"),
+                          }
                   }
                 />
               </div>
@@ -474,6 +524,9 @@ const ClassesList = () => {
                     (t: any) => t.isPrimary,
                   )?.teacher;
                   const classColor = (classItem as any).color || "#3b82f6";
+
+                  const isAssigned = classItem.teachers?.some((t: any) => t.teacher.id === identity?.id);
+                  const pendingApp = applications.find(app => app.classId === classItem.id && app.status === "pending");
 
                   return (
                     <div
@@ -547,6 +600,11 @@ const ClassesList = () => {
                                   </span>
                                 </div>
                               )}
+                              {isTeacher && pendingApp && (
+                                <Badge className="bg-amber-500/10 text-amber-600 border-none text-[9px] font-black uppercase tracking-widest">
+                                    Pending Approval
+                                </Badge>
+                              )}
                             </div>
                           </div>
 
@@ -591,7 +649,7 @@ const ClassesList = () => {
                         {/* Actions */}
                         <div className="flex items-center gap-3 mt-6 md:mt-0 shrink-0">
                           <div className="hidden lg:flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all translate-x-4 group-hover:translate-x-0">
-                            {(isTeacher || isAdmin) && (
+                            {(isTeacher && isAssigned || isAdmin) && (
                               <>
                                 <Button
                                   variant="ghost"
@@ -614,30 +672,41 @@ const ClassesList = () => {
                             )}
                           </div>
 
-                          <Button
-                            asChild
-                            variant={classItem.isLive ? "default" : "outline"}
-                            className={cn(
-                              "rounded-2xl px-8 h-12 text-[10px] font-black uppercase tracking-widest transition-all shadow-sm",
-                              classItem.isLive
-                                ? "bg-red-500 hover:bg-red-600 text-white border-none shadow-lg shadow-red-500/20"
-                                : "border-primary/10 text-primary hover:bg-primary hover:text-primary-foreground",
-                            )}
-                          >
-                            <Link to={`/classes/show/${classItem.id}`}>
-                              {classItem.isLive ? (
-                                <>
-                                  <Video className="h-4 w-4 mr-2" />
-                                  Join Live
-                                </>
-                              ) : (
-                                <>
-                                  Enter Class
-                                  <ArrowRight className="h-4 w-4 ml-2" />
-                                </>
-                              )}
-                            </Link>
-                          </Button>
+                          {isTeacher && !isAssigned ? (
+                            <Button
+                                onClick={() => setApplyTarget({ id: classItem.id, name: classItem.name })}
+                                disabled={!!pendingApp}
+                                className="rounded-2xl px-8 h-12 text-[10px] font-black uppercase tracking-widest transition-all shadow-xl shadow-primary/20"
+                            >
+                                <Send className="h-4 w-4 mr-2" />
+                                {pendingApp ? "Applied" : "Apply to Teach"}
+                            </Button>
+                          ) : (
+                            <Button
+                                asChild
+                                variant={classItem.isLive ? "default" : "outline"}
+                                className={cn(
+                                "rounded-2xl px-8 h-12 text-[10px] font-black uppercase tracking-widest transition-all shadow-sm",
+                                classItem.isLive
+                                    ? "bg-red-500 hover:bg-red-600 text-white border-none shadow-lg shadow-red-500/20"
+                                    : "border-primary/10 text-primary hover:bg-primary hover:text-primary-foreground",
+                                )}
+                            >
+                                <Link to={`/classes/show/${classItem.id}`}>
+                                {classItem.isLive ? (
+                                    <>
+                                    <Video className="h-4 w-4 mr-2" />
+                                    Join Live
+                                    </>
+                                ) : (
+                                    <>
+                                    Enter Class
+                                    <ArrowRight className="h-4 w-4 ml-2" />
+                                    </>
+                                )}
+                                </Link>
+                            </Button>
+                          )}
 
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -663,7 +732,7 @@ const ClassesList = () => {
                                 <Eye className="h-4 w-4 text-primary" />
                                 <span className="font-bold">View Details</span>
                               </DropdownMenuItem>
-                              {(isTeacher || isAdmin) && (
+                              {(isTeacher && isAssigned || isAdmin) && (
                                 <>
                                   <DropdownMenuItem
                                     onClick={() => edit("classes", classItem.id)}
@@ -738,6 +807,14 @@ const ClassesList = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <ApplyTeacherDialog 
+        isOpen={applyTarget !== null}
+        onOpenChange={(open) => !open && setApplyTarget(null)}
+        classId={applyTarget?.id || 0}
+        className={applyTarget?.name || ""}
+        onSuccess={() => invalidate({ resource: "teacher-applications", invalidates: ["list"] })}
+      />
     </div>
   );
 };

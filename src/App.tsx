@@ -15,32 +15,10 @@ import { authProvider } from "./providers/auth";
 import { accessControlProvider } from "./providers/access-control";
 import { TermProvider } from "./contexts/term-context";
 import { SocketProvider } from "./contexts/socket-context";
+import { resources } from "./config/resources";
 import { 
-  Home, 
-  BookOpen, 
-  Building2, 
-  Calendar, 
-  Sparkles, 
   GraduationCap, 
-  UserPlus, 
-  ClipboardCheck, 
-  Loader2, 
-  FileQuestion,
-  BrainCircuit,
-  ShieldCheck,
-  LayoutGrid,
-  FileText,
-  Send,
-  CheckSquare,
-  Library,
-  MessageSquare,
-  FolderOpen,
-  Bell,
-  TrendingUp,
-  Activity,
-  UserCircle,
-  CalendarDays,
-  CalendarClock
+  Loader2
 } from "lucide-react";
 import { Layout } from "@/components/refine-ui/layout/layout.tsx";
 import { AuthorizedRoute } from "./components/authorized-route";
@@ -91,6 +69,7 @@ const ActivityLogPage = React.lazy(() => import("@/pages/dashboard/activity-log.
 const StudyPlanner = React.lazy(() => import("@/pages/study-planner.tsx"));
 const TermsList = React.lazy(() => import("@/pages/terms/list.tsx"));
 const ReportCard = React.lazy(() => import("@/pages/student/report-card.tsx"));
+const TeacherApplicationsList = React.lazy(() => import("@/pages/teacher-applications/list.tsx"));
 
 // Quiz Pages
 const QuizCreate = React.lazy(() => import("./pages/quizzes/create"));
@@ -152,32 +131,7 @@ function App() {
                   text: "Classroom AI",
                 },
               }}
-              resources={[
-                { name: "dashboard", list: "/", meta: { label: "Dashboard", icon: <Home /> } },
-                { name: "classes", list: "/classes", create: "/classes/create", edit: "/classes/edit/:id", show: "/classes/show/:id", meta: { label: "Classes", icon: <LayoutGrid /> } },
-                { name: "ai-study-lab", list: "/ai-study-lab", meta: { label: "AI Study Lab", icon: <BrainCircuit /> } },
-                { name: "study-planner", list: "/study-planner", meta: { label: "Study Planner", icon: <CalendarDays /> } },
-                { name: "ai-assistant", list: "/ai-assistant", meta: { label: "AI Assistant", icon: <Sparkles /> } },
-                { name: "calendar", list: "/calendar", meta: { label: "Calendar", icon: <Calendar /> } },
-                { name: "academic-terms", list: "/admin/terms", meta: { label: "Academic Terms", icon: <CalendarClock /> } },
-                { name: "subjects", list: "/subjects", create: "/subjects/create", edit: "/subjects/edit/:id", meta: { label: "Subjects", icon: <BookOpen /> } },
-                { name: "departments", list: "/departments", create: "/departments/create", edit: "/departments/edit/:id", meta: { label: "Departments", icon: <Building2 /> } },
-                { name: "users", list: "/users", create: "/users/create", edit: "/users/edit/:id", show: "/users/show/:id", meta: { label: "Users", icon: <ShieldCheck /> } },
-                { name: "portfolio", list: "/portfolio", meta: { label: "My Portfolio", icon: <UserCircle /> } },
-                { name: "report-card", list: "/student/report-card", meta: { label: "Report Card", icon: <FileText /> } },
-                { name: "profile-requests", list: "/profile-requests", meta: { label: "Profile Requests", icon: <ClipboardCheck /> } },
-                { name: "activity-log", list: "/activity-log", meta: { label: "Activity Log", icon: <Activity /> } },
-                { name: "enrollments", list: "/enrollments", meta: { label: "Enrollments", icon: <UserPlus /> } },
-                { name: "assignments", list: "/assignments", create: "/assignments/create", show: "/assignments/show/:id", meta: { label: "Assignments", icon: <FileText /> } },
-                { name: "submissions", list: "/submissions", show: "/submissions/show/:id", meta: { label: "Submissions", icon: <Send /> } },
-                { name: "attendance", list: "/attendance", meta: { label: "Attendance", icon: <CheckSquare /> } },
-                { name: "quizzes", list: "/quizzes", create: "/quizzes/create", show: "/quizzes/show/:id", meta: { label: "Quizzes", icon: <FileQuestion /> } },
-                { name: "modules", list: "/modules", meta: { label: "Modules", icon: <Library /> } },
-                { name: "discussions", list: "/discussions", meta: { label: "Discussions", icon: <MessageSquare /> } },
-                { name: "resources", list: "/resources", meta: { label: "Resources", icon: <FolderOpen /> } },
-                { name: "notifications", list: "/notifications", meta: { label: "Notifications", icon: <Bell /> } },
-                { name: "progress", list: "/progress", meta: { label: "Progress", icon: <TrendingUp /> } },
-              ]}
+              resources={resources}
             >
               <OfflineBanner />
               <Suspense fallback={<Loading />}>
@@ -245,6 +199,7 @@ function App() {
                         <Route path="student/report-card"><Route index element={<AuthorizedRoute resource="report-card" action="list"><ReportCard /></AuthorizedRoute>} /></Route>
                         <Route path="profile-requests"><Route index element={<AuthorizedRoute resource="profile-requests" action="list"><ProfileRequestsList /></AuthorizedRoute>} /></Route>
                         <Route path="activity-log"><Route index element={<AuthorizedRoute resource="activity-log" action="list"><ActivityLogPage /></AuthorizedRoute>} /></Route>
+                        <Route path="teacher-applications"><Route index element={<AuthorizedRoute resource="teacher-applications" action="list"><TeacherApplicationsList /></AuthorizedRoute>} /></Route>
                         <Route path="classes">
                           <Route index element={<AuthorizedRoute resource="classes" action="list"><ClassesList /></AuthorizedRoute>} />
                           <Route path="create" element={<AuthorizedRoute resource="classes" action="create"><ClassesCreate /></AuthorizedRoute>} />

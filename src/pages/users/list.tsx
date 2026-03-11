@@ -232,7 +232,7 @@ const UsersList = () => {
       pending: users.filter(
         (u: User) =>
           u.role === UserRole.TEACHER &&
-          u.verificationStatus === VerificationStatus.PENDING,
+          (u.verificationStatus === VerificationStatus.PENDING || u.verificationStatus === VerificationStatus.UNVERIFIED),
       ).length,
       active: users.filter((u: User) => u.status === UserStatus.ACTIVE)
         .length,
@@ -487,8 +487,8 @@ const UsersList = () => {
 
                       <div className="flex items-center gap-2 ml-4">
                         {user.role === UserRole.TEACHER &&
-                          user.verificationStatus ===
-                            VerificationStatus.PENDING && (
+                          (user.verificationStatus ===
+                            VerificationStatus.PENDING || user.verificationStatus === VerificationStatus.UNVERIFIED) && (
                             <Button
                               variant="outline"
                               size="sm"

@@ -81,6 +81,7 @@ const resourceFilterMappings: Record<string, Record<string, string>> = {
   modules: { classId: "classId" },
   progress: { classId: "classId", userId: "userId" },
   "users/children": { parentId: "parentId" },
+  "teacher-applications": { status: "status", teacherId: "teacherId", classId: "classId" },
 };
 
 export const dataProvider: DataProvider = {
