@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { motion, Variants } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { 
   Sparkles, 
@@ -29,7 +29,7 @@ const LandingPage = () => {
     },
   };
 
-  const item = {
+  const item: Variants = {
     hidden: { opacity: 0, y: 20 },
     show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 100 } },
   };
@@ -98,65 +98,83 @@ const LandingPage = () => {
             AI-POWERED EDUCATION PLATFORM
         </motion.div>
 
-        <motion.h1 
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="text-6xl md:text-8xl font-black tracking-tighter leading-[0.9] max-w-5xl"
-        >
-          Elevate your <span className="text-primary">Classroom</span> into the <span className="italic">Future.</span>
-        </motion.h1>
-
-        <motion.p 
+        <div className="space-y-6 max-w-4xl mx-auto">
+          <motion.h1 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.8 }}
-            className="text-muted-foreground text-xl font-medium max-w-2xl leading-relaxed"
-        >
-          The enterprise-grade solution for modern learning. We combine real-time collaboration with AI assistance to create a world-class educational experience.
-        </motion.p>
+            transition={{ delay: 0.1 }}
+            className="text-6xl md:text-8xl font-black tracking-tighter leading-[0.9] uppercase"
+          >
+            Empower <span className="text-primary italic">Every</span> <br />
+            Student Journey.
+          </motion.h1>
+          <motion.p 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="text-lg md:text-xl text-muted-foreground font-medium max-w-2xl mx-auto leading-relaxed"
+          >
+            Tablawy OS is the next-generation operating system for modern classrooms.
+            AI-driven, gamified, and built for ultimate collaboration.
+          </motion.p>
+        </div>
 
         <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="flex flex-col sm:flex-row gap-6 pt-6"
+            transition={{ delay: 0.3 }}
+            className="flex flex-col sm:flex-row items-center gap-4"
         >
-          <Link to="/register">
-            <Button className="h-16 px-10 rounded-2xl text-md font-black uppercase tracking-widest shadow-xl shadow-primary/30 group">
-                Join Now 
-                <Zap className="ml-2 h-5 w-5 fill-current group-hover:scale-125 transition-transform" />
-            </Button>
-          </Link>
-          <Button variant="outline" className="h-16 px-10 rounded-2xl text-md font-black uppercase tracking-widest border-2">
-            Watch Demo
-            <Play className="ml-2 h-5 w-5" />
+          <Button size="lg" className="h-16 px-10 rounded-2xl text-lg font-black uppercase tracking-widest shadow-2xl shadow-primary/20 group" asChild>
+            <Link to="/register">
+                Get Started Free
+                <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+            </Link>
           </Button>
+          <Button size="lg" variant="outline" className="h-16 px-10 rounded-2xl text-lg font-black uppercase tracking-widest border-2 border-primary/10 bg-card/50 backdrop-blur-md" asChild>
+            <Link to="/login">
+                Sign In
+            </Link>
+          </Button>
+        </motion.div>
+
+        {/* Floating Stats or Badges */}
+        <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            className="pt-12 flex flex-wrap justify-center gap-8 md:gap-16 opacity-50 grayscale hover:grayscale-0 transition-all duration-700"
+        >
+            <div className="flex items-center gap-2">
+                <ShieldCheck className="h-5 w-5" />
+                <span className="font-bold text-xs uppercase tracking-widest">Enterprise Secure</span>
+            </div>
+            <div className="flex items-center gap-2">
+                <Globe className="h-5 w-5" />
+                <span className="font-bold text-xs uppercase tracking-widest">Used Globally</span>
+            </div>
+            <div className="flex items-center gap-2">
+                <Zap className="h-5 w-5" />
+                <span className="font-bold text-xs uppercase tracking-widest">Lightning Fast</span>
+            </div>
         </motion.div>
       </section>
 
-      {/* Stats Section */}
-      <section className="container mx-auto px-4 py-20">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 p-12 bg-muted/30 backdrop-blur-xl rounded-[3rem] border-t border-primary/10 shadow-2xl">
-              {[
-                  { label: "Active Students", value: "10K+" },
-                  { label: "AI Quizzes", value: "1M+" },
-                  { label: "Classrooms", value: "500+" },
-                  { label: "Uptime Rate", value: "99.9%" },
-              ].map((stat, i) => (
-                  <div key={i} className="text-center space-y-2">
-                      <p className="text-3xl font-black tracking-tight">{stat.value}</p>
-                      <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{stat.label}</p>
-                  </div>
-              ))}
-          </div>
-      </section>
-
       {/* Features Grid */}
-      <section id="features" className="container mx-auto px-4 py-32 space-y-24">
-        <div className="text-center space-y-6 max-w-3xl mx-auto">
-            <h2 className="text-5xl font-black tracking-tighter uppercase">Enterprise Grade Tools.</h2>
-            <p className="text-muted-foreground text-lg font-medium">Built with an Atomic & Modular architecture for extreme scalability and performance.</p>
+      <section className="container mx-auto px-4 py-32 border-t border-primary/5">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-20">
+            <div className="space-y-4 max-w-2xl">
+                <h2 className="text-4xl md:text-5xl font-black uppercase tracking-tighter leading-none">
+                    Unmatched <span className="text-primary italic">Intelligence.</span>
+                </h2>
+                <p className="text-muted-foreground font-medium text-lg leading-relaxed">
+                    A comprehensive suite of tools designed to reduce teacher workload and maximize student engagement through AI-driven insights.
+                </p>
+            </div>
+            <Button variant="ghost" className="font-black uppercase tracking-widest text-[10px] gap-2 h-12 px-6 rounded-xl hover:bg-primary/5">
+                Explore All Features
+                <ArrowRight className="h-4 w-4" />
+            </Button>
         </div>
 
         <motion.div 
@@ -184,70 +202,53 @@ const LandingPage = () => {
         </motion.div>
       </section>
 
-      {/* AI Call to Action */}
-      <section id="ai" className="container mx-auto px-4 py-32">
-          <div className="relative p-12 md:p-24 bg-primary rounded-[4rem] overflow-hidden group">
-              <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-20" />
-              <div className="absolute top-[-20%] right-[-10%] w-[50%] h-[100%] bg-white/20 blur-[120px] rounded-full rotate-45" />
-              
-              <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-                  <div className="space-y-8 text-primary-foreground">
-                      <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/20 text-xs font-black uppercase tracking-widest">
-                          <Sparkles className="h-4 w-4" />
-                          The AI Study Lab
-                      </div>
-                      <h2 className="text-5xl md:text-7xl font-black tracking-tight leading-[0.9]">Meet your new personal AI Teacher.</h2>
-                      <p className="text-primary-foreground/80 text-lg font-medium leading-relaxed max-w-lg">
-                          Generate quizzes, summarize entire modules, and ask complex questions to our AI assistant. Every student gets a personal workspace tailored to their learning speed.
-                      </p>
-                      <Link to="/register">
-                        <Button className="bg-white text-primary hover:bg-white/90 h-16 px-10 rounded-2xl text-md font-black uppercase tracking-widest shadow-2xl">
-                            Explore Study Lab
-                            <ArrowRight className="ml-2 h-5 w-5" />
-                        </Button>
-                      </Link>
-                  </div>
-                  <div className="relative hidden lg:block">
-                      <motion.div 
-                        animate={{ y: [0, -20, 0] }}
-                        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                        className="bg-white/10 backdrop-blur-3xl border border-white/20 rounded-3xl p-8 shadow-2xl space-y-6"
-                      >
-                          <div className="flex items-center gap-4 border-b border-white/10 pb-6">
-                              <div className="h-10 w-10 rounded-xl bg-white flex items-center justify-center text-primary">
-                                  <BrainCircuit className="h-6 w-6" />
-                              </div>
-                              <span className="font-black uppercase tracking-widest text-sm text-white">AI Assistant Running...</span>
-                          </div>
-                          <div className="space-y-4">
-                              <div className="h-4 w-[80%] bg-white/20 rounded-full animate-pulse" />
-                              <div className="h-4 w-[60%] bg-white/20 rounded-full animate-pulse" />
-                              <div className="h-32 w-full bg-white/5 rounded-2xl border border-white/10 flex items-center justify-center">
-                                  <Sparkles className="h-10 w-10 text-white/20" />
-                              </div>
-                          </div>
-                      </motion.div>
-                  </div>
-              </div>
-          </div>
+      {/* CTA Section */}
+      <section className="container mx-auto px-4 py-32">
+        <div className="bg-primary rounded-[3rem] p-12 md:p-24 text-primary-foreground text-center space-y-8 relative overflow-hidden shadow-2xl shadow-primary/40">
+            {/* Background elements */}
+            <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 pointer-events-none" />
+            <div className="absolute -top-24 -left-24 w-64 h-64 bg-white/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-white/10 rounded-full blur-3xl pointer-events-none" />
+
+            <div className="relative space-y-6 max-w-2xl mx-auto">
+                <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter leading-none italic">
+                    Ready to build the future?
+                </h2>
+                <p className="text-primary-foreground/80 font-medium text-lg">
+                    Join thousands of educators and students already transforming their learning experience.
+                </p>
+            </div>
+
+            <div className="relative flex flex-col sm:flex-row items-center justify-center gap-4 pt-8">
+                <Button size="lg" variant="secondary" className="h-16 px-10 rounded-2xl text-lg font-black uppercase tracking-widest group shadow-xl shadow-black/10">
+                    <Link to="/register" className="flex items-center">
+                        Launch Dashboard
+                        <Zap className="ml-2 h-5 w-5 fill-current" />
+                    </Link>
+                </Button>
+                <Button size="lg" variant="outline" className="h-16 px-10 rounded-2xl text-lg font-black uppercase tracking-widest border-white/20 hover:bg-white/10 text-white">
+                    <Play className="mr-2 h-5 w-5" />
+                    Watch Demo
+                </Button>
+            </div>
+        </div>
       </section>
 
-      {/* Global Community */}
-      <section className="container mx-auto px-4 py-32 text-center space-y-12">
-          <Globe className="h-16 w-16 mx-auto text-primary animate-pulse" />
-          <h2 className="text-5xl font-black tracking-tighter uppercase max-w-2xl mx-auto">Available Everywhere. Built for Everyone.</h2>
-          <div className="flex flex-wrap justify-center gap-12 grayscale opacity-50">
-              <div className="font-black text-2xl tracking-tighter flex items-center gap-2">
-                  <ShieldCheck className="h-8 w-8 text-green-500" /> ENTERPRISE READY
-              </div>
-              <div className="font-black text-2xl tracking-tighter flex items-center gap-2">
-                  <MessageCircle className="h-8 w-8 text-blue-500" /> PWA SUPPORTED
-              </div>
-              <div className="font-black text-2xl tracking-tighter flex items-center gap-2 italic">
-                  I18N LOCALIZED
-              </div>
-          </div>
-      </section>
+      {/* Footer */}
+      <footer className="container mx-auto px-4 py-12 border-t border-primary/5 flex flex-col md:flex-row items-center justify-between gap-8">
+        <div className="flex items-center gap-2">
+            <div className="h-8 w-8 bg-primary rounded-lg flex items-center justify-center text-white font-black text-xs italic">T</div>
+            <span className="font-black uppercase tracking-tighter text-xl italic">Tablawy OS</span>
+        </div>
+        <p className="text-muted-foreground text-sm font-medium">
+            &copy; {new Date().getFullYear()} Tablawy OS. All rights reserved.
+        </p>
+        <div className="flex gap-8">
+            <a href="#" className="text-sm font-bold uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors">Twitter</a>
+            <a href="#" className="text-sm font-bold uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors">GitHub</a>
+            <a href="#" className="text-sm font-bold uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors">Discord</a>
+        </div>
+      </footer>
     </div>
   );
 };

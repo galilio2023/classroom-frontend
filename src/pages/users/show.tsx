@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { 
-  User, 
+  User as UserIcon, 
   Mail, 
   Phone, 
   MapPin, 
@@ -48,16 +48,16 @@ const UserShow = () => {
   const { id } = useParams();
   const { data: identity } = useGetIdentity<UserType>();
   
-  const { query } = useShow<UserType>({
+  const { query } = useShow<UserType & { userBadges?: any[] }>({
     resource: "users",
     id,
     meta: {
-        populate: ["department"]
+        populate: ["department", "userBadges", "userBadges.badge"]
     }
   });
 
   // Fetch all available badges to calculate "unearned" badges for the UI
-  const { data: allBadgesData } = useList({
+  const { result: allBadgesData } = useList({
     resource: "badges",
     queryOptions: {
         enabled: !!query.data?.data
@@ -165,7 +165,7 @@ const UserShow = () => {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="flex items-center gap-4">
                 <div className="p-3 rounded-2xl bg-primary/10 text-primary shadow-sm">
-                    <User className="h-8 w-8" />
+                    <UserIcon className="h-8 w-8" />
                 </div>
                 <div>
                     <h1 className="text-4xl font-black tracking-tight">User Profile</h1>

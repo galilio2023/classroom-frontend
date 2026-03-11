@@ -46,11 +46,13 @@ export const LiveClassroom = ({
   const numericClassId = Number(classIdString);
 
   // Sync Class State (for persistence)
-  const { data: classData } = useOne({
+  const { query: classQuery } = useOne({
       resource: "classes",
       id: classIdString,
       queryOptions: { enabled: !!numericClassId }
   });
+
+  const classData = classQuery.data;
 
   useEffect(() => {
       if (classData?.data?.isBreakoutActive) {
@@ -59,7 +61,7 @@ export const LiveClassroom = ({
   }, [classData]);
 
   // Fetch groups to determine student's group or list for teacher
-  const { data: groupsData } = useList({
+  const { result: groupsData } = useList({
     resource: "project-groups",
     filters: [{ field: "classId", operator: "eq", value: numericClassId }],
     queryOptions: { enabled: !!numericClassId },
