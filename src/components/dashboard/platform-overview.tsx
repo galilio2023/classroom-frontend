@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { GraduationCap, Users, RefreshCw, LayoutGrid, FileText, ShieldAlert, LayoutDashboard, Sparkles, UserCheck } from "lucide-react";
+import { GraduationCap, Users, RefreshCw, LayoutGrid, FileText, ShieldAlert, LayoutDashboard, UserCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { DashboardStats } from "@/types/dashboard";
 import { StatCard } from "./stat-card";
@@ -15,6 +15,8 @@ interface PlatformOverviewProps {
 
 export const PlatformOverview = ({ stats, isLoading, onRefresh }: PlatformOverviewProps) => {
     const { list } = useNavigation();
+    
+    // Only show skeletons on initial load when we have no data
     const showSkeletons = isLoading && !stats;
 
     return (
@@ -38,7 +40,7 @@ export const PlatformOverview = ({ stats, isLoading, onRefresh }: PlatformOvervi
             </div>
             
             {!showSkeletons && stats ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-6">
+                <div className="grid grid-cols-1 gap-6">
                     <AnimatePresence mode="popLayout">
                       {stats.pendingVerifications !== undefined && stats.pendingVerifications > 0 && (
                           <motion.div 
@@ -60,75 +62,27 @@ export const PlatformOverview = ({ stats, isLoading, onRefresh }: PlatformOvervi
                           </motion.div>
                       )}
                       
-                      <motion.div
-                        key="total-users"
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.05 }}
-                      >
-                        <StatCard 
-                            label="Total Users" 
-                            value={stats.totalUsers} 
-                            icon={UserCheck} 
-                            color="text-primary" 
-                        />
-                      </motion.div>
-
-                      <motion.div
-                        key="students"
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.1 }}
-                      >
-                        <StatCard 
-                            label="Total Students" 
-                            value={stats.totalStudents} 
-                            icon={GraduationCap} 
-                            color="text-blue-500" 
-                        />
-                      </motion.div>
-
-                      <motion.div
-                        key="teachers"
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.2 }}
-                      >
-                        <StatCard 
-                            label="Total Teachers" 
-                            value={stats.totalTeachers} 
-                            icon={Users} 
-                            color="text-green-500" 
-                        />
-                      </motion.div>
-
-                      <motion.div
-                        key="classes"
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.3 }}
-                      >
-                        <StatCard 
-                            label="Total Classes" 
-                            value={stats.totalClasses} 
-                            icon={LayoutGrid} 
-                            color="text-purple-500" 
-                        />
-                      </motion.div>
-
-                      <motion.div
-                        key="assignments"
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.4 }}
-                      >
-                        <StatCard 
-                            label="Total Assignments" 
-                            value={stats.totalAssignments} 
-                            icon={FileText} 
-                            color="text-orange-500" 
-                        />
-                      </motion.div>
+                      {[
+                        { label: "Total Users", value: stats.totalUsers, icon: UserCheck, color: "text-primary", delay: 0.05 },
+                        { label: "Total Students", value: stats.totalStudents, icon: GraduationCap, color: "text-blue-500", delay: 0.1 },
+                        { label: "Total Teachers", value: stats.totalTeachers, icon: Users, color: "text-green-500", delay: 0.2 },
+                        { label: "Total Classes", value: stats.totalClasses, icon: LayoutGrid, color: "text-purple-500", delay: 0.3 },
+                        { label: "Total Assignments", value: stats.totalAssignments, icon: FileText, color: "text-orange-500", delay: 0.4 },
+                      ].map((item) => (
+                        <motion.div
+                          key={item.label}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: item.delay }}
+                        >
+                          <StatCard 
+                              label={item.label} 
+                              value={item.value ?? 0} 
+                              icon={item.icon} 
+                              color={item.color} 
+                          />
+                        </motion.div>
+                      ))}
                     </AnimatePresence>
                 </div>
             ) : (

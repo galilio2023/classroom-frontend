@@ -18,7 +18,6 @@ export const accessControlProvider: AccessControlProvider = {
     // 2. Teacher Permissions
     if (role === UserRole.TEACHER) {
       if (resourceName === "teacher-applications") {
-        // Teachers can only view the list and create new applications
         if (["list", "create", "show"].includes(action)) return { can: true };
         return { can: false, reason: "You cannot edit or delete applications." };
       }
@@ -74,8 +73,10 @@ export const accessControlProvider: AccessControlProvider = {
       const allowedResources = [
         "subjects", "classes", "assignments", "discussions", "calendar", 
         "dashboard", "attendance", "submissions", "quizzes", "resources", 
-        "modules", "ai-study-lab", "study-planner", "notifications", "progress"
+        "modules", "ai-study-lab", "study-planner", "notifications", "progress",
+        "report-card", "portfolio"
       ];
+
       if (allowedResources.includes(resourceName) && ["list", "show"].includes(action)) return { can: true };
       if (resourceName === "users" && action === "show") return { can: true };
       if (resourceName === "users" && action === "edit" && params?.id === identity?.id) return { can: true };

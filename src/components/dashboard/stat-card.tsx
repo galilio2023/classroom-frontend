@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { LucideIcon, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { motion, useMotionValue, useTransform, animate, AnimatePresence } from "framer-motion";
+import { motion, useMotionValue, useTransform, animate } from "framer-motion";
 
 interface StatCardProps {
   label: string;
@@ -19,14 +19,17 @@ interface StatCardProps {
 const CountUp: React.FC<{ value: number }> = ({ value }) => {
   const count = useMotionValue(0);
   const rounded = useTransform(count, (latest) => Math.round(latest));
-  const ref = useRef<HTMLSpanElement>(null);
-
+  
   useEffect(() => {
-    const controls = animate(count, value, { duration: 2, ease: [0.16, 1, 0.3, 1] });
-    return controls.stop;
+    // Reset to 0 if value changes to a new number to restart animation
+    const controls = animate(count, value, { 
+      duration: 2, 
+      ease: [0.16, 1, 0.3, 1] 
+    });
+    return () => controls.stop();
   }, [count, value]);
 
-  return <motion.span ref={ref}>{rounded}</motion.span>;
+  return <motion.span>{rounded}</motion.span>;
 };
 
 export const StatCard: React.FC<StatCardProps> = ({ label, value, icon: Icon, color, className, trend }) => {
@@ -34,8 +37,8 @@ export const StatCard: React.FC<StatCardProps> = ({ label, value, icon: Icon, co
 
   return (
     <motion.div
-      whileHover={{ y: -5, scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
+      whileHover={{ y: -5, scale: 1.01 }}
+      whileTap={{ scale: 0.99 }}
       transition={{ type: "spring", stiffness: 400, damping: 25 }}
       className="h-full"
     >
@@ -77,7 +80,7 @@ export const StatCard: React.FC<StatCardProps> = ({ label, value, icon: Icon, co
                 <h3 className="text-4xl font-black tracking-tighter text-foreground">
                   {isNumber ? <CountUp value={value as number} /> : value}
                 </h3>
-                {isNumber && (
+                {isNumber && value > 0 && (
                   <motion.div
                     initial={{ opacity: 0, scale: 0 }}
                     animate={{ opacity: 1, scale: 1 }}

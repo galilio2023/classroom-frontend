@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useState, useRef } from "react";
 import { io, Socket } from "socket.io-client";
-import { BACKEND_URL } from "@/config";
+import { SOCKET_URL } from "@/config";
 import { useGetIdentity } from "@refinedev/core";
 import { User } from "@/types";
 
@@ -16,21 +16,18 @@ const SocketContext = createContext<SocketContextType>({
 
 export const useSocket = () => useContext(SocketContext);
 
-/**
- * SocketProvider: Manages the lifecycle of the Socket.io connection.
- * Refined: Only connects when the user is authenticated and cleans up on logout.
- */
 export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { data: user, isLoading } = useGetIdentity<User>();
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
+  const socketRef = useRef<Socket | null>(null);
 
   useEffect(() => {
     if (isLoading) return;
 
-    if (user && !socket) {
-      // Initialize socket with credentials (cookies)
-      const newSocket = io(BACKEND_URL, {
+    if (user && !socketRef.current) {
+      // Use SOCKET_URL which correctly points to the root (e.g., http://localhost:8000)
+      const newSocket = io(SOCKET_URL, {
         withCredentials: true,
         transports: ["websocket", "polling"],
         reconnectionAttempts: 5,
@@ -51,24 +48,22 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         console.error("Socket connection error:", err.message);
       });
 
+      socketRef.current = newSocket;
       setSocket(newSocket);
     }
 
-    // Cleanup on logout or unmount
-    if (!user && socket) {
-      socket.disconnect();
+    // Cleanup on logout
+    if (!user && socketRef.current) {
+      socketRef.current.disconnect();
+      socketRef.current = null;
       setSocket(null);
       setIsConnected(false);
     }
 
     return () => {
-      if (socket) {
-        socket.off("connect");
-        socket.off("disconnect");
-        socket.off("connect_error");
-      }
+      // Global cleanup on unmount handled by socketRef check above or specific listeners here
     };
-  }, [user, socket, isLoading]);
+  }, [user, isLoading]);
 
   return (
     <SocketContext.Provider value={{ socket, isConnected }}>
