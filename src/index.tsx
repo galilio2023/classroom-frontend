@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import App from "./App";
 import { registerSW } from "virtual:pwa-register";
+import { ThemeProvider } from "./components/refine-ui/theme/theme-provider";
 
 const queryClient = new QueryClient();
 
@@ -24,7 +25,9 @@ const updateSW = registerSW({
 root.render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
-      <App />
+      <ThemeProvider defaultTheme="system" storageKey="refine-ui-theme">
+        <App />
+      </ThemeProvider>
     </QueryClientProvider>
   </React.StrictMode>
 );

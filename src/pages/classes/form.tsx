@@ -32,6 +32,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Label } from "@/components/ui/label";
 import { useList } from "@refinedev/core";
 import { AcademicTerm } from "@/types";
+import { useTranslation } from "react-i18next";
 
 interface ClassFormProps {
   form: UseFormReturn<any>;
@@ -63,6 +64,7 @@ export const ClassForm = ({
   formLoading,
   isEdit = false
 }: ClassFormProps) => {
+  const { t, i18n } = useTranslation();
   const selectedColor = form.watch("color");
 
   const { query: termsQuery } = useList<AcademicTerm>({
@@ -82,19 +84,21 @@ export const ClassForm = ({
 
   const terms = termsData?.data || [];
 
+  const isAr = i18n.language === 'ar';
+
   return (
     <div className="space-y-10">
       {/* Basic Details Card */}
       <Card className="border-none shadow-2xl bg-card/50 backdrop-blur-xl rounded-[2rem] overflow-hidden">
         <div className="h-1.5 w-full transition-colors duration-500" style={{ backgroundColor: selectedColor }} />
         <CardHeader className="p-8 pb-4">
-          <CardTitle className="text-sm font-black uppercase tracking-widest flex items-center gap-2 opacity-60">
+          <CardTitle className="text-sm font-black uppercase tracking-widest flex items-center gap-2 opacity-60 text-start">
             <BookOpen className="h-4 w-4" />
-            {isEdit ? "Update Class Details" : "Core Information"}
+            {isEdit ? t("classes.form.updateDetails") : t("classes.form.coreInfo")}
           </CardTitle>
         </CardHeader>
         <CardContent className="p-8 pt-4 space-y-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-start">
             <FormField
               control={form.control}
               name="name"
@@ -102,10 +106,10 @@ export const ClassForm = ({
                 <FormItem className="space-y-3">
                   <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2">
                     <LayoutDashboard className="h-3 w-3" />
-                    Class Name
+                    {t("classes.form.className")}
                   </FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g. Math 101 - Section A" {...field} className="h-14 rounded-2xl bg-muted/20 border-none focus-visible:ring-primary font-bold" />
+                    <Input placeholder={t("classes.form.classNamePlaceholder")} {...field} className="h-14 rounded-2xl bg-muted/20 border-none focus-visible:ring-primary font-bold" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -118,7 +122,7 @@ export const ClassForm = ({
                 <FormItem className="space-y-3">
                   <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2">
                     <Users className="h-3 w-3" />
-                    Student Capacity
+                    {t("classes.form.capacity")}
                   </FormLabel>
                   <FormControl>
                     <div className="relative group">
@@ -128,7 +132,9 @@ export const ClassForm = ({
                         onChange={(e) => field.onChange(e.target.value === '' ? undefined : Number(e.target.value))}
                         className="h-14 rounded-2xl bg-muted/20 border-none focus-visible:ring-primary font-black text-center text-xl" 
                       />
-                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black opacity-20 group-focus-within:opacity-40 transition-opacity">STUDENTS</span>
+                      <span className={cn("absolute top-1/2 -translate-y-1/2 text-[10px] font-black opacity-20 group-focus-within:opacity-40 transition-opacity", isAr ? "left-4" : "right-4")}>
+                        {t("classes.form.studentsUnit")}
+                      </span>
                     </div>
                   </FormControl>
                   <FormMessage />
@@ -137,7 +143,7 @@ export const ClassForm = ({
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-start">
             <FormField
               control={form.control}
               name="subjectId"
@@ -145,7 +151,7 @@ export const ClassForm = ({
                 <FormItem className="space-y-3">
                   <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2">
                     <BookOpen className="h-3 w-3" />
-                    Subject Area
+                    {t("classes.form.subjectArea")}
                   </FormLabel>
                   <Select 
                     onValueChange={field.onChange} 
@@ -153,7 +159,7 @@ export const ClassForm = ({
                   >
                     <FormControl>
                       <SelectTrigger className="h-14 rounded-2xl bg-muted/20 border-none focus:ring-primary transition-all font-bold">
-                        <SelectValue placeholder="Select a subject" />
+                        <SelectValue placeholder={t("classes.form.selectSubject")} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent className="rounded-xl border-none shadow-2xl">
@@ -176,7 +182,7 @@ export const ClassForm = ({
                 <FormItem className="space-y-3">
                   <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2">
                     <Calendar className="h-3 w-3" />
-                    Academic Term
+                    {t("classes.form.academicTerm")}
                   </FormLabel>
                   <Select 
                     onValueChange={(value) => field.onChange(Number(value))}
@@ -185,12 +191,12 @@ export const ClassForm = ({
                   >
                     <FormControl>
                       <SelectTrigger className="h-14 rounded-2xl bg-muted/20 border-none focus:ring-primary transition-all font-bold">
-                        <SelectValue placeholder="Select a term" />
+                        <SelectValue placeholder={t("classes.form.selectTerm")} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent className="rounded-xl border-none shadow-2xl">
                       {terms.map((term: AcademicTerm) => (
-                        <SelectItem key={term.id} value={String(term.id)} className="rounded-lg font-bold">
+                        <SelectItem key={term.id} value={String(term.id)} className="rounded-lg font-bold text-start">
                           {term.name}
                         </SelectItem>
                       ))}
@@ -202,7 +208,7 @@ export const ClassForm = ({
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-start">
             <FormField
               control={form.control}
               name="color"
@@ -210,7 +216,7 @@ export const ClassForm = ({
                 <FormItem className="space-y-4">
                   <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2">
                     <Palette className="h-3 w-3" />
-                    Theme Color
+                    {t("classes.form.themeColor")}
                   </FormLabel>
                   <FormControl>
                     <div className="flex flex-wrap gap-3 p-4 rounded-2xl bg-muted/10 border border-black/[0.03] dark:border-white/[0.03]">
@@ -243,7 +249,7 @@ export const ClassForm = ({
                     <FormItem className="space-y-3">
                     <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2">
                       <ShieldCheck className="h-3 w-3" />
-                      Class Status
+                      {t("classes.form.classStatus")}
                     </FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
@@ -252,9 +258,9 @@ export const ClassForm = ({
                         </SelectTrigger>
                         </FormControl>
                         <SelectContent className="rounded-xl border-none shadow-2xl">
-                        <SelectItem value={ClassStatus.ACTIVE} className="rounded-lg font-bold">Active</SelectItem>
-                        <SelectItem value={ClassStatus.INACTIVE} className="rounded-lg font-bold">Inactive</SelectItem>
-                        <SelectItem value={ClassStatus.ARCHIVED} className="rounded-lg font-bold">Archived</SelectItem>
+                        <SelectItem value={ClassStatus.ACTIVE} className="rounded-lg font-bold text-start">{t("classes.form.status.active")}</SelectItem>
+                        <SelectItem value={ClassStatus.INACTIVE} className="rounded-lg font-bold text-start">{t("classes.form.status.inactive")}</SelectItem>
+                        <SelectItem value={ClassStatus.ARCHIVED} className="rounded-lg font-bold text-start">{t("classes.form.status.archived")}</SelectItem>
                         </SelectContent>
                     </Select>
                     <FormMessage />
@@ -268,19 +274,19 @@ export const ClassForm = ({
             control={form.control}
             name="description"
             render={({ field }) => (
-              <FormItem className="space-y-3">
+              <FormItem className="space-y-3 text-start">
                 <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2">
                   <FileText className="h-3 w-3" />
-                  Description
+                  {t("classes.form.description")}
                 </FormLabel>
                 <FormControl>
                   <div className="relative group">
                     <Textarea 
-                      placeholder="Provide a brief overview of the class goals..." 
+                      placeholder={t("classes.form.descriptionPlaceholder")} 
                       className="min-h-[150px] rounded-2xl bg-muted/20 border-none focus-visible:ring-primary p-6 text-sm leading-relaxed shadow-inner transition-all resize-none"
                       {...field} 
                     />
-                    <div className="absolute bottom-4 right-4 opacity-10 group-focus-within:opacity-30 transition-opacity">
+                    <div className={cn("absolute bottom-4 opacity-10 group-focus-within:opacity-30 transition-opacity", isAr ? "left-4" : "right-4")}>
                       <Sparkles className="h-6 w-6" />
                     </div>
                   </div>
@@ -295,9 +301,9 @@ export const ClassForm = ({
       {/* Schedule Builder Card */}
       <Card className="border-none shadow-2xl bg-card/50 backdrop-blur-xl rounded-[2rem] overflow-hidden">
         <CardHeader className="p-8 pb-4">
-          <CardTitle className="text-sm font-black uppercase tracking-widest flex items-center gap-2 opacity-60">
+          <CardTitle className="text-sm font-black uppercase tracking-widest flex items-center gap-2 opacity-60 text-start">
             <Calendar className="h-4 w-4" />
-            Weekly Schedule
+            {t("classes.form.weeklySchedule")}
           </CardTitle>
         </CardHeader>
         <CardContent className="p-8 pt-4 space-y-6">
@@ -306,10 +312,10 @@ export const ClassForm = ({
               {fields.map((field, index) => (
                 <motion.div 
                   key={field.id} 
-                  initial={{ opacity: 0, x: -10 }}
+                  initial={{ opacity: 0, x: isAr ? 10 : -10 }}
                   animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 10 }}
-                  className="flex flex-col md:flex-row items-end gap-4 p-6 rounded-2xl bg-muted/10 border border-black/[0.03] dark:border-white/[0.03] group"
+                  exit={{ opacity: 0, x: isAr ? -10 : 10 }}
+                  className="flex flex-col md:flex-row items-end gap-4 p-6 rounded-2xl bg-muted/10 border border-black/[0.03] dark:border-white/[0.03] group text-start"
                 >
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 w-full">
                     <FormField
@@ -317,7 +323,7 @@ export const ClassForm = ({
                       name={`schedules.${index}.day`}
                       render={({ field }) => (
                         <FormItem className="space-y-2">
-                          <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Day</FormLabel>
+                          <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">{t("classes.form.day")}</FormLabel>
                           <Select onValueChange={field.onChange} value={field.value}>
                             <FormControl>
                               <SelectTrigger className="h-12 rounded-xl bg-background border-none focus:ring-primary transition-all font-bold">
@@ -326,7 +332,7 @@ export const ClassForm = ({
                             </FormControl>
                             <SelectContent className="rounded-xl border-none shadow-2xl">
                               {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day) => (
-                                <SelectItem key={day} value={day} className="rounded-lg font-bold">{day}</SelectItem>
+                                <SelectItem key={day} value={day} className="rounded-lg font-bold text-start">{t(`days.${day}`)}</SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
@@ -339,11 +345,11 @@ export const ClassForm = ({
                       name={`schedules.${index}.startTime`}
                       render={({ field }) => (
                         <FormItem className="space-y-2">
-                          <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Start Time</FormLabel>
+                          <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">{t("classes.form.startTime")}</FormLabel>
                           <FormControl>
                             <div className="relative group/input">
-                              <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within/input:text-primary transition-colors" />
-                              <Input type="time" className="h-12 rounded-xl bg-background border-none focus-visible:ring-primary pl-10 font-bold" {...field} />
+                              <Clock className={cn("absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within/input:text-primary transition-colors", isAr ? "right-3" : "left-3")} />
+                              <Input type="time" className={cn("h-12 rounded-xl bg-background border-none focus-visible:ring-primary font-bold", isAr ? "pr-10" : "pl-10")} {...field} />
                             </div>
                           </FormControl>
                           <FormMessage />
@@ -355,11 +361,11 @@ export const ClassForm = ({
                       name={`schedules.${index}.endTime`}
                       render={({ field }) => (
                         <FormItem className="space-y-2">
-                          <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">End Time</FormLabel>
+                          <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">{t("classes.form.endTime")}</FormLabel>
                           <FormControl>
                             <div className="relative group/input">
-                              <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within/input:text-primary transition-colors" />
-                              <Input type="time" className="h-12 rounded-xl bg-background border-none focus-visible:ring-primary pl-10 font-bold" {...field} />
+                              <Clock className={cn("absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within/input:text-primary transition-colors", isAr ? "right-3" : "left-3")} />
+                              <Input type="time" className={cn("h-12 rounded-xl bg-background border-none focus-visible:ring-primary font-bold", isAr ? "pr-10" : "pl-10")} {...field} />
                             </div>
                           </FormControl>
                           <FormMessage />
@@ -388,7 +394,7 @@ export const ClassForm = ({
               onClick={() => append({ day: "Mon", startTime: "09:00", endTime: "10:30" })}
             >
               <PlusCircle className="h-4 w-4" />
-              Add Time Slot
+              {t("buttons.addTimeSlot")}
             </Button>
           </div>
         </CardContent>
@@ -405,12 +411,12 @@ export const ClassForm = ({
           {formLoading ? (
             <div className="flex gap-3 items-center">
               <Loader2 className="h-6 w-6 animate-spin" />
-              <span>Saving...</span>
+              <span>{t("buttons.saving")}</span>
             </div>
           ) : (
             <div className="flex gap-3 items-center">
               <Save className="h-6 w-6" />
-              <span>{isEdit ? "Save Changes" : "Create Class"}</span>
+              <span>{isEdit ? t("buttons.saveChanges") : t("buttons.createClass")}</span>
             </div>
           )}
         </Button>

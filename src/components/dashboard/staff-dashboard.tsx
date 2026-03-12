@@ -8,6 +8,7 @@ import { DashboardData } from "@/types/dashboard";
 import { TeacherOnboarding } from "./teacher-onboarding";
 import { motion } from "framer-motion";
 import { BarChart3, AlertCircle, LayoutDashboard, History } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface StaffDashboardProps {
   data: DashboardData;
@@ -17,6 +18,8 @@ interface StaffDashboardProps {
 }
 
 export const StaffDashboard = ({ data, isLoading, onRefresh, show }: StaffDashboardProps) => {
+  const { t } = useTranslation();
+
   return (
     <div className="space-y-16">
       {/* Onboarding / Welcome Section */}
@@ -41,7 +44,7 @@ export const StaffDashboard = ({ data, isLoading, onRefresh, show }: StaffDashbo
                 <div className="p-2 rounded-xl bg-primary/10 text-primary">
                   <BarChart3 className="h-5 w-5" />
                 </div>
-                <h2 className="text-2xl font-black tracking-tight">Engagement Analytics</h2>
+                <h2 className="text-2xl font-black tracking-tight">{t("dashboard.staff.engagementAnalytics")}</h2>
                 <div className="h-px flex-1 bg-gradient-to-r from-primary/20 to-transparent" />
               </div>
               <EngagementChart 
@@ -77,7 +80,7 @@ export const StaffDashboard = ({ data, isLoading, onRefresh, show }: StaffDashbo
                 <div className="p-2 rounded-xl bg-destructive/10 text-destructive">
                   <AlertCircle className="h-5 w-5" />
                 </div>
-                <h2 className="text-xl font-black tracking-tight">At-Risk Students</h2>
+                <h2 className="text-xl font-black tracking-tight">{t("dashboard.staff.atRiskStudents.title")}</h2>
               </div>
               <AtRiskStudents students={data.atRiskStudents ?? []} />
             </motion.div>
@@ -93,7 +96,7 @@ export const StaffDashboard = ({ data, isLoading, onRefresh, show }: StaffDashbo
                 <div className="p-2 rounded-xl bg-primary/10 text-primary">
                   <LayoutDashboard className="h-5 w-5" />
                 </div>
-                <h2 className="text-xl font-black tracking-tight">Platform Overview</h2>
+                <h2 className="text-xl font-black tracking-tight">{t("dashboard.staff.platformOverview")}</h2>
               </div>
               <PlatformOverview 
                 stats={data.stats} 
@@ -113,7 +116,7 @@ export const StaffDashboard = ({ data, isLoading, onRefresh, show }: StaffDashbo
                 <div className="p-2 rounded-xl bg-primary/10 text-primary">
                   <History className="h-5 w-5" />
                 </div>
-                <h2 className="text-xl font-black tracking-tight">Recent Activity</h2>
+                <h2 className="text-xl font-black tracking-tight">{t("dashboard.staff.recentActivity")}</h2>
               </div>
               <RecentActivity limit={5} />
             </motion.div>

@@ -99,8 +99,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Label } from "@/components/ui/label";
 import usePageTitle from "@/hooks/use-page-title";
 import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
+import { useTranslation } from "react-i18next";
 
 const ClassesShow = () => {
+  const { t, i18n } = useTranslation();
   const { id } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const classId = id ?? "";
@@ -161,7 +163,7 @@ const ClassesShow = () => {
   const refetch = query?.refetch ?? (showResult as any)?.refetch;
 
   const aClass = aClassData?.data;
-  usePageTitle(aClass?.name ? `${aClass.name} Classroom` : "Classroom");
+  usePageTitle(aClass?.name ? `${aClass.name} Classroom` : t("classes.list.title"));
 
   const isAdmin = identity?.role === UserRole.ADMIN;
   const isTeacher = identity?.role === UserRole.TEACHER;
@@ -283,7 +285,7 @@ const ClassesShow = () => {
     if (aClass?.inviteCode) {
       void navigator.clipboard.writeText(aClass.inviteCode);
       setCopied(true);
-      toast.success("Invite code copied to clipboard");
+      toast.success(t("classes.show.toast.inviteCodeCopied"));
       setTimeout(() => setCopied(false), 2000);
     }
   };
@@ -300,11 +302,11 @@ const ClassesShow = () => {
       },
       {
         onSuccess: () => {
-          toast.success(`Student enrollment ${status}`);
+          toast.success(t("classes.show.toast.enrollmentStatus", { status: status === "approved" ? t("buttons.save") : t("buttons.reject") }));
           void refetch?.();
         },
         onError: (error: any) => {
-          toast.error(error?.data?.message || "Failed to update enrollment");
+          toast.error(error?.data?.message || t("classes.show.toast.enrollmentError"));
         },
       },
     );
@@ -318,22 +320,24 @@ const ClassesShow = () => {
       },
       {
         onSuccess: () => {
-          toast.success("Bulk message processing started in background");
+          toast.success(t("classes.show.toast.bulkProcessing"));
           setIsMessageAllOpen(false);
           setBulkMessage({ title: "", message: "" });
         },
         onError: (error: any) => {
-          toast.error(error?.data?.message || "Failed to send message");
+          toast.error(error?.data?.message || t("classes.show.toast.bulkError"));
         },
       },
     );
   };
 
+  const isAr = i18n.language === 'ar';
+
   const columns = useMemo<ColumnDef<Enrollment>[]>(
     () => [
       {
         id: "student",
-        header: () => <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Student</p>,
+        header: () => <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t("classes.show.students.table.student")}</p>,
         accessorKey: "student",
         cell: ({ getValue, row }) => {
           const student = getValue<User>();
@@ -348,12 +352,12 @@ const ClassesShow = () => {
                   {student.name?.[0]}
                 </AvatarFallback>
               </Avatar>
-              <div className="flex flex-col truncate">
+              <div className="flex flex-col truncate text-start">
                 <div className="flex items-center gap-2">
                   <span className="font-black text-sm tracking-tight">{student.name}</span>
                   {isWaitlisted && (
                     <Badge variant="outline" className="bg-orange-500/10 text-orange-600 border-none text-[8px] font-black uppercase tracking-tighter px-2 py-0 h-4">
-                      Waitlist #{row.original.waitlistPosition}
+                      {t("classes.show.students.table.waitlist", { pos: row.original.waitlistPosition })}
                     </Badge>
                   )}
                 </div>
@@ -367,11 +371,11 @@ const ClassesShow = () => {
       },
       {
         accessorKey: "createdAt",
-        header: () => <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Enrolled On</p>,
+        header: () => <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t("classes.show.students.table.enrolledOn")}</p>,
         cell: ({ getValue }) => (
           <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground">
             <Calendar className="h-3.5 w-3.5 opacity-40" />
-            <span>{new Date(getValue<string>()).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+            <span>{new Date(getValue<string>()).toLocaleDateString(isAr ? 'ar-EG' : 'en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
           </div>
         ),
       },
@@ -379,7 +383,7 @@ const ClassesShow = () => {
         id: "actions",
         header: "",
         cell: ({ row }) => (
-          <div className="flex items-center justify-end gap-2">
+          <div className={cn("flex items-center gap-2", isAr ? "justify-start" : "justify-end")}>
             {isStaff && (
               <Button
                 variant="outline"
@@ -393,7 +397,7 @@ const ClassesShow = () => {
                 }
               >
                 <Sparkles className="h-3.5 w-3.5" />
-                AI Insight
+                {t("buttons.aiInsight")}
               </Button>
             )}
             {isStaff && (
@@ -410,7 +414,7 @@ const ClassesShow = () => {
         ),
       },
     ],
-    [isStaff],
+    [isStaff, t, isAr],
   );
 
   const enrollmentsTable = useTable<Enrollment>({
@@ -438,19 +442,19 @@ const ClassesShow = () => {
   };
 
   const tabs = useMemo(() => [
-    { id: "curriculum", label: "Curriculum", icon: LayoutGrid },
-    { id: "analytics", label: "Analytics", icon: BarChart3, staffOnly: true },
-    { id: "live", label: "Live", icon: Video, indicator: isLiveIndicator },
-    { id: "leaderboard", label: "Leaderboard", icon: Trophy },
-    { id: "announcements", label: "Announcements", icon: Megaphone },
-    { id: "discussions", label: "Discussions", icon: MessageSquare },
-    { id: "resources", label: "Resources", icon: Library },
-    { id: "students", label: "Students", icon: Users, badge: isStaff && (pendingEnrollments.length + waitlistedEnrollments.length) > 0 ? (pendingEnrollments.length + waitlistedEnrollments.length) : null },
-    { id: "assignments", label: "Assignments", icon: ClipboardCheck },
-    { id: "quizzes", label: "Quizzes", icon: FileQuestion },
-    { id: "attendance", label: "Attendance", icon: CheckCircle2 },
-    { id: "details", label: "Details", icon: Info, staffOnly: true },
-  ].filter(t => !t.staffOnly || isStaff), [isLiveIndicator, isStaff, pendingEnrollments.length, waitlistedEnrollments.length]);
+    { id: "curriculum", label: t("classes.show.tabs.curriculum"), icon: LayoutGrid },
+    { id: "analytics", label: t("classes.show.tabs.analytics"), icon: BarChart3, staffOnly: true },
+    { id: "live", label: t("classes.show.tabs.live"), icon: Video, indicator: isLiveIndicator },
+    { id: "leaderboard", label: t("classes.show.tabs.leaderboard"), icon: Trophy },
+    { id: "announcements", label: t("classes.show.tabs.announcements"), icon: Megaphone },
+    { id: "discussions", label: t("classes.show.tabs.discussions"), icon: MessageSquare },
+    { id: "resources", label: t("classes.show.tabs.resources"), icon: Library },
+    { id: "students", label: t("classes.show.tabs.students"), icon: Users, badge: isStaff && (pendingEnrollments.length + waitlistedEnrollments.length) > 0 ? (pendingEnrollments.length + waitlistedEnrollments.length) : null },
+    { id: "assignments", label: t("classes.show.tabs.assignments"), icon: ClipboardCheck },
+    { id: "quizzes", label: t("classes.show.tabs.quizzes"), icon: FileQuestion },
+    { id: "attendance", label: t("classes.show.tabs.attendance"), icon: CheckCircle2 },
+    { id: "details", label: t("classes.show.tabs.details"), icon: Info, staffOnly: true },
+  ].filter(t => !t.staffOnly || isStaff), [isLiveIndicator, isStaff, pendingEnrollments.length, waitlistedEnrollments.length, t]);
 
   if (isLoading) {
     return (
@@ -461,7 +465,7 @@ const ClassesShow = () => {
                 <BookOpen className="h-6 w-6 text-primary/40" />
             </div>
         </div>
-        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground animate-pulse">Assembling Classroom...</p>
+        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground animate-pulse">{t("classes.show.assembling")}</p>
       </div>
     );
   }
@@ -473,11 +477,11 @@ const ClassesShow = () => {
           <XCircle className="h-16 w-16" />
         </div>
         <div className="space-y-2">
-            <h2 className="text-3xl font-black tracking-tight">Classroom not found</h2>
-            <p className="text-muted-foreground font-medium max-w-md mx-auto">The classroom you are looking for does not exist or has been removed from the system.</p>
+            <h2 className="text-3xl font-black tracking-tight">{t("classes.show.notFound")}</h2>
+            <p className="text-muted-foreground font-medium max-w-md mx-auto">{t("classes.show.notFoundDescription")}</p>
         </div>
         <Button asChild className="rounded-2xl h-12 px-8 font-black uppercase tracking-widest text-[10px]">
-            <Link to="/classes">Back to Classes</Link>
+            <Link to="/classes">{t("buttons.goBack")}</Link>
         </Button>
       </div>
     );
@@ -501,14 +505,14 @@ const ClassesShow = () => {
             className="space-y-4"
         >
             <Breadcrumb />
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 text-start">
                 <div className="flex items-center gap-4">
                     <div className="p-3 rounded-2xl bg-primary/10 text-primary shadow-sm">
                         <LayoutDashboard className="h-8 w-8" />
                     </div>
                     <div>
-                        <h1 className="text-4xl font-black tracking-tight">Classroom Hub</h1>
-                        <p className="text-muted-foreground font-medium">Manage curriculum, students, and live sessions.</p>
+                        <h1 className="text-4xl font-black tracking-tight">{t("classes.show.classroomHub")}</h1>
+                        <p className="text-muted-foreground font-medium">{t("classes.show.hubDescription")}</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-3">
@@ -517,11 +521,11 @@ const ClassesShow = () => {
                         className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-12 px-6 gap-2 border-primary/10 bg-card/50 backdrop-blur-sm"
                         onClick={() => {
                             navigator.clipboard.writeText(window.location.href);
-                            toast.success("Classroom link copied!");
+                            toast.success(t("classes.show.toast.linkCopied"));
                         }}
                     >
                         <Share2 className="w-4 h-4" />
-                        Share
+                        {t("buttons.share")}
                     </Button>
                     {isOwner && (
                         <Button 
@@ -530,7 +534,7 @@ const ClassesShow = () => {
                         >
                             <Link to={`/classes/edit/${aClass.id}`}>
                                 <Pencil className="w-4 h-4 mr-2" />
-                                Edit Class
+                                {t("buttons.editClass")}
                             </Link>
                         </Button>
                     )}
@@ -545,20 +549,20 @@ const ClassesShow = () => {
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="space-y-4"
+              className="space-y-4 text-start"
             >
               {pinnedAnnouncements.map((announcement: Announcement) => (
                 <div
                   key={announcement.id}
                   className="relative overflow-hidden rounded-[2rem] border border-primary/20 bg-primary/5 backdrop-blur-xl p-8 pr-16 shadow-xl shadow-primary/5 group"
                 >
-                  <div className="absolute top-0 left-0 w-1.5 h-full bg-primary" />
+                  <div className={cn("absolute top-0 w-1.5 h-full bg-primary", isAr ? "right-0" : "left-0")} />
                   <div className="flex items-center gap-2 mb-3">
                     <div className="p-2 rounded-xl bg-primary/10 text-primary">
                       <Pin className="h-4 w-4" />
                     </div>
                     <span className="font-black text-[10px] text-primary uppercase tracking-widest">
-                      Priority Announcement
+                      {t("classes.show.announcement.priority")}
                     </span>
                   </div>
                   <h4 className="font-black text-2xl tracking-tight">{announcement.title}</h4>
@@ -567,14 +571,14 @@ const ClassesShow = () => {
                     <Button variant="link" className="p-0 h-auto mt-4 text-sm font-black text-primary gap-2 uppercase tracking-widest" asChild>
                       <a href={announcement.fileUrl} target="_blank" rel="noopener noreferrer">
                         <Paperclip className="h-4 w-4" />
-                        View Attachment
+                        {t("classes.show.announcement.viewAttachment")}
                       </a>
                     </Button>
                   )}
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="absolute top-6 right-6 h-12 w-12 rounded-full hover:bg-primary/10 text-primary/40 hover:text-primary transition-all"
+                    className={cn("absolute top-6 h-12 w-12 rounded-full hover:bg-primary/10 text-primary/40 hover:text-primary transition-all", isAr ? "left-6" : "right-6")}
                     onClick={() => handleDismissAnnouncement(announcement.id)}
                   >
                     <X className="h-6 w-6" />
@@ -589,7 +593,7 @@ const ClassesShow = () => {
         <motion.div
           initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="relative h-64 w-full rounded-[3rem] overflow-hidden shadow-2xl group"
+          className="relative h-64 w-full rounded-[3rem] overflow-hidden shadow-2xl group text-start"
           style={{ backgroundColor: classColor }}
         >
           {/* Background Patterns */}
@@ -604,12 +608,12 @@ const ClassesShow = () => {
                   <BookOpen className="h-8 w-8" />
                 </div>
                 <Badge variant="secondary" className="bg-white/20 text-white border-none backdrop-blur-md font-black text-[10px] uppercase tracking-widest px-4 py-1.5 rounded-xl">
-                  {aClass.subject?.department?.name || "Academic"}
+                  {aClass.subject?.department?.name || t("classes.show.banner.academic")}
                 </Badge>
                 {isFull && (
                   <Badge className="bg-orange-500 text-white border-none font-black text-[10px] uppercase tracking-widest px-4 py-1.5 rounded-xl shadow-lg">
                     <Timer className="w-3 h-3 mr-1" />
-                    Waitlist Active
+                    {t("classes.show.banner.waitlistActive")}
                   </Badge>
                 )}
               </div>
@@ -622,14 +626,14 @@ const ClassesShow = () => {
                 <div className="w-1.5 h-1.5 rounded-full bg-white/30" />
                 <div className="flex items-center gap-2">
                   <Users className="h-4 w-4" />
-                  <span>{approvedEnrollments.length} Students Enrolled</span>
+                  <span>{t("classes.show.banner.studentsEnrolled", { count: approvedEnrollments.length })}</span>
                 </div>
                 {waitlistedEnrollments.length > 0 && (
                   <>
                     <div className="w-1.5 h-1.5 rounded-full bg-white/30" />
                     <div className="flex items-center gap-2">
                       <Timer className="h-4 w-4" />
-                      <span>{waitlistedEnrollments.length} on Waitlist</span>
+                      <span>{t("classes.show.banner.onWaitlist", { count: waitlistedEnrollments.length })}</span>
                     </div>
                   </>
                 )}
@@ -638,7 +642,7 @@ const ClassesShow = () => {
                         <div className="w-1.5 h-1.5 rounded-full bg-white/30" />
                         <div className="flex items-center gap-2">
                             <Clock className="h-4 w-4" />
-                            <span>{aClass.schedules[0].day} • {aClass.schedules[0].startTime}</span>
+                            <span>{t(`days.${aClass.schedules[0].day}`)} • {aClass.schedules[0].startTime}</span>
                         </div>
                     </>
                 )}
@@ -647,12 +651,12 @@ const ClassesShow = () => {
 
             {isLiveIndicator && (
               <motion.div 
-                initial={{ opacity: 0, x: 20 }}
+                initial={{ opacity: 0, x: isAr ? -20 : 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 className="flex items-center gap-4 bg-red-500 text-white px-8 py-4 rounded-[2rem] shadow-2xl shadow-red-500/40 animate-pulse border-4 border-white/20"
               >
                 <Video className="h-6 w-6" />
-                <span className="font-black uppercase tracking-widest text-sm">Live Session Active</span>
+                <span className="font-black uppercase tracking-widest text-sm">{t("classes.show.banner.liveActive")}</span>
               </motion.div>
             )}
           </div>
@@ -662,7 +666,7 @@ const ClassesShow = () => {
         <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full space-y-10">
           <div className="sticky top-6 z-40">
             <ScrollArea className="w-full whitespace-nowrap rounded-[2rem] border border-black/[0.05] dark:border-white/[0.05] bg-card/80 backdrop-blur-2xl p-2 shadow-2xl">
-              <TabsList className="flex h-14 items-center justify-start rounded-2xl p-1 text-muted-foreground bg-transparent">
+              <TabsList className={cn("flex h-14 items-center justify-start rounded-2xl p-1 text-muted-foreground bg-transparent", isAr && "flex-row-reverse")}>
                 {tabs.map((tab) => {
                   const Icon = tab.icon;
                   const isActive = activeTab === tab.id;
@@ -737,15 +741,15 @@ const ClassesShow = () => {
                   {activeTab === "students" && (
                     <>
                       {isStaff && (pendingEnrollments.length > 0 || waitlistedEnrollments.length > 0) && (
-                        <Card className="border-none shadow-2xl bg-primary/5 rounded-[2.5rem] overflow-hidden">
+                        <Card className="border-none shadow-2xl bg-primary/5 rounded-[2.5rem] overflow-hidden text-start">
                           <CardHeader className="p-10 pb-6">
                             <div className="flex items-center gap-4">
                               <div className="p-3 rounded-2xl bg-primary/10 text-primary">
                                 <Users className="h-8 w-8" />
                               </div>
                               <div>
-                                <CardTitle className="text-2xl font-black tracking-tight">Pending & Waitlisted</CardTitle>
-                                <CardDescription className="font-medium text-base">Students waiting for approval or a spot to open.</CardDescription>
+                                <CardTitle className="text-2xl font-black tracking-tight">{t("classes.show.students.pendingWaitlisted")}</CardTitle>
+                                <CardDescription className="font-medium text-base">{t("classes.show.students.pendingDescription")}</CardDescription>
                               </div>
                             </div>
                           </CardHeader>
@@ -761,7 +765,7 @@ const ClassesShow = () => {
                                       <AvatarImage src={enrollment.student.image ?? ""} className="object-cover" />
                                       <AvatarFallback className="bg-primary/5 text-primary font-black text-lg">{enrollment.student.name?.[0]}</AvatarFallback>
                                     </Avatar>
-                                    <div>
+                                    <div className="text-start">
                                       <div className="flex items-center gap-2">
                                         <p className="font-black text-lg tracking-tight">{enrollment.student.name}</p>
                                         <Badge variant="secondary" className="text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md">
@@ -780,7 +784,7 @@ const ClassesShow = () => {
                                       onClick={() => handleEnrollmentAction(enrollment.id, "rejected")}
                                     >
                                       <XCircle className="h-4 w-4 mr-2" />
-                                      Reject
+                                      {t("buttons.reject")}
                                     </Button>
                                     <Button
                                       size="lg"
@@ -789,7 +793,7 @@ const ClassesShow = () => {
                                       style={{ backgroundColor: classColor }}
                                     >
                                       <CheckCircle2 className="h-4 w-4 mr-2" />
-                                      Approve Student
+                                      {t("buttons.approveStudent")}
                                     </Button>
                                   </div>
                                 </div>
@@ -799,13 +803,13 @@ const ClassesShow = () => {
                         </Card>
                       )}
 
-                      <Card className="border-none shadow-2xl bg-card/50 backdrop-blur-xl rounded-[2.5rem] overflow-hidden">
+                      <Card className="border-none shadow-2xl bg-card/50 backdrop-blur-xl rounded-[2.5rem] overflow-hidden text-start">
                         <CardHeader className="p-10 pb-6 flex flex-col md:flex-row md:items-center justify-between border-b border-black/[0.03] dark:border-white/[0.03] gap-6">
                           <div className="space-y-2">
-                            <CardTitle className="text-2xl font-black tracking-tight">Enrolled Students</CardTitle>
+                            <CardTitle className="text-2xl font-black tracking-tight">{t("classes.show.students.enrolled")}</CardTitle>
                             <CardDescription className="font-bold flex items-center gap-2 text-primary">
                               <Users className="h-4 w-4" />
-                              {approvedEnrollments.length} of {aClass.capacity} spots filled
+                              {t("classes.show.students.spotsFilled", { approved: approvedEnrollments.length, capacity: aClass.capacity })}
                             </CardDescription>
                           </div>
                           {isStaff && (
@@ -814,33 +818,33 @@ const ClassesShow = () => {
                                 <DialogTrigger asChild>
                                   <Button variant="outline" className="h-12 rounded-2xl font-black uppercase tracking-widest text-[10px] px-6 border-primary/10 bg-card/50 backdrop-blur-sm hover:bg-primary/5 text-primary">
                                     <Send className="h-4 w-4 mr-2" />
-                                    Message All
+                                    {t("buttons.messageAll")}
                                   </Button>
                                 </DialogTrigger>
-                                <DialogContent className="rounded-[2.5rem] border-none shadow-2xl bg-card/95 backdrop-blur-xl max-w-lg">
+                                <DialogContent className="rounded-[2.5rem] border-none shadow-2xl bg-card/95 backdrop-blur-xl max-w-lg text-start">
                                   <DialogHeader className="space-y-4">
                                     <div className="p-4 rounded-2xl bg-primary/10 text-primary w-fit">
                                       <Send className="h-8 w-8" />
                                     </div>
                                     <div className="space-y-1">
-                                        <DialogTitle className="text-3xl font-black tracking-tight">Broadcast Message</DialogTitle>
-                                        <DialogDescription className="font-medium text-base">Send a priority notification to all enrolled students.</DialogDescription>
+                                        <DialogTitle className="text-3xl font-black tracking-tight">{t("classes.show.students.broadcastTitle")}</DialogTitle>
+                                        <DialogDescription className="font-medium text-base">{t("classes.show.students.broadcastDescription")}</DialogDescription>
                                     </div>
                                   </DialogHeader>
                                   <div className="space-y-8 py-8">
                                     <div className="space-y-3">
-                                      <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Notification Title</Label>
+                                      <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">{t("classes.show.students.notificationTitle")}</Label>
                                       <Input
-                                        placeholder="e.g., Important Update Regarding Tomorrow's Lesson"
+                                        placeholder={t("classes.show.students.titlePlaceholder")}
                                         value={bulkMessage.title}
                                         onChange={(e) => setBulkMessage({ ...bulkMessage, title: e.target.value })}
                                         className="h-14 rounded-2xl bg-muted/30 border-none focus-visible:ring-primary font-black text-sm"
                                       />
                                     </div>
                                     <div className="space-y-3">
-                                      <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Message Content</Label>
+                                      <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">{t("classes.show.students.messageContent")}</Label>
                                       <Textarea
-                                        placeholder="Type your message here..."
+                                        placeholder={t("classes.show.students.messagePlaceholder")}
                                         value={bulkMessage.message}
                                         onChange={(e) => setBulkMessage({ ...bulkMessage, message: e.target.value })}
                                         className="min-h-[200px] rounded-[2rem] bg-muted/30 border-none focus-visible:ring-primary p-6 text-base leading-relaxed font-medium resize-none"
@@ -848,14 +852,14 @@ const ClassesShow = () => {
                                     </div>
                                   </div>
                                   <DialogFooter className="gap-3">
-                                    <Button variant="ghost" className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-8" onClick={() => setIsMessageAllOpen(false)}>Cancel</Button>
+                                    <Button variant="ghost" className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-8" onClick={() => setIsMessageAllOpen(false)}>{t("buttons.cancel")}</Button>
                                     <Button 
                                       className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-12 shadow-xl shadow-primary/20" 
                                       onClick={handleMessageAll} 
                                       disabled={!bulkMessage.title || !bulkMessage.message}
                                       style={{ backgroundColor: classColor }}
                                     >
-                                      Send Broadcast
+                                      {t("buttons.sendBroadcast")}
                                     </Button>
                                   </DialogFooter>
                                 </DialogContent>
@@ -866,7 +870,7 @@ const ClassesShow = () => {
                                 style={{ backgroundColor: classColor }}
                               >
                                 <PlusCircle className="h-4 w-4 mr-2" />
-                                Enroll Student
+                                {t("buttons.enrollStudent")}
                               </Button>
                             </div>
                           )}
@@ -897,7 +901,7 @@ const ClassesShow = () => {
                 {isStaff && (
                   <TabsContent value="details" className="mt-0">
                     {activeTab === "details" && (
-                      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+                      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 text-start">
                         <div className="lg:col-span-2 space-y-10">
                           <Card className="border-none shadow-2xl bg-card/50 backdrop-blur-xl rounded-[2.5rem] overflow-hidden">
                             <CardHeader className="p-10 pb-6 border-b border-black/[0.03] dark:border-white/[0.03]">
@@ -905,20 +909,20 @@ const ClassesShow = () => {
                                 <div className="p-3 rounded-2xl bg-primary/10 text-primary">
                                   <Info className="h-6 w-6" />
                                 </div>
-                                Class Information
+                                {t("classes.show.details.classInfo")}
                               </CardTitle>
                             </CardHeader>
                             <CardContent className="p-10 space-y-8">
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                                 <div className="space-y-3">
-                                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Subject Area</Label>
+                                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">{t("classes.show.details.subjectArea")}</Label>
                                   <div className="p-5 rounded-[1.5rem] bg-muted/30 flex items-center gap-4 border border-primary/5">
                                     <div className="p-2 rounded-xl bg-primary/10 text-primary"><BookOpen className="h-5 w-5" /></div>
                                     <span className="font-black text-base">{aClass?.subject?.name ?? "N/A"}</span>
                                   </div>
                                 </div>
                                 <div className="space-y-3">
-                                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Class Status</Label>
+                                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">{t("classes.show.details.classStatus")}</Label>
                                   <div className="p-5 rounded-[1.5rem] bg-muted/30 flex items-center gap-4 border border-primary/5">
                                     <div className="p-2 rounded-xl bg-green-500/10 text-green-600"><ShieldCheck className="h-5 w-5" /></div>
                                     <Badge
@@ -931,17 +935,17 @@ const ClassesShow = () => {
                                   </div>
                                 </div>
                                 <div className="space-y-3">
-                                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Student Capacity</Label>
+                                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">{t("classes.show.details.studentCapacity")}</Label>
                                   <div className="p-5 rounded-[1.5rem] bg-muted/30 flex items-center gap-4 border border-primary/5">
                                     <div className="p-2 rounded-xl bg-primary/10 text-primary"><Users className="h-5 w-5" /></div>
-                                    <span className="font-black text-base">{aClass.capacity} Students Max</span>
+                                    <span className="font-black text-base">{t("classes.show.details.capacityMax", { count: aClass.capacity })}</span>
                                   </div>
                                 </div>
                                 <div className="space-y-3">
-                                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Department</Label>
+                                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">{t("classes.show.details.department")}</Label>
                                   <div className="p-5 rounded-[1.5rem] bg-muted/30 flex items-center gap-4 border border-primary/5">
                                     <div className="p-2 rounded-xl bg-primary/10 text-primary"><Building2 className="h-5 w-5" /></div>
-                                    <span className="font-black text-base">{aClass.subject?.department?.name || "Academic"}</span>
+                                    <span className="font-black text-base">{aClass.subject?.department?.name || t("classes.show.banner.academic")}</span>
                                   </div>
                                 </div>
                               </div>
@@ -956,13 +960,13 @@ const ClassesShow = () => {
                                     <div className="p-3 rounded-2xl bg-ai-primary/10">
                                       <StickyNote className="h-8 w-8" />
                                     </div>
-                                    Teacher Notes (Shared)
+                                    {t("classes.show.details.teacherNotes")}
                                   </CardTitle>
-                                  <CardDescription className="font-bold text-ai-primary/60">Private scratchpad for staff. Visible to all teachers in this class.</CardDescription>
+                                  <CardDescription className="font-bold text-ai-primary/60">{t("classes.show.details.notesDescription")}</CardDescription>
                                 </div>
                                 <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-ai-primary/60 bg-ai-primary/5 px-4 py-2 rounded-full border border-ai-primary/10 animate-pulse">
                                   <Sparkles className="h-4 w-4" />
-                                  Auto-saving
+                                  {t("classes.show.details.autoSaving")}
                                 </div>
                               </div>
                             </CardHeader>
@@ -974,12 +978,12 @@ const ClassesShow = () => {
                               ) : (
                                 <div className="relative group">
                                   <Textarea
-                                    placeholder="Jot down reminders, lesson ideas, or student observations..."
-                                    className="min-h-[400px] rounded-[2rem] bg-white/50 dark:bg-zinc-950/50 border-none focus-visible:ring-ai-primary p-8 text-base leading-relaxed shadow-inner transition-all font-medium resize-none"
+                                    placeholder={t("classes.show.details.notesPlaceholder")}
+                                    className="min-h-[400px] rounded-[2rem] bg-white/50 dark:bg-zinc-950/50 border-none focus-visible:ring-ai-primary p-8 text-base leading-relaxed shadow-inner transition-all font-medium resize-none text-start"
                                     value={teacherNotes}
                                     onChange={(e) => handleNoteChange(e.target.value)}
                                   />
-                                  <div className="absolute bottom-8 right-8 opacity-10 group-focus-within:opacity-40 transition-opacity">
+                                  <div className={cn("absolute bottom-8 opacity-10 group-focus-within:opacity-40 transition-opacity", isAr ? "left-8" : "right-8")}>
                                     <StickyNote className="h-12 w-12 text-ai-primary" />
                                   </div>
                                 </div>
@@ -996,7 +1000,7 @@ const ClassesShow = () => {
                                   <div className="p-3 rounded-2xl bg-primary/10 text-primary">
                                     <Megaphone className="h-8 w-8" />
                                   </div>
-                                  Access Control
+                                  {t("classes.show.details.accessControl")}
                                 </CardTitle>
                                 {isOwner && (
                                   <Button
@@ -1006,7 +1010,7 @@ const ClassesShow = () => {
                                     onClick={() => setIsInviteDialogOpen(true)}
                                   >
                                     <UserPlus className="h-4 w-4 mr-2" />
-                                    Invite
+                                    {t("buttons.invite")}
                                   </Button>
                                 )}
                               </div>
@@ -1024,7 +1028,7 @@ const ClassesShow = () => {
                                     className="text-[10px] font-black uppercase tracking-widest opacity-60"
                                     style={{ color: classColor }}
                                   >
-                                    Class Invite Code
+                                    {t("classes.show.details.inviteCode")}
                                   </p>
                                   <p className="text-5xl font-black font-mono tracking-[0.3em] ml-[0.3em]">
                                     {aClass.inviteCode}
@@ -1039,19 +1043,19 @@ const ClassesShow = () => {
                                   {copied ? (
                                     <>
                                       <Check className="h-4 w-4 text-success" />
-                                      Copied!
+                                      {t("buttons.copied")}
                                     </>
                                   ) : (
                                     <>
                                       <Copy className="h-4 w-4 text-primary" />
-                                      Copy Code
+                                      {t("buttons.copyCode")}
                                     </>
                                   )}
                                 </Button>
                               </div>
 
                               <div className="space-y-6">
-                                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Teaching Staff</Label>
+                                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">{t("classes.show.details.teachingStaff")}</Label>
                                 <div className="grid gap-4">
                                   {aClass.teachers?.map((tc: any) => (
                                     <div
@@ -1064,14 +1068,14 @@ const ClassesShow = () => {
                                           {tc.teacher.name?.[0]}
                                         </AvatarFallback>
                                       </Avatar>
-                                      <div className="flex-1">
+                                      <div className="flex-1 text-start">
                                         <p className="text-base font-black tracking-tight">
                                           {tc.teacher.name}
                                         </p>
                                         <p className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-widest">
                                           {tc.isPrimary
-                                            ? "Primary Instructor"
-                                            : "Co-Instructor"}
+                                            ? t("classes.show.details.primaryInstructor")
+                                            : t("classes.show.details.coInstructor")}
                                         </p>
                                       </div>
                                       {tc.isPrimary && (
@@ -1079,7 +1083,7 @@ const ClassesShow = () => {
                                           variant="secondary"
                                           className="text-[9px] font-black uppercase tracking-widest bg-primary/10 text-primary border-none px-3 py-1 rounded-lg"
                                         >
-                                          Lead
+                                          {t("classes.show.details.lead")}
                                         </Badge>
                                       )}
                                     </div>
@@ -1105,26 +1109,26 @@ const ClassesShow = () => {
             open={unenrollTarget !== null}
             onOpenChange={() => setUnenrollTarget(null)}
           >
-            <AlertDialogContent className="rounded-[2.5rem] border-none shadow-2xl bg-card/95 backdrop-blur-xl">
+            <AlertDialogContent className="rounded-[2.5rem] border-none shadow-2xl bg-card/95 backdrop-blur-xl text-start">
               <AlertDialogHeader className="space-y-4">
                 <div className="p-4 rounded-2xl bg-destructive/10 text-destructive w-fit">
                   <Trash2 className="h-8 w-8" />
                 </div>
                 <div className="space-y-1">
-                    <AlertDialogTitle className="text-3xl font-black tracking-tight">Confirm Unenrollment</AlertDialogTitle>
+                    <AlertDialogTitle className="text-3xl font-black tracking-tight">{t("classes.show.unenrollDialog.title")}</AlertDialogTitle>
                     <AlertDialogDescription className="font-medium text-base">
-                    This will permanently remove the student from this classroom. They will lose access to all curriculum, assignments, and grades.
+                    {t("classes.show.unenrollDialog.description")}
                     </AlertDialogDescription>
                 </div>
               </AlertDialogHeader>
               <AlertDialogFooter className="gap-3 pt-6">
-                <AlertDialogCancel className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-8">Cancel</AlertDialogCancel>
+                <AlertDialogCancel className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-8">{t("buttons.cancel")}</AlertDialogCancel>
                 <AlertDialogAction
                   onClick={handleConfirmUnenroll}
                   disabled={isDeleting}
                   className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-12 bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-xl shadow-destructive/20"
                 >
-                  {isDeleting ? "Processing..." : "Confirm Unenroll"}
+                  {isDeleting ? t("buttons.processing") : t("buttons.confirmUnenroll")}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { useList, useIsAuthenticated } from "@refinedev/core";
+import { useList } from "@refinedev/core";
 import { AcademicTerm } from "@/types";
 
 interface TermContextType {
@@ -17,10 +17,7 @@ export const TermProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [selectedTerm, setSelectedTerm] = useState<AcademicTerm | null>(null);
   
-  // Check if user is authenticated before fetching
-  const { data: authData } = useIsAuthenticated();
-  const isAuthenticated = authData?.authenticated;
-
+  // Refine useList implementation returns { result, query }
   const { result, query } = useList<AcademicTerm>({
     resource: "academic-terms",
     sorters: [
@@ -30,15 +27,15 @@ export const TermProvider: React.FC<{ children: React.ReactNode }> = ({
       },
     ],
     queryOptions: {
-      // ONLY run the query if the user is authenticated
-      enabled: !!isAuthenticated,
+      staleTime: 5 * 60 * 1000, 
     }
   });
 
   const terms = result?.data || [];
   const isLoading = query.isLoading;
+  
   const currentTerm =
-    terms.find((t: AcademicTerm) => t.status === "active") || null;
+    terms.find((t: AcademicTerm) => t.status === "active") || terms[0] || null;
 
   useEffect(() => {
     if (currentTerm && !selectedTerm) {

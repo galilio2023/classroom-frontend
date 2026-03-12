@@ -19,6 +19,7 @@ import { User, UserRole } from "@/types";
 import { useState } from "react";
 import { toast } from "sonner";
 import { LoadingButton } from "@/components/ui/loading-button";
+import { useTranslation } from "react-i18next";
 
 interface EnrollStudentDialogProps {
   classId: string;
@@ -33,6 +34,7 @@ export const EnrollStudentDialog = ({
   onOpenChange,
   enrolledStudentIds,
 }: EnrollStudentDialogProps) => {
+  const { t } = useTranslation();
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(
     null,
   );
@@ -51,7 +53,7 @@ export const EnrollStudentDialog = ({
 
   const handleEnroll = () => {
     if (!selectedStudentId) {
-      toast.error("Please select a student.");
+      toast.error(t("classes.dialogs.enrollStudent.toast.selectStudent"));
       return;
     }
 
@@ -66,7 +68,7 @@ export const EnrollStudentDialog = ({
       {
         onSuccess: () => {
           setIsSuccess(true);
-          toast.success("Student enrolled successfully!");
+          toast.success(t("classes.dialogs.enrollStudent.toast.success"));
           setTimeout(() => {
             setSelectedStudentId(null); // Reset selection
             setIsSuccess(false);
@@ -74,7 +76,7 @@ export const EnrollStudentDialog = ({
           }, 1000);
         },
         onError: (error) => {
-          toast.error(error.message || "Failed to enroll student.");
+          toast.error(error.message || t("classes.dialogs.enrollStudent.toast.error"));
         },
       },
     );
@@ -86,11 +88,11 @@ export const EnrollStudentDialog = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="text-start">
         <DialogHeader>
-          <DialogTitle>Enroll a New Student</DialogTitle>
+          <DialogTitle>{t("classes.dialogs.enrollStudent.title")}</DialogTitle>
           <DialogDescription>
-            Select a student from the list to enroll them in this class.
+            {t("classes.dialogs.enrollStudent.description")}
           </DialogDescription>
         </DialogHeader>
         <div className="py-4">
@@ -99,26 +101,26 @@ export const EnrollStudentDialog = ({
             value={selectedStudentId ?? undefined}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Select a student..." />
+              <SelectValue placeholder={t("classes.dialogs.enrollStudent.fieldPlaceholder")} />
             </SelectTrigger>
             <SelectContent>
               {availableStudents.length > 0 ? (
                 availableStudents.map((option) => (
-                  <SelectItem key={option.value} value={String(option.value)}>
+                  <SelectItem key={option.value} value={String(option.value)} className="text-start">
                     {option.label}
                   </SelectItem>
                 ))
               ) : (
-                <div className="p-4 text-sm text-muted-foreground">
-                  All available students are already enrolled.
+                <div className="p-4 text-sm text-muted-foreground text-start">
+                  {t("classes.dialogs.enrollStudent.noStudents")}
                 </div>
               )}
             </SelectContent>
           </Select>
         </div>
-        <DialogFooter>
+        <DialogFooter className="gap-2">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
+            {t("buttons.cancel")}
           </Button>
           <LoadingButton
             onClick={handleEnroll}
@@ -126,7 +128,7 @@ export const EnrollStudentDialog = ({
             isSuccess={isSuccess}
             disabled={availableStudents.length === 0}
           >
-            Enroll Student
+            {t("buttons.enrollStudent")}
           </LoadingButton>
         </DialogFooter>
       </DialogContent>

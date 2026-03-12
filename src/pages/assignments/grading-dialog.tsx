@@ -33,18 +33,19 @@ import Confetti from "react-confetti";
 import { useWindowSize } from "react-use";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
+import { useTranslation } from "react-i18next";
 
-const gradingSchema = z.object({
+const gradingSchema = (t: any) => z.object({
   grade: z.coerce
     .number()
-    .min(0, "Grade must be at least 0")
-    .max(100, "Grade cannot exceed 100"),
+    .min(0, t("assignments.grading.validation.min"))
+    .max(100, t("assignments.grading.validation.max")),
   feedback: z.string().optional(),
   requiresResubmission: z.boolean().default(false),
   teacherPrivateNotes: z.string().optional(),
 });
 
-type GradingFormValues = z.infer<typeof gradingSchema>;
+type GradingFormValues = z.infer<ReturnType<typeof gradingSchema>>;
 
 interface GradingDialogProps {
   isOpen: boolean;
@@ -59,6 +60,7 @@ export const GradingDialog = ({
   submission,
   readOnly = false,
 }: GradingDialogProps) => {
+  const { t, i18n } = useTranslation();
   const { open } = useNotification();
   const { width, height } = useWindowSize();
   const { data: identity } = useGetIdentity<User>();
@@ -74,7 +76,7 @@ export const GradingDialog = ({
   const isUpdating = updateMutation.isPending;
 
   const form = useForm<Submission, HttpError, GradingFormValues>({
-    resolver: zodResolver(gradingSchema) as any,
+    resolver: zodResolver(gradingSchema(t)) as any,
     defaultValues: {
       grade: submission?.grade ?? 0,
       feedback: submission?.feedback ?? "",
@@ -92,6 +94,7 @@ export const GradingDialog = ({
 
   const currentGrade = watch("grade");
   const isDraft = submission?.isDraft;
+  const isAr = i18n.language === 'ar';
 
   const { mutate: getAIFeedback, mutation: aiMutation } = useCustomMutation<AIFeedbackResponse>();
   const isAILoading = aiMutation.isPending;
@@ -156,8 +159,8 @@ export const GradingDialog = ({
           setIsAISuggested(true);
           open?.({
             type: "success",
-            message: "AI Analysis Complete",
-            description: "Suggested grade and feedback applied.",
+            message: t("assignments.grading.toasts.aiComplete"),
+            description: t("assignments.grading.toasts.aiApplied"),
           });
         },
       }
@@ -177,7 +180,7 @@ export const GradingDialog = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto border-none shadow-2xl p-0 overflow-hidden text-left bg-background/95 backdrop-blur-xl">
+      <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto border-none shadow-2xl p-0 overflow-hidden text-left bg-background/95 backdrop-blur-xl" style={{ direction: isAr ? 'rtl' : 'ltr' }}>
         {showConfetti && <Confetti width={width} height={height} recycle={false} numberOfPieces={200} gravity={0.2} colors={['#4f46e5', '#9333ea', '#db2777', '#22c55e']} />}
         
         <div className="h-1.5 bg-gradient-to-r from-primary via-ai-primary to-primary w-full" />
@@ -199,7 +202,7 @@ export const GradingDialog = ({
                         >
                             <Check className="h-12 w-12 stroke-[3]" />
                         </motion.div>
-                        <h3 className="text-2xl font-black tracking-tight">Grade Saved!</h3>
+                        <h3 className="text-2xl font-black tracking-tight">{t("assignments.grading.gradeSaved")}</h3>
                         {currentGrade >= 90 && (
                             <motion.div 
                                 initial={{ y: 10, opacity: 0 }}
@@ -208,14 +211,14 @@ export const GradingDialog = ({
                                 className="flex items-center gap-2 text-primary font-bold"
                             >
                                 <PartyPopper className="h-5 w-5" />
-                                <span>Excellent work by the student!</span>
+                                <span>{t("assignments.grading.excellentWork")}</span>
                             </motion.div>
                         )}
                     </motion.div>
                 )}
             </AnimatePresence>
 
-            <DialogHeader className="p-6 pb-2">
+            <DialogHeader className="p-6 pb-2 text-start">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="space-y-1">
                         <div className="flex items-center gap-3">
@@ -223,20 +226,20 @@ export const GradingDialog = ({
                               <div className="p-2 rounded-lg bg-primary/10 text-primary">
                                   <FileText className="h-5 w-5" />
                               </div>
-                              {isStaff ? "Grade Submission" : "Submission Details"}
+                              {isStaff ? t("assignments.grading.gradeSubmission") : t("assignments.grading.submissionDetails")}
                           </DialogTitle>
                           <Badge variant="outline" className="bg-primary/5 text-primary border-primary/10 font-black text-[10px] uppercase tracking-widest px-3 py-1 rounded-lg">
-                            Attempt #{submission.attemptNumber}
+                            {t("assignments.grading.attempt", { count: submission.attemptNumber })}
                           </Badge>
                           {isDraft && (
                             <Badge className="bg-amber-500/10 text-amber-600 border-none font-black text-[10px] uppercase tracking-widest px-3 py-1 rounded-lg">
-                              Draft
+                              {t("assignments.grading.draft")}
                             </Badge>
                           )}
                         </div>
                         <DialogDescription className="font-medium flex items-center gap-2 mt-1">
                             <UserIcon className="h-3.5 w-3.5 text-muted-foreground" />
-                            <span className="text-muted-foreground text-xs uppercase tracking-wider font-bold">Student:</span>
+                            <span className="text-muted-foreground text-xs uppercase tracking-wider font-bold">{t("assignments.grading.studentLabel")}</span>
                             <span className="text-foreground font-bold bg-primary/5 px-2 py-0.5 rounded-md border border-primary/10">{submission.student?.name}</span>
                         </DialogDescription>
                     </div>
@@ -253,25 +256,25 @@ export const GradingDialog = ({
                         >
                             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shine_1.5s_ease-in-out] pointer-events-none" />
                             {isAILoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-                            <span className="font-bold tracking-tight">{isAILoading ? "AI Analyzing..." : "AI Re-Analyze"}</span>
+                            <span className="font-bold tracking-tight">{isAILoading ? t("buttons.aiAnalyzing") : t("buttons.aiReanalyze")}</span>
                         </Button>
                     )}
                 </div>
             </DialogHeader>
 
-            <div className="p-6 pt-2 grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="p-6 pt-2 grid grid-cols-1 md:grid-cols-2 gap-8 text-start">
                 {/* Left Column: Student Work */}
                 <div className="space-y-4">
                     <div className="space-y-2">
                         <div className="flex items-center justify-between">
                             <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
                                 <span className="w-1 h-1 rounded-full bg-primary" />
-                                Student Work
+                                {t("assignments.grading.studentWork")}
                             </Label>
                             {submission.content && (
                                 <div className="flex items-center gap-3">
                                     <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-tighter">
-                                        {wordCount} words
+                                        {t("assignments.form.wordsCount", { count: wordCount })}
                                     </span>
                                     <button 
                                         onClick={copyToClipboard}
@@ -288,7 +291,7 @@ export const GradingDialog = ({
                                 {submission.content || (
                                     <div className="h-full flex flex-col items-center justify-center text-muted-foreground/40 py-20 gap-2">
                                         <FileText className="h-8 w-8 opacity-20" />
-                                        <span className="font-medium italic">No text content provided.</span>
+                                        <span className="font-medium italic">{t("assignments.grading.noContent")}</span>
                                     </div>
                                 )}
                             </div>
@@ -302,16 +305,16 @@ export const GradingDialog = ({
                                     <FileText className="h-5 w-5 text-primary" />
                                 </div>
                                 <div className="flex flex-col">
-                                    <span className="text-xs font-bold group-hover:text-primary transition-colors">Attached Document</span>
+                                    <span className="text-xs font-bold group-hover:text-primary transition-colors">{t("assignments.grading.attachedDoc")}</span>
                                     <span className="text-[10px] text-muted-foreground uppercase font-medium flex items-center gap-1">
-                                        View or Download <ExternalLink className="h-2 w-2" />
+                                        {t("assignments.grading.viewOrDownload")} <ExternalLink className="h-2 w-2" />
                                     </span>
                                 </div>
                             </div>
                             <Button variant="secondary" size="sm" className="h-9 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-sm gap-2" asChild>
                                 <a href={submission.fileUrl} target="_blank" rel="noopener noreferrer">
                                     <Download className="h-3 w-3" />
-                                    Open
+                                    {t("buttons.open")}
                                 </a>
                             </Button>
                         </div>
@@ -328,13 +331,13 @@ export const GradingDialog = ({
                                 <Lock className="h-10 w-10" />
                               </div>
                               <div className="space-y-2">
-                                <h4 className="text-xl font-black tracking-tight text-amber-700">Grading Locked</h4>
+                                <h4 className="text-xl font-black tracking-tight text-amber-700">{t("assignments.grading.gradingLocked")}</h4>
                                 <p className="text-sm text-amber-600/80 font-medium leading-relaxed">
-                                  This submission is currently a <strong>Draft</strong>. You can review the student's work, but grading is disabled until they officially turn it in.
+                                  {t("assignments.grading.draftNotice")}
                                 </p>
                               </div>
                               <Button variant="outline" className="rounded-xl border-amber-500/20 text-amber-700 hover:bg-amber-500/10 font-bold" onClick={() => onOpenChange(false)}>
-                                Close Preview
+                                {t("buttons.closePreview")}
                               </Button>
                             </div>
                           ) : (
@@ -348,7 +351,7 @@ export const GradingDialog = ({
                                                 <div className="flex items-center justify-between">
                                                     <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
                                                         <span className="w-1 h-1 rounded-full bg-primary" />
-                                                        Final Score (%)
+                                                        {t("assignments.grading.finalScore")}
                                                     </FormLabel>
                                                     <AnimatePresence>
                                                         {isAISuggested && (
@@ -357,7 +360,7 @@ export const GradingDialog = ({
                                                                 animate={{ opacity: 1, x: 0 }}
                                                                 className="text-[9px] font-black uppercase tracking-tighter text-ai-primary bg-ai-primary/10 px-2 py-0.5 rounded-full flex items-center gap-1"
                                                             >
-                                                                <Sparkles className="h-2.5 w-2.5" /> AI Suggested
+                                                                <Sparkles className="h-2.5 w-2.5" /> {t("assignments.grading.aiSuggested")}
                                                             </motion.span>
                                                         )}
                                                     </AnimatePresence>
@@ -397,12 +400,12 @@ export const GradingDialog = ({
                                             <FormItem>
                                                 <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
                                                     <span className="w-1 h-1 rounded-full bg-primary" />
-                                                    Feedback to Student
+                                                    {t("assignments.grading.feedbackToStudent")}
                                                 </FormLabel>
                                                 <FormControl>
                                                     <div className="relative">
                                                         <Textarea
-                                                            placeholder="Provide constructive feedback..."
+                                                            placeholder={t("assignments.grading.feedbackPlaceholder")}
                                                             className={cn(
                                                                 "min-h-[120px] rounded-2xl resize-none bg-muted/10 border-2 border-transparent focus-visible:ring-primary p-5 text-sm leading-relaxed shadow-inner transition-all",
                                                                 isAISuggested && "border-ai-primary/10 bg-ai-primary/[0.02]"
@@ -440,9 +443,9 @@ export const GradingDialog = ({
                                                   <div className="space-y-1 leading-none">
                                                       <FormLabel className="text-xs font-black uppercase tracking-widest text-orange-700 flex items-center gap-2">
                                                           <RotateCcw className="h-3 w-3" />
-                                                          Requires Resubmission
+                                                          {t("assignments.grading.requiresResubmission")}
                                                       </FormLabel>
-                                                      <p className="text-[10px] text-orange-600/60 font-medium">Student will be notified to submit a new attempt.</p>
+                                                      <p className="text-[10px] text-orange-600/60 font-medium">{t("assignments.grading.resubmissionNote")}</p>
                                                   </div>
                                               </FormItem>
                                           )}
@@ -455,11 +458,11 @@ export const GradingDialog = ({
                                               <FormItem>
                                                   <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
                                                       <Lock className="h-3 w-3" />
-                                                      Private Teacher Notes
+                                                      {t("assignments.grading.privateNotes")}
                                                   </FormLabel>
                                                   <FormControl>
                                                       <Textarea
-                                                          placeholder="Internal notes (not visible to student)..."
+                                                          placeholder={t("assignments.grading.privatePlaceholder")}
                                                           className="min-h-[80px] rounded-2xl resize-none bg-muted/5 border-none focus-visible:ring-primary p-4 text-xs leading-relaxed italic"
                                                           {...field}
                                                       />
@@ -471,7 +474,7 @@ export const GradingDialog = ({
                                     </div>
 
                                     <div className="flex gap-3 pt-2">
-                                        <Button type="button" variant="ghost" className="flex-1 rounded-xl font-bold h-12" onClick={() => onOpenChange(false)}>Cancel</Button>
+                                        <Button type="button" variant="ghost" className="flex-1 rounded-xl font-bold h-12" onClick={() => onOpenChange(false)}>{t("buttons.cancel")}</Button>
                                         <LoadingButton 
                                             type="submit" 
                                             isLoading={isUpdating}
@@ -479,7 +482,7 @@ export const GradingDialog = ({
                                             disabled={isAILoading}
                                             className="flex-[2] rounded-xl font-black uppercase tracking-widest shadow-lg shadow-primary/20 h-12"
                                         >
-                                            Save Grade
+                                            {t("buttons.saveGrade")}
                                         </LoadingButton>
                                     </div>
                                 </form>
@@ -491,7 +494,7 @@ export const GradingDialog = ({
                             <div className="space-y-2">
                                 <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
                                     <span className="w-1 h-1 rounded-full bg-primary" />
-                                    Your Score
+                                    {t("assignments.grading.yourScore")}
                                 </Label>
                                 <motion.div 
                                     initial={{ scale: 0.95, opacity: 0 }}
@@ -507,14 +510,20 @@ export const GradingDialog = ({
                                         <span className="text-2xl font-black text-primary/40 ml-1">%</span>
                                     </div>
                                     <div className="mt-2 px-3 py-1 rounded-full bg-primary/10 text-[10px] font-black uppercase tracking-widest text-primary relative z-10">
-                                        {submission.requiresResubmission ? "Resubmission Requested" : Number(submission.grade) >= 90 ? "Excellent Work!" : Number(submission.grade) >= 70 ? "Good Job!" : "Keep Improving!"}
+                                        {submission.requiresResubmission 
+                                            ? t("assignments.grading.status.requested") 
+                                            : Number(submission.grade) >= 90 
+                                                ? t("assignments.grading.status.excellent") 
+                                                : Number(submission.grade) >= 70 
+                                                    ? t("assignments.grading.status.good") 
+                                                    : t("assignments.grading.status.improving")}
                                     </div>
                                 </motion.div>
                             </div>
                             <div className="space-y-2">
                                 <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
                                     <span className="w-1 h-1 rounded-full bg-primary" />
-                                    Teacher Feedback
+                                    {t("assignments.grading.teacherFeedback")}
                                 </Label>
                                 <motion.div 
                                     initial={{ y: 10, opacity: 0 }}
@@ -523,10 +532,10 @@ export const GradingDialog = ({
                                     className="p-6 rounded-2xl bg-muted/20 border border-muted-foreground/10 min-h-[180px] text-sm leading-relaxed italic shadow-sm relative"
                                 >
                                     <MessageSquareQuote className="absolute top-4 right-4 h-5 w-5 text-muted-foreground/10" />
-                                    {submission.feedback || "No feedback provided yet."}
+                                    {submission.feedback || t("assignments.grading.noFeedback")}
                                 </motion.div>
                             </div>
-                            <Button className="w-full rounded-xl font-bold h-12 mt-4" onClick={() => onOpenChange(false)}>Close</Button>
+                            <Button className="w-full rounded-xl font-bold h-12 mt-4" onClick={() => onOpenChange(false)}>{t("buttons.close")}</Button>
                         </div>
                     )}
                 </div>

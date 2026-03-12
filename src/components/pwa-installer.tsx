@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Download, X } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 export function PWAInstaller() {
+  const { t } = useTranslation();
   const [installPrompt, setInstallPrompt] = useState<any>(null);
   const [isVisible, setIsVisible] = useState(false);
 
@@ -28,7 +30,7 @@ export function PWAInstaller() {
     const { outcome } = await installPrompt.userChoice;
     
     if (outcome === "accepted") {
-      toast.success("App installed successfully!");
+      toast.success(t("common.pwa.success"));
     }
     
     setInstallPrompt(null);
@@ -45,13 +47,13 @@ export function PWAInstaller() {
             <Download className="h-5 w-5 text-primary" />
           </div>
           <div>
-            <p className="text-sm font-medium">Install Classroom App</p>
-            <p className="text-xs text-muted-foreground">Access your classes faster</p>
+            <p className="text-sm font-medium">{t("common.pwa.title")}</p>
+            <p className="text-xs text-muted-foreground">{t("common.pwa.description")}</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
           <Button size="sm" onClick={handleInstall}>
-            Install
+            {t("common.pwa.install")}
           </Button>
           <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setIsVisible(false)}>
             <X className="h-4 w-4" />

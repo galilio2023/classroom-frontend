@@ -8,6 +8,7 @@ import { useQuiz } from "@/hooks/use-quiz";
 import { QuizProgress } from "./ai/quiz-progress";
 import { QuizOption } from "./ai/quiz-option";
 import { QuizExplanation } from "./ai/quiz-explanation";
+import { useTranslation } from "react-i18next";
 
 interface InteractiveQuizProps {
   assignmentId: number;
@@ -16,6 +17,7 @@ interface InteractiveQuizProps {
 }
 
 export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({ assignmentId, description, onComplete }) => {
+  const { t } = useTranslation();
   const go = useGo();
   const {
     questions,
@@ -82,15 +84,16 @@ export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({ assignmentId, 
               disabled={!selectedOption}
               onClick={handleCheckAnswer}
             >
-              Check Answer
+              {t("classes.quiz.checkAnswer")}
             </Button>
           ) : (
             <Button 
               className="w-full rounded-xl font-black h-10 md:h-12 shadow-lg shadow-primary/20" 
               onClick={handleNext}
             >
-              {currentStep === questions.length - 1 ? "Finish Quiz" : "Next Question"}
-              <ArrowRight className="ml-2 h-4 w-4 md:h-5 md:w-5" />
+              {currentStep === questions.length - 1 ? t("classes.quiz.finishQuiz") : t("classes.quiz.nextQuestion")}
+              <ArrowRight className="ml-2 h-4 w-4 md:h-5 md:w-5 ltr:block rtl:hidden" />
+              <ArrowRight className="mr-2 h-4 w-4 md:h-5 md:w-5 rtl:block ltr:hidden rotate-180" />
             </Button>
           )}
         </CardFooter>

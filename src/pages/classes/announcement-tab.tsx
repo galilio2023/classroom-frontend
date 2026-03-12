@@ -62,6 +62,7 @@ import { AnnouncementReadsModal } from "./announcement-reads-modal";
 import { motion, AnimatePresence } from "framer-motion";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useTranslation } from "react-i18next";
 
 interface AnnouncementTabProps {
   classId: string;
@@ -82,6 +83,7 @@ const AnnouncementItem = ({
   onMarkAsRead: (id: number) => void;
   onViewReads: (id: number) => void;
 }) => {
+  const { t } = useTranslation();
   const itemRef = useRef<HTMLDivElement>(null);
   const isRead = announcement.isRead;
 
@@ -149,7 +151,7 @@ const AnnouncementItem = ({
                       className="h-6 gap-1.5 px-3 rounded-full font-black text-[9px] uppercase tracking-widest bg-primary/10 text-primary border-none"
                     >
                       <Pin className="h-3 w-3" />
-                      Pinned
+                      {t("classes.announcements.pinnedLabel")}
                     </Badge>
                   )}
                   {isRead === false && !isStaff && (
@@ -157,7 +159,7 @@ const AnnouncementItem = ({
                       variant="default"
                       className="h-6 px-3 rounded-full bg-primary text-[9px] uppercase font-black tracking-widest animate-pulse"
                     >
-                      New Update
+                      {t("classes.announcements.newUpdate")}
                     </Badge>
                   )}
                 </div>
@@ -181,7 +183,7 @@ const AnnouncementItem = ({
                     size="icon"
                     className="h-10 w-10 rounded-xl text-muted-foreground hover:text-primary hover:bg-primary/5"
                     onClick={() => onViewReads(announcement.id)}
-                    title="View Read Status"
+                    title={t("classes.announcements.viewReadStatus")}
                   >
                     <Eye className="h-5 w-5" />
                   </Button>
@@ -205,15 +207,15 @@ const AnnouncementItem = ({
                       >
                         <Pin className="h-4 w-4" />
                         {announcement.isPinned
-                          ? "Unpin Announcement"
-                          : "Pin to Top"}
+                          ? t("classes.announcements.unpin")
+                          : t("classes.announcements.pin")}
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         className="text-destructive focus:text-destructive rounded-lg font-bold gap-2 py-2.5"
                         onClick={() => onDelete(announcement.id)}
                       >
                         <Trash2 className="h-4 w-4" />
-                        Delete Announcement
+                        {t("classes.announcements.delete")}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -240,7 +242,7 @@ const AnnouncementItem = ({
                   rel="noopener noreferrer"
                 >
                   <FileText className="h-4 w-4" />
-                  View Attachment
+                  {t("classes.announcements.viewAttachment")}
                   <ArrowRight className="h-3 w-3 ml-1" />
                 </a>
               </Button>
@@ -253,6 +255,7 @@ const AnnouncementItem = ({
 };
 
 export const AnnouncementTab = ({ classId }: AnnouncementTabProps) => {
+  const { t } = useTranslation();
   const { data: identity } = useGetIdentity<User>();
   const isStaff = identity?.role === "teacher" || identity?.role === "admin";
 
@@ -374,10 +377,10 @@ export const AnnouncementTab = ({ classId }: AnnouncementTabProps) => {
           fileUrl: result.secure_url,
           fileCldPubId: result.public_id,
         }));
-        toast.success("File uploaded securely");
+        toast.success(t("common.upload.success"));
       }
     } catch (error) {
-      toast.error("Failed to upload file securely");
+      toast.error(t("common.upload.error"));
     } finally {
       setIsUploading(false);
     }
@@ -448,7 +451,7 @@ export const AnnouncementTab = ({ classId }: AnnouncementTabProps) => {
       <div className="flex flex-col items-center justify-center py-20 gap-4">
         <Loader2 className="h-10 w-10 animate-spin text-primary/20" />
         <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">
-          Loading Announcements...
+          {t("common.searching")}
         </p>
       </div>
     );
@@ -480,7 +483,7 @@ export const AnnouncementTab = ({ classId }: AnnouncementTabProps) => {
                     <Pin className="h-4 w-4" />
                   </div>
                   <span className="font-black text-[10px] text-primary uppercase tracking-widest">
-                    Pinned Announcement
+                    {t("classes.announcements.pinnedLabel")}
                   </span>
                 </div>
                 <h4 className="font-black text-2xl tracking-tight">
@@ -501,7 +504,7 @@ export const AnnouncementTab = ({ classId }: AnnouncementTabProps) => {
                       rel="noopener noreferrer"
                     >
                       <Paperclip className="h-4 w-4" />
-                      View Attachment
+                      {t("classes.announcements.viewAttachment")}
                     </a>
                   </Button>
                 )}
@@ -527,11 +530,11 @@ export const AnnouncementTab = ({ classId }: AnnouncementTabProps) => {
               <Megaphone className="h-4 w-4" />
             </div>
             <h3 className="text-xl font-black tracking-tight">
-              Announcement History
+              {t("classes.announcements.history")}
             </h3>
           </div>
           <p className="text-sm text-muted-foreground font-medium">
-            Official updates and news for this class.
+            {t("classes.announcements.description")}
           </p>
         </div>
         {isStaff && (
@@ -539,7 +542,7 @@ export const AnnouncementTab = ({ classId }: AnnouncementTabProps) => {
             <DialogTrigger asChild>
               <Button className="rounded-xl h-11 px-6 font-black uppercase tracking-widest text-[10px] gap-2 shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95">
                 <PlusCircle className="h-4 w-4" />
-                New Announcement
+                {t("classes.announcements.new")}
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[600px] rounded-[2rem] border-none shadow-2xl bg-card/95 backdrop-blur-xl">
@@ -548,16 +551,16 @@ export const AnnouncementTab = ({ classId }: AnnouncementTabProps) => {
                   <Megaphone className="h-6 w-6" />
                 </div>
                 <DialogTitle className="text-2xl font-black tracking-tight">
-                  Create Announcement
+                  {t("classes.announcements.createTitle")}
                 </DialogTitle>
                 <DialogDescription className="font-medium">
-                  Post an official update for all students in this class.
+                  {t("classes.announcements.createDesc")}
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-6 py-6">
                 <div className="space-y-2.5">
                   <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
-                    Announcement Title
+                    {t("classes.announcements.fieldTitle")}
                   </Label>
                   <Input
                     placeholder="e.g., Upcoming Midterm Exam"
@@ -573,7 +576,7 @@ export const AnnouncementTab = ({ classId }: AnnouncementTabProps) => {
                 </div>
                 <div className="space-y-2.5">
                   <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
-                    Detailed Content
+                    {t("classes.announcements.fieldContent")}
                   </Label>
                   <Textarea
                     placeholder="Provide all necessary details here..."
@@ -590,7 +593,7 @@ export const AnnouncementTab = ({ classId }: AnnouncementTabProps) => {
                 </div>
                 <div className="space-y-2.5">
                   <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
-                    Attachment (Optional)
+                    {t("classes.announcements.fieldAttachment")}
                   </Label>
                   <div className="flex items-center gap-3 p-4 rounded-2xl border-2 border-dashed border-muted-foreground/10 bg-muted/10">
                     <div className="relative flex-1">
@@ -605,7 +608,7 @@ export const AnnouncementTab = ({ classId }: AnnouncementTabProps) => {
                           <Paperclip className="h-4 w-4" />
                         </div>
                         <span className="text-xs font-bold uppercase tracking-widest">
-                          {isUploading ? "Uploading..." : "Choose File"}
+                          {isUploading ? t("buttons.uploading") : t("buttons.selectFile")}
                         </span>
                       </div>
                     </div>
@@ -615,7 +618,7 @@ export const AnnouncementTab = ({ classId }: AnnouncementTabProps) => {
                     {newAnnouncement.fileUrl && (
                       <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-success bg-success/10 px-3 py-1.5 rounded-full">
                         <CheckCircle2 className="h-3 w-3" />
-                        Attached
+                        {t("assignments.create.attached")}
                       </div>
                     )}
                   </div>
@@ -637,10 +640,10 @@ export const AnnouncementTab = ({ classId }: AnnouncementTabProps) => {
                       htmlFor="pin"
                       className="text-sm font-black tracking-tight cursor-pointer"
                     >
-                      Pin to top
+                      {t("classes.announcements.fieldPin")}
                     </Label>
                     <p className="text-[10px] text-muted-foreground font-medium">
-                      This announcement will stay at the top of the feed.
+                      {t("classes.announcements.pinDesc")}
                     </p>
                   </div>
                 </div>
@@ -651,7 +654,7 @@ export const AnnouncementTab = ({ classId }: AnnouncementTabProps) => {
                   className="rounded-xl font-bold h-12"
                   onClick={() => setIsCreateOpen(false)}
                 >
-                  Cancel
+                  {t("buttons.cancel")}
                 </Button>
                 <Button
                   className="rounded-xl font-black uppercase tracking-widest h-12 px-8 shadow-lg shadow-primary/20"
@@ -668,7 +671,7 @@ export const AnnouncementTab = ({ classId }: AnnouncementTabProps) => {
                   ) : (
                     <Send className="h-4 w-4 mr-2" />
                   )}
-                  Post Announcement
+                  {t("buttons.postAnnouncement")}
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -691,10 +694,10 @@ export const AnnouncementTab = ({ classId }: AnnouncementTabProps) => {
               </div>
               <div className="space-y-2">
                 <h4 className="text-2xl font-black tracking-tight">
-                  No announcements yet
+                  {t("classes.announcements.noAnnouncements")}
                 </h4>
                 <p className="text-muted-foreground font-medium max-w-xs mx-auto">
-                  Official updates and news for this class will appear here.
+                  {t("classes.announcements.noAnnouncementsDesc")}
                 </p>
               </div>
             </CardContent>

@@ -12,12 +12,14 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Bell, CheckCheck, Info, GraduationCap, ClipboardCheck, Trophy, BrainCircuit, Video, MessageSquare } from "lucide-react";
 import { Notification, User } from "@/types";
 import { formatDistanceToNow } from "date-fns";
+import { ar, enUS } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { socket, connectSocket } from "@/lib/socket";
 import { toast } from "sonner";
 import Confetti from "react-confetti";
 import { useWindowSize } from "react-use";
+import { useTranslation } from "react-i18next";
 
 /**
  * Safely formats notification links to match frontend route structure.
@@ -36,6 +38,8 @@ const formatNotificationLink = (link: string | null) => {
 };
 
 export const NotificationBell = () => {
+  const { t, i18n } = useTranslation();
+  const isArabic = i18n.language === 'ar';
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const { data: identity } = useGetIdentity<User>();
@@ -75,7 +79,7 @@ export const NotificationBell = () => {
       toast.info(newNotification.title, {
         description: newNotification.message,
         action: link ? {
-          label: "View",
+          label: t("notifications.view"),
           onClick: () => navigate(link),
         } : undefined,
       });
@@ -100,19 +104,19 @@ export const NotificationBell = () => {
         description: data.message,
         duration: 8000,
         action: data.classId ? {
-          label: "View Class",
+          label: t("notifications.viewClass"),
           onClick: () => navigate(`/classes/show/${data.classId}`),
         } : undefined,
       });
     };
 
     const handleLiveSessionStarted = (data: any) => {
-        toast.info("Live Session Started!", {
+        toast.info(t("notifications.liveSessionStarted"), {
             icon: <Video className="h-5 w-5 text-live-primary animate-pulse" />,
-            description: `${data.startedBy} has started a live session. Join now!`,
+            description: t("notifications.liveSessionDescription", { name: data.startedBy }),
             duration: 10000,
             action: {
-                label: "Join Now",
+                label: t("notifications.joinNow"),
                 onClick: () => navigate(`/classes/show/${data.classId}?tab=live`),
             },
         });
@@ -135,9 +139,8 @@ export const NotificationBell = () => {
       socket.off("agent_alert", handleAgentAlert);
       socket.off("live_session_started", handleLiveSessionStarted);
       socket.off("connect");
-      // Do NOT disconnect singleton socket here
     };
-  }, [identity?.id, refetch, navigate]);
+  }, [identity?.id, refetch, navigate, t]);
 
   // Mark as read mutation (Optimistic Update)
   const { mutate: markAsRead } = useCustomMutation({
@@ -276,14 +279,14 @@ export const NotificationBell = () => {
                 variant="destructive" 
                 className="absolute -top-0.5 -right-0.5 h-5 min-w-5 flex items-center justify-center p-1 text-[10px] font-black border-2 border-background shadow-sm"
               >
-                {unreadCount > 9 ? "9+" : unreadCount}
+                {new Intl.NumberFormat(isArabic ? 'ar-EG' : 'en-US').format(unreadCount > 9 ? 9 : unreadCount)}{unreadCount > 9 && "+"}
               </Badge>
             )}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-80 p-0 mt-2 sidebar-glass border-border/50 shadow-2xl animate-in zoom-in-95 duration-200" align="end">
           <div className="flex items-center justify-between p-4 border-b border-border/50 bg-muted/20">
-            <h4 className="font-bold text-sm tracking-tight">Notifications</h4>
+            <h4 className="font-bold text-sm tracking-tight">{t("notifications.title")}</h4>
             {unreadCount > 0 && (
               <Button 
                 variant="ghost" 
@@ -291,7 +294,7 @@ export const NotificationBell = () => {
                 className="text-[10px] h-7 px-2 uppercase tracking-widest font-black hover:bg-primary/10 hover:text-primary"
                 onClick={handleMarkAllAsRead}
               >
-                Mark all as read
+                {t("notifications.markAllRead")}
               </Button>
             )}
           </div>
@@ -301,7 +304,7 @@ export const NotificationBell = () => {
                 <div className="p-4 bg-muted rounded-full mb-4 opacity-20">
                   <Bell className="h-8 w-8" />
                 </div>
-                <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">No notifications yet</p>
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">{t("notifications.noNotifications")}</p>
               </div>
             ) : (
               <div className="flex flex-col">
@@ -310,7 +313,7 @@ export const NotificationBell = () => {
                     key={notification.id}
                     className={cn(
                       "flex gap-3 p-4 border-b border-border/50 cursor-pointer transition-all duration-200 hover:bg-muted/50",
-                      !notification.isRead ? "bg-primary/5 border-l-2 border-l-primary" : ""
+                      !notification.isRead ? "bg-primary/5 ltr:border-l-2 rtl:border-r-2 ltr:border-l-primary rtl:border-r-primary" : ""
                     )}
                     onClick={() => handleMarkAsRead(notification)}
                   >
@@ -328,7 +331,10 @@ export const NotificationBell = () => {
                           {notification.title}
                         </span>
                         <span className="text-[9px] font-bold text-muted-foreground/60 whitespace-nowrap uppercase">
-                          {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
+                          {formatDistanceToNow(new Date(notification.createdAt), { 
+                            addSuffix: true,
+                            locale: isArabic ? ar : enUS
+                          })}
                         </span>
                       </div>
                       <p className="text-[11px] text-muted-foreground line-clamp-2 leading-relaxed">

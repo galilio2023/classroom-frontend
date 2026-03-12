@@ -5,6 +5,7 @@ import { Award, Printer, Share2, Eye } from "lucide-react";
 import { Certificate } from "./certificate";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 // Mock data for demonstration
 const MOCK_CERTIFICATES = [
@@ -30,6 +31,7 @@ interface CertificateGalleryProps {
 }
 
 export const CertificateGallery = ({ studentName, isOwner }: CertificateGalleryProps) => {
+  const { t } = useTranslation();
   const [selectedCert, setSelectedCert] = useState(MOCK_CERTIFICATES[0]);
   const printRef = useRef<HTMLDivElement>(null);
 
@@ -40,7 +42,7 @@ export const CertificateGallery = ({ studentName, isOwner }: CertificateGalleryP
   const handleShare = (id: string) => {
     const url = `${window.location.origin}/certificates/${id}`;
     navigator.clipboard.writeText(url);
-    toast.success("Certificate link copied to clipboard!");
+    toast.success(t("common.insightCopied"));
   };
 
   return (
@@ -62,7 +64,7 @@ export const CertificateGallery = ({ studentName, isOwner }: CertificateGalleryP
                 {cert.courseName}
               </h3>
               <p className="text-xs text-muted-foreground mb-4">
-                Instructor: {cert.teacherName}
+                {t("common.certificate.instructor")}: {cert.teacherName}
               </p>
               
               <div className="flex gap-2">
@@ -75,7 +77,7 @@ export const CertificateGallery = ({ studentName, isOwner }: CertificateGalleryP
                       onClick={() => setSelectedCert(cert)}
                     >
                       <Eye className="w-3.5 h-3.5" />
-                      View
+                      {t("buttons.view")}
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="max-w-4xl w-full p-0 bg-transparent border-none shadow-none overflow-hidden">
@@ -93,11 +95,11 @@ export const CertificateGallery = ({ studentName, isOwner }: CertificateGalleryP
                       <div className="flex gap-4 mt-4 no-print">
                         <Button onClick={handlePrint} className="gap-2 shadow-xl">
                           <Printer className="w-4 h-4" />
-                          Print / Download PDF
+                          {t("buttons.printReport")}
                         </Button>
                         <Button variant="secondary" onClick={() => handleShare(selectedCert.id)} className="gap-2 shadow-xl">
                           <Share2 className="w-4 h-4" />
-                          Share Link
+                          {t("buttons.share")}
                         </Button>
                       </div>
                     </div>

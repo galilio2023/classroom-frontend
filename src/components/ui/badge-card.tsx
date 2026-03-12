@@ -1,6 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { LucideIcon, Award, Star, Zap, Target, Flame, Trophy } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export interface BadgeData {
   id: string;
@@ -19,7 +20,13 @@ interface BadgeCardProps {
 }
 
 export function BadgeCard({ badge, className }: BadgeCardProps) {
+  const { t, i18n } = useTranslation();
+  const isArabic = i18n.language === 'ar';
   const Icon = badge.icon;
+
+  const formatNumber = (num: number) => {
+    return new Intl.NumberFormat(isArabic ? 'ar-EG' : 'en-US').format(num);
+  };
 
   return (
     <Card className={cn(
@@ -47,8 +54,8 @@ export function BadgeCard({ badge, className }: BadgeCardProps) {
         {!badge.unlocked && badge.progress !== undefined && badge.threshold !== undefined && (
           <div className="w-full mt-2 space-y-1">
             <div className="flex justify-between text-[8px] font-bold uppercase tracking-widest text-muted-foreground">
-              <span>Progress</span>
-              <span>{badge.progress} / {badge.threshold}</span>
+              <span>{t("common.progress")}</span>
+              <span>{formatNumber(badge.progress)} / {formatNumber(badge.threshold)}</span>
             </div>
             <div className="h-1 w-full bg-muted rounded-full overflow-hidden">
               <div 

@@ -19,6 +19,7 @@ import { User, UserRole } from "@/types";
 import { useState } from "react";
 import { toast } from "sonner";
 import { LoadingButton } from "@/components/ui/loading-button";
+import { useTranslation } from "react-i18next";
 
 interface InviteTeacherDialogProps {
   classId: string;
@@ -33,6 +34,7 @@ export const InviteTeacherDialog = ({
   onOpenChange,
   existingTeacherIds,
 }: InviteTeacherDialogProps) => {
+  const { t } = useTranslation();
   const { data: identity } = useGetIdentity<User>();
   const [selectedTeacherId, setSelectedTeacherId] = useState<string | null>(
     null,
@@ -51,7 +53,7 @@ export const InviteTeacherDialog = ({
 
   const handleInvite = () => {
     if (!selectedTeacherId) {
-      toast.error("Please select a teacher.");
+      toast.error(t("classes.dialogs.inviteTeacher.toast.selectTeacher"));
       return;
     }
 
@@ -66,7 +68,7 @@ export const InviteTeacherDialog = ({
       {
         onSuccess: () => {
           setIsSuccess(true);
-          toast.success("Teacher invited successfully!");
+          toast.success(t("classes.dialogs.inviteTeacher.toast.success"));
           setTimeout(() => {
             setSelectedTeacherId(null);
             setIsSuccess(false);
@@ -74,7 +76,7 @@ export const InviteTeacherDialog = ({
           }, 1000);
         },
         onError: (error: any) => {
-          toast.error(error?.data?.message || "Failed to invite teacher.");
+          toast.error(error?.data?.message || t("classes.dialogs.inviteTeacher.toast.error"));
         },
       },
     );
@@ -88,11 +90,11 @@ export const InviteTeacherDialog = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="text-start">
         <DialogHeader>
-          <DialogTitle>Invite a Co-Teacher</DialogTitle>
+          <DialogTitle>{t("classes.dialogs.inviteTeacher.title")}</DialogTitle>
           <DialogDescription>
-            Select a colleague to help manage this class.
+            {t("classes.dialogs.inviteTeacher.description")}
           </DialogDescription>
         </DialogHeader>
         <div className="py-4">
@@ -101,26 +103,26 @@ export const InviteTeacherDialog = ({
             value={selectedTeacherId ?? undefined}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Select a teacher..." />
+              <SelectValue placeholder={t("classes.dialogs.inviteTeacher.fieldPlaceholder")} />
             </SelectTrigger>
             <SelectContent>
               {availableTeachers.length > 0 ? (
                 availableTeachers.map((option) => (
-                  <SelectItem key={option.value} value={String(option.value)}>
+                  <SelectItem key={option.value} value={String(option.value)} className="text-start">
                     {option.label}
                   </SelectItem>
                 ))
               ) : (
-                <div className="p-4 text-sm text-muted-foreground">
-                  No other teachers available to invite.
+                <div className="p-4 text-sm text-muted-foreground text-start">
+                  {t("classes.dialogs.inviteTeacher.noTeachers")}
                 </div>
               )}
             </SelectContent>
           </Select>
         </div>
-        <DialogFooter>
+        <DialogFooter className="gap-2">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
+            {t("buttons.cancel")}
           </Button>
           <LoadingButton
             onClick={handleInvite}
@@ -128,7 +130,7 @@ export const InviteTeacherDialog = ({
             isSuccess={isSuccess}
             disabled={availableTeachers.length === 0}
           >
-            Invite Teacher
+            {t("buttons.inviteTeacher")}
           </LoadingButton>
         </DialogFooter>
       </DialogContent>

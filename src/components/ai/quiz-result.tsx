@@ -2,6 +2,7 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Trophy, RefreshCw } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface QuizResultProps {
   score: number;
@@ -10,6 +11,7 @@ interface QuizResultProps {
 }
 
 export const QuizResult: React.FC<QuizResultProps> = ({ score, totalQuestions, onBackToDashboard }) => {
+  const { t } = useTranslation();
   const finalPercentage = Math.round((score / totalQuestions) * 100);
   
   return (
@@ -21,14 +23,14 @@ export const QuizResult: React.FC<QuizResultProps> = ({ score, totalQuestions, o
           </div>
         </div>
         <div className="space-y-2">
-          <h2 className="text-2xl md:text-3xl font-black">Quiz Complete!</h2>
-          <p className="text-sm md:text-base text-muted-foreground font-medium px-4">You've finished the interactive assessment.</p>
+          <h2 className="text-2xl md:text-3xl font-black">{t("classes.quiz.quizComplete")}</h2>
+          <p className="text-sm md:text-base text-muted-foreground font-medium px-4">{t("classes.quiz.finishedAssessment")}</p>
         </div>
         <div className="text-5xl md:text-6xl font-black text-primary">
           {finalPercentage}%
         </div>
         <p className="text-xs md:text-sm font-bold uppercase tracking-widest text-primary/60">
-          {score} out of {totalQuestions} correct
+          {t("classes.quiz.scoreSummary", { score, total: totalQuestions })}
         </p>
       </CardContent>
       <CardFooter className="justify-center">
@@ -37,8 +39,8 @@ export const QuizResult: React.FC<QuizResultProps> = ({ score, totalQuestions, o
           variant="outline" 
           className="rounded-xl font-bold w-full max-w-[200px]"
         >
-          <RefreshCw className="mr-2 h-4 w-4" />
-          Back to Dashboard
+          <RefreshCw className="mr-2 h-4 w-4 rtl:mr-0 rtl:ml-2" />
+          {t("buttons.goBack")}
         </Button>
       </CardFooter>
     </Card>

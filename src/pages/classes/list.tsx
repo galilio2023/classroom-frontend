@@ -87,9 +87,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import usePageTitle from "@/hooks/use-page-title";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { ApplyTeacherDialog } from "./apply-teacher-dialog";
+import { useTranslation } from "react-i18next";
 
 const ClassesList = () => {
-  usePageTitle("Classrooms");
+  const { t, i18n } = useTranslation();
+  usePageTitle(t("classes.list.title"));
   const { data: identity } = useGetIdentity<User>();
   const { create, show, edit } = useNavigation();
   const { selectedTerm } = useTerm();
@@ -141,12 +143,12 @@ const ClassesList = () => {
       },
       {
         onSuccess: (data: any) => {
-          toast.success(data.data.message || "Request sent!");
+          toast.success(data.data.message || t("classes.list.toast.joinRequestSent"));
           setIsJoinModalOpen(false);
           setInviteCode("");
         },
         onError: (error: any) => {
-          toast.error(error?.data?.message || "Invalid invite code");
+          toast.error(error?.data?.message || t("classes.list.toast.invalidInviteCode"));
         },
       },
     );
@@ -161,7 +163,7 @@ const ClassesList = () => {
       },
       {
         onSuccess: () => {
-          toast.success("Class curriculum cloned successfully!");
+          toast.success(t("classes.list.toast.cloned"));
           invalidate({ resource: "classes", invalidates: ["list"] });
         },
       },
@@ -177,7 +179,7 @@ const ClassesList = () => {
         },
         {
           onSuccess: () => {
-            toast.success("Class deleted successfully");
+            toast.success(t("classes.list.toast.deleted"));
             setDeleteTarget(null);
           },
         },
@@ -264,6 +266,8 @@ const ClassesList = () => {
     overscan: 5,
   });
 
+  const isAr = i18n.language === 'ar';
+
   return (
     <div className="space-y-10 pb-20">
       <ListView>
@@ -276,15 +280,15 @@ const ClassesList = () => {
             <div className="space-y-4">
               <Breadcrumb />
               <div>
-                <h1 className="text-4xl font-black tracking-tight">
-                  {isStudent ? "Discover Classes" : viewMode === "mine" ? "My Classrooms" : "Browse Catalog"}
+                <h1 className="text-4xl font-black tracking-tight text-start">
+                  {isStudent ? t("classes.list.discover") : viewMode === "mine" ? t("classes.list.myClassrooms") : t("classes.list.browseCatalog")}
                 </h1>
-                <p className="text-muted-foreground font-medium mt-1">
+                <p className="text-muted-foreground font-medium mt-1 text-start">
                   {isStudent
-                    ? "Find and join new classes to expand your knowledge."
+                    ? t("classes.list.discoverDescription")
                     : viewMode === "mine" 
-                        ? "Manage your students, curriculum, and class activities."
-                        : "Explore available classes and apply to teach them."}
+                        ? t("classes.list.myDescription")
+                        : t("classes.list.browseDescription")}
                 </p>
               </div>
             </div>
@@ -295,11 +299,11 @@ const ClassesList = () => {
                     <TabsList className="bg-transparent h-12 gap-1">
                         <TabsTrigger value="mine" className="rounded-xl font-black uppercase tracking-widest text-[9px] gap-2 px-6 data-[state=active]:bg-primary data-[state=active]:text-white shadow-sm transition-all">
                             <Briefcase className="h-3.5 w-3.5" />
-                            My Classes
+                            {t("classes.list.myClassesTab")}
                         </TabsTrigger>
                         <TabsTrigger value="browse" className="rounded-xl font-black uppercase tracking-widest text-[9px] gap-2 px-6 data-[state=active]:bg-primary data-[state=active]:text-white shadow-sm transition-all">
                             <Compass className="h-3.5 w-3.5" />
-                            Browse
+                            {t("classes.list.browseTab")}
                         </TabsTrigger>
                     </TabsList>
                 </Tabs>
@@ -316,7 +320,7 @@ const ClassesList = () => {
                       className="flex-1 md:flex-none gap-2 rounded-2xl h-14 px-8 border-primary/10 bg-card/50 backdrop-blur-sm hover:bg-primary/5 text-primary font-black uppercase tracking-widest text-[10px] shadow-sm"
                     >
                       <Key className="h-4 w-4" />
-                      Join by Code
+                      {t("buttons.joinByCode")}
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="rounded-[2.5rem] border-none shadow-2xl bg-card/95 backdrop-blur-xl max-w-md">
@@ -324,20 +328,19 @@ const ClassesList = () => {
                       <div className="p-4 rounded-2xl bg-primary/10 text-primary w-fit">
                         <Key className="h-8 w-8" />
                       </div>
-                      <div className="space-y-1">
+                      <div className="space-y-1 text-start">
                         <DialogTitle className="text-3xl font-black tracking-tight">
-                          Join a Class
+                          {t("classes.list.joinModal.title")}
                         </DialogTitle>
                         <DialogDescription className="font-medium text-base">
-                          Enter the 8-character invite code provided by your
-                          teacher.
+                          {t("classes.list.joinModal.description")}
                         </DialogDescription>
                       </div>
                     </DialogHeader>
                     <div className="py-10">
                       <div className="relative group">
                         <Input
-                          placeholder="ABC123XY"
+                          placeholder={t("classes.list.joinModal.placeholder")}
                           value={inviteCode}
                           onChange={(e) =>
                             setInviteCode(e.target.value.toUpperCase())
@@ -347,7 +350,7 @@ const ClassesList = () => {
                         />
                         <div className="absolute -bottom-8 left-0 w-full text-center">
                           <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">
-                            8 Characters Required
+                            {t("classes.list.joinModal.required")}
                           </span>
                         </div>
                       </div>
@@ -358,7 +361,7 @@ const ClassesList = () => {
                         className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-6"
                         onClick={() => setIsJoinModalOpen(false)}
                       >
-                        Cancel
+                        {t("buttons.cancel")}
                       </Button>
                       <Button
                         className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-10 shadow-xl shadow-primary/20"
@@ -370,7 +373,7 @@ const ClassesList = () => {
                         ) : (
                           <PlusCircle className="h-4 w-4 mr-2" />
                         )}
-                        Join Class
+                        {t("buttons.joinClass")}
                       </Button>
                     </DialogFooter>
                   </DialogContent>
@@ -382,7 +385,7 @@ const ClassesList = () => {
                   className="flex-1 md:flex-none rounded-2xl h-14 px-10 font-black uppercase tracking-widest text-[10px] gap-2 shadow-xl shadow-primary/20 transition-all hover:scale-105 active:scale-95"
                 >
                   <PlusCircle className="h-5 w-5" />
-                  Create Class
+                  {t("buttons.createClass")}
                 </Button>
               )}
             </div>
@@ -399,14 +402,12 @@ const ClassesList = () => {
                 <div className="p-3 rounded-2xl bg-amber-500/20">
                   <AlertCircle className="h-6 w-6" />
                 </div>
-                <div className="space-y-1">
+                <div className="space-y-1 text-start">
                   <p className="font-black uppercase tracking-widest text-xs">
-                    Archive View Active
+                    {t("dashboard.archiveViewActive")}
                   </p>
                   <p className="text-sm font-medium">
-                    You are viewing classes from{" "}
-                    <strong>{selectedTerm.name}</strong>. This term is archived
-                    and read-only.
+                    {t("dashboard.archiveViewDescription", { termName: selectedTerm.name })}
                   </p>
                 </div>
               </motion.div>
@@ -417,11 +418,11 @@ const ClassesList = () => {
           <Card className="p-4 border-primary/5 bg-muted/30 rounded-4xl backdrop-blur-sm">
             <div className="flex flex-col lg:flex-row gap-4">
               <div className="relative flex-1 group">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                <Search className={cn("absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors", isAr ? "right-4" : "left-4")} />
                 <Input
                   type="text"
-                  placeholder="Search classes by name or subject..."
-                  className="pl-11 h-14 rounded-2xl border-none bg-background shadow-sm font-medium"
+                  placeholder={t("classes.list.searchPlaceholder")}
+                  className={cn("h-14 rounded-2xl border-none bg-background shadow-sm font-medium", isAr ? "pr-11 pl-4" : "pl-11 pr-4")}
                   value={searchQuery}
                   onChange={(event) => setSearchQuery(event.target.value)}
                 />
@@ -434,11 +435,11 @@ const ClassesList = () => {
                     onValueChange={setSelectedSubject}
                   >
                     <SelectTrigger className="w-[180px] border-none h-10 focus:ring-0 shadow-none font-black text-[10px] uppercase tracking-widest">
-                      <SelectValue placeholder="All Subjects" />
+                      <SelectValue placeholder={t("classes.list.allSubjects")} />
                     </SelectTrigger>
                     <SelectContent className="rounded-2xl border-none shadow-2xl">
                       <SelectItem value="all" className="rounded-xl font-bold">
-                        All Subjects
+                        {t("classes.list.allSubjects")}
                       </SelectItem>
                       {subjects.map((subject: Subject) => (
                         <SelectItem
@@ -481,28 +482,28 @@ const ClassesList = () => {
               <div className="h-full flex items-center justify-center p-10">
                 <EmptyState
                   icon={LayoutDashboard}
-                  title="No classes found"
+                  title={t("classes.list.noClasses")}
                   description={
                     isStudent
-                      ? "You haven't joined any classes yet. Use an invite code to get started."
+                      ? t("classes.list.noClassesDescriptionStudent")
                       : viewMode === "mine" 
-                        ? "You haven't been assigned to any classes yet."
-                        : "No classes match your search criteria."
+                        ? t("classes.list.noClassesDescriptionTeacher")
+                        : t("classes.list.noClassesDescriptionSearch")
                   }
                   className="border-none bg-transparent min-h-0"
                   action={
                     isStudent
                       ? {
-                          label: "Join a Class",
+                          label: t("buttons.joinClass"),
                           onClick: () => setIsJoinModalOpen(true),
                         }
                       : viewMode === "mine" && isTeacher
                         ? {
-                            label: "Browse Catalog",
+                            label: t("buttons.browseCatalog"),
                             onClick: () => setViewMode("browse"),
                           }
                         : {
-                            label: "Create Class",
+                            label: t("buttons.createClass"),
                             onClick: () => create("classes"),
                           }
                   }
@@ -542,7 +543,7 @@ const ClassesList = () => {
                       className="px-8"
                     >
                       <motion.div
-                        initial={{ opacity: 0, x: -10 }}
+                        initial={{ opacity: 0, x: isAr ? 10 : -10 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.2 }}
                         className="flex flex-col md:flex-row items-center h-full border-b border-primary/5 hover:bg-primary/[0.02] transition-all group"
@@ -570,16 +571,16 @@ const ClassesList = () => {
                             </div>
                           )}
                           {classItem.isLive && (
-                            <div className="absolute -top-2 -right-2 bg-red-500 text-white p-1.5 rounded-full border-4 border-background shadow-lg animate-pulse">
+                            <div className={cn("absolute -top-2 bg-red-500 text-white p-1.5 rounded-full border-4 border-background shadow-lg animate-pulse", isAr ? "-left-2" : "-right-2")}>
                               <Video className="h-3 w-3" />
                             </div>
                           )}
                         </div>
 
                         {/* Info */}
-                        <div className="flex-1 md:ml-8 text-center md:text-left min-w-0 w-full">
+                        <div className={cn("flex-1 text-center md:text-left min-w-0 w-full", isAr ? "md:mr-8" : "md:ml-8")}>
                           <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
-                            <h3 className="text-xl font-black tracking-tight truncate group-hover:text-primary transition-colors">
+                            <h3 className="text-xl font-black tracking-tight truncate group-hover:text-primary transition-colors text-start">
                               {classItem.name}
                             </h3>
                             <div className="flex items-center justify-center md:justify-start gap-2">
@@ -587,7 +588,7 @@ const ClassesList = () => {
                                 variant="outline"
                                 className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md border-primary/10"
                               >
-                                {classItem.subject?.name || "General"}
+                                {classItem.subject?.name || t("classes.list.general")}
                               </Badge>
                               {classItem.isLive && (
                                 <div className="flex items-center gap-1.5 bg-red-500/10 px-2 py-0.5 rounded-md">
@@ -596,13 +597,13 @@ const ClassesList = () => {
                                     <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-red-500"></span>
                                   </span>
                                   <span className="text-[9px] font-black text-red-500 uppercase tracking-widest">
-                                    Live
+                                    {t("classes.list.live")}
                                   </span>
                                 </div>
                               )}
                               {isTeacher && pendingApp && (
                                 <Badge className="bg-amber-500/10 text-amber-600 border-none text-[9px] font-black uppercase tracking-widest">
-                                    Pending Approval
+                                    {t("classes.list.pendingApproval")}
                                 </Badge>
                               )}
                             </div>
@@ -616,7 +617,7 @@ const ClassesList = () => {
                               <span className="text-xs font-bold">
                                 {classItem._count?.enrollments || 0}{" "}
                                 <span className="text-muted-foreground/50 font-medium">
-                                  / {classItem.capacity || "∞"} Students
+                                  / {classItem.capacity || "∞"} {t("classes.list.studentsLabel")}
                                 </span>
                               </span>
                             </div>
@@ -648,7 +649,7 @@ const ClassesList = () => {
 
                         {/* Actions */}
                         <div className="flex items-center gap-3 mt-6 md:mt-0 shrink-0">
-                          <div className="hidden lg:flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all translate-x-4 group-hover:translate-x-0">
+                          <div className={cn("hidden lg:flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all", isAr ? "-translate-x-4 group-hover:translate-x-0" : "translate-x-4 group-hover:translate-x-0")}>
                             {(isTeacher && isAssigned || isAdmin) && (
                               <>
                                 <Button
@@ -679,7 +680,7 @@ const ClassesList = () => {
                                 className="rounded-2xl px-8 h-12 text-[10px] font-black uppercase tracking-widest transition-all shadow-xl shadow-primary/20"
                             >
                                 <Send className="h-4 w-4 mr-2" />
-                                {pendingApp ? "Applied" : "Apply to Teach"}
+                                {pendingApp ? t("buttons.applied") : t("buttons.applyToTeach")}
                             </Button>
                           ) : (
                             <Button
@@ -696,12 +697,12 @@ const ClassesList = () => {
                                 {classItem.isLive ? (
                                     <>
                                     <Video className="h-4 w-4 mr-2" />
-                                    Join Live
+                                    {t("buttons.joinLive")}
                                     </>
                                 ) : (
                                     <>
-                                    Enter Class
-                                    <ArrowRight className="h-4 w-4 ml-2" />
+                                    {t("buttons.enterClass")}
+                                    <ArrowRight className={cn("h-4 w-4 ml-2", isAr && "mr-2 ml-0 rotate-180")} />
                                     </>
                                 )}
                                 </Link>
@@ -722,42 +723,42 @@ const ClassesList = () => {
                               align="end"
                               className="w-56 rounded-[1.5rem] p-2"
                             >
-                              <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-3 py-2">
-                                Class Options
+                              <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-3 py-2 text-start">
+                                {t("classes.list.classOptions")}
                               </DropdownMenuLabel>
                               <DropdownMenuItem
                                 onClick={() => show("classes", classItem.id)}
-                                className="rounded-xl gap-3 py-3 cursor-pointer"
+                                className="rounded-xl gap-3 py-3 cursor-pointer justify-start"
                               >
                                 <Eye className="h-4 w-4 text-primary" />
-                                <span className="font-bold">View Details</span>
+                                <span className="font-bold">{t("buttons.viewDetails")}</span>
                               </DropdownMenuItem>
                               {(isTeacher && isAssigned || isAdmin) && (
                                 <>
                                   <DropdownMenuItem
                                     onClick={() => edit("classes", classItem.id)}
-                                    className="rounded-xl gap-3 py-3 cursor-pointer"
+                                    className="rounded-xl gap-3 py-3 cursor-pointer justify-start"
                                   >
                                     <Pencil className="h-4 w-4 text-primary" />
-                                    <span className="font-bold">Edit Class</span>
+                                    <span className="font-bold">{t("buttons.editClass")}</span>
                                   </DropdownMenuItem>
                                   <DropdownMenuSeparator className="my-2" />
                                   <DropdownMenuItem
                                     onClick={() => handleClone(classItem.id)}
-                                    className="rounded-xl gap-3 py-3 cursor-pointer"
+                                    className="rounded-xl gap-3 py-3 cursor-pointer justify-start"
                                   >
                                     <Copy className="h-4 w-4 text-primary" />
                                     <span className="font-bold">
-                                      Duplicate Curriculum
+                                      {t("buttons.duplicateCurriculum")}
                                     </span>
                                   </DropdownMenuItem>
                                   <DropdownMenuItem
                                     onClick={() => setDeleteTarget(classItem.id)}
-                                    className="rounded-xl gap-3 py-3 cursor-pointer text-destructive focus:text-destructive"
+                                    className="rounded-xl gap-3 py-3 cursor-pointer text-destructive focus:text-destructive justify-start"
                                   >
                                     <Trash2 className="h-4 w-4" />
                                     <span className="font-bold">
-                                      Delete Class
+                                      {t("buttons.deleteClass")}
                                     </span>
                                   </DropdownMenuItem>
                                 </>
@@ -784,25 +785,24 @@ const ClassesList = () => {
             <div className="p-4 rounded-2xl bg-destructive/10 text-destructive w-fit">
               <Trash2 className="h-8 w-8" />
             </div>
-            <div className="space-y-1">
+            <div className="space-y-1 text-start">
               <AlertDialogTitle className="text-3xl font-black tracking-tight">
-                Are you absolutely sure?
+                {t("classes.list.deleteDialog.title")}
               </AlertDialogTitle>
               <AlertDialogDescription className="font-medium text-base">
-                This will permanently delete the class and all its curriculum
-                data. This action cannot be undone.
+                {t("classes.list.deleteDialog.description")}
               </AlertDialogDescription>
             </div>
           </AlertDialogHeader>
           <AlertDialogFooter className="gap-3 pt-6">
             <AlertDialogCancel className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-6">
-              Cancel
+              {t("buttons.cancel")}
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmDelete}
               className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-10 bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-xl shadow-destructive/20"
             >
-              Delete Class
+              {t("buttons.deleteClass")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

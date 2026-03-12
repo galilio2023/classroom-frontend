@@ -42,11 +42,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useTranslation } from "react-i18next";
 
 dayjs.extend(relativeTime);
 
 const AttendanceListPage = () => {
-  usePageTitle("Attendance");
+  const { t } = useTranslation();
+  usePageTitle(t("classes.attendance.governance.title"));
   const { data: identity } = useGetIdentity<User>();
   const isStaff = identity?.role === UserRole.ADMIN || identity?.role === UserRole.TEACHER;
   const { selectedTerm } = useTerm();
@@ -125,11 +127,11 @@ const AttendanceListPage = () => {
             <Breadcrumb />
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div>
-                <h1 className="text-4xl font-black tracking-tight">Attendance Governance</h1>
+                <h1 className="text-4xl font-black tracking-tight">{t("classes.attendance.governance.title")}</h1>
                 <p className="text-muted-foreground font-medium mt-1">
                     {isStaff 
-                        ? "Monitor class participation, manage QR check-ins, and oversee session history." 
-                        : "Track your academic presence and participation history across all classes."}
+                        ? t("classes.attendance.governance.descriptionStaff") 
+                        : t("classes.attendance.governance.descriptionStudent")}
                 </p>
               </div>
             </div>
@@ -142,7 +144,7 @@ const AttendanceListPage = () => {
                 <Activity className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Total Sessions</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t("classes.attendance.governance.totalSessions")}</p>
                 <p className="text-2xl font-black">{isLoading ? "..." : stats.total}</p>
               </div>
             </Card>
@@ -151,7 +153,7 @@ const AttendanceListPage = () => {
                 <UserCheck className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Avg. Presence</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t("classes.attendance.governance.avgPresence")}</p>
                 <p className="text-2xl font-black text-green-600">{isLoading ? "..." : `${stats.avgPresent}%`}</p>
               </div>
             </Card>
@@ -161,7 +163,7 @@ const AttendanceListPage = () => {
               </div>
               <div>
                 <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-                    {isStaff ? "Action Required" : "Total Absences"}
+                    {isStaff ? t("classes.attendance.governance.actionRequired") : t("classes.attendance.governance.totalAbsences")}
                 </p>
                 <p className="text-2xl font-black text-amber-600">{isLoading ? "..." : isStaff ? "0" : stats.recentAbsence}</p>
               </div>
@@ -175,7 +177,7 @@ const AttendanceListPage = () => {
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                 <Input
                   type="text"
-                  placeholder="Search by class name..."
+                  placeholder={t("classes.attendance.governance.searchPlaceholder")}
                   className="pl-11 h-14 rounded-2xl border-none bg-background shadow-sm font-medium"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -183,7 +185,7 @@ const AttendanceListPage = () => {
               </div>
               <div className="flex items-center gap-2 bg-background px-4 rounded-2xl shadow-sm border border-primary/5">
                 <Filter className="h-4 w-4 text-muted-foreground" />
-                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">History Filter</span>
+                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t("classes.attendance.governance.historyFilter")}</span>
               </div>
             </div>
           </Card>
@@ -200,8 +202,8 @@ const AttendanceListPage = () => {
                     <AlertCircle className="h-6 w-6" />
                   </div>
                   <div className="space-y-1">
-                    <p className="font-black uppercase tracking-widest text-xs">Archive View Active</p>
-                    <p className="text-sm font-medium">You are viewing attendance records from <strong>{selectedTerm.name}</strong>. Content is read-only.</p>
+                    <p className="font-black uppercase tracking-widest text-xs">{t("dashboard.archiveViewActive")}</p>
+                    <p className="text-sm font-medium">{t("dashboard.archiveViewDescription", { termName: selectedTerm.name })}</p>
                   </div>
               </motion.div>
             )}
@@ -229,8 +231,8 @@ const AttendanceListPage = () => {
               <div className="h-full w-full flex items-center justify-center p-12">
                 <EmptyState
                   icon={Calendar}
-                  title="No attendance records"
-                  description={isStaff ? "Start a class session to begin tracking attendance." : "You haven't attended any classes yet."}
+                  title={t("classes.attendance.noRecords")}
+                  description={isStaff ? t("classes.attendance.noRecordsDescription") : t("classes.attendance.personalRecordStudent")}
                   className="border-none bg-transparent min-h-0"
                 />
               </div>
@@ -294,7 +296,7 @@ const AttendanceListPage = () => {
                                           <UserCheck className="h-3.5 w-3.5 text-green-600" />
                                       </div>
                                       <span className="text-xs font-bold text-green-600">
-                                          {session.presentCount} <span className="text-muted-foreground/50 font-medium">Present</span>
+                                          {session.presentCount} <span className="text-muted-foreground/50 font-medium">{t("classes.attendance.present")}</span>
                                       </span>
                                   </div>
                                   {session.absentCount > 0 && (
@@ -303,7 +305,7 @@ const AttendanceListPage = () => {
                                               <UserMinus className="h-3.5 w-3.5 text-destructive" />
                                           </div>
                                           <span className="text-xs font-bold text-destructive">
-                                              {session.absentCount} <span className="text-muted-foreground/50 font-medium">Absent</span>
+                                              {session.absentCount} <span className="text-muted-foreground/50 font-medium">{t("classes.attendance.absent")}</span>
                                           </span>
                                       </div>
                                   )}
@@ -324,7 +326,7 @@ const AttendanceListPage = () => {
                                       "text-xs font-black uppercase tracking-widest",
                                       session.status === 'present' ? "text-green-600" : "text-destructive"
                                   )}>
-                                      {session.status}
+                                      {session.status === 'present' ? t("classes.attendance.present") : t("classes.attendance.absent")}
                                   </span>
                               </div>
                             )}
@@ -353,7 +355,7 @@ const AttendanceListPage = () => {
                             variant="outline"
                             className="rounded-2xl px-8 h-12 text-[10px] font-black uppercase tracking-widest transition-all shadow-sm border-primary/10 text-primary hover:bg-primary hover:text-primary-foreground"
                           >
-                            View Details
+                            {t("buttons.viewDetails")}
                             <ArrowRight className="h-4 w-4 ml-2" />
                           </Button>
 
@@ -364,10 +366,10 @@ const AttendanceListPage = () => {
                                   </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end" className="w-56 rounded-[1.5rem] p-2">
-                                  <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-3 py-2">Session Options</DropdownMenuLabel>
+                                  <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-3 py-2">{t("classes.attendance.governance.sessionOptions")}</DropdownMenuLabel>
                                   <DropdownMenuItem onClick={() => handleRowClick(session)} className="rounded-xl gap-3 py-3 cursor-pointer">
                                       <Eye className="h-4 w-4 text-primary" />
-                                      <span className="font-bold">View Full Report</span>
+                                      <span className="font-bold">{t("classes.attendance.governance.viewFullReport")}</span>
                                   </DropdownMenuItem>
                                   {isStaff && (
                                       <>
@@ -377,7 +379,7 @@ const AttendanceListPage = () => {
                                               className="rounded-xl gap-3 py-3 cursor-pointer"
                                           >
                                               <QrCode className="h-4 w-4 text-primary" />
-                                              <span className="font-bold">Start QR Check-in</span>
+                                              <span className="font-bold">{t("classes.attendance.governance.startQrCheckin")}</span>
                                           </DropdownMenuItem>
                                       </>
                                   )}

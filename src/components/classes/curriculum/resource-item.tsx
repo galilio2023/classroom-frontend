@@ -9,13 +9,13 @@ import {
   CheckCircle2, 
   Circle,
   ExternalLink,
-  ArrowRight,
-  Sparkles
+  ArrowRight
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslation } from "react-i18next";
 
 interface ResourceItemProps {
   resource: Resource;
@@ -32,6 +32,8 @@ export const ResourceItem = ({
   classId, 
   onToggleProgress 
 }: ResourceItemProps) => {
+  const { t } = useTranslation();
+  
   const getResourceIcon = () => {
     switch (resource.type) {
       case 'video':
@@ -101,7 +103,7 @@ export const ResourceItem = ({
                           {resource.title}
                       </span>
                       <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/40">
-                        {resource.type} {resource.type === 'note' && '• AI Generated'}
+                        {t(`classes.resource.addDialog.types.${resource.type}`)} {resource.type === 'note' && `• ${t("common.aiAnalyzed")}`}
                       </span>
                     </div>
                 </div>
@@ -112,15 +114,15 @@ export const ResourceItem = ({
                     <Button variant="ghost" size="sm" asChild className="h-9 rounded-xl px-4 text-[10px] font-black uppercase tracking-widest gap-2 text-primary hover:bg-primary/5 transition-all">
                         <Link to={`/classes/${classId}/lessons/${resource.id}`}>
                             <Eye className="h-3.5 w-3.5" />
-                            Read Lesson
-                            <ArrowRight className="h-3 w-3 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+                            {t("buttons.openLesson")}
+                            <ArrowRight className="h-3 w-3 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all rtl:rotate-180" />
                         </Link>
                     </Button>
                 ) : (
                     <Button variant="ghost" size="sm" asChild className="h-9 rounded-xl px-4 text-[10px] font-black uppercase tracking-widest gap-2 hover:bg-muted transition-all">
                         <a href={resource.url} target="_blank" rel="noreferrer">
                             <ExternalLink className="h-3.5 w-3.5" />
-                            View
+                            {t("buttons.view")}
                         </a>
                     </Button>
                 )}
@@ -128,7 +130,7 @@ export const ResourceItem = ({
         </div>
         
         {resource.type === 'note' && resource.content && (
-            <div className="mt-3 pl-12 text-[11px] text-muted-foreground/60 line-clamp-1 italic font-medium">
+            <div className="mt-3 pl-12 rtl:pl-0 rtl:pr-12 text-[11px] text-muted-foreground/60 line-clamp-1 italic font-medium">
                 <div className="prose prose-xs dark:prose-invert max-w-none pointer-events-none">
                     <ReactMarkdown>
                         {resource.content}

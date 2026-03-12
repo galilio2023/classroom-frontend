@@ -16,7 +16,9 @@ import { GradingDialog } from "./grading-dialog";
 import { SOCKET_URL } from "@/config";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import "dayjs/locale/ar";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 dayjs.extend(relativeTime);
 
@@ -26,12 +28,16 @@ interface SubmissionListProps {
 }
 
 export const SubmissionList = ({ submissions = [], assignmentId }: SubmissionListProps) => {
+  const { t, i18n } = useTranslation();
   const [selectedSubmission, setSelectedSubmission] =
     useState<Submission | null>(null);
   const [isGradingOpen, setIsGradingOpen] = useState(false);
 
+  // Update dayjs locale dynamically
+  dayjs.locale(i18n.language === "ar" ? "ar" : "en");
+
   // Fetch all peer reviews for this assignment to show completion status
-  const { result: allReviewsResult } = useCustom<PeerReview[]>({
+  const allReviewsResult = useCustom<PeerReview[]>({
     url: `${SOCKET_URL.replace("/socket.io", "")}/api/peer-reviews/assignment/${assignmentId}`,
     method: "get",
     queryOptions: {
@@ -39,7 +45,7 @@ export const SubmissionList = ({ submissions = [], assignmentId }: SubmissionLis
     },
   });
 
-  const allReviews = allReviewsResult?.data || [];
+  const allReviews = (allReviewsResult.result.data as PeerReview[]) || [];
 
   const handleGradeClick = (submission: Submission) => {
     setSelectedSubmission(submission);
@@ -50,11 +56,11 @@ export const SubmissionList = ({ submissions = [], assignmentId }: SubmissionLis
     () => [
       {
         id: "student",
-        header: "Student",
+        header: t("assignments.list.table.student"),
         accessorFn: (row) => row.student,
         cell: ({ getValue }) => {
           const student = getValue<User>();
-          if (!student) return <span className="text-muted-foreground italic text-xs">Unknown Student</span>;
+          if (!student) return <span className="text-muted-foreground italic text-xs">{t("assignments.list.table.unknownStudent")}</span>;
           return (
             <div className="flex items-center gap-3 py-1">
               <div className="relative group">
@@ -70,7 +76,7 @@ export const SubmissionList = ({ submissions = [], assignmentId }: SubmissionLis
               </div>
               <div className="flex flex-col">
                 <span className="font-bold text-sm tracking-tight group-hover:text-primary transition-colors">{student.name}</span>
-                <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">Student ID: {student.id.toString().slice(-4)}</span>
+                <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">{t("assignments.list.table.studentId", { id: student.id.toString().slice(-4) })}</span>
               </div>
             </div>
           );
@@ -78,7 +84,7 @@ export const SubmissionList = ({ submissions = [], assignmentId }: SubmissionLis
       },
       {
         accessorKey: "updatedAt",
-        header: "Submission Status",
+        header: t("assignments.list.table.status"),
         cell: ({ row }) => {
           const date = dayjs(row.original.updatedAt);
           const isLate = row.original.isLate;
@@ -91,12 +97,12 @@ export const SubmissionList = ({ submissions = [], assignmentId }: SubmissionLis
               {isLate ? (
                 <Badge variant="destructive" className="w-fit text-[9px] h-4 px-1.5 uppercase font-black tracking-tighter bg-destructive/10 text-destructive border-none">
                   <AlertCircle className="h-2.5 w-2.5 mr-1" />
-                  Late Submission
+                  {t("assignments.list.table.late")}
                 </Badge>
               ) : (
                 <Badge variant="secondary" className="w-fit text-[9px] h-4 px-1.5 uppercase font-black tracking-tighter bg-success/10 text-success border-none">
                   <CheckCircle2 className="h-2.5 w-2.5 mr-1" />
-                  On Time
+                  {t("assignments.list.table.onTime")}
                 </Badge>
               )}
             </div>
@@ -105,7 +111,7 @@ export const SubmissionList = ({ submissions = [], assignmentId }: SubmissionLis
       },
       {
         id: "peerReviews",
-        header: "Peer Progress",
+        header: t("assignments.list.table.peerProgress"),
         cell: ({ row }) => {
           const submissionId = row.original.id;
           const reviewsForThis = allReviews.filter((r: PeerReview) => r.submissionId === submissionId);
@@ -115,7 +121,7 @@ export const SubmissionList = ({ submissions = [], assignmentId }: SubmissionLis
           if (total === 0) return (
             <div className="flex items-center gap-2 text-muted-foreground/40">
               <MessageSquare className="h-3.5 w-3.5" />
-              <span className="text-[10px] font-bold uppercase tracking-widest">Not Assigned</span>
+              <span className="text-[10px] font-bold uppercase tracking-widest">{t("assignments.list.table.notAssigned")}</span>
             </div>
           );
 
@@ -125,11 +131,11 @@ export const SubmissionList = ({ submissions = [], assignmentId }: SubmissionLis
             <div className="flex flex-col gap-2 min-w-[100px]">
               <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-tighter">
                 <span className={cn(isFullyReviewed ? "text-success" : "text-muted-foreground")}>
-                  {completed} / {total} Reviews
+                  {t("assignments.list.table.reviews", { completed, total })}
                 </span>
                 <span className="text-muted-foreground/40">{Math.round((completed / total) * 100)}%</span>
               </div>
-              <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden border border-black/[0.03] dark:border-white/[0.03]">
+              <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden border border-black/[0.03] dark:border-white/10">
                 <div 
                   className={cn(
                     "h-full transition-all duration-500 rounded-full",
@@ -144,13 +150,13 @@ export const SubmissionList = ({ submissions = [], assignmentId }: SubmissionLis
       },
       {
         accessorKey: "grade",
-        header: "Final Grade",
+        header: t("assignments.list.table.grade"),
         cell: ({ getValue }) => {
           const grade = getValue<number | null>();
           
           if (grade === null) return (
             <Badge variant="outline" className="text-[10px] font-black uppercase tracking-widest border-dashed opacity-50">
-              Pending
+              {t("assignments.list.table.pending")}
             </Badge>
           );
 
@@ -183,12 +189,12 @@ export const SubmissionList = ({ submissions = [], assignmentId }: SubmissionLis
             onClick={() => handleGradeClick(row.original)}
           >
             <Eye className="h-3.5 w-3.5 group-hover:scale-110 transition-transform" />
-            Grade
+            {t("buttons.grade")}
           </Button>
         ),
       },
     ],
-    [allReviews],
+    [allReviews, t, i18n.language],
   );
 
   const reactTable = useReactTable({
@@ -224,7 +230,7 @@ export const SubmissionList = ({ submissions = [], assignmentId }: SubmissionLis
           <div className="p-1.5 rounded-lg bg-primary/10 text-primary">
             <MessageSquare className="h-4 w-4" />
           </div>
-          <h3 className="text-sm font-black uppercase tracking-widest">Submissions</h3>
+          <h3 className="text-sm font-black uppercase tracking-widest">{t("assignments.list.table.submissionsHeader")}</h3>
           <Badge variant="secondary" className="rounded-full px-2 py-0 h-5 text-[10px] font-bold">
             {submissions.length}
           </Badge>

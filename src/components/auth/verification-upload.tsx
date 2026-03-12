@@ -1,69 +1,98 @@
 import { useState } from "react";
-import { UploadCloud, FileCheck, Loader2, ShieldCheck } from "lucide-react";
+import { UploadCloud, FileCheck, Loader2, ShieldCheck, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { FormLabel } from "@/components/ui/form";
+import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import axios from "axios";
+import { BACKEND_URL } from "@/config";
+import { useTranslation } from "react-i18next";
 
 interface VerificationUploadProps {
-  url: string;
+  url?: string;
   onUpload: (url: string, publicId: string) => void;
   onClear: () => void;
 }
 
 export const VerificationUpload = ({ url, onUpload, onClear }: VerificationUploadProps) => {
+  const { t } = useTranslation();
   const [isUploading, setIsUploading] = useState(false);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // Simple validation (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error(t("common.upload.tooLarge"));
+      return;
+    }
+
     setIsUploading(true);
     const formData = new FormData();
     formData.append("file", file);
+    formData.append("folder", "verification");
 
     try {
-      const response = await axios.post("/api/uploads", formData, {
-        headers: { "Content-Type": "multipart/form-data" }
+      const response = await fetch(`${BACKEND_URL}/upload`, {
+        method: "POST",
+        body: formData,
       });
-      onUpload(response.data.url, response.data.publicId);
-      toast.success("Document uploaded successfully!");
+
+      if (!response.ok) throw new Error("Upload failed");
+      
+      const result = await response.json();
+      
+      onUpload(result.data.url, result.data.publicId);
+      toast.success(t("auth.register.verification.success"));
     } catch (error) {
-      toast.error("Failed to upload document. Please try again.");
+      console.error(error);
+      toast.error(t("auth.register.verification.error"));
     } finally {
       setIsUploading(false);
     }
   };
 
+  const handleClear = () => {
+    onClear();
+  };
+
   return (
-    <div className="space-y-2">
-      <FormLabel className="flex items-center gap-2">
+    <div className="space-y-3">
+      <Label className="flex items-center gap-2 text-sm font-medium">
         <ShieldCheck className="h-4 w-4 text-primary" />
-        Teacher Verification
-      </FormLabel>
-      <div className="border-2 border-dashed rounded-xl p-6 flex flex-col items-center justify-center text-center space-y-2 bg-slate-50/50 dark:bg-slate-900/50">
+        {t("auth.register.verification.title")}
+      </Label>
+      
+      <div className="border-2 border-dashed rounded-xl p-6 flex flex-col items-center justify-center text-center space-y-3 bg-muted/20 hover:bg-muted/30 transition-colors">
         {url ? (
-          <div className="flex items-center gap-2 text-green-600 font-medium">
-            <FileCheck className="h-5 w-5" />
-            Document Uploaded
+          <div className="flex flex-col items-center gap-3 w-full">
+            <div className="flex items-center gap-2 text-green-600 font-medium bg-green-50 dark:bg-green-900/20 px-4 py-2 rounded-lg w-full justify-center">
+              <FileCheck className="h-5 w-5" />
+              <span>{t("auth.register.verification.documentUploaded")}</span>
+            </div>
+            
             <Button 
               type="button" 
-              variant="ghost" 
+              variant="outline" 
               size="sm" 
-              className="text-xs text-muted-foreground"
-              onClick={onClear}
+              className="text-xs w-full gap-2 text-destructive hover:text-destructive"
+              onClick={handleClear}
             >
-              Change
+              <X className="h-3 w-3" />
+              {t("buttons.change")}
             </Button>
           </div>
         ) : (
           <>
-            <UploadCloud className="h-8 w-8 text-muted-foreground mb-1" />
-            <div className="space-y-1">
-              <p className="text-sm font-medium">Upload Teaching License or ID</p>
-              <p className="text-xs text-muted-foreground">PDF, JPG, or PNG (max 5MB)</p>
+            <div className="p-3 bg-primary/10 rounded-full">
+              <UploadCloud className="h-6 w-6 text-primary" />
             </div>
+            
+            <div className="space-y-1">
+              <p className="text-sm font-medium">{t("auth.register.verification.uploadLabel")}</p>
+              <p className="text-xs text-muted-foreground">{t("auth.register.verification.formatLabel")}</p>
+            </div>
+            
             <Input 
               type="file" 
               className="hidden" 
@@ -72,16 +101,23 @@ export const VerificationUpload = ({ url, onUpload, onClear }: VerificationUploa
               onChange={handleFileUpload}
               disabled={isUploading}
             />
+            
             <Button 
               type="button" 
-              variant="outline" 
+              variant="default" 
               size="sm" 
-              className="mt-2"
+              className="mt-2 w-full max-w-[200px]"
               onClick={() => document.getElementById("doc-upload")?.click()}
               disabled={isUploading}
             >
-              {isUploading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-              Select File
+              {isUploading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  {t("buttons.uploading")}
+                </>
+              ) : (
+                t("buttons.selectFile")
+              )}
             </Button>
           </>
         )}

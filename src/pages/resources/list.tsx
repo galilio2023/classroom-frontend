@@ -55,11 +55,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/empty-state";
 import { useTerm } from "@/contexts/term-context";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 dayjs.extend(relativeTime);
 
 const ResourcesListPage = () => {
-  usePageTitle("Learning Resources");
+  const { t } = useTranslation();
+  usePageTitle(t("resourcesPage.title"));
   const { data: identity } = useGetIdentity<UserType>();
   const isStaff = identity?.role === UserRole.ADMIN || identity?.role === UserRole.TEACHER;
   const { selectedTerm } = useTerm();
@@ -149,8 +151,8 @@ const ResourcesListPage = () => {
             <Breadcrumb />
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div>
-                <h1 className="text-4xl font-black tracking-tight">Resource Library</h1>
-                <p className="text-muted-foreground font-medium mt-1">Access and manage learning materials, documents, and multimedia content.</p>
+                <h1 className="text-4xl font-black tracking-tight">{t("resourcesPage.title")}</h1>
+                <p className="text-muted-foreground font-medium mt-1">{t("resourcesPage.description")}</p>
               </div>
               <div className="flex items-center gap-3 w-full md:w-auto">
                 {isStaff && (
@@ -159,7 +161,7 @@ const ResourcesListPage = () => {
                     className="flex-1 md:flex-none rounded-2xl h-14 px-10 font-black uppercase tracking-widest text-[10px] gap-2 shadow-xl shadow-primary/20 transition-all hover:scale-105 active:scale-95"
                   >
                     <PlusCircle className="h-5 w-5" />
-                    Upload Resource
+                    {t("resourcesPage.upload")}
                   </Button>
                 )}
               </div>
@@ -173,7 +175,7 @@ const ResourcesListPage = () => {
                 <FolderOpen className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Total Items</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t("resourcesPage.stats.total")}</p>
                 <p className="text-2xl font-black">{isLoading ? "..." : stats.total}</p>
               </div>
             </Card>
@@ -182,7 +184,7 @@ const ResourcesListPage = () => {
                 <Video className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Multimedia</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t("resourcesPage.stats.multimedia")}</p>
                 <p className="text-2xl font-black text-red-600">{isLoading ? "..." : stats.videos}</p>
               </div>
             </Card>
@@ -191,7 +193,7 @@ const ResourcesListPage = () => {
                 <FileText className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Documents</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t("resourcesPage.stats.documents")}</p>
                 <p className="text-2xl font-black text-amber-600">{isLoading ? "..." : stats.documents}</p>
               </div>
             </Card>
@@ -204,7 +206,7 @@ const ResourcesListPage = () => {
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                 <Input
                   type="text"
-                  placeholder="Search resources by title or type..."
+                  placeholder={t("resourcesPage.searchPlaceholder")}
                   className="pl-11 h-14 rounded-2xl border-none bg-background shadow-sm font-medium"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -212,7 +214,7 @@ const ResourcesListPage = () => {
               </div>
               <div className="flex items-center gap-2 bg-background px-4 rounded-2xl shadow-sm border border-primary/5">
                 <Filter className="h-4 w-4 text-muted-foreground" />
-                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Library Filter</span>
+                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t("discussions.filter")}</span>
               </div>
             </div>
           </Card>
@@ -229,8 +231,8 @@ const ResourcesListPage = () => {
                     <AlertCircle className="h-6 w-6" />
                   </div>
                   <div className="space-y-1">
-                    <p className="font-black uppercase tracking-widest text-xs">Archive View Active</p>
-                    <p className="text-sm font-medium">You are viewing resources from <strong>{selectedTerm.name}</strong>. Content is read-only.</p>
+                    <p className="font-black uppercase tracking-widest text-xs">{t("dashboard.archiveViewActive")}</p>
+                    <p className="text-sm font-medium">{t("dashboard.archiveViewDescription", { termName: selectedTerm.name })}</p>
                   </div>
               </motion.div>
             )}
@@ -258,11 +260,11 @@ const ResourcesListPage = () => {
               <div className="h-full w-full flex items-center justify-center p-12">
                 <EmptyState
                   icon={FolderOpen}
-                  title="No resources found"
-                  description={isStaff ? "Upload your first learning material to begin building your class library." : "There are no resources available for your classes yet."}
+                  title={t("resourcesPage.empty.title")}
+                  description={t("resourcesPage.empty.desc")}
                   className="border-none bg-transparent min-h-0"
                   action={isStaff && selectedTerm?.status === "active" ? {
-                    label: "Upload Resource",
+                    label: t("resourcesPage.upload"),
                     onClick: () => create("resources"),
                   } : undefined}
                 />
@@ -321,7 +323,7 @@ const ResourcesListPage = () => {
                                 <Calendar className="h-3.5 w-3.5 text-primary" />
                             </div>
                             <span className="text-xs font-bold">
-                                Uploaded {uploadDate.format("MMM D, YYYY")}
+                                {t("resourcesPage.labels.uploaded", { date: uploadDate.format("MMM D, YYYY") })}
                             </span>
                           </div>
 
@@ -377,7 +379,7 @@ const ResourcesListPage = () => {
                           asChild
                         >
                           <a href={resource.url} target="_blank" rel="noopener noreferrer">
-                            Open Resource
+                            {t("buttons.open")}
                             <ExternalLink className="h-4 w-4 ml-2" />
                           </a>
                         </Button>
@@ -389,30 +391,30 @@ const ResourcesListPage = () => {
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-56 rounded-[1.5rem] p-2">
-                                <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-3 py-2">Resource Options</DropdownMenuLabel>
+                                <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-3 py-2">{t("resourcesPage.labels.options")}</DropdownMenuLabel>
                                 <DropdownMenuItem className="rounded-xl gap-3 py-3 cursor-pointer" asChild>
                                     <a href={resource.url} target="_blank" rel="noopener noreferrer">
                                         <Download className="h-4 w-4 text-primary" />
-                                        <span className="font-bold">Download File</span>
+                                        <span className="font-bold">{t("resourcesPage.labels.download")}</span>
                                     </a>
                                 </DropdownMenuItem>
                                 <DropdownMenuItem className="rounded-xl gap-3 py-3 cursor-pointer">
                                     <Share2 className="h-4 w-4 text-primary" />
-                                    <span className="font-bold">Share Link</span>
+                                    <span className="font-bold">{t("resourcesPage.labels.share")}</span>
                                 </DropdownMenuItem>
                                 {isStaff && (
                                     <>
                                         <DropdownMenuSeparator className="my-2" />
                                         <DropdownMenuItem onClick={() => edit("resources", resource.id)} className="rounded-xl gap-3 py-3 cursor-pointer">
                                             <Pencil className="h-4 w-4 text-primary" />
-                                            <span className="font-bold">Edit Details</span>
+                                            <span className="font-bold">{t("resourcesPage.labels.edit")}</span>
                                         </DropdownMenuItem>
                                         <DropdownMenuItem 
                                             onClick={() => setDeleteTarget(resource.id)} 
                                             className="rounded-xl gap-3 py-3 cursor-pointer text-destructive focus:text-destructive"
                                         >
                                             <Trash2 className="h-4 w-4" />
-                                            <span className="font-bold">Delete Resource</span>
+                                            <span className="font-bold">{t("resourcesPage.labels.delete")}</span>
                                         </DropdownMenuItem>
                                     </>
                                 )}
@@ -435,19 +437,19 @@ const ResourcesListPage = () => {
               <Trash2 className="h-8 w-8" />
             </div>
             <div className="space-y-1">
-                <AlertDialogTitle className="text-3xl font-black tracking-tight">Are you absolutely sure?</AlertDialogTitle>
+                <AlertDialogTitle className="text-3xl font-black tracking-tight">{t("resourcesPage.deleteDialog.title")}</AlertDialogTitle>
                 <AlertDialogDescription className="font-medium text-base leading-relaxed">
-                    This action cannot be undone. This will permanently delete the resource and remove it from all class libraries.
+                    {t("resourcesPage.deleteDialog.desc")}
                 </AlertDialogDescription>
             </div>
           </AlertDialogHeader>
           <AlertDialogFooter className="gap-3 pt-6">
-            <AlertDialogCancel className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-8">Cancel</AlertDialogCancel>
+            <AlertDialogCancel className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-8">{t("buttons.cancel")}</AlertDialogCancel>
             <AlertDialogAction 
                 onClick={handleConfirmDelete} 
                 className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-12 bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-xl shadow-destructive/20"
             >
-                Confirm Delete
+                {t("buttons.confirmDelete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

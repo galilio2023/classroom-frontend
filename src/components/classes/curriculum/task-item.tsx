@@ -4,6 +4,8 @@ import { FileText, FileQuestion, CheckCircle2, Circle, Calendar, Clock, Sparkles
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import dayjs from "dayjs";
+import { useTranslation } from "react-i18next";
+import "dayjs/locale/ar";
 
 interface TaskItemProps {
   item: Assignment | Quiz;
@@ -20,6 +22,8 @@ export const TaskItem = ({
   completed, 
   onToggleProgress 
 }: TaskItemProps) => {
+  const { t, i18n } = useTranslation();
+  const isArabic = i18n.language === 'ar';
   const isQuiz = type === 'quiz';
   
   const getTaskStyles = () => {
@@ -31,6 +35,9 @@ export const TaskItem = ({
   const styles = getTaskStyles();
   const dueDate = type === 'assignment' ? (item as Assignment).dueDate : null;
   const isOverdue = dueDate ? dayjs(dueDate).isBefore(dayjs()) : false;
+
+  // Configure dayjs locale
+  dayjs.locale(i18n.language);
 
   return (
     <motion.div 
@@ -95,13 +102,13 @@ export const TaskItem = ({
                             isOverdue && !completed ? "text-destructive" : "text-muted-foreground/40"
                           )}>
                               <Calendar className="h-2.5 w-2.5" />
-                              <span>Due {dayjs(dueDate).format("MMM D")}</span>
+                              <span>{t("assignments.list.labels.due", { date: dayjs(dueDate).format("MMM D") })}</span>
                           </div>
                       )}
                       {isQuiz && !completed && (
                         <div className="flex items-center gap-1 text-[9px] font-black uppercase tracking-widest text-orange-500/60">
                           <Clock className="h-2.5 w-2.5" />
-                          <span>15 Mins</span>
+                          <span>{t("classes.quiz.minsUnitLocalized", { count: 15 })}</span>
                         </div>
                       )}
                     </div>
@@ -116,7 +123,7 @@ export const TaskItem = ({
               isQuiz ? "bg-orange-500/10 text-orange-600" : 
               "bg-blue-500/10 text-blue-600"
           )}>
-              {isQuiz ? "Quiz" : "Assignment"}
+              {isQuiz ? t("classes.show.tabs.quizzes") : t("classes.show.tabs.assignments")}
           </Badge>
           {!completed && (
             <div className="p-1.5 rounded-full bg-muted/50 group-hover:bg-primary group-hover:text-primary-foreground transition-all">

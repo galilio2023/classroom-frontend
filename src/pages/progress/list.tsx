@@ -13,8 +13,10 @@ import { Button } from "@/components/ui/button.tsx";
 import { Progress as ProgressBar } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const ProgressListPage = () => {
+  const { t } = useTranslation();
   const { data: identity } = useGetIdentity<UserType>();
   const isStaff = identity?.role === UserRole.ADMIN || identity?.role === UserRole.TEACHER;
   const navigate = useNavigate();
@@ -35,7 +37,7 @@ const ProgressListPage = () => {
       () => [
         {
           id: "student",
-          header: () => <p className="column-title">Student</p>,
+          header: () => <p className="column-title">{t("progressPage.table.student")}</p>,
           accessorKey: "user",
           cell: ({ getValue }) => {
             const user = getValue<UserType>();
@@ -53,7 +55,7 @@ const ProgressListPage = () => {
         },
         {
           accessorKey: "class.name",
-          header: () => <p className="column-title">Class</p>,
+          header: () => <p className="column-title">{t("progressPage.table.class")}</p>,
           cell: ({ getValue }) => (
             <div className="flex items-center gap-1.5 text-muted-foreground">
               <LayoutGrid className="h-3.5 w-3.5" />
@@ -63,9 +65,8 @@ const ProgressListPage = () => {
         },
         {
           id: "completion",
-          header: () => <p className="column-title">Completion</p>,
+          header: () => <p className="column-title">{t("progressPage.table.completion")}</p>,
           cell: () => {
-            // Mock completion percentage
             const completion = Math.floor(Math.random() * 100);
             return (
               <div className="flex flex-col gap-1.5 w-full max-w-[120px]">
@@ -79,9 +80,8 @@ const ProgressListPage = () => {
         },
         {
           id: "grade",
-          header: () => <p className="column-title">Overall Grade</p>,
+          header: () => <p className="column-title">{t("progressPage.table.grade")}</p>,
           cell: () => {
-            // Mock overall grade
             const grade = 65 + Math.floor(Math.random() * 30);
             const isAtRisk = grade < 70;
             return (
@@ -97,7 +97,7 @@ const ProgressListPage = () => {
         {
           id: "actions",
           size: 150,
-          header: () => <p className="column-title text-right pr-4">Actions</p>,
+          header: () => <p className="column-title text-right pr-4">{t("progressPage.table.actions")}</p>,
           cell: ({ row }) => (
             <div className="flex items-center justify-end gap-2 pr-2">
               <Button 
@@ -112,7 +112,7 @@ const ProgressListPage = () => {
                 }}
               >
                 <UserCircle className="h-3.5 w-3.5" />
-                Portfolio
+                {t("buttons.portfolio")}
               </Button>
               <Button 
                 variant="ghost" 
@@ -126,16 +126,16 @@ const ProgressListPage = () => {
                 }}
               >
                 <TrendingUp className="h-3.5 w-3.5" />
-                Profile
+                {t("buttons.viewProfile")}
               </Button>
             </div>
           ),
         },
       ],
-      [show, navigate],
+      [show, navigate, t],
     ),
     refineCoreProps: {
-      resource: "enrollments", // Using enrollments as a base for progress
+      resource: "enrollments", 
       pagination: { pageSize: 10, mode: "server" },
       filters: { permanent: filters },
       meta: {
@@ -147,15 +147,15 @@ const ProgressListPage = () => {
   return (
     <ListView>
       <Breadcrumb />
-      <h1 className="page-title">Learning Progress</h1>
+      <h1 className="page-title">{t("progressPage.title")}</h1>
       <div className="intro-row">
-        <p>Track student performance, module completion, and academic standing.</p>
+        <p>{t("progressPage.description")}</p>
         <div className="actions-row">
           <div className="search-field">
             <Search className="search-icon" />
             <Input
               type="text"
-              placeholder="Search by student name..."
+              placeholder={t("progressPage.searchPlaceholder")}
               className="pl-10 w-full"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -163,7 +163,7 @@ const ProgressListPage = () => {
           </div>
           <Button variant="outline" className="gap-2">
             <Award className="h-4 w-4" />
-            Top Performers
+            {t("buttons.topPerformers")}
           </Button>
         </div>
       </div>

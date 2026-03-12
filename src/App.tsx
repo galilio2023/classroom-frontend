@@ -26,6 +26,10 @@ import { ErrorBoundary } from "./components/error-boundary";
 import { AuthorizedRoute } from "./components/authorized-route";
 import { VerificationGuard } from "./components/verification-guard";
 
+// i18n
+import "./i18n/i18n";
+import { useTranslation } from "react-i18next";
+
 // Lazy Load Pages
 const Dashboard = React.lazy(() => import("./pages/dashboard"));
 const LoginPage = React.lazy(() => import("./pages/auth/login"));
@@ -98,6 +102,14 @@ const Loading = () => (
 );
 
 function App() {
+  const { t, i18n } = useTranslation();
+
+  const i18nProvider = {
+    translate: (key: string, params: object) => t(key, { ...params, defaultValue: key }),
+    changeLocale: (lang: string) => i18n.changeLanguage(lang),
+    getLocale: () => i18n.language,
+  };
+
   return (
     <BrowserRouter>
       <RefineKbarProvider>
@@ -109,6 +121,7 @@ function App() {
               accessControlProvider={accessControlProvider}
               routerProvider={routerBindings}
               notificationProvider={useNotificationProvider}
+              i18nProvider={i18nProvider}
               resources={resources}
               options={{
                 syncWithLocation: true,
@@ -116,7 +129,7 @@ function App() {
                 projectId: "classroom-refine",
                 title: {
                   icon: <GraduationCap className="w-8 h-8 text-primary" />,
-                  text: "Classroom AI",
+                  text: t("app.title", { defaultValue: "Classroom AI" }),
                 },
               }}
             >
@@ -130,8 +143,21 @@ function App() {
                         <Route path="/pricing" element={<PricingPage />} />
                       </Route>
 
-                      <Route path="/login" element={<LoginPage />} />
-                      <Route path="/register" element={<RegisterPage />} />
+                      {/* AUTH PAGES (REDIRECTS IF LOGGED IN) */}
+                      <Route
+                        element={
+                          <Authenticated
+                            key="auth-pages"
+                            fallback={<Outlet />}
+                          >
+                            <NavigateToResource resource="dashboard" />
+                          </Authenticated>
+                        }
+                      >
+                        <Route path="/login" element={<LoginPage />} />
+                        <Route path="/register" element={<RegisterPage />} />
+                      </Route>
+
                       <Route path="/unauthorized" element={<UnauthorizedPage />} />
 
                       {/* PROTECTED ROUTES */}
@@ -287,6 +313,8 @@ function App() {
                                 <Route path="edit/:id" element={<AuthorizedRoute resource="users" action="edit"><EditUser /></AuthorizedRoute>} />
                                 <Route path="show/:id" element={<AuthorizedRoute resource="users" action="show"><ShowUser /></AuthorizedRoute>} />
                             </Route>
+                            <Route path="/portfolio" element={<AuthorizedRoute resource="portfolio" action="list"><ShowUser /></AuthorizedRoute>} />
+                            
                             <Route path="/departments">
                                 <Route index element={<AuthorizedRoute resource="departments" action="list"><DepartmentsList /></AuthorizedRoute>} />
                                 <Route path="create" element={<AuthorizedRoute resource="departments" action="create"><CreateDepartment /></AuthorizedRoute>} />
@@ -315,11 +343,11 @@ function App() {
                         </Route>
                       </Route>
 
-                      {/* LOGGED IN REDIRECTS */}
+                      {/* REDIRECT ROOT TO DASHBOARD IF AUTHENTICATED */}
                       <Route
                         element={
                           <Authenticated
-                            key="authenticated-redirect"
+                            key="authenticated-root-redirect"
                             fallback={<Outlet />}
                           >
                             <NavigateToResource resource="dashboard" />
@@ -345,9 +373,6 @@ function App() {
                   </TermProvider>
                 </SocketProvider>
               </Suspense>
-              <UnsavedChangesNotifier />
-              <DocumentTitleHandler />
-              <Toaster />
               <RefineKbar />
             </Refine>
           </ErrorBoundary>

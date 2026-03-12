@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { socket } from "@/lib/socket";
 import { Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 interface XPGain {
   id: number;
@@ -10,7 +11,13 @@ interface XPGain {
 }
 
 export function XPGainPopup() {
+  const { t, i18n } = useTranslation();
+  const isArabic = i18n.language === 'ar';
   const [gains, setGains] = useState<XPGain[]>([]);
+
+  const formatNumber = (num: number) => {
+    return new Intl.NumberFormat(isArabic ? 'ar-EG' : 'en-US').format(num);
+  };
 
   useEffect(() => {
     socket.connect();
@@ -40,7 +47,10 @@ export function XPGainPopup() {
   }, []);
 
   return (
-    <div className="fixed bottom-8 right-8 z-[100] flex flex-col gap-2 pointer-events-none">
+    <div className={cn(
+        "fixed bottom-8 z-[100] flex flex-col gap-2 pointer-events-none",
+        isArabic ? "left-8" : "right-8"
+    )}>
       {gains.map((gain) => (
         <div
           key={gain.id}
@@ -49,10 +59,13 @@ export function XPGainPopup() {
             "animate-in slide-in-from-bottom-4 fade-in duration-500 fill-mode-both"
           )}
         >
-          <Zap className="h-4 w-4 fill-white" />
-          <span className="font-black text-sm">+{gain.amount} XP</span>
+          <Zap className={cn("h-4 w-4 fill-white", isArabic && "order-last")} />
+          <span className="font-black text-sm">+{formatNumber(gain.amount)} {t("common.xp")}</span>
           {gain.reason && (
-            <span className="text-[10px] font-bold uppercase opacity-80 border-l border-white/20 pl-2">
+            <span className={cn(
+                "text-[10px] font-bold uppercase opacity-80",
+                isArabic ? "border-r border-white/20 pr-2 order-first" : "border-l border-white/20 pl-2"
+            )}>
               {gain.reason}
             </span>
           )}

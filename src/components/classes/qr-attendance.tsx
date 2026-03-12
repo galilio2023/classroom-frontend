@@ -9,13 +9,17 @@ import { toast } from "sonner";
 import { io } from "socket.io-client";
 import { useCustomMutation } from "@refinedev/core";
 import { SOCKET_URL } from "@/config";
+import { useTranslation } from "react-i18next";
+import { cn } from "@/lib/utils";
 
 interface QRAttendanceProps {
   classId: number;
-  className: string;
+  className?: string;
 }
 
 export const QRAttendance = ({ classId, className }: QRAttendanceProps) => {
+  const { t, i18n } = useTranslation();
+  const isArabic = i18n.language === 'ar';
   const [isActive, setIsActive] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
   const [scannedCount, setScannedCount] = useState(0);
@@ -30,7 +34,7 @@ export const QRAttendance = ({ classId, className }: QRAttendanceProps) => {
       timer = setInterval(() => {
         setTimeLeft((prev) => prev - 1);
       }, 1000);
-    } else if (timeLeft === 0) {
+    } else if (isActive && timeLeft === 0) {
       setIsActive(false);
     }
     return () => clearInterval(timer);
@@ -42,7 +46,7 @@ export const QRAttendance = ({ classId, className }: QRAttendanceProps) => {
 
     const socket = io(SOCKET_URL, { query: { classId }, withCredentials: true });
 
-    socket.on("attendance_scanned", (data) => {
+    socket.on("attendance_scanned", (data: { studentName: string }) => {
       setScannedCount((prev) => prev + 1);
       toast.success(`${data.studentName} checked in!`);
     });
@@ -65,10 +69,13 @@ export const QRAttendance = ({ classId, className }: QRAttendanceProps) => {
             setIsActive(true);
             setTimeLeft(DURATION);
             setScannedCount(0);
-            toast.success(`Attendance session started for ${className}!`);
+            toast.success(t("classes.attendance.toast.savedDescription", { 
+              date: new Date().toLocaleDateString(),
+              defaultValue: `Attendance session started for ${new Date().toLocaleDateString()}`
+            } as any) as string);
         },
         onError: () => {
-            toast.error("Failed to start attendance session.");
+            toast.error(t("common.upload.error") as string);
         }
     });
   };
@@ -76,49 +83,51 @@ export const QRAttendance = ({ classId, className }: QRAttendanceProps) => {
   const stopSession = () => {
     setIsActive(false);
     setTimeLeft(0);
-    toast.info("Attendance session stopped.");
+    toast.info(t("buttons.stopSession") as string);
   };
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
+    const formattedMins = new Intl.NumberFormat(isArabic ? 'ar-EG' : 'en-US').format(mins);
+    const formattedSecs = new Intl.NumberFormat(isArabic ? 'ar-EG' : 'en-US').format(secs).padStart(2, isArabic ? "٠" : "0");
+    return `${formattedMins}:${formattedSecs}`;
   };
 
   const progress = (timeLeft / DURATION) * 100;
 
   return (
-    <Card className="border-primary/20 shadow-lg overflow-hidden">
+    <Card className={cn("border-primary/20 shadow-lg overflow-hidden", className)}>
       <CardHeader className="bg-primary/5 border-b border-primary/10">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <QrCode className="h-5 w-5 text-primary" />
-            <CardTitle className="text-lg">QR Attendance</CardTitle>
+            <CardTitle className="text-lg">{t("classes.attendance.qr.title")}</CardTitle>
           </div>
-          <Badge variant={isActive ? "default" : "secondary"} className={isActive ? "bg-green-500 animate-pulse" : ""}>
-            {isActive ? "Active Session" : "Inactive"}
+          <Badge variant={isActive ? "default" : "secondary"} className={cn(isActive && "bg-green-500 animate-pulse")}>
+            {isActive ? t("classes.attendance.qr.active") : t("classes.attendance.qr.inactive")}
           </Badge>
         </div>
         <CardDescription>
-          Students can scan the QR code to mark themselves present.
+          {t("classes.attendance.qr.description")}
         </CardDescription>
       </CardHeader>
       <CardContent className="p-6 flex flex-col items-center gap-6">
         {isActive ? (
           <>
             <div className="p-4 bg-white rounded-2xl shadow-inner border-4 border-primary/10">
-              <QRCodeSVG value={qrValue} size={200} level="H" includeMargin />
+              <QRCodeSVG value={qrValue} size={200} level="H" marginSize={4} />
             </div>
             
             <div className="w-full space-y-4">
               <div className="flex justify-between text-sm font-medium">
                 <div className="flex items-center gap-1.5 text-muted-foreground">
                   <Clock className="h-4 w-4" />
-                  Time Remaining: <span className="text-foreground font-bold font-mono">{formatTime(timeLeft)}</span>
+                  {t("classes.attendance.qr.timeRemaining")}: <span className="text-foreground font-bold font-mono">{formatTime(timeLeft)}</span>
                 </div>
                 <div className="flex items-center gap-1.5 text-muted-foreground">
                   <Users className="h-4 w-4" />
-                  Checked In: <span className="text-primary font-bold">{scannedCount}</span>
+                  {t("classes.attendance.qr.checkedIn")}: <span className="text-primary font-bold">{new Intl.NumberFormat(isArabic ? 'ar-EG' : 'en-US').format(scannedCount)}</span>
                 </div>
               </div>
               <Progress value={progress} className="h-2" />
@@ -126,7 +135,7 @@ export const QRAttendance = ({ classId, className }: QRAttendanceProps) => {
 
             <Button variant="destructive" className="w-full gap-2 h-11 rounded-xl" onClick={stopSession}>
               <StopCircle className="h-4 w-4" />
-              Stop Session
+              {t("buttons.stopSession")}
             </Button>
           </>
         ) : (
@@ -135,14 +144,14 @@ export const QRAttendance = ({ classId, className }: QRAttendanceProps) => {
               <QrCode className="h-12 w-12 text-primary/20" />
             </div>
             <div className="space-y-2">
-              <h4 className="font-bold">Ready to start?</h4>
-              <p className="text-sm text-muted-foreground max-w-[250px]">
-                Starting a session will generate a unique QR code for this class.
+              <h4 className="font-bold">{t("classes.attendance.qr.ready")}</h4>
+              <p className="text-sm text-muted-foreground max-w-62.5">
+                {t("classes.attendance.qr.startDescription")}
               </p>
             </div>
             <Button className="w-full gap-2 h-11 rounded-xl shadow-md" onClick={startSession}>
               <PlayCircle className="h-4 w-4" />
-              Start Attendance Session
+              {t("buttons.startAttendance")}
             </Button>
           </div>
         )}

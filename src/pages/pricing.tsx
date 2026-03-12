@@ -27,6 +27,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const FAQItem = ({ question, answer }: { question: string, answer: string }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -61,6 +62,8 @@ const FAQItem = ({ question, answer }: { question: string, answer: string }) => 
 };
 
 const Pricing = () => {
+  const { t, i18n } = useTranslation();
+  const isAr = i18n.language === 'ar';
   const { data: identity } = useGetIdentity<User>();
   const { mutate: createCheckout } = useCustomMutation();
   const navigate = useNavigate();
@@ -92,35 +95,37 @@ const Pricing = () => {
 
   const plans = [
     {
-      name: "Free",
-      price: "$0",
-      description: "Perfect for students and casual learners.",
+      name: t("pricing.plans.free.name"),
+      price: "0",
+      symbol: "$",
+      description: t("pricing.plans.free.desc"),
       features: [
-        "Join up to 5 Classes",
-        "Unlimited Quiz Attempts",
-        "Public Study Groups",
-        "Basic AI Concept Explainer",
-        "Standard Video Quality",
+        t("pricing.plans.free.f1"),
+        t("pricing.plans.free.f2"),
+        t("pricing.plans.free.f3"),
+        t("pricing.plans.free.f4"),
+        t("pricing.plans.free.f5"),
       ],
-      cta: identity ? "Current Plan" : "Get Started",
+      cta: identity ? t("pricing.currentPlan") : t("buttons.getStarted"),
       priceId: "free",
       featured: false,
     },
     {
-      name: "Pro",
-      price: "$9.99",
+      name: t("pricing.plans.pro.name"),
+      price: "9.99",
+      symbol: "$",
       period: "/month",
-      description: "For serious students and elite teachers.",
+      description: t("pricing.plans.pro.desc"),
       features: [
-        "Unlimited Classes",
-        "Full AI Study Lab Access",
-        "Advanced Risk Assessment",
-        "Whiteboard Snapshots",
-        "Stripe Invoice Management",
-        "Priority Support",
-        "Gold Crown Badge",
+        t("pricing.plans.pro.f1"),
+        t("pricing.plans.pro.f2"),
+        t("pricing.plans.pro.f3"),
+        t("pricing.plans.pro.f4"),
+        t("pricing.plans.pro.f5"),
+        t("pricing.plans.pro.f6"),
+        t("pricing.plans.pro.f7"),
       ],
-      cta: "Upgrade to Pro",
+      cta: t("pricing.upgrade"),
       priceId: "price_1P2k3l4m5n6o7p8q", // Replace with real Stripe Price ID
       featured: true,
     },
@@ -128,28 +133,29 @@ const Pricing = () => {
 
   const faqs = [
     {
-        question: "How does the AI Study Lab work?",
-        answer: "The AI Study Lab uses advanced machine learning models to analyze your course material and generate personalized summaries, flashcards, and practice quizzes. Pro members get unlimited credits for these tools."
+        question: t("pricing.faq.q1"),
+        answer: t("pricing.faq.a1")
     },
     {
-        question: "Can I cancel my Pro subscription at any time?",
-        answer: "Yes, you can cancel your subscription at any time through the Billing Portal in your account settings. You will continue to have access to Pro features until the end of your current billing cycle."
+        question: t("pricing.faq.q2"),
+        answer: t("pricing.faq.a2")
     },
     {
-        question: "Is there a discount for educational institutions?",
-        answer: "We offer special volume licensing for schools and universities. Please contact our sales team for a custom quote tailored to your institution's needs."
+        question: t("pricing.faq.q3"),
+        answer: t("pricing.faq.a3")
     },
     {
-        question: "Are my payments secure?",
-        answer: "Absolutely. All payments are processed through Stripe, the gold standard in online payments. We never store your credit card information on our servers."
+        question: t("pricing.faq.q4"),
+        answer: t("pricing.faq.a4")
     }
   ];
 
   return (
-    <div className="container mx-auto py-32 px-4 max-w-6xl space-y-32">
+    <div className="container mx-auto py-32 px-4 max-w-6xl space-y-32 text-start">
       {/* Background Decorative Elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-[-1]">
         <div className="absolute top-[20%] right-[-5%] w-[30%] h-[30%] bg-primary/5 blur-[100px] rounded-full" />
+        <div className="absolute bottom-[10%] left-[-5%] w-[30%] h-[30%] bg-purple-500/5 blur-[100px] rounded-full" />
       </div>
 
       <div className="text-center space-y-6 max-w-3xl mx-auto">
@@ -159,41 +165,49 @@ const Pricing = () => {
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-black uppercase tracking-widest"
         >
             <Crown className="h-4 w-4" />
-            Pricing Plans
+            {t("pricing.badge")}
         </motion.div>
-        <h1 className="text-6xl md:text-7xl font-black tracking-tighter leading-tight">
-          Supercharge Your <span className="text-primary">Learning.</span>
+        <h1 className="text-6xl md:text-7xl font-black tracking-tighter leading-tight uppercase">
+          {t("pricing.titlePart1")} <span className="text-primary italic">{t("pricing.titlePart2")}</span>
         </h1>
         <p className="text-muted-foreground text-xl font-medium">
-          Choose the plan that best fits your educational goals. Upgrade or downgrade anytime.
+          {t("pricing.description")}
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-5xl mx-auto">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-5xl mx-auto relative">
+        {/* Comparison Line or Element can go here */}
         {plans.map((plan, index) => (
           <motion.div
             key={plan.name}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
+            className="relative"
           >
             <Card className={cn(
-                "relative h-full flex flex-col border-none shadow-2xl rounded-[3rem] overflow-hidden transition-all hover:scale-[1.02] group",
-                plan.featured ? "bg-card/40 backdrop-blur-xl border-t-4 border-primary/50" : "bg-muted/20"
+                "relative h-full flex flex-col border-2 shadow-2xl rounded-[3rem] overflow-hidden transition-all duration-500 group hover:translate-y-[-8px]",
+                plan.featured 
+                  ? "bg-card border-primary/20 shadow-primary/10" 
+                  : "bg-card/40 border-transparent backdrop-blur-sm"
             )}>
               {plan.featured && (
-                <div className="absolute top-0 right-0 px-8 py-3 bg-primary text-primary-foreground text-[10px] font-black uppercase tracking-widest rounded-bl-[2rem] shadow-xl">
-                  Recommended
+                <div className={cn(
+                    "absolute top-0 px-8 py-3 bg-primary text-primary-foreground text-[10px] font-black uppercase tracking-widest shadow-xl z-10",
+                    isAr ? "left-0 rounded-br-[2rem]" : "right-0 rounded-bl-[2rem]"
+                )}>
+                  {t("pricing.recommended")}
                 </div>
               )}
               <CardHeader className="p-12 pb-8">
                 <CardTitle className="text-2xl font-black uppercase tracking-widest flex items-center gap-2">
-                    {plan.name === "Pro" && <Sparkles className="h-6 w-6 text-primary group-hover:animate-pulse" />}
+                    {plan.featured && <Sparkles className="h-6 w-6 text-primary" />}
                     {plan.name}
                 </CardTitle>
-                <div className="mt-6 flex items-baseline gap-2">
-                  <span className="text-6xl font-black tracking-tighter">{plan.price}</span>
-                  {plan.period && <span className="text-muted-foreground font-black uppercase text-sm tracking-widest">{plan.period}</span>}
+                <div className="mt-6 flex items-baseline gap-1">
+                  <span className="text-4xl font-black tracking-tight text-muted-foreground">{plan.symbol}</span>
+                  <span className="text-7xl font-black tracking-tighter">{plan.price}</span>
+                  {plan.period && <span className="text-muted-foreground font-black uppercase text-xs tracking-widest ml-2">{plan.period}</span>}
                 </div>
                 <CardDescription className="mt-6 text-lg font-medium leading-relaxed">
                   {plan.description}
@@ -201,13 +215,13 @@ const Pricing = () => {
               </CardHeader>
               <CardContent className="p-12 pt-0 flex-1">
                 <div className="space-y-5">
-                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">What's Included</p>
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">{t("pricing.whatsIncluded")}</p>
                   {plan.features.map((feature) => (
-                    <div key={feature} className="flex items-start gap-4">
-                      <div className="mt-1 p-1 rounded-full bg-primary/10 text-primary">
+                    <div key={feature} className="flex items-start gap-4 group/item">
+                      <div className="mt-1 p-1 rounded-full bg-primary/10 text-primary shrink-0 group-hover/item:bg-primary group-hover/item:text-primary-foreground transition-colors">
                         <Check className="h-3 w-3" strokeWidth={4} />
                       </div>
-                      <span className="text-sm font-bold tracking-tight">{feature}</span>
+                      <span className="text-sm font-bold tracking-tight text-foreground/80 group-hover/item:text-foreground transition-colors">{feature}</span>
                     </div>
                   ))}
                 </div>
@@ -219,12 +233,12 @@ const Pricing = () => {
                   className={cn(
                     "w-full h-16 rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl transition-all",
                     plan.featured 
-                      ? "bg-primary text-primary-foreground shadow-primary/20 hover:scale-[1.05]" 
-                      : "bg-muted text-muted-foreground hover:bg-muted/80"
+                      ? "bg-primary text-primary-foreground shadow-primary/20 hover:shadow-primary/40" 
+                      : "bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground"
                   )}
                 >
                   {plan.cta}
-                  <ArrowRight className="ml-2 h-4 w-4" />
+                  <ArrowRight className={cn("ml-2 h-4 w-4", isAr && "rotate-180")} />
                 </Button>
               </CardFooter>
             </Card>
@@ -232,36 +246,45 @@ const Pricing = () => {
         ))}
       </div>
 
-      {/* Feature Grid Section */}
-      <div className="pt-20">
+      {/* Trust & Features Section */}
+      <div className="pt-20 space-y-32">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-              <div className="p-10 bg-muted/20 rounded-[2.5rem] space-y-6">
+              <motion.div 
+                whileHover={{ y: -5 }}
+                className="p-10 bg-card border border-primary/5 rounded-[2.5rem] space-y-6 shadow-xl"
+              >
                   <div className="h-14 w-14 rounded-2xl bg-blue-500/10 text-blue-600 flex items-center justify-center shadow-lg">
                       <ShieldCheck className="h-7 w-7" />
                   </div>
-                  <h3 className="text-xl font-black tracking-tight uppercase">Secure Payments</h3>
+                  <h3 className="text-xl font-black tracking-tight uppercase">{t("pricing.features.payments.title")}</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed font-medium">
-                      All transactions are processed via **Stripe**. We prioritize your security and never store credit card data.
+                      {t("pricing.features.payments.desc")}
                   </p>
-              </div>
-              <div className="p-10 bg-muted/20 rounded-[2.5rem] space-y-6">
+              </motion.div>
+              <motion.div 
+                whileHover={{ y: -5 }}
+                className="p-10 bg-card border border-primary/5 rounded-[2.5rem] space-y-6 shadow-xl"
+              >
                   <div className="h-14 w-14 rounded-2xl bg-purple-500/10 text-purple-600 flex items-center justify-center shadow-lg">
                       <BrainCircuit className="h-7 w-7" />
                   </div>
-                  <h3 className="text-xl font-black tracking-tight uppercase">AI Credits</h3>
+                  <h3 className="text-xl font-black tracking-tight uppercase">{t("pricing.features.credits.title")}</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed font-medium">
-                      Pro members get unlimited access to all AI tools, including Magic Course Builder and AI Study Lab.
+                      {t("pricing.features.credits.desc")}
                   </p>
-              </div>
-              <div className="p-10 bg-muted/20 rounded-[2.5rem] space-y-6">
+              </motion.div>
+              <motion.div 
+                whileHover={{ y: -5 }}
+                className="p-10 bg-card border border-primary/5 rounded-[2.5rem] space-y-6 shadow-xl"
+              >
                   <div className="h-14 w-14 rounded-2xl bg-green-500/10 text-green-600 flex items-center justify-center shadow-lg">
                       <MessageSquare className="h-7 w-7" />
                   </div>
-                  <h3 className="text-xl font-black tracking-tight uppercase">Priority Support</h3>
+                  <h3 className="text-xl font-black tracking-tight uppercase">{t("pricing.features.support.title")}</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed font-medium">
-                      Pro subscribers get access to a dedicated support channel and faster response times for all inquiries.
+                      {t("pricing.features.support.desc")}
                   </p>
-              </div>
+              </motion.div>
           </div>
       </div>
 
@@ -270,9 +293,9 @@ const Pricing = () => {
           <div className="text-center space-y-4">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-muted text-muted-foreground text-[10px] font-black uppercase tracking-widest">
                   <HelpCircle className="h-4 w-4" />
-                  Common Questions
+                  {t("pricing.faq.badge")}
               </div>
-              <h2 className="text-5xl font-black tracking-tighter uppercase">Frequently Asked Questions</h2>
+              <h2 className="text-5xl font-black tracking-tighter uppercase">{t("pricing.faq.title")}</h2>
           </div>
           <div className="bg-card/40 backdrop-blur-xl rounded-[3rem] p-8 md:p-12 border border-primary/5 shadow-2xl">
               {faqs.map((faq, i) => (
@@ -282,16 +305,19 @@ const Pricing = () => {
       </div>
 
       {/* Final CTA */}
-      <div className="bg-primary p-16 rounded-[4rem] text-center text-primary-foreground space-y-8 relative overflow-hidden group">
+      <div className="bg-primary p-16 rounded-[4rem] text-center text-primary-foreground space-y-8 relative overflow-hidden group shadow-2xl shadow-primary/20">
           <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10" />
-          <h2 className="text-4xl md:text-6xl font-black tracking-tighter relative z-10 leading-[0.9]">Ready to transform your learning experience?</h2>
+          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-white/10 to-transparent pointer-events-none" />
+          <h2 className="text-4xl md:text-6xl font-black tracking-tighter relative z-10 leading-[0.9] italic uppercase">
+            {t("pricing.cta.title")}
+          </h2>
           <p className="text-primary-foreground/70 font-medium max-w-xl mx-auto relative z-10">
-              Join thousands of students and teachers already using Classroom CMS to achieve more.
+              {t("pricing.cta.desc")}
           </p>
           <div className="relative z-10 pt-4">
             <Link to="/register">
-                <Button size="lg" className="bg-white text-primary hover:bg-white/90 h-16 px-12 rounded-2xl font-black uppercase tracking-widest shadow-2xl">
-                    Get Started Now
+                <Button size="lg" className="bg-white text-primary hover:bg-white/90 h-16 px-12 rounded-2xl font-black uppercase tracking-widest shadow-2xl hover:scale-105 transition-transform">
+                    {t("pricing.cta.start")}
                     <Zap className="ml-2 h-5 w-5 fill-current" />
                 </Button>
             </Link>

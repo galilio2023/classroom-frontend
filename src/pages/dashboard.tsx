@@ -27,9 +27,11 @@ import { useTerm } from "@/contexts/term-context";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { useTranslation } from "react-i18next";
 
 const Dashboard = () => {
-  usePageTitle("Dashboard");
+  const { t, i18n } = useTranslation();
+  usePageTitle(t("dashboard.title"));
   const { list, show } = useNavigation();
   const { data: identity, isLoading: isIdentityLoading, refetch: refetchIdentity } = useGetIdentity<User>();
   const { selectedTerm } = useTerm();
@@ -97,18 +99,18 @@ const Dashboard = () => {
   }, [identity?.id, refetchCore, refetchAnalytics, refetchIdentity]);
 
   const activeCards = isStudent ? [
-    { title: "My Classes", icon: Layout, heading: "Enrolled Classes", description: "Access active classrooms.", resource: "classes" },
-    { title: "Assignments", icon: FileText, heading: "My Tasks", description: "Submit your work.", resource: "assignments" },
-    { title: "Calendar", icon: Calendar, heading: "Schedule", description: "Deadlines & events.", resource: "calendar" },
+    { title: t("dashboard.cards.myClasses"), icon: Layout, heading: t("dashboard.cards.enrolledClasses"), description: t("dashboard.cards.accessActiveClassrooms"), resource: "classes" },
+    { title: t("dashboard.cards.assignments"), icon: FileText, heading: t("dashboard.cards.myTasks"), description: t("dashboard.cards.submitYourWork"), resource: "assignments" },
+    { title: t("dashboard.cards.calendar"), icon: Calendar, heading: t("dashboard.cards.schedule"), description: t("dashboard.cards.deadlinesEvents"), resource: "calendar" },
   ] : isParent ? [
-    { title: "Family", icon: Heart, heading: "My Children", description: "Monitor progress.", resource: "users" },
-    { title: "Calendar", icon: Calendar, heading: "School Events", description: "Important dates.", resource: "calendar" },
-    { title: "Messages", icon: Bell, heading: "Notifications", description: "Teacher updates.", resource: "notifications" },
+    { title: t("dashboard.cards.family"), icon: Heart, heading: t("dashboard.cards.myChildren"), description: t("dashboard.cards.monitorProgress"), resource: "users" },
+    { title: t("dashboard.cards.calendar"), icon: Calendar, heading: t("dashboard.cards.schoolEvents"), description: t("dashboard.cards.importantDates"), resource: "calendar" },
+    { title: t("dashboard.cards.messages"), icon: Bell, heading: t("dashboard.cards.notifications"), description: t("dashboard.cards.teacherUpdates"), resource: "notifications" },
   ] : [
-    { title: "Classes", icon: Layout, heading: "Manage Classes", description: "Oversee classrooms.", resource: "classes" },
-    { title: "Assignments", icon: FileText, heading: "Curriculum", description: "Tasks and grading.", resource: "assignments" },
-    { title: "Calendar", icon: Calendar, heading: "Schedule", description: "View all academic deadlines.", resource: "calendar" },
-    { title: "Users", icon: Users, heading: "Directory", description: "Students and staff.", resource: "users" },
+    { title: t("dashboard.cards.manageClasses"), icon: Layout, heading: t("dashboard.cards.overseeClassrooms"), description: t("dashboard.cards.accessActiveClassrooms"), resource: "classes" },
+    { title: t("dashboard.cards.curriculum"), icon: FileText, heading: t("dashboard.cards.tasksGrading"), description: t("dashboard.cards.viewAllDeadlines"), resource: "assignments" },
+    { title: t("dashboard.cards.calendar"), icon: Calendar, heading: t("dashboard.cards.schedule"), description: t("dashboard.cards.deadlinesEvents"), resource: "calendar" },
+    { title: t("dashboard.cards.users"), icon: Users, heading: t("dashboard.cards.directory"), description: t("dashboard.cards.studentsStaff"), resource: "users" },
   ];
 
   if (isError) {
@@ -118,14 +120,14 @@ const Dashboard = () => {
           <AlertCircle className="h-12 w-12" />
         </div>
         <div className="text-center space-y-2">
-          <h2 className="text-2xl font-black tracking-tight">Failed to load dashboard</h2>
-          <p className="text-muted-foreground font-medium">We encountered an error while fetching your dashboard data.</p>
+          <h2 className="text-2xl font-black tracking-tight">{t("dashboard.failedToLoad")}</h2>
+          <p className="text-muted-foreground font-medium">{t("dashboard.failedToLoadDescription")}</p>
         </div>
         <Button 
           onClick={() => { void refetchCore(); void refetchAnalytics(); }}
           className="rounded-xl font-black uppercase tracking-widest h-12 px-8 shadow-lg shadow-primary/20"
         >
-          Try Again
+          {t("buttons.tryAgain")}
         </Button>
       </div>
     );
@@ -156,10 +158,11 @@ const Dashboard = () => {
       >
         <div className="relative">
           <WelcomeHeader name={identity?.name || "User"} isStudent={isStudent} user={identity} />
-          <div className="absolute top-0 right-0 hidden md:flex items-center gap-3">
+          {/* Fix: Use logical positioning to prevent overlap in RTL */}
+          <div className="absolute top-0 ltr:right-0 rtl:left-0 hidden md:flex items-center gap-3">
             <Badge variant="secondary" className="rounded-full px-4 py-1.5 font-black text-[10px] uppercase tracking-widest bg-card/50 backdrop-blur-xl border-black/[0.05] dark:border-white/[0.05] shadow-sm">
-              <Clock className="h-3 w-3 mr-2 text-primary" />
-              {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
+              <Clock className="h-3 w-3 mr-2 rtl:mr-0 rtl:ml-2 text-primary" />
+              {new Date().toLocaleDateString(i18n.language === 'ar' ? 'ar-EG' : 'en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
             </Badge>
             <Button variant="ghost" size="icon" className="rounded-full bg-card/50 backdrop-blur-xl border-black/[0.05] dark:border-white/[0.05] shadow-sm h-10 w-10">
               <Bell className="h-4 w-4" />
@@ -179,8 +182,8 @@ const Dashboard = () => {
                 <Info className="h-6 w-6" />
               </div>
               <div className="space-y-1">
-                <p className="font-black uppercase tracking-widest text-xs">Archive View Active</p>
-                <p className="text-sm font-medium">You are viewing data from <strong>{selectedTerm.name}</strong>. This term is archived and read-only.</p>
+                <p className="font-black uppercase tracking-widest text-xs">{t("dashboard.archiveViewActive")}</p>
+                <p className="text-sm font-medium">{t("dashboard.archiveViewDescription", { termName: selectedTerm.name })}</p>
               </div>
             </motion.div>
           )}
@@ -243,7 +246,7 @@ const Dashboard = () => {
                     <div className="p-2 rounded-xl bg-primary/10 text-primary">
                       <Sparkles className="h-5 w-5" />
                     </div>
-                    <h2 className="text-2xl font-black tracking-tight">Quick Actions</h2>
+                    <h2 className="text-2xl font-black tracking-tight">{t("dashboard.quickActions")}</h2>
                     <div className="h-px flex-1 bg-gradient-to-r from-primary/20 to-transparent" />
                   </div>
                   <QuickActions cards={activeCards} list={list} />
@@ -262,7 +265,7 @@ const Dashboard = () => {
                     <div className="p-2 rounded-xl bg-primary/10 text-primary">
                       <Calendar className="h-5 w-5" />
                     </div>
-                    <h2 className="text-2xl font-black tracking-tight">Today's Schedule</h2>
+                    <h2 className="text-2xl font-black tracking-tight">{t("dashboard.todaySchedule")}</h2>
                   </div>
                   <TodaySchedule 
                     schedule={coreData?.todaySchedule ?? []} 

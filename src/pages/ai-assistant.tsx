@@ -8,9 +8,11 @@ import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
 import usePageTitle from "@/hooks/use-page-title";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useTranslation } from "react-i18next";
 
 export const AIAssistantPage: React.FC = () => {
-  usePageTitle("AI Content Assistant");
+  const { t } = useTranslation();
+  usePageTitle(t("aiHub.assistant.title"));
 
   return (
     <div className="container mx-auto py-10 max-w-6xl space-y-10">
@@ -26,8 +28,8 @@ export const AIAssistantPage: React.FC = () => {
                     <Sparkles className="h-8 w-8" />
                 </div>
                 <div>
-                    <h1 className="text-4xl font-black tracking-tight">AI Content Assistant</h1>
-                    <p className="text-muted-foreground font-medium mt-1">Leverage Gemini AI to architect high-quality educational content in seconds.</p>
+                    <h1 className="text-4xl font-black tracking-tight">{t("aiHub.assistant.title")}</h1>
+                    <p className="text-muted-foreground font-medium mt-1">{t("aiHub.assistant.description")}</p>
                 </div>
             </div>
         </div>
@@ -44,14 +46,14 @@ export const AIAssistantPage: React.FC = () => {
                                 className="rounded-xl font-black uppercase tracking-widest text-[10px] gap-2 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-lg transition-all"
                             >
                                 <FileText className="h-4 w-4" />
-                                Assignment Architect
+                                {t("aiHub.assistant.architect")}
                             </TabsTrigger>
                             <TabsTrigger 
                                 value="quiz" 
                                 className="rounded-xl font-black uppercase tracking-widest text-[10px] gap-2 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-lg transition-all"
                             >
                                 <BrainCircuit className="h-4 w-4" />
-                                Quiz Generator
+                                {t("aiHub.assistant.generator")}
                             </TabsTrigger>
                         </TabsList>
                     </div>
@@ -86,7 +88,7 @@ export const AIAssistantPage: React.FC = () => {
                             <div className="p-2 rounded-xl bg-primary/10 text-primary">
                                 <Sparkles className="h-5 w-5" />
                             </div>
-                            <CardTitle className="text-lg font-black tracking-tight">AI Capabilities</CardTitle>
+                            <CardTitle className="text-lg font-black tracking-tight">{t("aiHub.assistant.capabilities")}</CardTitle>
                         </div>
                     </CardHeader>
                     <CardContent className="p-6 space-y-6">
@@ -95,9 +97,9 @@ export const AIAssistantPage: React.FC = () => {
                                 <FileText className="h-5 w-5 text-indigo-600" />
                             </div>
                             <div className="space-y-1">
-                                <p className="font-black text-xs uppercase tracking-widest text-indigo-600">Smart Rubrics</p>
+                                <p className="font-black text-xs uppercase tracking-widest text-indigo-600">{t("aiHub.assistant.rubrics")}</p>
                                 <p className="text-sm text-muted-foreground font-medium leading-relaxed">
-                                    Generate detailed grading criteria and learning objectives automatically.
+                                    {t("aiHub.assistant.rubricsDesc")}
                                 </p>
                             </div>
                         </div>
@@ -107,9 +109,9 @@ export const AIAssistantPage: React.FC = () => {
                                 <BrainCircuit className="h-5 w-5 text-purple-600" />
                             </div>
                             <div className="space-y-1">
-                                <p className="font-black text-xs uppercase tracking-widest text-purple-600">Adaptive Quizzes</p>
+                                <p className="font-black text-xs uppercase tracking-widest text-purple-600">{t("aiHub.assistant.quizzes")}</p>
                                 <p className="text-sm text-muted-foreground font-medium leading-relaxed">
-                                    Create multiple-choice questions with varying difficulty levels based on your topic.
+                                    {t("aiHub.assistant.quizzesDesc")}
                                 </p>
                             </div>
                         </div>
@@ -119,9 +121,9 @@ export const AIAssistantPage: React.FC = () => {
                                 <LayoutDashboard className="h-5 w-5 text-green-600" />
                             </div>
                             <div className="space-y-1">
-                                <p className="font-black text-xs uppercase tracking-widest text-green-600">Instant Drafts</p>
+                                <p className="font-black text-xs uppercase tracking-widest text-green-600">{t("aiHub.assistant.drafts")}</p>
                                 <p className="text-sm text-muted-foreground font-medium leading-relaxed">
-                                    Get a complete assignment draft including description and instructions in seconds.
+                                    {t("aiHub.assistant.draftsDesc")}
                                 </p>
                             </div>
                         </div>
@@ -131,9 +133,9 @@ export const AIAssistantPage: React.FC = () => {
                 <Alert className="rounded-[2rem] border-primary/10 bg-primary/5 p-6">
                     <Info className="h-5 w-5 text-primary" />
                     <div className="ml-2">
-                        <AlertTitle className="font-black text-sm uppercase tracking-widest mb-2">Pro Tip</AlertTitle>
+                        <AlertTitle className="font-black text-sm uppercase tracking-widest mb-2">{t("aiHub.assistant.proTip")}</AlertTitle>
                         <AlertDescription className="text-sm text-muted-foreground font-medium leading-relaxed">
-                            Be specific with your topics. Instead of "History", try "The impact of the Industrial Revolution on urban development."
+                            {t("aiHub.assistant.proTipDesc")}
                         </AlertDescription>
                     </div>
                 </Alert>

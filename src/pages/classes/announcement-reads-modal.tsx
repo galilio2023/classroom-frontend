@@ -10,6 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { format } from "date-fns";
 import { Loader2, Eye } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface AnnouncementReadsModalProps {
   announcementId: number | null;
@@ -31,6 +32,7 @@ export const AnnouncementReadsModal = ({
   open,
   onOpenChange,
 }: AnnouncementReadsModalProps) => {
+  const { t } = useTranslation();
   const { result, query } = useCustom<ReadReceipt[]>({
     url: `announcements/${announcementId}/reads`,
     method: "get",
@@ -50,10 +52,10 @@ export const AnnouncementReadsModal = ({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Eye className="h-5 w-5 text-primary" />
-            Read Receipts
+            {t("classes.announcements.reads.title")}
           </DialogTitle>
           <DialogDescription>
-            Students who have viewed this announcement.
+            {t("classes.announcements.reads.description")}
           </DialogDescription>
         </DialogHeader>
 
@@ -64,7 +66,7 @@ export const AnnouncementReadsModal = ({
             </div>
           ) : reads.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              No one has read this announcement yet.
+              {t("classes.announcements.reads.empty")}
             </div>
           ) : (
             <ScrollArea className="h-[300px] pr-4">
@@ -86,7 +88,7 @@ export const AnnouncementReadsModal = ({
                           {read.student.name}
                         </span>
                         <span className="text-xs text-muted-foreground">
-                          Student
+                          {t("roles.student")}
                         </span>
                       </div>
                     </div>

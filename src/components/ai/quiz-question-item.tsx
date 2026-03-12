@@ -1,5 +1,6 @@
 import React from "react";
 import { CheckCircle2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface QuizQuestion {
   question: string;
@@ -19,6 +20,7 @@ export const QuizQuestionItem: React.FC<QuizQuestionItemProps> = ({
   index: _index,
   showExplanation = true 
 }) => {
+  const { t } = useTranslation();
   return (
     <div className="space-y-4 pt-2">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -38,7 +40,9 @@ export const QuizQuestionItem: React.FC<QuizQuestionItemProps> = ({
       </div>
       {showExplanation && question.explanation && (
         <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-md border border-blue-100 dark:border-blue-800">
-          <p className="text-xs font-semibold text-blue-800 dark:text-blue-400 uppercase mb-1">Explanation</p>
+          <p className="text-xs font-semibold text-blue-800 dark:text-blue-400 uppercase mb-1">
+            {t("classes.quiz.explanation")}
+          </p>
           <p className="text-sm text-blue-700 dark:text-blue-300">{question.explanation}</p>
         </div>
       )}

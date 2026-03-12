@@ -10,6 +10,7 @@ import { motion } from "framer-motion";
 import usePageTitle from "@/hooks/use-page-title";
 import { cn } from "@/lib/utils";
 import { EmptyState } from "@/components/empty-state";
+import { useTranslation } from "react-i18next";
 
 interface ReportCardClass {
   classId: number;
@@ -31,7 +32,8 @@ interface ReportCardData {
 }
 
 export default function ReportCard() {
-  usePageTitle("Academic Report Card");
+  const { t } = useTranslation();
+  usePageTitle(t("reportCard.title"));
   const { data: identity } = useGetIdentity<User>();
   const { selectedTerm } = useTerm();
 
@@ -61,8 +63,8 @@ export default function ReportCard() {
       <div className="flex-1 flex items-center justify-center w-full min-h-[500px]">
         <EmptyState
           icon={FileText}
-          title="No Report Data"
-          description="We couldn't find any academic records for the selected term."
+          title={t("reportCard.noData")}
+          description={t("reportCard.noDataDesc")}
           className="border-none bg-transparent min-h-0"
         />
       </div>
@@ -84,13 +86,13 @@ export default function ReportCard() {
             <div className="p-3 rounded-2xl bg-primary/10 text-primary shadow-sm">
                 <GraduationCap className="h-8 w-8" />
             </div>
-            Academic Report Card
+            {t("reportCard.title")}
           </h1>
           <div className="flex items-center gap-3 text-muted-foreground font-bold text-sm ml-1">
             <Calendar className="h-4 w-4 text-primary" />
             <span>{report.term?.name || "Current Term"}</span>
             <div className="w-1 h-1 rounded-full bg-muted-foreground/30" />
-            <span>{report.term?.startDate ? new Date(report.term.startDate).getFullYear() : new Date().getFullYear()} Academic Year</span>
+            <span>{t("reportCard.academicYear", { year: report.term?.startDate ? new Date(report.term.startDate).getFullYear() : new Date().getFullYear() })}</span>
           </div>
         </div>
 
@@ -103,7 +105,7 @@ export default function ReportCard() {
               <Calculator className="h-8 w-8 text-white" />
             </div>
             <div>
-              <p className="text-[10px] font-black uppercase tracking-widest opacity-70">Cumulative GPA</p>
+              <p className="text-[10px] font-black uppercase tracking-widest opacity-70">{t("reportCard.gpa")}</p>
               <p className="text-5xl font-black tracking-tighter">{report.gpa || "0.00"}</p>
             </div>
           </CardContent>
@@ -123,12 +125,12 @@ export default function ReportCard() {
                         <div className="space-y-1">
                             <CardTitle className="text-2xl font-black tracking-tight flex items-center gap-3">
                                 <BookOpen className="h-6 w-6 text-primary" />
-                                Course Performance
+                                {t("reportCard.coursePerformance")}
                             </CardTitle>
-                            <CardDescription className="font-medium">Detailed breakdown of your grades across all subjects.</CardDescription>
+                            <CardDescription className="font-medium">{t("reportCard.coursePerformanceDesc")}</CardDescription>
                         </div>
                         <Badge variant="secondary" className="rounded-xl px-4 py-1.5 font-black text-[10px] uppercase tracking-widest bg-primary/5 text-primary border-none">
-                            {classes.length} Courses
+                            {t("reportCard.coursesCount", { count: classes.length })}
                         </Badge>
                     </div>
                 </CardHeader>
@@ -137,8 +139,8 @@ export default function ReportCard() {
                         <div className="p-20">
                             <EmptyState
                                 icon={FileText}
-                                title="No Graded Courses"
-                                description="You haven't received any grades for the selected term yet. Check back once your assignments are marked."
+                                title={t("reportCard.noGradedCourses")}
+                                description={t("reportCard.noGradedCoursesDesc")}
                                 className="border-none bg-transparent min-h-0"
                             />
                         </div>
@@ -146,10 +148,10 @@ export default function ReportCard() {
                         <Table>
                             <TableHeader className="bg-muted/30">
                                 <TableRow className="hover:bg-transparent border-none">
-                                    <TableHead className="h-14 px-10 font-black uppercase tracking-widest text-[10px]">Subject & Class</TableHead>
-                                    <TableHead className="h-14 text-center font-black uppercase tracking-widest text-[10px]">Tasks</TableHead>
-                                    <TableHead className="h-14 text-center font-black uppercase tracking-widest text-[10px]">Avg. Score</TableHead>
-                                    <TableHead className="h-14 text-right px-10 font-black uppercase tracking-widest text-[10px]">Grade</TableHead>
+                                    <TableHead className="h-14 px-10 font-black uppercase tracking-widest text-[10px]">{t("reportCard.subjectAndClass")}</TableHead>
+                                    <TableHead className="h-14 text-center font-black uppercase tracking-widest text-[10px]">{t("reportCard.tasks")}</TableHead>
+                                    <TableHead className="h-14 text-center font-black uppercase tracking-widest text-[10px]">{t("reportCard.avgScore")}</TableHead>
+                                    <TableHead className="h-14 text-right px-10 font-black uppercase tracking-widest text-[10px]">{t("reportCard.grade")}</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -163,7 +165,7 @@ export default function ReportCard() {
                                         </TableCell>
                                         <TableCell className="text-center py-6">
                                             <Badge variant="outline" className="rounded-lg font-black text-[10px] border-primary/10">
-                                                {c.gradedAssignments} Graded
+                                                {t("reportCard.graded", { count: c.gradedAssignments })}
                                             </Badge>
                                         </TableCell>
                                         <TableCell className="text-center py-6">
@@ -209,7 +211,7 @@ export default function ReportCard() {
                 <CardHeader className="p-8 pb-4">
                     <CardTitle className="text-sm font-black uppercase tracking-widest flex items-center gap-2">
                         <TrendingUp className="h-4 w-4 text-primary" />
-                        Academic Insights
+                        {t("reportCard.insights")}
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="p-8 pt-0 space-y-6">
@@ -218,7 +220,7 @@ export default function ReportCard() {
                             <Star className="h-5 w-5 text-green-600" />
                         </div>
                         <div className="space-y-1">
-                            <p className="font-black text-[10px] uppercase tracking-widest">Top Subject</p>
+                            <p className="font-black text-[10px] uppercase tracking-widest">{t("reportCard.topSubject")}</p>
                             <p className="text-sm text-muted-foreground font-bold">
                                 {hasClasses ? [...classes].sort((a, b) => b.average - a.average)[0]?.subject : "N/A"}
                             </p>
@@ -229,9 +231,9 @@ export default function ReportCard() {
                             <Award className="h-5 w-5 text-primary" />
                         </div>
                         <div className="space-y-1">
-                            <p className="font-black text-[10px] uppercase tracking-widest">Term Standing</p>
+                            <p className="font-black text-[10px] uppercase tracking-widest">{t("reportCard.termStanding")}</p>
                             <p className="text-sm text-muted-foreground font-bold">
-                                {Number(report.gpa || 0) >= 3.5 ? "Dean's List Candidate" : hasClasses ? "Good Academic Standing" : "No Standing Yet"}
+                                {Number(report.gpa || 0) >= 3.5 ? t("reportCard.deansList") : hasClasses ? t("reportCard.goodStanding") : t("reportCard.noStanding")}
                             </p>
                         </div>
                     </div>
@@ -244,12 +246,12 @@ export default function ReportCard() {
                         <div className="p-2 rounded-xl bg-primary/10 text-primary">
                             <Star className="h-5 w-5" />
                         </div>
-                        <p className="font-black text-sm uppercase tracking-widest">Instructor Note</p>
+                        <p className="font-black text-sm uppercase tracking-widest">{t("reportCard.instructorNote")}</p>
                     </div>
                     <p className="text-sm text-muted-foreground font-medium leading-relaxed italic">
                         {hasClasses 
-                            ? "\"Your performance this term has been exceptional. Keep focusing on your core subjects to maintain this high GPA.\""
-                            : "\"No instructor notes available for this term yet.\""}
+                            ? `\"${t("reportCard.defaultNote")}\"`
+                            : `\"${t("reportCard.noNote")}\"`}
                     </p>
                 </div>
             </Card>

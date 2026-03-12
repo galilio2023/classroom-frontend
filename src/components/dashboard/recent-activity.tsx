@@ -2,17 +2,20 @@ import { useCustom, HttpError } from "@refinedev/core";
 import { Bell, CheckCheck, Info, GraduationCap, ClipboardCheck, Trophy, BrainCircuit, ArrowRight, History, Sparkles, Clock } from "lucide-react";
 import { Notification } from "@/types";
 import { formatDistanceToNow } from "date-fns";
+import { ar } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslation } from "react-i18next";
 
 interface RecentActivityProps {
   limit?: number;
 }
 
 export const RecentActivity = ({ limit = 5 }: RecentActivityProps) => {
+  const { t, i18n } = useTranslation();
   const { query } = useCustom<Notification[], HttpError>({
     url: "/notifications",
     method: "get",
@@ -46,15 +49,15 @@ export const RecentActivity = ({ limit = 5 }: RecentActivityProps) => {
           <div className="p-1.5 rounded-lg bg-primary/10 text-primary">
             <History className="h-3.5 w-3.5" />
           </div>
-          <h3 className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-[0.2em]">Recent Activity</h3>
+          <h3 className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-[0.2em]">{t("dashboard.activity.recent")}</h3>
         </div>
         <Button 
           variant="ghost" 
           size="sm" 
           className="h-8 rounded-xl px-4 text-[10px] font-black uppercase tracking-widest text-primary hover:bg-primary/5 gap-2 group transition-all"
         >
-          View All 
-          <ArrowRight className="h-3 w-3 group-hover:translate-x-1 transition-transform" />
+          {t("buttons.viewAll")}
+          <ArrowRight className={cn("h-3 w-3 group-hover:translate-x-1 transition-transform", i18n.language === 'ar' && "rotate-180 group-hover:-translate-x-1")} />
         </Button>
       </div>
 
@@ -81,8 +84,8 @@ export const RecentActivity = ({ limit = 5 }: RecentActivityProps) => {
                 <Bell className="h-12 w-12" />
               </div>
               <div className="space-y-1">
-                <p className="text-xl font-black tracking-tight">No activity yet</p>
-                <p className="text-sm font-medium">Updates will appear here as they happen.</p>
+                <p className="text-xl font-black tracking-tight">{t("dashboard.activity.noActivity")}</p>
+                <p className="text-sm font-medium">{t("dashboard.activity.noActivityDescription")}</p>
               </div>
             </div>
           ) : (
@@ -116,7 +119,10 @@ export const RecentActivity = ({ limit = 5 }: RecentActivityProps) => {
                           </span>
                           <span className="text-[9px] font-black text-muted-foreground/40 whitespace-nowrap uppercase tracking-widest flex items-center gap-1.5">
                             <Clock className="h-2.5 w-2.5" />
-                            {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
+                            {formatDistanceToNow(new Date(notification.createdAt), { 
+                              addSuffix: true,
+                              locale: i18n.language === 'ar' ? ar : undefined
+                            })}
                           </span>
                         </div>
                         <p className="text-[11px] font-medium text-muted-foreground/80 line-clamp-2 leading-relaxed">
@@ -125,7 +131,7 @@ export const RecentActivity = ({ limit = 5 }: RecentActivityProps) => {
                         {notification.type === 'agent_alert' && (
                           <div className="mt-2 flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-ai-primary/60">
                             <Sparkles className="h-2.5 w-2.5" />
-                            AI Insight Available
+                            {t("dashboard.activity.aiInsightAvailable")}
                           </div>
                         )}
                       </div>

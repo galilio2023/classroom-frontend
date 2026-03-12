@@ -7,20 +7,15 @@ import {
 import { Button } from "@/components/ui/button";
 import { 
   BookOpen, 
-  Link as LinkIcon, 
-  FileText, 
-  MoreVertical, 
   Trash2, 
   Sparkles, 
   PenLine, 
   FileQuestion, 
-  PlusCircle,
-  LayoutDashboard,
-  ChevronRight,
+  FileText,
   Plus,
-  Wand2,
   Library,
-  ClipboardCheck
+  ClipboardCheck,
+  MoreVertical
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -30,9 +25,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ResourceItem } from "./resource-item";
 import { TaskItem } from "./task-item";
-import { cn } from "@/lib/utils";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
+import { useTranslation } from "react-i18next";
 
 interface ModuleItemProps {
   module: Module;
@@ -59,6 +54,8 @@ export const ModuleItem = ({
   onAddMaterial,
   onAddTask
 }: ModuleItemProps) => {
+  const { t, i18n } = useTranslation();
+  const isArabic = i18n.language === 'ar';
   const totalItems = (module.resources?.length || 0) + (module.assignments?.length || 0) + (module.quizzes?.length || 0);
   
   return (
@@ -67,8 +64,8 @@ export const ModuleItem = ({
       className="border-none shadow-xl bg-card/50 backdrop-blur-xl rounded-[2rem] overflow-hidden group transition-all hover:shadow-2xl hover:bg-card/80"
     >
       <div className="flex items-center justify-between w-full px-6">
-        <AccordionTrigger className="hover:no-underline py-6 flex-1 group/trigger">
-          <div className="flex items-center gap-4 text-left">
+        <AccordionTrigger className="hover:no-underline py-6 flex-1 group/trigger text-left rtl:text-right">
+          <div className="flex items-center gap-4">
             <div className="p-3 rounded-2xl bg-primary/10 text-primary group-hover/trigger:scale-110 transition-transform">
               <BookOpen className="h-6 w-6" />
             </div>
@@ -82,7 +79,9 @@ export const ModuleItem = ({
                 )}
                 <div className="flex items-center gap-1.5">
                   <div className="w-1 h-1 rounded-full bg-muted-foreground/30" />
-                  <span className="text-[10px] font-black text-primary uppercase tracking-widest">{totalItems} Items</span>
+                  <span className="text-[10px] font-black text-primary uppercase tracking-widest">
+                    {t("classes.curriculum.modulesItemsCount", { count: totalItems })}
+                  </span>
                 </div>
               </div>
             </div>
@@ -96,13 +95,13 @@ export const ModuleItem = ({
                   <MoreVertical className="h-5 w-5" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="rounded-xl border-none shadow-2xl">
+              <DropdownMenuContent align={isArabic ? "start" : "end"} className="rounded-xl border-none shadow-2xl">
                 <DropdownMenuItem 
                   className="text-destructive focus:text-destructive font-bold rounded-lg"
                   onClick={() => onDeleteModule(module.id)}
                 >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Delete Module
+                  <Trash2 className="h-4 w-4 mr-2 rtl:mr-0 rtl:ml-2" />
+                  {t("buttons.deleteModule")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -117,10 +116,10 @@ export const ModuleItem = ({
             <div className="flex items-center justify-between">
               <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2">
                 <Library className="h-3.5 w-3.5 text-primary" />
-                Learning Materials
+                {t("classes.resource.learningMaterials")}
               </h4>
               <Badge variant="secondary" className="rounded-full px-2 py-0 h-5 text-[9px] font-black bg-primary/5 text-primary border-none">
-                {module.resources?.length || 0}
+                {new Intl.NumberFormat(isArabic ? 'ar-EG' : 'en-US').format(module.resources?.length || 0)}
               </Badge>
             </div>
             <div className="grid gap-3">
@@ -138,7 +137,7 @@ export const ModuleItem = ({
               ) : (
                 <div className="p-6 rounded-2xl border-2 border-dashed border-muted-foreground/10 flex flex-col items-center justify-center gap-2 text-muted-foreground/40">
                   <Library className="h-6 w-6 opacity-20" />
-                  <p className="text-[10px] font-black uppercase tracking-widest">No materials added</p>
+                  <p className="text-[10px] font-black uppercase tracking-widest">{t("classes.resource.noMaterialsInModule")}</p>
                 </div>
               )}
             </div>
@@ -149,10 +148,10 @@ export const ModuleItem = ({
             <div className="flex items-center justify-between">
               <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2">
                 <ClipboardCheck className="h-3.5 w-3.5 text-primary" />
-                Tasks & Assessments
+                {t("assignments.show.studentSubmissions")}
               </h4>
               <Badge variant="secondary" className="rounded-full px-2 py-0 h-5 text-[9px] font-black bg-primary/5 text-primary border-none">
-                {(module.assignments?.length || 0) + (module.quizzes?.length || 0)}
+                {new Intl.NumberFormat(isArabic ? 'ar-EG' : 'en-US').format((module.assignments?.length || 0) + (module.quizzes?.length || 0))}
               </Badge>
             </div>
             <div className="grid gap-3">
@@ -179,7 +178,7 @@ export const ModuleItem = ({
               {(!module.assignments?.length && !module.quizzes?.length) && (
                 <div className="p-6 rounded-2xl border-2 border-dashed border-muted-foreground/10 flex flex-col items-center justify-center gap-2 text-muted-foreground/40">
                   <ClipboardCheck className="h-6 w-6 opacity-20" />
-                  <p className="text-[10px] font-black uppercase tracking-widest">No tasks assigned</p>
+                  <p className="text-[10px] font-black uppercase tracking-widest">{t("assignments.list.noAssignments")}</p>
                 </div>
               )}
             </div>
@@ -201,7 +200,7 @@ export const ModuleItem = ({
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shine_1.5s_ease-in-out] pointer-events-none" />
                   <Sparkles className="h-3.5 w-3.5" />
-                  AI Magic Builder
+                  {t("buttons.aiMagicBuilder")}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="rounded-xl border-none shadow-2xl p-2 min-w-[200px]">
@@ -209,19 +208,19 @@ export const ModuleItem = ({
                   <div className="p-1.5 rounded-md bg-ai-primary/10 text-ai-primary">
                     <PenLine className="h-3.5 w-3.5" />
                   </div>
-                  Generate Lesson Notes
+                  {t("buttons.generateNotes")}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => onMagicAction(module.id, "quiz")} className="rounded-lg font-bold gap-2 py-2.5">
                   <div className="p-1.5 rounded-md bg-ai-primary/10 text-ai-primary">
                     <FileQuestion className="h-3.5 w-3.5" />
                   </div>
-                  Generate Quiz
+                  {t("buttons.generateQuiz")}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => onMagicAction(module.id, "assignment")} className="rounded-lg font-bold gap-2 py-2.5">
                   <div className="p-1.5 rounded-md bg-ai-primary/10 text-ai-primary">
                     <FileText className="h-3.5 w-3.5" />
                   </div>
-                  Generate Assignment
+                  {t("buttons.generateAssignment")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -233,7 +232,7 @@ export const ModuleItem = ({
               onClick={() => onAddMaterial(module.id)}
             >
               <Plus className="h-3.5 w-3.5" />
-              Add Material
+              {t("buttons.addMaterial")}
             </Button>
             <Button 
               variant="outline" 
@@ -242,7 +241,7 @@ export const ModuleItem = ({
               onClick={() => onAddTask(module.id)}
             >
               <Plus className="h-3.5 w-3.5" />
-              Add Task
+              {t("buttons.addTask")}
             </Button>
           </motion.div>
         )}

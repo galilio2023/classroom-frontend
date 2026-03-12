@@ -6,6 +6,7 @@ import { Textarea } from "../ui/textarea";
 import { LoadingButton } from "../ui/loading-button";
 import { AICard } from "./ai-card";
 import { Sparkles, GraduationCap, MessageSquare, Target } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface AssignmentGeneratorFormProps {
   subject: string;
@@ -36,91 +37,94 @@ export const AssignmentGeneratorForm: React.FC<AssignmentGeneratorFormProps> = (
   handleGenerate,
   isLoading,
 }) => {
+  const { t } = useTranslation();
+
   return (
     <AICard
-      title="AI Assignment Helper"
-      description="Use Gemini AI to draft a structured assignment description."
+      title={t("aiHub.assistant.helper.title")}
+      description={t("aiHub.assistant.helper.desc")}
       footer={
         <LoadingButton
-          className="w-full"
+          className="w-full h-11 rounded-xl font-black uppercase tracking-widest text-[10px] gap-2 shadow-lg shadow-primary/20"
           onClick={handleGenerate}
           isLoading={isLoading}
-          loadingText="Generating..."
+          loadingText={t("aiHub.assistant.helper.generating")}
           icon={<Sparkles className="h-4 w-4" />}
         >
-          Generate Draft
+          {t("aiHub.assistant.helper.generate")}
         </LoadingButton>
       }
     >
-      <div className="space-y-5">
-        <div className="grid grid-cols-2 gap-4">
+      <div className="space-y-6 text-start">
+        <div className="grid grid-cols-2 gap-6">
             <div className="space-y-2">
-                <Label htmlFor="subject" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Subject</Label>
+                <Label htmlFor="subject" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">{t("aiHub.assistant.helper.subject")}</Label>
                 <Input
                     id="subject"
-                    placeholder="e.g. History"
+                    placeholder={t("aiHub.assistant.helper.placeholders.subject")}
                     value={subject}
                     onChange={(e) => setSubject(e.target.value)}
-                    className="h-9"
+                    className="h-11 rounded-xl bg-muted/30 border-none focus-visible:ring-primary font-bold"
                 />
             </div>
             <div className="space-y-2">
-                <Label htmlFor="difficulty" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Level</Label>
+                <Label htmlFor="difficulty" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">{t("aiHub.assistant.helper.level")}</Label>
                 <Select value={difficulty} onValueChange={setDifficulty}>
-                    <SelectTrigger id="difficulty" className="h-9">
+                    <SelectTrigger id="difficulty" className="h-11 rounded-xl bg-muted/30 border-none focus-visible:ring-primary font-bold">
                         <div className="flex items-center gap-2">
-                            <GraduationCap className="h-3.5 w-3.5 text-primary" />
-                            <SelectValue placeholder="Select level" />
+                            <GraduationCap className="h-4 w-4 text-primary" />
+                            <SelectValue placeholder={t("aiHub.assistant.helper.level")} />
                         </div>
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="beginner">Beginner</SelectItem>
-                        <SelectItem value="intermediate">Intermediate</SelectItem>
-                        <SelectItem value="advanced">Advanced</SelectItem>
+                        <SelectItem value="beginner" className="font-bold">{t("aiHub.assistant.helper.levels.beginner")}</SelectItem>
+                        <SelectItem value="intermediate" className="font-bold">{t("aiHub.assistant.helper.levels.intermediate")}</SelectItem>
+                        <SelectItem value="advanced" className="font-bold">{t("aiHub.assistant.helper.levels.advanced")}</SelectItem>
                     </SelectContent>
                 </Select>
             </div>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="topic" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Topic</Label>
+          <Label htmlFor="topic" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">{t("aiHub.assistant.helper.topic")}</Label>
           <Input
             id="topic"
-            placeholder="e.g. The French Revolution"
+            placeholder={t("aiHub.assistant.helper.placeholders.topic")}
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
+            className="h-11 rounded-xl bg-muted/30 border-none focus-visible:ring-primary font-bold"
           />
         </div>
 
         <div className="space-y-2">
-            <Label htmlFor="tone" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Tone & Style</Label>
+            <Label htmlFor="tone" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">{t("aiHub.assistant.helper.tone")}</Label>
             <Select value={tone} onValueChange={setTone}>
-                <SelectTrigger id="tone" className="h-9">
+                <SelectTrigger id="tone" className="h-11 rounded-xl bg-muted/30 border-none focus-visible:ring-primary font-bold">
                     <div className="flex items-center gap-2">
-                        <MessageSquare className="h-3.5 w-3.5 text-primary" />
-                        <SelectValue placeholder="Select tone" />
+                        <MessageSquare className="h-4 w-4 text-primary" />
+                        <SelectValue placeholder={t("aiHub.assistant.helper.tone")} />
                     </div>
                 </SelectTrigger>
                 <SelectContent>
-                    <SelectItem value="academic">Academic & Formal</SelectItem>
-                    <SelectItem value="creative">Creative & Engaging</SelectItem>
-                    <SelectItem value="practical">Practical & Hands-on</SelectItem>
-                    <SelectItem value="strict">Strict & Detailed</SelectItem>
+                    <SelectItem value="academic" className="font-bold">{t("aiHub.assistant.helper.tones.academic")}</SelectItem>
+                    <SelectItem value="creative" className="font-bold">{t("aiHub.assistant.helper.tones.creative")}</SelectItem>
+                    <SelectItem value="practical" className="font-bold">{t("aiHub.assistant.helper.tones.practical")}</SelectItem>
+                    <SelectItem value="strict" className="font-bold">{t("aiHub.assistant.helper.tones.strict")}</SelectItem>
                 </SelectContent>
             </Select>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="objectives" className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
+          <Label htmlFor="objectives" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2 ml-1">
             <Target className="h-3.5 w-3.5 text-primary" />
-            Learning Objectives (Optional)
+            {t("aiHub.assistant.helper.objectives")}
           </Label>
           <Textarea
             id="objectives"
-            placeholder="What should students learn? (e.g. Critical thinking, Data analysis)"
+            placeholder={t("aiHub.assistant.helper.placeholders.objectives")}
             value={objectives}
             onChange={(e) => setObjectives?.(e.target.value)}
-            className="resize-none text-xs min-h-20"
+            className="resize-none min-h-24 rounded-[1.5rem] bg-muted/30 border-none focus-visible:ring-primary p-5 text-sm font-medium leading-relaxed"
           />
         </div>
       </div>

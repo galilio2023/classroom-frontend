@@ -29,8 +29,10 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Whiteboard } from "@/components/classes/whiteboard";
+import { useTranslation } from "react-i18next";
 
 const ShowProjectGroup = () => {
+  const { t } = useTranslation();
   const { id } = useParams();
   const { data: identity } = useGetIdentity<User>();
   const [isAddMemberOpen, setAddMemberOpen] = useState(false);
@@ -67,7 +69,7 @@ const ShowProjectGroup = () => {
       values: { add: selectedStudents },
     }, {
       onSuccess: () => {
-        toast.success("Members added successfully!");
+        toast.success(t("projectGroups.toasts.membersAdded"));
         setAddMemberOpen(false);
         setSelectedStudents([]);
         refetch();
@@ -86,7 +88,7 @@ const ShowProjectGroup = () => {
             values: { remove: [studentId] },
         }, {
             onSuccess: () => {
-                toast.success("Member removed.");
+                toast.success(t("projectGroups.toasts.memberRemoved"));
                 refetch();
             },
             onError: (error: any) => {
@@ -103,11 +105,11 @@ const ShowProjectGroup = () => {
   const isTeacherOrAdmin = identity?.role === UserRole.TEACHER || identity?.role === UserRole.ADMIN;
 
   if (isLoading) {
-    return <div className="container mx-auto py-6">Loading group details...</div>;
+    return <div className="container mx-auto py-6">{t("profile.loading")}</div>;
   }
 
   if (!group) {
-    return <div className="container mx-auto py-6">Group not found.</div>;
+    return <div className="container mx-auto py-6">{t("profile.notFound")}</div>;
   }
 
   return (
@@ -116,7 +118,7 @@ const ShowProjectGroup = () => {
         <div>
           <h1 className="text-3xl font-bold">{group.name}</h1>
           <p className="text-muted-foreground">
-            Project group for class: <Link to={`/classes/show/${group.class.id}`} className="text-primary hover:underline">{group.class.name}</Link>
+            {t("projectGroups.show.projectGroupFor")} <Link to={`/classes/show/${group.class.id}`} className="text-primary hover:underline">{group.class.name}</Link>
           </p>
         </div>
       </div>
@@ -124,10 +126,10 @@ const ShowProjectGroup = () => {
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList>
           <TabsTrigger value="members" className="flex items-center gap-2">
-            <Users className="h-4 w-4" /> Members
+            <Users className="h-4 w-4" /> {t("projectGroups.members")}
           </TabsTrigger>
           <TabsTrigger value="whiteboard" className="flex items-center gap-2">
-            <Presentation className="h-4 w-4" /> Group Whiteboard
+            <Presentation className="h-4 w-4" /> {t("projectGroups.show.whiteboard")}
           </TabsTrigger>
         </TabsList>
 
@@ -135,10 +137,10 @@ const ShowProjectGroup = () => {
           <Card>
             <CardHeader>
               <div className="flex justify-between items-center">
-                <CardTitle>Group Members</CardTitle>
+                <CardTitle>{t("projectGroups.show.groupMembers")}</CardTitle>
                 {isTeacherOrAdmin && (
                   <Button onClick={() => setAddMemberOpen(true)} className="gap-2">
-                    <UserPlus className="h-4 w-4" /> Add Members
+                    <UserPlus className="h-4 w-4" /> {t("projectGroups.show.addMembers")}
                   </Button>
                 )}
               </div>
@@ -183,22 +185,22 @@ const ShowProjectGroup = () => {
       <Dialog open={isAddMemberOpen} onOpenChange={setAddMemberOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add Members to {group.name}</DialogTitle>
-            <DialogDescription>Select students from the class roster to add to this group.</DialogDescription>
+            <DialogTitle>{t("projectGroups.show.addMembersTo", { name: group.name })}</DialogTitle>
+            <DialogDescription>{t("projectGroups.show.addMembersDesc")}</DialogDescription>
           </DialogHeader>
           <div className="py-4">
             <Popover>
               <PopoverTrigger asChild>
                 <Button variant="outline" role="combobox" className="w-full justify-between">
-                  {selectedStudents.length > 0 ? `${selectedStudents.length} student(s) selected` : "Select students..."}
+                  {selectedStudents.length > 0 ? t("projectGroups.show.studentsSelected", { count: selectedStudents.length }) : t("projectGroups.show.selectStudents")}
                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
                 <Command>
-                  <CommandInput placeholder="Search students..." />
+                  <CommandInput placeholder={t("common.search")} />
                   <CommandList>
-                    <CommandEmpty>No students found.</CommandEmpty>
+                    <CommandEmpty>{t("projectGroups.show.noStudentsFound")}</CommandEmpty>
                     <CommandGroup>
                       {availableStudents.map((student: any) => (
                         <CommandItem
@@ -228,10 +230,10 @@ const ShowProjectGroup = () => {
             </Popover>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setAddMemberOpen(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setAddMemberOpen(false)}>{t("buttons.cancel")}</Button>
             <Button onClick={handleAddMembers} disabled={isManagingMembers}>
               {isManagingMembers && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Add Selected
+              {t("buttons.addSelected")}
             </Button>
           </DialogFooter>
         </DialogContent>

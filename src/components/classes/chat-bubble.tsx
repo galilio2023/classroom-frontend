@@ -6,6 +6,7 @@ import { Trash2, Reply } from "lucide-react";
 import dayjs from "dayjs";
 import { cn } from "@/lib/utils";
 import { MarkdownRenderer } from "@/components/ui/markdown-renderer";
+import { useTranslation } from "react-i18next";
 
 interface ChatBubbleProps {
   post: Discussion;
@@ -16,6 +17,9 @@ interface ChatBubbleProps {
 }
 
 export const ChatBubble = ({ post, isOwn, onDelete, onReply, isAdmin }: ChatBubbleProps) => {
+  const { t, i18n } = useTranslation();
+  dayjs.locale(i18n.language);
+
   return (
     <div className={cn(
       "flex gap-3 mb-4 group animate-in fade-in slide-in-from-bottom-2 duration-300",
@@ -40,7 +44,9 @@ export const ChatBubble = ({ post, isOwn, onDelete, onReply, isAdmin }: ChatBubb
             {dayjs(post.createdAt).format("h:mm A")}
           </span>
           {post.user?.role === "teacher" && (
-            <Badge variant="default" className="h-3.5 text-[8px] px-1 uppercase font-black">Teacher</Badge>
+            <Badge variant="default" className="h-3.5 text-[8px] px-1 uppercase font-black">
+                {t("roles.teacher")}
+            </Badge>
           )}
         </div>
 
@@ -86,7 +92,7 @@ export const ChatBubble = ({ post, isOwn, onDelete, onReply, isAdmin }: ChatBubb
             onClick={() => onReply(post.id)}
             className="mt-1 text-[10px] font-bold text-primary hover:underline px-1"
           >
-            {post.replies.length} {post.replies.length === 1 ? "reply" : "replies"}
+            {post.replies.length} {post.replies.length === 1 ? t("assignments.list.table.submissionsHeader").slice(0, -1) : t("assignments.list.table.submissionsHeader")}
           </button>
         )}
       </div>

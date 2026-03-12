@@ -7,7 +7,6 @@ import {
   BookOpen, 
   CheckCircle2, 
   Clock, 
-  AlertCircle, 
   ArrowUpDown,
   PlusCircle,
   Filter,
@@ -50,11 +49,13 @@ import usePageTitle from "@/hooks/use-page-title";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { EmptyState } from "@/components/empty-state";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 dayjs.extend(relativeTime);
 
 const ModulesListPage = () => {
-  usePageTitle("Course Modules");
+  const { t } = useTranslation();
+  usePageTitle(t("modulesPage.title"));
   const { data: identity } = useGetIdentity<User>();
   const isStaff = identity?.role === UserRole.ADMIN || identity?.role === UserRole.TEACHER;
 
@@ -112,7 +113,7 @@ const ModulesListPage = () => {
     if (!modules.length) return { total: 0, published: 0, draft: 0 };
     return {
       total: modules.length,
-      published: modules.filter((m: Module) => m.id % 2 === 0).length, // Mock logic
+      published: modules.filter((m: Module) => m.id % 2 === 0).length, 
       draft: modules.filter((m: Module) => m.id % 2 !== 0).length
     };
   }, [modules]);
@@ -129,8 +130,8 @@ const ModulesListPage = () => {
             <Breadcrumb />
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div>
-                <h1 className="text-4xl font-black tracking-tight">Curriculum Modules</h1>
-                <p className="text-muted-foreground font-medium mt-1">Organize course content into structured learning pathways.</p>
+                <h1 className="text-4xl font-black tracking-tight">{t("modulesPage.title")}</h1>
+                <p className="text-muted-foreground font-medium mt-1">{t("modulesPage.description")}</p>
               </div>
               <div className="flex items-center gap-3 w-full md:w-auto">
                 {isStaff && (
@@ -139,7 +140,7 @@ const ModulesListPage = () => {
                     className="flex-1 md:flex-none rounded-2xl h-14 px-10 font-black uppercase tracking-widest text-[10px] gap-2 shadow-xl shadow-primary/20 transition-all hover:scale-105 active:scale-95"
                   >
                     <PlusCircle className="h-5 w-5" />
-                    Create Module
+                    {t("modulesPage.create")}
                   </Button>
                 )}
               </div>
@@ -153,7 +154,7 @@ const ModulesListPage = () => {
                 <Library className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Total Modules</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t("modulesPage.stats.total")}</p>
                 <p className="text-2xl font-black">{isLoading ? "..." : stats.total}</p>
               </div>
             </Card>
@@ -162,7 +163,7 @@ const ModulesListPage = () => {
                 <CheckCircle2 className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Published</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t("modulesPage.stats.published")}</p>
                 <p className="text-2xl font-black text-green-600">{isLoading ? "..." : stats.published}</p>
               </div>
             </Card>
@@ -171,7 +172,7 @@ const ModulesListPage = () => {
                 <Clock className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Drafts</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t("modulesPage.stats.drafts")}</p>
                 <p className="text-2xl font-black text-amber-600">{isLoading ? "..." : stats.draft}</p>
               </div>
             </Card>
@@ -184,7 +185,7 @@ const ModulesListPage = () => {
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                 <Input
                   type="text"
-                  placeholder="Search modules by title..."
+                  placeholder={t("modulesPage.searchPlaceholder")}
                   className="pl-11 h-14 rounded-2xl border-none bg-background shadow-sm font-medium"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -192,7 +193,7 @@ const ModulesListPage = () => {
               </div>
               <div className="flex items-center gap-2 bg-background px-4 rounded-2xl shadow-sm border border-primary/5">
                 <Filter className="h-4 w-4 text-muted-foreground" />
-                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Module Filter</span>
+                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t("modulesPage.filter")}</span>
               </div>
             </div>
           </Card>
@@ -219,11 +220,11 @@ const ModulesListPage = () => {
               <div className="h-full w-full flex items-center justify-center p-12">
                 <EmptyState
                   icon={Library}
-                  title="No modules found"
-                  description={isStaff ? "Create your first module to begin organizing your course curriculum." : "There are no modules available for this course yet."}
+                  title={t("modulesPage.empty.title")}
+                  description={isStaff ? t("modulesPage.empty.desc") : t("classes.curriculum.noModulesDescription")}
                   className="border-none bg-transparent min-h-0"
                   action={isStaff ? {
-                    label: "Create Module",
+                    label: t("modulesPage.create"),
                     onClick: () => create("modules"),
                   } : undefined}
                 />
@@ -275,7 +276,7 @@ const ModulesListPage = () => {
                                       isPublished ? "bg-green-500/10 text-green-600" : "bg-amber-500/10 text-amber-600"
                                     )}
                                 >
-                                    {isPublished ? 'Published' : 'Draft'}
+                                    {isPublished ? t("status.published") : t("status.draft")}
                                 </Badge>
                                 <Badge variant="outline" className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md border-primary/10">
                                     {module.class?.name || "General"}
@@ -289,7 +290,7 @@ const ModulesListPage = () => {
                                     <BookOpen className="h-3.5 w-3.5 text-primary" />
                                 </div>
                                 <span className="text-xs font-bold">
-                                    {module.resources?.length || 0} <span className="text-muted-foreground/50 font-medium">Resources</span>
+                                    {module.resources?.length || 0} <span className="text-muted-foreground/50 font-medium">{t("modulesPage.labels.resources")}</span>
                                 </span>
                               </div>
 
@@ -298,7 +299,7 @@ const ModulesListPage = () => {
                                     <LayoutGrid className="h-3.5 w-3.5 text-primary" />
                                 </div>
                                 <span className="text-xs font-bold">
-                                    {module.assignments?.length || 0} <span className="text-muted-foreground/50 font-medium">Tasks</span>
+                                    {module.assignments?.length || 0} <span className="text-muted-foreground/50 font-medium">{t("modulesPage.labels.tasks")}</span>
                                 </span>
                               </div>
                             </div>
@@ -334,7 +335,7 @@ const ModulesListPage = () => {
                               className="rounded-2xl px-8 h-12 text-[10px] font-black uppercase tracking-widest transition-all shadow-sm border-primary/10 text-primary hover:bg-primary hover:text-primary-foreground"
                               onClick={() => show("modules", module.id)}
                             >
-                              View Module
+                              {t("modulesPage.labels.view")}
                               <ArrowRight className="h-4 w-4 ml-2" />
                             </Button>
 
@@ -345,16 +346,16 @@ const ModulesListPage = () => {
                                     </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end" className="w-56 rounded-[1.5rem] p-2">
-                                    <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-3 py-2">Module Options</DropdownMenuLabel>
+                                    <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-3 py-2">{t("modulesPage.labels.options")}</DropdownMenuLabel>
                                     <DropdownMenuItem onClick={() => show("modules", module.id)} className="rounded-xl gap-3 py-3 cursor-pointer">
                                         <Eye className="h-4 w-4 text-primary" />
-                                        <span className="font-bold">View Details</span>
+                                        <span className="font-bold">{t("buttons.show")}</span>
                                     </DropdownMenuItem>
                                     {isStaff && (
                                         <>
                                             <DropdownMenuItem onClick={() => edit("modules", module.id)} className="rounded-xl gap-3 py-3 cursor-pointer">
                                                 <Pencil className="h-4 w-4 text-primary" />
-                                                <span className="font-bold">Edit Module</span>
+                                                <span className="font-bold">{t("buttons.edit")}</span>
                                             </DropdownMenuItem>
                                             <DropdownMenuSeparator className="my-2" />
                                             <DropdownMenuItem 
@@ -362,7 +363,7 @@ const ModulesListPage = () => {
                                                 className="rounded-xl gap-3 py-3 cursor-pointer text-destructive focus:text-destructive"
                                             >
                                                 <Trash2 className="h-4 w-4" />
-                                                <span className="font-bold">Delete Module</span>
+                                                <span className="font-bold">{t("buttons.delete")}</span>
                                             </DropdownMenuItem>
                                         </>
                                     )}
@@ -386,19 +387,19 @@ const ModulesListPage = () => {
               <Trash2 className="h-8 w-8" />
             </div>
             <div className="space-y-1">
-                <AlertDialogTitle className="text-3xl font-black tracking-tight">Are you absolutely sure?</AlertDialogTitle>
+                <AlertDialogTitle className="text-3xl font-black tracking-tight">{t("modulesPage.deleteDialog.title")}</AlertDialogTitle>
                 <AlertDialogDescription className="font-medium text-base leading-relaxed">
-                    This action cannot be undone. This will permanently delete the module and all its content associations from the curriculum.
+                    {t("modulesPage.deleteDialog.desc")}
                 </AlertDialogDescription>
             </div>
           </AlertDialogHeader>
           <AlertDialogFooter className="gap-3 pt-6">
-            <AlertDialogCancel className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-8">Cancel</AlertDialogCancel>
+            <AlertDialogCancel className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-8">{t("buttons.cancel")}</AlertDialogCancel>
             <AlertDialogAction 
                 onClick={handleConfirmDelete} 
                 className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-12 bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-xl shadow-destructive/20"
             >
-                Confirm Delete
+                {t("buttons.confirmDelete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

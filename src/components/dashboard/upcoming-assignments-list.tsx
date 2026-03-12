@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ClipboardCheck, Sparkles, ArrowRight, Calendar, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { useTranslation } from "react-i18next";
 
 interface UpcomingAssignmentsListProps {
   assignments: UpcomingAssignment[];
@@ -14,6 +15,8 @@ interface UpcomingAssignmentsListProps {
 }
 
 export const UpcomingAssignmentsList = ({ assignments, list, show }: UpcomingAssignmentsListProps) => {
+  const { t, i18n } = useTranslation();
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between px-2">
@@ -22,13 +25,13 @@ export const UpcomingAssignmentsList = ({ assignments, list, show }: UpcomingAss
             <ClipboardCheck className="h-5 w-5" />
           </div>
           <div>
-            <h3 className="text-xl font-black tracking-tight">Upcoming Tasks</h3>
-            <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">Don't miss your deadlines</p>
+            <h3 className="text-xl font-black tracking-tight">{t("dashboard.student.upcomingTasks")}</h3>
+            <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">{t("dashboard.student.dontMissDeadlines")}</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
           <Badge variant="secondary" className="hidden sm:flex rounded-full px-3 py-1 font-black text-[10px] uppercase tracking-widest bg-muted/50 border-none">
-            {assignments.length} Pending
+            {t("dashboard.student.pendingCount", { count: assignments.length })}
           </Badge>
           <Button 
             variant="ghost" 
@@ -36,8 +39,8 @@ export const UpcomingAssignmentsList = ({ assignments, list, show }: UpcomingAss
             onClick={() => list("assignments")} 
             className="h-8 rounded-xl px-4 text-[10px] font-black uppercase tracking-widest text-primary hover:bg-primary/5 gap-2 group transition-all"
           >
-            View All 
-            <ArrowRight className="h-3 w-3 group-hover:translate-x-1 transition-transform" />
+            {t("buttons.viewAll")}
+            <ArrowRight className={cn("h-3 w-3 group-hover:translate-x-1 transition-transform", i18n.language === 'ar' && "rotate-180 group-hover:-translate-x-1")} />
           </Button>
         </div>
       </div>
@@ -73,12 +76,12 @@ export const UpcomingAssignmentsList = ({ assignments, list, show }: UpcomingAss
                 </div>
               </div>
               <div className="space-y-1 relative z-10">
-                <p className="text-xl font-black tracking-tight text-foreground">All caught up!</p>
-                <p className="text-sm font-medium text-muted-foreground/60">No upcoming assignments. Enjoy your time!</p>
+                <p className="text-xl font-black tracking-tight text-foreground">{t("dashboard.student.allCaughtUp")}</p>
+                <p className="text-sm font-medium text-muted-foreground/60">{t("dashboard.student.noUpcoming")}</p>
               </div>
               <div className="mt-2 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary/60 relative z-10">
                 <Sparkles className="h-3 w-3" />
-                <span>Great job, Student!</span>
+                <span>{t("dashboard.student.greatJobStudent")}</span>
               </div>
             </motion.div>
           )}
@@ -88,7 +91,7 @@ export const UpcomingAssignmentsList = ({ assignments, list, show }: UpcomingAss
       {assignments.length > 0 && (
         <div className="pt-4 flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">
           <Info className="h-3 w-3" />
-          <span>Click a task to view details and submit</span>
+          <span>{t("dashboard.student.clickTask")}</span>
         </div>
       )}
     </div>

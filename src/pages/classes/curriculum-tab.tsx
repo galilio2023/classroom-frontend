@@ -13,12 +13,14 @@ import { AddResourceDialog } from "@/components/classes/curriculum/add-resource-
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
+import { useTranslation } from "react-i18next";
 
 interface CurriculumTabProps {
   classId: string;
 }
 
 export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
+  const { t } = useTranslation();
   const { data: identity } = useGetIdentity<User>();
   const isTeacher = identity?.role === UserRole.TEACHER || identity?.role === UserRole.ADMIN;
   const isStudent = identity?.role === UserRole.STUDENT;
@@ -96,7 +98,7 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
           isCompleted: !currentStatus
         },
       },
-      { onSuccess: () => { void progressQuery.refetch(); toast.success(!currentStatus ? "Marked as completed!" : "Marked as incomplete"); } }
+      { onSuccess: () => { void progressQuery.refetch(); toast.success(!currentStatus ? t("classes.curriculum.toast.completed") : t("classes.curriculum.toast.incomplete")); } }
     );
   };
 
@@ -126,23 +128,23 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
   };
 
   if (isLoading) return (
-    <div className="flex flex-col items-center justify-center py-20 gap-4">
+    <div className="flex flex-col items-center justify-center py-20 gap-4 text-start">
       <Loader2 className="h-10 w-10 animate-spin text-primary/20" />
-      <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">Loading Curriculum...</p>
+      <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">{t("classes.curriculum.loading")}</p>
     </div>
   );
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 text-start">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <div className="p-1.5 rounded-lg bg-primary/10 text-primary">
               <BookOpen className="h-4 w-4" />
             </div>
-            <h3 className="text-xl font-black tracking-tight">Course Curriculum</h3>
+            <h3 className="text-xl font-black tracking-tight">{t("classes.curriculum.courseCurriculum")}</h3>
           </div>
-          <p className="text-sm text-muted-foreground font-medium">Structured lessons and materials for this class.</p>
+          <p className="text-sm text-muted-foreground font-medium">{t("classes.curriculum.curriculumDescription")}</p>
         </div>
         {isTeacher && (
           <div className="flex items-center gap-3">
@@ -151,9 +153,9 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
               className="rounded-xl h-11 px-6 border-ai-primary/20 text-ai-primary hover:bg-ai-primary/5 font-black uppercase tracking-widest text-[10px] gap-2 relative overflow-hidden group shadow-sm"
               onClick={() => { setMagicConfig({ ...magicConfig, moduleId: null, type: "package" }); setIsMagicModalOpen(true); }}
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shine_1.5s_ease-in-out] pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-[shine_1.5s_ease-in-out] pointer-events-none" />
               <Sparkles className="h-4 w-4" />
-              Magic Builder
+              {t("buttons.magicBuilder")}
             </Button>
             <Button 
               onClick={() => {
@@ -164,7 +166,7 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
               className="rounded-xl h-11 px-6 font-black uppercase tracking-widest text-[10px] gap-2 shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95"
             >
               <PlusCircle className="h-4 w-4" />
-              Add Module
+              {t("buttons.addModule")}
             </Button>
           </div>
         )}
@@ -184,8 +186,8 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
                 </div>
               </div>
               <div className="space-y-2">
-                <h4 className="text-2xl font-black tracking-tight">No modules yet</h4>
-                <p className="text-muted-foreground font-medium max-w-xs mx-auto">Start building your curriculum by adding your first module or using the AI Magic Builder.</p>
+                <h4 className="text-2xl font-black tracking-tight">{t("classes.curriculum.noModules")}</h4>
+                <p className="text-muted-foreground font-medium max-w-xs mx-auto">{t("classes.curriculum.noModulesDescription")}</p>
               </div>
               {isTeacher && (
                 <div className="flex items-center justify-center gap-3 pt-4">
@@ -195,14 +197,14 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
                     className="rounded-xl h-12 px-8 border-ai-primary/20 text-ai-primary hover:bg-ai-primary/5 font-black uppercase tracking-widest text-[10px] gap-2"
                   >
                     <Wand2 className="h-4 w-4" />
-                    AI Magic Builder
+                    {t("buttons.aiMagicBuilder")}
                   </Button>
                   <Button 
                     onClick={() => setIsCreateModalOpen(true)}
                     className="rounded-xl h-12 px-8 font-black uppercase tracking-widest text-[10px] gap-2 shadow-lg shadow-primary/20"
                   >
                     <Plus className="h-4 w-4" />
-                    Manual Create
+                    {t("buttons.manualCreate")}
                   </Button>
                 </div>
               )}
@@ -214,12 +216,12 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
           <div className="flex items-center justify-between px-2">
             <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
               <LayoutDashboard className="h-3 w-3" />
-              {modules.length} Modules Published
+              {t("classes.curriculum.modulesPublished", { count: modules.length })}
             </div>
             {isStudent && (
               <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary">
                 <Zap className="h-3 w-3" />
-                {userProgress.filter(p => p.isCompleted).length} Items Completed
+                {t("classes.curriculum.itemsCompleted", { count: userProgress.filter(p => p.isCompleted).length })}
               </div>
             )}
           </div>

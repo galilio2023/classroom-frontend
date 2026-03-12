@@ -52,33 +52,36 @@ import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { Switch } from "@/components/ui/switch";
 import { motion, AnimatePresence } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
+import { useTranslation } from "react-i18next";
 
-const assignmentSchema = z.object({
-  title: z.string().min(1, "Title is required"),
+const createAssignmentSchema = (t: any) => z.object({
+  title: z.string().min(1, t("assignments.create.validation.titleRequired")),
   description: z.string().optional(),
   dueDate: z.string().optional(),
   fileUrl: z.string().optional(),
   fileCldPubId: z.string().optional(),
   moduleId: z.coerce.number().optional().nullable(),
-  classId: z.coerce.number().min(1, "Class is required"),
+  classId: z.coerce.number().min(1, t("assignments.create.validation.classRequired")),
   hasPeerReview: z.boolean().default(false),
-  isGroupAssignment: z.boolean().default(false), // Added for group assignments
+  isGroupAssignment: z.boolean().default(false),
   peerReviewWeight: z.coerce.number().min(0).max(100).default(20),
   rubric: z.array(z.object({
-    criteria: z.string().min(1, "Criteria is required"),
-    maxPoints: z.coerce.number().min(1, "Points required"),
+    criteria: z.string().min(1, t("assignments.create.validation.criteriaRequired")),
+    maxPoints: z.coerce.number().min(1, t("assignments.create.validation.pointsRequired")),
   })).default([]),
 });
 
-type AssignmentFormValues = z.infer<typeof assignmentSchema>;
+type AssignmentFormValues = z.infer<ReturnType<typeof createAssignmentSchema>>;
 
 export const AssignmentCreate = () => {
+  const { t, i18n } = useTranslation();
   const [searchParams] = useSearchParams();
   const location = useLocation();
   const urlClassId = searchParams.get("classId");
   const initialModuleId = searchParams.get("moduleId");
   const go = useGo();
   const [showAI, setShowAI] = useState(false);
+  const isAr = i18n.language === 'ar';
 
   const { query: classesQuery } = useList<Class>({
     resource: "classes",
@@ -89,7 +92,7 @@ export const AssignmentCreate = () => {
   const classesLoading = classesQuery.isLoading;
 
   const form = useForm<AssignmentFormValues>({
-    resolver: zodResolver(assignmentSchema) as any,
+    resolver: zodResolver(createAssignmentSchema(t)) as any,
     defaultValues: {
       title: "",
       description: "",
@@ -99,7 +102,7 @@ export const AssignmentCreate = () => {
       moduleId: initialModuleId ? Number(initialModuleId) : null,
       classId: urlClassId ? Number(urlClassId) : undefined as any,
       hasPeerReview: false,
-      isGroupAssignment: false, // Default to individual
+      isGroupAssignment: false,
       peerReviewWeight: 20,
       rubric: [{ criteria: "Accuracy", maxPoints: 10 }, { criteria: "Clarity", maxPoints: 10 }],
     },
@@ -150,10 +153,10 @@ export const AssignmentCreate = () => {
     if (pendingContent) {
         setValue("description", pendingContent);
         if (sessionContent) sessionStorage.removeItem("pending_ai_assignment");
-        toast.info("AI draft applied from Assistant.");
+        toast.info(t("assignments.create.toasts.aiDraftApplied"));
         setShowAI(false);
     }
-  }, [initialModuleId, setValue, location.state]);
+  }, [initialModuleId, setValue, location.state, t]);
 
   const onSubmit = (values: FieldValues) => {
     onFinish(values);
@@ -161,7 +164,7 @@ export const AssignmentCreate = () => {
 
   const handleUseAIContent = (content: string) => {
     setValue("description", content);
-    toast.success("AI content applied!");
+    toast.success(t("assignments.create.toasts.aiContentApplied"));
     document.getElementById("description")?.scrollIntoView({ behavior: "smooth" });
   };
 
@@ -178,11 +181,11 @@ export const AssignmentCreate = () => {
             <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <Badge variant="secondary" className="rounded-full px-3 py-1 font-black text-[10px] uppercase tracking-widest bg-primary/10 text-primary border-none">
-                    Teacher Dashboard
+                    {t("assignments.create.teacherDashboard")}
                   </Badge>
                 </div>
-                <h1 className="text-4xl font-black tracking-tighter">Create Assignment</h1>
-                <p className="text-muted-foreground font-medium">Design and publish a new task for your students.</p>
+                <h1 className="text-4xl font-black tracking-tighter">{t("buttons.createAssignment")}</h1>
+                <p className="text-muted-foreground font-medium">{t("assignments.create.designAndPublish")}</p>
             </div>
             <AnimatePresence mode="wait">
               {!showAI && (
@@ -198,7 +201,7 @@ export const AssignmentCreate = () => {
                     >
                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shine_1.5s_ease-in-out] pointer-events-none" />
                         <Sparkles className="h-4 w-4" />
-                        <span className="font-black uppercase tracking-widest text-[10px]">AI Writing Assistant</span>
+                        <span className="font-black uppercase tracking-widest text-[10px]">{t("buttons.aiWritingAssistant")}</span>
                     </Button>
                   </motion.div>
               )}
@@ -219,12 +222,12 @@ export const AssignmentCreate = () => {
                     <CardHeader className="p-8 pb-4">
                         <CardTitle className="text-sm font-black uppercase tracking-widest flex items-center gap-2 opacity-60">
                           <LayoutDashboard className="h-4 w-4" />
-                          Assignment Configuration
+                          {t("assignments.create.assignmentConfig")}
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="p-8 pt-4">
                         <Form {...form}>
-                            <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+                            <form onSubmit={handleSubmit(onSubmit)} className="space-y-8 text-start">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                     <FormField
                                         control={control}
@@ -233,7 +236,7 @@ export const AssignmentCreate = () => {
                                         <FormItem className="space-y-3">
                                             <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2">
                                                 <BookOpen className="h-3 w-3" />
-                                                Target Class
+                                                {t("assignments.create.targetClass")}
                                             </FormLabel>
                                             <Select 
                                                 onValueChange={(val) => {
@@ -244,13 +247,13 @@ export const AssignmentCreate = () => {
                                                 disabled={!!urlClassId}
                                             >
                                                 <FormControl>
-                                                    <SelectTrigger className="h-14 rounded-2xl bg-muted/20 border-none focus:ring-primary transition-all">
-                                                        <SelectValue placeholder={classesLoading ? "Loading classes..." : "Select a class"} />
+                                                    <SelectTrigger className="h-14 rounded-2xl bg-muted/20 border-none focus:ring-primary transition-all text-start">
+                                                        <SelectValue placeholder={classesLoading ? t("assignments.create.placeholders.loadingClasses") : t("assignments.create.placeholders.selectClass")} />
                                                     </SelectTrigger>
                                                 </FormControl>
                                                 <SelectContent className="rounded-xl border-none shadow-2xl">
                                                     {classes.map((c: Class) => (
-                                                        <SelectItem key={c.id} value={c.id.toString()} className="rounded-lg font-bold">{c.name}</SelectItem>
+                                                        <SelectItem key={c.id} value={c.id.toString()} className="rounded-lg font-bold text-start">{c.name}</SelectItem>
                                                     ))}
                                                 </SelectContent>
                                             </Select>
@@ -265,10 +268,10 @@ export const AssignmentCreate = () => {
                                         <FormItem className="space-y-3">
                                             <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2">
                                               <FileText className="h-3 w-3" />
-                                              Assignment Title
+                                              {t("assignments.create.assignmentTitle")}
                                             </FormLabel>
                                             <FormControl>
-                                            <Input placeholder="e.g., Physics Lab Report" {...field} className="h-14 rounded-2xl bg-muted/20 border-none focus-visible:ring-primary font-bold" />
+                                            <Input placeholder={t("assignments.create.placeholders.title")} {...field} className="h-14 rounded-2xl bg-muted/20 border-none focus-visible:ring-primary font-bold" />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -284,7 +287,7 @@ export const AssignmentCreate = () => {
                                         <FormItem className="space-y-3">
                                             <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2">
                                               <LayoutDashboard className="h-3 w-3" />
-                                              Curriculum Module
+                                              {t("assignments.create.curriculumModule")}
                                             </FormLabel>
                                             <Select 
                                                 onValueChange={field.onChange} 
@@ -292,14 +295,14 @@ export const AssignmentCreate = () => {
                                                 disabled={!selectedClassId}
                                             >
                                                 <FormControl>
-                                                    <SelectTrigger className="h-14 rounded-2xl bg-muted/20 border-none focus:ring-primary transition-all">
-                                                        <SelectValue placeholder={!selectedClassId ? "Select a class first" : modulesLoading ? "Loading..." : "Select module"} />
+                                                    <SelectTrigger className="h-14 rounded-2xl bg-muted/20 border-none focus:ring-primary transition-all text-start">
+                                                        <SelectValue placeholder={!selectedClassId ? t("assignments.create.placeholders.selectClassFirst") : modulesLoading ? t("assignments.create.placeholders.loadingClasses") : t("assignments.create.placeholders.selectModule")} />
                                                     </SelectTrigger>
                                                 </FormControl>
                                                 <SelectContent className="rounded-xl border-none shadow-2xl">
-                                                    <SelectItem value="0" className="rounded-lg font-bold">None (Global)</SelectItem>
+                                                    <SelectItem value="0" className="rounded-lg font-bold text-start">{t("assignments.create.placeholders.noneGlobal")}</SelectItem>
                                                     {modules.map((m: Module) => (
-                                                        <SelectItem key={m.id} value={m.id.toString()} className="rounded-lg font-bold">{m.name}</SelectItem>
+                                                        <SelectItem key={m.id} value={m.id.toString()} className="rounded-lg font-bold text-start">{m.name}</SelectItem>
                                                     ))}
                                                 </SelectContent>
                                             </Select>
@@ -314,7 +317,7 @@ export const AssignmentCreate = () => {
                                         <FormItem className="space-y-3">
                                             <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2">
                                               <Calendar className="h-3 w-3" />
-                                              Submission Deadline
+                                              {t("assignments.create.submissionDeadline")}
                                             </FormLabel>
                                             <FormControl>
                                                 <Input type="date" {...field} className="h-14 rounded-2xl bg-muted/20 border-none focus-visible:ring-primary font-bold" />
@@ -332,14 +335,14 @@ export const AssignmentCreate = () => {
                                     <FormItem className="space-y-3">
                                         <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2">
                                           <MessageSquare className="h-3.5 w-3.5" />
-                                          Instructions & Content
+                                          {t("assignments.create.instructionsAndContent")}
                                         </FormLabel>
                                         <FormControl>
                                             <div className="rounded-2xl overflow-hidden border-2 border-transparent focus-within:border-primary/20 transition-all shadow-inner">
                                               <RichTextEditor 
                                                   value={field.value || ""} 
                                                   onChange={field.onChange}
-                                                  placeholder="Type your instructions here or use the AI Assistant..."
+                                                  placeholder={t("assignments.create.placeholders.instructions")}
                                                   className="min-h-[350px]"
                                               />
                                             </div>
@@ -357,10 +360,10 @@ export const AssignmentCreate = () => {
                                             <div className="space-y-1">
                                                 <FormLabel className="text-base font-bold flex items-center gap-2">
                                                     <Users className="h-5 w-5 text-primary" />
-                                                    Group Assignment
+                                                    {t("assignments.create.groupAssignment")}
                                                 </FormLabel>
                                                 <FormDescription className="text-xs">
-                                                    One submission per group. All members get the same grade.
+                                                    {t("assignments.create.groupDescription")}
                                                 </FormDescription>
                                             </div>
                                             <FormField
@@ -387,10 +390,10 @@ export const AssignmentCreate = () => {
                                             <div className="space-y-1">
                                                 <FormLabel className="text-base font-bold flex items-center gap-2">
                                                     <Users className="h-5 w-5 text-primary" />
-                                                    Peer Review
+                                                    {t("assignments.list.labels.peerReview")}
                                                 </FormLabel>
                                                 <FormDescription className="text-xs">
-                                                    Students grade each other based on a rubric.
+                                                    {t("assignments.create.peerReviewDescription")}
                                                 </FormDescription>
                                             </div>
                                             <FormField
@@ -426,15 +429,15 @@ export const AssignmentCreate = () => {
                                                   name="peerReviewWeight"
                                                   render={({ field }) => (
                                                       <FormItem className="space-y-3">
-                                                          <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Peer Grade Weight (%)</FormLabel>
+                                                          <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">{t("assignments.create.peerWeight")}</FormLabel>
                                                           <FormControl>
                                                               <div className="relative group">
                                                                 <Input type="number" {...field} className="h-14 rounded-2xl bg-background border-none focus-visible:ring-primary font-black text-center text-2xl" />
-                                                                <span className="absolute right-6 top-1/2 -translate-y-1/2 text-xl font-black opacity-20">%</span>
+                                                                <span className={cn("absolute top-1/2 -translate-y-1/2 text-xl font-black opacity-20", isAr ? "left-6" : "right-6")}>%</span>
                                                               </div>
                                                           </FormControl>
                                                           <FormDescription className="text-[10px] font-bold text-center">
-                                                              Percentage of the final grade contributed by peer reviews.
+                                                              {t("assignments.create.peerWeightDescription")}
                                                           </FormDescription>
                                                           <FormMessage />
                                                       </FormItem>
@@ -443,7 +446,7 @@ export const AssignmentCreate = () => {
 
                                               <div className="space-y-6">
                                                   <div className="flex items-center justify-between">
-                                                      <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Grading Rubric</Label>
+                                                      <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">{t("assignments.create.gradingRubric")}</Label>
                                                       <Button 
                                                           type="button" 
                                                           variant="outline" 
@@ -451,7 +454,7 @@ export const AssignmentCreate = () => {
                                                           onClick={() => append({ criteria: "", maxPoints: 10 })}
                                                           className="h-9 rounded-xl text-[10px] font-black uppercase tracking-widest border-primary/20 text-primary hover:bg-primary/5"
                                                       >
-                                                          <Plus className="h-3.5 w-3.5 mr-1.5" /> Add Criteria
+                                                          <Plus className="h-3.5 w-3.5 mr-1.5" /> {t("buttons.addCriteria")}
                                                       </Button>
                                                   </div>
                                                   
@@ -469,7 +472,7 @@ export const AssignmentCreate = () => {
                                                                   render={({ field }) => (
                                                                       <FormItem className="flex-1">
                                                                           <FormControl>
-                                                                              <Input placeholder="Criteria (e.g. Grammar)" {...field} className="h-12 rounded-xl bg-muted/20 border-none focus-visible:ring-primary font-bold" />
+                                                                              <Input placeholder={t("assignments.create.placeholders.criteriaName")} {...field} className="h-12 rounded-xl bg-muted/20 border-none focus-visible:ring-primary font-bold" />
                                                                           </FormControl>
                                                                           <FormMessage />
                                                                       </FormItem>
@@ -482,8 +485,8 @@ export const AssignmentCreate = () => {
                                                                       <FormItem className="w-28">
                                                                           <FormControl>
                                                                               <div className="relative">
-                                                                                <Input type="number" placeholder="Max" {...field} className="h-12 rounded-xl bg-muted/20 border-none focus-visible:ring-primary font-black text-center" />
-                                                                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-black opacity-20">PTS</span>
+                                                                                <Input type="number" placeholder={t("assignments.create.placeholders.max")} {...field} className="h-12 rounded-xl bg-muted/20 border-none focus-visible:ring-primary font-black text-center" />
+                                                                                <span className={cn("absolute top-1/2 -translate-y-1/2 text-[9px] font-black opacity-20", isAr ? "left-3" : "right-3")}>PTS</span>
                                                                               </div>
                                                                           </FormControl>
                                                                           <FormMessage />
@@ -511,10 +514,10 @@ export const AssignmentCreate = () => {
                                 <div className="p-8 bg-muted/30 rounded-[2rem] border-2 border-dashed border-muted-foreground/10 space-y-4">
                                     <div className="flex items-center gap-2">
                                       <Paperclip className="h-4 w-4 text-muted-foreground" />
-                                      <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Reference Materials (Optional)</Label>
+                                      <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">{t("assignments.create.referenceMaterials")}</Label>
                                     </div>
                                     <FileUpload 
-                                        label="Upload PDF or Document"
+                                        label={t("assignments.create.uploadMaterial")}
                                         folder="assignments"
                                         onUploadSuccess={handleFileUpload}
                                     />
@@ -529,8 +532,8 @@ export const AssignmentCreate = () => {
                                                 <CheckCircle2 className="h-4 w-4" />
                                               </div>
                                               <div className="flex flex-col">
-                                                <span className="text-xs font-black text-success uppercase tracking-widest">Attached</span>
-                                                <span className="text-[10px] text-muted-foreground font-medium">File ready for publishing</span>
+                                                <span className="text-xs font-black text-success uppercase tracking-widest">{t("assignments.create.attached")}</span>
+                                                <span className="text-[10px] text-muted-foreground font-medium">{t("assignments.create.attachedDesc")}</span>
                                               </div>
                                           </motion.div>
                                       )}
@@ -546,11 +549,11 @@ export const AssignmentCreate = () => {
                                   >
                                       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-[shine_2s_infinite] pointer-events-none" />
                                       {formLoading ? <Loader2 className="mr-3 h-6 w-6 animate-spin" /> : <Wand2 className="mr-3 h-6 w-6" />}
-                                      {formLoading ? "Publishing..." : "Publish Assignment"}
+                                      {formLoading ? t("buttons.publishing") : t("buttons.publishAssignment")}
                                   </Button>
                                   <div className="mt-4 flex items-center justify-center gap-2 text-muted-foreground/40">
                                     <Info className="h-3.5 w-3.5" />
-                                    <span className="text-[10px] font-black uppercase tracking-widest">Students will be notified immediately</span>
+                                    <span className="text-[10px] font-black uppercase tracking-widest">{t("assignments.create.notificationNote")}</span>
                                   </div>
                                 </div>
                             </form>
@@ -575,7 +578,7 @@ export const AssignmentCreate = () => {
                                   <div className="p-2 rounded-xl bg-ai-primary/10 text-ai-primary">
                                     <Sparkles className="h-5 w-5" />
                                   </div>
-                                  <CardTitle className="text-ai-primary text-sm font-black uppercase tracking-widest">AI Writing Assistant</CardTitle>
+                                  <CardTitle className="text-ai-primary text-sm font-black uppercase tracking-widest">{t("buttons.aiWritingAssistant")}</CardTitle>
                               </div>
                               <Button variant="ghost" size="icon" onClick={() => setShowAI(false)} className="h-10 w-10 rounded-full hover:bg-ai-primary/10 text-ai-primary transition-colors">
                                   <X className="h-5 w-5" />

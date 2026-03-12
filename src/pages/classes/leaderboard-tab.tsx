@@ -7,12 +7,15 @@ import { Trophy, Medal, Crown, Zap, Loader2, Star, TrendingUp, ChevronRight } fr
 import { cn } from "@/lib/utils";
 import { getLevelProgress } from "@/lib/xp";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslation } from "react-i18next";
 
 interface LeaderboardTabProps {
   classId: string;
 }
 
 export function LeaderboardTab({ classId }: LeaderboardTabProps) {
+  const { t, i18n } = useTranslation();
+  
   // Use the new optimized custom endpoint
   const { query } = useCustom<User[]>({
     url: `classes/${classId}/leaderboard`,
@@ -22,11 +25,13 @@ export function LeaderboardTab({ classId }: LeaderboardTabProps) {
   const { data, isLoading } = query;
   const rankedStudents = data?.data || [];
 
+  const isAr = i18n.language === 'ar';
+
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-4">
         <Loader2 className="h-10 w-10 animate-spin text-primary/20" />
-        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">Calculating Rankings...</p>
+        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">{t("leaderboard.calculating")}</p>
       </div>
     );
   }
@@ -93,7 +98,7 @@ export function LeaderboardTab({ classId }: LeaderboardTabProps) {
                           initial={{ scale: 0, rotate: -45 }}
                           animate={{ scale: 1, rotate: 0 }}
                           transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-                          className="absolute -top-6 -right-6 z-20"
+                          className={cn("absolute -top-6 z-20", isAr ? "-left-6" : "-right-6")}
                         >
                           {getRankIcon(originalIndex)}
                         </motion.div>
@@ -106,7 +111,7 @@ export function LeaderboardTab({ classId }: LeaderboardTabProps) {
                         )}>{student.name}</h3>
                         <div className="flex flex-col items-center gap-2">
                           <Badge variant="secondary" className="font-black text-[10px] uppercase tracking-widest bg-primary/10 text-primary border-none px-3">
-                            Level {currentLevel}
+                            {t("leaderboard.levelLabel", { level: currentLevel })}
                           </Badge>
                           <div className="flex items-center gap-1.5 text-gold-primary">
                             <Zap className="h-4 w-4 fill-gold-primary animate-pulse" />
@@ -130,17 +135,17 @@ export function LeaderboardTab({ classId }: LeaderboardTabProps) {
             <div className="p-2 rounded-xl bg-primary/10 text-primary">
               <Trophy className="h-5 w-5" />
             </div>
-            <div>
-              <h2 className="text-xl font-black tracking-tight">Class Rankings</h2>
-              <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">Based on total XP earned</p>
+            <div className="text-start">
+              <h2 className="text-xl font-black tracking-tight">{t("leaderboard.classRankings")}</h2>
+              <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">{t("leaderboard.basedOnXp")}</p>
             </div>
           </div>
           <Badge variant="outline" className="rounded-full px-4 py-1 font-black text-[10px] uppercase tracking-widest border-primary/20 text-primary">
-            {rankedStudents.length} Students
+            {t("leaderboard.studentsCount", { count: rankedStudents.length })}
           </Badge>
         </div>
 
-        <Card className="border-none shadow-2xl bg-card/50 backdrop-blur-xl rounded-[2.5rem] overflow-hidden">
+        <Card className="border-none shadow-2xl bg-card/50 backdrop-blur-xl rounded-[2.5rem] overflow-hidden text-start">
           <CardContent className="p-4">
             <div className="grid gap-2">
               <AnimatePresence mode="popLayout">
@@ -151,7 +156,7 @@ export function LeaderboardTab({ classId }: LeaderboardTabProps) {
                   return (
                     <motion.div 
                       key={student.id}
-                      initial={{ opacity: 0, x: -5 }}
+                      initial={{ opacity: 0, x: isAr ? 5 : -5 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ duration: 0.2 }}
                       className={cn(
@@ -174,7 +179,7 @@ export function LeaderboardTab({ classId }: LeaderboardTabProps) {
                               <AvatarFallback className="font-black bg-muted">{student.name[0]}</AvatarFallback>
                             </Avatar>
                             {isTopThree && (
-                              <div className="absolute -bottom-1 -right-1 size-4 bg-success rounded-full border-2 border-background flex items-center justify-center">
+                              <div className={cn("absolute -bottom-1 size-4 bg-success rounded-full border-2 border-background flex items-center justify-center", isAr ? "-left-1" : "-right-1")}>
                                 <Star className="h-2 w-2 text-white fill-white" />
                               </div>
                             )}
@@ -183,11 +188,11 @@ export function LeaderboardTab({ classId }: LeaderboardTabProps) {
                             <p className="font-black text-sm tracking-tight group-hover:text-primary transition-colors">{student.name}</p>
                             <div className="flex items-center gap-2 mt-0.5">
                               <Badge variant="outline" className="text-[9px] font-black uppercase tracking-tighter h-4 px-1.5 border-primary/20 text-primary/60">
-                                Level {currentLevel}
+                                {t("leaderboard.levelLabel", { level: currentLevel })}
                               </Badge>
                               <div className="flex items-center gap-1 text-[9px] font-bold text-muted-foreground/40 uppercase tracking-widest">
                                 <TrendingUp className="h-2.5 w-2.5" />
-                                Top {Math.round(((index + 1) / rankedStudents.length) * 100)}%
+                                {t("leaderboard.topPercent", { percent: Math.round(((index + 1) / rankedStudents.length) * 100) })}
                               </div>
                             </div>
                           </div>
@@ -199,10 +204,10 @@ export function LeaderboardTab({ classId }: LeaderboardTabProps) {
                           <Zap className="h-4 w-4 text-gold-primary fill-gold-primary animate-pulse" />
                           <div className="flex flex-col items-end">
                             <span className="text-sm font-black text-gold-primary tracking-tight">{student.xp || 0}</span>
-                            <span className="text-[8px] font-black text-gold-primary/60 uppercase tracking-tighter -mt-1">Points</span>
+                            <span className="text-[8px] font-black text-gold-primary/60 uppercase tracking-tighter -mt-1">{t("leaderboard.points")}</span>
                           </div>
                         </div>
-                        <ChevronRight className="h-4 w-4 text-muted-foreground/20 group-hover:text-primary transition-colors" />
+                        <ChevronRight className={cn("h-4 w-4 text-muted-foreground/20 group-hover:text-primary transition-colors", isAr && "rotate-180")} />
                       </div>
                     </motion.div>
                   );

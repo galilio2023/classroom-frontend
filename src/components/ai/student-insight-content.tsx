@@ -1,6 +1,7 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TrendingUp, TrendingDown, Lightbulb, CheckCircle2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface AIInsight {
   strengths: string[];
@@ -14,6 +15,7 @@ interface StudentInsightContentProps {
 }
 
 export const StudentInsightContent: React.FC<StudentInsightContentProps> = ({ insight }) => {
+  const { t } = useTranslation();
   return (
     <div className="space-y-6 py-4">
       {/* Summary Card */}
@@ -21,7 +23,7 @@ export const StudentInsightContent: React.FC<StudentInsightContentProps> = ({ in
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-semibold flex items-center gap-2">
             <CheckCircle2 className="h-4 w-4 text-primary" />
-            Overall Standing
+            {t("common.aiSummary")}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -36,7 +38,7 @@ export const StudentInsightContent: React.FC<StudentInsightContentProps> = ({ in
         <div className="space-y-3">
           <h4 className="text-sm font-bold flex items-center gap-2 text-green-600">
             <TrendingUp className="h-4 w-4" />
-            Strengths
+            {t("common.strengths")}
           </h4>
           <ul className="space-y-2">
             {insight.strengths.map((s, i) => (
@@ -49,7 +51,7 @@ export const StudentInsightContent: React.FC<StudentInsightContentProps> = ({ in
         <div className="space-y-3">
           <h4 className="text-sm font-bold flex items-center gap-2 text-amber-600">
             <TrendingDown className="h-4 w-4" />
-            Areas for Growth
+            {t("common.weaknesses")}
           </h4>
           <ul className="space-y-2">
             {insight.weaknesses.map((w, i) => (
@@ -65,7 +67,7 @@ export const StudentInsightContent: React.FC<StudentInsightContentProps> = ({ in
       <div className="space-y-3">
         <h4 className="text-sm font-bold flex items-center gap-2 text-primary">
           <Lightbulb className="h-4 w-4" />
-          Personalized Improvement Plan
+          {t("common.improvementPlan")}
         </h4>
         <div className="bg-muted p-4 rounded-lg border text-sm leading-relaxed whitespace-pre-wrap">
           {insight.improvementPlan}

@@ -51,11 +51,13 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import { useTerm } from "@/contexts/term-context";
 import { EmptyState } from "@/components/empty-state";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 dayjs.extend(relativeTime);
 
 const QuizzesListPage = () => {
-  usePageTitle("Assessments");
+  const { t } = useTranslation();
+  usePageTitle(t("classes.quiz.classQuizzes"));
   const { data: identity } = useGetIdentity<User>();
   const isStaff = identity?.role === UserRole.ADMIN || identity?.role === UserRole.TEACHER;
   const { selectedTerm } = useTerm();
@@ -134,8 +136,8 @@ const QuizzesListPage = () => {
             <Breadcrumb />
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div>
-                <h1 className="text-4xl font-black tracking-tight">Assessments</h1>
-                <p className="text-muted-foreground font-medium mt-1">Manage class quizzes and AI-generated assessments.</p>
+                <h1 className="text-4xl font-black tracking-tight">{t("classes.quiz.classQuizzes")}</h1>
+                <p className="text-muted-foreground font-medium mt-1">{t("classes.quiz.description", { count: quizzes.length })}</p>
               </div>
               <div className="flex items-center gap-3 w-full md:w-auto">
                 {isStaff && (
@@ -144,7 +146,7 @@ const QuizzesListPage = () => {
                     className="flex-1 md:flex-none rounded-2xl h-14 px-10 font-black uppercase tracking-widest text-[10px] gap-2 shadow-xl shadow-primary/20 transition-all hover:scale-105 active:scale-95"
                   >
                     <PlusCircle className="h-5 w-5" />
-                    Create Quiz
+                    {t("buttons.createQuiz")}
                   </Button>
                 )}
               </div>
@@ -158,7 +160,7 @@ const QuizzesListPage = () => {
                 <FileQuestion className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Total Quizzes</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t("dashboard.platform.stats.totalAssignments")}</p>
                 <p className="text-2xl font-black">{isLoading ? "..." : stats.total}</p>
               </div>
             </Card>
@@ -167,7 +169,7 @@ const QuizzesListPage = () => {
                 <Sparkles className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">AI Generated</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t("dashboard.charts.aiInsights")}</p>
                 <p className="text-2xl font-black text-indigo-600">{isLoading ? "..." : stats.aiGenerated}</p>
               </div>
             </Card>
@@ -176,7 +178,7 @@ const QuizzesListPage = () => {
                 <CheckCircle2 className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Active</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t("status.active")}</p>
                 <p className="text-2xl font-black text-green-600">{isLoading ? "..." : stats.active}</p>
               </div>
             </Card>
@@ -189,7 +191,7 @@ const QuizzesListPage = () => {
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                 <Input
                   type="text"
-                  placeholder="Search quizzes by title or class..."
+                  placeholder={t("assignments.list.filters.searchPlaceholder")}
                   className="pl-11 h-14 rounded-2xl border-none bg-background shadow-sm font-medium"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -197,7 +199,7 @@ const QuizzesListPage = () => {
               </div>
               <div className="flex items-center gap-2 bg-background px-4 rounded-2xl shadow-sm border border-primary/5">
                 <Filter className="h-4 w-4 text-muted-foreground" />
-                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Filters Active</span>
+                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t("assignments.list.filters.active")}</span>
               </div>
             </div>
           </Card>
@@ -214,8 +216,8 @@ const QuizzesListPage = () => {
                     <AlertCircle className="h-6 w-6" />
                   </div>
                   <div className="space-y-1">
-                    <p className="font-black uppercase tracking-widest text-xs">Archive View Active</p>
-                    <p className="text-sm font-medium">You are viewing quizzes from <strong>{selectedTerm.name}</strong>. Content is read-only.</p>
+                    <p className="font-black uppercase tracking-widest text-xs">{t("dashboard.archiveViewActive")}</p>
+                    <p className="text-sm font-medium">{t("dashboard.archiveViewDescription", { termName: selectedTerm.name })}</p>
                   </div>
               </motion.div>
             )}
@@ -243,11 +245,11 @@ const QuizzesListPage = () => {
               <div className="h-full w-full flex items-center justify-center p-12">
                 <EmptyState
                   icon={FileQuestion}
-                  title="No quizzes found"
-                  description={isStaff ? "Create your first quiz to start assessing student knowledge." : "You don't have any quizzes yet."}
+                  title={t("classes.quiz.noQuizzes")}
+                  description={isStaff ? t("classes.quiz.noQuizzesDescriptionTeacher") : t("classes.quiz.noQuizzesDescriptionStudent")}
                   className="border-none bg-transparent min-h-0"
                   action={isStaff && selectedTerm?.status === "active" ? {
-                    label: "Create Quiz",
+                    label: t("buttons.createQuiz"),
                     onClick: () => create("quizzes"),
                   } : undefined}
                 />
@@ -321,7 +323,7 @@ const QuizzesListPage = () => {
                                   <Trophy className="h-3.5 w-3.5 text-primary" />
                               </div>
                               <span className="text-xs font-bold">
-                                  {quiz.totalMarks || 100} <span className="text-muted-foreground/50 font-medium">Total Points</span>
+                                  {quiz.totalMarks || 100} <span className="text-muted-foreground/50 font-medium">{t("assignments.create.maxPoints")}</span>
                               </span>
                             </div>
 
@@ -330,7 +332,7 @@ const QuizzesListPage = () => {
                                   <Timer className="h-3.5 w-3.5 text-primary" />
                               </div>
                               <span className="text-xs font-bold">
-                                  {quiz.timeLimit || "No"} <span className="text-muted-foreground/50 font-medium">Minute Limit</span>
+                                  {quiz.timeLimit || "No"} <span className="text-muted-foreground/50 font-medium">{t("classes.quiz.minsUnit")}</span>
                               </span>
                             </div>
 
@@ -342,7 +344,7 @@ const QuizzesListPage = () => {
                                   "text-xs font-bold uppercase tracking-tight",
                                   isPast ? "text-destructive" : "text-primary"
                               )}>
-                                  {quiz.dueDate ? dayjs(quiz.dueDate).fromNow() : "Open"}
+                                  {quiz.dueDate ? t("classes.quiz.due", { date: dayjs(quiz.dueDate).fromNow() }) : t("assignments.list.labels.open")}
                               </span>
                             </div>
                           </div>
@@ -350,29 +352,6 @@ const QuizzesListPage = () => {
 
                         {/* Actions */}
                         <div className="flex items-center gap-3 mt-6 md:mt-0 shrink-0">
-                          <div className="hidden lg:flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all translate-x-4 group-hover:translate-x-0">
-                              {isStaff && (
-                                  <>
-                                      <Button
-                                          variant="ghost"
-                                          size="icon"
-                                          className="h-10 w-10 rounded-xl text-muted-foreground hover:text-primary hover:bg-primary/5"
-                                          onClick={(e) => { e.stopPropagation(); edit("quizzes", quiz.id); }}
-                                      >
-                                          <Pencil className="h-4 w-4" />
-                                      </Button>
-                                      <Button
-                                          variant="ghost"
-                                          size="icon"
-                                          className="h-10 w-10 rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/5"
-                                          onClick={(e) => { e.stopPropagation(); setDeleteTarget(quiz.id); }}
-                                      >
-                                          <Trash2 className="h-4 w-4" />
-                                      </Button>
-                                  </>
-                              )}
-                          </div>
-
                           <Button
                             variant={isPast ? "outline" : "default"}
                             className={cn(
@@ -382,7 +361,7 @@ const QuizzesListPage = () => {
                                 "bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20",
                             )}
                           >
-                            {isStaff ? "View Results" : "Start Quiz"}
+                            {isStaff ? t("buttons.results") : t("buttons.takeQuiz")}
                             <ArrowRight className="h-4 w-4 ml-2" />
                           </Button>
 
@@ -393,21 +372,21 @@ const QuizzesListPage = () => {
                                   </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end" className="w-56 rounded-[1.5rem] p-2">
-                                  <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-3 py-2">Quiz Options</DropdownMenuLabel>
+                                  <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-3 py-2">{t("assignments.list.labels.options")}</DropdownMenuLabel>
                                   <DropdownMenuItem onClick={() => show("quizzes", quiz.id)} className="rounded-xl gap-3 py-3 cursor-pointer">
                                       <Eye className="h-4 w-4 text-primary" />
-                                      <span className="font-bold">View Details</span>
+                                      <span className="font-bold">{t("buttons.viewDetails")}</span>
                                   </DropdownMenuItem>
                                   {isStaff && (
                                       <>
                                           <DropdownMenuItem onClick={() => edit("quizzes", quiz.id)} className="rounded-xl gap-3 py-3 cursor-pointer">
                                               <Pencil className="h-4 w-4 text-primary" />
-                                              <span className="font-bold">Edit Quiz</span>
+                                              <span className="font-bold">{t("buttons.edit")}</span>
                                           </DropdownMenuItem>
                                           <DropdownMenuSeparator className="my-2" />
                                           <DropdownMenuItem onClick={() => setDeleteTarget(quiz.id)} className="rounded-xl gap-3 py-3 cursor-pointer text-destructive focus:text-destructive">
                                               <Trash2 className="h-4 w-4" />
-                                              <span className="font-bold">Delete Quiz</span>
+                                              <span className="font-bold">{t("buttons.delete")}</span>
                                           </DropdownMenuItem>
                                       </>
                                   )}
@@ -431,19 +410,19 @@ const QuizzesListPage = () => {
               <Trash2 className="h-8 w-8" />
             </div>
             <div className="space-y-1">
-                <AlertDialogTitle className="text-3xl font-black tracking-tight">Are you absolutely sure?</AlertDialogTitle>
+                <AlertDialogTitle className="text-3xl font-black tracking-tight">{t("assignments.list.deleteDialog.title")}</AlertDialogTitle>
                 <AlertDialogDescription className="font-medium text-base">
-                This action cannot be undone. This will permanently delete the quiz and all student attempts from the system.
+                {t("assignments.list.deleteDialog.description")}
                 </AlertDialogDescription>
             </div>
           </AlertDialogHeader>
           <AlertDialogFooter className="gap-3 pt-6">
-            <AlertDialogCancel className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-8">Cancel</AlertDialogCancel>
+            <AlertDialogCancel className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-8">{t("buttons.cancel")}</AlertDialogCancel>
             <AlertDialogAction 
                 onClick={handleConfirmDelete} 
                 className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-12 bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-xl shadow-destructive/20"
             >
-                Confirm Delete
+                {t("buttons.confirmDelete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

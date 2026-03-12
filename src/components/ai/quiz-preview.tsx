@@ -4,21 +4,23 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "..
 import { HelpCircle } from "lucide-react";
 import { QuizQuestionItem } from "./quiz-question-item";
 import { QuizEmptyState } from "./quiz-empty-state";
+import { useTranslation } from "react-i18next";
 
 interface QuizPreviewProps {
   quiz: any[];
 }
 
 export const QuizPreview: React.FC<QuizPreviewProps> = ({ quiz }) => {
+  const { t } = useTranslation();
   return (
     <Card className="lg:col-span-2">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <HelpCircle className="h-5 w-5 text-primary" />
-          Questions Preview
+          {t("aiHub.assistant.quizGen.title")}
         </CardTitle>
         <CardDescription>
-          Review the generated questions and explanations.
+          {t("aiHub.assistant.quizGen.desc")}
         </CardDescription>
       </CardHeader>
       <CardContent>

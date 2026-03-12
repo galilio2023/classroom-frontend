@@ -1,11 +1,13 @@
 import React from "react";
 import { GraduationCap } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface ChatEmptyStateProps {
   subject?: string;
 }
 
 export const ChatEmptyState: React.FC<ChatEmptyStateProps> = ({ subject }) => {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col items-center justify-center h-full py-12 text-center space-y-6">
       <div className="relative">
@@ -15,9 +17,9 @@ export const ChatEmptyState: React.FC<ChatEmptyStateProps> = ({ subject }) => {
         </div>
       </div>
       <div className="space-y-2">
-        <p className="text-base font-bold text-foreground">Your Personal Tutor</p>
+        <p className="text-base font-bold text-foreground">{t("aiHub.studyLab.studyBuddy.personalTutor")}</p>
         <p className="text-xs text-muted-foreground px-10 leading-relaxed">
-          I'm here to help you master <span className="text-primary font-semibold">{subject || "your subjects"}</span>. What should we explore today?
+          {t("aiHub.studyLab.studyBuddy.masterSubject", { subject: subject || t("aiHub.studyLab.studyBuddy.masterGeneral") })}
         </p>
       </div>
     </div>

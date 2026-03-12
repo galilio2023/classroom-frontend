@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { Label } from "@/components/ui/label";
+import { useTranslation } from "react-i18next";
 
 interface AtRiskStudent {
   id: string;
@@ -36,6 +37,8 @@ interface AtRiskStudentItemProps {
 export const AtRiskStudentItem: React.FC<AtRiskStudentItemProps> = ({
   student,
 }) => {
+  const { t, i18n } = useTranslation();
+  const isArabic = i18n.language === 'ar';
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
@@ -71,13 +74,13 @@ export const AtRiskStudentItem: React.FC<AtRiskStudentItemProps> = ({
       }
     } catch (error) {
       const fallbacks: Record<string, string> = {
-        "Low Grades": `Hi ${student.name}, I noticed your recent grades have been a bit lower than usual. I know you can do better! Is there anything I can help you with?`,
-        "High Absences": `Hello ${student.name}, we've missed you in class lately! Regular attendance is key to success. Hope everything is okay.`,
-        Inactivity: `Hi ${student.name}, I noticed you haven't logged in for a few days. Don't fall behind on the latest modules! Let me know if you're stuck.`,
+        "Low Grades": t("dashboard.staff.atRiskStudents.fallbacks.lowGrades", { name: student.name }),
+        "High Absences": t("dashboard.staff.atRiskStudents.fallbacks.highAbsences", { name: student.name }),
+        Inactivity: t("dashboard.staff.atRiskStudents.fallbacks.inactivity", { name: student.name }),
       };
       setMessage(
         fallbacks[student.reason] ||
-          `Hi ${student.name}, just checking in to see how you're doing with your studies.`,
+          t("dashboard.staff.atRiskStudents.fallbacks.general", { name: student.name }),
       );
     } finally {
       setIsGenerating(false);
@@ -90,16 +93,15 @@ export const AtRiskStudentItem: React.FC<AtRiskStudentItemProps> = ({
         resource: "notifications",
         values: {
           userId: student.id,
-          title: "Message from your Teacher",
+          title: t("dashboard.staff.atRiskStudents.interventionTitle", { name: "" }).replace(":", "").trim(),
           message: message,
           type: "achievement",
         },
       },
       {
         onSuccess: () => {
-          toast.success(`Encouragement sent to ${student.name}!`);
+          toast.success(t("dashboard.staff.atRiskStudents.encouragementSent", { name: student.name }));
           
-          // Update intervention status in backend
           if (student.riskAssessmentId) {
             updateAssessment({
               resource: "student_risk_assessments",
@@ -117,18 +119,18 @@ export const AtRiskStudentItem: React.FC<AtRiskStudentItemProps> = ({
 
   const getStatusBadge = (status?: string) => {
     switch (status) {
-      case "notified_student": return <Badge className="bg-blue-500/10 text-blue-600 border-none text-[8px] font-black uppercase">Student Notified</Badge>;
-      case "notified_parent": return <Badge className="bg-purple-500/10 text-purple-600 border-none text-[8px] font-black uppercase">Parent Notified</Badge>;
-      case "resolved": return <Badge className="bg-green-500/10 text-green-600 border-none text-[8px] font-black uppercase">Resolved</Badge>;
-      default: return <Badge variant="outline" className="text-[8px] font-black uppercase opacity-40">No Action</Badge>;
+      case "notified_student": return <Badge className="bg-blue-500/10 text-blue-600 border-none text-[8px] font-bold uppercase">{t("dashboard.staff.atRiskStudents.status.studentNotified")}</Badge>;
+      case "notified_parent": return <Badge className="bg-purple-500/10 text-purple-600 border-none text-[8px] font-bold uppercase">{t("dashboard.staff.atRiskStudents.status.parentNotified")}</Badge>;
+      case "resolved": return <Badge className="bg-green-500/10 text-green-600 border-none text-[8px] font-bold uppercase">{t("dashboard.staff.atRiskStudents.status.resolved")}</Badge>;
+      default: return <Badge variant="outline" className="text-[8px] font-bold uppercase opacity-40">{t("dashboard.staff.atRiskStudents.status.noAction")}</Badge>;
     }
   };
 
   return (
     <>
       <motion.div 
-        whileHover={{ x: 5 }}
-        className="flex items-center justify-between p-4 rounded-2xl bg-background/50 border border-black/[0.03] dark:border-white/[0.03] hover:border-destructive/20 hover:bg-destructive/[0.02] transition-all group cursor-pointer shadow-sm"
+        whileHover={{ x: isArabic ? -5 : 5 }}
+        className="flex items-center justify-between p-4 rounded-2xl bg-background/50 border border-black/[0.03] dark:border-white/[0.03] hover:border-destructive/20 hover:bg-destructive/[0.02] transition-all group cursor-pointer shadow-sm text-left rtl:text-right"
         onClick={() => setIsModalOpen(true)}
       >
         <div className="flex items-center gap-4">
@@ -143,11 +145,11 @@ export const AtRiskStudentItem: React.FC<AtRiskStudentItemProps> = ({
           </div>
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <p className="text-sm font-black tracking-tight group-hover:text-destructive transition-colors">{student.name}</p>
+              <p className={cn("text-sm transition-colors", isArabic ? "font-bold" : "font-black tracking-tight")}>{student.name}</p>
               {getStatusBadge(student.interventionStatus)}
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">
+              <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60">
                 {student.reason}
               </span>
             </div>
@@ -162,13 +164,13 @@ export const AtRiskStudentItem: React.FC<AtRiskStudentItemProps> = ({
             {student.value}
           </Badge>
           <div className="p-2 rounded-full bg-muted/50 group-hover:bg-primary group-hover:text-primary-foreground transition-all opacity-0 group-hover:opacity-100">
-            <Send className="h-3.5 w-3.5" />
+            <Send className="h-3.5 w-3.5 rtl:rotate-180" />
           </div>
         </div>
       </motion.div>
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="sm:max-w-[600px] rounded-[2rem] border-none shadow-2xl bg-card/95 backdrop-blur-xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-[600px] rounded-[2rem] border-none shadow-2xl bg-card/95 backdrop-blur-xl max-h-[90vh] overflow-y-auto text-left rtl:text-right">
           <DialogHeader className="space-y-3">
             <div className="flex items-center justify-between">
               <div className="p-3 rounded-2xl bg-destructive/10 text-destructive w-fit">
@@ -176,24 +178,25 @@ export const AtRiskStudentItem: React.FC<AtRiskStudentItemProps> = ({
               </div>
               {student.suggestedResources && student.suggestedResources.length > 0 && (
                 <Badge className="bg-ai-primary/10 text-ai-primary border-none font-black text-[10px] uppercase tracking-widest px-3 py-1 rounded-lg">
-                  <Sparkles className="w-3 h-3 mr-1" />
-                  AI Support Ready
+                  <Sparkles className="w-3 h-3 ltr:mr-1 rtl:ml-1" />
+                  {t("dashboard.staff.atRiskStudents.aiSupportReady")}
                 </Badge>
               )}
             </div>
-            <DialogTitle className="text-2xl font-black tracking-tight">Intervention: {student.name}</DialogTitle>
+            <DialogTitle className={cn("text-2xl", isArabic ? "font-bold" : "font-black tracking-tight")}>
+                {t("dashboard.staff.atRiskStudents.interventionTitle", { name: student.name })}
+            </DialogTitle>
             <DialogDescription className="font-medium">
-              Take action to support this student. AI has analyzed their performance and suggested resources.
+              {t("dashboard.staff.atRiskStudents.interventionDescription")}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-8 py-6">
-            {/* AI Suggested Resources Section */}
             {student.suggestedResources && student.suggestedResources.length > 0 && (
               <div className="space-y-4">
                 <Label className="text-[10px] font-black uppercase tracking-widest text-ai-primary flex items-center gap-2">
                   <Sparkles className="h-3 w-3" />
-                  AI Recommended Support Materials
+                  {t("dashboard.staff.atRiskStudents.aiResources")}
                 </Label>
                 <div className="grid gap-3">
                   {student.suggestedResources.map((res, i) => (
@@ -217,7 +220,7 @@ export const AtRiskStudentItem: React.FC<AtRiskStudentItemProps> = ({
 
             <div className="space-y-4">
               <div className="flex justify-between items-center px-1">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Send Encouragement</Label>
+                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t("dashboard.staff.atRiskStudents.sendEncouragement")}</Label>
                 <Button
                   variant="outline"
                   size="sm"
@@ -231,12 +234,12 @@ export const AtRiskStudentItem: React.FC<AtRiskStudentItemProps> = ({
                   ) : (
                     <Sparkles className="h-3.5 w-3.5" />
                   )}
-                  AI Suggestion
+                  {t("buttons.aiSuggestion")}
                 </Button>
               </div>
               <div className="relative group">
                 <Textarea
-                  placeholder="Type your supportive message here..."
+                  placeholder={t("dashboard.staff.atRiskStudents.encouragementPlaceholder")}
                   className="min-h-[150px] rounded-2xl bg-muted/20 border-none focus-visible:ring-primary p-6 text-sm leading-relaxed shadow-inner transition-all resize-none"
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
@@ -258,14 +261,14 @@ export const AtRiskStudentItem: React.FC<AtRiskStudentItemProps> = ({
             <div className="flex items-start gap-3 p-4 rounded-2xl bg-primary/5 border border-primary/10">
               <Info className="h-4 w-4 text-primary mt-0.5" />
               <p className="text-[10px] text-muted-foreground font-medium leading-relaxed">
-                Sending this message will update the student's intervention status to <strong>"Student Notified"</strong>.
+                {t("dashboard.staff.atRiskStudents.interventionNote")}
               </p>
             </div>
           </div>
 
           <DialogFooter className="gap-3">
             <Button variant="ghost" className="rounded-xl font-bold h-12" onClick={() => setIsModalOpen(false)}>
-              Cancel
+              {t("buttons.cancel")}
             </Button>
             <Button
               className="rounded-xl font-black uppercase tracking-widest h-12 px-8 shadow-lg shadow-primary/20 gap-2"
@@ -273,7 +276,7 @@ export const AtRiskStudentItem: React.FC<AtRiskStudentItemProps> = ({
               disabled={isSending || !message.trim()}
             >
               {isSending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-              Send & Update Status
+              {t("buttons.sendUpdateStatus")}
             </Button>
           </DialogFooter>
         </DialogContent>

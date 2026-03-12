@@ -76,28 +76,26 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { EmptyState } from "@/components/empty-state";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
-const roleVariants: Record<
-  UserRole,
-  "default" | "secondary" | "destructive" | "outline"
-> = {
-  [UserRole.ADMIN]: "destructive",
-  [UserRole.TEACHER]: "default",
-  [UserRole.STUDENT]: "secondary",
+const roleVariants: Record<string, "default" | "secondary" | "outline" | "destructive"> = {
+  [UserRole.ADMIN]: "default",
+  [UserRole.TEACHER]: "secondary",
+  [UserRole.STUDENT]: "outline",
   [UserRole.PARENT]: "outline",
 };
 
-const statusVariants: Record<
-  UserStatus,
-  "default" | "secondary" | "destructive" | "outline"
-> = {
+const statusVariants: Record<string, "default" | "secondary" | "outline" | "destructive"> = {
   [UserStatus.ACTIVE]: "default",
-  [UserStatus.INACTIVE]: "secondary",
   [UserStatus.SUSPENDED]: "destructive",
+  [UserStatus.INACTIVE]: "secondary",
 };
 
 const UsersList = () => {
-  usePageTitle("User Governance");
+  const { t, i18n } = useTranslation();
+  const isAr = i18n.language === 'ar';
+  
+  usePageTitle(t("users.governance.title"));
   const { data: identity } = useGetIdentity<User>();
   const isAdmin = identity?.role === UserRole.ADMIN;
 
@@ -149,7 +147,7 @@ const UsersList = () => {
     return f;
   }, [searchQuery, selectedRole, selectedStatus, verificationFilter]);
 
-  const { query: usersQuery } = useList<User>({
+  const { result: usersResult, query: usersQuery } = useList<User>({
     resource: "users",
     pagination: { pageSize: 1000, mode: "server" },
     filters,
@@ -159,7 +157,7 @@ const UsersList = () => {
     },
   });
 
-  const users = usersQuery.data?.data || [];
+  const users = usersResult.data;
   const isLoading = usersQuery.isLoading;
   const hasData = users.length > 0;
 
@@ -189,8 +187,8 @@ const UsersList = () => {
         onSuccess: () => {
           toast.success(
             isVerified
-              ? "Teacher verified successfully!"
-              : "Verification rejected.",
+              ? t("users.governance.toasts.verified")
+              : t("users.governance.toasts.rejected"),
           );
           setVerificationTarget(null);
         },
@@ -207,7 +205,10 @@ const UsersList = () => {
       },
       {
         onSuccess: () => {
-          toast.success(`User status updated to ${newStatus}`);
+          toast.success(t("users.governance.toasts.statusUpdated", { 
+            status: t(`status.${newStatus.toLowerCase()}` as any),
+            defaultValue: `Status updated to ${newStatus}`
+          }));
         },
       }
     );
@@ -241,23 +242,22 @@ const UsersList = () => {
 
   return (
     <>
-      <ListView className="space-y-8">
+      <ListView className="space-y-8 text-start">
         <div className="space-y-4">
           <Breadcrumb />
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <h1 className="text-4xl font-black tracking-tight">
-                User Governance
+                {t("users.governance.title")}
               </h1>
               <p className="text-muted-foreground font-medium mt-1">
-                Manage teachers, students, and administrators. Oversee
-                verification and account status.
+                {t("users.governance.description")}
               </p>
             </div>
             {isAdmin && (
               <CreateButton className="h-12 rounded-2xl px-6 font-black uppercase tracking-widest text-xs shadow-lg shadow-primary/20">
-                <UserPlus className="h-4 w-4 mr-2" />
-                Add New User
+                <UserPlus className="h-4 w-4 mr-2 rtl:mr-0 rtl:ml-2" />
+                {t("buttons.addNewUser")}
               </CreateButton>
             )}
           </div>
@@ -271,10 +271,10 @@ const UsersList = () => {
             </div>
             <div>
               <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-                Total Users
+                {t("users.governance.stats.totalUsers")}
               </p>
               <p className="text-2xl font-black">
-                {isLoading ? "..." : stats.total}
+                {isLoading ? "..." : new Intl.NumberFormat(i18n.language).format(stats.total)}
               </p>
             </div>
           </Card>
@@ -284,10 +284,10 @@ const UsersList = () => {
             </div>
             <div>
               <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-                Pending Verification
+                {t("users.governance.stats.pendingVerification")}
               </p>
               <p className="text-2xl font-black text-amber-600">
-                {isLoading ? "..." : stats.pending}
+                {isLoading ? "..." : new Intl.NumberFormat(i18n.language).format(stats.pending)}
               </p>
             </div>
           </Card>
@@ -297,10 +297,10 @@ const UsersList = () => {
             </div>
             <div>
               <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-                Active Accounts
+                {t("users.governance.stats.activeAccounts")}
               </p>
               <p className="text-2xl font-black text-green-600">
-                {isLoading ? "..." : stats.active}
+                {isLoading ? "..." : new Intl.NumberFormat(i18n.language).format(stats.active)}
               </p>
             </div>
           </Card>
@@ -310,11 +310,11 @@ const UsersList = () => {
         <Card className="p-4 border-primary/5 bg-muted/30 rounded-4xl backdrop-blur-sm">
           <div className="flex flex-col lg:flex-row gap-4">
             <div className="relative flex-1">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Search className={cn("absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground", isAr ? "right-4" : "left-4")} />
               <Input
                 type="text"
-                placeholder="Search by name or email..."
-                className="pl-11 h-12 rounded-2xl border-none bg-background shadow-sm"
+                placeholder={t("users.governance.filters.searchPlaceholder")}
+                className={cn("h-12 rounded-2xl border-none bg-background shadow-sm", isAr ? "pr-11" : "pl-11")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -327,39 +327,37 @@ const UsersList = () => {
                   onValueChange={setVerificationFilter}
                 >
                   <SelectTrigger className="w-[160px] border-none h-10 focus:ring-0 shadow-none font-bold text-xs">
-                    <SelectValue placeholder="Verification" />
+                    <SelectValue placeholder={t("users.governance.filters.verification")} />
                   </SelectTrigger>
                   <SelectContent className="rounded-xl">
-                    <SelectItem value="all">All Verification</SelectItem>
-                    <SelectItem value="pending">Pending Teachers</SelectItem>
+                    <SelectItem value="all">{t("users.governance.filters.allVerification")}</SelectItem>
+                    <SelectItem value="pending">{t("users.governance.filters.pendingTeachers")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <Select value={selectedRole} onValueChange={setSelectedRole}>
                 <SelectTrigger className="w-[130px] h-12 rounded-2xl font-bold text-xs bg-background border-primary/5 shadow-sm">
-                  <SelectValue placeholder="Role" />
+                  <SelectValue placeholder={t("users.governance.filters.role")} />
                 </SelectTrigger>
                 <SelectContent className="rounded-xl">
-                  <SelectItem value="all">All Roles</SelectItem>
-                  <SelectItem value={UserRole.ADMIN}>Admin</SelectItem>
-                  <SelectItem value={UserRole.TEACHER}>Teacher</SelectItem>
-                  <SelectItem value={UserRole.STUDENT}>Student</SelectItem>
-                  <SelectItem value={UserRole.PARENT}>Parent</SelectItem>
+                  <SelectItem value="all">{t("users.governance.filters.allRoles")}</SelectItem>
+                  <SelectItem value={UserRole.ADMIN}>{t("roles.admin")}</SelectItem>
+                  <SelectItem value={UserRole.TEACHER}>{t("roles.teacher")}</SelectItem>
+                  <SelectItem value={UserRole.STUDENT}>{t("roles.student")}</SelectItem>
+                  <SelectItem value={UserRole.PARENT}>{t("roles.parent")}</SelectItem>
                 </SelectContent>
               </Select>
 
               <Select value={selectedStatus} onValueChange={setSelectedStatus}>
                 <SelectTrigger className="w-[130px] h-12 rounded-2xl font-bold text-xs bg-background border-primary/5 shadow-sm">
-                  <SelectValue placeholder="Status" />
+                  <SelectValue placeholder={t("users.governance.filters.status")} />
                 </SelectTrigger>
                 <SelectContent className="rounded-xl">
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value={UserStatus.ACTIVE}>Active</SelectItem>
-                  <SelectItem value={UserStatus.SUSPENDED}>
-                    Suspended
-                  </SelectItem>
-                  <SelectItem value={UserStatus.INACTIVE}>Inactive</SelectItem>
+                  <SelectItem value="all">{t("users.governance.filters.allStatus")}</SelectItem>
+                  <SelectItem value={UserStatus.ACTIVE}>{t("status.active")}</SelectItem>
+                  <SelectItem value={UserStatus.SUSPENDED}>{t("status.suspended")}</SelectItem>
+                  <SelectItem value={UserStatus.INACTIVE}>{t("status.inactive")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -391,8 +389,8 @@ const UsersList = () => {
             <div className="h-full flex items-center justify-center p-10">
               <EmptyState
                 icon={UsersIcon}
-                title="No users found"
-                description="Try adjusting your filters or search query to find what you're looking for."
+                title={t("users.governance.table.noUsers")}
+                description={t("users.governance.table.noUsersDesc")}
                 className="border-none bg-transparent min-h-0"
               />
             </div>
@@ -437,7 +435,7 @@ const UsersList = () => {
                         </AvatarFallback>
                       </Avatar>
 
-                      <div className="ml-4 flex-1 min-w-0">
+                      <div className={cn("flex-1 min-w-0", isAr ? "mr-4" : "ml-4")}>
                         <div className="flex items-center gap-2">
                           <span className="text-foreground font-black truncate">
                             {user.name}
@@ -475,17 +473,17 @@ const UsersList = () => {
                           variant={roleVariants[user.role] || "outline"}
                           className="capitalize text-[10px] font-black tracking-widest px-3 h-6 rounded-lg"
                         >
-                          {user.role}
+                          {t(`roles.${user.role.toLowerCase()}` as any)}
                         </Badge>
                         <Badge
                           variant={statusVariants[user.status]}
                           className="capitalize text-[10px] h-6 font-black tracking-widest px-3 rounded-lg"
                         >
-                          {user.status}
+                          {t(`status.${user.status.toLowerCase()}` as any)}
                         </Badge>
                       </div>
 
-                      <div className="flex items-center gap-2 ml-4">
+                      <div className={cn("flex items-center gap-2", isAr ? "mr-4" : "ml-4")}>
                         {user.role === UserRole.TEACHER &&
                           (user.verificationStatus ===
                             VerificationStatus.PENDING || user.verificationStatus === VerificationStatus.UNVERIFIED) && (
@@ -495,7 +493,7 @@ const UsersList = () => {
                               className="h-8 text-[10px] font-black uppercase tracking-widest rounded-xl border-amber-500/20 text-amber-600 bg-amber-500/5 hover:bg-amber-500/10"
                               onClick={() => setVerificationTarget(user)}
                             >
-                              Review Proof
+                              {t("buttons.reviewProof")}
                             </Button>
                           )}
 
@@ -514,21 +512,21 @@ const UsersList = () => {
                             className="w-48 rounded-xl"
                           >
                             <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-3 py-2">
-                              Actions
+                              {t("users.governance.table.actions")}
                             </DropdownMenuLabel>
                             <DropdownMenuItem
                               onClick={() => show("users", user.id)}
                               className="rounded-lg gap-2 cursor-pointer"
                             >
                               <Eye className="h-4 w-4 text-primary" />
-                              <span>View Profile</span>
+                              <span>{t("buttons.viewProfile")}</span>
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() => edit("users", user.id)}
                               className="rounded-lg gap-2 cursor-pointer"
                             >
                               <Pencil className="h-4 w-4 text-primary" />
-                              <span>Edit User</span>
+                              <span>{t("buttons.editUser")}</span>
                             </DropdownMenuItem>
                             
                             {isAdmin && user.id !== identity?.id && (
@@ -540,7 +538,7 @@ const UsersList = () => {
                                     className="rounded-lg gap-2 text-amber-600 focus:text-amber-600 cursor-pointer"
                                   >
                                     <UserMinus className="h-4 w-4" />
-                                    <span>Suspend User</span>
+                                    <span>{t("buttons.suspendUser")}</span>
                                   </DropdownMenuItem>
                                 ) : (
                                   <DropdownMenuItem
@@ -548,7 +546,7 @@ const UsersList = () => {
                                     className="rounded-lg gap-2 text-green-600 focus:text-green-600 cursor-pointer"
                                   >
                                     <UserPlus2 className="h-4 w-4" />
-                                    <span>Activate User</span>
+                                    <span>{t("buttons.activateUser")}</span>
                                   </DropdownMenuItem>
                                 )}
                                 <DropdownMenuItem
@@ -556,7 +554,7 @@ const UsersList = () => {
                                   className="rounded-lg gap-2 text-destructive focus:text-destructive cursor-pointer"
                                 >
                                   <Trash2 className="h-4 w-4" />
-                                  <span>Delete Account</span>
+                                  <span>{t("buttons.deleteAccount")}</span>
                                 </DropdownMenuItem>
                               </>
                             )}
@@ -577,16 +575,16 @@ const UsersList = () => {
         open={verificationTarget !== null}
         onOpenChange={() => setVerificationTarget(null)}
       >
-        <DialogContent className="max-w-2xl overflow-hidden rounded-[2rem] border-primary/10 shadow-2xl">
-          <DialogHeader>
+        <DialogContent className="max-w-2xl overflow-hidden rounded-[2rem] border-primary/10 shadow-2xl text-start">
+          <DialogHeader className="text-start">
             <DialogTitle className="flex items-center gap-3 text-2xl font-black">
               <div className="p-2 rounded-xl bg-primary/10 text-primary">
                 <ShieldCheck className="h-6 w-6" />
               </div>
-              Verification Review
+              {t("users.governance.verification.title")}
             </DialogTitle>
             <DialogDescription className="font-medium">
-              Review the credentials for {verificationTarget?.name}.
+              {t("users.governance.verification.description", { name: verificationTarget?.name })}
             </DialogDescription>
           </DialogHeader>
 
@@ -594,27 +592,27 @@ const UsersList = () => {
             <div className="grid grid-cols-2 gap-6 bg-muted/30 p-6 rounded-3xl border border-primary/5">
               <div className="space-y-1">
                 <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-                  Full Name
+                  {t("users.governance.verification.fullName")}
                 </p>
                 <p className="font-bold text-lg">{verificationTarget?.name}</p>
               </div>
               <div className="space-y-1">
                 <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-                  Email
+                  {t("users.governance.verification.email")}
                 </p>
                 <p className="font-bold">{verificationTarget?.email}</p>
               </div>
               <div className="space-y-1">
                 <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-                  Phone
+                  {t("users.governance.verification.phone")}
                 </p>
                 <p className="font-bold">
-                  {verificationTarget?.phoneNumber || "Not provided"}
+                  {verificationTarget?.phoneNumber || "---"}
                 </p>
               </div>
               <div className="space-y-1">
                 <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-                  Status
+                  {t("users.governance.verification.status")}
                 </p>
                 <Badge
                   variant={
@@ -627,15 +625,15 @@ const UsersList = () => {
                 >
                   {verificationTarget?.verificationStatus ===
                   VerificationStatus.VERIFIED
-                    ? "Verified"
-                    : "Pending Approval"}
+                    ? t("users.governance.verification.verified")
+                    : t("users.governance.verification.pending")}
                 </Badge>
               </div>
             </div>
 
             <div className="space-y-3">
               <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">
-                Verification Document
+                {t("users.governance.verification.document")}
               </p>
               {verificationTarget?.verificationDocumentUrl ? (
                 <div className="border-2 border-primary/10 rounded-[2rem] p-8 flex flex-col items-center gap-6 bg-card shadow-inner relative overflow-hidden">
@@ -646,10 +644,10 @@ const UsersList = () => {
                     </div>
                     <div className="flex-1">
                       <p className="text-lg font-black">
-                        Teaching Credentials Proof
+                        {t("users.governance.verification.proofTitle")}
                       </p>
                       <p className="text-sm text-muted-foreground font-medium">
-                        Uploaded by teacher for verification
+                        {t("users.governance.verification.proofDesc")}
                       </p>
                     </div>
                     <Button
@@ -663,8 +661,8 @@ const UsersList = () => {
                         target="_blank"
                         rel="noreferrer"
                       >
-                        <ExternalLink className="h-4 w-4 mr-2" />
-                        View Full
+                        <ExternalLink className="h-4 w-4 mr-2 rtl:mr-0 rtl:ml-2" />
+                        {t("buttons.viewFull")}
                       </a>
                     </Button>
                   </div>
@@ -687,7 +685,7 @@ const UsersList = () => {
                 <div className="border-2 border-dashed rounded-[2rem] p-16 text-center text-muted-foreground bg-muted/10">
                   <ShieldAlert className="h-12 w-12 mx-auto mb-4 opacity-20" />
                   <p className="text-sm font-black uppercase tracking-widest">
-                    No document uploaded.
+                    {t("users.governance.verification.noDocument")}
                   </p>
                 </div>
               )}
@@ -701,8 +699,8 @@ const UsersList = () => {
               onClick={() => handleVerify(verificationTarget!.id, false)}
               disabled={isUpdating}
             >
-              <XCircle className="h-4 w-4 mr-2" />
-              Reject
+              <XCircle className="h-4 w-4 mr-2 rtl:mr-0 rtl:ml-2" />
+              {t("buttons.reject")}
             </Button>
             <Button
               className="font-black uppercase tracking-widest text-[10px] h-12 px-10 rounded-2xl shadow-xl shadow-primary/20"
@@ -710,11 +708,11 @@ const UsersList = () => {
               disabled={isUpdating}
             >
               {isUpdating ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                <Loader2 className="h-4 w-4 animate-spin mr-2 rtl:mr-0 rtl:ml-2" />
               ) : (
-                <CheckCircle2 className="h-4 w-4 mr-2" />
+                <CheckCircle2 className="h-4 w-4 mr-2 rtl:mr-0 rtl:ml-2" />
               )}
-              Approve & Verify Teacher
+              {t("buttons.approveVerify")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -724,25 +722,24 @@ const UsersList = () => {
         open={deleteTarget !== null}
         onOpenChange={() => setDeleteTarget(null)}
       >
-        <AlertDialogContent className="rounded-[2.5rem]">
-          <AlertDialogHeader>
+        <AlertDialogContent className="rounded-[2.5rem] text-start">
+          <AlertDialogHeader className="text-start">
             <AlertDialogTitle className="text-2xl font-black">
-              Are you absolutely sure?
+              {t("users.governance.deleteDialog.title")}
             </AlertDialogTitle>
             <AlertDialogDescription className="font-medium">
-              This action cannot be undone. This will permanently delete the
-              user account and all associated data from the system.
+              {t("users.governance.deleteDialog.description")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="gap-3">
             <AlertDialogCancel className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-12 px-6">
-              Cancel
+              {t("buttons.cancel")}
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-2xl font-black uppercase tracking-widest text-[10px] h-12 px-8 shadow-lg shadow-destructive/20"
             >
-              Confirm Delete
+              {t("buttons.confirmDelete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

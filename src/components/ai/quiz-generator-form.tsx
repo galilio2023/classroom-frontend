@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { LoadingButton } from "../ui/loading-button";
 import { AICard } from "./ai-card";
 import { BrainCircuit, Sparkles, Save, BarChart, ListChecks } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface QuizGeneratorFormProps {
   topic: string;
@@ -40,88 +41,92 @@ export const QuizGeneratorForm: React.FC<QuizGeneratorFormProps> = ({
   hasQuiz,
   classId,
 }) => {
+  const { t, i18n } = useTranslation();
+  const isArabic = i18n.language === 'ar';
+
   return (
     <AICard
-      title="AI Quiz Generator"
-      description="Generate high-quality assessments instantly."
+      title={t("aiHub.assistant.quizGen.title")}
+      description={t("aiHub.assistant.quizGen.desc")}
       icon={BrainCircuit}
       className="lg:col-span-1"
       footer={
-        <div className="flex flex-col gap-2 w-full">
+        <div className="flex flex-col gap-3 w-full">
           <LoadingButton
-            className="w-full"
+            className="w-full h-11 rounded-xl font-black uppercase tracking-widest text-[10px] gap-2 shadow-lg shadow-primary/20"
             onClick={handleGenerate}
             isLoading={isLoading}
-            loadingText="Generating..."
+            loadingText={t("aiHub.assistant.quizGen.generating")}
             icon={<Sparkles className="h-4 w-4" />}
           >
-            Generate Quiz
+            {t("aiHub.assistant.quizGen.generate")}
           </LoadingButton>
           {hasQuiz && classId && (
             <LoadingButton
               variant="outline"
-              className="w-full"
+              className="w-full h-11 rounded-xl font-black uppercase tracking-widest text-[10px] gap-2 border-primary/20 text-primary hover:bg-primary/5"
               onClick={handleSaveAsAssignment}
               isLoading={isSaving}
-              loadingText="Saving..."
+              loadingText={t("aiHub.assistant.quizGen.saving")}
               icon={<Save className="h-4 w-4" />}
             >
-              Save as Assignment
+              {t("aiHub.assistant.quizGen.saveAsAssignment")}
             </LoadingButton>
           )}
         </div>
       }
     >
-      <div className="space-y-6">
+      <div className="space-y-6 text-start">
         <div className="space-y-2">
-          <Label htmlFor="topic" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Topic</Label>
+          <Label htmlFor="topic" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">{t("aiHub.assistant.quizGen.topic")}</Label>
           <Input
             id="topic"
-            placeholder="e.g. Quantum Physics"
+            placeholder={t("aiHub.assistant.quizGen.placeholders.topic")}
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
+            className="h-11 rounded-xl bg-muted/30 border-none focus-visible:ring-primary font-bold"
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-6">
             <div className="space-y-2">
-                <Label htmlFor="difficulty" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Difficulty</Label>
+                <Label htmlFor="difficulty" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">{t("aiHub.assistant.quizGen.difficulty")}</Label>
                 <Select value={difficulty} onValueChange={setDifficulty}>
-                    <SelectTrigger id="difficulty" className="h-9">
+                    <SelectTrigger id="difficulty" className="h-11 rounded-xl bg-muted/30 border-none focus-visible:ring-primary font-bold">
                         <div className="flex items-center gap-2">
-                            <BarChart className="h-3.5 w-3.5 text-primary" />
-                            <SelectValue placeholder="Level" />
+                            <BarChart className="h-4 w-4 text-primary" />
+                            <SelectValue placeholder={t("aiHub.assistant.quizGen.difficulty")} />
                         </div>
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="easy">Easy</SelectItem>
-                        <SelectItem value="medium">Medium</SelectItem>
-                        <SelectItem value="hard">Hard</SelectItem>
+                        <SelectItem value="easy" className="font-bold">{t("aiHub.assistant.quizGen.difficulties.easy")}</SelectItem>
+                        <SelectItem value="medium" className="font-bold">{t("aiHub.assistant.quizGen.difficulties.medium")}</SelectItem>
+                        <SelectItem value="hard" className="font-bold">{t("aiHub.assistant.quizGen.difficulties.hard")}</SelectItem>
                     </SelectContent>
                 </Select>
             </div>
             <div className="space-y-2">
-                <Label htmlFor="type" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Format</Label>
+                <Label htmlFor="type" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">{t("aiHub.assistant.quizGen.format")}</Label>
                 <Select value={type} onValueChange={setType}>
-                    <SelectTrigger id="type" className="h-9">
+                    <SelectTrigger id="type" className="h-11 rounded-xl bg-muted/30 border-none focus-visible:ring-primary font-bold">
                         <div className="flex items-center gap-2">
-                            <ListChecks className="h-3.5 w-3.5 text-primary" />
-                            <SelectValue placeholder="Type" />
+                            <ListChecks className="h-4 w-4 text-primary" />
+                            <SelectValue placeholder={t("aiHub.assistant.quizGen.format")} />
                         </div>
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="multiple_choice">Multiple Choice</SelectItem>
-                        <SelectItem value="true_false">True / False</SelectItem>
-                        <SelectItem value="mixed">Mixed Format</SelectItem>
+                        <SelectItem value="multiple_choice" className="font-bold">{t("aiHub.assistant.quizGen.formats.multiple_choice")}</SelectItem>
+                        <SelectItem value="true_false" className="font-bold">{t("aiHub.assistant.quizGen.formats.true_false")}</SelectItem>
+                        <SelectItem value="mixed" className="font-bold">{t("aiHub.assistant.quizGen.formats.mixed")}</SelectItem>
                     </SelectContent>
                 </Select>
             </div>
         </div>
 
         <div className="space-y-4">
-          <div className="flex justify-between">
-            <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Number of Questions</Label>
-            <span className="text-sm font-black text-primary">{count[0]}</span>
+          <div className="flex justify-between px-1">
+            <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t("aiHub.assistant.quizGen.questions")}</Label>
+            <span className="text-sm font-black text-primary">{new Intl.NumberFormat(isArabic ? 'ar-EG' : 'en-US').format(count[0])}</span>
           </div>
           <Slider
             value={count}
