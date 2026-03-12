@@ -313,7 +313,6 @@ function App() {
                                 <Route path="edit/:id" element={<AuthorizedRoute resource="users" action="edit"><EditUser /></AuthorizedRoute>} />
                                 <Route path="show/:id" element={<AuthorizedRoute resource="users" action="show"><ShowUser /></AuthorizedRoute>} />
                             </Route>
-                            <Route path="/portfolio" element={<AuthorizedRoute resource="portfolio" action="list"><ShowUser /></AuthorizedRoute>} />
                             
                             <Route path="/departments">
                                 <Route index element={<AuthorizedRoute resource="departments" action="list"><DepartmentsList /></AuthorizedRoute>} />
@@ -370,6 +369,9 @@ function App() {
                         <Route path="*" element={<CatchAllNavigate to="/login" />} />
                       </Route>
                     </Routes>
+                    <Toaster />
+                    <UnsavedChangesNotifier />
+                    <DocumentTitleHandler />
                   </TermProvider>
                 </SocketProvider>
               </Suspense>

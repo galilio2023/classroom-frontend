@@ -107,7 +107,7 @@ export const AIStudentInsightModal = ({
             <ClipboardCopy className="h-4 w-4 mr-2 rtl:mr-0 rtl:ml-2" />
             {t("common.copyInsight")}
           </Button>
-          <Button size="sm" disabled={!insight} onClick={() => toast.info("Feature coming soon")}>
+          <Button size="sm" disabled={!insight} onClick={() => toast.info(t("common.featureComingSoon"))}>
             <Send className="h-4 w-4 mr-2 rtl:mr-0 rtl:ml-2 rtl:rotate-180" />
             {t("common.sendToStudent")}
           </Button>
