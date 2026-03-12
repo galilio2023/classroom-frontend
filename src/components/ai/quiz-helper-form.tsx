@@ -4,6 +4,7 @@ import { Input } from "../ui/input";
 import { LoadingButton } from "../ui/loading-button";
 import { AICard } from "./ai-card";
 import { Sparkles } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface QuizHelperFormProps {
   topic: string;
@@ -22,34 +23,35 @@ export const QuizHelperForm: React.FC<QuizHelperFormProps> = ({
   handleGenerate,
   isLoading,
 }) => {
+  const { t } = useTranslation();
   return (
     <AICard
-      title="AI Quiz Helper"
-      description="Use Gemini AI to draft multiple-choice questions for your quiz."
+      title={t("aiHub.assistant.generator")}
+      description={t("aiHub.assistant.quizzesDesc")}
       footer={
         <LoadingButton
           className="w-full"
           onClick={handleGenerate}
           isLoading={isLoading}
-          loadingText="Generating..."
+          loadingText={t("aiHub.assistant.quizGen.generating")}
           icon={<Sparkles className="h-4 w-4" />}
         >
-          Generate Questions
+          {t("aiHub.assistant.quizGen.generate")}
         </LoadingButton>
       }
     >
       <div className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="topic">Topic</Label>
+          <Label htmlFor="topic">{t("aiHub.assistant.quizGen.topic")}</Label>
           <Input
             id="topic"
-            placeholder="e.g. Photosynthesis, World War II, React Hooks"
+            placeholder={t("aiHub.assistant.quizGen.placeholders.topic")}
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="count">Number of Questions</Label>
+          <Label htmlFor="count">{t("aiHub.assistant.quizGen.questions")}</Label>
           <Input
             id="count"
             type="number"

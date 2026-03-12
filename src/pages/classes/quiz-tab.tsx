@@ -8,12 +8,14 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import dayjs from "dayjs";
+import { useTranslation } from "react-i18next";
 
 interface QuizTabProps {
   classId: string;
 }
 
 export const QuizTab = ({ classId }: QuizTabProps) => {
+  const { t, i18n } = useTranslation();
   const { show, create } = useNavigation();
   const { data: identity } = useGetIdentity<User>();
   const isStaff = identity?.role === "teacher" || identity?.role === "admin";
@@ -29,27 +31,29 @@ export const QuizTab = ({ classId }: QuizTabProps) => {
   const quizzes = quizQuery.data?.data || [];
   const isLoading = quizQuery.isLoading;
 
+  const isAr = i18n.language === 'ar';
+
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-4">
         <Loader2 className="h-10 w-10 animate-spin text-primary/20" />
-        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">Loading Quizzes...</p>
+        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">{t("classes.quiz.loading")}</p>
       </div>
     );
   }
 
   return (
     <div className="space-y-8 pb-20">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 text-start">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <div className="p-1.5 rounded-lg bg-primary/10 text-primary">
               <FileQuestion className="h-4 w-4" />
             </div>
-            <h3 className="text-xl font-black tracking-tight">Class Quizzes</h3>
+            <h3 className="text-xl font-black tracking-tight">{t("classes.quiz.classQuizzes")}</h3>
           </div>
           <p className="text-sm text-muted-foreground font-medium">
-            {quizzes.length} assessments available for this class.
+            {t("classes.quiz.description", { count: quizzes.length })}
           </p>
         </div>
         {isStaff && (
@@ -58,7 +62,7 @@ export const QuizTab = ({ classId }: QuizTabProps) => {
             className="rounded-xl h-11 px-6 font-black uppercase tracking-widest text-[10px] gap-2 shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95"
           >
             <PlusCircle className="h-4 w-4" />
-            Create Quiz
+            {t("buttons.createQuiz")}
           </Button>
         )}
       </div>
@@ -75,17 +79,17 @@ export const QuizTab = ({ classId }: QuizTabProps) => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.2 }}
               >
-                <Card className="border-none shadow-2xl bg-card/50 backdrop-blur-xl rounded-[2rem] overflow-hidden group hover:shadow-2xl transition-all hover:-translate-y-1">
+                <Card className="border-none shadow-2xl bg-card/50 backdrop-blur-xl rounded-[2rem] overflow-hidden group hover:shadow-2xl transition-all hover:-translate-y-1 text-start">
                   <CardHeader className="p-8 pb-4">
                     <div className="flex items-start justify-between">
                       <div className="p-3 rounded-2xl bg-primary/10 text-primary group-hover:scale-110 transition-transform">
                         <FileQuestion className="h-6 w-6" />
                       </div>
-                      <div className="flex flex-col items-end gap-2">
+                      <div className={cn("flex flex-col gap-2", isAr ? "items-start" : "items-end")}>
                         {quiz.timeLimit && (
                           <Badge variant="secondary" className="flex items-center gap-1.5 font-black text-[9px] uppercase tracking-widest bg-orange-500/10 text-orange-600 border-none px-3 py-1">
                             <Clock className="h-3 w-3" />
-                            {quiz.timeLimit} Mins
+                            {quiz.timeLimit} {t("classes.quiz.minsUnit")}
                           </Badge>
                         )}
                         {quiz.dueDate && (
@@ -94,14 +98,14 @@ export const QuizTab = ({ classId }: QuizTabProps) => {
                             isOverdue ? "text-destructive" : "text-muted-foreground/40"
                           )}>
                             <Calendar className="h-3 w-3" />
-                            <span>Due {dayjs(quiz.dueDate).format("MMM D")}</span>
+                            <span>{t("classes.quiz.due", { date: dayjs(quiz.dueDate).format("MMM D") })}</span>
                           </div>
                         )}
                       </div>
                     </div>
                     <CardTitle className="mt-6 text-xl font-black tracking-tight group-hover:text-primary transition-colors">{quiz.title}</CardTitle>
                     <CardDescription className="line-clamp-2 font-medium leading-relaxed mt-2">
-                      {quiz.description || "No description provided."}
+                      {quiz.description || t("classes.quiz.noDescription")}
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="p-8 pt-4">
@@ -111,7 +115,7 @@ export const QuizTab = ({ classId }: QuizTabProps) => {
                           <LayoutDashboard className="h-3.5 w-3.5" />
                         </div>
                         <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
-                          {quiz.questions?.length || 0} Questions
+                          {t("classes.quiz.questionsCount", { count: quiz.questions?.length || 0 })}
                         </span>
                       </div>
                       <div className="flex gap-3">
@@ -123,7 +127,7 @@ export const QuizTab = ({ classId }: QuizTabProps) => {
                             className="h-10 rounded-xl font-black uppercase tracking-widest text-[9px] gap-2 border-primary/20 text-primary hover:bg-primary/5"
                           >
                             <Trophy className="h-3.5 w-3.5" />
-                            Results
+                            {t("buttons.results")}
                           </Button>
                         ) : (
                           <Button 
@@ -131,8 +135,8 @@ export const QuizTab = ({ classId }: QuizTabProps) => {
                             onClick={() => show("quizzes", quiz.id.toString())}
                             className="h-10 rounded-xl font-black uppercase tracking-widest text-[9px] gap-2 shadow-lg shadow-primary/20 px-6"
                           >
-                            Take Quiz
-                            <ArrowRight className="h-3.5 w-3.5" />
+                            {t("buttons.takeQuiz")}
+                            <ArrowRight className={cn("h-3.5 w-3.5", isAr && "rotate-180")} />
                           </Button>
                         )}
                       </div>
@@ -157,11 +161,11 @@ export const QuizTab = ({ classId }: QuizTabProps) => {
                 </div>
               </div>
               <div className="space-y-2">
-                <CardTitle className="text-2xl font-black tracking-tight">No quizzes yet</CardTitle>
+                <CardTitle className="text-2xl font-black tracking-tight">{t("classes.quiz.noQuizzes")}</CardTitle>
                 <CardDescription className="max-w-xs mx-auto mt-2 font-medium">
                   {isStaff 
-                    ? "Create your first quiz to test your students' knowledge and track their progress." 
-                    : "Your teacher hasn't posted any quizzes for this class yet. Check back later!"}
+                    ? t("classes.quiz.noQuizzesDescriptionTeacher") 
+                    : t("classes.quiz.noQuizzesDescriptionStudent")}
                 </CardDescription>
               </div>
               {isStaff && (
@@ -170,7 +174,7 @@ export const QuizTab = ({ classId }: QuizTabProps) => {
                   onClick={() => create("quizzes", "push", { query: { classId } })}
                 >
                   <PlusCircle className="h-4 w-4" />
-                  Create Quiz
+                  {t("buttons.createQuiz")}
                 </Button>
               )}
             </CardContent>

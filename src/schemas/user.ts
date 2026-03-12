@@ -1,14 +1,15 @@
 import * as z from "zod";
 import { UserRole, UserStatus } from "@/types";
+import i18next from "i18next";
 
 const phoneRegex = /^\+?[\d\s-()]{7,20}$/;
 
 // 1. Define the base object schema
 export const baseUserSchema = z.object({
-  name: z.string().min(1, "Name is required").max(255, "Name must be less than 255 characters"),
-  email: z.string().min(1, "Email is required").email("Invalid email address"),
+  name: z.string().min(1, { message: i18next.t("auth.register.nameRequired") }).max(255),
+  email: z.string().min(1, { message: i18next.t("auth.register.nameRequired") }).email({ message: i18next.t("auth.register.invalidEmail") }),
   role: z.nativeEnum(UserRole, {
-    errorMap: () => ({ message: "Role is required" }),
+    errorMap: () => ({ message: i18next.t("users.governance.filters.role") }),
   }),
   status: z.nativeEnum(UserStatus).default(UserStatus.ACTIVE),
   departmentId: z.number().optional().nullable(),
@@ -39,14 +40,14 @@ export const userFormSchema = baseUserSchema.superRefine((data, ctx) => {
       if (!data.parentName) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: "Parent name is required for users under 21",
+          message: i18next.t("auth.register.nameRequired"),
           path: ["parentName"],
         });
       }
       if (!data.parentPhone) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: "Parent phone is required for users under 21",
+          message: i18next.t("auth.register.nameRequired"),
           path: ["parentPhone"],
         });
       }
@@ -54,5 +55,5 @@ export const userFormSchema = baseUserSchema.superRefine((data, ctx) => {
   }
 });
 
-// 3. Extend the base schema for creation if needed (or just use the refined one)
+// 3. Extend the base schema for creation if needed
 export const userCreateSchema = userFormSchema;

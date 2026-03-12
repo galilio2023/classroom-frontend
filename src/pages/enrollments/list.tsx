@@ -14,12 +14,8 @@ import {
   Phone, 
   Mail, 
   LayoutGrid, 
-  Calendar,
   Activity,
   Users,
-  ShieldCheck,
-  Loader2,
-  ArrowRight,
   UserCheck,
   UserMinus,
   Clock
@@ -67,11 +63,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useTranslation } from "react-i18next";
 
 dayjs.extend(relativeTime);
 
 const EnrollmentsList = () => {
-  usePageTitle("Enrollment Management");
+  const { t } = useTranslation();
+  usePageTitle(t("enrollments.title"));
   const { data: identity } = useGetIdentity<User>();
   const isStaff = identity?.role === UserRole.ADMIN || identity?.role === UserRole.TEACHER;
   const { selectedTerm } = useTerm();
@@ -122,7 +120,7 @@ const EnrollmentsList = () => {
         values: { status },
     }, {
         onSuccess: () => {
-            toast.success(`Enrollment ${status} successfully`);
+            toast.success(t("enrollments.toasts.statusUpdate", { status }));
             invalidate({ resource: "enrollments", invalidates: ["list"] });
         }
     });
@@ -142,13 +140,13 @@ const EnrollmentsList = () => {
     );
 
     toast.promise(Promise.all(promises), {
-        loading: `Processing ${selectedIds.length} enrollments...`,
+        loading: t("enrollments.toasts.processing", { count: selectedIds.length }),
         success: () => {
             setSelectedIds([]);
             invalidate({ resource: "enrollments", invalidates: ["list"] });
-            return `Successfully processed ${selectedIds.length} enrollments`;
+            return t("enrollments.toasts.bulkSuccess", { count: selectedIds.length });
         },
-        error: "Failed to process some enrollments",
+        error: t("enrollments.toasts.bulkError"),
     });
   };
 
@@ -189,8 +187,8 @@ const EnrollmentsList = () => {
             <Breadcrumb />
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div>
-                <h1 className="text-4xl font-black tracking-tight">Admissions & Enrollments</h1>
-                <p className="text-muted-foreground font-medium mt-1">Manage student applications, class placements, and enrollment status.</p>
+                <h1 className="text-4xl font-black tracking-tight">{t("enrollments.title")}</h1>
+                <p className="text-muted-foreground font-medium mt-1">{t("enrollments.description")}</p>
               </div>
               <div className="flex items-center gap-3 w-full md:w-auto">
                 {isStaff && (
@@ -199,7 +197,7 @@ const EnrollmentsList = () => {
                     className="flex-1 md:flex-none rounded-2xl h-14 px-10 font-black uppercase tracking-widest text-[10px] gap-2 shadow-xl shadow-primary/20 transition-all hover:scale-105 active:scale-95"
                   >
                     <UserPlus className="h-5 w-5" />
-                    Enroll Student
+                    {t("enrollments.enrollStudent")}
                   </Button>
                 )}
               </div>
@@ -213,7 +211,7 @@ const EnrollmentsList = () => {
                 <Users className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Total Requests</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t("enrollments.stats.total")}</p>
                 <p className="text-2xl font-black">{isLoading ? "..." : stats.total}</p>
               </div>
             </Card>
@@ -222,7 +220,7 @@ const EnrollmentsList = () => {
                 <Activity className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Pending Approval</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t("enrollments.stats.pending")}</p>
                 <p className="text-2xl font-black text-amber-600">{isLoading ? "..." : stats.pending}</p>
               </div>
             </Card>
@@ -231,7 +229,7 @@ const EnrollmentsList = () => {
                 <UserCheck className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Active Students</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t("enrollments.stats.active")}</p>
                 <p className="text-2xl font-black text-green-600">{isLoading ? "..." : stats.approved}</p>
               </div>
             </Card>
@@ -244,7 +242,7 @@ const EnrollmentsList = () => {
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                 <Input
                   type="text"
-                  placeholder="Search by student name or email..."
+                  placeholder={t("enrollments.searchPlaceholder")}
                   className="pl-11 h-14 rounded-2xl border-none bg-background shadow-sm font-medium"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -253,12 +251,12 @@ const EnrollmentsList = () => {
               <div className="flex flex-wrap gap-3">
                 {selectedIds.length > 0 && (
                     <div className="flex items-center gap-2 bg-primary/5 px-4 rounded-2xl border border-primary/10 animate-in fade-in slide-in-from-right-4">
-                        <span className="text-[10px] font-black uppercase tracking-widest text-primary">{selectedIds.length} Selected</span>
+                        <span className="text-[10px] font-black uppercase tracking-widest text-primary">{selectedIds.length} {t("common.cases")}</span>
                         <Button size="sm" variant="ghost" className="h-8 text-green-600 hover:bg-green-50 font-black text-[10px] uppercase tracking-widest" onClick={() => handleBulkAction("approved")}>
-                            Approve
+                            {t("buttons.approve")}
                         </Button>
                         <Button size="sm" variant="ghost" className="h-8 text-destructive hover:bg-destructive/5 font-black text-[10px] uppercase tracking-widest" onClick={() => handleBulkAction("rejected")}>
-                            Reject
+                            {t("buttons.reject")}
                         </Button>
                     </div>
                 )}
@@ -266,13 +264,13 @@ const EnrollmentsList = () => {
                   <Filter className="h-4 w-4 text-muted-foreground" />
                   <Select value={statusFilter} onValueChange={setStatusFilter}>
                     <SelectTrigger className="w-40 border-none h-10 focus:ring-0 shadow-none font-black text-[10px] uppercase tracking-widest">
-                      <SelectValue placeholder="All Status" />
+                      <SelectValue placeholder={t("enrollments.allStatus")} />
                     </SelectTrigger>
                     <SelectContent className="rounded-2xl border-none shadow-2xl">
-                      <SelectItem value="all" className="rounded-xl font-bold">All Status</SelectItem>
-                      <SelectItem value="pending" className="rounded-xl font-bold">Pending</SelectItem>
-                      <SelectItem value="approved" className="rounded-xl font-bold">Approved</SelectItem>
-                      <SelectItem value="rejected" className="rounded-xl font-bold">Rejected</SelectItem>
+                      <SelectItem value="all" className="rounded-xl font-bold">{t("enrollments.allStatus")}</SelectItem>
+                      <SelectItem value="pending" className="rounded-xl font-bold">{t("status.upcoming")}</SelectItem>
+                      <SelectItem value="approved" className="rounded-xl font-bold">{t("status.active")}</SelectItem>
+                      <SelectItem value="rejected" className="rounded-xl font-bold">{t("buttons.reject")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -302,8 +300,8 @@ const EnrollmentsList = () => {
               <div className="h-full w-full flex items-center justify-center p-12">
                 <EmptyState
                   icon={Users}
-                  title="No enrollments found"
-                  description="There are no active or pending enrollment requests at this time."
+                  title={t("enrollments.empty.title")}
+                  description={t("enrollments.empty.desc")}
                   className="border-none bg-transparent min-h-0"
                 />
               </div>
@@ -395,7 +393,7 @@ const EnrollmentsList = () => {
                                   <Clock className="h-3.5 w-3.5 text-primary" />
                               </div>
                               <span className="text-xs font-bold uppercase tracking-tight">
-                                  Requested {enrollmentDate.fromNow()}
+                                  {t("enrollments.requested", { time: enrollmentDate.fromNow() })}
                               </span>
                             </div>
                           </div>
@@ -413,7 +411,7 @@ const EnrollmentsList = () => {
                                       disabled={isUpdating}
                                   >
                                       <CheckCircle2 className="h-4 w-4 mr-2" />
-                                      Approve
+                                      {t("buttons.approve")}
                                   </Button>
                                   <Button
                                       variant="outline"
@@ -423,7 +421,7 @@ const EnrollmentsList = () => {
                                       disabled={isUpdating}
                                   >
                                       <XCircle className="h-4 w-4 mr-2" />
-                                      Reject
+                                      {t("buttons.reject")}
                                   </Button>
                               </div>
                           )}
@@ -435,14 +433,14 @@ const EnrollmentsList = () => {
                                   </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end" className="w-56 rounded-[1.5rem] p-2">
-                                  <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-3 py-2">Enrollment Options</DropdownMenuLabel>
+                                  <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-3 py-2">{t("enrollments.options")}</DropdownMenuLabel>
                                   <DropdownMenuItem onClick={() => show("users", enrollment.student.id)} className="rounded-xl gap-3 py-3 cursor-pointer">
                                       <Eye className="h-4 w-4 text-primary" />
-                                      <span className="font-bold">View Student Profile</span>
+                                      <span className="font-bold">{t("enrollments.viewProfile")}</span>
                                   </DropdownMenuItem>
                                   <DropdownMenuItem onClick={() => show("classes", enrollment.class.id)} className="rounded-xl gap-3 py-3 cursor-pointer">
                                       <LayoutGrid className="h-4 w-4 text-primary" />
-                                      <span className="font-bold">View Classroom</span>
+                                      <span className="font-bold">{t("enrollments.viewClass")}</span>
                                   </DropdownMenuItem>
                                   <DropdownMenuSeparator className="my-2" />
                                   <DropdownMenuItem 
@@ -450,7 +448,7 @@ const EnrollmentsList = () => {
                                       className="rounded-xl gap-3 py-3 cursor-pointer text-destructive focus:text-destructive"
                                   >
                                       <UserMinus className="h-4 w-4" />
-                                      <span className="font-bold">Remove Enrollment</span>
+                                      <span className="font-bold">{t("enrollments.remove")}</span>
                                   </DropdownMenuItem>
                               </DropdownMenuContent>
                           </DropdownMenu>
@@ -472,23 +470,23 @@ const EnrollmentsList = () => {
               <Trash2 className="h-8 w-8" />
             </div>
             <div className="space-y-1">
-                <AlertDialogTitle className="text-3xl font-black tracking-tight">Remove Enrollment?</AlertDialogTitle>
+                <AlertDialogTitle className="text-3xl font-black tracking-tight">{t("enrollments.deleteDialog.title")}</AlertDialogTitle>
                 <AlertDialogDescription className="font-medium text-base leading-relaxed">
-                    This will permanently remove the student from the classroom. They will lose access to all curriculum, assignments, and grades for this specific class.
+                    {t("enrollments.deleteDialog.desc")}
                 </AlertDialogDescription>
             </div>
           </AlertDialogHeader>
           <AlertDialogFooter className="gap-3 pt-6">
-            <AlertDialogCancel className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-8">Cancel</AlertDialogCancel>
+            <AlertDialogCancel className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-8">{t("buttons.cancel")}</AlertDialogCancel>
             <AlertDialogAction 
                 onClick={() => {
                     if (deleteTarget) {
-                        unenroll({ resource: "enrollments", id: deleteTarget }, { onSuccess: () => { toast.success("Enrollment removed"); setDeleteTarget(null); } });
+                        unenroll({ resource: "enrollments", id: deleteTarget }, { onSuccess: () => { toast.success(t("enrollments.toasts.removed")); setDeleteTarget(null); } });
                     }
                 }} 
                 className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-12 bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-xl shadow-destructive/20"
             >
-                Confirm Removal
+                {t("buttons.confirmDelete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

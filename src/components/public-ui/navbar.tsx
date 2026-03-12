@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { 
   Crown, 
@@ -7,15 +7,39 @@ import {
   Sparkles,
   Layers,
   Zap,
-  BookOpen
+  BookOpen,
+  Languages,
+  LayoutDashboard,
+  LogOut,
+  User as UserIcon
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
+import { useGetIdentity, useLogout } from "@refinedev/core";
+import { User } from "@/types";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ThemeToggle } from "../refine-ui/theme/theme-toggle";
 
 export const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { t, i18n } = useTranslation();
+  const { pathname } = useLocation();
+  const { data: identity } = useGetIdentity<User>();
+  const { mutate: logout } = useLogout();
+
+  const changeLanguage = (lng: string) => {
+    void i18n.changeLanguage(lng);
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -26,37 +50,47 @@ export const Navbar = () => {
   }, []);
 
   const navLinks = [
-    { name: "Features", href: "/#features", icon: <Layers className="h-4 w-4" /> },
-    { name: "AI Study Lab", href: "/#ai", icon: <Sparkles className="h-4 w-4" /> },
+    { name: t("landing.features.sectionTitle"), href: "/#features", icon: <Layers className="h-4 w-4" /> },
+    { name: "AI Hub", href: "/#ai", icon: <Sparkles className="h-4 w-4" /> },
     { name: "Pricing", href: "/pricing", icon: <Crown className="h-4 w-4" /> },
   ];
+
+  const isActive = (path: string) => pathname === path;
 
   return (
     <nav
       className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b border-transparent",
+        "fixed top-0 left-0 right-0 z-50 transition-all duration-500",
         isScrolled 
-          ? "bg-background/80 backdrop-blur-md border-border py-3" 
-          : "bg-transparent py-5"
+          ? "bg-background/70 backdrop-blur-xl border-b border-primary/10 py-3 shadow-sm" 
+          : "bg-transparent py-6"
       )}
     >
       <div className="container mx-auto px-4 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2 group">
-          <div className="bg-primary p-2 rounded-xl group-hover:rotate-12 transition-transform duration-300">
-            <BookOpen className="h-6 w-6 text-primary-foreground" />
+        <Link to="/" className="flex items-center gap-3 group">
+          <div className="relative">
+            <div className="bg-primary p-2 rounded-xl group-hover:rotate-12 transition-transform duration-500 shadow-lg shadow-primary/20">
+                <BookOpen className="h-6 w-6 text-primary-foreground" />
+            </div>
+            <div className="absolute -top-1 -right-1 h-3 w-3 bg-green-500 border-2 border-background rounded-full animate-pulse" />
           </div>
-          <span className="text-xl font-black tracking-tighter uppercase">
-            Class<span className="text-primary">Room</span>
+          <span className="text-2xl font-black tracking-tighter uppercase italic">
+            Class<span className="text-primary not-italic">Room</span>
           </span>
         </Link>
 
         {/* Desktop Nav */}
-        <div className="hidden md:flex items-center gap-8">
+        <div className="hidden md:flex items-center gap-2 bg-muted/20 p-1.5 rounded-2xl border border-primary/5">
           {navLinks.map((link) => (
             <Link
               key={link.name}
               to={link.href}
-              className="text-sm font-bold hover:text-primary transition-colors flex items-center gap-2 uppercase tracking-widest"
+              className={cn(
+                "px-5 py-2 text-[10px] font-black uppercase tracking-[0.2em] transition-all rounded-xl flex items-center gap-2",
+                isActive(link.href) 
+                    ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20" 
+                    : "hover:bg-primary/5 text-muted-foreground hover:text-primary"
+              )}
             >
               {link.icon}
               {link.name}
@@ -65,61 +99,210 @@ export const Navbar = () => {
         </div>
 
         <div className="hidden md:flex items-center gap-4">
-          <Link to="/login">
-            <Button variant="ghost" className="font-bold uppercase tracking-widest text-xs">
-              Log In
-            </Button>
-          </Link>
-          <Link to="/register">
-            <Button className="font-black uppercase tracking-widest text-xs rounded-xl px-6 shadow-lg shadow-primary/20">
-              Get Started
-              <Zap className="ml-2 h-4 w-4 fill-current" />
-            </Button>
-          </Link>
+          <div className="flex items-center gap-2 bg-muted/30 p-1 rounded-xl border border-primary/5">
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="rounded-lg gap-2 font-bold uppercase tracking-widest text-[10px] h-8">
+                    <Languages className="h-4 w-4" />
+                    {i18n.language.toUpperCase()}
+                </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48 p-2 rounded-2xl border-primary/10 backdrop-blur-xl bg-background/90">
+                <DropdownMenuItem 
+                    onClick={() => changeLanguage("en")} 
+                    className={cn(
+                        "font-black uppercase tracking-widest text-[10px] py-3 cursor-pointer rounded-xl",
+                        i18n.language === 'en' && "bg-primary/10 text-primary"
+                    )}
+                >
+                    English
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                    onClick={() => changeLanguage("ar")} 
+                    className={cn(
+                        "font-black uppercase tracking-widest text-[10px] py-3 cursor-pointer rounded-xl",
+                        i18n.language === 'ar' && "bg-primary/10 text-primary"
+                    )}
+                >
+                    العربية
+                </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
+
+            <ThemeToggle />
+          </div>
+
+          <div className="h-6 w-px bg-primary/10 mx-2" />
+
+          {!identity ? (
+            <>
+              <Link to="/login">
+                <Button variant="ghost" className="font-black uppercase tracking-widest text-[10px] hover:bg-primary/5">
+                  {t("buttons.signIn")}
+                </Button>
+              </Link>
+              <Link to="/register">
+                <Button className="font-black uppercase tracking-widest text-[10px] rounded-xl px-6 shadow-xl shadow-primary/20 hover:scale-105 transition-transform active:scale-95">
+                  {t("buttons.getStarted")}
+                  <Zap className="ml-2 h-3 w-3 fill-current" />
+                </Button>
+              </Link>
+            </>
+          ) : (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="relative h-10 w-10 rounded-xl p-0 hover:bg-primary/10 transition-colors border border-primary/5">
+                  <Avatar className="h-8 w-8 rounded-lg">
+                    <AvatarImage src={identity?.image || ""} alt={identity?.name} />
+                    <AvatarFallback className="bg-primary/10 text-primary text-[10px] font-black">{identity?.name?.charAt(0).toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56 p-2 rounded-2xl border-primary/10 backdrop-blur-xl bg-background/90">
+                <div className="px-3 py-3 border-b border-primary/5 mb-2">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-primary mb-1">{identity?.role}</p>
+                    <p className="text-sm font-bold truncate">{identity?.name}</p>
+                </div>
+                <Link to="/dashboard">
+                    <DropdownMenuItem className="font-black uppercase tracking-widest text-[10px] py-3 cursor-pointer rounded-xl gap-3">
+                        <LayoutDashboard className="h-4 w-4 text-primary" />
+                        Dashboard
+                    </DropdownMenuItem>
+                </Link>
+                <Link to={`/users/show/${identity?.id}`}>
+                    <DropdownMenuItem className="font-black uppercase tracking-widest text-[10px] py-3 cursor-pointer rounded-xl gap-3">
+                        <UserIcon className="h-4 w-4 text-primary" />
+                        My Profile
+                    </DropdownMenuItem>
+                </Link>
+                <DropdownMenuSeparator className="bg-primary/5 my-2" />
+                <DropdownMenuItem 
+                    onClick={() => logout()}
+                    className="font-black uppercase tracking-widest text-[10px] py-3 cursor-pointer rounded-xl gap-3 text-destructive focus:bg-destructive/10 focus:text-destructive"
+                >
+                    <LogOut className="h-4 w-4" />
+                    {t("buttons.signOut")}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
 
         {/* Mobile Toggle */}
-        <button
-          className="md:hidden p-2"
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        >
-          {isMobileMenuOpen ? <X /> : <Menu />}
-        </button>
+        <div className="flex md:hidden items-center gap-3">
+          <button
+            className={cn(
+                "p-2.5 rounded-xl transition-all",
+                isMobileMenuOpen ? "bg-primary text-primary-foreground" : "bg-muted/50"
+            )}
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          >
+            {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile Menu */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="md:hidden bg-background border-b"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="md:hidden absolute top-full left-0 right-0 bg-background/95 backdrop-blur-2xl border-b border-primary/10 shadow-2xl"
           >
             <div className="container mx-auto px-4 py-8 flex flex-col gap-6">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.name}
-                  to={link.href}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="text-lg font-black uppercase tracking-widest flex items-center gap-4"
-                >
-                  <div className="p-2 rounded-lg bg-muted">{link.icon}</div>
-                  {link.name}
-                </Link>
-              ))}
-              <hr />
+              <div className="space-y-2">
+                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground px-4 mb-4">Navigation</p>
+                  {navLinks.map((link) => (
+                    <Link
+                      key={link.name}
+                      to={link.href}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="text-lg font-black uppercase tracking-widest flex items-center gap-4 p-4 rounded-2xl hover:bg-primary/5 transition-colors"
+                    >
+                      <div className="p-2.5 rounded-xl bg-primary/10 text-primary">{link.icon}</div>
+                      {link.name}
+                    </Link>
+                  ))}
+              </div>
+              
+              <div className="h-px bg-primary/10 w-full" />
+
               <div className="flex flex-col gap-4">
-                <Link to="/login" onClick={() => setIsMobileMenuOpen(false)}>
-                  <Button variant="outline" className="w-full font-black uppercase tracking-widest py-6 rounded-2xl">
-                    Log In
-                  </Button>
-                </Link>
-                <Link to="/register" onClick={() => setIsMobileMenuOpen(false)}>
-                  <Button className="w-full font-black uppercase tracking-widest py-6 rounded-2xl">
-                    Get Started
-                  </Button>
-                </Link>
+                {identity && (
+                    <div className="flex items-center gap-4 px-4 py-2 mb-4 bg-primary/5 rounded-2xl">
+                        <Avatar className="h-12 w-12 rounded-xl border-2 border-primary/20">
+                            <AvatarImage src={identity?.image || ""} />
+                            <AvatarFallback>{identity?.name?.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                        <div>
+                            <p className="text-xs font-black uppercase tracking-widest text-primary">{identity?.role}</p>
+                            <p className="font-bold">{identity?.name}</p>
+                        </div>
+                    </div>
+                )}
+
+                <div className="flex items-center justify-between px-4">
+                    <div className="flex flex-col gap-1">
+                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">Settings</span>
+                        <div className="flex gap-2">
+                            <ThemeToggle />
+                        </div>
+                    </div>
+                    <div className="flex flex-col gap-1 items-end">
+                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">Language</span>
+                        <div className="flex gap-2">
+                            <Button 
+                                variant={i18n.language === 'en' ? 'default' : 'outline'} 
+                                size="sm" 
+                                onClick={() => changeLanguage('en')}
+                                className="text-[10px] font-black uppercase tracking-widest rounded-lg h-8"
+                            >EN</Button>
+                            <Button 
+                                variant={i18n.language === 'ar' ? 'default' : 'outline'} 
+                                size="sm" 
+                                onClick={() => changeLanguage('ar')}
+                                className="text-[10px] font-black uppercase tracking-widest rounded-lg h-8"
+                            >AR</Button>
+                        </div>
+                    </div>
+                </div>
+
+                {!identity ? (
+                    <div className="grid grid-cols-2 gap-4 mt-4">
+                        <Link to="/login" onClick={() => setIsMobileMenuOpen(false)}>
+                          <Button variant="outline" className="w-full font-black uppercase tracking-widest h-14 rounded-2xl border-2">
+                            {t("buttons.signIn")}
+                          </Button>
+                        </Link>
+                        <Link to="/register" onClick={() => setIsMobileMenuOpen(false)}>
+                          <Button className="w-full font-black uppercase tracking-widest h-14 rounded-2xl shadow-lg shadow-primary/20">
+                            {t("buttons.getStarted")}
+                          </Button>
+                        </Link>
+                    </div>
+                ) : (
+                    <div className="space-y-3 mt-4">
+                        <Link to="/dashboard" onClick={() => setIsMobileMenuOpen(false)}>
+                            <Button className="w-full font-black uppercase tracking-widest h-14 rounded-2xl shadow-lg shadow-primary/20 gap-3">
+                                <LayoutDashboard className="h-5 w-5" />
+                                Go to Dashboard
+                            </Button>
+                        </Link>
+                        <Button 
+                            variant="outline" 
+                            className="w-full font-black uppercase tracking-widest h-14 rounded-2xl border-2 gap-3 text-destructive hover:bg-destructive/10"
+                            onClick={() => {
+                                setIsMobileMenuOpen(false);
+                                logout();
+                            }}
+                        >
+                            <LogOut className="h-5 w-5" />
+                            {t("buttons.signOut")}
+                        </Button>
+                    </div>
+                )}
               </div>
             </div>
           </motion.div>

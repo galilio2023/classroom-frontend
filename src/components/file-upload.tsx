@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
-import { Loader2, Upload, File, X, CheckCircle2 } from "lucide-react";
+import { Loader2, Upload, File as FileIcon, X, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { BACKEND_URL } from "@/config";
+import { useTranslation } from "react-i18next";
 
 interface FileUploadProps {
   onUploadSuccess: (url: string, publicId: string) => void;
@@ -19,23 +20,24 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   onUploadSuccess, 
   onClear,
   folder = "general",
-  label = "Upload File"
+  label
 }) => {
+  const { t } = useTranslation();
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadComplete, setUploadComplete] = useState(false);
-  const [inputKey, setInputKey] = useState(Date.now());
   const [uploadedPublicId, setUploadedPublicId] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const selectedFile = e.target.files[0];
       
       if (selectedFile.size > MAX_FILE_SIZE) {
-        toast.error("File too large", {
-          description: "Please select a file smaller than 10MB."
+        toast.error(t("common.upload.tooLarge"), {
+          description: t("common.upload.tooLargeDesc")
         });
-        setInputKey(Date.now());
+        if (fileInputRef.current) fileInputRef.current.value = "";
         return;
       }
 
@@ -57,127 +59,116 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       const response = await fetch(`${BACKEND_URL}/upload`, {
         method: "POST",
         body: formData,
-        credentials: "include",
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || "Upload failed");
+        throw new Error(errorData.message || t("common.upload.error"));
       }
 
       const result = await response.json();
       onUploadSuccess(result.data.url, result.data.publicId);
       setUploadedPublicId(result.data.publicId);
       setUploadComplete(true);
-      toast.success("File uploaded successfully!");
-    } catch (error) {
+      toast.success(t("common.upload.success"));
+    } catch (error: any) {
       console.error("Upload Error:", error);
-      const message = error instanceof Error ? error.message : "Failed to upload file. Please try again.";
+      const message = error instanceof Error ? error.message : t("common.upload.error");
       toast.error(message);
     } finally {
       setIsUploading(false);
     }
   };
 
-  const clearFile = async () => {
-    if (uploadedPublicId) {
-      try {
-        await fetch(`${BACKEND_URL}/upload`, {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ publicId: uploadedPublicId }),
-          credentials: "include",
-        });
-        toast.success("File removed successfully");
-      } catch (error) {
-        console.error("Delete Error:", error);
-        toast.error("Failed to remove file from server");
-      }
-    }
-
+  const clearFile = () => {
     setFile(null);
     setUploadComplete(false);
     setUploadedPublicId(null);
-    setInputKey(Date.now());
+    if (fileInputRef.current) fileInputRef.current.value = "";
     onClear?.();
   };
 
+  const handleContainerClick = () => {
+    fileInputRef.current?.click();
+  };
+
   return (
-    <div className="space-y-4 w-full">
-      <Label htmlFor="file-upload" className="text-sm font-medium">
-        {label}
-      </Label>
+    <div className="space-y-3 w-full">
+      {label && (
+        <Label className="text-sm font-medium">
+          {label}
+        </Label>
+      )}
       
       {!file ? (
-        <div className="border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center bg-muted/20 hover:bg-muted/30 transition-colors cursor-pointer relative">
-          <Input
-            key={inputKey}
-            id="file-upload"
+        <div 
+          onClick={handleContainerClick}
+          className="border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center bg-muted/20 hover:bg-muted/30 transition-colors cursor-pointer relative min-h-[120px]"
+        >
+          <input
+            ref={fileInputRef}
             type="file"
-            className="absolute inset-0 opacity-0 cursor-pointer"
+            className="hidden"
             onChange={handleFileChange}
             accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.webp"
           />
           <Upload className="h-8 w-8 text-muted-foreground mb-2" />
-          <p className="text-sm text-muted-foreground">Click or drag to select a file</p>
-          <p className="text-xs text-muted-foreground/60 mt-1">Max size: 10MB (PDF, Images, Word)</p>
+          <p className="text-sm font-medium text-muted-foreground">{t("common.upload.clickOrDrag")}</p>
+          <p className="text-xs text-muted-foreground/60 mt-1">{t("common.upload.maxSize")}</p>
         </div>
       ) : (
-        <div className="flex items-center justify-between p-3 border rounded-lg bg-background">
-          <div className="flex items-center gap-3 truncate">
-            <div className="p-2 bg-primary/10 rounded-md">
-              <File className="h-5 w-5 text-primary" />
+        <div className="flex flex-col gap-3 p-4 border rounded-lg bg-background shadow-sm">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="p-2 bg-primary/10 rounded-md shrink-0">
+                <FileIcon className="h-5 w-5 text-primary" />
+              </div>
+              <div className="flex flex-col min-w-0">
+                <span className="text-sm font-medium truncate max-w-[200px] sm:max-w-xs block">
+                  {file.name}
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  {(file.size / (1024 * 1024)).toFixed(2)} MB
+                </span>
+              </div>
             </div>
-            <div className="flex flex-col truncate">
-              <span className="text-sm font-medium truncate">{file.name}</span>
-              <span className="text-xs text-muted-foreground">
-                {(file.size / (1024 * 1024)).toFixed(2)} MB
-              </span>
-            </div>
+            
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={clearFile} 
+              disabled={isUploading}
+              className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+              title={t("common.upload.remove")}
+            >
+              <X className="h-4 w-4" />
+            </Button>
           </div>
-          
-          <div className="flex items-center gap-2">
+
+          <div className="flex justify-end pt-2 border-t mt-1">
             {!uploadComplete ? (
-              <>
-                <Button 
-                  size="sm" 
-                  onClick={handleUpload} 
-                  disabled={isUploading}
-                  className="h-8"
-                >
-                  {isUploading ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    "Upload"
-                  )}
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  onClick={clearFile} 
-                  disabled={isUploading}
-                  className="h-8 w-8"
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </>
+              <Button 
+                size="sm" 
+                onClick={handleUpload} 
+                disabled={isUploading}
+                className="w-full sm:w-auto min-w-[100px]"
+              >
+                {isUploading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    {t("buttons.uploading")}
+                  </>
+                ) : (
+                  <>
+                    <Upload className="mr-2 h-4 w-4" />
+                    {t("common.upload.label")}
+                  </>
+                )}
+              </Button>
             ) : (
-              <div className="flex items-center gap-2">
-                <div className="flex items-center gap-1 text-green-600 text-sm font-medium px-2">
-                  <CheckCircle2 className="h-4 w-4" />
-                  Uploaded
-                </div>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  onClick={clearFile} 
-                  className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                  title="Remove file"
-                >
-                  <X className="h-4 w-4" />
-                </Button>
+              <div className="flex items-center gap-2 text-green-600 text-sm font-medium w-full justify-end bg-green-50/50 dark:bg-green-900/10 p-2 rounded">
+                <CheckCircle2 className="h-4 w-4" />
+                {t("common.upload.uploaded")}
               </div>
             )}
           </div>

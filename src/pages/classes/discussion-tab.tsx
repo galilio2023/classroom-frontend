@@ -13,12 +13,14 @@ import { SOCKET_URL } from "@/config";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
+import { useTranslation } from "react-i18next";
 
 interface DiscussionTabProps {
   classId: string;
 }
 
 export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
+  const { t, i18n } = useTranslation();
   const { data: identity } = useGetIdentity<User>();
   const [newPost, setNewPost] = useState("");
   const [replyTo, setReplyTo] = useState<number | null>(null);
@@ -89,7 +91,7 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
         onSuccess: () => {
           setNewPost("");
           setReplyTo(null);
-          toast.success(replyTo ? "Reply sent" : "Message posted");
+          toast.success(replyTo ? t("discussion.toast.replySent") : t("discussion.toast.messagePosted"));
         },
       }
     );
@@ -110,9 +112,10 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
   };
 
   const replyingToPost = discussions.find(d => d.id === replyTo);
+  const isAr = i18n.language === 'ar';
 
   return (
-    <div className="flex flex-col h-[calc(100vh-250px)] md:h-[calc(100vh-350px)] min-h-[500px] bg-card/50 backdrop-blur-xl rounded-[2rem] border border-black/[0.05] dark:border-white/[0.05] overflow-hidden shadow-2xl">
+    <div className="flex flex-col h-[calc(100vh-250px)] md:h-[calc(100vh-350px)] min-h-[500px] bg-card/50 backdrop-blur-xl rounded-[2rem] border border-black/[0.05] dark:border-white/[0.05] overflow-hidden shadow-2xl text-start">
       {/* Header */}
       <div className="p-6 border-b bg-background/50 backdrop-blur-md flex justify-between items-center">
         <div className="flex items-center gap-4">
@@ -120,13 +123,13 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
             <MessageCircle className="h-5 w-5" />
           </div>
           <div>
-            <h3 className="text-lg font-black tracking-tight leading-none">Class Stream</h3>
-            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 mt-1.5">Real-time discussion</p>
+            <h3 className="text-lg font-black tracking-tight leading-none">{t("discussion.classStream")}</h3>
+            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 mt-1.5">{t("discussion.realTime")}</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
           <Badge variant="secondary" className="hidden sm:flex rounded-full px-3 py-1 font-black text-[10px] uppercase tracking-widest bg-muted/50 border-none">
-            {discussions.length} Messages
+            {t("discussion.messagesCount", { count: discussions.length })}
           </Badge>
           <Button 
             variant="outline" 
@@ -137,8 +140,8 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
           >
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shine_1.5s_ease-in-out] pointer-events-none" />
             {isSummarizing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
-            <span className="hidden sm:inline">AI Catch-up</span>
-            <span className="sm:hidden">Catch-up</span>
+            <span className="hidden sm:inline">{t("discussion.aiCatchUp")}</span>
+            <span className="sm:hidden">{t("discussion.aiCatchUp").split(' ')[0]}</span>
           </Button>
         </div>
       </div>
@@ -157,7 +160,7 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
                 <div className="p-1.5 rounded-lg bg-ai-primary/10 text-ai-primary">
                   <Sparkles className="h-3.5 w-3.5" />
                 </div>
-                <span className="font-black text-[10px] text-ai-primary uppercase tracking-widest">AI Discussion Summary</span>
+                <span className="font-black text-[10px] text-ai-primary uppercase tracking-widest">{t("discussion.aiSummary")}</span>
               </div>
               <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground font-medium leading-relaxed">
                 <MarkdownRenderer content={summary} />
@@ -167,7 +170,7 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
               variant="ghost" 
               size="icon" 
               onClick={() => setSummary(null)} 
-              className="absolute top-4 right-4 h-10 w-10 rounded-full hover:bg-ai-primary/10 text-ai-primary/40 hover:text-ai-primary transition-all"
+              className={cn("absolute top-4 h-10 w-10 rounded-full hover:bg-ai-primary/10 text-ai-primary/40 hover:text-ai-primary transition-all", isAr ? "left-4" : "right-4")}
             >
               <X className="h-5 w-5" />
             </Button>
@@ -180,7 +183,7 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
         {isLoading ? (
           <div className="flex flex-col items-center justify-center h-full gap-4">
             <Loader2 className="h-10 w-10 animate-spin text-primary/20" />
-            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">Loading Stream...</p>
+            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">{t("discussion.loadingStream")}</p>
           </div>
         ) : discussions.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center gap-4 opacity-20">
@@ -188,8 +191,8 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
               <MessageCircle className="h-12 w-12" />
             </div>
             <div className="space-y-1">
-              <p className="text-xl font-black tracking-tight">No messages yet</p>
-              <p className="text-sm font-medium">Be the first to start the conversation!</p>
+              <p className="text-xl font-black tracking-tight">{t("discussion.noMessages")}</p>
+              <p className="text-sm font-medium">{t("discussion.startConversation")}</p>
             </div>
           </div>
         ) : (
@@ -227,12 +230,12 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
               exit={{ opacity: 0, y: 10 }}
               className="mb-4 p-4 rounded-2xl bg-primary/5 border border-primary/10 flex justify-between items-center group"
             >
-              <div className="flex items-center gap-3 overflow-hidden">
+              <div className="flex items-center gap-3 overflow-hidden text-start">
                 <div className="p-2 rounded-lg bg-primary/10 text-primary">
-                  <Reply className="h-4 w-4" />
+                  <Reply className={cn("h-4 w-4", isAr && "rotate-180")} />
                 </div>
                 <div className="flex flex-col overflow-hidden">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-primary/60">Replying to</span>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-primary/60">{t("discussion.replyingTo")}</span>
                   <p className="text-xs font-bold truncate text-foreground">
                     {replyingToPost?.user.name}: <span className="font-medium text-muted-foreground italic">"{replyingToPost?.content.replace(/<[^>]*>/g, '')}"</span>
                   </p>
@@ -255,7 +258,7 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
             <RichTextEditor 
               value={newPost}
               onChange={setNewPost}
-              placeholder={replyTo ? "Write your reply..." : "Message your class..."}
+              placeholder={replyTo ? t("discussion.writeReply") : t("discussion.messageClass")}
               className="min-h-[100px]"
             />
           </div>
@@ -265,12 +268,12 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
             disabled={!newPost.trim() || newPost === "<p></p>" || mutation.isPending}
             className="h-14 w-14 shrink-0 rounded-2xl shadow-xl shadow-primary/20 transition-all hover:scale-105 active:scale-95 bg-primary text-primary-foreground"
           >
-            {mutation.isPending ? <Loader2 className="h-6 w-6 animate-spin" /> : <Send className="h-6 w-6" />}
+            {mutation.isPending ? <Loader2 className="h-6 w-6 animate-spin" /> : <Send className={cn("h-6 w-6", isAr && "rotate-180")} />}
           </Button>
         </div>
         <div className="mt-3 flex items-center justify-center gap-2 text-muted-foreground/30">
           <Info className="h-3 w-3" />
-          <span className="text-[9px] font-black uppercase tracking-widest">Press Enter to send, Shift+Enter for new line</span>
+          <span className="text-[9px] font-black uppercase tracking-widest">{t("discussion.pressEnter")}</span>
         </div>
       </div>
     </div>

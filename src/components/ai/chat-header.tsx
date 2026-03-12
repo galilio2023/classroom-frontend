@@ -2,12 +2,14 @@ import React from "react";
 import { CardTitle, CardHeader } from "../ui/card";
 import { Button } from "../ui/button";
 import { Sparkles, X } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface ChatHeaderProps {
   onClose: () => void;
 }
 
 export const ChatHeader: React.FC<ChatHeaderProps> = ({ onClose }) => {
+  const { t } = useTranslation();
   return (
     <CardHeader className="p-5 border-b ai-header-gradient text-primary-foreground rounded-t-[calc(var(--radius)-1px)] flex flex-row items-center justify-between space-y-0">
       <div className="flex items-center gap-3">
@@ -15,8 +17,8 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({ onClose }) => {
           <Sparkles className="h-5 w-5 animate-pulse" />
         </div>
         <div>
-          <CardTitle className="text-base font-bold tracking-tight">AI Study Buddy</CardTitle>
-          <p className="text-[10px] font-medium opacity-90 uppercase tracking-widest">Powered by Gemini</p>
+          <CardTitle className="text-base font-bold tracking-tight">{t("aiHub.studyLab.studyBuddy.title")}</CardTitle>
+          <p className="text-[10px] font-medium opacity-90 uppercase tracking-widest">{t("aiHub.studyLab.studyBuddy.poweredBy")}</p>
         </div>
       </div>
       <Button 

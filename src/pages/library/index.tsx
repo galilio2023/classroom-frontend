@@ -1,12 +1,11 @@
 import React, { useState } from "react";
 import { useList, useCustomMutation, useDelete, useGetIdentity } from "@refinedev/core";
 import { FileUpload } from "@/components/file-upload";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { 
   FolderOpen, 
   Trash2, 
-  File, 
   Link as LinkIcon, 
   Video, 
   FileText, 
@@ -29,13 +28,15 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { format } from "date-fns";
+import dayjs from "dayjs";
 import { EmptyState } from "@/components/empty-state";
 import { User, UserRole } from "@/types";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 const GlobalLibraryPage = () => {
+  const { t, i18n } = useTranslation();
+  const isAr = i18n.language === 'ar';
   const { data: identity } = useGetIdentity<User>();
   const [isUploadOpen, setUploadOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -49,7 +50,6 @@ const GlobalLibraryPage = () => {
 
   const { result: resourcesResult, query: { isLoading, refetch } } = useList({
     resource: "resources",
-    // No filters needed, the backend defaults to global library if classId is missing
   });
 
   const { mutate: createResource, mutation: createMutation } = useCustomMutation();
@@ -60,14 +60,13 @@ const GlobalLibraryPage = () => {
     setFileUrl(url);
     setFilePublicId(publicId);
     if (!title) {
-        // Auto-fill title from filename if empty (simplified logic)
-        setTitle("New Resource"); 
+        setTitle(t("library.resourceTitle")); 
     }
   };
 
   const handleCreate = () => {
     if (!title || !fileUrl) {
-      toast.error("Please provide a title and upload a file.");
+      toast.error(t("library.toasts.fillRequired"));
       return;
     }
 
@@ -80,12 +79,12 @@ const GlobalLibraryPage = () => {
         url: fileUrl,
         cldPubId: filePublicId,
         type: "file",
-        classId: null, // Explicitly null for global library
+        classId: null,
         isInternal: true,
       }
     }, {
       onSuccess: () => {
-        toast.success("Resource added to library!");
+        toast.success(t("library.toasts.added"));
         setUploadOpen(false);
         setTitle("");
         setDescription("");
@@ -94,19 +93,19 @@ const GlobalLibraryPage = () => {
         refetch();
       },
       onError: (error: any) => {
-        toast.error(error?.response?.data?.message || "Failed to add resource.");
+        toast.error(error?.response?.data?.message || t("library.toasts.error"));
       }
     });
   };
 
   const handleDelete = (id: number) => {
-    if (confirm("Are you sure you want to delete this resource?")) {
+    if (confirm(t("library.deleteConfirm"))) {
       deleteResource({
         resource: "resources",
         id,
       }, {
         onSuccess: () => {
-            toast.success("Resource deleted.");
+            toast.success(t("library.toasts.deleted"));
             refetch();
         }
       });
@@ -123,31 +122,31 @@ const GlobalLibraryPage = () => {
   if (!isTeacherOrAdmin) {
       return (
           <div className="container mx-auto py-20 text-center">
-              <h2 className="text-2xl font-bold">Access Denied</h2>
-              <p className="text-muted-foreground">Only teachers can manage the Global Library.</p>
+              <h2 className="text-2xl font-bold">{t("library.accessDenied")}</h2>
+              <p className="text-muted-foreground">{t("library.teacherOnly")}</p>
           </div>
       );
   }
 
   return (
-    <div className="container mx-auto py-6 space-y-8">
+    <div className="container mx-auto py-6 space-y-8 text-start">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
             <FolderOpen className="h-8 w-8 text-primary" />
-            Global Library
+            {t("library.title")}
           </h1>
-          <p className="text-muted-foreground">Manage your personal collection of teaching resources.</p>
+          <p className="text-muted-foreground">{t("library.description")}</p>
         </div>
         
         <div className="flex items-center gap-2">
             <div className="relative w-64">
-                <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Search className={cn("absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground", isAr ? "right-2" : "left-2")} />
                 <Input 
-                    placeholder="Search files..." 
+                    placeholder={t("library.searchPlaceholder")} 
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-8"
+                    className={cn(isAr ? "pr-8" : "pl-8")}
                 />
             </div>
             <div className="bg-muted/50 p-1 rounded-lg flex items-center gap-1 border">
@@ -171,47 +170,47 @@ const GlobalLibraryPage = () => {
             <Dialog open={isUploadOpen} onOpenChange={setUploadOpen}>
             <DialogTrigger asChild>
                 <Button className="gap-2 shadow-lg shadow-primary/20">
-                <Plus className="h-4 w-4" /> Add Resource
+                <Plus className="h-4 w-4" /> {t("library.addResource")}
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[500px]">
-                <DialogHeader>
-                <DialogTitle>Add to Library</DialogTitle>
-                <DialogDescription>Upload files to your personal library for reuse across classes.</DialogDescription>
+            <DialogContent className="sm:max-w-[500px] text-start">
+                <DialogHeader className="text-start">
+                <DialogTitle>{t("library.addToLibrary")}</DialogTitle>
+                <DialogDescription>{t("library.uploadDesc")}</DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
                 <div className="space-y-2">
-                    <Label htmlFor="title">Title</Label>
+                    <Label htmlFor="title">{t("library.resourceTitle")}</Label>
                     <Input 
                         id="title" 
-                        placeholder="Resource Title" 
+                        placeholder={t("library.resourceTitle")} 
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
                     />
                 </div>
                 <div className="space-y-2">
-                    <Label htmlFor="description">Description</Label>
+                    <Label htmlFor="description">{t("common.description")}</Label>
                     <Input 
                         id="description" 
-                        placeholder="Optional description" 
+                        placeholder={t("library.optionalDesc")} 
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
                     />
                 </div>
                 <div className="space-y-2">
-                    <Label>File</Label>
+                    <Label>{t("common.upload.label")}</Label>
                     <FileUpload 
-                        label="Upload Document"
+                        label={t("common.upload.label")}
                         folder="library"
                         onUploadSuccess={handleUploadSuccess}
                     />
                 </div>
                 </div>
-                <DialogFooter>
-                <Button variant="outline" onClick={() => setUploadOpen(false)}>Cancel</Button>
+                <DialogFooter className="gap-2">
+                <Button variant="outline" onClick={() => setUploadOpen(false)}>{t("buttons.cancel")}</Button>
                 <Button onClick={handleCreate} disabled={isCreating || !fileUrl}>
                     {isCreating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Add to Library
+                    {t("library.addToLibrary")}
                 </Button>
                 </DialogFooter>
             </DialogContent>
@@ -226,8 +225,8 @@ const GlobalLibraryPage = () => {
       ) : filteredResources.length === 0 ? (
         <EmptyState 
             icon={FolderOpen}
-            title="Library is Empty"
-            description="Upload files here to access them from any class."
+            title={t("library.emptyTitle")}
+            description={t("library.emptyDesc")}
         />
       ) : (
         <div className={cn(
@@ -246,16 +245,19 @@ const GlobalLibraryPage = () => {
                             <Button 
                                 variant="ghost" 
                                 size="icon" 
-                                className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 -mr-2 -mt-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                                className={cn(
+                                    "text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity",
+                                    isAr ? "-ml-2 -mt-2" : "-mr-2 -mt-2"
+                                )}
                                 onClick={() => handleDelete(resource.id)}
                             >
                                 <Trash2 className="h-4 w-4" />
                             </Button>
                         </div>
                         <h3 className="font-bold truncate" title={resource.title}>{resource.title}</h3>
-                        <p className="text-xs text-muted-foreground mt-1 truncate">{resource.description || "No description"}</p>
+                        <p className="text-xs text-muted-foreground mt-1 truncate">{resource.description || t("library.noDescription")}</p>
                         <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
-                            <span>{format(new Date(resource.createdAt), "MMM d, yyyy")}</span>
+                            <span>{dayjs(resource.createdAt).locale(i18n.language).format("MMM D, YYYY")}</span>
                             <a 
                                 href={resource.url} 
                                 target="_blank" 
@@ -263,7 +265,7 @@ const GlobalLibraryPage = () => {
                                 className="flex items-center gap-1 hover:text-primary transition-colors"
                             >
                                 <Download className="h-3 w-3" />
-                                Download
+                                {t("buttons.download")}
                             </a>
                         </div>
                     </CardContent>

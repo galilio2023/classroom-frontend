@@ -23,6 +23,7 @@ import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import { useCustomMutation } from "@refinedev/core";
+import { useTranslation } from "react-i18next";
 
 interface StudyBlock {
   day: string;
@@ -37,6 +38,8 @@ const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
 const TIME_SLOTS = ["Morning", "Afternoon", "Evening"];
 
 const StudyPlanner = () => {
+  const { t, i18n } = useTranslation();
+  const isArabic = i18n.language === 'ar';
   const [plan, setPlan] = useState<StudyBlock[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [completedBlocks, setCompletedBlocks] = useState<Record<string, boolean>>({});
@@ -70,16 +73,14 @@ const StudyPlanner = () => {
         url: "ai/generate-study-plan",
         method: "post",
         values: {
-            // Sending a dummy value to ensure the body is not empty
-            // The backend currently ignores the body but expects a valid JSON object if it parses it
             action: "generate" 
         },
         successNotification: () => ({
-            message: "AI has generated your personalized study plan!",
+            message: t("studyPlanner.toasts.generated"),
             type: "success",
         }),
         errorNotification: (error: any) => ({
-            message: error?.response?.data?.message || error?.message || "Failed to generate study plan. Please try again.",
+            message: error?.response?.data?.message || error?.message || t("studyPlanner.toasts.error"),
             type: "error",
         }),
     }, {
@@ -104,12 +105,12 @@ const StudyPlanner = () => {
     localStorage.setItem("study-plan-completed", JSON.stringify(newCompleted));
 
     if (isNowCompleted) {
-      toast.success("Study block completed! +20 XP", {
+      toast.success(t("studyPlanner.toasts.completed"), {
         icon: <Zap className="h-4 w-4 text-yellow-500 fill-yellow-500" />,
       });
-      // Frontend-only XP reward as requested
+      // Frontend-only XP reward
       const event = new CustomEvent("xp_gained_local", { 
-        detail: { amount: 20, reason: "Study Block Completed" } 
+        detail: { amount: 20, reason: t("studyPlanner.labels.blockCompleted") } 
       });
       window.dispatchEvent(event);
     }
@@ -127,10 +128,10 @@ const StudyPlanner = () => {
             <div className="p-2 bg-primary/10 rounded-xl">
               <CalendarIcon className="h-6 w-6 md:h-8 md:w-8 text-primary" />
             </div>
-            AI Study Planner
+            {t("resources.study-planner.label")}
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Your personalized weekly study schedule, powered by AI.
+            {t("studyPlanner.description")}
           </p>
         </div>
         <Button 
@@ -143,7 +144,7 @@ const StudyPlanner = () => {
           ) : (
             <Sparkles className="h-4 w-4" />
           )}
-          {plan.length > 0 ? "Regenerate Plan" : "Generate My Plan"}
+          {plan.length > 0 ? t("studyPlanner.buttons.regenerate") : t("studyPlanner.buttons.generate")}
         </Button>
       </div>
 
@@ -153,9 +154,9 @@ const StudyPlanner = () => {
             <div className="p-4 bg-primary/10 rounded-full mb-4">
               <BookOpen className="h-10 w-10 text-primary opacity-50" />
             </div>
-            <h3 className="text-xl font-bold">No Study Plan Yet</h3>
+            <h3 className="text-xl font-bold">{t("studyPlanner.empty.title")}</h3>
             <p className="text-muted-foreground max-w-sm mt-2">
-              Click the button above to let AI analyze your upcoming assignments and create a custom schedule for you.
+              {t("studyPlanner.empty.desc")}
             </p>
           </CardContent>
         </Card>
@@ -165,7 +166,7 @@ const StudyPlanner = () => {
             <div key={day} className="space-y-4">
               <div className="text-center">
                 <h3 className="font-black text-sm uppercase tracking-widest text-muted-foreground">
-                  {day.substring(0, 3)}
+                  {t(`days.${day.substring(0, 3)}`)}
                 </h3>
               </div>
               <div className="space-y-3">
@@ -186,7 +187,7 @@ const StudyPlanner = () => {
                         <CardContent className="p-3 flex flex-col h-full">
                           <div className="flex justify-between items-start mb-2">
                             <Badge variant="outline" className="text-[9px] font-bold uppercase tracking-wider text-primary/80 border-primary/20 bg-primary/5">
-                              {slot}
+                              {t(`studyPlanner.slots.${slot.toLowerCase()}`)}
                             </Badge>
                             <button
                               onClick={() => toggleComplete(day, slot)}
@@ -220,7 +221,7 @@ const StudyPlanner = () => {
                                 className="flex items-center gap-1.5 text-[10px] text-primary font-bold hover:underline group/link"
                               >
                                 <ExternalLink className="h-3 w-3 transition-transform group-hover/link:translate-x-0.5" />
-                                View Assignment
+                                {t("assignments.show.assignmentDetails")}
                               </Link>
                             )}
                           </div>
@@ -240,7 +241,7 @@ const StudyPlanner = () => {
                       ) : (
                         <CardContent className="p-3 flex items-center justify-center h-full">
                           <span className="text-[10px] font-bold uppercase text-muted-foreground/30 select-none">
-                            Free
+                            {t("studyPlanner.labels.free")}
                           </span>
                         </CardContent>
                       )}
@@ -259,12 +260,12 @@ const StudyPlanner = () => {
             <CardHeader className="pb-2">
               <CardTitle className="text-sm flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-primary" />
-                Coach's Tip
+                {t("studyPlanner.labels.coachTip")}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-xs text-muted-foreground italic font-medium">
-                "Consistency is key! Try to stick to your Morning blocks for heavy reading and use Evening blocks for review. You've got this!"
+                {t("studyPlanner.labels.tipText")}
               </p>
             </CardContent>
           </Card>
@@ -274,7 +275,6 @@ const StudyPlanner = () => {
   );
 };
 
-// Helper component for Badge since it wasn't imported from ui/badge
 const Badge = ({ children, variant, className, ...props }: any) => {
     return (
         <div className={cn("inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2", className)} {...props}>

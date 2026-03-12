@@ -33,17 +33,19 @@ import { cn } from "@/lib/utils.ts";
 import { Link as RouterLink } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { User, UserRole } from "@/types";
+import { useTranslation } from "react-i18next";
 
-// Define which roles can see which groups
+// Define which roles can see which groups - Internal keys used here
 const ROLE_GROUP_PERMISSIONS: Record<string, UserRole[]> = {
-  "Admin": [UserRole.ADMIN],
-  "AI Lab": [UserRole.ADMIN, UserRole.TEACHER, UserRole.STUDENT],
-  "Academic": [UserRole.ADMIN, UserRole.TEACHER, UserRole.STUDENT],
-  "Curriculum": [UserRole.ADMIN, UserRole.TEACHER, UserRole.STUDENT],
-  "Progress": [UserRole.ADMIN, UserRole.STUDENT],
+  "groups.admin": [UserRole.ADMIN],
+  "groups.ai-lab": [UserRole.ADMIN, UserRole.TEACHER, UserRole.STUDENT],
+  "groups.academic": [UserRole.ADMIN, UserRole.TEACHER, UserRole.STUDENT],
+  "groups.curriculum": [UserRole.ADMIN, UserRole.TEACHER, UserRole.STUDENT],
+  "groups.progress": [UserRole.ADMIN, UserRole.STUDENT],
 };
 
 export function Sidebar() {
+  const { t } = useTranslation();
   const { open } = useShadcnSidebar();
   const { menuItems, selectedKey } = useMenu();
   const { data: identity } = useGetIdentity<User>();
@@ -127,7 +129,7 @@ export function Sidebar() {
                       "mb-3"
                     )}
                   >
-                    {groupName}
+                    {t(groupName)}
                   </motion.span>
                 )}
               </AnimatePresence>
@@ -204,6 +206,7 @@ function SidebarItemCollapsible({ item, selectedKey }: MenuItemProps) {
 function SidebarItemDropdown({ item, selectedKey }: MenuItemProps) {
   const { children } = item;
   const Link = useLink();
+  const { t } = useTranslation();
 
   return (
     <DropdownMenu>
@@ -227,7 +230,7 @@ function SidebarItemDropdown({ item, selectedKey }: MenuItemProps) {
                   icon={child.meta?.icon ?? child.icon}
                   isSelected={isSelected}
                 />
-                <span className="font-medium">{getDisplayName(child)}</span>
+                <span className="font-medium">{getDisplayName(child, t)}</span>
               </Link>
             </DropdownMenuItem>
           );
@@ -281,8 +284,10 @@ function SidebarHeader() {
   );
 }
 
-function getDisplayName(item: TreeMenuItem) {
-  return item.meta?.label ?? item.label ?? item.name;
+function getDisplayName(item: TreeMenuItem, t: any) {
+  const label = item.meta?.label ?? item.label ?? item.name;
+  // If the label looks like a translation key, translate it
+  return typeof label === "string" && label.includes(".") ? t(label) : label;
 }
 
 type IconProps = {
@@ -322,6 +327,7 @@ function SidebarButton({
 }: SidebarButtonProps) {
   const Link = useLink();
   const { open } = useShadcnSidebar();
+  const { t } = useTranslation();
 
   const buttonContent = (
     <>
@@ -344,7 +350,7 @@ function SidebarButton({
               "text-muted-foreground group-hover:text-foreground": !isSelected,
             })}
           >
-            {getDisplayName(item)}
+            {getDisplayName(item, t)}
           </motion.span>
         )}
       </AnimatePresence>

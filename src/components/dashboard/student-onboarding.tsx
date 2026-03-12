@@ -4,8 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { useNavigation } from "@refinedev/core";
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 
 export const StudentOnboarding = () => {
+  const { t } = useTranslation();
   const { list } = useNavigation();
 
   return (
@@ -32,14 +34,14 @@ export const StudentOnboarding = () => {
           <div className="space-y-3 max-w-2xl mx-auto">
             <div className="flex items-center justify-center gap-2 mb-2">
               <span className="px-3 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest border border-primary/20">
-                Get Started
+                {t("dashboard.onboarding.getStarted")}
               </span>
             </div>
             <CardTitle className="text-3xl md:text-4xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70">
-              Welcome to your Digital Classroom!
+              {t("dashboard.onboarding.student.welcome")}
             </CardTitle>
             <CardDescription className="text-lg font-medium text-muted-foreground/80 leading-relaxed">
-              You haven't joined any classes yet. Join a class to start your learning journey, access assignments, and collaborate with peers.
+              {t("dashboard.onboarding.student.description")}
             </CardDescription>
           </div>
         </CardHeader>
@@ -53,15 +55,15 @@ export const StudentOnboarding = () => {
               <div className="p-4 bg-blue-500/10 rounded-2xl mb-6 group-hover/card:scale-110 transition-transform duration-500">
                 <PlusCircle className="h-8 w-8 text-blue-500" />
               </div>
-              <h3 className="text-xl font-black tracking-tight mb-3">Join a Class</h3>
+              <h3 className="text-xl font-black tracking-tight mb-3">{t("dashboard.onboarding.student.joinClass.title")}</h3>
               <p className="text-sm font-medium text-muted-foreground/80 mb-8 leading-relaxed">
-                Enter a class code provided by your teacher to join a new classroom and start learning.
+                {t("dashboard.onboarding.student.joinClass.description")}
               </p>
               <Button 
                 className="w-full h-12 rounded-xl font-black uppercase tracking-widest text-[10px] shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all hover:scale-[1.02] active:scale-[0.98]" 
                 onClick={() => list("classes")}
               >
-                Join Class
+                {t("buttons.joinClass")}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </motion.div>
@@ -73,16 +75,16 @@ export const StudentOnboarding = () => {
               <div className="p-4 bg-purple-500/10 rounded-2xl mb-6 group-hover/card:scale-110 transition-transform duration-500">
                 <Sparkles className="h-8 w-8 text-purple-500" />
               </div>
-              <h3 className="text-xl font-black tracking-tight mb-3">Explore Resources</h3>
+              <h3 className="text-xl font-black tracking-tight mb-3">{t("dashboard.onboarding.student.exploreResources.title")}</h3>
               <p className="text-sm font-medium text-muted-foreground/80 mb-8 leading-relaxed">
-                Check out public resources, study materials, and AI-powered tools available to all students.
+                {t("dashboard.onboarding.student.exploreResources.description")}
               </p>
               <Button 
                 variant="outline" 
                 className="w-full h-12 rounded-xl font-black uppercase tracking-widest text-[10px] border-2 hover:bg-purple-500/5 hover:text-purple-600 hover:border-purple-500/20 transition-all hover:scale-[1.02] active:scale-[0.98]" 
                 onClick={() => list("resources")}
               >
-                View Resources
+                {t("buttons.viewResources")}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </motion.div>

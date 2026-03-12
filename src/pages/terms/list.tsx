@@ -58,19 +58,23 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { EmptyState } from "@/components/empty-state";
+import { useTranslation } from "react-i18next";
 
 dayjs.extend(relativeTime);
 
-const termSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  startDate: z.string().min(1, "Start date is required"),
-  endDate: z.string().min(1, "End date is required"),
-});
-
-type TermFormValues = z.infer<typeof termSchema>;
-
 export default function TermsList() {
-  usePageTitle("Academic Terms");
+  const { t, i18n } = useTranslation();
+  const isAr = i18n.language === 'ar';
+
+  const termSchema = useMemo(() => z.object({
+    name: z.string().min(1, t("terms.form.nameRequired")),
+    startDate: z.string().min(1, t("terms.form.startRequired")),
+    endDate: z.string().min(1, t("terms.form.endRequired")),
+  }), [t]);
+
+  type TermFormValues = z.infer<typeof termSchema>;
+
+  usePageTitle(t("terms.title"));
   const { data: identity } = useGetIdentity<User>();
   const isAdmin = identity?.role === UserRole.ADMIN;
 
@@ -99,8 +103,8 @@ export default function TermsList() {
         values: { status: "active" },
       },
       {
-        onSuccess: () => toast.success("Term activated successfully"),
-        onError: () => toast.error("Failed to activate term"),
+        onSuccess: () => toast.success(t("terms.toasts.activated")),
+        onError: () => toast.error(t("terms.toasts.error")),
       },
     );
   };
@@ -113,17 +117,15 @@ export default function TermsList() {
         values: { status: "archived" },
       },
       {
-        onSuccess: () => toast.success("Term archived successfully"),
-        onError: () => toast.error("Failed to archive term"),
+        onSuccess: () => toast.success(t("terms.toasts.archived")),
+        onError: () => toast.error(t("terms.toasts.error")),
       },
     );
   };
 
   const handleDelete = (id: number) => {
     if (
-      window.confirm(
-        "Are you sure you want to delete this term? This will affect all classes linked to it.",
-      )
+      window.confirm(t("terms.deleteDialog.title") + " " + t("terms.deleteDialog.description"))
     ) {
       deleteMutation(
         {
@@ -131,8 +133,8 @@ export default function TermsList() {
           id,
         },
         {
-          onSuccess: () => toast.success("Term deleted successfully"),
-          onError: () => toast.error("Failed to delete term"),
+          onSuccess: () => toast.success(t("terms.toasts.deleted")),
+          onError: () => toast.error(t("terms.toasts.error")),
         },
       );
     }
@@ -149,11 +151,11 @@ export default function TermsList() {
       },
       {
         onSuccess: () => {
-          toast.success("Term created successfully");
+          toast.success(t("terms.toasts.created"));
           setIsCreateOpen(false);
           form.reset();
         },
-        onError: () => toast.error("Failed to create term"),
+        onError: () => toast.error(t("terms.toasts.error")),
       },
     );
   };
@@ -180,7 +182,7 @@ export default function TermsList() {
   }, [terms]);
 
   return (
-    <div className="space-y-10 pb-20">
+    <div className="space-y-10 pb-20 text-start">
       <ListView>
         <div className="space-y-10">
           <motion.div
@@ -192,10 +194,10 @@ export default function TermsList() {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div>
                 <h1 className="text-4xl font-black tracking-tight">
-                  Academic Calendar
+                  {t("terms.title")}
                 </h1>
                 <p className="text-muted-foreground font-medium mt-1">
-                  Manage school years, semesters, and institutional timelines.
+                  {t("terms.description")}
                 </p>
               </div>
               <div className="flex items-center gap-3 w-full md:w-auto">
@@ -204,21 +206,20 @@ export default function TermsList() {
                     <DialogTrigger asChild>
                       <Button className="flex-1 md:flex-none rounded-2xl h-14 px-10 font-black uppercase tracking-widest text-[10px] gap-2 shadow-xl shadow-primary/20 transition-all hover:scale-105 active:scale-95">
                         <PlusCircle className="h-5 w-5" />
-                        Create New Term
+                        {t("terms.create")}
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="rounded-[2.5rem] border-none shadow-2xl bg-card/95 backdrop-blur-xl max-w-lg">
-                      <DialogHeader className="space-y-4">
+                    <DialogContent className="rounded-[2.5rem] border-none shadow-2xl bg-card/95 backdrop-blur-xl max-w-lg text-start">
+                      <DialogHeader className="space-y-4 text-start">
                         <div className="p-4 rounded-2xl bg-primary/10 text-primary w-fit">
                           <Calendar className="h-8 w-8" />
                         </div>
                         <div className="space-y-1">
                           <DialogTitle className="text-3xl font-black tracking-tight">
-                            New Academic Term
+                            {t("terms.newTitle")}
                           </DialogTitle>
                           <DialogDescription className="font-medium text-base">
-                            Define the timeline for a new semester or school
-                            year.
+                            {t("terms.newDesc")}
                           </DialogDescription>
                         </div>
                       </DialogHeader>
@@ -228,10 +229,10 @@ export default function TermsList() {
                       >
                         <div className="space-y-3">
                           <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
-                            Term Name
+                            {t("terms.form.name")}
                           </Label>
                           <Input
-                            placeholder="e.g. Fall Semester 2024"
+                            placeholder={t("terms.form.namePlaceholder")}
                             {...form.register("name")}
                             className="h-14 rounded-2xl bg-muted/30 border-none focus-visible:ring-primary font-black text-sm"
                           />
@@ -244,7 +245,7 @@ export default function TermsList() {
                         <div className="grid grid-cols-2 gap-6">
                           <div className="space-y-3">
                             <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
-                              Start Date
+                              {t("terms.form.start")}
                             </Label>
                             <Input
                               type="date"
@@ -259,7 +260,7 @@ export default function TermsList() {
                           </div>
                           <div className="space-y-3">
                             <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
-                              End Date
+                              {t("terms.form.end")}
                             </Label>
                             <Input
                               type="date"
@@ -280,7 +281,7 @@ export default function TermsList() {
                             className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-8"
                             onClick={() => setIsCreateOpen(false)}
                           >
-                            Cancel
+                            {t("buttons.cancel")}
                           </Button>
                           <Button
                             type="submit"
@@ -292,7 +293,7 @@ export default function TermsList() {
                             ) : (
                               <PlusCircle className="h-4 w-4 mr-2" />
                             )}
-                            Create Term
+                            {t("buttons.create")}
                           </Button>
                         </DialogFooter>
                       </form>
@@ -311,10 +312,10 @@ export default function TermsList() {
               </div>
               <div>
                 <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-                  Total Terms
+                  {t("terms.stats.total")}
                 </p>
                 <p className="text-2xl font-black">
-                  {isLoading ? "..." : stats.total}
+                  {isLoading ? "..." : new Intl.NumberFormat(i18n.language).format(stats.total)}
                 </p>
               </div>
             </Card>
@@ -324,10 +325,10 @@ export default function TermsList() {
               </div>
               <div>
                 <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-                  Active Now
+                  {t("terms.stats.active")}
                 </p>
                 <p className="text-2xl font-black text-green-600">
-                  {isLoading ? "..." : stats.active}
+                  {isLoading ? "..." : new Intl.NumberFormat(i18n.language).format(stats.active)}
                 </p>
               </div>
             </Card>
@@ -337,10 +338,10 @@ export default function TermsList() {
               </div>
               <div>
                 <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-                  Upcoming
+                  {t("terms.stats.upcoming")}
                 </p>
                 <p className="text-2xl font-black text-indigo-600">
-                  {isLoading ? "..." : stats.upcoming}
+                  {isLoading ? "..." : new Intl.NumberFormat(i18n.language).format(stats.upcoming)}
                 </p>
               </div>
             </Card>
@@ -371,13 +372,13 @@ export default function TermsList() {
               <div className="h-full flex items-center justify-center p-10">
                 <EmptyState
                   icon={Calendar}
-                  title="No academic terms"
-                  description="Define your first academic term to begin organizing classes and curriculum."
+                  title={t("terms.empty.title")}
+                  description={t("terms.empty.desc")}
                   className="border-none bg-transparent min-h-0"
                   action={
                     isAdmin
                       ? {
-                          label: "Create Term",
+                          label: t("terms.create"),
                           onClick: () => setIsCreateOpen(true),
                         }
                       : undefined
@@ -438,7 +439,7 @@ export default function TermsList() {
                         </div>
 
                         {/* Info */}
-                        <div className="flex-1 md:ml-6 text-center md:text-left min-w-0 w-full">
+                        <div className={cn("flex-1 text-center min-w-0 w-full", isAr ? "md:mr-6 md:text-right" : "md:ml-6 md:text-left")}>
                           <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-3">
                             <h3 className="text-lg font-black tracking-tight truncate group-hover:text-primary transition-colors">
                               {term.name}
@@ -454,7 +455,7 @@ export default function TermsList() {
                                 }
                                 className="text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md border-none"
                               >
-                                {term.status}
+                                {t(`status.${term.status.toLowerCase()}` as any)}
                               </Badge>
                             </div>
                           </div>
@@ -463,8 +464,8 @@ export default function TermsList() {
                             <div className="flex items-center gap-1.5 text-muted-foreground">
                               <Calendar className="h-3 w-3 text-primary" />
                               <span className="text-[11px] font-bold">
-                                {startDate.format("MMM D, YYYY")} —{" "}
-                                {endDate.format("MMM D, YYYY")}
+                                {startDate.locale(i18n.language).format("MMM D, YYYY")} —{" "}
+                                {endDate.locale(i18n.language).format("MMM D, YYYY")}
                               </span>
                             </div>
 
@@ -472,17 +473,17 @@ export default function TermsList() {
                               <Clock className="h-3 w-3 text-primary" />
                               <span className="text-[11px] font-bold uppercase tracking-tight">
                                 {term.status === "active"
-                                  ? `Ends ${endDate.fromNow()}`
+                                  ? t("terms.relative.ends", { time: endDate.locale(i18n.language).fromNow() })
                                   : term.status === "upcoming"
-                                    ? `Starts ${startDate.fromNow()}`
-                                    : "Completed"}
+                                    ? t("terms.relative.starts", { time: startDate.locale(i18n.language).fromNow() })
+                                    : t("terms.relative.completed")}
                               </span>
                             </div>
                           </div>
                         </div>
 
                         {/* Actions */}
-                        <div className="flex items-center gap-2 mt-4 md:mt-0 shrink-0">
+                        <div className={cn("flex items-center gap-2 mt-4 md:mt-0 shrink-0", isAr ? "mr-4" : "ml-4")}>
                           {isAdmin && term.status !== "archived" && (
                             <div className="flex items-center gap-2">
                               {term.status === "upcoming" && (
@@ -494,7 +495,7 @@ export default function TermsList() {
                                   disabled={updateMutation.isPending}
                                 >
                                   <CheckCircle className="h-3.5 w-3.5 mr-1.5" />
-                                  Activate
+                                  {t("buttons.activate")}
                                 </Button>
                               )}
                               <Button
@@ -505,7 +506,7 @@ export default function TermsList() {
                                 disabled={updateMutation.isPending}
                               >
                                 <Archive className="h-3.5 w-3.5 mr-1.5" />
-                                Archive
+                                {t("buttons.archive")}
                               </Button>
                             </div>
                           )}
@@ -525,12 +526,12 @@ export default function TermsList() {
                               className="w-48 rounded-xl p-1"
                             >
                               <DropdownMenuLabel className="text-[9px] font-black uppercase tracking-widest text-muted-foreground px-2 py-1.5">
-                                Options
+                                {t("assignments.list.labels.options")}
                               </DropdownMenuLabel>
                               <DropdownMenuItem className="rounded-lg gap-2 py-2 cursor-pointer">
                                 <Eye className="h-3.5 w-3.5 text-primary" />
                                 <span className="font-bold text-xs">
-                                  View Classes
+                                  {t("buttons.viewClasses")}
                                 </span>
                               </DropdownMenuItem>
                               {isAdmin && (
@@ -538,7 +539,7 @@ export default function TermsList() {
                                   <DropdownMenuItem className="rounded-lg gap-2 py-2 cursor-pointer">
                                     <Pencil className="h-3.5 w-3.5 text-primary" />
                                     <span className="font-bold text-xs">
-                                      Edit Timeline
+                                      {t("buttons.editTimeline")}
                                     </span>
                                   </DropdownMenuItem>
                                   <DropdownMenuSeparator className="my-1" />
@@ -548,7 +549,7 @@ export default function TermsList() {
                                   >
                                     <Trash2 className="h-3.5 w-3.5" />
                                     <span className="font-bold text-xs">
-                                      Delete Term
+                                      {t("buttons.deleteTerm")}
                                     </span>
                                   </DropdownMenuItem>
                                 </>

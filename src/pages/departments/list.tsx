@@ -45,9 +45,14 @@ import usePageTitle from "@/hooks/use-page-title";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/empty-state";
+import { useTranslation } from "react-i18next";
+import { cn } from "@/lib/utils";
 
 const DepartmentsList = () => {
-  usePageTitle("Academic Departments");
+  const { t, i18n } = useTranslation();
+  const isAr = i18n.language === 'ar';
+  
+  usePageTitle(t("departments.title"));
   const { data: identity } = useGetIdentity<User>();
   const isAdmin = identity?.role === UserRole.ADMIN;
 
@@ -112,7 +117,7 @@ const DepartmentsList = () => {
   }, [departments]);
 
   return (
-    <div className="space-y-10 pb-20">
+    <div className="space-y-10 pb-20 text-start">
       <ListView>
         <div className="space-y-10">
           <motion.div 
@@ -123,8 +128,8 @@ const DepartmentsList = () => {
             <Breadcrumb />
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div>
-                <h1 className="text-4xl font-black tracking-tight">Institutional Structure</h1>
-                <p className="text-muted-foreground font-medium mt-1">Manage academic departments, faculties, and departmental leadership.</p>
+                <h1 className="text-4xl font-black tracking-tight">{t("departments.title")}</h1>
+                <p className="text-muted-foreground font-medium mt-1">{t("departments.description")}</p>
               </div>
               <div className="flex items-center gap-3 w-full md:w-auto">
                 {isAdmin && (
@@ -133,7 +138,7 @@ const DepartmentsList = () => {
                     className="flex-1 md:flex-none rounded-2xl h-14 px-10 font-black uppercase tracking-widest text-[10px] gap-2 shadow-xl shadow-primary/20 transition-all hover:scale-105 active:scale-95"
                   >
                     <PlusCircle className="h-5 w-5" />
-                    Create Department
+                    {t("departments.create")}
                   </Button>
                 )}
               </div>
@@ -147,8 +152,8 @@ const DepartmentsList = () => {
                 <Building2 className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Total Departments</p>
-                <p className="text-2xl font-black">{isLoading ? "..." : stats.total}</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t("departments.stats.total")}</p>
+                <p className="text-2xl font-black">{isLoading ? "..." : new Intl.NumberFormat(i18n.language).format(stats.total)}</p>
               </div>
             </Card>
             <Card className="p-6 border-indigo-500/10 bg-card/50 backdrop-blur-sm flex items-center gap-4 rounded-[2rem] shadow-lg shadow-indigo-500/5">
@@ -156,8 +161,8 @@ const DepartmentsList = () => {
                 <ShieldCheck className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">With Leadership</p>
-                <p className="text-2xl font-black text-indigo-600">{isLoading ? "..." : stats.withHead}</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t("departments.stats.withHead")}</p>
+                <p className="text-2xl font-black text-indigo-600">{isLoading ? "..." : new Intl.NumberFormat(i18n.language).format(stats.withHead)}</p>
               </div>
             </Card>
             <Card className="p-6 border-green-500/10 bg-card/50 backdrop-blur-sm flex items-center gap-4 rounded-[2rem] shadow-lg shadow-green-500/5">
@@ -165,8 +170,8 @@ const DepartmentsList = () => {
                 <Activity className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Active Status</p>
-                <p className="text-2xl font-black text-green-600">{isLoading ? "..." : stats.active}</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t("departments.stats.active")}</p>
+                <p className="text-2xl font-black text-green-600">{isLoading ? "..." : new Intl.NumberFormat(i18n.language).format(stats.active)}</p>
               </div>
             </Card>
           </div>
@@ -175,18 +180,18 @@ const DepartmentsList = () => {
           <Card className="p-4 border-primary/5 bg-muted/30 rounded-[2rem] backdrop-blur-sm">
             <div className="flex flex-col lg:flex-row gap-4">
               <div className="relative flex-1 group">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                <Search className={cn("absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors", isAr ? "right-4" : "left-4")} />
                 <Input
                   type="text"
-                  placeholder="Search by department name or code..."
-                  className="pl-11 h-14 rounded-2xl border-none bg-background shadow-sm font-medium"
+                  placeholder={t("departments.filters.searchPlaceholder")}
+                  className={cn("h-14 rounded-2xl border-none bg-background shadow-sm font-medium", isAr ? "pr-11" : "pl-11")}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
               <div className="flex items-center gap-2 bg-background px-4 rounded-2xl shadow-sm border border-primary/5">
                 <Filter className="h-4 w-4 text-muted-foreground" />
-                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Structure Filter</span>
+                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t("departments.filters.structure")}</span>
               </div>
             </div>
           </Card>
@@ -213,10 +218,10 @@ const DepartmentsList = () => {
               <div className="h-full w-full flex items-center justify-center p-12">
                 <EmptyState
                   icon={Building2}
-                  title="No departments found"
-                  description="Create your first academic department to begin organizing your curriculum."
+                  title={t("departments.empty.title")}
+                  description={t("departments.empty.desc")}
                   action={isAdmin ? {
-                    label: "Create Department",
+                    label: t("departments.create"),
                     onClick: () => create("departments"),
                   } : undefined}
                   className="border-none bg-transparent min-h-0"
@@ -255,7 +260,7 @@ const DepartmentsList = () => {
                         </div>
 
                         {/* Info */}
-                        <div className="flex-1 md:ml-6 text-center md:text-left min-w-0 w-full">
+                        <div className={cn("flex-1 text-center min-w-0 w-full", isAr ? "md:mr-6 md:text-right" : "md:ml-6 md:text-left")}>
                           <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-3">
                             <h3 className="text-lg font-black tracking-tight truncate group-hover:text-primary transition-colors">
                               {department.name}
@@ -280,13 +285,13 @@ const DepartmentsList = () => {
                                       </AvatarFallback>
                                   </Avatar>
                                   <span className="text-[11px] font-bold">
-                                      Head: <span className="text-foreground/80">{(department as any).headOfDepartment.name}</span>
+                                      {t("departments.head")}: <span className="text-foreground/80">{(department as any).headOfDepartment.name}</span>
                                   </span>
                               </div>
                             ) : (
                               <div className="flex items-center gap-1.5 text-muted-foreground/40 italic">
                                   <UserCircle className="h-3.5 w-3.5" />
-                                  <span className="text-[11px] font-medium">No Head Assigned</span>
+                                  <span className="text-[11px] font-medium">{t("departments.noHead")}</span>
                               </div>
                             )}
 
@@ -295,15 +300,15 @@ const DepartmentsList = () => {
                                   <BookOpen className="h-3 w-3 text-primary" />
                               </div>
                               <span className="text-[11px] font-bold uppercase tracking-tight">
-                                  Academic Unit
+                                  {t("departments.unit")}
                               </span>
                             </div>
                           </div>
                         </div>
 
                         {/* Actions */}
-                        <div className="flex items-center gap-2 mt-4 md:mt-0 shrink-0">
-                          <div className="hidden lg:flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all translate-x-2 group-hover:translate-x-0">
+                        <div className={cn("flex items-center gap-2 mt-4 md:mt-0 shrink-0", isAr ? "mr-4" : "ml-4")}>
+                          <div className={cn("hidden lg:flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all group-hover:translate-x-0", isAr ? "-translate-x-2" : "translate-x-2")}>
                               {isAdmin && (
                                   <>
                                       <Button
@@ -331,8 +336,8 @@ const DepartmentsList = () => {
                             className="rounded-xl px-6 h-10 text-[9px] font-black uppercase tracking-widest transition-all shadow-sm border-primary/10 text-primary hover:bg-primary hover:text-primary-foreground"
                             onClick={() => edit("departments", department.id)}
                           >
-                            Manage
-                            <ArrowRight className="h-3.5 w-3.5 ml-1.5" />
+                            {t("buttons.manage")}
+                            <ArrowRight className={cn("h-3.5 w-3.5 ml-1.5", isAr && "rotate-180")} />
                           </Button>
 
                           <DropdownMenu>
@@ -342,10 +347,10 @@ const DepartmentsList = () => {
                                   </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end" className="w-48 rounded-xl p-1">
-                                  <DropdownMenuLabel className="text-[9px] font-black uppercase tracking-widest text-muted-foreground px-2 py-1.5">Options</DropdownMenuLabel>
+                                  <DropdownMenuLabel className="text-[9px] font-black uppercase tracking-widest text-muted-foreground px-2 py-1.5">{t("assignments.list.labels.options")}</DropdownMenuLabel>
                                   <DropdownMenuItem onClick={() => edit("departments", department.id)} className="rounded-lg gap-2 py-2 cursor-pointer">
                                       <Pencil className="h-3.5 w-3.5 text-primary" />
-                                      <span className="font-bold text-xs">Edit Details</span>
+                                      <span className="font-bold text-xs">{t("buttons.editDetails")}</span>
                                   </DropdownMenuItem>
                                   {isAdmin && (
                                       <>
@@ -355,7 +360,7 @@ const DepartmentsList = () => {
                                               className="rounded-lg gap-2 py-2 cursor-pointer text-destructive focus:text-destructive"
                                           >
                                               <Trash2 className="h-3.5 w-3.5" />
-                                              <span className="font-bold text-xs">Delete Dept</span>
+                                              <span className="font-bold text-xs">{t("buttons.deleteDept")}</span>
                                           </DropdownMenuItem>
                                       </>
                                   )}
@@ -373,27 +378,29 @@ const DepartmentsList = () => {
       </ListView>
 
       <AlertDialog open={deleteTarget !== null} onOpenChange={() => setDeleteTarget(null)}>
-        <AlertDialogContent className="rounded-[2.5rem] border-none shadow-2xl bg-card/95 backdrop-blur-xl">
-          <AlertDialogHeader className="space-y-4">
+        <AlertDialogContent className="rounded-[2.5rem] border-none shadow-2xl bg-card/95 backdrop-blur-xl text-start">
+          <AlertDialogHeader className="space-y-4 text-start">
             <div className="p-4 rounded-2xl bg-destructive/10 text-destructive w-fit">
               <Trash2 className="h-8 w-8" />
             </div>
             <div className="space-y-1">
-                <AlertDialogTitle className="text-3xl font-black tracking-tight">Are you absolutely sure?</AlertDialogTitle>
-                <AlertDialogDescription className="font-medium text-base leading-relaxed">
-                    This action cannot be undone. This will permanently delete the department from the institutional structure.
-                    <br /><br />
-                    <span className="font-black text-destructive uppercase tracking-widest text-[10px] bg-destructive/5 px-2 py-1 rounded">Warning:</span> You cannot delete a department if it still has subjects or staff assigned to it.
-                </AlertDialogDescription>
+                <AlertDialogTitle className="text-3xl font-black tracking-tight">{t("assignments.list.deleteDialog.title")}</AlertDialogTitle>
+                <div className="font-medium text-base leading-relaxed text-muted-foreground">
+                    <p>{t("assignments.list.deleteDialog.description")}</p>
+                    <div className="mt-4 flex items-center gap-2">
+                        <span className="font-black text-destructive uppercase tracking-widest text-[10px] bg-destructive/5 px-2 py-1 rounded">{t("departments.delete.warning")}</span>
+                        <span className="text-sm">{t("departments.delete.warningDesc")}</span>
+                    </div>
+                </div>
             </div>
           </AlertDialogHeader>
           <AlertDialogFooter className="gap-3 pt-6">
-            <AlertDialogCancel className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-8">Cancel</AlertDialogCancel>
+            <AlertDialogCancel className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-8">{t("buttons.cancel")}</AlertDialogCancel>
             <AlertDialogAction 
                 onClick={handleConfirmDelete} 
                 className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-12 bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-xl shadow-destructive/20"
             >
-                Confirm Delete
+                {t("buttons.confirmDelete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

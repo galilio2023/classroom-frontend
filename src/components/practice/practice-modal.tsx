@@ -6,6 +6,7 @@ import Confetti from "react-confetti";
 import { useWindowSize } from "react-use";
 import { PracticeQuizStep } from "./practice-quiz-step";
 import { PracticeResultStep } from "./practice-result-step";
+import { useTranslation } from "react-i18next";
 
 interface PracticeModalProps {
   topic: string;
@@ -26,6 +27,7 @@ interface Session {
 }
 
 export const PracticeModal = ({ topic, subjectId, onClose }: PracticeModalProps) => {
+  const { t } = useTranslation();
   const [step, setStep] = useState<"loading" | "quiz" | "result">("loading");
   const [session, setSession] = useState<Session | null>(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -46,7 +48,7 @@ export const PracticeModal = ({ topic, subjectId, onClose }: PracticeModalProps)
       method: "post",
       values: { topic, subjectId },
       successNotification: false,
-      errorNotification: { message: "Failed to start practice session", type: "error" },
+      errorNotification: { message: t("aiHub.studyLab.toasts.error"), type: "error" },
     }, {
       onSuccess: (data) => {
         setSession(data.data);
@@ -97,12 +99,12 @@ export const PracticeModal = ({ topic, subjectId, onClose }: PracticeModalProps)
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Trophy className="h-5 w-5 text-yellow-500" />
-            Practice: {topic}
+            {t("aiHub.studyLab.tools.quiz.title")}: {topic}
           </DialogTitle>
           <DialogDescription>
-            {step === "loading" && "Generating your personalized quiz..."}
-            {step === "quiz" && `Question ${currentQuestionIndex + 1} of ${session?.questions.length}`}
-            {step === "result" && "Session Complete!"}
+            {step === "loading" && t("common.analyzingData")}
+            {step === "quiz" && t("aiHub.studyLab.flashcards.cardOf", { current: currentQuestionIndex + 1, total: session?.questions.length })}
+            {step === "result" && t("aiHub.studyLab.flashcards.sessionComplete")}
           </DialogDescription>
         </DialogHeader>
 
@@ -110,7 +112,7 @@ export const PracticeModal = ({ topic, subjectId, onClose }: PracticeModalProps)
           {step === "loading" && (
             <div className="flex flex-col items-center justify-center py-10 space-y-4">
               <Loader2 className="h-10 w-10 animate-spin text-primary" />
-              <p className="text-muted-foreground animate-pulse">AI is crafting questions for you...</p>
+              <p className="text-muted-foreground animate-pulse">{t("common.analyzingData")}</p>
             </div>
           )}
 

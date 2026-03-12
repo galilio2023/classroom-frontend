@@ -76,7 +76,8 @@ export const authProvider: AuthProvider = {
         localStorage.setItem("user", JSON.stringify(userWithVerified));
       }
       
-      return { success: true, redirectTo: "/" };
+      // Fixed: Redirect to dashboard instead of landing page
+      return { success: true, redirectTo: "/dashboard" };
     } catch (err: any) {
       return {
         success: false,

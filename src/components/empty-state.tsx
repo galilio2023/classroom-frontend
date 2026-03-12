@@ -2,6 +2,7 @@ import React from "react";
 import { LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 interface EmptyStateProps {
   icon: LucideIcon;
@@ -21,11 +22,17 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   action,
   className,
 }) => {
+  const { i18n } = useTranslation();
+  const isAr = i18n.language === "ar";
+
   return (
-    <div className={cn(
-      "flex flex-col items-center justify-center w-full h-full min-h-[400px] p-8 text-center border-2 border-dashed rounded-[2.5rem] bg-muted/5 border-primary/10 text-muted-foreground animate-in fade-in zoom-in duration-500",
-      className
-    )}>
+    <div 
+      dir={isAr ? "rtl" : "ltr"}
+      className={cn(
+        "flex flex-col items-center justify-center w-full h-full min-h-[400px] p-8 text-center border-2 border-dashed rounded-[2.5rem] bg-muted/5 border-primary/10 text-muted-foreground animate-in fade-in zoom-in duration-500",
+        className
+      )}
+    >
       <div className="p-6 rounded-3xl bg-primary/5 mb-6">
         <Icon className="h-12 w-12 text-primary/40" />
       </div>

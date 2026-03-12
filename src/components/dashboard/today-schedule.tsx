@@ -5,6 +5,7 @@ import { ScheduleItemCard } from "./schedule-item-card";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { useTranslation } from "react-i18next";
 
 interface TodayScheduleProps {
   schedule: ScheduleItem[];
@@ -12,6 +13,8 @@ interface TodayScheduleProps {
 }
 
 export const TodaySchedule = ({ schedule, show }: TodayScheduleProps) => {
+  const { t } = useTranslation();
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -29,10 +32,10 @@ export const TodaySchedule = ({ schedule, show }: TodayScheduleProps) => {
               <div className="p-2.5 rounded-xl bg-primary/10 text-primary group-hover:scale-110 transition-transform duration-500">
                 <Clock className="h-6 w-6" />
               </div>
-              Today's Schedule
+              {t("dashboard.schedule.today")}
             </CardTitle>
             <Badge variant="secondary" className="rounded-full px-3 py-1 font-black text-[10px] uppercase tracking-widest bg-primary/5 text-primary border-none">
-              {schedule.length} Classes
+              {t("dashboard.schedule.classesCount", { count: schedule.length })}
             </Badge>
           </div>
         </CardHeader>
@@ -69,12 +72,12 @@ export const TodaySchedule = ({ schedule, show }: TodayScheduleProps) => {
                   </div>
                 </div>
                 <div className="space-y-1 relative z-10">
-                  <p className="text-xl font-black tracking-tight text-foreground">Free Day!</p>
-                  <p className="text-sm font-medium text-muted-foreground/60">No classes scheduled for today.</p>
+                  <p className="text-xl font-black tracking-tight text-foreground">{t("dashboard.schedule.freeDay")}</p>
+                  <p className="text-sm font-medium text-muted-foreground/60">{t("dashboard.schedule.noClasses")}</p>
                 </div>
                 <div className="mt-2 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary/60 relative z-10">
                   <Sparkles className="h-3 w-3" />
-                  <span>Enjoy your time off</span>
+                  <span>{t("dashboard.schedule.enjoyTimeOff")}</span>
                 </div>
               </motion.div>
             )}
@@ -83,7 +86,7 @@ export const TodaySchedule = ({ schedule, show }: TodayScheduleProps) => {
           {schedule.length > 0 && (
             <div className="pt-4 border-t border-black/[0.03] dark:border-white/[0.03] flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">
               <Info className="h-3 w-3" />
-              <span>Click a class to enter the room</span>
+              <span>{t("dashboard.schedule.clickClass")}</span>
             </div>
           )}
         </CardContent>

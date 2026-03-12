@@ -24,8 +24,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useTranslation } from "react-i18next";
+import { cn } from "@/lib/utils";
 
 const ProjectGroupsPage = () => {
+    const { t, i18n } = useTranslation();
+    const isAr = i18n.language === 'ar';
     const { data: identity } = useGetIdentity<User>();
     const { show } = useNavigation();
     const [isCreateOpen, setCreateOpen] = useState(false);
@@ -54,7 +58,7 @@ const ProjectGroupsPage = () => {
 
     const handleCreate = () => {
         if (!groupName || !selectedClassId) {
-            toast.error("Please fill in all fields");
+            toast.error(t("projectGroups.toasts.fillFields"));
             return;
         }
 
@@ -68,7 +72,7 @@ const ProjectGroupsPage = () => {
             }
         }, {
             onSuccess: () => {
-                toast.success("Group created successfully");
+                toast.success(t("projectGroups.toasts.created"));
                 setCreateOpen(false);
                 setGroupName("");
                 setSelectedClassId("");
@@ -81,13 +85,13 @@ const ProjectGroupsPage = () => {
     };
 
     const handleDelete = (id: number) => {
-        if (confirm("Are you sure you want to delete this group?")) {
+        if (confirm(t("projectGroups.toasts.deleteConfirm"))) {
             deleteGroup({
                 resource: "project-groups",
                 id,
             }, {
                 onSuccess: () => {
-                    toast.success("Group deleted");
+                    toast.success(t("projectGroups.toasts.deleted"));
                     refetchGroups();
                 },
                 onError: () => toast.error("Failed to delete group")
@@ -100,15 +104,15 @@ const ProjectGroupsPage = () => {
     const isTeacherOrAdmin = identity?.role === 'teacher' || identity?.role === 'admin';
 
     return (
-        <div className="container mx-auto py-6">
+        <div className="container mx-auto py-6 text-start">
             <div className="flex justify-between items-center mb-6">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Project Groups</h1>
-                    <p className="text-muted-foreground">Manage collaborative student teams.</p>
+                    <h1 className="text-3xl font-bold tracking-tight">{t("projectGroups.title")}</h1>
+                    <p className="text-muted-foreground">{t("projectGroups.description")}</p>
                 </div>
                 {isTeacherOrAdmin && (
                     <Button onClick={() => setCreateOpen(true)} className="gap-2 shadow-lg shadow-primary/20">
-                        <Plus className="h-4 w-4" /> Create Group
+                        <Plus className="h-4 w-4" /> {t("projectGroups.createGroup")}
                     </Button>
                 )}
             </div>
@@ -120,10 +124,10 @@ const ProjectGroupsPage = () => {
             ) : groups.length === 0 ? (
                 <EmptyState
                     icon={Users}
-                    title="No Project Groups"
+                    title={t("projectGroups.noGroups")}
                     description={isTeacherOrAdmin 
-                        ? "Create groups to facilitate team-based assignments." 
-                        : "You haven't been assigned to any project groups yet."}
+                        ? t("projectGroups.noGroupsDescTeacher") 
+                        : t("projectGroups.noGroupsDescStudent")}
                 />
             ) : (
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -133,7 +137,7 @@ const ProjectGroupsPage = () => {
                                 <div>
                                     <CardTitle className="text-lg font-bold">{group.name}</CardTitle>
                                     <p className="text-xs text-muted-foreground font-medium mt-1">
-                                        {group.class?.name || "Unknown Class"}
+                                        {group.class?.name || t("projectGroups.unknownClass")}
                                     </p>
                                 </div>
                                 {isTeacherOrAdmin && (
@@ -147,11 +151,11 @@ const ProjectGroupsPage = () => {
                             <CardContent className="flex-1 pt-4">
                                 <div className="space-y-4">
                                     <div className="flex items-center justify-between text-sm">
-                                        <span className="text-muted-foreground">Members</span>
-                                        <span className="font-medium">{group.members?.length || 0}</span>
+                                        <span className="text-muted-foreground">{t("projectGroups.members")}</span>
+                                        <span className="font-medium">{new Intl.NumberFormat(i18n.language).format(group.members?.length || 0)}</span>
                                     </div>
                                     
-                                    <div className="flex -space-x-2 overflow-hidden py-1">
+                                    <div className={cn("flex overflow-hidden py-1", isAr ? "-space-x-reverse space-x-2" : "-space-x-2")}>
                                         {group.members?.length > 0 ? (
                                             <>
                                                 {group.members.slice(0, 5).map((member: any) => (
@@ -164,12 +168,12 @@ const ProjectGroupsPage = () => {
                                                 ))}
                                                 {group.members.length > 5 && (
                                                     <div className="flex items-center justify-center h-8 w-8 rounded-full bg-muted text-xs font-medium text-muted-foreground ring-2 ring-background">
-                                                        +{group.members.length - 5}
+                                                        +{new Intl.NumberFormat(i18n.language).format(group.members.length - 5)}
                                                     </div>
                                                 )}
                                             </>
                                         ) : (
-                                            <span className="text-xs text-muted-foreground italic">No members assigned</span>
+                                            <span className="text-xs text-muted-foreground italic">{t("projectGroups.noMembers")}</span>
                                         )}
                                     </div>
                                 </div>
@@ -181,7 +185,7 @@ const ProjectGroupsPage = () => {
                                     className="w-full text-xs font-medium h-8 gap-2"
                                     onClick={() => show("project-groups", group.id)}
                                 >
-                                    <Eye className="h-3 w-3" /> View Details & Members
+                                    <Eye className="h-3 w-3" /> {t("buttons.viewDetailsAndMembers")}
                                 </Button>
                             </div>
                         </Card>
@@ -191,28 +195,28 @@ const ProjectGroupsPage = () => {
 
             {/* Create Group Dialog */}
             <Dialog open={isCreateOpen} onOpenChange={setCreateOpen}>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>Create New Project Group</DialogTitle>
+                <DialogContent className="text-start">
+                    <DialogHeader className="text-start">
+                        <DialogTitle>{t("projectGroups.createDialogTitle")}</DialogTitle>
                         <DialogDescription>
-                            Groups are linked to a specific class. You can add members after creating the group.
+                            {t("projectGroups.createDialogDesc")}
                         </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4 py-4">
                         <div className="space-y-2">
-                            <Label htmlFor="name">Group Name</Label>
+                            <Label htmlFor="name">{t("projectGroups.groupName")}</Label>
                             <Input 
                                 id="name" 
-                                placeholder="e.g., Team Alpha, Group 1" 
+                                placeholder={t("projectGroups.groupNamePlaceholder")} 
                                 value={groupName}
                                 onChange={(e) => setGroupName(e.target.value)}
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label>Class</Label>
+                            <Label>{t("projectGroups.classLabel")}</Label>
                             <Select onValueChange={setSelectedClassId} value={selectedClassId}>
                                 <SelectTrigger>
-                                    <SelectValue placeholder="Select a class" />
+                                    <SelectValue placeholder={t("projectGroups.selectClass")} />
                                 </SelectTrigger>
                                 <SelectContent>
                                     {classesList.map((cls: any) => (
@@ -224,11 +228,11 @@ const ProjectGroupsPage = () => {
                             </Select>
                         </div>
                     </div>
-                    <DialogFooter>
-                        <Button variant="outline" onClick={() => setCreateOpen(false)}>Cancel</Button>
+                    <DialogFooter className="gap-2">
+                        <Button variant="outline" onClick={() => setCreateOpen(false)}>{t("buttons.cancel")}</Button>
                         <Button onClick={handleCreate} disabled={isCreating}>
                             {isCreating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            Create Group
+                            {t("buttons.create")}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

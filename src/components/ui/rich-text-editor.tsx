@@ -14,12 +14,16 @@ import {
   Image as ImageIcon,
   Link as LinkIcon,
   Heading1,
-  Heading2
+  Heading2,
+  Strikethrough,
+  Underline
 } from "lucide-react";
 import { Toggle } from "@/components/ui/toggle";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { Button } from "./button";
+import { useTranslation } from "react-i18next";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./tooltip";
 
 interface RichTextEditorProps {
   value: string;
@@ -28,11 +32,44 @@ interface RichTextEditorProps {
   className?: string;
 }
 
+const EditorButton = ({ 
+  onClick, 
+  isActive, 
+  icon: Icon, 
+  label 
+}: { 
+  onClick: () => void; 
+  isActive?: boolean; 
+  icon: any; 
+  label: string 
+}) => (
+  <TooltipProvider>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button
+          variant={isActive ? "secondary" : "ghost"}
+          size="sm"
+          onClick={onClick}
+          className={cn("h-8 w-8 p-0", isActive && "bg-muted text-foreground")}
+          type="button"
+        >
+          <Icon className="h-4 w-4" />
+          <span className="sr-only">{label}</span>
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>
+        <p>{label}</p>
+      </TooltipContent>
+    </Tooltip>
+  </TooltipProvider>
+);
+
 const EditorToolbar = ({ editor }: { editor: Editor | null }) => {
+  const { t } = useTranslation();
   if (!editor) return null;
 
   const addImage = () => {
-    const url = window.prompt("URL");
+    const url = window.prompt(t("common.editor.urlPrompt"));
     if (url) {
       editor.chain().focus().setImage({ src: url }).run();
     }
@@ -40,7 +77,7 @@ const EditorToolbar = ({ editor }: { editor: Editor | null }) => {
 
   const setLink = () => {
     const previousUrl = editor.getAttributes("link").href;
-    const url = window.prompt("URL", previousUrl);
+    const url = window.prompt(t("common.editor.urlPrompt"), previousUrl);
 
     if (url === null) return;
     if (url === "") {
@@ -53,95 +90,108 @@ const EditorToolbar = ({ editor }: { editor: Editor | null }) => {
 
   return (
     <div className="flex flex-wrap items-center gap-1 p-1 bg-muted/50 border-b rounded-t-xl">
-      <Toggle
-        size="sm"
-        pressed={editor.isActive("bold")}
-        onPressedChange={() => editor.chain().focus().toggleBold().run()}
-      >
-        <Bold className="h-4 w-4" />
-      </Toggle>
-      <Toggle
-        size="sm"
-        pressed={editor.isActive("italic")}
-        onPressedChange={() => editor.chain().focus().toggleItalic().run()}
-      >
-        <Italic className="h-4 w-4" />
-      </Toggle>
+      <EditorButton
+        onClick={() => editor.chain().focus().toggleBold().run()}
+        isActive={editor.isActive("bold")}
+        icon={Bold}
+        label={t("common.editor.bold")}
+      />
+      <EditorButton
+        onClick={() => editor.chain().focus().toggleItalic().run()}
+        isActive={editor.isActive("italic")}
+        icon={Italic}
+        label={t("common.editor.italic")}
+      />
+      <EditorButton
+        onClick={() => editor.chain().focus().toggleStrike().run()}
+        isActive={editor.isActive("strike")}
+        icon={Strikethrough}
+        label={t("common.editor.strike")}
+      />
+      
       <Separator orientation="vertical" className="mx-1 h-6" />
-      <Toggle
-        size="sm"
-        pressed={editor.isActive("heading", { level: 1 })}
-        onPressedChange={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-      >
-        <Heading1 className="h-4 w-4" />
-      </Toggle>
-      <Toggle
-        size="sm"
-        pressed={editor.isActive("heading", { level: 2 })}
-        onPressedChange={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-      >
-        <Heading2 className="h-4 w-4" />
-      </Toggle>
+      
+      <EditorButton
+        onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+        isActive={editor.isActive("heading", { level: 1 })}
+        icon={Heading1}
+        label={t("common.editor.h1")}
+      />
+      <EditorButton
+        onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+        isActive={editor.isActive("heading", { level: 2 })}
+        icon={Heading2}
+        label={t("common.editor.h2")}
+      />
+      
       <Separator orientation="vertical" className="mx-1 h-6" />
-      <Toggle
-        size="sm"
-        pressed={editor.isActive("bulletList")}
-        onPressedChange={() => editor.chain().focus().toggleBulletList().run()}
-      >
-        <List className="h-4 w-4" />
-      </Toggle>
-      <Toggle
-        size="sm"
-        pressed={editor.isActive("orderedList")}
-        onPressedChange={() => editor.chain().focus().toggleOrderedList().run()}
-      >
-        <ListOrdered className="h-4 w-4" />
-      </Toggle>
+      
+      <EditorButton
+        onClick={() => editor.chain().focus().toggleBulletList().run()}
+        isActive={editor.isActive("bulletList")}
+        icon={List}
+        label={t("common.editor.bulletList")}
+      />
+      <EditorButton
+        onClick={() => editor.chain().focus().toggleOrderedList().run()}
+        isActive={editor.isActive("orderedList")}
+        icon={ListOrdered}
+        label={t("common.editor.orderedList")}
+      />
+      
       <Separator orientation="vertical" className="mx-1 h-6" />
-      <Toggle
-        size="sm"
-        pressed={editor.isActive("blockquote")}
-        onPressedChange={() => editor.chain().focus().toggleBlockquote().run()}
-      >
-        <Quote className="h-4 w-4" />
-      </Toggle>
-      <Toggle
-        size="sm"
-        pressed={editor.isActive("codeBlock")}
-        onPressedChange={() => editor.chain().focus().toggleCodeBlock().run()}
-      >
-        <Code className="h-4 w-4" />
-      </Toggle>
+      
+      <EditorButton
+        onClick={() => editor.chain().focus().toggleBlockquote().run()}
+        isActive={editor.isActive("blockquote")}
+        icon={Quote}
+        label={t("common.editor.quote")}
+      />
+      <EditorButton
+        onClick={() => editor.chain().focus().toggleCodeBlock().run()}
+        isActive={editor.isActive("codeBlock")}
+        icon={Code}
+        label={t("common.editor.code")}
+      />
+      
       <Separator orientation="vertical" className="mx-1 h-6" />
-      <Button variant="ghost" size="sm" onClick={addImage} type="button">
-        <ImageIcon className="h-4 w-4" />
-      </Button>
-      <Button 
-        variant="ghost" 
-        size="sm" 
-        onClick={setLink} 
-        type="button"
-        className={cn(editor.isActive("link") && "bg-accent")}
-      >
-        <LinkIcon className="h-4 w-4" />
-      </Button>
+      
+      <EditorButton
+        onClick={addImage}
+        icon={ImageIcon}
+        label={t("common.editor.image")}
+      />
+      <EditorButton
+        onClick={setLink}
+        isActive={editor.isActive("link")}
+        icon={LinkIcon}
+        label={t("common.editor.link")}
+      />
+      
       <Separator orientation="vertical" className="mx-1 h-6" />
-      <Button variant="ghost" size="sm" onClick={() => editor.chain().focus().undo().run()} type="button">
-        <Undo className="h-4 w-4" />
-      </Button>
-      <Button variant="ghost" size="sm" onClick={() => editor.chain().focus().redo().run()} type="button">
-        <Redo className="h-4 w-4" />
-      </Button>
+      
+      <EditorButton
+        onClick={() => editor.chain().focus().undo().run()}
+        icon={Undo}
+        label={t("common.editor.undo")}
+      />
+      <EditorButton
+        onClick={() => editor.chain().focus().redo().run()}
+        icon={Redo}
+        label={t("common.editor.redo")}
+      />
     </div>
   );
 };
 
 export const RichTextEditor = ({ value, onChange, className }: RichTextEditorProps) => {
+  const { t } = useTranslation();
+  
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
         // Disable the default link extension to avoid duplicate name warning
-        link: false,
+        // We configure it manually below
       }),
       Image.configure({
         HTMLAttributes: {
@@ -171,7 +221,7 @@ export const RichTextEditor = ({ value, onChange, className }: RichTextEditorPro
 
   return (
     <div className="flex flex-col w-full border rounded-xl bg-background focus-within:ring-1 focus-within:ring-primary/30 transition-all">
-      <EditorToolbar editor={editor} />
+      {editor && <EditorToolbar editor={editor} />}
       <EditorContent editor={editor} />
     </div>
   );

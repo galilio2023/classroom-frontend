@@ -5,6 +5,7 @@ import { PendingSubmission } from "@/types/dashboard";
 import { PendingSubmissionCard } from "./pending-submission-card";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 interface PendingGradingListProps {
   submissions: PendingSubmission[];
@@ -12,6 +13,8 @@ interface PendingGradingListProps {
 }
 
 export const PendingGradingList = ({ submissions, show }: PendingGradingListProps) => {
+  const { t } = useTranslation();
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between px-2">
@@ -20,12 +23,12 @@ export const PendingGradingList = ({ submissions, show }: PendingGradingListProp
             <ClipboardCheck className="h-5 w-5" />
           </div>
           <div>
-            <h3 className="text-xl font-black tracking-tight">Pending Grading</h3>
-            <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">Submissions awaiting feedback</p>
+            <h3 className="text-xl font-black tracking-tight">{t("dashboard.staff.pendingGrading")}</h3>
+            <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">{t("dashboard.staff.submissionsAwaiting")}</p>
           </div>
         </div>
         <Badge variant="secondary" className="rounded-full px-3 py-1 font-black text-[10px] uppercase tracking-widest bg-primary/10 text-primary border-none animate-pulse">
-          {submissions.length} New
+          {t("dashboard.staff.newSubmissions", { count: submissions.length })}
         </Badge>
       </div>
 
@@ -60,12 +63,12 @@ export const PendingGradingList = ({ submissions, show }: PendingGradingListProp
                 </div>
               </div>
               <div className="space-y-1 relative z-10">
-                <p className="text-xl font-black tracking-tight text-foreground">All caught up!</p>
-                <p className="text-sm font-medium text-muted-foreground/60">You've graded all recent submissions.</p>
+                <p className="text-xl font-black tracking-tight text-foreground">{t("dashboard.staff.allCaughtUp")}</p>
+                <p className="text-sm font-medium text-muted-foreground/60">{t("dashboard.staff.allGraded")}</p>
               </div>
               <div className="mt-2 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-success/60 relative z-10">
                 <Sparkles className="h-3 w-3" />
-                <span>Great job, Teacher!</span>
+                <span>{t("dashboard.staff.greatJobTeacher")}</span>
               </div>
             </motion.div>
           )}

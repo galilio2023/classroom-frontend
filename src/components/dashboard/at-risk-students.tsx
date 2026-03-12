@@ -4,6 +4,7 @@ import { AtRiskStudentItem } from "./at-risk-student-item";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslation } from "react-i18next";
 
 interface AtRiskStudent {
   id: string;
@@ -20,6 +21,9 @@ interface AtRiskStudentsProps {
 }
 
 export const AtRiskStudents = ({ students }: AtRiskStudentsProps) => {
+  const { t, i18n } = useTranslation();
+  const isArabic = i18n.language === 'ar';
+
   if (students.length === 0) {
     return (
       <motion.div
@@ -34,9 +38,14 @@ export const AtRiskStudents = ({ students }: AtRiskStudentsProps) => {
                 <ShieldCheck className="h-6 w-6" />
               </div>
               <div className="space-y-1">
-                <CardTitle className="text-xl font-black tracking-tight text-success">All Clear</CardTitle>
+                <CardTitle className={cn(
+                    "text-xl text-success",
+                    isArabic ? "font-bold" : "font-black tracking-tight"
+                )}>
+                    {t("dashboard.staff.atRiskStudents.allClear")}
+                </CardTitle>
                 <CardDescription className="font-medium text-success/60">
-                  No students are currently flagged as at-risk. Great job!
+                  {t("dashboard.staff.atRiskStudents.allClearDescription")}
                 </CardDescription>
               </div>
             </div>
@@ -60,15 +69,20 @@ export const AtRiskStudents = ({ students }: AtRiskStudentsProps) => {
                 <AlertTriangle className="h-6 w-6" />
               </div>
               <div className="space-y-1">
-                <CardTitle className="text-xl font-black tracking-tight text-destructive">At-Risk Students</CardTitle>
+                <CardTitle className={cn(
+                    "text-xl text-destructive",
+                    isArabic ? "font-bold" : "font-black tracking-tight"
+                )}>
+                    {t("dashboard.staff.atRiskStudents.title")}
+                </CardTitle>
                 <div className="flex items-center gap-2">
                   <Sparkles className="h-3 w-3 text-ai-primary opacity-40" />
-                  <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">AI-Detected Intervention</span>
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">{t("dashboard.staff.atRiskStudents.aiDetected")}</span>
                 </div>
               </div>
             </div>
             <Badge variant="destructive" className="rounded-full px-3 py-1 font-black text-[10px] uppercase tracking-widest animate-pulse border-none shadow-lg shadow-destructive/20">
-              {students.length} Critical
+              {new Intl.NumberFormat(isArabic ? 'ar-EG' : 'en-US').format(students.length)} {isArabic ? "حالات" : "Critical"}
             </Badge>
           </div>
         </CardHeader>
@@ -90,7 +104,7 @@ export const AtRiskStudents = ({ students }: AtRiskStudentsProps) => {
           
           <div className="pt-4 border-t border-black/[0.03] dark:border-white/[0.03] flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">
             <Info className="h-3 w-3" />
-            <span>Immediate intervention recommended</span>
+            <span>{t("dashboard.staff.atRiskStudents.interventionRecommended")}</span>
           </div>
         </CardContent>
       </Card>

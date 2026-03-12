@@ -12,8 +12,7 @@ import {
   Eye,
   Activity,
   Sparkles,
-  Clock,
-  AlertCircle
+  Clock
 } from "lucide-react";
 import { Input } from "@/components/ui/input.tsx";
 import { useMemo, useState, useRef, useCallback } from "react";
@@ -24,7 +23,7 @@ import { Button } from "@/components/ui/button.tsx";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { EmptyState } from "@/components/empty-state";
 import { Card } from "@/components/ui/card";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import usePageTitle from "@/hooks/use-page-title";
@@ -40,11 +39,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useTranslation } from "react-i18next";
 
 dayjs.extend(relativeTime);
 
 const DiscussionsListPage = () => {
-  usePageTitle("Community Discussions");
+  const { t } = useTranslation();
+  usePageTitle(t("discussions.title"));
   const { data: identity } = useGetIdentity<UserType>();
   const isStaff = identity?.role === UserRole.ADMIN || identity?.role === UserRole.TEACHER;
   const { selectedTerm } = useTerm();
@@ -57,7 +58,6 @@ const DiscussionsListPage = () => {
     if (searchQuery) {
       f.push({ field: "content", operator: "contains" as const, value: searchQuery });
     }
-    // Only show top-level discussions (not replies)
     f.push({ field: "parentId", operator: "null" as const, value: true });
     if (selectedTerm) {
         f.push({ field: "termId", operator: "eq" as const, value: selectedTerm.id });
@@ -111,8 +111,8 @@ const DiscussionsListPage = () => {
             <Breadcrumb />
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div>
-                <h1 className="text-4xl font-black tracking-tight">Community Hub</h1>
-                <p className="text-muted-foreground font-medium mt-1">Engage with students and teachers in class-wide discussion threads.</p>
+                <h1 className="text-4xl font-black tracking-tight">{t("discussions.title")}</h1>
+                <p className="text-muted-foreground font-medium mt-1">{t("discussions.description")}</p>
               </div>
               <div className="flex items-center gap-3 w-full md:w-auto">
                 <Button 
@@ -120,7 +120,7 @@ const DiscussionsListPage = () => {
                   className="flex-1 md:flex-none rounded-2xl h-14 px-10 font-black uppercase tracking-widest text-[10px] gap-2 shadow-xl shadow-primary/20 transition-all hover:scale-105 active:scale-95"
                 >
                   <PlusCircle className="h-5 w-5" />
-                  Start Discussion
+                  {t("discussions.start")}
                 </Button>
               </div>
             </div>
@@ -133,7 +133,7 @@ const DiscussionsListPage = () => {
                 <MessageSquare className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Total Threads</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t("discussions.stats.total")}</p>
                 <p className="text-2xl font-black">{isLoading ? "..." : stats.total}</p>
               </div>
             </Card>
@@ -142,7 +142,7 @@ const DiscussionsListPage = () => {
                 <Activity className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Active Today</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t("discussions.stats.active")}</p>
                 <p className="text-2xl font-black text-indigo-600">{isLoading ? "..." : stats.activeToday}</p>
               </div>
             </Card>
@@ -151,7 +151,7 @@ const DiscussionsListPage = () => {
                 <MessageCircle className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Total Replies</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t("discussions.stats.replies")}</p>
                 <p className="text-2xl font-black text-green-600">{isLoading ? "..." : stats.totalReplies}</p>
               </div>
             </Card>
@@ -164,7 +164,7 @@ const DiscussionsListPage = () => {
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                 <Input
                   type="text"
-                  placeholder="Search discussions by content or keywords..."
+                  placeholder={t("discussions.searchPlaceholder")}
                   className="pl-11 h-14 rounded-2xl border-none bg-background shadow-sm font-medium"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -172,7 +172,7 @@ const DiscussionsListPage = () => {
               </div>
               <div className="flex items-center gap-2 bg-background px-4 rounded-2xl shadow-sm border border-primary/5">
                 <Filter className="h-4 w-4 text-muted-foreground" />
-                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Community Filter</span>
+                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t("discussions.filter")}</span>
               </div>
             </div>
           </Card>
@@ -199,11 +199,11 @@ const DiscussionsListPage = () => {
               <div className="h-full w-full flex items-center justify-center p-12">
                 <EmptyState
                   icon={MessageSquare}
-                  title="No discussions found"
-                  description="Start a new conversation to engage with your class community."
+                  title={t("discussions.empty.title")}
+                  description={t("discussions.empty.desc")}
                   className="border-none bg-transparent min-h-0"
                   action={{
-                    label: "Start Discussion",
+                    label: t("discussions.start"),
                     onClick: () => create("discussions"),
                   }}
                 />
@@ -267,7 +267,7 @@ const DiscussionsListPage = () => {
                               </Badge>
                               {discussion.replies && discussion.replies.length > 5 && (
                                   <Badge className="bg-orange-500/10 text-orange-600 border-none font-black px-2 py-0.5 rounded-md text-[9px] tracking-widest uppercase">
-                                      Trending
+                                      {t("discussions.labels.trending")}
                                   </Badge>
                               )}
                             </div>
@@ -289,7 +289,7 @@ const DiscussionsListPage = () => {
                                   <MessageCircle className="h-3.5 w-3.5 text-primary" />
                               </div>
                               <span className="text-xs font-bold">
-                                  {discussion.replies?.length || 0} <span className="text-muted-foreground/50 font-medium">Replies</span>
+                                  {discussion.replies?.length || 0} <span className="text-muted-foreground/50 font-medium">{t("discussions.labels.replies")}</span>
                               </span>
                             </div>
 
@@ -298,7 +298,7 @@ const DiscussionsListPage = () => {
                                   <Clock className="h-3.5 w-3.5 text-primary" />
                               </div>
                               <span className="text-xs font-bold uppercase tracking-tight">
-                                  Active {lastActivity.fromNow()}
+                                  {t("discussions.labels.active", { time: lastActivity.fromNow() })}
                               </span>
                             </div>
                           </div>
@@ -310,7 +310,7 @@ const DiscussionsListPage = () => {
                             variant="outline"
                             className="rounded-2xl px-8 h-12 text-[10px] font-black uppercase tracking-widest transition-all shadow-sm border-primary/10 text-primary hover:bg-primary hover:text-primary-foreground"
                           >
-                            View Thread
+                            {t("buttons.view")}
                             <ArrowRight className="h-4 w-4 ml-2" />
                           </Button>
 
@@ -321,14 +321,14 @@ const DiscussionsListPage = () => {
                                   </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end" className="w-56 rounded-[1.5rem] p-2">
-                                  <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-3 py-2">Thread Options</DropdownMenuLabel>
+                                  <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-3 py-2">{t("discussions.labels.options")}</DropdownMenuLabel>
                                   <DropdownMenuItem onClick={() => show("discussions", discussion.id)} className="rounded-xl gap-3 py-3 cursor-pointer">
                                       <Eye className="h-4 w-4 text-primary" />
-                                      <span className="font-bold">Open Discussion</span>
+                                      <span className="font-bold">{t("discussions.labels.open")}</span>
                                   </DropdownMenuItem>
                                   <DropdownMenuItem className="rounded-xl gap-3 py-3 cursor-pointer">
                                       <Activity className="h-4 w-4 text-primary" />
-                                      <span className="font-bold">Follow Thread</span>
+                                      <span className="font-bold">{t("discussions.labels.follow")}</span>
                                   </DropdownMenuItem>
                               </DropdownMenuContent>
                           </DropdownMenu>

@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useTranslation } from "react-i18next";
 
 interface CreateModuleDialogProps {
   isOpen: boolean;
@@ -29,23 +30,33 @@ export const CreateModuleDialog = ({
   setDescription,
   onCreate
 }: CreateModuleDialogProps) => {
+  const { t } = useTranslation();
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent>
-        <DialogHeader><DialogTitle>New Module</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>{t("buttons.createModule")}</DialogTitle></DialogHeader>
         <div className="space-y-4 py-4">
           <div className="grid gap-2">
-            <Label>Name</Label>
-            <Input value={name} onChange={(e) => setName(e.target.value)} />
+            <Label>{t("classes.form.className")}</Label>
+            <Input 
+                placeholder={t("classes.form.classNamePlaceholder")}
+                value={name} 
+                onChange={(e) => setName(e.target.value)} 
+            />
           </div>
           <div className="grid gap-2">
-            <Label>Description</Label>
-            <Textarea value={description} onChange={(e) => setDescription(e.target.value)} />
+            <Label>{t("classes.form.description")}</Label>
+            <Textarea 
+                placeholder={t("classes.form.descriptionPlaceholder")}
+                value={description} 
+                onChange={(e) => setDescription(e.target.value)} 
+            />
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button onClick={onCreate}>Create</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>{t("buttons.cancel")}</Button>
+          <Button onClick={onCreate}>{t("buttons.create")}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

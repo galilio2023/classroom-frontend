@@ -40,26 +40,28 @@ import axios from "axios";
 import { RoleSelector } from "@/components/auth/role-selector";
 import { VerificationUpload } from "@/components/auth/verification-upload";
 import { motion, AnimatePresence } from "framer-motion";
-
-const registerSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
-  role: z.enum(["student", "teacher", "parent"]),
-  phoneNumber: z.string().optional(),
-  bio: z.string().optional(),
-  dateOfBirth: z.string().optional(),
-  parentName: z.string().optional(),
-  parentPhone: z.string().optional(),
-  verificationDocumentUrl: z.string().optional(),
-  verificationDocumentCldPubId: z.string().optional(),
-});
+import { useTranslation } from "react-i18next";
 
 const RegisterPage = () => {
+  const { t, i18n } = useTranslation();
   const { mutate: register, isPending } = useRegister();
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [isGeneratingBio, setIsGeneratingBio] = useState(false);
+
+  const registerSchema = z.object({
+    name: z.string().min(1, t("auth.register.nameRequired")),
+    email: z.string().email(t("auth.register.invalidEmail")),
+    password: z.string().min(8, t("auth.register.passwordMinLength")),
+    role: z.enum(["student", "teacher", "parent"]),
+    phoneNumber: z.string().optional(),
+    bio: z.string().optional(),
+    dateOfBirth: z.string().optional(),
+    parentName: z.string().optional(),
+    parentPhone: z.string().optional(),
+    verificationDocumentUrl: z.string().optional(),
+    verificationDocumentCldPubId: z.string().optional(),
+  });
 
   const form = useForm<z.infer<typeof registerSchema>>({
     resolver: zodResolver(registerSchema),
@@ -84,7 +86,7 @@ const RegisterPage = () => {
   const generateAIBio = async () => {
     const name = form.getValues("name");
     if (!name) {
-      toast.error("Please enter your name first");
+      toast.error(t("auth.register.enterNameFirst"));
       return;
     }
 
@@ -96,7 +98,7 @@ const RegisterPage = () => {
       });
       
       form.setValue("bio", response.data.content);
-      toast.success("AI Bio generated!");
+      toast.success(t("auth.register.aiBioGenerated"));
     } catch (error) {
       const fallbacks: Record<string, string> = {
         teacher: `Hello, I'm ${name}. I am a dedicated educator committed to fostering a positive and engaging learning environment for all my students.`,
@@ -104,7 +106,7 @@ const RegisterPage = () => {
         parent: `Hello, I'm ${name}. I am a supportive parent dedicated to my child's educational success and well-being.`,
       };
       form.setValue("bio", fallbacks[role as keyof typeof fallbacks] || `Hi, I'm ${name}.`);
-      toast.info("Generated a standard bio for you (AI service unavailable).");
+      toast.info(t("auth.register.aiBioFallback"));
     } finally {
       setIsGeneratingBio(false);
     }
@@ -121,19 +123,21 @@ const RegisterPage = () => {
       register(values, {
         onSuccess: () => {
           const successMsg = values.role === "teacher" 
-            ? "Registration successful! Please wait for admin verification."
-            : "Registration successful! Welcome to the classroom.";
+            ? t("auth.register.registrationSuccessTeacher")
+            : t("auth.register.registrationSuccess");
           toast.success(successMsg);
           navigate("/login");
         },
         onError: (error: any) => {
           const errorMessage =
-            error?.data?.message || error.message || "An unknown error occurred.";
+            error?.data?.message || error.message || t("auth.login.unknownError");
           toast.error(errorMessage);
         },
       });
     })();
   };
+
+  const isAr = i18n.language === 'ar';
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 relative overflow-hidden">
@@ -159,11 +163,11 @@ const RegisterPage = () => {
           <CardHeader className="text-center pt-10 pb-6 space-y-4">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-[10px] font-black uppercase tracking-widest text-primary mx-auto">
                 <Sparkles className="h-3 w-3" />
-                Step {step} of 2: {step === 1 ? "Account Setup" : "Profile Details"}
+                {t("auth.register.stepOf", { step, label: step === 1 ? t("auth.register.accountSetup") : t("auth.register.profileDetails") })}
             </div>
-            <CardTitle className="text-4xl font-black tracking-tighter uppercase">Join Our Classroom</CardTitle>
+            <CardTitle className="text-4xl font-black tracking-tighter uppercase">{t("auth.register.title")}</CardTitle>
             <CardDescription className="font-medium text-muted-foreground/80">
-              Complete your registration to get started.
+              {t("auth.register.description")}
             </CardDescription>
           </CardHeader>
           <CardContent className="px-10">
@@ -173,9 +177,9 @@ const RegisterPage = () => {
                   {step === 1 ? (
                     <motion.div
                       key="step1"
-                      initial={{ opacity: 0, x: -20 }}
+                      initial={{ opacity: 0, x: isAr ? 20 : -20 }}
                       animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: 20 }}
+                      exit={{ opacity: 0, x: isAr ? -20 : 20 }}
                       className="space-y-6"
                     >
                       <RoleSelector 
@@ -189,9 +193,9 @@ const RegisterPage = () => {
                           name="name"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="font-black uppercase text-[10px] tracking-widest text-muted-foreground/80">Full Name</FormLabel>
+                              <FormLabel className="font-black uppercase text-[10px] tracking-widest text-muted-foreground/80">{t("auth.register.fullNameLabel")}</FormLabel>
                               <FormControl>
-                                <Input placeholder="John Doe" className="h-14 rounded-2xl bg-muted/30 border-none focus-visible:ring-primary/20 font-bold" {...field} />
+                                <Input placeholder={t("auth.register.fullNamePlaceholder")} className="h-14 rounded-2xl bg-muted/30 border-none focus-visible:ring-primary/20 font-bold" {...field} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -202,9 +206,9 @@ const RegisterPage = () => {
                           name="email"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="font-black uppercase text-[10px] tracking-widest text-muted-foreground/80">Email Address</FormLabel>
+                              <FormLabel className="font-black uppercase text-[10px] tracking-widest text-muted-foreground/80">{t("auth.register.emailLabel")}</FormLabel>
                               <FormControl>
-                                <Input type="email" placeholder="john.doe@example.com" className="h-14 rounded-2xl bg-muted/30 border-none focus-visible:ring-primary/20 font-bold" {...field} />
+                                <Input type="email" placeholder={t("auth.register.emailPlaceholder")} className="h-14 rounded-2xl bg-muted/30 border-none focus-visible:ring-primary/20 font-bold" {...field} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -216,9 +220,9 @@ const RegisterPage = () => {
                         name="password"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="font-black uppercase text-[10px] tracking-widest text-muted-foreground/80">Password</FormLabel>
+                            <FormLabel className="font-black uppercase text-[10px] tracking-widest text-muted-foreground/80">{t("auth.register.passwordLabel")}</FormLabel>
                             <FormControl>
-                              <Input type="password" placeholder="••••••••" className="h-14 rounded-2xl bg-muted/30 border-none focus-visible:ring-primary/20 font-bold" {...field} />
+                              <Input type="password" placeholder={t("auth.register.passwordPlaceholder")} className="h-14 rounded-2xl bg-muted/30 border-none focus-visible:ring-primary/20 font-bold" {...field} />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -228,14 +232,14 @@ const RegisterPage = () => {
                   ) : (
                     <motion.div
                       key="step2"
-                      initial={{ opacity: 0, x: 20 }}
+                      initial={{ opacity: 0, x: isAr ? -20 : 20 }}
                       animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -20 }}
+                      exit={{ opacity: 0, x: isAr ? 20 : -20 }}
                       className="space-y-6"
                     >
                       <div className="p-4 rounded-2xl bg-primary/5 border border-primary/10">
                         <p className="text-xs text-muted-foreground font-black uppercase tracking-widest leading-relaxed">
-                          ⚡ Complete your profile for better experience.
+                          ⚡ {t("auth.register.completeProfileTip")}
                         </p>
                       </div>
 
@@ -245,9 +249,9 @@ const RegisterPage = () => {
                           name="phoneNumber"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="font-black uppercase text-[10px] tracking-widest text-muted-foreground/80">Phone Number</FormLabel>
+                              <FormLabel className="font-black uppercase text-[10px] tracking-widest text-muted-foreground/80">{t("auth.register.phoneNumberLabel")}</FormLabel>
                               <FormControl>
-                                <Input placeholder="+1 (555) 000-0000" className="h-14 rounded-2xl bg-muted/30 border-none focus-visible:ring-primary/20 font-bold" {...field} />
+                                <Input placeholder={t("auth.register.phoneNumberPlaceholder")} className="h-14 rounded-2xl bg-muted/30 border-none focus-visible:ring-primary/20 font-bold" {...field} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -259,7 +263,7 @@ const RegisterPage = () => {
                             name="dateOfBirth"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel className="font-black uppercase text-[10px] tracking-widest text-muted-foreground/80">Date of Birth</FormLabel>
+                                <FormLabel className="font-black uppercase text-[10px] tracking-widest text-muted-foreground/80">{t("auth.register.dobLabel")}</FormLabel>
                                 <FormControl>
                                   <Input type="date" className="h-14 rounded-2xl bg-muted/30 border-none focus-visible:ring-primary/20 font-bold" {...field} />
                                 </FormControl>
@@ -278,7 +282,7 @@ const RegisterPage = () => {
                             render={({ field }) => (
                               <FormItem>
                                 <div className="flex justify-between items-center mb-1">
-                                  <FormLabel className="font-black uppercase text-[10px] tracking-widest text-muted-foreground/80">Professional Bio</FormLabel>
+                                  <FormLabel className="font-black uppercase text-[10px] tracking-widest text-muted-foreground/80">{t("auth.register.bioLabel")}</FormLabel>
                                   <Button 
                                     type="button" 
                                     variant="ghost" 
@@ -288,11 +292,11 @@ const RegisterPage = () => {
                                     disabled={isGeneratingBio}
                                   >
                                     {isGeneratingBio ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
-                                    AI Assist
+                                    {t("buttons.aiAssist")}
                                   </Button>
                                 </div>
                                 <FormControl>
-                                  <Textarea placeholder="Tell us about your teaching experience..." className="rounded-2xl bg-muted/30 border-none focus-visible:ring-primary/20 font-bold resize-none" rows={3} {...field} />
+                                  <Textarea placeholder={t("auth.register.bioPlaceholder")} className="rounded-2xl bg-muted/30 border-none focus-visible:ring-primary/20 font-bold resize-none" rows={3} {...field} />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -320,19 +324,19 @@ const RegisterPage = () => {
                 <div className="flex gap-4 pt-4">
                   {step > 1 && (
                     <Button type="button" variant="outline" className="flex-1 h-14 rounded-2xl font-black uppercase tracking-widest text-xs border-2 border-muted" onClick={() => setStep(1)}>
-                      <ArrowLeft className="h-4 w-4 mr-2" />
-                      Back
+                      <ArrowLeft className={cn("h-4 w-4 mr-2", isAr && "ml-2 mr-0 rotate-180")} />
+                      {t("buttons.back")}
                     </Button>
                   )}
                   {step < 2 ? (
                     <Button type="button" className="flex-1 h-14 rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl shadow-primary/20 group" onClick={nextStep}>
-                      Continue
-                      <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                      {t("buttons.continue")}
+                      <ArrowRight className={cn("h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform", isAr && "mr-2 ml-0 rotate-180 group-hover:-translate-x-1")} />
                     </Button>
                   ) : (
                     <Button type="button" className="flex-1 h-14 rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl shadow-primary/20 group" disabled={isPending} onClick={handleFinalSubmit}>
-                      {isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : "Complete Join"}
-                      <Zap className="ml-2 h-4 w-4 fill-current group-hover:scale-125 transition-transform" />
+                      {isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : t("buttons.completeJoin")}
+                      <Zap className={cn("ml-2 h-4 w-4 fill-current group-hover:scale-125 transition-transform", isAr && "mr-2 ml-0")} />
                     </Button>
                   )}
                 </div>
@@ -341,8 +345,8 @@ const RegisterPage = () => {
           </CardContent>
           <CardFooter className="flex justify-center py-8 bg-muted/10 border-t border-muted">
             <p className="text-sm font-medium text-muted-foreground">
-              Already have an account?&nbsp;
-              <Link to="/login" className="font-black text-primary hover:underline uppercase tracking-widest text-xs">Sign In</Link>
+              {t("auth.register.alreadyHaveAccount")}&nbsp;
+              <Link to="/login" className="font-black text-primary hover:underline uppercase tracking-widest text-xs">{t("buttons.signIn")}</Link>
             </p>
           </CardFooter>
         </Card>

@@ -8,7 +8,6 @@ import {
   Eye, 
   Mail, 
   LayoutGrid, 
-  Users,
   Loader2,
   Clock,
   MessageSquare,
@@ -45,11 +44,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useTranslation } from "react-i18next";
 
 dayjs.extend(relativeTime);
 
 const TeacherApplicationsList = () => {
-  usePageTitle("Teacher Applications");
+  const { t } = useTranslation();
+  usePageTitle(t("teacherApps.title"));
   const { data: identity } = useGetIdentity<User>();
   const isAdmin = identity?.role === UserRole.ADMIN;
   
@@ -86,7 +87,7 @@ const TeacherApplicationsList = () => {
         values: { status },
     }, {
         onSuccess: () => {
-            toast.success(`Application ${status} successfully`);
+            toast.success(t("teacherApps.toasts.statusUpdate", { status }));
             invalidate({ resource: "teacher-applications", invalidates: ["list"] });
             invalidate({ resource: "classes", invalidates: ["list"] });
         }
@@ -114,8 +115,8 @@ const TeacherApplicationsList = () => {
             <Breadcrumb />
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div>
-                <h1 className="text-4xl font-black tracking-tight">Teacher Applications</h1>
-                <p className="text-muted-foreground font-medium mt-1">Review and manage requests from educators to teach specific classes.</p>
+                <h1 className="text-4xl font-black tracking-tight">{t("teacherApps.title")}</h1>
+                <p className="text-muted-foreground font-medium mt-1">{t("teacherApps.description")}</p>
               </div>
             </div>
           </motion.div>
@@ -127,13 +128,13 @@ const TeacherApplicationsList = () => {
                   <Filter className="h-4 w-4 text-muted-foreground" />
                   <Select value={statusFilter} onValueChange={setStatusFilter}>
                     <SelectTrigger className="w-40 border-none h-10 focus:ring-0 shadow-none font-black text-[10px] uppercase tracking-widest">
-                      <SelectValue placeholder="All Status" />
+                      <SelectValue placeholder={t("enrollments.allStatus")} />
                     </SelectTrigger>
                     <SelectContent className="rounded-2xl border-none shadow-2xl">
-                      <SelectItem value="all" className="rounded-xl font-bold">All Status</SelectItem>
-                      <SelectItem value="pending" className="rounded-xl font-bold">Pending</SelectItem>
-                      <SelectItem value="approved" className="rounded-xl font-bold">Approved</SelectItem>
-                      <SelectItem value="rejected" className="rounded-xl font-bold">Rejected</SelectItem>
+                      <SelectItem value="all" className="rounded-xl font-bold">{t("enrollments.allStatus")}</SelectItem>
+                      <SelectItem value="pending" className="rounded-xl font-bold">{t("status.upcoming")}</SelectItem>
+                      <SelectItem value="approved" className="rounded-xl font-bold">{t("status.active")}</SelectItem>
+                      <SelectItem value="rejected" className="rounded-xl font-bold">{t("buttons.reject")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -155,8 +156,8 @@ const TeacherApplicationsList = () => {
               <div className="h-full w-full flex items-center justify-center p-12">
                 <EmptyState
                   icon={Briefcase}
-                  title="No applications found"
-                  description="There are no teacher applications matching your current filter."
+                  title={t("teacherApps.empty.title")}
+                  description={t("teacherApps.empty.desc")}
                   className="border-none bg-transparent min-h-0"
                 />
               </div>
@@ -206,7 +207,7 @@ const TeacherApplicationsList = () => {
                                   {app.status}
                               </Badge>
                               <Badge variant="outline" className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md border-primary/10">
-                                  Applying for: {app.class?.name}
+                                  {t("teacherApps.labels.applyingFor", { name: app.class?.name })}
                               </Badge>
                             </div>
                           </div>
@@ -219,7 +220,7 @@ const TeacherApplicationsList = () => {
                             <div className="flex items-center gap-2 text-muted-foreground">
                               <Clock className="h-3.5 w-3.5 text-primary" />
                               <span className="text-xs font-bold uppercase tracking-tight">
-                                  Applied {appDate.fromNow()}
+                                  {t("teacherApps.labels.applied", { time: appDate.fromNow() })}
                               </span>
                             </div>
                             {app.message && (
@@ -242,7 +243,7 @@ const TeacherApplicationsList = () => {
                                       disabled={isUpdating}
                                   >
                                       <CheckCircle2 className="h-4 w-4 mr-2" />
-                                      Approve
+                                      {t("buttons.approve")}
                                   </Button>
                                   <Button
                                       variant="outline"
@@ -252,7 +253,7 @@ const TeacherApplicationsList = () => {
                                       disabled={isUpdating}
                                   >
                                       <XCircle className="h-4 w-4 mr-2" />
-                                      Reject
+                                      {t("buttons.reject")}
                                   </Button>
                               </div>
                           )}
@@ -264,14 +265,14 @@ const TeacherApplicationsList = () => {
                                   </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end" className="w-56 rounded-[1.5rem] p-2">
-                                  <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-3 py-2">Options</DropdownMenuLabel>
+                                  <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-3 py-2">{t("assignments.list.labels.options")}</DropdownMenuLabel>
                                   <DropdownMenuItem onClick={() => show("users", app.teacher.id)} className="rounded-xl gap-3 py-3 cursor-pointer">
                                       <Eye className="h-4 w-4 text-primary" />
-                                      <span className="font-bold">View Teacher Profile</span>
+                                      <span className="font-bold">{t("teacherApps.labels.viewTeacher")}</span>
                                   </DropdownMenuItem>
                                   <DropdownMenuItem onClick={() => show("classes", app.class.id)} className="rounded-xl gap-3 py-3 cursor-pointer">
                                       <LayoutGrid className="h-4 w-4 text-primary" />
-                                      <span className="font-bold">View Classroom</span>
+                                      <span className="font-bold">{t("teacherApps.labels.viewClass")}</span>
                                   </DropdownMenuItem>
                               </DropdownMenuContent>
                           </DropdownMenu>

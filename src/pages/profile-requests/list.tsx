@@ -59,11 +59,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useTranslation } from "react-i18next";
 
 dayjs.extend(relativeTime);
 
 const ProfileRequestsList = () => {
-  usePageTitle("Profile Approvals");
+  const { t } = useTranslation();
+  usePageTitle(t("profileRequests.title"));
 
   const [searchQuery, setSearchQuery] = useState("");
   const [rejectTarget, setRejectTarget] = useState<number | null>(null);
@@ -109,7 +111,7 @@ const ProfileRequestsList = () => {
         values: {},
     }, {
         onSuccess: () => {
-            toast.success("Changes approved and applied");
+            toast.success(t("profileRequests.toasts.approved"));
             invalidate({ resource: "profile-requests", invalidates: ["list"] });
         }
     });
@@ -124,7 +126,7 @@ const ProfileRequestsList = () => {
         values: { notes: rejectReason || "Changes rejected by administrator" },
     }, {
         onSuccess: () => {
-            toast.success("Changes rejected");
+            toast.success(t("profileRequests.toasts.rejected"));
             setRejectTarget(null);
             setRejectReason("");
             invalidate({ resource: "profile-requests", invalidates: ["list"] });
@@ -165,8 +167,8 @@ const ProfileRequestsList = () => {
             <Breadcrumb />
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div>
-                <h1 className="text-4xl font-black tracking-tight">Profile Governance</h1>
-                <p className="text-muted-foreground font-medium mt-1">Review and approve sensitive profile changes and verification documents.</p>
+                <h1 className="text-4xl font-black tracking-tight">{t("profileRequests.title")}</h1>
+                <p className="text-muted-foreground font-medium mt-1">{t("profileRequests.description")}</p>
               </div>
             </div>
           </motion.div>
@@ -178,7 +180,7 @@ const ProfileRequestsList = () => {
                 <Activity className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Total Requests</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t("profileRequests.stats.total")}</p>
                 <p className="text-2xl font-black">{isLoading ? "..." : stats.total}</p>
               </div>
             </Card>
@@ -187,7 +189,7 @@ const ProfileRequestsList = () => {
                 <Clock className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Pending Review</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t("profileRequests.stats.pending")}</p>
                 <p className="text-2xl font-black text-amber-600">{isLoading ? "..." : stats.pending}</p>
               </div>
             </Card>
@@ -196,7 +198,7 @@ const ProfileRequestsList = () => {
                 <UserCheck className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Approved</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t("profileRequests.stats.approved")}</p>
                 <p className="text-2xl font-black text-green-600">{isLoading ? "..." : stats.approved}</p>
               </div>
             </Card>
@@ -209,7 +211,7 @@ const ProfileRequestsList = () => {
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                 <Input
                   type="text"
-                  placeholder="Search by user name or email..."
+                  placeholder={t("profileRequests.searchPlaceholder")}
                   className="pl-11 h-14 rounded-2xl border-none bg-background shadow-sm font-medium"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -219,13 +221,13 @@ const ProfileRequestsList = () => {
                 <Filter className="h-4 w-4 text-muted-foreground" />
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
                   <SelectTrigger className="w-40 border-none h-10 focus:ring-0 shadow-none font-black text-[10px] uppercase tracking-widest">
-                    <SelectValue placeholder="All Status" />
+                    <SelectValue placeholder={t("enrollments.allStatus")} />
                   </SelectTrigger>
                   <SelectContent className="rounded-2xl border-none shadow-2xl">
-                    <SelectItem value="all" className="rounded-xl font-bold">All Status</SelectItem>
-                    <SelectItem value="pending" className="rounded-xl font-bold">Pending</SelectItem>
-                    <SelectItem value="approved" className="rounded-xl font-bold">Approved</SelectItem>
-                    <SelectItem value="rejected" className="rounded-xl font-bold">Rejected</SelectItem>
+                    <SelectItem value="all" className="rounded-xl font-bold">{t("enrollments.allStatus")}</SelectItem>
+                    <SelectItem value="pending" className="rounded-xl font-bold">{t("status.upcoming")}</SelectItem>
+                    <SelectItem value="approved" className="rounded-xl font-bold">{t("status.active")}</SelectItem>
+                    <SelectItem value="rejected" className="rounded-xl font-bold">{t("buttons.reject")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -254,8 +256,8 @@ const ProfileRequestsList = () => {
               <div className="h-full w-full flex items-center justify-center p-12">
                 <EmptyState
                   icon={ShieldCheck}
-                  title="No pending requests"
-                  description="All profile change requests have been processed. You're all caught up!"
+                  title={t("profileRequests.empty.title")}
+                  description={t("profileRequests.empty.desc")}
                   className="border-none bg-transparent min-h-0"
                 />
               </div>
@@ -315,7 +317,7 @@ const ProfileRequestsList = () => {
                                   {request.status}
                               </Badge>
                               <Badge variant="outline" className="text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md border-primary/10">
-                                  {changedKeys.length} Changes
+                                  {t("profileRequests.labels.changes", { count: changedKeys.length })}
                               </Badge>
                             </div>
                           </div>
@@ -329,7 +331,7 @@ const ProfileRequestsList = () => {
                             <div className="flex items-center gap-1.5 text-muted-foreground">
                               <Clock className="h-3 w-3 text-primary" />
                               <span className="text-[11px] font-bold uppercase tracking-tight">
-                                  Requested {requestDate.fromNow()}
+                                  {t("profileRequests.labels.requested", { time: requestDate.fromNow() })}
                               </span>
                             </div>
                           </div>
@@ -349,11 +351,11 @@ const ProfileRequestsList = () => {
                                                   onClick={() => setPreviewUrl(String(newData[key]))}
                                               >
                                                   <FileText className="h-2.5 w-2.5" />
-                                                  View Proof
+                                                  {t("profileRequests.labels.viewProof")}
                                               </Button>
                                           ) : (
                                               <div className="flex items-center gap-1 text-[9px] font-bold">
-                                                  <span className="text-muted-foreground/40 line-through truncate max-w-15">{String(oldData[key] || "empty")}</span>
+                                                  <span className="text-muted-foreground/40 line-through truncate max-w-15">{String(oldData[key] || t("profileRequests.labels.empty"))}</span>
                                                   <ArrowRight className="h-2 w-2 text-primary/40" />
                                                   <span className="text-primary truncate max-w-15">{String(newData[key])}</span>
                                               </div>
@@ -376,7 +378,7 @@ const ProfileRequestsList = () => {
                                       disabled={isApproving}
                                   >
                                       {isApproving ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" /> : <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />}
-                                      Approve
+                                      {t("buttons.approve")}
                                   </Button>
                                   <Button
                                       variant="outline"
@@ -386,7 +388,7 @@ const ProfileRequestsList = () => {
                                       disabled={isRejecting}
                                   >
                                       <XCircle className="h-3.5 w-3.5 mr-1.5" />
-                                      Reject
+                                      {t("buttons.reject")}
                                   </Button>
                               </div>
                           )}
@@ -398,14 +400,14 @@ const ProfileRequestsList = () => {
                                   </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end" className="w-48 rounded-xl p-1">
-                                  <DropdownMenuLabel className="text-[9px] font-black uppercase tracking-widest text-muted-foreground px-2 py-1.5">Options</DropdownMenuLabel>
+                                  <DropdownMenuLabel className="text-[9px] font-black uppercase tracking-widest text-muted-foreground px-2 py-1.5">{t("assignments.list.labels.options")}</DropdownMenuLabel>
                                   <DropdownMenuItem onClick={() => show("users", request.user.id)} className="rounded-lg gap-2 py-2 cursor-pointer">
                                       <Eye className="h-3.5 w-3.5 text-primary" />
-                                      <span className="font-bold text-xs">View User Profile</span>
+                                      <span className="font-bold text-xs">{t("buttons.viewProfile")}</span>
                                   </DropdownMenuItem>
                                   <DropdownMenuItem className="rounded-lg gap-2 py-2 cursor-pointer">
                                       <MessageSquare className="h-3.5 w-3.5 text-primary" />
-                                      <span className="font-bold text-xs">Contact User</span>
+                                      <span className="font-bold text-xs">{t("buttons.contactUser")}</span>
                                   </DropdownMenuItem>
                               </DropdownMenuContent>
                           </DropdownMenu>
@@ -429,7 +431,7 @@ const ProfileRequestsList = () => {
                         <div className="p-2 rounded-xl bg-primary/10 text-primary">
                             <FileText className="h-6 w-6" />
                         </div>
-                        <DialogTitle className="text-2xl font-black tracking-tight">Verification Document</DialogTitle>
+                        <DialogTitle className="text-2xl font-black tracking-tight">{t("profileRequests.labels.verificationDoc")}</DialogTitle>
                     </div>
                   </div>
               </DialogHeader>
@@ -443,11 +445,11 @@ const ProfileRequestsList = () => {
                   )}
               </div>
               <DialogFooter className="p-6 pt-4 gap-3">
-                  <Button variant="ghost" className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-12 px-6" onClick={() => setPreviewUrl(null)}>Close Preview</Button>
+                  <Button variant="ghost" className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-12 px-6" onClick={() => setPreviewUrl(null)}>{t("buttons.closePreview")}</Button>
                   <Button className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-12 px-8 shadow-xl shadow-primary/20" asChild>
                       <a href={previewUrl || ""} target="_blank" rel="noreferrer">
                           <ExternalLink className="h-4 w-4 mr-2" />
-                          Open Full Resolution
+                          {t("buttons.openFullRes")}
                       </a>
                   </Button>
               </DialogFooter>
@@ -462,23 +464,23 @@ const ProfileRequestsList = () => {
                     <XCircle className="h-8 w-8" />
                   </div>
                   <div className="space-y-1">
-                    <DialogTitle className="text-3xl font-black tracking-tight">Reject Changes</DialogTitle>
+                    <DialogTitle className="text-3xl font-black tracking-tight">{t("profileRequests.dialogs.rejectTitle")}</DialogTitle>
                     <DialogDescription className="font-medium text-base">
-                        Please provide a specific reason for rejecting these profile updates.
+                        {t("profileRequests.dialogs.rejectDesc")}
                     </DialogDescription>
                   </div>
               </DialogHeader>
               <div className="py-8 space-y-3">
-                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Rejection Feedback</Label>
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">{t("profileRequests.dialogs.rejectionFeedback")}</Label>
                   <Textarea 
-                      placeholder="e.g. The uploaded document is blurry or invalid. Please re-upload a clear copy of your teaching certificate."
+                      placeholder={t("profileRequests.dialogs.rejectionPlaceholder")}
                       value={rejectReason}
                       onChange={(e) => setRejectReason(e.target.value)}
                       className="min-h-37.5 rounded-4xl bg-muted/30 border-none focus-visible:ring-destructive/30 p-6 text-base leading-relaxed font-medium resize-none"
                   />
               </div>
               <DialogFooter className="gap-3">
-                  <Button variant="ghost" className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-8" onClick={() => setRejectTarget(null)}>Cancel</Button>
+                  <Button variant="ghost" className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-8" onClick={() => setRejectTarget(null)}>{t("buttons.cancel")}</Button>
                   <Button 
                       variant="destructive" 
                       onClick={handleReject}
@@ -486,7 +488,7 @@ const ProfileRequestsList = () => {
                       className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-12 shadow-xl shadow-destructive/20"
                   >
                       {isRejecting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <XCircle className="h-4 w-4 mr-2" />}
-                      Confirm Rejection
+                      {t("profileRequests.dialogs.confirmRejection")}
                   </Button>
               </DialogFooter>
           </DialogContent>

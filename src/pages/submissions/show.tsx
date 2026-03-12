@@ -22,8 +22,13 @@ import {
 import { Submission, User as UserType, Assignment } from "@/types";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
+import { useTranslation } from "react-i18next";
+import { cn } from "@/lib/utils";
+import dayjs from "dayjs";
 
 const SubmissionShow = () => {
+  const { t, i18n } = useTranslation();
+  const isAr = i18n.language === 'ar';
   const { id } = useParams();
   const navigate = useNavigate();
   const { data: identity } = useGetIdentity<UserType>();
@@ -60,7 +65,7 @@ const SubmissionShow = () => {
       },
     }, {
       onSuccess: () => {
-        toast.success("Submission graded successfully!");
+        toast.success(t("assignments.grading.gradeSaved"));
         navigate(-1);
       }
     });
@@ -78,11 +83,11 @@ const SubmissionShow = () => {
             setGrade(result.suggestedGrade);
             setFeedback(result.feedback);
             setIsAnalyzing(false);
-            toast.success("AI Analysis complete!");
+            toast.success(t("assignments.grading.toasts.aiComplete"));
         },
         onError: () => {
             setIsAnalyzing(false);
-            toast.error("AI Analysis failed. Please try again.");
+            toast.error(t("common.aiServiceError"));
         }
     });
   };
@@ -95,25 +100,25 @@ const SubmissionShow = () => {
     );
   }
 
-  if (!submission) return <div>Submission not found</div>;
+  if (!submission) return <div className="p-20 text-center font-bold">{t("assignments.show.notFound")}</div>;
 
   return (
     <ShowView>
-      <div className="max-w-5xl mx-auto space-y-8">
+      <div className="max-w-5xl mx-auto space-y-8 text-start">
         {/* Header */}
         <div className="flex items-center justify-between">
             <Button variant="ghost" onClick={() => navigate(-1)} className="gap-2">
-                <ArrowLeft className="h-4 w-4" />
-                Back to List
+                <ArrowLeft className={cn("h-4 w-4", isAr && "rotate-180")} />
+                {t("buttons.back")}
             </Button>
             <div className="flex items-center gap-3">
                 {submission.grade !== null ? (
                     <Badge className="bg-success text-success-foreground px-4 py-1 rounded-full font-black uppercase tracking-widest text-[10px]">
-                        Graded
+                        {t("status.completed")}
                     </Badge>
                 ) : (
                     <Badge variant="outline" className="px-4 py-1 rounded-full font-black uppercase tracking-widest text-[10px]">
-                        Pending Grade
+                        {t("assignments.list.table.pending")}
                     </Badge>
                 )}
             </div>
@@ -140,18 +145,18 @@ const SubmissionShow = () => {
                     </CardHeader>
                     <CardContent className="pt-8">
                         <div className="prose prose-sm dark:prose-invert max-w-none bg-muted/10 p-6 rounded-2xl border border-dashed">
-                            <ReactMarkdown>{submission.content || "No text content provided."}</ReactMarkdown>
+                            <ReactMarkdown>{submission.content || t("assignments.grading.noContent")}</ReactMarkdown>
                         </div>
                     </CardContent>
                     <CardFooter className="bg-muted/10 border-t py-4 flex justify-between text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
                         <div className="flex items-center gap-1">
                             <Calendar className="h-3 w-3" />
-                            Submitted: {new Date(submission.createdAt).toLocaleString()}
+                            {t("assignments.show.submittedContent")}: {dayjs(submission.createdAt).locale(i18n.language).format("LLL")}
                         </div>
                         {submission.isLate && (
                             <div className="flex items-center gap-1 text-destructive">
                                 <AlertCircle className="h-3 w-3" />
-                                Late Submission
+                                {t("assignments.list.table.late")}
                             </div>
                         )}
                     </CardFooter>
@@ -164,7 +169,7 @@ const SubmissionShow = () => {
                     <div className="h-1.5 bg-primary w-full" />
                     <CardHeader>
                         <CardTitle className="text-sm font-black uppercase tracking-widest flex items-center justify-between">
-                            Grading Panel
+                            {t("assignments.grading.gradeSubmission")}
                             <Button 
                                 variant="outline" 
                                 size="sm" 
@@ -173,13 +178,13 @@ const SubmissionShow = () => {
                                 className="h-7 text-[10px] gap-1.5 border-ai-primary/20 text-ai-primary hover:bg-ai-primary/5"
                             >
                                 {isAnalyzing ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
-                                AI Analyze
+                                {t("buttons.aiAssist")}
                             </Button>
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-6">
                         <div className="space-y-2">
-                            <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Final Grade (%)</Label>
+                            <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t("assignments.grading.finalScore")}</Label>
                             <div className="relative">
                                 <Input 
                                     type="number" 
@@ -189,28 +194,28 @@ const SubmissionShow = () => {
                                     min={0}
                                     max={100}
                                 />
-                                <div className="absolute right-4 top-1/2 -translate-y-1/2 text-xl font-black text-muted-foreground/30">%</div>
+                                <div className={cn("absolute top-1/2 -translate-y-1/2 text-xl font-black text-muted-foreground/30", isAr ? "left-4" : "right-4")}>%</div>
                             </div>
                         </div>
 
                         <div className="space-y-2">
-                            <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Teacher Feedback</Label>
+                            <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t("assignments.grading.feedbackToStudent")}</Label>
                             <Textarea 
                                 value={feedback}
                                 onChange={(e) => setFeedback(e.target.value)}
-                                placeholder="Provide constructive feedback..."
+                                placeholder={t("assignments.grading.feedbackPlaceholder")}
                                 className="min-h-[200px] rounded-xl resize-none bg-muted/10 border-none p-4 text-sm leading-relaxed"
                             />
                         </div>
 
-                        {submission.suggestedGrade !== undefined && submission.suggestedGrade !== null && !submission.grade && (
+                        {(submission.suggestedGrade !== undefined && submission.suggestedGrade !== null && !submission.grade) && (
                             <div className="p-4 bg-ai-secondary/30 rounded-xl border border-ai-primary/10 space-y-2">
                                 <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-ai-primary">
                                     <Wand2 className="h-3 w-3" />
-                                    AI Suggestion
+                                    {t("assignments.show.aiCoach")}
                                 </div>
                                 <p className="text-xs text-ai-primary/70 leading-relaxed italic">
-                                    "AI suggests a grade of {submission.suggestedGrade}% based on the content quality and alignment with objectives."
+                                    {t("assignments.grading.toasts.aiApplied")}
                                 </p>
                             </div>
                         )}
@@ -222,7 +227,7 @@ const SubmissionShow = () => {
                             className="w-full h-12 rounded-xl font-black uppercase tracking-widest shadow-lg shadow-primary/20"
                         >
                             {mutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                            Save Final Grade
+                            {t("buttons.saveGrade")}
                         </Button>
                     </CardFooter>
                 </Card>

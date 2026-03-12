@@ -3,6 +3,7 @@ import { CardFooter } from "../ui/card";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { Send } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface ChatInputProps {
   input: string;
@@ -17,17 +18,18 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   handleSend,
   isLoading,
 }) => {
+  const { t } = useTranslation();
   return (
     <CardFooter className="p-4 border-t bg-muted/20">
       <form 
-        className="flex w-full items-center space-x-2"
+        className="flex w-full items-center gap-2"
         onSubmit={(e) => {
           e.preventDefault();
           handleSend();
         }}
       >
         <Input
-          placeholder="Type your question..."
+          placeholder={t("classes.reader.askPlaceholder")}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           disabled={isLoading}
@@ -37,9 +39,9 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           type="submit" 
           size="icon" 
           disabled={isLoading || !input.trim()}
-          className="h-11 w-11 rounded-xl shadow-lg shadow-primary/20 transition-all active:scale-95"
+          className="h-11 w-11 rounded-xl shadow-lg shadow-primary/20 transition-all active:scale-95 shrink-0"
         >
-          <Send className="h-4 w-4" />
+          <Send className="h-4 w-4 rtl:rotate-180" />
         </Button>
       </form>
     </CardFooter>

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { useNavigation } from "@refinedev/core";
+import { useTranslation } from "react-i18next";
 
 interface OnboardingStep {
   id: string;
@@ -16,6 +17,7 @@ interface OnboardingStep {
 }
 
 export const TeacherOnboarding = ({ stats }: { stats?: any }) => {
+  const { t } = useTranslation();
   const { create, list } = useNavigation();
   const [dismissed, setDismissed] = useState(false);
 
@@ -27,24 +29,24 @@ export const TeacherOnboarding = ({ stats }: { stats?: any }) => {
   const steps: OnboardingStep[] = [
     {
       id: "create-class",
-      title: "Create your first class",
-      description: "Set up a space for your students to learn and collaborate.",
+      title: t("dashboard.onboarding.teacher.steps.createClass.title"),
+      description: t("dashboard.onboarding.teacher.steps.createClass.description"),
       icon: Plus,
       action: () => create("classes"),
       completed: (stats?.totalClasses || 0) > 0,
     },
     {
       id: "add-assignment",
-      title: "Add an assignment",
-      description: "Create your first task to start tracking student progress.",
+      title: t("dashboard.onboarding.teacher.steps.addAssignment.title"),
+      description: t("dashboard.onboarding.teacher.steps.addAssignment.description"),
       icon: BookOpen,
       action: () => create("assignments"),
       completed: (stats?.totalAssignments || 0) > 0,
     },
     {
       id: "invite-students",
-      title: "Invite students",
-      description: "Add students to your classes to begin the journey.",
+      title: t("dashboard.onboarding.teacher.steps.inviteStudents.title"),
+      description: t("dashboard.onboarding.teacher.steps.inviteStudents.description"),
       icon: UserPlus,
       action: () => list("users"),
       completed: (stats?.totalStudents || 0) > 0,
@@ -68,7 +70,7 @@ export const TeacherOnboarding = ({ stats }: { stats?: any }) => {
     <Card className="border-primary/20 bg-primary/5 mb-8 overflow-hidden relative">
       <div className="absolute top-0 right-0 p-4">
         <Button variant="ghost" size="sm" onClick={handleDismiss} className="text-muted-foreground hover:text-foreground">
-          Dismiss
+          {t("buttons.dismiss")}
         </Button>
       </div>
       <CardHeader>
@@ -77,14 +79,14 @@ export const TeacherOnboarding = ({ stats }: { stats?: any }) => {
             <CheckCircle2 className="h-6 w-6 text-primary" />
           </div>
           <div>
-            <CardTitle className="text-xl">Welcome, Teacher! Let's get started</CardTitle>
-            <CardDescription>Complete these steps to set up your digital classroom.</CardDescription>
+            <CardTitle className="text-xl">{t("dashboard.onboarding.teacher.welcome")}</CardTitle>
+            <CardDescription>{t("dashboard.onboarding.teacher.description")}</CardDescription>
           </div>
         </div>
         <div className="mt-4 space-y-2">
           <div className="flex justify-between text-sm font-medium">
-            <span>Setup Progress</span>
-            <span>{completedSteps} of {steps.length} steps</span>
+            <span>{t("dashboard.onboarding.teacher.setupProgress")}</span>
+            <span>{t("dashboard.onboarding.teacher.stepsOf", { completed: completedSteps, total: steps.length })}</span>
           </div>
           <Progress value={progress} className="h-2" />
         </div>
@@ -118,7 +120,7 @@ export const TeacherOnboarding = ({ stats }: { stats?: any }) => {
               <p className="text-xs text-muted-foreground mb-4">{step.description}</p>
               {!step.completed && (
                 <Button size="sm" variant="outline" className="w-full group" onClick={step.action}>
-                  Get Started
+                  {t("buttons.getStarted")}
                   <ArrowRight className="ml-2 h-3 w-3 transition-transform group-hover:translate-x-1" />
                 </Button>
               )}

@@ -39,6 +39,7 @@ import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import "dayjs/locale/ar";
 import usePageTitle from "@/hooks/use-page-title";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -50,11 +51,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useTranslation } from "react-i18next";
 
 dayjs.extend(relativeTime);
 
 const AssignmentsListPage = () => {
-  usePageTitle("Assignments");
+  const { t, i18n } = useTranslation();
+  usePageTitle(t("assignments.list.title"));
   const { data: identity } = useGetIdentity<User>();
   const isStaff = identity?.role === UserRole.ADMIN || identity?.role === UserRole.TEACHER;
   const { selectedTerm } = useTerm();
@@ -64,6 +67,10 @@ const AssignmentsListPage = () => {
 
   const { edit, show, create } = useNavigation();
   const { mutate: deleteMutation } = useDelete();
+
+  const isAr = i18n.language === 'ar';
+  if (isAr) dayjs.locale('ar');
+  else dayjs.locale('en');
 
   const filters = useMemo(() => {
     const f = [];
@@ -126,13 +133,13 @@ const AssignmentsListPage = () => {
           <motion.div 
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="space-y-4"
+            className="space-y-4 text-start"
           >
             <Breadcrumb />
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div>
-                <h1 className="text-4xl font-black tracking-tight">Assignments</h1>
-                <p className="text-muted-foreground font-medium mt-1">Track and manage all class assignments and student tasks.</p>
+                <h1 className="text-4xl font-black tracking-tight">{t("assignments.list.title")}</h1>
+                <p className="text-muted-foreground font-medium mt-1">{t("assignments.list.description")}</p>
               </div>
               <div className="flex items-center gap-3 w-full md:w-auto">
                 {isStaff && (
@@ -141,7 +148,7 @@ const AssignmentsListPage = () => {
                     className="flex-1 md:flex-none rounded-2xl h-14 px-10 font-black uppercase tracking-widest text-[10px] gap-2 shadow-xl shadow-primary/20 transition-all hover:scale-105 active:scale-95"
                   >
                     <PlusCircle className="h-5 w-5" />
-                    Create Assignment
+                    {t("buttons.createAssignment")}
                   </Button>
                 )}
               </div>
@@ -149,13 +156,13 @@ const AssignmentsListPage = () => {
           </motion.div>
 
           {/* Stats Row */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-start">
             <Card className="p-6 border-primary/10 bg-card/50 backdrop-blur-sm flex items-center gap-4 rounded-4xl shadow-lg shadow-primary/5">
               <div className="p-3 rounded-2xl bg-primary/10 text-primary">
                 <FileText className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Total Tasks</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t("assignments.list.stats.total")}</p>
                 <p className="text-2xl font-black">{isLoading ? "..." : stats.total}</p>
               </div>
             </Card>
@@ -164,7 +171,7 @@ const AssignmentsListPage = () => {
                 <CheckCircle2 className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Active</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t("assignments.list.stats.active")}</p>
                 <p className="text-2xl font-black text-green-600">{isLoading ? "..." : stats.active}</p>
               </div>
             </Card>
@@ -173,7 +180,7 @@ const AssignmentsListPage = () => {
                 <Timer className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Overdue</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t("assignments.list.stats.overdue")}</p>
                 <p className="text-2xl font-black text-destructive">{isLoading ? "..." : stats.overdue}</p>
               </div>
             </Card>
@@ -183,18 +190,18 @@ const AssignmentsListPage = () => {
           <Card className="p-4 border-primary/5 bg-muted/30 rounded-4xl backdrop-blur-sm">
             <div className="flex flex-col lg:flex-row gap-4">
               <div className="relative flex-1 group">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                <Search className={cn("absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors", isAr ? "right-4" : "left-4")} />
                 <Input
                   type="text"
-                  placeholder="Search assignments by title or class..."
-                  className="pl-11 h-14 rounded-2xl border-none bg-background shadow-sm font-medium"
+                  placeholder={t("assignments.list.filters.searchPlaceholder")}
+                  className={cn("h-14 rounded-2xl border-none bg-background shadow-sm font-medium", isAr ? "pr-11 pl-4" : "pl-11 pr-4")}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
               <div className="flex items-center gap-2 bg-background px-4 rounded-2xl shadow-sm border border-primary/5">
                 <Filter className="h-4 w-4 text-muted-foreground" />
-                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Filters Active</span>
+                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t("assignments.list.filters.active")}</span>
               </div>
             </div>
           </Card>
@@ -205,14 +212,16 @@ const AssignmentsListPage = () => {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="bg-amber-500/10 border border-amber-500/20 text-amber-700 p-6 rounded-4xl shadow-sm flex items-start gap-4 backdrop-blur-sm"
+                className="bg-amber-500/10 border border-amber-500/20 text-amber-700 p-6 rounded-4xl shadow-sm flex items-start gap-4 backdrop-blur-sm text-start"
               >
                   <div className="p-3 rounded-2xl bg-amber-500/20">
                     <AlertCircle className="h-6 w-6" />
                   </div>
                   <div className="space-y-1">
-                    <p className="font-black uppercase tracking-widest text-xs">Archive View Active</p>
-                    <p className="text-sm font-medium">You are viewing assignments from <strong>{selectedTerm.name}</strong>. Content is read-only.</p>
+                    <p className="font-black uppercase tracking-widest text-xs">{t("dashboard.archiveViewActive")}</p>
+                    <p className="text-sm font-medium">
+                      {t("dashboard.archiveViewDescription", { termName: selectedTerm.name })}
+                    </p>
                   </div>
               </motion.div>
             )}
@@ -224,7 +233,7 @@ const AssignmentsListPage = () => {
             className="h-150 overflow-auto pr-2 custom-scrollbar rounded-[2.5rem] border border-primary/5 bg-card/30 backdrop-blur-sm relative"
           >
             {isLoading ? (
-              <div className="p-8 space-y-6">
+              <div className="p-8 space-y-6 text-start">
                 {Array.from({ length: 6 }).map((_, i) => (
                   <div key={i} className="flex flex-col md:flex-row items-center gap-6">
                     <Skeleton className="h-14 w-14 rounded-2xl shrink-0" />
@@ -240,11 +249,11 @@ const AssignmentsListPage = () => {
               <div className="h-full w-full flex items-center justify-center p-12">
                 <EmptyState
                   icon={FileText}
-                  title="No assignments found"
-                  description={isStaff ? "Create your first assignment to start tracking student progress." : "You don't have any assignments yet."}
+                  title={t("assignments.list.noAssignments")}
+                  description={isStaff ? t("assignments.list.noAssignmentsDescriptionTeacher") : t("assignments.list.noAssignmentsDescriptionStudent")}
                   className="border-none bg-transparent min-h-0"
                   action={isStaff && selectedTerm?.status === "active" ? {
-                    label: "Create Assignment",
+                    label: t("buttons.createAssignment"),
                     onClick: () => create("assignments"),
                   } : undefined}
                 />
@@ -258,7 +267,7 @@ const AssignmentsListPage = () => {
                   return (
                     <motion.div
                       key={virtualItem.key}
-                      initial={{ opacity: 0, x: -10 }}
+                      initial={{ opacity: 0, x: isAr ? 10 : -10 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ duration: 0.2 }}
                       style={{
@@ -283,8 +292,8 @@ const AssignmentsListPage = () => {
                       </div>
 
                       {/* Info */}
-                      <div className="flex-1 md:ml-8 text-center md:text-left min-w-0 w-full">
-                        <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
+                      <div className={cn("flex-1 text-center md:text-left min-w-0 w-full", isAr ? "md:mr-8" : "md:ml-8")}>
+                        <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 text-start">
                           <h3 className="text-xl font-black tracking-tight truncate group-hover:text-primary transition-colors">
                             {assignment.title}
                           </h3>
@@ -293,11 +302,11 @@ const AssignmentsListPage = () => {
                                 variant="outline" 
                                 className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md border-primary/10"
                             >
-                                {(assignment as any).class?.name || "General"}
+                                {(assignment as any).class?.name || t("assignments.list.labels.general")}
                             </Badge>
                             {assignment.hasPeerReview && (
                                 <Badge className="bg-amber-500/10 text-amber-600 border-none font-black px-2 py-0.5 rounded-md text-[9px] tracking-widest uppercase">
-                                    Peer Review
+                                    {t("assignments.list.labels.peerReview")}
                                 </Badge>
                             )}
                           </div>
@@ -309,7 +318,7 @@ const AssignmentsListPage = () => {
                                 <Calendar className="h-3.5 w-3.5 text-primary" />
                             </div>
                             <span className="text-xs font-bold">
-                                Due {assignment.dueDate ? dayjs(assignment.dueDate).format("MMM D, YYYY") : "No deadline"}
+                                {t("assignments.list.labels.due", { date: assignment.dueDate ? dayjs(assignment.dueDate).format("MMM D, YYYY") : t("assignments.list.labels.noDeadline") })}
                             </span>
                           </div>
 
@@ -321,7 +330,7 @@ const AssignmentsListPage = () => {
                                 "text-xs font-bold uppercase tracking-tight",
                                 isPast ? "text-destructive" : "text-primary"
                             )}>
-                                {assignment.dueDate ? dayjs(assignment.dueDate).fromNow() : "Open"}
+                                {assignment.dueDate ? dayjs(assignment.dueDate).fromNow() : t("assignments.list.labels.open")}
                             </span>
                           </div>
                         </div>
@@ -329,7 +338,7 @@ const AssignmentsListPage = () => {
 
                       {/* Actions */}
                       <div className="flex items-center gap-3 mt-6 md:mt-0 shrink-0">
-                        <div className="hidden lg:flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all translate-x-4 group-hover:translate-x-0">
+                        <div className={cn("hidden lg:flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all", isAr ? "-translate-x-4 group-hover:translate-x-0" : "translate-x-4 group-hover:translate-x-0")}>
                             {isStaff && (
                                 <>
                                     <Button
@@ -361,8 +370,8 @@ const AssignmentsListPage = () => {
                               "bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20",
                           )}
                         >
-                          View Details
-                          <ArrowRight className="h-4 w-4 ml-2" />
+                          {t("buttons.viewDetails")}
+                          <ArrowRight className={cn("h-4 w-4 ml-2", isAr && "mr-2 ml-0 rotate-180")} />
                         </Button>
 
                         <DropdownMenu>
@@ -372,21 +381,21 @@ const AssignmentsListPage = () => {
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-56 rounded-[1.5rem] p-2">
-                                <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-3 py-2">Assignment Options</DropdownMenuLabel>
-                                <DropdownMenuItem onClick={() => show("assignments", assignment.id)} className="rounded-xl gap-3 py-3 cursor-pointer">
+                                <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-3 py-2 text-start">{t("assignments.list.labels.options")}</DropdownMenuLabel>
+                                <DropdownMenuItem onClick={() => show("assignments", assignment.id)} className="rounded-xl gap-3 py-3 cursor-pointer justify-start">
                                     <Eye className="h-4 w-4 text-primary" />
-                                    <span className="font-bold">View Details</span>
+                                    <span className="font-bold">{t("buttons.viewDetails")}</span>
                                 </DropdownMenuItem>
                                 {isStaff && (
                                     <>
-                                        <DropdownMenuItem onClick={() => edit("assignments", assignment.id)} className="rounded-xl gap-3 py-3 cursor-pointer">
+                                        <DropdownMenuItem onClick={() => edit("assignments", assignment.id)} className="rounded-xl gap-3 py-3 cursor-pointer justify-start">
                                             <Edit3 className="h-4 w-4 text-primary" />
-                                            <span className="font-bold">Edit Assignment</span>
+                                            <span className="font-bold">{t("buttons.editAssignment")}</span>
                                         </DropdownMenuItem>
                                         <DropdownMenuSeparator className="my-2" />
-                                        <DropdownMenuItem onClick={() => setDeleteTarget(assignment.id)} className="rounded-xl gap-3 py-3 cursor-pointer text-destructive focus:text-destructive">
+                                        <DropdownMenuItem onClick={() => setDeleteTarget(assignment.id)} className="rounded-xl gap-3 py-3 cursor-pointer text-destructive focus:text-destructive justify-start">
                                             <Trash2 className="h-4 w-4" />
-                                            <span className="font-bold">Delete Assignment</span>
+                                            <span className="font-bold">{t("buttons.deleteAssignment")}</span>
                                         </DropdownMenuItem>
                                     </>
                                 )}
@@ -403,25 +412,25 @@ const AssignmentsListPage = () => {
       </ListView>
 
       <AlertDialog open={deleteTarget !== null} onOpenChange={() => setDeleteTarget(null)}>
-        <AlertDialogContent className="rounded-[2.5rem] border-none shadow-2xl bg-card/95 backdrop-blur-xl">
+        <AlertDialogContent className="rounded-[2.5rem] border-none shadow-2xl bg-card/95 backdrop-blur-xl text-start">
           <AlertDialogHeader className="space-y-4">
             <div className="p-4 rounded-2xl bg-destructive/10 text-destructive w-fit">
               <Trash2 className="h-8 w-8" />
             </div>
             <div className="space-y-1">
-                <AlertDialogTitle className="text-3xl font-black tracking-tight">Are you absolutely sure?</AlertDialogTitle>
+                <AlertDialogTitle className="text-3xl font-black tracking-tight">{t("assignments.list.deleteDialog.title")}</AlertDialogTitle>
                 <AlertDialogDescription className="font-medium text-base">
-                This action cannot be undone. This will permanently delete the assignment and all associated student submissions from the system.
+                {t("assignments.list.deleteDialog.description")}
                 </AlertDialogDescription>
             </div>
           </AlertDialogHeader>
           <AlertDialogFooter className="gap-3 pt-6">
-            <AlertDialogCancel className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-8">Cancel</AlertDialogCancel>
+            <AlertDialogCancel className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-8">{t("buttons.cancel")}</AlertDialogCancel>
             <AlertDialogAction 
                 onClick={handleConfirmDelete} 
                 className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-12 bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-xl shadow-destructive/20"
             >
-                Confirm Delete
+                {t("buttons.confirmDelete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

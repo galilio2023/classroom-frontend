@@ -1,6 +1,8 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { cn } from "@/lib/utils";
 
 interface Question {
   question: string;
@@ -30,6 +32,9 @@ export const PracticeQuizStep: React.FC<PracticeQuizStepProps> = ({
   onNext,
   isSubmitting,
 }) => {
+  const { t, i18n } = useTranslation();
+  const isArabic = i18n.language === 'ar';
+
   return (
     <div className="space-y-6">
       {/* Progress Bar */}
@@ -49,11 +54,12 @@ export const PracticeQuizStep: React.FC<PracticeQuizStepProps> = ({
             <button
               key={idx}
               onClick={() => onOptionSelect(option)}
-              className={`p-4 rounded-xl border-2 text-left transition-all hover:bg-accent ${
+              className={cn(
+                "p-4 rounded-xl border-2 text-left transition-all hover:bg-accent",
                 selectedOption === option
                   ? "border-primary bg-primary/5 ring-2 ring-primary/20"
                   : "border-border bg-card"
-              }`}
+              )}
             >
               <span className="font-medium">{option}</span>
             </button>
@@ -70,10 +76,11 @@ export const PracticeQuizStep: React.FC<PracticeQuizStepProps> = ({
           {isSubmitting ? (
             <Loader2 className="h-4 w-4 animate-spin mr-2" />
           ) : currentQuestionIndex === totalQuestions - 1 ? (
-            "Submit Quiz"
+            t("classes.quiz.finishQuiz")
           ) : (
             <>
-              Next Question <ArrowRight className="h-4 w-4 ml-2" />
+              {t("classes.quiz.nextQuestion")} 
+              <ArrowRight className={cn("h-4 w-4 ml-2", isArabic && "rotate-180 ml-0 mr-2")} />
             </>
           )}
         </Button>

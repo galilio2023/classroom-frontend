@@ -13,6 +13,7 @@ import { getLevelProgress } from "@/lib/xp";
 import { StudentOnboarding } from "./student-onboarding";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
+import { useTranslation } from "react-i18next";
 
 interface StudentDashboardProps {
   data: DashboardData;
@@ -22,6 +23,7 @@ interface StudentDashboardProps {
 }
 
 export const StudentDashboard = ({ data, isLoading, list, show }: StudentDashboardProps) => {
+  const { t } = useTranslation();
   const { data: identity } = useGetIdentity<User>();
 
   const currentXP = identity?.xp || 0;
@@ -79,7 +81,7 @@ export const StudentDashboard = ({ data, isLoading, list, show }: StudentDashboa
                   transition={{ delay: 0.5, type: "spring" }}
                   className="absolute -bottom-2 -right-2 bg-gold-primary text-white font-black text-xs md:text-sm px-3 py-1.5 rounded-full border-4 border-white shadow-xl z-20"
                 >
-                  LVL {currentLevel}
+                  {t("dashboard.student.level")} {currentLevel}
                 </motion.div>
               </div>
               
@@ -87,23 +89,23 @@ export const StudentDashboard = ({ data, isLoading, list, show }: StudentDashboa
                 <div className="space-y-2">
                   <div className="flex items-center justify-center md:justify-start gap-2">
                     <Badge variant="secondary" className="bg-white/20 text-white border-none backdrop-blur-md font-black text-[10px] uppercase tracking-widest px-3 py-1">
-                      Academic Journey
+                      {t("dashboard.student.academicJourney")}
                     </Badge>
                     {currentStreak >= 3 && (
                       <div className="flex items-center gap-1 text-orange-400 animate-bounce">
                         <Flame className="h-3 w-3 fill-orange-400" />
-                        <span className="text-[10px] font-black uppercase tracking-widest">On Fire!</span>
+                        <span className="text-[10px] font-black uppercase tracking-widest">{t("dashboard.student.onFire")}</span>
                       </div>
                     )}
                     <div className="flex items-center gap-1 text-gold-primary animate-pulse">
                       <Sparkles className="h-3 w-3 fill-gold-primary" />
-                      <span className="text-[10px] font-black uppercase tracking-widest">Elite Student</span>
+                      <span className="text-[10px] font-black uppercase tracking-widest">{t("dashboard.student.eliteStudent")}</span>
                     </div>
                   </div>
-                  <h2 className="text-3xl md:text-5xl font-black tracking-tighter leading-none">Keep it up, {identity?.name?.split(' ')[0] || "Student"}!</h2>
+                  <h2 className="text-3xl md:text-5xl font-black tracking-tighter leading-none">{t("dashboard.student.keepItUp", { name: identity?.name?.split(' ')[0] || "Student" })}</h2>
                   <p className="text-white/70 text-sm md:text-lg font-medium flex items-center justify-center md:justify-start gap-2">
                     <Zap className="h-5 w-5 text-gold-primary fill-gold-primary" />
-                    You are <span className="text-white font-black">{Math.round(xpNeeded)} XP</span> away from Level {currentLevel + 1}
+                    {t("dashboard.student.xpToNextLevel", { xp: Math.round(xpNeeded), level: currentLevel + 1 })}
                   </p>
                 </div>
                 
@@ -115,9 +117,9 @@ export const StudentDashboard = ({ data, isLoading, list, show }: StudentDashboa
                     indicatorClassName="bg-gradient-to-r from-gold-primary via-yellow-400 to-gold-secondary shadow-[0_0_15px_rgba(234,179,8,0.5)]"
                   />
                   <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-[0.2em] text-white/40">
-                    <span>Level {currentLevel}</span>
+                    <span>{t("dashboard.student.level")} {currentLevel}</span>
                     <span className="text-white/60">{Math.floor(xpInCurrentLevel)} / {xpRequiredForNextLevel} XP</span>
-                    <span>Level {currentLevel + 1}</span>
+                    <span>{t("dashboard.student.level")} {currentLevel + 1}</span>
                   </div>
                 </div>
               </div>
@@ -131,8 +133,8 @@ export const StudentDashboard = ({ data, isLoading, list, show }: StudentDashboa
                       <Flame className="h-6 w-6 fill-orange-500" />
                     </div>
                     <div>
-                      <p className="text-[10px] font-black uppercase tracking-widest text-white/40">Daily Streak</p>
-                      <p className="text-xl font-black text-white">{currentStreak} Days</p>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-white/40">{t("dashboard.student.dailyStreak")}</p>
+                      <p className="text-xl font-black text-white">{currentStreak} {t("dashboard.student.days")}</p>
                     </div>
                  </motion.div>
                  <motion.div 
@@ -143,8 +145,8 @@ export const StudentDashboard = ({ data, isLoading, list, show }: StudentDashboa
                       <Star className="h-6 w-6 fill-success" />
                     </div>
                     <div>
-                      <p className="text-[10px] font-black uppercase tracking-widest text-white/40">Next Reward</p>
-                      <p className="text-sm font-black text-white">Profile Badge</p>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-white/40">{t("dashboard.student.nextReward")}</p>
+                      <p className="text-sm font-black text-white">{t("dashboard.student.profileBadge")}</p>
                     </div>
                  </motion.div>
               </div>
@@ -166,7 +168,7 @@ export const StudentDashboard = ({ data, isLoading, list, show }: StudentDashboa
                 <div className="p-2 rounded-xl bg-primary/10 text-primary">
                   <TrendingUp className="h-5 w-5" />
                 </div>
-                <h2 className="text-2xl font-black tracking-tight">Academic Journey</h2>
+                <h2 className="text-2xl font-black tracking-tight">{t("dashboard.student.academicJourney")}</h2>
                 <div className="h-px flex-1 bg-gradient-to-r from-primary/20 to-transparent" />
               </div>
               <StudentAcademicJourney 
@@ -204,7 +206,7 @@ export const StudentDashboard = ({ data, isLoading, list, show }: StudentDashboa
                 <div className="p-2 rounded-xl bg-primary/10 text-primary">
                   <History className="h-5 w-5" />
                 </div>
-                <h2 className="text-xl font-black tracking-tight">Recent Activity</h2>
+                <h2 className="text-xl font-black tracking-tight">{t("dashboard.student.recentActivity")}</h2>
               </div>
               <RecentActivity limit={5} />
             </motion.div>

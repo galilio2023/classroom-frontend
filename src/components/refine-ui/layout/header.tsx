@@ -15,13 +15,13 @@ import {
   LifeBuoy,
   BellRing,
   CalendarClock,
+  Languages,
 } from "lucide-react";
 import { toast } from "sonner";
 import { User, UserRole } from "@/types";
 import { ThemeToggle } from "../theme/theme-toggle";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { NotificationBell } from "@/components/notification-bell";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { CommandMenu } from "@/components/command-menu";
 import { XPProgressBar } from "@/components/xp-progress-bar";
 import { cn } from "@/lib/utils";
@@ -34,17 +34,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useTranslation } from "react-i18next";
+import { UserAvatar } from "./user-avatar";
 
 export function Header() {
   const { mutate: logout } = useLogout();
   const { data: identity } = useGetIdentity<User>();
   const { show, edit } = useNavigation();
   const { selectedTerm, setSelectedTerm, terms } = useTerm();
+  const { t, i18n } = useTranslation();
 
   const handleLogout = () => {
     logout(undefined, {
       onSuccess: () => {
-        toast.success("Successfully logged out");
+        toast.success(t("auth.logoutSuccess"));
       },
     });
   };
@@ -52,65 +55,30 @@ export function Header() {
   const handleEnablePush = async () => {
     const permission = await Notification.requestPermission();
     if (permission === "granted") {
-      await subscribeToPush();
-      toast.success("Push notifications enabled!");
+      void subscribeToPush();
+      toast.success(t("notifications.pushEnabled"));
     } else {
-      toast.error("Notification permission denied");
+      toast.error(t("notifications.pushDenied"));
     }
+  };
+
+  const changeLanguage = (lng: string) => {
+    void i18n.changeLanguage(lng);
   };
 
   const isStudent = identity?.role === UserRole.STUDENT;
-
-  // Generate a consistent background color based on the user's name
-  const getBackgroundColor = (name: string) => {
-    const colors = [
-      "bg-red-500",
-      "bg-orange-500",
-      "bg-amber-500",
-      "bg-yellow-500",
-      "bg-lime-500",
-      "bg-green-500",
-      "bg-emerald-500",
-      "bg-teal-500",
-      "bg-cyan-500",
-      "bg-sky-500",
-      "bg-blue-500",
-      "bg-indigo-500",
-      "bg-violet-500",
-      "bg-purple-500",
-      "bg-fuchsia-500",
-      "bg-pink-500",
-      "bg-rose-500",
-    ];
-    if (!name) return colors[0];
-    let hash = 0;
-    for (let i = 0; i < name.length; i++) {
-      hash = name.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    return colors[Math.abs(hash) % colors.length];
-  };
-
-  const getInitials = (name = "") => {
-    if (!name) return "?";
-    const names = name.trim().split(" ");
-    let initials = names[0].substring(0, 1).toUpperCase();
-    if (names.length > 1) {
-      initials += names[names.length - 1].substring(0, 1).toUpperCase();
-    }
-    return initials;
-  };
 
   return (
     <header className="flex h-20 items-center gap-4 border-b border-border/40 bg-background/60 backdrop-blur-xl px-6 sticky top-0 z-50">
       <SidebarTrigger className="md:hidden" />
 
-      <div className="w-full flex-1 flex items-center gap-6">
+      <div className="w-full flex-1 flex items-center gap-2 md:gap-6">
         <CommandMenu />
 
-        {/* Term Switcher */}
+        {/* Term Switcher - Visible on all screens, adjusted for mobile */}
         {terms.length > 0 && (
-          <div className="hidden md:flex items-center gap-2">
-            <CalendarClock className="h-4 w-4 text-muted-foreground" />
+          <div className="flex items-center gap-2">
+            <CalendarClock className="h-4 w-4 text-muted-foreground shrink-0 hidden xs:block" />
             <Select
               value={selectedTerm?.id?.toString() || ""}
               onValueChange={(val) => {
@@ -118,13 +86,15 @@ export function Header() {
                 if (term) setSelectedTerm(term);
               }}
             >
-              <SelectTrigger className="w-[180px] h-9 bg-muted/30 border-border/50">
-                <SelectValue placeholder="Select Term" />
+              <SelectTrigger className="w-30 md:w-45 h-9 bg-muted/30 border-border/50 text-[10px] md:text-sm">
+                <SelectValue placeholder={t("classes.form.selectTerm")} />
               </SelectTrigger>
               <SelectContent>
                 {terms.map((term) => (
                   <SelectItem key={term.id} value={term.id.toString()}>
-                    {term.name} {term.status === "active" && "(Current)"}
+                    {term.name}{" "}
+                    {term.status === "active" &&
+                      `(${t("classes.form.status.active")})`}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -139,8 +109,35 @@ export function Header() {
         )}
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 shrink-0">
         <div className="flex items-center gap-2 bg-muted/30 p-1 rounded-full border border-border/50">
+          {/* Language Switcher */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 rounded-full"
+              >
+                <Languages className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem
+                onClick={() => changeLanguage("en")}
+                className={cn(i18n.language === "en" && "bg-accent")}
+              >
+                English
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => changeLanguage("ar")}
+                className={cn(i18n.language === "ar" && "bg-accent")}
+              >
+                العربية (Arabic)
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
           <NotificationBell />
           <ThemeToggle />
         </div>
@@ -151,22 +148,12 @@ export function Header() {
               variant="ghost"
               className="relative h-10 w-10 rounded-full p-0 hover:bg-primary/10 transition-colors"
             >
-              <Avatar className="h-10 w-10 border-2 border-background shadow-sm">
-                <AvatarImage src={identity?.image || ""} alt={identity?.name} />
-                <AvatarFallback
-                  className={cn(
-                    "text-white font-bold",
-                    getBackgroundColor(identity?.name || ""),
-                  )}
-                >
-                  {getInitials(identity?.name)}
-                </AvatarFallback>
-              </Avatar>
+              <UserAvatar />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent
             align="end"
-            className="w-56 mt-2 sidebar-glass border-border/50"
+            className="w-56 mt-2 sidebar-glass border-border/50 z-100"
           >
             <DropdownMenuLabel className="font-normal">
               <div className="flex flex-col space-y-1">
@@ -194,25 +181,25 @@ export function Header() {
               onClick={() => identity?.id && show("users", identity.id)}
             >
               <UserIcon className="h-4 w-4" />
-              <span>My Profile</span>
+              <span>{t("buttons.viewProfile")}</span>
             </DropdownMenuItem>
             <DropdownMenuItem
               className="gap-2 cursor-pointer"
               onClick={() => identity?.id && edit("users", identity.id)}
             >
               <CircleUser className="h-4 w-4" />
-              <span>Edit Profile</span>
+              <span>{t("buttons.editProfile")}</span>
             </DropdownMenuItem>
             <DropdownMenuItem
               className="gap-2 cursor-pointer"
               onClick={handleEnablePush}
             >
               <BellRing className="h-4 w-4" />
-              <span>Enable Push Alerts</span>
+              <span>{t("notifications.enablePush")}</span>
             </DropdownMenuItem>
             <DropdownMenuItem className="gap-2 cursor-pointer">
               <LifeBuoy className="h-4 w-4" />
-              <span>Support</span>
+              <span>{t("buttons.contactSupport")}</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator className="bg-border/50" />
             <DropdownMenuItem
@@ -220,7 +207,7 @@ export function Header() {
               className="gap-2 cursor-pointer text-destructive focus:text-destructive"
             >
               <LogOut className="h-4 w-4" />
-              <span>Logout</span>
+              <span>{t("buttons.signOut")}</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

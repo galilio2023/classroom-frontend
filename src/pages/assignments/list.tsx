@@ -11,6 +11,8 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import { cn } from "@/lib/utils";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
+import "dayjs/locale/ar";
 
 dayjs.extend(relativeTime);
 
@@ -23,8 +25,13 @@ export const AssignmentList = ({
   classId,
   assignments = [],
 }: AssignmentListProps) => {
+  const { t, i18n } = useTranslation();
   const go = useGo();
   const { data: identity } = useGetIdentity<User>();
+  const isAr = i18n.language === "ar";
+  
+  if (isAr) dayjs.locale("ar");
+  else dayjs.locale("en");
 
   const isAdmin = identity?.role === "admin";
   const isTeacher = identity?.role === "teacher";
@@ -53,7 +60,7 @@ export const AssignmentList = ({
           <div className="p-2 rounded-xl bg-primary/10 text-primary">
             <FileText className="h-5 w-5" />
           </div>
-          <CardTitle className="text-xl font-black uppercase tracking-widest">Assignments</CardTitle>
+          <CardTitle className="text-xl font-black uppercase tracking-widest">{t("assignments.list.title")}</CardTitle>
           <Badge variant="secondary" className="rounded-full px-2 py-0 h-5 text-[10px] font-bold">
             {assignments.length}
           </Badge>
@@ -64,7 +71,7 @@ export const AssignmentList = ({
             className="rounded-xl font-black uppercase tracking-widest text-[10px] h-10 px-4 gap-2 shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95"
           >
             <PlusCircle className="h-4 w-4" />
-            Create Assignment
+            {t("buttons.createAssignment")}
           </Button>
         )}
       </CardHeader>
@@ -102,7 +109,7 @@ export const AssignmentList = ({
                       <div className="p-3 rounded-2xl bg-primary/10 text-primary group-hover:scale-110 transition-transform shrink-0">
                         <FileText className="h-5 w-5" />
                       </div>
-                      <div className="flex flex-col min-w-0">
+                      <div className="flex flex-col min-w-0 items-start">
                         <span className="font-black text-base tracking-tight truncate group-hover:text-primary transition-colors">
                           {assignment.title}
                         </span>
@@ -120,7 +127,7 @@ export const AssignmentList = ({
                               </span>
                             </div>
                           ) : (
-                            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/30 italic">No Deadline</span>
+                            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/30 italic">{t("assignments.list.labels.noDeadline")}</span>
                           )}
                         </div>
                       </div>
@@ -134,7 +141,7 @@ export const AssignmentList = ({
                           !isOverdue && "bg-green-500/10 text-green-600"
                         )}
                       >
-                        {isOverdue ? "Closed" : "Active"}
+                        {isOverdue ? t("status.completed") : t("status.active")}
                       </Badge>
 
                       <div className="flex items-center gap-2">
@@ -156,7 +163,7 @@ export const AssignmentList = ({
                           size="icon"
                           className="h-9 w-9 rounded-xl text-muted-foreground group-hover:text-primary"
                         >
-                          <ArrowRight className="h-4 w-4" />
+                          <ArrowRight className={cn("h-4 w-4", isAr && "rotate-180")} />
                         </Button>
                       </div>
                     </div>
@@ -169,10 +176,10 @@ export const AssignmentList = ({
           <div className="py-20">
             <EmptyState
               icon={FileText}
-              title="No assignments yet"
-              description={isStaff ? "Create your first assignment to start tracking student progress." : "There are no assignments for this class yet."}
+              title={t("assignments.list.noAssignments")}
+              description={isStaff ? t("assignments.list.noAssignmentsDescriptionTeacher") : t("assignments.list.noAssignmentsDescriptionStudent")}
               action={isStaff ? {
-                label: "Create Assignment",
+                label: t("buttons.createAssignment"),
                 onClick: handleCreate,
               } : undefined}
             />

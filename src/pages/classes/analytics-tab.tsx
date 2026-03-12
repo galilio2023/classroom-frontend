@@ -13,12 +13,14 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { useTranslation } from "react-i18next";
 
 interface AnalyticsTabProps {
   classId: string;
 }
 
 export const AnalyticsTab = ({ classId }: AnalyticsTabProps) => {
+  const { t, i18n } = useTranslation();
   const [dateRange, setDateRange] = useState("30");
 
   const { result, query } = useCustom({
@@ -37,14 +39,16 @@ export const AnalyticsTab = ({ classId }: AnalyticsTabProps) => {
 
   const handleExportPDF = () => {
     window.print();
-    toast.success("Preparing print-friendly report...");
+    toast.success(t("analytics.toast.preparingPrint"));
   };
+
+  const isAr = i18n.language === 'ar';
 
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-4">
         <Loader2 className="h-10 w-10 animate-spin text-primary/20" />
-        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">Analyzing Class Data...</p>
+        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">{t("analytics.analyzing")}</p>
       </div>
     );
   }
@@ -56,11 +60,11 @@ export const AnalyticsTab = ({ classId }: AnalyticsTabProps) => {
           <AlertCircle className="h-8 w-8" />
         </div>
         <div className="space-y-1">
-          <h3 className="text-lg font-black tracking-tight">Failed to load analytics</h3>
-          <p className="text-sm text-muted-foreground font-medium">We couldn't fetch the data for this class.</p>
+          <h3 className="text-lg font-black tracking-tight">{t("analytics.failedToLoad")}</h3>
+          <p className="text-sm text-muted-foreground font-medium">{t("analytics.failedToLoadDescription")}</p>
         </div>
         <Button variant="outline" onClick={() => query?.refetch()} className="mt-4">
-          Try Again
+          {t("buttons.tryAgain")}
         </Button>
       </div>
     );
@@ -70,36 +74,36 @@ export const AnalyticsTab = ({ classId }: AnalyticsTabProps) => {
     <div className="space-y-10 pb-20 print:space-y-4">
       {/* Header & Controls */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 print:hidden">
-        <div className="space-y-1">
+        <div className="space-y-1 text-start">
           <div className="flex items-center gap-2">
             <div className="p-1.5 rounded-lg bg-primary/10 text-primary">
               <BarChart3 className="h-4 w-4" />
             </div>
-            <h2 className="text-2xl font-black tracking-tight">Class Analytics</h2>
+            <h2 className="text-2xl font-black tracking-tight">{t("analytics.title")}</h2>
           </div>
           <p className="text-sm text-muted-foreground font-medium">
-            Detailed performance and engagement metrics for this class.
+            {t("analytics.description")}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <Select value={dateRange} onValueChange={setDateRange}>
             <SelectTrigger className="w-[180px] h-11 rounded-xl bg-card/50 backdrop-blur-xl border-black/[0.05] dark:border-white/[0.05] shadow-sm font-bold">
-              <Calendar className="mr-2 h-4 w-4 text-primary/60" />
-              <SelectValue placeholder="Select range" />
+              <Calendar className={cn("h-4 w-4 text-primary/60", isAr ? "ml-2" : "mr-2")} />
+              <SelectValue placeholder={t("analytics.selectRange")} />
             </SelectTrigger>
             <SelectContent className="rounded-xl border-none shadow-2xl">
-              <SelectItem value="7" className="rounded-lg font-bold">Last 7 Days</SelectItem>
-              <SelectItem value="30" className="rounded-lg font-bold">Last 30 Days</SelectItem>
-              <SelectItem value="semester" className="rounded-lg font-bold">Full Semester</SelectItem>
+              <SelectItem value="7" className="rounded-lg font-bold text-start">{t("analytics.ranges.7")}</SelectItem>
+              <SelectItem value="30" className="rounded-lg font-bold text-start">{t("analytics.ranges.30")}</SelectItem>
+              <SelectItem value="semester" className="rounded-lg font-bold text-start">{t("analytics.ranges.semester")}</SelectItem>
             </SelectContent>
           </Select>
           <Button variant="outline" onClick={handleExportPDF} className="h-11 rounded-xl font-black uppercase tracking-widest text-[10px] gap-2 border-primary/20 hover:bg-primary/5 transition-all">
             <Printer className="h-4 w-4" />
-            Print Report
+            {t("buttons.printReport")}
           </Button>
-          <Button onClick={() => toast.info("Exporting CSV...")} className="h-11 rounded-xl font-black uppercase tracking-widest text-[10px] gap-2 shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95">
+          <Button onClick={() => toast.info(t("analytics.toast.exportingCsv"))} className="h-11 rounded-xl font-black uppercase tracking-widest text-[10px] gap-2 shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95">
             <FileDown className="h-4 w-4" />
-            Export Data
+            {t("buttons.exportData")}
           </Button>
         </div>
       </div>
@@ -114,8 +118,8 @@ export const AnalyticsTab = ({ classId }: AnalyticsTabProps) => {
           >
             <GradeDistributionChart 
               data={analytics?.gradeDistribution ?? []} 
-              title="Class Grade Distribution"
-              description="Student performance across all assignments in this class."
+              title={t("analytics.charts.gradeDistribution")}
+              description={t("analytics.charts.gradeDescription")}
             />
           </motion.div>
           
@@ -141,9 +145,9 @@ export const AnalyticsTab = ({ classId }: AnalyticsTabProps) => {
         </div>
         
         {/* Sidebar Column */}
-        <div className="space-y-10">
+        <div className="space-y-10 text-start">
           <motion.div
-            initial={{ opacity: 0, x: 20 }}
+            initial={{ opacity: 0, x: isAr ? -20 : 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2 }}
           >
@@ -152,7 +156,7 @@ export const AnalyticsTab = ({ classId }: AnalyticsTabProps) => {
           
           {analytics?.classComparison && analytics.classComparison.length > 0 && (
             <motion.div
-              initial={{ opacity: 0, x: 20 }}
+              initial={{ opacity: 0, x: isAr ? -20 : 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.3 }}
             >
@@ -162,7 +166,7 @@ export const AnalyticsTab = ({ classId }: AnalyticsTabProps) => {
 
           {analytics?.studentTrajectories && analytics.studentTrajectories.length > 0 && (
             <motion.div
-              initial={{ opacity: 0, x: 20 }}
+              initial={{ opacity: 0, x: isAr ? -20 : 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.4 }}
               className="space-y-6"
@@ -173,12 +177,12 @@ export const AnalyticsTab = ({ classId }: AnalyticsTabProps) => {
                     <Sparkles className="h-5 w-5" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-black tracking-tight">AI Predictions</h3>
-                    <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest text-ai-primary/60">Predicted Outcomes</p>
+                    <h3 className="text-lg font-black tracking-tight">{t("analytics.ai.predictions")}</h3>
+                    <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest text-ai-primary/60">{t("analytics.ai.predictedOutcomes")}</p>
                   </div>
                 </div>
                 <Badge variant="secondary" className="rounded-full px-3 py-1 font-black text-[10px] uppercase tracking-widest bg-ai-primary/10 text-ai-primary border-none">
-                  Beta
+                  {t("analytics.ai.beta")}
                 </Badge>
               </div>
               <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">

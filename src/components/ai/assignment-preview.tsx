@@ -5,6 +5,7 @@ import { Copy, Check, Send, PlusCircle, BookOpen, FileText, HelpCircle } from "l
 import ReactMarkdown from "react-markdown";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 interface AssignmentPreviewProps {
   content: string;
@@ -12,6 +13,7 @@ interface AssignmentPreviewProps {
 }
 
 export const AssignmentPreview: React.FC<AssignmentPreviewProps> = ({ content, onUseContent }) => {
+  const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
   const navigate = useNavigate();
 
@@ -51,10 +53,10 @@ export const AssignmentPreview: React.FC<AssignmentPreviewProps> = ({ content, o
                 {isAssignment && <FileText className="h-4 w-4 text-badge-purple" />}
                 {isQuiz && <HelpCircle className="h-4 w-4 text-badge-pink" />}
                 <span className="text-[10px] font-black uppercase tracking-widest opacity-50">
-                  {isLesson ? "Lesson Material" : isAssignment ? "Assignment Task" : isQuiz ? "Quiz Section" : "Content Section"}
+                  {isLesson ? t("classes.show.tabs.curriculum") : isAssignment ? t("classes.show.tabs.assignments") : isQuiz ? t("classes.show.tabs.quizzes") : t("common.details")}
                 </span>
               </CardHeader>
-              <CardContent className="p-6 prose prose-sm dark:prose-invert max-w-none">
+              <CardContent className="p-6 prose prose-sm dark:prose-invert max-w-none text-start">
                 <ReactMarkdown>{section}</ReactMarkdown>
               </CardContent>
             </Card>
@@ -67,9 +69,9 @@ export const AssignmentPreview: React.FC<AssignmentPreviewProps> = ({ content, o
   return (
     <Card className="flex flex-col h-full border-primary/10 shadow-xl bg-muted/5">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 border-b bg-card">
-        <div className="space-y-1">
-          <CardTitle className="text-sm font-bold uppercase tracking-wider">Magic Builder Output</CardTitle>
-          <CardDescription className="text-[10px]">Beautifully structured educational content.</CardDescription>
+        <div className="space-y-1 text-start">
+          <CardTitle className="text-sm font-bold uppercase tracking-wider">{t("buttons.magicBuilder")}</CardTitle>
+          <CardDescription className="text-[10px]">{t("aiHub.assistant.description")}</CardDescription>
         </div>
         <div className="flex gap-2">
           {content && (
@@ -77,12 +79,12 @@ export const AssignmentPreview: React.FC<AssignmentPreviewProps> = ({ content, o
               {onUseContent ? (
                 <Button variant="default" size="sm" onClick={() => onUseContent(content)} className="gap-2 bg-ai-primary hover:bg-ai-primary/90 h-8 text-xs text-ai-primary-foreground">
                   <Send className="h-3.5 w-3.5" />
-                  Use Content
+                  {t("aiHub.assistant.helper.generate")}
                 </Button>
               ) : (
                 <Button variant="default" size="sm" onClick={handleGlobalCreate} className="gap-2 bg-primary hover:bg-primary/90 h-8 text-xs">
                   <PlusCircle className="h-3.5 w-3.5" />
-                  Create Assignment
+                  {t("buttons.createAssignment")}
                 </Button>
               )}
               <Button variant="outline" size="icon" onClick={copyToClipboard} className="h-8 w-8">
@@ -100,7 +102,7 @@ export const AssignmentPreview: React.FC<AssignmentPreviewProps> = ({ content, o
               <div className="p-4 bg-muted rounded-full animate-pulse">
                 <PlusCircle className="h-8 w-8" />
               </div>
-              <p className="italic font-medium">Your AI-generated content will appear here...</p>
+              <p className="italic font-medium">{t("common.noResults")}</p>
           </div>
         )}
       </CardContent>

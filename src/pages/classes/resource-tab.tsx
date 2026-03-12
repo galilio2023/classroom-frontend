@@ -57,12 +57,14 @@ import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
+import { useTranslation } from "react-i18next";
 
 interface ResourceTabProps {
   classId: string;
 }
 
 export const ResourceTab = ({ classId }: ResourceTabProps) => {
+  const { t, i18n } = useTranslation();
   const { data: identity } = useGetIdentity<User>();
   const isTeacher = identity?.role === UserRole.TEACHER || identity?.role === UserRole.ADMIN;
 
@@ -93,7 +95,7 @@ export const ResourceTab = ({ classId }: ResourceTabProps) => {
 
   const handleAddResource = () => {
     if (!newResource.title || !activeModuleId) {
-      toast.error("Please fill in all required fields");
+      toast.error(t("classes.resource.toast.fillRequired"));
       return;
     }
 
@@ -112,7 +114,7 @@ export const ResourceTab = ({ classId }: ResourceTabProps) => {
           setNewResource({ title: "", description: "", type: "file", url: "", content: "", cldPubId: "" });
           setActiveModuleId(null);
           query.refetch();
-          toast.success("Resource added to module");
+          toast.success(t("classes.resource.toast.added"));
         },
       }
     );
@@ -123,34 +125,36 @@ export const ResourceTab = ({ classId }: ResourceTabProps) => {
       { resource: "resources", id },
       {
         onSuccess: () => {
-          toast.success("Resource deleted");
+          toast.success(t("classes.resource.toast.deleted"));
           query.refetch();
         },
       }
     );
   };
 
+  const isAr = i18n.language === 'ar';
+
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-4">
         <Loader2 className="h-10 w-10 animate-spin text-primary/20" />
-        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">Loading Materials...</p>
+        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">{t("classes.resource.loading")}</p>
       </div>
     );
   }
 
   return (
     <div className="space-y-8 pb-20">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 text-start">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <div className="p-1.5 rounded-lg bg-primary/10 text-primary">
               <Library className="h-4 w-4" />
             </div>
-            <h3 className="text-xl font-black tracking-tight">Learning Materials</h3>
+            <h3 className="text-xl font-black tracking-tight">{t("classes.resource.learningMaterials")}</h3>
           </div>
           <p className="text-sm text-muted-foreground font-medium">
-            Access all files, links, and notes for this class.
+            {t("classes.resource.description")}
           </p>
         </div>
       </div>
@@ -169,8 +173,8 @@ export const ResourceTab = ({ classId }: ResourceTabProps) => {
                 </div>
               </div>
               <div className="space-y-2">
-                <h4 className="text-2xl font-black tracking-tight">No materials yet</h4>
-                <p className="text-muted-foreground font-medium max-w-xs mx-auto">Materials are organized by modules. Ask your teacher to add some!</p>
+                <h4 className="text-2xl font-black tracking-tight">{t("classes.resource.noMaterials")}</h4>
+                <p className="text-muted-foreground font-medium max-w-xs mx-auto">{t("classes.resource.noMaterialsDescription")}</p>
               </div>
             </CardContent>
           </Card>
@@ -187,7 +191,7 @@ export const ResourceTab = ({ classId }: ResourceTabProps) => {
               >
                 <AccordionItem 
                   value={`module-${module.id}`} 
-                  className="border-none shadow-xl bg-card/50 backdrop-blur-xl rounded-[2rem] overflow-hidden group transition-all hover:shadow-2xl hover:bg-card/80"
+                  className="border-none shadow-xl bg-card/50 backdrop-blur-xl rounded-[2rem] overflow-hidden group transition-all hover:shadow-2xl hover:bg-card/80 text-start"
                 >
                   <div className="flex items-center justify-between w-full px-6">
                     <AccordionTrigger className="hover:no-underline py-6 flex-1 group/trigger">
@@ -196,9 +200,11 @@ export const ResourceTab = ({ classId }: ResourceTabProps) => {
                           <BookOpen className="h-6 w-6" />
                         </div>
                         <div className="space-y-1">
-                          <div className="font-black text-lg tracking-tight group-hover/trigger:text-primary transition-colors">{module.name}</div>
+                          <div className="font-black text-lg tracking-tight group-hover/trigger:text-primary transition-colors text-start">{module.name}</div>
                           <div className="flex items-center gap-3">
-                            <span className="text-[10px] font-black text-primary uppercase tracking-widest">{module.resources?.length || 0} Items</span>
+                            <span className="text-[10px] font-black text-primary uppercase tracking-widest">
+                              {t("classes.resource.itemsCount", { count: module.resources?.length || 0 })}
+                            </span>
                           </div>
                         </div>
                       </div>
@@ -207,19 +213,19 @@ export const ResourceTab = ({ classId }: ResourceTabProps) => {
                       <Button 
                         variant="outline" 
                         size="sm" 
-                        className="h-10 rounded-xl font-black uppercase tracking-widest text-[9px] gap-2 border-primary/20 text-primary hover:bg-primary/5 ml-4"
+                        className={cn("h-10 rounded-xl font-black uppercase tracking-widest text-[9px] gap-2 border-primary/20 text-primary hover:bg-primary/5", isAr ? "mr-4" : "ml-4")}
                         onClick={() => {
                           setActiveModuleId(module.id);
                           setIsAddResourceOpen(true);
                         }}
                       >
                         <PlusCircle className="h-3.5 w-3.5" />
-                        Add Material
+                        {t("buttons.addMaterial")}
                       </Button>
                     )}
                   </div>
                   <AccordionContent className="pb-8 pt-2 px-8">
-                    <div className="grid grid-cols-1 gap-3">
+                    <div className="grid grid-cols-1 gap-3 text-start">
                       {module.resources && module.resources.length > 0 ? (
                         module.resources.map((res) => (
                           <div key={res.id} className="flex items-center justify-between p-4 rounded-2xl border border-black/[0.03] dark:border-white/[0.03] bg-muted/20 hover:bg-primary/5 transition-all cursor-pointer group/item">
@@ -248,15 +254,15 @@ export const ResourceTab = ({ classId }: ResourceTabProps) => {
                                 <Button variant="ghost" size="sm" asChild className="h-9 rounded-xl px-4 text-[10px] font-black uppercase tracking-widest gap-2 text-primary hover:bg-primary/10 transition-all">
                                   <Link to={`/classes/${classId}/lessons/${res.id}`}>
                                     <ExternalLink className="h-3.5 w-3.5" />
-                                    Open Lesson
-                                    <ArrowRight className="h-3 w-3 opacity-0 -translate-x-2 group-hover/item:opacity-100 group-hover/item:translate-x-0 transition-all" />
+                                    {t("buttons.openLesson")}
+                                    <ArrowRight className={cn("h-3 w-3 opacity-0 group-hover/item:opacity-100 transition-all", isAr ? "translate-x-2 group-hover:translate-x-0 rotate-180" : "-translate-x-2 group-hover:translate-x-0")} />
                                   </Link>
                                 </Button>
                               ) : (
                                 <Button variant="ghost" size="sm" asChild className="h-9 rounded-xl px-4 text-[10px] font-black uppercase tracking-widest gap-2 hover:bg-muted transition-all">
                                   <a href={res.url} target="_blank" rel="noreferrer">
                                     <ExternalLink className="h-3.5 w-3.5" />
-                                    View
+                                    {t("buttons.view")}
                                   </a>
                                 </Button>
                               )}
@@ -276,7 +282,7 @@ export const ResourceTab = ({ classId }: ResourceTabProps) => {
                       ) : (
                         <div className="p-10 rounded-2xl border-2 border-dashed border-muted-foreground/10 flex flex-col items-center justify-center gap-3 text-muted-foreground/40">
                           <Library className="h-8 w-8 opacity-20" />
-                          <p className="text-[10px] font-black uppercase tracking-widest">No materials in this module</p>
+                          <p className="text-[10px] font-black uppercase tracking-widest">{t("classes.resource.noMaterialsInModule")}</p>
                         </div>
                       )}
                     </div>
@@ -290,41 +296,41 @@ export const ResourceTab = ({ classId }: ResourceTabProps) => {
 
       {/* Add Resource Dialog */}
       <Dialog open={isAddResourceOpen} onOpenChange={setIsAddResourceOpen}>
-        <DialogContent className="sm:max-w-[650px] rounded-[2rem] border-none shadow-2xl bg-card/95 backdrop-blur-xl">
+        <DialogContent className="sm:max-w-[650px] rounded-[2rem] border-none shadow-2xl bg-card/95 backdrop-blur-xl text-start">
           <DialogHeader className="space-y-3">
             <div className="p-3 rounded-2xl bg-primary/10 text-primary w-fit">
               <PlusCircle className="h-6 w-6" />
             </div>
-            <DialogTitle className="text-2xl font-black tracking-tight">Add Material</DialogTitle>
-            <DialogDescription className="font-medium">Share a file, link, or note with your students.</DialogDescription>
+            <DialogTitle className="text-2xl font-black tracking-tight">{t("classes.resource.addDialog.title")}</DialogTitle>
+            <DialogDescription className="font-medium">{t("classes.resource.addDialog.description")}</DialogDescription>
           </DialogHeader>
           <div className="grid gap-6 py-6">
             <div className="grid grid-cols-2 gap-6">
               <div className="space-y-2.5">
-                <Label htmlFor="title" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Title</Label>
+                <Label htmlFor="title" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">{t("classes.resource.addDialog.fieldTitle")}</Label>
                 <Input 
                   id="title" 
-                  placeholder="e.g. Lesson Notes" 
+                  placeholder={t("classes.resource.addDialog.titlePlaceholder")} 
                   value={newResource.title}
                   onChange={(e) => setNewResource({ ...newResource, title: e.target.value })}
                   className="h-12 rounded-xl bg-muted/20 border-none focus-visible:ring-primary font-bold"
                 />
               </div>
               <div className="space-y-2.5">
-                <Label htmlFor="type" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Type</Label>
+                <Label htmlFor="type" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">{t("classes.resource.addDialog.fieldType")}</Label>
                 <Select 
                   value={newResource.type} 
                   onValueChange={(v: any) => setNewResource({ ...newResource, type: v })}
                 >
                   <SelectTrigger className="h-12 rounded-xl bg-muted/20 border-none focus:ring-primary transition-all font-bold">
-                    <SelectValue placeholder="Select type" />
+                    <SelectValue placeholder={t("classes.resource.addDialog.typePlaceholder")} />
                   </SelectTrigger>
                   <SelectContent className="rounded-xl border-none shadow-2xl">
-                    <SelectItem value="note" className="rounded-lg font-bold">Written Note</SelectItem>
-                    <SelectItem value="file" className="rounded-lg font-bold">File (PDF, Doc)</SelectItem>
-                    <SelectItem value="image" className="rounded-lg font-bold">Image</SelectItem>
-                    <SelectItem value="link" className="rounded-lg font-bold">External Link</SelectItem>
-                    <SelectItem value="video" className="rounded-lg font-bold">Video URL</SelectItem>
+                    <SelectItem value="note" className="rounded-lg font-bold text-start">{t("classes.resource.addDialog.types.note")}</SelectItem>
+                    <SelectItem value="file" className="rounded-lg font-bold text-start">{t("classes.resource.addDialog.types.file")}</SelectItem>
+                    <SelectItem value="image" className="rounded-lg font-bold text-start">{t("classes.resource.addDialog.types.image")}</SelectItem>
+                    <SelectItem value="link" className="rounded-lg font-bold text-start">{t("classes.resource.addDialog.types.link")}</SelectItem>
+                    <SelectItem value="video" className="rounded-lg font-bold text-start">{t("classes.resource.addDialog.types.video")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -332,9 +338,9 @@ export const ResourceTab = ({ classId }: ResourceTabProps) => {
 
             {newResource.type === "note" && (
               <div className="space-y-2.5">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Content (Markdown)</Label>
+                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">{t("classes.resource.addDialog.fieldContent")}</Label>
                 <Textarea 
-                  placeholder="Type your lesson notes here..." 
+                  placeholder={t("classes.resource.addDialog.contentPlaceholder")} 
                   value={newResource.content}
                   onChange={(e) => setNewResource({ ...newResource, content: e.target.value })}
                   className="min-h-[250px] rounded-2xl bg-muted/20 border-none focus-visible:ring-primary p-5 text-sm leading-relaxed font-mono shadow-inner"
@@ -344,7 +350,9 @@ export const ResourceTab = ({ classId }: ResourceTabProps) => {
             
             {(newResource.type === "file" || newResource.type === "image") && (
               <div className="space-y-2.5">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Upload {newResource.type === "image" ? "Image" : "File"}</Label>
+                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                  {t("classes.resource.addDialog.fieldUpload", { type: newResource.type === "image" ? t("classes.resource.addDialog.types.image") : t("classes.resource.addDialog.types.file") })}
+                </Label>
                 <div className="p-6 rounded-2xl border-2 border-dashed border-muted-foreground/10 bg-muted/10">
                   <FileUpload 
                     onUploadSuccess={(url, pubId) => setNewResource({ ...newResource, url, cldPubId: pubId })}
@@ -355,25 +363,25 @@ export const ResourceTab = ({ classId }: ResourceTabProps) => {
 
             {(newResource.type === "link" || newResource.type === "video") && (
               <div className="space-y-2.5">
-                <Label htmlFor="url" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">URL</Label>
+                <Label htmlFor="url" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">{t("classes.resource.addDialog.fieldUrl")}</Label>
                 <div className="relative group">
                   <Input 
                     id="url" 
-                    placeholder="https://..." 
+                    placeholder={t("classes.resource.addDialog.urlPlaceholder")} 
                     value={newResource.url}
                     onChange={(e) => setNewResource({ ...newResource, url: e.target.value })}
-                    className="h-12 rounded-xl bg-muted/20 border-none focus-visible:ring-primary font-bold pl-10"
+                    className={cn("h-12 rounded-xl bg-muted/20 border-none focus-visible:ring-primary font-bold", isAr ? "pr-10" : "pl-10")}
                   />
-                  <LinkIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                  <LinkIcon className={cn("absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors", isAr ? "right-3.5" : "left-3.5")} />
                 </div>
               </div>
             )}
             
             <div className="space-y-2.5">
-              <Label htmlFor="desc" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Description (Optional)</Label>
+              <Label htmlFor="desc" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">{t("classes.resource.addDialog.fieldDescription")}</Label>
               <Input 
                 id="desc" 
-                placeholder="Brief summary"
+                placeholder={t("classes.resource.addDialog.descPlaceholder")}
                 value={newResource.description}
                 onChange={(e) => setNewResource({ ...newResource, description: e.target.value })}
                 className="h-12 rounded-xl bg-muted/20 border-none focus-visible:ring-primary font-bold"
@@ -381,14 +389,14 @@ export const ResourceTab = ({ classId }: ResourceTabProps) => {
             </div>
           </div>
           <DialogFooter className="gap-3">
-            <Button variant="ghost" className="rounded-xl font-bold h-12" onClick={() => setIsAddResourceOpen(false)}>Cancel</Button>
+            <Button variant="ghost" className="rounded-xl font-bold h-12" onClick={() => setIsAddResourceOpen(false)}>{t("buttons.cancel")}</Button>
             <Button 
               onClick={handleAddResource} 
               disabled={isCreatingResource}
               className="rounded-xl font-black uppercase tracking-widest h-12 px-8 shadow-lg shadow-primary/20"
             >
               {isCreatingResource ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
-              Save Material
+              {t("buttons.saveMaterial")}
             </Button>
           </DialogFooter>
         </DialogContent>

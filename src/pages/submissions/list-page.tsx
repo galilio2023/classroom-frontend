@@ -44,11 +44,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useTranslation } from "react-i18next";
 
 dayjs.extend(relativeTime);
 
 const SubmissionsListPage = () => {
-  usePageTitle("Student Submissions");
+  const { t, i18n } = useTranslation();
+  const isAr = i18n.language === 'ar';
+  
+  usePageTitle(t("resources.submissions.label"));
   const { data: identity } = useGetIdentity<UserType>();
   const isStaff = identity?.role === UserRole.ADMIN || identity?.role === UserRole.TEACHER;
   const { selectedTerm } = useTerm();
@@ -108,7 +112,7 @@ const SubmissionsListPage = () => {
   }, [submissions]);
 
   return (
-    <div className="space-y-10 pb-20">
+    <div className="space-y-10 pb-20 text-start">
       <ListView>
         <div className="space-y-10">
           <motion.div 
@@ -119,8 +123,8 @@ const SubmissionsListPage = () => {
             <Breadcrumb />
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div>
-                <h1 className="text-4xl font-black tracking-tight">Submissions & Grading</h1>
-                <p className="text-muted-foreground font-medium mt-1">Review student work, provide feedback, and manage academic performance.</p>
+                <h1 className="text-4xl font-black tracking-tight">{t("resources.submissions.label")}</h1>
+                <p className="text-muted-foreground font-medium mt-1">{t("dashboard.staff.pendingGrading")}</p>
               </div>
             </div>
           </motion.div>
@@ -132,8 +136,8 @@ const SubmissionsListPage = () => {
                 <FileText className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Total Submissions</p>
-                <p className="text-2xl font-black">{isLoading ? "..." : stats.total}</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t("notifications.stats.total")}</p>
+                <p className="text-2xl font-black">{isLoading ? "..." : new Intl.NumberFormat(i18n.language).format(stats.total)}</p>
               </div>
             </Card>
             <Card className="p-6 border-green-500/10 bg-card/50 backdrop-blur-sm flex items-center gap-4 rounded-4xl shadow-lg shadow-green-500/5">
@@ -141,8 +145,8 @@ const SubmissionsListPage = () => {
                 <CheckSquare className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Graded</p>
-                <p className="text-2xl font-black text-green-600">{isLoading ? "..." : stats.graded}</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t("status.completed")}</p>
+                <p className="text-2xl font-black text-green-600">{isLoading ? "..." : new Intl.NumberFormat(i18n.language).format(stats.graded)}</p>
               </div>
             </Card>
             <Card className="p-6 border-amber-500/10 bg-card/50 backdrop-blur-sm flex items-center gap-4 rounded-4xl shadow-lg shadow-amber-500/5">
@@ -150,8 +154,8 @@ const SubmissionsListPage = () => {
                 <Activity className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Pending Review</p>
-                <p className="text-2xl font-black text-amber-600">{isLoading ? "..." : stats.pending}</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t("assignments.list.table.pending")}</p>
+                <p className="text-2xl font-black text-amber-600">{isLoading ? "..." : new Intl.NumberFormat(i18n.language).format(stats.pending)}</p>
               </div>
             </Card>
           </div>
@@ -160,18 +164,18 @@ const SubmissionsListPage = () => {
           <Card className="p-4 border-primary/5 bg-muted/30 rounded-4xl backdrop-blur-sm">
             <div className="flex flex-col lg:flex-row gap-4">
               <div className="relative flex-1 group">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                <Search className={cn("absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors", isAr ? "right-4" : "left-4")} />
                 <Input
                   type="text"
-                  placeholder="Search by assignment title or student name..."
-                  className="pl-11 h-14 rounded-2xl border-none bg-background shadow-sm font-medium"
+                  placeholder={t("assignments.list.filters.searchPlaceholder")}
+                  className={cn("h-14 rounded-2xl border-none bg-background shadow-sm font-medium", isAr ? "pr-11" : "pl-11")}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
               <div className="flex items-center gap-2 bg-background px-4 rounded-2xl shadow-sm border border-primary/5">
                 <Filter className="h-4 w-4 text-muted-foreground" />
-                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Grading Filter</span>
+                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t("notifications.filters.label")}</span>
               </div>
             </div>
           </Card>
@@ -188,8 +192,8 @@ const SubmissionsListPage = () => {
                     <AlertCircle className="h-6 w-6" />
                   </div>
                   <div className="space-y-1">
-                    <p className="font-black uppercase tracking-widest text-xs">Archive View Active</p>
-                    <p className="text-sm font-medium">You are viewing submissions from <strong>{selectedTerm.name}</strong>. Content is read-only.</p>
+                    <p className="font-black uppercase tracking-widest text-xs">{t("dashboard.archiveViewActive")}</p>
+                    <p className="text-sm font-medium">{t("dashboard.archiveViewDescription", { termName: selectedTerm.name })}</p>
                   </div>
               </motion.div>
             )}
@@ -217,8 +221,8 @@ const SubmissionsListPage = () => {
               <div className="h-full w-full flex items-center justify-center p-12">
                 <EmptyState
                   icon={FileText}
-                  title="No submissions found"
-                  description="There are no student submissions to review at this time."
+                  title={t("assignments.list.noAssignments")}
+                  description={t("assignments.list.noAssignmentsDescriptionTeacher")}
                   className="border-none bg-transparent min-h-0"
                 />
               </div>
@@ -255,14 +259,14 @@ const SubmissionsListPage = () => {
                           </AvatarFallback>
                         </Avatar>
                         {submission.isLate && (
-                          <div className="absolute -top-2 -right-2 bg-destructive text-white p-1 rounded-lg border-2 border-background shadow-lg">
+                          <div className={cn("absolute -top-2 bg-destructive text-white p-1 rounded-lg border-2 border-background shadow-lg", isAr ? "-left-2" : "-right-2")}>
                             <Timer className="h-3 w-3" />
                           </div>
                         )}
                       </div>
 
                       {/* Info */}
-                      <div className="flex-1 md:ml-8 text-center md:text-left min-w-0 w-full">
+                      <div className={cn("flex-1 text-center min-w-0 w-full", isAr ? "md:mr-8 md:text-right" : "md:ml-8 md:text-left")}>
                         <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
                           <h3 className="text-xl font-black tracking-tight truncate group-hover:text-primary transition-colors">
                             {submission.student?.name}
@@ -275,11 +279,11 @@ const SubmissionsListPage = () => {
                                     isGraded ? "bg-green-500/10 text-green-600" : "bg-amber-500/10 text-amber-600"
                                 )}
                             >
-                                {isGraded ? 'Graded' : 'Pending'}
+                                {isGraded ? t("status.completed") : t("assignments.list.table.pending")}
                             </Badge>
                             {submission.isLate && (
                                 <Badge variant="destructive" className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md">
-                                    Late
+                                    {t("assignments.list.table.late")}
                                 </Badge>
                             )}
                           </div>
@@ -309,21 +313,21 @@ const SubmissionsListPage = () => {
                                 <Clock className="h-3.5 w-3.5 text-primary" />
                             </div>
                             <span className="text-xs font-bold uppercase tracking-tight">
-                                {submissionDate.fromNow()}
+                                {submissionDate.locale(i18n.language).fromNow()}
                             </span>
                           </div>
                         </div>
                       </div>
 
                       {/* Actions */}
-                      <div className="flex items-center gap-3 mt-6 md:mt-0 shrink-0">
-                        <div className="flex flex-col items-end mr-4">
-                            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">Current Grade</p>
+                      <div className={cn("flex items-center gap-3 mt-6 md:mt-0 shrink-0", isAr ? "mr-4" : "ml-4")}>
+                        <div className={cn("flex flex-col", isAr ? "items-start ml-4" : "items-end mr-4")}>
+                            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">{t("assignments.grading.finalScore")}</p>
                             <p className={cn(
                                 "text-2xl font-black",
                                 isGraded ? "text-primary" : "text-muted-foreground/20"
                             )}>
-                                {isGraded ? `${submission.grade}%` : '--'}
+                                {isGraded ? `${new Intl.NumberFormat(i18n.language).format(submission.grade!)}%` : '--'}
                             </p>
                         </div>
 
@@ -337,8 +341,8 @@ const SubmissionsListPage = () => {
                           )}
                           onClick={() => handleGradeClick(submission)}
                         >
-                          {isGraded ? "Review Grade" : "Grade Now"}
-                          <ArrowRight className="h-4 w-4 ml-2" />
+                          {isGraded ? t("buttons.reviewProof") : t("buttons.grade")}
+                          <ArrowRight className={cn("h-4 w-4 ml-2", isAr && "rotate-180")} />
                         </Button>
 
                         <DropdownMenu>
@@ -348,22 +352,22 @@ const SubmissionsListPage = () => {
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-56 rounded-[1.5rem] p-2">
-                                <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-3 py-2">Submission Options</DropdownMenuLabel>
+                                <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-3 py-2">{t("assignments.list.labels.options")}</DropdownMenuLabel>
                                 <DropdownMenuItem onClick={() => handleGradeClick(submission)} className="rounded-xl gap-3 py-3 cursor-pointer">
                                     <Eye className="h-4 w-4 text-primary" />
-                                    <span className="font-bold">View Submission</span>
+                                    <span className="font-bold">{t("buttons.show")}</span>
                                 </DropdownMenuItem>
                                 {!isGraded && (
                                     <DropdownMenuItem onClick={() => handleGradeClick(submission)} className="rounded-xl gap-3 py-3 cursor-pointer">
                                         <BrainCircuit className="h-4 w-4 text-primary" />
-                                        <span className="font-bold">AI Grading Assist</span>
+                                        <span className="font-bold">{t("buttons.aiAssist")}</span>
                                     </DropdownMenuItem>
                                 )}
                                 <DropdownMenuSeparator className="my-2" />
                                 {submission.student && (
                                     <DropdownMenuItem onClick={() => show("users", submission.student!.id)} className="rounded-xl gap-3 py-3 cursor-pointer">
                                         <User className="h-4 w-4 text-primary" />
-                                        <span className="font-bold">Student Profile</span>
+                                        <span className="font-bold">{t("buttons.viewProfile")}</span>
                                     </DropdownMenuItem>
                                 )}
                             </DropdownMenuContent>

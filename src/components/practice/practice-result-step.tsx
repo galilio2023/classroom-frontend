@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Trophy, Target, CheckCircle2, XCircle, ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 interface QuestionReview {
   question: string;
@@ -30,7 +31,9 @@ export const PracticeResultStep: React.FC<PracticeResultStepProps> = ({
   result,
   onClose,
 }) => {
+  const { t, i18n } = useTranslation();
   const [showReview, setShowReview] = useState(false);
+  const isArabic = i18n.language === 'ar';
 
   return (
     <div className="space-y-6 py-4 max-h-[70vh] overflow-y-auto pr-2">
@@ -49,20 +52,24 @@ export const PracticeResultStep: React.FC<PracticeResultStepProps> = ({
 
         <div className="space-y-2">
           <div className="inline-flex items-center px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-black uppercase tracking-widest mb-2">
-            {result.passed ? "Passed" : "Practice Needed"}
+            {result.passed ? t("practice.results.passed") : t("practice.results.practiceNeeded")}
           </div>
           <h2 className="text-3xl font-black tracking-tight">
-            {result.passed ? "Mastery Achieved!" : "Keep Practicing!"}
+            {result.passed ? t("practice.results.masteryAchieved") : t("practice.results.keepPracticing")}
           </h2>
           <div className="flex items-center justify-center gap-4 mt-4">
             <div className="text-center">
-              <p className="text-3xl font-black text-primary">{result.score}%</p>
-              <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-tighter">Final Score</p>
+              <p className="text-3xl font-black text-primary">
+                {new Intl.NumberFormat(isArabic ? 'ar-EG' : 'en-US').format(result.score)}%
+              </p>
+              <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-tighter">{t("practice.results.finalScore")}</p>
             </div>
             <div className="w-px h-10 bg-border" />
             <div className="text-center">
-              <p className="text-3xl font-black text-foreground">{result.correctCount}/{result.totalQuestions}</p>
-              <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-tighter">Correct</p>
+              <p className="text-3xl font-black text-foreground">
+                {new Intl.NumberFormat(isArabic ? 'ar-EG' : 'en-US').format(result.correctCount)}/{new Intl.NumberFormat(isArabic ? 'ar-EG' : 'en-US').format(result.totalQuestions)}
+              </p>
+              <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-tighter">{t("practice.results.correct")}</p>
             </div>
           </div>
         </div>
@@ -75,7 +82,7 @@ export const PracticeResultStep: React.FC<PracticeResultStepProps> = ({
               className="h-16 w-16 drop-shadow-md"
             />
             <div className="text-center">
-              <h4 className="font-bold text-yellow-700 dark:text-yellow-500">New Badge Unlocked!</h4>
+              <h4 className="font-bold text-yellow-700 dark:text-yellow-500">{t("practice.results.badgeUnlocked")}</h4>
               <p className="text-sm text-yellow-600 dark:text-yellow-400 font-medium">
                 {result.badgeEarned.name}
               </p>
@@ -85,7 +92,7 @@ export const PracticeResultStep: React.FC<PracticeResultStepProps> = ({
 
         {!result.passed && (
           <div className="bg-muted p-4 rounded-xl text-sm text-muted-foreground font-medium">
-            Don't worry! Review the material and try again to earn your badge.
+            {t("practice.results.reviewMaterial")}
           </div>
         )}
       </div>
@@ -97,7 +104,7 @@ export const PracticeResultStep: React.FC<PracticeResultStepProps> = ({
             className="w-full justify-between font-bold"
             onClick={() => setShowReview(!showReview)}
           >
-            Review Questions
+            {t("practice.results.reviewQuestions")}
             {showReview ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
           </Button>
 
@@ -118,12 +125,12 @@ export const PracticeResultStep: React.FC<PracticeResultStepProps> = ({
                       <p className="font-bold text-sm leading-tight">{item.question}</p>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
                         <div className="p-2 rounded-lg bg-background/50 border border-border">
-                          <span className="text-muted-foreground block mb-1 uppercase font-black text-[8px]">Your Answer</span>
+                          <span className="text-muted-foreground block mb-1 uppercase font-black text-[8px]">{t("practice.results.yourAnswer")}</span>
                           <span className={cn("font-bold", item.isCorrect ? "text-green-600" : "text-red-600")}>{item.userAnswer}</span>
                         </div>
                         {!item.isCorrect && (
                           <div className="p-2 rounded-lg bg-background/50 border border-border">
-                            <span className="text-muted-foreground block mb-1 uppercase font-black text-[8px]">Correct Answer</span>
+                            <span className="text-muted-foreground block mb-1 uppercase font-black text-[8px]">{t("practice.results.correctAnswer")}</span>
                             <span className="font-bold text-green-600">{item.correctAnswer}</span>
                           </div>
                         )}
@@ -144,7 +151,7 @@ export const PracticeResultStep: React.FC<PracticeResultStepProps> = ({
 
       <div className="flex justify-center pt-4 sticky bottom-0 bg-background/80 backdrop-blur-sm pb-2">
         <Button onClick={onClose} className="w-full h-12 text-lg font-black shadow-lg shadow-primary/20">
-          Finish Session
+          {t("practice.results.finishSession")}
         </Button>
       </div>
     </div>

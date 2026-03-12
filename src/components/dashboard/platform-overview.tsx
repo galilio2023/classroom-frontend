@@ -6,6 +6,7 @@ import { DashboardStats } from "@/types/dashboard";
 import { StatCard } from "./stat-card";
 import { useNavigation } from "@refinedev/core";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslation } from "react-i18next";
 
 interface PlatformOverviewProps {
   stats: DashboardStats | undefined;
@@ -14,6 +15,7 @@ interface PlatformOverviewProps {
 }
 
 export const PlatformOverview = ({ stats, isLoading, onRefresh }: PlatformOverviewProps) => {
+    const { t } = useTranslation();
     const { list } = useNavigation();
     
     // Only show skeletons on initial load when we have no data
@@ -26,7 +28,7 @@ export const PlatformOverview = ({ stats, isLoading, onRefresh }: PlatformOvervi
                   <div className="p-1.5 rounded-lg bg-primary/10 text-primary">
                     <LayoutDashboard className="h-3.5 w-3.5" />
                   </div>
-                  <h3 className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-[0.2em]">Platform Overview</h3>
+                  <h3 className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-[0.2em]">{t("dashboard.platform.overview")}</h3>
                 </div>
                 <Button 
                   variant="ghost" 
@@ -52,7 +54,7 @@ export const PlatformOverview = ({ stats, isLoading, onRefresh }: PlatformOvervi
                               onClick={() => list("users")}
                           >
                               <StatCard 
-                                  label="Pending Verifications" 
+                                  label={t("dashboard.platform.stats.pendingVerifications")} 
                                   value={stats.pendingVerifications} 
                                   icon={ShieldAlert} 
                                   color="text-amber-500" 
@@ -63,11 +65,11 @@ export const PlatformOverview = ({ stats, isLoading, onRefresh }: PlatformOvervi
                       )}
                       
                       {[
-                        { label: "Total Users", value: stats.totalUsers, icon: UserCheck, color: "text-primary", delay: 0.05 },
-                        { label: "Total Students", value: stats.totalStudents, icon: GraduationCap, color: "text-blue-500", delay: 0.1 },
-                        { label: "Total Teachers", value: stats.totalTeachers, icon: Users, color: "text-green-500", delay: 0.2 },
-                        { label: "Total Classes", value: stats.totalClasses, icon: LayoutGrid, color: "text-purple-500", delay: 0.3 },
-                        { label: "Total Assignments", value: stats.totalAssignments, icon: FileText, color: "text-orange-500", delay: 0.4 },
+                        { label: t("dashboard.platform.stats.totalUsers"), value: stats.totalUsers, icon: UserCheck, color: "text-primary", delay: 0.05 },
+                        { label: t("dashboard.platform.stats.totalStudents"), value: stats.totalStudents, icon: GraduationCap, color: "text-blue-500", delay: 0.1 },
+                        { label: t("dashboard.platform.stats.totalTeachers"), value: stats.totalTeachers, icon: Users, color: "text-green-500", delay: 0.2 },
+                        { label: t("dashboard.platform.stats.totalClasses"), value: stats.totalClasses, icon: LayoutGrid, color: "text-purple-500", delay: 0.3 },
+                        { label: t("dashboard.platform.stats.totalAssignments"), value: stats.totalAssignments, icon: FileText, color: "text-orange-500", delay: 0.4 },
                       ].map((item) => (
                         <motion.div
                           key={item.label}

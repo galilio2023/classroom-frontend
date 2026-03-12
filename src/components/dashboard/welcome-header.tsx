@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useCustomMutation } from "@refinedev/core";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 interface WelcomeHeaderProps {
   name: string;
@@ -13,6 +14,7 @@ interface WelcomeHeaderProps {
 }
 
 export const WelcomeHeader = ({ name, isStudent, user }: WelcomeHeaderProps) => {
+  const { t } = useTranslation();
   const [isUploading, setIsUploading] = useState(false);
   const { mutate: requestChange, mutation } = useCustomMutation();
   const isPending = mutation.isPending;
@@ -46,12 +48,12 @@ export const WelcomeHeader = ({ name, isStudent, user }: WelcomeHeaderProps) => 
             },
           }, {
             onSuccess: () => {
-              toast.success("Verification document submitted for review!");
+              toast.success(t("dashboard.verification.success"));
             }
           });
         }
       } catch (err) {
-        toast.error("Failed to upload document. Please try again.");
+        toast.error(t("dashboard.verification.error"));
       } finally {
         setIsUploading(false);
       }
@@ -67,10 +69,10 @@ export const WelcomeHeader = ({ name, isStudent, user }: WelcomeHeaderProps) => 
     <div className="mb-8 md:mb-12 space-y-6">
       <div className="space-y-2">
         <h1 className="text-3xl md:text-4xl font-black tracking-tight">
-            Welcome back, {name || "User"}!
+            {t("dashboard.welcomeBack", { name: name || "User" })}
         </h1>
         <p className="text-muted-foreground text-lg md:text-xl font-medium tracking-tight">
-          {isStudent ? "Ready to continue your learning journey?" : "Here is your management overview for today."}
+          {isStudent ? t("dashboard.readyToContinue") : t("dashboard.managementOverview")}
         </p>
       </div>
 
@@ -79,9 +81,9 @@ export const WelcomeHeader = ({ name, isStudent, user }: WelcomeHeaderProps) => 
           <ShieldAlert className="h-5 w-5 text-amber-600" />
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 w-full">
             <div>
-              <AlertTitle className="text-amber-800 font-black uppercase tracking-tight text-xs">Account Verification Required</AlertTitle>
+              <AlertTitle className="text-amber-800 font-black uppercase tracking-tight text-xs">{t("dashboard.verification.required")}</AlertTitle>
               <AlertDescription className="text-amber-700/80 text-sm font-medium">
-                Your teacher account is currently unverified. Please upload your teaching credentials or ID to unlock all features.
+                {t("dashboard.verification.requiredDescription")}
               </AlertDescription>
             </div>
             <Button 
@@ -95,7 +97,7 @@ export const WelcomeHeader = ({ name, isStudent, user }: WelcomeHeaderProps) => 
               ) : (
                 <FileUp className="h-4 w-4" />
               )}
-              Upload Credentials
+              {t("buttons.uploadCredentials")}
             </Button>
           </div>
         </Alert>
@@ -104,7 +106,7 @@ export const WelcomeHeader = ({ name, isStudent, user }: WelcomeHeaderProps) => 
       {user?.role === UserRole.TEACHER && user?.verificationStatus === "verified" && (
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-500/10 border border-green-500/20 text-green-600 text-[10px] font-black uppercase tracking-widest">
             <CheckCircle2 className="h-3 w-3" />
-            Verified Educator
+            {t("dashboard.verification.verifiedEducator")}
         </div>
       )}
     </div>

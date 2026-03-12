@@ -15,11 +15,13 @@ import {
 } from "@refinedev/core";
 import { Home } from "lucide-react";
 import { Fragment, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 
 export function Breadcrumb() {
   const Link = useLink();
   const { breadcrumbs } = useBreadcrumb();
   const { resources } = useResourceParams();
+  const { t } = useTranslation();
   const rootRouteResource = matchResourceFromRoute("/", resources);
 
   const breadCrumbItems = useMemo(() => {
@@ -41,16 +43,29 @@ export function Breadcrumb() {
       ),
     });
 
-    for (const { label, href } of breadcrumbs) {
+    for (const { label, href, icon } of breadcrumbs) {
+      // Try to translate the label if it matches a resource key or common term
+      const translatedLabel = t(label, { defaultValue: label });
+
       list.push({
         key: `breadcrumb-item-${label}`,
         href: href ?? "",
-        Component: href ? <Link to={href}>{label}</Link> : <span>{label}</span>,
+        Component: href ? (
+          <Link to={href} className="flex items-center gap-2">
+            {icon && <span className="mr-1">{icon}</span>}
+            {translatedLabel}
+          </Link>
+        ) : (
+          <span className="flex items-center gap-2">
+            {icon && <span className="mr-1">{icon}</span>}
+            {translatedLabel}
+          </span>
+        ),
       });
     }
 
     return list;
-  }, [breadcrumbs, Link, rootRouteResource]);
+  }, [breadcrumbs, Link, rootRouteResource, t]);
 
   return (
     <ShadcnBreadcrumb>

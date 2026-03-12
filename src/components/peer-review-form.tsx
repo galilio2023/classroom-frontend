@@ -19,6 +19,7 @@ import { Loader2, CheckCircle2, Star, MessageSquare, Info, Sparkles, Send } from
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { Label } from "@/components/ui/label";
+import { useTranslation } from "react-i18next";
 
 const peerReviewSchema = z.object({
   scores: z.record(z.string(), z.coerce.number().min(0)),
@@ -34,6 +35,7 @@ interface PeerReviewFormProps {
 }
 
 export const PeerReviewForm = ({ review, assignment, onSuccess }: PeerReviewFormProps) => {
+  const { t } = useTranslation();
   const { mutate, mutation } = useUpdate();
   const isLoading = mutation.isPending;
 
@@ -51,7 +53,7 @@ export const PeerReviewForm = ({ review, assignment, onSuccess }: PeerReviewForm
       id: review.id,
       values,
       successNotification: {
-        message: "Peer review submitted successfully!",
+        message: t("assignments.show.toast.peersSuccess"),
         type: "success",
       },
     }, {
@@ -74,8 +76,8 @@ export const PeerReviewForm = ({ review, assignment, onSuccess }: PeerReviewForm
           <CheckCircle2 className="h-8 w-8 stroke-[3]" />
         </div>
         <div className="space-y-1">
-          <h3 className="text-lg font-black tracking-tight text-success">Review Submitted!</h3>
-          <p className="text-sm text-success/70 font-medium">Thank you for providing constructive feedback to your peer.</p>
+          <h3 className="text-lg font-black tracking-tight text-success">{t("assignments.show.peersAssigned")}</h3>
+          <p className="text-sm text-success/70 font-medium">{t("assignments.show.pendingReview")}</p>
         </div>
       </motion.div>
     );
@@ -87,10 +89,10 @@ export const PeerReviewForm = ({ review, assignment, onSuccess }: PeerReviewForm
         <div className="flex items-center justify-between">
           <CardTitle className="text-sm font-black uppercase tracking-widest flex items-center gap-2 text-primary">
             <Star className="h-4 w-4" />
-            Review Rubric
+            {t("assignments.create.gradingRubric")}
           </CardTitle>
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Criteria: {assignment.rubric.length}</span>
+            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">{t("assignments.create.criteria")}: {assignment.rubric.length}</span>
           </div>
         </div>
       </CardHeader>
@@ -113,7 +115,7 @@ export const PeerReviewForm = ({ review, assignment, onSuccess }: PeerReviewForm
                           <FormLabel className="text-xs font-black uppercase tracking-tight group-hover:text-primary transition-colors">{item.criteria}</FormLabel>
                         </div>
                         <div className="px-2 py-0.5 rounded-full bg-muted text-[9px] font-black uppercase tracking-widest text-muted-foreground">
-                          Max: {item.maxPoints}
+                          {t("assignments.create.maxPoints")}: {item.maxPoints}
                         </div>
                       </div>
                       <FormControl>
@@ -125,7 +127,7 @@ export const PeerReviewForm = ({ review, assignment, onSuccess }: PeerReviewForm
                             {...field} 
                             className="h-12 text-lg font-black text-center rounded-xl bg-muted/20 border-none focus-visible:ring-primary transition-all"
                           />
-                          <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-black opacity-20">PTS</div>
+                          <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-black opacity-20 uppercase tracking-widest">PTS</div>
                         </div>
                       </FormControl>
                       <FormMessage />
@@ -143,17 +145,17 @@ export const PeerReviewForm = ({ review, assignment, onSuccess }: PeerReviewForm
                   <div className="flex items-center justify-between">
                     <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
                       <MessageSquare className="h-3.5 w-3.5" />
-                      Constructive Feedback
+                      {t("assignments.grading.feedbackToStudent")}
                     </FormLabel>
                     <div className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-primary/60">
                       <Sparkles className="h-2.5 w-2.5" />
-                      Be Helpful
+                      {t("buttons.aiSuggestion")}
                     </div>
                   </div>
                   <FormControl>
                     <div className="relative group">
                       <Textarea 
-                        placeholder="What did your peer do well? What could be improved? Be specific and kind." 
+                        placeholder={t("assignments.grading.feedbackPlaceholder")} 
                         className="min-h-[150px] rounded-2xl resize-none bg-muted/10 border-2 border-transparent focus-visible:ring-primary p-5 text-sm leading-relaxed shadow-inner transition-all"
                         {...field}
                       />
@@ -166,7 +168,7 @@ export const PeerReviewForm = ({ review, assignment, onSuccess }: PeerReviewForm
                   <div className="flex items-start gap-2 p-3 rounded-xl bg-primary/5 border border-primary/10">
                     <Info className="h-3.5 w-3.5 text-primary mt-0.5" />
                     <p className="text-[10px] text-muted-foreground leading-relaxed">
-                      Your feedback is anonymous to the student but visible to the teacher. Focus on actionable advice.
+                      {t("assignments.show.integrityDescription")}
                     </p>
                   </div>
                 </FormItem>
@@ -179,7 +181,7 @@ export const PeerReviewForm = ({ review, assignment, onSuccess }: PeerReviewForm
               className="w-full h-12 rounded-xl font-black uppercase tracking-widest shadow-lg shadow-primary/20 gap-2 transition-all hover:scale-[1.02] active:scale-[0.98]"
             >
               {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-              Submit Review
+              {t("assignments.show.interactiveQuiz")}
             </Button>
           </form>
         </Form>

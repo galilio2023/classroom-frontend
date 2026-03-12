@@ -1,14 +1,17 @@
 import * as z from "zod";
+import i18next from "i18next";
 
 /**
- * Enhanced Sign Up Form Schema
- * This schema matches all the fields collected in the RegisterPage.
- * It ensures that the authProvider passes all data to the backend.
+ * Enhanced Sign Up Form Schema with i18n validation messages.
+ * Note: We use { massage: i18next.t(...) } object instead of a naked function
+ * to satisfy Zod's type expectations.
  */
 export const signUpFormSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
+  name: z.string().min(1, { message: i18next.t("auth.register.nameRequired") }),
+  email: z.string().email({ message: i18next.t("auth.register.invalidEmail") }),
+  password: z
+    .string()
+    .min(8, { message: i18next.t("auth.register.passwordMinLength") }),
   role: z.enum(["student", "teacher", "parent"]),
   phoneNumber: z.string().optional(),
   bio: z.string().optional(),

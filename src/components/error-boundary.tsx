@@ -1,8 +1,9 @@
 import React, { Component, ErrorInfo, ReactNode } from "react";
 import { AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { withTranslation, WithTranslation } from "react-i18next";
 
-interface Props {
+interface Props extends WithTranslation {
   children?: ReactNode;
   fallback?: ReactNode;
 }
@@ -12,7 +13,7 @@ interface State {
   error?: Error;
 }
 
-export class ErrorBoundary extends Component<Props, State> {
+class ErrorBoundaryInner extends Component<Props, State> {
   public state: State = {
     hasError: false,
   };
@@ -26,6 +27,8 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   public render() {
+    const { t } = this.props;
+
     if (this.state.hasError) {
       if (this.props.fallback) {
         return this.props.fallback;
@@ -34,16 +37,18 @@ export class ErrorBoundary extends Component<Props, State> {
       return (
         <div className="flex flex-col items-center justify-center p-6 border border-destructive/20 bg-destructive/5 rounded-lg text-center h-full min-h-[200px]">
           <AlertTriangle className="h-10 w-10 text-destructive mb-4" />
-          <h3 className="text-lg font-bold text-foreground mb-2">Something went wrong</h3>
+          <h3 className="text-lg font-bold text-foreground mb-2">
+            {t("common.error")}
+          </h3>
           <p className="text-sm text-muted-foreground mb-4 max-w-xs">
-            {this.state.error?.message || "An unexpected error occurred while loading this component."}
+            {this.state.error?.message || t("common.aiServiceError")}
           </p>
           <Button 
             variant="outline" 
             size="sm" 
             onClick={() => this.setState({ hasError: false })}
           >
-            Try again
+            {t("buttons.tryAgain")}
           </Button>
         </div>
       );
@@ -52,3 +57,5 @@ export class ErrorBoundary extends Component<Props, State> {
     return this.props.children;
   }
 }
+
+export const ErrorBoundary = withTranslation()(ErrorBoundaryInner);

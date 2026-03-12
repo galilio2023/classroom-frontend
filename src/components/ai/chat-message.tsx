@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Avatar } from "@/components/ui/avatar";
 import { Sparkles, User as UserIcon } from "lucide-react";
 import { MarkdownRenderer } from "@/components/ui/markdown-renderer";
+import { useTranslation } from "react-i18next";
 
 interface Message {
   role: "user" | "model";
@@ -13,6 +14,7 @@ interface ChatMessageProps {
 }
 
 export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
+  const { t } = useTranslation();
   const isModel = message.role === "model";
   const fullText = message.parts[0].text;
   const [displayedText, setDisplayedText] = useState(isModel ? "" : fullText);
@@ -24,7 +26,6 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
     const words = fullText.split(" ");
     let index = 0;
     
-    // Optimization: If text is very long, show it immediately to avoid performance issues
     if (words.length > 100) {
         setDisplayedText(fullText);
         setIsTyping(false);
@@ -39,7 +40,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
         setIsTyping(false);
         clearInterval(timer);
       }
-    }, 30); // Adjust speed here
+    }, 30);
 
     return () => clearInterval(timer);
   }, [fullText, isModel]);
@@ -64,7 +65,6 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
             : "bg-primary text-primary-foreground rounded-tr-none"
         }`}>
           <div className="max-w-none">
-            {/* Optimization: Only render Markdown when typing is finished or for short texts */}
             {isTyping ? (
                 <div className="whitespace-pre-wrap">{displayedText}</div>
             ) : (
@@ -74,7 +74,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
           </div>
         </div>
         <span className="text-[9px] text-muted-foreground px-1">
-          {isModel ? "Study Buddy" : "You"}
+          {isModel ? t("aiHub.studyLab.studyBuddy.title") : t("messages.you").replace(": ", "")}
         </span>
       </div>
     </div>
