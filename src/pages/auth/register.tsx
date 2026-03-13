@@ -322,11 +322,18 @@ const RegisterPage = () => {
                 </AnimatePresence>
 
                 <div className="flex gap-4 pt-4">
-                  {step > 1 && (
+                  {step > 1 ? (
                     <Button type="button" variant="outline" className="flex-1 h-14 rounded-2xl font-black uppercase tracking-widest text-xs border-2 border-muted" onClick={() => setStep(1)}>
                       <ArrowLeft className={cn("h-4 w-4 mr-2", isAr && "ml-2 mr-0 rotate-180")} />
                       {t("buttons.back")}
                     </Button>
+                  ) : (
+                    <Link to="/login" className="flex-1">
+                      <Button variant="outline" className="w-full h-14 rounded-2xl font-black uppercase tracking-widest text-xs border-2 border-muted">
+                        <ArrowLeft className={cn("h-4 w-4 mr-2", isAr && "ml-2 mr-0 rotate-180")} />
+                        {t("buttons.signIn")}
+                      </Button>
+                    </Link>
                   )}
                   {step < 2 ? (
                     <Button type="button" className="flex-1 h-14 rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl shadow-primary/20 group" onClick={nextStep}>

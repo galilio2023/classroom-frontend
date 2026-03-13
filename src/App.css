@@ -430,3 +430,8 @@ header, .sidebar-header {
     margin: 0;
   }
 }
+
+/* --- RTL SUPPORT --- */
+[dir="rtl"] .space-x-reverse > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-x-reverse: 0;
+}

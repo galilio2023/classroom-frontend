@@ -42,7 +42,11 @@
       "success": "File uploaded successfully!",
       "removeSuccess": "File removed successfully",
       "error": "Upload failed",
-      "removeError": "Failed to remove file from server"
+      "removeError": "Failed to remove file from server",
+      "video": {
+        "maxSize": "Max size: 100MB (.mp4, .mov)",
+        "label": "Upload Trailer Video"
+      }
     },
     "pwa": {
       "title": "Install Classroom App",
@@ -256,10 +260,9 @@
     "approve": "Approve",
     "portfolio": "Portfolio",
     "topPerformers": "Top Performers",
-    "results": "Results",
-    "createQuiz": "Create Quiz",
-    "createModule": "Create Module",
-    "viewModule": "View Module",
+    "createChannel": "Create Channel",
+    "updateChannel": "Update Channel",
+    "viewChannel": "View Channel",
     "contactUser": "Contact User",
     "openFullRes": "Open Full Resolution"
   },
@@ -1558,6 +1561,31 @@
       }
     }
   },
+  "teacherChannel": {
+    "title": "My Channel",
+    "description": "Manage your public profile and introductory content for students.",
+    "setup": "Channel Setup",
+    "setupDesc": "Configure how students see your professional profile and trailers.",
+    "labels": {
+      "headline": "Professional Headline",
+      "bio": "Channel Biography",
+      "trailer": "Introductory Trailer",
+      "thumbnail": "Video Thumbnail",
+      "stats": "Channel Performance",
+      "views": "Total Views",
+      "conversion": "Conversion Rate",
+      "preview": "Card Preview",
+      "livePreview": "How students see you in the catalog"
+    },
+    "placeholders": {
+      "headline": "e.g. Expert Physics Educator with 10+ years experience",
+      "bio": "Tell students what they will learn from you and why they should enroll in your classes..."
+    },
+    "toasts": {
+      "success": "Channel updated successfully!",
+      "error": "Failed to update channel."
+    }
+  },
   "resources": {
     "dashboard": { "label": "Dashboard" },
     "calendar": { "label": "Calendar" },
@@ -1586,7 +1614,8 @@
     "academic-terms": { "label": "Terms" },
     "profile-requests": { "label": "Profile Requests" },
     "teacher-applications": { "label": "Teacher Apps" },
-    "activity-log": { "label": "Activity Log" }
+    "activity-log": { "label": "Activity Log" },
+    "teacher-channel": { "label": "My Channel" }
   },
   "groups": {
     "ai-lab": "AI Lab",
@@ -1921,6 +1950,55 @@
         "collaboration": {
             "title": "Team Collaboration",
             "desc": "Built-in project groups and real-time discussion streams."
+        },
+        "smartClassroom": {
+            "title": "Smart Classroom",
+            "desc": "Integrated management for classes, assignments, and quizzes in one place."
+        },
+        "community": {
+            "title": "Community Hub",
+            "desc": "Stay connected with real-time messages and class-wide discussion streams."
+        }
+    },
+    "showcase": {
+        "badge": "The Command Center",
+        "title": "A Powerful Hub for",
+        "desc": "One platform to manage your entire academic life. From real-time classes to AI-powered study sessions.",
+        "attendance": "Attendance",
+        "verified": "Verified via QR",
+        "ai": "AI Assistant",
+        "draft": "Draft Ready"
+    },
+    "roles": {
+        "student": {
+            "f1": "AI Study Buddy & Tutor",
+            "f2": "Gamified Learning Path",
+            "f3": "Interactive Assignments",
+            "f4": "Personal Study Planner"
+        },
+        "teacher": {
+            "f1": "AI Content Generator",
+            "f2": "Automated Grading",
+            "f3": "Classroom Governance",
+            "f4": "Advanced Analytics"
+        }
+    },
+    "ai": {
+        "title1": "AI-Powered",
+        "title2": "Study Hub",
+        "desc": "A cutting-edge learning companion that understands your curriculum. Generate quizzes, summarize notes, and create flashcards instantly with Gemini 2.0 Flash.",
+        "list": {
+            "assistant": "24/7 AI Teaching Assistant",
+            "quiz": "Adaptive Quiz Generation",
+            "summary": "Smart Content Summarization",
+            "paths": "Personalized Learning Paths"
+        },
+        "exploreButton": "Explore AI Lab",
+        "chat": {
+            "header": "AI Learning Assistant",
+            "msg1": "Hey there! I noticed you have a Physics test coming up. Want to review Quantum Mechanics?",
+            "msg2": "That would be great! Can you explain the Heisenberg Uncertainty Principle simply?",
+            "msg3": "Absolutely! Imagine trying to take a photo of a speeding car. If you use a fast shutter speed to freeze its position, you can't tell how fast it's going..."
         }
     },
     "trust": {

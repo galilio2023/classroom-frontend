@@ -12,8 +12,8 @@
   <img src="https://img.shields.io/badge/refine-1890FF?style=for-the-badge&logo=refine&logoColor=white" alt="Refine" />
   <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind CSS" />
   <img src="https://img.shields.io/badge/shadcn%2Fui-000000?style=for-the-badge&logo=shadcnui&logoColor=white" alt="Shadcn UI" />
+  <img src="https://img.shields.io/badge/Framer_Motion-0055FF?style=for-the-badge&logo=framer&logoColor=white" alt="Framer Motion" />
   <img src="https://img.shields.io/badge/Socket.io-010101?style=for-the-badge&logo=socket.io&logoColor=white" alt="Socket.io" />
-  <img src="https://img.shields.io/badge/Stripe-008CDD?style=for-the-badge&logo=stripe&logoColor=white" alt="Stripe" />
 </div>
 
 ---
@@ -21,8 +21,8 @@
 ## 📖 Table of Contents
 1.  [Architectural Blueprint](#-architectural-blueprint-the-headless-revolution)
 2.  [Key Features Implemented](#-key-features-implemented)
-3.  [Real-Time Integration](#-real-time-integration)
-4.  [Gamification & XP UI](#-gamification--xp-ui)
+3.  [The "Teacher TV" Discovery Engine](#-the-teacher-tv-discovery-engine)
+4.  [Real-Time Integration](#-real-time-integration)
 5.  [Setup & Installation](#-setup--installation)
 6.  [Project Structure](#-project-structure)
 
@@ -30,53 +30,49 @@
 
 ## 🏗️ Architectural Blueprint: The "Headless" Revolution
 
-We chose a **Headless Architecture** powered by **Refine v5** to achieve maximum design flexibility and development speed. This approach decouples the UI from the backend, allowing us to build a pixel-perfect, custom interface without being locked into a traditional admin panel framework.
+We chose a **Headless Architecture** powered by **Refine v5**. This approach decouples the UI from the backend, allowing us to build a pixel-perfect, custom interface without being locked into a traditional admin panel framework.
 
-### The Layers
-
-*   **Data Provider (`src/providers/data.ts`)**: The **Translator**. This is the core of our headless setup. It maps Refine's data operations (`getList`, `create`, `update`) to our specific backend API endpoints and data structures. It handles all API communication, including adding authentication tokens and normalizing responses.
-*   **Auth Provider (`src/providers/auth.ts`)**: The **Gatekeeper**. It manages the entire authentication lifecycle, including login, logout, checking for active sessions, and retrieving user permissions. It integrates seamlessly with the Data Provider to secure all API requests.
-*   **Logic Layer (Refine Hooks)**: The **Brain**. We leverage Refine's comprehensive suite of hooks (`useList`, `useForm`, `useOne`, `useCustom`) to manage all server state, including caching, optimistic updates, and real-time invalidation. We **never** write raw `fetch` or `axios` calls directly in our UI components.
-*   **UI Layer (`src/components/` & `src/pages/`)**: The **Face**. We use **shadcn/ui** for its accessible, unstyled component primitives, which we then style with **Tailwind CSS**. This gives us complete control over our design system, enabling a unique look and feel, dark mode, and fluid animations.
+*   **Data Provider (`src/providers/data.ts`)**: Maps Refine's operations to our specific backend REST and custom endpoints.
+*   **Logic Layer (Refine Hooks)**: Manages all server state, including caching, optimistic updates, and real-time invalidation.
+*   **UI Layer**: Built with **shadcn/ui** and **Tailwind CSS** for maximum flexibility and accessibility.
 
 ---
 
 ## ✨ Key Features Implemented
 
-### 📊 Role-Based Dashboards
-*   **Teacher Dashboard**: Features automated **At-Risk Student Detection**, a list of pending submissions, and a schedule of upcoming classes.
-*   **Student Dashboard**: Showcases an **Academic Journey** view with grade trends, XP progression, and a unified calendar of all enrolled classes.
-*   **Admin Dashboard**: Provides system-wide analytics, user management tools, and a teacher verification queue.
+### 📺 Teacher Discovery Engine (Teacher TV)
+*   **Netflix-Style Catalog**: A high-end horizontal carousel featuring teacher promotions.
+*   **Cinematic Auto-Play**: Hovering over a teacher card triggers a smooth video trailer preview.
+*   **Trending Algorithm**: Displays teachers ranked by a weighted score of views and conversion rates.
+*   **Conversion Funnel**: Integrated buttons to view teacher profiles and enroll directly into their available classes.
 
 ### 🤖 AI-Powered Tools
-*   **Magic Builder (for Teachers)**: A modal-based workflow where teachers can input a topic and generate a complete module, notes, assignment, and quiz with a single click.
-*   **AI Grading Agent (for Teachers)**: When a teacher opens the grading view for a submission, a real-time **Agent Alert** (a toast notification) pops up with a `suggestedGrade` and `suggestedFeedback`.
-*   **AI Study Buddy (for Students)**: A persistent, slide-out chat panel available in every classroom, with full chat history.
-*   **AI Study Lab (for Students)**: A dedicated page with three tools: an **Explainer** for complex topics, a **Summarizer** for text, and a **Flashcard Generator**.
+*   **Magic Builder**: One-click generation of course modules, notes, and assignments.
+*   **AI Grading Agent**: Proactive grading suggestions and feedback for student submissions.
+*   **AI Study Buddy**: Context-aware persistent chat panel inside every classroom.
+*   **AI Study Lab**: Personalized learning tools including a Concept Explainer and Flashcard Generator.
 
-### 📢 Announcements & Engagement
-*   **Announcement Tracking**: Students' "Read" status is updated automatically via **Intersection Observer** as they scroll past announcements.
-*   **Teacher "Seen By" View**: Teachers can click an "Eye" icon on any announcement to see a real-time list of students who have read it.
+### 🎥 Live Classroom & Engagement
+*   **Jitsi Meet Integration**: Fully embedded virtual classrooms.
+*   **QR Attendance**: Real-time presence tracking via dynamic QR codes.
+*   **Real-time Notifications**: Instant updates for grades, announcements, and live sessions.
 
-### 🎥 Live Classroom & Attendance
-*   **Jitsi Meet Integration:** A fully embedded virtual classroom experience launched directly from the class page.
-*   **Real-time Status Indicators:** UI elements across the app (e.g., on class cards) show a "Live" badge when a session is active.
-*   **QR Code Attendance:** Teachers can launch a full-screen QR code; students scan this with their device to be marked as present, with the teacher's view updating in real-time.
+---
 
-### 🏆 Gamification & Engagement
-*   **XP & Level Display:** The user's current Level and XP are prominently displayed in the header and on their profile.
-*   **Class Leaderboards:** A dedicated tab in each class showing a real-time ranked list of students by XP.
+## 📺 The "Teacher TV" Discovery Engine
+
+Designed to boost platform engagement, the Discovery Engine provides:
+1.  **Immersive Browsing**: High-performance video trailer rendering using Framer Motion.
+2.  **Smart Performance**: Optimized Redis-backed view tracking prevents backend lag during high-traffic browsing sessions.
+3.  **Visual Polish**: Staggered entry animations and smooth layout transitions for a "billion-dollar app" feel.
 
 ---
 
 ## ⚡ Real-Time Integration
 
 The frontend is connected to the backend's **Socket.io** server to create a live, interactive experience.
-
-*   **Global Socket Client (`src/lib/socket.ts`)**: A single, memoized Socket.io client is initialized and used throughout the application.
-*   **Real-time Hooks (`src/hooks/use-socket.ts`)**: A custom hook simplifies subscribing to and handling real-time events within components.
-*   **Refine Invalidation**: When a relevant event is received (e.g., `discussion:new`), we call Refine's `invalidate` function. This intelligently re-fetches only the necessary data, keeping the UI perfectly in sync with the backend state.
-*   **Live Toasts (`sonner`)**: We use toast notifications to provide immediate, actionable feedback for events like `notification:new` and `agent:alert`.
+*   **Live Invalidation**: Relevant components re-fetch data instantly when backend state changes (e.g., a new discussion post or a live session start).
+*   **Live Toasts**: Immediate actionable feedback for users.
 
 ---
 
@@ -85,22 +81,20 @@ The frontend is connected to the backend's **Socket.io** server to create a live
 1.  **Clone the repository:**
     ```bash
     git clone https://github.com/galilio2023/classroom-frontend.git
-    cd classroom-frontend
     ```
 2.  **Install dependencies:**
     ```bash
     npm install
     ```
-3.  **Create a `.env.local` file** in the root directory and add the following variables, pointing to your backend API and WebSocket URLs:
+3.  **Environment Setup (.env.local):**
     ```
     VITE_API_URL=http://localhost:8000/api
     VITE_SOCKET_URL=http://localhost:8000
     ```
-4.  **Run the development server:**
+4.  **Run:**
     ```bash
     npm run dev
     ```
-    The application will be available at `http://localhost:5173`.
 
 ---
 
@@ -108,20 +102,11 @@ The frontend is connected to the backend's **Socket.io** server to create a live
 ```
 /
 ├── src/
-│   ├── components/          # Reusable UI components (built with Shadcn)
-│   │   ├── common/          # General-purpose components (e.g., Empty, Loader)
-│   │   └── layout/          # Main layout components (Header, Sider)
-│   ├── config/              # Application configuration (e.g., constants)
-│   ├── hooks/               # Custom React hooks (e.g., useSocket)
-│   ├── lib/                 # Utility functions and library initializations (e.g., axios)
-│   ├── pages/               # Top-level page components, organized by resource
+│   ├── components/          # UI components (Shadcn + Framer Motion)
+│   │   ├── classes/         # Classroom-specific tools (e.g., DiscoveryList)
+│   │   └── layout/          # Sidebar, Header, etc.
+│   ├── pages/               # Top-level routes
 │   ├── providers/           # Refine's Auth and Data Providers
-│   ├── socket/              # Socket.io client setup and event handlers
-│   ├── types/               # Global TypeScript type definitions
-│   ├── App.tsx              # Main application component with Refine router
-│   └── main.tsx             # Application entry point
-├── .env.local.example       # Example environment file
-├── package.json             # Project dependencies
-├── tsconfig.json            # TypeScript configuration
-└── vite.config.ts           # Vite build configuration
+│   ├── types/               # TypeScript definitions
+│   └── App.tsx              # Main application router
 ```

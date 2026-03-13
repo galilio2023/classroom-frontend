@@ -70,7 +70,7 @@ export function Sidebar() {
       }
 
       // 2. Fail-safe: Explicitly hide specific items for roles
-      if (userRole === UserRole.STUDENT && item.name === "ai-assistant") {
+      if (userRole === UserRole.STUDENT && (item.name === "ai-assistant" || item.name === "teacher-channel")) {
         return;
       }
 

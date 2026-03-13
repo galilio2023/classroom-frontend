@@ -88,6 +88,7 @@ import usePageTitle from "@/hooks/use-page-title";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { ApplyTeacherDialog } from "./apply-teacher-dialog";
 import { useTranslation } from "react-i18next";
+import { TeacherDiscoveryList } from "@/components/classes/teacher-discovery-list";
 
 const ClassesList = () => {
   const { t, i18n } = useTranslation();
@@ -413,6 +414,17 @@ const ClassesList = () => {
               </motion.div>
             )}
           </AnimatePresence>
+
+          {/* Teacher Discovery Catalog (Netflix Style) */}
+          {isStudent && (
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+            >
+                <TeacherDiscoveryList />
+            </motion.div>
+          )}
 
           {/* Filters & Search */}
           <Card className="p-4 border-primary/5 bg-muted/30 rounded-4xl backdrop-blur-sm">

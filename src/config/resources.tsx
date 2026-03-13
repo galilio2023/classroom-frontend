@@ -26,7 +26,8 @@ import {
   MessageCircle,
   Users,
   Files,
-  Clock
+  Clock,
+  Tv
 } from "lucide-react";
 import { ResourceProps } from "@refinedev/core";
 
@@ -62,6 +63,9 @@ export const resources: ResourceProps[] = [
   { name: "portfolio", list: "/portfolio", meta: { group: "groups.progress", label: "resources.portfolio.label", icon: <UserCircle /> } },
   { name: "report-card", list: "/student/report-card", meta: { group: "groups.progress", label: "resources.report-card.label", icon: <FileText /> } },
   { name: "progress", list: "/progress", meta: { group: "groups.progress", label: "resources.progress.label", icon: <TrendingUp /> } },
+
+  // --- TEACHER HUB ---
+  { name: "teacher-channel", list: "/teacher/channel", meta: { group: "groups.academic", label: "resources.teacher-channel.label", icon: <Tv /> } },
 
   // --- ADMINISTRATION ---
   { name: "users", list: "/users", create: "/users/create", edit: "/users/edit/:id", show: "/users/show/:id", meta: { group: "groups.admin", label: "resources.users.label", icon: <ShieldCheck /> } },
