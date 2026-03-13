@@ -1309,7 +1309,9 @@
         "poweredBy": "Powered by Gemini",
         "personalTutor": "Your Personal Tutor",
         "masterSubject": "I'm here to help you master {{subject}}. What should we explore today?",
-        "masterGeneral": "your subjects"
+        "masterGeneral": "your subjects",
+        "sources": "Sources",
+        "source": "Source"
       }
     }
   },
