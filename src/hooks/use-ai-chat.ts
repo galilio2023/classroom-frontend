@@ -15,6 +15,8 @@ interface UseAIChatProps {
   classId?: string | number;
 }
 
+const ERROR_MESSAGE = "I'm having trouble reading the class materials right now. Please try again in a moment.";
+
 export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -89,10 +91,43 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
       }
     });
 
+    const handleError = () => {
+      setMessages((prev) => {
+        const lastMessage = prev[prev.length - 1];
+        
+        // Scenario 1: Empty chat state
+        if (!lastMessage) {
+          return [...prev, { role: "model", parts: [{ text: ERROR_MESSAGE }] }];
+        }
+        
+        // Scenario 2: The last message is a user message, we never got a response
+        if (lastMessage.role === "user") {
+          return [...prev, { role: "model", parts: [{ text: ERROR_MESSAGE }] }];
+        }
+        
+        // Scenario 3: The last message is an active model message that is still streaming
+        if (lastMessage.role === "model" && currentStreamId.current) {
+           const existingText = lastMessage.parts[0].text;
+           const newText = existingText ? existingText + "\n\n[Error: " + ERROR_MESSAGE + "]" : ERROR_MESSAGE;
+           return [...prev.slice(0, -1), { ...lastMessage, parts: [{ text: newText }] }];
+        }
+        
+        // Scenario 4: A general error occurred but we aren't actively streaming (fallback)
+        return [...prev, { role: "model", parts: [{ text: ERROR_MESSAGE }] }];
+      });
+      setIsStreaming(false);
+      currentStreamId.current = null;
+    };
+
+    socket.on("study-buddy:error", handleError);
+    socket.on("disconnect", handleError);
+
     return () => {
       socket.off("study-buddy:start");
       socket.off("study-buddy:chunk");
       socket.off("study-buddy:end");
+      socket.off("study-buddy:error", handleError);
+      socket.off("disconnect", handleError);
     };
   }, []);
 
@@ -131,6 +166,12 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
             setMessages((prev) => [...prev, aiMessage]);
           }
         },
+        onError: () => {
+           setMessages((prev) => [
+             ...prev, 
+             { role: "model", parts: [{ text: ERROR_MESSAGE }] }
+           ]);
+        }
       }
     );
   };
