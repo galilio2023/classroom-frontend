@@ -176,14 +176,13 @@ const Pricing = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-5xl mx-auto relative">
-        {/* Comparison Line or Element can go here */}
         {plans.map((plan, index) => (
           <motion.div
             key={plan.name}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
-            className="relative"
+            className="relative h-full"
           >
             <Card className={cn(
                 "relative h-full flex flex-col border-2 shadow-2xl rounded-[3rem] overflow-hidden transition-all duration-500 group hover:translate-y-[-8px]",
@@ -251,9 +250,9 @@ const Pricing = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
               <motion.div 
                 whileHover={{ y: -5 }}
-                className="p-10 bg-card border border-primary/5 rounded-[2.5rem] space-y-6 shadow-xl"
+                className="p-10 bg-card border border-primary/5 rounded-[2.5rem] space-y-6 shadow-xl text-center md:text-start"
               >
-                  <div className="h-14 w-14 rounded-2xl bg-blue-500/10 text-blue-600 flex items-center justify-center shadow-lg">
+                  <div className="h-14 w-14 rounded-2xl bg-blue-500/10 text-blue-600 flex items-center justify-center shadow-lg mx-auto md:mx-0">
                       <ShieldCheck className="h-7 w-7" />
                   </div>
                   <h3 className="text-xl font-black tracking-tight uppercase">{t("pricing.features.payments.title")}</h3>
@@ -263,9 +262,9 @@ const Pricing = () => {
               </motion.div>
               <motion.div 
                 whileHover={{ y: -5 }}
-                className="p-10 bg-card border border-primary/5 rounded-[2.5rem] space-y-6 shadow-xl"
+                className="p-10 bg-card border border-primary/5 rounded-[2.5rem] space-y-6 shadow-xl text-center md:text-start"
               >
-                  <div className="h-14 w-14 rounded-2xl bg-purple-500/10 text-purple-600 flex items-center justify-center shadow-lg">
+                  <div className="h-14 w-14 rounded-2xl bg-purple-500/10 text-purple-600 flex items-center justify-center shadow-lg mx-auto md:mx-0">
                       <BrainCircuit className="h-7 w-7" />
                   </div>
                   <h3 className="text-xl font-black tracking-tight uppercase">{t("pricing.features.credits.title")}</h3>
@@ -275,9 +274,9 @@ const Pricing = () => {
               </motion.div>
               <motion.div 
                 whileHover={{ y: -5 }}
-                className="p-10 bg-card border border-primary/5 rounded-[2.5rem] space-y-6 shadow-xl"
+                className="p-10 bg-card border border-primary/5 rounded-[2.5rem] space-y-6 shadow-xl text-center md:text-start"
               >
-                  <div className="h-14 w-14 rounded-2xl bg-green-500/10 text-green-600 flex items-center justify-center shadow-lg">
+                  <div className="h-14 w-14 rounded-2xl bg-green-500/10 text-green-600 flex items-center justify-center shadow-lg mx-auto md:mx-0">
                       <MessageSquare className="h-7 w-7" />
                   </div>
                   <h3 className="text-xl font-black tracking-tight uppercase">{t("pricing.features.support.title")}</h3>

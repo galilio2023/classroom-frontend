@@ -89,6 +89,7 @@ const TeacherApplicationsList = React.lazy(() => import("./pages/teacher-applica
 const ActivityLogPage = React.lazy(() => import("./pages/dashboard/activity-log"));
 const StudentReportCard = React.lazy(() => import("./pages/student/report-card"));
 const StudentProgress = React.lazy(() => import("./pages/progress/list"));
+const TeacherChannelPage = React.lazy(() => import("./pages/teacher-channel/index"));
 
 // PUBLIC PAGES
 const LandingPage = React.lazy(() => import("./pages/landing"));
@@ -305,6 +306,16 @@ function App() {
                             <Route path="/discussions" element={<AuthorizedRoute resource="discussions" action="list"><DiscussionsList /></AuthorizedRoute>} />
                             <Route path="/modules" element={<AuthorizedRoute resource="modules" action="list"><ModulesList /></AuthorizedRoute>} />
                             <Route path="/resources" element={<AuthorizedRoute resource="resources" action="list"><ResourcesList /></AuthorizedRoute>} />
+
+                            {/* TEACHER HUB */}
+                            <Route 
+                                path="/teacher/channel" 
+                                element={
+                                    <AuthorizedRoute resource="teacher-channel" action="list">
+                                        <TeacherChannelPage />
+                                    </AuthorizedRoute>
+                                } 
+                            />
 
                             {/* ADMIN */}
                             <Route path="/users">

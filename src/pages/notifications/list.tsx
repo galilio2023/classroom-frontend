@@ -66,9 +66,10 @@ import { useTranslation } from "react-i18next";
 dayjs.extend(relativeTime);
 
 const NotificationsListPage = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   usePageTitle(t("notifications.title"));
   const { data: identity } = useGetIdentity<User>();
+  const isAr = i18n.language === 'ar';
 
   const [searchQuery, setSearchQuery] = useState("");
   const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
@@ -165,7 +166,7 @@ const NotificationsListPage = () => {
   }, [notifications]);
 
   return (
-    <div className="space-y-10 pb-20">
+    <div className="space-y-10 pb-20 text-start">
       <ListView>
         <div className="space-y-10">
           <motion.div
@@ -190,7 +191,7 @@ const NotificationsListPage = () => {
                   onClick={handleMarkAllAsRead}
                   className="flex-1 md:flex-none rounded-2xl h-14 px-8 border-primary/10 bg-card/50 backdrop-blur-sm hover:bg-primary/5 text-primary font-black uppercase tracking-widest text-[10px] shadow-sm"
                 >
-                  <CheckSquare className="h-4 w-4 mr-2" />
+                  {isAr ? <CheckSquare className="h-4 w-4 ml-2" /> : <CheckSquare className="h-4 w-4 mr-2" />}
                   {t("notifications.markAllRead")}
                 </Button>
               </div>
@@ -244,11 +245,16 @@ const NotificationsListPage = () => {
           <Card className="p-4 border-primary/5 bg-muted/30 rounded-4xl backdrop-blur-sm">
             <div className="flex flex-col lg:flex-row gap-4">
               <div className="relative flex-1 group">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                <div className={cn("absolute top-1/2 -translate-y-1/2 flex items-center pointer-events-none", isAr ? "right-4" : "left-4")}>
+                    <Search className="h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                </div>
                 <Input
                   type="text"
                   placeholder={t("common.search")}
-                  className="pl-11 h-14 rounded-2xl border-none bg-background shadow-sm font-medium"
+                  className={cn(
+                    "h-14 rounded-2xl border-none bg-background shadow-sm font-medium",
+                    isAr ? "pr-11" : "pl-11"
+                  )}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -343,7 +349,7 @@ const NotificationsListPage = () => {
                       </div>
 
                       {/* Info */}
-                      <div className="flex-1 md:ml-8 text-center md:text-left min-w-0 w-full">
+                      <div className={cn("flex-1 text-center min-w-0 w-full", isAr ? "md:mr-8 md:text-right" : "md:ml-8 md:text-left")}>
                         <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
                           <h3
                             className={cn(
@@ -387,7 +393,7 @@ const NotificationsListPage = () => {
                               <Calendar className="h-3.5 w-3.5 text-primary" />
                             </div>
                             <span className="text-xs font-bold">
-                              {createdAt.format("MMM D, YYYY")}
+                              {createdAt.locale(i18n.language).format("MMM D, YYYY")}
                             </span>
                           </div>
 
@@ -396,7 +402,7 @@ const NotificationsListPage = () => {
                               <Clock className="h-3.5 w-3.5 text-primary" />
                             </div>
                             <span className="text-xs font-bold uppercase tracking-tight">
-                              {createdAt.fromNow()}
+                              {createdAt.locale(i18n.language).fromNow()}
                             </span>
                           </div>
                         </div>
@@ -404,7 +410,7 @@ const NotificationsListPage = () => {
 
                       {/* Actions */}
                       <div className="flex items-center gap-3 mt-6 md:mt-0 shrink-0">
-                        <div className="hidden lg:flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all translate-x-4 group-hover:translate-x-0">
+                        <div className={cn("hidden lg:flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all", isAr ? "-translate-x-4 group-hover:translate-x-0" : "translate-x-4 group-hover:translate-x-0")}>
                           {!notification.isRead && (
                             <Button
                               variant="ghost"
@@ -435,7 +441,7 @@ const NotificationsListPage = () => {
                           >
                             <a href={notification.link}>
                               {t("buttons.viewDetails")}
-                              <ArrowRight className="h-4 w-4 ml-2" />
+                              {isAr ? <ArrowRight className="h-4 w-4 mr-2 rotate-180" /> : <ArrowRight className="h-4 w-4 ml-2" />}
                             </a>
                           </Button>
                         )}
@@ -510,7 +516,7 @@ const NotificationsListPage = () => {
             <div className="p-4 rounded-2xl bg-destructive/10 text-destructive w-fit">
               <Trash2 className="h-8 w-8" />
             </div>
-            <div className="space-y-1">
+            <div className="space-y-1 text-start">
               <AlertDialogTitle className="text-3xl font-black tracking-tight">
                 {t("classes.list.deleteDialog.title")}
               </AlertDialogTitle>

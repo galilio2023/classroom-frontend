@@ -12,15 +12,19 @@ interface FileUploadProps {
   onClear?: () => void;
   folder?: string;
   label?: string;
+  accept?: string;
+  maxSize?: number; // In bytes
 }
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+const DEFAULT_MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
 export const FileUpload: React.FC<FileUploadProps> = ({ 
   onUploadSuccess, 
   onClear,
   folder = "general",
-  label
+  label,
+  accept = ".pdf,.doc,.docx,.jpg,.jpeg,.png,.webp",
+  maxSize = DEFAULT_MAX_FILE_SIZE
 }) => {
   const { t } = useTranslation();
   const [file, setFile] = useState<File | null>(null);
@@ -33,7 +37,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     if (e.target.files && e.target.files[0]) {
       const selectedFile = e.target.files[0];
       
-      if (selectedFile.size > MAX_FILE_SIZE) {
+      if (selectedFile.size > maxSize) {
         toast.error(t("common.upload.tooLarge"), {
           description: t("common.upload.tooLargeDesc")
         });
@@ -92,6 +96,8 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     fileInputRef.current?.click();
   };
 
+  const isVideo = folder === "trailers" || accept.includes("video");
+
   return (
     <div className="space-y-3 w-full">
       {label && (
@@ -110,11 +116,13 @@ export const FileUpload: React.FC<FileUploadProps> = ({
             type="file"
             className="hidden"
             onChange={handleFileChange}
-            accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.webp"
+            accept={accept}
           />
           <Upload className="h-8 w-8 text-muted-foreground mb-2" />
           <p className="text-sm font-medium text-muted-foreground">{t("common.upload.clickOrDrag")}</p>
-          <p className="text-xs text-muted-foreground/60 mt-1">{t("common.upload.maxSize")}</p>
+          <p className="text-xs text-muted-foreground/60 mt-1">
+            {isVideo ? t("common.upload.video.maxSize") : t("common.upload.maxSize")}
+          </p>
         </div>
       ) : (
         <div className="flex flex-col gap-3 p-4 border rounded-lg bg-background shadow-sm">

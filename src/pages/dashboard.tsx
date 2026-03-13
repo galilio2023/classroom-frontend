@@ -158,7 +158,6 @@ const Dashboard = () => {
       >
         <div className="relative">
           <WelcomeHeader name={identity?.name || "User"} isStudent={isStudent} user={identity} />
-          {/* Fix: Use logical positioning to prevent overlap in RTL */}
           <div className="absolute top-0 ltr:right-0 rtl:left-0 hidden md:flex items-center gap-3">
             <Badge variant="secondary" className="rounded-full px-4 py-1.5 font-black text-[10px] uppercase tracking-widest bg-card/50 backdrop-blur-xl border-black/[0.05] dark:border-white/[0.05] shadow-sm">
               <Clock className="h-3 w-3 mr-2 rtl:mr-0 rtl:ml-2 text-primary" />

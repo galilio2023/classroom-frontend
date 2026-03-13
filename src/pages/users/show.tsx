@@ -1,6 +1,6 @@
 import { useShow, useGetIdentity, useList } from "@refinedev/core";
-import { useParams } from "react-router-dom";
-import { useMemo } from "react";
+import { useParams, Link } from "react-router-dom";
+import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -24,15 +24,18 @@ import {
   Clock,
   CheckCircle2,
   XCircle,
+  Tv,
+  Users,
+  ArrowRight
 } from "lucide-react";
-import { User as UserType, UserRole, VerificationStatus } from "@/types";
+import { User as UserType, UserRole, VerificationStatus, Class } from "@/types";
 import { XPProgressBar } from "@/components/xp-progress-bar";
 import { getLevelProgress } from "@/lib/xp";
 import { BadgeCard, BadgeData } from "@/components/ui/badge-card";
 import { CertificateGallery } from "@/components/certificate-gallery";
 import { toast } from "sonner";
 import ReportCard from "@/pages/student/report-card";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
 import usePageTitle from "@/hooks/use-page-title";
 import { useTranslation } from "react-i18next";
@@ -44,6 +47,7 @@ const UserShow = () => {
   
   const { id: paramsId } = useParams();
   const { data: identity } = useGetIdentity<UserType>();
+  const [isPreviewHovered, setIsPreviewHovered] = useState(false);
   
   // Logic: Use ID from URL if available, otherwise fallback to current user's ID (for /portfolio)
   const id = paramsId || identity?.id;
@@ -55,7 +59,7 @@ const UserShow = () => {
         enabled: !!id
     },
     meta: {
-        populate: ["department", "userBadges", "userBadges.badge"]
+        populate: ["department", "userBadges", "userBadges.badge", "teacherChannel"]
     }
   });
 
@@ -67,6 +71,19 @@ const UserShow = () => {
         enabled: !!query.data?.data
     }
   });
+
+  // Fetch teacher's classes if this is a teacher
+  const { result: teacherClassesResult } = useList<Class>({
+    resource: "classes",
+    filters: [
+        { field: "teacherUid", operator: "eq", value: id }
+    ],
+    queryOptions: {
+        enabled: !!query.data?.data && query.data.data.role === UserRole.TEACHER
+    }
+  });
+
+  const teacherClasses = teacherClassesResult.data;
 
   const { data, isLoading, isError } = query;
   const user = data?.data;
@@ -123,6 +140,7 @@ const UserShow = () => {
   const isSelf = identity?.id === user.id;
   const isAdmin = identity?.role === UserRole.ADMIN;
   const isStudent = user.role === UserRole.STUDENT;
+  const isTeacher = user.role === UserRole.TEACHER;
   
   const { currentLevel } = getLevelProgress(user.xp || 0);
 
@@ -154,13 +172,21 @@ const UserShow = () => {
     }
   };
 
+  const pageVariants = {
+    initial: { opacity: 0, scale: 0.98 },
+    animate: { opacity: 1, scale: 1 },
+    exit: { opacity: 0, scale: 0.98 }
+  };
+
   return (
-    <div className="container mx-auto py-10 max-w-6xl space-y-10 text-start">
-      <motion.div 
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="space-y-4"
-      >
+    <motion.div 
+        variants={pageVariants}
+        initial="initial"
+        animate="animate"
+        exit="exit"
+        className="container mx-auto py-10 max-w-6xl space-y-10 text-start"
+    >
+      <div className="space-y-4">
         <Breadcrumb />
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="flex items-center gap-4">
@@ -194,16 +220,11 @@ const UserShow = () => {
                 )}
             </div>
         </div>
-      </motion.div>
+      </div>
 
       <div className="grid gap-10 md:grid-cols-12">
         {/* Left Column: Profile Card */}
-        <motion.div 
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.1 }}
-            className="md:col-span-4 space-y-8"
-        >
+        <div className="md:col-span-4 space-y-8">
           <Card className="overflow-hidden border-primary/10 shadow-2xl rounded-[2.5rem] bg-card/50 backdrop-blur-sm">
             <div className="h-32 bg-gradient-to-br from-primary/20 via-primary/10 to-transparent relative">
                 <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10" />
@@ -297,42 +318,177 @@ const UserShow = () => {
               </div>
             </CardContent>
           </Card>
-        </motion.div>
+
+          {isTeacher && user.teacherChannel && (
+            <Card className="border-primary/10 shadow-xl rounded-[2.5rem] bg-card/50 backdrop-blur-sm overflow-hidden p-6">
+                <div className="flex items-center gap-3 mb-4">
+                    <div className="p-2 rounded-xl bg-primary/10 text-primary">
+                        <Tv className="h-5 w-5" />
+                    </div>
+                    <h4 className="text-sm font-black uppercase tracking-widest">{t("teacherChannel.labels.stats")}</h4>
+                </div>
+                <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                        <span className="text-xs font-bold text-muted-foreground">{t("teacherChannel.labels.views")}</span>
+                        <span className="text-lg font-black">{user.teacherChannel.totalViews.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                        <span className="text-xs font-bold text-muted-foreground">{t("teacherChannel.labels.conversion")}</span>
+                        <span className="text-lg font-black text-primary">{(user.teacherChannel.conversionRate * 100).toFixed(1)}%</span>
+                    </div>
+                </div>
+            </Card>
+          )}
+        </div>
 
         {/* Right Column: Details & Bio */}
-        <motion.div 
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2 }}
-            className="md:col-span-8 space-y-10"
-        >
-          <Card className="border-primary/10 shadow-xl rounded-[2.5rem] bg-card/50 backdrop-blur-sm overflow-hidden">
-            <CardHeader className="p-8 pb-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-primary/10 text-primary">
-                    <FileText className="h-5 w-5" />
-                </div>
-                <CardTitle className="text-2xl font-black tracking-tight">{t("profile.labels.bio")}</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent className="p-8 pt-4 space-y-8">
-              <div className="space-y-4">
-                <p className="text-base leading-relaxed text-foreground/80 font-medium whitespace-pre-wrap">
-                  {user.bio || t("profile.placeholders.noBio")}
-                </p>
-              </div>
+        <div className="md:col-span-8 space-y-10">
+          {isTeacher && user.teacherChannel ? (
+            <div className="space-y-10">
+                {/* Hero Trailer Section */}
+                <Card className="border-none shadow-2xl rounded-[3rem] bg-black overflow-hidden relative aspect-video group">
+                    <AnimatePresence>
+                        {isPreviewHovered && user.teacherChannel.trailerVideoUrl ? (
+                            <motion.video 
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                src={user.teacherChannel.trailerVideoUrl}
+                                autoPlay
+                                muted
+                                loop
+                                className="absolute inset-0 w-full h-full object-cover"
+                            />
+                        ) : (
+                            <motion.img 
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                src={user.teacherChannel.thumbnailUrl || user.image || ""}
+                                className="absolute inset-0 w-full h-full object-cover"
+                            />
+                        )}
+                    </AnimatePresence>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent p-10 flex flex-col justify-end gap-4">
+                        <motion.div 
+                            initial={{ y: 20, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            className="space-y-2"
+                        >
+                            <h2 className="text-4xl font-black text-white tracking-tight leading-tight max-w-2xl">
+                                {user.teacherChannel.headline}
+                            </h2>
+                            <div className="flex items-center gap-4">
+                                <Badge className="bg-primary text-white border-none rounded-lg px-4 py-1.5 font-black uppercase tracking-widest text-xs">
+                                    Official Channel
+                                </Badge>
+                                <Button 
+                                    variant="ghost" 
+                                    className="text-white hover:bg-white/10 gap-2 font-black uppercase tracking-widest text-[10px]"
+                                    onMouseEnter={() => setIsPreviewHovered(true)}
+                                    onMouseLeave={() => setIsPreviewHovered(false)}
+                                >
+                                    <Tv className="h-4 w-4" />
+                                    Watch Trailer
+                                </Button>
+                            </div>
+                        </motion.div>
+                    </div>
+                </Card>
 
-              {user.address && (
-                <div className="pt-6 border-t border-primary/5">
-                  <div className="flex items-center gap-2 mb-3">
-                    <MapPin className="h-4 w-4 text-primary" />
-                    <h4 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t("profile.labels.address")}</h4>
-                  </div>
-                  <p className={cn("text-sm font-bold text-foreground/80", isAr ? "mr-6" : "ml-6")}>{user.address}</p>
+                {/* Channel Bio */}
+                <Card className="border-primary/10 shadow-xl rounded-[2.5rem] bg-card/50 backdrop-blur-sm overflow-hidden">
+                    <CardHeader className="p-8 pb-4">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-xl bg-primary/10 text-primary">
+                                <FileText className="h-5 w-5" />
+                            </div>
+                            <CardTitle className="text-2xl font-black tracking-tight">{t("teacherChannel.labels.bio")}</CardTitle>
+                        </div>
+                    </CardHeader>
+                    <CardContent className="p-8 pt-4">
+                        <p className="text-lg leading-relaxed text-foreground/80 font-medium whitespace-pre-wrap italic">
+                            "{user.teacherChannel.bio}"
+                        </p>
+                    </CardContent>
+                </Card>
+
+                {/* Available Classes Section */}
+                <div className="space-y-6">
+                    <div className="flex items-center justify-between px-2">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-xl bg-primary/10 text-primary">
+                                <GraduationCap className="h-6 w-6" />
+                            </div>
+                            <h2 className="text-2xl font-black tracking-tight">Available Classes</h2>
+                        </div>
+                        <Badge variant="outline" className="rounded-xl border-primary/10 font-bold px-4 py-1.5">
+                            {teacherClasses?.length || 0} active modules
+                        </Badge>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        {teacherClasses?.map((classItem) => (
+                            <Card key={classItem.id} className="border-primary/5 bg-card/50 backdrop-blur-sm rounded-3xl overflow-hidden hover:shadow-2xl hover:scale-[1.02] transition-all group">
+                                <div className="aspect-[16/9] relative overflow-hidden">
+                                    <img 
+                                        src={classItem.bannerUrl || "https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?auto=format&fit=crop&q=80&w=1000"} 
+                                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
+                                    />
+                                    <div className="absolute inset-0 bg-black/20" />
+                                    <Badge className="absolute top-4 right-4 bg-white/90 text-black border-none font-black text-[9px] uppercase tracking-widest">
+                                        {classItem.subject?.name}
+                                    </Badge>
+                                </div>
+                                <CardContent className="p-6 space-y-4">
+                                    <div className="space-y-1">
+                                        <h4 className="text-xl font-black tracking-tight group-hover:text-primary transition-colors truncate">{classItem.name}</h4>
+                                        <div className="flex items-center gap-2 text-muted-foreground text-xs font-bold">
+                                            <Users className="h-3.5 w-3.5" />
+                                            {classItem.enrollments?.length || 0} / {classItem.capacity} students
+                                        </div>
+                                    </div>
+                                    <Button asChild className="w-full h-12 rounded-2xl font-black uppercase tracking-widest gap-2 shadow-lg shadow-primary/10">
+                                        <Link to={`/classes/show/${classItem.id}`}>
+                                            Enroll Now
+                                            <ArrowRight className="h-4 w-4" />
+                                        </Link>
+                                    </Button>
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
                 </div>
-              )}
-            </CardContent>
-          </Card>
+            </div>
+          ) : (
+            <Card className="border-primary/10 shadow-xl rounded-[2.5rem] bg-card/50 backdrop-blur-sm overflow-hidden">
+                <CardHeader className="p-8 pb-4">
+                <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-xl bg-primary/10 text-primary">
+                        <FileText className="h-5 w-5" />
+                    </div>
+                    <CardTitle className="text-2xl font-black tracking-tight">{t("profile.labels.bio")}</CardTitle>
+                </div>
+                </CardHeader>
+                <CardContent className="p-8 pt-4 space-y-8">
+                <div className="space-y-4">
+                    <p className="text-base leading-relaxed text-foreground/80 font-medium whitespace-pre-wrap">
+                    {user.bio || t("profile.placeholders.noBio")}
+                    </p>
+                </div>
+
+                {user.address && (
+                    <div className="pt-6 border-t border-primary/5">
+                    <div className="flex items-center gap-2 mb-3">
+                        <MapPin className="h-4 w-4 text-primary" />
+                        <h4 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t("profile.labels.address")}</h4>
+                    </div>
+                    <p className={cn("text-sm font-bold text-foreground/80", isAr ? "mr-6" : "ml-6")}>{user.address}</p>
+                    </div>
+                )}
+                </CardContent>
+            </Card>
+          )}
 
           {isStudent && (
             <>
@@ -437,9 +593,9 @@ const UserShow = () => {
               </Badge>
             </div>
           )}
-        </motion.div>
+        </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

@@ -494,7 +494,7 @@ export default function TermsList() {
                                   onClick={() => handleActivate(term.id)}
                                   disabled={updateMutation.isPending}
                                 >
-                                  <CheckCircle className="h-3.5 w-3.5 mr-1.5" />
+                                  {isAr ? <CheckCircle className="h-3.5 w-3.5 ml-1.5" /> : <CheckCircle className="h-3.5 w-3.5 mr-1.5" />}
                                   {t("buttons.activate")}
                                 </Button>
                               )}
@@ -505,7 +505,7 @@ export default function TermsList() {
                                 onClick={() => handleArchive(term.id)}
                                 disabled={updateMutation.isPending}
                               >
-                                <Archive className="h-3.5 w-3.5 mr-1.5" />
+                                {isAr ? <Archive className="h-3.5 w-3.5 ml-1.5" /> : <Archive className="h-3.5 w-3.5 mr-1.5" />}
                                 {t("buttons.archive")}
                               </Button>
                             </div>

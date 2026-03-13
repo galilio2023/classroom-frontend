@@ -53,6 +53,7 @@ export interface User {
   longestStreak: number;
   lastActiveAt: string | null;
   enrollments?: Enrollment[];
+  teacherChannel?: TeacherChannel;
 }
 
 export interface Department {
@@ -439,6 +440,22 @@ export interface TeacherApplication {
   updatedAt: string;
   teacher: User;
   class: Class;
+}
+
+export interface TeacherChannel {
+  id: number;
+  teacherId: string;
+  headline: string;
+  bio: string;
+  trailerVideoUrl: string | null;
+  trailerVideoCldPubId: string | null;
+  thumbnailUrl: string | null;
+  thumbnailCldPubId: string | null;
+  totalViews: number;
+  conversionRate: number;
+  teacher?: User;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export * from "./quiz";
