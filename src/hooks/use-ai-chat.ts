@@ -89,10 +89,40 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
       }
     });
 
+    const handleError = () => {
+      setMessages((prev) => {
+        const lastMessage = prev[prev.length - 1];
+        if (!lastMessage) return prev;
+        
+        const errorMessage = "I'm having trouble reading the class materials right now. Please try again in a moment.";
+        
+        // If the last message is a user message, we never got a response
+        if (lastMessage.role === "user") {
+          return [...prev, { role: "model", parts: [{ text: errorMessage }] }];
+        }
+        
+        // If the last message is a model message that is still streaming or empty
+        if (lastMessage.role === "model" && currentStreamId.current) {
+           const existingText = lastMessage.parts[0].text;
+           const newText = existingText ? existingText + "\n\n[Error: " + errorMessage + "]" : errorMessage;
+           return [...prev.slice(0, -1), { ...lastMessage, parts: [{ text: newText }] }];
+        }
+        
+        return prev;
+      });
+      setIsStreaming(false);
+      currentStreamId.current = null;
+    };
+
+    socket.on("study-buddy:error", handleError);
+    socket.on("disconnect", handleError);
+
     return () => {
       socket.off("study-buddy:start");
       socket.off("study-buddy:chunk");
       socket.off("study-buddy:end");
+      socket.off("study-buddy:error", handleError);
+      socket.off("disconnect", handleError);
     };
   }, []);
 
@@ -131,6 +161,12 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
             setMessages((prev) => [...prev, aiMessage]);
           }
         },
+        onError: () => {
+           setMessages((prev) => [
+             ...prev, 
+             { role: "model", parts: [{ text: "I'm having trouble reading the class materials right now. Please try again in a moment." }] }
+           ]);
+        }
       }
     );
   };
