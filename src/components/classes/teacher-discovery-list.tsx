@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigation, useCustomMutation, useCustom } from "@refinedev/core";
 import { TeacherChannel } from "@/types";
 import { motion, AnimatePresence } from "framer-motion";
@@ -10,7 +10,8 @@ import {
   ChevronRight, 
   ChevronLeft,
   Sparkles,
-  Users
+  Users,
+  PlusCircle
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTranslation } from "react-i18next";
@@ -19,6 +20,7 @@ export const TeacherDiscoveryList = () => {
   const { t } = useTranslation();
   const { show } = useNavigation();
   const [hoveredId, setHoveredId] = useState<number | null>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   
   const { mutate: recordView } = useCustomMutation();
 
@@ -30,15 +32,38 @@ export const TeacherDiscoveryList = () => {
   const channels = query.data?.data;
   const isLoading = query.isLoading;
 
-  const handleHover = (channelId: number) => {
-    if (hoveredId === channelId) return;
-    setHoveredId(channelId);
-    // Task 4.1: Record view in Redis via backend
-    recordView({
-        url: `/channels/${channelId}/view`,
-        method: "post",
-        values: {},
-    });
+  // Debounce hover effect for view recording
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+
+    if (hoveredId) {
+      timeoutId = setTimeout(() => {
+        recordView({
+          url: `/channels/${hoveredId}/view`,
+          method: "post",
+          values: {},
+        });
+      }, 500); // Only record after 500ms of sustained hover
+    }
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [hoveredId, recordView]);
+
+  const scroll = (direction: "left" | "right") => {
+    if (scrollContainerRef.current) {
+      const scrollAmount = 400;
+      const currentScroll = scrollContainerRef.current.scrollLeft;
+      const targetScroll = direction === "left" 
+        ? currentScroll - scrollAmount 
+        : currentScroll + scrollAmount;
+        
+      scrollContainerRef.current.scrollTo({
+        left: targetScroll,
+        behavior: "smooth",
+      });
+    }
   };
 
   if (isLoading) {
@@ -76,10 +101,20 @@ export const TeacherDiscoveryList = () => {
           <h2 className="text-2xl font-black tracking-tight">{t("classes.list.discover")}</h2>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="icon" className="rounded-full h-10 w-10 border-primary/10">
+          <Button 
+            variant="outline" 
+            size="icon" 
+            className="rounded-full h-10 w-10 border-primary/10"
+            onClick={() => scroll("left")}
+          >
             <ChevronLeft className="h-5 w-5" />
           </Button>
-          <Button variant="outline" size="icon" className="rounded-full h-10 w-10 border-primary/10">
+          <Button 
+            variant="outline" 
+            size="icon" 
+            className="rounded-full h-10 w-10 border-primary/10"
+            onClick={() => scroll("right")}
+          >
             <ChevronRight className="h-5 w-5" />
           </Button>
         </div>
@@ -90,13 +125,14 @@ export const TeacherDiscoveryList = () => {
         initial="hidden"
         animate="show"
         className="flex gap-6 overflow-x-auto pb-10 custom-scrollbar scroll-smooth px-2"
+        ref={scrollContainerRef}
       >
         {channels?.map((channel) => (
           <motion.div
             key={channel.id}
             variants={item}
             layoutId={`channel-${channel.id}`}
-            onMouseEnter={() => handleHover(channel.id)}
+            onMouseEnter={() => setHoveredId(channel.id)}
             onMouseLeave={() => setHoveredId(null)}
             className="min-w-[320px] md:min-w-[380px] relative aspect-[4/5] rounded-[2.5rem] overflow-hidden border border-primary/10 shadow-xl group bg-black cursor-pointer"
             onClick={() => show("users", channel.teacherId)}
@@ -120,7 +156,7 @@ export const TeacherDiscoveryList = () => {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  src={channel.thumbnailUrl || (channel.teacher as any)?.image || "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&q=80&w=1000"}
+                  src={channel.thumbnailUrl || channel.teacher?.image || "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&q=80&w=1000"}
                   className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                 />
               )}
@@ -150,7 +186,7 @@ export const TeacherDiscoveryList = () => {
                 </h3>
                 <div className="flex items-center gap-3">
                   <span className="text-white/90 text-sm font-black uppercase tracking-tight">
-                    {(channel.teacher as any)?.name}
+                    {channel.teacher?.name}
                   </span>
                   <div className="flex items-center gap-1 text-white/60 text-[10px] font-bold">
                     <Users className="h-3 w-3" />
@@ -178,7 +214,7 @@ export const TeacherDiscoveryList = () => {
                     size="icon" 
                     className="h-12 w-12 rounded-2xl border-white/20 bg-black/20 backdrop-blur-md text-white hover:bg-white hover:text-black transition-all"
                 >
-                    <PlusCircleIcon className="h-5 w-5" />
+                    <PlusCircle className="h-5 w-5" />
                 </Button>
               </div>
             </div>
@@ -188,7 +224,3 @@ export const TeacherDiscoveryList = () => {
     </div>
   );
 };
-
-const PlusCircleIcon = ({ className }: { className?: string }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/><path d="M12 8v8"/></svg>
-);
