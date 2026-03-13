@@ -1,12 +1,15 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Avatar } from "@/components/ui/avatar";
-import { Sparkles, User as UserIcon } from "lucide-react";
+import { Sparkles, User as UserIcon, FileText } from "lucide-react";
 import { MarkdownRenderer } from "@/components/ui/markdown-renderer";
 import { useTranslation } from "react-i18next";
+import { Badge } from "@/components/ui/badge";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface Message {
   role: "user" | "model";
   parts: { text: string }[];
+  sources?: any[];
 }
 
 interface ChatMessageProps {
@@ -17,33 +20,6 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
   const { t } = useTranslation();
   const isModel = message.role === "model";
   const fullText = message.parts[0].text;
-  const [displayedText, setDisplayedText] = useState(isModel ? "" : fullText);
-  const [isTyping, setIsTyping] = useState(isModel);
-
-  useEffect(() => {
-    if (!isModel) return;
-
-    const words = fullText.split(" ");
-    let index = 0;
-    
-    if (words.length > 100) {
-        setDisplayedText(fullText);
-        setIsTyping(false);
-        return;
-    }
-
-    const timer = setInterval(() => {
-      if (index < words.length) {
-        setDisplayedText((prev) => (prev ? prev + " " + words[index] : words[index]));
-        index++;
-      } else {
-        setIsTyping(false);
-        clearInterval(timer);
-      }
-    }, 30);
-
-    return () => clearInterval(timer);
-  }, [fullText, isModel]);
 
   return (
     <div className={`flex gap-3 ${!isModel ? "flex-row-reverse" : ""}`}>
@@ -64,14 +40,39 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
             ? "bg-card border rounded-tl-none" 
             : "bg-primary text-primary-foreground rounded-tr-none"
         }`}>
-          <div className="max-w-none">
-            {isTyping ? (
-                <div className="whitespace-pre-wrap">{displayedText}</div>
-            ) : (
-                <MarkdownRenderer content={displayedText} />
-            )}
-            {isTyping && <span className="inline-block w-1.5 h-4 ml-1 bg-primary/40 animate-pulse align-middle" />}
+          <div className="max-w-none prose dark:prose-invert">
+            <MarkdownRenderer content={fullText} />
           </div>
+          
+          {/* Citation Chips (Task 4.4) */}
+          {message.sources && message.sources.length > 0 && (
+            <div className="mt-4 pt-3 border-t border-primary-foreground/10 flex flex-wrap gap-2">
+              <span className="text-[10px] uppercase font-black tracking-widest opacity-60 w-full mb-1">
+                {t("aiHub.studyLab.studyBuddy.sources")}:
+              </span>
+              <TooltipProvider>
+                {message.sources.map((source, idx) => (
+                  <Tooltip key={idx}>
+                    <TooltipTrigger asChild>
+                      <Badge 
+                        variant="secondary" 
+                        className="text-[9px] h-6 gap-1 bg-white/10 hover:bg-white/20 border-none text-white font-bold cursor-help"
+                      >
+                        <FileText className="h-3 w-3" />
+                        {t("aiHub.studyLab.studyBuddy.source")} #{idx + 1}
+                      </Badge>
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-[300px] text-xs font-medium">
+                      <p className="font-black mb-1">Chunk Metadata:</p>
+                      <pre className="bg-muted p-2 rounded text-[10px]">
+                        {JSON.stringify(source, null, 2)}
+                      </pre>
+                    </TooltipContent>
+                  </Tooltip>
+                ))}
+              </TooltipProvider>
+            </div>
+          )}
         </div>
         <span className="text-[9px] text-muted-foreground px-1">
           {isModel ? t("aiHub.studyLab.studyBuddy.title") : t("messages.you").replace(": ", "")}
