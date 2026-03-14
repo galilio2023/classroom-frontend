@@ -2,6 +2,12 @@
   "app": {
     "title": "Classroom AI"
   },
+  "actions": {
+    "edit": "Edit",
+    "create": "Create",
+    "show": "Show",
+    "list": "List"
+  },
   "common": {
     "search": "Search...",
     "typeToSearch": "Type a command or search...",
@@ -264,7 +270,11 @@
     "updateChannel": "Update Channel",
     "viewChannel": "View Channel",
     "contactUser": "Contact User",
-    "openFullRes": "Open Full Resolution"
+    "openFullRes": "Open Full Resolution",
+    "exploreClasses": "Explore Your Classes",
+    "practiceLevelUp": "Practice & Level Up",
+    "reply": "Reply",
+    "post": "Post"
   },
   "roles": {
     "student": "Student",
@@ -548,37 +558,12 @@
         "messagePosted": "Message posted"
       }
     },
-    "analytics": {
-      "title": "Class Analytics",
-      "description": "Detailed performance and engagement metrics for this class.",
-      "analyzing": "Analyzing Class Data...",
-      "failedToLoad": "Failed to load analytics",
-      "failedToLoadDescription": "We couldn't fetch the data for this class.",
-      "selectRange": "Select range",
-      "ranges": {
-        "7": "Last 7 Days",
-        "30": "Last 30 Days",
-        "semester": "Full Semester"
-      },
-      "toast": {
-        "preparingPrint": "Preparing print-friendly report...",
-        "exportingCsv": "Exporting CSV..."
-      },
-      "charts": {
-        "gradeDistribution": "Class Grade Distribution",
-        "gradeDescription": "Student performance across all assignments in this class."
-      },
-      "ai": {
-        "predictions": "AI Predictions",
-        "predictedOutcomes": "Predicted Outcomes",
-        "beta": "Beta"
-      }
-    },
     "attendance": {
       "present": "Present",
       "absent": "Absent",
       "late": "Late",
       "excused": "Excused",
+      "rate": "Rate",
       "markAttendance": "Mark Attendance",
       "history": "History",
       "dailyAttendance": "Daily Attendance",
@@ -639,133 +624,30 @@
       "topPercent": "Top {{percent}}%",
       "levelLabel": "Level {{level}}"
     },
-    "resource": {
-      "loading": "Loading Materials...",
-      "learningMaterials": "Learning Materials",
-      "description": "Access all files, links, and notes for this class.",
-      "noMaterials": "No materials yet",
-      "noMaterialsDescription": "Materials are organized by modules. Ask your teacher to add some!",
-      "itemsCount": "{{count}} Items",
-      "noMaterialsInModule": "No materials in this module",
-      "addDialog": {
-        "title": "Add Material",
-        "description": "Share a file, link, or note with your students.",
-        "fieldTitle": "Title",
-        "titlePlaceholder": "e.g. Lesson Notes",
-        "fieldType": "Type",
-        "typePlaceholder": "Select type",
-        "fieldContent": "Content (Markdown)",
-        "contentPlaceholder": "Type your lesson notes here...",
-        "fieldUpload": "Upload {{type}}",
-        "fieldUrl": "URL",
-        "urlPlaceholder": "https://...",
-        "fieldDescription": "Description (Optional)",
-        "descPlaceholder": "Brief summary",
-        "types": {
-          "note": "Written Note",
-          "file": "File (PDF, Doc)",
-          "image": "Image",
-          "link": "External Link",
-          "video": "Video URL"
-        }
+    "analytics": {
+      "title": "Class Analytics",
+      "description": "Detailed performance and engagement metrics for this class.",
+      "analyzing": "Analyzing Class Data...",
+      "failedToLoad": "Failed to load analytics",
+      "failedToLoadDescription": "We couldn't fetch the data for this class.",
+      "selectRange": "Select range",
+      "ranges": {
+        "7": "Last 7 Days",
+        "30": "Last 30 Days",
+        "semester": "Full Semester"
       },
       "toast": {
-        "fillRequired": "Please fill in all required fields",
-        "added": "Resource added to module",
-        "deleted": "Resource deleted"
-      }
-    },
-    "quiz": {
-      "loading": "Loading Quizzes...",
-      "classQuizzes": "Class Quizzes",
-      "description": "{{count}} assessments available for this class.",
-      "noQuizzes": "No quizzes yet",
-      "noQuizzesDescriptionTeacher": "Create your first quiz to test your students' knowledge and track their progress.",
-      "noQuizzesDescriptionStudent": "Your teacher hasn't posted any quizzes for this class yet. Check back later!",
-      "minsUnit": "Mins",
-      "minsUnitLocalized": "{{count}} Mins",
-      "due": "Due {{date}}",
-      "questionsCount": "{{count}} Questions",
-      "noDescription": "No description provided.",
-      "checkAnswer": "Check Answer",
-      "finishQuiz": "Finish Quiz",
-      "nextQuestion": "Next Question",
-      "quizComplete": "Quiz Complete!",
-      "finishedAssessment": "You've finished the interactive assessment.",
-      "scoreSummary": "{{score}} out of {{total}} correct",
-      "explanation": "Explanation"
-    },
-    "reader": {
-      "aiTutor": "AI Tutor",
-      "hideAiTutor": "Hide AI Tutor",
-      "lessonNotFound": "Lesson not found or invalid type.",
-      "tutorTitle": "AI Lesson Tutor",
-      "tutorDescription": "Ask me anything about this lesson",
-      "welcome": "Hi {{name}}! I've read through {{title}}. If you're confused about any part of the text or want more examples, just ask!",
-      "thinking": "Tutor is thinking...",
-      "askPlaceholder": "Ask a question...",
-      "toast": {
-        "unavailable": "AI Tutor is currently unavailable."
-      }
-    },
-    "dialogs": {
-      "applyTeacher": {
-        "title": "Apply to Teach",
-        "description": "You are requesting to manage and teach <strong>{{className}}</strong>. The administrator will review your request.",
-        "fieldLabel": "Introduction / Proposal (Optional)",
-        "fieldPlaceholder": "Briefly explain your experience or plan for this class...",
-        "toast": {
-          "success": "Application submitted successfully!",
-          "error": "Failed to submit application"
-        }
+        "preparingPrint": "Preparing print-friendly report...",
+        "exportingCsv": "Exporting CSV..."
       },
-      "inviteTeacher": {
-        "title": "Invite a Co-Teacher",
-        "description": "Select a colleague to help manage this class.",
-        "fieldPlaceholder": "Select a teacher...",
-        "noTeachers": "No other teachers available to invite.",
-        "toast": {
-          "selectTeacher": "Please select a teacher.",
-          "success": "Teacher invited successfully!",
-          "error": "Failed to invite teacher."
-        }
+      "charts": {
+        "gradeDistribution": "Class Grade Distribution",
+        "gradeDescription": "Student performance across all assignments in this class."
       },
-      "enrollStudent": {
-        "title": "Enroll a New Student",
-        "description": "Select a student from the list to enroll them in this class.",
-        "fieldPlaceholder": "Select a student...",
-        "noStudents": "All available students are already enrolled.",
-        "toast": {
-          "selectStudent": "Please select a student.",
-          "success": "Student enrolled successfully!",
-          "error": "Failed to enroll student."
-        }
-      }
-    },
-    "announcements": {
-      "history": "Announcement History",
-      "description": "Official updates and news for this class.",
-      "new": "New Announcement",
-      "createTitle": "Create Announcement",
-      "createDesc": "Post an official update for all students in this class.",
-      "fieldTitle": "Announcement Title",
-      "fieldContent": "Detailed Content",
-      "fieldAttachment": "Attachment (Optional)",
-      "fieldPin": "Pin to top",
-      "pinDesc": "This announcement will stay at the top of the feed.",
-      "noAnnouncements": "No announcements yet",
-      "noAnnouncementsDesc": "Official updates and news for this class will appear here.",
-      "pinnedLabel": "Pinned Announcement",
-      "newUpdate": "New Update",
-      "viewAttachment": "View Attachment",
-      "unpin": "Unpin Announcement",
-      "pin": "Pin to Top",
-      "delete": "Delete Announcement",
-      "viewReadStatus": "View Read Status",
-      "reads": {
-        "title": "Read Receipts",
-        "description": "Students who have viewed this announcement.",
-        "empty": "No one has read this announcement yet."
+      "ai": {
+        "predictions": "AI Predictions",
+        "predictedOutcomes": "Predicted Outcomes",
+        "beta": "Beta"
       }
     }
   },
@@ -1015,7 +897,19 @@
       "allCaughtUp": "All caught up!",
       "noUpcoming": "No upcoming assignments. Enjoy your time!",
       "greatJobStudent": "Great job, Student!",
-      "clickTask": "Click a task to view details and submit"
+      "clickTask": "Click a task to view details and submit",
+      "welcomeJourney": "Welcome to Your Learning Journey!",
+      "welcomeJourneyDesc": "You haven't started any classes or assignments yet. Your academic progress will appear here once you begin.",
+      "focusArea": "Focus Area Identified",
+      "aiRecommendation": "AI-Powered Recommendation",
+      "actionRequiredBadge": "Action Required",
+      "strugglingWith": "We noticed you might be struggling with {{subject}}. Practice now to earn a mastery badge and boost your grade!",
+      "gradeProgress": "Grade Progress",
+      "gradeProgressDesc": "Your grade performance over time.",
+      "noGradeData": "No grade data yet. Complete assignments to see your progress!",
+      "subjectMastery": "Subject Mastery",
+      "subjectMasteryDesc": "Average performance per subject.",
+      "noSubjectData": "No subject data yet. Your mastery radar will appear here."
     },
     "staff": {
       "engagementAnalytics": "Engagement Analytics",
@@ -1142,6 +1036,7 @@
         "JOIN_CLASS": "Class Joined",
         "APPROVE_ENROLLMENT": "Enrollment Approved",
         "SUBMIT_ASSIGNMENT": "Assignment Submitted",
+        "JOIN_ASSIGNMENT": "Assignment Joined",
         "GRADE_SUBMISSION": "Submission Graded",
         "USER_LOGIN": "User Login"
       }
@@ -1382,7 +1277,8 @@
     },
     "filters": {
       "searchPlaceholder": "Search by department name or code...",
-      "structure": "Structure Filter"
+      "structure": "Structure Filter",
+      "allDepartments": "All Departments"
     },
     "empty": {
       "title": "No departments found",
@@ -2074,6 +1970,52 @@
       "title": "Unlock Your Full Potential",
       "desc": "Join our Pro community and transform your learning experience.",
       "start": "Get Started Today"
+    }
+  },
+  "portfolioPage": {
+    "pageTitle": "{{name}}'s Portfolio",
+    "fallbackPageTitle": "Student Portfolio",
+    "loading": "Assembling Portfolio...",
+    "notFound": "Student not found",
+    "notFoundDesc": "The portfolio you are looking for is unavailable.",
+    "title": "Academic Portfolio",
+    "description": "A comprehensive showcase of learning progress, achievements, and skills.",
+    "level": "Level {{level}}",
+    "xp": "{{xp}} XP",
+    "progressToLevel": "Progress to Level {{level}}",
+    "email": "Email",
+    "phone": "Phone",
+    "stats": {
+      "badges": "Badges",
+      "avgGrade": "Avg Grade",
+      "dayStreak": "Day Streak",
+      "globalRank": "Global Rank"
+    },
+    "learningConsistency": "Learning Consistency",
+    "academicJourney": "Academic Journey",
+    "unlockedAchievements": "Unlocked Achievements",
+    "badgesEarned": "{{earned}} / {{total}} Earned"
+  },
+  "badges": {
+    "first-submission": {
+      "name": "First Step",
+      "desc": "Submit your first assignment"
+    },
+    "perfect-score": {
+      "name": "Perfectionist",
+      "desc": "Get 100% on any quiz"
+    },
+    "streak-5": {
+      "name": "Consistent",
+      "desc": "5-day login streak"
+    },
+    "top-10": {
+      "name": "Elite",
+      "desc": "Reach top 10 in leaderboard"
+    },
+    "fast-learner": {
+      "name": "Speedster",
+      "desc": "Complete a module in one day"
     }
   }
 }

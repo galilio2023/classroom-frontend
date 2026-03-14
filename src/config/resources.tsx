@@ -48,19 +48,19 @@ export const resources: ResourceProps[] = [
   { name: "subjects", list: "/subjects", create: "/subjects/create", edit: "/subjects/edit/:id", meta: { group: "groups.academic", label: "resources.subjects.label", icon: <BookOpen /> } },
   { name: "enrollments", list: "/enrollments", meta: { group: "groups.academic", label: "resources.enrollments.label", icon: <UserPlus />, hide: false } },
   { name: "attendance", list: "/attendance", meta: { group: "groups.academic", label: "resources.attendance.label", icon: <CheckSquare /> } },
-  { name: "project-groups", list: "/project-groups", meta: { group: "groups.academic", label: "resources.project-groups.label", icon: <Users /> } },
+  { name: "project-groups", list: "/project-groups", show: "/project-groups/show/:id", meta: { group: "groups.academic", label: "resources.project-groups.label", icon: <Users /> } },
 
   // --- CURRICULUM ---
   { name: "assignments", list: "/assignments", create: "/assignments/create", show: "/assignments/show/:id", meta: { group: "groups.curriculum", label: "resources.assignments.label", icon: <FileText /> } },
   { name: "quizzes", list: "/quizzes", create: "/quizzes/create", show: "/quizzes/show/:id", meta: { group: "groups.curriculum", label: "resources.quizzes.label", icon: <FileQuestion /> } },
   { name: "submissions", list: "/submissions", show: "/submissions/show/:id", meta: { group: "groups.curriculum", label: "resources.submissions.label", icon: <Send /> } },
   { name: "modules", list: "/modules", meta: { group: "groups.curriculum", label: "resources.modules.label", icon: <Library /> } },
-  { name: "resources", list: "/resources", meta: { group: "groups.curriculum", label: "resources.resources.label", icon: <FolderOpen /> } },
+  { name: "resources", list: "/resources", show: "/classes/:classId/lessons/:resourceId", meta: { group: "groups.curriculum", label: "resources.resources.label", icon: <FolderOpen /> } },
   { name: "library", list: "/library", meta: { group: "groups.curriculum", label: "resources.library.label", icon: <Files /> } },
   { name: "discussions", list: "/discussions", meta: { group: "groups.curriculum", label: "resources.discussions.label", icon: <MessageSquare /> } },
 
   // --- PROGRESS ---
-  { name: "portfolio", list: "/portfolio", meta: { group: "groups.progress", label: "resources.portfolio.label", icon: <UserCircle /> } },
+  { name: "portfolio", list: "/portfolio", show: "/portfolio/:id", meta: { group: "groups.progress", label: "resources.portfolio.label", icon: <UserCircle /> } },
   { name: "report-card", list: "/student/report-card", meta: { group: "groups.progress", label: "resources.report-card.label", icon: <FileText /> } },
   { name: "progress", list: "/progress", meta: { group: "groups.progress", label: "resources.progress.label", icon: <TrendingUp /> } },
 

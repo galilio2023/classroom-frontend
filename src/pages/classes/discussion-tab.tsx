@@ -58,7 +58,6 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
     if (!identity?.id || !classId) return;
     
     const socket = io(SOCKET_URL, {
-      query: { userId: identity.id, classId },
       withCredentials: true,
       transports: ["websocket", "polling"],
     });
@@ -91,189 +90,217 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
         onSuccess: () => {
           setNewPost("");
           setReplyTo(null);
-          toast.success(replyTo ? t("discussion.toast.replySent") : t("discussion.toast.messagePosted"));
+          toast.success(replyTo ? t("classes.discussion.toast.replySent") : t("classes.discussion.toast.messagePosted"));
         },
       }
     );
   };
 
   const handleGenerateSummary = () => {
+    if (!discussions.length) return;
     setIsSummarizing(true);
     generateSummary(
-      { url: `classes/${classId}/generate-summary`, method: "post", values: {} },
+      {
+        url: `ai/discussions/summarize`,
+        method: "post",
+        values: { classId: Number(classId) },
+      },
       {
         onSuccess: (data: any) => {
           setSummary(data.data.summary);
           setIsSummarizing(false);
         },
-        onError: () => setIsSummarizing(false)
+        onError: () => {
+          toast.error(t("classes.discussion.toast.summaryError"));
+          setIsSummarizing(false);
+        },
       }
     );
   };
 
-  const replyingToPost = discussions.find(d => d.id === replyTo);
-  const isAr = i18n.language === 'ar';
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-250px)] md:h-[calc(100vh-350px)] min-h-[500px] bg-card/50 backdrop-blur-xl rounded-[2rem] border border-black/[0.05] dark:border-white/[0.05] overflow-hidden shadow-2xl text-start">
-      {/* Header */}
-      <div className="p-6 border-b bg-background/50 backdrop-blur-md flex justify-between items-center">
-        <div className="flex items-center gap-4">
-          <div className="p-2.5 rounded-xl bg-primary/10 text-primary">
-            <MessageCircle className="h-5 w-5" />
-          </div>
-          <div>
-            <h3 className="text-lg font-black tracking-tight leading-none">{t("discussion.classStream")}</h3>
-            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 mt-1.5">{t("discussion.realTime")}</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-3">
-          <Badge variant="secondary" className="hidden sm:flex rounded-full px-3 py-1 font-black text-[10px] uppercase tracking-widest bg-muted/50 border-none">
-            {t("discussion.messagesCount", { count: discussions.length })}
+    <div className="flex flex-col h-[calc(100vh-16rem)] max-w-5xl mx-auto space-y-4">
+      {/* Discussion Header */}
+      <div className="flex items-center justify-between px-2">
+        <div className="flex items-center gap-2">
+          <MessageCircle className="w-5 h-5 text-primary" />
+          <h2 className="text-xl font-bold tracking-tight">
+            {t("classes.discussion.classStream")}
+          </h2>
+          <Badge variant="outline" className="ml-2 font-mono">
+            {discussions.length}
           </Badge>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={handleGenerateSummary} 
-            disabled={isSummarizing}
-            className="h-10 rounded-xl font-black uppercase tracking-widest text-[10px] gap-2 border-ai-primary/20 text-ai-primary hover:bg-ai-primary/5 relative overflow-hidden group shadow-sm"
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleGenerateSummary}
+            disabled={isSummarizing || !discussions.length}
+            className="hidden sm:flex items-center gap-2 hover:bg-primary/10 hover:text-primary transition-colors"
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shine_1.5s_ease-in-out] pointer-events-none" />
-            {isSummarizing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
-            <span className="hidden sm:inline">{t("discussion.aiCatchUp")}</span>
-            <span className="sm:hidden">{t("discussion.aiCatchUp").split(' ')[0]}</span>
+            {isSummarizing ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Sparkles className="h-4 w-4" />
+            )}
+            {t("classes.discussion.aiCatchUp")}
           </Button>
         </div>
       </div>
 
-      {/* AI Summary Overlay */}
+      {/* Summary Box */}
       <AnimatePresence>
         {summary && (
-          <motion.div 
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="bg-ai-primary/[0.03] border-b border-ai-primary/10 relative overflow-hidden"
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="mx-2 p-4 bg-primary/5 border border-primary/20 rounded-xl relative group shadow-sm"
           >
-            <div className="p-6 pr-14">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="p-1.5 rounded-lg bg-ai-primary/10 text-ai-primary">
-                  <Sparkles className="h-3.5 w-3.5" />
-                </div>
-                <span className="font-black text-[10px] text-ai-primary uppercase tracking-widest">{t("discussion.aiSummary")}</span>
+            <div className="flex items-start gap-3">
+              <div className="mt-1 p-2 bg-primary/10 rounded-lg">
+                <LayoutDashboard className="w-4 h-4 text-primary" />
               </div>
-              <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground font-medium leading-relaxed">
-                <MarkdownRenderer content={summary} />
+              <div className="flex-1 space-y-2">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-semibold text-primary flex items-center gap-2">
+                    {t("classes.discussion.aiSummary")}
+                    <span className="text-[10px] uppercase tracking-wider bg-primary/10 px-1.5 py-0.5 rounded text-primary/70">
+                      AI GENERATED
+                    </span>
+                  </h3>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 rounded-full hover:bg-primary/10"
+                    onClick={() => setSummary(null)}
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                </div>
+                <div className="text-sm leading-relaxed text-foreground/80">
+                  <MarkdownRenderer content={summary} />
+                </div>
               </div>
             </div>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={() => setSummary(null)} 
-              className={cn("absolute top-4 h-10 w-10 rounded-full hover:bg-ai-primary/10 text-ai-primary/40 hover:text-ai-primary transition-all", isAr ? "left-4" : "right-4")}
-            >
-              <X className="h-5 w-5" />
-            </Button>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Chat Stream */}
-      <ScrollArea ref={scrollRef} className="flex-1 p-6">
-        {isLoading ? (
-          <div className="flex flex-col items-center justify-center h-full gap-4">
-            <Loader2 className="h-10 w-10 animate-spin text-primary/20" />
-            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">{t("discussion.loadingStream")}</p>
-          </div>
-        ) : discussions.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-center gap-4 opacity-20">
-            <div className="p-6 rounded-full bg-muted/50">
-              <MessageCircle className="h-12 w-12" />
+      {/* Messages Area */}
+      <ScrollArea 
+        ref={scrollRef} 
+        className="flex-1 px-4 rounded-2xl bg-muted/30 border shadow-inner"
+      >
+        <div className="py-6 space-y-8">
+          {discussions.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-48 text-muted-foreground space-y-4">
+              <div className="p-4 bg-muted rounded-full">
+                <MessageCircle className="w-8 h-8 opacity-20" />
+              </div>
+              <p className="text-sm font-medium">{t("classes.discussion.noMessages")}</p>
             </div>
-            <div className="space-y-1">
-              <p className="text-xl font-black tracking-tight">{t("discussion.noMessages")}</p>
-              <p className="text-sm font-medium">{t("discussion.startConversation")}</p>
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {discussions.map((post, idx) => (
-              <motion.div
-                key={post.id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: idx * 0.05 }}
-              >
-                <ChatBubble 
-                  post={post} 
-                  isOwn={post.userId === identity?.id}
-                  isAdmin={identity?.role === "admin"}
-                  onDelete={(id) => deletePost({ resource: "discussions", id })}
-                  onReply={(id) => {
-                    setReplyTo(id);
-                    (document.querySelector('.rich-text-editor [contenteditable="true"]') as HTMLElement)?.focus();
-                  }}
-                />
-              </motion.div>
-            ))}
-          </div>
-        )}
+          ) : (
+            discussions.map((discussion) => (
+              <ChatBubble
+                key={discussion.id}
+                discussion={discussion}
+                onReply={(id) => {
+                  setReplyTo(id);
+                  // Scroll to editor
+                }}
+                onDelete={(id) => {
+                  deletePost({ resource: "discussions", id });
+                }}
+              />
+            ))
+          )}
+        </div>
       </ScrollArea>
 
-      {/* Input Area */}
-      <div className="p-6 bg-background/80 backdrop-blur-xl border-t border-black/[0.05] dark:border-white/[0.05]">
+      {/* Posting Area */}
+      <div className="px-2 pb-2 space-y-3">
         <AnimatePresence>
           {replyTo && (
-            <motion.div 
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 10 }}
-              className="mb-4 p-4 rounded-2xl bg-primary/5 border border-primary/10 flex justify-between items-center group"
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="bg-primary/10 px-4 py-2 rounded-t-xl border-x border-t flex items-center justify-between"
             >
-              <div className="flex items-center gap-3 overflow-hidden text-start">
-                <div className="p-2 rounded-lg bg-primary/10 text-primary">
-                  <Reply className={cn("h-4 w-4", isAr && "rotate-180")} />
-                </div>
-                <div className="flex flex-col overflow-hidden">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-primary/60">{t("discussion.replyingTo")}</span>
-                  <p className="text-xs font-bold truncate text-foreground">
-                    {replyingToPost?.user.name}: <span className="font-medium text-muted-foreground italic">"{replyingToPost?.content.replace(/<[^>]*>/g, '')}"</span>
-                  </p>
-                </div>
+              <div className="flex items-center gap-2 text-xs font-medium text-primary">
+                <Reply className="w-3 h-3" />
+                <span>Replying to message #{replyTo}</span>
               </div>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={() => setReplyTo(null)} 
-                className="h-8 w-8 rounded-full hover:bg-primary/10 text-primary/40 hover:text-primary transition-all"
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6 text-primary hover:bg-primary/20"
+                onClick={() => setReplyTo(null)}
               >
-                <X className="h-4 w-4" />
+                <X className="h-3 w-3" />
               </Button>
             </motion.div>
           )}
         </AnimatePresence>
         
-        <div className="flex gap-4 items-end">
-          <div className="flex-1 rounded-[1.5rem] overflow-hidden border-2 border-transparent focus-within:border-primary/20 transition-all shadow-inner bg-muted/20">
-            <RichTextEditor 
-              value={newPost}
-              onChange={setNewPost}
-              placeholder={replyTo ? t("discussion.writeReply") : t("discussion.messageClass")}
-              className="min-h-[100px]"
-            />
+        <div className={cn(
+          "bg-background rounded-2xl border-2 transition-all duration-200 shadow-lg",
+          mutation.isLoading ? "opacity-70 pointer-events-none" : "hover:border-primary/30",
+          replyTo ? "rounded-t-none border-t-0" : ""
+        )}>
+          <RichTextEditor
+            value={newPost}
+            onChange={setNewPost}
+            placeholder={t("classes.discussion.messageClass")}
+            className="border-0 shadow-none ring-0 min-h-[100px]"
+          />
+          <div className="flex items-center justify-between p-3 bg-muted/20 border-t rounded-b-2xl">
+            <div className="flex items-center gap-4 text-[10px] text-muted-foreground px-1">
+              <div className="flex items-center gap-1.5">
+                <div className="w-1 h-1 rounded-full bg-primary" />
+                Markdown supported
+              </div>
+              <div className="flex items-center gap-1.5">
+                <div className="w-1 h-1 rounded-full bg-green-500" />
+                Real-time sync
+              </div>
+            </div>
+            <Button
+              onClick={handlePost}
+              disabled={mutation.isLoading || !newPost.trim() || newPost === "<p></p>"}
+              size="sm"
+              className="px-6 rounded-xl shadow-md transition-all hover:translate-y-[-1px] active:translate-y-[0px]"
+            >
+              {mutation.isLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : (
+                <Send className="h-4 w-4 mr-2" />
+              )}
+              {replyTo ? t("buttons.reply") : t("buttons.post")}
+            </Button>
           </div>
-          <Button 
-            size="icon" 
-            onClick={handlePost} 
-            disabled={!newPost.trim() || newPost === "<p></p>" || mutation.isPending}
-            className="h-14 w-14 shrink-0 rounded-2xl shadow-xl shadow-primary/20 transition-all hover:scale-105 active:scale-95 bg-primary text-primary-foreground"
-          >
-            {mutation.isPending ? <Loader2 className="h-6 w-6 animate-spin" /> : <Send className={cn("h-6 w-6", isAr && "rotate-180")} />}
-          </Button>
         </div>
-        <div className="mt-3 flex items-center justify-center gap-2 text-muted-foreground/30">
-          <Info className="h-3 w-3" />
-          <span className="text-[9px] font-black uppercase tracking-widest">{t("discussion.pressEnter")}</span>
+        
+        {/* Tips / Info */}
+        <div className="flex items-center justify-center gap-6 text-[11px] text-muted-foreground/60 font-medium pt-1">
+          <div className="flex items-center gap-1">
+            <Info className="w-3 h-3" />
+            Guidelines
+          </div>
+          <div className="flex items-center gap-1">
+            <ArrowRight className="w-3 h-3" />
+            Class Community
+          </div>
         </div>
       </div>
     </div>

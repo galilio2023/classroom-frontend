@@ -16,9 +16,7 @@ import {
   Heading1,
   Heading2,
   Strikethrough,
-  Underline
 } from "lucide-react";
-import { Toggle } from "@/components/ui/toggle";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { Button } from "./button";
@@ -185,13 +183,10 @@ const EditorToolbar = ({ editor }: { editor: Editor | null }) => {
 };
 
 export const RichTextEditor = ({ value, onChange, className }: RichTextEditorProps) => {
-  const { t } = useTranslation();
-  
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
-        // Disable the default link extension to avoid duplicate name warning
-        // We configure it manually below
+        // Disable the default history to avoid conflicts if needed, but usually link is the culprit
       }),
       Image.configure({
         HTMLAttributes: {

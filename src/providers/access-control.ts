@@ -44,6 +44,11 @@ export const accessControlProvider: AccessControlProvider = {
         if (action === "list" || action === "show") return { can: true };
       }
 
+      // Neutralize phantom show/edit for specific resources
+      if (["enrollments", "attendance"].includes(resourceName)) {
+          if (["show", "edit"].includes(action)) return { can: false, reason: "View via Class dashboard." };
+      }
+
       if (resourceName === "users" && action === "show") return { can: true };
       if (resourceName === "users" && action === "edit" && params?.id === identity?.id) return { can: true };
 
@@ -78,10 +83,19 @@ export const accessControlProvider: AccessControlProvider = {
       ];
 
       if (allowedResources.includes(resourceName) && ["list", "show"].includes(action)) return { can: true };
+      
+      // Neutralize phantom show/edit for specific resources
+      if (["enrollments", "attendance"].includes(resourceName)) {
+          if (["show", "edit"].includes(action)) return { can: false, reason: "Access denied." };
+      }
+
       if (resourceName === "users" && action === "show") return { can: true };
       if (resourceName === "users" && action === "edit" && params?.id === identity?.id) return { can: true };
       if (resourceName === "submissions" && action === "create") return { can: true };
-      if (resourceName === "quizzes" && action === "create") return { can: true };
+      
+      // FIXED: Students should NOT be able to 'create' official quizzes. 
+      // They can 'list' and 'show' them to take them.
+      if (resourceName === "quizzes" && action === "create") return { can: false, reason: "Students cannot create official quizzes." };
 
       return { can: false, reason: "Access denied." };
     }

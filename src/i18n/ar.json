@@ -576,6 +576,7 @@
       "absent": "غائب",
       "late": "متأخر",
       "excused": "بعذر",
+      "rate": "النسبة",
       "markAttendance": "تسجيل الحضور",
       "history": "السجل",
       "dailyAttendance": "الحضور اليومي",
@@ -1013,7 +1014,19 @@
       "allCaughtUp": "أنهيت كل شيء!",
       "noUpcoming": "لا توجد تكليفات قادمة. استمتع بوقتك!",
       "greatJobStudent": "عمل رائع أيها الطالب!",
-      "clickTask": "انقر على المهمة لعرض التفاصيل والتسليم"
+      "clickTask": "انقر على المهمة لعرض التفاصيل والتسليم",
+      "welcomeJourney": "مرحباً بك في رحلة التعلم الخاصة بك!",
+      "welcomeJourneyDesc": "لم تبدأ أي فصول أو تكليفات بعد. سيظهر تقدمك الأكاديمي هنا بمجرد البدء.",
+      "focusArea": "تم تحديد مجال التركيز",
+      "aiRecommendation": "توصية مدعومة بالذكاء الاصطناعي",
+      "actionRequiredBadge": "إجراء مطلوب",
+      "strugglingWith": "لاحظنا أنك قد تواجه صعوبة في {{subject}}. تدرب الآن للحصول على وسام الإتقان وتحسين درجاتك!",
+      "gradeProgress": "تقدم الدرجات",
+      "gradeProgressDesc": "أداء درجاتك بمرور الوقت.",
+      "noGradeData": "لا توجد بيانات للدرجات بعد. أكمل التكليفات لرؤية تقدمك!",
+      "subjectMastery": "إتقان المواد",
+      "subjectMasteryDesc": "متوسط الأداء لكل مادة.",
+      "noSubjectData": "لا توجد بيانات للمواد بعد. سيظهر رادار الإتقان الخاص بك هنا."
     },
     "staff": {
       "engagementAnalytics": "تحليلات التفاعل",
@@ -1561,6 +1574,31 @@
       }
     }
   },
+  "teacherChannel": {
+    "title": "My Channel",
+    "description": "Manage your public profile and introductory content for students.",
+    "setup": "Channel Setup",
+    "setupDesc": "Configure how students see your professional profile and trailers.",
+    "labels": {
+      "headline": "Professional Headline",
+      "bio": "Channel Biography",
+      "trailer": "Introductory Trailer",
+      "thumbnail": "Video Thumbnail",
+      "stats": "Channel Performance",
+      "views": "Total Views",
+      "conversion": "Conversion Rate",
+      "preview": "Card Preview",
+      "livePreview": "How students see you in the catalog"
+    },
+    "placeholders": {
+      "headline": "e.g. Expert Physics Educator with 10+ years experience",
+      "bio": "Tell students what they will learn from you and why they should enroll in your classes..."
+    },
+    "toasts": {
+      "success": "Channel updated successfully!",
+      "error": "Failed to update channel."
+    }
+  },
   "resources": {
     "dashboard": { "label": "لوحة التحكم" },
     "calendar": { "label": "التقويم" },
@@ -1589,7 +1627,8 @@
     "academic-terms": { "label": "الفصول الدراسية" },
     "profile-requests": { "label": "طلبات الملفات" },
     "teacher-applications": { "label": "طلبات التدريس" },
-    "activity-log": { "label": "سجل النشاط" }
+    "activity-log": { "label": "سجل النشاط" },
+    "teacher-channel": { "label": "My Channel" }
   },
   "groups": {
     "ai-lab": "مختبر الذكاء الاصطناعي",
@@ -2046,6 +2085,58 @@
       "title": "أطلق العنان لإمكانياتك الكاملة",
       "desc": "انضم إلى مجتمع البرو الخاص بنا وحول تجربتك التعليمية.",
       "start": "ابدأ اليوم"
+    }
+  },
+  "portfolioPage": {
+    "pageTitle": "الملف الأكاديمي لـ {{name}}",
+    "fallbackPageTitle": "الملف الأكاديمي للطالب",
+    "loading": "جاري تجميع الملف الأكاديمي...",
+    "notFound": "الطالب غير موجود",
+    "notFoundDesc": "الملف الأكاديمي الذي تبحث عنه غير متوفر.",
+    "title": "الملف الأكاديمي",
+    "description": "عرض شامل لتقدم التعلم والإنجازات والمهارات.",
+    "level": "المستوى {{level}}",
+    "xp": "{{xp}} نقطة خبرة",
+    "progressToLevel": "التقدم إلى المستوى {{level}}",
+    "email": "البريد الإلكتروني",
+    "phone": "الهاتف",
+    "stats": {
+      "badges": "الأوسمة",
+      "avgGrade": "متوسط الدرجة",
+      "dayStreak": "التتابع اليومي",
+      "globalRank": "التصنيف العالمي"
+    },
+    "learningConsistency": "استمرارية التعلم",
+    "academicJourney": "الرحلة الأكاديمية",
+    "unlockedAchievements": "الإنجازات المفتوحة",
+    "badgesEarned": "تم الحصول على {{earned}} / {{total}}",
+    "submissionActivity": "نشاط التسليم",
+    "submissionActivityDesc": "معدل تسليم التكليفات الخاص بك خلال الـ 6 أشهر الماضية.",
+    "heatmapSubmissions": "{{count}} تسليمات",
+    "heatmapOn": "في",
+    "heatmapLess": "أقل",
+    "heatmapMore": "أكثر"
+  },
+  "badges": {
+    "first-submission": {
+      "name": "الخطوة الأولى",
+      "desc": "قم بتسليم أول تكليف لك"
+    },
+    "perfect-score": {
+      "name": "المثالي",
+      "desc": "احصل على 100% في أي اختبار"
+    },
+    "streak-5": {
+      "name": "المثابر",
+      "desc": "تسجيل دخول لمدة 5 أيام متتالية"
+    },
+    "top-10": {
+      "name": "النخبة",
+      "desc": "الوصول إلى أفضل 10 في لوحة الصدارة"
+    },
+    "fast-learner": {
+      "name": "السريع",
+      "desc": "أكمل وحدة في يوم واحد"
     }
   }
 }

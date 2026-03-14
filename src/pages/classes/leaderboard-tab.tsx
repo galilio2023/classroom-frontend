@@ -31,7 +31,7 @@ export function LeaderboardTab({ classId }: LeaderboardTabProps) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-4">
         <Loader2 className="h-10 w-10 animate-spin text-primary/20" />
-        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">{t("leaderboard.calculating")}</p>
+        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">{t("classes.leaderboard.calculating")}</p>
       </div>
     );
   }
@@ -111,7 +111,7 @@ export function LeaderboardTab({ classId }: LeaderboardTabProps) {
                         )}>{student.name}</h3>
                         <div className="flex flex-col items-center gap-2">
                           <Badge variant="secondary" className="font-black text-[10px] uppercase tracking-widest bg-primary/10 text-primary border-none px-3">
-                            {t("leaderboard.levelLabel", { level: currentLevel })}
+                            {t("classes.leaderboard.levelLabel", { level: currentLevel })}
                           </Badge>
                           <div className="flex items-center gap-1.5 text-gold-primary">
                             <Zap className="h-4 w-4 fill-gold-primary animate-pulse" />
@@ -136,12 +136,12 @@ export function LeaderboardTab({ classId }: LeaderboardTabProps) {
               <Trophy className="h-5 w-5" />
             </div>
             <div className="text-start">
-              <h2 className="text-xl font-black tracking-tight">{t("leaderboard.classRankings")}</h2>
-              <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">{t("leaderboard.basedOnXp")}</p>
+              <h2 className="text-xl font-black tracking-tight">{t("classes.leaderboard.classRankings")}</h2>
+              <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">{t("classes.leaderboard.basedOnXp")}</p>
             </div>
           </div>
           <Badge variant="outline" className="rounded-full px-4 py-1 font-black text-[10px] uppercase tracking-widest border-primary/20 text-primary">
-            {t("leaderboard.studentsCount", { count: rankedStudents.length })}
+            {t("classes.leaderboard.studentsCount", { count: rankedStudents.length })}
           </Badge>
         </div>
 
@@ -188,11 +188,11 @@ export function LeaderboardTab({ classId }: LeaderboardTabProps) {
                             <p className="font-black text-sm tracking-tight group-hover:text-primary transition-colors">{student.name}</p>
                             <div className="flex items-center gap-2 mt-0.5">
                               <Badge variant="outline" className="text-[9px] font-black uppercase tracking-tighter h-4 px-1.5 border-primary/20 text-primary/60">
-                                {t("leaderboard.levelLabel", { level: currentLevel })}
+                                {t("classes.leaderboard.levelLabel", { level: currentLevel })}
                               </Badge>
                               <div className="flex items-center gap-1 text-[9px] font-bold text-muted-foreground/40 uppercase tracking-widest">
                                 <TrendingUp className="h-2.5 w-2.5" />
-                                {t("leaderboard.topPercent", { percent: Math.round(((index + 1) / rankedStudents.length) * 100) })}
+                                {t("classes.leaderboard.topPercent", { percent: Math.round(((index + 1) / rankedStudents.length) * 100) })}
                               </div>
                             </div>
                           </div>
@@ -204,7 +204,7 @@ export function LeaderboardTab({ classId }: LeaderboardTabProps) {
                           <Zap className="h-4 w-4 text-gold-primary fill-gold-primary animate-pulse" />
                           <div className="flex flex-col items-end">
                             <span className="text-sm font-black text-gold-primary tracking-tight">{student.xp || 0}</span>
-                            <span className="text-[8px] font-black text-gold-primary/60 uppercase tracking-tighter -mt-1">{t("leaderboard.points")}</span>
+                            <span className="text-[8px] font-black text-gold-primary/60 uppercase tracking-tighter -mt-1">{t("classes.leaderboard.points")}</span>
                           </div>
                         </div>
                         <ChevronRight className={cn("h-4 w-4 text-muted-foreground/20 group-hover:text-primary transition-colors", isAr && "rotate-180")} />

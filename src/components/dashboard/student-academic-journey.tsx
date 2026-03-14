@@ -16,6 +16,7 @@ import { useNavigation } from "@refinedev/core";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
+import { useTranslation } from "react-i18next";
 
 interface StudentAcademicJourneyProps {
   gradeTrends: any[];
@@ -23,24 +24,11 @@ interface StudentAcademicJourneyProps {
   attendanceSummary: any;
 }
 
-const gradeConfig = {
-  grade: {
-    label: "Grade",
-    color: "hsl(var(--primary))",
-  },
-} satisfies ChartConfig;
-
-const masteryConfig = {
-  avgGrade: {
-    label: "Average Grade",
-    color: "hsl(var(--primary))",
-  },
-} satisfies ChartConfig;
-
 export const StudentAcademicJourney = ({ gradeTrends, subjectMastery, attendanceSummary }: StudentAcademicJourneyProps) => {
   const [practiceTopic, setPracticeTopic] = useState<string | null>(null);
   const [practiceSubjectId, setPracticeSubjectId] = useState<number | null>(null);
   const { list } = useNavigation();
+  const { t } = useTranslation();
 
   const weakSubjects = subjectMastery.filter(s => s.avgGrade < 70);
   const hasData = gradeTrends.length > 0 || subjectMastery.length > 0 || (attendanceSummary?.total || 0) > 0;
@@ -49,6 +37,20 @@ export const StudentAcademicJourney = ({ gradeTrends, subjectMastery, attendance
   const attendanceRate = attendanceSummary?.total > 0 
     ? Math.round((attendedCount / attendanceSummary.total) * 100) 
     : 0;
+
+  const gradeConfig = {
+    grade: {
+      label: t("reportCard.grade"),
+      color: "hsl(var(--primary))",
+    },
+  } satisfies ChartConfig;
+
+  const masteryConfig = {
+    avgGrade: {
+      label: t("reportCard.avgScore"),
+      color: "hsl(var(--primary))",
+    },
+  } satisfies ChartConfig;
 
   return (
     <div className="space-y-10">
@@ -67,14 +69,14 @@ export const StudentAcademicJourney = ({ gradeTrends, subjectMastery, attendance
                 </div>
               </div>
               <div className="space-y-2">
-                <h4 className="text-2xl font-black tracking-tight">Welcome to Your Learning Journey!</h4>
-                <p className="text-muted-foreground font-medium max-w-md mx-auto">You haven't started any classes or assignments yet. Your academic progress will appear here once you begin.</p>
+                <h4 className="text-2xl font-black tracking-tight">{t("dashboard.student.welcomeJourney")}</h4>
+                <p className="text-muted-foreground font-medium max-w-md mx-auto">{t("dashboard.student.welcomeJourneyDesc")}</p>
               </div>
               <Button 
                 onClick={() => list("classes")}
                 className="mt-4 rounded-xl h-12 px-8 font-black uppercase tracking-widest text-[10px] gap-2 shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95"
               >
-                Explore Your Classes
+                {t("buttons.exploreClasses")}
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </CardContent>
@@ -99,22 +101,21 @@ export const StudentAcademicJourney = ({ gradeTrends, subjectMastery, attendance
                       <Target className="h-6 w-6" />
                     </div>
                     <div className="space-y-1">
-                      <CardTitle className="text-xl font-black tracking-tight text-orange-700">Focus Area Identified</CardTitle>
+                      <CardTitle className="text-xl font-black tracking-tight text-orange-700">{t("dashboard.student.focusArea")}</CardTitle>
                       <div className="flex items-center gap-2">
                         <Sparkles className="h-3 w-3 text-ai-primary opacity-40" />
-                        <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">AI-Powered Recommendation</span>
+                        <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">{t("dashboard.student.aiRecommendation")}</span>
                       </div>
                     </div>
                   </div>
                   <Badge variant="secondary" className="rounded-full px-3 py-1 font-black text-[9px] uppercase tracking-widest bg-orange-500/10 text-orange-600 border-none">
-                    Action Required
+                    {t("dashboard.student.actionRequiredBadge")}
                   </Badge>
                 </div>
               </CardHeader>
               <CardContent className="p-8 pt-2 space-y-6">
                 <p className="text-sm font-medium text-orange-600/80 leading-relaxed">
-                  We noticed you might be struggling with <span className="font-black text-orange-700">{weakSubjects[0].subject}</span>. 
-                  Practice now to earn a mastery badge and boost your grade!
+                  {t("dashboard.student.strugglingWith", { subject: weakSubjects[0].subject })}
                 </p>
                 <Button 
                   onClick={() => {
@@ -124,7 +125,7 @@ export const StudentAcademicJourney = ({ gradeTrends, subjectMastery, attendance
                   className="h-12 rounded-xl px-8 font-black uppercase tracking-widest text-[10px] gap-2 bg-orange-600 hover:bg-orange-700 text-white shadow-lg shadow-orange-600/20 transition-all hover:scale-105 active:scale-95"
                 >
                   <Trophy className="h-4 w-4" />
-                  Practice & Level Up
+                  {t("buttons.practiceLevelUp")}
                 </Button>
               </CardContent>
             </Card>
@@ -148,9 +149,9 @@ export const StudentAcademicJourney = ({ gradeTrends, subjectMastery, attendance
                     <div className="p-2.5 rounded-xl bg-primary/10 text-primary group-hover:scale-110 transition-transform duration-500">
                       <TrendingUp className="h-6 w-6" />
                     </div>
-                    Grade Progress
+                    {t("dashboard.student.gradeProgress")}
                   </CardTitle>
-                  <CardDescription className="font-medium text-muted-foreground/60">Your grade performance over time.</CardDescription>
+                  <CardDescription className="font-medium text-muted-foreground/60">{t("dashboard.student.gradeProgressDesc")}</CardDescription>
                 </div>
               </div>
             </CardHeader>
@@ -190,7 +191,7 @@ export const StudentAcademicJourney = ({ gradeTrends, subjectMastery, attendance
                     </LineChart>
                 </ChartContainer>
               ) : (
-                <NoChartData icon={TrendingUp} message="No grade data yet. Complete assignments to see your progress!" />
+                <NoChartData icon={TrendingUp} message={t("dashboard.student.noGradeData")} />
               )}
             </CardContent>
           </Card>
@@ -210,9 +211,9 @@ export const StudentAcademicJourney = ({ gradeTrends, subjectMastery, attendance
                     <div className="p-2.5 rounded-xl bg-primary/10 text-primary group-hover:scale-110 transition-transform duration-500">
                       <BookOpen className="h-6 w-6" />
                     </div>
-                    Subject Mastery
+                    {t("dashboard.student.subjectMastery")}
                   </CardTitle>
-                  <CardDescription className="font-medium text-muted-foreground/60">Average performance per subject.</CardDescription>
+                  <CardDescription className="font-medium text-muted-foreground/60">{t("dashboard.student.subjectMasteryDesc")}</CardDescription>
                 </div>
               </div>
             </CardHeader>
@@ -227,7 +228,7 @@ export const StudentAcademicJourney = ({ gradeTrends, subjectMastery, attendance
                       />
                       <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
                       <Radar
-                        name="Avg Grade"
+                        name={t("reportCard.avgScore")}
                         dataKey="avgGrade"
                         stroke="hsl(var(--primary))"
                         fill="hsl(var(--primary))"
@@ -240,7 +241,7 @@ export const StudentAcademicJourney = ({ gradeTrends, subjectMastery, attendance
                     </RadarChart>
                 </ChartContainer>
               ) : (
-                <NoChartData icon={BookOpen} message="No subject data yet. Your mastery radar will appear here." />
+                <NoChartData icon={BookOpen} message={t("dashboard.student.noSubjectData")} />
               )}
             </CardContent>
           </Card>
@@ -250,10 +251,10 @@ export const StudentAcademicJourney = ({ gradeTrends, subjectMastery, attendance
       {/* 4. Attendance Stats */}
       <div className="grid gap-6 grid-cols-2 md:grid-cols-4">
         {[
-          { label: "Present", value: attendanceSummary?.present || 0, icon: CheckCircle2, color: "text-success", bg: "bg-success/10" },
-          { label: "Absent", value: attendanceSummary?.absent || 0, icon: XCircle, color: "text-destructive", bg: "bg-destructive/10" },
-          { label: "Late", value: attendanceSummary?.late || 0, icon: Clock, color: "text-orange-500", bg: "bg-orange-500/10" },
-          { label: "Rate", value: `${attendanceRate}%`, icon: TrendingUp, color: "text-primary", bg: "bg-primary/10" },
+          { label: t("classes.attendance.present"), value: attendanceSummary?.present || 0, icon: CheckCircle2, color: "text-success", bg: "bg-success/10" },
+          { label: t("classes.attendance.absent"), value: attendanceSummary?.absent || 0, icon: XCircle, color: "text-destructive", bg: "bg-destructive/10" },
+          { label: t("classes.attendance.late"), value: attendanceSummary?.late || 0, icon: Clock, color: "text-orange-500", bg: "bg-orange-500/10" },
+          { label: t("classes.attendance.rate"), value: `${attendanceRate}%`, icon: TrendingUp, color: "text-primary", bg: "bg-primary/10" },
         ].map((stat, idx) => (
           <motion.div
             key={stat.label}

@@ -29,6 +29,7 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
   const [isSaving, setIsSaving] = useState(false);
   const lastUpdateRef = useRef<number>(0);
   const isTeacher = identity?.role === "teacher" || identity?.role === "admin";
+  const hasChangesRef = useRef<boolean>(false);
 
   // If roomId is not provided, fallback to classId (backward compatibility)
   const activeRoomId = roomId || classId;
@@ -88,12 +89,36 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
     };
   }, [activeRoomId, excalidrawAPI]);
 
+  // 🚀 AUTO-SAVE HEARTBEAT: Save to Postgres every 10 seconds if changes exist
+  useEffect(() => {
+    if (!activeRoomId || !isTeacher) return;
+
+    const interval = setInterval(() => {
+        if (hasChangesRef.current && excalidrawAPI) {
+            const elements = excalidrawAPI.getSceneElements();
+            const appState = excalidrawAPI.getAppState();
+            
+            socket.emit("whiteboard:autosave", {
+                classId: activeRoomId,
+                elements,
+                appState
+            });
+            hasChangesRef.current = false;
+            console.log("[Whiteboard] Auto-saved to Postgres");
+        }
+    }, 10000);
+
+    return () => clearInterval(interval);
+  }, [activeRoomId, isTeacher, excalidrawAPI]);
+
   const onChange = useCallback(
     (elements: readonly any[], appState: any) => {
       if (!excalidrawAPI || !activeRoomId) return;
       
       // Only broadcast if not locked or if user is teacher
       if (isLocked && !isTeacher) return;
+
+      hasChangesRef.current = true; // Mark for autosave
 
       const now = Date.now();
       if (now - lastUpdateRef.current > 100) { // Throttle updates

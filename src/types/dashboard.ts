@@ -148,6 +148,11 @@ export interface ClassComparison {
   studentCount: number;
 }
 
+export interface ChannelStats {
+  totalViews: number;
+  conversionRate: number;
+}
+
 export interface DashboardData {
   todaySchedule: ScheduleItem[];
   stats?: DashboardStats;
@@ -163,4 +168,5 @@ export interface DashboardData {
   submissionTiming?: SubmissionTiming[];
   studentTrajectories?: StudentTrajectory[];
   classComparison?: ClassComparison[];
+  channelStats?: ChannelStats;
 }

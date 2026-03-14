@@ -90,6 +90,7 @@ const ActivityLogPage = React.lazy(() => import("./pages/dashboard/activity-log"
 const StudentReportCard = React.lazy(() => import("./pages/student/report-card"));
 const StudentProgress = React.lazy(() => import("./pages/progress/list"));
 const TeacherChannelPage = React.lazy(() => import("./pages/teacher-channel/index"));
+const StudentPortfolio = React.lazy(() => import("./pages/users/portfolio"));
 
 // PUBLIC PAGES
 const LandingPage = React.lazy(() => import("./pages/landing"));
@@ -99,6 +100,14 @@ const PublicLayout = React.lazy(() => import("./components/public-ui/layout").th
 const Loading = () => (
   <div className="flex h-dvh items-center justify-center">
     <Loader2 className="h-12 w-12 animate-spin text-primary" />
+  </div>
+);
+
+const ErrorComponent = () => (
+  <div className="flex flex-col h-dvh items-center justify-center space-y-4">
+    <h1 className="text-4xl font-bold">404</h1>
+    <p className="text-muted-foreground">The page you are looking for does not exist.</p>
+    <a href="/dashboard" className="text-primary hover:underline font-medium">Back to Dashboard</a>
   </div>
 );
 
@@ -350,6 +359,14 @@ function App() {
                                 element={<AuthorizedRoute resource="report-card" action="list"><StudentReportCard /></AuthorizedRoute>}
                             />
                             <Route path="/progress" element={<AuthorizedRoute resource="progress" action="list"><StudentProgress /></AuthorizedRoute>} />
+                            
+                            <Route path="/portfolio">
+                                <Route index element={<AuthorizedRoute resource="portfolio" action="list"><StudentPortfolio /></AuthorizedRoute>} />
+                                <Route path=":id" element={<AuthorizedRoute resource="portfolio" action="show"><StudentPortfolio /></AuthorizedRoute>} />
+                            </Route>
+
+                            {/* FIXED: Strict catch-all for unmatched nested routes to avoid white screen */}
+                            <Route path="*" element={<ErrorComponent />} />
                         </Route>
                       </Route>
 

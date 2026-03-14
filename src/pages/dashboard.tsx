@@ -37,6 +37,7 @@ const Dashboard = () => {
   const { selectedTerm } = useTerm();
   
   const isStaff = identity?.role === UserRole.TEACHER || identity?.role === UserRole.ADMIN;
+  const isTeacher = identity?.role === UserRole.TEACHER;
   const isStudent = identity?.role === UserRole.STUDENT;
   const isParent = identity?.role === UserRole.PARENT;
   
@@ -65,7 +66,7 @@ const Dashboard = () => {
     config: {
       query: { 
         sections: isStaff 
-          ? "stats,attendanceTrend,gradeDistribution,pendingSubmissions,atRiskStudents" 
+          ? `stats,attendanceTrend,gradeDistribution,pendingSubmissions,atRiskStudents${isTeacher ? ',channelStats' : ''}`
           : "upcomingAssignments,gradeTrends,subjectMastery,attendanceSummary",
         termId: selectedTerm?.id
       }

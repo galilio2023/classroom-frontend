@@ -25,8 +25,8 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   useEffect(() => {
     if (isLoading) return;
 
-    if (user && !socketRef.current) {
-      // Use SOCKET_URL which correctly points to the root (e.g., http://localhost:8000)
+    // Only reconnect if the actual user ID changes (login/logout)
+    if (user?.id && !socketRef.current) {
       const newSocket = io(SOCKET_URL, {
         withCredentials: true,
         transports: ["websocket", "polling"],
@@ -53,7 +53,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }
 
     // Cleanup on logout
-    if (!user && socketRef.current) {
+    if (!user?.id && socketRef.current) {
       socketRef.current.disconnect();
       socketRef.current = null;
       setSocket(null);
@@ -61,9 +61,15 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }
 
     return () => {
-      // Global cleanup on unmount handled by socketRef check above or specific listeners here
+      // Clean up socket on unmount
+      if (socketRef.current) {
+        socketRef.current.disconnect();
+        socketRef.current = null;
+        setSocket(null);
+        setIsConnected(false);
+      }
     };
-  }, [user, isLoading]);
+  }, [user?.id, isLoading]); // Only watch user.id
 
   return (
     <SocketContext.Provider value={{ socket, isConnected }}>

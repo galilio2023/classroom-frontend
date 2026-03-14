@@ -32,10 +32,12 @@ import { motion } from "framer-motion";
 import usePageTitle from "@/hooks/use-page-title";
 import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 const StudentPortfolio = () => {
   const { id } = useParams();
   const { data: identity } = useGetIdentity<UserType>();
+  const { t } = useTranslation();
   
   const studentId = id || identity?.id;
 
@@ -59,14 +61,14 @@ const StudentPortfolio = () => {
   const user = userData?.data;
   const analytics = analyticsData?.data;
 
-  usePageTitle(user?.name ? `${user.name}'s Portfolio` : "Student Portfolio");
+  usePageTitle(user?.name ? t("portfolioPage.pageTitle", { name: user.name }) : t("portfolioPage.fallbackPageTitle"));
 
   if (isUserLoading || isAnalyticsLoading) {
     return (
       <div className="flex h-[80vh] items-center justify-center">
         <div className="flex flex-col items-center gap-4">
             <Loader2 className="h-12 w-12 animate-spin text-primary" />
-            <p className="text-muted-foreground font-black uppercase tracking-widest text-[10px]">Assembling Portfolio...</p>
+            <p className="text-muted-foreground font-black uppercase tracking-widest text-[10px]">{t("portfolioPage.loading")}</p>
         </div>
       </div>
     );
@@ -75,8 +77,8 @@ const StudentPortfolio = () => {
   if (!user) {
     return (
       <div className="container mx-auto py-20 text-center">
-        <h2 className="text-2xl font-black">Student not found</h2>
-        <p className="text-muted-foreground">The portfolio you are looking for is unavailable.</p>
+        <h2 className="text-2xl font-black">{t("portfolioPage.notFound")}</h2>
+        <p className="text-muted-foreground">{t("portfolioPage.notFoundDesc")}</p>
       </div>
     );
   }
@@ -96,8 +98,8 @@ const StudentPortfolio = () => {
             <GraduationCap className="h-8 w-8" />
           </div>
           <div>
-            <h1 className="text-4xl font-black tracking-tight">Academic Portfolio</h1>
-            <p className="text-muted-foreground font-medium">A comprehensive showcase of learning progress, achievements, and skills.</p>
+            <h1 className="text-4xl font-black tracking-tight">{t("portfolioPage.title")}</h1>
+            <p className="text-muted-foreground font-medium">{t("portfolioPage.description")}</p>
           </div>
         </div>
       </motion.div>
@@ -126,17 +128,17 @@ const StudentPortfolio = () => {
                 <h2 className="text-3xl font-black tracking-tight">{user.name}</h2>
                 <div className="flex items-center justify-center gap-2">
                   <Badge variant="secondary" className="font-black px-4 py-1 rounded-lg text-[10px] tracking-widest uppercase">
-                    Level {currentLevel}
+                    {t("portfolioPage.level", { level: currentLevel })}
                   </Badge>
                   <Badge className="bg-primary/10 text-primary border-none font-black px-4 py-1 rounded-lg text-[10px] tracking-widest uppercase">
-                    {user.xp || 0} XP
+                    {t("portfolioPage.xp", { xp: user.xp || 0 })}
                   </Badge>
                 </div>
               </div>
               
               <div className="w-full mt-8 space-y-4">
                 <div className="flex justify-between items-end px-1">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Progress to Level {currentLevel + 1}</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t("portfolioPage.progressToLevel", { level: currentLevel + 1 })}</span>
                     <span className="text-xs font-black text-primary">{Math.round(((user.xp || 0) % 1000) / 10)}%</span>
                 </div>
                 <XPProgressBar xp={user.xp || 0} />
@@ -148,7 +150,7 @@ const StudentPortfolio = () => {
                 <div className="flex items-center gap-4 p-4 rounded-2xl bg-background/50 border border-primary/5">
                   <div className="p-2.5 bg-primary/10 rounded-xl text-primary"><Mail className="h-5 w-5" /></div>
                   <div className="flex flex-col min-w-0">
-                    <span className="text-[10px] uppercase font-black text-muted-foreground tracking-widest">Email</span>
+                    <span className="text-[10px] uppercase font-black text-muted-foreground tracking-widest">{t("portfolioPage.email")}</span>
                     <span className="font-bold truncate text-sm">{user.email}</span>
                   </div>
                 </div>
@@ -156,7 +158,7 @@ const StudentPortfolio = () => {
                   <div className="flex items-center gap-4 p-4 rounded-2xl bg-background/50 border border-primary/5">
                     <div className="p-2.5 bg-primary/10 rounded-xl text-primary"><Phone className="h-5 w-5" /></div>
                     <div className="flex flex-col">
-                      <span className="text-[10px] uppercase font-black text-muted-foreground tracking-widest">Phone</span>
+                      <span className="text-[10px] uppercase font-black text-muted-foreground tracking-widest">{t("portfolioPage.phone")}</span>
                       <span className="font-bold text-sm">{user.phoneNumber}</span>
                     </div>
                   </div>
@@ -174,10 +176,10 @@ const StudentPortfolio = () => {
         >
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {[
-                { label: "Badges", value: analytics?.totalBadges || 0, icon: Trophy, color: "text-amber-500", bg: "bg-amber-500/10" },
-                { label: "Avg Grade", value: `${analytics?.avgGrade || 0}%`, icon: Target, color: "text-primary", bg: "bg-primary/10" },
-                { label: "Day Streak", value: analytics?.streak || 0, icon: Flame, color: "text-orange-500", bg: "bg-orange-500/10" },
-                { label: "Global Rank", value: analytics?.rank || "N/A", icon: Star, color: "text-yellow-500", bg: "bg-yellow-500/10" },
+                { label: t("portfolioPage.stats.badges"), value: analytics?.totalBadges || 0, icon: Trophy, color: "text-amber-500", bg: "bg-amber-500/10" },
+                { label: t("portfolioPage.stats.avgGrade"), value: `${analytics?.avgGrade || 0}%`, icon: Target, color: "text-primary", bg: "bg-primary/10" },
+                { label: t("portfolioPage.stats.dayStreak"), value: analytics?.streak || 0, icon: Flame, color: "text-orange-500", bg: "bg-orange-500/10" },
+                { label: t("portfolioPage.stats.globalRank"), value: analytics?.rank || "N/A", icon: Star, color: "text-yellow-500", bg: "bg-yellow-500/10" },
             ].map((stat, i) => (
                 <Card key={i} className="p-6 flex flex-col items-center justify-center text-center border-primary/5 bg-card/50 backdrop-blur-sm rounded-[2rem] shadow-lg shadow-primary/5">
                     <div className={cn("p-3 rounded-2xl mb-3", stat.bg, stat.color)}>
@@ -195,7 +197,7 @@ const StudentPortfolio = () => {
                     <div className="p-2 rounded-xl bg-primary/10 text-primary">
                         <Activity className="h-5 w-5" />
                     </div>
-                    <CardTitle className="text-2xl font-black tracking-tight">Learning Consistency</CardTitle>
+                    <CardTitle className="text-2xl font-black tracking-tight">{t("portfolioPage.learningConsistency")}</CardTitle>
                 </div>
             </CardHeader>
             <CardContent className="p-8 pt-4">
@@ -216,7 +218,7 @@ const StudentPortfolio = () => {
           <div className="p-2 rounded-xl bg-primary/10 text-primary">
             <TrendingUp className="h-6 w-6" />
           </div>
-          <h3 className="text-3xl font-black tracking-tight">Academic Journey</h3>
+          <h3 className="text-3xl font-black tracking-tight">{t("portfolioPage.academicJourney")}</h3>
           <div className="h-px flex-1 bg-gradient-to-r from-primary/20 to-transparent ml-4" />
         </div>
         
@@ -239,10 +241,10 @@ const StudentPortfolio = () => {
             <div className="p-2 rounded-xl bg-amber-500/10 text-amber-600">
                 <Award className="h-6 w-6" />
             </div>
-            <h3 className="text-3xl font-black tracking-tight">Unlocked Achievements</h3>
+            <h3 className="text-3xl font-black tracking-tight">{t("portfolioPage.unlockedAchievements")}</h3>
           </div>
           <Badge variant="outline" className="font-black text-[10px] uppercase tracking-widest px-4 py-2 rounded-xl border-primary/10">
-            {MOCK_BADGES.filter(b => b.unlocked).length} / {MOCK_BADGES.length} Earned
+            {t("portfolioPage.badgesEarned", { earned: MOCK_BADGES.filter(b => b.unlocked).length, total: MOCK_BADGES.length })}
           </Badge>
         </div>
         <Card className="p-10 border-primary/10 shadow-xl rounded-[3rem] bg-card/50 backdrop-blur-sm">

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Card,
   CardContent,
@@ -47,6 +47,18 @@ const AIStudyLab = () => {
 
   const [practiceTopic, setPracticeTopic] = useState<string | null>(null);
   const [flashcards, setFlashcards] = useState<any[] | null>(null);
+  
+  // Ref to track AbortController for cleaning up pending AI requests
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    // Cleanup on unmount
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, []);
 
   const handleToolAction = async () => {
     if (!input.trim()) {
@@ -59,13 +71,23 @@ const AIStudyLab = () => {
       return;
     }
 
+    // Abort any existing request before starting a new one
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    abortControllerRef.current = new AbortController();
+
     setIsLoading(true);
     setResult("");
     setFlashcards(null);
 
     try {
       if (activeTool === "flashcards") {
-        const response = await axios.post("/api/ai/generate-flashcards", { input, locale: i18n.language });
+        const response = await axios.post(
+            "/api/ai/generate-flashcards", 
+            { input, locale: i18n.language },
+            { signal: abortControllerRef.current.signal }
+        );
         setFlashcards(response.data.flashcards);
         toast.success(t("aiHub.studyLab.toasts.flashcardsGenerated"));
       } else {
@@ -74,12 +96,20 @@ const AIStudyLab = () => {
             ? `Explain the following concept in simple terms for a student in ${isAr ? 'Arabic' : 'English'}: ${input}`
             : `Summarize the following text into key bullet points in ${isAr ? 'Arabic' : 'English'}: ${input}`;
 
-        const response = await axios.post("/api/ai/generate-content", { prompt });
+        const response = await axios.post(
+            "/api/ai/generate-content", 
+            { prompt },
+            { signal: abortControllerRef.current.signal }
+        );
         setResult(response.data.content);
         toast.success(t("aiHub.studyLab.toasts.aiFinished"));
       }
-    } catch (error) {
-      toast.error(t("aiHub.studyLab.toasts.error"));
+    } catch (error: any) {
+      if (axios.isCancel(error)) {
+        console.log("AI request cancelled by component unmount or new request.");
+      } else {
+        toast.error(t("aiHub.studyLab.toasts.error"));
+      }
     } finally {
       setIsLoading(false);
     }

@@ -208,8 +208,8 @@ export const AttendanceTab = ({ classId, enrollments }: AttendanceTabProps) => {
         onSuccess: () => {
           open?.({
             type: "success",
-            message: t("attendance.toast.saved"),
-            description: t("attendance.toast.savedDescription", { date: selectedDate }),
+            message: t("classes.attendance.toast.saved"),
+            description: t("classes.attendance.toast.savedDescription", { date: selectedDate }),
           });
           void refetchDaily();
           void refetchHistory();
@@ -237,7 +237,7 @@ export const AttendanceTab = ({ classId, enrollments }: AttendanceTabProps) => {
       case AttendanceStatus.PRESENT:
         return (
           <Badge className="bg-success/10 text-success border-none font-black text-[9px] uppercase tracking-widest">
-            {t("attendance.present")}
+            {t("classes.attendance.present")}
           </Badge>
         );
       case AttendanceStatus.ABSENT:
@@ -246,19 +246,19 @@ export const AttendanceTab = ({ classId, enrollments }: AttendanceTabProps) => {
             variant="destructive"
             className="bg-destructive/10 text-destructive border-none font-black text-[9px] uppercase tracking-widest"
           >
-            {t("attendance.absent")}
+            {t("classes.attendance.absent")}
           </Badge>
         );
       case AttendanceStatus.LATE:
         return (
           <Badge className="bg-yellow-500/10 text-yellow-600 border-none font-black text-[9px] uppercase tracking-widest">
-            {t("attendance.late")}
+            {t("classes.attendance.late")}
           </Badge>
         );
       case AttendanceStatus.EXCUSED:
         return (
           <Badge className="bg-blue-500/10 text-blue-600 border-none font-black text-[9px] uppercase tracking-widest">
-            {t("attendance.excused")}
+            {t("classes.attendance.excused")}
           </Badge>
         );
     }
@@ -272,7 +272,7 @@ export const AttendanceTab = ({ classId, enrollments }: AttendanceTabProps) => {
       <div className="grid gap-6 md:grid-cols-4">
         {[
           {
-            label: t("attendance.present"),
+            label: t("classes.attendance.present"),
             value: statsData?.data?.present || 0,
             icon: CheckCircle2,
             color: "text-success",
@@ -280,7 +280,7 @@ export const AttendanceTab = ({ classId, enrollments }: AttendanceTabProps) => {
             border: "border-success/20",
           },
           {
-            label: t("attendance.absent"),
+            label: t("classes.attendance.absent"),
             value: statsData?.data?.absent || 0,
             icon: XCircle,
             color: "text-destructive",
@@ -288,7 +288,7 @@ export const AttendanceTab = ({ classId, enrollments }: AttendanceTabProps) => {
             border: "border-destructive/20",
           },
           {
-            label: t("attendance.late"),
+            label: t("classes.attendance.late"),
             value: statsData?.data?.late || 0,
             icon: Clock,
             color: "text-yellow-600",
@@ -296,7 +296,7 @@ export const AttendanceTab = ({ classId, enrollments }: AttendanceTabProps) => {
             border: "border-yellow-500/20",
           },
           {
-            label: t("attendance.excused"),
+            label: t("classes.attendance.excused"),
             value: statsData?.data?.excused || 0,
             icon: AlertCircle,
             color: "text-blue-600",
@@ -359,7 +359,7 @@ export const AttendanceTab = ({ classId, enrollments }: AttendanceTabProps) => {
                   className="rounded-xl font-black uppercase tracking-widest text-[10px] px-6 gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
                 >
                   <CalendarIcon className="h-3.5 w-3.5" />
-                  {t("attendance.markAttendance")}
+                  {t("classes.attendance.markAttendance")}
                 </TabsTrigger>
               )}
               <TabsTrigger
@@ -367,7 +367,7 @@ export const AttendanceTab = ({ classId, enrollments }: AttendanceTabProps) => {
                 className="rounded-xl font-black uppercase tracking-widest text-[10px] px-6 gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
               >
                 <History className="h-3.5 w-3.5" />
-                {t("attendance.history")}
+                {t("classes.attendance.history")}
               </TabsTrigger>
             </TabsList>
 
@@ -403,10 +403,10 @@ export const AttendanceTab = ({ classId, enrollments }: AttendanceTabProps) => {
                       <div className="p-2 rounded-xl bg-primary/10 text-primary">
                         <ClipboardCheck className="h-6 w-6" />
                       </div>
-                      {t("attendance.dailyAttendance")}
+                      {t("classes.attendance.dailyAttendance")}
                     </CardTitle>
                     <CardDescription className="font-medium">
-                      {t("attendance.markFor", { date: format(new Date(selectedDate), "PPP", { locale: isAr ? ar : undefined }) })}
+                      {t("classes.attendance.markFor", { date: format(new Date(selectedDate), "PPP", { locale: isAr ? ar : undefined }) })}
                     </CardDescription>
                   </div>
                   <div className="flex flex-wrap items-center gap-4">
@@ -438,7 +438,7 @@ export const AttendanceTab = ({ classId, enrollments }: AttendanceTabProps) => {
                     <div className="flex flex-col items-center justify-center py-20 gap-4">
                       <Loader2 className="h-10 w-10 animate-spin text-primary/20" />
                       <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">
-                        {t("attendance.fetching")}
+                        {t("classes.attendance.fetching")}
                       </p>
                     </div>
                   ) : enrollments.length > 0 ? (
@@ -447,19 +447,19 @@ export const AttendanceTab = ({ classId, enrollments }: AttendanceTabProps) => {
                         <TableHeader>
                           <TableRow className="hover:bg-transparent border-none text-start">
                             <TableHead className="text-[10px] font-black uppercase tracking-widest py-6">
-                              {t("attendance.table.student")}
+                              {t("classes.attendance.table.student")}
                             </TableHead>
                             <TableHead className="text-[10px] font-black uppercase tracking-widest py-6">
-                              {t("attendance.table.status")}
+                              {t("classes.attendance.table.status")}
                             </TableHead>
                             <TableHead className="text-[10px] font-black uppercase tracking-widest py-6">
-                              {t("attendance.table.minutes")}
+                              {t("classes.attendance.table.minutes")}
                             </TableHead>
                             <TableHead className="text-[10px] font-black uppercase tracking-widest py-6">
-                              {t("attendance.table.participation")}
+                              {t("classes.attendance.table.participation")}
                             </TableHead>
                             <TableHead className="text-[10px] font-black uppercase tracking-widest py-6">
-                              {t("attendance.table.remarks")}
+                              {t("classes.attendance.table.remarks")}
                             </TableHead>
                           </TableRow>
                         </TableHeader>
@@ -523,25 +523,25 @@ export const AttendanceTab = ({ classId, enrollments }: AttendanceTabProps) => {
                                         value={AttendanceStatus.PRESENT}
                                         className="rounded-lg font-bold text-start"
                                       >
-                                        {t("attendance.present")}
+                                        {t("classes.attendance.present")}
                                       </SelectItem>
                                       <SelectItem
                                         value={AttendanceStatus.ABSENT}
                                         className="rounded-lg font-bold text-start"
                                       >
-                                        {t("attendance.absent")}
+                                        {t("classes.attendance.absent")}
                                       </SelectItem>
                                       <SelectItem
                                         value={AttendanceStatus.LATE}
                                         className="rounded-lg font-bold text-start"
                                       >
-                                        {t("attendance.late")}
+                                        {t("classes.attendance.late")}
                                       </SelectItem>
                                       <SelectItem
                                         value={AttendanceStatus.EXCUSED}
                                         className="rounded-lg font-bold text-start"
                                       >
-                                        {t("attendance.excused")}
+                                        {t("classes.attendance.excused")}
                                       </SelectItem>
                                     </SelectContent>
                                   </Select>
@@ -575,7 +575,7 @@ export const AttendanceTab = ({ classId, enrollments }: AttendanceTabProps) => {
                                 <TableCell className="py-4">
                                   <div className="relative group/input">
                                     <Input
-                                      placeholder={t("attendance.table.remarksPlaceholder")}
+                                      placeholder={t("classes.attendance.table.remarksPlaceholder")}
                                       value={data.remarks}
                                       onChange={(e) =>
                                         handleValueChange(
@@ -601,8 +601,8 @@ export const AttendanceTab = ({ classId, enrollments }: AttendanceTabProps) => {
                     <div className="py-20">
                       <EmptyState
                         icon={ClipboardCheck}
-                        title={t("attendance.noEnrollments")}
-                        description={t("attendance.noEnrollmentsDescription")}
+                        title={t("classes.attendance.noEnrollments")}
+                        description={t("classes.attendance.noEnrollmentsDescription")}
                       />
                     </div>
                   )}
@@ -620,12 +620,12 @@ export const AttendanceTab = ({ classId, enrollments }: AttendanceTabProps) => {
                   </div>
                   <div>
                     <CardTitle className="text-xl font-black tracking-tight">
-                      {t("attendance.history")}
+                      {t("classes.attendance.history")}
                     </CardTitle>
                     <CardDescription className="font-medium">
                       {isTeacher
-                        ? t("attendance.dailySummaryTeacher")
-                        : t("attendance.personalRecordStudent")}
+                        ? t("classes.attendance.dailySummaryTeacher")
+                        : t("classes.attendance.personalRecordStudent")}
                     </CardDescription>
                   </div>
                 </div>
@@ -635,7 +635,7 @@ export const AttendanceTab = ({ classId, enrollments }: AttendanceTabProps) => {
                   <div className="flex flex-col items-center justify-center py-20 gap-4">
                     <Loader2 className="h-10 w-10 animate-spin text-primary/20" />
                     <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">
-                      {t("attendance.loadingHistory")}
+                      {t("classes.attendance.loadingHistory")}
                     </p>
                   </div>
                 ) : (historyData?.data?.length ?? 0) > 0 ? (
@@ -644,33 +644,33 @@ export const AttendanceTab = ({ classId, enrollments }: AttendanceTabProps) => {
                       <TableHeader>
                         <TableRow className="hover:bg-transparent border-none text-start">
                           <TableHead className="text-[10px] font-black uppercase tracking-widest py-6">
-                            {t("attendance.table.date")}
+                            {t("classes.attendance.table.date")}
                           </TableHead>
                           {isTeacher ? (
                             <>
                               <TableHead className="text-[10px] font-black uppercase tracking-widest py-6">
-                                {t("attendance.present")}
+                                {t("classes.attendance.present")}
                               </TableHead>
                               <TableHead className="text-[10px] font-black uppercase tracking-widest py-6">
-                                {t("attendance.absent")}
+                                {t("classes.attendance.absent")}
                               </TableHead>
                               <TableHead className="text-[10px] font-black uppercase tracking-widest py-6">
-                                {t("attendance.late")}
+                                {t("classes.attendance.late")}
                               </TableHead>
                               <TableHead className="text-[10px] font-black uppercase tracking-widest py-6">
-                                {t("attendance.excused")}
+                                {t("classes.attendance.excused")}
                               </TableHead>
                             </>
                           ) : (
                             <>
                               <TableHead className="text-[10px] font-black uppercase tracking-widest py-6">
-                                {t("attendance.table.status")}
+                                {t("classes.attendance.table.status")}
                               </TableHead>
                               <TableHead className="text-[10px] font-black uppercase tracking-widest py-6">
-                                {t("attendance.table.participation")}
+                                {t("classes.attendance.table.participation")}
                               </TableHead>
                               <TableHead className="text-[10px] font-black uppercase tracking-widest py-6">
-                                {t("attendance.table.remarks")}
+                                {t("classes.attendance.table.remarks")}
                               </TableHead>
                             </>
                           )}
@@ -743,7 +743,7 @@ export const AttendanceTab = ({ classId, enrollments }: AttendanceTabProps) => {
                                   <TableCell className="py-6">
                                     <div className="flex items-center gap-2 text-muted-foreground/60 italic text-xs font-medium">
                                       <Info className="h-3.5 w-3.5 opacity-40" />
-                                      {group.records[0].remarks || t("attendance.noRemarks")}
+                                      {group.records[0].remarks || t("classes.attendance.noRemarks")}
                                     </div>
                                   </TableCell>
                                 </>
@@ -758,8 +758,8 @@ export const AttendanceTab = ({ classId, enrollments }: AttendanceTabProps) => {
                   <div className="py-20">
                     <EmptyState
                       icon={History}
-                      title={t("attendance.noRecords")}
-                      description={t("attendance.noRecordsDescription")}
+                      title={t("classes.attendance.noRecords")}
+                      description={t("classes.attendance.noRecordsDescription")}
                     />
                   </div>
                 )}

@@ -44,10 +44,10 @@ export function BadgeCard({ badge, className }: BadgeCardProps) {
         
         <div className="space-y-1">
           <h4 className="text-xs font-black uppercase tracking-tight leading-none">
-            {badge.name}
+            {t(`badges.${badge.id}.name`, { defaultValue: badge.name })}
           </h4>
           <p className="text-[10px] text-muted-foreground font-medium leading-tight">
-            {badge.description}
+            {t(`badges.${badge.id}.desc`, { defaultValue: badge.description })}
           </p>
         </div>
 

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useCustomMutation } from "@refinedev/core";
-import { socket } from "@/lib/socket";
+import { useSocket } from "@/contexts/socket-context";
 
 export interface Message {
   id?: string;
@@ -27,6 +27,7 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
   const currentStreamId = useRef<string | null>(null);
 
   const { mutate: sendMessage, mutation } = useCustomMutation<{ success: boolean }>();
+  const { socket } = useSocket();
   
   const isLoading = mutation.isPending || isStreaming;
 
@@ -48,7 +49,7 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
     if (!socket) return;
 
     // Use a unique ID for each streaming session (provided by backend or generated locally)
-    socket.on("study-buddy:start", (data: { streamId?: string }) => {
+    const handleStart = (data: { streamId?: string }) => {
       setIsStreaming(true);
       
       const streamId = data?.streamId || `stream-${Date.now()}`;
@@ -62,9 +63,9 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
         ...prev,
         { id: streamId, role: "model", parts: [{ text: "" }] }
       ]);
-    });
+    };
 
-    socket.on("study-buddy:chunk", (data: { text: string, streamId?: string }) => {
+    const handleChunk = (data: { text: string, streamId?: string }) => {
       setMessages((prev) => {
         // Find the specific message by ID or fallback to the last one
         const lastMessage = prev[prev.length - 1];
@@ -74,9 +75,9 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
         }
         return prev;
       });
-    });
+    };
 
-    socket.on("study-buddy:end", (data: { sources: any[], streamId?: string }) => {
+    const handleEnd = (data: { sources: any[], streamId?: string }) => {
       setIsStreaming(false);
       currentStreamId.current = null; // Clear the stream tracking
       
@@ -89,7 +90,7 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
           return prev;
         });
       }
-    });
+    };
 
     const handleError = () => {
       setMessages((prev) => {
@@ -119,17 +120,20 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
       currentStreamId.current = null;
     };
 
+    socket.on("study-buddy:start", handleStart);
+    socket.on("study-buddy:chunk", handleChunk);
+    socket.on("study-buddy:end", handleEnd);
     socket.on("study-buddy:error", handleError);
     socket.on("disconnect", handleError);
 
     return () => {
-      socket.off("study-buddy:start");
-      socket.off("study-buddy:chunk");
-      socket.off("study-buddy:end");
+      socket.off("study-buddy:start", handleStart);
+      socket.off("study-buddy:chunk", handleChunk);
+      socket.off("study-buddy:end", handleEnd);
       socket.off("study-buddy:error", handleError);
       socket.off("disconnect", handleError);
     };
-  }, []);
+  }, [socket]);
 
   const handleSend = () => {
     if (!input.trim() || isLoading) return;
