@@ -1,8 +1,24 @@
-import { useList, useCreate, useDelete, useGetIdentity, useCustomMutation } from "@refinedev/core";
+import {
+  useList,
+  useCreate,
+  useDelete,
+  useGetIdentity,
+  useCustomMutation,
+} from "@refinedev/core";
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Discussion, User } from "@/types";
-import { Loader2, Send, Sparkles, X, MessageCircle, LayoutDashboard, Info, ArrowRight, Reply } from "lucide-react";
+import { Discussion, User, UserRole } from "@/types";
+import {
+  Loader2,
+  Send,
+  Sparkles,
+  X,
+  MessageCircle,
+  LayoutDashboard,
+  Info,
+  ArrowRight,
+  Reply,
+} from "lucide-react";
 import { toast } from "sonner";
 import { io } from "socket.io-client";
 import { ChatBubble } from "@/components/classes/chat-bubble";
@@ -25,7 +41,7 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
   const [newPost, setNewPost] = useState("");
   const [replyTo, setReplyTo] = useState<number | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
-  
+
   const [summary, setSummary] = useState<string | null>(null);
   const [isSummarizing, setIsSummarizing] = useState(false);
 
@@ -49,29 +65,31 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
 
   useEffect(() => {
     if (scrollRef.current) {
-      const viewport = scrollRef.current.querySelector('[data-radix-scroll-area-viewport]');
+      const viewport = scrollRef.current.querySelector(
+        "[data-radix-scroll-area-viewport]",
+      );
       if (viewport) viewport.scrollTop = viewport.scrollHeight;
     }
   }, [discussions]);
 
   useEffect(() => {
     if (!identity?.id || !classId) return;
-    
+
     const socket = io(SOCKET_URL, {
       withCredentials: true,
       transports: ["websocket", "polling"],
     });
 
-    socket.on("new_discussion", () => { 
-      void refetch(); 
+    socket.on("new_discussion", () => {
+      void refetch();
     });
 
-    socket.on("delete_discussion", () => { 
-      void refetch(); 
+    socket.on("delete_discussion", () => {
+      void refetch();
     });
 
-    return () => { 
-      socket.disconnect(); 
+    return () => {
+      socket.disconnect();
     };
   }, [identity?.id, classId, refetch]);
 
@@ -80,19 +98,23 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
     createPost(
       {
         resource: "discussions",
-        values: { 
-          content: newPost, 
+        values: {
+          content: newPost,
           classId: Number(classId),
-          parentId: replyTo
+          parentId: replyTo,
         },
       },
       {
         onSuccess: () => {
           setNewPost("");
           setReplyTo(null);
-          toast.success(replyTo ? t("classes.discussion.toast.replySent") : t("classes.discussion.toast.messagePosted"));
+          toast.success(
+            replyTo
+              ? t("classes.discussion.toast.replySent")
+              : t("classes.discussion.toast.messagePosted"),
+          );
         },
-      }
+      },
     );
   };
 
@@ -114,7 +136,7 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
           toast.error(t("classes.discussion.toast.summaryError"));
           setIsSummarizing(false);
         },
-      }
+      },
     );
   };
 
@@ -197,8 +219,8 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
       </AnimatePresence>
 
       {/* Messages Area */}
-      <ScrollArea 
-        ref={scrollRef} 
+      <ScrollArea
+        ref={scrollRef}
         className="flex-1 px-4 rounded-2xl bg-muted/30 border shadow-inner"
       >
         <div className="py-6 space-y-8">
@@ -207,13 +229,17 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
               <div className="p-4 bg-muted rounded-full">
                 <MessageCircle className="w-8 h-8 opacity-20" />
               </div>
-              <p className="text-sm font-medium">{t("classes.discussion.noMessages")}</p>
+              <p className="text-sm font-medium">
+                {t("classes.discussion.noMessages")}
+              </p>
             </div>
           ) : (
             discussions.map((discussion) => (
               <ChatBubble
                 key={discussion.id}
-                discussion={discussion}
+                post={discussion}
+                isOwn={discussion.user.id === identity?.id}
+                isAdmin={identity?.role === UserRole.ADMIN}
                 onReply={(id) => {
                   setReplyTo(id);
                   // Scroll to editor
@@ -252,12 +278,16 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
             </motion.div>
           )}
         </AnimatePresence>
-        
-        <div className={cn(
-          "bg-background rounded-2xl border-2 transition-all duration-200 shadow-lg",
-          mutation.isLoading ? "opacity-70 pointer-events-none" : "hover:border-primary/30",
-          replyTo ? "rounded-t-none border-t-0" : ""
-        )}>
+
+        <div
+          className={cn(
+            "bg-background rounded-2xl border-2 transition-all duration-200 shadow-lg",
+            mutation.isPending
+              ? "opacity-70 pointer-events-none"
+              : "hover:border-primary/30",
+            replyTo ? "rounded-t-none border-t-0" : "",
+          )}
+        >
           <RichTextEditor
             value={newPost}
             onChange={setNewPost}
@@ -277,11 +307,13 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
             </div>
             <Button
               onClick={handlePost}
-              disabled={mutation.isLoading || !newPost.trim() || newPost === "<p></p>"}
+              disabled={
+                mutation.isPending || !newPost.trim() || newPost === "<p></p>"
+              }
               size="sm"
               className="px-6 rounded-xl shadow-md transition-all hover:translate-y-[-1px] active:translate-y-[0px]"
             >
-              {mutation.isLoading ? (
+              {mutation.isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
               ) : (
                 <Send className="h-4 w-4 mr-2" />
@@ -290,7 +322,7 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
             </Button>
           </div>
         </div>
-        
+
         {/* Tips / Info */}
         <div className="flex items-center justify-center gap-6 text-[11px] text-muted-foreground/60 font-medium pt-1">
           <div className="flex items-center gap-1">
