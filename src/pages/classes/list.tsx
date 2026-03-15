@@ -20,7 +20,7 @@ import {
   LayoutDashboard,
   Send,
   Compass,
-  Briefcase
+  Briefcase,
 } from "lucide-react";
 import { useMemo, useState, useEffect, useRef, useCallback } from "react";
 import {
@@ -31,7 +31,9 @@ import {
   useInvalidate,
   useDelete,
   useNavigation,
+  BaseKey,
 } from "@refinedev/core";
+import { useTable } from "@refinedev/react-table";
 import { Link } from "react-router-dom";
 
 import {
@@ -77,7 +79,13 @@ import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import { Subject, User, UserRole, ClassListItem, TeacherApplication } from "@/types";
+import {
+  Subject,
+  User,
+  UserRole,
+  ClassListItem,
+  TeacherApplication,
+} from "@/types";
 import { toast } from "sonner";
 import { EmptyState } from "@/components/empty-state";
 import { cn } from "@/lib/utils";
@@ -89,6 +97,7 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import { ApplyTeacherDialog } from "./apply-teacher-dialog";
 import { useTranslation } from "react-i18next";
 import { TeacherDiscoveryList } from "@/components/classes/teacher-discovery-list";
+import { ColumnDef } from "@tanstack/react-table";
 
 const ClassesList = () => {
   const { t, i18n } = useTranslation();
@@ -100,14 +109,17 @@ const ClassesList = () => {
   const isTeacher = identity?.role === UserRole.TEACHER;
   const isAdmin = identity?.role === UserRole.ADMIN;
 
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedSubject, setSelectedSubject] = useState<string>("all");
   const [inviteCode, setInviteCode] = useState("");
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
-  
-  const [applyTarget, setApplyTarget] = useState<{ id: number; name: string } | null>(null);
-  const [viewMode, setViewMode] = useState<"mine" | "browse">(isTeacher ? "mine" : "browse");
+
+  const [applyTarget, setApplyTarget] = useState<{
+    id: number;
+    name: string;
+  } | null>(null);
+  const [viewMode, setViewMode] = useState<"mine" | "browse">(
+    isTeacher ? "mine" : "browse",
+  );
 
   const { mutate: joinClass, mutation: joinMutation } = useCustomMutation();
   const { mutate: cloneClass, mutation: cloneMutation } = useCustomMutation();
@@ -144,12 +156,16 @@ const ClassesList = () => {
       },
       {
         onSuccess: (data: any) => {
-          toast.success(data.data.message || t("classes.list.toast.joinRequestSent"));
+          toast.success(
+            data.data.message || t("classes.list.toast.joinRequestSent"),
+          );
           setIsJoinModalOpen(false);
           setInviteCode("");
         },
         onError: (error: any) => {
-          toast.error(error?.data?.message || t("classes.list.toast.invalidInviteCode"));
+          toast.error(
+            error?.data?.message || t("classes.list.toast.invalidInviteCode"),
+          );
         },
       },
     );
@@ -190,70 +206,131 @@ const ClassesList = () => {
 
   const { query: subjectsQuery } = useList<Subject, HttpError>({
     resource: "subjects",
-    pagination: { pageSize: 100 },
+    pagination: { pageSize: 1000 },
   });
 
   const subjects = subjectsQuery.data?.data ?? [];
 
-  const filters = useMemo(() => {
-    const f = [];
-    if (selectedSubject !== "all")
-      f.push({
-        field: "subject",
-        operator: "eq" as const,
-        value: selectedSubject,
-      });
-    if (searchQuery)
-      f.push({
-        field: "name",
-        operator: "contains" as const,
-        value: searchQuery,
-      });
-    if (selectedTerm) {
-      f.push({
-        field: "termId",
-        operator: "eq" as const,
-        value: selectedTerm.id,
-      });
-    }
-    
-    // Senior Engineer Logic: Apply teacherUid filter only in "mine" mode
-    if (isTeacher && viewMode === "mine") {
-        f.push({
-            field: "teacherUid",
-            operator: "eq" as const,
-            value: identity?.id
-        });
-    }
-    
-    return f;
-  }, [selectedSubject, searchQuery, selectedTerm, viewMode, isTeacher, identity?.id]);
+  const columns = useMemo<ColumnDef<ClassListItem>[]>(
+    () => [
+      {
+        id: "id",
+        accessorKey: "id",
+        header: "ID",
+      },
+    ],
+    []
+  );
 
-  const { query: { data: classesData, isLoading, refetch: refetchClasses } } = useList<ClassListItem>({
-    resource: "classes",
-    pagination: { pageSize: 1000, mode: "server" },
-    filters,
-    sorters: [{ field: "id", order: "desc" }],
-    meta: {
-      populate: [
-        "subject",
-        "subject.department",
-        "teachers",
-        "teachers.teacher",
-        "_count",
+  const {
+    refineCore: {
+      tableQuery: tableQueryResult,
+      filters,
+      setFilters,
+    }
+  } = useTable<ClassListItem>({
+    columns,
+    refineCoreProps: {
+      resource: "classes",
+      pagination: { mode: "server" },
+      sorters: { initial: [{ field: "id", order: "desc" }] },
+      queryOptions: {
+        staleTime: 0,
+      },
+      meta: {
+        populate: [
+          "subject",
+          "subject.department",
+          "teachers",
+          "teachers.teacher",
+          "_count",
+        ],
+      },
+      syncWithLocation: true,
+      filters: {
+        permanent: selectedTerm
+          ? [
+              {
+                field: "termId",
+                operator: "eq",
+                value: selectedTerm.id,
+              },
+            ]
+          : [],
+      },
+    }
+  });
+
+  const classesData = tableQueryResult?.data;
+  const isLoading = tableQueryResult?.isLoading;
+
+  // Re-apply filters when viewMode or identity changes (for Teacher's "mine" mode)
+  useEffect(() => {
+    if (isTeacher) {
+      if (viewMode === "mine") {
+        setFilters(
+          [
+            {
+              field: "teacherUid",
+              operator: "eq",
+              value: identity?.id,
+            },
+          ],
+          "merge",
+        );
+      } else {
+        setFilters(
+          [
+            {
+              field: "teacherUid",
+              operator: "eq",
+              value: undefined,
+            },
+          ],
+          "merge",
+        );
+      }
+    }
+  }, [viewMode, identity?.id, isTeacher]);
+
+  const searchQuery =
+    (filters.find((f) => "field" in f && f.field === "name") as any)?.value ||
+    "";
+  const selectedSubject =
+    (filters.find((f) => "field" in f && f.field === "subject") as any)
+      ?.value || "all";
+
+  const setSearchQuery = (val: string) => {
+    setFilters(
+      [{ field: "name", operator: "contains", value: val || undefined }],
+      "merge",
+    );
+  };
+
+  const setSelectedSubject = (val: string) => {
+    setFilters(
+      [
+        {
+          field: "subject",
+          operator: "eq",
+          value: val === "all" ? undefined : val,
+        },
       ],
+      "merge",
+    );
+  };
+
+  const {
+    result: { data: applicationsData },
+  } = useList<TeacherApplication>({
+    resource: "teacher-applications",
+    queryOptions: {
+      enabled: isTeacher,
     },
   });
 
-  const { query: { data: applicationsData } } = useList<TeacherApplication>({
-    resource: "teacher-applications",
-    queryOptions: {
-        enabled: isTeacher
-    }
-  });
-
   const classes = classesData?.data || [];
-  const applications = applicationsData?.data || [];
+  const applications = applicationsData || [];
   const hasData = classes.length > 0;
 
   const parentRef = useRef<HTMLDivElement>(null);
@@ -267,7 +344,7 @@ const ClassesList = () => {
     overscan: 5,
   });
 
-  const isAr = i18n.language === 'ar';
+  const isAr = i18n.language === "ar";
 
   return (
     <div className="space-y-10 pb-20">
@@ -282,31 +359,45 @@ const ClassesList = () => {
               <Breadcrumb />
               <div>
                 <h1 className="text-4xl font-black tracking-tight text-start">
-                  {isStudent ? t("classes.list.discover") : viewMode === "mine" ? t("classes.list.myClassrooms") : t("classes.list.browseCatalog")}
+                  {isStudent
+                    ? t("classes.list.discover")
+                    : viewMode === "mine"
+                      ? t("classes.list.myClassrooms")
+                      : t("classes.list.browseCatalog")}
                 </h1>
                 <p className="text-muted-foreground font-medium mt-1 text-start">
                   {isStudent
                     ? t("classes.list.discoverDescription")
-                    : viewMode === "mine" 
-                        ? t("classes.list.myDescription")
-                        : t("classes.list.browseDescription")}
+                    : viewMode === "mine"
+                      ? t("classes.list.myDescription")
+                      : t("classes.list.browseDescription")}
                 </p>
               </div>
             </div>
 
             <div className="flex gap-3 w-full md:w-auto">
               {isTeacher && (
-                <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as any)} className="bg-muted/20 p-1 rounded-2xl border border-primary/5">
-                    <TabsList className="bg-transparent h-12 gap-1">
-                        <TabsTrigger value="mine" className="rounded-xl font-black uppercase tracking-widest text-[9px] gap-2 px-6 data-[state=active]:bg-primary data-[state=active]:text-white shadow-sm transition-all">
-                            <Briefcase className="h-3.5 w-3.5" />
-                            {t("classes.list.myClassesTab")}
-                        </TabsTrigger>
-                        <TabsTrigger value="browse" className="rounded-xl font-black uppercase tracking-widest text-[9px] gap-2 px-6 data-[state=active]:bg-primary data-[state=active]:text-white shadow-sm transition-all">
-                            <Compass className="h-3.5 w-3.5" />
-                            {t("classes.list.browseTab")}
-                        </TabsTrigger>
-                    </TabsList>
+                <Tabs
+                  value={viewMode}
+                  onValueChange={(v) => setViewMode(v as any)}
+                  className="bg-muted/20 p-1 rounded-2xl border border-primary/5"
+                >
+                  <TabsList className="bg-transparent h-12 gap-1">
+                    <TabsTrigger
+                      value="mine"
+                      className="rounded-xl font-black uppercase tracking-widest text-[9px] gap-2 px-6 data-[state=active]:bg-primary data-[state=active]:text-white shadow-sm transition-all"
+                    >
+                      <Briefcase className="h-3.5 w-3.5" />
+                      {t("classes.list.myClassesTab")}
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="browse"
+                      className="rounded-xl font-black uppercase tracking-widest text-[9px] gap-2 px-6 data-[state=active]:bg-primary data-[state=active]:text-white shadow-sm transition-all"
+                    >
+                      <Compass className="h-3.5 w-3.5" />
+                      {t("classes.list.browseTab")}
+                    </TabsTrigger>
+                  </TabsList>
                 </Tabs>
               )}
 
@@ -408,7 +499,9 @@ const ClassesList = () => {
                     {t("dashboard.archiveViewActive")}
                   </p>
                   <p className="text-sm font-medium">
-                    {t("dashboard.archiveViewDescription", { termName: selectedTerm.name })}
+                    {t("dashboard.archiveViewDescription", {
+                      termName: selectedTerm.name,
+                    })}
                   </p>
                 </div>
               </motion.div>
@@ -418,11 +511,11 @@ const ClassesList = () => {
           {/* Teacher Discovery Catalog (Netflix Style) */}
           {isStudent && (
             <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
             >
-                <TeacherDiscoveryList />
+              <TeacherDiscoveryList />
             </motion.div>
           )}
 
@@ -430,11 +523,19 @@ const ClassesList = () => {
           <Card className="p-4 border-primary/5 bg-muted/30 rounded-4xl backdrop-blur-sm">
             <div className="flex flex-col lg:flex-row gap-4">
               <div className="relative flex-1 group">
-                <Search className={cn("absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors", isAr ? "right-4" : "left-4")} />
+                <Search
+                  className={cn(
+                    "absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors",
+                    isAr ? "right-4" : "left-4",
+                  )}
+                />
                 <Input
                   type="text"
                   placeholder={t("classes.list.searchPlaceholder")}
-                  className={cn("h-14 rounded-2xl border-none bg-background shadow-sm font-medium", isAr ? "pr-11 pl-4" : "pl-11 pr-4")}
+                  className={cn(
+                    "h-14 rounded-2xl border-none bg-background shadow-sm font-medium",
+                    isAr ? "pr-11 pl-4" : "pl-11 pr-4",
+                  )}
                   value={searchQuery}
                   onChange={(event) => setSearchQuery(event.target.value)}
                 />
@@ -447,7 +548,9 @@ const ClassesList = () => {
                     onValueChange={setSelectedSubject}
                   >
                     <SelectTrigger className="w-[180px] border-none h-10 focus:ring-0 shadow-none font-black text-[10px] uppercase tracking-widest">
-                      <SelectValue placeholder={t("classes.list.allSubjects")} />
+                      <SelectValue
+                        placeholder={t("classes.list.allSubjects")}
+                      />
                     </SelectTrigger>
                     <SelectContent className="rounded-2xl border-none shadow-2xl">
                       <SelectItem value="all" className="rounded-xl font-bold">
@@ -498,7 +601,7 @@ const ClassesList = () => {
                   description={
                     isStudent
                       ? t("classes.list.noClassesDescriptionStudent")
-                      : viewMode === "mine" 
+                      : viewMode === "mine"
                         ? t("classes.list.noClassesDescriptionTeacher")
                         : t("classes.list.noClassesDescriptionSearch")
                   }
@@ -532,14 +635,19 @@ const ClassesList = () => {
                 {rowVirtualizer.getVirtualItems().map((virtualItem) => {
                   const classItem = classes[virtualItem.index];
                   if (!classItem) return null;
-                  
+
                   const primaryTeacher = classItem.teachers?.find(
                     (t: any) => t.isPrimary,
                   )?.teacher;
                   const classColor = (classItem as any).color || "#3b82f6";
 
-                  const isAssigned = classItem.teachers?.some((t: any) => t.teacher.id === identity?.id);
-                  const pendingApp = applications.find(app => app.classId === classItem.id && app.status === "pending");
+                  const isAssigned = classItem.teachers?.some(
+                    (t: any) => t.teacher.id === identity?.id,
+                  );
+                  const pendingApp = applications.find(
+                    (app) =>
+                      app.classId === classItem.id && app.status === "pending",
+                  );
 
                   return (
                     <div
@@ -583,14 +691,24 @@ const ClassesList = () => {
                             </div>
                           )}
                           {classItem.isLive && (
-                            <div className={cn("absolute -top-2 bg-red-500 text-white p-1.5 rounded-full border-4 border-background shadow-lg animate-pulse", isAr ? "-left-2" : "-right-2")}>
+                            <div
+                              className={cn(
+                                "absolute -top-2 bg-red-500 text-white p-1.5 rounded-full border-4 border-background shadow-lg animate-pulse",
+                                isAr ? "-left-2" : "-right-2",
+                              )}
+                            >
                               <Video className="h-3 w-3" />
                             </div>
                           )}
                         </div>
 
                         {/* Info */}
-                        <div className={cn("flex-1 text-center md:text-left min-w-0 w-full", isAr ? "md:mr-8" : "md:ml-8")}>
+                        <div
+                          className={cn(
+                            "flex-1 text-center md:text-left min-w-0 w-full",
+                            isAr ? "md:mr-8" : "md:ml-8",
+                          )}
+                        >
                           <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
                             <h3 className="text-xl font-black tracking-tight truncate group-hover:text-primary transition-colors text-start">
                               {classItem.name}
@@ -600,7 +718,8 @@ const ClassesList = () => {
                                 variant="outline"
                                 className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md border-primary/10"
                               >
-                                {classItem.subject?.name || t("classes.list.general")}
+                                {classItem.subject?.name ||
+                                  t("classes.list.general")}
                               </Badge>
                               {classItem.isLive && (
                                 <div className="flex items-center gap-1.5 bg-red-500/10 px-2 py-0.5 rounded-md">
@@ -615,7 +734,7 @@ const ClassesList = () => {
                               )}
                               {isTeacher && pendingApp && (
                                 <Badge className="bg-amber-500/10 text-amber-600 border-none text-[9px] font-black uppercase tracking-widest">
-                                    {t("classes.list.pendingApproval")}
+                                  {t("classes.list.pendingApproval")}
                                 </Badge>
                               )}
                             </div>
@@ -629,7 +748,8 @@ const ClassesList = () => {
                               <span className="text-xs font-bold">
                                 {classItem._count?.enrollments || 0}{" "}
                                 <span className="text-muted-foreground/50 font-medium">
-                                  / {classItem.capacity || "∞"} {t("classes.list.studentsLabel")}
+                                  / {classItem.capacity || "∞"}{" "}
+                                  {t("classes.list.studentsLabel")}
                                 </span>
                               </span>
                             </div>
@@ -661,14 +781,23 @@ const ClassesList = () => {
 
                         {/* Actions */}
                         <div className="flex items-center gap-3 mt-6 md:mt-0 shrink-0">
-                          <div className={cn("hidden lg:flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all", isAr ? "-translate-x-4 group-hover:translate-x-0" : "translate-x-4 group-hover:translate-x-0")}>
-                            {(isTeacher && isAssigned || isAdmin) && (
+                          <div
+                            className={cn(
+                              "hidden lg:flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all",
+                              isAr
+                                ? "-translate-x-4 group-hover:translate-x-0"
+                                : "translate-x-4 group-hover:translate-x-0",
+                            )}
+                          >
+                            {((isTeacher && isAssigned) || isAdmin) && (
                               <>
                                 <Button
                                   variant="ghost"
                                   size="icon"
                                   className="h-10 w-10 rounded-xl text-muted-foreground hover:text-primary hover:bg-primary/5"
-                                  onClick={() => handleClone(classItem.id)}
+                                  onClick={() =>
+                                    handleClone(classItem.id as number)
+                                  }
                                   disabled={isCloning}
                                 >
                                   <Copy className="h-4 w-4" />
@@ -677,7 +806,9 @@ const ClassesList = () => {
                                   variant="ghost"
                                   size="icon"
                                   className="h-10 w-10 rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/5"
-                                  onClick={() => setDeleteTarget(classItem.id)}
+                                  onClick={() =>
+                                    setDeleteTarget(classItem.id as number)
+                                  }
                                 >
                                   <Trash2 className="h-4 w-4" />
                                 </Button>
@@ -687,37 +818,49 @@ const ClassesList = () => {
 
                           {isTeacher && !isAssigned ? (
                             <Button
-                                onClick={() => setApplyTarget({ id: classItem.id, name: classItem.name })}
-                                disabled={!!pendingApp}
-                                className="rounded-2xl px-8 h-12 text-[10px] font-black uppercase tracking-widest transition-all shadow-xl shadow-primary/20"
+                              onClick={() =>
+                                setApplyTarget({
+                                  id: classItem.id as number,
+                                  name: classItem.name,
+                                })
+                              }
+                              disabled={!!pendingApp}
+                              className="rounded-2xl px-8 h-12 text-[10px] font-black uppercase tracking-widest transition-all shadow-xl shadow-primary/20"
                             >
-                                <Send className="h-4 w-4 mr-2" />
-                                {pendingApp ? t("buttons.applied") : t("buttons.applyToTeach")}
+                              <Send className="h-4 w-4 mr-2" />
+                              {pendingApp
+                                ? t("buttons.applied")
+                                : t("buttons.applyToTeach")}
                             </Button>
                           ) : (
                             <Button
-                                asChild
-                                variant={classItem.isLive ? "default" : "outline"}
-                                className={cn(
+                              asChild
+                              variant={classItem.isLive ? "default" : "outline"}
+                              className={cn(
                                 "rounded-2xl px-8 h-12 text-[10px] font-black uppercase tracking-widest transition-all shadow-sm",
                                 classItem.isLive
-                                    ? "bg-red-500 hover:bg-red-600 text-white border-none shadow-lg shadow-red-500/20"
-                                    : "border-primary/10 text-primary hover:bg-primary hover:text-primary-foreground",
-                                )}
+                                  ? "bg-red-500 hover:bg-red-600 text-white border-none shadow-lg shadow-red-500/20"
+                                  : "border-primary/10 text-primary hover:bg-primary hover:text-primary-foreground",
+                              )}
                             >
-                                <Link to={`/classes/show/${classItem.id}`}>
+                              <Link to={`/classes/show/${classItem.id}`}>
                                 {classItem.isLive ? (
-                                    <>
+                                  <>
                                     <Video className="h-4 w-4 mr-2" />
                                     {t("buttons.joinLive")}
-                                    </>
+                                  </>
                                 ) : (
-                                    <>
+                                  <>
                                     {t("buttons.enterClass")}
-                                    <ArrowRight className={cn("h-4 w-4 ml-2", isAr && "mr-2 ml-0 rotate-180")} />
-                                    </>
+                                    <ArrowRight
+                                      className={cn(
+                                        "h-4 w-4 ml-2",
+                                        isAr && "mr-2 ml-0 rotate-180",
+                                      )}
+                                    />
+                                  </>
                                 )}
-                                </Link>
+                              </Link>
                             </Button>
                           )}
 
@@ -739,24 +882,34 @@ const ClassesList = () => {
                                 {t("classes.list.classOptions")}
                               </DropdownMenuLabel>
                               <DropdownMenuItem
-                                onClick={() => show("classes", classItem.id)}
+                                onClick={() =>
+                                  show("classes", classItem.id as BaseKey)
+                                }
                                 className="rounded-xl gap-3 py-3 cursor-pointer justify-start"
                               >
                                 <Eye className="h-4 w-4 text-primary" />
-                                <span className="font-bold">{t("buttons.viewDetails")}</span>
+                                <span className="font-bold">
+                                  {t("buttons.viewDetails")}
+                                </span>
                               </DropdownMenuItem>
-                              {(isTeacher && isAssigned || isAdmin) && (
+                              {((isTeacher && isAssigned) || isAdmin) && (
                                 <>
                                   <DropdownMenuItem
-                                    onClick={() => edit("classes", classItem.id)}
+                                    onClick={() =>
+                                      edit("classes", classItem.id as BaseKey)
+                                    }
                                     className="rounded-xl gap-3 py-3 cursor-pointer justify-start"
                                   >
                                     <Pencil className="h-4 w-4 text-primary" />
-                                    <span className="font-bold">{t("buttons.editClass")}</span>
+                                    <span className="font-bold">
+                                      {t("buttons.editClass")}
+                                    </span>
                                   </DropdownMenuItem>
                                   <DropdownMenuSeparator className="my-2" />
                                   <DropdownMenuItem
-                                    onClick={() => handleClone(classItem.id)}
+                                    onClick={() =>
+                                      handleClone(classItem.id as number)
+                                    }
                                     className="rounded-xl gap-3 py-3 cursor-pointer justify-start"
                                   >
                                     <Copy className="h-4 w-4 text-primary" />
@@ -765,7 +918,9 @@ const ClassesList = () => {
                                     </span>
                                   </DropdownMenuItem>
                                   <DropdownMenuItem
-                                    onClick={() => setDeleteTarget(classItem.id)}
+                                    onClick={() =>
+                                      setDeleteTarget(classItem.id as number)
+                                    }
                                     className="rounded-xl gap-3 py-3 cursor-pointer text-destructive focus:text-destructive justify-start"
                                   >
                                     <Trash2 className="h-4 w-4" />
@@ -820,12 +975,17 @@ const ClassesList = () => {
         </AlertDialogContent>
       </AlertDialog>
 
-      <ApplyTeacherDialog 
+      <ApplyTeacherDialog
         isOpen={applyTarget !== null}
         onOpenChange={(open) => !open && setApplyTarget(null)}
         classId={applyTarget?.id || 0}
         className={applyTarget?.name || ""}
-        onSuccess={() => invalidate({ resource: "teacher-applications", invalidates: ["list"] })}
+        onSuccess={() =>
+          invalidate({
+            resource: "teacher-applications",
+            invalidates: ["list"],
+          })
+        }
       />
     </div>
   );

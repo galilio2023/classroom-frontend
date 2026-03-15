@@ -110,7 +110,7 @@ const LandingPage = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
             className={cn(
-              "text-6xl md:text-9xl font-black leading-[0.85] uppercase",
+              "text-6xl md:text-9xl font-black leading-[0.85] uppercase text-balance",
               !isAr && "tracking-tighter",
             )}
           >
@@ -188,84 +188,108 @@ const LandingPage = () => {
       {/* App Showcase Preview */}
       <section className="container mx-auto px-4 py-20">
         <motion.div
-            initial={{ opacity: 0, y: 100 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ type: "spring", bounce: 0.2, duration: 1 }}
-            className="relative max-w-6xl mx-auto"
+          initial={{ opacity: 0, y: 100 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ type: "spring", bounce: 0.2, duration: 1 }}
+          className="relative max-w-6xl mx-auto group"
         >
-            <div className="absolute -inset-4 bg-linear-to-tr from-primary/20 via-purple-500/20 to-blue-500/20 blur-3xl rounded-[4rem] opacity-50" />
-            <div className="relative bg-card border-4 border-primary/10 rounded-[3.5rem] p-4 shadow-2xl overflow-hidden">
-                <div className="absolute top-0 left-0 right-0 h-12 bg-muted/50 border-b border-primary/5 flex items-center px-8 gap-2">
-                    <div className="flex gap-1.5">
-                        <div className="h-3 w-3 rounded-full bg-red-500/20" />
-                        <div className="h-3 w-3 rounded-full bg-yellow-500/20" />
-                        <div className="h-3 w-3 rounded-full bg-green-500/20" />
-                    </div>
-                    <div className="mx-auto bg-background/50 px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest text-muted-foreground border border-primary/5">
-                        app.classroom.ai/dashboard
-                    </div>
+          <div className="absolute -inset-4 bg-linear-to-tr from-primary/30 via-purple-500/30 to-blue-500/30 blur-3xl rounded-[4rem] opacity-50 group-hover:opacity-100 transition-opacity duration-1000" />
+          <div className="relative bg-card border-4 border-primary/10 rounded-[3.5rem] p-4 shadow-2xl overflow-hidden bg-grid-black dark:bg-grid-white">
+            <div className="absolute inset-0 bg-background/40 backdrop-blur-[2px] pointer-events-none" />
+            <div className="relative z-10">
+              <div className="absolute top-0 left-0 right-0 h-12 bg-muted/50 border-b border-primary/5 flex items-center px-8 gap-2">
+                <div className="flex gap-1.5">
+                  <div className="h-3 w-3 rounded-full bg-red-500/40" />
+                  <div className="h-3 w-3 rounded-full bg-yellow-500/40" />
+                  <div className="h-3 w-3 rounded-full bg-green-500/40" />
                 </div>
-                <div className="pt-16 pb-8 px-4 md:px-12 grid grid-cols-12 gap-8">
-                    {/* Sidebar Placeholder */}
-                    <div className="hidden md:block col-span-3 space-y-6 border-e border-primary/5 pe-8">
-                        <div className="h-10 w-full bg-primary/10 rounded-xl" />
-                        <div className="space-y-3">
-                            <div className="h-8 w-full bg-muted/50 rounded-lg" />
-                            <div className="h-8 w-3/4 bg-muted/30 rounded-lg" />
-                            <div className="h-8 w-full bg-muted/30 rounded-lg" />
-                        </div>
-                    </div>
-                    {/* Main Content Placeholder */}
-                    <div className="col-span-12 md:col-span-9 space-y-8">
-                        <div className="flex justify-between items-center">
-                            <div className="space-y-2">
-                                <div className="h-8 w-48 bg-primary/10 rounded-lg" />
-                                <div className="h-4 w-32 bg-muted/30 rounded-md" />
-                            </div>
-                            <div className="h-12 w-12 bg-primary rounded-2xl shadow-lg shadow-primary/20" />
-                        </div>
-                        <div className="grid grid-cols-3 gap-6">
-                            <div className="h-32 bg-muted/20 rounded-3xl border border-primary/5" />
-                            <div className="h-32 bg-muted/20 rounded-3xl border border-primary/5" />
-                            <div className="h-32 bg-primary/5 rounded-3xl border border-primary/20" />
-                        </div>
-                        <div className="h-64 bg-muted/10 rounded-[2.5rem] border border-primary/5 relative overflow-hidden">
-                            <div className="absolute top-6 left-6 h-6 w-32 bg-muted/30 rounded-md" />
-                            <div className="absolute bottom-6 right-6 h-10 w-10 bg-primary/20 rounded-xl" />
-                        </div>
-                    </div>
+                <div className="mx-auto bg-background/50 px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest text-muted-foreground border border-primary/5">
+                  app.classroom.ai/dashboard
                 </div>
+              </div>
+              <div className="pt-16 pb-8 px-4 md:px-12 grid grid-cols-12 gap-8">
+                {/* Sidebar Placeholder */}
+                <div className="hidden md:block col-span-3 space-y-6 border-e border-primary/5 pe-8">
+                  <div className="h-10 w-full bg-primary/20 rounded-xl animate-pulse" />
+                  <div className="space-y-3">
+                    <div className="h-8 w-full bg-muted/50 rounded-lg" />
+                    <div className="h-8 w-3/4 bg-muted/30 rounded-lg" />
+                    <div className="h-8 w-full bg-muted/30 rounded-lg" />
+                  </div>
+                </div>
+                {/* Main Content Placeholder */}
+                <div className="col-span-12 md:col-span-9 space-y-8">
+                  <div className="flex justify-between items-center">
+                    <div className="space-y-2">
+                      <div className="h-8 w-48 bg-primary/10 rounded-lg" />
+                      <div className="h-4 w-32 bg-muted/30 rounded-md" />
+                    </div>
+                    <div className="h-12 w-12 bg-primary rounded-2xl shadow-lg shadow-primary/20 flex items-center justify-center text-primary-foreground">
+                      <Zap className="h-6 w-6 fill-current" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-6">
+                    <div className="h-32 bg-muted/20 rounded-3xl border border-primary/5 hover:border-primary/20 transition-colors" />
+                    <div className="h-32 bg-muted/20 rounded-3xl border border-primary/5 hover:border-primary/20 transition-colors" />
+                    <div className="h-32 bg-primary/5 rounded-3xl border border-primary/20 hover:bg-primary/10 transition-colors" />
+                  </div>
+                  <div className="h-64 bg-muted/10 rounded-[2.5rem] border border-primary/5 relative overflow-hidden group/chart">
+                    <div className="absolute top-6 left-6 h-6 w-32 bg-muted/30 rounded-md" />
+                    <div className="absolute inset-x-8 bottom-12 h-32 flex items-end gap-2">
+                      {[40, 70, 45, 90, 65, 80, 50, 85].map((h, i) => (
+                        <motion.div
+                          key={i}
+                          initial={{ height: 0 }}
+                          whileInView={{ height: `${h}%` }}
+                          transition={{ delay: i * 0.05, duration: 1 }}
+                          className="flex-1 bg-primary/20 rounded-t-lg group-hover/chart:bg-primary/40 transition-colors"
+                        />
+                      ))}
+                    </div>
+                    <div className="absolute bottom-6 right-6 h-10 w-10 bg-primary/20 rounded-xl flex items-center justify-center text-primary">
+                      <PieChart className="h-5 w-5" />
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
+          </div>
 
-            {/* Floating UI Elements */}
-            <motion.div 
-                animate={{ y: [0, -10, 0] }}
-                transition={{ duration: 4, repeat: Infinity }}
-                className="absolute -top-12 -right-12 hidden lg:flex bg-background border-2 border-primary/20 p-6 rounded-[2rem] shadow-2xl items-center gap-4 z-20"
-            >
-                <div className="h-12 w-12 rounded-xl bg-green-500/10 text-green-600 flex items-center justify-center">
-                    <QrCode className="h-6 w-6" />
-                </div>
-                <div>
-                    <p className="text-[10px] font-black uppercase text-muted-foreground">{t("landing.showcase.attendance")}</p>
-                    <p className="text-sm font-bold">{t("landing.showcase.verified")}</p>
-                </div>
-            </motion.div>
+          {/* Floating UI Elements */}
+          <motion.div
+            animate={{ y: [0, -10, 0] }}
+            transition={{ duration: 4, repeat: Infinity }}
+            className="absolute -top-12 -right-12 hidden lg:flex bg-background border-2 border-primary/20 p-6 rounded-[2rem] shadow-2xl items-center gap-4 z-20"
+          >
+            <div className="h-12 w-12 rounded-xl bg-green-500/10 text-green-600 flex items-center justify-center">
+              <QrCode className="h-6 w-6" />
+            </div>
+            <div>
+              <p className="text-[10px] font-black uppercase text-muted-foreground">
+                {t("landing.showcase.attendance")}
+              </p>
+              <p className="text-sm font-bold">
+                {t("landing.showcase.verified")}
+              </p>
+            </div>
+          </motion.div>
 
-            <motion.div 
-                animate={{ y: [0, 10, 0] }}
-                transition={{ duration: 5, repeat: Infinity, delay: 1 }}
-                className="absolute -bottom-8 -left-12 hidden lg:flex bg-background border-2 border-primary/20 p-6 rounded-[2rem] shadow-2xl items-center gap-4 z-20"
-            >
-                <div className="h-12 w-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-                    <Sparkles className="h-6 w-6" />
-                </div>
-                <div>
-                    <p className="text-[10px] font-black uppercase text-muted-foreground">{t("landing.showcase.ai")}</p>
-                    <p className="text-sm font-bold">{t("landing.showcase.draft")}</p>
-                </div>
-            </motion.div>
+          <motion.div
+            animate={{ y: [0, 10, 0] }}
+            transition={{ duration: 5, repeat: Infinity, delay: 1 }}
+            className="absolute -bottom-8 -left-12 hidden lg:flex bg-background border-2 border-primary/20 p-6 rounded-[2rem] shadow-2xl items-center gap-4 z-20"
+          >
+            <div className="h-12 w-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+              <Sparkles className="h-6 w-6" />
+            </div>
+            <div>
+              <p className="text-[10px] font-black uppercase text-muted-foreground">
+                {t("landing.showcase.ai")}
+              </p>
+              <p className="text-sm font-bold">{t("landing.showcase.draft")}</p>
+            </div>
+          </motion.div>
         </motion.div>
       </section>
 
@@ -293,10 +317,18 @@ const LandingPage = () => {
       </section>
 
       {/* Features Grid */}
-      <section id="features" className="container mx-auto px-4 py-32 text-start">
+      <section
+        id="features"
+        className="container mx-auto px-4 py-32 text-start"
+      >
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-12 mb-24">
           <div className="space-y-6 max-w-3xl">
-            <h2 className={cn("text-5xl md:text-7xl font-black uppercase leading-[0.9]", !isAr && "tracking-tighter")}>
+            <h2
+              className={cn(
+                "text-5xl md:text-7xl font-black uppercase leading-[0.9]",
+                !isAr && "tracking-tighter",
+              )}
+            >
               {t("landing.features.sectionTitle")}{" "}
               <span className="text-primary italic">
                 {t("landing.features.sectionTitleItalic")}
@@ -326,6 +358,7 @@ const LandingPage = () => {
             <motion.div
               key={index}
               variants={item}
+              whileHover={{ y: -10, scale: 1.02 }}
               className="p-12 bg-card/40 hover:bg-card border-2 border-transparent hover:border-primary/20 rounded-[3.5rem] shadow-xl hover:shadow-2xl transition-all group relative overflow-hidden"
             >
               <div className="absolute -top-10 -right-10 w-32 h-32 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-colors" />
@@ -372,17 +405,17 @@ const LandingPage = () => {
               <p className="text-xl text-muted-foreground font-medium leading-relaxed max-w-xl">
                 {t("landing.ai.desc")}
               </p>
-              
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 {[
-                    t("landing.ai.list.assistant"),
-                    t("landing.ai.list.quiz"),
-                    t("landing.ai.list.summary"),
-                    t("landing.ai.list.paths")
+                  t("landing.ai.list.assistant"),
+                  t("landing.ai.list.quiz"),
+                  t("landing.ai.list.summary"),
+                  t("landing.ai.list.paths"),
                 ].map((item, i) => (
                   <div key={i} className="flex items-center gap-4 group">
                     <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all">
-                        <CheckCircle2 className="h-5 w-5" />
+                      <CheckCircle2 className="h-5 w-5" />
                     </div>
                     <span className="font-black text-sm uppercase tracking-wider text-muted-foreground group-hover:text-foreground transition-colors">
                       {item}
@@ -397,8 +430,8 @@ const LandingPage = () => {
                 asChild
               >
                 <Link to="/ai-study-lab">
-                    {t("landing.ai.exploreButton")}
-                    <Sparkles className="ms-3 h-5 w-5" />
+                  {t("landing.ai.exploreButton")}
+                  <Sparkles className="ms-3 h-5 w-5" />
                 </Link>
               </Button>
             </motion.div>
@@ -411,25 +444,29 @@ const LandingPage = () => {
             >
               {/* Decorative AI Glow */}
               <div className="absolute inset-0 bg-linear-to-r from-primary/30 to-purple-500/30 blur-[120px] rounded-full animate-pulse" />
-              
+
               <div className="relative bg-card border-4 border-primary/20 rounded-[4rem] p-10 shadow-2xl backdrop-blur-xl">
                 <div className="flex items-center justify-between mb-10 border-b border-primary/5 pb-6">
                   <div className="flex items-center gap-4">
                     <div className="h-12 w-12 rounded-2xl bg-primary flex items-center justify-center text-primary-foreground shadow-lg shadow-primary/20">
-                        <BrainCircuit className="h-6 w-6" />
+                      <BrainCircuit className="h-6 w-6" />
                     </div>
                     <div>
-                        <p className="text-sm font-black uppercase tracking-widest">{t("landing.ai.chat.header")}</p>
-                        <div className="flex items-center gap-2">
-                            <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-                            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Active Now</span>
-                        </div>
+                      <p className="text-sm font-black uppercase tracking-widest">
+                        {t("landing.ai.chat.header")}
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                          Active Now
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="space-y-6 text-start">
-                  <motion.div 
+                  <motion.div
                     initial={{ opacity: 0, x: -20 }}
                     whileInView={{ opacity: 1, x: 0 }}
                     className="bg-muted/50 p-6 rounded-3xl rounded-ss-none max-w-[85%] border border-primary/5"
@@ -438,7 +475,7 @@ const LandingPage = () => {
                       {t("landing.ai.chat.msg1")}
                     </p>
                   </motion.div>
-                  <motion.div 
+                  <motion.div
                     initial={{ opacity: 0, x: 20 }}
                     whileInView={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.5 }}
@@ -448,7 +485,7 @@ const LandingPage = () => {
                       {t("landing.ai.chat.msg2")}
                     </p>
                   </motion.div>
-                  <motion.div 
+                  <motion.div
                     initial={{ opacity: 0, x: -20 }}
                     whileInView={{ opacity: 1, x: 0 }}
                     transition={{ delay: 1 }}
@@ -458,18 +495,18 @@ const LandingPage = () => {
                       {t("landing.ai.chat.msg3")}
                     </p>
                     <div className="mt-6 space-y-3">
-                        <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-primary">
-                            <span>Processing Summary</span>
-                            <span>84%</span>
-                        </div>
-                        <div className="h-2 w-full bg-primary/10 rounded-full overflow-hidden">
-                            <motion.div 
-                                initial={{ width: 0 }}
-                                whileInView={{ width: "84%" }}
-                                transition={{ duration: 2, delay: 1.5 }}
-                                className="h-full bg-primary rounded-full shadow-[0_0_10px_rgba(var(--primary),0.5)]" 
-                            />
-                        </div>
+                      <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-primary">
+                        <span>Processing Summary</span>
+                        <span>84%</span>
+                      </div>
+                      <div className="h-2 w-full bg-primary/10 rounded-full overflow-hidden">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          whileInView={{ width: "84%" }}
+                          transition={{ duration: 2, delay: 1.5 }}
+                          className="h-full bg-primary rounded-full shadow-[0_0_10px_rgba(var(--primary),0.5)]"
+                        />
+                      </div>
                     </div>
                   </motion.div>
                 </div>
@@ -482,78 +519,98 @@ const LandingPage = () => {
       {/* Role Switcher Section */}
       <section className="container mx-auto px-4 py-40">
         <div className="text-center space-y-6 mb-24">
-            <h2 className="text-5xl md:text-7xl font-black uppercase tracking-tighter italic">
-                Tailored for <span className="text-primary not-italic underline decoration-primary/20">Everyone</span>
-            </h2>
-            <p className="text-xl text-muted-foreground font-medium max-w-2xl mx-auto">
-                Whether you are leading a class or mastering a subject, we provide the tools to excel.
-            </p>
+          <h2 className="text-5xl md:text-7xl font-black uppercase tracking-tighter italic">
+            Tailored for{" "}
+            <span className="text-primary not-italic underline decoration-primary/20">
+              Everyone
+            </span>
+          </h2>
+          <p className="text-xl text-muted-foreground font-medium max-w-2xl mx-auto">
+            Whether you are leading a class or mastering a subject, we provide
+            the tools to excel.
+          </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-            {/* Student Role Card */}
-            <motion.div 
-                whileHover={{ y: -10 }}
-                className="bg-card border-2 border-primary/5 p-12 rounded-[4rem] shadow-xl hover:shadow-primary/5 transition-all relative overflow-hidden group"
-            >
-                <div className="absolute top-0 right-0 p-8">
-                    <GraduationCap className="h-20 w-20 text-primary/5 group-hover:text-primary/10 transition-colors rotate-12" />
-                </div>
-                <div className="space-y-8 relative z-10">
-                    <div className="h-16 w-16 rounded-2xl bg-primary/10 text-primary flex items-center justify-center">
-                        <Users className="h-8 w-8" />
-                    </div>
-                    <h3 className="text-4xl font-black uppercase italic tracking-tighter">{t("roles.student")}</h3>
-                    <ul className="space-y-4">
-                        {[
-                            t("landing.roles.student.f1"),
-                            t("landing.roles.student.f2"),
-                            t("landing.roles.student.f3"),
-                            t("landing.roles.student.f4")
-                        ].map((f, i) => (
-                            <li key={i} className="flex items-center gap-4 text-lg font-bold text-muted-foreground group-hover:text-foreground transition-colors">
-                                <div className="h-2 w-2 rounded-full bg-primary" />
-                                {f}
-                            </li>
-                        ))}
-                    </ul>
-                    <Button variant="outline" className="h-14 rounded-2xl px-8 border-2 font-black uppercase tracking-widest group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary transition-all">
-                        Join as Student
-                    </Button>
-                </div>
-            </motion.div>
+          {/* Student Role Card */}
+          <motion.div
+            whileHover={{ y: -10 }}
+            className="bg-card border-2 border-primary/5 p-12 rounded-[4rem] shadow-xl hover:shadow-primary/5 transition-all relative overflow-hidden group"
+          >
+            <div className="absolute top-0 right-0 p-8">
+              <GraduationCap className="h-20 w-20 text-primary/5 group-hover:text-primary/10 transition-colors rotate-12" />
+            </div>
+            <div className="space-y-8 relative z-10">
+              <div className="h-16 w-16 rounded-2xl bg-primary/10 text-primary flex items-center justify-center">
+                <Users className="h-8 w-8" />
+              </div>
+              <h3 className="text-4xl font-black uppercase italic tracking-tighter">
+                {t("roles.student")}
+              </h3>
+              <ul className="space-y-4">
+                {[
+                  t("landing.roles.student.f1"),
+                  t("landing.roles.student.f2"),
+                  t("landing.roles.student.f3"),
+                  t("landing.roles.student.f4"),
+                ].map((f, i) => (
+                  <li
+                    key={i}
+                    className="flex items-center gap-4 text-lg font-bold text-muted-foreground group-hover:text-foreground transition-colors"
+                  >
+                    <div className="h-2 w-2 rounded-full bg-primary" />
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <Button
+                variant="outline"
+                className="h-14 rounded-2xl px-8 border-2 font-black uppercase tracking-widest group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary transition-all"
+              >
+                Join as Student
+              </Button>
+            </div>
+          </motion.div>
 
-            {/* Teacher Role Card */}
-            <motion.div 
-                whileHover={{ y: -10 }}
-                className="bg-primary text-primary-foreground p-12 rounded-[4rem] shadow-2xl shadow-primary/20 transition-all relative overflow-hidden group"
-            >
-                <div className="absolute top-0 right-0 p-8">
-                    <Shield className="h-20 w-20 text-white/5 group-hover:text-white/10 transition-colors -rotate-12" />
-                </div>
-                <div className="space-y-8 relative z-10">
-                    <div className="h-16 w-16 rounded-2xl bg-white/10 text-white flex items-center justify-center">
-                        <Activity className="h-8 w-8" />
-                    </div>
-                    <h3 className="text-4xl font-black uppercase italic tracking-tighter">{t("roles.teacher")}</h3>
-                    <ul className="space-y-4">
-                        {[
-                            t("landing.roles.teacher.f1"),
-                            t("landing.roles.teacher.f2"),
-                            t("landing.roles.teacher.f3"),
-                            t("landing.roles.teacher.f4")
-                        ].map((f, i) => (
-                            <li key={i} className="flex items-center gap-4 text-lg font-bold text-primary-foreground/80 group-hover:text-primary-foreground transition-colors">
-                                <div className="h-2 w-2 rounded-full bg-white" />
-                                {f}
-                            </li>
-                        ))}
-                    </ul>
-                    <Button variant="secondary" className="h-14 rounded-2xl px-8 font-black uppercase tracking-widest bg-white text-primary hover:bg-white/90 transition-all">
-                        Apply to Teach
-                    </Button>
-                </div>
-            </motion.div>
+          {/* Teacher Role Card */}
+          <motion.div
+            whileHover={{ y: -10 }}
+            className="bg-primary text-primary-foreground p-12 rounded-[4rem] shadow-2xl shadow-primary/20 transition-all relative overflow-hidden group"
+          >
+            <div className="absolute top-0 right-0 p-8">
+              <Shield className="h-20 w-20 text-white/5 group-hover:text-white/10 transition-colors -rotate-12" />
+            </div>
+            <div className="space-y-8 relative z-10">
+              <div className="h-16 w-16 rounded-2xl bg-white/10 text-white flex items-center justify-center">
+                <Activity className="h-8 w-8" />
+              </div>
+              <h3 className="text-4xl font-black uppercase italic tracking-tighter">
+                {t("roles.teacher")}
+              </h3>
+              <ul className="space-y-4">
+                {[
+                  t("landing.roles.teacher.f1"),
+                  t("landing.roles.teacher.f2"),
+                  t("landing.roles.teacher.f3"),
+                  t("landing.roles.teacher.f4"),
+                ].map((f, i) => (
+                  <li
+                    key={i}
+                    className="flex items-center gap-4 text-lg font-bold text-primary-foreground/80 group-hover:text-primary-foreground transition-colors"
+                  >
+                    <div className="h-2 w-2 rounded-full bg-white" />
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <Button
+                variant="secondary"
+                className="h-14 rounded-2xl px-8 font-black uppercase tracking-widest bg-white text-primary hover:bg-white/90 transition-all"
+              >
+                Apply to Teach
+              </Button>
+            </div>
+          </motion.div>
         </div>
       </section>
 
@@ -566,10 +623,10 @@ const LandingPage = () => {
           <div className="absolute -bottom-24 -end-24 rtl:-start-24 rtl:-end-auto w-96 h-96 bg-white/10 rounded-full blur-[120px] pointer-events-none group-hover:bg-white/20 transition-all duration-1000" />
 
           <div className="relative space-y-8 max-w-4xl mx-auto">
-            <motion.h2 
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                className="text-5xl md:text-8xl font-black uppercase leading-[0.85] italic"
+            <motion.h2
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              className="text-5xl md:text-8xl font-black uppercase leading-[0.85] italic"
             >
               {t("landing.cta.title")}
             </motion.h2>

@@ -31,7 +31,7 @@ export function DataTable<TData extends BaseRecord>({
   onRowClick,
 }: DataTableProps<TData>) {
   // --- SAFETY GUARD ---
-  if (!tableResult?.refineCore || !tableResult?.reactTable || !tableResult.reactTable.getHeaderGroups) {
+  if (!tableResult?.reactTable || !tableResult.reactTable.getHeaderGroups) {
     return (
       <div className="flex justify-center items-center h-40 border rounded-md bg-muted/5">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -41,18 +41,11 @@ export function DataTable<TData extends BaseRecord>({
 
   const {
     reactTable: { getHeaderGroups, getRowModel, getAllColumns, getAllLeafColumns },
-    refineCore: {
-      tableQuery,
-      currentPage,
-      setCurrentPage,
-      pageCount,
-      pageSize,
-      setPageSize,
-    },
+    refineCore,
   } = tableResult;
 
   const columns = getAllColumns();
-  const isLoading = tableQuery.isLoading;
+  const isLoading = refineCore?.tableQuery?.isLoading;
 
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const tableRef = useRef<HTMLTableElement>(null);
@@ -78,7 +71,7 @@ export function DataTable<TData extends BaseRecord>({
       window.removeEventListener("resize", checkOverflow);
       clearTimeout(timeoutId);
     };
-  }, [tableQuery.data?.data, pageSize]);
+  }, [refineCore?.tableQuery?.data?.data, refineCore?.pageSize]);
 
   const headerGroups = getHeaderGroups() || [];
 
@@ -123,7 +116,7 @@ export function DataTable<TData extends BaseRecord>({
                     exit={{ opacity: 0 }}
                   >
                     <td colSpan={columns.length}>
-                      {Array.from({ length: pageSize < 1 ? 5 : Math.min(pageSize, 10) }).map((_, rowIndex) => (
+                      {Array.from({ length: (refineCore?.pageSize || 0) < 1 ? 5 : Math.min(refineCore?.pageSize || 0, 10) }).map((_, rowIndex) => (
                         <div key={`skeleton-row-${rowIndex}`} className="flex border-b last:border-0">
                           {getAllLeafColumns().map((column) => (
                             <div key={`skeleton-cell-${rowIndex}-${column.id}`} style={{ width: column.getSize() }} className="py-4 px-4">
@@ -173,15 +166,15 @@ export function DataTable<TData extends BaseRecord>({
         <ScrollBar orientation="horizontal" />
       </ScrollArea>
       
-      {!isLoading && getRowModel().rows?.length > 0 && (
+      {!isLoading && getRowModel().rows?.length > 0 && refineCore && (
         <div className="w-full overflow-x-auto pb-2">
           <DataTablePagination
-            currentPage={currentPage}
-            pageCount={pageCount}
-            setCurrentPage={setCurrentPage}
-            pageSize={pageSize}
-            setPageSize={setPageSize}
-            total={tableQuery.data?.total}
+            currentPage={refineCore.currentPage}
+            pageCount={refineCore.pageCount}
+            setCurrentPage={refineCore.setCurrentPage}
+            pageSize={refineCore.pageSize}
+            setPageSize={refineCore.setPageSize}
+            total={refineCore.tableQuery?.data?.total}
           />
         </div>
       )}
@@ -202,7 +195,7 @@ function DataTableNoData({ isOverflowing, columnsLength }: { isOverflowing: { ho
   );
 }
 
-export function getCommonStyles<TData>({ column, isOverflowing }: { column: Column<TData>; isOverflowing: { horizontal: boolean; vertical: boolean; }; }): React.CSSProperties {
+function getCommonStyles<TData>({ column, isOverflowing }: { column: Column<TData>; isOverflowing: { horizontal: boolean; vertical: boolean; }; }): React.CSSProperties {
   const isPinned = column.getIsPinned();
   const isLastLeftPinnedColumn = isPinned === "left" && column.getIsLastColumn("left");
   const isFirstRightPinnedColumn = isPinned === "right" && column.getIsFirstColumn("right");

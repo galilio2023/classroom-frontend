@@ -20,12 +20,11 @@ import {
   Reply,
 } from "lucide-react";
 import { toast } from "sonner";
-import { io } from "socket.io-client";
 import { ChatBubble } from "@/components/classes/chat-bubble";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { MarkdownRenderer } from "@/components/ui/markdown-renderer";
 import { RichTextEditor } from "@/components/ui/rich-text-editor";
-import { SOCKET_URL } from "@/config";
+import { getSocket } from "@/lib/socket";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
@@ -75,21 +74,22 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
   useEffect(() => {
     if (!identity?.id || !classId) return;
 
-    const socket = io(SOCKET_URL, {
-      withCredentials: true,
-      transports: ["websocket", "polling"],
-    });
+    const socket = getSocket();
 
-    socket.on("new_discussion", () => {
+    const handleNewDiscussion = () => {
       void refetch();
-    });
+    };
 
-    socket.on("delete_discussion", () => {
+    const handleDeleteDiscussion = () => {
       void refetch();
-    });
+    };
+
+    socket.on("new_discussion", handleNewDiscussion);
+    socket.on("delete_discussion", handleDeleteDiscussion);
 
     return () => {
-      socket.disconnect();
+      socket.off("new_discussion", handleNewDiscussion);
+      socket.off("delete_discussion", handleDeleteDiscussion);
     };
   }, [identity?.id, classId, refetch]);
 

@@ -22,6 +22,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "./button";
 import { useTranslation } from "react-i18next";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./tooltip";
+import { useMemo } from "react";
 
 interface RichTextEditorProps {
   value: string;
@@ -183,23 +184,28 @@ const EditorToolbar = ({ editor }: { editor: Editor | null }) => {
 };
 
 export const RichTextEditor = ({ value, onChange, className }: RichTextEditorProps) => {
+  // Memoize extensions to prevent duplicate registration on re-renders
+  const extensions = useMemo(() => [
+    StarterKit.configure({
+      // Some versions include these by default, causing duplicates if manually added
+      // We'll keep them enabled here but ensure they aren't added again manually
+    }),
+    Image.configure({
+      HTMLAttributes: {
+        class: "rounded-lg border shadow-sm max-w-full h-auto",
+      },
+    }),
+    Link.configure({
+      openOnClick: false,
+      autolink: true,
+      HTMLAttributes: {
+        class: "text-primary underline underline-offset-4 font-medium",
+      },
+    }),
+  ], []);
+
   const editor = useEditor({
-    extensions: [
-      StarterKit.configure({
-        // Disable the default history to avoid conflicts if needed, but usually link is the culprit
-      }),
-      Image.configure({
-        HTMLAttributes: {
-          class: "rounded-lg border shadow-sm max-w-full h-auto",
-        },
-      }),
-      Link.configure({
-        openOnClick: false,
-        HTMLAttributes: {
-          class: "text-primary underline underline-offset-4 font-medium",
-        },
-      }),
-    ],
+    extensions,
     content: value,
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML());
@@ -212,7 +218,7 @@ export const RichTextEditor = ({ value, onChange, className }: RichTextEditorPro
         ),
       },
     },
-  });
+  }, []); // Static dependency array
 
   return (
     <div className="flex flex-col w-full border rounded-xl bg-background focus-within:ring-1 focus-within:ring-primary/30 transition-all">
