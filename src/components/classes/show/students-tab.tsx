@@ -66,6 +66,8 @@ export const StudentsTab = ({
         cell: ({ getValue, row }) => {
           const student = getValue<User>();
           const isWaitlisted = row.original.status === "waitlisted";
+          const isPending = row.original.status === "pending";
+
           return (
             <div className="flex items-center gap-3 py-1">
               <Avatar className="size-10 border-2 border-background shadow-sm rounded-xl">
@@ -93,6 +95,14 @@ export const StudentsTab = ({
                       {t("classes.show.students.table.waitlist", {
                         pos: row.original.waitlistPosition,
                       })}
+                    </Badge>
+                  )}
+                  {isPending && (
+                    <Badge
+                      variant="outline"
+                      className="bg-blue-500/10 text-blue-600 border-none text-[8px] font-black uppercase tracking-tighter px-2 py-0 h-4"
+                    >
+                      {t("classes.show.students.pending.status")}
                     </Badge>
                   )}
                 </div>
@@ -133,7 +143,7 @@ export const StudentsTab = ({
               isAr ? "justify-start" : "justify-end",
             )}
           >
-            {isStaff && (
+            {isStaff && row.original.status === "approved" && (
               <Button
                 variant="outline"
                 size="sm"
@@ -166,7 +176,7 @@ export const StudentsTab = ({
     [isStaff, t, isAr, onInsight, onUnenroll],
   );
 
-  const tableData = useMemo(() => [...approvedEnrollments, ...waitlistedEnrollments], [approvedEnrollments, waitlistedEnrollments]);
+  const tableData = useMemo(() => [...approvedEnrollments, ...waitlistedEnrollments, ...pendingEnrollments], [approvedEnrollments, waitlistedEnrollments, pendingEnrollments]);
 
   const enrollmentsTable = useTable<Enrollment>({
     columns,
@@ -223,7 +233,8 @@ export const StudentsTab = ({
           <CardContent className="p-0">
             <DataTable table={enrollmentsTable} />
             {approvedEnrollments.length === 0 &&
-              waitlistedEnrollments.length === 0 && (
+              waitlistedEnrollments.length === 0 &&
+              pendingEnrollments.length === 0 && (
                 <div className="flex flex-col items-center justify-center py-20 text-center space-y-4 opacity-40">
                   <Users className="h-12 w-12" />
                   <p className="font-black uppercase tracking-widest text-[10px]">

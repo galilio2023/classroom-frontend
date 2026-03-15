@@ -23,6 +23,10 @@ export const PinnedAnnouncements = ({
     (a) => a.isPinned && !dismissedAnnouncements.includes(a.id),
   );
 
+  const isSafeUrl = (url: string) => {
+    return url.startsWith("http://") || url.startsWith("https://") || url.startsWith("/");
+  };
+
   if (pinnedAnnouncements.length === 0) return null;
 
   return (
@@ -58,7 +62,7 @@ export const PinnedAnnouncements = ({
             <p className="text-base mt-3 text-muted-foreground leading-relaxed line-clamp-2 font-medium">
               {announcement.content}
             </p>
-            {announcement.fileUrl && (
+            {announcement.fileUrl && isSafeUrl(announcement.fileUrl) && (
               <Button
                 variant="link"
                 className="p-0 h-auto mt-4 text-sm font-black text-primary gap-2 uppercase tracking-widest"
