@@ -16,7 +16,6 @@ import { Class, Enrollment, User, UserRole, Announcement } from "@/types";
 import {
   Loader2,
   Trash2,
-  ClipboardCheck,
   MessageSquare,
   Library,
   FileQuestion,
@@ -400,7 +399,6 @@ const ClassesShow = () => {
           id: "details",
           label: t("classes.show.tabs.details"),
           icon: Info,
-          staffOnly: true,
         },
       ].filter((t) => !t.staffOnly || isStaff),
     [
@@ -618,22 +616,21 @@ const ClassesShow = () => {
                   )}
                 </TabsContent>
 
-                {isStaff && (
-                  <TabsContent value="details" className="mt-0">
-                    {activeTab === "details" && (
-                      <DetailsTab
-                        aClass={aClass}
-                        isOwner={isOwner}
-                        teacherNotes={teacherNotes}
-                        isLoadingNotes={isLoadingNotes}
-                        handleNoteChange={handleNoteChange}
-                        handleCopyInviteCode={handleCopyInviteCode}
-                        copied={copied}
-                        onInviteClick={() => setIsInviteDialogOpen(true)}
-                      />
-                    )}
-                  </TabsContent>
-                )}
+                <TabsContent value="details" className="mt-0">
+                  {activeTab === "details" && (
+                    <DetailsTab
+                      aClass={aClass}
+                      isOwner={isOwner}
+                      isStaff={isStaff}
+                      teacherNotes={teacherNotes}
+                      isLoadingNotes={isLoadingNotes}
+                      handleNoteChange={handleNoteChange}
+                      handleCopyInviteCode={handleCopyInviteCode}
+                      copied={copied}
+                      onInviteClick={() => setIsInviteDialogOpen(true)}
+                    />
+                  )}
+                </TabsContent>
               </motion.div>
             </AnimatePresence>
           </div>

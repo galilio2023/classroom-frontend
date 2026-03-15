@@ -11,6 +11,7 @@ import { TeacherNotes } from "./teacher-notes";
 interface DetailsTabProps {
   aClass: Class;
   isOwner: boolean;
+  isStaff: boolean;
   teacherNotes: string;
   isLoadingNotes: boolean;
   handleNoteChange: (val: string) => void;
@@ -22,6 +23,7 @@ interface DetailsTabProps {
 export const DetailsTab = ({
   aClass,
   isOwner,
+  isStaff,
   teacherNotes,
   isLoadingNotes,
   handleNoteChange,
@@ -140,43 +142,45 @@ export const DetailsTab = ({
             </div>
           </CardHeader>
           <CardContent className="p-10 space-y-10">
-            <div
-              className="flex flex-col items-center justify-center p-10 rounded-[2.5rem] border-4 border-dashed transition-all group hover:bg-primary/[0.02] text-center space-y-4"
-              style={{
-                backgroundColor: `${classColor}05`,
-                borderColor: `${classColor}20`,
-              }}
-            >
-              <div className="space-y-1">
-                <p
-                  className="text-[10px] font-black uppercase tracking-widest opacity-60"
-                  style={{ color: classColor }}
-                >
-                  {t("classes.show.details.inviteCode")}
-                </p>
-                <p className="text-5xl font-black font-mono tracking-[0.3em] ml-[0.3em]">
-                  {aClass.inviteCode}
-                </p>
-              </div>
-              <Button
-                variant="outline"
-                size="lg"
-                className="rounded-2xl border-none bg-white dark:bg-zinc-900 shadow-xl group-hover:scale-105 transition-transform font-black uppercase tracking-widest text-[10px] h-12 px-8 gap-2"
-                onClick={handleCopyInviteCode}
+            {isStaff && (
+              <div
+                className="flex flex-col items-center justify-center p-10 rounded-[2.5rem] border-4 border-dashed transition-all group hover:bg-primary/[0.02] text-center space-y-4"
+                style={{
+                  backgroundColor: `${classColor}05`,
+                  borderColor: `${classColor}20`,
+                }}
               >
-                {copied ? (
-                  <>
-                    <Check className="h-4 w-4 text-success" />
-                    {t("buttons.copied")}
-                  </>
-                ) : (
-                  <>
-                    <Copy className="h-4 w-4 text-primary" />
-                    {t("buttons.copyCode")}
-                  </>
-                )}
-              </Button>
-            </div>
+                <div className="space-y-1">
+                  <p
+                    className="text-[10px] font-black uppercase tracking-widest opacity-60"
+                    style={{ color: classColor }}
+                  >
+                    {t("classes.show.details.inviteCode")}
+                  </p>
+                  <p className="text-5xl font-black font-mono tracking-[0.3em] ml-[0.3em]">
+                    {aClass.inviteCode}
+                  </p>
+                </div>
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="rounded-2xl border-none bg-white dark:bg-zinc-900 shadow-xl group-hover:scale-105 transition-transform font-black uppercase tracking-widest text-[10px] h-12 px-8 gap-2"
+                  onClick={handleCopyInviteCode}
+                >
+                  {copied ? (
+                    <>
+                      <Check className="h-4 w-4 text-success" />
+                      {t("buttons.copied")}
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="h-4 w-4 text-primary" />
+                      {t("buttons.copyCode")}
+                    </>
+                  )}
+                </Button>
+              </div>
+            )}
 
             <div className="space-y-6">
               <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
