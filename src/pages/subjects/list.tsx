@@ -1,14 +1,14 @@
 import { ListView } from "@/components/refine-ui/views/list-view.tsx";
 import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb.tsx";
-import { 
-  Search, 
-  GraduationCap, 
-  PlusCircle, 
-  Filter, 
-  MoreHorizontal, 
-  Eye, 
-  Pencil, 
-  Trash2, 
+import {
+  Search,
+  GraduationCap,
+  PlusCircle,
+  Filter,
+  MoreHorizontal,
+  Eye,
+  Pencil,
+  Trash2,
   ArrowRight,
   BookOpen,
   Building2,
@@ -16,7 +16,7 @@ import {
   ShieldCheck,
   Loader2,
   Layers,
-  Award
+  Award,
 } from "lucide-react";
 import { Input } from "@/components/ui/input.tsx";
 import { useMemo, useState, useRef, useCallback } from "react";
@@ -27,7 +27,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select.tsx";
-import { useList, useSelect, useNavigation, useDelete, useGetIdentity } from "@refinedev/core";
+import {
+  useSelect,
+  useNavigation,
+  useDelete,
+  useGetIdentity,
+  HttpError,
+} from "@refinedev/core";
+import { useTable } from "@refinedev/react-table";
 import { Subject, Department, User, UserRole } from "@/types";
 import { Badge } from "@/components/ui/badge.tsx";
 import { Button } from "@/components/ui/button.tsx";
@@ -57,17 +64,16 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/empty-state";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
+import { ColumnDef } from "@tanstack/react-table";
 
 const SubjectsList = () => {
   const { t, i18n } = useTranslation();
-  const isAr = i18n.language === 'ar';
-  
+  const isAr = i18n.language === "ar";
+
   usePageTitle(t("subjects.title"));
   const { data: identity } = useGetIdentity<User>();
   const isAdmin = identity?.role === UserRole.ADMIN;
 
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedDepartment, setSelectedDepartment] = useState("all");
   const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
 
   const { edit, show, create } = useNavigation();
@@ -80,26 +86,62 @@ const SubjectsList = () => {
     optionValue: "name",
   });
 
-  const filters = useMemo(() => {
-    const f = [];
-    if (searchQuery) {
-      f.push({ field: "search", operator: "contains" as const, value: searchQuery });
-    }
-    if (selectedDepartment && selectedDepartment !== "all") {
-      f.push({ field: "department", operator: "eq" as const, value: selectedDepartment });
-    }
-    return f;
-  }, [searchQuery, selectedDepartment]);
+  const columns = useMemo<ColumnDef<Subject>[]>(
+    () => [
+      {
+        id: "id",
+        accessorKey: "id",
+        header: "ID",
+      },
+    ],
+    []
+  );
 
-  const { query } = useList<Subject>({
-    resource: "subjects",
-    pagination: { pageSize: 1000, mode: "server" },
-    filters,
-    sorters: [{ field: "id", order: "desc" }],
-    meta: {
-      populate: ["department"]
+  const {
+    refineCore: {
+      tableQuery: query,
+      filters,
+      setFilters,
+    }
+  } = useTable<Subject, HttpError>({
+    columns,
+    refineCoreProps: {
+      resource: "subjects",
+      pagination: { mode: "server" },
+      sorters: { initial: [{ field: "id", order: "desc" }] },
+      meta: {
+        populate: ["department"],
+      },
+      syncWithLocation: true,
     }
   });
+
+  const searchQuery =
+    (filters.find((f) => "field" in f && f.field === "search") as any)?.value ||
+    "";
+  const selectedDepartment =
+    (filters.find((f) => "field" in f && f.field === "department") as any)
+      ?.value || "all";
+
+  const setSearchQuery = (val: string) => {
+    setFilters(
+      [{ field: "search", operator: "contains", value: val || undefined }],
+      "merge",
+    );
+  };
+
+  const setSelectedDepartment = (val: string) => {
+    setFilters(
+      [
+        {
+          field: "department",
+          operator: "eq",
+          value: val === "all" ? undefined : val,
+        },
+      ],
+      "merge",
+    );
+  };
 
   const subjects = useMemo(() => query.data?.data || [], [query.data?.data]);
   const isLoading = query.isLoading;
@@ -107,13 +149,16 @@ const SubjectsList = () => {
 
   const handleConfirmDelete = () => {
     if (deleteTarget) {
-      deleteMutation({
-        resource: "subjects",
-        id: deleteTarget,
-        mutationMode: "pessimistic",
-      }, {
-        onSuccess: () => setDeleteTarget(null),
-      });
+      deleteMutation(
+        {
+          resource: "subjects",
+          id: deleteTarget,
+          mutationMode: "pessimistic",
+        },
+        {
+          onSuccess: () => setDeleteTarget(null),
+        },
+      );
     }
   };
 
@@ -131,11 +176,14 @@ const SubjectsList = () => {
   // Stats calculation
   const stats = useMemo(() => {
     if (!subjects.length) return { total: 0, totalCredits: 0, avgCredits: 0 };
-    const totalCredits = subjects.reduce((acc: number, curr: Subject) => acc + (curr.credits || 0), 0);
+    const totalCredits = subjects.reduce(
+      (acc: number, curr: Subject) => acc + (curr.credits || 0),
+      0,
+    );
     return {
       total: subjects.length,
       totalCredits,
-      avgCredits: Math.round((totalCredits / subjects.length) * 10) / 10
+      avgCredits: Math.round((totalCredits / subjects.length) * 10) / 10,
     };
   }, [subjects]);
 
@@ -143,7 +191,7 @@ const SubjectsList = () => {
     <div className="space-y-10 pb-20 text-start">
       <ListView>
         <div className="space-y-10">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             className="space-y-4"
@@ -151,12 +199,16 @@ const SubjectsList = () => {
             <Breadcrumb />
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div>
-                <h1 className="text-4xl font-black tracking-tight">{t("subjects.title")}</h1>
-                <p className="text-muted-foreground font-medium mt-1">{t("subjects.description")}</p>
+                <h1 className="text-4xl font-black tracking-tight">
+                  {t("subjects.title")}
+                </h1>
+                <p className="text-muted-foreground font-medium mt-1">
+                  {t("subjects.description")}
+                </p>
               </div>
               <div className="flex items-center gap-3 w-full md:w-auto">
                 {isAdmin && (
-                  <Button 
+                  <Button
                     onClick={() => create("subjects")}
                     className="flex-1 md:flex-none rounded-2xl h-14 px-10 font-black uppercase tracking-widest text-[10px] gap-2 shadow-xl shadow-primary/20 transition-all hover:scale-105 active:scale-95"
                   >
@@ -175,8 +227,14 @@ const SubjectsList = () => {
                 <BookOpen className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t("subjects.stats.total")}</p>
-                <p className="text-2xl font-black">{isLoading ? "..." : new Intl.NumberFormat(i18n.language).format(stats.total)}</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                  {t("subjects.stats.total")}
+                </p>
+                <p className="text-2xl font-black">
+                  {isLoading
+                    ? "..."
+                    : new Intl.NumberFormat(i18n.language).format(stats.total)}
+                </p>
               </div>
             </Card>
             <Card className="p-6 border-indigo-500/10 bg-card/50 backdrop-blur-sm flex items-center gap-4 rounded-[2rem] shadow-lg shadow-indigo-500/5">
@@ -184,8 +242,16 @@ const SubjectsList = () => {
                 <Award className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t("subjects.stats.weighted")}</p>
-                <p className="text-2xl font-black text-indigo-600">{isLoading ? "..." : new Intl.NumberFormat(i18n.language).format(stats.totalCredits)}</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                  {t("subjects.stats.weighted")}
+                </p>
+                <p className="text-2xl font-black text-indigo-600">
+                  {isLoading
+                    ? "..."
+                    : new Intl.NumberFormat(i18n.language).format(
+                        stats.totalCredits,
+                      )}
+                </p>
               </div>
             </Card>
             <Card className="p-6 border-green-500/10 bg-card/50 backdrop-blur-sm flex items-center gap-4 rounded-[2rem] shadow-lg shadow-green-500/5">
@@ -193,21 +259,39 @@ const SubjectsList = () => {
                 <Layers className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t("subjects.stats.archived")}</p>
-                <p className="text-2xl font-black text-green-600">{isLoading ? "..." : new Intl.NumberFormat(i18n.language).format(stats.avgCredits)}</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                  {t("subjects.stats.archived")}
+                </p>
+                <p className="text-2xl font-black text-green-600">
+                  {isLoading
+                    ? "..."
+                    : new Intl.NumberFormat(i18n.language).format(
+                        stats.avgCredits,
+                      )}
+                </p>
               </div>
             </Card>
           </div>
-          
+
           {/* Filters & Search */}
           <Card className="p-4 border-primary/5 bg-muted/30 rounded-[2rem] backdrop-blur-sm">
             <div className="flex flex-col lg:flex-row gap-4">
               <div className="relative flex-1 group">
-                <Search className={cn("absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors", isAr ? "right-4" : "left-4")} />
+                <Search
+                  className={cn(
+                    "absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors",
+                    isAr ? "right-4" : "left-4",
+                  )}
+                />
                 <Input
                   type="text"
-                  placeholder={t("subjects.filters.searchPlaceholder") as string}
-                  className={cn("h-14 rounded-2xl border-none bg-background shadow-sm font-medium", isAr ? "pr-11" : "pl-11")}
+                  placeholder={
+                    t("subjects.filters.searchPlaceholder") as string
+                  }
+                  className={cn(
+                    "h-14 rounded-2xl border-none bg-background shadow-sm font-medium",
+                    isAr ? "pr-11" : "pl-11",
+                  )}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -215,14 +299,27 @@ const SubjectsList = () => {
               <div className="flex flex-wrap gap-3">
                 <div className="flex items-center gap-2 bg-background px-4 rounded-2xl shadow-sm border border-primary/5">
                   <Filter className="h-4 w-4 text-muted-foreground" />
-                  <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
+                  <Select
+                    value={selectedDepartment}
+                    onValueChange={setSelectedDepartment}
+                  >
                     <SelectTrigger className="w-[200px] border-none h-10 focus:ring-0 shadow-none font-black text-[10px] uppercase tracking-widest">
-                      <SelectValue placeholder={t("departments.filters.allDepartments") as string} />
+                      <SelectValue
+                        placeholder={
+                          t("departments.filters.allDepartments") as string
+                        }
+                      />
                     </SelectTrigger>
                     <SelectContent className="rounded-2xl border-none shadow-2xl">
-                      <SelectItem value="all" className="rounded-xl font-bold">{t("departments.filters.allDepartments")}</SelectItem>
+                      <SelectItem value="all" className="rounded-xl font-bold">
+                        {t("departments.filters.allDepartments")}
+                      </SelectItem>
                       {departmentOptions.map(({ value, label }) => (
-                        <SelectItem value={String(value)} key={value} className="rounded-xl font-bold">
+                        <SelectItem
+                          value={String(value)}
+                          key={value}
+                          className="rounded-xl font-bold"
+                        >
                           {label}
                         </SelectItem>
                       ))}
@@ -234,14 +331,19 @@ const SubjectsList = () => {
           </Card>
 
           {/* Virtualized List Container */}
-          <div 
-            ref={parentRef} 
+          <div
+            ref={parentRef}
             className="h-[600px] overflow-auto pr-2 custom-scrollbar rounded-[2.5rem] border border-primary/5 bg-card/30 backdrop-blur-sm relative"
           >
             {isLoading ? (
-              <div style={{ height: '100%', width: '100%', position: 'relative' }}>
+              <div
+                style={{ height: "100%", width: "100%", position: "relative" }}
+              >
                 {Array.from({ length: 6 }).map((_, i) => (
-                  <div key={i} className="flex flex-col md:flex-row items-center p-8 border-b border-primary/5 gap-6">
+                  <div
+                    key={i}
+                    className="flex flex-col md:flex-row items-center p-8 border-b border-primary/5 gap-6"
+                  >
                     <Skeleton className="h-14 w-14 rounded-2xl shrink-0" />
                     <div className="flex-1 space-y-3 w-full">
                       <Skeleton className="h-6 w-[250px]" />
@@ -257,27 +359,37 @@ const SubjectsList = () => {
                   icon={BookOpen}
                   title={t("subjects.empty.title")}
                   description={t("subjects.empty.desc")}
-                  action={isAdmin ? {
-                    label: t("subjects.create"),
-                    onClick: () => create("subjects"),
-                  } : undefined}
+                  action={
+                    isAdmin
+                      ? {
+                          label: t("subjects.create"),
+                          onClick: () => create("subjects"),
+                        }
+                      : undefined
+                  }
                   className="border-none bg-transparent min-h-0"
                 />
               </div>
             ) : (
-              <div style={{ height: `${rowVirtualizer.getTotalSize()}px`, width: '100%', position: 'relative' }}>
+              <div
+                style={{
+                  height: `${rowVirtualizer.getTotalSize()}px`,
+                  width: "100%",
+                  position: "relative",
+                }}
+              >
                 {rowVirtualizer.getVirtualItems().map((virtualItem) => {
                   const subject = subjects[virtualItem.index];
                   if (!subject) return null;
-                  
+
                   return (
                     <div
                       key={virtualItem.key}
                       style={{
-                        position: 'absolute',
+                        position: "absolute",
                         top: 0,
                         left: 0,
-                        width: '100%',
+                        width: "100%",
                         height: `${virtualItem.size}px`,
                         transform: `translateY(${virtualItem.start}px)`,
                       }}
@@ -291,74 +403,97 @@ const SubjectsList = () => {
                         {/* Icon/Code */}
                         <div className="relative shrink-0 mb-4 md:mb-0">
                           <div className="h-14 w-14 rounded-xl border-2 border-background flex flex-col items-center justify-center shadow-md group-hover:scale-110 transition-transform bg-primary/10 text-primary">
-                              <BookOpen className="h-6 w-6 mb-1" />
-                              <span className="text-[9px] font-black uppercase tracking-tighter">{subject.code}</span>
+                            <BookOpen className="h-6 w-6 mb-1" />
+                            <span className="text-[9px] font-black uppercase tracking-tighter">
+                              {subject.code}
+                            </span>
                           </div>
                         </div>
 
                         {/* Info */}
-                        <div className={cn("flex-1 text-center min-w-0 w-full", isAr ? "md:mr-6 md:text-right" : "md:ml-6 md:text-left")}>
+                        <div
+                          className={cn(
+                            "flex-1 text-center min-w-0 w-full",
+                            isAr
+                              ? "md:mr-6 md:text-right"
+                              : "md:ml-6 md:text-left",
+                          )}
+                        >
                           <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-3">
                             <h3 className="text-lg font-black tracking-tight truncate group-hover:text-primary transition-colors">
                               {subject.name}
                             </h3>
                             <div className="flex items-center justify-center md:justify-start gap-2">
-                              <Badge 
-                                  variant="outline" 
-                                  className="text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md border-primary/10"
+                              <Badge
+                                variant="outline"
+                                className="text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md border-primary/10"
                               >
-                                  {subject.code}
+                                {subject.code}
                               </Badge>
                               <Badge className="bg-primary/5 text-primary border-none font-black px-2 py-0.5 rounded-md text-[8px] tracking-widest uppercase">
-                                  {new Intl.NumberFormat(i18n.language).format(subject.credits || 0)} {t("classes.form.studentsUnit")}
+                                {new Intl.NumberFormat(i18n.language).format(
+                                  subject.credits || 0,
+                                )}{" "}
+                                {t("classes.form.studentsUnit")}
                               </Badge>
                             </div>
                           </div>
-                          
+
                           <div className="flex flex-wrap items-center justify-center md:justify-start gap-x-4 gap-y-1 mt-2">
                             <div className="flex items-center gap-1.5 text-muted-foreground">
                               <div className="p-1 rounded-lg bg-primary/5">
-                                  <Building2 className="h-3 w-3 text-primary" />
+                                <Building2 className="h-3 w-3 text-primary" />
                               </div>
                               <span className="text-[11px] font-bold">
-                                  {subject.department?.name || t("subjects.filters.generalDepartment")}
+                                {subject.department?.name ||
+                                  t("subjects.filters.generalDepartment")}
                               </span>
                             </div>
 
                             <div className="flex items-center gap-1.5 text-muted-foreground">
                               <div className="p-1 rounded-lg bg-primary/5">
-                                  <GraduationCap className="h-3 w-3 text-primary" />
+                                <GraduationCap className="h-3 w-3 text-primary" />
                               </div>
                               <span className="text-[11px] font-bold uppercase tracking-tight">
-                                  {t("subjects.academicSubject")}
+                                {t("subjects.academicSubject")}
                               </span>
                             </div>
                           </div>
                         </div>
 
                         {/* Actions */}
-                        <div className={cn("flex items-center gap-2 mt-4 md:mt-0 shrink-0", isAr ? "mr-4" : "ml-4")}>
-                          <div className={cn("hidden lg:flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all group-hover:translate-x-0", isAr ? "-translate-x-2" : "translate-x-2")}>
-                              {isAdmin && (
-                                  <>
-                                      <Button
-                                          variant="ghost"
-                                          size="icon"
-                                          className="h-9 w-9 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/5"
-                                          onClick={() => edit("subjects", subject.id)}
-                                      >
-                                          <Pencil className="h-4 w-4" />
-                                      </Button>
-                                      <Button
-                                          variant="ghost"
-                                          size="icon"
-                                          className="h-9 w-9 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/5"
-                                          onClick={() => setDeleteTarget(subject.id)}
-                                      >
-                                          <Trash2 className="h-4 w-4" />
-                                      </Button>
-                                  </>
-                              )}
+                        <div
+                          className={cn(
+                            "flex items-center gap-2 mt-4 md:mt-0 shrink-0",
+                            isAr ? "mr-4" : "ml-4",
+                          )}
+                        >
+                          <div
+                            className={cn(
+                              "hidden lg:flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all group-hover:translate-x-0",
+                              isAr ? "-translate-x-2" : "translate-x-2",
+                            )}
+                          >
+                            {isAdmin && (
+                              <>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-9 w-9 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/5"
+                                  onClick={() => edit("subjects", subject.id)}
+                                >
+                                  <Pencil className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-9 w-9 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/5"
+                                  onClick={() => setDeleteTarget(subject.id)}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </>
+                            )}
                           </div>
 
                           <Button
@@ -367,38 +502,64 @@ const SubjectsList = () => {
                             onClick={() => show("subjects", subject.id)}
                           >
                             {t("buttons.viewDetails")}
-                            <ArrowRight className={cn("h-3.5 w-3.5 ml-1.5", isAr && "rotate-180")} />
+                            <ArrowRight
+                              className={cn(
+                                "h-3.5 w-3.5 ml-1.5",
+                                isAr && "rotate-180",
+                              )}
+                            />
                           </Button>
 
                           <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="icon" className="h-9 w-9 rounded-lg md:hidden lg:flex">
-                                      <MoreHorizontal className="h-4 w-4" />
-                                  </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className="w-48 rounded-xl p-1">
-                                  <DropdownMenuLabel className="text-[9px] font-black uppercase tracking-widest text-muted-foreground px-2 py-1.5">{t("assignments.list.labels.options")}</DropdownMenuLabel>
-                                  <DropdownMenuItem onClick={() => show("subjects", subject.id)} className="rounded-lg gap-2 py-2 cursor-pointer">
-                                      <Eye className="h-3.5 w-3.5 text-primary" />
-                                      <span className="font-bold text-xs">{t("buttons.viewDetails")}</span>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-9 w-9 rounded-lg md:hidden lg:flex"
+                              >
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent
+                              align="end"
+                              className="w-48 rounded-xl p-1"
+                            >
+                              <DropdownMenuLabel className="text-[9px] font-black uppercase tracking-widest text-muted-foreground px-2 py-1.5">
+                                {t("assignments.list.labels.options")}
+                              </DropdownMenuLabel>
+                              <DropdownMenuItem
+                                onClick={() => show("subjects", subject.id)}
+                                className="rounded-lg gap-2 py-2 cursor-pointer"
+                              >
+                                <Eye className="h-3.5 w-3.5 text-primary" />
+                                <span className="font-bold text-xs">
+                                  {t("buttons.viewDetails")}
+                                </span>
+                              </DropdownMenuItem>
+                              {isAdmin && (
+                                <>
+                                  <DropdownMenuItem
+                                    onClick={() => edit("subjects", subject.id)}
+                                    className="rounded-lg gap-2 py-2 cursor-pointer"
+                                  >
+                                    <Pencil className="h-3.5 w-3.5 text-primary" />
+                                    <span className="font-bold text-xs">
+                                      {t("buttons.editAssignment")}
+                                    </span>
                                   </DropdownMenuItem>
-                                  {isAdmin && (
-                                      <>
-                                          <DropdownMenuItem onClick={() => edit("subjects", subject.id)} className="rounded-lg gap-2 py-2 cursor-pointer">
-                                              <Pencil className="h-3.5 w-3.5 text-primary" />
-                                              <span className="font-bold text-xs">{t("buttons.editAssignment")}</span>
-                                          </DropdownMenuItem>
-                                          <DropdownMenuSeparator className="my-1" />
-                                          <DropdownMenuItem 
-                                              onClick={() => setDeleteTarget(subject.id)} 
-                                              className="rounded-lg gap-2 py-2 cursor-pointer text-destructive focus:text-destructive"
-                                          >
-                                              <Trash2 className="h-3.5 w-3.5" />
-                                              <span className="font-bold text-xs">{t("buttons.delete")}</span>
-                                          </DropdownMenuItem>
-                                      </>
-                                  )}
-                              </DropdownMenuContent>
+                                  <DropdownMenuSeparator className="my-1" />
+                                  <DropdownMenuItem
+                                    onClick={() => setDeleteTarget(subject.id)}
+                                    className="rounded-lg gap-2 py-2 cursor-pointer text-destructive focus:text-destructive"
+                                  >
+                                    <Trash2 className="h-3.5 w-3.5" />
+                                    <span className="font-bold text-xs">
+                                      {t("buttons.delete")}
+                                    </span>
+                                  </DropdownMenuItem>
+                                </>
+                              )}
+                            </DropdownMenuContent>
                           </DropdownMenu>
                         </div>
                       </motion.div>
@@ -411,27 +572,36 @@ const SubjectsList = () => {
         </div>
       </ListView>
 
-      <AlertDialog open={deleteTarget !== null} onOpenChange={() => setDeleteTarget(null)}>
+      <AlertDialog
+        open={deleteTarget !== null}
+        onOpenChange={() => setDeleteTarget(null)}
+      >
         <AlertDialogContent className="rounded-[2.5rem] border-none shadow-2xl bg-card/95 backdrop-blur-xl text-start">
           <AlertDialogHeader className="text-start space-y-4">
             <div className="p-4 rounded-2xl bg-destructive/10 text-destructive w-fit">
               <Trash2 className="h-8 w-8" />
             </div>
             <div className="space-y-1">
-                <AlertDialogTitle className="text-3xl font-black tracking-tight">{t("assignments.list.deleteDialog.title")}</AlertDialogTitle>
-                <AlertDialogDescription className="font-medium text-base leading-relaxed">
-                    {t("assignments.list.deleteDialog.description")}
-                </AlertDialogDescription>
+              <AlertDialogTitle className="text-3xl font-black tracking-tight">
+                {t("assignments.list.deleteDialog.title")}
+              </AlertDialogTitle>
+              <AlertDialogDescription className="font-medium text-base leading-relaxed">
+                {t("assignments.list.deleteDialog.description")}
+              </AlertDialogDescription>
             </div>
           </AlertDialogHeader>
           <AlertDialogFooter className="gap-3 pt-6">
-            <AlertDialogCancel className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-8">{t("buttons.cancel")}</AlertDialogCancel>
-            <AlertDialogAction 
-                onClick={handleConfirmDelete} 
-                disabled={isDeleteLoading}
-                className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-12 bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-xl shadow-destructive/20"
+            <AlertDialogCancel className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-8">
+              {t("buttons.cancel")}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDelete}
+              disabled={isDeleteLoading}
+              className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-12 bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-xl shadow-destructive/20"
             >
-                {isDeleteLoading ? t("buttons.processing") : t("buttons.confirmDelete")}
+              {isDeleteLoading
+                ? t("buttons.processing")
+                : t("buttons.confirmDelete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

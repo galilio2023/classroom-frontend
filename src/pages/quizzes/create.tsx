@@ -493,7 +493,7 @@ const QuizCreate = () => {
               <div className="space-y-2">
                 <p className="font-black text-[10px] uppercase tracking-widest text-foreground flex items-center gap-2">
                   <Sparkles className="h-3.5 w-3.5 text-primary" />
-                  {t("aiHub.assistant.assistant.title")}
+                  {t("aiHub.assistant.title")}
                 </p>
                 <p className="text-xs font-medium leading-relaxed">
                   {t("aiHub.assistant.draftsDesc")}

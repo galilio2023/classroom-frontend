@@ -48,6 +48,9 @@
   --badge-purple: hsl(262.1 83.3% 57.8%);
   --badge-yellow: hsl(47.9 95.8% 53.1%);
   --badge-pink: hsl(330 80% 60%);
+
+  /* Focus States */
+  --focus-border: hsl(250 80% 60%);
 }
 
 /* --- PRO MIDNIGHT DARK MODE --- */
@@ -89,6 +92,9 @@
   --badge-purple: hsl(270 95% 75%);
   --badge-yellow: hsl(47.9 95.8% 53.1%);
   --badge-pink: hsl(330 80% 70%);
+
+  /* Focus States (Dark Mode) */
+  --focus-border: hsl(250 100% 75%);
 }
 
 @theme inline {
@@ -130,6 +136,8 @@
   --color-badge-purple: var(--badge-purple);
   --color-badge-yellow: var(--badge-yellow);
   --color-badge-pink: var(--badge-pink);
+
+  --color-focus-border: var(--focus-border);
 
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 4px);
@@ -429,6 +437,28 @@ header, .sidebar-header {
     size: landscape;
     margin: 0;
   }
+}
+
+/* --- SMOOTH SCROLLING --- */
+html {
+  scroll-behavior: smooth;
+}
+
+/* --- ADVANCED UTILITIES --- */
+.text-balance {
+  text-wrap: balance;
+}
+
+.bg-grid-white {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' width='32' height='32' fill='none' stroke='rgb(255 255 255 / 0.04)'%3E%3Cpath d='M0 .5H31.5V32'/%3E%3C/svg%3E");
+}
+
+.bg-grid-black {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' width='32' height='32' fill='none' stroke='rgb(0 0 0 / 0.04)'%3E%3Cpath d='M0 .5H31.5V32'/%3E%3C/svg%3E");
+}
+
+.mask-radial-faded {
+  mask-image: radial-gradient(circle at center, black, transparent 80%);
 }
 
 /* --- RTL SUPPORT --- */

@@ -188,14 +188,19 @@ export const Footer = () => {
             <div className="flex gap-3">
               <Input
                 placeholder={t("footer.emailPlaceholder", "you@university.edu")}
-                className="bg-background rounded-2xl border-none shadow-inner h-16 font-bold px-6 text-lg text-start"
+                className="bg-background rounded-2xl border-none shadow-inner h-16 font-bold px-6 text-lg text-start focus-visible:ring-primary/20"
                 dir="ltr"
               />
               <Button
                 size="icon"
-                className="rounded-2xl h-16 w-16 shrink-0 shadow-xl shadow-primary/20 hover:scale-105 transition-transform"
+                className="rounded-2xl h-16 w-16 shrink-0 shadow-xl shadow-primary/20 hover:scale-110 active:scale-95 transition-all group/btn"
               >
-                <ArrowRight className={cn("h-6 w-6", isAr && "rotate-180")} />
+                <ArrowRight
+                  className={cn(
+                    "h-6 w-6 group-hover/btn:translate-x-1 transition-transform",
+                    isAr && "rotate-180 group-hover/btn:-translate-x-1",
+                  )}
+                />
               </Button>
             </div>
             <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest text-center lg:text-start opacity-60">
