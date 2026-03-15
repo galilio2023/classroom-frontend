@@ -1,5 +1,5 @@
 import { createAuthClient } from "better-auth/react";
-import { AUTH_BASE_URL } from "@/config";
+import { BACKEND_URL } from "@/config";
 
 /**
  * Better Auth Client Configuration
@@ -7,9 +7,9 @@ import { AUTH_BASE_URL } from "@/config";
  * It is configured to handle the custom fields (role, status) we added.
  */
 export const authClient = createAuthClient({
-  // baseURL should point to the API root where better-auth is mounted
-  // better-auth will automatically append /auth/ to its requests
-  baseURL: AUTH_BASE_URL,
+  // The baseURL must point exactly to the mount point on the backend
+  // Backend is configured with: app.use("/api/auth", ...)
+  baseURL: `${BACKEND_URL}/auth`,
   fetchOptions: {
     credentials: "include",
   },
