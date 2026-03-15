@@ -5,7 +5,6 @@
   "type": "module",
   "dependencies": {
     "@excalidraw/excalidraw": "^0.17.6",
-    "@google/generative-ai": "^0.24.1",
     "@hookform/resolvers": "^5.0.1",
     "@radix-ui/react-accordion": "^1.2.8",
     "@radix-ui/react-alert-dialog": "^1.1.11",

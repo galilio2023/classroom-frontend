@@ -1,7 +1,10 @@
+import React, { Suspense } from "react";
 import { useCan } from "@refinedev/core";
 import { Navigate, useParams, useLocation } from "react-router-dom";
-import UnauthorizedPage from "@/pages/unauthorized";
 import { Loader2 } from "lucide-react";
+
+// Use lazy loading to avoid static vs dynamic import warning in build
+const UnauthorizedPage = React.lazy(() => import("@/pages/unauthorized"));
 
 interface AuthorizedRouteProps {
   resource: string;
@@ -43,5 +46,13 @@ export const AuthorizedRoute = ({
     );
   }
 
-  return <UnauthorizedPage reason={data?.reason} />;
+  return (
+    <Suspense fallback={
+      <div className="flex flex-1 items-center justify-center w-full h-full min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    }>
+      <UnauthorizedPage reason={data?.reason} />
+    </Suspense>
+  );
 };

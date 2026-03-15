@@ -77,21 +77,29 @@ export default defineConfig({
       output: {
         manualChunks: (id) => {
           if (id.includes("node_modules")) {
-            if (id.includes("@refinedev")) {
-              return "vendor-refine";
+            // 1. Isolate the absolute heaviest dependencies
+            if (id.includes("@excalidraw")) {
+              return "vendor-excalidraw";
             }
-            if (id.includes("lucide-react") || id.includes("@radix-ui")) {
-              return "vendor-ui";
+            
+            // 2. Group the Rich Text Editor ecosystem
+            if (id.includes("@tiptap") || id.includes("prosemirror")) {
+              return "vendor-editor";
             }
-            if (id.includes("framer-motion") || id.includes("recharts")) {
-                return "vendor-viz";
+
+            // 3. Group heavy visualization tools
+            if (id.includes("recharts") || id.includes("framer-motion")) {
+              return "vendor-viz";
             }
-            return "vendor";
+
+            // 4. Let Vite/Rollup handle React, Refine, and Radix automatically.
+            // This prevents circular dependencies because Vite can intelligently 
+            // share modules between these framework-level libraries.
           }
         },
       },
     },
-    chunkSizeWarningLimit: 1000,
+    chunkSizeWarningLimit: 2500, // Adjusted for the combined weight of framework + UI
   },
   define: {
     "process.env": {},
