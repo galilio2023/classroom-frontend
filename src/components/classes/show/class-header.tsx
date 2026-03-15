@@ -9,10 +9,11 @@ import { toast } from "sonner";
 interface ClassHeaderProps {
   classId: string;
   isOwner: boolean;
-  t: (key: string) => string;
 }
 
-export const ClassHeader = ({ classId, isOwner, t }: ClassHeaderProps) => {
+export const ClassHeader = ({ classId, isOwner }: ClassHeaderProps) => {
+  const { t } = useTranslation();
+
   return (
     <motion.div
       initial={{ opacity: 0, y: -20 }}

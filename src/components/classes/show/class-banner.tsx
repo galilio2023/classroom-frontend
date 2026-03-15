@@ -1,6 +1,5 @@
-import { Class, Enrollment, UserRole } from "@/types";
+import { Class, Enrollment } from "@/types";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { BookOpen, Clock, Globe, Timer, Users, Video } from "lucide-react";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
@@ -21,7 +20,7 @@ export const ClassBanner = ({
   isAr,
 }: ClassBannerProps) => {
   const { t } = useTranslation();
-  const classColor = (aClass as any).color || "#3b82f6";
+  const classColor = aClass.color || "#3b82f6";
   const isFull =
     aClass.capacity && approvedEnrollments.length >= aClass.capacity;
 

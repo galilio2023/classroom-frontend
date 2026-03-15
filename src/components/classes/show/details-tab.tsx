@@ -30,7 +30,7 @@ export const DetailsTab = ({
   onInviteClick,
 }: DetailsTabProps) => {
   const { t } = useTranslation();
-  const classColor = (aClass as any).color || "#3b82f6";
+  const classColor = aClass.color || "#3b82f6";
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 text-start">

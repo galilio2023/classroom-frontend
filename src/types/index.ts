@@ -250,6 +250,7 @@ export type Class = z.infer<typeof classFormSchema> & {
   inviteCode: string;
   bannerUrl?: string | null;
   bannerCldPubId?: string | null;
+  color?: string;
   gradingStatus: GradingStatus;
   allowParentAccess: boolean;
   archivedAt: string | null;
@@ -281,6 +282,7 @@ export type ClassListItem = Pick<
   | "schedules"
   | "isLive"
   | "isBreakoutActive"
+  | "color"
 > & {
   subject?: {
     name: string;

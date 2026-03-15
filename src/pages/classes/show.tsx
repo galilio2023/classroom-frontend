@@ -11,18 +11,10 @@ import { useParams, useSearchParams, Link } from "react-router-dom";
 import { useMemo, useState, useEffect, useCallback } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Class, Enrollment, User, UserRole, Announcement } from "@/types";
 import {
   Loader2,
-  PlusCircle,
   Trash2,
   ClipboardCheck,
   MessageSquare,
@@ -34,12 +26,9 @@ import {
   XCircle,
   Users,
   Info,
-  Copy,
-  Check,
   Video,
   Trophy,
   BarChart3,
-  UserPlus,
   BookOpen,
 } from "lucide-react";
 import {
@@ -89,7 +78,6 @@ import { ClassBanner } from "@/components/classes/show/class-banner";
 import { PinnedAnnouncements } from "@/components/classes/show/pinned-announcements";
 import { ClassHeader } from "@/components/classes/show/class-header";
 import { StudentsTab } from "@/components/classes/show/students-tab";
-import { TeacherNotes } from "@/components/classes/show/teacher-notes";
 import { useClassRealtime } from "@/hooks/use-class-realtime";
 import { DetailsTab } from "@/components/classes/show/details-tab";
 
@@ -460,12 +448,10 @@ const ClassesShow = () => {
     );
   }
 
-  const classColor = (aClass as any).color || "#3b82f6";
-
   return (
     <>
       <div className="container mx-auto py-10 max-w-7xl space-y-10">
-        <ClassHeader classId={classId} isOwner={isOwner} t={t} />
+        <ClassHeader classId={classId} isOwner={isOwner} />
 
         <PinnedAnnouncements
           announcements={announcements}
@@ -489,7 +475,7 @@ const ClassesShow = () => {
           className="w-full space-y-10"
         >
           <div className="sticky top-6 z-40">
-            <ScrollArea className="w-full whitespace-nowrap rounded-[2rem] border border-black/[0.05] dark:border-white/[0.05] bg-card/80 backdrop-blur-2xl p-2 shadow-2xl">
+            <ScrollArea className="w-full whitespace-nowrap rounded-4xl border border-black/5 dark:border-white/5 bg-card/80 backdrop-blur-2xl p-2 shadow-2xl">
               <TabsList
                 className={cn(
                   "flex h-14 items-center justify-start rounded-2xl p-1 text-muted-foreground bg-transparent",
@@ -512,8 +498,8 @@ const ClassesShow = () => {
                       style={
                         isActive
                           ? {
-                              backgroundColor: classColor,
-                              boxShadow: `0 10px 25px -5px ${classColor}50`,
+                              backgroundColor: aClass.color || "#3b82f6",
+                              boxShadow: `0 10px 25px -5px ${aClass.color || "#3b82f6"}50`,
                             }
                           : {}
                       }
@@ -659,7 +645,7 @@ const ClassesShow = () => {
             open={unenrollTarget !== null}
             onOpenChange={() => setUnenrollTarget(null)}
           >
-            <AlertDialogContent className="rounded-[2.5rem] border-none shadow-2xl bg-card/95 backdrop-blur-xl text-start">
+            <AlertDialogContent className="rounded-4xl border-none shadow-2xl bg-card/95 backdrop-blur-xl text-start">
               <AlertDialogHeader className="space-y-4">
                 <div className="p-4 rounded-2xl bg-destructive/10 text-destructive w-fit">
                   <Trash2 className="h-8 w-8" />
@@ -716,7 +702,7 @@ const ClassesShow = () => {
             open={isMessageAllOpen}
             onOpenChange={setIsMessageAllOpen}
           >
-            <DialogContent className="rounded-[2.5rem] border-none shadow-2xl bg-card/95 backdrop-blur-xl text-start max-w-2xl">
+            <DialogContent className="rounded-4xl border-none shadow-2xl bg-card/95 backdrop-blur-xl text-start max-w-2xl">
               <DialogHeader className="space-y-4">
                 <div className="p-4 rounded-2xl bg-primary/10 text-primary w-fit">
                   <MessageSquare className="h-8 w-8" />
@@ -763,7 +749,7 @@ const ClassesShow = () => {
                     placeholder={t(
                       "classes.show.messageAllDialog.messagePlaceholder",
                     )}
-                    className="min-h-[200px] rounded-3xl p-6 text-base"
+                    className="min-h-50 rounded-3xl p-6 text-base"
                   />
                 </div>
               </div>
