@@ -29,6 +29,7 @@ import {
   Trophy,
   BarChart3,
   BookOpen,
+  ClipboardCheck,
 } from "lucide-react";
 import {
   AlertDialog,
