@@ -1,28 +1,56 @@
 import { Class, Enrollment } from "@/types";
 import { Badge } from "@/components/ui/badge";
-import { BookOpen, Clock, Globe, Timer, Users, Video } from "lucide-react";
+import { 
+  BookOpen, 
+  Clock, 
+  Globe, 
+  Timer, 
+  Users, 
+  Video,
+  Calculator,
+  FlaskConical,
+  Languages,
+  Palette,
+  Music,
+  Dumbbell,
+  Code,
+  Landmark
+} from "lucide-react";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import { Fragment } from "react";
+import { Fragment, useMemo } from "react";
 
 interface ClassBannerProps {
   aClass: Class;
-  approvedEnrollments: Enrollment[];
-  waitlistedEnrollments: Enrollment[];
+  approvedCount: number;
+  waitlistedCount: number;
   isLiveIndicator: boolean;
 }
 
 export const ClassBanner = ({
   aClass,
-  approvedEnrollments,
-  waitlistedEnrollments,
+  approvedCount,
+  waitlistedCount,
   isLiveIndicator,
 }: ClassBannerProps) => {
   const { t, i18n } = useTranslation();
   const isAr = i18n.language === "ar";
   const classColor = aClass.color || "#3b82f6";
   const isFull =
-    aClass.capacity && approvedEnrollments.length >= aClass.capacity;
+    aClass.capacity && approvedCount >= aClass.capacity;
+
+  const SubjectIcon = useMemo(() => {
+    const name = aClass.subject?.name?.toLowerCase() || "";
+    if (name.includes("math")) return Calculator;
+    if (name.includes("science") || name.includes("bio") || name.includes("chem") || name.includes("phys")) return FlaskConical;
+    if (name.includes("lang") || name.includes("english") || name.includes("arabic") || name.includes("french")) return Languages;
+    if (name.includes("art") || name.includes("design")) return Palette;
+    if (name.includes("music")) return Music;
+    if (name.includes("sport") || name.includes("gym") || name.includes("physical")) return Dumbbell;
+    if (name.includes("tech") || name.includes("code") || name.includes("computer") || name.includes("web")) return Code;
+    if (name.includes("hist") || name.includes("geog") || name.includes("social")) return Landmark;
+    return BookOpen;
+  }, [aClass.subject?.name]);
 
   return (
     <motion.div
@@ -31,16 +59,16 @@ export const ClassBanner = ({
       className="relative h-64 w-full rounded-[3rem] overflow-hidden shadow-2xl group text-start"
       style={{ backgroundColor: classColor }}
     >
-      {/* Background Patterns */}
+      {/* Background Patterns - Replaced external texture with local dot pattern */}
       <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white via-transparent to-transparent" />
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-      <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10" />
+      <div className="absolute inset-0 bg-dot-pattern opacity-10" />
 
       <div className="absolute bottom-0 left-0 w-full p-10 md:p-12 flex flex-col md:flex-row md:items-end justify-between gap-8">
         <div className="space-y-4">
           <div className="flex items-center gap-3">
             <div className="p-3 rounded-2xl bg-white/20 backdrop-blur-md text-white shadow-lg">
-              <BookOpen className="h-8 w-8" />
+              <SubjectIcon className="h-8 w-8" />
             </div>
             <Badge
               variant="secondary"
@@ -69,18 +97,18 @@ export const ClassBanner = ({
               <Users className="h-4 w-4" />
               <span>
                 {t("classes.show.banner.studentsEnrolled", {
-                  count: approvedEnrollments.length,
+                  count: approvedCount,
                 })}
               </span>
             </div>
-            {waitlistedEnrollments.length > 0 && (
+            {waitlistedCount > 0 && (
               <>
                 <div className="w-1.5 h-1.5 rounded-full bg-white/30" />
                 <div className="flex items-center gap-2">
                   <Timer className="h-4 w-4" />
                   <span>
                     {t("classes.show.banner.onWaitlist", {
-                      count: waitlistedEnrollments.length,
+                      count: waitlistedCount,
                     })}
                   </span>
                 </div>

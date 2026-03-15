@@ -322,7 +322,11 @@ const ClassesShow = () => {
     if (unenrollTarget) {
       deleteMutation(
         { resource: "enrollments", id: unenrollTarget },
-        { onSuccess: () => setUnenrollTarget(null) },
+        { onSuccess: () => {
+            setUnenrollTarget(null);
+            void refetch?.();
+          } 
+        },
       );
     }
   };
@@ -461,8 +465,8 @@ const ClassesShow = () => {
 
         <ClassBanner
           aClass={aClass}
-          approvedEnrollments={approvedEnrollments}
-          waitlistedEnrollments={waitlistedEnrollments}
+          approvedCount={approvedEnrollments.length}
+          waitlistedCount={waitlistedEnrollments.length}
           isLiveIndicator={isLiveIndicator}
         />
 
@@ -579,8 +583,8 @@ const ClassesShow = () => {
                 <TabsContent value="students" className="mt-0 space-y-10">
                   {activeTab === "students" && (
                     <StudentsTab
-                      approvedEnrollments={approvedEnrollments}
-                      waitlistedEnrollments={waitlistedEnrollments}
+                      classId={classId}
+                      approvedCount={approvedEnrollments.length}
                       pendingEnrollments={pendingEnrollments}
                       isStaff={isStaff}
                       onInsight={(s) => setInsightTarget(s)}

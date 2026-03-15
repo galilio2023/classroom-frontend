@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { Enrollment, User } from "@/types";
+import { HttpError } from "@refinedev/core";
 import { ColumnDef } from "@tanstack/react-table";
 import { useTable } from "@refinedev/react-table";
 import { DataTable } from "@/components/refine-ui/data-table/data-table";
@@ -27,8 +28,8 @@ import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 
 interface StudentsTabProps {
-  approvedEnrollments: Enrollment[];
-  waitlistedEnrollments: Enrollment[];
+  classId: string;
+  approvedCount: number;
   pendingEnrollments: Enrollment[];
   isStaff: boolean;
   onInsight: (student: { id: string; name: string }) => void;
@@ -39,8 +40,8 @@ interface StudentsTabProps {
 }
 
 export const StudentsTab = ({
-  approvedEnrollments,
-  waitlistedEnrollments,
+  classId,
+  approvedCount,
   pendingEnrollments,
   isStaff,
   onInsight,
@@ -175,17 +176,23 @@ export const StudentsTab = ({
     [isStaff, t, isAr, onInsight, onUnenroll],
   );
 
-  const tableData = useMemo(() => [...approvedEnrollments, ...waitlistedEnrollments, ...pendingEnrollments], [approvedEnrollments, waitlistedEnrollments, pendingEnrollments]);
-
-  const enrollmentsTable = useTable<Enrollment>({
+  const enrollmentsTable = useTable<Enrollment, HttpError>({
     columns,
-    data: tableData,
     refineCoreProps: {
         resource: "enrollments",
+        filters: {
+            initial: [
+                {
+                    field: "classId",
+                    operator: "eq",
+                    value: classId,
+                }
+            ]
+        },
         pagination: {
-            mode: "client",
             pageSize: 10,
-        }
+        },
+        syncWithLocation: false,
     }
   });
 
@@ -205,7 +212,7 @@ export const StudentsTab = ({
               </div>
               <CardDescription className="text-muted-foreground font-medium px-1">
                 {t("classes.show.students.table.description", {
-                  count: approvedEnrollments.length,
+                  count: approvedCount,
                 })}
               </CardDescription>
             </div>
@@ -231,16 +238,6 @@ export const StudentsTab = ({
           </CardHeader>
           <CardContent className="p-0">
             <DataTable table={enrollmentsTable} />
-            {approvedEnrollments.length === 0 &&
-              waitlistedEnrollments.length === 0 &&
-              pendingEnrollments.length === 0 && (
-                <div className="flex flex-col items-center justify-center py-20 text-center space-y-4 opacity-40">
-                  <Users className="h-12 w-12" />
-                  <p className="font-black uppercase tracking-widest text-[10px]">
-                    {t("classes.show.students.table.empty")}
-                  </p>
-                </div>
-              )}
           </CardContent>
         </Card>
       </div>
