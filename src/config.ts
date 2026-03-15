@@ -16,19 +16,20 @@ const getEnvVar = (key: string, defaultValue?: string): string => {
   return value;
 };
 
-// Base URL for the backend server (without the /api prefix)
-// Example: https://backend.railway.app
-export const BASE_URL = getEnvVar("VITE_API_URL", "http://localhost:8000").replace(/\/api\/?$/, "");
+// VITE_API_URL is set to: https://classroom-backend-production-6e52.up.railway.app/api
+const rawApiUrl = getEnvVar("VITE_API_URL", "http://localhost:8000/api");
 
-// Standard API endpoint URL (with /api prefix)
-// Example: https://backend.railway.app/api
-export const BACKEND_URL = `${BASE_URL}/api`;
+// Standard API endpoint URL (as provided by Vercel)
+export const BACKEND_URL = rawApiUrl.replace(/\/+$/, "");
+
+// Base URL for the domain (removes /api)
+// Example: https://classroom-backend-production-6e52.up.railway.app
+export const BASE_URL = BACKEND_URL.replace(/\/api\/?$/, "");
 
 // --- Socket Configuration ---
 // Sockets should connect to the root domain
 export const SOCKET_URL = BASE_URL;
 
 // --- Auth Configuration ---
-// Better Auth handles its own /auth prefix, so it needs the API root
-// Example: https://backend.railway.app/api
-export const AUTH_BASE_URL = BACKEND_URL;
+// AUTH_BASE_URL should be the root domain (better-auth adds /api/auth internally)
+export const AUTH_BASE_URL = BASE_URL;
