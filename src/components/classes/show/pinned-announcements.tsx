@@ -23,7 +23,13 @@ export const PinnedAnnouncements = ({
   );
 
   const isSafeUrl = (url: string) => {
-    return url.startsWith("http://") || url.startsWith("https://") || url.startsWith("/");
+    try {
+      // Use window.location.origin as base for relative URLs (e.g., /uploads/file.pdf)
+      const parsedUrl = new URL(url, window.location.origin);
+      return ["http:", "https:"].includes(parsedUrl.protocol);
+    } catch (e) {
+      return false;
+    }
   };
 
   if (pinnedAnnouncements.length === 0) return null;
