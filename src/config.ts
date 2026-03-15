@@ -1,7 +1,4 @@
 // This file centralizes all environment-dependent variables for the application.
-// It reads from Vite's `import.meta.env` object and provides validated,
-// reusable constants for the rest of the application.
-
 const getEnvVar = (key: string, defaultValue?: string): string => {
   const value = import.meta.env[key];
   if (!value) {
@@ -11,14 +8,17 @@ const getEnvVar = (key: string, defaultValue?: string): string => {
   return value;
 };
 
-// Vercel VITE_API_URL: https://classroom-backend-production-6e52.up.railway.app/api
-export const BACKEND_URL = getEnvVar("VITE_API_URL", "http://localhost:8000/api").replace(/\/+$/, "");
+// Vercel VITE_API_URL = https://classroom-backend-production-6e52.up.railway.app/api
+const rawApiUrl = getEnvVar("VITE_API_URL", "http://localhost:8000/api");
 
-// Base domain without /api
+// Standard API root (e.g., https://.../api)
+export const BACKEND_URL = rawApiUrl.replace(/\/+$/, "");
+
+// Root domain (e.g., https://...)
 export const BASE_URL = BACKEND_URL.replace(/\/api\/?$/, "");
 
-// Socket connects to root
-export const SOCKET_URL = BASE_URL;
+// Better Auth specific root (Points exactly to the /api/auth endpoint)
+export const BETTER_AUTH_ROOT = `${BACKEND_URL}/auth`;
 
-// Better Auth Client configuration needs the API root
-export const AUTH_API_URL = BACKEND_URL;
+// Sockets connect to root domain
+export const SOCKET_URL = BASE_URL;

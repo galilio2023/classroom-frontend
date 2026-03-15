@@ -1,19 +1,17 @@
 import { createAuthClient } from "better-auth/react";
-import { BASE_URL } from "@/config";
+import { BETTER_AUTH_ROOT } from "@/config";
 
 /**
  * Better Auth Client Configuration
  * 
- * We must use the BASE_URL (the domain root) and explicitly 
- * set the basePath to /api/auth.
- * 
- * Requests will now go correctly to:
- * https://your-backend.com/api/auth/sign-in/email
- * instead of missing the /auth prefix.
+ * To avoid any path resolution errors, we provide the FULL 
+ * path to the auth root (e.g., https://backend.com/api/auth)
+ * as the baseURL, and set basePath to an empty string.
  */
 export const authClient = createAuthClient({
-  baseURL: BASE_URL,
-  basePath: "/api/auth",
+  baseURL: BETTER_AUTH_ROOT,
+  // We provide the full path in baseURL, so we clear the default /api/auth path
+  basePath: "",
   fetchOptions: {
     credentials: "include",
   },
