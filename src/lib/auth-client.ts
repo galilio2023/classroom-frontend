@@ -1,17 +1,16 @@
 import { createAuthClient } from "better-auth/react";
-import { BASE_URL } from "@/config";
+import { AUTH_API_URL } from "@/config";
 
 /**
  * Better Auth Client Configuration
  * 
- * We use BASE_URL (the domain) and explicitly set the basePath to /api/auth.
- * This ensures requests go to https://your-backend.com/api/auth/...
+ * In production:
+ * AUTH_API_URL = https://classroom-backend-production-6e52.up.railway.app/api
+ * better-auth adds /auth/ to its requests, resulting in:
+ * https://classroom-backend-production-6e52.up.railway.app/api/auth/sign-in/email
  */
 export const authClient = createAuthClient({
-  baseURL: BASE_URL,
-  // basePath defaults to /api/auth, but we'll be explicit to ensure consistency
-  // as the backend mounts auth at app.all(/\/api\/auth\/.*/, ...)
-  basePath: "/api/auth",
+  baseURL: AUTH_API_URL,
   fetchOptions: {
     credentials: "include",
   },
