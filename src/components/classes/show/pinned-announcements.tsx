@@ -9,16 +9,15 @@ interface PinnedAnnouncementsProps {
   announcements: Announcement[];
   dismissedAnnouncements: number[];
   handleDismissAnnouncement: (id: number) => void;
-  isAr: boolean;
 }
 
 export const PinnedAnnouncements = ({
   announcements,
   dismissedAnnouncements,
   handleDismissAnnouncement,
-  isAr,
 }: PinnedAnnouncementsProps) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isAr = i18n.language === "ar";
   const pinnedAnnouncements = announcements.filter(
     (a) => a.isPinned && !dismissedAnnouncements.includes(a.id),
   );

@@ -31,7 +31,6 @@ interface StudentsTabProps {
   waitlistedEnrollments: Enrollment[];
   pendingEnrollments: Enrollment[];
   isStaff: boolean;
-  isAr: boolean;
   onInsight: (student: { id: string; name: string }) => void;
   onUnenroll: (id: number) => void;
   onEnrollClick: () => void;
@@ -44,14 +43,14 @@ export const StudentsTab = ({
   waitlistedEnrollments,
   pendingEnrollments,
   isStaff,
-  isAr,
   onInsight,
   onUnenroll,
   onEnrollClick,
   onMessageAllClick,
   onEnrollmentAction,
 }: StudentsTabProps) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isAr = i18n.language === "ar";
 
   const columns = useMemo<ColumnDef<Enrollment>[]>(
     () => [

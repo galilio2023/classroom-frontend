@@ -457,7 +457,6 @@ const ClassesShow = () => {
           announcements={announcements}
           dismissedAnnouncements={dismissedAnnouncements}
           handleDismissAnnouncement={handleDismissAnnouncement}
-          isAr={isAr}
         />
 
         <ClassBanner
@@ -465,7 +464,6 @@ const ClassesShow = () => {
           approvedEnrollments={approvedEnrollments}
           waitlistedEnrollments={waitlistedEnrollments}
           isLiveIndicator={isLiveIndicator}
-          isAr={isAr}
         />
 
         {/* Main Navigation Tabs */}
@@ -585,7 +583,6 @@ const ClassesShow = () => {
                       waitlistedEnrollments={waitlistedEnrollments}
                       pendingEnrollments={pendingEnrollments}
                       isStaff={isStaff}
-                      isAr={isAr}
                       onInsight={(s) => setInsightTarget(s)}
                       onUnenroll={(id) => setUnenrollTarget(id)}
                       onEnrollClick={() => setIsEnrollDialogOpen(true)}

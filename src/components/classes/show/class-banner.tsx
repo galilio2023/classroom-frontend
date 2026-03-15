@@ -3,13 +3,13 @@ import { Badge } from "@/components/ui/badge";
 import { BookOpen, Clock, Globe, Timer, Users, Video } from "lucide-react";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
+import { Fragment } from "react";
 
 interface ClassBannerProps {
   aClass: Class;
   approvedEnrollments: Enrollment[];
   waitlistedEnrollments: Enrollment[];
   isLiveIndicator: boolean;
-  isAr: boolean;
 }
 
 export const ClassBanner = ({
@@ -17,9 +17,9 @@ export const ClassBanner = ({
   approvedEnrollments,
   waitlistedEnrollments,
   isLiveIndicator,
-  isAr,
 }: ClassBannerProps) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isAr = i18n.language === "ar";
   const classColor = aClass.color || "#3b82f6";
   const isFull =
     aClass.capacity && approvedEnrollments.length >= aClass.capacity;
@@ -86,18 +86,17 @@ export const ClassBanner = ({
                 </div>
               </>
             )}
-            {aClass.schedules?.[0] && (
-              <>
+            {aClass.schedules?.map((schedule, index) => (
+              <Fragment key={index}>
                 <div className="w-1.5 h-1.5 rounded-full bg-white/30" />
                 <div className="flex items-center gap-2">
                   <Clock className="h-4 w-4" />
                   <span>
-                    {t(`days.${aClass.schedules[0].day}`)} •{" "}
-                    {aClass.schedules[0].startTime}
+                    {t(`days.${schedule.day}`)} • {schedule.startTime}
                   </span>
                 </div>
-              </>
-            )}
+              </Fragment>
+            ))}
           </div>
         </div>
 
