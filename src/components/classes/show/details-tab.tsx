@@ -183,16 +183,19 @@ export const DetailsTab = ({
                 {t("classes.show.details.teachingStaff")}
               </Label>
               <div className="grid gap-4">
-                {aClass.teachers?.map((tc: any) => (
+                {aClass.teachers?.map((tc) => (
                   <div
                     key={tc.teacher.id}
                     className="flex items-center gap-5 p-5 rounded-[1.5rem] bg-muted/30 border border-transparent hover:border-primary/10 transition-all group"
                   >
                     <Avatar className="h-12 w-12 border-4 border-background shadow-lg group-hover:scale-110 transition-transform rounded-2xl">
-                      <AvatarImage
-                        src={tc.teacher.image ?? ""}
-                        className="object-cover"
-                      />
+                      {tc.teacher.image && (
+                        <AvatarImage
+                          src={tc.teacher.image}
+                          alt={tc.teacher.name}
+                          className="object-cover"
+                        />
+                      )}
                       <AvatarFallback className="bg-primary/5 text-primary font-black">
                         {tc.teacher.name?.[0]}
                       </AvatarFallback>

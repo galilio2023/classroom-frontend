@@ -174,7 +174,8 @@ export const StudentsTab = ({
     refineCoreProps: {
         resource: "enrollments",
         pagination: {
-            mode: "client"
+            mode: "client",
+            pageSize: 10,
         }
     }
   });
@@ -261,16 +262,22 @@ export const StudentsTab = ({
                   </p>
                 </div>
               ) : (
-                pendingEnrollments.map((enrollment: any) => (
+                pendingEnrollments.map((enrollment: Enrollment) => (
                   <div
                     key={enrollment.id}
                     className="flex items-center justify-between p-4 rounded-3xl bg-orange-500/5 border border-orange-500/10 transition-all hover:bg-orange-500/10 group"
                   >
                     <div className="flex items-center gap-3">
                       <Avatar className="h-10 w-10 border-2 border-orange-500/20 rounded-xl">
-                        <AvatarImage src={enrollment.student.image} />
+                        {enrollment.student.image && (
+                          <AvatarImage
+                            src={enrollment.student.image}
+                            alt={enrollment.student.name}
+                            className="object-cover"
+                          />
+                        )}
                         <AvatarFallback className="bg-orange-500/10 text-orange-600 font-black text-xs">
-                          {enrollment.student.name[0]}
+                          {enrollment.student.name?.[0]}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex flex-col text-start">
