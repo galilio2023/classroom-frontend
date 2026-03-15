@@ -1,4 +1,4 @@
-import { Class, Enrollment } from "@/types";
+import { Class } from "@/types";
 import { Badge } from "@/components/ui/badge";
 import { 
   BookOpen, 
@@ -27,6 +27,19 @@ interface ClassBannerProps {
   isLiveIndicator: boolean;
 }
 
+const getSubjectIcon = (subjectName: string = "") => {
+  const name = subjectName.toLowerCase();
+  if (name.includes("math")) return Calculator;
+  if (name.includes("science") || name.includes("bio") || name.includes("chem") || name.includes("phys")) return FlaskConical;
+  if (name.includes("lang") || name.includes("english") || name.includes("arabic") || name.includes("french")) return Languages;
+  if (name.includes("art") || name.includes("design")) return Palette;
+  if (name.includes("music")) return Music;
+  if (name.includes("sport") || name.includes("gym") || name.includes("physical")) return Dumbbell;
+  if (name.includes("tech") || name.includes("code") || name.includes("computer") || name.includes("web")) return Code;
+  if (name.includes("hist") || name.includes("geog") || name.includes("social")) return Landmark;
+  return BookOpen;
+};
+
 export const ClassBanner = ({
   aClass,
   approvedCount,
@@ -39,18 +52,10 @@ export const ClassBanner = ({
   const isFull =
     aClass.capacity && approvedCount >= aClass.capacity;
 
-  const SubjectIcon = useMemo(() => {
-    const name = aClass.subject?.name?.toLowerCase() || "";
-    if (name.includes("math")) return Calculator;
-    if (name.includes("science") || name.includes("bio") || name.includes("chem") || name.includes("phys")) return FlaskConical;
-    if (name.includes("lang") || name.includes("english") || name.includes("arabic") || name.includes("french")) return Languages;
-    if (name.includes("art") || name.includes("design")) return Palette;
-    if (name.includes("music")) return Music;
-    if (name.includes("sport") || name.includes("gym") || name.includes("physical")) return Dumbbell;
-    if (name.includes("tech") || name.includes("code") || name.includes("computer") || name.includes("web")) return Code;
-    if (name.includes("hist") || name.includes("geog") || name.includes("social")) return Landmark;
-    return BookOpen;
-  }, [aClass.subject?.name]);
+  const SubjectIcon = useMemo(() => 
+    getSubjectIcon(aClass.subject?.name), 
+    [aClass.subject?.name]
+  );
 
   return (
     <motion.div
@@ -59,7 +64,7 @@ export const ClassBanner = ({
       className="relative h-64 w-full rounded-[3rem] overflow-hidden shadow-2xl group text-start"
       style={{ backgroundColor: classColor }}
     >
-      {/* Background Patterns - Replaced external texture with local dot pattern */}
+      {/* Background Patterns */}
       <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white via-transparent to-transparent" />
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
       <div className="absolute inset-0 bg-dot-pattern opacity-10" />

@@ -186,6 +186,11 @@ export const StudentsTab = ({
                     field: "classId",
                     operator: "eq",
                     value: classId,
+                },
+                {
+                    field: "status",
+                    operator: "in",
+                    value: ["approved", "waitlisted"]
                 }
             ]
         },
