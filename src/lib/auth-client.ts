@@ -1,16 +1,19 @@
 import { createAuthClient } from "better-auth/react";
-import { AUTH_API_URL } from "@/config";
+import { BASE_URL } from "@/config";
 
 /**
  * Better Auth Client Configuration
  * 
- * In production:
- * AUTH_API_URL = https://classroom-backend-production-6e52.up.railway.app/api
- * better-auth adds /auth/ to its requests, resulting in:
- * https://classroom-backend-production-6e52.up.railway.app/api/auth/sign-in/email
+ * We must use the BASE_URL (the domain root) and explicitly 
+ * set the basePath to /api/auth.
+ * 
+ * Requests will now go correctly to:
+ * https://your-backend.com/api/auth/sign-in/email
+ * instead of missing the /auth prefix.
  */
 export const authClient = createAuthClient({
-  baseURL: AUTH_API_URL,
+  baseURL: BASE_URL,
+  basePath: "/api/auth",
   fetchOptions: {
     credentials: "include",
   },
