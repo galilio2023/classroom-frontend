@@ -48,7 +48,21 @@ export function Sidebar() {
   const { t } = useTranslation();
   const { open } = useShadcnSidebar();
   const { menuItems, selectedKey } = useMenu();
-  const { data: identity } = useGetIdentity<User>();
+  const { data: identity, isLoading: identityLoading } = useGetIdentity<User>();
+
+  // Use a fallback identity from local storage to prevent UI blinking during refetch
+  const activeIdentity = useMemo(() => {
+    if (identity) return identity;
+    const cached = localStorage.getItem("user");
+    if (cached) {
+      try {
+        return JSON.parse(cached) as User;
+      } catch (e) {
+        return null;
+      }
+    }
+    return null;
+  }, [identity]);
 
   // Group items by their meta.group property and filter by role
   const groupedItems = useMemo(() => {
@@ -56,7 +70,7 @@ export function Sidebar() {
       default: []
     };
 
-    const userRole = identity?.role;
+    const userRole = activeIdentity?.role;
 
     menuItems.forEach((item) => {
       const groupName = item.meta?.group as string | undefined;
@@ -85,7 +99,7 @@ export function Sidebar() {
     });
 
     return groups;
-  }, [menuItems, identity?.role]);
+  }, [menuItems, activeIdentity?.role]);
 
   return (
     <ShadcnSidebar collapsible="icon" className={cn("border-none sidebar-glass")}>
@@ -114,27 +128,14 @@ export function Sidebar() {
           
           return (
             <div key={groupName} className="mt-8 mb-2">
-              <AnimatePresence initial={false}>
-                {open && (
-                  <motion.span
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -10 }}
-                    className={cn(
-                      "ml-4",
-                      "block",
-                      "text-[10px]",
-                      "font-black",
-                      "uppercase",
-                      "tracking-[0.2em]",
-                      "text-muted-foreground/40",
-                      "mb-4"
-                    )}
-                  >
-                    {t(groupName as any)}
-                  </motion.span>
+              <div
+                className={cn(
+                  "ml-4 mb-4 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40 transition-all duration-300",
+                  !open && "opacity-0 -translate-x-4 pointer-events-none h-0 mb-0 overflow-hidden"
                 )}
-              </AnimatePresence>
+              >
+                {t(groupName as any)}
+              </div>
               <div className="flex flex-col gap-1.5">
                 {items.map((item: TreeMenuItem) => (
                   <SidebarItem
@@ -160,11 +161,19 @@ type MenuItemProps = {
 function SidebarItem({ item, selectedKey }: MenuItemProps) {
   const { open } = useShadcnSidebar();
 
+  // STABLE RENDER: Always render the same base component structure
+  // We use CSS to hide/show parts rather than conditional component swapping
   if (item.children && item.children.length > 0) {
-    if (open) {
-      return <SidebarItemCollapsible item={item} selectedKey={selectedKey} />;
-    }
-    return <SidebarItemDropdown item={item} selectedKey={selectedKey} />;
+    return (
+      <div className="relative">
+        <div className={cn(!open && "hidden")}>
+           <SidebarItemCollapsible item={item} selectedKey={selectedKey} />
+        </div>
+        <div className={cn(open && "hidden")}>
+           <SidebarItemDropdown item={item} selectedKey={selectedKey} />
+        </div>
+      </div>
+    );
   }
 
   return <SidebarItemLink item={item} selectedKey={selectedKey} />;
@@ -341,29 +350,25 @@ function SidebarButton({
   const buttonContent = (
     <>
       <ItemIcon icon={item.meta?.icon ?? item.icon} isSelected={isSelected} />
-      <AnimatePresence mode="wait">
-        {open && (
-          <motion.span
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -10 }}
-            transition={{ duration: 0.2, delay: 0.1 }}
-            className={cn("tracking-tight transition-all", {
-              "flex-1": rightIcon,
-              "text-left": rightIcon,
-              "line-clamp-1": !rightIcon,
-              truncate: !rightIcon,
-              "font-medium": !isSelected,
-              "font-bold": isSelected,
-              "text-primary": isSelected,
-              "text-muted-foreground group-hover:text-foreground": !isSelected,
-            })}
-          >
-            {getDisplayName(item, t)}
-          </motion.span>
+      <span
+        className={cn(
+          "tracking-tight transition-all duration-200",
+          open ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-4 pointer-events-none w-0",
+          {
+            "flex-1": rightIcon,
+            "text-left": rightIcon,
+            "line-clamp-1": !rightIcon,
+            truncate: !rightIcon,
+            "font-medium": !isSelected,
+            "font-bold": isSelected,
+            "text-primary": isSelected,
+            "text-muted-foreground group-hover:text-foreground": !isSelected,
+          }
         )}
-      </AnimatePresence>
-      {rightIcon}
+      >
+        {getDisplayName(item, t)}
+      </span>
+      {rightIcon && open && rightIcon}
     </>
   );
 
