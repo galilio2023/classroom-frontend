@@ -27,7 +27,7 @@ import {
   useGetIdentity,
   type TreeMenuItem,
 } from "@refinedev/core";
-import { ChevronRight, ListIcon } from "lucide-react";
+import { ChevronRight, ListIcon, Loader2 } from "lucide-react";
 import React, { useMemo } from "react";
 import { cn } from "@/lib/utils.ts";
 import { Link as RouterLink } from "react-router-dom";
@@ -50,27 +50,22 @@ export function Sidebar() {
   const { menuItems, selectedKey } = useMenu();
   const { data: identity, isLoading: identityLoading } = useGetIdentity<User>();
 
-  // Use a fallback identity from local storage to prevent UI blinking during refetch
-  const activeIdentity = useMemo(() => {
-    if (identity) return identity;
-    const cached = localStorage.getItem("user");
-    if (cached) {
-      try {
-        return JSON.parse(cached) as User;
-      } catch (e) {
-        return null;
-      }
-    }
-    return null;
-  }, [identity]);
+  // Security Update: Relying on localStorage for sidebar display logic is 
+  // secondary to server-side RBAC, but we should prioritize live identity data
+  // to avoid showing stale or forbidden menu items.
+  const userRole = identity?.role;
 
   // Group items by their meta.group property and filter by role
   const groupedItems = useMemo(() => {
-    const groups: Record<string, TreeMenuItem[]> = {
+    // If identity is still loading, we return empty groups to prevent 
+    // flickering "Admin" links for a "Student" for a split second.
+    if (identityLoading && !identity) {
+        return { default: [], loading: true };
+    }
+
+    const groups: Record<string, any> = {
       default: []
     };
-
-    const userRole = activeIdentity?.role;
 
     menuItems.forEach((item) => {
       const groupName = item.meta?.group as string | undefined;
@@ -99,7 +94,7 @@ export function Sidebar() {
     });
 
     return groups;
-  }, [menuItems, activeIdentity?.role]);
+  }, [menuItems, userRole, identityLoading, identity]);
 
   return (
     <ShadcnSidebar collapsible="icon" className={cn("border-none sidebar-glass")}>
@@ -111,43 +106,51 @@ export function Sidebar() {
           "px-2": !open,
         })}
       >
-        {/* Render default (ungrouped) items first */}
-        <div className="flex flex-col gap-1.5">
-            {groupedItems.default.map((item: TreeMenuItem) => (
-                <SidebarItem
-                    key={item.key || item.name}
-                    item={item}
-                    selectedKey={selectedKey}
-                />
-            ))}
-        </div>
-
-        {/* Render grouped items with headers */}
-        {Object.entries(groupedItems).map(([groupName, items]) => {
-          if (groupName === "default" || items.length === 0) return null;
-          
-          return (
-            <div key={groupName} className="mt-8 mb-2">
-              <div
-                className={cn(
-                  "ml-4 mb-4 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40 transition-all duration-300",
-                  !open && "opacity-0 -translate-x-4 pointer-events-none h-0 mb-0 overflow-hidden"
-                )}
-              >
-                {t(groupName as any)}
-              </div>
-              <div className="flex flex-col gap-1.5">
-                {items.map((item: TreeMenuItem) => (
-                  <SidebarItem
-                    key={item.key || item.name}
-                    item={item}
-                    selectedKey={selectedKey}
-                  />
-                ))}
-              </div>
+        {identityLoading && !identity ? (
+            <div className="flex flex-col gap-4 items-center justify-center py-10 opacity-40">
+                <Loader2 className="h-5 w-5 animate-spin" />
             </div>
-          );
-        })}
+        ) : (
+            <>
+                {/* Render default (ungrouped) items first */}
+                <div className="flex flex-col gap-1.5">
+                    {groupedItems.default.map((item: TreeMenuItem) => (
+                        <SidebarItem
+                            key={item.key || item.name}
+                            item={item}
+                            selectedKey={selectedKey}
+                        />
+                    ))}
+                </div>
+
+                {/* Render grouped items with headers */}
+                {Object.entries(groupedItems).map(([groupName, items]) => {
+                if (groupName === "default" || groupName === "loading" || (items as any).length === 0) return null;
+                
+                return (
+                    <div key={groupName} className="mt-8 mb-2">
+                    <div
+                        className={cn(
+                        "ml-4 mb-4 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40 transition-all duration-300",
+                        !open && "opacity-0 -translate-x-4 pointer-events-none h-0 mb-0 overflow-hidden"
+                        )}
+                    >
+                        {t(groupName as any)}
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                        {(items as any[]).map((item: TreeMenuItem) => (
+                        <SidebarItem
+                            key={item.key || item.name}
+                            item={item}
+                            selectedKey={selectedKey}
+                        />
+                        ))}
+                    </div>
+                    </div>
+                );
+                })}
+            </>
+        )}
       </ShadcnSidebarContent>
     </ShadcnSidebar>
   );
