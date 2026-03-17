@@ -1,11 +1,18 @@
-import { useEffect, useState, useCallback, useRef, Suspense, lazy } from "react";
+import {
+  lazy,
+  Suspense,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { socket } from "@/lib/socket";
-import { useGetIdentity, useCustomMutation } from "@refinedev/core";
-import { User, UserRole } from "@/types";
+import { useCustomMutation, useGetIdentity } from "@refinedev/core";
+import { User } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Save, Trash2, Lock, Unlock, Loader2 } from "lucide-react";
+import { Loader2, Lock, Save, Trash2, Unlock } from "lucide-react";
 import { toast } from "sonner";
 
 // Lazy load Excalidraw to avoid SSR/Vite bundling issues
@@ -19,7 +26,7 @@ let exportToBlob: any;
 
 interface WhiteboardProps {
   classId?: string; // Optional: context for saving resources
-  roomId?: string;  // Explicit socket room ID. If not provided, defaults to classId.
+  roomId?: string; // Explicit socket room ID. If not provided, defaults to classId.
 }
 
 export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
@@ -42,7 +49,7 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
       const module = await import("@excalidraw/excalidraw");
       exportToBlob = module.exportToBlob;
     };
-    loadHelpers();
+    void loadHelpers();
   }, []);
 
   useEffect(() => {
@@ -94,18 +101,18 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
     if (!activeRoomId || !isTeacher) return;
 
     const interval = setInterval(() => {
-        if (hasChangesRef.current && excalidrawAPI) {
-            const elements = excalidrawAPI.getSceneElements();
-            const appState = excalidrawAPI.getAppState();
-            
-            socket.emit("whiteboard:autosave", {
-                classId: activeRoomId,
-                elements,
-                appState
-            });
-            hasChangesRef.current = false;
-            console.log("[Whiteboard] Auto-saved to Postgres");
-        }
+      if (hasChangesRef.current && excalidrawAPI) {
+        const elements = excalidrawAPI.getSceneElements();
+        const appState = excalidrawAPI.getAppState();
+
+        socket.emit("whiteboard:autosave", {
+          classId: activeRoomId,
+          elements,
+          appState,
+        });
+        hasChangesRef.current = false;
+        console.log("[Whiteboard] Auto-saved to Postgres");
+      }
     }, 10000);
 
     return () => clearInterval(interval);
@@ -114,14 +121,15 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
   const onChange = useCallback(
     (elements: readonly any[], appState: any) => {
       if (!excalidrawAPI || !activeRoomId) return;
-      
+
       // Only broadcast if not locked or if user is teacher
       if (isLocked && !isTeacher) return;
 
       hasChangesRef.current = true; // Mark for autosave
 
       const now = Date.now();
-      if (now - lastUpdateRef.current > 100) { // Throttle updates
+      if (now - lastUpdateRef.current > 100) {
+        // Throttle updates
         socket.emit("whiteboard:update", {
           classId: activeRoomId, // Backend expects "classId" property for room ID
           elements,
@@ -130,14 +138,17 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
         lastUpdateRef.current = now;
       }
     },
-    [activeRoomId, excalidrawAPI, isLocked, isTeacher]
+    [activeRoomId, excalidrawAPI, isLocked, isTeacher],
   );
 
   const toggleLock = () => {
     if (!activeRoomId) return;
     const newLockedState = !isLocked;
     setIsLocked(newLockedState);
-    socket.emit("whiteboard:toggle-lock", { classId: activeRoomId, isLocked: newLockedState });
+    socket.emit("whiteboard:toggle-lock", {
+      classId: activeRoomId,
+      isLocked: newLockedState,
+    });
   };
 
   const clearWhiteboard = () => {
@@ -169,49 +180,59 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
         files: excalidrawAPI.getFiles(),
       });
 
-      const file = new File([blob], `whiteboard-${activeRoomId}-${Date.now()}.png`, { type: "image/png" });
-      
+      const file = new File(
+        [blob],
+        `whiteboard-${activeRoomId}-${Date.now()}.png`,
+        { type: "image/png" },
+      );
+
       const formData = new FormData();
       formData.append("file", file);
       formData.append("folder", "resources");
 
-      uploadFile({
-        url: "/upload",
-        method: "post",
-        values: formData,
-        meta: {
-          headers: { "Content-Type": "multipart/form-data" },
+      uploadFile(
+        {
+          url: "/upload",
+          method: "post",
+          values: formData,
+          meta: {
+            headers: { "Content-Type": "multipart/form-data" },
+          },
         },
-      }, {
-        onSuccess: (data: any) => {
-          const fileUrl = data.data.url;
-          // Now create a resource entry
-          uploadFile({
-            url: "/resources",
-            method: "post",
-            values: {
-              title: `Whiteboard Snapshot - ${new Date().toLocaleString()}`,
-              type: "image",
-              url: fileUrl,
-              classId: Number(classId),
-              description: `Snapshot from ${roomId ? 'Group' : 'Class'} Whiteboard`,
-            }
-          }, {
-            onSuccess: () => {
-              toast.success("Whiteboard snapshot saved to resources");
-              setIsSaving(false);
-            },
-            onError: () => {
-              toast.error("Failed to save resource entry");
-              setIsSaving(false);
-            }
-          });
+        {
+          onSuccess: (data: any) => {
+            const fileUrl = data.data.url;
+            // Now create a resource entry
+            uploadFile(
+              {
+                url: "/resources",
+                method: "post",
+                values: {
+                  title: `Whiteboard Snapshot - ${new Date().toLocaleString()}`,
+                  type: "image",
+                  url: fileUrl,
+                  classId: Number(classId),
+                  description: `Snapshot from ${roomId ? "Group" : "Class"} Whiteboard`,
+                },
+              },
+              {
+                onSuccess: () => {
+                  toast.success("Whiteboard snapshot saved to resources");
+                  setIsSaving(false);
+                },
+                onError: () => {
+                  toast.error("Failed to save resource entry");
+                  setIsSaving(false);
+                },
+              },
+            );
+          },
+          onError: () => {
+            toast.error("Failed to upload image");
+            setIsSaving(false);
+          },
         },
-        onError: () => {
-          toast.error("Failed to upload image");
-          setIsSaving(false);
-        }
-      });
+      );
     } catch (error) {
       console.error("Save snapshot error:", error);
       toast.error("Failed to save snapshot");
@@ -224,7 +245,7 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
       <div className="flex items-center justify-between p-2 border-b bg-muted/30">
         <div className="flex items-center gap-4">
           <h4 className="text-sm font-semibold px-2">
-             {roomId ? "Group Whiteboard" : "Class Whiteboard"}
+            {roomId ? "Group Whiteboard" : "Class Whiteboard"}
           </h4>
           {isTeacher && (
             <div className="flex items-center space-x-2">
@@ -233,8 +254,15 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
                 checked={isLocked}
                 onCheckedChange={toggleLock}
               />
-              <Label htmlFor="lock-mode" className="text-xs flex items-center gap-1">
-                {isLocked ? <Lock className="h-3 w-3" /> : <Unlock className="h-3 w-3" />}
+              <Label
+                htmlFor="lock-mode"
+                className="text-xs flex items-center gap-1"
+              >
+                {isLocked ? (
+                  <Lock className="h-3 w-3" />
+                ) : (
+                  <Unlock className="h-3 w-3" />
+                )}
                 {isLocked ? "Students Locked" : "Students Can Draw"}
               </Label>
             </div>
@@ -248,27 +276,42 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
         </div>
         <div className="flex items-center gap-2">
           {isTeacher && (
-            <Button variant="outline" size="sm" onClick={clearWhiteboard} className="h-8">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={clearWhiteboard}
+              className="h-8"
+            >
               <Trash2 className="h-4 w-4 mr-1" />
               Clear
             </Button>
           )}
           {classId && (
-            <Button 
-              variant="default" 
-              size="sm" 
-              onClick={saveSnapshot} 
+            <Button
+              variant="default"
+              size="sm"
+              onClick={saveSnapshot}
               disabled={isSaving}
               className="h-8 bg-live-primary hover:bg-live-primary/90"
             >
-              {isSaving ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Save className="h-4 w-4 mr-1" />}
+              {isSaving ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-1" />
+              ) : (
+                <Save className="h-4 w-4 mr-1" />
+              )}
               Save Snapshot
             </Button>
           )}
         </div>
       </div>
-      <div className="flex-1 relative min-h-[500px]">
-        <Suspense fallback={<div className="flex items-center justify-center h-full"><Loader2 className="h-8 w-8 animate-spin" /></div>}>
+      <div className="flex-1 relative min-h-125">
+        <Suspense
+          fallback={
+            <div className="flex items-center justify-center h-full">
+              <Loader2 className="h-8 w-8 animate-spin" />
+            </div>
+          }
+        >
           <Excalidraw
             excalidrawAPI={(api) => setExcalidrawAPI(api)}
             onChange={onChange}
@@ -279,7 +322,7 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
                 loadScene: false,
                 saveAsImage: true,
                 export: false,
-              }
+              },
             }}
           />
         </Suspense>

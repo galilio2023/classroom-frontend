@@ -84,7 +84,7 @@ const ActivityLogPage = () => {
         },
         {
           id: "network",
-          header: () => <p className="column-title">{t("activity.network")}</p>,
+          header: () => <p className="column-title">{t("dashboard.activity.network" as any)}</p>,
           cell: ({ row }) => (
             <div className="flex flex-col gap-0.5">
                 <div className="flex items-center gap-1.5 text-[9px] font-bold text-muted-foreground">

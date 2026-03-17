@@ -17,7 +17,8 @@ import { useCustomMutation } from "@refinedev/core";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { DashboardData } from "@/types/dashboard";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 interface WelcomeHeaderProps {
   name: string;
@@ -55,7 +56,6 @@ export const WelcomeHeader = ({
       return t("dashboard.summary.teacher", { count, active });
     }
     if (isParent) {
-      // In a real app we'd get this from data, using placeholders for now
       return t("dashboard.summary.parent", { name: "Your children", count: 5 });
     }
     if (isAdmin) {
@@ -88,7 +88,7 @@ export const WelcomeHeader = ({
       setIsUploading(true);
       const formData = new FormData();
       formData.append("file", file);
-      formData.append("upload_preset", "classroom_unsigned"); // Assuming this preset exists
+      formData.append("upload_preset", "classroom_unsigned");
 
       try {
         const res = await fetch(
@@ -122,44 +122,44 @@ export const WelcomeHeader = ({
     input.click();
   };
 
-  // Check if user is a teacher and not verified.
-  // We use optional chaining and default to false if properties are missing.
   const isUnverifiedTeacher =
     user?.role === UserRole.TEACHER && user?.verificationStatus !== "verified";
 
   return (
-    <div className="mb-8 md:mb-12 space-y-6">
-      <div className="space-y-2">
-        <h1 className="text-3xl md:text-4xl font-black tracking-tight">
+    <div className="mb-6 md:mb-12 space-y-4 md:space-y-6">
+      <div className="space-y-1.5 md:space-y-3 max-w-4xl">
+        <h1 className="text-3xl xs:text-4xl md:text-5xl lg:text-6xl font-black tracking-tight leading-[1.1] text-balance">
           {t("dashboard.welcomeBack", { name: name || "User" })}
         </h1>
         <motion.div
           initial={{ opacity: 0, x: -10 }}
           animate={{ opacity: 1, x: 0 }}
-          className="flex items-center gap-2 text-muted-foreground text-lg md:text-xl font-medium tracking-tight"
+          className="flex items-start md:items-center gap-3 text-muted-foreground text-sm xs:text-base md:text-xl font-medium tracking-tight"
         >
-          <div className="p-1.5 rounded-lg bg-primary/5 text-primary/60">
-            <SummaryIcon className="h-4 w-4" />
+          <div className="p-2 rounded-xl bg-primary/10 text-primary shrink-0 mt-0.5 md:mt-0 shadow-sm border border-primary/5">
+            <SummaryIcon className="h-4 w-4 md:h-5 md:w-5" />
           </div>
-          <p>{getSummaryText()}</p>
+          <p className="line-clamp-2 md:line-clamp-1 leading-relaxed md:leading-normal">
+            {getSummaryText()}
+          </p>
         </motion.div>
       </div>
 
       {isUnverifiedTeacher && (
-        <Alert className="border-amber-500/20 bg-amber-500/5 animate-in slide-in-from-top-4 duration-500">
-          <ShieldAlert className="h-5 w-5 text-amber-600" />
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 w-full">
-            <div>
-              <AlertTitle className="text-amber-800 font-black uppercase tracking-tight text-xs">
+        <Alert className="border-amber-500/20 bg-amber-500/5 animate-in slide-in-from-top-4 duration-500 p-4 md:p-8 rounded-[1.5rem] md:rounded-[2.5rem]">
+          <ShieldAlert className="h-6 w-6 text-amber-600 shrink-0 mt-1" />
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 w-full ml-3">
+            <div className="space-y-1.5">
+              <AlertTitle className="text-amber-800 font-black uppercase tracking-[0.15em] text-[10px] md:text-xs">
                 {t("dashboard.verification.required")}
               </AlertTitle>
-              <AlertDescription className="text-amber-700/80 text-sm font-medium">
+              <AlertDescription className="text-amber-700/80 text-xs md:text-base font-medium leading-relaxed max-w-xl">
                 {t("dashboard.verification.requiredDescription")}
               </AlertDescription>
             </div>
             <Button
-              size="sm"
-              className="bg-amber-600 hover:bg-amber-700 text-white font-bold gap-2 shrink-0"
+              size="lg"
+              className="bg-amber-600 hover:bg-amber-700 text-white font-black uppercase tracking-widest text-[10px] gap-2 shrink-0 h-12 md:h-14 px-6 md:px-8 rounded-2xl shadow-xl shadow-amber-600/20 transition-all hover:scale-105 active:scale-95"
               onClick={handleUploadClick}
               disabled={isUploading || isPending}
             >
@@ -176,8 +176,8 @@ export const WelcomeHeader = ({
 
       {user?.role === UserRole.TEACHER &&
         user?.verificationStatus === "verified" && (
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-500/10 border border-green-500/20 text-green-600 text-[10px] font-black uppercase tracking-widest">
-            <CheckCircle2 className="h-3 w-3" />
+          <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 text-[10px] font-black uppercase tracking-widest shadow-sm">
+            <CheckCircle2 className="h-3.5 w-3.5" />
             {t("dashboard.verification.verifiedEducator")}
           </div>
         )}

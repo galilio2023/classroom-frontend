@@ -152,30 +152,48 @@ const AssignmentShow = () => {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center h-[80vh] gap-6">
-        <div className="relative">
-            <Loader2 className="h-16 w-16 animate-spin text-primary/20" />
-            <div className="absolute inset-0 flex items-center justify-center">
-                <FileText className="h-6 w-6 text-primary/40" />
-            </div>
+      <div className="flex flex-col items-center justify-center h-[85vh] gap-8">
+        <motion.div 
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="relative"
+        >
+          <div className="absolute inset-[-20px] rounded-full bg-primary/5 animate-ping duration-[3000ms]" />
+          <Loader2 className="h-20 w-20 animate-spin text-primary/10 stroke-[1]" />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <FileText className="h-8 w-8 text-primary/30" />
+          </div>
+        </motion.div>
+        <div className="text-center space-y-2">
+            <h2 className="text-sm font-black uppercase tracking-[0.3em] text-primary/60 animate-pulse">
+                {t("assignments.show.assembling")}
+            </h2>
+            <p className="text-xs font-medium text-muted-foreground/60 italic">Preparing your assignment details...</p>
         </div>
-        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground animate-pulse">{t("assignments.show.assembling")}</p>
       </div>
     );
   }
 
   if (isError || !assignment) {
     return (
-      <div className="container mx-auto py-20 text-center space-y-6">
-        <div className="p-6 rounded-full bg-destructive/10 text-destructive w-fit mx-auto">
-          <XCircle className="h-16 w-16" />
+      <div className="container mx-auto py-32 text-center space-y-8">
+        <div className="p-8 rounded-[2.5rem] bg-destructive/5 text-destructive w-fit mx-auto border border-destructive/10">
+          <XCircle className="h-20 w-20" />
         </div>
-        <div className="space-y-2">
-            <h2 className="text-3xl font-black tracking-tight">{t("assignments.show.notFound")}</h2>
-            <p className="text-muted-foreground font-medium max-w-md mx-auto">{t("assignments.show.notFoundDescription")}</p>
+        <div className="space-y-3">
+          <h2 className="text-4xl font-black tracking-tight">
+            {t("assignments.show.notFound")}
+          </h2>
+          <p className="text-muted-foreground font-medium max-w-md mx-auto text-lg">
+            {t("assignments.show.notFoundDescription")}
+          </p>
         </div>
-        <Button asChild className="rounded-2xl h-12 px-8 font-black uppercase tracking-widest text-[10px]">
-            <Link to="/assignments">{t("buttons.goBack")}</Link>
+        <Button
+          asChild
+          size="lg"
+          className="rounded-2xl h-14 px-10 font-bold uppercase tracking-widest text-[10px]"
+        >
+          <Link to="/assignments">{t("buttons.goBack")}</Link>
         </Button>
       </div>
     );
@@ -207,28 +225,29 @@ const AssignmentShow = () => {
   const blendedGrade = calculateBlendedGrade();
 
   return (
-    <div className="container mx-auto py-10 max-w-7xl space-y-10">
+    <div className="container mx-auto py-8 md:py-12 max-w-7xl space-y-10 md:space-y-16">
       {/* Header & Breadcrumb */}
       <motion.div 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="space-y-4 text-start"
+          className="space-y-4 md:space-y-6 text-start"
       >
           <Breadcrumb />
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div className="flex items-center gap-4">
-                  <div className="p-3 rounded-2xl bg-primary/10 text-primary shadow-sm">
-                      <FileText className="h-8 w-8" />
+                  <div className="p-3 rounded-2xl bg-primary/10 text-primary shadow-sm border border-primary/5">
+                      <FileText className="h-6 w-6 md:h-8 md:w-8" />
                   </div>
                   <div>
-                      <h1 className="text-4xl font-black tracking-tight">{t("assignments.show.assignmentDetails")}</h1>
-                      <p className="text-muted-foreground font-medium">{t("assignments.show.description")}</p>
+                      <h1 className="text-3xl md:text-4xl lg:text-5xl font-black tracking-tight">{t("assignments.show.assignmentDetails")}</h1>
+                      <p className="text-muted-foreground font-medium max-w-xl text-balance">{t("assignments.show.description")}</p>
                   </div>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
                   <Button 
                       variant="outline" 
-                      className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-12 px-6 gap-2 border-primary/10 bg-card/50 backdrop-blur-sm"
+                      size="lg"
+                      className="w-full md:w-auto rounded-2xl font-bold uppercase tracking-widest text-[10px] h-12 md:h-14 px-6 md:px-8 gap-2 border-primary/20 bg-primary/5 hover:bg-primary/10"
                       onClick={() => {
                           navigator.clipboard.writeText(window.location.href);
                           toast.success(t("assignments.show.toast.linkCopied"));
@@ -239,7 +258,8 @@ const AssignmentShow = () => {
                   </Button>
                   {isStaff && (
                       <Button 
-                          className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-12 px-8 shadow-xl shadow-primary/20"
+                          size="lg"
+                          className="w-full md:w-auto rounded-2xl font-bold uppercase tracking-widest text-[10px] h-12 md:h-14 px-8 md:px-10 shadow-lg shadow-primary/25"
                           asChild
                       >
                           <Link to={`/assignments/edit/${assignment.id}`}>
@@ -256,41 +276,41 @@ const AssignmentShow = () => {
       <motion.div 
         initial={{ opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="relative overflow-hidden rounded-[3rem] border border-black/[0.08] dark:border-white/10 bg-card/50 backdrop-blur-2xl shadow-2xl text-start"
+        className="relative overflow-hidden rounded-[2.5rem] md:rounded-[3rem] border border-border/40 bg-card/50 backdrop-blur-3xl shadow-2xl text-start"
       >
         <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-primary via-ai-primary to-primary" />
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5" />
         
-        <div className="p-10 md:p-12 flex flex-col md:flex-row md:items-center justify-between gap-10">
-          <div className="space-y-6">
+        <div className="p-8 md:p-12 flex flex-col lg:flex-row lg:items-center justify-between gap-8 md:gap-10">
+          <div className="space-y-6 flex-1">
             <div className="flex flex-wrap gap-3">
               {assignment.hasPeerReview && (
-                <Badge className="bg-amber-500/10 text-amber-600 border-amber-500/20 px-4 py-1.5 rounded-xl font-black uppercase tracking-widest text-[10px] flex items-center gap-2">
+                <Badge className="bg-amber-500/10 text-amber-600 border border-amber-500/20 px-4 py-1.5 rounded-xl font-black uppercase tracking-widest text-[10px] flex items-center gap-2 shadow-sm">
                   <Users className="h-4 w-4" />
                   {t("assignments.show.banner.peerReviewActive")}
                 </Badge>
               )}
               {isQuiz && (
-                <Badge className="bg-indigo-500/10 text-indigo-600 border-indigo-500/20 px-4 py-1.5 rounded-xl font-black uppercase tracking-widest text-[10px] flex items-center gap-2">
+                <Badge className="bg-indigo-500/10 text-indigo-600 border border-indigo-500/20 px-4 py-1.5 rounded-xl font-black uppercase tracking-widest text-[10px] flex items-center gap-2 shadow-sm">
                   <BrainCircuit className="h-4 w-4" />
                   {t("assignments.show.banner.aiQuizMode")}
                 </Badge>
               )}
               {assignment.isGroupAssignment && (
-                <Badge className="bg-blue-500/10 text-blue-600 border-blue-500/20 px-4 py-1.5 rounded-xl font-black uppercase tracking-widest text-[10px] flex items-center gap-2">
+                <Badge className="bg-blue-500/10 text-blue-600 border border-blue-500/20 px-4 py-1.5 rounded-xl font-black uppercase tracking-widest text-[10px] flex items-center gap-2 shadow-sm">
                   <Users className="h-4 w-4" />
                   {t("assignments.show.banner.groupAssignment")}
                 </Badge>
               )}
-              <Badge className="bg-primary/10 text-primary border-primary/20 px-4 py-1.5 rounded-xl font-black uppercase tracking-widest text-[10px] flex items-center gap-2">
+              <Badge className="bg-primary/10 text-primary border border-primary/20 px-4 py-1.5 rounded-xl font-black uppercase tracking-widest text-[10px] flex items-center gap-2 shadow-sm">
                 <LayoutDashboard className="h-4 w-4" />
                 {(assignment as any).class?.name || t("assignments.list.labels.general")}
               </Badge>
             </div>
             
             <div className="space-y-3">
-              <h1 className="text-5xl md:text-6xl font-black tracking-tighter leading-none">{assignment.title}</h1>
-              <div className="flex flex-wrap items-center gap-6 text-muted-foreground font-black text-xs uppercase tracking-widest">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tighter leading-none text-balance">{assignment.title}</h1>
+              <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-muted-foreground font-black text-xs uppercase tracking-widest">
                 <div className="flex items-center gap-2">
                   <Calendar className={cn("h-5 w-5", isOverdue ? "text-destructive" : "text-primary")} />
                   <span className={cn(isOverdue && "text-destructive")}>
@@ -316,7 +336,8 @@ const AssignmentShow = () => {
           {isStaff && assignment.hasPeerReview && (
             <Button 
               variant="outline" 
-              className="rounded-[1.5rem] font-black uppercase tracking-widest text-[10px] h-16 px-10 gap-3 border-primary/10 bg-card/50 backdrop-blur-sm hover:bg-primary/5 transition-all shadow-xl shadow-primary/5"
+              size="lg"
+              className="w-full lg:w-auto rounded-[1.5rem] font-bold uppercase tracking-widest text-[10px] h-14 md:h-16 px-10 gap-3 border-primary/20 bg-primary/5 backdrop-blur-sm hover:bg-primary/10 transition-all shadow-xl shadow-primary/5"
               onClick={() => {
                 toast.promise(
                   fetch(`${SOCKET_URL.replace("/socket.io", "")}/api/assignments/${id}/assign-peer-reviews`, {
@@ -340,18 +361,18 @@ const AssignmentShow = () => {
         </div>
 
         {/* Description Section */}
-        <div className="px-10 md:px-12 pb-12">
+        <div className="px-4 md:px-6 lg:px-8">
           <div className={cn(
-            "p-10 rounded-[2.5rem] bg-muted/20 border border-black/[0.03] dark:border-white/10 shadow-inner relative overflow-hidden",
+            "p-8 md:p-12 rounded-[2.5rem] bg-muted/20 border border-border/40 shadow-inner relative overflow-hidden",
             isQuiz && "opacity-40 blur-[0.5px] select-none"
           )}>
-            <div className={cn("absolute top-0 p-6 opacity-5", isAr ? "left-0" : "right-0")}>
-                <FileText className="h-32 w-32" />
+            <div className={cn("absolute opacity-5", isAr ? "left-0" : "right-0")}>
+                <FileText className="h-32 w-32 md:h-48 md:w-48" />
             </div>
             {isQuiz ? (
-              <div className="flex flex-col items-center justify-center py-10 gap-4 text-muted-foreground">
-                <BrainCircuit className="h-12 w-12" />
-                <p className="font-black uppercase tracking-widest text-xs">{t("assignments.show.quizContentActive")}</p>
+              <div className="flex flex-col items-center justify-center py-10 md:py-16 gap-4 text-muted-foreground">
+                <BrainCircuit className="h-12 w-12 md:h-16 md:w-16" />
+                <p className="font-black uppercase tracking-widest text-xs md:text-sm">{t("assignments.show.quizContentActive")}</p>
               </div>
             ) : (
               <div className="prose prose-lg dark:prose-invert max-w-none font-medium leading-relaxed text-start">
@@ -362,23 +383,23 @@ const AssignmentShow = () => {
         </div>
       </motion.div>
 
-      <div className="grid gap-12">
+      <div className="grid gap-10 md:gap-16">
         {isQuiz && (
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
           >
-            <Card className="border-none shadow-2xl bg-card overflow-hidden rounded-[3rem] text-start">
-              <CardHeader className="bg-indigo-500/5 border-b border-indigo-500/10 p-10">
-                <CardTitle className="text-2xl font-black uppercase tracking-widest flex items-center gap-4 text-indigo-600">
+            <Card className="border-none shadow-2xl bg-card overflow-hidden rounded-[2.5rem] md:rounded-[3rem] text-start">
+              <CardHeader className="bg-indigo-500/5 border-b border-indigo-500/10 p-8 md:p-10">
+                <CardTitle className="text-xl md:text-2xl font-black uppercase tracking-widest flex items-center gap-4 text-indigo-600">
                   <div className="p-3 rounded-2xl bg-indigo-500/10">
-                    <BrainCircuit className="h-8 w-8" />
+                    <BrainCircuit className="h-6 w-6 md:h-8 md:w-8" />
                   </div>
                   {t("assignments.show.interactiveQuiz")}
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-10">
+              <CardContent className="p-8 md:p-10">
                 <InteractiveQuiz 
                   assignmentId={assignment.id} 
                   description={assignment.description || ""} 
@@ -389,30 +410,30 @@ const AssignmentShow = () => {
         )}
 
         {!isStaff && !isQuiz && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 text-start">
-            <div className="lg:col-span-2 space-y-12">
-              <Card className="border-none shadow-2xl bg-card overflow-hidden rounded-[3rem]">
-                <CardHeader className="bg-primary/5 border-b border-primary/10 p-10">
-                  <CardTitle className="text-2xl font-black uppercase tracking-widest flex items-center gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 md:gap-16 text-start">
+            <div className="lg:col-span-2 space-y-10 md:space-y-16">
+              <Card className="border-none shadow-2xl bg-card overflow-hidden rounded-[2.5rem] md:rounded-[3rem]">
+                <CardHeader className="bg-primary/5 border-b border-primary/10 p-8 md:p-10">
+                  <CardTitle className="text-xl md:text-2xl font-black uppercase tracking-widest flex items-center gap-4">
                     <div className="p-3 rounded-2xl bg-primary/10 text-primary">
-                      <CheckCircle2 className="h-8 w-8" />
+                      <CheckCircle2 className="h-6 w-6 md:h-8 md:w-8" />
                     </div>
                     {t("assignments.show.yourSubmission")}
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-10">
+                <CardContent className="p-8 md:p-10">
                   {!mySubmission || isResubmitting ? (
-                    <div className="space-y-6">
+                    <div className="space-y-8">
                         {mySubmission?.requiresResubmission && (
-                            <div className="p-6 rounded-[1.5rem] bg-destructive/10 border border-destructive/20 flex items-start gap-4">
-                                <div className="p-2 rounded-xl bg-destructive/10 text-destructive">
+                            <div className="p-6 rounded-[1.5rem] bg-destructive/10 border border-destructive/20 flex items-start gap-4 shadow-sm">
+                                <div className="p-3 rounded-xl bg-destructive/10 text-destructive">
                                     <AlertTriangle className="h-6 w-6" />
                                 </div>
                                 <div className="space-y-1">
-                                    <h4 className="text-lg font-black text-destructive tracking-tight">{t("assignments.show.resubmissionRequired")}</h4>
-                                    <p className="text-muted-foreground font-medium">{t("assignments.show.resubmissionDescription")}</p>
+                                    <h4 className="text-lg font-black text-destructive tracking-tight">{t("assignments.show.resubmissionRequiredTitle")}</h4>
+                                    <p className="text-muted-foreground font-medium text-sm leading-relaxed">{t("assignments.show.resubmissionDescription")}</p>
                                     {mySubmission.feedback && (
-                                        <div className="mt-4 p-4 rounded-xl bg-white dark:bg-zinc-900 shadow-sm border border-destructive/10 text-destructive italic font-medium">
+                                        <div className="mt-4 p-4 rounded-xl bg-white dark:bg-zinc-900 shadow-sm border border-destructive/10 text-destructive italic font-medium text-sm">
                                             "{mySubmission.feedback}"
                                         </div>
                                     )}
@@ -427,14 +448,14 @@ const AssignmentShow = () => {
                         />
                     </div>
                   ) : (
-                    <div className="space-y-10">
-                        <div className="p-6 border-2 border-dashed rounded-[2rem] bg-success/5 border-success/20 flex items-center gap-5 shadow-sm">
-                          <div className="p-3 rounded-2xl bg-success/10 text-success">
+                    <div className="space-y-10 md:space-y-12">
+                        <div className="p-6 rounded-[2rem] bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-5 shadow-sm">
+                          <div className="p-3 rounded-2xl bg-emerald-500/10 text-emerald-600">
                             <CheckCircle2 className="h-6 w-6" />
                           </div>
                           <div className="flex flex-col">
-                            <span className="font-black text-success uppercase tracking-widest text-[10px]">{t("assignments.show.submissionStatus")}</span>
-                            <span className="font-black text-xl text-success/80">{t("assignments.show.successfullyTurnedIn")}</span>
+                            <span className="font-black text-emerald-600 uppercase tracking-widest text-[10px]">{t("assignments.show.submissionStatus")}</span>
+                            <span className="font-black text-xl md:text-2xl text-emerald-600/80">{t("assignments.show.successfullyTurnedIn")}</span>
                           </div>
                         </div>
                         
@@ -443,39 +464,39 @@ const AssignmentShow = () => {
                             <span className="w-1.5 h-1.5 rounded-full bg-primary" />
                             {t("assignments.show.submittedContent")}
                           </Label>
-                          <div className="p-10 bg-muted/20 rounded-[2rem] text-lg font-medium italic border border-black/[0.03] dark:border-white/10 leading-relaxed shadow-inner">
+                          <div className="p-8 md:p-10 bg-muted/20 rounded-[2rem] text-base md:text-lg font-medium italic border border-border/40 leading-relaxed shadow-inner">
                             {mySubmission.content}
                           </div>
                         </div>
 
-                        {/* --- FEEDBACK SECTION (NEW) --- */}
+                        {/* --- FEEDBACK SECTION --- */}
                         {(mySubmission.feedback || mySubmission.suggestedFeedback) && (
-                            <div className="space-y-6 pt-6 border-t border-black/[0.05] dark:border-white/[0.05]">
+                            <div className="space-y-8 pt-8 border-t border-border/40">
                                 <div className="flex items-center gap-3">
-                                    <div className="p-2 rounded-xl bg-primary/10 text-primary">
-                                        <MessageSquare className="h-5 w-5" />
+                                    <div className="p-3 rounded-2xl bg-primary/10 text-primary">
+                                        <MessageSquare className="h-6 w-6" />
                                     </div>
-                                    <h3 className="text-xl font-black uppercase tracking-widest">{t("assignments.show.feedbackReview")}</h3>
+                                    <h3 className="text-xl md:text-2xl font-black uppercase tracking-widest">{t("assignments.show.feedbackReview")}</h3>
                                 </div>
 
                                 {mySubmission.feedback && (
-                                    <div className="p-8 bg-primary/5 rounded-[2rem] border border-primary/10 relative group hover:bg-primary/10 transition-all shadow-sm">
-                                        <div className="flex items-center gap-3 mb-4">
-                                            <Badge className="bg-primary text-primary-foreground">{t("assignments.show.instructorFeedback")}</Badge>
+                                    <div className="p-8 rounded-[2rem] bg-primary/5 border border-primary/10 relative group hover:bg-primary/10 transition-all shadow-sm">
+                                        <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
+                                            <Badge className="bg-primary text-primary-foreground rounded-full">{t("assignments.show.instructorFeedback")}</Badge>
                                             <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                                                 {dayjs(mySubmission.gradedAt).fromNow()}
                                             </span>
                                         </div>
-                                        <p className="text-lg italic text-muted-foreground leading-relaxed font-medium">
+                                        <p className="text-base md:text-lg italic text-muted-foreground leading-relaxed font-medium">
                                             "{mySubmission.feedback}"
                                         </p>
                                     </div>
                                 )}
 
                                 {mySubmission.suggestedFeedback && (
-                                    <div className="p-8 bg-indigo-500/5 rounded-[2rem] border border-indigo-500/10 relative">
-                                        <div className="flex items-center gap-3 mb-4">
-                                            <Badge variant="outline" className="text-indigo-600 border-indigo-200 bg-indigo-50">{t("assignments.show.aiCoach")}</Badge>
+                                    <div className="p-8 rounded-[2rem] bg-indigo-500/5 border border-indigo-500/10 relative shadow-sm">
+                                        <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
+                                            <Badge variant="outline" className="text-indigo-600 border-indigo-500/20 bg-indigo-500/10 rounded-full">{t("assignments.show.aiCoach")}</Badge>
                                             <Sparkles className="h-4 w-4 text-indigo-400" />
                                         </div>
                                         <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground">
@@ -486,31 +507,31 @@ const AssignmentShow = () => {
                             </div>
                         )}
 
-                        {/* --- RESUBMIT BUTTON (NEW) --- */}
+                        {/* --- RESUBMIT BUTTON --- */}
                         <div className="flex justify-end pt-4">
                              <Button 
                                 variant="outline" 
                                 size="lg" 
-                                className="rounded-2xl font-black uppercase tracking-widest gap-2"
+                                className="rounded-2xl font-bold uppercase tracking-widest text-[10px] h-12 md:h-14 px-8 shadow-sm"
                                 onClick={() => setIsResubmitting(true)}
                              >
-                                <RotateCcw className="h-4 w-4" />
+                                <RotateCcw className="h-4 w-4 mr-2" />
                                 {t("buttons.resubmitAssignment")}
                              </Button>
                         </div>
 
 
                         {receivedReviews.length > 0 && (
-                          <div className="space-y-8 pt-6 border-t border-black/[0.05] dark:border-white/[0.05]">
+                          <div className="space-y-8 pt-8 border-t border-border/40">
                             <div className="flex items-center gap-3">
-                                <div className="p-2 rounded-xl bg-primary/10 text-primary">
-                                    <Users className="h-5 w-5" />
+                                <div className="p-3 rounded-2xl bg-primary/10 text-primary">
+                                    <Users className="h-6 w-6" />
                                 </div>
-                                <h3 className="text-xl font-black uppercase tracking-widest">{t("assignments.show.peerFeedback")}</h3>
+                                <h3 className="text-xl md:text-2xl font-black uppercase tracking-widest">{t("assignments.show.peerFeedback")}</h3>
                             </div>
                             <div className="grid gap-8">
                               {receivedReviews.map((review: PeerReview, idx: number) => (
-                                <div key={review.id} className="p-8 bg-primary/5 rounded-[2rem] border border-primary/10 relative group hover:bg-primary/10 transition-all shadow-sm">
+                                <div key={review.id} className="p-8 rounded-[2rem] bg-primary/5 border border-primary/10 relative group hover:bg-primary/10 transition-all shadow-sm">
                                   <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
                                     <div className="flex items-center gap-3">
                                       <div className="size-8 rounded-xl bg-primary/20 flex items-center justify-center text-xs font-black text-primary">
@@ -526,7 +547,7 @@ const AssignmentShow = () => {
                                       ))}
                                     </div>
                                   </div>
-                                  <p className="text-lg italic text-muted-foreground leading-relaxed font-medium">"{review.feedback}"</p>
+                                  <p className="text-base md:text-lg italic text-muted-foreground leading-relaxed font-medium">"{review.feedback}"</p>
                                 </div>
                               ))}
                             </div>
@@ -538,19 +559,19 @@ const AssignmentShow = () => {
               </Card>
 
               {assignedReviews.length > 0 && (
-                <Card className="border-none shadow-2xl bg-card overflow-hidden rounded-[3rem]">
-                  <CardHeader className="bg-amber-500/5 border-b border-amber-500/10 p-10">
-                    <CardTitle className="text-2xl font-black uppercase tracking-widest flex items-center gap-4 text-amber-600">
+                <Card className="border-none shadow-2xl bg-card overflow-hidden rounded-[2.5rem] md:rounded-[3rem]">
+                  <CardHeader className="bg-amber-500/5 border-b border-amber-500/10 p-8 md:p-10">
+                    <CardTitle className="text-xl md:text-2xl font-black uppercase tracking-widest flex items-center gap-4 text-amber-600">
                       <div className="p-3 rounded-2xl bg-amber-500/10">
-                        <Star className="h-8 w-8" />
+                        <Star className="h-6 w-6 md:h-8 md:w-8" />
                       </div>
                       {t("assignments.show.peersAssigned")}
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="p-10 space-y-12">
+                  <CardContent className="p-8 md:p-10 space-y-10 md:space-y-12">
                     {assignedReviews.map((review: PeerReview) => (
-                      <div key={review.id} className="space-y-8 p-8 rounded-[2.5rem] border-2 border-dashed border-amber-500/20 bg-amber-500/[0.02]">
-                        <div className="flex items-center justify-between">
+                      <div key={review.id} className="space-y-8 p-8 rounded-[2rem] border-2 border-dashed border-amber-500/20 bg-amber-500/[0.02] shadow-sm">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                           <div className="flex items-center gap-4">
                             <Avatar className="h-14 w-14 rounded-2xl border-4 border-background shadow-lg">
                                 <AvatarImage src={review.submission?.student?.image ?? ""} className="object-cover" />
@@ -561,9 +582,9 @@ const AssignmentShow = () => {
                               <h4 className="font-black text-xl tracking-tight">{review.submission?.student?.name}</h4>
                             </div>
                           </div>
-                          <Badge variant="outline" className="border-amber-500/30 text-amber-600 font-black uppercase tracking-widest text-[10px] px-4 py-1.5 rounded-xl">{t("assignments.show.pendingReview")}</Badge>
+                          <Badge variant="outline" className="border-amber-500/30 text-amber-600 font-black uppercase tracking-widest text-[10px] px-4 py-1.5 rounded-xl shadow-sm">{t("assignments.show.pendingReview")}</Badge>
                         </div>
-                        <div className="p-8 bg-white dark:bg-zinc-900 rounded-[1.5rem] text-base font-medium italic shadow-inner border border-black/[0.03] dark:border-white/10 leading-relaxed">
+                        <div className="p-8 bg-white dark:bg-zinc-900 rounded-[1.5rem] text-base font-medium italic shadow-inner border border-border/40 leading-relaxed">
                           {review.submission?.content}
                         </div>
                         <PeerReviewForm 
@@ -578,33 +599,33 @@ const AssignmentShow = () => {
               )}
             </div>
 
-            <div className="space-y-12">
+            <div className="space-y-10 md:space-y-16">
               <AnimatePresence>
                 {mySubmission?.grade && (
                   <motion.div
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                   >
-                    <Card className="border-none shadow-2xl bg-gradient-to-br from-primary to-ai-primary text-primary-foreground overflow-hidden rounded-[3rem] relative">
+                    <Card className="border-none shadow-2xl bg-gradient-to-br from-primary to-ai-primary text-primary-foreground overflow-hidden rounded-[2.5rem] md:rounded-[3rem] relative">
                       <div className={cn("absolute opacity-10 rotate-12", isAr ? "-left-12 -top-12" : "-right-12 -top-12")}>
                         <Trophy className="h-64 w-64" />
                       </div>
-                      <CardHeader className="p-10 pb-4">
+                      <CardHeader className="p-8 md:p-10 pb-4">
                         <CardTitle className="text-[10px] font-black uppercase tracking-widest opacity-70 flex items-center gap-2">
                           <Trophy className="h-4 w-4" />
                           {t("assignments.show.academicPerformance")}
                         </CardTitle>
                       </CardHeader>
-                      <CardContent className="p-10 pt-0 space-y-10 relative z-10">
+                      <CardContent className="p-8 md:p-10 pt-0 space-y-10 relative z-10">
                         <div className="flex flex-col gap-6">
                           <div className="space-y-1">
                             <p className="text-[10px] font-black uppercase tracking-widest opacity-60">{t("assignments.show.instructorGrade")}</p>
-                            <p className="text-5xl font-black">{mySubmission.grade}%</p>
+                            <p className="text-5xl md:text-6xl font-black">{mySubmission.grade}%</p>
                           </div>
                           {blendedGrade && (
                             <div className="space-y-1 pt-6 border-t border-white/10">
                               <p className="text-[10px] font-black uppercase tracking-widest opacity-60">{t("assignments.show.blendedScore")}</p>
-                              <p className="text-7xl font-black tracking-tighter">{blendedGrade.toFixed(1)}%</p>
+                              <p className="text-6xl md:text-7xl font-black tracking-tighter">{blendedGrade.toFixed(1)}%</p>
                             </div>
                           )}
                         </div>
@@ -612,7 +633,7 @@ const AssignmentShow = () => {
                         {assignment.hasPeerReview && (
                           <div className="space-y-4">
                             <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest opacity-70">
-                              <span>{t("assignments.show.peerReviewWeight")}</span>
+                              <span>{t("assignments.show.peerReviewerWeight")}</span>
                               <span>{assignment.peerReviewWeight}%</span>
                             </div>
                             <div className="h-3 bg-white/10 rounded-full overflow-hidden p-1 border border-white/5">
@@ -635,30 +656,30 @@ const AssignmentShow = () => {
                 )}
               </AnimatePresence>
 
-              <Card className="border-none shadow-2xl bg-card/50 backdrop-blur-xl rounded-[2.5rem] overflow-hidden">
-                <CardHeader className="p-8 pb-4 border-b border-black/[0.03] dark:border-white/10">
-                    <CardTitle className="text-sm font-black uppercase tracking-widest flex items-center gap-2">
+              <Card className="border-none shadow-2xl bg-card/50 backdrop-blur-xl rounded-[2.5rem] md:rounded-[3rem] overflow-hidden">
+                <CardHeader className="p-8 md:p-10 pb-4 border-b border-border/40">
+                    <CardTitle className="text-sm md:text-base font-black uppercase tracking-widest flex items-center gap-2">
                         <ShieldCheck className="h-4 w-4 text-primary" />
                         {t("assignments.show.submissionRules")}
                     </CardTitle>
                 </CardHeader>
-                <CardContent className="p-8 space-y-6">
+                <CardContent className="p-8 md:p-10 space-y-6 md:space-y-8">
                     <div className="flex gap-4">
-                        <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                            <Timer className="h-5 w-5 text-primary" />
+                        <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                            <Timer className="h-6 w-6 text-primary" />
                         </div>
                         <div className="space-y-1">
                             <p className="font-black text-[10px] uppercase tracking-widest">{t("assignments.show.latePolicy")}</p>
-                            <p className="text-sm text-muted-foreground font-medium">{t("assignments.show.lateDescription")}</p>
+                            <p className="text-sm md:text-base text-muted-foreground font-medium leading-relaxed">{t("assignments.show.lateDescription")}</p>
                         </div>
                     </div>
                     <div className="flex gap-4">
-                        <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                            <GraduationCap className="h-5 w-5 text-primary" />
+                        <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                            <GraduationCap className="h-6 w-6 text-primary" />
                         </div>
                         <div className="space-y-1">
                             <p className="font-black text-[10px] uppercase tracking-widest">{t("assignments.show.academicIntegrity")}</p>
-                            <p className="text-sm text-muted-foreground font-medium">{t("assignments.show.integrityDescription")}</p>
+                            <p className="text-sm md:text-base text-muted-foreground font-medium leading-relaxed">{t("assignments.show.integrityDescription")}</p>
                         </div>
                     </div>
                 </CardContent>
@@ -673,26 +694,26 @@ const AssignmentShow = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
           >
-            <Card className="border-none shadow-2xl bg-card overflow-hidden rounded-[3rem] text-start">
-              <CardHeader className="bg-primary/5 border-b border-primary/10 p-10">
+            <Card className="border-none shadow-2xl bg-card overflow-hidden rounded-[2.5rem] md:rounded-[3rem] text-start">
+              <CardHeader className="bg-primary/5 border-b border-primary/10 p-8 md:p-10">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                   <div className="flex items-center gap-4">
                     <div className="p-3 rounded-2xl bg-primary/10 text-primary">
-                        <Users className="h-8 w-8" />
+                        <Users className="h-6 w-6 md:h-8 md:w-8" />
                     </div>
                     <div>
-                        <CardTitle className="text-2xl font-black uppercase tracking-widest">{t("assignments.show.studentSubmissions")}</CardTitle>
-                        <CardDescription className="font-bold text-primary/60">{t("assignments.show.submissionsDescription")}</CardDescription>
+                        <CardTitle className="text-xl md:text-2xl font-black uppercase tracking-widest">{t("assignments.show.studentSubmissions")}</CardTitle>
+                        <CardDescription className="font-bold text-primary/60 text-sm md:text-base">{t("assignments.show.submissionsDescription")}</CardDescription>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <Badge variant="secondary" className="rounded-xl px-4 py-2 font-black text-[10px] uppercase tracking-widest bg-primary/10 text-primary border-none">
+                    <Badge variant="secondary" className="rounded-xl px-4 py-2 font-black text-[10px] uppercase tracking-widest bg-primary/10 text-primary border-none shadow-sm">
                       {t("assignments.show.submissionsCount", { count: submissions.length })}
                     </Badge>
                   </div>
                 </div>
               </CardHeader>
-              <CardContent className="p-10">
+              <CardContent className="p-8 md:p-10">
                 <SubmissionList submissions={submissions} assignmentId={Number(assignment.id)} />
               </CardContent>
             </Card>

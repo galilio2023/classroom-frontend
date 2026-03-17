@@ -48,11 +48,9 @@ const AIStudyLab = () => {
   const [practiceTopic, setPracticeTopic] = useState<string | null>(null);
   const [flashcards, setFlashcards] = useState<any[] | null>(null);
   
-  // Ref to track AbortController for cleaning up pending AI requests
   const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
-    // Cleanup on unmount
     return () => {
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
@@ -71,7 +69,6 @@ const AIStudyLab = () => {
       return;
     }
 
-    // Abort any existing request before starting a new one
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
@@ -115,86 +112,101 @@ const AIStudyLab = () => {
     }
   };
 
+  const tools = [
+    { id: "explain", title: t("aiHub.studyLab.tools.explain.title"), desc: t("aiHub.studyLab.tools.explain.desc"), icon: BookOpen, color: "text-blue-500", bg: "bg-blue-500/10" },
+    { id: "quiz", title: t("aiHub.studyLab.tools.quiz.title"), desc: t("aiHub.studyLab.tools.quiz.desc"), icon: FileQuestion, color: "text-purple-500", bg: "bg-purple-500/10" },
+    { id: "summary", title: t("aiHub.studyLab.tools.summary.title"), desc: t("aiHub.studyLab.tools.summary.desc"), icon: Sparkles, color: "text-green-500", bg: "bg-green-500/10" },
+    { id: "flashcards", title: t("aiHub.studyLab.tools.flashcards.title"), desc: t("aiHub.studyLab.tools.flashcards.desc"), icon: Layers, color: "text-orange-500", bg: "bg-orange-500/10" },
+  ];
+
   return (
-    <div className="container mx-auto py-10 max-w-6xl space-y-10" dir={isAr ? "rtl" : "ltr"}>
+    <div className="space-y-10 md:space-y-16 pb-20 max-w-7xl mx-auto" dir={isAr ? "rtl" : "ltr"}>
+      {/* Header Section */}
       <motion.div 
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="space-y-4"
+        className="space-y-4 md:space-y-6 text-start px-2"
       >
         <Breadcrumb />
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="flex items-center gap-4">
-                <div className="p-3 rounded-2xl bg-primary/10 text-primary shadow-sm">
-                    <BrainCircuit className="h-8 w-8" />
+                <div className="p-3 rounded-2xl bg-primary/10 text-primary border border-primary/5 shadow-sm">
+                    <BrainCircuit className="h-6 w-6 md:h-8 md:w-8" />
                 </div>
-                <div className="text-start">
-                    <h1 className="text-4xl font-black tracking-tight">{t("aiHub.studyLab.title")}</h1>
-                    <p className="text-muted-foreground font-medium mt-1">{t("aiHub.studyLab.description")}</p>
+                <div>
+                    <h1 className="text-3xl md:text-4xl lg:text-5xl font-black tracking-tight text-balance">
+                        {t("aiHub.studyLab.title")}
+                    </h1>
+                    <p className="text-muted-foreground font-medium max-w-xl text-balance">
+                        {t("aiHub.studyLab.description")}
+                    </p>
                 </div>
             </div>
-            <Button variant="outline" className="rounded-2xl h-12 px-6 font-black uppercase tracking-widest text-[10px] gap-2 border-primary/10 bg-card/50 backdrop-blur-sm">
+            <Button variant="outline" size="lg" className="w-full md:w-auto rounded-2xl h-12 md:h-14 px-8 border-primary/20 bg-primary/5 hover:bg-primary/10 text-primary font-bold uppercase tracking-widest text-[10px] shadow-sm gap-2">
                 <History className="h-4 w-4" />
                 {t("buttons.studyHistory")}
             </Button>
         </div>
       </motion.div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12 items-start">
         {/* Tool Selection Sidebar */}
-        <div className="lg:col-span-4 space-y-4">
-          {[
-            { id: "explain", title: t("aiHub.studyLab.tools.explain.title"), desc: t("aiHub.studyLab.tools.explain.desc"), icon: BookOpen, color: "text-blue-500", bg: "bg-blue-500/10" },
-            { id: "quiz", title: t("aiHub.studyLab.tools.quiz.title"), desc: t("aiHub.studyLab.tools.quiz.desc"), icon: FileQuestion, color: "text-purple-500", bg: "bg-purple-500/10" },
-            { id: "summary", title: t("aiHub.studyLab.tools.summary.title"), desc: t("aiHub.studyLab.tools.summary.desc"), icon: Sparkles, color: "text-green-500", bg: "bg-green-500/10" },
-            { id: "flashcards", title: t("aiHub.studyLab.tools.flashcards.title"), desc: t("aiHub.studyLab.tools.flashcards.desc"), icon: Layers, color: "text-orange-500", bg: "bg-orange-500/10" },
-          ].map((tool) => (
-            <motion.div
-                key={tool.id}
-                whileHover={{ x: isAr ? -4 : 4 }}
-                whileTap={{ scale: 0.98 }}
-            >
-                <Card
-                    className={cn(
-                        "cursor-pointer transition-all border-none shadow-lg rounded-2xl overflow-hidden group",
-                        activeTool === tool.id
-                            ? "bg-primary text-primary-foreground shadow-primary/20"
-                            : "bg-card/50 backdrop-blur-sm hover:bg-primary/5"
-                    )}
-                    onClick={() => setActiveTool(tool.id as any)}
+        <div className="lg:col-span-4 space-y-6 md:space-y-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4 md:gap-6">
+            {tools.map((tool) => (
+                <motion.div
+                    key={tool.id}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="h-full"
                 >
-                    <CardHeader className="p-5 text-start">
-                        <div className="flex items-center gap-4">
-                            <div className={cn(
-                                "p-3 rounded-xl transition-colors",
-                                activeTool === tool.id ? "bg-white/20 text-white" : tool.bg + " " + tool.color
-                            )}>
-                                <tool.icon className="h-6 w-6" />
-                            </div>
-                            <div className="space-y-0.5">
-                                <CardTitle className="text-base font-black tracking-tight">{tool.title}</CardTitle>
-                                <CardDescription className={cn(
-                                    "text-xs font-medium",
-                                    activeTool === tool.id ? "text-white/70" : "text-muted-foreground"
-                                )}>
-                                    {tool.desc}
-                                </CardDescription>
-                            </div>
-                        </div>
-                    </CardHeader>
-                </Card>
-            </motion.div>
-          ))}
+                    <Card
+                        className={cn(
+                            "h-full cursor-pointer transition-all duration-300 border border-border/40 shadow-sm rounded-[1.5rem] md:rounded-[2rem] overflow-hidden group relative",
+                            activeTool === tool.id
+                                ? "bg-primary text-primary-foreground shadow-2xl shadow-primary/20"
+                                : "bg-card/50 backdrop-blur-3xl hover:bg-primary/5 hover:border-primary/20"
+                        )}
+                        onClick={() => setActiveTool(tool.id as any)}
+                    >
+                        {/* Selected Accent */}
+                        {activeTool === tool.id && (
+                            <div className="absolute left-0 top-0 w-1.5 h-full bg-white/20" />
+                        )}
 
-          <Card className="mt-8 border-primary/10 bg-primary/5 rounded-[2rem] p-6 text-start">
-            <div className="flex gap-4">
-                <div className="p-2 rounded-xl bg-primary/10 text-primary h-fit">
-                    <Lightbulb className="h-5 w-5" />
+                        <CardHeader className="p-6 md:p-8 text-start">
+                            <div className="flex items-center gap-4">
+                                <div className={cn(
+                                    "p-3 rounded-2xl transition-all duration-500 shrink-0 shadow-sm",
+                                    activeTool === tool.id ? "bg-white/20 text-white" : tool.bg + " " + tool.color
+                                )}>
+                                    <tool.icon className="h-6 w-6 md:h-7 md:w-7" />
+                                </div>
+                                <div className="space-y-1 min-w-0">
+                                    <CardTitle className="text-lg md:text-xl font-black tracking-tight truncate">{tool.title}</CardTitle>
+                                    <CardDescription className={cn(
+                                        "text-xs md:text-sm font-medium leading-tight",
+                                        activeTool === tool.id ? "text-white/70" : "text-muted-foreground/70"
+                                    )}>
+                                        {tool.desc}
+                                    </CardDescription>
+                                </div>
+                            </div>
+                        </CardHeader>
+                    </Card>
+                </motion.div>
+            ))}
+          </div>
+
+          <Card className="border-border/40 bg-primary/5 rounded-[2rem] md:rounded-[2.5rem] p-8 text-start shadow-xl shadow-primary/5 border-2 border-dashed backdrop-blur-sm">
+            <div className="flex gap-5">
+                <div className="p-2.5 rounded-xl bg-primary/10 text-primary h-fit shrink-0">
+                    <Lightbulb className="h-6 w-6" />
                 </div>
-                <div className="space-y-1">
-                    <p className="font-black text-xs uppercase tracking-widest text-primary">{t("aiHub.studyLab.studyTip")}</p>
-                    <p className="text-xs text-muted-foreground font-medium leading-relaxed">
-                        {t("aiHub.studyLab.studyTipDesc")}
+                <div className="space-y-2">
+                    <p className="font-black text-[10px] uppercase tracking-[0.2em] text-primary">{t("aiHub.studyLab.studyTip")}</p>
+                    <p className="text-sm md:text-base text-muted-foreground/80 font-medium leading-relaxed italic">
+                        "{t("aiHub.studyLab.studyTipDesc")}"
                     </p>
                 </div>
             </div>
@@ -202,7 +214,7 @@ const AIStudyLab = () => {
         </div>
 
         {/* Main Interaction Area */}
-        <div className="lg:col-span-8 space-y-8">
+        <div className="lg:col-span-8 space-y-8 md:space-y-12">
           <AnimatePresence mode="wait">
             {!flashcards ? (
                 <motion.div
@@ -210,25 +222,28 @@ const AIStudyLab = () => {
                     initial={{ opacity: 0, scale: 0.98 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.98 }}
+                    transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
                 >
-                    <Card className="border-none shadow-2xl bg-card/50 backdrop-blur-xl rounded-[2.5rem] overflow-hidden">
-                        <CardHeader className="p-10 pb-6 text-start">
+                    <Card className="border-border/40 shadow-2xl bg-card/50 backdrop-blur-3xl rounded-[2.5rem] md:rounded-[3rem] overflow-hidden">
+                        <CardHeader className="p-8 md:p-12 pb-6 md:pb-8 text-start bg-primary/5 border-b border-border/40">
                             <div className="flex items-center gap-3 mb-2">
-                                <Zap className="h-5 w-5 text-primary animate-pulse" />
-                                <CardTitle className="text-2xl font-black tracking-tight">
+                                <div className="p-2.5 rounded-xl bg-primary/10 text-primary border border-primary/5 shadow-sm">
+                                    <Zap className="h-6 w-6 animate-pulse" />
+                                </div>
+                                <CardTitle className="text-2xl md:text-3xl font-black tracking-tight">
                                     {activeTool === "explain" && t("aiHub.studyLab.questions.understand")}
                                     {activeTool === "quiz" && t("aiHub.studyLab.questions.test")}
                                     {activeTool === "summary" && t("aiHub.studyLab.questions.summary")}
                                     {activeTool === "flashcards" && t("aiHub.studyLab.questions.cards")}
                                 </CardTitle>
                             </div>
-                            <CardDescription className="font-medium text-base">
+                            <CardDescription className="font-medium text-base md:text-lg text-muted-foreground/70">
                                 {t("aiHub.studyLab.questions.sub")}
                             </CardDescription>
                         </CardHeader>
-                        <CardContent className="p-10 pt-4 space-y-8 text-start">
-                            <div className="space-y-3">
-                                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">{t("aiHub.studyLab.inputLabel")}</Label>
+                        <CardContent className="p-8 md:p-12 space-y-8 text-start">
+                            <div className="space-y-4">
+                                <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 ml-2">{t("aiHub.studyLab.inputLabel")}</Label>
                                 {activeTool === "quiz" || activeTool === "explain" || activeTool === "flashcards" ? (
                                     <Input
                                         placeholder={
@@ -240,14 +255,14 @@ const AIStudyLab = () => {
                                         }
                                         value={input}
                                         onChange={(e) => setInput(e.target.value)}
-                                        className="h-16 rounded-2xl bg-muted/30 border-none focus-visible:ring-primary font-black text-lg px-6"
+                                        className="h-16 md:h-20 rounded-3xl bg-muted/30 border-none shadow-inner px-8 text-lg md:text-2xl font-black placeholder:text-muted-foreground/30 focus-visible:ring-primary/20"
                                     />
                                 ) : (
                                     <Textarea
                                         placeholder={t("aiHub.studyLab.placeholderNotes")}
                                         value={input}
                                         onChange={(e) => setInput(e.target.value)}
-                                        className="min-h-[250px] rounded-[2rem] bg-muted/30 border-none focus-visible:ring-primary p-8 text-base leading-relaxed font-medium resize-none"
+                                        className="min-h-[250px] md:min-h-[400px] rounded-[2rem] md:rounded-[3rem] bg-muted/30 border-none shadow-inner p-8 md:p-12 text-base md:text-xl leading-relaxed font-medium resize-none focus-visible:ring-primary/20"
                                     />
                                 )}
                             </div>
@@ -255,19 +270,22 @@ const AIStudyLab = () => {
                             <Button
                                 onClick={handleToolAction}
                                 disabled={isLoading}
-                                className="w-full h-16 rounded-2xl font-black uppercase tracking-widest text-xs gap-3 shadow-2xl shadow-primary/20 group"
+                                size="lg"
+                                className="w-full h-16 md:h-20 rounded-[1.5rem] md:rounded-3xl font-black uppercase tracking-widest text-xs md:text-sm gap-4 shadow-2xl shadow-primary/30 group transition-all"
                             >
                                 {isLoading ? (
-                                    <Loader2 className="h-5 w-5 animate-spin" />
+                                    <Loader2 className="h-6 w-6 animate-spin" />
                                 ) : (
-                                    <Sparkles className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                                    <Sparkles className="h-6 w-6 group-hover:scale-110 transition-transform" />
                                 )}
-                                {activeTool === "quiz"
-                                    ? t("buttons.startPracticeQuiz")
-                                    : activeTool === "flashcards"
-                                    ? t("buttons.generateFlashcards")
-                                    : t("buttons.generateWithAi")}
-                                {!isLoading && <ArrowRight className={cn("h-4 w-4 ml-2 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all", isAr && "rotate-180 mr-2 ml-0 group-hover:-translate-x-1")} />}
+                                <span className="truncate">
+                                    {activeTool === "quiz"
+                                        ? t("buttons.startPracticeQuiz")
+                                        : activeTool === "flashcards"
+                                        ? t("buttons.generateFlashcards")
+                                        : t("buttons.generateWithAi")}
+                                </span>
+                                {!isLoading && <ArrowRight className={cn("hidden sm:block h-5 w-5 ml-2 opacity-0 group-hover:opacity-100 group-hover:translate-x-2 transition-all", isAr && "rotate-180 mr-2 ml-0 group-hover:-translate-x-2")} />}
                             </Button>
                         </CardContent>
                     </Card>
@@ -278,23 +296,24 @@ const AIStudyLab = () => {
                     initial={{ opacity: 0, scale: 0.98 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.98 }}
+                    transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
                 >
-                    <Card className="shadow-2xl border-none bg-card/50 backdrop-blur-xl rounded-[3rem] overflow-hidden">
-                        <CardHeader className="bg-primary/5 border-b border-primary/10 flex flex-row items-center justify-between p-8 text-start">
+                    <Card className="shadow-2xl border-border/40 bg-card/50 backdrop-blur-3xl rounded-[2.5rem] md:rounded-[3rem] overflow-hidden">
+                        <CardHeader className="bg-primary/5 border-b border-border/40 flex flex-row items-center justify-between p-8 md:p-12 text-start">
                             <div className="flex items-center gap-4">
-                                <div className="p-3 rounded-2xl bg-primary/10 text-primary">
+                                <div className="p-3 rounded-2xl bg-primary/10 text-primary border border-primary/5 shadow-sm">
                                     <Layers className="h-8 w-8" />
                                 </div>
-                                <div>
-                                    <CardTitle className="text-2xl font-black tracking-tight">{t("aiHub.studyLab.flashcardSession")}</CardTitle>
-                                    <CardDescription className="font-bold text-primary/60 uppercase tracking-widest text-[10px]">{t("aiHub.studyLab.activeRecall")}</CardDescription>
+                                <div className="min-w-0">
+                                    <CardTitle className="text-2xl md:text-3xl font-black tracking-tight truncate">{t("aiHub.studyLab.flashcardSession")}</CardTitle>
+                                    <CardDescription className="font-black text-primary/60 uppercase tracking-[0.2em] text-[10px] md:text-xs truncate">{t("aiHub.studyLab.activeRecall")}</CardDescription>
                                 </div>
                             </div>
-                            <Button variant="ghost" size="icon" className="h-12 w-12 rounded-full hover:bg-destructive/5 hover:text-destructive" onClick={() => setFlashcards(null)}>
+                            <Button variant="ghost" size="icon" className="h-12 w-12 rounded-full hover:bg-destructive/10 hover:text-destructive shrink-0 bg-muted/20" onClick={() => setFlashcards(null)}>
                                 <X className="h-6 w-6" />
                             </Button>
                         </CardHeader>
-                        <CardContent className="p-12">
+                        <CardContent className="p-8 md:p-16">
                             <FlashcardPlayer 
                                 cards={flashcards} 
                                 onComplete={() => setFlashcards(null)} 
@@ -305,31 +324,37 @@ const AIStudyLab = () => {
             )}
           </AnimatePresence>
 
-          <AnimatePresence>
+          <AnimatePresence mode="wait">
             {result && (
                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 20 }}
+                    exit={{ opacity: 0, y: 30 }}
+                    transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
                 >
-                    <Card className="border-none shadow-2xl bg-indigo-500/[0.02] backdrop-blur-xl rounded-[2.5rem] overflow-hidden border border-indigo-500/10">
-                        <CardHeader className="p-10 pb-6 border-b border-indigo-500/10 text-start">
-                            <div className="flex items-center gap-3">
-                                <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-600">
-                                    <Sparkles className="h-5 w-5" />
+                    <Card className="border-border/40 shadow-2xl bg-indigo-500/[0.03] backdrop-blur-3xl rounded-[2.5rem] md:rounded-[3rem] overflow-hidden">
+                        <CardHeader className="p-8 md:p-12 pb-6 md:pb-8 border-b border-indigo-500/10 text-start bg-indigo-500/5">
+                            <div className="flex items-center justify-between w-full">
+                                <div className="flex items-center gap-4">
+                                    <div className="p-3 rounded-2xl bg-indigo-500/10 text-indigo-600 border border-indigo-500/20 shadow-sm">
+                                        <Sparkles className="h-6 w-6" />
+                                    </div>
+                                    <CardTitle className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-indigo-600">
+                                        {t("aiHub.studyLab.aiResponse")}
+                                    </CardTitle>
                                 </div>
-                                <CardTitle className="text-[10px] font-black uppercase tracking-widest text-indigo-600">
-                                    {t("aiHub.studyLab.aiResponse")}
-                                </CardTitle>
+                                <Button variant="ghost" size="icon" onClick={() => setResult("")} className="h-10 w-10 rounded-full bg-muted/20 hover:bg-destructive/10 hover:text-destructive">
+                                    <X className="h-5 w-5" />
+                                </Button>
                             </div>
                         </CardHeader>
-                        <CardContent className="p-10 prose prose-lg dark:prose-invert max-w-none font-medium leading-relaxed text-start">
+                        <CardContent className="p-8 md:p-12 prose prose-base md:prose-lg lg:prose-xl dark:prose-invert max-w-none font-medium leading-relaxed text-start selection:bg-indigo-500/20">
                             <ReactMarkdown>{result}</ReactMarkdown>
                         </CardContent>
-                        <div className="p-8 bg-indigo-500/5 border-t border-indigo-500/10 flex justify-end">
-                            <Button variant="ghost" className="rounded-xl font-black uppercase tracking-widest text-[10px] gap-2 text-indigo-600 hover:bg-indigo-500/10">
-                                <History className="h-4 w-4" />
-                                {t("buttons.saveToHistory")}
+                        <div className="p-8 md:p-10 bg-indigo-500/[0.05] border-t border-indigo-500/10 flex justify-end">
+                            <Button size="lg" variant="ghost" className="rounded-2xl font-black uppercase tracking-widest text-[10px] gap-3 text-indigo-600 hover:bg-indigo-500/10 h-14 px-8">
+                                <History className="h-5 w-5" />
+                                <span>{t("buttons.saveToHistory")}</span>
                             </Button>
                         </div>
                     </Card>

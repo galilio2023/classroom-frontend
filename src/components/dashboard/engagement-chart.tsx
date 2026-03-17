@@ -49,35 +49,35 @@ const ChartCard = ({
       transition={{ delay, duration: 0.5 }}
       className="h-full"
     >
-      <Card className="h-full border-none shadow-2xl overflow-hidden bg-card/50 backdrop-blur-xl rounded-[2rem] group">
+      <Card className="h-full border-none shadow-2xl overflow-hidden bg-card/50 backdrop-blur-xl rounded-[2rem] md:rounded-[2.5rem] group">
         {/* Top Accent Bar */}
         <div className="h-1.5 bg-gradient-to-r from-primary via-ai-primary to-primary w-full opacity-20 group-hover:opacity-100 transition-opacity duration-500" />
         
-        <CardHeader className="p-8 pb-2">
-          <div className="flex items-center justify-between">
+        <CardHeader className="p-6 md:p-8 pb-2 text-start">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="space-y-1">
               <CardTitle className={cn(
-                  "flex items-center gap-3 text-2xl tracking-tighter",
+                  "flex items-center gap-3 text-xl md:text-2xl tracking-tighter",
                   isArabic ? "font-bold" : "font-black"
               )}>
                 <div className="p-2.5 rounded-xl bg-primary/10 text-primary group-hover:scale-110 transition-transform duration-500">
-                  <Icon className="h-6 w-6" />
+                  <Icon className="h-5 w-5 md:h-6 md:w-6" />
                 </div>
                 {title}
               </CardTitle>
-              <CardDescription className="font-medium text-muted-foreground/60">{description}</CardDescription>
+              <CardDescription className="font-medium text-muted-foreground/60 text-sm">{description}</CardDescription>
             </div>
-            <Badge variant="secondary" className="rounded-full px-3 py-1 font-black text-[9px] uppercase tracking-widest bg-primary/5 text-primary border-none">
+            <Badge variant="secondary" className="rounded-full px-3 py-1 font-black text-[9px] md:text-[10px] uppercase tracking-widest bg-primary/5 text-primary border-none w-fit">
               {t("dashboard.charts.last7Days")}
             </Badge>
           </div>
         </CardHeader>
-        <CardContent className="h-[300px] p-8 pt-6">
+        <CardContent className="h-[250px] md:h-[300px] p-4 md:p-8 pt-6">
           {hasData ? children : <NoChartData icon={Icon} message={t("dashboard.charts.noData", { title: title.toLowerCase() })} />}
         </CardContent>
         
         {/* Footer Stats */}
-        <div className="px-8 pb-8 flex items-center justify-center gap-6">
+        <div className="px-6 md:px-8 pb-6 md:pb-8 flex flex-wrap items-center justify-center gap-4 md:gap-6">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-primary" />
             <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/40">{t("dashboard.charts.activeEngagement")}</span>
@@ -111,7 +111,7 @@ export const EngagementChart = ({ attendanceData, gradeData }: EngagementChartPr
     } satisfies ChartConfig;
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12">
             <ChartCard 
                 title={t("dashboard.charts.attendance.title")} 
                 description={t("dashboard.charts.attendance.description")} 
@@ -138,7 +138,7 @@ export const EngagementChart = ({ attendanceData, gradeData }: EngagementChartPr
                               axisLine={false} 
                               tickLine={false} 
                               tickMargin={12}
-                              className="fill-muted-foreground/60 text-[10px] font-black uppercase tracking-widest"
+                              className="fill-muted-foreground/60 text-[8px] md:text-[10px] font-black uppercase tracking-widest"
                               tickFormatter={(str) => {
                                   try {
                                       return new Date(str).toLocaleDateString(i18n.language === 'ar' ? 'ar-EG' : 'en-US', { weekday: 'short' });
@@ -152,7 +152,7 @@ export const EngagementChart = ({ attendanceData, gradeData }: EngagementChartPr
                             axisLine={false} 
                             tickLine={false} 
                             tickMargin={12} 
-                            className="fill-muted-foreground/60 text-[10px] font-black uppercase tracking-widest"
+                            className="fill-muted-foreground/60 text-[8px] md:text-[10px] font-black uppercase tracking-widest"
                             orientation={isArabic ? "right" : "left"}
                             tickFormatter={(val) => new Intl.NumberFormat(isArabic ? 'ar-EG' : 'en-US').format(val)}
                           />
@@ -202,14 +202,14 @@ export const EngagementChart = ({ attendanceData, gradeData }: EngagementChartPr
                                   axisLine={false} 
                                   tickLine={false} 
                                   tickMargin={12}
-                                  className="fill-muted-foreground/60 text-[10px] font-black uppercase tracking-widest"
+                                  className="fill-muted-foreground/60 text-[8px] md:text-[10px] font-black uppercase tracking-widest"
                                   reversed={isArabic}
                               />
                               <YAxis 
                                 axisLine={false} 
                                 tickLine={false} 
                                 tickMargin={12} 
-                                className="fill-muted-foreground/60 text-[10px] font-black uppercase tracking-widest"
+                                className="fill-muted-foreground/60 text-[8px] md:text-[10px] font-black uppercase tracking-widest"
                                 orientation={isArabic ? "right" : "left"}
                                 tickFormatter={(val) => new Intl.NumberFormat(isArabic ? 'ar-EG' : 'en-US').format(val)}
                               />

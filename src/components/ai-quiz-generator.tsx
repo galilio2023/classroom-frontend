@@ -14,6 +14,10 @@ export const AIQuizGenerator: React.FC<AIQuizGeneratorProps> = ({ classId }) => 
     setTopic,
     count,
     setCount,
+    difficulty,
+    setDifficulty,
+    type,
+    setType,
     quiz,
     handleGenerate,
     isLoading,
@@ -61,6 +65,10 @@ export const AIQuizGenerator: React.FC<AIQuizGeneratorProps> = ({ classId }) => 
         setTopic={setTopic}
         count={count}
         setCount={setCount}
+        difficulty={difficulty}
+        setDifficulty={setDifficulty}
+        type={type}
+        setType={setType}
         handleGenerate={handleGenerate}
         handleSaveAsAssignment={handleSaveAsAssignment}
         isLoading={isLoading}

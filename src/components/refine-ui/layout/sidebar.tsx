@@ -92,48 +92,50 @@ export function Sidebar() {
       <ShadcnSidebarRail />
       <SidebarHeader />
       <ShadcnSidebarContent
-        className={cn("transition-discrete", "pt-8", {
-          "px-3": open,
-          "px-1": !open,
+        className={cn("transition-all duration-300", "pt-6", {
+          "px-4": open,
+          "px-2": !open,
         })}
       >
         {/* Render default (ungrouped) items first */}
-        {groupedItems.default.map((item: TreeMenuItem) => (
-          <SidebarItem
-            key={item.key || item.name}
-            item={item}
-            selectedKey={selectedKey}
-          />
-        ))}
+        <div className="flex flex-col gap-1.5">
+            {groupedItems.default.map((item: TreeMenuItem) => (
+                <SidebarItem
+                    key={item.key || item.name}
+                    item={item}
+                    selectedKey={selectedKey}
+                />
+            ))}
+        </div>
 
         {/* Render grouped items with headers */}
         {Object.entries(groupedItems).map(([groupName, items]) => {
           if (groupName === "default" || items.length === 0) return null;
           
           return (
-            <div key={groupName} className="mt-6 mb-2">
+            <div key={groupName} className="mt-8 mb-2">
               <AnimatePresence initial={false}>
                 {open && (
                   <motion.span
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -10 }}
                     className={cn(
-                      "ml-3",
+                      "ml-4",
                       "block",
                       "text-[10px]",
-                      "font-bold",
+                      "font-black",
                       "uppercase",
-                      "tracking-widest",
-                      "text-muted-foreground/50",
-                      "mb-3"
+                      "tracking-[0.2em]",
+                      "text-muted-foreground/40",
+                      "mb-4"
                     )}
                   >
-                    {t(groupName)}
+                    {t(groupName as any)}
                   </motion.span>
                 )}
               </AnimatePresence>
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-1.5">
                 {items.map((item: TreeMenuItem) => (
                   <SidebarItem
                     key={item.key || item.name}
@@ -174,12 +176,12 @@ function SidebarItemCollapsible({ item, selectedKey }: MenuItemProps) {
   const chevronIcon = (
     <ChevronRight
       className={cn(
-        "h-4",
-        "w-4",
+        "h-3.5",
+        "w-3.5",
         "shrink-0",
-        "text-muted-foreground",
+        "text-muted-foreground/60",
         "transition-transform",
-        "duration-200",
+        "duration-300",
         "group-data-[state=open]:rotate-90",
       )}
     />
@@ -190,7 +192,7 @@ function SidebarItemCollapsible({ item, selectedKey }: MenuItemProps) {
       <CollapsibleTrigger asChild>
         <SidebarButton item={item} rightIcon={chevronIcon} />
       </CollapsibleTrigger>
-      <CollapsibleContent className={cn("ml-6", "flex", "flex-col", "gap-1", "mt-1")}>
+      <CollapsibleContent className={cn("ml-8", "flex", "flex-col", "gap-1.5", "mt-1.5", "border-l border-border/40 pl-2")}>
         {children?.map((child: TreeMenuItem) => (
           <SidebarItem
             key={child.key || child.name}
@@ -213,24 +215,24 @@ function SidebarItemDropdown({ item, selectedKey }: MenuItemProps) {
       <DropdownMenuTrigger asChild>
         <SidebarButton item={item} />
       </DropdownMenuTrigger>
-      <DropdownMenuContent side="right" align="start" className="sidebar-glass">
+      <DropdownMenuContent side="right" align="start" className="sidebar-glass w-56 p-2">
         {children?.map((child: TreeMenuItem) => {
           const { key: childKey } = child;
           const isSelected = childKey === selectedKey;
 
           return (
-            <DropdownMenuItem key={childKey || child.name} asChild>
+            <DropdownMenuItem key={childKey || child.name} asChild className="rounded-lg mb-1 last:mb-0 cursor-pointer">
               <Link
                 to={child.route || ""}
-                className={cn("flex w-full items-center gap-2", {
-                  "bg-primary/10 text-primary": isSelected,
+                className={cn("flex w-full items-center gap-3 p-2", {
+                  "bg-primary/10 text-primary font-bold": isSelected,
                 })}
               >
                 <ItemIcon
                   icon={child.meta?.icon ?? child.icon}
                   isSelected={isSelected}
                 />
-                <span className="font-medium">{getDisplayName(child, t)}</span>
+                <span className="text-sm">{getDisplayName(child, t)}</span>
               </Link>
             </DropdownMenuItem>
           );
@@ -252,7 +254,7 @@ function SidebarHeader() {
   return (
     <ShadcnSidebarHeader
       className={cn(
-        "p-0 h-20 border-b border-sidebar-border/50 flex items-center overflow-hidden bg-transparent",
+        "p-0 h-20 border-b border-border/40 flex items-center overflow-hidden bg-transparent transition-all duration-300",
         !open && !isMobile ? "justify-center" : "flex-row justify-between px-6",
       )}
     >
@@ -260,23 +262,30 @@ function SidebarHeader() {
         {(open || isMobile) && (
           <motion.div
             key="logo-full"
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -10 }}
-            transition={{ duration: 0.2 }}
+            initial={{ opacity: 0, x: -20, filter: "blur(10px)" }}
+            animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+            exit={{ opacity: 0, x: -20, filter: "blur(10px)" }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
           >
-            <RouterLink to="/" className="flex flex-row items-center gap-3 whitespace-nowrap hover:opacity-80">
-              <div className="shrink-0 p-2 bg-primary/10 rounded-xl">{title.icon}</div>
-              <h2 className="text-base font-black tracking-tight text-foreground">
-                {title.text}
-              </h2>
+            <RouterLink to="/" className="flex flex-row items-center gap-3 whitespace-nowrap group">
+              <div className="shrink-0 p-2.5 bg-primary/10 rounded-xl transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 shadow-sm">
+                {title.icon}
+              </div>
+              <div className="flex flex-col">
+                <h2 className="text-sm font-black tracking-tight text-foreground leading-none mb-0.5">
+                    {title.text}
+                </h2>
+                <span className="text-[10px] text-muted-foreground/60 font-medium tracking-wide">
+                    {open ? "Learning Management" : ""}
+                </span>
+              </div>
             </RouterLink>
           </motion.div>
         )}
       </AnimatePresence>
       <ShadcnSidebarTrigger
         className={cn(
-          "text-muted-foreground hover:text-foreground transition-colors shrink-0 opacity-100 pointer-events-auto",
+          "text-muted-foreground/60 hover:text-primary transition-all duration-300 shrink-0 opacity-100 pointer-events-auto",
           { "mr-0": !open && !isMobile },
         )}
       />
@@ -298,9 +307,9 @@ type IconProps = {
 function ItemIcon({ icon, isSelected }: IconProps) {
   return (
     <div
-      className={cn("w-5 h-5 flex items-center justify-center transition-colors", {
-        "text-muted-foreground group-hover:text-foreground": !isSelected,
-        "text-primary": isSelected,
+      className={cn("w-5 h-5 flex items-center justify-center transition-all duration-300", {
+        "text-muted-foreground/70 group-hover:text-foreground group-hover:scale-110": !isSelected,
+        "text-primary scale-110": isSelected,
       })}
     >
       {icon ?? <ListIcon className="w-4 h-4" />}
@@ -335,10 +344,10 @@ function SidebarButton({
       <AnimatePresence mode="wait">
         {open && (
           <motion.span
-            initial={{ opacity: 0, x: -5 }}
+            initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -5 }}
-            transition={{ duration: 0.15 }}
+            exit={{ opacity: 0, x: -10 }}
+            transition={{ duration: 0.2, delay: 0.1 }}
             className={cn("tracking-tight transition-all", {
               "flex-1": rightIcon,
               "text-left": rightIcon,
@@ -364,10 +373,10 @@ function SidebarButton({
       variant="ghost"
       size="lg"
       className={cn(
-        "group flex w-full items-center justify-start gap-3 py-2.5 px-4! text-sm rounded-xl transition-all duration-200",
+        "group flex w-full items-center justify-start gap-3.5 py-3 px-4! text-sm rounded-xl transition-all duration-300",
         {
-          "bg-primary/10 shadow-[inset_0_0_0_1px_rgba(99,102,241,0.1)]": isSelected,
-          "hover:bg-muted/50": !isSelected,
+          "bg-primary/10 shadow-[inset_0_0_0_1px_rgba(var(--primary),0.1)] text-primary": isSelected,
+          "hover:bg-muted/60": !isSelected,
         },
         className,
       )}
@@ -375,7 +384,7 @@ function SidebarButton({
       {...props}
     >
       {asLink && item.route ? (
-        <Link to={item.route} className={cn("flex w-full items-center gap-3")}>
+        <Link to={item.route} className={cn("flex w-full items-center gap-3.5")}>
           {buttonContent}
         </Link>
       ) : (

@@ -223,6 +223,7 @@ export interface Announcement {
   priority: AnnouncementPriority;
   expiresAt: string | null;
   allowComments: boolean;
+  linkUrl?: string | null;
   fileUrl?: string | null;
   fileCldPubId?: string | null;
   author?: User;

@@ -51,13 +51,17 @@ import { useTerm } from "@/contexts/term-context";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
+import { useTranslation } from "react-i18next";
 
 const ClassesEdit = () => {
+  const { t, i18n } = useTranslation();
   const { id } = useParams();
   const { terms } = useTerm();
   const [isImportOpen, setIsImportOpen] = useState(false);
   const [selectedSourceTerm, setSelectedSourceTerm] = useState<string>("");
   const [selectedSourceClass, setSelectedSourceClass] = useState<string>("");
+
+  const isAr = i18n.language === "ar";
 
   const { query: classQuery } = useOne<Class>({
     resource: "classes",
@@ -127,13 +131,13 @@ const ClassesEdit = () => {
         },
         successNotification: () => {
           return {
-            message: "Content imported successfully",
+            message: t("classes.list.toast.cloned"),
             type: "success",
           };
         },
         errorNotification: () => {
           return {
-            message: "Failed to import content",
+            message: t("common.error"),
             type: "error",
           };
         },
@@ -149,19 +153,19 @@ const ClassesEdit = () => {
   };
 
   return (
-    <div className="container mx-auto py-10 px-4 md:px-6 max-w-7xl pb-20">
+    <div className="container mx-auto py-10 px-4 md:px-6 max-w-7xl pb-20" dir={isAr ? "rtl" : "ltr"}>
       <div className="flex flex-col gap-8">
         <div className="space-y-1">
           <EditViewHeader />
           <p className="text-muted-foreground font-medium">
-            Update your classroom settings, schedule, and curriculum.
+            {t("classes.edit.subtitle")}
           </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
           {/* Main Form Column */}
           <motion.div
-            initial={{ opacity: 0, x: -20 }}
+            initial={{ opacity: 0, x: isAr ? 20 : -20 }}
             animate={{ opacity: 1, x: 0 }}
             className="lg:col-span-8"
           >
@@ -170,7 +174,7 @@ const ClassesEdit = () => {
               <CardHeader className="p-8 pb-4">
                 <CardTitle className="text-sm font-black uppercase tracking-widest flex items-center gap-2 opacity-60">
                   <LayoutDashboard className="h-4 w-4" />
-                  Class Configuration
+                  {t("classes.edit.configuration")}
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-8 pt-4">
@@ -193,7 +197,7 @@ const ClassesEdit = () => {
 
           {/* Sidebar Column */}
           <motion.div
-            initial={{ opacity: 0, x: 20 }}
+            initial={{ opacity: 0, x: isAr ? -20 : 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.1 }}
             className="lg:col-span-4 space-y-10"
@@ -203,13 +207,12 @@ const ClassesEdit = () => {
               <CardHeader className="p-6 pb-2">
                 <CardTitle className="text-xs font-black uppercase tracking-widest flex items-center gap-2 text-primary">
                   <Info className="h-4 w-4" />
-                  Editing Mode
+                  {t("classes.edit.editingMode")}
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6 pt-2">
                 <p className="text-sm font-medium text-muted-foreground leading-relaxed">
-                  Changes to the schedule and settings will update immediately
-                  for all enrolled students.
+                  {t("classes.edit.editingModeDesc")}
                 </p>
               </CardContent>
             </Card>
@@ -219,21 +222,20 @@ const ClassesEdit = () => {
               <CardHeader className="p-6 pb-2">
                 <CardTitle className="text-xs font-black uppercase tracking-widest flex items-center gap-2 opacity-60">
                   <Key className="h-4 w-4" />
-                  Access Control
+                  {t("classes.edit.accessControl")}
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6 pt-2 space-y-4">
                 <div className="p-4 rounded-2xl bg-muted/20 border border-black/[0.03] dark:border-white/[0.03] flex flex-col items-center justify-center gap-2">
                   <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">
-                    Invite Code
+                    {t("classes.edit.inviteCode")}
                   </span>
                   <span className="text-3xl font-black font-mono tracking-[0.2em] text-primary">
                     {classQuery?.data?.data?.inviteCode ?? "..."}
                   </span>
                 </div>
                 <p className="text-[10px] text-center font-medium text-muted-foreground/60 px-4">
-                  Share this code with students to allow them to join this
-                  classroom instantly.
+                  {t("classes.edit.inviteCodeDesc")}
                 </p>
               </CardContent>
             </Card>
@@ -243,7 +245,7 @@ const ClassesEdit = () => {
               <CardHeader className="p-6 pb-2">
                 <CardTitle className="text-xs font-black uppercase tracking-widest flex items-center gap-2 text-ai-primary">
                   <Sparkles className="h-4 w-4" />
-                  Content Actions
+                  {t("classes.edit.contentActions")}
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6 pt-2 space-y-6">
@@ -255,7 +257,7 @@ const ClassesEdit = () => {
                     >
                       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shine_1.5s_ease-in-out] pointer-events-none" />
                       <Import className="h-4 w-4" />
-                      Import Content
+                      {t("classes.edit.importContent")}
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="sm:max-w-[550px] rounded-[2rem] border-none shadow-2xl bg-card/95 backdrop-blur-xl">
@@ -264,17 +266,16 @@ const ClassesEdit = () => {
                         <Import className="h-6 w-6" />
                       </div>
                       <DialogTitle className="text-2xl font-black tracking-tight">
-                        Import from Archive
+                        {t("classes.edit.importArchive")}
                       </DialogTitle>
                       <DialogDescription className="font-medium">
-                        Copy modules, assignments, and quizzes from a previous
-                        term. Imported content will be set to "Draft" mode.
+                        {t("classes.edit.importArchiveDesc")}
                       </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-6 py-6">
                       <div className="space-y-2.5">
                         <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
-                          Select Source Term
+                          {t("classes.edit.selectSourceTerm")}
                         </Label>
                         <Select
                           onValueChange={setSelectedSourceTerm}
@@ -283,7 +284,7 @@ const ClassesEdit = () => {
                           <SelectTrigger className="h-12 rounded-xl bg-muted/20 border-none focus:ring-ai-primary transition-all font-bold">
                             <div className="flex items-center gap-2">
                               <History className="h-4 w-4 text-ai-primary/60" />
-                              <SelectValue placeholder="Select a past term" />
+                              <SelectValue placeholder={t("classes.edit.selectTermPlaceholder")} />
                             </div>
                           </SelectTrigger>
                           <SelectContent className="rounded-xl border-none shadow-2xl">
@@ -304,7 +305,7 @@ const ClassesEdit = () => {
 
                       <div className="space-y-2.5">
                         <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
-                          Select Source Class
+                          {t("classes.edit.selectSourceClass")}
                         </Label>
                         <Select
                           onValueChange={setSelectedSourceClass}
@@ -314,7 +315,7 @@ const ClassesEdit = () => {
                           <SelectTrigger className="h-12 rounded-xl bg-muted/20 border-none focus:ring-ai-primary transition-all font-bold">
                             <div className="flex items-center gap-2">
                               <BookOpen className="h-4 w-4 text-ai-primary/60" />
-                              <SelectValue placeholder="Select a class" />
+                              <SelectValue placeholder={t("classes.edit.selectClassPlaceholder")} />
                             </div>
                           </SelectTrigger>
                           <SelectContent className="rounded-xl border-none shadow-2xl">
@@ -337,7 +338,7 @@ const ClassesEdit = () => {
                         className="rounded-xl font-bold h-12"
                         onClick={() => setIsImportOpen(false)}
                       >
-                        Cancel
+                        {t("buttons.cancel")}
                       </Button>
                       <Button
                         onClick={handleImport}
@@ -349,14 +350,13 @@ const ClassesEdit = () => {
                         ) : (
                           <Sparkles className="h-4 w-4 mr-2" />
                         )}
-                        Import Content
+                        {t("classes.edit.importContent")}
                       </Button>
                     </DialogFooter>
                   </DialogContent>
                 </Dialog>
                 <p className="text-[10px] text-center font-medium text-muted-foreground/40 px-4">
-                  Quickly populate your curriculum by reusing materials from
-                  archived terms.
+                  {t("classes.edit.importFooterDesc")}
                 </p>
               </CardContent>
             </Card>

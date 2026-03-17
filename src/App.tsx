@@ -1,4 +1,4 @@
-import React, { Suspense } from "react";
+import React, { Suspense, useEffect } from "react";
 import { Authenticated, Refine } from "@refinedev/core";
 import { RefineKbar, RefineKbarProvider } from "@refinedev/kbar";
 import { DevtoolsProvider } from "@refinedev/devtools";
@@ -113,6 +113,13 @@ const ErrorComponent = () => (
 
 function App() {
   const { t, i18n } = useTranslation();
+
+  // Enforce RTL direction globally on load and when language changes
+  useEffect(() => {
+    const dir = i18n.dir(); // i18next has a built-in .dir() helper
+    document.documentElement.dir = dir;
+    document.documentElement.lang = i18n.language;
+  }, [i18n.language, i18n]);
 
   const i18nProvider = {
     translate: (key: string, params: object) => t(key, { ...params, defaultValue: key }),

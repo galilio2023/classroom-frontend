@@ -28,6 +28,7 @@ import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
 
 const FAQItem = ({
   question,
@@ -38,24 +39,24 @@ const FAQItem = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   return (
-    <div className="border-b border-primary/10 last:border-0">
+    <div className="border-b border-border/40 last:border-0">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full py-6 flex items-center justify-between text-left group"
+        className="w-full py-6 flex items-center justify-between text-left group transition-all"
       >
-        <span className="text-lg font-black tracking-tight group-hover:text-primary transition-colors">
+        <span className="text-base md:text-lg font-black tracking-tight group-hover:text-primary transition-colors pr-4">
           {question}
         </span>
         <div
           className={cn(
-            "p-2 rounded-lg bg-muted transition-transform duration-300",
-            isOpen && "rotate-180 bg-primary text-primary-foreground",
+            "p-2 rounded-xl bg-muted/50 transition-all duration-300 shrink-0",
+            isOpen && "rotate-180 bg-primary text-primary-foreground shadow-lg shadow-primary/20",
           )}
         >
           {isOpen ? (
-            <Minus className="h-4 w-4" />
+            <Minus className="h-4 w-4 md:h-5 md:w-5" />
           ) : (
-            <Plus className="h-4 w-4" />
+            <Plus className="h-4 w-4 md:h-5 md:w-5" />
           )}
         </div>
       </button>
@@ -65,10 +66,10 @@ const FAQItem = ({
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
             className="overflow-hidden"
           >
-            <p className="pb-6 text-muted-foreground font-medium leading-relaxed">
+            <p className="pb-6 text-sm md:text-base text-muted-foreground/80 font-medium leading-relaxed italic">
               {answer}
             </p>
           </motion.div>
@@ -146,7 +147,7 @@ const Pricing = () => {
         t("pricing.plans.pro.f7"),
       ],
       cta: t("pricing.upgrade"),
-      priceId: "price_1P2k3l4m5n6o7p8q", // Replace with real Stripe Price ID
+      priceId: "price_1P2k3l4m5n6o7p8q",
       featured: true,
     },
   ];
@@ -171,52 +172,54 @@ const Pricing = () => {
   ];
 
   return (
-    <div className="container mx-auto py-32 px-4 max-w-6xl space-y-32 text-start">
+    <div className="space-y-24 md:space-y-32 pb-32 max-w-7xl mx-auto px-4 md:px-8">
       {/* Background Decorative Elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-[-1]">
-        <div className="absolute top-[20%] right-[-5%] w-[30%] h-[30%] bg-primary/5 blur-[100px] rounded-full" />
-        <div className="absolute bottom-[10%] left-[-5%] w-[30%] h-[30%] bg-purple-500/5 blur-[100px] rounded-full" />
+        <div className="absolute top-[20%] right-[-5%] w-[40%] h-[40%] bg-primary/5 blur-[100px] md:blur-[120px] rounded-full opacity-50" />
+        <div className="absolute bottom-[10%] left-[-5%] w-[40%] h-[40%] bg-purple-500/5 blur-[100px] md:blur-[120px] rounded-full opacity-50" />
       </div>
 
-      <div className="text-center space-y-6 max-w-3xl mx-auto">
+      {/* Hero Section */}
+      <div className="text-center space-y-6 md:space-y-8 max-w-4xl mx-auto pt-16 md:pt-24">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-black uppercase tracking-widest"
+          className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] md:text-xs font-black uppercase tracking-[0.2em] shadow-lg shadow-primary/5"
         >
           <Crown className="h-4 w-4" />
           {t("pricing.badge")}
         </motion.div>
-        <h1 className="text-6xl md:text-8xl font-black tracking-tighter leading-[0.9] uppercase text-balance">
+        <h1 className="text-4xl xs:text-5xl md:text-8xl font-black tracking-tight leading-[0.95] md:leading-[0.9] uppercase text-balance">
           {t("pricing.titlePart1")}{" "}
           <span className="text-primary italic">{t("pricing.titlePart2")}</span>
         </h1>
-        <p className="text-muted-foreground text-xl md:text-2xl font-medium max-w-2xl mx-auto">
+        <p className="text-muted-foreground text-lg md:text-2xl font-medium max-w-2xl mx-auto text-balance">
           {t("pricing.description")}
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-5xl mx-auto relative">
+      {/* Pricing Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 max-w-5xl mx-auto relative">
         {plans.map((plan, index) => (
           <motion.div
             key={plan.name}
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 }}
+            transition={{ delay: index * 0.1, duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
             className="relative h-full"
           >
             <Card
               className={cn(
-                "relative h-full flex flex-col border-2 shadow-2xl rounded-[3rem] overflow-hidden transition-all duration-500 group hover:translate-y-[-8px]",
+                "relative h-full flex flex-col border border-border/40 shadow-2xl rounded-[2.5rem] md:rounded-[3rem] overflow-hidden transition-all duration-500 group hover:translate-y-[-8px] hover:shadow-primary/10",
                 plan.featured
-                  ? "bg-card border-primary/20 shadow-primary/10"
-                  : "bg-card/40 border-transparent backdrop-blur-sm",
+                  ? "bg-card/60 backdrop-blur-3xl border-primary/20"
+                  : "bg-card/40 backdrop-blur-3xl",
               )}
             >
               {plan.featured && (
                 <div
                   className={cn(
-                    "absolute top-0 px-8 py-3 bg-primary text-primary-foreground text-[10px] font-black uppercase tracking-widest shadow-xl z-10",
+                    "absolute top-0 px-8 py-3 bg-primary text-primary-foreground text-[10px] font-black uppercase tracking-[0.2em] shadow-xl z-10",
                     isAr
                       ? "left-0 rounded-br-[2rem]"
                       : "right-0 rounded-bl-[2rem]",
@@ -225,33 +228,33 @@ const Pricing = () => {
                   {t("pricing.recommended")}
                 </div>
               )}
-              <CardHeader className="p-12 pb-8">
-                <CardTitle className="text-2xl font-black uppercase tracking-widest flex items-center gap-2">
+              <CardHeader className="p-8 md:p-12 pb-6 md:pb-8">
+                <CardTitle className="text-xl md:text-2xl font-black uppercase tracking-widest flex items-center gap-3">
                   {plan.featured && (
-                    <Sparkles className="h-6 w-6 text-primary" />
+                    <Sparkles className="h-6 w-6 text-primary animate-pulse" />
                   )}
                   {plan.name}
                 </CardTitle>
-                <div className="mt-8 flex items-baseline gap-1">
-                  <span className="text-4xl font-black tracking-tight text-muted-foreground/50">
+                <div className="mt-8 md:mt-10 flex items-baseline gap-1">
+                  <span className="text-3xl md:text-4xl font-black tracking-tight text-muted-foreground/40">
                     {plan.symbol}
                   </span>
-                  <span className="text-8xl font-black tracking-tighter">
+                  <span className="text-6xl md:text-8xl font-black tracking-tighter">
                     {plan.price}
                   </span>
                   {plan.period && (
-                    <span className="text-muted-foreground font-black uppercase text-xs tracking-widest ml-2 opacity-60">
+                    <span className="text-muted-foreground font-black uppercase text-[10px] md:text-xs tracking-[0.2em] ml-2 opacity-60">
                       {plan.period}
                     </span>
                   )}
                 </div>
-                <CardDescription className="mt-8 text-lg font-medium leading-relaxed">
+                <CardDescription className="mt-6 md:mt-8 text-base md:text-lg font-medium leading-relaxed italic opacity-80 text-start">
                   {plan.description}
                 </CardDescription>
               </CardHeader>
-              <CardContent className="p-12 pt-0 flex-1">
+              <CardContent className="p-8 md:p-12 pt-0 flex-1">
                 <div className="space-y-5">
-                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">
+                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/40 mb-6">
                     {t("pricing.whatsIncluded")}
                   </p>
                   {plan.features.map((feature) => (
@@ -259,30 +262,31 @@ const Pricing = () => {
                       key={feature}
                       className="flex items-start gap-4 group/item"
                     >
-                      <div className="mt-1 p-1 rounded-full bg-primary/10 text-primary shrink-0 group-hover/item:bg-primary group-hover/item:text-primary-foreground transition-colors">
-                        <Check className="h-3 w-3" strokeWidth={4} />
+                      <div className="mt-1 p-1 rounded-full bg-primary/10 text-primary shrink-0 group-hover/item:bg-primary group-hover/item:text-primary-foreground transition-all duration-300 shadow-sm">
+                        <Check className="h-3 w-3 md:h-3.5 md:w-3.5" strokeWidth={4} />
                       </div>
-                      <span className="text-sm font-bold tracking-tight text-foreground/80 group-hover/item:text-foreground transition-colors">
+                      <span className="text-sm md:text-base font-bold tracking-tight text-foreground/70 group-hover/item:text-primary transition-colors text-start">
                         {feature}
                       </span>
                     </div>
                   ))}
                 </div>
               </CardContent>
-              <CardFooter className="p-12 pt-0">
+              <CardFooter className="p-8 md:p-12 pt-4 md:pt-0">
                 <Button
                   onClick={() => handleUpgrade(plan.priceId)}
                   disabled={identity && plan.priceId === "free"}
+                  size="lg"
                   className={cn(
-                    "w-full h-16 rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl transition-all",
+                    "w-full h-16 md:h-20 rounded-2xl md:rounded-[1.5rem] font-black uppercase tracking-widest text-[10px] md:text-xs shadow-2xl transition-all duration-300 group",
                     plan.featured
-                      ? "bg-primary text-primary-foreground shadow-primary/20 hover:shadow-primary/40"
-                      : "bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground",
+                      ? "bg-primary text-primary-foreground shadow-primary/30 hover:shadow-primary/50"
+                      : "bg-muted/50 text-muted-foreground hover:bg-primary hover:text-white",
                   )}
                 >
                   {plan.cta}
                   <ArrowRight
-                    className={cn("ml-2 h-4 w-4", isAr && "rotate-180")}
+                    className={cn("ml-2 h-4 w-4 md:h-5 md:w-5 group-hover:translate-x-1 transition-transform", isAr && "rotate-180")}
                   />
                 </Button>
               </CardFooter>
@@ -292,65 +296,44 @@ const Pricing = () => {
       </div>
 
       {/* Trust & Features Section */}
-      <div className="pt-20 space-y-32">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-          <motion.div
-            whileHover={{ y: -5 }}
-            className="p-10 bg-card border border-primary/5 rounded-[2.5rem] space-y-6 shadow-xl text-center md:text-start"
-          >
-            <div className="h-14 w-14 rounded-2xl bg-blue-500/10 text-blue-600 flex items-center justify-center shadow-lg mx-auto md:mx-0">
-              <ShieldCheck className="h-7 w-7" />
-            </div>
-            <h3 className="text-xl font-black tracking-tight uppercase">
-              {t("pricing.features.payments.title")}
-            </h3>
-            <p className="text-sm text-muted-foreground leading-relaxed font-medium">
-              {t("pricing.features.payments.desc")}
-            </p>
-          </motion.div>
-          <motion.div
-            whileHover={{ y: -5 }}
-            className="p-10 bg-card border border-primary/5 rounded-[2.5rem] space-y-6 shadow-xl text-center md:text-start"
-          >
-            <div className="h-14 w-14 rounded-2xl bg-purple-500/10 text-purple-600 flex items-center justify-center shadow-lg mx-auto md:mx-0">
-              <BrainCircuit className="h-7 w-7" />
-            </div>
-            <h3 className="text-xl font-black tracking-tight uppercase">
-              {t("pricing.features.credits.title")}
-            </h3>
-            <p className="text-sm text-muted-foreground leading-relaxed font-medium">
-              {t("pricing.features.credits.desc")}
-            </p>
-          </motion.div>
-          <motion.div
-            whileHover={{ y: -5 }}
-            className="p-10 bg-card border border-primary/5 rounded-[2.5rem] space-y-6 shadow-xl text-center md:text-start"
-          >
-            <div className="h-14 w-14 rounded-2xl bg-green-500/10 text-green-600 flex items-center justify-center shadow-lg mx-auto md:mx-0">
-              <MessageSquare className="h-7 w-7" />
-            </div>
-            <h3 className="text-xl font-black tracking-tight uppercase">
-              {t("pricing.features.support.title")}
-            </h3>
-            <p className="text-sm text-muted-foreground leading-relaxed font-medium">
-              {t("pricing.features.support.desc")}
-            </p>
-          </motion.div>
+      <div className="pt-16 md:pt-24 space-y-24 md:space-y-32">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
+          {[
+            { icon: ShieldCheck, title: t("pricing.features.payments.title"), desc: t("pricing.features.payments.desc"), color: "text-blue-500", bg: "bg-blue-500/10" },
+            { icon: BrainCircuit, title: t("pricing.features.credits.title"), desc: t("pricing.features.credits.desc"), color: "text-purple-500", bg: "bg-purple-500/10" },
+            { icon: MessageSquare, title: t("pricing.features.support.title"), desc: t("pricing.features.support.desc"), color: "text-green-500", bg: "bg-green-500/10" },
+          ].map((feature, i) => (
+            <motion.div
+              key={i}
+              whileHover={{ y: -8 }}
+              className="p-8 md:p-10 bg-card/40 backdrop-blur-3xl border border-border/40 rounded-[2.5rem] space-y-6 shadow-xl text-center md:text-start group transition-all duration-500"
+            >
+              <div className={cn("h-14 w-14 rounded-2xl flex items-center justify-center shadow-lg mx-auto md:mx-0 group-hover:scale-110 transition-transform duration-500", feature.bg, feature.color)}>
+                <feature.icon className="h-7 w-7" />
+              </div>
+              <h3 className="text-xl font-black tracking-tight uppercase">
+                {feature.title}
+              </h3>
+              <p className="text-sm md:text-base text-muted-foreground/80 leading-relaxed font-medium">
+                {feature.desc}
+              </p>
+            </motion.div>
+          ))}
         </div>
       </div>
 
       {/* FAQ Section */}
-      <div className="max-w-4xl mx-auto space-y-16">
+      <div className="max-w-4xl mx-auto space-y-12 md:space-y-16">
         <div className="text-center space-y-4">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-muted text-muted-foreground text-[10px] font-black uppercase tracking-widest">
+          <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-muted/50 text-muted-foreground/60 text-[10px] font-black uppercase tracking-[0.2em] border border-border/40">
             <HelpCircle className="h-4 w-4" />
             {t("pricing.faq.badge")}
           </div>
-          <h2 className="text-5xl font-black tracking-tighter uppercase">
+          <h2 className="text-4xl md:text-6xl font-black tracking-tighter uppercase leading-tight">
             {t("pricing.faq.title")}
           </h2>
         </div>
-        <div className="bg-card/40 backdrop-blur-xl rounded-[3rem] p-8 md:p-12 border border-primary/5 shadow-2xl">
+        <div className="bg-card/40 backdrop-blur-3xl rounded-[2.5rem] md:rounded-[3rem] p-6 md:p-12 border border-border/40 shadow-2xl">
           {faqs.map((faq, i) => (
             <FAQItem key={i} {...faq} />
           ))}
@@ -358,23 +341,25 @@ const Pricing = () => {
       </div>
 
       {/* Final CTA */}
-      <div className="bg-primary p-16 rounded-[4rem] text-center text-primary-foreground space-y-8 relative overflow-hidden group shadow-2xl shadow-primary/20">
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10" />
+      <div className="bg-primary p-10 md:p-24 rounded-[3rem] md:rounded-[5rem] text-center text-primary-foreground space-y-10 md:space-y-12 relative overflow-hidden group shadow-[0_40px_80px_-15px_rgba(var(--primary),0.4)]">
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 pointer-events-none" />
         <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-white/10 to-transparent pointer-events-none" />
-        <h2 className="text-4xl md:text-6xl font-black tracking-tighter relative z-10 leading-[0.9] italic uppercase">
-          {t("pricing.cta.title")}
-        </h2>
-        <p className="text-primary-foreground/70 font-medium max-w-xl mx-auto relative z-10">
-          {t("pricing.cta.desc")}
-        </p>
-        <div className="relative z-10 pt-4">
-          <Link to="/register">
+        <div className="relative space-y-6 md:space-y-8 max-w-4xl mx-auto">
+            <h2 className="text-4xl md:text-8xl font-black tracking-tighter italic leading-[0.9] uppercase text-balance">
+            {t("pricing.cta.title")}
+            </h2>
+            <p className="text-primary-foreground/80 font-medium text-lg md:text-2xl max-w-2xl mx-auto leading-relaxed text-balance">
+            {t("pricing.cta.desc")}
+            </p>
+        </div>
+        <div className="relative z-10 pt-4 flex justify-center">
+          <Link to="/register" className="w-full sm:w-auto">
             <Button
               size="lg"
-              className="bg-white text-primary hover:bg-white/90 h-16 px-12 rounded-2xl font-black uppercase tracking-widest shadow-2xl hover:scale-105 transition-transform"
+              className="w-full sm:w-auto bg-white text-primary hover:bg-white/90 h-16 md:h-20 px-10 md:px-16 rounded-2xl md:rounded-[1.5rem] font-black uppercase tracking-widest text-[10px] md:text-xs shadow-2xl hover:scale-105 active:scale-95 transition-all group shadow-black/20"
             >
               {t("pricing.cta.start")}
-              <Zap className="ml-2 h-5 w-5 fill-current" />
+              <Zap className="ml-3 h-5 w-5 md:h-6 md:w-6 fill-current animate-pulse group-hover:scale-125 transition-transform" />
             </Button>
           </Link>
         </div>

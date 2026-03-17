@@ -3,31 +3,48 @@ import { CardTitle, CardHeader } from "../ui/card";
 import { Button } from "../ui/button";
 import { Sparkles, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { cn } from "@/lib/utils";
 
 interface ChatHeaderProps {
   onClose: () => void;
 }
 
 export const ChatHeader: React.FC<ChatHeaderProps> = ({ onClose }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isAr = i18n.language === "ar";
+
   return (
-    <CardHeader className="p-5 border-b ai-header-gradient text-primary-foreground rounded-t-[calc(var(--radius)-1px)] flex flex-row items-center justify-between space-y-0">
-      <div className="flex items-center gap-3">
-        <div className="p-2 bg-white/20 backdrop-blur-sm rounded-xl shadow-inner">
-          <Sparkles className="h-5 w-5 animate-pulse" />
+    <CardHeader className="p-4 md:p-6 border-b border-border/10 ai-header-gradient text-white rounded-t-[calc(var(--radius)*2-1px)] md:rounded-t-[calc(var(--radius)*3-1px)] flex flex-row items-center justify-between space-y-0 relative overflow-hidden">
+      {/* Subtle shine effect */}
+      <div
+        className={cn(
+          "absolute inset-0 bg-linear-to-r from-transparent via-white/10 to-transparent pointer-events-none transition-all duration-1000",
+          isAr
+            ? "translate-x-full animate-[shine-rtl_3s_infinite]"
+            : "-translate-x-full animate-[shine_3s_infinite]",
+        )}
+      />
+
+      <div className="flex items-center gap-3 md:gap-4 relative z-10">
+        <div className="p-2 md:p-2.5 bg-white/20 backdrop-blur-md rounded-xl md:rounded-2xl shadow-inner border border-white/20">
+          <Sparkles className="h-5 w-5 md:h-6 md:w-6 animate-pulse text-white" />
         </div>
-        <div>
-          <CardTitle className="text-base font-bold tracking-tight">{t("aiHub.studyLab.studyBuddy.title")}</CardTitle>
-          <p className="text-[10px] font-medium opacity-90 uppercase tracking-widest">{t("aiHub.studyLab.studyBuddy.poweredBy")}</p>
+        <div className="flex flex-col text-start">
+          <CardTitle className="text-base md:text-xl font-black tracking-tight leading-none text-white">
+            {t("aiHub.studyLab.studyBuddy.title")}
+          </CardTitle>
+          <p className="text-[9px] md:text-[10px] font-bold opacity-90 uppercase tracking-[0.2em] mt-1 text-white/80">
+            {t("aiHub.studyLab.studyBuddy.poweredBy")}
+          </p>
         </div>
       </div>
-      <Button 
-        variant="ghost" 
-        size="icon" 
-        className="h-8 w-8 hover:bg-white/20 text-primary-foreground rounded-full"
+      <Button
+        variant="ghost"
+        size="icon"
+        className="h-10 w-10 md:h-12 md:w-12 hover:bg-white/20 text-white rounded-full transition-all relative z-10"
         onClick={onClose}
       >
-        <X className="h-4 w-4" />
+        <X className="h-5 w-5 md:h-6 md:w-6" />
       </Button>
     </CardHeader>
   );

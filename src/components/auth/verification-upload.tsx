@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState, useRef } from "react";
 import { UploadCloud, FileCheck, Loader2, ShieldCheck, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +16,7 @@ interface VerificationUploadProps {
 export const VerificationUpload = ({ url, onUpload, onClear }: VerificationUploadProps) => {
   const { t } = useTranslation();
   const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -38,7 +39,11 @@ export const VerificationUpload = ({ url, onUpload, onClear }: VerificationUploa
         body: formData,
       });
 
-      if (!response.ok) throw new Error("Upload failed");
+      if (!response.ok) {
+        toast.error(t("auth.register.verification.error"));
+        setIsUploading(false);
+        return;
+      }
       
       const result = await response.json();
       
@@ -96,6 +101,7 @@ export const VerificationUpload = ({ url, onUpload, onClear }: VerificationUploa
             <Input 
               type="file" 
               className="hidden" 
+              ref={fileInputRef}
               id="doc-upload" 
               accept=".pdf,.jpg,.jpeg,.png"
               onChange={handleFileUpload}
@@ -106,8 +112,10 @@ export const VerificationUpload = ({ url, onUpload, onClear }: VerificationUploa
               type="button" 
               variant="default" 
               size="sm" 
-              className="mt-2 w-full max-w-[200px]"
-              onClick={() => document.getElementById("doc-upload")?.click()}
+              className="mt-2 w-full max-w-50"
+              onClick={() => {
+                fileInputRef.current?.click();
+              }}
               disabled={isUploading}
             >
               {isUploading ? (

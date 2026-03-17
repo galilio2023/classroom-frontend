@@ -3,126 +3,138 @@ import { AIAssignmentHelper } from "@/components/ai-assignment-helper";
 import { AIQuizGenerator } from "@/components/ai-quiz-generator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Sparkles, FileText, BrainCircuit, LayoutDashboard, ArrowRight, Info } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
 import usePageTitle from "@/hooks/use-page-title";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useTranslation } from "react-i18next";
+import { cn } from "@/lib/utils";
 
 export const AIAssistantPage: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isAr = i18n.language === 'ar';
   usePageTitle(t("aiHub.assistant.title"));
 
   return (
-    <div className="container mx-auto py-10 max-w-6xl space-y-10">
+    <div className="space-y-10 md:space-y-16 pb-20 max-w-7xl mx-auto">
+      {/* Header Section */}
       <motion.div 
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="space-y-4"
+        className="space-y-4 md:space-y-6 text-start px-2"
       >
         <Breadcrumb />
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="flex items-center gap-4">
-                <div className="p-3 rounded-2xl bg-primary/10 text-primary shadow-sm">
-                    <Sparkles className="h-8 w-8" />
+                <div className="p-3 rounded-2xl bg-primary/10 text-primary border border-primary/5 shadow-sm">
+                    <Sparkles className="h-6 w-6 md:h-8 md:w-8" />
                 </div>
                 <div>
-                    <h1 className="text-4xl font-black tracking-tight">{t("aiHub.assistant.title")}</h1>
-                    <p className="text-muted-foreground font-medium mt-1">{t("aiHub.assistant.description")}</p>
+                    <h1 className="text-3xl md:text-4xl lg:text-5xl font-black tracking-tight text-balance">
+                        {t("aiHub.assistant.title")}
+                    </h1>
+                    <p className="text-muted-foreground font-medium max-w-xl text-balance">
+                        {t("aiHub.assistant.description")}
+                    </p>
                 </div>
             </div>
         </div>
       </motion.div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12 items-start">
+        {/* Main Content Area */}
         <div className="lg:col-span-8 space-y-10">
-            <Tabs defaultValue="assignment" className="w-full space-y-8">
-                <div className="sticky top-6 z-40">
-                    <div className="rounded-2xl border border-black/[0.05] dark:border-white/[0.05] bg-card/80 backdrop-blur-2xl p-1.5 shadow-xl">
-                        <TabsList className="grid w-full grid-cols-2 h-12 bg-transparent">
+            <Tabs defaultValue="assignment" className="w-full space-y-8 md:space-y-12">
+                <div className="sticky top-20 z-40">
+                    <div className="rounded-3xl border border-border/40 bg-background/40 backdrop-blur-3xl p-1.5 shadow-2xl shadow-black/5">
+                        <TabsList className="grid w-full grid-cols-2 h-12 md:h-14 bg-muted/20 gap-1 rounded-[1.25rem]">
                             <TabsTrigger 
                                 value="assignment" 
-                                className="rounded-xl font-black uppercase tracking-widest text-[10px] gap-2 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-lg transition-all"
+                                className="rounded-xl font-black uppercase tracking-widest text-[9px] md:text-[10px] gap-2 md:gap-3 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-xl transition-all duration-300"
                             >
-                                <FileText className="h-4 w-4" />
+                                <FileText className="h-4 w-4 md:h-5 md:w-5" />
                                 {t("aiHub.assistant.architect")}
                             </TabsTrigger>
                             <TabsTrigger 
                                 value="quiz" 
-                                className="rounded-xl font-black uppercase tracking-widest text-[10px] gap-2 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-lg transition-all"
+                                className="rounded-xl font-black uppercase tracking-widest text-[9px] md:text-[10px] gap-2 md:gap-3 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-xl transition-all duration-300"
                             >
-                                <BrainCircuit className="h-4 w-4" />
+                                <BrainCircuit className="h-4 w-4 md:h-5 md:w-5" />
                                 {t("aiHub.assistant.generator")}
                             </TabsTrigger>
                         </TabsList>
                     </div>
                 </div>
                 
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 }}
-                >
-                    <TabsContent value="assignment" className="mt-0">
-                        <AIAssignmentHelper />
-                    </TabsContent>
-                    
-                    <TabsContent value="quiz" className="mt-0">
-                        <AIQuizGenerator />
-                    </TabsContent>
-                </motion.div>
+                <AnimatePresence mode="wait">
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
+                    >
+                        <TabsContent value="assignment" className="mt-0 focus-visible:outline-none">
+                            <AIAssignmentHelper />
+                        </TabsContent>
+                        
+                        <TabsContent value="quiz" className="mt-0 focus-visible:outline-none">
+                            <AIQuizGenerator />
+                        </TabsContent>
+                    </motion.div>
+                </AnimatePresence>
             </Tabs>
         </div>
 
-        <div className="lg:col-span-4 space-y-8">
+        {/* Sidebar Capabilities */}
+        <div className="lg:col-span-4 space-y-8 md:space-y-12">
             <motion.div
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.2 }}
-                className="space-y-8"
+                className="space-y-8 sticky top-24"
             >
-                <Card className="border-primary/10 shadow-lg rounded-[2rem] overflow-hidden bg-card/50 backdrop-blur-sm">
-                    <CardHeader className="bg-primary/5 pb-6">
+                <Card className="border-border/40 shadow-2xl rounded-[2.5rem] md:rounded-[3rem] overflow-hidden bg-card/50 backdrop-blur-3xl">
+                    <CardHeader className="bg-primary/5 border-b border-border/40 p-8 md:p-10">
                         <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-xl bg-primary/10 text-primary">
+                            <div className="p-2.5 rounded-xl bg-primary/10 text-primary border border-primary/5 shadow-sm">
                                 <Sparkles className="h-5 w-5" />
                             </div>
-                            <CardTitle className="text-lg font-black tracking-tight">{t("aiHub.assistant.capabilities")}</CardTitle>
+                            <CardTitle className="text-xl font-black uppercase tracking-tight">{t("aiHub.assistant.capabilities")}</CardTitle>
                         </div>
                     </CardHeader>
-                    <CardContent className="p-6 space-y-6">
-                        <div className="flex gap-4">
-                            <div className="h-10 w-10 rounded-2xl bg-indigo-500/10 flex items-center justify-center shrink-0">
-                                <FileText className="h-5 w-5 text-indigo-600" />
+                    <CardContent className="p-8 md:p-10 space-y-8">
+                        <div className="flex gap-5 group">
+                            <div className="h-12 w-12 rounded-[1.25rem] bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-500 shadow-sm">
+                                <FileText className="h-6 w-6 text-indigo-600" />
                             </div>
-                            <div className="space-y-1">
-                                <p className="font-black text-xs uppercase tracking-widest text-indigo-600">{t("aiHub.assistant.rubrics")}</p>
-                                <p className="text-sm text-muted-foreground font-medium leading-relaxed">
+                            <div className="space-y-1.5">
+                                <p className="font-black text-[10px] uppercase tracking-[0.2em] text-indigo-600/70">{t("aiHub.assistant.rubrics")}</p>
+                                <p className="text-sm md:text-base text-muted-foreground/80 font-medium leading-relaxed">
                                     {t("aiHub.assistant.rubricsDesc")}
                                 </p>
                             </div>
                         </div>
                         
-                        <div className="flex gap-4">
-                            <div className="h-10 w-10 rounded-2xl bg-purple-500/10 flex items-center justify-center shrink-0">
-                                <BrainCircuit className="h-5 w-5 text-purple-600" />
+                        <div className="flex gap-5 group">
+                            <div className="h-12 w-12 rounded-[1.25rem] bg-purple-500/10 border border-purple-500/20 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-500 shadow-sm">
+                                <BrainCircuit className="h-6 w-6 text-purple-600" />
                             </div>
-                            <div className="space-y-1">
-                                <p className="font-black text-xs uppercase tracking-widest text-purple-600">{t("aiHub.assistant.quizzes")}</p>
-                                <p className="text-sm text-muted-foreground font-medium leading-relaxed">
+                            <div className="space-y-1.5">
+                                <p className="font-black text-[10px] uppercase tracking-[0.2em] text-purple-600/70">{t("aiHub.assistant.quizzes")}</p>
+                                <p className="text-sm md:text-base text-muted-foreground/80 font-medium leading-relaxed">
                                     {t("aiHub.assistant.quizzesDesc")}
                                 </p>
                             </div>
                         </div>
 
-                        <div className="flex gap-4">
-                            <div className="h-10 w-10 rounded-2xl bg-green-500/10 flex items-center justify-center shrink-0">
-                                <LayoutDashboard className="h-5 w-5 text-green-600" />
+                        <div className="flex gap-5 group">
+                            <div className="h-12 w-12 rounded-[1.25rem] bg-green-500/10 border border-green-500/20 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-500 shadow-sm">
+                                <LayoutDashboard className="h-6 w-6 text-green-600" />
                             </div>
-                            <div className="space-y-1">
-                                <p className="font-black text-xs uppercase tracking-widest text-green-600">{t("aiHub.assistant.drafts")}</p>
-                                <p className="text-sm text-muted-foreground font-medium leading-relaxed">
+                            <div className="space-y-1.5">
+                                <p className="font-black text-[10px] uppercase tracking-[0.2em] text-green-600/70">{t("aiHub.assistant.drafts")}</p>
+                                <p className="text-sm md:text-base text-muted-foreground/80 font-medium leading-relaxed">
                                     {t("aiHub.assistant.draftsDesc")}
                                 </p>
                             </div>
@@ -130,12 +142,12 @@ export const AIAssistantPage: React.FC = () => {
                     </CardContent>
                 </Card>
 
-                <Alert className="rounded-[2rem] border-primary/10 bg-primary/5 p-6">
-                    <Info className="h-5 w-5 text-primary" />
-                    <div className="ml-2">
-                        <AlertTitle className="font-black text-sm uppercase tracking-widest mb-2">{t("aiHub.assistant.proTip")}</AlertTitle>
-                        <AlertDescription className="text-sm text-muted-foreground font-medium leading-relaxed">
-                            {t("aiHub.assistant.proTipDesc")}
+                <Alert className="rounded-[2.5rem] border-primary/20 bg-primary/5 p-8 shadow-xl shadow-primary/5 backdrop-blur-sm border-2 border-dashed">
+                    <Info className="h-6 w-6 text-primary mt-1" />
+                    <div className={cn(isAr ? "mr-4" : "ml-4")}>
+                        <AlertTitle className="font-black text-xs uppercase tracking-[0.2em] mb-3 text-primary">{t("aiHub.assistant.proTip")}</AlertTitle>
+                        <AlertDescription className="text-sm md:text-base text-muted-foreground/80 font-medium leading-relaxed italic">
+                            "{t("aiHub.assistant.proTipDesc")}"
                         </AlertDescription>
                     </div>
                 </Alert>

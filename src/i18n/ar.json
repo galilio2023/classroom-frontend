@@ -2,6 +2,12 @@
   "app": {
     "title": "كلاس روم ذكي"
   },
+  "actions": {
+    "edit": "تعديل",
+    "create": "إنشاء",
+    "show": "عرض",
+    "list": "قائمة"
+  },
   "common": {
     "dashboard": "لوحة التحكم",
     "myProfile": "ملفي الشخصي",
@@ -17,6 +23,8 @@
     "offline": "أنت غير متصل بالإنترنت — قد تكون بعض الميزات محدودة",
     "details": "التفاصيل",
     "description": "الوصف",
+    "featureComingSoon": "الميزة ستتوفر قريباً!",
+    "aiPowered": "مدعوم بالذكاء الاصطناعي",
     "editor": {
       "urlPrompt": "أدخل الرابط",
       "bold": "عريض",
@@ -44,7 +52,11 @@
       "success": "تم رفع الملف بنجاح!",
       "removeSuccess": "تم إزالة الملف بنجاح",
       "error": "فشل الرفع",
-      "removeError": "فشل إزالة الملف من الخادم"
+      "removeError": "فشل إزالة الملف من الخادم",
+      "video": {
+        "maxSize": "Max size: 100MB (.mp4, .mov)",
+        "label": "Upload Trailer Video"
+      }
     },
     "pwa": {
       "title": "تثبيت تطبيق كلاس روم",
@@ -263,7 +275,14 @@
     "updateChannel": "تحديث القناة",
     "viewChannel": "عرض القناة",
     "contactUser": "الاتصال بالمستخدم",
-    "openFullRes": "فتح بالدقة الكاملة"
+    "openFullRes": "فتح بالدقة الكاملة",
+    "exploreClasses": "استكشف فصولك",
+    "practiceLevelUp": "تدرب وارتقِ بمستواك",
+    "reply": "رد",
+    "post": "نشر",
+    "createModule": "إنشاء وحدة",
+    "generating": "جاري الإنشاء...",
+    "readMore": "اقرأ المزيد"
   },
   "roles": {
     "student": "طالب",
@@ -373,6 +392,54 @@
       "identityError": "لا يمكن إنشاء الفصل: لم يتم العثور على بيانات المستخدم.",
       "inviteNote": "يمكنك دعوة معلمين مساعدين وطلاب بعد الإنشاء"
     },
+    "edit": {
+      "subtitle": "تحديث إعدادات الفصل الدراسي والجدول الزمني والمنهج.",
+      "configuration": "إعدادات الفصل",
+      "editingMode": "وضع التعديل",
+      "editingModeDesc": "سيتم تحديث التغييرات في الجدول والإعدادات فوراً لجميع الطلاب المسجلين.",
+      "accessControl": "التحكم في الوصول",
+      "inviteCode": "رمز الدعوة",
+      "inviteCodeDesc": "شارك هذا الرمز مع الطلاب للسماح لهم بالانضمام إلى هذا الفصل فوراً.",
+      "contentActions": "إجراءات المحتوى",
+      "importContent": "استيراد المحتوى",
+      "importArchive": "استيراد من الأرشيف",
+      "importArchiveDesc": "انسخ الوحدات والتكليفات والاختبارات من فصل دراسي سابق. سيتم ضبط المحتوى المستورد على وضع \"مسودة\".",
+      "selectSourceTerm": "اختر الفصل الدراسي المصدر",
+      "selectTermPlaceholder": "اختر فصلاً دراسياً سابقاً",
+      "selectSourceClass": "اختر الفصل المصدر",
+      "selectClassPlaceholder": "اختر فصلاً",
+      "importFooterDesc": "قم بتعبئة منهجك بسرعة عن طريق إعادة استخدام المواد من الفصول المؤرشفة."
+    },
+    "live": {
+      "title": "الفصل المباشر",
+      "mainHall": "(القاعة الرئيسية)",
+      "breakoutRoom": "(غرفة فرعية)",
+      "breakoutActive": "جلسات الغرف الفرعية نشطة.",
+      "mainActive": "الجلسة الرئيسية نشطة.",
+      "startBreakouts": "بدء الغرف الفرعية",
+      "endBreakouts": "إنهاء الغرف الفرعية",
+      "readyToJoin": "جاهز للانضمام؟",
+      "breakoutDescription": "جلسات الغرف الفرعية جارية. ستنضم إلى غرفة مجموعتك.",
+      "mainDescription": "انقر أدناه لدخول الفصل الافتراضي.",
+      "joinNow": "انضم للفصل الآن",
+      "joinGroup": "انضم لغرفة {{name}}",
+      "videoSession": "جلسة الفيديو",
+      "whiteboard": "السبورة",
+      "startLiveSession": "بدء الجلسة المباشرة",
+      "sessionNotStarted": "لم تبدأ الجلسة المباشرة بعد.",
+      "toasts": {
+        "sessionStarted": "بدأ {{name}} جلسة مباشرة!",
+        "sessionEnded": "انتهت الجلسة المباشرة.",
+        "breakoutStarted": "بدأت جلسات الغرف الفرعية!",
+        "joiningGroup": "جاري الانضمام لمجموعتك: {{name}}",
+        "breakoutEnded": "انتهت جلسات الغرف الفرعية. العودة للقاعة الرئيسية.",
+        "joinFailed": "فشل الانضمام للجلسة. يرجى المحاولة مرة أخرى.",
+        "recordingSaved": "تم حفظ التسجيل في المصادر.",
+        "initFailed": "فشل تهيئة مؤتمر الفيديو.",
+        "sessionStartedTeacher": "تم بدء الجلسة المباشرة بنجاح!",
+        "startFailed": "فشل بدء الجلسة المباشرة. يرجى المحاولة مرة أخرى."
+      }
+    },
     "form": {
       "updateDetails": "تحديث تفاصيل الفصل",
       "coreInfo": "المعلومات الأساسية",
@@ -442,6 +509,15 @@
       "notFoundDescription": "الفصل الذي تبحث عنه غير موجود أو تم حذفه من النظام.",
       "classroomHub": "مركز الفصل",
       "hubDescription": "إدارة المنهج والطلاب والجلسات المباشرة.",
+      "description": "الوصف",
+      "banner": {
+        "academic": "أكاديمي",
+        "waitlistActive": "قائمة الانتظار نشطة",
+        "studentsEnrolled": "{{count}} طلاب مسجلين",
+        "onWaitlist": "{{count}} في قائمة الانتظار",
+        "liveActive": "جلسة مباشرة نشطة",
+        "pinned": "إعلان مثبت"
+      },
       "toast": {
         "linkCopied": "تم نسخ رابط الفصل!",
         "inviteCodeCopied": "تم نسخ رمز الدعوة",
@@ -453,13 +529,6 @@
       "announcement": {
         "priority": "إعلان هام",
         "viewAttachment": "عرض المرفق"
-      },
-      "banner": {
-        "academic": "أكاديمي",
-        "waitlistActive": "قائمة الانتظار نشطة",
-        "studentsEnrolled": "{{count}} طلاب مسجلين",
-        "onWaitlist": "{{count}} في قائمة الانتظار",
-        "liveActive": "جلسة مباشرة نشطة"
       },
       "tabs": {
         "curriculum": "المنهج",
@@ -485,6 +554,7 @@
           "empty": "لم يتم العثور على طلاب في هذا الفصل الدراسي."
         },
         "pending": {
+          "status": "حالة الانتظار",
           "title": "الطلبات المعلقة",
           "count": "{{count}} معلق",
           "empty": "لا توجد طلبات انضمام معلقة",
@@ -535,7 +605,7 @@
       "noModulesDescription": "ابدأ ببناء منهجك بإضافة وحدتك الأولى أو استخدام البناء السحري.",
       "modulesPublished": "تم نشر {{count}} وحدات",
       "itemsCompleted": "تم إنجاز {{count}} عناصر",
-      "modulesItemsCount": "تم إنجاز {{count}} عناصر",
+      "modulesItemsCount": "{{count}} عناصر",
       "toast": {
         "completed": "تم التحديد كمكتمل!",
         "incomplete": "تم التحديد كغير مكتمل"
@@ -549,14 +619,15 @@
       "aiSummary": "ملخص النقاش بالذكاء الاصطناعي",
       "loadingStream": "جاري تحميل المشاركات...",
       "noMessages": "لا توجد رسائل بعد",
-      "startConversation": "كن أول من يبدأ النقاش!",
+      "start Conversation": "كن أول من يبدأ النقاش!",
       "replyingTo": "الرد على",
       "writeReply": "اكتب ردك...",
       "messageClass": "أرسل رسالة لفصلك...",
       "pressEnter": "اضغط Enter للإرسال، Shift+Enter لسطر جديد",
       "toast": {
         "replySent": "تم إرسال الرد",
-        "messagePosted": "تم نشر الرسالة"
+        "messagePosted": "تم نشر الرسالة",
+        "summaryError": "فشل في إنشاء ملخص النقاش."
       }
     },
     "attendance": {
@@ -596,7 +667,7 @@
         "description": "يمكن للطلاب مسح رمز QR لتسجيل حضورهم.",
         "active": "جلسة نشطة",
         "inactive": "غير نشط",
-        "timeRemaining": "الوقت المتبقي",
+        "time Remaining": "الوقت المتبقي",
         "checkedIn": "تم تسجيل الدخول",
         "ready": "جاهز للبدء؟",
         "startDescription": "سيؤدي بدء الجلسة إلى إنشاء رمز QR فريد لهذا الفصل."
@@ -625,9 +696,35 @@
       "topPercent": "أفضل {{percent}}%",
       "levelLabel": "المستوى {{level}}"
     },
+    "announcements": {
+      "history": "سجل الإعلانات",
+      "description": "التحديثات والأخبار الرسمية لهذا الفصل.",
+      "new": "إعلان جديد",
+      "createTitle": "إنشاء إعلان",
+      "createDesc": "انشر تحديثاً رسمياً لجميع الطلاب في هذا الفصل.",
+      "fieldTitle": "عنوان الإعلان",
+      "fieldContent": "المحتوى التفصيلي",
+      "fieldAttachment": "مرفق (اختياري)",
+      "fieldPin": "تثبيت في الأعلى",
+      "pinDesc": "سيبقى هذا الإعلان في أعلى القائمة.",
+      "noAnnouncements": "لا توجد إعلانات بعد",
+      "noAnnouncementsDesc": "ستظهر هنا التحديثات والأخبار الرسمية لهذا الفصل.",
+      "pinnedLabel": "إعلان مثبت",
+      "newUpdate": "تحديث جديد",
+      "viewAttachment": "عرض المرفق",
+      "unpin": "إلغاء التثبيت",
+      "pin": "تثبيت في الأعلى",
+      "delete": "حذف الإعلان",
+      "viewReadStatus": "عرض حالة القراءة",
+      "reads": {
+        "title": "إيصالات القراءة",
+        "description": "الطلاب الذين شاهدوا هذا الإعلان.",
+        "empty": "لم يقرأ أحد هذا الإعلان بعد."
+      }
+    },
     "resource": {
       "loading": "جاري تحميل المواد...",
-      "learningMaterials": "Materials",
+      "learningMaterials": "المواد التعليمية",
       "description": "الوصول إلى جميع الملفات والروابط والملاحظات لهذا الفصل.",
       "noMaterials": "لا توجد مواد بعد",
       "noMaterialsDescription": "يتم تنظيم المواد حسب الوحدات. اطلب من معلمك إضافة بعض المواد!",
@@ -652,13 +749,27 @@
           "file": "ملف (PDF, Doc)",
           "image": "صورة",
           "link": "رابط خارجي",
-          "video": "رابط فيديو"
+          "video": "رابط فيديو",
+          "other": "أخرى"
         }
       },
       "toast": {
         "fillRequired": "يرجى ملء جميع الحقول المطلوبة",
         "added": "تمت إضافة المادة للوحدة",
         "deleted": "تم حذف المادة"
+      }
+    },
+    "reader": {
+      "aiTutor": "مساعد الذكاء الاصطناعي",
+      "hideAiTutor": "إخفاء المساعد",
+      "lessonNotFound": "الدرس غير موجود أو نوعه غير صالح.",
+      "tutorTitle": "مساعد الدرس الذكي",
+      "tutorDescription": "اسألني أي شيء عن هذا الدرس",
+      "welcome": "مرحباً {{name}}! لقد قرأت {{title}}. إذا كنت مرتبكاً بشأن أي جزء أو تريد أمثلة إضافية، فقط اسأل!",
+      "thinking": "المساعد يفكر...",
+      "askPlaceholder": "اسأل سؤالاً...",
+      "toast": {
+        "unavailable": "مساعد الذكاء الاصطناعي غير متوفر حالياً."
       }
     },
     "quiz": {
@@ -680,19 +791,6 @@
       "finishedAssessment": "لقد انتهيت من التقييم التفاعلي.",
       "scoreSummary": "{{score}} من أصل {{total}} إجابات صحيحة",
       "explanation": "الشرح"
-    },
-    "reader": {
-      "aiTutor": "مساعد الذكاء الاصطناعي",
-      "hideAiTutor": "إخفاء المساعد",
-      "lessonNotFound": "الدرس غير موجود أو نوعه غير صالح.",
-      "tutorTitle": "مساعد الدرس الذكي",
-      "tutorDescription": "اسألني أي شيء عن هذا الدرس",
-      "welcome": "مرحباً {{name}}! لقد قرأت {{title}}. إذا كنت مرتبكاً بشأن أي جزء أو تريد أمثلة إضافية، فقط اسأل!",
-      "thinking": "المساعد يفكر...",
-      "askPlaceholder": "اسأل سؤالاً...",
-      "toast": {
-        "unavailable": "مساعد الذكاء الاصطناعي غير متوفر حالياً."
-      }
     },
     "dialogs": {
       "applyTeacher": {
@@ -726,32 +824,6 @@
           "success": "تم تسجيل الطالب بنجاح!",
           "error": "فشل تسجيل الطالب."
         }
-      }
-    },
-    "announcements": {
-      "history": "سجل الإعلانات",
-      "description": "التحديثات والأخبار الرسمية لهذا الفصل.",
-      "new": "إعلان جديد",
-      "createTitle": "إنشاء إعلان",
-      "createDesc": "انشر تحديثاً رسمياً لجميع الطلاب في هذا الفصل.",
-      "fieldTitle": "عنوان الإعلان",
-      "fieldContent": "المحتوى التفصيلي",
-      "fieldAttachment": "مرفق (اختياري)",
-      "fieldPin": "تثبيت في الأعلى",
-      "pinDesc": "سيبقى هذا الإعلان في أعلى القائمة.",
-      "noAnnouncements": "لا توجد إعلانات بعد",
-      "noAnnouncementsDesc": "ستظهر هنا التحديثات والأخبار الرسمية لهذا الفصل.",
-      "pinnedLabel": "إعلان مثبت",
-      "newUpdate": "تحديث جديد",
-      "viewAttachment": "عرض المرفق",
-      "unpin": "إلغاء التثبيت",
-      "pin": "تثبيت في الأعلى",
-      "delete": "حذف الإعلان",
-      "viewReadStatus": "عرض حالة القراءة",
-      "reads": {
-        "title": "إيصالات القراءة",
-        "description": "الطلاب الذين شاهدوا هذا الإعلان.",
-        "empty": "لم يقرأ أحد هذا الإعلان بعد."
       }
     }
   },
@@ -863,11 +935,11 @@
       "academicPerformance": "الأداء الأكاديمي",
       "instructorGrade": "درجة المعلم",
       "blendedScore": "الدرجة النهائية المدمجة",
-      "peerReviewWeight": "وزن مراجعة الزملاء",
+      "peerReviewerWeight": "وزن مراجعة الزملاء",
       "submissionRules": "قواعد التسليم",
       "latePolicy": "سياسة التأخير",
       "lateDescription": "التسليمات بعد الموعد النهائي ستعتبر متأخرة وقد يطبق عليها خصم.",
-      "academicIntegrity": "النزاهة الأكاديمية",
+      "academic Integrity": "النزاهة الأكاديمية",
       "integrityDescription": "يجب أن يكون العمل أصلياً. يجب الإشارة إلى استخدام الذكاء الاصطناعي إذا كان مسموحاً.",
       "studentSubmissions": "تسليمات الطلاب",
       "submissionsDescription": "إدارة الدرجات والملاحظات لجميع الطلاب.",
@@ -1038,7 +1110,6 @@
       "days": "أيام",
       "nextReward": "المكافأة التالية",
       "profileBadge": "وسام الملف الشخصي",
-      "recentActivity": "النشاط الأخير",
       "upcomingTasks": "المهام القادمة",
       "dontMissDeadlines": "لا تفوت المواعيد النهائية",
       "pendingCount": "{{count}} قيد الانتظار",
@@ -1046,7 +1117,7 @@
       "noUpcoming": "لا توجد تكليفات قادمة. استمتع بوقتك!",
       "greatJobStudent": "عمل رائع أيها الطالب!",
       "clickTask": "انقر على المهمة لعرض التفاصيل والتسليم",
-      "welcomeJourney": "مرحباً بك في رحلة التعلم الخاصة بك!",
+      "welcomeJourney": "مرحباً بك في رحلتك التعليمية!",
       "welcomeJourneyDesc": "لم تبدأ أي فصول أو تكليفات بعد. سيظهر تقدمك الأكاديمي هنا بمجرد البدء.",
       "focusArea": "تم تحديد مجال التركيز",
       "aiRecommendation": "توصية مدعومة بالذكاء الاصطناعي",
@@ -1057,7 +1128,8 @@
       "noGradeData": "لا توجد بيانات للدرجات بعد. أكمل التكليفات لرؤية تقدمك!",
       "subjectMastery": "إتقان المواد",
       "subjectMasteryDesc": "متوسط الأداء لكل مادة.",
-      "noSubjectData": "لا توجد بيانات للمواد بعد. سيظهر رادار الإتقان الخاص بك هنا."
+      "noSubjectData": "لا توجد بيانات للمواد بعد. سيظهر رادار الإتقان الخاص بك هنا.",
+      "recent Activity": "النشاط الأخير"
     },
     "staff": {
       "engagementAnalytics": "تحليلات التفاعل",
@@ -1110,7 +1182,6 @@
         }
       },
       "platformOverview": "نظرة عامة على المنصة",
-      "recentActivity": "النشاط الأخير",
       "pendingGrading": "في انتظار التقييم",
       "submissionsAwaiting": "تسليمات في انتظار التقييم",
       "newSubmissions": "{{count}} جديدة",
@@ -1124,7 +1195,8 @@
       "enrollmentSuccess": "نجاح التسجيل",
       "channelStatus": "حالة القناة",
       "active": "نشط",
-      "manageChannel": "إدارة قناتك العامة"
+      "manageChannel": "إدارة قناتك العامة",
+      "recent Activity": "النشاط الأخير"
     },
     "stats": {
       "totalStudents": "إجمالي الطلاب",
@@ -1149,7 +1221,7 @@
             "description": "أنشئ مهمتك الأولى للبدء في متابعة تقدم الطلاب."
           },
           "inviteStudents": {
-            "title": "ادعُ الطلاب",
+            "title": "دعوة الطلاب",
             "description": "أضف الطلاب إلى فصولك لبدء الرحلة."
           }
         }
@@ -1191,7 +1263,8 @@
         "APPROVE_ENROLLMENT": "تم قبول تسجيل",
         "SUBMIT_ASSIGNMENT": "تم تسليم تكليف",
         "GRADE_SUBMISSION": "تم تقييم تسليم",
-        "USER_LOGIN": "تم تسجيل دخول مستخدم"
+        "USER_LOGIN": "تم تسجيل دخول مستخدم",
+        "JOIN_ASSIGNMENT": "تم الانضمام للتكليف"
       }
     },
     "charts": {
@@ -1249,7 +1322,7 @@
       "linkAccount": "ربط الحساب",
       "noChildren": "لا يوجد أطفال مرتبطون بعد",
       "noChildrenDescription": "انقر على زر \"ربط طفل\" أعلاه لربط حسابك بملفات تعريف أبنائك.",
-      "dayStreak": "سلسلة لمدة {{count}} أيام",
+      "day Streak": "تتابع الأيام",
       "gpaAverage": "المعدل التراكمي / المتوسط",
       "attendance": "الحضور",
       "levelProgress": "التقدم في المستوى",
@@ -1269,11 +1342,11 @@
       "generator": "منشئ الاختبارات",
       "capabilities": "قدرات الذكاء الاصطناعي",
       "rubrics": "معايير ذكية",
-      "rubricsDesc": "أنشئ معايير تقييم مفصلة وأهداف تعليمية تلقائياً.",
+      "rubricsDesc": "إنشاء معايير تقييم مفصلة وأهداف تعليمية تلقائياً.",
       "quizzes": "اختبارات تكيفية",
-      "quizzesDesc": "أنشئ أسئلة اختيار من متعدد بمستويات صعوبة متفاوتة بناءً على موضوعك.",
+      "quizzesDesc": "إنشاء أسئلة اختيار من متعدد بمستويات صعوبة متفاوتة بناءً على موضوعك.",
       "drafts": "مسودات فورية",
-      "draftsDesc": "احصل على مسودة تكليف كاملة تشمل الوصف والتعليمات في ثوانٍ.",
+      "draftsDesc": "احصل على مسودة تكليف كاملة تتضمن الوصف والتعليمات في ثوانٍ.",
       "proTip": "نصيحة الخبراء",
       "proTipDesc": "كن دقيقاً في مواضيعك. بدلاً من \"التاريخ\"، جرب \"أثر الثورة الصناعية على التطور العمراني\".",
       "helper": {
@@ -1446,6 +1519,8 @@
       "classes": "فصول",
       "tasks": "مهام"
     },
+    "eventsSelectedDay": "أحداث يوم {{date}}",
+    "selectDate": "اختر تاريخاً لعرض الأحداث",
     "toasts": {
       "selectClass": "يرجى اختيار فصل",
       "generated": "تم إنشاء الخطة الشهرية بنجاح!"
@@ -1465,7 +1540,8 @@
     },
     "filters": {
       "searchPlaceholder": "البحث باسم القسم أو الرمز...",
-      "structure": "فلتر الهيكل"
+      "structure": "فلتر الهيكل",
+      "allDepartments": "كل الأقسام"
     },
     "empty": {
       "title": "لم يتم العثور على أقسام",
@@ -1599,7 +1675,7 @@
       "description": "إدارة المعلمين والطلاب والمسؤولين. الإشراف على حالة التحقق والحسابات.",
       "stats": {
         "totalUsers": "إجمالي المستخدمين",
-        "pendingVerification": "في انتظار التحقق",
+        "pending Verification": "في انتظار التحقق",
         "activeAccounts": "الحسابات النشطة"
       },
       "filters": {
@@ -1660,7 +1736,7 @@
       "views": "إجمالي المشاهدات",
       "conversion": "معدل التحويل",
       "preview": "معاينة البطاقة",
-      "livePreview": "كيف يراك الطلاب في الكتالوج"
+      "livePreview": "معاينة حية"
     },
     "placeholders": {
       "headline": "مثال: معلم فيزياء خبير بخبرة تزيد عن 10 سنوات",
@@ -1672,38 +1748,96 @@
     }
   },
   "resources": {
-    "dashboard": { "label": "لوحة التحكم" },
-    "calendar": { "label": "التقويم" },
-    "notifications": { "label": "الإشعارات" },
-    "messages": { "label": "الرسائل" },
-    "ai-assistant": { "label": "مساعد الذكاء الاصطناعي" },
-    "ai-study-lab": { "label": "مختبر الدراسة" },
-    "study-planner": { "label": "مخطط الدراسة" },
-    "classes": { "label": "الفصول" },
-    "subjects": { "label": "المواد" },
-    "enrollments": { "label": "التسجيلات" },
-    "attendance": { "label": "الحضور" },
-    "project-groups": { "label": "مجموعات المشاريع" },
-    "assignments": { "label": "التكليفات" },
-    "quizzes": { "label": "الاختبارات" },
-    "submissions": { "label": "التسليمات" },
-    "modules": { "label": "الوحدات" },
-    "resources": { "label": "المصادر" },
-    "library": { "label": "المكتبة العامة" },
-    "discussions": { "label": "النقاشات" },
-    "portfolio": { "label": "ملفي الشخصي" },
-    "report-card": { "label": "الشهادة" },
-    "progress": { "label": "الرؤى" },
-    "users": { "label": "المستخدمين" },
-    "departments": { "label": "الأقسام" },
-    "academic-terms": { "label": "الفصول الدراسية" },
-    "profile-requests": { "label": "طلبات الملفات" },
-    "teacher-applications": { "label": "طلبات التدريس" },
-    "activity-log": { "label": "سجل النشاط" },
-    "teacher-channel": { "label": "قناتي" }
+    "dashboard": {
+      "label": "لوحة التحكم"
+    },
+    "calendar": {
+      "label": "التقويم"
+    },
+    "notifications": {
+      "label": "الإشعارات"
+    },
+    "messages": {
+      "label": "الرسائل"
+    },
+    "ai-assistant": {
+      "label": "مساعد الذكاء الاصطناعي"
+    },
+    "ai-study-lab": {
+      "label": "مختبر الدراسة"
+    },
+    "study-planner": {
+      "label": "مخطط الدراسة"
+    },
+    "classes": {
+      "label": "الفصول"
+    },
+    "subjects": {
+      "label": "المواد"
+    },
+    "enrollments": {
+      "label": "التسجيلات"
+    },
+    "attendance": {
+      "label": "الحضور"
+    },
+    "project-groups": {
+      "label": "مجموعات المشاريع"
+    },
+    "assignments": {
+      "label": "التكليفات"
+    },
+    "quizzes": {
+      "label": "الاختبارات"
+    },
+    "submissions": {
+      "label": "التسليمات"
+    },
+    "modules": {
+      "label": "الوحدات"
+    },
+    "resources": {
+      "label": "المصادر"
+    },
+    "library": {
+      "label": "المكتبة العامة"
+    },
+    "discussions": {
+      "label": "النقاشات"
+    },
+    "portfolio": {
+      "label": "ملفي الشخصي"
+    },
+    "report-card": {
+      "label": "الشهادة"
+    },
+    "progress": {
+      "label": "الرؤى"
+    },
+    "users": {
+      "label": "المستخدمين"
+    },
+    "departments": {
+      "label": "الأقسام"
+    },
+    "academic-terms": {
+      "label": "الفصول الدراسية"
+    },
+    "profile-requests": {
+      "label": "طلبات الملفات"
+    },
+    "teacher-applications": {
+      "label": "طلبات التدريس"
+    },
+    "activity-log": {
+      "label": "سجل النشاط"
+    },
+    "teacher-channel": {
+      "label": "قناتي"
+    }
   },
   "groups": {
-    "ai-lab": "مختبر الذكاء الاصطناعي",
+    "ai-lab": "AI Lab",
     "academic": "أكاديمي",
     "curriculum": "المنهج",
     "progress": "التقدم",
@@ -1718,7 +1852,7 @@
       "finalScore": "الدرجة النهائية",
       "correct": "صحيحة",
       "badgeUnlocked": "تم فتح وسام جديد!",
-      "reviewMaterial": "لا تقلق! راجع المادة وحاول مرة أخرى للحصول على الوسام.",
+      "reviewMaterial": "لا تقلق! راجع المواد وحاول مرة أخرى للحصول على وسامك.",
       "reviewQuestions": "مراجعة الأسئلة",
       "yourAnswer": "إجابتك",
       "correctAnswer": "الاجابة الصحيحة",
@@ -1822,7 +1956,9 @@
     "you": "أنت: ",
     "typeMessage": "اكتب رسالة...",
     "selectChat": "رسائلك",
-    "selectChatDesc": "اختر محادثة من اليسار أو ابحث عن طالب/معلم لبدء الدردشة."
+    "selectChatDesc": "اختر محادثة من اليسار أو ابحث عن طالب/معلم لبدء الدردشة.",
+    "description": "وصف الرسائل",
+    "noMessages": "لا توجد رسائل"
   },
   "enrollments": {
     "title": "القبول والتسجيل",
@@ -1946,12 +2082,12 @@
       "documents": "مستندات"
     },
     "empty": {
-      "title": "لم يتم العثور على مصادر",
+      "title": "لا توجد مصادر",
       "desc": "ارفع أول مادة تعليمية للبدء في بناء مكتبة فصلك."
     },
     "labels": {
       "uploaded": "تم الرفع في {{date}}",
-      "options": "Resource Options",
+      "options": "خيارات المورد",
       "download": "تحميل الملف",
       "share": "مشاركة الرابط",
       "edit": "تعديل التفاصيل",
@@ -1960,7 +2096,8 @@
     "deleteDialog": {
       "title": "هل أنت متأكد تماماً؟",
       "desc": "لا يمكن التراجع عن هذا الإجراء. سيؤدي هذا إلى حذف المورد نهائياً وإزالته من جميع مكتبات الفصول."
-    }
+    },
+    "searchPlaceholder": "البحث في المصادر..."
   },
   "profileRequests": {
     "title": "حوكمة الملفات الشخصية",
@@ -1984,7 +2121,7 @@
     },
     "dialogs": {
       "rejectTitle": "رفض التغييرات",
-      "rejectDesc": "يرجى تقديم سبب محدد لرفض تحديثات الملف الشخصي هذه.",
+      "rejectDesc": "يرجى تقديم سبب محدد لرفض هذه التغييرات.",
       "rejectionFeedback": "ملاحظات الرفض",
       "rejectionPlaceholder": "مثال: الوثيقة المرفوعة غير واضحة أو غير صالحة. يرجى إعادة رفع نسخة واضحة من شهادة التدريس الخاصة بك.",
       "confirmRejection": "تأكيد الرفض"
@@ -2017,7 +2154,7 @@
     "emailPlaceholder": "you@university.edu",
     "noSpam": "لا رسائل مزعجة. ابتكار خالص فقط.",
     "brandDesc": "الجيل القادم من التعليم. أدوات مدعومة بالذكاء الاصطناعي، بيئات تعاونية، وإدارة فصول دراسية بمستوى احترافي.",
-    "rightsReserved": "Talabawy OS. جميع الحقوق محفوظة.",
+    "rightsReserved": "Tablawy OS. جميع الحقوق محفوظة.",
     "builtWith": "صنع بـ",
     "byTeam": "بواسطة الفريق الخبير",
     "terms": "شروط الخدمة",
@@ -2059,15 +2196,15 @@
       },
       "gamification": {
         "title": "التعلم باللعب",
-        "desc": "أوسمة ونقاط خبرة ولوحات صدارة لتحفيز الطلاب."
+        "desc": "أوسمة ونقاط خبرة ولوحات صدارة لإبقاء الطلاب متحفزين."
       },
       "qr": {
         "title": "الحضور عبر QR",
-        "desc": "تتبع حضور سريع وآمن باستخدام رموز QR فريدة."
+        "desc": "تتبع سريع وآمن للحضور باستخدام رموز QR فريدة."
       },
       "analytics": {
         "title": "تحليلات متقدمة",
-        "desc": "رؤى عميقة حول أداء الطلاب وتفاعل الفصل."
+        "desc": "رؤى عميقة حول أداء الطلاب وتفاعلهم في الفصل."
       },
       "collaboration": {
         "title": "تعاون الفريق",
@@ -2087,13 +2224,13 @@
       "title": "مركز قوي لـ",
       "desc": "منصة واحدة لإدارة حياتك الأكاديمية بالكامل. من الفصول الدراسية الفورية إلى جلسات الدراسة المدعومة بالذكاء الاصطناعي.",
       "attendance": "الحضور",
-      "verified": "تم التحقق عبر QR",
+      "verified": "موثق عبر QR",
       "ai": "مساعد ذكي",
       "draft": "المسودة جاهزة"
     },
     "roles": {
       "student": {
-        "f1": "مساعد دراسة ومعلم ذكي",
+        "f1": "مساعد دراسة ومدرب ذكي",
         "f2": "مسار تعلم محفز",
         "f3": "تكليفات تفاعلية",
         "f4": "مخطط دراسة شخصي"
@@ -2110,7 +2247,7 @@
       "title2": "مدعوم بالذكاء الاصطناعي",
       "desc": "رفيق تعليمي متطور يفهم منهجك الدراسي. أنشئ اختبارات، لخص الملاحظات، وأنشئ بطاقات تعليمية على الفور باستخدام Gemini 2.0 Flash.",
       "list": {
-        "assistant": "مساعد تدريس يعمل على مدار الساعة",
+        "assistant": "مساعد تدريس ذكي متاح 24/7",
         "quiz": "إنشاء اختبارات تكيفية",
         "summary": "تلخيص ذكي للمحتوى",
         "paths": "مسارات تعلم مخصصة"
@@ -2216,7 +2353,7 @@
     "stats": {
       "badges": "الأوسمة",
       "avgGrade": "متوسط الدرجة",
-      "dayStreak": "التتابع اليومي",
+      "day Streak": "تتابع الأيام",
       "globalRank": "التصنيف العالمي"
     },
     "learningConsistency": "استمرارية التعلم",

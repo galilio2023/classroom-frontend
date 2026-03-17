@@ -30,7 +30,7 @@ import {
   FileText,
   FileQuestion,
   Wand2,
-  Plus,
+  Sparkles,
 } from "lucide-react";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
@@ -54,8 +54,10 @@ import {
 } from "@/components/ui/select";
 import { useTranslation } from "react-i18next";
 import { ar } from "date-fns/locale";
+import { motion, AnimatePresence } from "framer-motion";
 
 import usePageTitle from "@/hooks/use-page-title";
+import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
 
 dayjs.extend(utc);
 
@@ -84,7 +86,6 @@ export const CalendarPage = () => {
   const [selectedClassId, setSelectedClassId] = useState<string>("");
 
   const isTeacher = identity?.role === UserRole.TEACHER;
-  const isStudent = identity?.role === UserRole.STUDENT;
 
   // Custom query to fetch all schedules and deadlines
   const calendarQuery = useCustom<CalendarEvent[], HttpError>({
@@ -92,7 +93,7 @@ export const CalendarPage = () => {
     method: "get",
     queryOptions: {
       enabled: !!identity?.id,
-      staleTime: 5 * 60 * 1000, // 5 minutes
+      staleTime: 5 * 60 * 1000,
     },
   });
 
@@ -105,7 +106,6 @@ export const CalendarPage = () => {
   const calendarData = calendarResult?.data || [];
 
   useEffect(() => {
-    // Ensure data is fresh on mount
     if (identity && refetch) {
       void refetch();
     }
@@ -130,7 +130,7 @@ export const CalendarPage = () => {
 
   const handleGenerateSchedule = () => {
     if (!selectedClassId) {
-      toast.error(t("calendar.generateDialog.selectClassError"));
+      toast.error(t("calendar.toasts.selectClass"));
       return;
     }
 
@@ -142,14 +142,14 @@ export const CalendarPage = () => {
       },
       {
         onSuccess: () => {
-          toast.success(t("calendar.generateDialog.success"));
+          toast.success(t("calendar.toasts.generated"));
           setIsGenerateDialogOpen(false);
           setSelectedClassId("");
           void refetch();
         },
         onError: (error: any) => {
           toast.error(
-            error?.response?.data?.message || t("calendar.generateDialog.error")
+            error?.response?.data?.message || t("common.error")
           );
         },
       },
@@ -173,17 +173,16 @@ export const CalendarPage = () => {
     if (customColor) return customColor;
     switch (type) {
       case "class":
-        return "var(--primary)"; // Primary blue
+        return "var(--primary)";
       case "assignment":
-        return "#f59e0b"; // Amber
+        return "#f59e0b";
       case "quiz":
-        return "#ef4444"; // Red
+        return "#ef4444";
       default:
-        return "#6b7280"; // Gray
+        return "#6b7280";
     }
   };
 
-  // Group events by date string (YYYY-MM-DD)
   const eventsByDate = useMemo(() => {
     const grouped: Record<string, CalendarEvent[]> = {};
     const events = calendarData || [];
@@ -196,7 +195,6 @@ export const CalendarPage = () => {
       grouped[dateKey].push(event);
     });
 
-    // Sort events within each day by start time
     Object.keys(grouped).forEach((key) => {
       grouped[key].sort((a, b) => {
         if (!a.startTime || !b.startTime) return 0;
@@ -223,18 +221,29 @@ export const CalendarPage = () => {
   const isAr = i18n.language === "ar";
 
   return (
-    <div className="space-y-10 pb-20">
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div className="space-y-1 text-start">
-          <h1 className="text-4xl font-black tracking-tight flex items-center gap-3">
-            <div className="p-2.5 rounded-2xl bg-primary/10 text-primary">
-              <CalendarIcon className="h-8 w-8" />
-            </div>
-            {t("calendar.title")}
-          </h1>
-          <p className="text-muted-foreground font-medium">
-            {t("calendar.description")}
-          </p>
+    <div className="space-y-8 md:space-y-12 pb-20 relative">
+      {/* Background Polish */}
+      <div className="hidden sm:block absolute top-0 left-1/4 w-[400px] h-[400px] bg-primary/5 rounded-full blur-[100px] -z-10 animate-pulse" />
+
+      {/* Header Section */}
+      <motion.div 
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex flex-col md:flex-row items-start md:items-end justify-between gap-6"
+      >
+        <div className="space-y-4 flex-1">
+          <Breadcrumb />
+          <div className="space-y-1">
+            <h1 className="page-title mb-0 flex items-center gap-3">
+              <div className="p-3 rounded-2xl bg-primary/10 text-primary shadow-sm border border-primary/5">
+                <CalendarIcon className="h-6 w-6 md:h-8 md:w-8" />
+              </div>
+              {t("calendar.title")}
+            </h1>
+            <p className="text-muted-foreground font-medium max-w-2xl text-balance">
+              {t("calendar.description")}
+            </p>
+          </div>
         </div>
 
         {isTeacher && (
@@ -243,218 +252,245 @@ export const CalendarPage = () => {
             onOpenChange={setIsGenerateDialogOpen}
           >
             <DialogTrigger asChild>
-              <Button className="rounded-2xl h-12 px-6 font-black uppercase tracking-widest text-[10px] gap-2 shadow-xl shadow-ai-primary/20 bg-ai-primary hover:bg-ai-primary/90 text-white border-none">
-                <Wand2 className="h-4 w-4" />
-                {t("calendar.generateSchedule")}
+              <Button size="lg" className="rounded-2xl font-black uppercase tracking-widest text-[10px] gap-2 shadow-xl shadow-ai-primary/20 bg-ai-primary hover:bg-ai-primary/90 text-white border-none h-12 md:h-14 px-8 w-full md:w-auto">
+                <Wand2 className="h-4 w-4 md:h-5 md:w-5" />
+                {t("calendar.generatePlan")}
               </Button>
             </DialogTrigger>
-            <DialogContent className="rounded-[2.5rem] border-none shadow-2xl bg-card/95 backdrop-blur-xl">
-              <DialogHeader className="space-y-4">
-                <div className="p-4 rounded-2xl bg-ai-primary/10 text-ai-primary w-fit">
-                  <Wand2 className="h-8 w-8" />
+            <DialogContent className="rounded-[2.5rem] border-none shadow-2xl bg-card/95 backdrop-blur-3xl max-w-lg p-0 overflow-hidden">
+              <div className="p-8 md:p-12 space-y-8">
+                <DialogHeader className="space-y-4">
+                    <div className="p-5 rounded-2xl bg-ai-primary/10 text-ai-primary w-fit mx-auto">
+                    <Wand2 className="h-10 w-10" />
+                    </div>
+                    <div className="space-y-2 text-center">
+                    <DialogTitle className="text-3xl font-black tracking-tight">
+                        {t("calendar.generateTitle")}
+                    </DialogTitle>
+                    <DialogDescription className="font-medium text-base text-muted-foreground">
+                        {t("calendar.generateDesc")}
+                    </DialogDescription>
+                    </div>
+                </DialogHeader>
+                <div className="space-y-6">
+                    <div className="space-y-3">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                        {t("calendar.selectClass")}
+                    </label>
+                    <Select
+                        value={selectedClassId}
+                        onValueChange={setSelectedClassId}
+                    >
+                        <SelectTrigger className="h-14 rounded-2xl bg-muted/30 border-none shadow-inner px-6 text-lg">
+                        <SelectValue
+                            placeholder={t("calendar.selectClass")}
+                        />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-2xl border-none shadow-2xl p-2">
+                        {classesData?.data?.map((c: Class) => (
+                            <SelectItem
+                            key={c.id}
+                            value={String(c.id)}
+                            className="rounded-xl py-3 cursor-pointer"
+                            >
+                            <span className="font-bold">{c.name}</span>
+                            </SelectItem>
+                        ))}
+                        </SelectContent>
+                    </Select>
+                    </div>
+                    <div className="p-6 rounded-2xl bg-primary/5 text-xs text-primary/70 border border-primary/10 flex items-start gap-4">
+                    <Info className="h-5 w-5 shrink-0 mt-0.5" />
+                    <p className="font-medium leading-relaxed">{t("calendar.syncInfo")}</p>
+                    </div>
                 </div>
-                <div className="space-y-1 text-start">
-                  <DialogTitle className="text-3xl font-black tracking-tight">
-                    {t("calendar.generateDialog.title")}
-                  </DialogTitle>
-                  <DialogDescription className="font-medium text-base">
-                    {t("calendar.generateDialog.description")}
-                  </DialogDescription>
-                </div>
-              </DialogHeader>
-              <div className="py-6 space-y-4 text-start">
-                <div className="space-y-2">
-                  <label className="text-sm font-bold">
-                    {t("calendar.generateDialog.selectClass")}
-                  </label>
-                  <Select
-                    value={selectedClassId}
-                    onValueChange={setSelectedClassId}
-                  >
-                    <SelectTrigger className="h-12 rounded-xl">
-                      <SelectValue
-                        placeholder={t("calendar.generateDialog.placeholder")}
-                      />
-                    </SelectTrigger>
-                    <SelectContent className="rounded-xl">
-                      {classesData?.data?.map((c: Class) => (
-                        <SelectItem
-                          key={c.id}
-                          value={String(c.id)}
-                          className="rounded-lg"
-                        >
-                          {c.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="p-4 rounded-xl bg-muted/50 text-xs text-muted-foreground">
-                  <Info className="h-4 w-4 mb-2 text-primary" />
-                  {t("calendar.generateDialog.info")}
-                </div>
+                <DialogFooter className="flex-col sm:flex-row gap-3">
+                    <Button
+                    variant="ghost"
+                    className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-8"
+                    onClick={() => setIsGenerateDialogOpen(false)}
+                    >
+                    {t("buttons.cancel")}
+                    </Button>
+                    <Button
+                    size="lg"
+                    className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-10 bg-ai-primary hover:bg-ai-primary/90 text-white shadow-xl shadow-ai-primary/20"
+                    onClick={handleGenerateSchedule}
+                    disabled={isGenerating.isPending || !selectedClassId}
+                    >
+                    {isGenerating.isPending ? (
+                        <>
+                        <Loader2 className="h-5 w-5 mr-3 animate-spin" />
+                        {t("buttons.processing")}
+                        </>
+                    ) : (
+                        <>
+                        <Sparkles className="h-5 w-5 mr-3" />
+                        {t("buttons.create")}
+                        </>
+                    )}
+                    </Button>
+                </DialogFooter>
               </div>
-              <DialogFooter className="gap-3 pt-6">
-                <Button
-                  variant="ghost"
-                  className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-12 px-6"
-                  onClick={() => setIsGenerateDialogOpen(false)}
-                >
-                  {t("buttons.cancel")}
-                </Button>
-                <Button
-                  className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-12 px-8 bg-ai-primary hover:bg-ai-primary/90 text-white shadow-xl shadow-ai-primary/20"
-                  onClick={handleGenerateSchedule}
-                  disabled={isGenerating.isPending || !selectedClassId}
-                >
-                  {isGenerating.isPending ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      {t("buttons.processing")}
-                    </>
-                  ) : (
-                    <>
-                      <Wand2 className="h-4 w-4 mr-2" />
-                      {t("buttons.generate")}
-                    </>
-                  )}
-                </Button>
-              </DialogFooter>
             </DialogContent>
           </Dialog>
         )}
-      </div>
+      </motion.div>
 
-      <div className="grid lg:grid-cols-12 gap-8 items-start">
-        {/* Calendar View */}
-        <Card className="lg:col-span-8 rounded-[2.5rem] border-none shadow-2xl shadow-black/5 bg-card/50 backdrop-blur-xl overflow-hidden p-6 md:p-10">
-          <Calendar
-            mode="single"
-            selected={selectedDate}
-            onSelect={setSelectedDate}
-            className="w-full flex justify-center"
-            classNames={{
-              months: "w-full",
-              month: "w-full space-y-8",
-              caption: "flex justify-center pt-2 relative items-center mb-8",
-              caption_label: "text-2xl font-black tracking-tight",
-              nav: "space-x-2 flex items-center",
-              nav_button: cn(
-                "h-10 w-10 bg-muted/30 hover:bg-primary/10 rounded-2xl transition-all flex items-center justify-center p-0",
-              ),
-              nav_button_previous: "absolute left-2",
-              nav_button_next: "absolute right-2",
-              table: "w-full border-collapse space-y-2",
-              head_row: "flex w-full mb-4",
-              head_cell:
-                "text-muted-foreground w-full font-black uppercase tracking-widest text-[10px]",
-              row: "flex w-full mt-2 gap-2",
-              cell: "text-center text-sm p-0 relative w-full h-14 focus-within:relative focus-within:z-20",
-              day: cn(
-                "h-14 w-full p-0 font-bold hover:bg-primary/5 rounded-2xl transition-all aria-selected:opacity-100",
-              ),
-              day_selected:
-                "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground shadow-lg shadow-primary/20",
-              day_today: "bg-muted/50 text-accent-foreground",
-              day_outside: "text-muted-foreground opacity-50",
-              day_disabled: "text-muted-foreground opacity-50",
-              day_range_middle:
-                "aria-selected:bg-accent aria-selected:text-accent-foreground",
-              day_hidden: "invisible",
-            }}
-            locale={isAr ? ar : undefined}
-            components={{
-              DayContent: ({ date, activeModifiers }) => {
-                const dateKey = dayjs(date).format("YYYY-MM-DD");
-                const dayEvents = eventsByDate[dateKey] || [];
-                const isSelected = activeModifiers.selected;
-                const isToday = activeModifiers.today;
+      <div className="grid lg:grid-cols-12 gap-8 md:gap-12 items-start">
+        {/* Calendar Card */}
+        <motion.div 
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="lg:col-span-8"
+        >
+            <Card className="rounded-[2.5rem] border border-border/40 shadow-2xl shadow-black/5 bg-card/40 backdrop-blur-3xl overflow-hidden p-4 md:p-8 lg:p-12">
+            <Calendar
+                mode="single"
+                selected={selectedDate}
+                onSelect={setSelectedDate}
+                className="w-full flex justify-center"
+                classNames={{
+                months: "w-full",
+                month: "w-full space-y-8 md:space-y-12",
+                caption: "flex justify-center pt-2 relative items-center mb-10 md:mb-16",
+                caption_label: "text-2xl md:text-3xl font-black tracking-tighter text-foreground",
+                nav: "space-x-2 flex items-center",
+                nav_button: cn(
+                    "h-10 w-10 md:h-12 md:w-12 bg-muted/40 hover:bg-primary/10 rounded-2xl transition-all flex items-center justify-center p-0",
+                ),
+                nav_button_previous: "absolute left-2",
+                nav_button_next: "absolute right-2",
+                table: "w-full border-collapse space-y-4",
+                head_row: "flex w-full mb-6",
+                head_cell:
+                    "text-muted-foreground/50 w-full font-black uppercase tracking-[0.2em] text-[9px] md:text-[10px]",
+                row: "flex w-full mt-2 gap-2 md:gap-4",
+                cell: "text-center text-sm p-0 relative w-full h-12 xs:h-16 md:h-20 focus-within:relative focus-within:z-20",
+                day: cn(
+                    "h-full w-full p-0 font-bold hover:bg-primary/5 rounded-2xl md:rounded-[1.5rem] transition-all aria-selected:opacity-100",
+                ),
+                day_selected:
+                    "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground shadow-2xl shadow-primary/30",
+                day_today: "bg-primary/10 text-primary border border-primary/20",
+                day_outside: "text-muted-foreground/30 opacity-50",
+                day_disabled: "text-muted-foreground opacity-50",
+                day_range_middle:
+                    "aria-selected:bg-accent aria-selected:text-accent-foreground",
+                day_hidden: "invisible",
+                }}
+                locale={isAr ? ar : undefined}
+                components={{
+                DayContent: ({ date, activeModifiers }) => {
+                    const dateKey = dayjs(date).format("YYYY-MM-DD");
+                    const dayEvents = eventsByDate[dateKey] || [];
+                    const isSelected = activeModifiers.selected;
+                    const isToday = activeModifiers.today;
 
-                return (
-                  <div
-                    className={cn(
-                      "flex flex-col items-center justify-center h-full w-full relative",
-                      isSelected && "text-primary-foreground",
-                      !isSelected && isToday && "text-primary",
-                    )}
-                  >
-                    <span>{date.getDate()}</span>
-                    {dayEvents.length > 0 && (
-                      <div className="flex gap-1 mt-1 absolute bottom-2">
-                        {dayEvents.slice(0, 3).map((event, i) => (
-                          <div
-                            key={i}
-                            className="h-1.5 w-1.5 rounded-full"
-                            style={{
-                              backgroundColor: isSelected
-                                ? "white"
-                                : getEventColor(event.type, event.color),
-                            }}
-                          />
-                        ))}
-                        {dayEvents.length > 3 && (
-                          <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground" />
+                    return (
+                    <div
+                        className={cn(
+                        "flex flex-col items-center justify-center h-full w-full relative group/day",
+                        isSelected && "text-primary-foreground",
+                        !isSelected && isToday && "text-primary",
                         )}
-                      </div>
-                    )}
-                  </div>
-                );
-              },
-            }}
-          />
-        </Card>
+                    >
+                        <span className="text-sm md:text-lg lg:text-xl font-black">{date.getDate()}</span>
+                        {dayEvents.length > 0 && (
+                        <div className="flex flex-wrap justify-center gap-1 md:gap-1.5 mt-1 absolute bottom-2 md:bottom-3 max-w-[80%]">
+                            {dayEvents.slice(0, 3).map((event, i) => (
+                            <div
+                                key={i}
+                                className="h-1.5 w-1.5 md:h-2 md:w-2 rounded-full shadow-sm"
+                                style={{
+                                backgroundColor: isSelected
+                                    ? "white"
+                                    : getEventColor(event.type, event.color),
+                                }}
+                            />
+                            ))}
+                            {dayEvents.length > 3 && (
+                            <div className="h-1 w-1 md:h-1.5 md:w-1.5 rounded-full bg-muted-foreground/40" />
+                            )}
+                        </div>
+                        )}
+                    </div>
+                    );
+                },
+                }}
+            />
+            </Card>
+        </motion.div>
 
-        {/* Selected Day Events */}
-        <div className="lg:col-span-4 space-y-6">
-          <Card className="rounded-[2.5rem] border-none shadow-2xl shadow-black/5 bg-card/50 backdrop-blur-xl overflow-hidden sticky top-6">
-            <CardHeader className="p-8 pb-4 border-b border-black/[0.03] bg-muted/30">
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="text-xl font-black tracking-tight">
-                    {selectedDate
-                      ? dayjs(selectedDate).format(
-                          isAr ? "DD MMMM YYYY" : "MMMM D, YYYY",
-                        )
-                      : t("calendar.selectDate")}
-                  </CardTitle>
-                  <CardDescription className="text-[10px] font-bold uppercase tracking-widest text-primary mt-1">
+        {/* Events Sidebar */}
+        <motion.div 
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="lg:col-span-4"
+        >
+          <Card className="rounded-[2.5rem] border border-border/40 shadow-2xl shadow-black/5 bg-card/40 backdrop-blur-3xl overflow-hidden sticky top-24">
+            <CardHeader className="p-8 md:p-10 pb-6 md:pb-8 border-b border-border/40 bg-muted/20">
+              <div className="flex flex-col gap-4">
+                <div className="flex items-center gap-3">
+                    <div className="p-2.5 rounded-xl bg-primary/10 text-primary">
+                        <Clock className="h-5 w-5" />
+                    </div>
+                    <CardTitle className="text-xl md:text-2xl font-black tracking-tight">
+                        {selectedDate
+                        ? dayjs(selectedDate).format(
+                            isAr ? "DD MMMM YYYY" : "MMMM D, YYYY",
+                            )
+                        : t("calendar.selectDate")}
+                    </CardTitle>
+                </div>
+                <Badge
+                    variant="ai"
+                    className="w-fit px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em]"
+                >
                     {selectedDayEvents.length}{" "}
                     {t("calendar.eventsSelectedDay")}
-                  </CardDescription>
-                </div>
+                </Badge>
               </div>
             </CardHeader>
             <CardContent className="p-0">
               {isLoading ? (
-                <div className="flex flex-col items-center justify-center py-20 gap-4">
-                  <Loader2 className="h-8 w-8 animate-spin text-primary/40" />
-                  <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground animate-pulse">
-                    {t("calendar.loading")}
+                <div className="flex flex-col items-center justify-center py-32 gap-6">
+                  <div className="relative">
+                    <Loader2 className="h-12 w-12 animate-spin text-primary/10" />
+                    <CalendarIcon className="h-5 w-5 text-primary/30 absolute inset-0 m-auto" />
+                  </div>
+                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/40 animate-pulse">
+                    {t("classes.curriculum.loading")}
                   </p>
                 </div>
               ) : selectedDayEvents.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-20 text-center px-8 opacity-40">
-                  <CalendarIcon className="h-12 w-12 mb-4" />
-                  <p className="font-black uppercase tracking-widest text-xs">
+                <div className="flex flex-col items-center justify-center py-32 text-center px-10 opacity-30 grayscale scale-95 transition-all">
+                  <div className="p-6 rounded-[2rem] bg-muted/50 mb-6">
+                    <CalendarIcon className="h-16 w-16" />
+                  </div>
+                  <p className="font-black uppercase tracking-[0.2em] text-[10px]">
                     {t("calendar.noEvents")}
                   </p>
-                  <p className="text-sm font-medium mt-2">
-                    {t("calendar.noEventsDescription")}
+                  <p className="text-sm font-medium mt-3 leading-relaxed">
+                    {t("calendar.noEventsDesc")}
                   </p>
                 </div>
               ) : (
-                <ScrollArea className="h-[500px] p-6 pr-8">
-                  <div className="space-y-4">
+                <ScrollArea className="h-[450px] md:h-[600px] p-6 md:p-8">
+                  <div className="space-y-5 pr-2">
                     {selectedDayEvents.map((event, index) => {
                       const color = getEventColor(event.type, event.color);
                       return (
-                        <div
+                        <motion.div
                           key={event.id || index}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: index * 0.05 }}
                           onClick={() => handleEventClick(event)}
                           className={cn(
-                            "group flex flex-col p-5 rounded-3xl border transition-all cursor-pointer shadow-sm hover:shadow-md",
+                            "group flex flex-col p-6 rounded-[2rem] border transition-all duration-300 cursor-pointer shadow-sm hover:shadow-xl hover:shadow-primary/5",
                             event.classId
-                              ? "hover:bg-primary/[0.02]"
+                              ? "hover:-translate-y-1"
                               : "hover:bg-muted/50 cursor-default",
                           )}
                           style={{
@@ -462,20 +498,20 @@ export const CalendarPage = () => {
                             backgroundColor: `${color}05`,
                           }}
                         >
-                          <div className="flex justify-between items-start mb-3">
+                          <div className="flex flex-wrap justify-between items-start gap-3 mb-5">
                             <Badge
-                              variant="outline"
-                              className="border-none text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg flex items-center gap-1.5"
+                              className="border-none text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full flex items-center gap-2 shadow-sm"
                               style={{
                                 backgroundColor: `${color}15`,
                                 color: color,
+                                border: `1px solid ${color}20`
                               }}
                             >
                               {getEventIcon(event.type)}
-                              {t(`calendar.types.${event.type}`)}
+                              {t(`calendar.eventTypes.classes`)}
                             </Badge>
                             {event.startTime && (
-                              <div className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground bg-background/50 px-2 py-1 rounded-md backdrop-blur-sm">
+                              <div className="flex items-center gap-2 text-[10px] font-black text-muted-foreground/60 bg-background/60 px-3 py-1.5 rounded-full backdrop-blur-md border border-border/40">
                                 <Clock className="h-3.5 w-3.5" />
                                 <span>
                                   {dayjs(event.startTime).format("HH:mm")}
@@ -484,16 +520,25 @@ export const CalendarPage = () => {
                               </div>
                             )}
                           </div>
-                          <h4 className="font-black text-lg tracking-tight mb-1 group-hover:text-primary transition-colors text-start">
+                          <h4 className="font-black text-lg md:text-xl tracking-tight mb-2 group-hover:text-primary transition-colors text-start leading-tight">
                             {event.title}
                           </h4>
                           {event.className && (
-                            <p className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
-                              <Users className="h-3.5 w-3.5 opacity-50" />
-                              {event.className}
-                            </p>
+                            <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground/60">
+                              <div className="p-1.5 rounded-lg bg-primary/5">
+                                <Users className="h-3 w-3 text-primary" />
+                              </div>
+                              <span className="truncate">{event.className}</span>
+                            </div>
                           )}
-                        </div>
+                          
+                          {event.classId && (
+                            <div className="mt-5 flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-primary opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0">
+                                {t("notifications.viewClass")}
+                                <ChevronRight className="h-3 w-3" />
+                            </div>
+                          )}
+                        </motion.div>
                       );
                     })}
                   </div>
@@ -501,7 +546,7 @@ export const CalendarPage = () => {
               )}
             </CardContent>
           </Card>
-        </div>
+        </motion.div>
       </div>
     </div>
   );

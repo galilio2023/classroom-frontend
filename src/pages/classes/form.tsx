@@ -332,7 +332,7 @@ export const ClassForm = ({
                             </FormControl>
                             <SelectContent className="rounded-xl border-none shadow-2xl">
                               {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day) => (
-                                <SelectItem key={day} value={day} className="rounded-lg font-bold text-start">{t(`days.${day}`)}</SelectItem>
+                                <SelectItem key={day} value={day} className="rounded-lg font-bold text-start">{t(`days.${day}` as any)}</SelectItem>
                               ))}
                             </SelectContent>
                           </Select>

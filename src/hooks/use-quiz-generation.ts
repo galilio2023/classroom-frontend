@@ -15,6 +15,8 @@ interface AIResponse {
 export const useQuizGeneration = (initialCount: number = 5) => {
   const [topic, setTopic] = useState("");
   const [count, setCount] = useState([initialCount]);
+  const [difficulty, setDifficulty] = useState("medium");
+  const [type, setType] = useState("multiple_choice");
   const [quiz, setQuiz] = useState<QuizQuestion[]>([]);
 
   const { open } = useNotification();
@@ -35,7 +37,7 @@ export const useQuizGeneration = (initialCount: number = 5) => {
       {
         url: "/ai/generate-quiz",
         method: "post",
-        values: { topic, count: count[0] },
+        values: { topic, count: count[0], difficulty, format: type },
       },
       {
         onSuccess: (data) => {
@@ -62,6 +64,10 @@ export const useQuizGeneration = (initialCount: number = 5) => {
     setTopic,
     count,
     setCount,
+    difficulty,
+    setDifficulty,
+    type,
+    setType,
     quiz,
     setQuiz,
     handleGenerate,

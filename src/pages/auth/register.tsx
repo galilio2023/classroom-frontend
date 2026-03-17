@@ -19,7 +19,6 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-  FormDescription,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -33,7 +32,8 @@ import {
   Loader2,
   BookOpen,
   Zap,
-  ShieldCheck
+  ShieldCheck,
+  AlertCircle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import axios from "axios";
@@ -140,39 +140,44 @@ const RegisterPage = () => {
   const isAr = i18n.language === 'ar';
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 relative overflow-hidden">
-      {/* Background elements */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/5 blur-[120px] rounded-full" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-500/5 blur-[120px] rounded-full" />
+    <div className="min-h-dvh bg-background flex flex-col items-center justify-center p-4 md:p-8 relative overflow-hidden">
+      {/* Immersive Background - Mobile Optimized */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-[-1]">
+        <div className="absolute top-[-10%] start-[-10%] w-[60%] h-[40%] bg-primary/10 blur-[80px] md:blur-[120px] rounded-full opacity-50" />
+        <div className="absolute bottom-[-10%] end-[-10%] w-[60%] h-[40%] bg-purple-500/10 blur-[80px] md:blur-[120px] rounded-full opacity-50" />
+      </div>
 
       <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
         className="w-full max-w-xl z-10"
       >
-        <Link to="/" className="flex items-center justify-center gap-2 mb-8 group">
-          <div className="bg-primary p-2 rounded-xl group-hover:rotate-12 transition-transform duration-300">
-            <BookOpen className="h-6 w-6 text-primary-foreground" />
+        <Link to="/" className="flex items-center justify-center gap-3 mb-10 md:mb-14 group">
+          <div className="bg-primary p-2.5 rounded-2xl group-hover:rotate-6 group-hover:scale-110 transition-all duration-500 shadow-lg shadow-primary/20">
+            <BookOpen className="h-7 w-7 text-primary-foreground" />
           </div>
-          <span className="text-2xl font-black tracking-tighter uppercase">
-            Class<span className="text-primary">Room</span>
+          <span className="text-3xl font-black tracking-tighter uppercase leading-none">
+            Class<span className="text-primary italic">Room</span>
           </span>
         </Link>
 
-        <Card className="border-none shadow-2xl rounded-[3rem] bg-card/50 backdrop-blur-xl overflow-hidden">
-          <CardHeader className="text-center pt-10 pb-6 space-y-4">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-[10px] font-black uppercase tracking-widest text-primary mx-auto">
-                <Sparkles className="h-3 w-3" />
+        <Card className="border-border/40 shadow-[0_32px_64px_-12px_rgba(0,0,0,0.15)] dark:shadow-[0_32px_64px_-12px_rgba(0,0,0,0.4)] rounded-[2.5rem] md:rounded-[3rem] bg-card/50 backdrop-blur-3xl overflow-hidden">
+          <CardHeader className="text-center pt-10 md:pt-14 pb-6 md:pb-10 space-y-4 md:space-y-6">
+            <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-primary/5 text-[10px] font-black uppercase tracking-[0.2em] text-primary/60 mx-auto border border-primary/10">
+                <Sparkles className="h-3.5 w-3.5" />
                 {t("auth.register.stepOf", { step, label: step === 1 ? t("auth.register.accountSetup") : t("auth.register.profileDetails") })}
             </div>
-            <CardTitle className="text-4xl font-black tracking-tighter uppercase">{t("auth.register.title")}</CardTitle>
-            <CardDescription className="font-medium text-muted-foreground/80">
-              {t("auth.register.description")}
-            </CardDescription>
+            <div className="space-y-2">
+                <CardTitle className="text-3xl md:text-4xl font-black tracking-tighter uppercase leading-tight">{t("auth.register.title")}</CardTitle>
+                <CardDescription className="font-medium text-base md:text-lg px-4 md:px-8">
+                {t("auth.register.description")}
+                </CardDescription>
+            </div>
           </CardHeader>
-          <CardContent className="px-10">
+          <CardContent className="px-6 md:px-12">
             <Form {...form}>
-              <div className="space-y-6">
+              <div className="space-y-6 md:space-y-8">
                 <AnimatePresence mode="wait">
                   {step === 1 ? (
                     <motion.div
@@ -180,24 +185,37 @@ const RegisterPage = () => {
                       initial={{ opacity: 0, x: isAr ? 20 : -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: isAr ? -20 : 20 }}
-                      className="space-y-6"
+                      transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
+                      className="space-y-6 md:space-y-8"
                     >
-                      <RoleSelector 
-                        value={role as "student" | "teacher" | "parent"}
-                        onChange={(val) => form.setValue("role", val as any)} 
+                      <FormField
+                        control={form.control}
+                        name="role"
+                        render={({ field }) => (
+                          <FormItem className="space-y-3">
+                            <FormLabel className="font-black uppercase text-[10px] tracking-[0.2em] text-muted-foreground/60 ml-2">{t("profile.labels.role")}</FormLabel>
+                            <FormControl>
+                              <RoleSelector 
+                                value={field.value as "student" | "teacher" | "parent"}
+                                onChange={(val) => field.onChange(val)} 
+                              />
+                            </FormControl>
+                            <FormMessage className="ml-2 font-bold" />
+                          </FormItem>
+                        )}
                       />
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
                         <FormField
                           control={form.control}
                           name="name"
                           render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="font-black uppercase text-[10px] tracking-widest text-muted-foreground/80">{t("auth.register.fullNameLabel")}</FormLabel>
+                            <FormItem className="space-y-3">
+                              <FormLabel className="font-black uppercase text-[10px] tracking-[0.2em] text-muted-foreground/60 ml-2">{t("auth.register.fullNameLabel")}</FormLabel>
                               <FormControl>
-                                <Input placeholder={t("auth.register.fullNamePlaceholder")} className="h-14 rounded-2xl bg-muted/30 border-none focus-visible:ring-primary/20 font-bold" {...field} />
+                                <Input placeholder={t("auth.register.fullNamePlaceholder")} className="h-14 md:h-16 rounded-2xl md:rounded-3xl bg-muted/30 border-none shadow-inner px-6 md:px-8 text-base md:text-lg font-black placeholder:text-muted-foreground/30 focus-visible:ring-primary/20" {...field} />
                               </FormControl>
-                              <FormMessage />
+                              <FormMessage className="ml-2 font-bold" />
                             </FormItem>
                           )}
                         />
@@ -205,12 +223,12 @@ const RegisterPage = () => {
                           control={form.control}
                           name="email"
                           render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="font-black uppercase text-[10px] tracking-widest text-muted-foreground/80">{t("auth.register.emailLabel")}</FormLabel>
+                            <FormItem className="space-y-3">
+                              <FormLabel className="font-black uppercase text-[10px] tracking-[0.2em] text-muted-foreground/60 ml-2">{t("auth.register.emailLabel")}</FormLabel>
                               <FormControl>
-                                <Input type="email" placeholder={t("auth.register.emailPlaceholder")} className="h-14 rounded-2xl bg-muted/30 border-none focus-visible:ring-primary/20 font-bold" {...field} />
+                                <Input type="email" placeholder={t("auth.register.emailPlaceholder")} className="h-14 md:h-16 rounded-2xl md:rounded-3xl bg-muted/30 border-none shadow-inner px-6 md:px-8 text-base md:text-lg font-black placeholder:text-muted-foreground/30 focus-visible:ring-primary/20" {...field} />
                               </FormControl>
-                              <FormMessage />
+                              <FormMessage className="ml-2 font-bold" />
                             </FormItem>
                           )}
                         />
@@ -219,12 +237,12 @@ const RegisterPage = () => {
                         control={form.control}
                         name="password"
                         render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="font-black uppercase text-[10px] tracking-widest text-muted-foreground/80">{t("auth.register.passwordLabel")}</FormLabel>
+                          <FormItem className="space-y-3">
+                            <FormLabel className="font-black uppercase text-[10px] tracking-[0.2em] text-muted-foreground/60 ml-2">{t("auth.register.passwordLabel")}</FormLabel>
                             <FormControl>
-                              <Input type="password" placeholder={t("auth.register.passwordPlaceholder")} className="h-14 rounded-2xl bg-muted/30 border-none focus-visible:ring-primary/20 font-bold" {...field} />
+                              <Input type="password" placeholder={t("auth.register.passwordPlaceholder")} className="h-14 md:h-16 rounded-2xl md:rounded-3xl bg-muted/30 border-none shadow-inner px-6 md:px-8 text-base md:text-lg font-black placeholder:text-muted-foreground/30 focus-visible:ring-primary/20" {...field} />
                             </FormControl>
-                            <FormMessage />
+                            <FormMessage className="ml-2 font-bold" />
                           </FormItem>
                         )}
                       />
@@ -235,25 +253,27 @@ const RegisterPage = () => {
                       initial={{ opacity: 0, x: isAr ? -20 : 20 }}
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: isAr ? 20 : -20 }}
-                      className="space-y-6"
+                      transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
+                      className="space-y-6 md:space-y-8"
                     >
-                      <div className="p-4 rounded-2xl bg-primary/5 border border-primary/10">
-                        <p className="text-xs text-muted-foreground font-black uppercase tracking-widest leading-relaxed">
-                          ⚡ {t("auth.register.completeProfileTip")}
+                      <div className="p-5 rounded-[1.5rem] bg-primary/5 border border-primary/10 shadow-sm">
+                        <p className="text-xs md:text-sm text-muted-foreground font-black uppercase tracking-widest leading-relaxed flex items-center gap-2">
+                          <Sparkles className="h-4 w-4 text-primary" />
+                          {t("auth.register.completeProfileTip")}
                         </p>
                       </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
                         <FormField
                           control={form.control}
                           name="phoneNumber"
                           render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="font-black uppercase text-[10px] tracking-widest text-muted-foreground/80">{t("auth.register.phoneNumberLabel")}</FormLabel>
+                            <FormItem className="space-y-3">
+                              <FormLabel className="font-black uppercase text-[10px] tracking-[0.2em] text-muted-foreground/60 ml-2">{t("auth.register.phoneNumberLabel")}</FormLabel>
                               <FormControl>
-                                <Input placeholder={t("auth.register.phoneNumberPlaceholder")} className="h-14 rounded-2xl bg-muted/30 border-none focus-visible:ring-primary/20 font-bold" {...field} />
+                                <Input placeholder={t("auth.register.phoneNumberPlaceholder")} className="h-14 md:h-16 rounded-2xl md:rounded-3xl bg-muted/30 border-none shadow-inner px-6 md:px-8 text-base md:text-lg font-black placeholder:text-muted-foreground/30 focus-visible:ring-primary/20" {...field} />
                               </FormControl>
-                              <FormMessage />
+                              <FormMessage className="ml-2 font-bold" />
                             </FormItem>
                           )}
                         />
@@ -262,58 +282,102 @@ const RegisterPage = () => {
                             control={form.control}
                             name="dateOfBirth"
                             render={({ field }) => (
-                              <FormItem>
-                                <FormLabel className="font-black uppercase text-[10px] tracking-widest text-muted-foreground/80">{t("auth.register.dobLabel")}</FormLabel>
+                              <FormItem className="space-y-3">
+                                <FormLabel className="font-black uppercase text-[10px] tracking-[0.2em] text-muted-foreground/60 ml-2">{t("auth.register.dobLabel")}</FormLabel>
                                 <FormControl>
-                                  <Input type="date" className="h-14 rounded-2xl bg-muted/30 border-none focus-visible:ring-primary/20 font-bold" {...field} />
+                                  <Input type="date" className="h-14 md:h-16 rounded-2xl md:rounded-3xl bg-muted/30 border-none shadow-inner px-6 md:px-8 text-base md:text-lg font-black placeholder:text-muted-foreground/30 focus-visible:ring-primary/20" {...field} />
                                 </FormControl>
-                                <FormMessage />
+                                <FormMessage className="ml-2 font-bold" />
                               </FormItem>
                             )}
                           />
                         )}
+                        {role === "parent" && (
+                          <>
+                            <FormField
+                              control={form.control}
+                              name="parentName"
+                              render={({ field }) => (
+                                <FormItem className="space-y-3">
+                                  <FormLabel className="font-black uppercase text-[10px] tracking-[0.2em] text-muted-foreground/60 ml-2">{t("auth.register.fullNameLabel")}</FormLabel>
+                                  <FormControl>
+                                    <Input placeholder={t("auth.register.fullNamePlaceholder")} className="h-14 md:h-16 rounded-2xl md:rounded-3xl bg-muted/30 border-none shadow-inner px-6 md:px-8 text-base md:text-lg font-black placeholder:text-muted-foreground/30 focus-visible:ring-primary/20" {...field} />
+                                  </FormControl>
+                                  <FormMessage className="ml-2 font-bold" />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={form.control}
+                              name="parentPhone"
+                              render={({ field }) => (
+                                <FormItem className="space-y-3">
+                                  <FormLabel className="font-black uppercase text-[10px] tracking-[0.2em] text-muted-foreground/60 ml-2">{t("auth.register.phoneNumberLabel")}</FormLabel>
+                                  <FormControl>
+                                    <Input placeholder={t("auth.register.phoneNumberPlaceholder")} className="h-14 md:h-16 rounded-2xl md:rounded-3xl bg-muted/30 border-none shadow-inner px-6 md:px-8 text-base md:text-lg font-black placeholder:text-muted-foreground/30 focus-visible:ring-primary/20" {...field} />
+                                  </FormControl>
+                                  <FormMessage className="ml-2 font-bold" />
+                                </FormItem>
+                              )}
+                            />
+                          </>
+                        )}
                       </div>
 
                       {role === "teacher" && (
-                        <div className="space-y-4">
+                        <div className="space-y-6 md:space-y-8">
                           <FormField
                             control={form.control}
                             name="bio"
                             render={({ field }) => (
-                              <FormItem>
-                                <div className="flex justify-between items-center mb-1">
-                                  <FormLabel className="font-black uppercase text-[10px] tracking-widest text-muted-foreground/80">{t("auth.register.bioLabel")}</FormLabel>
+                              <FormItem className="space-y-3">
+                                <div className="flex justify-between items-center">
+                                  <FormLabel className="font-black uppercase text-[10px] tracking-[0.2em] text-muted-foreground/60 ml-2">{t("auth.register.bioLabel")}</FormLabel>
                                   <Button 
                                     type="button" 
                                     variant="ghost" 
                                     size="sm" 
-                                    className="h-8 text-[10px] font-black uppercase tracking-widest text-primary hover:text-primary hover:bg-primary/10 rounded-lg gap-2"
+                                    className="h-9 text-[10px] font-black uppercase tracking-widest text-primary hover:text-primary hover:bg-primary/10 rounded-xl gap-2"
                                     onClick={generateAIBio}
                                     disabled={isGeneratingBio}
                                   >
-                                    {isGeneratingBio ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
+                                    {isGeneratingBio ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
                                     {t("buttons.aiAssist")}
                                   </Button>
                                 </div>
                                 <FormControl>
-                                  <Textarea placeholder={t("auth.register.bioPlaceholder")} className="rounded-2xl bg-muted/30 border-none focus-visible:ring-primary/20 font-bold resize-none" rows={3} {...field} />
+                                  <Textarea placeholder={t("auth.register.bioPlaceholder")} className="min-h-32 md:min-h-40 rounded-2xl md:rounded-3xl bg-muted/30 border-none shadow-inner px-6 md:px-8 text-base md:text-lg font-medium p-6 resize-none focus-visible:ring-primary/20 leading-relaxed italic" {...field} />
                                 </FormControl>
-                                <FormMessage />
+                                <FormMessage className="ml-2 font-bold" />
                               </FormItem>
                             )}
                           />
                           
-                          <VerificationUpload 
-                            url={form.watch("verificationDocumentUrl") || ""}
-                            onUpload={(url, publicId) => {
-                              form.setValue("verificationDocumentUrl", url);
-                              form.setValue("verificationDocumentCldPubId", publicId);
-                              form.trigger("verificationDocumentUrl");
-                            }}
-                            onClear={() => {
-                              form.setValue("verificationDocumentUrl", "");
-                              form.setValue("verificationDocumentCldPubId", "");
-                            }}
+                          <FormField
+                            control={form.control}
+                            name="verificationDocumentUrl"
+                            render={({ field }) => (
+                              <FormItem className="space-y-3">
+                                <FormLabel className="font-black uppercase text-[10px] tracking-[0.2em] text-muted-foreground/60 ml-2">{t("auth.register.verification.uploadLabel")}</FormLabel>
+                                <FormControl>
+                                  <VerificationUpload 
+                                    url={field.value || ""}
+                                    onUpload={(url, publicId) => {
+                                      field.onChange(url);
+                                      form.setValue("verificationDocumentCldPubId", publicId);
+                                    }}
+                                    onClear={() => {
+                                      field.onChange("");
+                                      form.setValue("verificationDocumentCldPubId", "");
+                                    }}
+                                  />
+                                </FormControl>
+                                <CardDescription className="ml-2 text-xs md:text-sm text-muted-foreground/70">
+                                    {t("auth.register.verification.success")}
+                                </CardDescription>
+                                <FormMessage className="ml-2 font-bold" />
+                              </FormItem>
+                            )}
                           />
                         </div>
                       )}
@@ -321,39 +385,48 @@ const RegisterPage = () => {
                   )}
                 </AnimatePresence>
 
-                <div className="flex gap-4 pt-4">
+                <div className="flex flex-col sm:flex-row gap-4 pt-4 md:pt-6">
                   {step > 1 ? (
-                    <Button type="button" variant="outline" className="flex-1 h-14 rounded-2xl font-black uppercase tracking-widest text-xs border-2 border-muted" onClick={() => setStep(1)}>
+                    <Button type="button" variant="outline" size="lg" className="flex-1 h-14 md:h-16 rounded-2xl md:rounded-3xl font-black uppercase tracking-widest text-xs md:text-sm border-2 border-border/40 bg-background/50 shadow-sm" onClick={() => setStep(1)}>
                       <ArrowLeft className={cn("h-4 w-4 mr-2", isAr && "ml-2 mr-0 rotate-180")} />
                       {t("buttons.back")}
                     </Button>
                   ) : (
                     <Link to="/login" className="flex-1">
-                      <Button variant="outline" className="w-full h-14 rounded-2xl font-black uppercase tracking-widest text-xs border-2 border-muted">
+                      <Button variant="outline" size="lg" className="w-full h-14 md:h-16 rounded-2xl md:rounded-3xl font-black uppercase tracking-widest text-xs md:text-sm border-2 border-border/40 bg-background/50 shadow-sm">
                         <ArrowLeft className={cn("h-4 w-4 mr-2", isAr && "ml-2 mr-0 rotate-180")} />
                         {t("buttons.signIn")}
                       </Button>
                     </Link>
                   )}
                   {step < 2 ? (
-                    <Button type="button" className="flex-1 h-14 rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl shadow-primary/20 group" onClick={nextStep}>
+                    <Button type="button" size="lg" className="flex-1 h-14 md:h-16 rounded-2xl md:rounded-3xl font-black uppercase tracking-widest text-xs md:text-sm shadow-2xl shadow-primary/30 group" onClick={nextStep}>
                       {t("buttons.continue")}
                       <ArrowRight className={cn("h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform", isAr && "mr-2 ml-0 rotate-180 group-hover:-translate-x-1")} />
                     </Button>
                   ) : (
-                    <Button type="button" className="flex-1 h-14 rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl shadow-primary/20 group" disabled={isPending} onClick={handleFinalSubmit}>
-                      {isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : t("buttons.completeJoin")}
-                      <Zap className={cn("ml-2 h-4 w-4 fill-current group-hover:scale-125 transition-transform", isAr && "mr-2 ml-0")} />
+                    <Button type="button" size="lg" className="flex-1 h-14 md:h-16 rounded-2xl md:rounded-3xl font-black uppercase tracking-widest text-xs md:text-sm shadow-2xl shadow-primary/30 group" disabled={isPending} onClick={handleFinalSubmit}>
+                      {isPending ? (
+                        <div className="flex items-center gap-3">
+                            <Loader2 className="h-5 w-5 animate-spin" />
+                            {t("buttons.authenticating")}
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-3">
+                            {t("buttons.completeJoin")}
+                            <Zap className={cn("h-5 w-5 fill-current group-hover:scale-125 transition-transform", isAr && "rotate-180")} />
+                        </div>
+                      )}
                     </Button>
                   )}
                 </div>
               </div>
             </Form>
           </CardContent>
-          <CardFooter className="flex justify-center py-8 bg-muted/10 border-t border-muted">
-            <p className="text-sm font-medium text-muted-foreground">
+          <CardFooter className="flex justify-center py-8 md:py-12 bg-primary/[0.02] border-t border-border/40 mt-8">
+            <p className="text-sm md:text-base font-medium text-muted-foreground/80">
               {t("auth.register.alreadyHaveAccount")}&nbsp;
-              <Link to="/login" className="font-black text-primary hover:underline uppercase tracking-widest text-xs">{t("buttons.signIn")}</Link>
+              <Link to="/login" className="font-black text-primary hover:underline uppercase tracking-[0.1em] text-xs md:text-sm">{t("buttons.signIn")}</Link>
             </p>
           </CardFooter>
         </Card>

@@ -4,7 +4,7 @@ import { Module, User, UserRole, Resource, Progress } from "@/types";
 import { Accordion } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { PlusCircle, Loader2, LayoutGrid, Zap, Sparkles, BookOpen, LayoutDashboard, Info, Plus, Wand2 } from "lucide-react";
+import { PlusCircle, Loader2, LayoutGrid, Zap, BookOpen, LayoutDashboard, Wand2 } from "lucide-react";
 import { toast } from "sonner";
 import { ModuleItem } from "@/components/classes/curriculum/module-item";
 import { MagicBuilderDialog, MagicBuilderConfig } from "@/components/classes/curriculum/magic-builder-dialog";
@@ -12,7 +12,6 @@ import { CreateModuleDialog } from "@/components/classes/curriculum/create-modul
 import { AddResourceDialog } from "@/components/classes/curriculum/add-resource-dialog";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
-import { Badge } from "@/components/ui/badge";
 import { useTranslation } from "react-i18next";
 
 interface CurriculumTabProps {
@@ -20,7 +19,8 @@ interface CurriculumTabProps {
 }
 
 export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isAr = i18n.language === "ar";
   const { data: identity } = useGetIdentity<User>();
   const isTeacher = identity?.role === UserRole.TEACHER || identity?.role === UserRole.ADMIN;
   const isStudent = identity?.role === UserRole.STUDENT;
@@ -135,27 +135,28 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
   );
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 md:space-y-10">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 text-start">
-        <div className="space-y-1">
+        <div className="space-y-1 md:space-y-2">
           <div className="flex items-center gap-2">
-            <div className="p-1.5 rounded-lg bg-primary/10 text-primary">
-              <BookOpen className="h-4 w-4" />
+            <div className="p-2 rounded-lg bg-primary/10 text-primary">
+              <BookOpen className="h-4 w-4 md:h-5 md:w-5" />
             </div>
-            <h3 className="text-xl font-black tracking-tight">{t("classes.curriculum.courseCurriculum")}</h3>
+            <h3 className="text-xl md:text-2xl font-black tracking-tight">{t("classes.curriculum.courseCurriculum")}</h3>
           </div>
-          <p className="text-sm text-muted-foreground font-medium">{t("classes.curriculum.curriculumDescription")}</p>
+          <p className="text-sm md:text-base text-muted-foreground font-medium max-w-2xl">{t("classes.curriculum.curriculumDescription")}</p>
         </div>
+        
         {isTeacher && (
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 md:gap-3 w-full md:w-auto">
             <Button 
               variant="outline" 
-              className="rounded-xl h-11 px-6 border-ai-primary/20 text-ai-primary hover:bg-ai-primary/5 font-black uppercase tracking-widest text-[10px] gap-2 relative overflow-hidden group shadow-sm"
+              className="flex-1 md:flex-none rounded-xl h-10 md:h-12 px-4 md:px-8 border-ai-primary/20 text-ai-primary hover:bg-ai-primary/5 font-black uppercase tracking-widest text-[9px] md:text-[10px] gap-2 relative overflow-hidden group shadow-sm"
               onClick={() => { setMagicConfig({ ...magicConfig, moduleId: null, type: "package" }); setIsMagicModalOpen(true); }}
             >
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-[shine_1.5s_ease-in-out] pointer-events-none" />
-              <Sparkles className="h-4 w-4" />
-              {t("buttons.magicBuilder")}
+              <Wand2 className="h-3.5 w-3.5 md:h-4 md:w-4" />
+              <span className="truncate">{t("buttons.magicBuilder")}</span>
             </Button>
             <Button 
               onClick={() => {
@@ -163,10 +164,10 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
                 setNewModuleDesc("");
                 setIsCreateModalOpen(true);
               }}
-              className="rounded-xl h-11 px-6 font-black uppercase tracking-widest text-[10px] gap-2 shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95"
+              className="flex-1 md:flex-none rounded-xl h-10 md:h-12 px-4 md:px-8 font-black uppercase tracking-widest text-[9px] md:text-[10px] gap-2 shadow-lg shadow-primary/20 transition-all active:scale-95"
             >
-              <PlusCircle className="h-4 w-4" />
-              {t("buttons.addModule")}
+              <PlusCircle className="h-3.5 w-3.5 md:h-4 md:w-4" />
+              <span className="truncate">{t("buttons.addModule")}</span>
             </Button>
           </div>
         )}
@@ -177,33 +178,33 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
           initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
         >
-          <Card className="border-none shadow-2xl bg-card/50 backdrop-blur-xl rounded-[2rem] overflow-hidden py-20 text-center">
-            <CardContent className="space-y-6">
+          <Card className="border-none shadow-2xl bg-card/50 backdrop-blur-xl rounded-[1.5rem] md:rounded-[2.5rem] overflow-hidden py-12 md:py-24 text-center">
+            <CardContent className="space-y-6 md:space-y-8">
               <div className="relative mx-auto w-fit">
-                <div className="absolute inset-0 bg-primary/20 rounded-full blur-2xl animate-pulse" />
-                <div className="relative p-6 rounded-full bg-primary/10 text-primary">
-                  <LayoutGrid className="h-12 w-12 opacity-40" />
+                <div className="absolute inset-0 bg-primary/20 rounded-full blur-3xl animate-pulse" />
+                <div className="relative p-6 md:p-8 rounded-full bg-primary/10 text-primary">
+                  <LayoutGrid className="h-10 w-10 md:h-16 md:w-16 opacity-40" />
                 </div>
               </div>
-              <div className="space-y-2">
-                <h4 className="text-2xl font-black tracking-tight">{t("classes.curriculum.noModules")}</h4>
-                <p className="text-muted-foreground font-medium max-w-xs mx-auto">{t("classes.curriculum.noModulesDescription")}</p>
+              <div className="space-y-2 md:space-y-3 px-4">
+                <h4 className="text-xl md:text-3xl font-black tracking-tight">{t("classes.curriculum.noModules")}</h4>
+                <p className="text-sm md:text-base text-muted-foreground font-medium max-w-sm mx-auto">{t("classes.curriculum.noModulesDescription")}</p>
               </div>
               {isTeacher && (
-                <div className="flex items-center justify-center gap-3 pt-4">
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-3 md:gap-4 pt-4 px-6">
                   <Button 
                     variant="outline" 
                     onClick={() => setIsMagicModalOpen(true)}
-                    className="rounded-xl h-12 px-8 border-ai-primary/20 text-ai-primary hover:bg-ai-primary/5 font-black uppercase tracking-widest text-[10px] gap-2"
+                    className="w-full sm:w-auto rounded-xl h-11 md:h-14 px-8 md:px-10 border-ai-primary/20 text-ai-primary hover:bg-ai-primary/5 font-black uppercase tracking-widest text-[9px] md:text-[10px] gap-2"
                   >
                     <Wand2 className="h-4 w-4" />
                     {t("buttons.aiMagicBuilder")}
                   </Button>
                   <Button 
                     onClick={() => setIsCreateModalOpen(true)}
-                    className="rounded-xl h-12 px-8 font-black uppercase tracking-widest text-[10px] gap-2 shadow-lg shadow-primary/20"
+                    className="w-full sm:w-auto rounded-xl h-11 md:h-14 px-8 md:px-10 font-black uppercase tracking-widest text-[9px] md:text-[10px] gap-2 shadow-xl shadow-primary/20"
                   >
-                    <Plus className="h-4 w-4" />
+                    <PlusCircle className="h-4 w-4" />
                     {t("buttons.manualCreate")}
                   </Button>
                 </div>
@@ -214,19 +215,19 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
       ) : (
         <div className="space-y-6">
           <div className="flex items-center justify-between px-2">
-            <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
+            <div className="flex items-center gap-2 text-[9px] md:text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
               <LayoutDashboard className="h-3 w-3" />
               {t("classes.curriculum.modulesPublished", { count: modules.length })}
             </div>
             {isStudent && (
-              <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary">
-                <Zap className="h-3 w-3" />
-                {t("classes.curriculum.itemsCompleted", { count: userProgress.filter(p => p.isCompleted).length })}
+              <div className="flex items-center gap-1.5 md:gap-2 text-[9px] md:text-[10px] font-black uppercase tracking-widest text-primary">
+                <Zap className="h-3 w-3 md:h-3.5 md:w-3.5" />
+                <span>{t("classes.curriculum.itemsCompleted", { count: userProgress.filter(p => p.isCompleted).length })}</span>
               </div>
             )}
           </div>
           
-          <Accordion type="multiple" className="w-full space-y-6">
+          <Accordion type="multiple" className="w-full space-y-4 md:space-y-6">
             <AnimatePresence mode="popLayout">
               {modules.map((module, idx) => (
                 <motion.div

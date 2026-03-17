@@ -15,9 +15,11 @@ import {
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTranslation } from "react-i18next";
+import { cn } from "@/lib/utils";
 
 export const TeacherDiscoveryList = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isAr = i18n.language === 'ar';
   const { show } = useNavigation();
   const [hoveredId, setHoveredId] = useState<number | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -55,9 +57,16 @@ export const TeacherDiscoveryList = () => {
     if (scrollContainerRef.current) {
       const scrollAmount = 400;
       const currentScroll = scrollContainerRef.current.scrollLeft;
-      const targetScroll = direction === "left" 
-        ? currentScroll - scrollAmount 
-        : currentScroll + scrollAmount;
+      // In RTL, "right" means scrolling towards the origin (which is positive left in some browsers, negative in others)
+      // Standardize scrolling by checking dir
+      const isRtl = document.documentElement.dir === 'rtl';
+      let targetScroll;
+      
+      if (direction === "left") {
+          targetScroll = isRtl ? currentScroll + scrollAmount : currentScroll - scrollAmount;
+      } else {
+          targetScroll = isRtl ? currentScroll - scrollAmount : currentScroll + scrollAmount;
+      }
         
       scrollContainerRef.current.scrollTo({
         left: targetScroll,
@@ -70,7 +79,7 @@ export const TeacherDiscoveryList = () => {
     return (
       <div className="flex gap-6 overflow-x-auto pb-10 scrollbar-hide">
         {[1, 2, 3, 4].map((i) => (
-          <Skeleton key={i} className="min-w-[300px] h-[450px] rounded-[2.5rem]" />
+          <Skeleton key={i} className="min-w-75 h-112.5 rounded-[2.5rem]" />
         ))}
       </div>
     );
@@ -107,7 +116,7 @@ export const TeacherDiscoveryList = () => {
             className="rounded-full h-10 w-10 border-primary/10"
             onClick={() => scroll("left")}
           >
-            <ChevronLeft className="h-5 w-5" />
+            <ChevronLeft className={cn("h-5 w-5", isAr && "rotate-180")} />
           </Button>
           <Button 
             variant="outline" 
@@ -115,7 +124,7 @@ export const TeacherDiscoveryList = () => {
             className="rounded-full h-10 w-10 border-primary/10"
             onClick={() => scroll("right")}
           >
-            <ChevronRight className="h-5 w-5" />
+            <ChevronRight className={cn("h-5 w-5", isAr && "rotate-180")} />
           </Button>
         </div>
       </div>
@@ -134,7 +143,7 @@ export const TeacherDiscoveryList = () => {
             layoutId={`channel-${channel.id}`}
             onMouseEnter={() => setHoveredId(channel.id)}
             onMouseLeave={() => setHoveredId(null)}
-            className="min-w-[320px] md:min-w-[380px] relative aspect-[4/5] rounded-[2.5rem] overflow-hidden border border-primary/10 shadow-xl group bg-black cursor-pointer"
+            className="min-w-[320px] md:min-w-95 relative aspect-4/5 rounded-[2.5rem] overflow-hidden border border-primary/10 shadow-xl group bg-black cursor-pointer text-start"
             onClick={() => show("users", channel.teacherId)}
           >
             <AnimatePresence mode="wait">
@@ -163,7 +172,7 @@ export const TeacherDiscoveryList = () => {
             </AnimatePresence>
 
             {/* Overlay Gradient */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
+            <div className="absolute inset-0 bg-linear-to-t from-black via-black/40 to-transparent" />
 
             {/* Hover Play Indicator */}
             <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
@@ -171,7 +180,7 @@ export const TeacherDiscoveryList = () => {
             </div>
 
             {/* Top Badge */}
-            <div className="absolute top-6 left-6 flex gap-2">
+            <div className="absolute top-6 start-6 flex gap-2">
                 <Badge className="bg-primary text-white border-none rounded-lg px-3 py-1 font-black uppercase tracking-widest text-[8px] flex items-center gap-1 shadow-lg">
                     <Sparkles className="h-3 w-3" />
                     Trending
@@ -201,7 +210,7 @@ export const TeacherDiscoveryList = () => {
 
               <div className="flex gap-2 pt-2">
                 <Button 
-                    className="flex-1 h-12 rounded-2xl font-black uppercase tracking-widest bg-white text-black hover:bg-primary hover:text-white border-none transition-all shadow-xl shadow-black/20"
+                    className="flex-1 h-12 rounded-2xl font-black uppercase tracking-widest bg-white text-black hover:bg-primary hover:text-white border-none transition-all shadow-xl shadow-black/20 text-[10px]"
                     onClick={(e) => {
                         e.stopPropagation();
                         show("users", channel.teacherId);
@@ -212,7 +221,7 @@ export const TeacherDiscoveryList = () => {
                 <Button 
                     variant="outline" 
                     size="icon" 
-                    className="h-12 w-12 rounded-2xl border-white/20 bg-black/20 backdrop-blur-md text-white hover:bg-white hover:text-black transition-all"
+                    className="h-12 w-12 rounded-2xl border-white/20 bg-black/20 backdrop-blur-md text-white hover:bg-white hover:text-black transition-all shrink-0"
                 >
                     <PlusCircle className="h-5 w-5" />
                 </Button>

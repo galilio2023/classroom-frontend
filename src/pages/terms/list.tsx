@@ -22,6 +22,8 @@ import {
   Pencil,
   PlusCircle,
   Trash2,
+  Layers,
+  ArrowRight,
 } from "lucide-react";
 import { AcademicTerm, User, UserRole } from "@/types";
 import { useCallback, useMemo, useRef, useState } from "react";
@@ -40,11 +42,10 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import usePageTitle from "@/hooks/use-page-title";
-import { useVirtualizer } from "@tanstack/react-virtual";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
 import { ListView } from "@/components/refine-ui/views/list-view";
@@ -80,6 +81,7 @@ export default function TermsList() {
 
   const { query } = useList<AcademicTerm>({
     resource: "academic-terms",
+    pagination: { pageSize: 50, mode: "server" },
     sorters: [{ field: "startDate", order: "desc" }],
   });
 
@@ -160,17 +162,6 @@ export default function TermsList() {
     );
   };
 
-  const parentRef = useRef<HTMLDivElement>(null);
-
-  const estimateSize = useCallback(() => 140, []);
-
-  const rowVirtualizer = useVirtualizer({
-    count: terms.length,
-    getScrollElement: () => parentRef.current,
-    estimateSize,
-    overscan: 5,
-  });
-
   const stats = useMemo(() => {
     if (!terms.length) return { total: 0, active: 0, upcoming: 0 };
     return {
@@ -182,296 +173,300 @@ export default function TermsList() {
   }, [terms]);
 
   return (
-    <div className="space-y-10 pb-20 text-start">
-      <ListView>
-        <div className="space-y-10">
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="space-y-4"
-          >
+    <ListView>
+      <div className="space-y-8 md:space-y-12">
+        {/* Header Section */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6"
+        >
+          <div className="space-y-4 flex-1">
             <Breadcrumb />
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-              <div>
-                <h1 className="text-4xl font-black tracking-tight">
-                  {t("terms.title")}
-                </h1>
-                <p className="text-muted-foreground font-medium mt-1">
-                  {t("terms.description")}
-                </p>
-              </div>
-              <div className="flex items-center gap-3 w-full md:w-auto">
-                {isAdmin && (
-                  <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-                    <DialogTrigger asChild>
-                      <Button className="flex-1 md:flex-none rounded-2xl h-14 px-10 font-black uppercase tracking-widest text-[10px] gap-2 shadow-xl shadow-primary/20 transition-all hover:scale-105 active:scale-95">
-                        <PlusCircle className="h-5 w-5" />
-                        {t("terms.create")}
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="rounded-[2.5rem] border-none shadow-2xl bg-card/95 backdrop-blur-xl max-w-lg text-start">
-                      <DialogHeader className="space-y-4 text-start">
-                        <div className="p-4 rounded-2xl bg-primary/10 text-primary w-fit">
-                          <Calendar className="h-8 w-8" />
-                        </div>
-                        <div className="space-y-1">
-                          <DialogTitle className="text-3xl font-black tracking-tight">
-                            {t("terms.newTitle")}
-                          </DialogTitle>
-                          <DialogDescription className="font-medium text-base">
-                            {t("terms.newDesc")}
-                          </DialogDescription>
-                        </div>
-                      </DialogHeader>
-                      <form
-                        onSubmit={form.handleSubmit(onSubmit)}
-                        className="space-y-8 py-8"
-                      >
+            <div className="space-y-1 text-start">
+              <h1 className="page-title mb-0 flex items-center gap-3">
+                <div className="p-3 rounded-2xl bg-primary/10 text-primary border border-primary/5 shadow-sm">
+                  <Calendar className="h-6 w-6 md:h-8 md:w-8" />
+                </div>
+                {t("terms.title")}
+              </h1>
+              <p className="text-muted-foreground font-medium max-w-2xl text-balance">
+                {t("terms.description")}
+              </p>
+            </div>
+          </div>
+          <div className="w-full md:w-auto">
+            {isAdmin && (
+              <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+                <DialogTrigger asChild>
+                  <Button size="lg" className="w-full md:w-auto rounded-2xl h-12 md:h-14 px-10 font-bold uppercase tracking-widest text-[10px] gap-2 shadow-lg shadow-primary/25 hover:translate-y-[-2px] transition-all">
+                    <PlusCircle className="h-5 w-5" />
+                    {t("terms.create")}
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="rounded-[2.5rem] border-none shadow-2xl bg-card/95 backdrop-blur-xl max-w-lg p-0 overflow-hidden text-start">
+                  <div className="p-8 md:p-12 space-y-8">
+                    <DialogHeader className="space-y-4 text-start">
+                      <div className="p-5 rounded-2xl bg-primary/10 text-primary w-fit mx-auto">
+                        <Calendar className="h-10 w-10" />
+                      </div>
+                      <div className="space-y-2 text-center">
+                        <DialogTitle className="text-3xl font-black tracking-tight">
+                          {t("terms.newTitle")}
+                        </DialogTitle>
+                        <DialogDescription className="font-medium text-base text-muted-foreground">
+                          {t("terms.newDesc")}
+                        </DialogDescription>
+                      </div>
+                    </DialogHeader>
+                    <form
+                      onSubmit={form.handleSubmit(onSubmit)}
+                      className="space-y-8"
+                    >
+                      <div className="space-y-3">
+                        <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ms-2">
+                          {t("terms.form.name")}
+                        </Label>
+                        <Input
+                          placeholder={t("terms.form.namePlaceholder")}
+                          {...form.register("name")}
+                          className="h-16 rounded-3xl bg-muted/30 border-none shadow-inner px-8 text-lg font-black"
+                        />
+                        {form.formState.errors.name && (
+                          <p className="text-xs font-bold text-destructive ms-2">
+                            {form.formState.errors.name.message}
+                          </p>
+                        )}
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <div className="space-y-3">
-                          <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
-                            {t("terms.form.name")}
+                          <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ms-2">
+                            {t("terms.form.start")}
                           </Label>
                           <Input
-                            placeholder={t("terms.form.namePlaceholder")}
-                            {...form.register("name")}
-                            className="h-14 rounded-2xl bg-muted/30 border-none focus-visible:ring-primary font-black text-sm"
+                            type="date"
+                            {...form.register("startDate")}
+                            className="h-16 rounded-3xl bg-muted/30 border-none shadow-inner px-8 font-bold"
                           />
-                          {form.formState.errors.name && (
-                            <p className="text-xs font-bold text-destructive ml-1">
-                              {form.formState.errors.name.message}
+                          {form.formState.errors.startDate && (
+                            <p className="text-xs font-bold text-destructive ms-2">
+                              {form.formState.errors.startDate.message}
                             </p>
                           )}
                         </div>
-                        <div className="grid grid-cols-2 gap-6">
-                          <div className="space-y-3">
-                            <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
-                              {t("terms.form.start")}
-                            </Label>
-                            <Input
-                              type="date"
-                              {...form.register("startDate")}
-                              className="h-14 rounded-2xl bg-muted/30 border-none focus-visible:ring-primary font-bold"
-                            />
-                            {form.formState.errors.startDate && (
-                              <p className="text-xs font-bold text-destructive ml-1">
-                                {form.formState.errors.startDate.message}
-                              </p>
-                            )}
-                          </div>
-                          <div className="space-y-3">
-                            <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
-                              {t("terms.form.end")}
-                            </Label>
-                            <Input
-                              type="date"
-                              {...form.register("endDate")}
-                              className="h-14 rounded-2xl bg-muted/30 border-none focus-visible:ring-primary font-bold"
-                            />
-                            {form.formState.errors.endDate && (
-                              <p className="text-xs font-bold text-destructive ml-1">
-                                {form.formState.errors.endDate.message}
-                              </p>
-                            )}
-                          </div>
+                        <div className="space-y-3">
+                          <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ms-2">
+                            {t("terms.form.end")}
+                          </Label>
+                          <Input
+                            type="date"
+                            {...form.register("endDate")}
+                            className="h-16 rounded-3xl bg-muted/30 border-none shadow-inner px-8 font-bold"
+                          />
+                          {form.formState.errors.endDate && (
+                            <p className="text-xs font-bold text-destructive ms-2">
+                              {form.formState.errors.endDate.message}
+                            </p>
+                          )}
                         </div>
-                        <DialogFooter className="gap-3 pt-4">
-                          <Button
-                            variant="ghost"
-                            type="button"
-                            className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-8"
-                            onClick={() => setIsCreateOpen(false)}
-                          >
-                            {t("buttons.cancel")}
-                          </Button>
-                          <Button
-                            type="submit"
-                            className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-12 shadow-xl shadow-primary/20"
-                            disabled={createMutation.isPending}
-                          >
-                            {createMutation.isPending ? (
-                              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                            ) : (
-                              <PlusCircle className="h-4 w-4 mr-2" />
-                            )}
-                            {t("buttons.create")}
-                          </Button>
-                        </DialogFooter>
-                      </form>
-                    </DialogContent>
-                  </Dialog>
-                )}
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Stats Row */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <Card className="p-6 border-primary/10 bg-card/50 backdrop-blur-sm flex items-center gap-4 rounded-4xl shadow-lg shadow-primary/5">
-              <div className="p-3 rounded-2xl bg-primary/10 text-primary">
-                <Calendar className="h-6 w-6" />
-              </div>
-              <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-                  {t("terms.stats.total")}
-                </p>
-                <p className="text-2xl font-black">
-                  {isLoading ? "..." : new Intl.NumberFormat(i18n.language).format(stats.total)}
-                </p>
-              </div>
-            </Card>
-            <Card className="p-6 border-green-500/10 bg-card/50 backdrop-blur-sm flex items-center gap-4 rounded-4xl shadow-lg shadow-green-500/5">
-              <div className="p-3 rounded-2xl bg-green-500/10 text-green-600">
-                <Activity className="h-6 w-6" />
-              </div>
-              <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-                  {t("terms.stats.active")}
-                </p>
-                <p className="text-2xl font-black text-green-600">
-                  {isLoading ? "..." : new Intl.NumberFormat(i18n.language).format(stats.active)}
-                </p>
-              </div>
-            </Card>
-            <Card className="p-6 border-indigo-500/10 bg-card/50 backdrop-blur-sm flex items-center gap-4 rounded-4xl shadow-lg shadow-indigo-500/5">
-              <div className="p-3 rounded-2xl bg-indigo-500/10 text-indigo-600">
-                <Clock className="h-6 w-6" />
-              </div>
-              <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-                  {t("terms.stats.upcoming")}
-                </p>
-                <p className="text-2xl font-black text-indigo-600">
-                  {isLoading ? "..." : new Intl.NumberFormat(i18n.language).format(stats.upcoming)}
-                </p>
-              </div>
-            </Card>
-          </div>
-
-          {/* Virtualized List Container */}
-          <div
-            ref={parentRef}
-            className="h-175 overflow-auto pr-2 custom-scrollbar rounded-[2.5rem] border border-primary/5 bg-card/30 backdrop-blur-sm relative"
-          >
-            {isLoading ? (
-              <div className="p-8 space-y-6">
-                {Array.from({ length: 6 }).map((_, i) => (
-                  <div
-                    key={i}
-                    className="flex flex-col md:flex-row items-center gap-6"
-                  >
-                    <Skeleton className="h-16 w-16 rounded-2xl shrink-0" />
-                    <div className="flex-1 space-y-3 w-full">
-                      <Skeleton className="h-6 w-75" />
-                      <Skeleton className="h-4 w-50" />
-                    </div>
-                    <Skeleton className="h-10 w-24 rounded-xl" />
+                      </div>
+                      <DialogFooter className="flex-col sm:flex-row gap-3 pt-4">
+                        <Button
+                          variant="ghost"
+                          type="button"
+                          className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-8 order-2 sm:order-1"
+                          onClick={() => setIsCreateOpen(false)}
+                        >
+                          {t("buttons.cancel")}
+                        </Button>
+                        <Button
+                          type="submit"
+                          size="lg"
+                          className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-12 shadow-xl shadow-primary/20 order-1 sm:order-2"
+                          disabled={createMutation.isPending}
+                        >
+                          {createMutation.isPending ? (
+                            <Loader2 className="h-5 w-5 animate-spin me-3" />
+                          ) : (
+                            <PlusCircle className="h-5 w-5 me-3" />
+                          )}
+                          {t("buttons.create")}
+                        </Button>
+                      </DialogFooter>
+                    </form>
                   </div>
-                ))}
-              </div>
-            ) : terms.length === 0 ? (
-              <div className="h-full flex items-center justify-center p-10">
-                <EmptyState
-                  icon={Calendar}
-                  title={t("terms.empty.title")}
-                  description={t("terms.empty.desc")}
-                  className="border-none bg-transparent min-h-0"
-                  action={
-                    isAdmin
-                      ? {
-                          label: t("terms.create"),
-                          onClick: () => setIsCreateOpen(true),
-                        }
-                      : undefined
-                  }
-                />
-              </div>
-            ) : (
-              <div
-                style={{
-                  height: `${rowVirtualizer.getTotalSize()}px`,
-                  width: "100%",
-                  position: "relative",
-                }}
-              >
-                {rowVirtualizer.getVirtualItems().map((virtualItem) => {
-                  const term = terms[virtualItem.index];
-                  if (!term) return null;
+                </DialogContent>
+              </Dialog>
+            )}
+          </div>
+        </motion.div>
 
+        {/* Stats Row - Adaptive */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
+          <Card className="p-6 md:p-8 bg-card/40 backdrop-blur-3xl border-border/40 rounded-[2rem] md:rounded-[2.5rem] flex items-center gap-5 shadow-sm">
+            <div className="p-3.5 rounded-2xl bg-primary/10 text-primary">
+              <Calendar className="h-6 w-6 md:h-7 md:w-7" />
+            </div>
+            <div className="text-start">
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 mb-1">
+                {t("terms.stats.total")}
+              </p>
+              <p className="text-2xl md:text-3xl font-black">
+                {isLoading ? "..." : new Intl.NumberFormat(i18n.language).format(stats.total)}
+              </p>
+            </div>
+          </Card>
+          <Card className="p-6 md:p-8 bg-card/40 backdrop-blur-3xl border-border/40 rounded-[2rem] md:rounded-[2.5rem] flex items-center gap-5 shadow-sm">
+            <div className="p-3.5 rounded-2xl bg-green-500/10 text-green-600">
+              <Activity className="h-6 w-6 md:h-7 md:w-7" />
+            </div>
+            <div className="text-start">
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 mb-1">
+                {t("terms.stats.active")}
+              </p>
+              <p className="text-2xl md:text-3xl font-black text-green-600">
+                {isLoading ? "..." : new Intl.NumberFormat(i18n.language).format(stats.active)}
+              </p>
+            </div>
+          </Card>
+          <Card className="p-6 md:p-8 bg-card/40 backdrop-blur-3xl border-border/40 rounded-[2rem] md:rounded-[2.5rem] flex items-center gap-5 shadow-sm">
+            <div className="p-3.5 rounded-2xl bg-indigo-500/10 text-indigo-600">
+              <Clock className="h-6 w-6 md:h-7 md:w-7" />
+            </div>
+            <div className="text-start">
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 mb-1">
+                {t("terms.stats.upcoming")}
+              </p>
+              <p className="text-2xl md:text-3xl font-black text-indigo-600">
+                {isLoading ? "..." : new Intl.NumberFormat(i18n.language).format(stats.upcoming)}
+              </p>
+            </div>
+          </Card>
+        </div>
+
+        {/* List Container - Global Scroll */}
+        <div className="relative min-h-[400px]">
+          {isLoading ? (
+            <div className="space-y-4">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Card key={i} className="p-6 flex flex-col md:flex-row items-center gap-6 border-border/20 bg-background/50">
+                  <Skeleton className="h-20 w-20 rounded-3xl shrink-0" />
+                  <div className="flex-1 space-y-4 w-full">
+                    <Skeleton className="h-8 w-[350px] max-w-full" />
+                    <div className="flex gap-4">
+                       <Skeleton className="h-4 w-24" />
+                       <Skeleton className="h-4 w-24" />
+                    </div>
+                  </div>
+                  <Skeleton className="h-12 w-36 rounded-2xl" />
+                </Card>
+              ))}
+            </div>
+          ) : terms.length === 0 ? (
+            <div className="flex items-center justify-center p-16 bg-card/20 rounded-[2.5rem] border border-dashed border-border/40">
+              <EmptyState
+                icon={Layers}
+                title={t("terms.empty.title")}
+                description={t("terms.empty.desc")}
+                className="border-none bg-transparent min-h-0"
+                action={
+                  isAdmin
+                    ? {
+                        label: t("terms.create"),
+                        onClick: () => setIsCreateOpen(true),
+                      }
+                    : undefined
+                }
+              />
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <AnimatePresence mode="popLayout">
+                {terms.map((term, index) => {
                   const startDate = dayjs(term.startDate);
                   const endDate = dayjs(term.endDate);
 
                   return (
-                    <div
-                      key={virtualItem.key}
-                      style={{
-                        position: "absolute",
-                        top: 0,
-                        left: 0,
-                        width: "100%",
-                        height: `${virtualItem.size}px`,
-                        transform: `translateY(${virtualItem.start}px)`,
-                      }}
-                      className="px-8"
+                    <motion.div
+                      key={term.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      transition={{ delay: index * 0.05 }}
+                      className={cn(
+                        "group relative flex flex-col md:flex-row items-center p-5 md:p-6 rounded-[2rem] bg-card/50 backdrop-blur-sm border border-border/40 hover:border-primary/30 hover:bg-card/80 transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-primary/5 cursor-pointer"
+                      )}
                     >
-                      <motion.div
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        className="flex flex-col md:flex-row items-center h-full border-b border-primary/5 hover:bg-primary/2 transition-all group shadow-sm"
-                      >
-                        {/* Icon */}
-                        <div className="relative shrink-0 mb-4 md:mb-0">
-                          <div
-                            className={cn(
-                              "h-14 w-14 rounded-xl border-2 border-background flex items-center justify-center shadow-md group-hover:scale-110 transition-transform",
-                              term.status === "active"
-                                ? "bg-green-500/10 text-green-600"
-                                : term.status === "upcoming"
-                                  ? "bg-indigo-500/10 text-indigo-600"
-                                  : "bg-muted text-muted-foreground",
-                            )}
-                          >
-                            {term.status === "archived" ? (
-                              <History className="h-6 w-6" />
-                            ) : (
-                              <Calendar className="h-6 w-6" />
-                            )}
+                      {/* Status Color Accent using logical properties */}
+                      <div 
+                        className={cn(
+                          "absolute start-0 top-1/2 -translate-y-1/2 w-1.5 h-12 rounded-e-full transition-all group-hover:h-20",
+                          term.status === "active" ? "bg-green-500" : term.status === "upcoming" ? "bg-indigo-500" : "bg-muted-foreground/40"
+                        )}
+                      />
+
+                      {/* Icon */}
+                      <div className="relative shrink-0 mb-4 md:mb-0">
+                        <div
+                          className={cn(
+                            "h-20 w-20 rounded-[1.5rem] border-4 border-background flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-500",
+                            term.status === "active"
+                              ? "bg-green-500/10 text-green-600"
+                              : term.status === "upcoming"
+                                ? "bg-indigo-500/10 text-indigo-600"
+                                : "bg-muted/40 text-muted-foreground/60",
+                          )}
+                        >
+                          {term.status === "archived" ? (
+                            <History className="h-8 w-8" />
+                          ) : (
+                            <Calendar className="h-8 w-8" />
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Info Area */}
+                      <div className={cn("flex-1 min-w-0 w-full text-start", "md:ms-8")}>
+                        <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 mb-2">
+                          <h3 className="text-xl md:text-2xl font-black tracking-tight truncate group-hover:text-primary transition-colors leading-tight">
+                            {term.name}
+                          </h3>
+                          <div className="flex items-center justify-center md:justify-start gap-2">
+                            <Badge
+                              variant={
+                                term.status === "active"
+                                  ? "default"
+                                  : term.status === "upcoming"
+                                    ? "secondary"
+                                    : "outline"
+                              }
+                              className="text-[9px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full border-none shadow-sm"
+                            >
+                              {t(`status.${term.status.toLowerCase()}` as any)}
+                            </Badge>
                           </div>
                         </div>
 
-                        {/* Info */}
-                        <div className={cn("flex-1 text-center min-w-0 w-full", isAr ? "md:mr-6 md:text-right" : "md:ml-6 md:text-left")}>
-                          <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-3">
-                            <h3 className="text-lg font-black tracking-tight truncate group-hover:text-primary transition-colors">
-                              {term.name}
-                            </h3>
-                            <div className="flex items-center justify-center md:justify-start gap-2">
-                              <Badge
-                                variant={
-                                  term.status === "active"
-                                    ? "default"
-                                    : term.status === "upcoming"
-                                      ? "secondary"
-                                      : "outline"
-                                }
-                                className="text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md border-none"
-                              >
-                                {t(`status.${term.status.toLowerCase()}` as any)}
-                              </Badge>
+                        <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 md:gap-6 mt-4">
+                          <div className="flex items-center gap-2.5 bg-background/40 px-3 py-1.5 rounded-full border border-border/20 shadow-sm">
+                            <div className="p-1.5 rounded-lg bg-primary/5 shrink-0">
+                              <Calendar className="h-3.5 w-3.5 text-primary" />
+                            </div>
+                            <div className="flex flex-col text-start">
+                              <span className="text-[9px] uppercase font-bold text-muted-foreground/60 tracking-wider">Duration</span>
+                              <span className="text-[11px] font-black text-foreground">
+                                {startDate.locale(i18n.language).format("MMM D, YYYY")} — {endDate.locale(i18n.language).format("MMM D, YYYY")}
+                              </span>
                             </div>
                           </div>
 
-                          <div className="flex flex-wrap items-center justify-center md:justify-start gap-x-4 gap-y-1 mt-2">
-                            <div className="flex items-center gap-1.5 text-muted-foreground">
-                              <Calendar className="h-3 w-3 text-primary" />
-                              <span className="text-[11px] font-bold">
-                                {startDate.locale(i18n.language).format("MMM D, YYYY")} —{" "}
-                                {endDate.locale(i18n.language).format("MMM D, YYYY")}
-                              </span>
+                          <div className="flex items-center gap-2.5 bg-background/40 px-3 py-1.5 rounded-full border border-border/20 shadow-sm">
+                            <div className="p-1.5 rounded-lg bg-primary/5 shrink-0">
+                              <Clock className="h-3.5 w-3.5 text-primary" />
                             </div>
-
-                            <div className="flex items-center gap-1.5 text-muted-foreground">
-                              <Clock className="h-3 w-3 text-primary" />
-                              <span className="text-[11px] font-bold uppercase tracking-tight">
+                            <div className="flex flex-col text-start">
+                              <span className="text-[9px] uppercase font-bold text-muted-foreground/60 tracking-wider">Timeline</span>
+                              <span className="text-[11px] font-black uppercase tracking-tight">
                                 {term.status === "active"
                                   ? t("terms.relative.ends", { time: endDate.locale(i18n.language).fromNow() })
                                   : term.status === "upcoming"
@@ -481,91 +476,87 @@ export default function TermsList() {
                             </div>
                           </div>
                         </div>
+                      </div>
 
-                        {/* Actions */}
-                        <div className={cn("flex items-center gap-2 mt-4 md:mt-0 shrink-0", isAr ? "mr-4" : "ml-4")}>
-                          {isAdmin && term.status !== "archived" && (
-                            <div className="flex items-center gap-2">
-                              {term.status === "upcoming" && (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className="h-9 rounded-lg font-black uppercase tracking-widest text-[9px] border-green-500/20 text-green-600 bg-green-500/5 hover:bg-green-500/10 px-3"
-                                  onClick={() => handleActivate(term.id)}
-                                  disabled={updateMutation.isPending}
-                                >
-                                  {isAr ? <CheckCircle className="h-3.5 w-3.5 ml-1.5" /> : <CheckCircle className="h-3.5 w-3.5 mr-1.5" />}
-                                  {t("buttons.activate")}
-                                </Button>
-                              )}
+                      {/* Action Area */}
+                      <div className="flex items-center gap-3 mt-6 md:mt-0 shrink-0">
+                        {isAdmin && term.status !== "archived" && (
+                          <div className={cn("hidden lg:flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:translate-x-0", "ltr:translate-x-4 rtl:-translate-x-4")}>
+                            {term.status === "upcoming" && (
                               <Button
                                 variant="outline"
-                                size="sm"
-                                className="h-9 rounded-lg font-black uppercase tracking-widest text-[9px] border-amber-500/20 text-amber-600 bg-amber-500/5 hover:bg-amber-500/10 px-3"
-                                onClick={() => handleArchive(term.id)}
+                                size="lg"
+                                className="rounded-2xl px-6 h-12 font-black uppercase tracking-widest text-[10px] border-green-500/20 text-green-600 bg-green-500/5 hover:bg-green-500/10"
+                                onClick={(e) => { e.stopPropagation(); handleActivate(term.id); }}
                                 disabled={updateMutation.isPending}
                               >
-                                {isAr ? <Archive className="h-3.5 w-3.5 ml-1.5" /> : <Archive className="h-3.5 w-3.5 mr-1.5" />}
-                                {t("buttons.archive")}
+                                <CheckCircle className={cn("h-4 w-4", "me-2")} />
+                                {t("buttons.activate")}
                               </Button>
-                            </div>
-                          )}
-
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-9 w-9 rounded-lg"
-                              >
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent
-                              align="end"
-                              className="w-48 rounded-xl p-1"
+                            )}
+                            <Button
+                              variant="outline"
+                              size="lg"
+                              className="rounded-2xl px-6 h-12 font-black uppercase tracking-widest text-[10px] border-amber-500/20 text-amber-600 bg-amber-500/5 hover:bg-amber-500/10"
+                              onClick={(e) => { e.stopPropagation(); handleArchive(term.id); }}
+                              disabled={updateMutation.isPending}
                             >
-                              <DropdownMenuLabel className="text-[9px] font-black uppercase tracking-widest text-muted-foreground px-2 py-1.5">
-                                {t("assignments.list.labels.options")}
-                              </DropdownMenuLabel>
-                              <DropdownMenuItem className="rounded-lg gap-2 py-2 cursor-pointer">
-                                <Eye className="h-3.5 w-3.5 text-primary" />
-                                <span className="font-bold text-xs">
-                                  {t("buttons.viewClasses")}
-                                </span>
-                              </DropdownMenuItem>
-                              {isAdmin && (
-                                <>
-                                  <DropdownMenuItem className="rounded-lg gap-2 py-2 cursor-pointer">
-                                    <Pencil className="h-3.5 w-3.5 text-primary" />
-                                    <span className="font-bold text-xs">
-                                      {t("buttons.editTimeline")}
-                                    </span>
-                                  </DropdownMenuItem>
-                                  <DropdownMenuSeparator className="my-1" />
-                                  <DropdownMenuItem
-                                    className="rounded-lg gap-2 py-2 cursor-pointer text-destructive focus:text-destructive"
-                                    onClick={() => handleDelete(term.id)}
-                                  >
-                                    <Trash2 className="h-3.5 w-3.5" />
-                                    <span className="font-bold text-xs">
-                                      {t("buttons.deleteTerm")}
-                                    </span>
-                                  </DropdownMenuItem>
-                                </>
-                              )}
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
-                      </motion.div>
-                    </div>
+                              <Archive className={cn("h-4 w-4", "me-2")} />
+                              {t("buttons.archive")}
+                            </Button>
+                          </div>
+                        )}
+
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-12 w-12 rounded-2xl bg-muted/30 hover:bg-muted/50"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <MoreHorizontal className="h-5 w-5" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-64 p-2 rounded-3xl">
+                            <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/40 px-3 py-3">{t("assignments.list.labels.options")}</DropdownMenuLabel>
+                            <DropdownMenuItem className="rounded-xl gap-3 py-3 cursor-pointer">
+                              <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                                <Eye className="h-4 w-4" />
+                              </div>
+                              <span className="font-bold text-xs">{t("buttons.viewClasses")}</span>
+                            </DropdownMenuItem>
+                            {isAdmin && (
+                              <>
+                                <DropdownMenuItem className="rounded-xl gap-3 py-3 cursor-pointer">
+                                  <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                                    <Pencil className="h-4 w-4" />
+                                  </div>
+                                  <span className="font-bold text-xs">{t("buttons.editTimeline")}</span>
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator className="my-2 opacity-50" />
+                                <DropdownMenuItem
+                                  className="rounded-xl gap-3 py-3 cursor-pointer text-destructive focus:bg-destructive/10"
+                                  onClick={() => handleDelete(term.id)}
+                                >
+                                  <div className="p-2 rounded-lg bg-destructive/10 text-destructive">
+                                    <Trash2 className="h-4 w-4" />
+                                  </div>
+                                  <span className="font-bold text-xs">{t("buttons.deleteTerm")}</span>
+                                </DropdownMenuItem>
+                              </>
+                            )}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </motion.div>
                   );
                 })}
-              </div>
-            )}
-          </div>
+              </AnimatePresence>
+            </div>
+          )}
         </div>
-      </ListView>
-    </div>
+      </div>
+    </ListView>
   );
 }

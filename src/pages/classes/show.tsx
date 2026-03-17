@@ -119,7 +119,6 @@ const ClassesShow = () => {
       (prev) => {
         const newParams = new URLSearchParams(prev);
         newParams.set("tab", value);
-        // Clear pagination when switching tabs to prevent state leakage
         newParams.delete("pageSize");
         newParams.delete("currentPage");
         return newParams;
@@ -270,8 +269,8 @@ const ClassesShow = () => {
             t("classes.show.toast.enrollmentStatus", {
               status:
                 status === "approved"
-                  ? t("classes.show.toast.approved")
-                  : t("classes.show.toast.rejected"),
+                  ? t("profileRequests.toasts.approved")
+                  : t("profileRequests.toasts.rejected"),
             }),
           );
           void refetch?.();
@@ -413,37 +412,46 @@ const ClassesShow = () => {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center h-[80vh] gap-6">
-        <div className="relative">
-          <Loader2 className="h-16 w-16 animate-spin text-primary/20" />
+      <div className="flex flex-col items-center justify-center h-[85vh] gap-8">
+        <motion.div 
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="relative"
+        >
+          <div className="absolute inset-[-20px] rounded-full bg-primary/5 animate-ping duration-[3000ms]" />
+          <Loader2 className="h-20 w-20 animate-spin text-primary/10 stroke-[1]" />
           <div className="absolute inset-0 flex items-center justify-center">
-            <BookOpen className="h-6 w-6 text-primary/40" />
+            <BookOpen className="h-8 w-8 text-primary/30" />
           </div>
+        </motion.div>
+        <div className="text-center space-y-2">
+            <h2 className="text-sm font-black uppercase tracking-[0.3em] text-primary/60 animate-pulse">
+                {t("classes.show.assembling")}
+            </h2>
+            <p className="text-xs font-medium text-muted-foreground/60 italic">Preparing your immersive classroom...</p>
         </div>
-        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground animate-pulse">
-          {t("classes.show.assembling")}
-        </p>
       </div>
     );
   }
 
   if (isError || !aClass) {
     return (
-      <div className="container mx-auto py-20 text-center space-y-6">
-        <div className="p-6 rounded-full bg-destructive/10 text-destructive w-fit mx-auto">
-          <XCircle className="h-16 w-16" />
+      <div className="container mx-auto py-32 text-center space-y-8">
+        <div className="p-8 rounded-[2.5rem] bg-destructive/5 text-destructive w-fit mx-auto border border-destructive/10">
+          <XCircle className="h-20 w-20" />
         </div>
-        <div className="space-y-2">
-          <h2 className="text-3xl font-black tracking-tight">
+        <div className="space-y-3">
+          <h2 className="text-4xl font-black tracking-tight">
             {t("classes.show.notFound")}
           </h2>
-          <p className="text-muted-foreground font-medium max-w-md mx-auto">
+          <p className="text-muted-foreground font-medium max-w-md mx-auto text-lg">
             {t("classes.show.notFoundDescription")}
           </p>
         </div>
         <Button
           asChild
-          className="rounded-2xl h-12 px-8 font-black uppercase tracking-widest text-[10px]"
+          size="lg"
+          className="rounded-2xl h-14 px-10 font-bold uppercase tracking-widest text-[10px]"
         >
           <Link to="/classes">{t("buttons.goBack")}</Link>
         </Button>
@@ -451,10 +459,14 @@ const ClassesShow = () => {
     );
   }
 
+  const classColor = aClass.color || "#6366f1";
+
   return (
     <>
-      <div className="container mx-auto py-10 max-w-7xl space-y-10">
-        <ClassHeader classId={classId} isOwner={isOwner} />
+      <div className="space-y-8 md:space-y-12 pb-20 max-w-screen-2xl mx-auto px-4 md:px-8 lg:px-12">
+        <div className="px-2">
+          <ClassHeader classId={classId} isOwner={isOwner} />
+        </div>
 
         <PinnedAnnouncements
           announcements={announcements}
@@ -469,117 +481,120 @@ const ClassesShow = () => {
           isLiveIndicator={isLiveIndicator}
         />
 
-        {/* Main Navigation Tabs */}
+        {/* Dynamic Tab Navigation System */}
         <Tabs
           value={activeTab}
           onValueChange={handleTabChange}
-          className="w-full space-y-10"
+          className="w-full space-y-8 md:space-y-12"
+          dir={isAr ? "rtl" : "ltr"}
         >
-          <div className="sticky top-6 z-40">
-            <ScrollArea className="w-full whitespace-nowrap rounded-4xl border border-black/5 dark:border-white/5 bg-card/80 backdrop-blur-2xl p-2 shadow-2xl">
-              <TabsList
-                className={cn(
-                  "flex h-14 items-center justify-start rounded-2xl p-1 text-muted-foreground bg-transparent",
-                  isAr && "flex-row-reverse",
-                )}
-              >
-                {tabs.map((tab) => {
-                  const Icon = tab.icon;
-                  const isActive = activeTab === tab.id;
-                  return (
-                    <TabsTrigger
-                      key={tab.id}
-                      value={tab.id}
-                      className={cn(
-                        "px-8 py-2 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all gap-3 h-11",
-                        isActive
-                          ? "text-white shadow-xl"
-                          : "hover:bg-primary/5 hover:text-primary",
-                      )}
-                      style={
-                        isActive
-                          ? {
-                              backgroundColor: aClass.color || "#3b82f6",
-                              boxShadow: `0 10px 25px -5px ${aClass.color || "#3b82f6"}50`,
-                            }
-                          : {}
-                      }
-                    >
-                      <Icon className="h-4 w-4" />
-                      <span>{tab.label}</span>
-                      {tab.indicator && (
-                        <span className="flex h-2 w-2 rounded-full bg-white animate-pulse" />
-                      )}
-                      {tab.badge && (
-                        <Badge
-                          variant="destructive"
-                          className="h-5 min-w-5 p-0 flex items-center justify-center text-[9px] rounded-full border-none font-black"
+          <div className="sticky top-16 md:top-20 z-40">
+            <div className="bg-background/80 backdrop-blur-3xl border border-border/40 rounded-[2rem] md:rounded-[2.5rem] p-1.5 md:p-2 shadow-2xl shadow-black/5 mx-auto w-full">
+              <ScrollArea className="w-full whitespace-nowrap custom-scrollbar pb-2 sm:pb-0">
+                <TabsList
+                    className={cn(
+                    "flex h-auto md:h-14 items-center justify-start rounded-full p-1 bg-muted/20 gap-1 min-w-max",
+                    )}
+                >
+                    {tabs.map((tab) => {
+                    const Icon = tab.icon;
+                    const isActive = activeTab === tab.id;
+                    return (
+                        <TabsTrigger
+                        key={tab.id}
+                        value={tab.id}
+                        className={cn(
+                            "px-4 md:px-8 py-2 md:py-2.5 rounded-full font-black uppercase tracking-widest text-[9px] md:text-[10px] transition-all duration-300 gap-2 md:gap-3 h-10 md:h-12 whitespace-nowrap",
+                            isActive
+                            ? "text-white shadow-xl"
+                            : "text-muted-foreground hover:bg-primary/5 hover:text-primary",
+                        )}
+                        style={
+                            isActive
+                            ? {
+                                backgroundColor: classColor,
+                                boxShadow: `0 8px 25px -5px ${classColor}60`,
+                                }
+                            : {}
+                        }
                         >
-                          {tab.badge}
-                        </Badge>
-                      )}
-                    </TabsTrigger>
-                  );
-                })}
-              </TabsList>
-              <ScrollBar orientation="horizontal" className="hidden" />
-            </ScrollArea>
+                        <Icon className={cn("h-3.5 w-3.5 md:h-4 md:w-4", isActive && "animate-pulse")} />
+                        <span>{tab.label}</span>
+                        {tab.indicator && (
+                            <span className="flex h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
+                        )}
+                        {tab.badge && (
+                            <Badge
+                            className="h-4 md:h-5 min-w-[1rem] md:min-w-[1.25rem] p-0 flex items-center justify-center text-[8px] md:text-[9px] rounded-full border-none bg-white text-primary font-black ms-1"
+                            style={{ color: isActive ? classColor : 'inherit' }}
+                            >
+                            {tab.badge}
+                            </Badge>
+                        )}
+                        </TabsTrigger>
+                    );
+                    })}
+                </TabsList>
+                <ScrollBar orientation="horizontal" className="hidden md:flex" />
+              </ScrollArea>
+            </div>
           </div>
 
-          <div className="mt-10">
+          <div className="min-h-[500px]">
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeTab}
-                initial={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.2 }}
+                exit={{ opacity: 0, y: -15 }}
+                transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
+                className="focus:outline-none"
               >
-                <TabsContent value="curriculum" className="mt-0">
+                <TabsContent value="curriculum" className="mt-0 focus-visible:outline-none">
                   {activeTab === "curriculum" && (
                     <CurriculumTab classId={classId} />
                   )}
                 </TabsContent>
 
                 {isStaff && (
-                  <TabsContent value="analytics" className="mt-0">
+                  <TabsContent value="analytics" className="mt-0 focus-visible:outline-none">
                     {activeTab === "analytics" && (
                       <AnalyticsTab classId={classId} />
                     )}
                   </TabsContent>
                 )}
 
-                <TabsContent value="live" className="mt-0">
+                <TabsContent value="live" className="mt-0 focus-visible:outline-none">
                   {activeTab === "live" && (
                     <LiveClassroom classId={classId} className="w-full" />
                   )}
                 </TabsContent>
 
-                <TabsContent value="leaderboard" className="mt-0">
+                <TabsContent value="leaderboard" className="mt-0 focus-visible:outline-none">
                   {activeTab === "leaderboard" && (
                     <LeaderboardTab classId={classId} />
                   )}
                 </TabsContent>
 
-                <TabsContent value="announcements" className="mt-0">
+                <TabsContent value="announcements" className="mt-0 focus-visible:outline-none">
                   {activeTab === "announcements" && (
                     <AnnouncementTab classId={classId} />
                   )}
                 </TabsContent>
 
-                <TabsContent value="discussions" className="mt-0">
+                <TabsContent value="discussions" className="mt-0 focus-visible:outline-none">
                   {activeTab === "discussions" && (
                     <DiscussionTab classId={classId} />
                   )}
                 </TabsContent>
 
-                <TabsContent value="resources" className="mt-0">
+                <TabsContent value="resources" className="mt-0 focus-visible:outline-none">
                   {activeTab === "resources" && (
                     <ResourceTab classId={classId} />
                   )}
                 </TabsContent>
 
-                <TabsContent value="students" className="mt-0 space-y-10">
+                <TabsContent value="students" className="mt-0 focus-visible:outline-none">
                   {activeTab === "students" && (
                     <StudentsTab
                       classId={classId}
@@ -595,7 +610,7 @@ const ClassesShow = () => {
                   )}
                 </TabsContent>
 
-                <TabsContent value="assignments" className="mt-0">
+                <TabsContent value="assignments" className="mt-0 focus-visible:outline-none">
                   {activeTab === "assignments" && (
                     <AssignmentList
                       classId={classId}
@@ -604,11 +619,11 @@ const ClassesShow = () => {
                   )}
                 </TabsContent>
 
-                <TabsContent value="quizzes" className="mt-0">
+                <TabsContent value="quizzes" className="mt-0 focus-visible:outline-none">
                   {activeTab === "quizzes" && <QuizTab classId={classId} />}
                 </TabsContent>
 
-                <TabsContent value="attendance" className="mt-0">
+                <TabsContent value="attendance" className="mt-0 focus-visible:outline-none">
                   {activeTab === "attendance" && (
                     <AttendanceTab
                       classId={classId}
@@ -617,7 +632,7 @@ const ClassesShow = () => {
                   )}
                 </TabsContent>
 
-                <TabsContent value="details" className="mt-0">
+                <TabsContent value="details" className="mt-0 focus-visible:outline-none">
                   {activeTab === "details" && (
                     <DetailsTab
                       aClass={aClass}
@@ -644,28 +659,28 @@ const ClassesShow = () => {
             open={unenrollTarget !== null}
             onOpenChange={() => setUnenrollTarget(null)}
           >
-            <AlertDialogContent className="rounded-4xl border-none shadow-2xl bg-card/95 backdrop-blur-xl text-start">
-              <AlertDialogHeader className="space-y-4">
-                <div className="p-4 rounded-2xl bg-destructive/10 text-destructive w-fit">
-                  <Trash2 className="h-8 w-8" />
+            <AlertDialogContent className="rounded-[2.5rem] border-none shadow-2xl bg-card/95 backdrop-blur-xl max-w-[95vw] sm:max-w-lg">
+              <AlertDialogHeader className="space-y-6">
+                <div className="p-5 rounded-2xl bg-destructive/10 text-destructive w-fit mx-auto">
+                  <Trash2 className="h-10 w-10" />
                 </div>
-                <div className="space-y-1">
-                  <AlertDialogTitle className="text-3xl font-black tracking-tight">
+                <div className="space-y-2 text-center">
+                  <AlertDialogTitle className="text-3xl font-black">
                     {t("classes.show.unenrollDialog.title")}
                   </AlertDialogTitle>
-                  <AlertDialogDescription className="font-medium text-base">
+                  <AlertDialogDescription className="text-base font-medium px-6">
                     {t("classes.show.unenrollDialog.description")}
                   </AlertDialogDescription>
                 </div>
               </AlertDialogHeader>
-              <AlertDialogFooter className="gap-3 pt-6">
-                <AlertDialogCancel className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-8">
+              <AlertDialogFooter className="sm:justify-center gap-4 pt-8">
+                <AlertDialogCancel className="rounded-2xl px-10 h-14 font-black uppercase tracking-widest text-[10px]">
                   {t("buttons.cancel")}
                 </AlertDialogCancel>
                 <AlertDialogAction
                   onClick={handleConfirmUnenroll}
                   disabled={isDeleting}
-                  className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-12 bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-xl shadow-destructive/20"
+                  className="rounded-2xl px-12 h-14 font-black uppercase tracking-widest text-[10px] bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-xl shadow-destructive/20"
                 >
                   {isDeleting
                     ? t("buttons.processing")
@@ -701,25 +716,25 @@ const ClassesShow = () => {
             open={isMessageAllOpen}
             onOpenChange={setIsMessageAllOpen}
           >
-            <DialogContent className="rounded-4xl border-none shadow-2xl bg-card/95 backdrop-blur-xl text-start max-w-2xl">
-              <DialogHeader className="space-y-4">
-                <div className="p-4 rounded-2xl bg-primary/10 text-primary w-fit">
-                  <MessageSquare className="h-8 w-8" />
+            <DialogContent className="rounded-[2.5rem] border-none shadow-2xl bg-card/95 backdrop-blur-xl max-w-[95vw] sm:max-w-2xl">
+              <DialogHeader className="space-y-6">
+                <div className="p-5 rounded-2xl bg-primary/10 text-primary w-fit mx-auto">
+                  <MessageSquare className="h-10 w-10" />
                 </div>
-                <div className="space-y-1">
-                  <DialogTitle className="text-3xl font-black tracking-tight">
+                <div className="space-y-2 text-center">
+                  <DialogTitle className="text-3xl font-black">
                     {t("classes.show.messageAllDialog.title")}
                   </DialogTitle>
-                  <DialogDescription className="font-medium text-base">
+                  <DialogDescription className="text-base font-medium px-6">
                     {t("classes.show.messageAllDialog.description", {
                       count: approvedEnrollments.length,
                     })}
                   </DialogDescription>
                 </div>
               </DialogHeader>
-              <div className="py-6 space-y-6">
+              <div className="py-8 space-y-8">
                 <div className="space-y-3">
-                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                  <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ms-2">
                     {t("classes.show.messageAllDialog.subject")}
                   </Label>
                   <Input
@@ -730,11 +745,11 @@ const ClassesShow = () => {
                     placeholder={t(
                       "classes.show.messageAllDialog.subjectPlaceholder",
                     )}
-                    className="h-14 rounded-2xl text-base px-6"
+                    className="h-16 rounded-3xl text-lg px-8 bg-muted/30 border-none shadow-inner"
                   />
                 </div>
                 <div className="space-y-3">
-                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                  <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ms-2">
                     {t("classes.show.messageAllDialog.message")}
                   </Label>
                   <Textarea
@@ -748,28 +763,30 @@ const ClassesShow = () => {
                     placeholder={t(
                       "classes.show.messageAllDialog.messagePlaceholder",
                     )}
-                    className="min-h-50 rounded-3xl p-6 text-base"
+                    className="min-h-60 rounded-[2rem] p-8 text-lg bg-muted/30 border-none shadow-inner"
                   />
                 </div>
               </div>
-              <DialogFooter className="gap-3 pt-6">
+              <DialogFooter className="sm:justify-center gap-4 pt-6">
                 <Button
-                  variant="outline"
+                  variant="ghost"
+                  size="lg"
                   onClick={() => setIsMessageAllOpen(false)}
-                  className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-8"
+                  className="rounded-2xl px-10 h-14"
                 >
                   {t("buttons.cancel")}
                 </Button>
                 <Button
                   onClick={handleMessageAll}
+                  size="lg"
                   disabled={
                     isMessaging || !bulkMessage.title || !bulkMessage.message
                   }
-                  className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-12 shadow-xl shadow-primary/20"
+                  className="rounded-2xl px-14 h-14 font-black uppercase tracking-widest text-[10px] shadow-xl shadow-primary/20"
                 >
                   {isMessaging ? (
                     <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      <Loader2 className="h-5 w-5 me-3 animate-spin" />
                       {t("buttons.processing")}
                     </>
                   ) : (
@@ -782,11 +799,20 @@ const ClassesShow = () => {
         </>
       )}
 
-      <AIStudyBuddy
-        subject={aClass.subject?.name}
-        topic={aClass.name}
-        classId={classId}
-      />
+      {/* Premium Floating AI Assistant Trigger */}
+      <motion.div
+        initial={{ scale: 0, rotate: -20 }}
+        animate={{ scale: 1, rotate: 0 }}
+        transition={{ delay: 1, type: "spring", stiffness: 260, damping: 20 }}
+        className="fixed bottom-[5rem] md:bottom-10 end-4 md:end-10 z-50 group"
+      >
+        <div className="absolute -inset-4 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-full blur-2xl opacity-20 group-hover:opacity-40 transition-opacity duration-500 pointer-events-none" />
+        <AIStudyBuddy
+            subject={aClass.subject?.name}
+            topic={aClass.name}
+            classId={classId}
+        />
+      </motion.div>
     </>
   );
 };

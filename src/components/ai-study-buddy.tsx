@@ -17,7 +17,7 @@ interface AIStudyBuddyProps {
   subject?: string;
   topic?: string;
   assignment?: string;
-  classId?: string | number; // New: Support for class-specific knowledge
+  classId?: string | number; // Support for class-specific knowledge
 }
 
 export const AIStudyBuddy = ({ subject, topic, assignment, classId }: AIStudyBuddyProps) => {
@@ -37,20 +37,20 @@ export const AIStudyBuddy = ({ subject, topic, assignment, classId }: AIStudyBud
 
   return (
     <div className={cn(
-      "fixed z-50 transition-all duration-300",
+      "fixed z-50 transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)]",
       isOpen 
-        ? "inset-0 md:inset-auto md:bottom-6 md:right-6" 
-        : "bottom-20 md:bottom-6 right-6"
+        ? "inset-0 md:inset-auto md:bottom-6 md:end-6 md:w-auto" 
+        : "bottom-[5rem] md:bottom-6 end-4 md:end-6" // Adjusted for mobile nav and logical RTL
     )}>
       {isOpen ? (
         <Card className={cn(
           "shadow-2xl flex flex-col ai-gradient-border animate-in zoom-in-95 duration-300 overflow-hidden",
-          "w-full h-full md:w-[400px] md:h-[600px] rounded-none md:rounded-xl"
+          "w-full h-full md:w-[400px] md:h-[600px] rounded-none md:rounded-3xl bg-card/90 backdrop-blur-3xl"
         )}>
           <ChatHeader onClose={() => setIsOpen(false)} />
           
           <CardContent className="flex-1 p-0 overflow-hidden bg-dot-pattern">
-            <ScrollArea ref={scrollAreaRef} className="h-full p-4 md:p-6">
+            <ScrollArea ref={scrollAreaRef} className="h-full p-4 md:p-6 custom-scrollbar">
               {messages.length === 0 && (
                 <ChatEmptyState subject={subject} />
               )}
@@ -60,15 +60,15 @@ export const AIStudyBuddy = ({ subject, topic, assignment, classId }: AIStudyBud
                   <ChatMessage key={i} message={msg} />
                 ))}
                 {isLoading && (
-                  <div className="flex gap-3">
-                    <div className="bg-ai-primary h-9 w-9 shrink-0 rounded-full flex items-center justify-center border-2 border-background shadow-sm">
-                      <Sparkles className="h-4 w-4 text-ai-primary-foreground" />
+                  <div className="flex gap-3 md:gap-4 animate-in fade-in slide-in-from-bottom-2">
+                    <div className="bg-ai-primary h-10 w-10 md:h-12 md:w-12 shrink-0 rounded-2xl md:rounded-[1.25rem] flex items-center justify-center border-2 border-background shadow-md">
+                      <Sparkles className="h-4 w-4 md:h-5 md:w-5 text-white" />
                     </div>
-                    <div className="bg-card border p-4 rounded-2xl rounded-tl-none shadow-sm">
-                      <div className="flex gap-1">
-                        <span className="h-1.5 w-1.5 bg-ai-primary/40 rounded-full animate-bounce" />
-                        <span className="h-1.5 w-1.5 bg-ai-primary/40 rounded-full animate-bounce [animation-delay:0.2s]" />
-                        <span className="h-1.5 w-1.5 bg-ai-primary/40 rounded-full animate-bounce [animation-delay:0.4s]" />
+                    <div className="bg-card/80 backdrop-blur-md border border-border/40 p-4 md:p-5 rounded-[1.5rem] md:rounded-[2rem] rounded-ts-none shadow-sm flex items-center h-fit">
+                      <div className="flex gap-1.5 md:gap-2">
+                        <span className="h-1.5 w-1.5 md:h-2 md:w-2 bg-ai-primary/40 rounded-full animate-bounce" />
+                        <span className="h-1.5 w-1.5 md:h-2 md:w-2 bg-ai-primary/40 rounded-full animate-bounce [animation-delay:0.2s]" />
+                        <span className="h-1.5 w-1.5 md:h-2 md:w-2 bg-ai-primary/40 rounded-full animate-bounce [animation-delay:0.4s]" />
                       </div>
                     </div>
                   </div>
@@ -87,10 +87,11 @@ export const AIStudyBuddy = ({ subject, topic, assignment, classId }: AIStudyBud
       ) : (
         <Button 
           size="lg" 
-          className="rounded-2xl h-14 w-14 md:h-16 md:w-16 shadow-2xl shadow-ai-primary/40 hover:scale-110 transition-all duration-300 bg-ai-primary border-0"
+          className="rounded-[1.5rem] md:rounded-[2rem] h-14 w-14 md:h-16 md:w-16 shadow-[0_10px_40px_-10px_rgba(var(--ai-primary),0.8)] hover:scale-110 active:scale-95 transition-all duration-500 bg-ai-primary border-none text-white p-0 group overflow-hidden"
           onClick={() => setIsOpen(true)}
         >
-          <MessageCircle className="h-6 w-6 md:h-7 md:w-7" />
+          <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/20 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+          <MessageCircle className="h-6 w-6 md:h-7 md:w-7 group-hover:rotate-12 transition-transform duration-500 relative z-10" />
         </Button>
       )}
     </div>

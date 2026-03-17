@@ -294,7 +294,7 @@ const SubmissionsListPage = () => {
                             <div className="p-1.5 rounded-lg bg-primary/5">
                                 <FileText className="h-3.5 w-3.5 text-primary" />
                             </div>
-                            <span className="text-xs font-bold truncate max-w-[200px]">
+                            <span className="text-xs font-bold truncate max-w-50">
                                 {submission.assignment?.title}
                             </span>
                           </div>

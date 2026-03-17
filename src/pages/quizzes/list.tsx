@@ -15,7 +15,8 @@ import {
   Trash2,
   ArrowRight,
   Timer,
-  AlertCircle
+  AlertCircle,
+  Layers
 } from "lucide-react";
 import { Input } from "@/components/ui/input.tsx";
 import { useMemo, useState, useRef, useCallback } from "react";
@@ -46,8 +47,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { motion, AnimatePresence } from "framer-motion";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import "dayjs/locale/ar";
 import usePageTitle from "@/hooks/use-page-title";
-import { useVirtualizer } from "@tanstack/react-virtual";
 import { useTerm } from "@/contexts/term-context";
 import { EmptyState } from "@/components/empty-state";
 import { cn } from "@/lib/utils";
@@ -56,7 +57,7 @@ import { useTranslation } from "react-i18next";
 dayjs.extend(relativeTime);
 
 const QuizzesListPage = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   usePageTitle(t("classes.quiz.classQuizzes"));
   const { data: identity } = useGetIdentity<User>();
   const isStaff = identity?.role === UserRole.ADMIN || identity?.role === UserRole.TEACHER;
@@ -67,6 +68,8 @@ const QuizzesListPage = () => {
 
   const { edit, show, create } = useNavigation();
   const { mutate: deleteMutation } = useDelete();
+
+  dayjs.locale(i18n.language === 'ar' ? 'ar' : 'en');
 
   const filters = useMemo(() => {
     const f = [];
@@ -81,7 +84,7 @@ const QuizzesListPage = () => {
 
   const { query: { data: quizzesData, isLoading } } = useList<Quiz>({
     resource: "quizzes",
-    pagination: { pageSize: 1000, mode: "server" },
+    pagination: { pageSize: 50, mode: "server" }, // Reduced page size for better performance on global scroll
     filters,
     sorters: [{ field: "id", order: "desc" }],
     meta: {
@@ -103,17 +106,6 @@ const QuizzesListPage = () => {
     }
   };
 
-  const parentRef = useRef<HTMLDivElement>(null);
-
-  const estimateSize = useCallback(() => 120, []);
-
-  const rowVirtualizer = useVirtualizer({
-    count: quizzes.length,
-    getScrollElement: () => parentRef.current,
-    estimateSize,
-    overscan: 5,
-  });
-
   // Stats calculation
   const stats = useMemo(() => {
     if (!quizzes.length) return { total: 0, aiGenerated: 0, active: 0 };
@@ -125,309 +117,369 @@ const QuizzesListPage = () => {
   }, [quizzes]);
 
   return (
-    <div className="space-y-10 pb-20">
-      <ListView>
-        <div className="space-y-10">
-          <motion.div 
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="space-y-4"
-          >
+    <ListView>
+      <div className="space-y-8 md:space-y-12">
+        {/* Header Section */}
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6"
+        >
+          <div className="space-y-4 flex-1">
             <Breadcrumb />
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-              <div>
-                <h1 className="text-4xl font-black tracking-tight">{t("classes.quiz.classQuizzes")}</h1>
-                <p className="text-muted-foreground font-medium mt-1">{t("classes.quiz.description", { count: quizzes.length })}</p>
-              </div>
-              <div className="flex items-center gap-3 w-full md:w-auto">
-                {isStaff && (
-                  <Button 
-                    onClick={() => create("quizzes")}
-                    className="flex-1 md:flex-none rounded-2xl h-14 px-10 font-black uppercase tracking-widest text-[10px] gap-2 shadow-xl shadow-primary/20 transition-all hover:scale-105 active:scale-95"
-                  >
-                    <PlusCircle className="h-5 w-5" />
-                    {t("buttons.createQuiz")}
-                  </Button>
-                )}
-              </div>
+            <div className="space-y-1 text-start">
+              <h1 className="page-title mb-0 flex items-center gap-3">
+                <div className="p-3 rounded-2xl bg-primary/10 text-primary border border-primary/5 shadow-sm">
+                  <FileQuestion className="h-6 w-6 md:h-8 md:w-8" />
+                </div>
+                {t("classes.quiz.classQuizzes")}
+              </h1>
+              <p className="text-muted-foreground font-medium max-w-2xl text-balance">
+                {t("classes.quiz.description", { count: quizzes.length })}
+              </p>
             </div>
-          </motion.div>
-
-          {/* Stats Row */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <Card className="p-6 border-primary/10 bg-card/50 backdrop-blur-sm flex items-center gap-4 rounded-4xl shadow-lg shadow-primary/5">
-              <div className="p-3 rounded-2xl bg-primary/10 text-primary">
-                <FileQuestion className="h-6 w-6" />
-              </div>
-              <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t("dashboard.platform.stats.totalAssignments")}</p>
-                <p className="text-2xl font-black">{isLoading ? "..." : stats.total}</p>
-              </div>
-            </Card>
-            <Card className="p-6 border-indigo-500/10 bg-card/50 backdrop-blur-sm flex items-center gap-4 rounded-4xl shadow-lg shadow-indigo-500/5">
-              <div className="p-3 rounded-2xl bg-indigo-500/10 text-indigo-600">
-                <Sparkles className="h-6 w-6" />
-              </div>
-              <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t("dashboard.charts.aiInsights")}</p>
-                <p className="text-2xl font-black text-indigo-600">{isLoading ? "..." : stats.aiGenerated}</p>
-              </div>
-            </Card>
-            <Card className="p-6 border-green-500/10 bg-card/50 backdrop-blur-sm flex items-center gap-4 rounded-4xl shadow-lg shadow-green-500/5">
-              <div className="p-3 rounded-2xl bg-green-500/10 text-green-600">
-                <CheckCircle2 className="h-6 w-6" />
-              </div>
-              <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t("status.active")}</p>
-                <p className="text-2xl font-black text-green-600">{isLoading ? "..." : stats.active}</p>
-              </div>
-            </Card>
           </div>
-          
-          {/* Filters & Search */}
-          <Card className="p-4 border-primary/5 bg-muted/30 rounded-4xl backdrop-blur-sm">
-            <div className="flex flex-col lg:flex-row gap-4">
-              <div className="relative flex-1 group">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                <Input
-                  type="text"
-                  placeholder={t("assignments.list.filters.searchPlaceholder")}
-                  className="pl-11 h-14 rounded-2xl border-none bg-background shadow-sm font-medium"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-              <div className="flex items-center gap-2 bg-background px-4 rounded-2xl shadow-sm border border-primary/5">
-                <Filter className="h-4 w-4 text-muted-foreground" />
-                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t("assignments.list.filters.active")}</span>
-              </div>
+          <div className="w-full md:w-auto">
+            {isStaff && (
+              <Button 
+                onClick={() => create("quizzes")}
+                size="lg"
+                className="w-full md:w-auto rounded-2xl h-12 md:h-14 px-10 font-bold uppercase tracking-widest text-[10px] gap-2 shadow-lg shadow-primary/25 hover:translate-y-[-2px] transition-all"
+              >
+                <PlusCircle className="h-5 w-5" />
+                {t("buttons.createQuiz")}
+              </Button>
+            )}
+          </div>
+        </motion.div>
+
+        {/* Stats Row - Adaptive */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
+          <Card className="p-6 md:p-8 bg-card/40 backdrop-blur-3xl border-border/40 rounded-[2rem] md:rounded-[2.5rem] flex items-center gap-5 shadow-sm">
+            <div className="p-3.5 rounded-2xl bg-primary/10 text-primary">
+              <FileQuestion className="h-6 w-6 md:h-7 md:w-7" />
+            </div>
+            <div className="text-start">
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 mb-1">
+                {t("dashboard.platform.stats.totalAssignments")}
+              </p>
+              <p className="text-2xl md:text-3xl font-black">
+                {isLoading ? "..." : stats.total}
+              </p>
             </div>
           </Card>
+          <Card className="p-6 md:p-8 bg-card/40 backdrop-blur-3xl border-border/40 rounded-[2rem] md:rounded-[2.5rem] flex items-center gap-5 shadow-sm">
+            <div className="p-3.5 rounded-2xl bg-indigo-500/10 text-indigo-600">
+              <Sparkles className="h-6 w-6 md:h-7 md:w-7" />
+            </div>
+            <div className="text-start">
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 mb-1">
+                {t("dashboard.charts.aiInsights")}
+              </p>
+              <p className="text-2xl md:text-3xl font-black text-indigo-600">
+                {isLoading ? "..." : stats.aiGenerated}
+              </p>
+            </div>
+          </Card>
+          <Card className="p-6 md:p-8 bg-card/40 backdrop-blur-3xl border-border/40 rounded-[2rem] md:rounded-[2.5rem] flex items-center gap-5 shadow-sm">
+            <div className="p-3.5 rounded-2xl bg-green-500/10 text-green-600">
+              <CheckCircle2 className="h-6 w-6 md:h-7 md:w-7" />
+            </div>
+            <div className="text-start">
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 mb-1">
+                {t("status.active")}
+              </p>
+              <p className="text-2xl md:text-3xl font-black text-green-600">
+                {isLoading ? "..." : stats.active}
+              </p>
+            </div>
+          </Card>
+        </div>
+        
+        {/* Search & Filters Card - Sticky */}
+        <Card className="p-2 border-border/40 bg-muted/20 rounded-[1.75rem] md:rounded-3xl backdrop-blur-md sticky top-20 z-30 shadow-sm">
+          <div className="flex flex-col lg:flex-row gap-2">
+            <div className="relative flex-1 group">
+              <Search className={cn("absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60 group-focus-within:text-primary transition-colors", "start-4")} />
+              <Input
+                type="text"
+                placeholder={t("assignments.list.filters.searchPlaceholder")}
+                className={cn("h-12 rounded-2xl border-none bg-background/50 shadow-none font-medium", "ps-11 pe-4")}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+            <div className="flex items-center gap-2 bg-background/50 px-4 py-2 rounded-2xl border border-border/40 shrink-0">
+              <Filter className="h-3.5 w-3.5 text-muted-foreground/60" />
+              <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">{t("assignments.list.filters.active")}</span>
+            </div>
+          </div>
+        </Card>
 
-          <AnimatePresence>
-            {selectedTerm?.status === "archived" && (
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                className="bg-amber-500/10 border border-amber-500/20 text-amber-700 p-6 rounded-4xl shadow-sm flex items-start gap-4 backdrop-blur-sm"
-              >
-                  <div className="p-3 rounded-2xl bg-amber-500/20">
-                    <AlertCircle className="h-6 w-6" />
-                  </div>
-                  <div className="space-y-1">
-                    <p className="font-black uppercase tracking-widest text-xs">{t("dashboard.archiveViewActive")}</p>
-                    <p className="text-sm font-medium">{t("dashboard.archiveViewDescription", { termName: selectedTerm.name })}</p>
-                  </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+        {/* Archive Banner */}
+        <AnimatePresence>
+          {selectedTerm?.status === "archived" && (
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.98 }}
+              className="bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 p-6 md:p-8 rounded-[2rem] flex flex-col sm:flex-row items-center sm:items-start gap-5 backdrop-blur-sm text-center sm:text-start"
+            >
+                <div className="p-3 rounded-[1.25rem] bg-amber-500/20 shrink-0">
+                  <AlertCircle className="h-6 w-6 md:h-8 md:w-8" />
+                </div>
+                <div className="space-y-1">
+                  <p className="font-black uppercase tracking-[0.15em] text-[10px] opacity-80">{t("dashboard.archiveViewActive")}</p>
+                  <p className="text-base md:text-lg font-bold">
+                    {t("dashboard.archiveViewDescription", { termName: selectedTerm.name })}
+                  </p>
+                </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-          {/* Virtualized List Container */}
-          <div 
-            ref={parentRef} 
-            className="h-150 overflow-auto pr-2 custom-scrollbar rounded-[2.5rem] border border-primary/5 bg-card/30 backdrop-blur-sm relative"
-          >
-            {isLoading ? (
-              <div className="p-8 space-y-6">
-                {Array.from({ length: 6 }).map((_, i) => (
-                  <div key={i} className="flex flex-col md:flex-row items-center gap-6">
-                    <Skeleton className="h-14 w-14 rounded-2xl shrink-0" />
-                    <div className="flex-1 space-y-3 w-full">
-                      <Skeleton className="h-6 w-62.5" />
-                      <Skeleton className="h-4 w-45" />
+        {/* Quizzes List - Global Scroll Behavior */}
+        <div className="relative min-h-[400px]">
+          {isLoading ? (
+            <div className="space-y-4">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Card key={i} className="p-6 flex flex-col md:flex-row items-center gap-6 border-border/20 bg-background/50">
+                  <Skeleton className="h-20 w-20 rounded-3xl shrink-0" />
+                  <div className="flex-1 space-y-4 w-full">
+                    <Skeleton className="h-8 w-[350px] max-w-full" />
+                    <div className="flex gap-4">
+                       <Skeleton className="h-4 w-24" />
+                       <Skeleton className="h-4 w-24" />
                     </div>
-                    <Skeleton className="h-10 w-24 rounded-xl" />
                   </div>
-                ))}
-              </div>
-            ) : !hasData ? (
-              <div className="h-full w-full flex items-center justify-center p-12">
-                <EmptyState
-                  icon={FileQuestion}
-                  title={t("classes.quiz.noQuizzes")}
-                  description={isStaff ? t("classes.quiz.noQuizzesDescriptionTeacher") : t("classes.quiz.noQuizzesDescriptionStudent")}
-                  className="border-none bg-transparent min-h-0"
-                  action={isStaff && selectedTerm?.status === "active" ? {
-                    label: t("buttons.createQuiz"),
-                    onClick: () => create("quizzes"),
-                  } : undefined}
-                />
-              </div>
-            ) : (
-              <div style={{ height: `${rowVirtualizer.getTotalSize()}px`, width: '100%', position: 'relative' }}>
-                {rowVirtualizer.getVirtualItems().map((virtualItem) => {
-                  const quiz = quizzes[virtualItem.index];
+                  <Skeleton className="h-12 w-36 rounded-2xl" />
+                </Card>
+              ))}
+            </div>
+          ) : !hasData ? (
+            <div className="flex items-center justify-center p-16 bg-card/20 rounded-[2.5rem] border border-dashed border-border/40">
+              <EmptyState
+                icon={Layers}
+                title={t("classes.quiz.noQuizzes")}
+                description={isStaff ? t("classes.quiz.noQuizzesDescriptionTeacher") : t("classes.quiz.noQuizzesDescriptionStudent")}
+                className="border-none bg-transparent min-h-0"
+                action={isStaff && selectedTerm?.status === "active" ? {
+                  label: t("buttons.createQuiz"),
+                  onClick: () => create("quizzes"),
+                } : undefined}
+              />
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <AnimatePresence mode="popLayout">
+                {quizzes.map((quiz, index) => {
                   const isPast = quiz.dueDate && dayjs(quiz.dueDate).isBefore(dayjs());
-                  const isAI = quiz.id % 2 === 0;
+                  const isAI = quiz.id % 2 === 0; // Placeholder for AI generated
+                  const quizColor = (quiz as any).class?.color || "#6366f1";
                   
                   return (
-                    <div
-                      key={virtualItem.key}
-                      style={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        width: '100%',
-                        height: `${virtualItem.size}px`,
-                        transform: `translateY(${virtualItem.start}px)`,
-                      }}
-                      className="px-8"
+                    <motion.div
+                      key={quiz.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      transition={{ delay: index * 0.05 }}
+                      className={cn(
+                        "group relative flex flex-col md:flex-row items-center p-5 md:p-6 rounded-[2rem] bg-card/50 backdrop-blur-sm border border-border/40 hover:border-primary/30 hover:bg-card/80 transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-primary/5 cursor-pointer"
+                      )}
+                      onClick={() => show("quizzes", quiz.id)}
                     >
-                      <motion.div
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.2 }}
-                        className="flex flex-col md:flex-row items-center h-full border-b border-primary/5 hover:bg-primary/[0.02] transition-all group cursor-pointer"
-                        onClick={() => show("quizzes", quiz.id)}
-                      >
-                        {/* Icon */}
-                        <div className="relative shrink-0 mb-4 md:mb-0">
-                          <div className={cn(
-                              "h-14 w-14 rounded-2xl border-4 border-background flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform",
-                              isAI ? "bg-indigo-500/10 text-indigo-600" : "bg-primary/10 text-primary"
-                          )}>
-                              <FileQuestion className="h-7 w-7" />
-                          </div>
-                          {isAI && (
-                            <div className="absolute -top-2 -right-2 bg-indigo-500 text-white p-1 rounded-full border-2 border-background shadow-lg">
-                              <Sparkles className="h-3 w-3" />
-                            </div>
-                          )}
+                      {/* Class Color Accent using logical properties */}
+                      <div 
+                        className="absolute start-0 top-1/2 -translate-y-1/2 w-1.5 h-12 rounded-e-full transition-all group-hover:h-20"
+                        style={{ backgroundColor: quizColor }}
+                      />
+
+                      {/* Icon Container */}
+                      <div className="relative shrink-0 mb-4 md:mb-0">
+                        <div className={cn(
+                            "h-20 w-20 rounded-[1.5rem] border-4 border-background flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-500",
+                            isAI ? "bg-indigo-500/10 text-indigo-600" : "bg-primary/10 text-primary"
+                        )}>
+                            <FileQuestion className="h-8 w-8 md:h-10 md:w-10" />
                         </div>
-
-                        {/* Info */}
-                        <div className="flex-1 md:ml-8 text-center md:text-left min-w-0 w-full">
-                          <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
-                            <h3 className="text-xl font-black tracking-tight truncate group-hover:text-primary transition-colors">
-                              {quiz.title}
-                            </h3>
-                            <div className="flex items-center justify-center md:justify-start gap-2">
-                              <Badge 
-                                  variant="outline" 
-                                  className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md border-primary/10"
-                              >
-                                  {(quiz as any).class?.name || "General Class"}
-                              </Badge>
-                              {isAI && (
-                                  <Badge className="bg-indigo-500/10 text-indigo-600 border-none font-black px-2 py-0.5 rounded-md text-[9px] tracking-widest uppercase">
-                                      AI Generated
-                                  </Badge>
-                              )}
-                            </div>
+                        {isAI && (
+                          <div className="absolute -top-3 -end-3 p-1.5 rounded-full bg-indigo-500 text-white shadow-lg shadow-indigo-500/30 border-4 border-background animate-pulse">
+                            <Sparkles className="h-4 w-4" />
                           </div>
-                          
-                          <div className="flex flex-wrap items-center justify-center md:justify-start gap-x-6 gap-y-2 mt-3">
-                            <div className="flex items-center gap-2 text-muted-foreground">
-                              <div className="p-1.5 rounded-lg bg-primary/5">
-                                  <Trophy className="h-3.5 w-3.5 text-primary" />
-                              </div>
-                              <span className="text-xs font-bold">
-                                  {quiz.totalMarks || 100} <span className="text-muted-foreground/50 font-medium">{t("assignments.create.maxPoints")}</span>
-                              </span>
-                            </div>
+                        )}
+                      </div>
 
-                            <div className="flex items-center gap-2 text-muted-foreground">
-                              <div className="p-1.5 rounded-lg bg-primary/5">
-                                  <Timer className="h-3.5 w-3.5 text-primary" />
-                              </div>
-                              <span className="text-xs font-bold">
-                                  {quiz.timeLimit || "No"} <span className="text-muted-foreground/50 font-medium">{t("classes.quiz.minsUnit")}</span>
-                              </span>
-                            </div>
-
-                            <div className="flex items-center gap-2 text-muted-foreground">
-                              <div className="p-1.5 rounded-lg bg-primary/5">
-                                  <Calendar className="h-3.5 w-3.5 text-primary" />
-                              </div>
-                              <span className={cn(
-                                  "text-xs font-bold uppercase tracking-tight",
-                                  isPast ? "text-destructive" : "text-primary"
-                              )}>
-                                  {quiz.dueDate ? t("classes.quiz.due", { date: dayjs(quiz.dueDate).fromNow() }) : t("assignments.list.labels.open")}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Actions */}
-                        <div className="flex items-center gap-3 mt-6 md:mt-0 shrink-0">
-                          <Button
-                            variant={isPast ? "outline" : "default"}
-                            className={cn(
-                              "rounded-2xl px-8 h-12 text-[10px] font-black uppercase tracking-widest transition-all shadow-sm",
-                              isPast ?
-                                "border-destructive/20 text-destructive hover:bg-destructive/5" :
-                                "bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20",
+                      {/* Content Area */}
+                      <div className={cn("flex-1 min-w-0 w-full text-center md:text-start", "md:ms-8")}>
+                        <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 mb-2">
+                          <h3 className="text-xl md:text-2xl font-black tracking-tight truncate group-hover:text-primary transition-colors leading-tight">
+                            {quiz.title}
+                          </h3>
+                          <div className="flex items-center justify-center md:justify-start gap-2">
+                            <Badge 
+                                variant="ai" 
+                                className="h-6"
+                            >
+                                {(quiz as any).class?.name || t("assignments.list.labels.general")}
+                            </Badge>
+                            {isAI && (
+                                <Badge className="bg-indigo-500/10 text-indigo-600 border border-indigo-500/20 font-black px-2.5 py-0.5 rounded-full text-[9px] tracking-widest uppercase shadow-sm">
+                                    AI Generated
+                                </Badge>
                             )}
-                          >
-                            {isStaff ? t("buttons.results") : t("buttons.takeQuiz")}
-                            <ArrowRight className="h-4 w-4 ml-2" />
-                          </Button>
-
-                          <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl md:hidden lg:flex" onClick={(e) => e.stopPropagation()}>
-                                      <MoreHorizontal className="h-5 w-5" />
-                                  </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className="w-56 rounded-[1.5rem] p-2">
-                                  <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-3 py-2">{t("assignments.list.labels.options")}</DropdownMenuLabel>
-                                  <DropdownMenuItem onClick={() => show("quizzes", quiz.id)} className="rounded-xl gap-3 py-3 cursor-pointer">
-                                      <Eye className="h-4 w-4 text-primary" />
-                                      <span className="font-bold">{t("buttons.viewDetails")}</span>
-                                  </DropdownMenuItem>
-                                  {isStaff && (
-                                      <>
-                                          <DropdownMenuItem onClick={() => edit("quizzes", quiz.id)} className="rounded-xl gap-3 py-3 cursor-pointer">
-                                              <Pencil className="h-4 w-4 text-primary" />
-                                              <span className="font-bold">{t("buttons.edit")}</span>
-                                          </DropdownMenuItem>
-                                          <DropdownMenuSeparator className="my-2" />
-                                          <DropdownMenuItem onClick={() => setDeleteTarget(quiz.id)} className="rounded-xl gap-3 py-3 cursor-pointer text-destructive focus:text-destructive">
-                                              <Trash2 className="h-4 w-4" />
-                                              <span className="font-bold">{t("buttons.delete")}</span>
-                                          </DropdownMenuItem>
-                                      </>
-                                  )}
-                              </DropdownMenuContent>
-                          </DropdownMenu>
+                          </div>
                         </div>
-                      </motion.div>
-                    </div>
+                        
+                        <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 md:gap-6 mt-4">
+                          <div className="flex items-center gap-2.5 bg-background/40 px-3 py-1.5 rounded-full border border-border/20 shadow-sm">
+                            <div className="p-1.5 rounded-lg bg-primary/5 shrink-0">
+                                <Trophy className="h-3.5 w-3.5 text-primary" />
+                            </div>
+                            <div className="flex flex-col text-start">
+                                <span className="text-[9px] uppercase font-bold text-muted-foreground/60 tracking-wider">Max Points</span>
+                                <span className="text-[11px] font-black text-foreground">
+                                    {quiz.totalMarks || 100}
+                                </span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2.5 bg-background/40 px-3 py-1.5 rounded-full border border-border/20 shadow-sm">
+                            <div className="p-1.5 rounded-lg bg-primary/5 shrink-0">
+                                <Timer className="h-3.5 w-3.5 text-primary" />
+                            </div>
+                            <div className="flex flex-col text-start">
+                                <span className="text-[9px] uppercase font-bold text-muted-foreground/60 tracking-wider">Time Limit</span>
+                                <span className="text-[11px] font-black text-foreground">
+                                    {quiz.timeLimit ? `${quiz.timeLimit} ${t("classes.quiz.minsUnit")}` : t("assignments.list.labels.open")}
+                                </span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2.5 bg-background/40 px-3 py-1.5 rounded-full border border-border/20 shadow-sm">
+                            <div className="p-1.5 rounded-lg bg-primary/5 shrink-0">
+                                <Calendar className="h-3.5 w-3.5 text-primary" />
+                            </div>
+                            <div className="flex flex-col text-start">
+                                <span className="text-[9px] uppercase font-bold text-muted-foreground/60 tracking-wider">Due Date</span>
+                                <span className={cn(
+                                    "text-[11px] font-black",
+                                    isPast ? "text-destructive" : "text-foreground"
+                                )}>
+                                    {quiz.dueDate ? dayjs(quiz.dueDate).format("MMM D, YYYY") : t("assignments.list.labels.noDeadline")}
+                                </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Action Area */}
+                      <div className="flex items-center gap-3 mt-6 md:mt-0 shrink-0">
+                        <div className={cn("hidden lg:flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:translate-x-0", "ltr:translate-x-4 rtl:-translate-x-4")}>
+                            {isStaff && (
+                                <>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-11 w-11 rounded-2xl text-muted-foreground hover:text-primary hover:bg-primary/5 bg-muted/20"
+                                        onClick={(e) => { e.stopPropagation(); edit("quizzes", quiz.id); }}
+                                    >
+                                        <Pencil className="h-5 w-5" />
+                                    </Button>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-11 w-11 rounded-2xl text-destructive hover:bg-destructive/10 bg-muted/20"
+                                        onClick={(e) => { e.stopPropagation(); setDeleteTarget(quiz.id); }}
+                                    >
+                                        <Trash2 className="h-5 w-5" />
+                                    </Button>
+                                </>
+                            )}
+                        </div>
+
+                        <Button
+                          variant={isPast ? "outline" : "default"}
+                          size="lg"
+                          className={cn(
+                            "w-full md:w-auto rounded-2xl px-8 h-12 font-black uppercase tracking-widest text-[10px] transition-all",
+                            isPast ?
+                              "border-destructive/20 text-destructive hover:bg-destructive/5" :
+                              "bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20",
+                          )}
+                        >
+                          {isStaff ? t("buttons.results") : t("buttons.takeQuiz")}
+                          <ArrowRight className={cn("h-4 w-4", "ms-2 rtl:-scale-x-100")} />
+                        </Button>
+
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon" className="h-12 w-12 rounded-2xl md:hidden lg:flex bg-muted/30" onClick={(e) => e.stopPropagation()}>
+                                    <MoreHorizontal className="h-5 w-5" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-64 p-2 rounded-3xl">
+                                <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/40 px-3 py-3">{t("assignments.list.labels.options")}</DropdownMenuLabel>
+                                <DropdownMenuItem onClick={() => show("quizzes", quiz.id)} className="rounded-xl gap-3 py-3 cursor-pointer">
+                                    <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                                        <Eye className="h-4 w-4" />
+                                    </div>
+                                    <span className="font-bold">{t("buttons.viewDetails")}</span>
+                                </DropdownMenuItem>
+                                {isStaff && (
+                                    <>
+                                        <DropdownMenuItem onClick={() => edit("quizzes", quiz.id)} className="rounded-xl gap-3 py-3 cursor-pointer">
+                                            <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                                                <Pencil className="h-4 w-4" />
+                                            </div>
+                                            <span className="font-bold">{t("buttons.edit")}</span>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuSeparator className="my-2 opacity-50" />
+                                        <DropdownMenuItem onClick={() => setDeleteTarget(quiz.id)} className="rounded-xl gap-3 py-3 cursor-pointer text-destructive focus:bg-destructive/10">
+                                            <div className="p-2 rounded-lg bg-destructive/10 text-destructive">
+                                                <Trash2 className="h-4 w-4" />
+                                            </div>
+                                            <span className="font-bold">{t("buttons.delete")}</span>
+                                        </DropdownMenuItem>
+                                    </>
+                                )}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </motion.div>
                   );
                 })}
-              </div>
-            )}
-          </div>
+              </AnimatePresence>
+            </div>
+          )}
         </div>
-      </ListView>
+      </div>
 
       <AlertDialog open={deleteTarget !== null} onOpenChange={() => setDeleteTarget(null)}>
         <AlertDialogContent className="rounded-[2.5rem] border-none shadow-2xl bg-card/95 backdrop-blur-xl">
-          <AlertDialogHeader className="space-y-4">
-            <div className="p-4 rounded-2xl bg-destructive/10 text-destructive w-fit">
-              <Trash2 className="h-8 w-8" />
+          <AlertDialogHeader className="space-y-6">
+            <div className="p-5 rounded-2xl bg-destructive/10 text-destructive w-fit mx-auto">
+              <Trash2 className="h-10 w-10" />
             </div>
-            <div className="space-y-1">
+            <div className="space-y-2 text-center">
                 <AlertDialogTitle className="text-3xl font-black tracking-tight">{t("assignments.list.deleteDialog.title")}</AlertDialogTitle>
-                <AlertDialogDescription className="font-medium text-base">
+                <AlertDialogDescription className="text-base font-medium px-8 leading-relaxed">
                 {t("assignments.list.deleteDialog.description")}
                 </AlertDialogDescription>
             </div>
           </AlertDialogHeader>
-          <AlertDialogFooter className="gap-3 pt-6">
-            <AlertDialogCancel className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-8">{t("buttons.cancel")}</AlertDialogCancel>
+          <AlertDialogFooter className="sm:justify-center gap-4 pt-8">
+            <AlertDialogCancel className="rounded-2xl px-10 h-14 font-black uppercase tracking-widest text-[10px]">{t("buttons.cancel")}</AlertDialogCancel>
             <AlertDialogAction 
                 onClick={handleConfirmDelete} 
-                className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-12 bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-xl shadow-destructive/20"
+                className="rounded-2xl px-12 h-14 font-black uppercase tracking-widest text-[10px] bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-xl shadow-destructive/20"
             >
                 {t("buttons.confirmDelete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </ListView>
   );
 };
 
