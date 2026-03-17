@@ -5,6 +5,12 @@ import App from "./App";
 import { registerSW } from "virtual:pwa-register";
 import { ThemeProvider } from "./components/refine-ui/theme/theme-provider";
 
+// Handle Vite dynamic import errors (e.g., when a new version is deployed and old chunks are gone)
+window.addEventListener("vite:preloadError", (event) => {
+  console.warn("Preload error detected, reloading page...", event);
+  window.location.reload();
+});
+
 // Configure QueryClient with reasonable defaults
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -21,9 +27,10 @@ const container = document.getElementById("root") as HTMLElement;
 const root = createRoot(container);
 
 // Register service worker with automatic updates support
-const updateSW = registerSW({
+registerSW({
   onNeedRefresh() {
-    // Show a toast or non-blocking notification instead of confirm
+    // In many cases, autoUpdate in vite-plugin-pwa handles this,
+    // but we can also manually trigger a reload or show a notification.
     console.log("New content available, please refresh.");
   },
   onOfflineReady() {

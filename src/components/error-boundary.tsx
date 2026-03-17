@@ -24,6 +24,12 @@ class ErrorBoundaryInner extends Component<Props, State> {
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error("Uncaught error:", error, errorInfo);
+    
+    // Specifically handle dynamic import (chunk) failures
+    if (error.name === "ChunkLoadError" || error.message.includes("Failed to fetch dynamically imported module")) {
+      console.warn("Dynamic import failed, reloading page...");
+      window.location.reload();
+    }
   }
 
   public render() {
@@ -43,13 +49,22 @@ class ErrorBoundaryInner extends Component<Props, State> {
           <p className="text-sm text-muted-foreground mb-4 max-w-xs">
             {this.state.error?.message || t("common.aiServiceError")}
           </p>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => this.setState({ hasError: false })}
-          >
-            {t("buttons.tryAgain")}
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => window.location.reload()}
+            >
+                {t("buttons.refresh", { defaultValue: "Refresh Page" })}
+            </Button>
+            <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => this.setState({ hasError: false })}
+            >
+                {t("buttons.tryAgain")}
+            </Button>
+          </div>
         </div>
       );
     }
