@@ -332,3 +332,38 @@
 .prose h1, .prose h2, .prose h3 {
   @apply font-black tracking-tight text-foreground mt-6 mb-4;
 }
+
+/* --- 3D FLASHCARD SYSTEM --- */
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}
+
+/* --- PRINT SYSTEM --- */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  .page-break {
+    page-break-before: always;
+  }
+}
