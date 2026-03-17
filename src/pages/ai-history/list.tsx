@@ -39,7 +39,7 @@ const AIHistoryList = () => {
     sorters: [{ field: "createdAt", order: "desc" }],
     filters: [
       {
-        field: "input",
+        field: "prompt", // Fixed: Was 'input'
         operator: "contains",
         value: searchQuery,
       },
@@ -119,7 +119,7 @@ const AIHistoryList = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {data?.map((log: any, index: number) => {
-            const toolInfo = getToolIcon(log.tool);
+            const toolInfo = getToolIcon(log.action); // Fixed: Was 'log.tool'
             return (
               <motion.div
                 key={log.id}
@@ -142,17 +142,17 @@ const AIHistoryList = () => {
                       </div>
                     </div>
                     <CardTitle className="text-lg font-black tracking-tight mt-4 line-clamp-2 min-h-[3.5rem]">
-                      {log.input}
+                      {log.prompt} {/* Fixed: Was 'log.input' */}
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-6 pt-0 space-y-6">
                     <div className="h-12 line-clamp-2 text-sm text-muted-foreground/80 leading-relaxed font-medium">
-                      {log.tool === "flashcards" ? "Flashcard Deck generated" : log.output}
+                      {log.action === "flashcards" ? "Flashcard Deck generated" : log.response} {/* Fixed: Was tool/output */}
                     </div>
                     
                     <div className="flex items-center justify-between pt-4 border-t border-border/40">
                       <span className="text-[9px] font-black uppercase tracking-[0.2em] px-2 py-1 rounded-md bg-muted/50 text-muted-foreground">
-                        {log.tool}
+                        {log.action} {/* Fixed: Was 'log.tool' */}
                       </span>
                       <div className="flex items-center gap-2">
                          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-primary/10 hover:text-primary transition-all opacity-0 group-hover:opacity-100">

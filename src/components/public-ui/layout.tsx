@@ -4,6 +4,7 @@ import { Footer } from "./footer";
 import { OfflineBanner } from "@/components/offline-banner";
 import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
+import { useEffect } from "react";
 
 /**
  * PublicLayout
@@ -13,6 +14,12 @@ export const PublicLayout = () => {
   const { i18n } = useTranslation();
   const location = useLocation();
   const isAr = i18n.language === "ar";
+
+  // Syncing document direction and language for global styles and SEO
+  useEffect(() => {
+    document.documentElement.dir = isAr ? "rtl" : "ltr";
+    document.documentElement.lang = i18n.language;
+  }, [i18n.language, isAr]);
 
   return (
     <div 

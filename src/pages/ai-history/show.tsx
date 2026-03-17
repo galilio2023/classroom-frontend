@@ -1,4 +1,4 @@
-import { useShow, useNavigation } from "@refinedev/core";
+import { useShow, useNavigation, useDelete } from "@refinedev/core";
 import { 
   Card, 
   CardContent, 
@@ -35,6 +35,7 @@ import { toast } from "sonner";
 const AIHistoryShow = () => {
   const { t, i18n } = useTranslation();
   const { list } = useNavigation();
+  const { mutate: deleteRecord } = useDelete();
   const isAr = i18n.language === "ar";
 
   const { query } = useShow({
@@ -62,6 +63,39 @@ const AIHistoryShow = () => {
     if (record?.response) {
       navigator.clipboard.writeText(record.response);
       toast.success(t("toasts.copiedToClipboard", { defaultValue: "Copied to clipboard!" }));
+    }
+  };
+
+  const handleDownload = () => {
+    if (!record) return;
+    
+    const content = `AI Study Session\n\nPrompt: ${record.prompt}\n\nTool: ${record.action}\n\nDate: ${format(new Date(record.createdAt), "PPPP")}\n\nResponse:\n\n${record.response}`;
+    const element = document.createElement("a");
+    const file = new Blob([content], { type: "text/plain" });
+    element.href = URL.createObjectURL(file);
+    element.download = `ai-study-${record.id}.txt`;
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+    toast.success(t("toasts.downloadStarted", { defaultValue: "Download started!" }));
+  };
+
+  const handleDelete = () => {
+    if (!record?.id) return;
+    
+    if (confirm(t("messages.confirmDelete", { defaultValue: "Are you sure you want to delete this history item?" }))) {
+        deleteRecord(
+            {
+                resource: "ai-activity-logs",
+                id: record.id,
+            },
+            {
+                onSuccess: () => {
+                    toast.success(t("toasts.deletedSuccessfully", { defaultValue: "Deleted successfully" }));
+                    list("ai-activity-logs");
+                }
+            }
+        );
     }
   };
 
@@ -101,11 +135,11 @@ const AIHistoryShow = () => {
                 <Copy className="h-4 w-4" />
                 <span className="hidden sm:inline">{t("buttons.copy", { defaultValue: "Copy" })}</span>
             </Button>
-            <Button variant="outline" size="sm" className="rounded-xl font-bold gap-2 h-11 border-border/40 bg-card/50">
+            <Button variant="outline" size="sm" onClick={handleDownload} className="rounded-xl font-bold gap-2 h-11 border-border/40 bg-card/50">
                 <Download className="h-4 w-4" />
                 <span className="hidden sm:inline">{t("buttons.export", { defaultValue: "Export" })}</span>
             </Button>
-            <Button variant="ghost" size="sm" className="rounded-xl font-bold gap-2 h-11 text-destructive hover:bg-destructive/10">
+            <Button variant="ghost" size="sm" onClick={handleDelete} className="rounded-xl font-bold gap-2 h-11 text-destructive hover:bg-destructive/10">
                 <Trash2 className="h-4 w-4" />
                 <span className="hidden sm:inline">{t("buttons.delete", { defaultValue: "Delete" })}</span>
             </Button>
