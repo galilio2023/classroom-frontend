@@ -1,19 +1,18 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import { Navbar } from "./navbar";
 import { Footer } from "./footer";
 import { OfflineBanner } from "@/components/offline-banner";
 import { useTranslation } from "react-i18next";
-import { useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
+/**
+ * PublicLayout
+ * Optimized for smooth transitions between landing, pricing, and auth pages.
+ */
 export const PublicLayout = () => {
   const { i18n } = useTranslation();
+  const location = useLocation();
   const isAr = i18n.language === "ar";
-
-  // Senior Tip: Sync HTML dir attribute with i18n language
-  useEffect(() => {
-    document.documentElement.dir = isAr ? "rtl" : "ltr";
-    document.documentElement.lang = i18n.language;
-  }, [isAr, i18n.language]);
 
   return (
     <div 
@@ -22,8 +21,20 @@ export const PublicLayout = () => {
     >
       <OfflineBanner />
       <Navbar />
-      <main className="flex-1 pt-16 overflow-x-hidden">
-        <Outlet />
+      <main className="flex-1 pt-16 overflow-x-hidden relative">
+        {/* Syncing animation pattern with internal Layout for consistency */}
+        <AnimatePresence mode="popLayout" initial={false}>
+          <motion.div
+            key={location.pathname}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className="w-full h-full"
+          >
+            <Outlet />
+          </motion.div>
+        </AnimatePresence>
       </main>
       <Footer />
     </div>

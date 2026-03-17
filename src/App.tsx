@@ -78,6 +78,8 @@ const CalendarPage = React.lazy(() => import("./pages/calendar"));
 const NotificationsPage = React.lazy(() => import("./pages/notifications/list"));
 const AiAssistantPage = React.lazy(() => import("./pages/ai-assistant"));
 const AiStudyLabPage = React.lazy(() => import("./pages/ai-study-lab"));
+const AiHistoryList = React.lazy(() => import("./pages/ai-history/list"));
+const AiHistoryShow = React.lazy(() => import("./pages/ai-history/show"));
 const MessagesPage = React.lazy(() => import("./pages/messages/index"));
 const ProjectGroupsPage = React.lazy(() => import("./pages/project-groups/index"));
 const ShowProjectGroup = React.lazy(() => import("./pages/project-groups/show"));
@@ -278,6 +280,24 @@ function App() {
                                 </AuthorizedRoute>
                             } 
                             />
+                            <Route path="/ai-history">
+                                <Route 
+                                    index 
+                                    element={
+                                        <AuthorizedRoute resource="ai-activity-logs" action="list">
+                                            <AiHistoryList />
+                                        </AuthorizedRoute>
+                                    } 
+                                />
+                                <Route 
+                                    path="show/:id" 
+                                    element={
+                                        <AuthorizedRoute resource="ai-activity-logs" action="show">
+                                            <AiHistoryShow />
+                                        </AuthorizedRoute>
+                                    } 
+                                />
+                            </Route>
                             <Route 
                             path="/study-planner" 
                             element={

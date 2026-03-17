@@ -21,6 +21,8 @@ import {
   ArrowRight,
   Zap,
   Lightbulb,
+  Save,
+  CheckCircle2,
 } from "lucide-react";
 import { toast } from "sonner";
 import axios from "axios";
@@ -33,22 +35,37 @@ import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
 import usePageTitle from "@/hooks/use-page-title";
 import { Label } from "@/components/ui/label";
 import { useTranslation } from "react-i18next";
+import { useCreate, useList, useNavigation } from "@refinedev/core";
 
 const AIStudyLab = () => {
   const { t, i18n } = useTranslation();
   usePageTitle(t("aiHub.studyLab.title"));
+  const { list } = useNavigation();
   const [activeTool, setActiveTool] = useState<"explain" | "quiz" | "summary" | "flashcards">(
     "explain",
   );
   const [input, setInput] = useState("");
   const [result, setResult] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [hasSaved, setHasSaved] = useState(false);
   const isAr = i18n.language === "ar";
 
   const [practiceTopic, setPracticeTopic] = useState<string | null>(null);
   const [flashcards, setFlashcards] = useState<any[] | null>(null);
   
   const abortControllerRef = useRef<AbortController | null>(null);
+  const { mutate: createHistory } = useCreate();
+
+  // Refine v5 Fix: destructure 'result' correctly
+  const { result: classesResult } = useList({
+    resource: "classes",
+    pagination: { pageSize: 100 },
+  });
+
+  const classesData = classesResult?.data || [];
+
+  const [selectedClassId, setSelectedClassId] = useState<string>("");
 
   useEffect(() => {
     return () => {
@@ -77,12 +94,13 @@ const AIStudyLab = () => {
     setIsLoading(true);
     setResult("");
     setFlashcards(null);
+    setHasSaved(false);
 
     try {
       if (activeTool === "flashcards") {
         const response = await axios.post(
             "/api/ai/generate-flashcards", 
-            { input, locale: i18n.language },
+            { input, locale: i18n.language, classId: selectedClassId },
             { signal: abortControllerRef.current.signal }
         );
         setFlashcards(response.data.flashcards);
@@ -95,7 +113,7 @@ const AIStudyLab = () => {
 
         const response = await axios.post(
             "/api/ai/generate-content", 
-            { prompt },
+            { prompt, classId: selectedClassId },
             { signal: abortControllerRef.current.signal }
         );
         setResult(response.data.content);
@@ -110,6 +128,35 @@ const AIStudyLab = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleSaveToHistory = () => {
+    if (!result && !flashcards) return;
+    
+    setIsSaving(true);
+    createHistory({
+      resource: "ai-activity-logs",
+      values: {
+        tool: activeTool,
+        input: input,
+        output: result || JSON.stringify(flashcards),
+        metadata: {
+            classId: selectedClassId || null,
+            language: i18n.language,
+        }
+      },
+    }, {
+      onSuccess: () => {
+        setIsSaving(false);
+        setHasSaved(true);
+        // Fix: Use a key that exists or provide a default value to bypass strict i18n typing
+        toast.success(t("notifications.success", { defaultValue: "Saved to history!" }));
+      },
+      onError: () => {
+        setIsSaving(false);
+        toast.error("Failed to save to history.");
+      }
+    });
   };
 
   const tools = [
@@ -142,7 +189,12 @@ const AIStudyLab = () => {
                     </p>
                 </div>
             </div>
-            <Button variant="outline" size="lg" className="w-full md:w-auto rounded-2xl h-12 md:h-14 px-8 border-primary/20 bg-primary/5 hover:bg-primary/10 text-primary font-bold uppercase tracking-widest text-[10px] shadow-sm gap-2">
+            <Button 
+                variant="outline" 
+                size="lg" 
+                onClick={() => list("ai-activity-logs")}
+                className="w-full md:w-auto rounded-2xl h-12 md:h-14 px-8 border-primary/20 bg-primary/5 hover:bg-primary/10 text-primary font-bold uppercase tracking-widest text-[10px] shadow-sm gap-2"
+            >
                 <History className="h-4 w-4" />
                 {t("buttons.studyHistory")}
             </Button>
@@ -152,6 +204,32 @@ const AIStudyLab = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12 items-start">
         {/* Tool Selection Sidebar */}
         <div className="lg:col-span-4 space-y-6 md:space-y-8">
+          
+          {/* Context Selector: Class selection for contextual AI */}
+          <Card className="border-border/40 bg-card/50 backdrop-blur-3xl rounded-[2rem] p-6 shadow-sm">
+              <div className="space-y-4">
+                  <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/60 flex items-center gap-2">
+                    <Zap className="h-3 w-3" />
+                    {t("aiHub.studyLab.context.title", { defaultValue: "Study Context" })}
+                  </Label>
+                  <select
+                    className="w-full h-12 rounded-xl bg-muted/50 border-none px-4 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none"
+                    value={selectedClassId}
+                    onChange={(e) => setSelectedClassId(e.target.value)}
+                  >
+                    <option value="">{t("aiHub.studyLab.context.general", { defaultValue: "General Knowledge" })}</option>
+                    {classesData?.map((cls: any) => (
+                        <option key={cls.id} value={cls.id}>
+                            {cls.name}
+                        </option>
+                    ))}
+                  </select>
+                  <p className="text-[10px] text-muted-foreground italic px-2 leading-tight">
+                    {t("aiHub.studyLab.context.help", { defaultValue: "Selecting a class helps the AI understand your specific curriculum." })}
+                  </p>
+              </div>
+          </Card>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4 md:gap-6">
             {tools.map((tool) => (
                 <motion.div
@@ -352,9 +430,24 @@ const AIStudyLab = () => {
                             <ReactMarkdown>{result}</ReactMarkdown>
                         </CardContent>
                         <div className="p-8 md:p-10 bg-indigo-500/[0.05] border-t border-indigo-500/10 flex justify-end">
-                            <Button size="lg" variant="ghost" className="rounded-2xl font-black uppercase tracking-widest text-[10px] gap-3 text-indigo-600 hover:bg-indigo-500/10 h-14 px-8">
-                                <History className="h-5 w-5" />
-                                <span>{t("buttons.saveToHistory")}</span>
+                            <Button 
+                              size="lg" 
+                              variant="ghost" 
+                              disabled={isSaving || hasSaved}
+                              onClick={handleSaveToHistory}
+                              className={cn(
+                                "rounded-2xl font-black uppercase tracking-widest text-[10px] gap-3 h-14 px-8 transition-all",
+                                hasSaved ? "text-green-600 bg-green-50" : "text-indigo-600 hover:bg-indigo-500/10"
+                              )}
+                            >
+                                {isSaving ? (
+                                    <Loader2 className="h-5 w-5 animate-spin" />
+                                ) : hasSaved ? (
+                                    <CheckCircle2 className="h-5 w-5" />
+                                ) : (
+                                    <Save className="h-5 w-5" />
+                                )}
+                                <span>{hasSaved ? t("buttons.saved", { defaultValue: "Saved" }) : t("buttons.saveToHistory")}</span>
                             </Button>
                         </div>
                     </Card>
