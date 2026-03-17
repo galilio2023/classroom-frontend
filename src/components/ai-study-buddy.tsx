@@ -5,7 +5,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Sparkles, MessageCircle, X } from "lucide-react";
+import { Sparkles, MessageCircle } from "lucide-react";
 import { ChatMessage } from "./ai/chat-message";
 import { useAIChat } from "@/hooks/use-ai-chat";
 import { ChatHeader } from "./ai/chat-header";
@@ -44,7 +44,7 @@ export const AIStudyBuddy = ({ subject, topic, assignment, classId }: AIStudyBud
     )}>
       {isOpen ? (
         <Card className={cn(
-          "shadow-2xl flex flex-col ai-gradient-border animate-in zoom-in-95 duration-300 overflow-hidden",
+          "shadow-2xl flex flex-col ai-gradient-border animate-[zoom-in_0.3s_ease-out] overflow-hidden",
           "w-full h-full md:w-[400px] md:h-[600px] rounded-none md:rounded-3xl bg-card/90 backdrop-blur-3xl"
         )}>
           <ChatHeader onClose={() => setIsOpen(false)} />
@@ -60,7 +60,7 @@ export const AIStudyBuddy = ({ subject, topic, assignment, classId }: AIStudyBud
                   <ChatMessage key={i} message={msg} />
                 ))}
                 {isLoading && (
-                  <div className="flex gap-3 md:gap-4 animate-in fade-in slide-in-from-bottom-2">
+                  <div className="flex gap-3 md:gap-4 animate-[fade-in_0.3s_ease-out]">
                     <div className="bg-ai-primary h-10 w-10 md:h-12 md:w-12 shrink-0 rounded-2xl md:rounded-[1.25rem] flex items-center justify-center border-2 border-background shadow-md">
                       <Sparkles className="h-4 w-4 md:h-5 md:w-5 text-white" />
                     </div>

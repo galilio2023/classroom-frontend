@@ -5,7 +5,8 @@ import { Slider } from "../ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { LoadingButton } from "../ui/loading-button";
 import { AICard } from "./ai-card";
-import { BrainCircuit, Sparkles, Save, BarChart, ListChecks } from "lucide-react";
+import { AIActionButton } from "./ai-action-button";
+import { BrainCircuit, Save, BarChart, ListChecks } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 interface QuizGeneratorFormProps {
@@ -52,15 +53,13 @@ export const QuizGeneratorForm: React.FC<QuizGeneratorFormProps> = ({
       className="lg:col-span-1 overflow-hidden"
       footer={
         <div className="flex flex-col gap-3 w-full">
-          <LoadingButton
-            className="w-full h-11 rounded-xl font-black uppercase tracking-widest text-[10px] gap-2 shadow-lg shadow-primary/20"
+          <AIActionButton
             onClick={handleGenerate}
             isLoading={isLoading}
             loadingText={t("aiHub.assistant.quizGen.generating")}
-            icon={<Sparkles className="h-4 w-4" />}
           >
             {t("aiHub.assistant.quizGen.generate")}
-          </LoadingButton>
+          </AIActionButton>
           {hasQuiz && classId && (
             <LoadingButton
               variant="outline"

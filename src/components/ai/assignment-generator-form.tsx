@@ -9,9 +9,9 @@ import {
   SelectValue,
 } from "../ui/select";
 import { Textarea } from "../ui/textarea";
-import { LoadingButton } from "../ui/loading-button";
 import { AICard } from "./ai-card";
-import { Sparkles, GraduationCap, MessageSquare, Target } from "lucide-react";
+import { AIActionButton } from "./ai-action-button";
+import { GraduationCap, MessageSquare, Target } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 interface AssignmentGeneratorFormProps {
@@ -53,15 +53,13 @@ export const AssignmentGeneratorForm: React.FC<
       description={t("aiHub.assistant.helper.desc")}
       className="overflow-hidden"
       footer={
-        <LoadingButton
-          className="w-full h-11 rounded-xl font-black uppercase tracking-widest text-[10px] gap-2 shadow-lg shadow-primary/20"
+        <AIActionButton
           onClick={handleGenerate}
           isLoading={isLoading}
           loadingText={t("aiHub.assistant.helper.generating")}
-          icon={<Sparkles className="h-4 w-4" />}
         >
           {t("aiHub.assistant.helper.generate")}
-        </LoadingButton>
+        </AIActionButton>
       }
     >
       <div className="space-y-6 text-start">

@@ -20,6 +20,8 @@ const arPath = path.join(__dirname, '../src/i18n/ar.json');
 const en = JSON.parse(fs.readFileSync(enPath, 'utf8'));
 const ar = JSON.parse(fs.readFileSync(arPath, 'utf8'));
 
+const isDryRun = process.argv.includes('--dry-run');
+
 let missingCount = 0;
 let extraCount = 0;
 let mismatchCount = 0;
@@ -86,15 +88,23 @@ function getSyncedData(source, target) {
 }
 
 console.log("--- 🔍 i18n Sync Report ---");
+if (isDryRun) {
+  console.log("🏃 Running in DRY-RUN mode. No files will be changed.\n");
+}
+
 reportMissingKeys(en, ar);
 reportExtraKeys(en, ar);
 
 console.log(`\nResults: ${missingCount} Missing | ${extraCount} Extra | ${mismatchCount} Mismatched`);
 
-// Auto-sync with cleanup
-const updatedAr = getSyncedData(en, ar);
-fs.writeFileSync(arPath, JSON.stringify(updatedAr, null, 2), 'utf8');
+if (!isDryRun) {
+  // Auto-sync with cleanup
+  const updatedAr = getSyncedData(en, ar);
+  fs.writeFileSync(arPath, JSON.stringify(updatedAr, null, 2), 'utf8');
 
-console.log("\n✅ ar.json has been synced.");
-console.log("- Missing keys were filled with English placeholders.");
-console.log("- Extra (stale) keys were removed to keep the translation clean.");
+  console.log("\n✅ ar.json has been synced.");
+  console.log("- Missing keys were filled with English placeholders.");
+  console.log("- Extra (stale) keys were removed to keep the translation clean.");
+} else {
+  console.log("\n👀 Dry run complete. No changes made.");
+}
