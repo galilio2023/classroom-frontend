@@ -37,8 +37,6 @@
   --ai-primary: hsl(270 95% 60%); /* Purple */
   --ai-primary-foreground: hsl(0 0% 100%);
   --ai-secondary: hsl(270 95% 95%); /* Light Purple */
-  --live-primary: hsl(0 84.2% 60.2%); /* Red */
-  --live-secondary: hsl(0 84.2% 95%); /* Light Red */
   --gold-primary: hsl(45 93% 47%); /* Gold */
   --gold-secondary: hsl(45 93% 95%); /* Light Gold */
 
@@ -245,6 +243,10 @@
   @apply border-black/[0.05] dark:border-white/[0.05];
 }
 
+[data-slot="table-row"].cursor-pointer:hover {
+  @apply bg-muted/30 transition-colors;
+}
+
 /* --- TABS REFINEMENT --- */
 [data-slot="tabs-list"] {
   @apply bg-muted/40 p-1 rounded-xl border border-black/[0.03] dark:border-white/[0.03] gap-1;
@@ -265,4 +267,30 @@
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* --- DIALOG REFINEMENT --- */
+[data-slot="dialog-content"] {
+  @apply rounded-2xl border-none shadow-2xl bg-background/95 backdrop-blur-xl animate-in zoom-in-95 duration-300;
+}
+
+[data-slot="dialog-overlay"] {
+  @apply bg-black/40 backdrop-blur-sm animate-in fade-in duration-300;
+}
+
+.bg-dot-pattern {
+  background-image: radial-gradient(circle, var(--border) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.prose {
+  @apply max-w-none;
+}
+
+.prose p {
+  @apply leading-relaxed mb-4 text-foreground/90;
+}
+
+.prose h1, .prose h2, .prose h3 {
+  @apply font-black tracking-tight text-foreground mt-6 mb-4;
 }
