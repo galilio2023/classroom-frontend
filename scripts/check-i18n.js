@@ -2,7 +2,15 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-// Get __dirname equivalent in ES modules
+/**
+ * i18n Sync Utility
+ * 
+ * Ensures ar.json stays in sync with en.json (the source of truth).
+ * - Adds missing keys to ar.json with English placeholders.
+ * - Removes extra keys from ar.json that no longer exist in en.json.
+ * - Reports type mismatches.
+ */
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -16,38 +24,60 @@ let missingCount = 0;
 let extraCount = 0;
 let mismatchCount = 0;
 
-function syncCheck(source, target, currentPath = '', mode = 'missing') {
+/**
+ * Reports keys present in source but missing in target.
+ */
+function reportMissingKeys(source, target, currentPath = '') {
   Object.keys(source).forEach(key => {
     const fullPath = currentPath ? `${currentPath}.${key}` : key;
     
     if (!(key in target)) {
-      if (mode === 'missing') {
-        console.log(`❌ Missing in Arabic: ${fullPath}`);
-        missingCount++;
-      } else {
-        console.log(`⚠️ Extra in Arabic (Not in English): ${fullPath}`);
-        extraCount++;
-      }
+      console.log(`❌ Missing in Arabic: ${fullPath}`);
+      missingCount++;
     } else if (typeof source[key] !== typeof target[key]) {
-      // Catch type mismatches (e.g., string vs object)
       console.log(`‼️ Type Mismatch at: ${fullPath} (${typeof source[key]} vs ${typeof target[key]})`);
       mismatchCount++;
-    } else if (typeof source[key] === 'object' && source[key] !== null) {
-      syncCheck(source[key], target[key], fullPath, mode);
+    } else if (typeof source[key] === 'object' && source[key] !== null && !Array.isArray(source[key])) {
+      reportMissingKeys(source[key], target[key], fullPath);
     }
   });
 }
 
+/**
+ * Reports keys present in target but missing in source (stale keys).
+ */
+function reportExtraKeys(source, target, currentPath = '') {
+  Object.keys(target).forEach(key => {
+    const fullPath = currentPath ? `${currentPath}.${key}` : key;
+    
+    if (!(key in source)) {
+      console.log(`⚠️ Extra in Arabic (Not in English): ${fullPath}`);
+      extraCount++;
+    } else if (typeof source[key] === 'object' && source[key] !== null && !Array.isArray(source[key])) {
+      reportExtraKeys(source[key], target[key], fullPath);
+    }
+  });
+}
+
+/**
+ * Performs a deep sync of target from source.
+ * This is an "Exclusive Sync": it only keeps keys present in the source.
+ */
 function getSyncedData(source, target) {
-  // Clone the target to avoid mutating the original until we are ready
-  const synced = Array.isArray(target) ? [...target] : { ...target };
+  // If source is not an object or is an array, we just return the source as the new value
+  // (unless we want to preserve the target value if it exists and types match)
+  if (typeof source !== 'object' || source === null || Array.isArray(source)) {
+    return (typeof target === typeof source) ? target : source;
+  }
+
+  const synced = {};
   
   Object.keys(source).forEach(key => {
     if (!(key in target)) {
-      // Key is missing, fill with English value as a placeholder
+      // Key is missing in target, use source value (English placeholder)
       synced[key] = source[key]; 
-    } else if (typeof source[key] === 'object' && source[key] !== null && !Array.isArray(source[key])) {
-      // Recursively sync nested objects
+    } else {
+      // Key exists in both, recurse if it's an object
       synced[key] = getSyncedData(source[key], target[key]);
     }
   });
@@ -56,12 +86,15 @@ function getSyncedData(source, target) {
 }
 
 console.log("--- 🔍 i18n Sync Report ---");
-syncCheck(en, ar, '', 'missing'); // Check what Arabic is missing
-syncCheck(ar, en, '', 'extra');   // Check what Arabic has that English doesn't
+reportMissingKeys(en, ar);
+reportExtraKeys(en, ar);
 
 console.log(`\nResults: ${missingCount} Missing | ${extraCount} Extra | ${mismatchCount} Mismatched`);
 
-// Auto-sync
+// Auto-sync with cleanup
 const updatedAr = getSyncedData(en, ar);
 fs.writeFileSync(arPath, JSON.stringify(updatedAr, null, 2), 'utf8');
-console.log("\n✅ ar.json has been synced. Missing keys filled with English placeholders.");
+
+console.log("\n✅ ar.json has been synced.");
+console.log("- Missing keys were filled with English placeholders.");
+console.log("- Extra (stale) keys were removed to keep the translation clean.");

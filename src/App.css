@@ -106,6 +106,26 @@
 
   --breakpoint-xs: 475px;
   --breakpoint-2xl: 1600px; /* Increased to 1600px for larger desktops */
+
+  --animate-in: animate-in 0.3s ease-out;
+  --animate-out: animate-out 0.3s ease-in;
+  --animate-fade-in: fade-in 0.3s ease-out;
+  --animate-zoom-in: zoom-in 0.3s ease-out;
+}
+
+@keyframes animate-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes zoom-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
 }
 
 @layer base {
@@ -271,11 +291,13 @@
 
 /* --- DIALOG REFINEMENT --- */
 [data-slot="dialog-content"] {
-  @apply rounded-2xl border-none shadow-2xl bg-background/95 backdrop-blur-xl animate-in zoom-in-95 duration-300;
+  @apply rounded-2xl border-none shadow-2xl bg-background/95 backdrop-blur-xl;
+  animation: zoom-in 0.3s ease-out;
 }
 
 [data-slot="dialog-overlay"] {
-  @apply bg-black/40 backdrop-blur-sm animate-in fade-in duration-300;
+  @apply bg-black/40 backdrop-blur-sm;
+  animation: fade-in 0.3s ease-out;
 }
 
 .bg-dot-pattern {
