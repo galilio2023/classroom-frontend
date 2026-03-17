@@ -26,6 +26,19 @@ import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 
+interface IAIActivityLog {
+  id: number;
+  userId: string;
+  action: string;
+  prompt: string;
+  response: string;
+  model: string;
+  tokensUsed: number | null;
+  metadata: any;
+  createdAt: string;
+  updatedAt: string;
+}
+
 const AIHistoryList = () => {
   const { t, i18n } = useTranslation();
   usePageTitle(t("resources.ai-history.label", { defaultValue: "AI Study History" }));
@@ -34,12 +47,12 @@ const AIHistoryList = () => {
   const isAr = i18n.language === "ar";
 
   // Refine v5 useList returns { query, result }
-  const { query, result } = useList({
+  const { query, result } = useList<IAIActivityLog>({
     resource: "ai-activity-logs",
     sorters: [{ field: "createdAt", order: "desc" }],
     filters: [
       {
-        field: "prompt", // Fixed: Was 'input'
+        field: "prompt",
         operator: "contains",
         value: searchQuery,
       },
@@ -101,25 +114,29 @@ const AIHistoryList = () => {
       {isLoading ? (
         <div className="flex flex-col items-center justify-center py-20 gap-4">
           <Loader2 className="h-10 w-10 animate-spin text-primary/40" />
-          <p className="text-muted-foreground font-medium animate-pulse">Loading your history...</p>
+          <p className="text-muted-foreground font-medium animate-pulse">{t("aiHub.history.loading", { defaultValue: "Loading your history..." })}</p>
         </div>
       ) : data?.length === 0 ? (
         <Card className="border-dashed border-2 border-border/40 bg-muted/10 rounded-[2.5rem] py-20 flex flex-col items-center justify-center text-center px-6">
           <div className="p-4 rounded-full bg-muted/20 text-muted-foreground mb-6">
             <History className="h-12 w-12 opacity-20" />
           </div>
-          <h3 className="text-2xl font-black tracking-tight mb-2">No history found</h3>
+          <h3 className="text-2xl font-black tracking-tight mb-2">
+            {t("aiHub.history.empty.title", { defaultValue: "No history found" })}
+          </h3>
           <p className="text-muted-foreground max-w-sm mb-8">
-            You haven't saved any AI study sessions yet. Start exploring the AI Study Lab!
+            {t("aiHub.history.empty.description", { defaultValue: "You haven't saved any AI study sessions yet. Start exploring the AI Study Lab!" })}
           </p>
           <Button asChild size="lg" className="rounded-2xl px-8 font-black uppercase tracking-widest text-[10px]">
-            <a href="/ai-study-lab">Go to Study Lab</a>
+            <a href="/ai-study-lab">
+                {t("aiHub.history.empty.cta", { defaultValue: "Go to Study Lab" })}
+            </a>
           </Button>
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {data?.map((log: any, index: number) => {
-            const toolInfo = getToolIcon(log.action); // Fixed: Was 'log.tool'
+          {data?.map((log, index) => {
+            const toolInfo = getToolIcon(log.action);
             return (
               <motion.div
                 key={log.id}
@@ -142,22 +159,22 @@ const AIHistoryList = () => {
                       </div>
                     </div>
                     <CardTitle className="text-lg font-black tracking-tight mt-4 line-clamp-2 min-h-[3.5rem]">
-                      {log.prompt} {/* Fixed: Was 'log.input' */}
+                      {log.prompt}
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-6 pt-0 space-y-6">
                     <div className="h-12 line-clamp-2 text-sm text-muted-foreground/80 leading-relaxed font-medium">
-                      {log.action === "flashcards" ? "Flashcard Deck generated" : log.response} {/* Fixed: Was tool/output */}
+                      {log.action === "flashcards" ? t("aiHub.studyLab.tools.flashcards.generated", { defaultValue: "Flashcard Deck generated" }) : log.response}
                     </div>
                     
                     <div className="flex items-center justify-between pt-4 border-t border-border/40">
                       <span className="text-[9px] font-black uppercase tracking-[0.2em] px-2 py-1 rounded-md bg-muted/50 text-muted-foreground">
-                        {log.action} {/* Fixed: Was 'log.tool' */}
+                        {log.action}
                       </span>
                       <div className="flex items-center gap-2">
-                         <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-primary/10 hover:text-primary transition-all opacity-0 group-hover:opacity-100">
+                         <div className="h-8 w-8 rounded-full flex items-center justify-center hover:bg-primary/10 hover:text-primary transition-all opacity-0 group-hover:opacity-100">
                             <ExternalLink className="h-4 w-4" />
-                         </Button>
+                         </div>
                       </div>
                     </div>
                   </CardContent>
