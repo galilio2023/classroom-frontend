@@ -134,10 +134,6 @@
 }
 
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-
   body {
     @apply bg-background text-foreground antialiased selection:bg-primary/20 transition-colors duration-500;
     font-feature-settings: "cv02", "cv03", "cv04", "ss01";
