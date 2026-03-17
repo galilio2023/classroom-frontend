@@ -5,7 +5,8 @@ import { Slider } from "../ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { LoadingButton } from "../ui/loading-button";
 import { AICard } from "./ai-card";
-import { BrainCircuit, Sparkles, Save, BarChart, ListChecks } from "lucide-react";
+import { AIActionButton } from "./ai-action-button";
+import { BrainCircuit, Save, BarChart, ListChecks } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 interface QuizGeneratorFormProps {
@@ -49,18 +50,16 @@ export const QuizGeneratorForm: React.FC<QuizGeneratorFormProps> = ({
       title={t("aiHub.assistant.quizGen.title")}
       description={t("aiHub.assistant.quizGen.desc")}
       icon={BrainCircuit}
-      className="lg:col-span-1"
+      className="lg:col-span-1 overflow-hidden"
       footer={
         <div className="flex flex-col gap-3 w-full">
-          <LoadingButton
-            className="w-full h-11 rounded-xl font-black uppercase tracking-widest text-[10px] gap-2 shadow-lg shadow-primary/20"
+          <AIActionButton
             onClick={handleGenerate}
             isLoading={isLoading}
             loadingText={t("aiHub.assistant.quizGen.generating")}
-            icon={<Sparkles className="h-4 w-4" />}
           >
             {t("aiHub.assistant.quizGen.generate")}
-          </LoadingButton>
+          </AIActionButton>
           {hasQuiz && classId && (
             <LoadingButton
               variant="outline"
@@ -88,14 +87,14 @@ export const QuizGeneratorForm: React.FC<QuizGeneratorFormProps> = ({
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-6">
-            <div className="space-y-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-2 min-w-0">
                 <Label htmlFor="difficulty" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">{t("aiHub.assistant.quizGen.difficulty")}</Label>
                 <Select value={difficulty} onValueChange={setDifficulty}>
-                    <SelectTrigger id="difficulty" className="h-11 rounded-xl bg-muted/30 border-none focus-visible:ring-primary font-bold">
-                        <div className="flex items-center gap-2">
-                            <BarChart className="h-4 w-4 text-primary" />
-                            <SelectValue placeholder={t("aiHub.assistant.quizGen.difficulty")} />
+                    <SelectTrigger id="difficulty" className="h-11 w-full rounded-xl bg-muted/30 border-none focus-visible:ring-primary font-bold">
+                        <div className="flex items-center gap-2 truncate min-w-0">
+                            <BarChart className="h-4 w-4 text-primary shrink-0" />
+                            <span className="truncate block"><SelectValue placeholder={t("aiHub.assistant.quizGen.difficulty")} /></span>
                         </div>
                     </SelectTrigger>
                     <SelectContent>
@@ -105,13 +104,13 @@ export const QuizGeneratorForm: React.FC<QuizGeneratorFormProps> = ({
                     </SelectContent>
                 </Select>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-2 min-w-0">
                 <Label htmlFor="type" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">{t("aiHub.assistant.quizGen.format")}</Label>
                 <Select value={type} onValueChange={setType}>
-                    <SelectTrigger id="type" className="h-11 rounded-xl bg-muted/30 border-none focus-visible:ring-primary font-bold">
-                        <div className="flex items-center gap-2">
-                            <ListChecks className="h-4 w-4 text-primary" />
-                            <SelectValue placeholder={t("aiHub.assistant.quizGen.format")} />
+                    <SelectTrigger id="type" className="h-11 w-full rounded-xl bg-muted/30 border-none focus-visible:ring-primary font-bold">
+                        <div className="flex items-center gap-2 truncate min-w-0">
+                            <ListChecks className="h-4 w-4 text-primary shrink-0" />
+                            <span className="truncate block"><SelectValue placeholder={t("aiHub.assistant.quizGen.format")} /></span>
                         </div>
                     </SelectTrigger>
                     <SelectContent>

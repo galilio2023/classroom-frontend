@@ -24,7 +24,9 @@ import {
   BarChart3,
   Loader2,
   AlertCircle,
-  LayoutDashboard
+  LayoutDashboard,
+  Sparkles,
+  ArrowRight,
 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -38,6 +40,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import usePageTitle from "@/hooks/use-page-title";
+import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
+import { cn } from "@/lib/utils";
 
 const channelSchema = z.object({
   headline: z.string().min(5, "Headline must be at least 5 characters"),
@@ -51,7 +55,8 @@ const channelSchema = z.object({
 type ChannelFormValues = z.infer<typeof channelSchema>;
 
 const TeacherChannelPage = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isAr = i18n.language === 'ar';
   usePageTitle(t("teacherChannel.title"));
   const { data: identity } = useGetIdentity<User>();
   const invalidate = useInvalidate();
@@ -68,7 +73,6 @@ const TeacherChannelPage = () => {
 
   const channelData = query.data;
   const isLoading = query.isLoading;
-  const isError = query.isError;
 
   const { mutate: upsertChannel, mutation: upsertMutation } = useCustomMutation();
 
@@ -120,163 +124,190 @@ const TeacherChannelPage = () => {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto py-10 space-y-8">
-        <Skeleton className="h-12 w-64" />
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <Skeleton className="h-[600px] lg:col-span-2" />
-          <Skeleton className="h-[400px]" />
+      <div className="flex flex-col items-center justify-center h-[85vh] gap-8">
+        <motion.div 
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="relative"
+        >
+          <div className="absolute inset-[-20px] rounded-full bg-primary/5 animate-ping duration-[3000ms]" />
+          <Loader2 className="h-20 w-20 animate-spin text-primary/10 stroke-[1]" />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <Tv className="h-8 w-8 text-primary/30" />
+          </div>
+        </motion.div>
+        <div className="text-center space-y-2">
+            <h2 className="text-sm font-black uppercase tracking-[0.3em] text-primary/60 animate-pulse">
+                {t("profile.loading")}
+            </h2>
+            <p className="text-xs font-medium text-muted-foreground/60 italic">Preparing your broadcasting studio...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto py-10 space-y-10 text-start">
-      <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="space-y-1">
-          <h1 className="text-4xl font-black tracking-tight flex items-center gap-3">
-            <div className="p-3 bg-primary/10 rounded-2xl">
-                <Tv className="h-8 w-8 text-primary" />
+    <div className="space-y-10 md:space-y-16 pb-20 max-w-7xl mx-auto">
+      {/* Header Section */}
+      <motion.header 
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex flex-col md:flex-row md:items-end justify-between gap-8 px-2"
+      >
+        <div className="space-y-4 md:space-y-6 flex-1 text-start">
+          <Breadcrumb />
+          <div className="flex items-center gap-4">
+            <div className="p-3 rounded-2xl bg-primary/10 text-primary border border-primary/5 shadow-sm">
+                <Tv className="h-6 w-6 md:h-8 md:w-8" />
             </div>
-            {t("teacherChannel.title")}
-          </h1>
-          <p className="text-muted-foreground font-medium">
-            {t("teacherChannel.description")}
-          </p>
+            <div>
+                <h1 className="page-title mb-0">{t("teacherChannel.title")}</h1>
+                <p className="text-muted-foreground font-medium max-w-xl text-balance">
+                    {t("teacherChannel.description")}
+                </p>
+            </div>
+          </div>
         </div>
         
         {channelData?.data && (
-          <div className="flex items-center gap-4 bg-card/50 p-4 rounded-2xl border border-primary/5 shadow-sm">
-            <div className="text-end">
-              <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+          <div className="flex items-center gap-6 bg-card/50 backdrop-blur-3xl p-6 rounded-[2rem] border border-border/40 shadow-xl shadow-black/5 min-w-[280px]">
+            <div className="flex-1 text-center">
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 mb-1.5">
                 {t("teacherChannel.labels.views")}
               </p>
-              <p className="text-xl font-black">{channelData.data.totalViews.toLocaleString()}</p>
+              <p className="text-2xl font-black tracking-tighter">{channelData.data.totalViews.toLocaleString()}</p>
             </div>
-            <div className="h-10 w-px bg-primary/10" />
-            <div className="text-end">
-              <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+            <div className="h-12 w-px bg-border/40" />
+            <div className="flex-1 text-center">
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 mb-1.5">
                 {t("teacherChannel.labels.conversion")}
               </p>
-              <p className="text-xl font-black text-primary">
+              <p className="text-2xl font-black text-primary tracking-tighter">
                 {(channelData.data.conversionRate * 100).toFixed(1)}%
               </p>
             </div>
           </div>
         )}
-      </header>
+      </motion.header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-16 items-start">
         {/* Configuration Form */}
-        <div className="lg:col-span-2 space-y-8">
-          <Card className="rounded-[2.5rem] border-primary/5 shadow-xl bg-card/50 backdrop-blur-sm overflow-hidden">
-            <CardHeader className="bg-primary/5 border-b border-primary/5 p-8">
+        <div className="lg:col-span-7 space-y-8 md:space-y-12">
+          <Card className="rounded-[2.5rem] md:rounded-[3rem] border-border/40 shadow-2xl bg-card/50 backdrop-blur-3xl overflow-hidden">
+            <CardHeader className="bg-primary/5 border-b border-border/40 p-8 md:p-10 text-start">
               <div className="flex items-center gap-4">
-                <div className="p-3 rounded-2xl bg-primary/10 text-primary">
+                <div className="p-3 rounded-2xl bg-primary/10 text-primary border border-primary/5 shadow-sm">
                   <LayoutDashboard className="h-6 w-6" />
                 </div>
                 <div className="space-y-1">
-                  <CardTitle className="text-2xl font-black tracking-tight">
+                  <CardTitle className="text-xl md:text-2xl font-black tracking-tight">
                     {t("teacherChannel.setup")}
                   </CardTitle>
-                  <CardDescription className="font-medium">
+                  <CardDescription className="font-medium text-sm md:text-base">
                     {t("teacherChannel.setupDesc")}
                   </CardDescription>
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="p-8 space-y-8">
-              <form onSubmit={handleSubmit(onFinish)} className="space-y-8">
-                <div className="space-y-3">
-                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+            <CardContent className="p-8 md:p-10">
+              <form onSubmit={handleSubmit(onFinish)} className="space-y-10">
+                <div className="space-y-4 text-start">
+                  <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 ml-2">
                     {t("teacherChannel.labels.headline")}
                   </Label>
                   <Input 
                     {...register("headline")}
                     placeholder={t("teacherChannel.placeholders.headline")}
-                    className="h-14 rounded-2xl bg-muted/30 border-none focus-visible:ring-primary/30 text-lg font-bold px-6"
+                    className="h-16 rounded-3xl bg-muted/30 border-none shadow-inner px-8 text-lg md:text-xl font-black placeholder:text-muted-foreground/30 focus-visible:ring-primary/20"
                   />
                   {errors.headline && (
-                    <p className="text-xs text-destructive font-bold flex items-center gap-1 ml-1">
-                      <AlertCircle className="h-3 w-3" />
+                    <p className="text-xs text-destructive font-black flex items-center gap-2 ml-2">
+                      <AlertCircle className="h-4 w-4" />
                       {errors.headline.message}
                     </p>
                   )}
                 </div>
 
-                <div className="space-y-3">
-                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                <div className="space-y-4 text-start">
+                  <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 ml-2">
                     {t("teacherChannel.labels.bio")}
                   </Label>
                   <Textarea 
                     {...register("bio")}
                     placeholder={t("teacherChannel.placeholders.bio")}
-                    className="min-h-40 rounded-3xl bg-muted/30 border-none focus-visible:ring-primary/30 text-base font-medium p-6 resize-none"
+                    className="min-h-48 md:min-h-60 rounded-[2rem] md:rounded-[2.5rem] bg-muted/30 border-none shadow-inner text-base md:text-lg font-medium p-8 md:p-10 resize-none focus-visible:ring-primary/20 leading-relaxed italic"
                   />
                   {errors.bio && (
-                    <p className="text-xs text-destructive font-bold flex items-center gap-1 ml-1">
-                      <AlertCircle className="h-3 w-3" />
+                    <p className="text-xs text-destructive font-black flex items-center gap-2 ml-2">
+                      <AlertCircle className="h-4 w-4" />
                       {errors.bio.message}
                     </p>
                   )}
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <div className="space-y-3">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 md:gap-10">
+                  <div className="space-y-4 text-start">
+                    <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 ml-2">
                       {t("teacherChannel.labels.trailer")}
                     </Label>
-                    <FileUpload 
-                      folder="trailers"
-                      accept="video/mp4,video/quicktime"
-                      maxSize={100 * 1024 * 1024} // 100MB
-                      label={t("upload.video.label")}
-                      onUploadSuccess={(url, publicId) => {
-                        setValue("trailerVideoUrl", url, { shouldDirty: true });
-                        setValue("trailerVideoCldPubId", publicId, { shouldDirty: true });
-                      }}
-                    />
+                    <div className="p-1 rounded-[2rem] bg-muted/30 shadow-inner">
+                        <FileUpload 
+                        folder="trailers"
+                        accept="video/mp4,video/quicktime"
+                        maxSize={100 * 1024 * 1024}
+                        label={t("upload.video.label" as any)}
+                        onUploadSuccess={(url, publicId) => {
+                            setValue("trailerVideoUrl", url, { shouldDirty: true });
+                            setValue("trailerVideoCldPubId", publicId, { shouldDirty: true });
+                        }}
+                        />
+                    </div>
                     {watchedValues.trailerVideoUrl && (
-                      <div className="flex items-center gap-2 mt-2">
-                        <Badge variant="outline" className="bg-green-500/10 text-green-600 border-none rounded-lg px-3 py-1 font-black uppercase tracking-tighter text-[9px]">
-                          Video Linked ✅
+                      <div className="flex items-center gap-2 mt-2 px-2">
+                        <Badge variant="success" className="rounded-full px-3 py-1 font-black uppercase tracking-widest text-[9px] shadow-sm">
+                          {t("status.active")}
                         </Badge>
+                        <span className="text-[10px] font-bold text-muted-foreground">Trailer Linked</span>
                       </div>
                     )}
                   </div>
 
-                  <div className="space-y-3">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                  <div className="space-y-4 text-start">
+                    <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 ml-2">
                       {t("teacherChannel.labels.thumbnail")}
                     </Label>
-                    <FileUpload 
-                      folder="thumbnails"
-                      accept="image/*"
-                      onUploadSuccess={(url, publicId) => {
-                        setValue("thumbnailUrl", url, { shouldDirty: true });
-                        setValue("thumbnailCldPubId", publicId, { shouldDirty: true });
-                      }}
-                    />
+                    <div className="p-1 rounded-[2rem] bg-muted/30 shadow-inner">
+                        <FileUpload 
+                        folder="thumbnails"
+                        accept="image/*"
+                        onUploadSuccess={(url, publicId) => {
+                            setValue("thumbnailUrl", url, { shouldDirty: true });
+                            setValue("thumbnailCldPubId", publicId, { shouldDirty: true });
+                        }}
+                        />
+                    </div>
                     {watchedValues.thumbnailUrl && (
-                      <div className="flex items-center gap-2 mt-2">
-                        <Badge variant="outline" className="bg-green-500/10 text-green-600 border-none rounded-lg px-3 py-1 font-black uppercase tracking-tighter text-[9px]">
-                          Thumbnail Linked ✅
+                      <div className="flex items-center gap-2 mt-2 px-2">
+                        <Badge variant="success" className="rounded-full px-3 py-1 font-black uppercase tracking-widest text-[9px] shadow-sm">
+                          {t("status.active")}
                         </Badge>
+                        <span className="text-[10px] font-bold text-muted-foreground">Thumbnail Linked</span>
                       </div>
                     )}
                   </div>
                 </div>
 
-                <div className="pt-4 border-t border-primary/5">
+                <div className="pt-8 border-t border-border/40">
                   <Button 
                     type="submit" 
+                    size="lg"
                     disabled={upsertMutation.isPending || (!isDirty && !!channelData?.data)}
-                    className="h-16 w-full md:w-auto px-12 rounded-2xl font-black uppercase tracking-widest shadow-xl shadow-primary/20 transition-all hover:scale-[1.02]"
+                    className="h-16 w-full md:w-auto px-12 rounded-[1.25rem] font-black uppercase tracking-widest text-xs md:text-sm shadow-2xl shadow-primary/30 transition-all hover:scale-[1.02] active:scale-95 group"
                   >
                     {upsertMutation.isPending ? (
-                      <Loader2 className="h-5 w-5 animate-spin mr-2" />
+                      <Loader2 className="h-5 w-5 animate-spin mr-3" />
                     ) : (
-                      <Save className="h-5 w-5 mr-2" />
+                      <Save className="h-5 w-5 mr-3 group-hover:scale-110 transition-transform" />
                     )}
                     {channelData?.data ? t("buttons.saveChanges") : t("buttons.createChannel")}
                   </Button>
@@ -286,17 +317,19 @@ const TeacherChannelPage = () => {
           </Card>
         </div>
 
-        {/* Live Preview */}
-        <div className="space-y-8">
+        {/* Live Preview Sidebar */}
+        <div className="lg:col-span-5 space-y-8 md:space-y-12">
           <div className="sticky top-24">
-            <div className="flex items-center justify-between mb-4 px-2">
-              <div className="flex items-center gap-2">
-                <Eye className="h-4 w-4 text-primary" />
-                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+            <div className="flex items-center justify-between mb-6 px-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-xl bg-primary/10 text-primary border border-primary/5 shadow-sm">
+                    <Eye className="h-4 w-4" />
+                </div>
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">
                   {t("teacherChannel.labels.preview")}
                 </span>
               </div>
-              <Badge variant="secondary" className="rounded-md font-bold text-[9px] uppercase tracking-widest bg-red-500/10 text-red-600">
+              <Badge variant="destructive" className="rounded-full px-4 py-1.5 font-black text-[9px] uppercase tracking-[0.2em] shadow-lg shadow-destructive/20 animate-pulse border-none">
                 {t("teacherChannel.labels.livePreview")}
               </Badge>
             </div>
@@ -305,9 +338,10 @@ const TeacherChannelPage = () => {
               initial={false}
               onMouseEnter={() => setIsPreviewHovered(true)}
               onMouseLeave={() => setIsPreviewHovered(false)}
-              className="relative aspect-[4/5] rounded-[2.5rem] overflow-hidden border border-primary/10 shadow-2xl group bg-black"
+              onTouchStart={() => setIsPreviewHovered(true)}
+              className="relative aspect-[4/5] rounded-[3rem] overflow-hidden border border-border/40 shadow-[0_32px_64px_-12px_rgba(0,0,0,0.2)] dark:shadow-[0_32px_64px_-12px_rgba(0,0,0,0.6)] group bg-black"
             >
-              <AnimatePresence>
+              <AnimatePresence mode="wait">
                 {isPreviewHovered && watchedValues.trailerVideoUrl ? (
                   <motion.video
                     key="trailer"
@@ -318,6 +352,7 @@ const TeacherChannelPage = () => {
                     autoPlay
                     muted
                     loop
+                    playsInline
                     className="absolute inset-0 w-full h-full object-cover"
                   />
                 ) : (
@@ -327,49 +362,58 @@ const TeacherChannelPage = () => {
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     src={watchedValues.thumbnailUrl || identity?.image || "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&q=80&w=1000"}
-                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 grayscale-[0.2] group-hover:grayscale-0"
+                    alt="Preview"
                   />
                 )}
               </AnimatePresence>
 
-              {/* Overlay Gradient */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
+              {/* Overlay Polish */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-80 group-hover:opacity-100 transition-opacity duration-500" />
 
               {/* Content Overlay */}
-              <div className="absolute inset-x-0 bottom-0 p-8 space-y-4">
-                <div className="space-y-2">
-                  <h3 className="text-2xl font-black text-white tracking-tight leading-none text-start">
+              <div className="absolute inset-x-0 bottom-0 p-8 md:p-12 space-y-6">
+                <div className="space-y-3">
+                  <h3 className="text-3xl md:text-4xl font-black text-white tracking-tighter leading-tight text-start">
                     {watchedValues.headline || identity?.name || "Teacher Name"}
                   </h3>
-                  <div className="flex items-center gap-3">
-                    <Badge variant="outline" className="bg-primary/20 text-white border-none rounded-lg text-[9px] font-black uppercase tracking-widest px-2 py-0.5 backdrop-blur-md">
+                  <div className="flex flex-wrap items-center gap-4">
+                    <Badge variant="ai" className="bg-primary text-white border-none rounded-full px-4 py-1 font-black uppercase tracking-widest text-[9px] shadow-lg shadow-primary/20">
                       {t("roles.teacher")}
                     </Badge>
-                    <div className="flex items-center gap-1.5 text-white/80 text-[10px] font-bold">
-                      <BarChart3 className="h-3 w-3" />
+                    <div className="flex items-center gap-2 text-white/70 text-[10px] font-black uppercase tracking-widest">
+                      <BarChart3 className="h-4 w-4" />
                       {channelData?.data?.totalViews.toLocaleString() || 0} {t("teacherChannel.labels.views")}
                     </div>
                   </div>
                 </div>
 
-                <p className="text-sm font-medium text-white/90 line-clamp-3 leading-relaxed text-start">
-                  {watchedValues.bio || "Your channel biography will appear here. Students use this to decide if they want to join your classes."}
+                <p className="text-base md:text-lg font-medium text-white/80 line-clamp-3 leading-relaxed text-start italic selection:bg-primary/30">
+                  "{watchedValues.bio || "Your channel biography will appear here. Students use this to decide if they want to join your classes."}"
                 </p>
 
-                <Button className="w-full h-14 rounded-2xl font-black uppercase tracking-widest bg-white text-black hover:bg-white/90 shadow-xl shadow-black/20 text-xs">
+                <Button className="w-full h-16 rounded-[1.5rem] font-black uppercase tracking-widest bg-white text-black hover:bg-primary hover:text-white transition-all duration-500 shadow-2xl shadow-black/40 text-[10px] gap-3">
                   {t("buttons.viewClasses")}
+                  <ArrowRight className="h-4 w-4" />
                 </Button>
               </div>
             </motion.div>
 
-            <div className="mt-6 p-6 rounded-3xl bg-primary/5 border border-primary/5 backdrop-blur-sm">
-              <div className="flex gap-3 items-start">
-                <AlertCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                <p className="text-xs font-medium text-primary/80 leading-relaxed text-start">
-                  Hover over the card to see how your trailer video will auto-play for students in the discovery catalog. A great trailer can boost enrollment by 40%.
+            <motion.div 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+                className="mt-8 p-8 rounded-[2.5rem] bg-indigo-500/[0.03] border-2 border-dashed border-indigo-500/20 backdrop-blur-sm text-start"
+            >
+              <div className="flex gap-5 items-start">
+                <div className="p-2.5 rounded-xl bg-indigo-500/10 text-indigo-600 shadow-sm">
+                    <Sparkles className="h-5 w-5" />
+                </div>
+                <p className="text-sm md:text-base font-medium text-muted-foreground/80 leading-relaxed">
+                  Hover or tap the card to see how your trailer auto-plays. A high-quality trailer can boost classroom discovery by <span className="text-primary font-black">40%</span>.
                 </p>
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
       </div>

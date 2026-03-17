@@ -11,7 +11,8 @@ import {
   Loader2,
   Clock,
   MessageSquare,
-  Briefcase
+  Briefcase,
+  Layers
 } from "lucide-react";
 import { useMemo, useState, useRef } from "react";
 import { useList, useNavigation, useGetIdentity, useCustomMutation, useInvalidate } from "@refinedev/core";
@@ -28,11 +29,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import usePageTitle from "@/hooks/use-page-title";
-import { useVirtualizer } from "@tanstack/react-virtual";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/empty-state";
 import { cn } from "@/lib/utils";
@@ -49,7 +49,7 @@ import { useTranslation } from "react-i18next";
 dayjs.extend(relativeTime);
 
 const TeacherApplicationsList = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   usePageTitle(t("teacherApps.title"));
   const { data: identity } = useGetIdentity<User>();
   const isAdmin = identity?.role === UserRole.ADMIN;
@@ -72,7 +72,7 @@ const TeacherApplicationsList = () => {
 
   const { query: { data: appsData, isLoading } } = useList<TeacherApplication>({
     resource: "teacher-applications",
-    pagination: { pageSize: 1000, mode: "server" },
+    pagination: { pageSize: 50, mode: "server" }, // Reduced page size for global scroll
     filters,
     sorters: [{ field: "id", order: "desc" }],
   });
@@ -94,151 +94,177 @@ const TeacherApplicationsList = () => {
     });
   };
 
-  const parentRef = useRef<HTMLDivElement>(null);
-
-  const rowVirtualizer = useVirtualizer({
-    count: applications.length,
-    getScrollElement: () => parentRef.current,
-    estimateSize: () => 120,
-    overscan: 5,
-  });
-
   return (
-    <div className="space-y-10 pb-20">
-      <ListView>
-        <div className="space-y-10">
-          <motion.div 
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="space-y-4"
-          >
+    <ListView>
+      <div className="space-y-8 md:space-y-12">
+        {/* Header Section */}
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6"
+        >
+          <div className="space-y-4 flex-1">
             <Breadcrumb />
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-              <div>
-                <h1 className="text-4xl font-black tracking-tight">{t("teacherApps.title")}</h1>
-                <p className="text-muted-foreground font-medium mt-1">{t("teacherApps.description")}</p>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Filters */}
-          <Card className="p-4 border-primary/5 bg-muted/30 rounded-4xl backdrop-blur-sm">
-            <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2 bg-background px-4 rounded-2xl shadow-sm border border-primary/5">
-                  <Filter className="h-4 w-4 text-muted-foreground" />
-                  <Select value={statusFilter} onValueChange={setStatusFilter}>
-                    <SelectTrigger className="w-40 border-none h-10 focus:ring-0 shadow-none font-black text-[10px] uppercase tracking-widest">
-                      <SelectValue placeholder={t("enrollments.allStatus")} />
-                    </SelectTrigger>
-                    <SelectContent className="rounded-2xl border-none shadow-2xl">
-                      <SelectItem value="all" className="rounded-xl font-bold">{t("enrollments.allStatus")}</SelectItem>
-                      <SelectItem value="pending" className="rounded-xl font-bold">{t("status.upcoming")}</SelectItem>
-                      <SelectItem value="approved" className="rounded-xl font-bold">{t("status.active")}</SelectItem>
-                      <SelectItem value="rejected" className="rounded-xl font-bold">{t("buttons.reject")}</SelectItem>
-                    </SelectContent>
-                  </Select>
+            <div className="space-y-1">
+              <h1 className="page-title mb-0 flex items-center gap-3">
+                <div className="p-3 rounded-2xl bg-primary/10 text-primary border border-primary/5 shadow-sm">
+                  <Briefcase className="h-6 w-6 md:h-8 md:w-8" />
                 </div>
+                {t("teacherApps.title")}
+              </h1>
+              <p className="text-muted-foreground font-medium max-w-2xl text-balance">
+                {t("teacherApps.description")}
+              </p>
             </div>
-          </Card>
+          </div>
+        </motion.div>
 
-          {/* List Container */}
-          <div 
-            ref={parentRef} 
-            className="h-150 overflow-auto pr-2 custom-scrollbar rounded-[2.5rem] border border-primary/5 bg-card/30 backdrop-blur-sm relative"
-          >
-            {isLoading ? (
-              <div className="p-8 space-y-6">
-                {Array.from({ length: 4 }).map((_, i) => (
-                  <Skeleton key={i} className="h-24 w-full rounded-3xl" />
-                ))}
-              </div>
-            ) : !hasData ? (
-              <div className="h-full w-full flex items-center justify-center p-12">
-                <EmptyState
-                  icon={Briefcase}
-                  title={t("teacherApps.empty.title")}
-                  description={t("teacherApps.empty.desc")}
-                  className="border-none bg-transparent min-h-0"
-                />
-              </div>
-            ) : (
-              <div style={{ height: `${rowVirtualizer.getTotalSize()}px`, width: '100%', position: 'relative' }}>
-                {rowVirtualizer.getVirtualItems().map((virtualItem) => {
-                  const app = applications[virtualItem.index];
+        {/* Filters - Sticky */}
+        <Card className="p-2 border-border/40 bg-muted/20 rounded-[1.75rem] md:rounded-3xl backdrop-blur-md sticky top-20 z-30 shadow-sm">
+          <div className="flex items-center gap-2 bg-background/50 px-3 py-1 rounded-2xl border border-border/40">
+            <Filter className="h-3.5 w-3.5 text-muted-foreground/60" />
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-[160px] border-none h-10 focus:ring-0 shadow-none font-bold text-[10px] uppercase tracking-wider bg-transparent">
+                <SelectValue placeholder={t("enrollments.allStatus")} />
+              </SelectTrigger>
+              <SelectContent className="rounded-2xl">
+                <SelectItem value="all" className="font-bold">{t("enrollments.allStatus")}</SelectItem>
+                <SelectItem value="pending" className="font-bold">{t("status.upcoming")}</SelectItem>
+                <SelectItem value="approved" className="font-bold">{t("status.active")}</SelectItem>
+                <SelectItem value="rejected" className="font-bold">{t("buttons.reject")}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </Card>
+
+        {/* List Container */}
+        <div className="relative min-h-[400px]">
+          {isLoading ? (
+            <div className="space-y-4">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Card key={i} className="p-6 flex flex-col md:flex-row items-center gap-6 border-border/20 bg-background/50">
+                  <Skeleton className="h-20 w-20 rounded-3xl shrink-0" />
+                  <div className="flex-1 space-y-4 w-full">
+                    <Skeleton className="h-8 w-[350px] max-w-full" />
+                    <div className="flex gap-4">
+                       <Skeleton className="h-4 w-24" />
+                       <Skeleton className="h-4 w-24" />
+                    </div>
+                  </div>
+                  <Skeleton className="h-12 w-36 rounded-2xl" />
+                </Card>
+              ))}
+            </div>
+          ) : !hasData ? (
+            <div className="flex items-center justify-center p-16 bg-card/20 rounded-[2.5rem] border border-dashed border-border/40">
+              <EmptyState
+                icon={Layers}
+                title={t("teacherApps.empty.title")}
+                description={t("teacherApps.empty.desc")}
+                className="border-none bg-transparent min-h-0"
+              />
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <AnimatePresence mode="popLayout">
+                {applications.map((app, index) => {
                   const appDate = dayjs(app.createdAt);
                   
                   return (
-                    <div
-                      key={virtualItem.key}
-                      style={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        width: '100%',
-                        height: `${virtualItem.size}px`,
-                        transform: `translateY(${virtualItem.start}px)`,
-                      }}
-                      className="px-8"
+                    <motion.div
+                      key={app.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      transition={{ delay: index * 0.05 }}
+                      className={cn(
+                        "group relative flex flex-col md:flex-row items-center p-5 md:p-6 rounded-[2rem] bg-card/50 backdrop-blur-sm border border-border/40 hover:border-primary/30 hover:bg-card/80 transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-primary/5"
+                      )}
                     >
-                      <motion.div
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        className="flex flex-col md:flex-row items-center h-full border-b border-primary/5 hover:bg-primary/[0.02] transition-all group"
-                      >
-                        <div className="flex items-center gap-6 shrink-0">
-                          <Avatar className="h-16 w-16 rounded-2xl border-4 border-background shadow-lg">
-                            <AvatarImage src={app.teacher?.image ?? undefined} className="object-cover" />
-                            <AvatarFallback className="bg-primary/5 text-primary font-black text-xl">
-                              {app.teacher?.name?.[0]}
-                            </AvatarFallback>
-                          </Avatar>
-                        </div>
+                      {/* Status Color Accent */}
+                      <div 
+                        className={cn(
+                          "absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-12 rounded-r-full transition-all group-hover:h-20",
+                          app.status === 'approved' ? 'bg-green-500' : app.status === 'pending' ? 'bg-amber-500' : 'bg-destructive'
+                        )}
+                      />
 
-                        <div className="flex-1 md:ml-8 text-center md:text-left min-w-0 w-full">
-                          <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
-                            <h3 className="text-xl font-black tracking-tight truncate">
-                              {app.teacher?.name}
-                            </h3>
-                            <div className="flex items-center justify-center md:justify-start gap-2">
-                              <Badge 
-                                  variant={app.status === 'approved' ? 'default' : app.status === 'pending' ? 'secondary' : 'destructive'}
-                                  className="text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-lg border-none"
-                              >
-                                  {app.status}
-                              </Badge>
-                              <Badge variant="outline" className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md border-primary/10">
-                                  {t("teacherApps.labels.applyingFor", { name: app.class?.name })}
-                              </Badge>
-                            </div>
-                          </div>
-                          
-                          <div className="flex flex-wrap items-center justify-center md:justify-start gap-x-6 gap-y-2 mt-3">
-                            <div className="flex items-center gap-2 text-muted-foreground">
-                              <Mail className="h-3.5 w-3.5 text-primary" />
-                              <span className="text-xs font-bold">{app.teacher?.email}</span>
-                            </div>
-                            <div className="flex items-center gap-2 text-muted-foreground">
-                              <Clock className="h-3.5 w-3.5 text-primary" />
-                              <span className="text-xs font-bold uppercase tracking-tight">
-                                  {t("teacherApps.labels.applied", { time: appDate.fromNow() })}
-                              </span>
-                            </div>
-                            {app.message && (
-                                <div className="flex items-center gap-2 text-primary/60 italic">
-                                    <MessageSquare className="h-3.5 w-3.5" />
-                                    <span className="text-xs font-medium truncate max-w-xs">"{app.message}"</span>
-                                </div>
-                            )}
+                      {/* Avatar */}
+                      <div className="relative shrink-0 mb-4 md:mb-0">
+                        <Avatar className="h-20 w-20 rounded-[1.5rem] border-4 border-background shadow-lg group-hover:scale-105 transition-transform duration-500">
+                          <AvatarImage src={app.teacher?.image ?? undefined} className="object-cover" />
+                          <AvatarFallback className="bg-primary/10 text-primary font-black text-xl">
+                            {app.teacher?.name?.[0]}
+                          </AvatarFallback>
+                        </Avatar>
+                      </div>
+
+                      {/* Info */}
+                      <div className={cn("flex-1 min-w-0 w-full", i18n.language === 'ar' ? "md:mr-8 md:text-right" : "md:ml-8 md:text-left")}>
+                        <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 mb-2">
+                          <h3 className="text-xl md:text-2xl font-black tracking-tight truncate group-hover:text-primary transition-colors leading-tight">
+                            {app.teacher?.name}
+                          </h3>
+                          <div className="flex items-center justify-center md:justify-start gap-2">
+                            <Badge 
+                                variant={app.status === 'approved' ? 'default' : app.status === 'pending' ? 'secondary' : 'destructive'}
+                                className={cn(
+                                    "text-[9px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full shadow-sm",
+                                    app.status === 'pending' && "bg-amber-500/10 text-amber-600 border border-amber-500/20"
+                                )}
+                            >
+                                {app.status}
+                            </Badge>
+                            <Badge variant="ai" className="text-[9px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full shadow-sm">
+                                {t("teacherApps.labels.applyingFor", { name: app.class?.name })}
+                            </Badge>
                           </div>
                         </div>
+                        
+                        <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 md:gap-6 mt-4">
+                          <div className="flex items-center gap-2.5 bg-background/40 px-3 py-1.5 rounded-full border border-border/20 shadow-sm">
+                            <div className="p-1.5 rounded-lg bg-primary/5 shrink-0">
+                                <Mail className="h-3.5 w-3.5 text-primary" />
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="text-[9px] uppercase font-bold text-muted-foreground/60 tracking-wider">Email</span>
+                                <span className="text-[11px] font-black text-foreground truncate max-w-[150px]">{app.teacher?.email}</span>
+                            </div>
+                          </div>
 
-                        <div className="flex items-center gap-3 mt-6 md:mt-0 shrink-0">
-                          {app.status === 'pending' && isAdmin && (
+                          <div className="flex items-center gap-2.5 bg-background/40 px-3 py-1.5 rounded-full border border-border/20 shadow-sm">
+                            <div className="p-1.5 rounded-lg bg-primary/5 shrink-0">
+                                <Clock className="h-3.5 w-3.5 text-primary" />
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="text-[9px] uppercase font-bold text-muted-foreground/60 tracking-wider">Applied</span>
+                                <span className="text-[11px] font-black text-foreground uppercase tracking-tight">
+                                    {appDate.fromNow()}
+                                </span>
+                            </div>
+                          </div>
+                          {app.message && (
+                              <div className="flex items-center gap-2.5 bg-background/40 px-3 py-1.5 rounded-full border border-border/20 shadow-sm">
+                                  <div className="p-1.5 rounded-lg bg-primary/5 shrink-0">
+                                      <MessageSquare className="h-3.5 w-3.5 text-primary" />
+                                  </div>
+                                  <div className="flex flex-col">
+                                      <span className="text-[9px] uppercase font-bold text-muted-foreground/60 tracking-wider">Message</span>
+                                      <span className="text-[11px] font-black text-foreground truncate max-w-[150px]">"{app.message}"</span>
+                                  </div>
+                              </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Action Area */}
+                      <div className="flex items-center gap-3 mt-6 md:mt-0 shrink-0">
+                        {app.status === 'pending' && isAdmin && (
                               <div className="flex items-center gap-2">
                                   <Button
                                       variant="outline"
-                                      size="sm"
-                                      className="h-10 rounded-xl font-black uppercase tracking-widest text-[10px] border-green-500/20 text-green-600 bg-green-500/5 hover:bg-green-500/10 px-4"
+                                      size="lg"
+                                      className="w-full md:w-auto rounded-2xl px-8 h-12 font-black uppercase tracking-widest text-[10px] border-green-500/20 text-green-600 bg-green-500/5 hover:bg-green-500/10 shadow-sm"
                                       onClick={() => handleStatusUpdate(app.id, "approved")}
                                       disabled={isUpdating}
                                   >
@@ -247,8 +273,8 @@ const TeacherApplicationsList = () => {
                                   </Button>
                                   <Button
                                       variant="outline"
-                                      size="sm"
-                                      className="h-10 rounded-xl font-black uppercase tracking-widest text-[10px] border-destructive/20 text-destructive bg-destructive/5 hover:bg-destructive/10 px-4"
+                                      size="lg"
+                                      className="w-full md:w-auto rounded-2xl px-8 h-12 font-black uppercase tracking-widest text-[10px] border-destructive/20 text-destructive bg-destructive/5 hover:bg-destructive/10 shadow-sm"
                                       onClick={() => handleStatusUpdate(app.id, "rejected")}
                                       disabled={isUpdating}
                                   >
@@ -260,33 +286,36 @@ const TeacherApplicationsList = () => {
 
                           <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl">
+                                  <Button variant="ghost" size="icon" className="h-12 w-12 rounded-2xl bg-muted/30 hover:bg-muted/50">
                                       <MoreHorizontal className="h-5 w-5" />
                                   </Button>
                               </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className="w-56 rounded-[1.5rem] p-2">
-                                  <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-3 py-2">{t("assignments.list.labels.options")}</DropdownMenuLabel>
+                              <DropdownMenuContent align="end" className="w-64 p-2 rounded-3xl">
+                                  <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/40 px-3 py-3">{t("assignments.list.labels.options")}</DropdownMenuLabel>
                                   <DropdownMenuItem onClick={() => show("users", app.teacher.id)} className="rounded-xl gap-3 py-3 cursor-pointer">
-                                      <Eye className="h-4 w-4 text-primary" />
+                                      <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                                          <Eye className="h-4 w-4" />
+                                      </div>
                                       <span className="font-bold">{t("teacherApps.labels.viewTeacher")}</span>
                                   </DropdownMenuItem>
                                   <DropdownMenuItem onClick={() => show("classes", app.class.id)} className="rounded-xl gap-3 py-3 cursor-pointer">
-                                      <LayoutGrid className="h-4 w-4 text-primary" />
+                                      <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                                          <LayoutGrid className="h-4 w-4" />
+                                      </div>
                                       <span className="font-bold">{t("teacherApps.labels.viewClass")}</span>
                                   </DropdownMenuItem>
                               </DropdownMenuContent>
                           </DropdownMenu>
-                        </div>
-                      </motion.div>
-                    </div>
+                      </div>
+                    </motion.div>
                   );
                 })}
-              </div>
-            )}
-          </div>
+              </AnimatePresence>
+            </div>
+          )}
         </div>
-      </ListView>
-    </div>
+      </div>
+    </ListView>
   );
 };
 

@@ -1,6 +1,7 @@
 import { Announcement } from "@/types";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Pin, X, Paperclip } from "lucide-react";
+import { Pin, X, ChevronRight, Megaphone } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
@@ -18,85 +19,88 @@ export const PinnedAnnouncements = ({
 }: PinnedAnnouncementsProps) => {
   const { t, i18n } = useTranslation();
   const isAr = i18n.language === "ar";
-  const pinnedAnnouncements = announcements.filter(
-    (a) => a.isPinned && !dismissedAnnouncements.includes(a.id),
+
+  const pinnedAnnouncements = announcements.filter((a) => a.isPinned);
+  const visiblePinned = pinnedAnnouncements.filter(
+    (a) => !dismissedAnnouncements.includes(a.id),
   );
 
-  const isSafeUrl = (url: string) => {
-    try {
-      // Use window.location.origin as base for relative URLs (e.g., /uploads/file.pdf)
-      const parsedUrl = new URL(url, window.location.origin);
-      return ["http:", "https:"].includes(parsedUrl.protocol);
-    } catch (e) {
-      return false;
-    }
-  };
-
-  if (pinnedAnnouncements.length === 0) return null;
+  if (visiblePinned.length === 0) return null;
 
   return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -20 }}
-        className="space-y-4 text-start"
-      >
-        {pinnedAnnouncements.map((announcement) => (
-          <div
+    <div className="space-y-4 px-2 md:px-0">
+      <AnimatePresence mode="popLayout">
+        {visiblePinned.map((announcement, index) => (
+          <motion.div
             key={announcement.id}
-            className="relative overflow-hidden rounded-[2rem] border border-primary/20 bg-primary/5 backdrop-blur-xl p-8 pr-16 shadow-xl shadow-primary/5 group"
+            initial={{ opacity: 0, y: -20, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
+            transition={{
+              delay: index * 0.1,
+              type: "spring",
+              stiffness: 200,
+              damping: 20,
+            }}
+            className="group relative bg-amber-500/10 border-2 border-amber-500/20 rounded-4xl md:rounded-[2.5rem] p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-xl shadow-amber-500/5 backdrop-blur-md overflow-hidden text-start"
           >
-            <div
-              className={cn(
-                "absolute top-0 w-1.5 h-full bg-primary",
-                isAr ? "right-0" : "left-0",
-              )}
-            />
-            <div className="flex items-center gap-2 mb-3">
-              <div className="p-2 rounded-xl bg-primary/10 text-primary">
-                <Pin className="h-4 w-4" />
+            {/* Subtle Animated Background */}
+            <div className="absolute inset-0 bg-linear-to-r from-transparent via-amber-500/5 to-transparent -translate-x-full group-hover:animate-[shine_3s_infinite] pointer-events-none" />
+
+            <div className="flex items-start gap-4 md:gap-5 flex-1 min-w-0 z-10">
+              <div className="p-3 md:p-3.5 rounded-xl md:rounded-2xl bg-amber-500/20 text-amber-600 shadow-inner shrink-0 group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-500">
+                <Megaphone className="h-5 w-5 md:h-6 md:w-6" />
               </div>
-              <span className="font-black text-[10px] text-primary uppercase tracking-widest">
-                {t("classes.show.announcement.priority")}
-              </span>
+              <div className="space-y-1.5 md:space-y-2">
+                <div className="flex flex-wrap items-center gap-2 md:gap-3">
+                  <Badge
+                    variant="outline"
+                    className="bg-amber-500/10 text-amber-700 border-amber-500/30 text-[9px] md:text-[10px] font-black uppercase tracking-widest px-3 py-0.5 md:py-1 rounded-full shadow-sm"
+                  >
+                    <Pin className="h-3 w-3 me-1.5" />
+                    {t("classes.show.banner.pinned" as any)}
+                  </Badge>
+                  <h4 className="font-black text-lg md:text-xl text-amber-900 dark:text-amber-400 tracking-tight leading-tight group-hover:text-amber-600 transition-colors">
+                    {announcement.title}
+                  </h4>
+                </div>
+                <p className="text-sm md:text-base text-amber-800/80 dark:text-amber-500/80 font-medium leading-relaxed max-w-3xl">
+                  {announcement.content}
+                </p>
+              </div>
             </div>
-            <h4 className="font-black text-2xl tracking-tight">
-              {announcement.title}
-            </h4>
-            <p className="text-base mt-3 text-muted-foreground leading-relaxed line-clamp-2 font-medium">
-              {announcement.content}
-            </p>
-            {announcement.fileUrl && isSafeUrl(announcement.fileUrl) && (
-              <Button
-                variant="link"
-                className="p-0 h-auto mt-4 text-sm font-black text-primary gap-2 uppercase tracking-widest"
-                asChild
-              >
-                <a
-                  href={announcement.fileUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
+            <div className="flex items-center gap-3 w-full md:w-auto z-10 shrink-0">
+              {announcement.linkUrl && (
+                <Button
+                  variant="outline"
+                  className="flex-1 md:flex-none rounded-xl md:rounded-2xl font-black uppercase tracking-widest text-[9px] md:text-[10px] h-10 md:h-12 px-6 bg-white dark:bg-zinc-900 border-amber-500/20 text-amber-700 hover:bg-amber-50 hover:text-amber-800 shadow-sm transition-all"
+                  asChild
                 >
-                  <Paperclip className="h-4 w-4" />
-                  {t("classes.show.announcement.viewAttachment")}
-                </a>
-              </Button>
-            )}
-            <Button
-              variant="ghost"
-              size="icon"
-              className={cn(
-                "absolute top-6 h-12 w-12 rounded-full hover:bg-primary/10 text-primary/40 hover:text-primary transition-all",
-                isAr ? "left-6" : "right-6",
+                  <a
+                    href={announcement.linkUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {t("buttons.readMore" as any)}
+                    <ChevronRight
+                      className={cn("h-4 w-4 ms-1.5", isAr && "rotate-180")}
+                    />
+                  </a>
+                </Button>
               )}
-              onClick={() => handleDismissAnnouncement(announcement.id)}
-            >
-              <X className="h-6 w-6" />
-            </Button>
-          </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl text-amber-700/50 hover:text-destructive hover:bg-destructive/10 transition-colors shrink-0"
+                onClick={() => handleDismissAnnouncement(announcement.id)}
+                title={t("buttons.dismiss" as any)}
+              >
+                <X className="h-5 w-5 md:h-6 md:w-6" />
+              </Button>
+            </div>
+          </motion.div>
         ))}
-      </motion.div>
-    </AnimatePresence>
+      </AnimatePresence>
+    </div>
   );
 };

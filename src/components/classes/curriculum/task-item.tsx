@@ -36,20 +36,19 @@ export const TaskItem = ({
   const dueDate = type === 'assignment' ? (item as Assignment).dueDate : null;
   const isOverdue = dueDate ? dayjs(dueDate).isBefore(dayjs()) : false;
 
-  // Configure dayjs locale
   dayjs.locale(i18n.language);
 
   return (
     <motion.div 
       layout
       className={cn(
-        "group flex items-center justify-between p-4 rounded-2xl border transition-all duration-300",
+        "group flex items-center justify-between p-3 md:p-4 rounded-xl md:rounded-2xl border transition-all duration-300",
         styles.bg,
         styles.border,
         !completed && "hover:border-primary/20 hover:bg-card hover:shadow-md"
       )}
     >
-        <div className="flex items-center gap-4 overflow-hidden flex-1">
+        <div className="flex items-center gap-3 md:gap-4 overflow-hidden flex-1">
             {isStudent && (
                 <button 
                     onClick={() => onToggleProgress(item.id)}
@@ -63,7 +62,7 @@ export const TaskItem = ({
                             animate={{ scale: 1, opacity: 1 }}
                             exit={{ scale: 0.5, opacity: 0 }}
                           >
-                            <CheckCircle2 className="h-5 w-5 text-success" />
+                            <CheckCircle2 className="h-4 w-4 md:h-5 md:w-5 text-success" />
                           </motion.div>
                       ) : (
                           <motion.div
@@ -72,25 +71,25 @@ export const TaskItem = ({
                             animate={{ scale: 1, opacity: 1 }}
                             exit={{ scale: 0.5, opacity: 0 }}
                           >
-                            <Circle className="h-5 w-5 text-muted-foreground/40 group-hover/check:text-primary transition-colors" />
+                            <Circle className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground/40 group-hover/check:text-primary transition-colors" />
                           </motion.div>
                       )}
                     </AnimatePresence>
                 </button>
             )}
             
-            <div className="flex items-center gap-3 min-w-0">
-                <div className={cn("p-2 rounded-xl shrink-0 transition-transform group-hover:scale-110", styles.iconBg)}>
+            <div className="flex items-center gap-2.5 md:gap-3 min-w-0">
+                <div className={cn("p-1.5 md:p-2 rounded-lg md:rounded-xl shrink-0 transition-transform group-hover:scale-110", styles.iconBg)}>
                     {isQuiz ? (
-                        <FileQuestion className={cn("h-4 w-4", styles.iconColor)} />
+                        <FileQuestion className={cn("h-3.5 w-3.5 md:h-4 md:w-4", styles.iconColor)} />
                     ) : (
-                        <FileText className={cn("h-4 w-4", styles.iconColor)} />
+                        <FileText className={cn("h-3.5 w-3.5 md:h-4 md:w-4", styles.iconColor)} />
                     )}
                 </div>
                 
-                <div className="flex flex-col min-w-0">
+                <div className="flex flex-col min-w-0 text-start">
                     <span className={cn(
-                        "text-sm font-black tracking-tight truncate transition-all",
+                        "text-xs md:text-sm font-black tracking-tight truncate transition-all",
                         completed ? "text-success/60 line-through decoration-success/30" : "text-foreground group-hover:text-primary"
                     )}>
                         {item.title}
@@ -98,15 +97,15 @@ export const TaskItem = ({
                     <div className="flex items-center gap-2 mt-0.5">
                       {dueDate && (
                           <div className={cn(
-                            "flex items-center gap-1 text-[9px] font-black uppercase tracking-widest",
+                            "flex items-center gap-1 text-[8px] md:text-[9px] font-black uppercase tracking-widest",
                             isOverdue && !completed ? "text-destructive" : "text-muted-foreground/40"
                           )}>
                               <Calendar className="h-2.5 w-2.5" />
-                              <span>{t("assignments.list.labels.due", { date: dayjs(dueDate).format("MMM D") })}</span>
+                              <span className="truncate">{t("assignments.list.labels.due", { date: dayjs(dueDate).format("MMM D") })}</span>
                           </div>
                       )}
                       {isQuiz && !completed && (
-                        <div className="flex items-center gap-1 text-[9px] font-black uppercase tracking-widest text-orange-500/60">
+                        <div className="flex items-center gap-1 text-[8px] md:text-[9px] font-black uppercase tracking-widest text-orange-500/60">
                           <Clock className="h-2.5 w-2.5" />
                           <span>{t("classes.quiz.minsUnitLocalized", { count: 15 })}</span>
                         </div>
@@ -116,17 +115,18 @@ export const TaskItem = ({
             </div>
         </div>
         
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex items-center gap-2 md:gap-3 shrink-0">
           <Badge variant="secondary" className={cn(
-              "text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border-none", 
+              "text-[8px] md:text-[9px] font-black uppercase tracking-widest px-1.5 md:px-2 py-0.5 rounded-full border-none", 
               completed ? "bg-success/10 text-success" :
               isQuiz ? "bg-orange-500/10 text-orange-600" : 
               "bg-blue-500/10 text-blue-600"
           )}>
-              {isQuiz ? t("classes.show.tabs.quizzes") : t("classes.show.tabs.assignments")}
+              <span className="hidden xs:inline">{isQuiz ? t("classes.show.tabs.quizzes") : t("classes.show.tabs.assignments")}</span>
+              <span className="xs:hidden">{isQuiz ? 'Q' : 'A'}</span>
           </Badge>
           {!completed && (
-            <div className="p-1.5 rounded-full bg-muted/50 group-hover:bg-primary group-hover:text-primary-foreground transition-all">
+            <div className="hidden sm:block p-1.5 rounded-full bg-muted/50 group-hover:bg-primary group-hover:text-primary-foreground transition-all">
               <Sparkles className="h-3 w-3" />
             </div>
           )}

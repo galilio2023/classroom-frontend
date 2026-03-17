@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useCustom, useCustomMutation, useGetIdentity } from "@refinedev/core";
 import { User } from "@/types";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Send, Search, MessageCircle, MoreVertical, Paperclip } from "lucide-react";
+import { Send, Search, MessageCircle, MoreVertical, Paperclip, ChevronLeft } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ar as arLocale, enUS as enLocale } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -14,6 +14,8 @@ import { io, Socket } from "socket.io-client";
 import { SOCKET_URL } from "@/config";
 import { Badge } from "@/components/ui/badge";
 import { useTranslation } from "react-i18next";
+import { motion, AnimatePresence } from "framer-motion";
+import usePageTitle from "@/hooks/use-page-title";
 
 interface Message {
     id: number;
@@ -47,16 +49,17 @@ interface Conversation {
 const MessagesPage = () => {
     const { t, i18n } = useTranslation();
     const isAr = i18n.language === 'ar';
+    usePageTitle(t("messages.title"));
     const { data: identity } = useGetIdentity<User>();
     const [selectedUser, setSelectedUser] = useState<Conversation["user"] | null>(null);
     const [messageInput, setMessageInput] = useState("");
-    const scrollRef = useRef<HTMLDivElement>(null);
+    const messagesEndRef = useRef<HTMLDivElement>(null); // Renamed for clarity
     const [_socket, setSocket] = useState<Socket | null>(null);
 
     const dateLocale = isAr ? arLocale : enLocale;
 
     // Fetch Conversations
-    const { result: conversationsResult, query: { refetch: refetchConversations } } = useCustom<{ data: Conversation[] }>({
+    const { result: conversationsResult, query: { refetch: refetchConversations, isLoading: isLoadingConversations } } = useCustom<{ data: Conversation[] }>({
         url: "/messages",
         method: "get",
         queryOptions: {
@@ -66,7 +69,7 @@ const MessagesPage = () => {
     });
 
     // Fetch Messages for Selected User
-    const { result: messagesResult, query: { refetch: refetchMessages } } = useCustom<{ data: Message[] }>({
+    const { result: messagesResult, query: { refetch: refetchMessages, isLoading: isLoadingMessages } } = useCustom<{ data: Message[] }>({
         url: `/messages/${selectedUser?.id}`,
         method: "get",
         queryOptions: {
@@ -97,8 +100,8 @@ const MessagesPage = () => {
 
     // Scroll to bottom on new message
     useEffect(() => {
-        if (scrollRef.current) {
-            scrollRef.current.scrollIntoView({ behavior: "smooth" });
+        if (messagesEndRef.current) {
+            messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
         }
     }, [messagesResult]);
 
@@ -128,24 +131,50 @@ const MessagesPage = () => {
     const messages = messagesResult?.data?.data || [];
 
     return (
-        <div className="container mx-auto py-6 h-[calc(100vh-4rem)] text-start">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 h-full">
+        <div className="container mx-auto py-6 md:py-8 h-[calc(100vh-4rem)] max-w-screen-2xl">
+            <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6 h-full">
                 {/* Sidebar: Conversations List */}
-                <Card className="md:col-span-1 h-full flex flex-col border-none shadow-xl bg-card/50 backdrop-blur-xl">
-                    <div className="p-4 border-b border-border/50">
-                        <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-                            <MessageCircle className="h-5 w-5 text-primary" />
+                <motion.div
+                    initial={{ opacity: 0, x: isAr ? 20 : -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: isAr ? 20 : -20 }}
+                    transition={{ duration: 0.2 }}
+                    className={cn(
+                        "md:col-span-1 lg:col-span-2 h-full flex flex-col border-none shadow-xl bg-card/50 backdrop-blur-3xl rounded-[2.5rem]",
+                        selectedUser ? "hidden md:flex" : "flex"
+                    )}
+                >
+                    <CardHeader className="p-6 md:p-8 pb-4 border-b border-border/40">
+                        <CardTitle className="text-2xl md:text-3xl font-black flex items-center gap-3">
+                            <MessageCircle className="h-6 w-6 md:h-8 md:w-8 text-primary" />
                             {t("messages.title")}
-                        </h2>
-                        <div className="relative">
-                            <Search className={cn("absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground", isAr ? "right-3" : "left-3")} />
-                            <Input placeholder={t("messages.searchPeople")} className={cn("bg-background/50 border-border/50", isAr ? "pr-9" : "pl-9")} />
+                        </CardTitle>
+                        <p className="text-muted-foreground font-medium text-sm md:text-base">{t("messages.description")}</p>
+                    </CardHeader>
+                    <div className="p-4 md:p-6 border-b border-border/40">
+                        <div className="relative group">
+                            <Search className={cn("absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60 group-focus-within:text-primary transition-colors", isAr ? "right-4" : "left-4")} />
+                            <Input 
+                                placeholder={t("messages.searchPeople")} 
+                                className={cn("bg-background/50 border-border/40 h-12 rounded-xl shadow-sm", isAr ? "pr-11 pl-4" : "pl-11 pr-4")} 
+                            />
                         </div>
                     </div>
-                    <ScrollArea className="flex-1 p-2">
-                        <div className="space-y-2">
-                            {conversations.length === 0 ? (
-                                <div className="text-center p-4 text-muted-foreground text-sm">
+                    <ScrollArea className="flex-1 p-4 md:p-6">
+                        <div className="space-y-3">
+                            {isLoadingConversations ? (
+                                Array.from({ length: 5 }).map((_, i) => (
+                                    <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-muted/20 animate-pulse">
+                                        <div className="h-10 w-10 rounded-full bg-muted/40" />
+                                        <div className="flex-1 space-y-2">
+                                            <div className="h-4 w-3/4 bg-muted/40 rounded" />
+                                            <div className="h-3 w-1/2 bg-muted/40 rounded" />
+                                        </div>
+                                    </div>
+                                ))
+                            ) : conversations.length === 0 ? (
+                                <div className="text-center p-8 text-muted-foreground text-base">
+                                    <MessageCircle className="h-12 w-12 mx-auto mb-4 opacity-30" />
                                     {t("messages.noConversations")}
                                 </div>
                             ) : (
@@ -154,25 +183,28 @@ const MessagesPage = () => {
                                         key={conv.user.id}
                                         onClick={() => setSelectedUser(conv.user)}
                                         className={cn(
-                                            "flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-colors hover:bg-primary/5",
-                                            selectedUser?.id === conv.user.id ? "bg-primary/10" : ""
+                                            "flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-colors hover:bg-primary/5 border border-transparent hover:border-primary/10 shadow-sm",
+                                            selectedUser?.id === conv.user.id ? "bg-primary/10 border-primary/20" : "bg-background/50"
                                         )}
                                     >
-                                        <div className="relative">
-                                            <Avatar className="h-10 w-10 border border-border/50">
+                                        <div className="relative shrink-0">
+                                            <Avatar className="h-12 w-12 border-2 border-background shadow-sm">
                                                 <AvatarImage src={conv.user.image} />
-                                                <AvatarFallback>{conv.user.name[0]}</AvatarFallback>
+                                                <AvatarFallback className="bg-primary/10 text-primary font-bold text-sm">{conv.user.name[0]}</AvatarFallback>
                                             </Avatar>
+                                            {!conv.lastMessage.isRead && !conv.lastMessage.isMe && (
+                                                <div className="absolute -top-1 -right-1 size-3 bg-red-500 rounded-full border-2 border-background animate-pulse" />
+                                            )}
                                         </div>
                                         <div className="flex-1 overflow-hidden">
                                             <div className="flex justify-between items-center mb-0.5">
-                                                <h3 className="font-semibold text-sm truncate">{conv.user.name}</h3>
-                                                <span className="text-[10px] text-muted-foreground">
+                                                <h3 className="font-bold text-base truncate">{conv.user.name}</h3>
+                                                <span className="text-[10px] text-muted-foreground/60">
                                                     {formatDistanceToNow(new Date(conv.lastMessage.createdAt), { addSuffix: false, locale: dateLocale })}
                                                 </span>
                                             </div>
-                                            <p className="text-xs text-muted-foreground truncate">
-                                                {conv.lastMessage.isMe && t("messages.you")}{conv.lastMessage.content}
+                                            <p className="text-sm text-muted-foreground/80 truncate">
+                                                {conv.lastMessage.isMe && <span className="font-bold text-primary/80">{t("messages.you")}: </span>}{conv.lastMessage.content}
                                             </p>
                                         </div>
                                     </div>
@@ -180,104 +212,129 @@ const MessagesPage = () => {
                             )}
                         </div>
                     </ScrollArea>
-                </Card>
+                </motion.div>
 
                 {/* Main Chat Area */}
-                <Card className="md:col-span-3 h-full flex flex-col border-none shadow-xl bg-card/50 backdrop-blur-xl overflow-hidden">
+                <motion.div
+                    initial={{ opacity: 0, x: isAr ? -20 : 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: isAr ? -20 : 20 }}
+                    transition={{ duration: 0.2 }}
+                    className={cn(
+                        "md:col-span-3 lg:col-span-3 h-full flex flex-col border-none shadow-xl bg-card/50 backdrop-blur-3xl rounded-[2.5rem]",
+                        selectedUser ? "flex" : "hidden md:flex"
+                    )}
+                >
                     {selectedUser ? (
                         <>
                             {/* Header */}
-                            <div className="p-4 border-b border-border/50 flex justify-between items-center bg-card/30">
+                            <div className="p-4 md:p-6 border-b border-border/40 flex justify-between items-center bg-card/30">
                                 <div className="flex items-center gap-3">
-                                    <Avatar className="h-10 w-10 border border-border/50">
+                                    <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setSelectedUser(null)}>
+                                        <ChevronLeft className="h-5 w-5" />
+                                    </Button>
+                                    <Avatar className="h-12 w-12 border-2 border-background shadow-sm">
                                         <AvatarImage src={selectedUser.image} />
-                                        <AvatarFallback>{selectedUser.name[0]}</AvatarFallback>
+                                        <AvatarFallback className="bg-primary/10 text-primary font-bold text-base">{selectedUser.name[0]}</AvatarFallback>
                                     </Avatar>
                                     <div className="text-start">
-                                        <h3 className="font-bold">{selectedUser.name}</h3>
-                                        <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 capitalize">
+                                        <h3 className="font-bold text-lg">{selectedUser.name}</h3>
+                                        <Badge variant="outline" className="text-[10px] px-2 py-0.5 h-5 capitalize rounded-full shadow-sm">
                                             {selectedUser.role}
                                         </Badge>
                                     </div>
                                 </div>
-                                <Button variant="ghost" size="icon">
+                                <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl">
                                     <MoreVertical className="h-5 w-5 text-muted-foreground" />
                                 </Button>
                             </div>
 
                             {/* Messages List */}
-                            <ScrollArea className="flex-1 p-4 bg-background/30">
+                            <ScrollArea className="flex-1 p-4 md:p-6 bg-background/30">
                                 <div className="space-y-4">
-                                    {messages.map((msg: Message) => {
-                                        const isMe = msg.userId === identity?.id;
-                                        return (
-                                            <div
-                                                key={msg.id}
-                                                className={cn(
-                                                    "flex w-full",
-                                                    isMe ? "justify-end" : "justify-start"
-                                                )}
-                                            >
+                                    {isLoadingMessages ? (
+                                        Array.from({ length: 5 }).map((_, i) => (
+                                            <div key={i} className={cn("flex", i % 2 === 0 ? "justify-end" : "justify-start")}>
+                                                <div className="max-w-[60%] rounded-2xl px-4 py-2 bg-muted/30 animate-pulse h-16 w-full" />
+                                            </div>
+                                        ))
+                                    ) : messages.length === 0 ? (
+                                        <div className="text-center p-8 text-muted-foreground text-base">
+                                            <MessageCircle className="h-12 w-12 mx-auto mb-4 opacity-30" />
+                                            {t("messages.noMessages")}
+                                        </div>
+                                    ) : (
+                                        messages.map((msg: Message) => {
+                                            const isMe = msg.userId === identity?.id;
+                                            return (
                                                 <div
+                                                    key={msg.id}
                                                     className={cn(
-                                                        "max-w-[70%] rounded-2xl px-4 py-2 text-sm shadow-sm",
-                                                        isMe
-                                                            ? "bg-primary text-primary-foreground ltr:rounded-br-none rtl:rounded-bl-none"
-                                                            : "bg-white dark:bg-zinc-800 border border-border/50 ltr:rounded-bl-none rtl:rounded-br-none"
+                                                        "flex w-full",
+                                                        isMe ? "justify-end" : "justify-start"
                                                     )}
                                                 >
-                                                    <p className="text-start">{msg.content}</p>
-                                                    <span className={cn(
-                                                        "text-[10px] block mt-1 opacity-70",
-                                                        isAr ? "text-left" : "text-right",
-                                                        isMe ? "text-primary-foreground/80" : "text-muted-foreground"
-                                                    )}>
-                                                        {new Date(msg.createdAt).toLocaleTimeString(isAr ? 'ar-EG' : 'en-US', { hour: '2-digit', minute: '2-digit' })}
-                                                    </span>
+                                                    <div
+                                                        className={cn(
+                                                            "max-w-[70%] rounded-2xl px-4 py-2 text-sm md:text-base shadow-sm",
+                                                            isMe
+                                                                ? "bg-primary text-primary-foreground ltr:rounded-br-none rtl:rounded-bl-none"
+                                                                : "bg-white dark:bg-zinc-800 border border-border/40 ltr:rounded-bl-none rtl:rounded-br-none"
+                                                        )}
+                                                    >
+                                                        <p className="text-start leading-relaxed">{msg.content}</p>
+                                                        <span className={cn(
+                                                            "text-[10px] block mt-1 opacity-70",
+                                                            isAr ? "text-left" : "text-right",
+                                                            isMe ? "text-primary-foreground/80" : "text-muted-foreground"
+                                                        )}>
+                                                            {new Date(msg.createdAt).toLocaleTimeString(isAr ? 'ar-EG' : 'en-US', { hour: '2-digit', minute: '2-digit' })}
+                                                        </span>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        );
-                                    })}
-                                    <div ref={scrollRef} />
+                                            );
+                                        })
+                                    )}
+                                    <div ref={messagesEndRef} />
                                 </div>
                             </ScrollArea>
 
                             {/* Input Area */}
-                            <div className="p-4 bg-card/30 border-t border-border/50">
+                            <div className="p-4 md:p-6 bg-card/30 border-t border-border/40">
                                 <form
                                     onSubmit={(e) => {
                                         e.preventDefault();
                                         handleSend();
                                     }}
-                                    className="flex items-center gap-2"
+                                    className="flex items-center gap-3"
                                 >
-                                    <Button type="button" variant="ghost" size="icon" className="text-muted-foreground hover:text-primary">
+                                    <Button type="button" variant="ghost" size="icon" className="text-muted-foreground hover:text-primary h-10 w-10 rounded-xl">
                                         <Paperclip className="h-5 w-5" />
                                     </Button>
                                     <Input
                                         value={messageInput}
                                         onChange={(e) => setMessageInput(e.target.value)}
                                         placeholder={t("messages.typeMessage")}
-                                        className="flex-1 bg-background/50 border-border/50 focus-visible:ring-primary"
+                                        className="flex-1 bg-background/50 border-border/40 focus-visible:ring-primary h-12 rounded-xl shadow-sm"
                                     />
-                                    <Button type="submit" size="icon" disabled={!messageInput.trim()}>
-                                        <Send className={cn("h-4 w-4", isAr && "rotate-180")} />
+                                    <Button type="submit" size="icon" disabled={!messageInput.trim()} className="h-12 w-12 rounded-xl shadow-lg shadow-primary/20">
+                                        <Send className={cn("h-5 w-5", isAr && "rotate-180")} />
                                     </Button>
                                 </form>
                             </div>
                         </>
                     ) : (
                         <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground p-8 text-center">
-                            <div className="h-20 w-20 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+                            <div className="h-20 w-20 bg-primary/10 rounded-full flex items-center justify-center mb-4 shadow-lg">
                                 <MessageCircle className="h-10 w-10 text-primary" />
                             </div>
-                            <h3 className="text-xl font-bold text-foreground mb-2">{t("messages.selectChat")}</h3>
-                            <p className="max-w-sm">
+                            <h3 className="text-xl md:text-2xl font-bold text-foreground mb-2">{t("messages.selectChat")}</h3>
+                            <p className="max-w-sm text-sm md:text-base leading-relaxed">
                                 {t("messages.selectChatDesc")}
                             </p>
                         </div>
                     )}
-                </Card>
+                </motion.div>
             </div>
         </div>
     );

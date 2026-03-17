@@ -17,10 +17,14 @@ export const AssignmentPreview: React.FC<AssignmentPreviewProps> = ({ content, o
   const [copied, setCopied] = useState(false);
   const navigate = useNavigate();
 
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(content);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  const copyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(content);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy text: ", err);
+    }
   };
 
   const handleGlobalCreate = () => {
@@ -98,7 +102,7 @@ export const AssignmentPreview: React.FC<AssignmentPreviewProps> = ({ content, o
         {content ? (
           renderStructuredContent(content)
         ) : (
-          <div className="flex flex-col items-center justify-center h-full min-h-[400px] text-muted-foreground space-y-4 opacity-50 bg-card rounded-2xl border border-dashed">
+          <div className="flex flex-col items-center justify-center h-full min-h-100 text-muted-foreground space-y-4 opacity-50 bg-card rounded-2xl border border-dashed">
               <div className="p-4 bg-muted rounded-full animate-pulse">
                 <PlusCircle className="h-8 w-8" />
               </div>

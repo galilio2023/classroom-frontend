@@ -23,6 +23,8 @@
     "offline": "You're offline — some features may be limited",
     "details": "Details",
     "description": "Description",
+    "featureComingSoon": "Feature coming soon!",
+    "aiPowered": "AI Powered",
     "editor": {
       "urlPrompt": "Enter URL",
       "bold": "Bold",
@@ -277,7 +279,10 @@
     "exploreClasses": "Explore Your Classes",
     "practiceLevelUp": "Practice & Level Up",
     "reply": "Reply",
-    "post": "Post"
+    "post": "Post",
+    "createModule": "Create Module",
+    "generating": "Generating...",
+    "readMore": "Read More"
   },
   "roles": {
     "student": "Student",
@@ -387,6 +392,54 @@
       "identityError": "Cannot create class: User identity not found.",
       "inviteNote": "You can invite co-teachers and students after creation"
     },
+    "edit": {
+      "subtitle": "Update your classroom settings, schedule, and curriculum.",
+      "configuration": "Class Configuration",
+      "editingMode": "Editing Mode",
+      "editingModeDesc": "Changes to the schedule and settings will update immediately for all enrolled students.",
+      "accessControl": "Access Control",
+      "inviteCode": "Invite Code",
+      "inviteCodeDesc": "Share this code with students to allow them to join this classroom instantly.",
+      "contentActions": "Content Actions",
+      "importContent": "Import Content",
+      "importArchive": "Import from Archive",
+      "importArchiveDesc": "Copy modules, assignments, and quizzes from a previous term. Imported content will be set to \"Draft\" mode.",
+      "selectSourceTerm": "Select Source Term",
+      "selectTermPlaceholder": "Select a past term",
+      "selectSourceClass": "Select Source Class",
+      "selectClassPlaceholder": "Select a class",
+      "importFooterDesc": "Quickly populate your curriculum by reusing materials from archived terms."
+    },
+    "live": {
+      "title": "Live Classroom",
+      "mainHall": "(Main Hall)",
+      "breakoutRoom": "(Breakout Room)",
+      "breakoutActive": "Breakout sessions are active.",
+      "mainActive": "Main session active.",
+      "startBreakouts": "Start Breakouts",
+      "endBreakouts": "End Breakouts",
+      "readyToJoin": "Ready to join?",
+      "breakoutDescription": "Breakout sessions are in progress. You will join your group room.",
+      "mainDescription": "Click below to enter the virtual classroom.",
+      "joinNow": "Join Class Now",
+      "joinGroup": "Join {{name}} Room",
+      "videoSession": "Video Session",
+      "whiteboard": "Whiteboard",
+      "startLiveSession": "Start Live Session",
+      "sessionNotStarted": "Live session has not started yet.",
+      "toasts": {
+        "sessionStarted": "{{name}} started a live session!",
+        "sessionEnded": "The live session has ended.",
+        "breakoutStarted": "Breakout sessions started!",
+        "joiningGroup": "Joining your group: {{name}}",
+        "breakoutEnded": "Breakout sessions ended. Returning to main hall.",
+        "joinFailed": "Failed to join session. Please try again.",
+        "recordingSaved": "Recording saved to resources.",
+        "initFailed": "Failed to initialize video conference.",
+        "sessionStartedTeacher": "Live session started successfully!",
+        "startFailed": "Failed to start live session. Please try again."
+      }
+    },
     "form": {
       "updateDetails": "Update Class Details",
       "coreInfo": "Core Information",
@@ -456,6 +509,15 @@
       "notFoundDescription": "The classroom you are looking for does not exist or has been removed from the system.",
       "classroomHub": "Classroom Hub",
       "hubDescription": "Manage curriculum, students, and live sessions.",
+      "description": "Description",
+      "banner": {
+        "pinned": "Pinned Announcement",
+        "academic": "Academic",
+        "waitlistActive": "Waitlist Active",
+        "studentsEnrolled": "{{count}} Students Enrolled",
+        "onWaitlist": "{{count}} on Waitlist",
+        "liveActive": "Live Session Active"
+      },
       "toast": {
         "linkCopied": "Classroom link copied!",
         "inviteCodeCopied": "Invite code copied to clipboard",
@@ -467,13 +529,6 @@
       "announcement": {
         "priority": "Priority Announcement",
         "viewAttachment": "View Attachment"
-      },
-      "banner": {
-        "academic": "Academic",
-        "waitlistActive": "Waitlist Active",
-        "studentsEnrolled": "{{count}} Students Enrolled",
-        "onWaitlist": "{{count}} on Waitlist",
-        "liveActive": "Live Session Active"
       },
       "tabs": {
         "curriculum": "Curriculum",
@@ -499,6 +554,7 @@
           "empty": "No students found in this classroom."
         },
         "pending": {
+          "status": "Pending Status",
           "title": "Pending Requests",
           "count": "{{count}} Pending",
           "empty": "No pending applications",
@@ -519,6 +575,7 @@
         "teacherNotes": "Teacher Notes (Shared)",
         "teacherNotesDesc": "Private scratchpad for staff",
         "teacherNotesPlaceholder": "Start typing your notes here...",
+        "notesPlaceholder": "Jot down reminders, lesson ideas, or notes about students...",
         "autoSaving": "Auto-saving",
         "accessControl": "Access Control",
         "inviteCode": "Class Invite Code",
@@ -569,7 +626,8 @@
       "pressEnter": "Press Enter to send, Shift+Enter for new line",
       "toast": {
         "replySent": "Reply sent",
-        "messagePosted": "Message posted"
+        "messagePosted": "Message posted",
+        "summaryError": "Failed to generate discussion summary."
       }
     },
     "attendance": {
@@ -646,7 +704,6 @@
       "createDesc": "Post an official update for all students in this class.",
       "fieldTitle": "Announcement Title",
       "fieldContent": "Detailed Content",
-      "fieldAttachment": "Attachment (Optional)",
       "fieldPin": "Pin to Top",
       "pinDesc": "This announcement will stay at the top of the list.",
       "noAnnouncements": "No announcements yet",
@@ -662,7 +719,8 @@
         "title": "Read Receipts",
         "description": "Students who have viewed this announcement.",
         "empty": "No one has read this announcement yet."
-      }
+      },
+      "fieldAttachment": "Attachment (Optional)"
     },
     "resource": {
       "loading": "Loading Materials...",
@@ -691,7 +749,8 @@
           "file": "File (PDF, Doc)",
           "image": "Image",
           "link": "External Link",
-          "video": "Video Link"
+          "video": "Video Link",
+          "other": "Other"
         }
       },
       "toast": {
@@ -702,7 +761,16 @@
     },
     "reader": {
       "aiTutor": "AI Tutor",
-      "askPlaceholder": "Ask a question..."
+      "hideAiTutor": "Hide AI Tutor",
+      "lessonNotFound": "Lesson not found or invalid resource type.",
+      "tutorTitle": "Smart Lesson Tutor",
+      "tutorDescription": "Ask me anything about this lesson",
+      "welcome": "Hello {{name}}! You are reading {{title}}. If you're confused about any part or want more examples, just ask!",
+      "thinking": "Tutor is thinking...",
+      "askPlaceholder": "Ask a question...",
+      "toast": {
+        "unavailable": "AI Tutor is currently unavailable."
+      }
     },
     "quiz": {
       "loading": "Loading Quizzes...",
@@ -710,11 +778,19 @@
       "description": "Test your knowledge with these available assessments.",
       "noQuizzes": "No quizzes yet",
       "noQuizzesDescriptionTeacher": "Create your first quiz to test student knowledge and track progress.",
-      "noQuizzesDescriptionStudent": "Your instructor hasn't published any quizzes for this class yet. Check back later!",
+      "noQuizzesDescriptionStudent": "Your teacher hasn't published any quizzes for this class yet. Check back later!",
       "minsUnit": "min",
+      "minsUnitLocalized": "{{count}} mins",
       "due": "Due {{date}}",
       "questionsCount": "{{count}} Questions",
-      "noDescription": "No description provided."
+      "noDescription": "No description provided.",
+      "checkAnswer": "Check Answer",
+      "finishQuiz": "Finish Quiz",
+      "nextQuestion": "Next Question",
+      "quizComplete": "Quiz Complete!",
+      "finishedAssessment": "You have finished the interactive assessment.",
+      "scoreSummary": "{{score}} out of {{total}} correct",
+      "explanation": "Explanation"
     },
     "dialogs": {
       "applyTeacher": {
@@ -874,6 +950,7 @@
       "submissionStatus": "Submission Status",
       "editingDraft": "Editing Draft",
       "submittingAttempt": "Submitting Attempt #{{count}}",
+      "originalAttempt": "Original Attempt",
       "draftMode": "Draft Mode",
       "selectGroup": "Select Your Group",
       "selectGroupPlaceholder": "Which group are you submitting for?",
@@ -1005,7 +1082,13 @@
     "schedule": {
       "child": "{{name}}'s Schedule",
       "noClasses": "No classes for {{name}} today.",
-      "viewFull": "View Full Schedule"
+      "noClassesChild": "No classes for {{name}} today.",
+      "viewFull": "View Full Schedule",
+      "today": "Today's Schedule",
+      "classesCount": "{{count}} Classes",
+      "freeDay": "Free Day!",
+      "enjoyTimeOff": "Enjoy your time off",
+      "clickClass": "Click a class to enter the room"
     },
     "readyToContinue": "Ready to continue your learning journey?",
     "managementOverview": "Here is your management overview for today.",
@@ -1027,7 +1110,6 @@
       "days": "Days",
       "nextReward": "Next Reward",
       "profileBadge": "Profile Badge",
-      "recentActivity": "Recent Activity",
       "upcomingTasks": "Upcoming Tasks",
       "dontMissDeadlines": "Don't miss your deadlines",
       "pendingCount": "{{count}} Pending",
@@ -1046,7 +1128,8 @@
       "noGradeData": "No grade data yet. Complete assignments to see your progress!",
       "subjectMastery": "Subject Mastery",
       "subjectMasteryDesc": "Average performance per subject.",
-      "noSubjectData": "No subject data yet. Your mastery radar will appear here."
+      "noSubjectData": "No subject data yet. Your mastery radar will appear here.",
+      "recentActivity": "Recent Activity"
     },
     "staff": {
       "engagementAnalytics": "Engagement Analytics",
@@ -1120,14 +1203,6 @@
       "totalTeachers": "Total Teachers",
       "pendingVerifications": "Pending Verifications",
       "activeClasses": "Active Classes"
-    },
-    "schedule": {
-      "today": "Today's Schedule",
-      "classesCount": "{{count}} Classes",
-      "freeDay": "Free Day!",
-      "noClasses": "No classes scheduled for today.",
-      "enjoyTimeOff": "Enjoy your time off",
-      "clickClass": "Click a class to enter the room"
     },
     "onboarding": {
       "getStarted": "Get Started",
@@ -1247,7 +1322,7 @@
       "linkAccount": "Link Account",
       "noChildren": "No children linked yet",
       "noChildrenDescription": "Click the \"Link Child\" button above to connect your account with your children's student profiles.",
-      "dayStreak": "{{count}} Day Streak",
+      "dayStreak": "Day Streak",
       "gpaAverage": "GPA / Average",
       "attendance": "Attendance",
       "levelProgress": "Level Progress",
@@ -1427,7 +1502,7 @@
     "title": "Academic Calendar",
     "description": "Your unified schedule for classes, assignments, and quizzes.",
     "monthlyOverview": "Monthly Overview",
-    "generatePlan": "Generate Monthly Plan",
+    "generatePlan": "Generate My Monthly Plan",
     "generateTitle": "Generate Monthly Schedule",
     "generateDesc": "This will automatically create class sessions for the entire month based on the recurring schedule rules.",
     "targetClass": "Target Class (Group)",
@@ -1444,6 +1519,8 @@
       "classes": "Classes",
       "tasks": "Tasks"
     },
+    "eventsSelectedDay": "Events on {{date}}",
+    "selectDate": "Select a date to view events",
     "toasts": {
       "selectClass": "Please select a class",
       "generated": "Monthly plan generated successfully!"
@@ -1699,7 +1776,6 @@
     "profile-requests": { "label": "Profile Requests" },
     "teacher-applications": { "label": "Teacher Apps" },
     "activity-log": { "label": "Activity Log" },
-    "calender": { "label": "Calendar" },
     "teacher-channel": { "label": "My Channel" }
   },
   "groups": {
@@ -1822,7 +1898,9 @@
     "you": "You: ",
     "typeMessage": "Type a message...",
     "selectChat": "Your Messages",
-    "selectChatDesc": "Select a conversation from the left or search for a student/teacher to start chatting."
+    "selectChatDesc": "Select a conversation from the left or search for a student/teacher to start chatting.",
+    "description": "Messages description",
+    "noMessages": "No messages"
   },
   "enrollments": {
     "title": "Admissions & Enrollments",
@@ -1945,6 +2023,7 @@
       "multimedia": "Multimedia",
       "documents": "Documents"
     },
+    "searchPlaceholder": "Search resources...",
     "empty": {
       "title": "No resources found",
       "desc": "Upload your first learning material to begin building your class library."
@@ -2223,7 +2302,7 @@
     "academicJourney": "Academic Journey",
     "unlockedAchievements": "Unlocked Achievements",
     "badgesEarned": "{{earned}} / {{total}} Earned"
-  },
+    },
   "badges": {
     "first-submission": {
       "name": "First Step",

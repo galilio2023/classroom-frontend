@@ -1,14 +1,20 @@
 import { useEffect, useRef, useState } from "react";
-import { useCustomMutation, useGetIdentity, useList, useOne } from "@refinedev/core";
+import {
+  useCustomMutation,
+  useGetIdentity,
+  useList,
+  useOne,
+} from "@refinedev/core";
 import { User, UserRole } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, Video, Users, Presentation, Grid } from "lucide-react";
+import { Grid, Loader2, Presentation, Users, Video } from "lucide-react";
 import { toast } from "sonner";
 import { socket } from "@/lib/socket";
 import { Whiteboard } from "./whiteboard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 interface LiveClassroomProps {
   classId: string;
@@ -24,13 +30,14 @@ declare global {
 export const LiveClassroom = ({
   classId: classIdString,
 }: LiveClassroomProps) => {
+  const { t, i18n } = useTranslation();
   const { data: identity } = useGetIdentity<User>();
   const jitsiContainerRef = useRef<HTMLDivElement>(null);
   const [api, setApi] = useState<any>(null);
   const [isJoined, setIsJoined] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("video");
-  
+
   // Breakout Room State
   const [isBreakoutActive, setIsBreakoutActive] = useState(false);
   const [currentGroupId, setCurrentGroupId] = useState<number | null>(null);
@@ -41,17 +48,20 @@ export const LiveClassroom = ({
   const { mutate: endLiveSession } = useCustomMutation();
   const { mutate: saveRecording } = useCustomMutation();
   const { mutate: manageBreakout } = useCustomMutation();
+  const { mutate: startLiveSession } = useCustomMutation();
 
-  const isTeacher = identity?.role === UserRole.TEACHER || identity?.role === UserRole.ADMIN;
+  const isTeacher =
+    identity?.role === UserRole.TEACHER || identity?.role === UserRole.ADMIN;
   const numericClassId = Number(classIdString);
+  const isAr = i18n.language === "ar";
 
   // Sync Class State (for persistence)
   const { query: classQuery } = useOne({
-      resource: "classes",
-      id: classIdString,
-      queryOptions: { 
-        enabled: !!numericClassId,
-      }
+    resource: "classes",
+    id: classIdString,
+    queryOptions: {
+      enabled: !!numericClassId,
+    },
   });
 
   const classData = classQuery.data?.data;
@@ -63,19 +73,19 @@ export const LiveClassroom = ({
   }, [classQuery.isError, classQuery.error]);
 
   useEffect(() => {
-      if (classData?.isBreakoutActive) {
-          setIsBreakoutActive(true);
-      }
+    if (classData?.isBreakoutActive) {
+      setIsBreakoutActive(true);
+    }
   }, [classData]);
 
   // Fetch groups to determine student's group or list for teacher
   const { query: groupsQuery } = useList({
     resource: "project-groups",
     filters: [{ field: "classId", operator: "eq", value: numericClassId }],
-    queryOptions: { 
+    queryOptions: {
       enabled: !!numericClassId,
     },
-    pagination: { mode: "off" }
+    pagination: { mode: "off" },
   });
 
   useEffect(() => {
@@ -89,8 +99,8 @@ export const LiveClassroom = ({
   useEffect(() => {
     if (groups.length > 0 && identity && !isTeacher) {
       // Find the group the student belongs to
-      const group = groups.find((g: any) => 
-        g.members?.some((m: any) => m.studentId === identity.id)
+      const group = groups.find((g: any) =>
+        g.members?.some((m: any) => m.studentId === identity.id),
       );
       setMyGroup(group);
     }
@@ -109,12 +119,15 @@ export const LiveClassroom = ({
 
     socket.on("live_session_started", (data) => {
       if (Number(data.classId) === numericClassId && !isTeacher) {
-        toast.info(`${data.startedBy} started a live session!`, {
-          action: {
-            label: "Join Now",
-            onClick: () => startMeeting(),
+        toast.info(
+          t("classes.live.toasts.sessionStarted", { name: data.startedBy }),
+          {
+            action: {
+              label: t("notifications.joinNow"),
+              onClick: () => startMeeting(),
+            },
           },
-        });
+        );
       }
     });
 
@@ -122,31 +135,33 @@ export const LiveClassroom = ({
       if (Number(data.classId) === numericClassId) {
         setIsJoined(false);
         if (api) api.dispose();
-        toast.error("The live session has ended.");
+        toast.error(t("classes.live.toasts.sessionEnded"));
       }
     });
 
     socket.on("breakout_session_started", (data) => {
-        if (Number(data.classId) === numericClassId) {
-            setIsBreakoutActive(true);
-            toast.info("Breakout sessions started!");
-            
-            // Auto-join for students if they are already in the call
-            if (!isTeacher && myGroup) {
-                toast.success(`Joining your group: ${myGroup.name}`);
-                joinBreakoutRoom(myGroup.id);
-            }
+      if (Number(data.classId) === numericClassId) {
+        setIsBreakoutActive(true);
+        toast.info(t("classes.live.toasts.breakoutStarted"));
+
+        // Auto-join for students if they are already in the call
+        if (!isTeacher && myGroup) {
+          toast.success(
+            t("classes.live.toasts.joiningGroup", { name: myGroup.name }),
+          );
+          joinBreakoutRoom(myGroup.id);
         }
+      }
     });
 
     socket.on("breakout_session_ended", (data) => {
-        if (Number(data.classId) === numericClassId) {
-            setIsBreakoutActive(false);
-            setCurrentGroupId(null);
-            toast.info("Breakout sessions ended. Returning to main hall.");
-            // Re-join main hall
-            startMeeting();
-        }
+      if (Number(data.classId) === numericClassId) {
+        setIsBreakoutActive(false);
+        setCurrentGroupId(null);
+        toast.info(t("classes.live.toasts.breakoutEnded"));
+        // Re-join main hall
+        startMeeting();
+      }
     });
 
     return () => {
@@ -158,7 +173,31 @@ export const LiveClassroom = ({
       socket.off("breakout_session_started");
       socket.off("breakout_session_ended");
     };
-  }, [api, numericClassId, isTeacher, myGroup]);
+  }, [api, numericClassId, isTeacher, myGroup, t]);
+
+  const handleStartLiveSession = () => {
+    setIsLoading(true);
+    startLiveSession(
+      {
+        url: "/live-session/start",
+        method: "post",
+        values: { classId: numericClassId },
+      },
+      {
+        onSuccess: () => {
+          toast.success(t("classes.live.toasts.sessionStartedTeacher"));
+          startMeeting();
+        },
+        onError: (error: any) => {
+          setIsLoading(false);
+          toast.error(
+            error?.data?.message || t("classes.live.toasts.startFailed"),
+          );
+          console.error("Failed to start live session:", error);
+        },
+      },
+    );
+  };
 
   const startMeeting = (groupId?: number) => {
     if (!window.JitsiMeetExternalAPI || !identity || isNaN(numericClassId))
@@ -174,9 +213,9 @@ export const LiveClassroom = ({
       {
         url: "/live-session/token",
         method: "post",
-        values: { 
-            classId: numericClassId,
-            groupId: groupId // Optional: if provided, joins breakout room
+        values: {
+          classId: numericClassId,
+          groupId: groupId, // Optional: if provided, joins breakout room
         },
       },
       {
@@ -186,7 +225,7 @@ export const LiveClassroom = ({
         },
         onError: (error: any) => {
           setIsLoading(false);
-          toast.error("Failed to join session. Please try again.");
+          toast.error(t("classes.live.toasts.joinFailed"));
           console.error("Live session error:", error);
         },
       },
@@ -194,11 +233,15 @@ export const LiveClassroom = ({
   };
 
   const joinBreakoutRoom = (groupId: number) => {
-      setCurrentGroupId(groupId);
-      startMeeting(groupId);
+    setCurrentGroupId(groupId);
+    startMeeting(groupId);
   };
 
-  const initializeJitsi = (roomName: string, token?: string, groupId?: number) => {
+  const initializeJitsi = (
+    roomName: string,
+    token?: string,
+    groupId?: number,
+  ) => {
     if (!window.JitsiMeetExternalAPI || !identity) return;
 
     setIsJoined(true);
@@ -229,7 +272,7 @@ export const LiveClassroom = ({
           startWithVideoMuted: false,
           prejoinPageEnabled: false,
           enableLobby: false,
-          disableRecording: !!groupId && !isTeacher, 
+          disableRecording: !!groupId && !isTeacher,
         },
         interfaceConfigOverwrite: {},
       };
@@ -250,39 +293,49 @@ export const LiveClassroom = ({
             }
           },
           videoConferenceLeft: () => {
-             if (groupId) {
-                 setCurrentGroupId(null);
-             } else {
-                setIsJoined(false);
-                setApi(null);
-                if (isTeacher) {
-                    endLiveSession({
-                        url: "/live-session/end",
-                        method: "post",
-                        values: { classId: numericClassId },
-                    });
-                }
-             }
+            if (groupId) {
+              setCurrentGroupId(null);
+            } else {
+              setIsJoined(false);
+              setApi(null);
+              if (isTeacher) {
+                endLiveSession({
+                  url: "/live-session/end",
+                  method: "post",
+                  values: { classId: numericClassId },
+                });
+              }
+            }
           },
           readyToClose: () => {
-             setIsJoined(false);
-             setApi(null);
+            setIsJoined(false);
+            setApi(null);
           },
-          recordingStatusChanged: (payload: { on: boolean; link?: string; error?: string }) => {
+          recordingStatusChanged: (payload: {
+            on: boolean;
+            link?: string;
+            error?: string;
+          }) => {
             if (!payload.on && payload.link && isTeacher && !groupId) {
-              saveRecording({
-                url: "/resources",
-                method: "post",
-                values: {
-                  classId: numericClassId,
-                  title: `Live Session Recording - ${new Date().toLocaleDateString()}`,
-                  url: payload.link,
-                  type: "video",
-                  description: "Recording of the live session held on " + new Date().toLocaleString(),
+              saveRecording(
+                {
+                  url: "/resources",
+                  method: "post",
+                  values: {
+                    classId: numericClassId,
+                    title: `Live Session Recording - ${new Date().toLocaleDateString()}`,
+                    url: payload.link,
+                    type: "video",
+                    description:
+                      "Recording of the live session held on " +
+                      new Date().toLocaleString(),
+                  },
                 },
-              }, {
-                onSuccess: () => toast.success("Recording saved to resources."),
-              });
+                {
+                  onSuccess: () =>
+                    toast.success(t("classes.live.toasts.recordingSaved")),
+                },
+              );
             }
           },
         });
@@ -290,72 +343,88 @@ export const LiveClassroom = ({
         console.error("Error initializing Jitsi:", err);
         setIsLoading(false);
         setIsJoined(false);
-        toast.error("Failed to initialize video conference.");
+        toast.error(t("classes.live.toasts.initFailed"));
       }
     }, 100);
   };
 
   const handleToggleBreakout = () => {
-      const endpoint = isBreakoutActive ? "/breakout/end" : "/breakout/start";
-      manageBreakout({
-          url: `/live-session${endpoint}`,
-          method: "post",
-          values: { classId: numericClassId }
-      }, {
-          onSuccess: () => {
-              toast.success(isBreakoutActive ? "Breakout sessions ended." : "Breakout sessions started.");
-              setIsBreakoutActive(!isBreakoutActive);
-          }
-      });
+    const endpoint = isBreakoutActive ? "/breakout/end" : "/breakout/start";
+    manageBreakout(
+      {
+        url: `/live-session${endpoint}`,
+        method: "post",
+        values: { classId: numericClassId },
+      },
+      {
+        onSuccess: () => {
+          toast.success(
+            isBreakoutActive
+              ? t("classes.live.toasts.breakoutEnded")
+              : t("classes.live.toasts.breakoutStarted"),
+          );
+          setIsBreakoutActive(!isBreakoutActive);
+        },
+      },
+    );
   };
 
+  const isClassLive = classData?.isLive;
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" dir={isAr ? "rtl" : "ltr"}>
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-lg font-semibold flex items-center gap-2">
             <Video className="h-5 w-5 text-live-primary" />
-            Live Classroom {currentGroupId ? "(Breakout Room)" : "(Main Hall)"}
+            {t("classes.live.title")}{" "}
+            {currentGroupId
+              ? t("classes.live.breakoutRoom")
+              : t("classes.live.mainHall")}
           </h3>
           <p className="text-sm text-muted-foreground">
-             {isBreakoutActive ? "Breakout sessions are active." : "Main session active."}
+            {isBreakoutActive
+              ? t("classes.live.breakoutActive")
+              : t("classes.live.mainActive")}
           </p>
         </div>
-        
+
         {isTeacher && isJoined && (
-            <div className="flex gap-2">
-                 <Button 
-                    variant={isBreakoutActive ? "destructive" : "secondary"}
-                    size="sm"
-                    onClick={handleToggleBreakout}
-                 >
-                    <Grid className="h-4 w-4 mr-2" />
-                    {isBreakoutActive ? "End Breakouts" : "Start Breakouts"}
-                 </Button>
-            </div>
+          <div className="flex gap-2">
+            <Button
+              variant={isBreakoutActive ? "destructive" : "secondary"}
+              size="sm"
+              onClick={handleToggleBreakout}
+            >
+              <Grid className={cn("h-4 w-4", isAr ? "ml-2" : "mr-2")} />
+              {isBreakoutActive
+                ? t("classes.live.endBreakouts")
+                : t("classes.live.startBreakouts")}
+            </Button>
+          </div>
         )}
       </div>
 
       {isTeacher && isBreakoutActive && isJoined && (
-          <div className="flex gap-2 overflow-x-auto pb-2">
-              <Button 
-                variant={currentGroupId === null ? "default" : "outline"}
-                size="sm"
-                onClick={() => startMeeting()}
-              >
-                Main Hall
-              </Button>
-              {groups.map((group: any) => (
-                  <Button
-                    key={group.id}
-                    variant={currentGroupId === group.id ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => joinBreakoutRoom(group.id)}
-                  >
-                    {group.name}
-                  </Button>
-              ))}
-          </div>
+        <div className="flex gap-2 overflow-x-auto pb-2">
+          <Button
+            variant={currentGroupId === null ? "default" : "outline"}
+            size="sm"
+            onClick={() => startMeeting()}
+          >
+            {t("classes.live.mainHall")}
+          </Button>
+          {groups.map((group: any) => (
+            <Button
+              key={group.id}
+              variant={currentGroupId === group.id ? "default" : "outline"}
+              size="sm"
+              onClick={() => joinBreakoutRoom(group.id)}
+            >
+              {group.name}
+            </Button>
+          ))}
+        </div>
       )}
 
       {!isJoined ? (
@@ -365,66 +434,110 @@ export const LiveClassroom = ({
               <Users className="h-8 w-8 text-live-primary" />
             </div>
             <div className="space-y-2">
-              <h4 className="text-xl font-bold">Ready to join?</h4>
+              <h4 className="text-xl font-bold">
+                {t("classes.live.readyToJoin")}
+              </h4>
               <p className="text-muted-foreground max-w-md mx-auto">
-                {isBreakoutActive && !isTeacher 
-                    ? "Breakout sessions are in progress. You will join your group room." 
-                    : "Click below to enter the virtual classroom."}
+                {isBreakoutActive && !isTeacher
+                  ? t("classes.live.breakoutDescription")
+                  : isClassLive
+                    ? t("classes.live.mainDescription")
+                    : t("classes.live.sessionNotStarted")}
               </p>
             </div>
-            
-            <div className="flex flex-col gap-2">
-                <Button
-                size="lg"
-                onClick={() => isBreakoutActive && myGroup ? joinBreakoutRoom(myGroup.id) : startMeeting()}
-                disabled={isLoading}
-                className="bg-live-primary hover:bg-live-primary/90 text-white shadow-lg shadow-live-primary/20"
-                >
-                {isLoading ? (
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                ) : (
-                    <Video className="h-4 w-4 mr-2" />
-                )}
-                {isBreakoutActive && myGroup ? `Join ${myGroup.name} Room` : "Join Class Now"}
-                </Button>
-            </div>
 
+            <div className="flex flex-col gap-2">
+              {isTeacher && !isClassLive ? (
+                <Button
+                  size="lg"
+                  onClick={handleStartLiveSession}
+                  disabled={isLoading}
+                  className="bg-live-primary hover:bg-live-primary/90 text-white shadow-lg shadow-live-primary/20"
+                >
+                  {isLoading ? (
+                    <Loader2
+                      className={cn(
+                        "h-4 w-4 animate-spin",
+                        isAr ? "ml-2" : "mr-2",
+                      )}
+                    />
+                  ) : (
+                    <Video className={cn("h-4 w-4", isAr ? "ml-2" : "mr-2")} />
+                  )}
+                  {t("classes.live.startLiveSession")}
+                </Button>
+              ) : (
+                <Button
+                  size="lg"
+                  onClick={() =>
+                    isBreakoutActive && myGroup
+                      ? joinBreakoutRoom(myGroup.id)
+                      : startMeeting()
+                  }
+                  disabled={isLoading || !isClassLive}
+                  className="bg-live-primary hover:bg-live-primary/90 text-white shadow-lg shadow-live-primary/20"
+                >
+                  {isLoading ? (
+                    <Loader2
+                      className={cn(
+                        "h-4 w-4 animate-spin",
+                        isAr ? "ml-2" : "mr-2",
+                      )}
+                    />
+                  ) : (
+                    <Video className={cn("h-4 w-4", isAr ? "ml-2" : "mr-2")} />
+                  )}
+                  {isBreakoutActive && myGroup
+                    ? t("classes.live.joinGroup", { name: myGroup.name })
+                    : t("classes.live.joinNow")}
+                </Button>
+              )}
+            </div>
           </CardContent>
         </Card>
       ) : (
         <div className="space-y-4">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 max-w-[400px]">
+          <Tabs
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="w-full"
+          >
+            <TabsList className="grid w-full grid-cols-2 max-w-100">
               <TabsTrigger value="video" className="flex items-center gap-2">
                 <Video className="h-4 w-4" />
-                Video Session
+                {t("classes.live.videoSession")}
               </TabsTrigger>
-              <TabsTrigger value="whiteboard" className="flex items-center gap-2">
+              <TabsTrigger
+                value="whiteboard"
+                className="flex items-center gap-2"
+              >
                 <Presentation className="h-4 w-4" />
-                Whiteboard
+                {t("classes.live.whiteboard")}
               </TabsTrigger>
             </TabsList>
-            
+
             <div className="mt-4">
-              <TabsContent 
-                value="video" 
-                forceMount 
+              <TabsContent
+                value="video"
+                forceMount
                 className={cn("m-0", activeTab !== "video" && "hidden")}
               >
                 <div className="rounded-xl overflow-hidden border shadow-2xl bg-black">
-                  <div ref={jitsiContainerRef} className="w-full h-[600px]" />
+                  <div ref={jitsiContainerRef} className="w-full h-150" />
                 </div>
               </TabsContent>
-              
-              <TabsContent 
-                value="whiteboard" 
-                forceMount 
+
+              <TabsContent
+                value="whiteboard"
+                forceMount
                 className={cn("m-0", activeTab !== "whiteboard" && "hidden")}
               >
-                <div className="h-[650px]">
-                  <Whiteboard 
-                    classId={classIdString} 
-                    roomId={currentGroupId ? `group-${currentGroupId}` : classIdString}
+                <div className="h-162.5">
+                  <Whiteboard
+                    classId={classIdString}
+                    roomId={
+                      currentGroupId ? `group-${currentGroupId}` : classIdString
+                    }
                   />
                 </div>
               </TabsContent>

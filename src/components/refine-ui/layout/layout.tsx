@@ -24,20 +24,25 @@ export function Layout({ children }: PropsWithChildren) {
     <ThemeProvider>
       <SidebarProvider>
         <Sidebar />
-        <SidebarInset className="flex flex-col min-h-screen">
+        <SidebarInset className="flex flex-col min-h-screen bg-background/50">
           <OfflineBanner />
           <Header />
-          <main className="flex-1 flex flex-col relative">
-            <AnimatePresence mode="wait">
+          <main className="flex-1 flex flex-col relative w-full overflow-x-hidden">
+            <AnimatePresence mode="wait" initial={false}>
               <motion.div
                 key={pathname}
-                initial={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.2, ease: "easeInOut" }}
+                exit={{ opacity: 0, y: -12 }}
+                transition={{ 
+                  duration: 0.3, 
+                  ease: [0.23, 1, 0.32, 1] // Apple-style cubic bezier for smoother feel
+                }}
                 className={cn(
-                  "flex-1 flex flex-col w-full",
-                  "px-4 py-6 md:px-8 md:py-8 lg:px-10"
+                  "flex-1 flex flex-col w-full mx-auto",
+                  "max-w-screen-2xl",
+                  "p-4 md:p-6 lg:p-8 xl:p-10",
+                  "pb-28 md:pb-10" // Balanced bottom padding for MobileNav
                 )}
               >
                 {children}

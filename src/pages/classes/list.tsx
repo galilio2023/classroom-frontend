@@ -21,6 +21,7 @@ import {
   Send,
   Compass,
   Briefcase,
+  Layers,
 } from "lucide-react";
 import { useMemo, useState, useEffect, useRef, useCallback } from "react";
 import {
@@ -93,7 +94,6 @@ import { socket } from "@/lib/socket";
 import { useTerm } from "@/contexts/term-context";
 import { motion, AnimatePresence } from "framer-motion";
 import usePageTitle from "@/hooks/use-page-title";
-import { useVirtualizer } from "@tanstack/react-virtual";
 import { ApplyTeacherDialog } from "./apply-teacher-dialog";
 import { useTranslation } from "react-i18next";
 import { TeacherDiscoveryList } from "@/components/classes/teacher-discovery-list";
@@ -108,6 +108,7 @@ const ClassesList = () => {
   const isStudent = identity?.role === UserRole.STUDENT;
   const isTeacher = identity?.role === UserRole.TEACHER;
   const isAdmin = identity?.role === UserRole.ADMIN;
+  const isAr = i18n.language === 'ar';
 
   const [inviteCode, setInviteCode] = useState("");
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
@@ -232,7 +233,7 @@ const ClassesList = () => {
     columns,
     refineCoreProps: {
       resource: "classes",
-      pagination: { mode: "server" },
+      pagination: { mode: "server", pageSize: 50 },
       sorters: { initial: [{ field: "id", order: "desc" }] },
       queryOptions: {
         staleTime: 0,
@@ -244,6 +245,7 @@ const ClassesList = () => {
           "teachers",
           "teachers.teacher",
           "_count",
+          "schedules"
         ],
       },
       syncWithLocation: true,
@@ -264,7 +266,6 @@ const ClassesList = () => {
   const classesData = tableQueryResult?.data;
   const isLoading = tableQueryResult?.isLoading;
 
-  // Re-apply filters when viewMode or identity changes (for Teacher's "mine" mode)
   useEffect(() => {
     if (isTeacher) {
       if (viewMode === "mine") {
@@ -335,37 +336,27 @@ const ClassesList = () => {
 
   const parentRef = useRef<HTMLDivElement>(null);
 
-  const estimateSize = useCallback(() => 120, []);
-
-  const rowVirtualizer = useVirtualizer({
-    count: classes.length,
-    getScrollElement: () => parentRef.current,
-    estimateSize,
-    overscan: 5,
-  });
-
-  const isAr = i18n.language === "ar";
-
   return (
-    <div className="space-y-10 pb-20">
+    <div className="space-y-8 md:space-y-12 max-w-screen-2xl mx-auto">
       <ListView>
-        <div className="space-y-10">
+        <div className="space-y-8 md:space-y-12">
+          {/* Header Section */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6"
+            className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6"
           >
-            <div className="space-y-4">
+            <div className="space-y-4 flex-1">
               <Breadcrumb />
-              <div>
-                <h1 className="text-4xl font-black tracking-tight text-start">
+              <div className="space-y-1">
+                <h1 className="page-title mb-0 text-start">
                   {isStudent
                     ? t("classes.list.discover")
                     : viewMode === "mine"
                       ? t("classes.list.myClassrooms")
                       : t("classes.list.browseCatalog")}
                 </h1>
-                <p className="text-muted-foreground font-medium mt-1 text-start">
+                <p className="text-muted-foreground font-medium max-w-2xl text-start text-balance">
                   {isStudent
                     ? t("classes.list.discoverDescription")
                     : viewMode === "mine"
@@ -375,26 +366,26 @@ const ClassesList = () => {
               </div>
             </div>
 
-            <div className="flex gap-3 w-full md:w-auto">
+            <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
               {isTeacher && (
                 <Tabs
                   value={viewMode}
                   onValueChange={(v) => setViewMode(v as any)}
-                  className="bg-muted/20 p-1 rounded-2xl border border-primary/5"
+                  className="bg-muted/30 p-1 rounded-2xl border border-border/40 w-full sm:w-auto"
                 >
-                  <TabsList className="bg-transparent h-12 gap-1">
+                  <TabsList className="bg-transparent h-12 gap-1 w-full sm:w-auto">
                     <TabsTrigger
                       value="mine"
-                      className="rounded-xl font-black uppercase tracking-widest text-[9px] gap-2 px-6 data-[state=active]:bg-primary data-[state=active]:text-white shadow-sm transition-all"
+                      className="rounded-xl font-black uppercase tracking-wider text-[10px] gap-2 px-6 data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all flex-1 sm:flex-none"
                     >
-                      <Briefcase className="h-3.5 w-3.5" />
+                      <Briefcase className="h-4 w-4" />
                       {t("classes.list.myClassesTab")}
                     </TabsTrigger>
                     <TabsTrigger
                       value="browse"
-                      className="rounded-xl font-black uppercase tracking-widest text-[9px] gap-2 px-6 data-[state=active]:bg-primary data-[state=active]:text-white shadow-sm transition-all"
+                      className="rounded-xl font-black uppercase tracking-wider text-[10px] gap-2 px-6 data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all flex-1 sm:flex-none"
                     >
-                      <Compass className="h-3.5 w-3.5" />
+                      <Compass className="h-4 w-4" />
                       {t("classes.list.browseTab")}
                     </TabsTrigger>
                   </TabsList>
@@ -409,22 +400,23 @@ const ClassesList = () => {
                   <DialogTrigger asChild>
                     <Button
                       variant="outline"
-                      className="flex-1 md:flex-none gap-2 rounded-2xl h-14 px-8 border-primary/10 bg-card/50 backdrop-blur-sm hover:bg-primary/5 text-primary font-black uppercase tracking-widest text-[10px] shadow-sm"
+                      size="lg"
+                      className="w-full md:w-auto gap-2 rounded-2xl border-primary/20 bg-primary/5 hover:bg-primary/10 text-primary font-black uppercase tracking-widest text-[10px] h-12 md:h-14"
                     >
                       <Key className="h-4 w-4" />
                       {t("buttons.joinByCode")}
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="rounded-[2.5rem] border-none shadow-2xl bg-card/95 backdrop-blur-xl max-w-md">
+                  <DialogContent className="max-w-md rounded-[2.5rem] bg-card/95 backdrop-blur-xl border-none shadow-2xl">
                     <DialogHeader className="space-y-4">
-                      <div className="p-4 rounded-2xl bg-primary/10 text-primary w-fit">
+                      <div className="p-4 rounded-2xl bg-primary/10 text-primary w-fit mx-auto">
                         <Key className="h-8 w-8" />
                       </div>
-                      <div className="space-y-1 text-start">
-                        <DialogTitle className="text-3xl font-black tracking-tight">
+                      <div className="space-y-2 text-center">
+                        <DialogTitle className="text-3xl font-black">
                           {t("classes.list.joinModal.title")}
                         </DialogTitle>
-                        <DialogDescription className="font-medium text-base">
+                        <DialogDescription className="font-medium text-muted-foreground px-4">
                           {t("classes.list.joinModal.description")}
                         </DialogDescription>
                       </div>
@@ -432,38 +424,36 @@ const ClassesList = () => {
                     <div className="py-10">
                       <div className="relative group">
                         <Input
-                          placeholder={t("classes.list.joinModal.placeholder")}
+                          placeholder="XXXX-XXXX"
                           value={inviteCode}
                           onChange={(e) =>
                             setInviteCode(e.target.value.toUpperCase())
                           }
-                          className="h-24 text-center text-5xl font-black font-mono tracking-[0.3em] rounded-3xl bg-muted/30 border-none focus-visible:ring-primary transition-all shadow-inner"
+                          className="h-24 text-center text-4xl sm:text-5xl font-black font-mono tracking-widest rounded-3xl bg-muted/30 border-none focus-visible:ring-primary/20 shadow-inner"
                           maxLength={8}
+                          dir="ltr"
                         />
-                        <div className="absolute -bottom-8 left-0 w-full text-center">
-                          <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">
-                            {t("classes.list.joinModal.required")}
-                          </span>
-                        </div>
                       </div>
                     </div>
-                    <DialogFooter className="gap-3 pt-6">
+                    <DialogFooter className="sm:justify-center gap-3">
                       <Button
                         variant="ghost"
-                        className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-6"
+                        size="lg"
+                        className="rounded-xl px-8 font-black uppercase tracking-widest text-[10px] h-14"
                         onClick={() => setIsJoinModalOpen(false)}
                       >
                         {t("buttons.cancel")}
                       </Button>
                       <Button
-                        className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-10 shadow-xl shadow-primary/20"
+                        size="lg"
+                        className="rounded-xl px-10 shadow-xl shadow-primary/20 font-black uppercase tracking-widest text-[10px] h-14"
                         onClick={handleJoinByCode}
                         disabled={isJoining || inviteCode.length !== 8}
                       >
                         {isJoining ? (
-                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                          <Loader2 className="h-4 w-4 animate-spin me-2" />
                         ) : (
-                          <PlusCircle className="h-4 w-4 mr-2" />
+                          <PlusCircle className="h-4 w-4 me-2" />
                         )}
                         {t("buttons.joinClass")}
                       </Button>
@@ -474,7 +464,8 @@ const ClassesList = () => {
               {(isTeacher || isAdmin) && (
                 <Button
                   onClick={() => create("classes")}
-                  className="flex-1 md:flex-none rounded-2xl h-14 px-10 font-black uppercase tracking-widest text-[10px] gap-2 shadow-xl shadow-primary/20 transition-all hover:scale-105 active:scale-95"
+                  size="lg"
+                  className="w-full md:w-auto rounded-2xl h-12 md:h-14 px-10 font-bold uppercase tracking-widest text-[10px] gap-2 shadow-lg shadow-primary/25 hover:translate-y-[-2px] transition-all"
                 >
                   <PlusCircle className="h-5 w-5" />
                   {t("buttons.createClass")}
@@ -483,22 +474,23 @@ const ClassesList = () => {
             </div>
           </motion.div>
 
+          {/* Archive Alert */}
           <AnimatePresence>
             {selectedTerm?.status === "archived" && (
               <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
+                initial={{ opacity: 0, scale: 0.98 }}
                 animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                className="bg-amber-500/10 border border-amber-500/20 text-amber-700 p-6 rounded-4xl shadow-sm flex items-start gap-4 backdrop-blur-sm"
+                exit={{ opacity: 0, scale: 0.98 }}
+                className="bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 p-6 md:p-8 rounded-3xl md:rounded-[2.5rem] flex flex-col sm:flex-row items-center gap-5 backdrop-blur-sm text-center sm:text-start"
               >
-                <div className="p-3 rounded-2xl bg-amber-500/20">
-                  <AlertCircle className="h-6 w-6" />
+                <div className="p-3.5 rounded-2xl bg-amber-500/20 shrink-0">
+                  <AlertCircle className="h-8 w-8" />
                 </div>
-                <div className="space-y-1 text-start">
-                  <p className="font-black uppercase tracking-widest text-xs">
+                <div className="flex-1 space-y-1.5">
+                  <p className="font-black uppercase tracking-[0.2em] text-[10px]">
                     {t("dashboard.archiveViewActive")}
                   </p>
-                  <p className="text-sm font-medium">
+                  <p className="text-base font-bold opacity-90 text-balance">
                     {t("dashboard.archiveViewDescription", {
                       termName: selectedTerm.name,
                     })}
@@ -508,95 +500,79 @@ const ClassesList = () => {
             )}
           </AnimatePresence>
 
-          {/* Teacher Discovery Catalog (Netflix Style) */}
+          {/* Teacher Discovery Catalog */}
           {isStudent && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
+              className="bg-primary/[0.02] border border-primary/5 rounded-[2.5rem] md:rounded-[3rem] p-6 md:p-8"
             >
-              <TeacherDiscoveryList />
+               <TeacherDiscoveryList />
             </motion.div>
           )}
 
-          {/* Filters & Search */}
-          <Card className="p-4 border-primary/5 bg-muted/30 rounded-4xl backdrop-blur-sm">
-            <div className="flex flex-col lg:flex-row gap-4">
+          {/* Search & Filters Card */}
+          <Card className="p-2 border-border/40 bg-muted/20 rounded-[1.5rem] md:rounded-[2rem] backdrop-blur-xl sticky top-20 z-30 shadow-sm">
+            <div className="flex flex-col lg:flex-row gap-2">
               <div className="relative flex-1 group">
                 <Search
-                  className={cn(
-                    "absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors",
-                    isAr ? "right-4" : "left-4",
-                  )}
+                  className="absolute top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground/60 group-focus-within:text-primary transition-colors start-4 md:start-6"
                 />
                 <Input
                   type="text"
                   placeholder={t("classes.list.searchPlaceholder")}
-                  className={cn(
-                    "h-14 rounded-2xl border-none bg-background shadow-sm font-medium",
-                    isAr ? "pr-11 pl-4" : "pl-11 pr-4",
-                  )}
+                  className="h-14 md:h-16 rounded-[1.25rem] md:rounded-3xl border-none bg-background/50 shadow-inner font-bold text-base md:text-lg ps-12 md:ps-14 pe-4 md:pe-6"
                   value={searchQuery}
                   onChange={(event) => setSearchQuery(event.target.value)}
                 />
               </div>
-              <div className="flex flex-wrap gap-3">
-                <div className="flex items-center gap-2 bg-background px-4 rounded-2xl shadow-sm border border-primary/5">
-                  <Filter className="h-4 w-4 text-muted-foreground" />
+              <div className="flex items-center gap-2 bg-background/50 px-4 md:px-6 py-2 rounded-[1.25rem] md:rounded-3xl border border-border/40 shrink-0 shadow-inner">
+                  <Filter className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground/60" />
                   <Select
                     value={selectedSubject}
                     onValueChange={setSelectedSubject}
                   >
-                    <SelectTrigger className="w-[180px] border-none h-10 focus:ring-0 shadow-none font-black text-[10px] uppercase tracking-widest">
-                      <SelectValue
-                        placeholder={t("classes.list.allSubjects")}
-                      />
+                    <SelectTrigger className="w-[180px] md:w-[220px] border-none h-12 focus:ring-0 shadow-none font-black text-xs uppercase tracking-widest bg-transparent">
+                      <SelectValue placeholder={t("classes.list.allSubjects")} />
                     </SelectTrigger>
-                    <SelectContent className="rounded-2xl border-none shadow-2xl">
-                      <SelectItem value="all" className="rounded-xl font-bold">
-                        {t("classes.list.allSubjects")}
-                      </SelectItem>
+                    <SelectContent className="rounded-2xl border-border/40 shadow-2xl bg-card/95 backdrop-blur-xl">
+                      <SelectItem value="all" className="font-bold py-3">{t("classes.list.allSubjects")}</SelectItem>
                       {subjects.map((subject: Subject) => (
-                        <SelectItem
-                          key={subject.id}
-                          value={subject.name}
-                          className="rounded-xl font-bold"
-                        >
+                        <SelectItem key={subject.id} value={subject.name} className="font-bold py-3">
                           {subject.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
-                </div>
               </div>
             </div>
           </Card>
 
-          {/* List Container */}
-          <div
-            ref={parentRef}
-            className="h-[700px] overflow-auto pr-2 custom-scrollbar rounded-[2.5rem] border border-primary/5 bg-card/30 backdrop-blur-sm relative"
-          >
+          {/* Class List Main Area - Using Grid on Desktop */}
+          <div className="relative">
             {isLoading ? (
-              <div className="p-8 space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                 {Array.from({ length: 6 }).map((_, i) => (
-                  <div
-                    key={i}
-                    className="flex flex-col md:flex-row items-center gap-6"
-                  >
-                    <Skeleton className="h-20 w-20 rounded-2xl shrink-0" />
-                    <div className="flex-1 space-y-3 w-full">
-                      <Skeleton className="h-6 w-[250px]" />
-                      <Skeleton className="h-4 w-[180px]" />
+                  <Card key={i} className="p-6 md:p-8 flex flex-col gap-6 border-border/20 bg-background/50 rounded-[2rem]">
+                    <div className="flex items-center gap-4">
+                        <Skeleton className="h-20 w-20 rounded-2xl shrink-0" />
+                        <div className="flex-1 space-y-3">
+                            <Skeleton className="h-6 w-3/4" />
+                            <Skeleton className="h-4 w-1/2" />
+                        </div>
                     </div>
-                    <Skeleton className="h-12 w-32 rounded-xl" />
-                  </div>
+                    <div className="flex gap-4">
+                        <Skeleton className="h-10 w-full rounded-xl" />
+                        <Skeleton className="h-10 w-10 rounded-xl shrink-0" />
+                    </div>
+                  </Card>
                 ))}
               </div>
             ) : !hasData ? (
-              <div className="h-full flex items-center justify-center p-10">
+              <div className="flex items-center justify-center p-12 md:p-20 bg-card/20 rounded-[3rem] border-2 border-dashed border-border/40 text-center">
                 <EmptyState
-                  icon={LayoutDashboard}
+                  icon={Layers}
                   title={t("classes.list.noClasses")}
                   description={
                     isStudent
@@ -625,21 +601,15 @@ const ClassesList = () => {
                 />
               </div>
             ) : (
-              <div
-                style={{
-                  height: `${rowVirtualizer.getTotalSize()}px`,
-                  width: "100%",
-                  position: "relative",
-                }}
-              >
-                {rowVirtualizer.getVirtualItems().map((virtualItem) => {
-                  const classItem = classes[virtualItem.index];
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 md:gap-8">
+                <AnimatePresence mode="popLayout">
+                {classes.map((classItem, index) => {
                   if (!classItem) return null;
 
                   const primaryTeacher = classItem.teachers?.find(
                     (t: any) => t.isPrimary,
                   )?.teacher;
-                  const classColor = (classItem as any).color || "#3b82f6";
+                  const classColor = (classItem as any).color || "#6366f1";
 
                   const isAssigned = classItem.teachers?.some(
                     (t: any) => t.teacher.id === identity?.id,
@@ -650,214 +620,159 @@ const ClassesList = () => {
                   );
 
                   return (
-                    <div
-                      key={virtualItem.key}
-                      style={{
-                        position: "absolute",
-                        top: 0,
-                        left: 0,
-                        width: "100%",
-                        height: `${virtualItem.size}px`,
-                        transform: `translateY(${virtualItem.start}px)`,
-                      }}
-                      className="px-8"
-                    >
                       <motion.div
-                        initial={{ opacity: 0, x: isAr ? 10 : -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.2 }}
-                        className="flex flex-col md:flex-row items-center h-full border-b border-primary/5 hover:bg-primary/[0.02] transition-all group"
+                        key={classItem.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        transition={{ delay: index * 0.05 }}
+                        className="group relative flex flex-col h-full p-6 md:p-8 rounded-[2.5rem] bg-card/50 backdrop-blur-3xl border border-border/40 hover:border-primary/30 hover:bg-card/80 transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-primary/5 cursor-pointer"
+                        onClick={() => show("classes", classItem.id)}
                       >
-                        {/* Banner/Icon */}
-                        <div className="relative shrink-0 mb-4 md:mb-0">
-                          {classItem.bannerUrl ? (
-                            <img
-                              src={classItem.bannerUrl}
-                              alt={classItem.name}
-                              className="h-20 w-20 rounded-[1.5rem] object-cover border-4 border-background shadow-lg group-hover:scale-105 transition-transform"
-                            />
-                          ) : (
-                            <div
-                              className="h-20 w-20 rounded-[1.5rem] border-4 border-background flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform"
-                              style={{
-                                backgroundColor: `${classColor}15`,
-                                borderColor: `${classColor}30`,
-                              }}
-                            >
-                              <BookOpen
-                                className="h-10 w-10"
-                                style={{ color: classColor }}
-                              />
+                        {/* Status Line Accent - using logical properties */}
+                        <div 
+                           className="absolute start-0 top-1/2 -translate-y-1/2 w-1.5 h-16 rounded-e-full transition-all group-hover:h-24"
+                           style={{ backgroundColor: classColor }}
+                        />
+
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 md:gap-6 mb-6">
+                            {/* Banner/Icon Container */}
+                            <div className="relative shrink-0">
+                            {classItem.bannerUrl ? (
+                                <div className="relative p-1 rounded-[1.75rem] bg-background shadow-md group-hover:scale-105 transition-transform duration-500 overflow-hidden">
+                                    <img
+                                        src={classItem.bannerUrl}
+                                        alt={classItem.name}
+                                        className="h-20 w-20 md:h-24 md:w-24 rounded-[1.5rem] object-cover"
+                                    />
+                                </div>
+                            ) : (
+                                <div
+                                className="h-20 w-20 md:h-24 md:w-24 rounded-[1.75rem] bg-muted/30 border-2 border-dashed border-border/40 flex items-center justify-center group-hover:scale-105 transition-transform duration-500"
+                                style={{
+                                    backgroundColor: `${classColor}10`,
+                                    borderColor: `${classColor}30`,
+                                }}
+                                >
+                                <BookOpen
+                                    className="h-8 w-8 md:h-10 md:w-10 transition-colors duration-500"
+                                    style={{ color: classColor }}
+                                />
+                                </div>
+                            )}
+                            {classItem.isLive && (
+                                <div className="absolute -top-2 -end-2 p-1.5 rounded-full bg-red-500 text-white shadow-lg shadow-red-500/30 border-4 border-background animate-bounce">
+                                <Video className="h-3 w-3 md:h-4 md:w-4" />
+                                </div>
+                            )}
                             </div>
-                          )}
-                          {classItem.isLive && (
-                            <div
-                              className={cn(
-                                "absolute -top-2 bg-red-500 text-white p-1.5 rounded-full border-4 border-background shadow-lg animate-pulse",
-                                isAr ? "-left-2" : "-right-2",
-                              )}
-                            >
-                              <Video className="h-3 w-3" />
+
+                            {/* Title & Badges */}
+                            <div className="flex-1 min-w-0 space-y-2.5 w-full">
+                                <h3 className="text-xl md:text-2xl font-black tracking-tight truncate group-hover:text-primary transition-colors">
+                                    {classItem.name}
+                                </h3>
+                                <div className="flex flex-wrap items-center gap-2">
+                                    <Badge variant="ai" className="h-6 text-[9px] md:text-[10px]">
+                                        {classItem.subject?.name || t("classes.list.general")}
+                                    </Badge>
+                                    {classItem.isLive && (
+                                        <Badge variant="destructive" className="animate-pulse gap-1.5 h-6 text-[9px] md:text-[10px]">
+                                            <span className="h-1.5 w-1.5 rounded-full bg-white" />
+                                            {t("classes.list.live")}
+                                        </Badge>
+                                    )}
+                                </div>
                             </div>
-                          )}
                         </div>
 
-                        {/* Info */}
-                        <div
-                          className={cn(
-                            "flex-1 text-center md:text-left min-w-0 w-full",
-                            isAr ? "md:mr-8" : "md:ml-8",
-                          )}
-                        >
-                          <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
-                            <h3 className="text-xl font-black tracking-tight truncate group-hover:text-primary transition-colors text-start">
-                              {classItem.name}
-                            </h3>
-                            <div className="flex items-center justify-center md:justify-start gap-2">
-                              <Badge
-                                variant="outline"
-                                className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md border-primary/10"
-                              >
-                                {classItem.subject?.name ||
-                                  t("classes.list.general")}
-                              </Badge>
-                              {classItem.isLive && (
-                                <div className="flex items-center gap-1.5 bg-red-500/10 px-2 py-0.5 rounded-md">
-                                  <span className="relative flex h-1.5 w-1.5">
-                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-red-500"></span>
-                                  </span>
-                                  <span className="text-[9px] font-black text-red-500 uppercase tracking-widest">
-                                    {t("classes.list.live")}
-                                  </span>
+                        {/* Meta Info Grid */}
+                        <div className="grid grid-cols-2 gap-4 mb-6 md:mb-8 mt-auto flex-1 content-end">
+                            <div className="flex items-center gap-3 bg-background/50 p-3 rounded-2xl border border-border/40 shadow-sm">
+                                <div className="p-2 rounded-xl bg-primary/5 text-primary shrink-0">
+                                    <Users className="h-4 w-4" />
                                 </div>
-                              )}
-                              {isTeacher && pendingApp && (
-                                <Badge className="bg-amber-500/10 text-amber-600 border-none text-[9px] font-black uppercase tracking-widest">
-                                  {t("classes.list.pendingApproval")}
-                                </Badge>
-                              )}
-                            </div>
-                          </div>
-
-                          <div className="flex flex-wrap items-center justify-center md:justify-start gap-x-6 gap-y-2 mt-3">
-                            <div className="flex items-center gap-2 text-muted-foreground">
-                              <div className="p-1.5 rounded-lg bg-primary/5">
-                                <Users className="h-3.5 w-3.5 text-primary" />
-                              </div>
-                              <span className="text-xs font-bold">
-                                {classItem._count?.enrollments || 0}{" "}
-                                <span className="text-muted-foreground/50 font-medium">
-                                  / {classItem.capacity || "∞"}{" "}
-                                  {t("classes.list.studentsLabel")}
-                                </span>
-                              </span>
+                                <div className="flex flex-col min-w-0">
+                                    <span className="text-[9px] uppercase font-bold text-muted-foreground/60 tracking-wider truncate">
+                                        {t("classes.list.studentsLabel")}
+                                    </span>
+                                    <span className="text-xs md:text-sm font-black text-foreground">
+                                        {classItem._count?.enrollments || 0}
+                                    </span>
+                                </div>
                             </div>
 
-                            {primaryTeacher && (
-                              <div className="flex items-center gap-2 text-muted-foreground">
-                                <div className="p-1.5 rounded-lg bg-primary/5">
-                                  <Building2 className="h-3.5 w-3.5 text-primary" />
+                            {primaryTeacher ? (
+                                <div className="flex items-center gap-3 bg-background/50 p-3 rounded-2xl border border-border/40 shadow-sm">
+                                    <div className="p-2 rounded-xl bg-primary/5 text-primary shrink-0">
+                                        <Building2 className="h-4 w-4" />
+                                    </div>
+                                    <div className="flex flex-col min-w-0">
+                                        <span className="text-[9px] uppercase font-bold text-muted-foreground/60 tracking-wider truncate">
+                                            Teacher
+                                        </span>
+                                        <span className="text-xs md:text-sm font-black text-foreground truncate">
+                                            {primaryTeacher.name.split(' ')[0]}
+                                        </span>
+                                    </div>
                                 </div>
-                                <span className="text-xs font-bold">
-                                  {primaryTeacher.name}
-                                </span>
-                              </div>
-                            )}
-
-                            {classItem.schedules?.[0] && (
-                              <div className="flex items-center gap-2 text-muted-foreground">
-                                <div className="p-1.5 rounded-lg bg-primary/5">
-                                  <Clock className="h-3.5 w-3.5 text-primary" />
+                            ) : classItem.schedules?.[0] ? (
+                                <div className="flex items-center gap-3 bg-background/50 p-3 rounded-2xl border border-border/40 shadow-sm">
+                                    <div className="p-2 rounded-xl bg-primary/5 text-primary shrink-0">
+                                        <Clock className="h-4 w-4" />
+                                    </div>
+                                    <div className="flex flex-col min-w-0">
+                                        <span className="text-[9px] uppercase font-bold text-muted-foreground/60 tracking-wider truncate">
+                                            {classItem.schedules[0].day.substring(0,3)}
+                                        </span>
+                                        <span className="text-xs md:text-sm font-black text-foreground uppercase truncate">
+                                            {classItem.schedules[0].startTime}
+                                        </span>
+                                    </div>
                                 </div>
-                                <span className="text-xs font-bold uppercase tracking-tight">
-                                  {classItem.schedules[0].day} •{" "}
-                                  {classItem.schedules[0].startTime}
-                                </span>
-                              </div>
-                            )}
-                          </div>
+                            ) : null}
                         </div>
 
-                        {/* Actions */}
-                        <div className="flex items-center gap-3 mt-6 md:mt-0 shrink-0">
-                          <div
-                            className={cn(
-                              "hidden lg:flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all",
-                              isAr
-                                ? "-translate-x-4 group-hover:translate-x-0"
-                                : "translate-x-4 group-hover:translate-x-0",
-                            )}
-                          >
-                            {((isTeacher && isAssigned) || isAdmin) && (
-                              <>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-10 w-10 rounded-xl text-muted-foreground hover:text-primary hover:bg-primary/5"
-                                  onClick={() =>
-                                    handleClone(classItem.id as number)
-                                  }
-                                  disabled={isCloning}
-                                >
-                                  <Copy className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-10 w-10 rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/5"
-                                  onClick={() =>
-                                    setDeleteTarget(classItem.id as number)
-                                  }
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </>
-                            )}
-                          </div>
-
+                        {/* Actions Area */}
+                        <div className="flex items-center gap-3 pt-4 border-t border-border/40 w-full mt-auto">
                           {isTeacher && !isAssigned ? (
                             <Button
-                              onClick={() =>
+                              onClick={(e) => {
+                                e.stopPropagation();
                                 setApplyTarget({
                                   id: classItem.id as number,
                                   name: classItem.name,
-                                })
-                              }
+                                });
+                              }}
                               disabled={!!pendingApp}
-                              className="rounded-2xl px-8 h-12 text-[10px] font-black uppercase tracking-widest transition-all shadow-xl shadow-primary/20"
+                              size="lg"
+                              className="w-full rounded-2xl h-12 md:h-14 font-black uppercase tracking-widest text-[10px] md:text-xs transition-all shadow-xl shadow-primary/20"
                             >
-                              <Send className="h-4 w-4 mr-2" />
-                              {pendingApp
-                                ? t("buttons.applied")
-                                : t("buttons.applyToTeach")}
+                              <Send className="h-4 w-4 me-2 rtl:-scale-x-100" />
+                              {pendingApp ? t("buttons.applied") : t("buttons.applyToTeach")}
                             </Button>
                           ) : (
                             <Button
                               asChild
+                              size="lg"
                               variant={classItem.isLive ? "default" : "outline"}
                               className={cn(
-                                "rounded-2xl px-8 h-12 text-[10px] font-black uppercase tracking-widest transition-all shadow-sm",
+                                "flex-1 rounded-2xl h-12 md:h-14 font-black uppercase tracking-widest text-[10px] md:text-xs transition-all",
                                 classItem.isLive
-                                  ? "bg-red-500 hover:bg-red-600 text-white border-none shadow-lg shadow-red-500/20"
-                                  : "border-primary/10 text-primary hover:bg-primary hover:text-primary-foreground",
+                                  ? "bg-red-500 hover:bg-red-600 shadow-lg shadow-red-500/30 border-none text-white"
+                                  : "border-primary/20 hover:bg-primary/5 text-primary",
                               )}
                             >
-                              <Link to={`/classes/show/${classItem.id}`}>
+                              <Link to={`/classes/show/${classItem.id}`} onClick={(e) => e.stopPropagation()}>
                                 {classItem.isLive ? (
                                   <>
-                                    <Video className="h-4 w-4 mr-2" />
+                                    <Video className="h-4 w-4 me-2" />
                                     {t("buttons.joinLive")}
                                   </>
                                 ) : (
                                   <>
                                     {t("buttons.enterClass")}
-                                    <ArrowRight
-                                      className={cn(
-                                        "h-4 w-4 ml-2",
-                                        isAr && "mr-2 ml-0 rotate-180",
-                                      )}
-                                    />
+                                    <ArrowRight className={cn("h-4 w-4 ms-2 rtl:-scale-x-100")} />
                                   </>
                                 )}
                               </Link>
@@ -869,64 +784,55 @@ const ClassesList = () => {
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-10 w-10 rounded-xl md:hidden lg:flex"
+                                className="h-12 w-12 md:h-14 md:w-14 rounded-2xl bg-muted/30 hover:bg-muted/50 shrink-0"
+                                onClick={(e) => e.stopPropagation()}
                               >
                                 <MoreHorizontal className="h-5 w-5" />
                               </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent
-                              align="end"
-                              className="w-56 rounded-[1.5rem] p-2"
-                            >
-                              <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-3 py-2 text-start">
+                            <DropdownMenuContent align="end" className="w-56 md:w-64 p-2 rounded-3xl">
+                              <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/50 px-3 py-3">
                                 {t("classes.list.classOptions")}
                               </DropdownMenuLabel>
                               <DropdownMenuItem
-                                onClick={() =>
-                                  show("classes", classItem.id as BaseKey)
-                                }
-                                className="rounded-xl gap-3 py-3 cursor-pointer justify-start"
+                                onClick={(e) => { e.stopPropagation(); show("classes", classItem.id as BaseKey); }}
+                                className="rounded-xl gap-3 py-3 cursor-pointer"
                               >
-                                <Eye className="h-4 w-4 text-primary" />
-                                <span className="font-bold">
-                                  {t("buttons.viewDetails")}
-                                </span>
+                                <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                                    <Eye className="h-4 w-4" />
+                                </div>
+                                <span className="font-bold text-sm">{t("buttons.viewDetails")}</span>
                               </DropdownMenuItem>
+                              
                               {((isTeacher && isAssigned) || isAdmin) && (
                                 <>
                                   <DropdownMenuItem
-                                    onClick={() =>
-                                      edit("classes", classItem.id as BaseKey)
-                                    }
-                                    className="rounded-xl gap-3 py-3 cursor-pointer justify-start"
+                                    onClick={(e) => { e.stopPropagation(); edit("classes", classItem.id as BaseKey); }}
+                                    className="rounded-xl gap-3 py-3 cursor-pointer"
                                   >
-                                    <Pencil className="h-4 w-4 text-primary" />
-                                    <span className="font-bold">
-                                      {t("buttons.editClass")}
-                                    </span>
+                                    <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                                        <Pencil className="h-4 w-4" />
+                                    </div>
+                                    <span className="font-bold text-sm">{t("buttons.editClass")}</span>
                                   </DropdownMenuItem>
-                                  <DropdownMenuSeparator className="my-2" />
+                                  <DropdownMenuSeparator className="my-2 opacity-50" />
                                   <DropdownMenuItem
-                                    onClick={() =>
-                                      handleClone(classItem.id as number)
-                                    }
-                                    className="rounded-xl gap-3 py-3 cursor-pointer justify-start"
+                                    onClick={(e) => { e.stopPropagation(); handleClone(classItem.id as number); }}
+                                    className="rounded-xl gap-3 py-3 cursor-pointer"
                                   >
-                                    <Copy className="h-4 w-4 text-primary" />
-                                    <span className="font-bold">
-                                      {t("buttons.duplicateCurriculum")}
-                                    </span>
+                                    <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                                        <Copy className="h-4 w-4" />
+                                    </div>
+                                    <span className="font-bold text-sm">{t("buttons.duplicateCurriculum")}</span>
                                   </DropdownMenuItem>
                                   <DropdownMenuItem
-                                    onClick={() =>
-                                      setDeleteTarget(classItem.id as number)
-                                    }
-                                    className="rounded-xl gap-3 py-3 cursor-pointer text-destructive focus:text-destructive justify-start"
+                                    onClick={(e) => { e.stopPropagation(); setDeleteTarget(classItem.id as number); }}
+                                    className="rounded-xl gap-3 py-3 cursor-pointer text-destructive focus:bg-destructive/10"
                                   >
-                                    <Trash2 className="h-4 w-4" />
-                                    <span className="font-bold">
-                                      {t("buttons.deleteClass")}
-                                    </span>
+                                    <div className="p-2 rounded-lg bg-destructive/10 text-destructive">
+                                        <Trash2 className="h-4 w-4" />
+                                    </div>
+                                    <span className="font-bold text-sm">{t("buttons.deleteClass")}</span>
                                   </DropdownMenuItem>
                                 </>
                               )}
@@ -934,9 +840,9 @@ const ClassesList = () => {
                           </DropdownMenu>
                         </div>
                       </motion.div>
-                    </div>
                   );
                 })}
+              </AnimatePresence>
               </div>
             )}
           </div>
@@ -947,27 +853,27 @@ const ClassesList = () => {
         open={deleteTarget !== null}
         onOpenChange={() => setDeleteTarget(null)}
       >
-        <AlertDialogContent className="rounded-[2.5rem] border-none shadow-2xl bg-card/95 backdrop-blur-xl">
+        <AlertDialogContent className="rounded-[2.5rem]">
           <AlertDialogHeader className="space-y-4">
-            <div className="p-4 rounded-2xl bg-destructive/10 text-destructive w-fit">
+            <div className="p-5 rounded-2xl bg-destructive/10 text-destructive w-fit mx-auto">
               <Trash2 className="h-8 w-8" />
             </div>
-            <div className="space-y-1 text-start">
-              <AlertDialogTitle className="text-3xl font-black tracking-tight">
+            <div className="space-y-2 text-center">
+              <AlertDialogTitle className="text-3xl font-black">
                 {t("classes.list.deleteDialog.title")}
               </AlertDialogTitle>
-              <AlertDialogDescription className="font-medium text-base">
+              <AlertDialogDescription className="text-base font-medium px-4">
                 {t("classes.list.deleteDialog.description")}
               </AlertDialogDescription>
             </div>
           </AlertDialogHeader>
-          <AlertDialogFooter className="gap-3 pt-6">
-            <AlertDialogCancel className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-6">
+          <AlertDialogFooter className="sm:justify-center gap-3 pt-6">
+            <AlertDialogCancel className="rounded-xl px-8">
               {t("buttons.cancel")}
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmDelete}
-              className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-10 bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-xl shadow-destructive/20"
+              className="rounded-xl px-10 bg-destructive hover:bg-destructive/90 shadow-xl shadow-destructive/20"
             >
               {t("buttons.deleteClass")}
             </AlertDialogAction>

@@ -10,7 +10,6 @@ import {
   Mail, 
   Phone, 
   MapPin, 
-  Calendar, 
   Shield, 
   FileText, 
   Loader2, 
@@ -49,7 +48,6 @@ const UserShow = () => {
   const { data: identity } = useGetIdentity<UserType>();
   const [isPreviewHovered, setIsPreviewHovered] = useState(false);
   
-  // Logic: Use ID from URL if available, otherwise fallback to current user's ID (for /portfolio)
   const id = paramsId || identity?.id;
 
   const { query } = useShow<UserType & { userBadges?: any[] }>({
@@ -63,7 +61,6 @@ const UserShow = () => {
     }
   });
 
-  // Fetch all available badges from DB
   const { result: badgesResult } = useList<any>({
     resource: "badges",
     pagination: { mode: "off" },
@@ -72,7 +69,6 @@ const UserShow = () => {
     }
   });
 
-  // Fetch teacher's classes if this is a teacher
   const { result: teacherClassesResult } = useList<Class>({
     resource: "classes",
     filters: [
@@ -108,7 +104,7 @@ const UserShow = () => {
         .map((b: any) => ({
             id: b.id.toString(),
             name: b.name,
-            description: b.description || t("status.suspended"), 
+            description: b.description || t("status.suspended" as any), 
             icon: Target,
             color: "bg-muted text-muted-foreground",
             unlocked: false,
@@ -119,10 +115,23 @@ const UserShow = () => {
 
   if (isLoading || !id) {
     return (
-      <div className="flex h-[80vh] items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-            <Loader2 className="h-12 w-12 animate-spin text-primary" />
-            <p className="text-muted-foreground font-black uppercase tracking-widest text-[10px]">{t("profile.loading")}</p>
+      <div className="flex flex-col items-center justify-center h-[85vh] gap-8">
+        <motion.div 
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="relative"
+        >
+          <div className="absolute -inset-5 rounded-full bg-primary/5 animate-ping duration-3000" />
+          <Loader2 className="h-20 w-20 animate-spin text-primary/10 stroke-1" />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <UserIcon className="h-8 w-8 text-primary/30" />
+          </div>
+        </motion.div>
+        <div className="text-center space-y-2">
+            <h2 className="text-sm font-black uppercase tracking-[0.3em] text-primary/60 animate-pulse">
+                {t("profile.loading" as any)}
+            </h2>
+            <p className="text-xs font-medium text-muted-foreground/60 italic">Fetching user details and achievements...</p>
         </div>
       </div>
     );
@@ -130,9 +139,25 @@ const UserShow = () => {
 
   if (isError || !user) {
     return (
-      <div className="container mx-auto py-20 text-center space-y-4">
-        <h2 className="text-2xl font-black">{t("profile.notFound")}</h2>
-        <p className="text-muted-foreground">{t("profile.notFoundDesc")}</p>
+      <div className="container mx-auto py-32 text-center space-y-8">
+        <div className="p-8 rounded-[2.5rem] bg-destructive/5 text-destructive w-fit mx-auto border border-destructive/10">
+          <XCircle className="h-20 w-20" />
+        </div>
+        <div className="space-y-3">
+          <h2 className="text-4xl font-black tracking-tight">
+            {t("profile.notFound" as any)}
+          </h2>
+          <p className="text-muted-foreground font-medium max-w-md mx-auto text-lg">
+            {t("profile.notFoundDesc" as any)}
+          </p>
+        </div>
+        <Button
+          asChild
+          size="lg"
+          className="rounded-2xl h-14 px-10 font-bold uppercase tracking-widest text-[10px]"
+        >
+          <Link to="/users">{t("buttons.goBack" as any)}</Link>
+        </Button>
       </div>
     );
   }
@@ -148,23 +173,23 @@ const UserShow = () => {
     switch (user.verificationStatus) {
       case VerificationStatus.VERIFIED:
         return (
-          <Badge className="bg-green-500/10 text-green-600 hover:bg-green-500/20 border-none font-black px-3 py-1 rounded-lg text-[10px] tracking-widest">
+          <Badge className="bg-green-500/10 text-green-600 hover:bg-green-500/20 border border-green-500/20 font-black px-3 py-1 rounded-full text-[10px] tracking-widest shadow-sm">
             <CheckCircle2 className={cn("w-3 h-3", isAr ? "ml-1" : "mr-1")} />
-            {t("users.governance.verification.verified")}
+            {t("users.governance.verification.verified" as any)}
           </Badge>
         );
       case VerificationStatus.PENDING:
         return (
-          <Badge className="bg-amber-500/10 text-amber-600 hover:bg-amber-500/20 border-none font-black px-3 py-1 rounded-lg text-[10px] tracking-widest">
+          <Badge className="bg-amber-500/10 text-amber-600 hover:bg-amber-500/20 border border-amber-500/20 font-black px-3 py-1 rounded-full text-[10px] tracking-widest shadow-sm">
             <Clock className={cn("w-3 h-3", isAr ? "ml-1" : "mr-1")} />
-            {t("users.governance.verification.pending")}
+            {t("users.governance.verification.pending" as any)}
           </Badge>
         );
       case VerificationStatus.REJECTED:
         return (
-          <Badge className="bg-red-500/10 text-red-600 hover:bg-red-500/20 border-none font-black px-3 py-1 rounded-lg text-[10px] tracking-widest">
+          <Badge className="bg-red-500/10 text-red-600 hover:bg-red-500/20 border border-red-500/20 font-black px-3 py-1 rounded-full text-[10px] tracking-widest shadow-sm">
             <XCircle className={cn("w-3 h-3", isAr ? "ml-1" : "mr-1")} />
-            {t("users.governance.toasts.rejected")}
+            {t("users.governance.toasts.rejected" as any)}
           </Badge>
         );
       default:
@@ -184,63 +209,65 @@ const UserShow = () => {
         initial="initial"
         animate="animate"
         exit="exit"
-        className="container mx-auto py-10 max-w-6xl space-y-10 text-start"
+        className="container mx-auto py-8 md:py-12 max-w-7xl space-y-10 md:space-y-16"
     >
-      <div className="space-y-4">
+      <div className="space-y-4 md:space-y-6">
         <Breadcrumb />
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="flex items-center gap-4">
-                <div className="p-3 rounded-2xl bg-primary/10 text-primary shadow-sm">
-                    <UserIcon className="h-8 w-8" />
+                <div className="p-3 rounded-2xl bg-primary/10 text-primary shadow-sm border border-primary/5">
+                    <UserIcon className="h-6 w-6 md:h-8 md:w-8" />
                 </div>
                 <div>
-                    <h1 className="text-4xl font-black tracking-tight">{t("profile.title")}</h1>
-                    <p className="text-muted-foreground font-medium">{t("profile.description")}</p>
+                    <h1 className="text-3xl md:text-4xl lg:text-5xl font-black tracking-tight text-balance">{t("profile.title" as any)}</h1>
+                    <p className="text-muted-foreground font-medium max-w-xl text-balance">{t("profile.description" as any)}</p>
                 </div>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
                 <Button 
                     variant="outline" 
-                    className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-12 px-6 gap-2 border-primary/10 bg-card/50 backdrop-blur-sm"
+                    size="lg"
+                    className="w-full md:w-auto rounded-2xl font-bold uppercase tracking-widest text-[10px] h-12 md:h-14 px-6 md:px-8 gap-2 border-primary/20 bg-primary/5 hover:bg-primary/10"
                     onClick={() => {
-                        navigator.clipboard.writeText(window.location.href);
-                        toast.success(t("profile.toasts.linkCopied"));
+                        void navigator.clipboard.writeText(window.location.href);
+                        toast.success(t("profile.toasts.linkCopied" as any));
                     }}
                 >
                     <Share2 className="w-4 h-4" />
-                    {t("buttons.shareProfile")}
+                    {t("buttons.shareProfile" as any)}
                 </Button>
                 {(isSelf || isAdmin) && (
                     <Button 
-                        className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-12 px-8 shadow-xl shadow-primary/20"
+                        size="lg"
+                        className="w-full md:w-auto rounded-2xl font-bold uppercase tracking-widest text-[10px] h-12 md:h-14 px-8 md:px-10 shadow-lg shadow-primary/25"
                         asChild
                     >
-                        <a href={`/users/edit/${user.id}`}>{t("buttons.editProfile")}</a>
+                        <Link to={`/users/edit/${user.id}`}>{t("buttons.editProfile" as any)}</Link>
                     </Button>
                 )}
             </div>
         </div>
       </div>
 
-      <div className="grid gap-10 md:grid-cols-12">
+      <div className="grid gap-10 md:gap-16 lg:grid-cols-12">
         {/* Left Column: Profile Card */}
-        <div className="md:col-span-4 space-y-8">
-          <Card className="overflow-hidden border-primary/10 shadow-2xl rounded-[2.5rem] bg-card/50 backdrop-blur-sm">
-            <div className="h-32 bg-gradient-to-br from-primary/20 via-primary/10 to-transparent relative">
+        <div className="lg:col-span-4 space-y-10 md:space-y-16">
+          <Card className="overflow-hidden border-border/40 shadow-2xl rounded-[2.5rem] md:rounded-[3rem] bg-card/50 backdrop-blur-3xl">
+            <div className="h-32 bg-linear-to-br from-primary/20 via-primary/10 to-transparent relative">
                 <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10" />
             </div>
-            <CardContent className="relative pt-0 flex flex-col items-center text-center px-8 pb-10">
-              <Avatar className="h-32 w-32 border-8 border-background -mt-16 shadow-2xl rounded-[2rem]">
+            <CardContent className="relative pt-0 flex flex-col items-center text-center px-6 md:px-8 pb-10 md:pb-12">
+              <Avatar className="h-32 w-32 md:h-40 md:w-40 border-8 border-background -mt-16 shadow-2xl rounded-4xl md:rounded-[2.5rem]">
                 <AvatarImage src={user.image ?? ""} className="object-cover" />
-                <AvatarFallback className="text-4xl font-black bg-primary text-primary-foreground">
+                <AvatarFallback className="text-4xl md:text-5xl font-black bg-primary text-primary-foreground">
                   {user.name[0]}
                 </AvatarFallback>
               </Avatar>
               
               <div className="mt-6 space-y-2">
-                <h2 className="text-3xl font-black tracking-tight">{user.name}</h2>
+                <h2 className="text-3xl md:text-4xl font-black tracking-tight text-balance">{user.name}</h2>
                 <div className="flex items-center justify-center gap-2">
-                    <Badge variant="secondary" className="capitalize font-black px-4 py-1 rounded-lg text-[10px] tracking-widest">
+                    <Badge variant="secondary" className="capitalize font-black px-4 py-1.5 rounded-full text-[10px] tracking-widest shadow-sm">
                         {t(`roles.${user.role.toLowerCase()}` as any)}
                     </Badge>
                     {renderVerificationBadge()}
@@ -248,16 +275,16 @@ const UserShow = () => {
               </div>
               
               {isStudent && (
-                <div className="w-full mt-8 space-y-6 bg-primary/5 p-6 rounded-[2rem] border border-primary/5">
+                <div className="w-full mt-8 space-y-6 bg-primary/5 p-6 rounded-4xl border border-primary/5 shadow-inner">
                   <div className="flex items-center justify-between px-2">
                     <div className="flex flex-col items-start">
-                      <span className="text-3xl font-black text-primary">{new Intl.NumberFormat(i18n.language).format(currentLevel)}</span>
-                      <span className="text-[10px] uppercase font-black text-muted-foreground tracking-widest">{t("profile.labels.level")}</span>
+                      <span className="text-3xl md:text-4xl font-black text-primary">{new Intl.NumberFormat(i18n.language).format(currentLevel)}</span>
+                      <span className="text-[10px] uppercase font-black text-muted-foreground/60 tracking-widest">{t("profile.labels.level" as any)}</span>
                     </div>
                     <div className="h-10 w-px bg-primary/10" />
                     <div className="flex flex-col items-end">
-                      <span className="text-3xl font-black text-primary">{new Intl.NumberFormat(i18n.language).format(user.xp || 0)}</span>
-                      <span className="text-[10px] uppercase font-black text-muted-foreground tracking-widest">{t("profile.labels.totalXp")}</span>
+                      <span className="text-3xl md:text-4xl font-black text-primary">{new Intl.NumberFormat(i18n.language).format(user.xp || 0)}</span>
+                      <span className="text-[10px] uppercase font-black text-muted-foreground/60 tracking-widest">{t("profile.labels.totalXp" as any)}</span>
                     </div>
                   </div>
                   <XPProgressBar xp={user.xp || 0} />
@@ -266,53 +293,53 @@ const UserShow = () => {
 
               {isStudent && (
                 <div className="w-full mt-4 grid grid-cols-2 gap-4">
-                  <div className="bg-orange-500/10 p-4 rounded-2xl border border-orange-500/10 flex flex-col items-center">
-                    <Flame className="h-6 w-6 text-orange-500 mb-1" />
-                    <span className="text-xl font-black text-orange-600">{new Intl.NumberFormat(i18n.language).format(user.currentStreak || 0)}</span>
-                    <span className="text-[8px] uppercase font-black text-orange-600/60 tracking-widest">{t("profile.labels.currentStreak")}</span>
+                  <div className="bg-orange-500/10 p-4 md:p-6 rounded-2xl border border-orange-500/10 flex flex-col items-center shadow-sm">
+                    <Flame className="h-6 w-6 md:h-8 md:w-8 text-orange-500 mb-1" />
+                    <span className="text-xl md:text-2xl font-black text-orange-600">{new Intl.NumberFormat(i18n.language).format(user.currentStreak || 0)}</span>
+                    <span className="text-[8px] uppercase font-black text-orange-600/60 tracking-widest">{t("profile.labels.currentStreak" as any)}</span>
                   </div>
-                  <div className="bg-primary/10 p-4 rounded-2xl border border-primary/10 flex flex-col items-center">
-                    <Trophy className="h-6 w-6 text-primary mb-1" />
-                    <span className="text-xl font-black text-primary">{new Intl.NumberFormat(i18n.language).format(user.longestStreak || 0)}</span>
-                    <span className="text-[8px] uppercase font-black text-primary/60 tracking-widest">{t("profile.labels.longestStreak")}</span>
+                  <div className="bg-primary/10 p-4 md:p-6 rounded-2xl border border-primary/10 flex flex-col items-center shadow-sm">
+                    <Trophy className="h-6 w-6 md:h-8 md:w-8 text-primary mb-1" />
+                    <span className="text-xl md:text-2xl font-black text-primary">{new Intl.NumberFormat(i18n.language).format(user.longestStreak || 0)}</span>
+                    <span className="text-[8px] uppercase font-black text-primary/60 tracking-widest">{t("profile.labels.longestStreak" as any)}</span>
                   </div>
                 </div>
               )}
               
               <div className="w-full mt-10 space-y-5 text-start">
-                <div className="flex items-center gap-4 p-4 rounded-2xl bg-background/50 border border-primary/5">
+                <div className="flex items-center gap-4 p-4 rounded-2xl bg-background/50 border border-border/40 shadow-sm">
                   <div className="p-2.5 bg-primary/10 rounded-xl text-primary"><Mail className="h-5 w-5" /></div>
                   <div className="flex flex-col min-w-0">
-                    <span className="text-[10px] uppercase font-black text-muted-foreground tracking-widest">{t("profile.labels.email")}</span>
-                    <span className="font-bold truncate text-sm">{user.email}</span>
+                    <span className="text-[10px] uppercase font-black text-muted-foreground/60 tracking-widest">{t("profile.labels.email" as any)}</span>
+                    <span className="font-bold truncate text-sm md:text-base">{user.email}</span>
                   </div>
                 </div>
 
                 {user.phoneNumber && (
-                  <div className="flex items-center gap-4 p-4 rounded-2xl bg-background/50 border border-primary/5">
+                  <div className="flex items-center gap-4 p-4 rounded-2xl bg-background/50 border border-border/40 shadow-sm">
                     <div className="p-2.5 bg-primary/10 rounded-xl text-primary"><Phone className="h-5 w-5" /></div>
                     <div className="flex flex-col">
-                      <span className="text-[10px] uppercase font-black text-muted-foreground tracking-widest">{t("profile.labels.phone")}</span>
-                      <span className="font-bold text-sm">{user.phoneNumber}</span>
+                      <span className="text-[10px] uppercase font-black text-muted-foreground/60 tracking-widest">{t("profile.labels.phone" as any)}</span>
+                      <span className="font-bold text-sm md:text-base">{user.phoneNumber}</span>
                     </div>
                   </div>
                 )}
 
                 {user.department && (
-                  <div className="flex items-center gap-4 p-4 rounded-2xl bg-background/50 border border-primary/5">
+                  <div className="flex items-center gap-4 p-4 rounded-2xl bg-background/50 border border-border/40 shadow-sm">
                     <div className="p-2.5 bg-primary/10 rounded-xl text-primary"><Building2 className="h-5 w-5" /></div>
                     <div className="flex flex-col">
-                      <span className="text-[10px] uppercase font-black text-muted-foreground tracking-widest">{t("profile.labels.department")}</span>
-                      <span className="font-bold text-sm">{user.department.name}</span>
+                      <span className="text-[10px] uppercase font-black text-muted-foreground/60 tracking-widest">{t("profile.labels.department" as any)}</span>
+                      <span className="font-bold text-sm md:text-base">{user.department.name}</span>
                     </div>
                   </div>
                 )}
 
-                <div className="flex items-center gap-4 p-4 rounded-2xl bg-background/50 border border-primary/5">
+                <div className="flex items-center gap-4 p-4 rounded-2xl bg-background/50 border border-border/40 shadow-sm">
                   <div className="p-2.5 bg-primary/10 rounded-xl text-primary"><Clock className="h-5 w-5" /></div>
                   <div className="flex flex-col">
-                    <span className="text-[10px] uppercase font-black text-muted-foreground tracking-widest">{t("profile.labels.memberSince")}</span>
-                    <span className="font-bold text-sm">{new Date(user.createdAt).toLocaleDateString(i18n.language === 'ar' ? 'ar-EG' : 'en-US', { month: 'long', year: 'numeric' })}</span>
+                    <span className="text-[10px] uppercase font-black text-muted-foreground/60 tracking-widest">{t("profile.labels.memberSince" as any)}</span>
+                    <span className="font-bold text-sm md:text-base">{new Date(user.createdAt).toLocaleDateString(i18n.language === 'ar' ? 'ar-EG' : 'en-US', { month: 'long', year: 'numeric' })}</span>
                   </div>
                 </div>
               </div>
@@ -320,21 +347,21 @@ const UserShow = () => {
           </Card>
 
           {isTeacher && user.teacherChannel && (
-            <Card className="border-primary/10 shadow-xl rounded-[2.5rem] bg-card/50 backdrop-blur-sm overflow-hidden p-6">
+            <Card className="border-border/40 shadow-xl rounded-[2.5rem] md:rounded-[3rem] bg-card/50 backdrop-blur-3xl overflow-hidden p-6 md:p-8">
                 <div className="flex items-center gap-3 mb-4">
-                    <div className="p-2 rounded-xl bg-primary/10 text-primary">
+                    <div className="p-2.5 rounded-xl bg-primary/10 text-primary shadow-sm border border-primary/5">
                         <Tv className="h-5 w-5" />
                     </div>
-                    <h4 className="text-sm font-black uppercase tracking-widest">{t("teacherChannel.labels.stats")}</h4>
+                    <h4 className="text-xl md:text-2xl font-black tracking-tight">{t("teacherChannel.labels.stats" as any)}</h4>
                 </div>
                 <div className="space-y-4">
                     <div className="flex justify-between items-center">
-                        <span className="text-xs font-bold text-muted-foreground">{t("teacherChannel.labels.views")}</span>
-                        <span className="text-lg font-black">{user.teacherChannel.totalViews.toLocaleString()}</span>
+                        <span className="text-sm md:text-base font-bold text-muted-foreground">{t("teacherChannel.labels.views" as any)}</span>
+                        <span className="text-lg md:text-xl font-black">{user.teacherChannel.totalViews.toLocaleString()}</span>
                     </div>
                     <div className="flex justify-between items-center">
-                        <span className="text-xs font-bold text-muted-foreground">{t("teacherChannel.labels.conversion")}</span>
-                        <span className="text-lg font-black text-primary">{(user.teacherChannel.conversionRate * 100).toFixed(1)}%</span>
+                        <span className="text-sm md:text-base font-bold text-muted-foreground">{t("teacherChannel.labels.conversion" as any)}</span>
+                        <span className="text-lg md:text-xl font-black text-primary">{(user.teacherChannel.conversionRate * 100).toFixed(1)}%</span>
                     </div>
                 </div>
             </Card>
@@ -342,11 +369,11 @@ const UserShow = () => {
         </div>
 
         {/* Right Column: Details & Bio */}
-        <div className="md:col-span-8 space-y-10">
+        <div className="lg:col-span-8 space-y-10 md:space-y-16">
           {isTeacher && user.teacherChannel ? (
-            <div className="space-y-10">
+            <div className="space-y-10 md:space-y-16">
                 {/* Hero Trailer Section */}
-                <Card className="border-none shadow-2xl rounded-[3rem] bg-black overflow-hidden relative aspect-video group">
+                <Card className="border-none shadow-2xl rounded-[2.5rem] md:rounded-[3rem] bg-black overflow-hidden relative aspect-video group">
                     <AnimatePresence>
                         {isPreviewHovered && user.teacherChannel.trailerVideoUrl ? (
                             <motion.video 
@@ -357,6 +384,7 @@ const UserShow = () => {
                                 autoPlay
                                 muted
                                 loop
+                                playsInline
                                 className="absolute inset-0 w-full h-full object-cover"
                             />
                         ) : (
@@ -369,88 +397,93 @@ const UserShow = () => {
                             />
                         )}
                     </AnimatePresence>
-                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent p-10 flex flex-col justify-end gap-4">
+                    <div className="absolute inset-0 bg-linear-to-t from-black via-black/40 to-transparent p-6 md:p-10 flex flex-col justify-end gap-4">
                         <motion.div 
                             initial={{ y: 20, opacity: 0 }}
                             animate={{ y: 0, opacity: 1 }}
                             className="space-y-2"
                         >
-                            <h2 className="text-4xl font-black text-white tracking-tight leading-tight max-w-2xl">
+                            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight max-w-2xl text-balance">
                                 {user.teacherChannel.headline}
                             </h2>
-                            <div className="flex items-center gap-4">
-                                <Badge className="bg-primary text-white border-none rounded-lg px-4 py-1.5 font-black uppercase tracking-widest text-xs">
-                                    Official Channel
+                            <div className="flex flex-wrap items-center gap-4">
+                                <Badge className="bg-primary text-white border-none rounded-full px-4 py-1.5 font-black uppercase tracking-widest text-[10px] shadow-sm">
+                                    {t("teacherChannel.labels.officialChannel" as any)}
                                 </Badge>
-                                <Button 
-                                    variant="ghost" 
-                                    className="text-white hover:bg-white/10 gap-2 font-black uppercase tracking-widest text-[10px]"
-                                    onMouseEnter={() => setIsPreviewHovered(true)}
-                                    onMouseLeave={() => setIsPreviewHovered(false)}
-                                >
-                                    <Tv className="h-4 w-4" />
-                                    Watch Trailer
-                                </Button>
+                                {user.teacherChannel.trailerVideoUrl && (
+                                    <Button 
+                                        variant="ghost" 
+                                        className="text-white hover:bg-white/10 gap-2 font-black uppercase tracking-widest text-[10px] rounded-full px-4 py-1.5"
+                                        onMouseEnter={() => setIsPreviewHovered(true)}
+                                        onMouseLeave={() => setIsPreviewHovered(false)}
+                                        onTouchStart={() => setIsPreviewHovered(true)}
+                                        onTouchEnd={() => setIsPreviewHovered(false)}
+                                    >
+                                        <Tv className="h-4 w-4" />
+                                        {t("teacherChannel.labels.trailer" as any)}
+                                    </Button>
+                                )}
                             </div>
                         </motion.div>
                     </div>
                 </Card>
 
                 {/* Channel Bio */}
-                <Card className="border-primary/10 shadow-xl rounded-[2.5rem] bg-card/50 backdrop-blur-sm overflow-hidden">
-                    <CardHeader className="p-8 pb-4">
+                <Card className="border-border/40 shadow-xl rounded-[2.5rem] md:rounded-[3rem] bg-card/50 backdrop-blur-3xl overflow-hidden">
+                    <CardHeader className="p-8 md:p-10 pb-4">
                         <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-xl bg-primary/10 text-primary">
+                            <div className="p-2.5 rounded-xl bg-primary/10 text-primary shadow-sm border border-primary/5">
                                 <FileText className="h-5 w-5" />
                             </div>
-                            <CardTitle className="text-2xl font-black tracking-tight">{t("teacherChannel.labels.bio")}</CardTitle>
+                            <CardTitle className="text-xl md:text-2xl font-black tracking-tight">{t("teacherChannel.labels.bio" as any)}</CardTitle>
                         </div>
                     </CardHeader>
-                    <CardContent className="p-8 pt-4">
-                        <p className="text-lg leading-relaxed text-foreground/80 font-medium whitespace-pre-wrap italic">
+                    <CardContent className="p-8 md:p-10 pt-4">
+                        <p className="text-base md:text-lg leading-relaxed text-foreground/80 font-medium whitespace-pre-wrap italic">
                             "{user.teacherChannel.bio}"
                         </p>
                     </CardContent>
                 </Card>
 
                 {/* Available Classes Section */}
-                <div className="space-y-6">
-                    <div className="flex items-center justify-between px-2">
+                <div className="space-y-6 md:space-y-8">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between px-2 gap-4">
                         <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-xl bg-primary/10 text-primary">
+                            <div className="p-2.5 rounded-xl bg-primary/10 text-primary shadow-sm border border-primary/5">
                                 <GraduationCap className="h-6 w-6" />
                             </div>
-                            <h2 className="text-2xl font-black tracking-tight">Available Classes</h2>
+                            <h2 className="text-xl md:text-2xl font-black tracking-tight">{t("dashboard.stats.activeClasses" as any)}</h2>
                         </div>
-                        <Badge variant="outline" className="rounded-xl border-primary/10 font-bold px-4 py-1.5">
-                            {teacherClasses?.length || 0} active modules
+                        <Badge variant="outline" className="rounded-full border-primary/20 font-bold px-4 py-1.5 text-[10px] uppercase tracking-widest shadow-sm">
+                            {t("teacherChannel.labels.activeModules" as any, { count: teacherClasses?.length || 0 })}
                         </Badge>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8">
                         {teacherClasses?.map((classItem) => (
-                            <Card key={classItem.id} className="border-primary/5 bg-card/50 backdrop-blur-sm rounded-3xl overflow-hidden hover:shadow-2xl hover:scale-[1.02] transition-all group">
-                                <div className="aspect-[16/9] relative overflow-hidden">
+                            <Card key={classItem.id} className="border-border/40 bg-card/50 backdrop-blur-3xl rounded-4xl overflow-hidden hover:shadow-2xl hover:scale-[1.02] transition-all group shadow-sm">
+                                <div className="aspect-video relative overflow-hidden">
                                     <img 
                                         src={classItem.bannerUrl || "https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?auto=format&fit=crop&q=80&w=1000"} 
                                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
+                                        alt={classItem.name}
                                     />
                                     <div className="absolute inset-0 bg-black/20" />
-                                    <Badge className="absolute top-4 right-4 bg-white/90 text-black border-none font-black text-[9px] uppercase tracking-widest">
+                                    <Badge className="absolute top-4 right-4 bg-white/90 text-black border-none font-black text-[9px] uppercase tracking-widest shadow-sm">
                                         {classItem.subject?.name}
                                     </Badge>
                                 </div>
-                                <CardContent className="p-6 space-y-4">
+                                <CardContent className="p-6 md:p-8 space-y-4">
                                     <div className="space-y-1">
-                                        <h4 className="text-xl font-black tracking-tight group-hover:text-primary transition-colors truncate">{classItem.name}</h4>
-                                        <div className="flex items-center gap-2 text-muted-foreground text-xs font-bold">
+                                        <h4 className="text-xl md:text-2xl font-black tracking-tight group-hover:text-primary transition-colors truncate leading-tight">{classItem.name}</h4>
+                                        <div className="flex items-center gap-2 text-muted-foreground text-xs md:text-sm font-bold">
                                             <Users className="h-3.5 w-3.5" />
-                                            {classItem.enrollments?.length || 0} / {classItem.capacity} students
+                                            {classItem.enrollments?.length || 0} / {classItem.capacity} {t("classes.list.studentsLabel" as any)}
                                         </div>
                                     </div>
-                                    <Button asChild className="w-full h-12 rounded-2xl font-black uppercase tracking-widest gap-2 shadow-lg shadow-primary/10">
+                                    <Button asChild className="w-full h-12 md:h-14 rounded-2xl font-black uppercase tracking-widest text-[10px] gap-2 shadow-lg shadow-primary/10">
                                         <Link to={`/classes/show/${classItem.id}`}>
-                                            Enroll Now
+                                            {t("buttons.joinClass" as any)}
                                             <ArrowRight className="h-4 w-4" />
                                         </Link>
                                     </Button>
@@ -461,29 +494,29 @@ const UserShow = () => {
                 </div>
             </div>
           ) : (
-            <Card className="border-primary/10 shadow-xl rounded-[2.5rem] bg-card/50 backdrop-blur-sm overflow-hidden">
-                <CardHeader className="p-8 pb-4">
+            <Card className="border-border/40 shadow-xl rounded-[2.5rem] md:rounded-[3rem] bg-card/50 backdrop-blur-3xl overflow-hidden">
+                <CardHeader className="p-8 md:p-10 pb-4">
                 <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-xl bg-primary/10 text-primary">
+                    <div className="p-2.5 rounded-xl bg-primary/10 text-primary shadow-sm border border-primary/5">
                         <FileText className="h-5 w-5" />
                     </div>
-                    <CardTitle className="text-2xl font-black tracking-tight">{t("profile.labels.bio")}</CardTitle>
+                    <CardTitle className="text-xl md:text-2xl font-black tracking-tight">{t("profile.labels.bio" as any)}</CardTitle>
                 </div>
                 </CardHeader>
-                <CardContent className="p-8 pt-4 space-y-8">
+                <CardContent className="p-8 md:p-10 pt-4 space-y-8">
                 <div className="space-y-4">
-                    <p className="text-base leading-relaxed text-foreground/80 font-medium whitespace-pre-wrap">
-                    {user.bio || t("profile.placeholders.noBio")}
+                    <p className="text-base md:text-lg leading-relaxed text-foreground/80 font-medium whitespace-pre-wrap">
+                    {user.bio || t("profile.placeholders.noBio" as any)}
                     </p>
                 </div>
 
                 {user.address && (
-                    <div className="pt-6 border-t border-primary/5">
+                    <div className="pt-6 border-t border-border/40">
                     <div className="flex items-center gap-2 mb-3">
                         <MapPin className="h-4 w-4 text-primary" />
-                        <h4 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t("profile.labels.address")}</h4>
+                        <h4 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t("profile.labels.address" as any)}</h4>
                     </div>
-                    <p className={cn("text-sm font-bold text-foreground/80", isAr ? "mr-6" : "ml-6")}>{user.address}</p>
+                    <p className={cn("text-sm md:text-base font-bold text-foreground/80", isAr ? "mr-6" : "ml-6")}>{user.address}</p>
                     </div>
                 )}
                 </CardContent>
@@ -498,29 +531,29 @@ const UserShow = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
               >
-                <Card className="border-primary/10 shadow-xl rounded-[2.5rem] bg-card/50 backdrop-blur-sm overflow-hidden">
-                    <CardHeader className="p-8 pb-4">
-                        <div className="flex items-center justify-between">
+                <Card className="border-border/40 shadow-xl rounded-[2.5rem] md:rounded-[3rem] bg-card/50 backdrop-blur-3xl overflow-hidden">
+                    <CardHeader className="p-8 md:p-10 pb-4">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                             <div className="flex items-center gap-3">
-                                <div className="p-2 rounded-xl bg-primary/10 text-primary">
+                                <div className="p-2.5 rounded-xl bg-primary/10 text-primary shadow-sm border border-primary/5">
                                     <GraduationCap className="h-5 w-5" />
                                 </div>
-                                <CardTitle className="text-2xl font-black tracking-tight">{t("profile.sections.report")}</CardTitle>
+                                <CardTitle className="text-xl md:text-2xl font-black tracking-tight">{t("profile.sections.report" as any)}</CardTitle>
                             </div>
-                            <Badge className="bg-primary/10 text-primary border-none font-black px-4 py-1.5 rounded-xl text-[10px] tracking-widest">
-                                {t("profile.labels.currentTerm")}
+                            <Badge className="bg-primary/10 text-primary border border-primary/20 font-black px-4 py-1.5 rounded-full text-[10px] tracking-widest shadow-sm">
+                                {t("profile.labels.currentTerm" as any)}
                             </Badge>
                         </div>
                     </CardHeader>
-                    <CardContent className="p-8">
+                    <CardContent className="p-8 md:p-10">
                         {isSelf || isAdmin ? (
                             <ReportCard />
                         ) : (
-                            <div className="flex flex-col items-center justify-center py-12 text-center space-y-4 bg-muted/20 rounded-[2rem] border-2 border-dashed border-primary/10">
+                            <div className="flex flex-col items-center justify-center py-12 text-center space-y-4 bg-muted/20 rounded-4xl border-2 border-dashed border-border/40">
                                 <Shield className="h-12 w-12 text-muted-foreground/20" />
                                 <div className="space-y-1">
-                                    <p className="font-black uppercase tracking-widest text-xs text-muted-foreground">{t("profile.privacy.note")}</p>
-                                    <p className="text-sm text-muted-foreground/60 font-medium">{t("profile.privacy.reportHidden")}</p>
+                                    <p className="font-black uppercase tracking-widest text-xs text-muted-foreground">{t("profile.privacy.note" as any)}</p>
+                                    <p className="text-sm text-muted-foreground/60 font-medium">{t("profile.privacy.reportHidden" as any)}</p>
                                 </div>
                             </div>
                         )}
@@ -533,17 +566,17 @@ const UserShow = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
               >
-                <Card className="border-primary/10 shadow-xl rounded-[2.5rem] bg-card/50 backdrop-blur-sm overflow-hidden">
-                    <CardHeader className="p-8 pb-4">
-                    <div className="flex flex-row items-center justify-between">
+                <Card className="border-border/40 shadow-xl rounded-[2.5rem] md:rounded-[3rem] bg-card/50 backdrop-blur-3xl overflow-hidden">
+                    <CardHeader className="p-8 md:p-10 pb-4">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                         <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-xl bg-amber-500/10 text-amber-600">
+                            <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-600 shadow-sm border border-amber-500/20">
                                 <Trophy className="h-5 w-5" />
                             </div>
-                            <CardTitle className="text-2xl font-black tracking-tight">{t("profile.sections.achievements")}</CardTitle>
+                            <CardTitle className="text-xl md:text-2xl font-black tracking-tight">{t("profile.sections.achievements" as any)}</CardTitle>
                         </div>
-                        <Badge variant="outline" className="font-black text-[10px] uppercase tracking-widest px-4 py-1.5 rounded-xl border-primary/10">
-                            {t("profile.labels.earned", { 
+                        <Badge variant="outline" className="rounded-full border-primary/20 font-bold px-4 py-1.5 text-[10px] uppercase tracking-widest shadow-sm">
+                            {t("profile.labels.earned" as any, { 
                                 count: displayBadges.filter(b => b.unlocked).length,
                                 total: displayBadges.length,
                                 defaultValue: `${displayBadges.filter(b => b.unlocked).length} / ${displayBadges.length} Earned`
@@ -551,8 +584,8 @@ const UserShow = () => {
                         </Badge>
                     </div>
                     </CardHeader>
-                    <CardContent className="p-8">
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+                    <CardContent className="p-8 md:p-10">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8">
                         {displayBadges.map((badge: BadgeData) => (
                         <BadgeCard key={badge.id} badge={badge} />
                         ))}
@@ -566,18 +599,18 @@ const UserShow = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
               >
-                <Card className="border-primary/10 shadow-xl rounded-[2.5rem] bg-card/50 backdrop-blur-sm overflow-hidden">
-                    <CardHeader className="p-8 pb-4">
-                    <div className="flex flex-row items-center justify-between">
+                <Card className="border-border/40 shadow-xl rounded-[2.5rem] md:rounded-[3rem] bg-card/50 backdrop-blur-3xl overflow-hidden">
+                    <CardHeader className="p-8 md:p-10 pb-4">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                         <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-xl bg-primary/10 text-primary">
+                            <div className="p-2.5 rounded-xl bg-primary/10 text-primary shadow-sm border border-primary/5">
                                 <Award className="h-5 w-5" />
                             </div>
-                            <CardTitle className="text-2xl font-black tracking-tight">{t("profile.sections.certificates")}</CardTitle>
+                            <CardTitle className="text-xl md:text-2xl font-black tracking-tight">{t("profile.sections.certificates" as any)}</CardTitle>
                         </div>
                     </div>
                     </CardHeader>
-                    <CardContent className="p-8">
+                    <CardContent className="p-8 md:p-10">
                     <CertificateGallery studentName={user.name} isOwner={isSelf} />
                     </CardContent>
                 </Card>
@@ -587,9 +620,9 @@ const UserShow = () => {
 
           {(isSelf || isAdmin) && (
             <div className="pt-6 flex justify-center">
-              <Badge variant="outline" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/50 border-primary/5 px-6 py-2 rounded-full">
+              <Badge variant="outline" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/50 border-primary/5 px-6 py-2 rounded-full shadow-sm">
                 <Shield className={cn("w-3 h-3", isAr ? "ml-2" : "mr-2")} />
-                {t("profile.privacy.adminOnly")}
+                {t("profile.privacy.adminOnly" as any)}
               </Badge>
             </div>
           )}

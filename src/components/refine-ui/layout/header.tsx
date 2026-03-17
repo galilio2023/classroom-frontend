@@ -16,6 +16,7 @@ import {
   BellRing,
   CalendarClock,
   Languages,
+  MoreVertical,
 } from "lucide-react";
 import { toast } from "sonner";
 import { User, UserRole } from "@/types";
@@ -64,21 +65,26 @@ export function Header() {
 
   const changeLanguage = (lng: string) => {
     void i18n.changeLanguage(lng);
+    document.documentElement.dir = lng === 'ar' ? 'rtl' : 'ltr';
   };
 
   const isStudent = identity?.role === UserRole.STUDENT;
 
   return (
-    <header className="flex h-20 items-center gap-4 border-b border-border/40 bg-background/60 backdrop-blur-xl px-6 sticky top-0 z-50">
-      <SidebarTrigger className="md:hidden" />
+    <header className="flex h-16 md:h-20 items-center gap-3 md:gap-4 border-b border-border/40 bg-background/60 backdrop-blur-xl px-4 md:px-6 sticky top-0 z-50">
+      <SidebarTrigger className="md:hidden shrink-0" />
 
-      <div className="w-full flex-1 flex items-center gap-2 md:gap-6">
-        <CommandMenu />
+      <div className="flex-1 flex items-center gap-2 md:gap-6 min-w-0">
+        <div className="hidden sm:block flex-1 max-w-md">
+            <CommandMenu />
+        </div>
+        
+        {/* Mobile Search Trigger - Optional, can be added if CommandMenu has a mobile version */}
 
-        {/* Term Switcher - Visible on all screens, adjusted for mobile */}
+        {/* Term Switcher - Optimized for Mobile */}
         {terms.length > 0 && (
-          <div className="flex items-center gap-2">
-            <CalendarClock className="h-4 w-4 text-muted-foreground shrink-0 hidden xs:block" />
+          <div className="flex items-center gap-1 md:gap-2 shrink-0">
+            <CalendarClock className="h-4 w-4 text-muted-foreground shrink-0 hidden md:block" />
             <Select
               value={selectedTerm?.id?.toString() || ""}
               onValueChange={(val) => {
@@ -86,7 +92,7 @@ export function Header() {
                 if (term) setSelectedTerm(term);
               }}
             >
-              <SelectTrigger className="w-30 md:w-45 h-9 bg-muted/30 border-border/50 text-[10px] md:text-sm">
+              <SelectTrigger className="w-24 xs:w-32 md:w-45 h-9 bg-muted/30 border-border/50 text-[10px] md:text-sm px-2 md:px-3">
                 <SelectValue placeholder={t("classes.form.selectTerm")} />
               </SelectTrigger>
               <SelectContent>
@@ -109,8 +115,8 @@ export function Header() {
         )}
       </div>
 
-      <div className="flex items-center gap-4 shrink-0">
-        <div className="flex items-center gap-2 bg-muted/30 p-1 rounded-full border border-border/50">
+      <div className="flex items-center gap-2 md:gap-4 shrink-0">
+        <div className="hidden xs:flex items-center gap-1 md:gap-2 bg-muted/30 p-1 rounded-full border border-border/50">
           {/* Language Switcher */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -122,7 +128,7 @@ export function Header() {
                 <Languages className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent align="end" className="sidebar-glass">
               <DropdownMenuItem
                 onClick={() => changeLanguage("en")}
                 className={cn(i18n.language === "en" && "bg-accent")}
@@ -141,26 +147,48 @@ export function Header() {
           <NotificationBell />
           <ThemeToggle />
         </div>
+        
+        {/* Small Screen Actions Menu */}
+        <div className="xs:hidden">
+             <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full bg-muted/30 border border-border/50">
+                        <MoreVertical className="h-4 w-4" />
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="sidebar-glass w-48">
+                    <DropdownMenuItem className="gap-2" onClick={() => changeLanguage(i18n.language === 'en' ? 'ar' : 'en')}>
+                        <Languages className="h-4 w-4" />
+                        <span>{i18n.language === 'en' ? 'العربية' : 'English'}</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <div className="flex items-center justify-around p-2">
+                        <NotificationBell />
+                        <ThemeToggle />
+                    </div>
+                </DropdownMenuContent>
+             </DropdownMenu>
+        </div>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
-              className="relative h-10 w-10 rounded-full p-0 hover:bg-primary/10 transition-colors"
+              className="relative h-9 w-9 md:h-10 md:w-10 rounded-full p-0 hover:bg-primary/10 transition-colors"
             >
-              <UserAvatar />
+              <UserAvatar className="h-9 w-9 md:h-10 md:w-10" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent
             align="end"
-            className="w-56 mt-2 sidebar-glass border-border/50 z-100"
+            className="w-64 mt-2 sidebar-glass border-border/50 z-100"
           >
             <DropdownMenuLabel className="font-normal">
               <div className="flex flex-col space-y-1">
                 <p className="text-sm font-bold leading-none">
                   {identity?.name}
                 </p>
-                <p className="text-xs leading-none text-muted-foreground">
+                <p className="text-xs leading-none text-muted-foreground truncate">
                   {identity?.email}
                 </p>
               </div>

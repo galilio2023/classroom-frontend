@@ -7,6 +7,7 @@ import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { useResourceParams, useUserFriendlyName } from "@refinedev/core";
+import { motion } from "framer-motion";
 
 type ListViewProps = PropsWithChildren<{
   className?: string;
@@ -14,9 +15,13 @@ type ListViewProps = PropsWithChildren<{
 
 export function ListView({ children, className }: ListViewProps) {
   return (
-    <div className={cn("flex flex-col gap-4 w-full max-w-full overflow-hidden", className)}>
+    <motion.div 
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className={cn("flex flex-col gap-6 w-full max-w-full overflow-hidden pb-10", className)}
+    >
       {children}
-    </div>
+    </motion.div>
   );
 }
 
@@ -52,18 +57,26 @@ export const ListViewHeader = ({
     );
 
   return (
-    <div className={cn("flex flex-col", "gap-4", wrapperClassName)}>
+    <div className={cn("flex flex-col gap-6 mb-2", wrapperClassName)}>
       <div className="flex items-center relative gap-2">
         <div className="bg-background z-[2] pr-4">
           <Breadcrumb />
         </div>
-        <Separator className={cn("absolute", "left-0", "right-0", "z-[1]")} />
+        <Separator className={cn("absolute", "left-0", "right-0", "z-[1] opacity-50")} />
       </div>
-      <div className={cn("flex", "justify-between", "gap-4", headerClassName)}>
-        <h2 className="text-2xl font-bold">{title}</h2>
+      <div className={cn(
+        "flex flex-col sm:flex-row sm:items-center justify-between gap-4", 
+        headerClassName
+      )}>
+        <h1 className="text-3xl md:text-4xl font-black tracking-tight text-foreground">
+          {title}
+        </h1>
         {isCreateButtonVisible && (
           <div className="flex items-center gap-2">
-            <CreateButton resource={resourceName} />
+            <CreateButton 
+              resource={resourceName} 
+              className="rounded-xl font-bold uppercase tracking-widest text-[10px] h-11 px-6 shadow-lg shadow-primary/20"
+            />
           </div>
         )}
       </div>

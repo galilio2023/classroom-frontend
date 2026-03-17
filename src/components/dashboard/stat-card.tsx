@@ -48,44 +48,46 @@ export const StatCard: React.FC<StatCardProps> = ({ label, value, icon: Icon, co
       className="h-full"
     >
       <Card className={cn(
-        "h-full border-none shadow-xl hover:shadow-2xl transition-all duration-500 overflow-hidden group bg-card/50 backdrop-blur-2xl rounded-[2rem] relative",
+        "h-full border-none shadow-xl hover:shadow-2xl transition-all duration-500 overflow-hidden group bg-card/50 backdrop-blur-2xl rounded-[1.5rem] md:rounded-[2rem] relative",
         className
       )}>
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-[shine_2s_infinite] pointer-events-none" />
+        <div className={cn("absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent pointer-events-none transition-all duration-1000", isArabic ? "translate-x-full group-hover:animate-[shine-rtl_2s_infinite]" : "-translate-x-full group-hover:animate-[shine_2s_infinite]")} />
         
-        <CardContent className="flex flex-col p-8 gap-6 relative h-full justify-between text-left rtl:text-right">
-          <div className="absolute ltr:-right-4 rtl:-left-4 -top-4 p-2 opacity-[0.03] group-hover:opacity-[0.08] transition-all duration-700 ltr:rotate-12 rtl:-rotate-12 group-hover:rotate-0 group-hover:scale-110">
-            <Icon className="h-32 w-32" />
+        <CardContent className="flex flex-col p-5 md:p-8 gap-4 md:gap-6 relative h-full justify-between text-start">
+          <div className="absolute end-[-1rem] top-[-1rem] p-2 opacity-[0.03] group-hover:opacity-[0.08] transition-all duration-700 rtl:-rotate-12 ltr:rotate-12 group-hover:rotate-0 group-hover:scale-110 pointer-events-none">
+            <Icon className="h-24 w-24 md:h-32 md:w-32" />
           </div>
 
-          <div className="space-y-6 relative z-10">
+          <div className="space-y-4 md:space-y-6 relative z-10">
             <div className="flex items-center justify-between">
               <div className={cn(
-                "p-3.5 rounded-2xl transition-all duration-500 group-hover:scale-110 shadow-lg",
+                "p-2.5 md:p-3.5 rounded-xl md:rounded-2xl transition-all duration-500 group-hover:scale-110 shadow-lg",
                 "bg-background/80 backdrop-blur-md border border-black/[0.03] dark:border-white/[0.03] text-foreground"
               )}>
-                <Icon className={cn("h-6 w-6", color)} />
+                <Icon className={cn("h-5 w-5 md:h-6 md:w-6", color)} />
               </div>
               {trend && (
                 <div className={cn(
-                  "rounded-full px-3 py-1 font-black text-[10px] uppercase tracking-widest border-none shadow-sm",
+                  "rounded-full px-2 py-0.5 md:px-3 md:py-1 font-black text-[9px] md:text-[10px] uppercase tracking-widest border-none shadow-sm flex items-center gap-1",
                   trend.isUp ? "bg-green-500/10 text-green-500" : "bg-red-500/10 text-red-500"
                 )}>
-                  {trend.isUp ? "+" : "-"}{new Intl.NumberFormat(isArabic ? 'ar-EG' : 'en-US').format(trend.value)}%
+                  <span dir="ltr">
+                    {trend.isUp ? "+" : "-"}{new Intl.NumberFormat(isArabic ? 'ar-EG' : 'en-US').format(trend.value)}%
+                  </span>
                 </div>
               )}
             </div>
 
             <div className="space-y-1">
               <p className={cn(
-                "text-[10px] uppercase tracking-[0.2em] text-muted-foreground/60",
+                "text-[9px] md:text-[10px] uppercase tracking-[0.2em] text-muted-foreground/60 truncate",
                 isArabic ? "font-bold" : "font-black"
               )}>
                 {label}
               </p>
               <div className="flex items-baseline gap-2">
                 <h3 className={cn(
-                  "text-4xl text-foreground",
+                  "text-2xl xs:text-3xl md:text-4xl text-foreground",
                   isArabic ? "font-bold" : "font-black tracking-tighter"
                 )}>
                   {isNumber ? (
@@ -99,6 +101,7 @@ export const StatCard: React.FC<StatCardProps> = ({ label, value, icon: Icon, co
                     initial={{ opacity: 0, scale: 0 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 1 }}
+                    className="hidden xs:block"
                   >
                     <Sparkles className="h-4 w-4 text-primary/40" />
                   </motion.div>
@@ -107,7 +110,7 @@ export const StatCard: React.FC<StatCardProps> = ({ label, value, icon: Icon, co
             </div>
           </div>
 
-          <div className="mt-4 h-1.5 w-full rounded-full bg-muted/30 overflow-hidden">
+          <div className="mt-2 md:mt-4 h-1 md:h-1.5 w-full rounded-full bg-muted/30 overflow-hidden">
             <motion.div 
               initial={{ width: 0 }}
               animate={{ width: "100%" }}

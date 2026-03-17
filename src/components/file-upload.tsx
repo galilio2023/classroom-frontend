@@ -72,7 +72,9 @@ export const FileUpload: React.FC<FileUploadProps> = ({
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || t("common.upload.error"));
+        toast.error(errorData.message || t("common.upload.error"));
+        setIsUploading(false);
+        return;
       }
 
       const result = await response.json();
@@ -140,7 +142,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
                 <FileIcon className="h-5 w-5 text-primary" />
               </div>
               <div className="flex flex-col min-w-0">
-                <span className="text-sm font-medium truncate max-w-[200px] sm:max-w-xs block">
+                <span className="text-sm font-medium truncate max-w-50 sm:max-w-xs block">
                   {file.name}
                 </span>
                 <span className="text-xs text-muted-foreground">
