@@ -27,7 +27,8 @@ import {
   Users,
   Files,
   Clock,
-  Tv
+  Tv,
+  History
 } from "lucide-react";
 import { ResourceProps } from "@refinedev/core";
 
@@ -41,6 +42,7 @@ export const resources: ResourceProps[] = [
   // --- AI HUB ---
   { name: "ai-assistant", list: "/ai-assistant", meta: { group: "groups.ai-lab", label: "resources.ai-assistant.label", icon: <Sparkles /> } },
   { name: "ai-study-lab", list: "/ai-study-lab", meta: { group: "groups.ai-lab", label: "resources.ai-study-lab.label", icon: <BrainCircuit /> } },
+  { name: "ai-activity-logs", list: "/ai-history", show: "/ai-history/show/:id", meta: { group: "groups.ai-lab", label: "resources.ai-history.label", icon: <History /> } },
   { name: "study-planner", list: "/study-planner", meta: { group: "groups.ai-lab", label: "resources.study-planner.label", icon: <CalendarDays /> } },
 
   // --- ACADEMIC ---

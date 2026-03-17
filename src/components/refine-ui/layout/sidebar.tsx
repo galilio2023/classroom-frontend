@@ -27,7 +27,7 @@ import {
   useGetIdentity,
   type TreeMenuItem,
 } from "@refinedev/core";
-import { ChevronRight, ListIcon } from "lucide-react";
+import { ChevronRight, ListIcon, Loader2 } from "lucide-react";
 import React, { useMemo } from "react";
 import { cn } from "@/lib/utils.ts";
 import { Link as RouterLink } from "react-router-dom";
@@ -44,32 +44,40 @@ const ROLE_GROUP_PERMISSIONS: Record<string, UserRole[]> = {
   "groups.progress": [UserRole.ADMIN, UserRole.STUDENT],
 };
 
+type GroupedMenuItems = Record<string, TreeMenuItem[]>;
+
 export function Sidebar() {
   const { t } = useTranslation();
   const { open } = useShadcnSidebar();
   const { menuItems, selectedKey } = useMenu();
-  const { data: identity } = useGetIdentity<User>();
+  const { data: identity, isLoading: identityLoading } = useGetIdentity<User>();
+
+  const userRole = identity?.role;
+  const isSidebarLoading = identityLoading && !identity;
 
   // Group items by their meta.group property and filter by role
-  const groupedItems = useMemo(() => {
-    const groups: Record<string, TreeMenuItem[]> = {
+  const groupedItems = useMemo<GroupedMenuItems>(() => {
+    // If loading, return empty structure to avoid stale data display
+    if (isSidebarLoading) {
+        return { default: [] };
+    }
+
+    const groups: GroupedMenuItems = {
       default: []
     };
-
-    const userRole = identity?.role;
 
     menuItems.forEach((item) => {
       const groupName = item.meta?.group as string | undefined;
       
-      // 1. Check if the group itself is allowed for this role
+      // 1. RBAC: Check if the group itself is allowed for this role
       if (groupName && userRole) {
         const allowedRoles = ROLE_GROUP_PERMISSIONS[groupName];
         if (allowedRoles && !allowedRoles.includes(userRole)) {
-          return; // Skip this item if the group isn't for this role
+          return;
         }
       }
 
-      // 2. Fail-safe: Explicitly hide specific items for roles
+      // 2. Explicit role-based exclusions
       if (userRole === UserRole.STUDENT && (item.name === "ai-assistant" || item.name === "teacher-channel")) {
         return;
       }
@@ -85,7 +93,7 @@ export function Sidebar() {
     });
 
     return groups;
-  }, [menuItems, identity?.role]);
+  }, [menuItems, userRole, isSidebarLoading]);
 
   return (
     <ShadcnSidebar collapsible="icon" className={cn("border-none sidebar-glass")}>
@@ -97,56 +105,51 @@ export function Sidebar() {
           "px-2": !open,
         })}
       >
-        {/* Render default (ungrouped) items first */}
-        <div className="flex flex-col gap-1.5">
-            {groupedItems.default.map((item: TreeMenuItem) => (
-                <SidebarItem
-                    key={item.key || item.name}
-                    item={item}
-                    selectedKey={selectedKey}
-                />
-            ))}
-        </div>
-
-        {/* Render grouped items with headers */}
-        {Object.entries(groupedItems).map(([groupName, items]) => {
-          if (groupName === "default" || items.length === 0) return null;
-          
-          return (
-            <div key={groupName} className="mt-8 mb-2">
-              <AnimatePresence initial={false}>
-                {open && (
-                  <motion.span
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -10 }}
-                    className={cn(
-                      "ml-4",
-                      "block",
-                      "text-[10px]",
-                      "font-black",
-                      "uppercase",
-                      "tracking-[0.2em]",
-                      "text-muted-foreground/40",
-                      "mb-4"
-                    )}
-                  >
-                    {t(groupName as any)}
-                  </motion.span>
-                )}
-              </AnimatePresence>
-              <div className="flex flex-col gap-1.5">
-                {items.map((item: TreeMenuItem) => (
-                  <SidebarItem
-                    key={item.key || item.name}
-                    item={item}
-                    selectedKey={selectedKey}
-                  />
-                ))}
-              </div>
+        {isSidebarLoading ? (
+            <div className="flex flex-col gap-4 items-center justify-center py-10 opacity-40">
+                <Loader2 className="h-5 w-5 animate-spin" />
             </div>
-          );
-        })}
+        ) : (
+            <>
+                {/* Render default (ungrouped) items first */}
+                <div className="flex flex-col gap-1.5">
+                    {groupedItems.default.map((item: TreeMenuItem) => (
+                        <SidebarItem
+                            key={item.key || item.name}
+                            item={item}
+                            selectedKey={selectedKey}
+                        />
+                    ))}
+                </div>
+
+                {/* Render grouped items with headers */}
+                {Object.entries(groupedItems).map(([groupName, items]) => {
+                if (groupName === "default" || items.length === 0) return null;
+                
+                return (
+                    <div key={groupName} className="mt-8 mb-2">
+                    <div
+                        className={cn(
+                        "ml-4 mb-4 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40 transition-all duration-300",
+                        !open && "opacity-0 -translate-x-4 pointer-events-none h-0 mb-0 overflow-hidden"
+                        )}
+                    >
+                        {t(groupName as any)}
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                        {items.map((item: TreeMenuItem) => (
+                        <SidebarItem
+                            key={item.key || item.name}
+                            item={item}
+                            selectedKey={selectedKey}
+                        />
+                        ))}
+                    </div>
+                    </div>
+                );
+                })}
+            </>
+        )}
       </ShadcnSidebarContent>
     </ShadcnSidebar>
   );
@@ -157,14 +160,25 @@ type MenuItemProps = {
   selectedKey?: string;
 };
 
+/**
+ * SidebarItem
+ * Uses a Stable Render pattern to prevent component remounting during 
+ * sidebar state changes (collapsed/expanded).
+ */
 function SidebarItem({ item, selectedKey }: MenuItemProps) {
   const { open } = useShadcnSidebar();
 
   if (item.children && item.children.length > 0) {
-    if (open) {
-      return <SidebarItemCollapsible item={item} selectedKey={selectedKey} />;
-    }
-    return <SidebarItemDropdown item={item} selectedKey={selectedKey} />;
+    return (
+      <div className="relative">
+        <div className={cn(!open && "hidden")}>
+           <SidebarItemCollapsible item={item} selectedKey={selectedKey} />
+        </div>
+        <div className={cn(open && "hidden")}>
+           <SidebarItemDropdown item={item} selectedKey={selectedKey} />
+        </div>
+      </div>
+    );
   }
 
   return <SidebarItemLink item={item} selectedKey={selectedKey} />;
@@ -247,6 +261,7 @@ function SidebarItemLink({ item, selectedKey }: MenuItemProps) {
 
   return <SidebarButton item={item} isSelected={isSelected} asLink={true} />;
 }
+
 function SidebarHeader() {
   const { title } = useRefineOptions();
   const { open, isMobile } = useShadcnSidebar();
@@ -295,7 +310,6 @@ function SidebarHeader() {
 
 function getDisplayName(item: TreeMenuItem, t: any) {
   const label = item.meta?.label ?? item.label ?? item.name;
-  // If the label looks like a translation key, translate it
   return typeof label === "string" && label.includes(".") ? t(label) : label;
 }
 
@@ -341,29 +355,25 @@ function SidebarButton({
   const buttonContent = (
     <>
       <ItemIcon icon={item.meta?.icon ?? item.icon} isSelected={isSelected} />
-      <AnimatePresence mode="wait">
-        {open && (
-          <motion.span
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -10 }}
-            transition={{ duration: 0.2, delay: 0.1 }}
-            className={cn("tracking-tight transition-all", {
-              "flex-1": rightIcon,
-              "text-left": rightIcon,
-              "line-clamp-1": !rightIcon,
-              truncate: !rightIcon,
-              "font-medium": !isSelected,
-              "font-bold": isSelected,
-              "text-primary": isSelected,
-              "text-muted-foreground group-hover:text-foreground": !isSelected,
-            })}
-          >
-            {getDisplayName(item, t)}
-          </motion.span>
+      <span
+        className={cn(
+          "tracking-tight transition-all duration-200",
+          open ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-4 pointer-events-none w-0",
+          {
+            "flex-1": rightIcon,
+            "text-left": rightIcon,
+            "line-clamp-1": !rightIcon,
+            truncate: !rightIcon,
+            "font-medium": !isSelected,
+            "font-bold": isSelected,
+            "text-primary": isSelected,
+            "text-muted-foreground group-hover:text-foreground": !isSelected,
+          }
         )}
-      </AnimatePresence>
-      {rightIcon}
+      >
+        {getDisplayName(item, t)}
+      </span>
+      {rightIcon && open && rightIcon}
     </>
   );
 

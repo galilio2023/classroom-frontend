@@ -28,7 +28,8 @@ export function Layout({ children }: PropsWithChildren) {
           <OfflineBanner />
           <Header />
           <main className="flex-1 flex flex-col relative w-full overflow-x-hidden">
-            <AnimatePresence mode="wait" initial={false}>
+            {/* Removed mode="wait" to prevent white-screen gaps between page transitions */}
+            <AnimatePresence mode="popLayout" initial={false}>
               <motion.div
                 key={pathname}
                 initial={{ opacity: 0, y: 12 }}
@@ -36,13 +37,13 @@ export function Layout({ children }: PropsWithChildren) {
                 exit={{ opacity: 0, y: -12 }}
                 transition={{ 
                   duration: 0.3, 
-                  ease: [0.23, 1, 0.32, 1] // Apple-style cubic bezier for smoother feel
+                  ease: [0.23, 1, 0.32, 1] 
                 }}
                 className={cn(
                   "flex-1 flex flex-col w-full mx-auto",
                   "max-w-screen-2xl",
                   "p-4 md:p-6 lg:p-8 xl:p-10",
-                  "pb-28 md:pb-10" // Balanced bottom padding for MobileNav
+                  "pb-28 md:pb-10"
                 )}
               >
                 {children}
