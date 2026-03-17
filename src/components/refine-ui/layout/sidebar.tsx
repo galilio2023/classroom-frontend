@@ -44,41 +44,40 @@ const ROLE_GROUP_PERMISSIONS: Record<string, UserRole[]> = {
   "groups.progress": [UserRole.ADMIN, UserRole.STUDENT],
 };
 
+type GroupedMenuItems = Record<string, TreeMenuItem[]>;
+
 export function Sidebar() {
   const { t } = useTranslation();
   const { open } = useShadcnSidebar();
   const { menuItems, selectedKey } = useMenu();
   const { data: identity, isLoading: identityLoading } = useGetIdentity<User>();
 
-  // Security Update: Relying on localStorage for sidebar display logic is 
-  // secondary to server-side RBAC, but we should prioritize live identity data
-  // to avoid showing stale or forbidden menu items.
   const userRole = identity?.role;
+  const isSidebarLoading = identityLoading && !identity;
 
   // Group items by their meta.group property and filter by role
-  const groupedItems = useMemo(() => {
-    // If identity is still loading, we return empty groups to prevent 
-    // flickering "Admin" links for a "Student" for a split second.
-    if (identityLoading && !identity) {
-        return { default: [], loading: true };
+  const groupedItems = useMemo<GroupedMenuItems>(() => {
+    // If loading, return empty structure to avoid stale data display
+    if (isSidebarLoading) {
+        return { default: [] };
     }
 
-    const groups: Record<string, any> = {
+    const groups: GroupedMenuItems = {
       default: []
     };
 
     menuItems.forEach((item) => {
       const groupName = item.meta?.group as string | undefined;
       
-      // 1. Check if the group itself is allowed for this role
+      // 1. RBAC: Check if the group itself is allowed for this role
       if (groupName && userRole) {
         const allowedRoles = ROLE_GROUP_PERMISSIONS[groupName];
         if (allowedRoles && !allowedRoles.includes(userRole)) {
-          return; // Skip this item if the group isn't for this role
+          return;
         }
       }
 
-      // 2. Fail-safe: Explicitly hide specific items for roles
+      // 2. Explicit role-based exclusions
       if (userRole === UserRole.STUDENT && (item.name === "ai-assistant" || item.name === "teacher-channel")) {
         return;
       }
@@ -94,7 +93,7 @@ export function Sidebar() {
     });
 
     return groups;
-  }, [menuItems, userRole, identityLoading, identity]);
+  }, [menuItems, userRole, isSidebarLoading]);
 
   return (
     <ShadcnSidebar collapsible="icon" className={cn("border-none sidebar-glass")}>
@@ -106,7 +105,7 @@ export function Sidebar() {
           "px-2": !open,
         })}
       >
-        {identityLoading && !identity ? (
+        {isSidebarLoading ? (
             <div className="flex flex-col gap-4 items-center justify-center py-10 opacity-40">
                 <Loader2 className="h-5 w-5 animate-spin" />
             </div>
@@ -125,7 +124,7 @@ export function Sidebar() {
 
                 {/* Render grouped items with headers */}
                 {Object.entries(groupedItems).map(([groupName, items]) => {
-                if (groupName === "default" || groupName === "loading" || (items as any).length === 0) return null;
+                if (groupName === "default" || items.length === 0) return null;
                 
                 return (
                     <div key={groupName} className="mt-8 mb-2">
@@ -138,7 +137,7 @@ export function Sidebar() {
                         {t(groupName as any)}
                     </div>
                     <div className="flex flex-col gap-1.5">
-                        {(items as any[]).map((item: TreeMenuItem) => (
+                        {items.map((item: TreeMenuItem) => (
                         <SidebarItem
                             key={item.key || item.name}
                             item={item}
@@ -161,11 +160,14 @@ type MenuItemProps = {
   selectedKey?: string;
 };
 
+/**
+ * SidebarItem
+ * Uses a Stable Render pattern to prevent component remounting during 
+ * sidebar state changes (collapsed/expanded).
+ */
 function SidebarItem({ item, selectedKey }: MenuItemProps) {
   const { open } = useShadcnSidebar();
 
-  // STABLE RENDER: Always render the same base component structure
-  // We use CSS to hide/show parts rather than conditional component swapping
   if (item.children && item.children.length > 0) {
     return (
       <div className="relative">
@@ -259,6 +261,7 @@ function SidebarItemLink({ item, selectedKey }: MenuItemProps) {
 
   return <SidebarButton item={item} isSelected={isSelected} asLink={true} />;
 }
+
 function SidebarHeader() {
   const { title } = useRefineOptions();
   const { open, isMobile } = useShadcnSidebar();
@@ -307,7 +310,6 @@ function SidebarHeader() {
 
 function getDisplayName(item: TreeMenuItem, t: any) {
   const label = item.meta?.label ?? item.label ?? item.name;
-  // If the label looks like a translation key, translate it
   return typeof label === "string" && label.includes(".") ? t(label) : label;
 }
 
