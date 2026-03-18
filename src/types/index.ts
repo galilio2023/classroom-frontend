@@ -284,6 +284,7 @@ export type ClassListItem = Pick<
   | "isLive"
   | "isBreakoutActive"
   | "color"
+  | "enrollments"
 > & {
   subject?: {
     name: string;
