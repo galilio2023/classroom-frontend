@@ -511,12 +511,12 @@
       "hubDescription": "إدارة المنهج والطلاب والجلسات المباشرة.",
       "description": "الوصف",
       "banner": {
+        "pinned": "إعلان مثبت",
         "academic": "أكاديمي",
         "waitlistActive": "قائمة الانتظار نشطة",
         "studentsEnrolled": "{{count}} طلاب مسجلين",
         "onWaitlist": "{{count}} في قائمة الانتظار",
-        "liveActive": "جلسة مباشرة نشطة",
-        "pinned": "إعلان مثبت"
+        "liveActive": "جلسة مباشرة نشطة"
       },
       "toast": {
         "linkCopied": "تم نسخ رابط الفصل!",
@@ -575,8 +575,8 @@
         "teacherNotes": "ملاحظات المعلم (مشتركة)",
         "teacherNotesDesc": "مساحة خاصة للكادر التعليمي",
         "teacherNotesPlaceholder": "ابدأ بكتابة ملاحظاتك هنا...",
-        "autoSaving": "جاري الحفظ التلقائي",
         "notesPlaceholder": "دون تذكيرات، أفكار للدروس، أو ملاحظات عن الطلاب...",
+        "autoSaving": "جاري الحفظ التلقائي",
         "accessControl": "التحكم في الوصول",
         "inviteCode": "رمز دعوة الفصل",
         "teachingStaff": "الكادر التعليمي",
@@ -619,7 +619,7 @@
       "aiSummary": "ملخص النقاش بالذكاء الاصطناعي",
       "loadingStream": "جاري تحميل المشاركات...",
       "noMessages": "لا توجد رسائل بعد",
-      "start Conversation": "كن أول من يبدأ النقاش!",
+      "startConversation": "كن أول من يبدأ النقاش!",
       "replyingTo": "الرد على",
       "writeReply": "اكتب ردك...",
       "messageClass": "أرسل رسالة لفصلك...",
@@ -667,7 +667,7 @@
         "description": "يمكن للطلاب مسح رمز QR لتسجيل حضورهم.",
         "active": "جلسة نشطة",
         "inactive": "غير نشط",
-        "time Remaining": "الوقت المتبقي",
+        "timeRemaining": "الوقت المتبقي",
         "checkedIn": "تم تسجيل الدخول",
         "ready": "جاهز للبدء؟",
         "startDescription": "سيؤدي بدء الجلسة إلى إنشاء رمز QR فريد لهذا الفصل."
@@ -704,7 +704,6 @@
       "createDesc": "انشر تحديثاً رسمياً لجميع الطلاب في هذا الفصل.",
       "fieldTitle": "عنوان الإعلان",
       "fieldContent": "المحتوى التفصيلي",
-      "fieldAttachment": "مرفق (اختياري)",
       "fieldPin": "تثبيت في الأعلى",
       "pinDesc": "سيبقى هذا الإعلان في أعلى القائمة.",
       "noAnnouncements": "لا توجد إعلانات بعد",
@@ -720,7 +719,8 @@
         "title": "إيصالات القراءة",
         "description": "الطلاب الذين شاهدوا هذا الإعلان.",
         "empty": "لم يقرأ أحد هذا الإعلان بعد."
-      }
+      },
+      "fieldAttachment": "مرفق (اختياري)"
     },
     "resource": {
       "loading": "جاري تحميل المواد...",
@@ -939,7 +939,7 @@
       "submissionRules": "قواعد التسليم",
       "latePolicy": "سياسة التأخير",
       "lateDescription": "التسليمات بعد الموعد النهائي ستعتبر متأخرة وقد يطبق عليها خصم.",
-      "academic Integrity": "النزاهة الأكاديمية",
+      "academicIntegrity": "النزاهة الأكاديمية",
       "integrityDescription": "يجب أن يكون العمل أصلياً. يجب الإشارة إلى استخدام الذكاء الاصطناعي إذا كان مسموحاً.",
       "studentSubmissions": "تسليمات الطلاب",
       "submissionsDescription": "إدارة الدرجات والملاحظات لجميع الطلاب.",
@@ -1129,7 +1129,7 @@
       "subjectMastery": "إتقان المواد",
       "subjectMasteryDesc": "متوسط الأداء لكل مادة.",
       "noSubjectData": "لا توجد بيانات للمواد بعد. سيظهر رادار الإتقان الخاص بك هنا.",
-      "recent Activity": "النشاط الأخير"
+      "recentActivity": "النشاط الأخير"
     },
     "staff": {
       "engagementAnalytics": "تحليلات التفاعل",
@@ -1182,6 +1182,7 @@
         }
       },
       "platformOverview": "نظرة عامة على المنصة",
+      "recentActivity": "النشاط الأخير",
       "pendingGrading": "في انتظار التقييم",
       "submissionsAwaiting": "تسليمات في انتظار التقييم",
       "newSubmissions": "{{count}} جديدة",
@@ -1195,8 +1196,7 @@
       "enrollmentSuccess": "نجاح التسجيل",
       "channelStatus": "حالة القناة",
       "active": "نشط",
-      "manageChannel": "إدارة قناتك العامة",
-      "recent Activity": "النشاط الأخير"
+      "manageChannel": "إدارة قناتك العامة"
     },
     "stats": {
       "totalStudents": "إجمالي الطلاب",
@@ -1262,9 +1262,9 @@
         "JOIN_CLASS": "تم الانضمام لفصل",
         "APPROVE_ENROLLMENT": "تم قبول تسجيل",
         "SUBMIT_ASSIGNMENT": "تم تسليم تكليف",
+        "JOIN_ASSIGNMENT": "تم الانضمام للتكليف",
         "GRADE_SUBMISSION": "تم تقييم تسليم",
-        "USER_LOGIN": "تم تسجيل دخول مستخدم",
-        "JOIN_ASSIGNMENT": "تم الانضمام للتكليف"
+        "USER_LOGIN": "تم تسجيل دخول مستخدم"
       }
     },
     "charts": {
@@ -1322,7 +1322,7 @@
       "linkAccount": "ربط الحساب",
       "noChildren": "لا يوجد أطفال مرتبطون بعد",
       "noChildrenDescription": "انقر على زر \"ربط طفل\" أعلاه لربط حسابك بملفات تعريف أبنائك.",
-      "day Streak": "تتابع الأيام",
+      "dayStreak": "سلسلة الأيام",
       "gpaAverage": "المعدل التراكمي / المتوسط",
       "attendance": "الحضور",
       "levelProgress": "التقدم في المستوى",
@@ -1675,7 +1675,7 @@
       "description": "إدارة المعلمين والطلاب والمسؤولين. الإشراف على حالة التحقق والحسابات.",
       "stats": {
         "totalUsers": "إجمالي المستخدمين",
-        "pending Verification": "في انتظار التحقق",
+        "pendingVerification": "تحققات معلقة",
         "activeAccounts": "الحسابات النشطة"
       },
       "filters": {
@@ -2081,6 +2081,7 @@
       "multimedia": "وسائط متعددة",
       "documents": "مستندات"
     },
+    "searchPlaceholder": "البحث في المصادر...",
     "empty": {
       "title": "لا توجد مصادر",
       "desc": "ارفع أول مادة تعليمية للبدء في بناء مكتبة فصلك."
@@ -2096,8 +2097,7 @@
     "deleteDialog": {
       "title": "هل أنت متأكد تماماً؟",
       "desc": "لا يمكن التراجع عن هذا الإجراء. سيؤدي هذا إلى حذف المورد نهائياً وإزالته من جميع مكتبات الفصول."
-    },
-    "searchPlaceholder": "البحث في المصادر..."
+    }
   },
   "profileRequests": {
     "title": "حوكمة الملفات الشخصية",
@@ -2266,7 +2266,7 @@
     "cta": {
       "title": "جاهز لتحويل فصلك الدراسي؟",
       "desc": "انضم إلى آلاف المعلمين والطلاب الذين يستخدمون Classroom CMS لتشكيل مستقبل التعليم.",
-      "launch": "ابدأ فصلك الآن",
+      "launch": "Launch Your Classroom",
       "watchDemo": "شاهد العرض التجريبي"
     }
   },
@@ -2353,7 +2353,7 @@
     "stats": {
       "badges": "الأوسمة",
       "avgGrade": "متوسط الدرجة",
-      "day Streak": "تتابع الأيام",
+      "dayStreak": "سلسلة الأيام",
       "globalRank": "التصنيف العالمي"
     },
     "learningConsistency": "استمرارية التعلم",
