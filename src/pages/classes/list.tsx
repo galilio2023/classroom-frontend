@@ -23,8 +23,9 @@ import {
   Briefcase,
   Layers,
   GraduationCap,
+  Calendar,
 } from "lucide-react";
-import { useMemo, useState, useEffect, useRef, useCallback } from "react";
+import { useMemo, useState, useEffect } from "react";
 import {
   useList,
   HttpError,
@@ -100,6 +101,10 @@ import { ApplyTeacherDialog } from "./apply-teacher-dialog";
 import { useTranslation } from "react-i18next";
 import { TeacherDiscoveryList } from "@/components/classes/teacher-discovery-list";
 import { ColumnDef } from "@tanstack/react-table";
+
+const DEFAULT_PAGE_SIZE = 50;
+const DEPARTMENTS_PAGE_SIZE = 100;
+const SUBJECTS_PAGE_SIZE = 1000;
 
 const ClassesList = () => {
   const { t, i18n } = useTranslation();
@@ -230,12 +235,12 @@ const ClassesList = () => {
 
   const { query: subjectsQuery } = useList<Subject, HttpError>({
     resource: "subjects",
-    pagination: { pageSize: 1000 },
+    pagination: { pageSize: SUBJECTS_PAGE_SIZE },
   });
 
   const { query: departmentsQuery } = useList<Department, HttpError>({
     resource: "departments",
-    pagination: { pageSize: 100 },
+    pagination: { pageSize: DEPARTMENTS_PAGE_SIZE },
   });
 
   const subjects = subjectsQuery.data?.data ?? [];
@@ -262,7 +267,7 @@ const ClassesList = () => {
     columns,
     refineCoreProps: {
       resource: "classes",
-      pagination: { mode: "server", pageSize: 50 },
+      pagination: { mode: "server", pageSize: DEFAULT_PAGE_SIZE },
       sorters: { initial: [{ field: "id", order: "desc" }] },
       queryOptions: {
         staleTime: 0,
@@ -689,6 +694,8 @@ const ClassesList = () => {
                       app.classId === classItem.id && app.status === "pending",
                   );
 
+                  const firstSchedule = classItem.schedules?.[0];
+
                   return (
                       <motion.div
                         key={classItem.id}
@@ -704,6 +711,17 @@ const ClassesList = () => {
                            className="absolute start-0 top-1/2 -translate-y-1/2 w-1.5 h-16 rounded-e-full transition-all group-hover:h-24"
                            style={{ backgroundColor: classColor }}
                         />
+
+                        {/* Live Indicator Overlay */}
+                        {classItem.isLive && (
+                          <div className="absolute top-6 end-6 z-10">
+                            <Badge className="bg-red-500 hover:bg-red-600 text-white border-none px-3 py-1 rounded-full flex items-center gap-1.5 shadow-lg shadow-red-500/20 animate-pulse">
+                              <span className="h-1.5 w-1.5 rounded-full bg-white animate-ping" />
+                              <Video className="h-3 w-3" />
+                              <span className="text-[10px] font-black uppercase tracking-widest">Live Now</span>
+                            </Badge>
+                          </div>
+                        )}
 
                         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 md:gap-6 mb-6">
                             <div className="relative shrink-0">
@@ -764,14 +782,18 @@ const ClassesList = () => {
 
                             <div className="flex items-center gap-3 bg-background/50 p-3 rounded-2xl border border-border/40 shadow-sm">
                                 <div className="p-2 rounded-xl bg-primary/5 text-primary shrink-0">
-                                    <GraduationCap className="h-4 w-4" />
+                                    {primaryTeacher ? <GraduationCap className="h-4 w-4" /> : <Calendar className="h-4 w-4" />}
                                 </div>
                                 <div className="flex flex-col min-w-0">
                                     <span className="text-[9px] uppercase font-bold text-muted-foreground/60 tracking-wider truncate">
-                                        Teacher
+                                        {primaryTeacher ? "Teacher" : "Schedule"}
                                     </span>
                                     <span className="text-xs md:text-sm font-black text-foreground truncate">
-                                        {primaryTeacher?.name.split(' ')[0] || "Staff"}
+                                        {primaryTeacher 
+                                          ? primaryTeacher.name.split(' ')[0] 
+                                          : firstSchedule 
+                                            ? `${firstSchedule.day.substring(0,3)} ${firstSchedule.startTime}`
+                                            : "Staff"}
                                     </span>
                                 </div>
                             </div>
