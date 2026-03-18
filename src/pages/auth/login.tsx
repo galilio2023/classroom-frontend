@@ -2,6 +2,7 @@ import { useLogin } from "@refinedev/core";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
+import { useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -20,7 +21,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { BookOpen, Zap, ArrowRight, ShieldCheck, Loader2 } from "lucide-react";
@@ -30,6 +31,8 @@ import { cn } from "@/lib/utils";
 const LoginPage = () => {
   const { t, i18n } = useTranslation();
   const isAr = i18n.language === 'ar';
+  const [searchParams] = useSearchParams();
+  const inviteCode = searchParams.get("inviteCode");
 
   const loginSchema = z.object({
     email: z.string().email(t("auth.login.invalidEmail")),
@@ -46,8 +49,16 @@ const LoginPage = () => {
     },
   });
 
+  useEffect(() => {
+    if (inviteCode) {
+        toast.info(t("classes.show.toast.inviteLinkDetected"), {
+            description: t("classes.show.toast.loginToJoin")
+        });
+    }
+  }, [inviteCode, t]);
+
   const onSubmit = (values: z.infer<typeof loginSchema>) => {
-    login(values, {
+    login({ ...values, inviteCode }, {
       onSuccess: () => {},
       onError: (error: any) => {
         const errorMessage =
@@ -157,7 +168,7 @@ const LoginPage = () => {
             <p className="text-sm md:text-base font-medium text-muted-foreground/80">
               {t("auth.login.newToClassroom")}&nbsp;
               <Link
-                to="/register"
+                to={`/register${inviteCode ? `?inviteCode=${inviteCode}` : ''}`}
                 className="font-black text-primary hover:underline uppercase tracking-[0.1em] text-xs md:text-sm"
               >
                 {t("buttons.createAccount")} <ArrowRight className={cn("inline h-4 w-4 ml-1 mb-0.5", isAr && "mr-1 ml-0 rotate-180")} />

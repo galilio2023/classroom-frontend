@@ -27,7 +27,9 @@ import {
   Timer,
   AlertTriangle,
   RotateCcw,
-  XCircle
+  XCircle,
+  FlaskConical,
+  Activity
 } from "lucide-react";
 import { Assignment, User, Submission, UserRole, PeerReview } from "@/types";
 import { SubmissionForm } from "./submission-form";
@@ -51,6 +53,8 @@ import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useTranslation } from "react-i18next";
+import { PhysicsLab } from "@/components/physics-lab";
+import { QuizMonitor } from "@/components/classes/quiz-monitor";
 
 dayjs.extend(relativeTime);
 
@@ -59,6 +63,7 @@ const AssignmentShow = () => {
   const { id } = useParams();
   const { data: identity, isLoading: isIdentityLoading } = useGetIdentity<User>();
   const [isResubmitting, setIsResubmitting] = useState(false);
+  const [isMonitoring, setIsMonitoring] = useState(false);
 
   const isAr = i18n.language === 'ar';
   if (isAr) dayjs.locale('ar');
@@ -145,6 +150,13 @@ const AssignmentShow = () => {
 
   const isQuiz = useMemo(() => {
     return assignment?.description?.includes("### Q1:") && assignment?.description?.includes("---");
+  }, [assignment]);
+
+  // NEW: Detect if this is a physics lab assignment
+  const isPhysicsLab = useMemo(() => {
+    return assignment?.title?.toLowerCase().includes("lab") || 
+           assignment?.description?.toLowerCase().includes("trajectory") ||
+           assignment?.description?.toLowerCase().includes("kinematics");
   }, [assignment]);
 
   const isLoading = isIdentityLoading || assignmentQuery.isLoading || submissionsList.query.isLoading;
@@ -296,6 +308,12 @@ const AssignmentShow = () => {
                   {t("assignments.show.banner.aiQuizMode")}
                 </Badge>
               )}
+              {isPhysicsLab && (
+                <Badge className="bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 px-4 py-1.5 rounded-xl font-black uppercase tracking-widest text-[10px] flex items-center gap-2 shadow-sm">
+                  <FlaskConical className="h-4 w-4" />
+                  {t("assignments.show.banner.physicsLab" as any)}
+                </Badge>
+              )}
               {assignment.isGroupAssignment && (
                 <Badge className="bg-blue-500/10 text-blue-600 border border-blue-500/20 px-4 py-1.5 rounded-xl font-black uppercase tracking-widest text-[10px] flex items-center gap-2 shadow-sm">
                   <Users className="h-4 w-4" />
@@ -314,7 +332,7 @@ const AssignmentShow = () => {
                 <div className="flex items-center gap-2">
                   <Calendar className={cn("h-5 w-5", isOverdue ? "text-destructive" : "text-primary")} />
                   <span className={cn(isOverdue && "text-destructive")}>
-                    {t("assignments.show.banner.due", { date: dueDate ? dueDate.format("MMM D, YYYY") : t("assignments.list.labels.noDeadline") })}
+                    {t("assignments.show.banner.due" as any, { date: dueDate ? dueDate.format("MMM D, YYYY") : t("assignments.list.labels.noDeadline") })}
                   </span>
                 </div>
                 <div className="w-1.5 h-1.5 rounded-full bg-muted-foreground/30" />
@@ -333,46 +351,63 @@ const AssignmentShow = () => {
             </div>
           </div>
 
-          {isStaff && assignment.hasPeerReview && (
-            <Button 
-              variant="outline" 
-              size="lg"
-              className="w-full lg:w-auto rounded-[1.5rem] font-bold uppercase tracking-widest text-[10px] h-14 md:h-16 px-10 gap-3 border-primary/20 bg-primary/5 backdrop-blur-sm hover:bg-primary/10 transition-all shadow-xl shadow-primary/5"
-              onClick={() => {
-                toast.promise(
-                  fetch(`${SOCKET_URL.replace("/socket.io", "")}/api/assignments/${id}/assign-peer-reviews`, {
-                    method: "POST",
-                    headers: {
-                      "Authorization": `Bearer ${localStorage.getItem("refine-auth")}`
+          <div className="flex flex-col gap-3 w-full lg:w-auto">
+            {isStaff && isQuiz && (
+                <Button 
+                    variant="outline" 
+                    size="lg"
+                    className={cn(
+                        "rounded-[1.5rem] font-bold uppercase tracking-widest text-[10px] h-14 md:h-16 px-10 gap-3 border-primary/20 transition-all shadow-xl shadow-primary/5",
+                        isMonitoring ? "bg-primary text-white" : "bg-primary/5 text-primary hover:bg-primary/10"
+                    )}
+                    onClick={() => setIsMonitoring(!isMonitoring)}
+                >
+                    <Activity className={cn("h-5 w-5", isMonitoring && "animate-pulse")} />
+                    {isMonitoring ? t("buttons.stopMonitoring", "Stop Monitoring") : t("buttons.liveMonitor", "Live Monitor")}
+                </Button>
+            )}
+
+            {isStaff && assignment.hasPeerReview && (
+                <Button 
+                variant="outline" 
+                size="lg"
+                className="rounded-[1.5rem] font-bold uppercase tracking-widest text-[10px] h-14 md:h-16 px-10 gap-3 border-primary/20 bg-primary/5 backdrop-blur-sm hover:bg-primary/10 transition-all shadow-xl shadow-primary/5"
+                onClick={() => {
+                    toast.promise(
+                    fetch(`${SOCKET_URL.replace("/socket.io", "")}/api/assignments/${id}/assign-peer-reviews`, {
+                        method: "POST",
+                        headers: {
+                        "Authorization": `Bearer ${localStorage.getItem("refine-auth")}`
+                        }
+                    }),
+                    {
+                        loading: t("assignments.show.toast.peersLoading"),
+                        success: t("assignments.show.toast.peersSuccess"),
+                        error: t("assignments.show.toast.peersError"),
                     }
-                  }),
-                  {
-                    loading: t("assignments.show.toast.peersLoading"),
-                    success: t("assignments.show.toast.peersSuccess"),
-                    error: t("assignments.show.toast.peersError"),
-                  }
-                );
-              }}
-            >
-              <Sparkles className="h-5 w-5 text-primary animate-pulse" />
-              {t("buttons.assignPeerReviews")}
-            </Button>
-          )}
+                    );
+                }}
+                >
+                <Sparkles className="h-5 w-5 text-primary animate-pulse" />
+                {t("buttons.assignPeerReviews")}
+                </Button>
+            )}
+          </div>
         </div>
 
         {/* Description Section */}
         <div className="px-4 md:px-6 lg:px-8">
           <div className={cn(
             "p-8 md:p-12 rounded-[2.5rem] bg-muted/20 border border-border/40 shadow-inner relative overflow-hidden",
-            isQuiz && "opacity-40 blur-[0.5px] select-none"
+            (isQuiz || isPhysicsLab) && "opacity-40 blur-[0.5px] select-none"
           )}>
             <div className={cn("absolute opacity-5", isAr ? "left-0" : "right-0")}>
                 <FileText className="h-32 w-32 md:h-48 md:w-48" />
             </div>
-            {isQuiz ? (
+            {(isQuiz || isPhysicsLab) ? (
               <div className="flex flex-col items-center justify-center py-10 md:py-16 gap-4 text-muted-foreground">
-                <BrainCircuit className="h-12 w-12 md:h-16 md:w-16" />
-                <p className="font-black uppercase tracking-widest text-xs md:text-sm">{t("assignments.show.quizContentActive")}</p>
+                <FlaskConical className="h-12 w-12 md:h-16 md:w-16" />
+                <p className="font-black uppercase tracking-widest text-xs md:text-sm">{t("assignments.show.interactiveContentActive" as any)}</p>
               </div>
             ) : (
               <div className="prose prose-lg dark:prose-invert max-w-none font-medium leading-relaxed text-start">
@@ -384,6 +419,18 @@ const AssignmentShow = () => {
       </motion.div>
 
       <div className="grid gap-10 md:gap-16">
+        <AnimatePresence>
+            {isMonitoring && isStaff && isQuiz && (
+                <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                >
+                    <QuizMonitor quizId={Number(assignment.id)} assignmentTitle={assignment.title} />
+                </motion.div>
+            )}
+        </AnimatePresence>
+
         {isQuiz && (
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
@@ -409,7 +456,29 @@ const AssignmentShow = () => {
           </motion.div>
         )}
 
-        {!isStaff && !isQuiz && (
+        {isPhysicsLab && (
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <Card className="border-none shadow-2xl bg-card overflow-hidden rounded-[2.5rem] md:rounded-[3rem] text-start">
+              <CardHeader className="bg-emerald-500/5 border-b border-emerald-500/10 p-8 md:p-10">
+                <CardTitle className="text-xl md:text-2xl font-black uppercase tracking-widest flex items-center gap-4 text-emerald-600">
+                  <div className="p-3 rounded-2xl bg-emerald-500/10">
+                    <FlaskConical className="h-6 w-6 md:h-8 md:w-8" />
+                  </div>
+                  {t("assignments.show.physicsLabTitle", "Interactive Simulation")}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-8 md:p-10">
+                <PhysicsLab />
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+
+        {!isStaff && !isQuiz && !isPhysicsLab && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 md:gap-16 text-start">
             <div className="lg:col-span-2 space-y-10 md:space-y-16">
               <Card className="border-none shadow-2xl bg-card overflow-hidden rounded-[2.5rem] md:rounded-[3rem]">

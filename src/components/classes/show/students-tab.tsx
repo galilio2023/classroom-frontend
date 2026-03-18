@@ -1,6 +1,6 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Enrollment, User } from "@/types";
-import { HttpError } from "@refinedev/core";
+import { HttpError, useInvalidate } from "@refinedev/core";
 import { ColumnDef } from "@tanstack/react-table";
 import { useTable } from "@refinedev/react-table";
 import { DataTable } from "@/components/refine-ui/data-table/data-table";
@@ -23,11 +23,14 @@ import {
   MessageSquare,
   CheckCircle2,
   XCircle,
+  FileSpreadsheet,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { motion, AnimatePresence } from "framer-motion";
+import { useQueryClient } from "@tanstack/react-query";
+import { BulkEnrollDialog } from "./bulk-enroll-dialog";
 
 interface StudentsTabProps {
   classId: string;
@@ -54,6 +57,31 @@ export const StudentsTab = ({
 }: StudentsTabProps) => {
   const { t, i18n } = useTranslation();
   const isAr = i18n.language === "ar";
+  const queryClient = useQueryClient();
+  const [bulkDialogOpen, setBulkDialogOpen] = useState(false);
+
+  /**
+   * ARCHITECTURAL PATTERN: Optimistic Update Helper
+   * Manually updates the React Query cache before the server responds.
+   */
+  const handleOptimisticEnrollment = async (id: number, status: "approved" | "rejected") => {
+    // 1. Trigger the actual mutation (which remains passed from the parent for consistency)
+    onEnrollmentAction(id, status);
+
+    // 2. Perform manual cache manipulation for instant UI feedback
+    const queryKey = ["enrollments", "list"];
+    
+    // We update both the specific enrollment list and general dashboard stats
+    await queryClient.cancelQueries({ queryKey });
+    
+    queryClient.setQueriesData({ queryKey }, (old: any) => {
+        if (!old?.data) return old;
+        return {
+            ...old,
+            data: old.data.map((e: Enrollment) => e.id === id ? { ...e, status } : e)
+        };
+    });
+  };
 
   const columns = useMemo<ColumnDef<Enrollment>[]>(
     () => [
@@ -235,6 +263,18 @@ export const StudentsTab = ({
                   <span className="xs:hidden">Message</span>
                 </Button>
                 <Button
+                  variant="outline"
+                  size="lg"
+                  onClick={() => setBulkDialogOpen(true)}
+                  className="flex-1 sm:flex-none rounded-xl md:rounded-2xl h-12 md:h-14 px-6 md:px-8 font-black uppercase tracking-widest text-[9px] md:text-[10px] gap-2 border-emerald-500/20 hover:bg-emerald-500/10 transition-all text-emerald-600 shadow-sm"
+                >
+                  <FileSpreadsheet className="h-4 w-4 md:h-5 md:w-5" />
+                  <span className="hidden xs:inline">
+                    {t("classes.show.students.actions.bulkEnroll", "Bulk Enroll")}
+                  </span>
+                  <span className="xs:hidden">CSV</span>
+                </Button>
+                <Button
                   size="lg"
                   onClick={onEnrollClick}
                   className="flex-1 sm:flex-none rounded-xl md:rounded-2xl h-12 md:h-14 px-6 md:px-8 font-black uppercase tracking-widest text-[9px] md:text-[10px] gap-2 shadow-xl shadow-primary/20 transition-all text-white bg-primary hover:bg-primary/90"
@@ -327,7 +367,7 @@ export const StudentsTab = ({
                                 size="icon"
                                 className="h-9 w-9 md:h-10 md:w-10 rounded-xl text-emerald-600 border-emerald-500/20 bg-emerald-500/5 hover:bg-emerald-500 hover:text-white transition-all shadow-sm"
                                 onClick={() =>
-                                  onEnrollmentAction(enrollment.id, "approved")
+                                  handleOptimisticEnrollment(enrollment.id, "approved")
                                 }
                               >
                                 <CheckCircle2 className="h-4 w-4 md:h-5 md:w-5" />
@@ -337,7 +377,7 @@ export const StudentsTab = ({
                                 size="icon"
                                 className="h-9 w-9 md:h-10 md:w-10 rounded-xl text-destructive border-destructive/20 bg-destructive/5 hover:bg-destructive hover:text-white transition-all shadow-sm"
                                 onClick={() =>
-                                  onEnrollmentAction(enrollment.id, "rejected")
+                                  handleOptimisticEnrollment(enrollment.id, "rejected")
                                 }
                               >
                                 <XCircle className="h-4 w-4 md:h-5 md:w-5" />
@@ -354,6 +394,12 @@ export const StudentsTab = ({
           </Card>
         </div>
       )}
+
+      <BulkEnrollDialog
+        open={bulkDialogOpen}
+        onOpenChange={setBulkDialogOpen}
+        classId={classId}
+      />
     </div>
   );
 };

@@ -345,6 +345,7 @@
       "passwordPlaceholder": "••••••••",
       "phoneNumberLabel": "Phone Number",
       "phoneNumberPlaceholder": "+1 (555) 000-0000",
+      "phoneRequired": "Phone number is required",
       "dobLabel": "Date of Birth",
       "bioLabel": "Professional Bio",
       "bioPlaceholder": "Tell us about your teaching experience...",
@@ -524,7 +525,10 @@
         "enrollmentStatus": "Student enrollment {{status}}",
         "enrollmentError": "Failed to update enrollment",
         "bulkProcessing": "Bulk message processing started in background",
-        "bulkError": "Failed to send message"
+        "bulkError": "Failed to send message",
+        "inviteLinkDetected": "Invite Link Detected",
+        "loginToJoin": "Please login to join this class",
+        "registerToJoin": "Please register to join this class"
       },
       "announcement": {
         "priority": "Priority Announcement",
@@ -845,7 +849,7 @@
     },
     "charts": {
       "gradeDistribution": "Grade Distribution",
-      "gradeDescription": "Grade Description"
+      "gradeDescription": "Grade Distribution"
     },
     "ai": {
       "predictions": "AI Predictions",
@@ -1252,6 +1256,7 @@
     },
     "activity": {
       "recent": "Recent Activity",
+      "systemLogs": "System Logs",
       "noActivity": "No activity yet",
       "noActivityDescription": "Updates will appear here as they happen.",
       "aiInsightAvailable": "AI Insight Available",

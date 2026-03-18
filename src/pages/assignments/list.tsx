@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
+import { CanAccess } from "@/components/auth/can-access";
 import "dayjs/locale/ar";
 
 dayjs.extend(relativeTime);
@@ -65,15 +66,16 @@ export const AssignmentList = ({
             {assignments.length}
           </Badge>
         </div>
-        {isStaff && (
-          <Button 
-            onClick={handleCreate}
-            className="rounded-xl font-black uppercase tracking-widest text-[10px] h-10 px-4 gap-2 shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95"
-          >
-            <PlusCircle className="h-4 w-4" />
-            {t("buttons.createAssignment")}
-          </Button>
-        )}
+        
+        <CanAccess resource="assignments" action="create" params={{ classId }}>
+            <Button 
+                onClick={handleCreate}
+                className="rounded-xl font-black uppercase tracking-widest text-[10px] h-10 px-4 gap-2 shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95"
+            >
+                <PlusCircle className="h-4 w-4" />
+                {t("buttons.createAssignment")}
+            </Button>
+        </CanAccess>
       </CardHeader>
       <CardContent className="p-0">
         {assignments.length > 0 ? (
@@ -145,7 +147,7 @@ export const AssignmentList = ({
                       </Badge>
 
                       <div className="flex items-center gap-2">
-                        {isStaff && (
+                        <CanAccess resource="assignments" action="edit" id={assignment.id}>
                           <Button
                             variant="ghost"
                             size="icon"
@@ -157,7 +159,7 @@ export const AssignmentList = ({
                           >
                             <Edit3 className="h-4 w-4" />
                           </Button>
-                        )}
+                        </CanAccess>
                         <Button
                           variant="ghost"
                           size="icon"

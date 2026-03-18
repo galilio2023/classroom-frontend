@@ -8,6 +8,7 @@ export type SignUpPayload = z.infer<typeof signUpFormSchema>;
 export enum UserRole {
   ADMIN = "admin",
   TEACHER = "teacher",
+  TA = "ta",
   STUDENT = "student",
   PARENT = "parent",
 }

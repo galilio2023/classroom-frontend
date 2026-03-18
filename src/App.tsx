@@ -34,7 +34,9 @@ import { useTranslation } from "react-i18next";
 const Dashboard = React.lazy(() => import("./pages/dashboard"));
 const LoginPage = React.lazy(() => import("./pages/auth/login"));
 const RegisterPage = React.lazy(() => import("./pages/auth/register"));
-const PendingVerification = React.lazy(() => import("./pages/auth/pending-verification"));
+const PendingVerification = React.lazy(
+  () => import("./pages/auth/pending-verification"),
+);
 const UnauthorizedPage = React.lazy(() => import("./pages/unauthorized"));
 
 const ClassesList = React.lazy(() => import("./pages/classes/list"));
@@ -48,11 +50,19 @@ const ShowUser = React.lazy(() => import("./pages/users/show"));
 const CreateUser = React.lazy(() => import("./pages/users/create"));
 const EditUser = React.lazy(() => import("./pages/users/edit"));
 
-const AssignmentsList = React.lazy(() => import("./pages/assignments/list-page"));
-const CreateAssignment = React.lazy(() => import("./pages/assignments/create").then(m => ({ default: m.AssignmentCreate })));
+const AssignmentsList = React.lazy(
+  () => import("./pages/assignments/list-page"),
+);
+const CreateAssignment = React.lazy(() =>
+  import("./pages/assignments/create").then((m) => ({
+    default: m.AssignmentCreate,
+  })),
+);
 const AssignmentShow = React.lazy(() => import("./pages/assignments/show"));
 
-const SubmissionsList = React.lazy(() => import("./pages/submissions/list-page"));
+const SubmissionsList = React.lazy(
+  () => import("./pages/submissions/list-page"),
+);
 const SubmissionShow = React.lazy(() => import("./pages/submissions/show"));
 
 const AttendanceList = React.lazy(() => import("./pages/attendance/list"));
@@ -75,29 +85,49 @@ const CreateSubject = React.lazy(() => import("./pages/subjects/create"));
 const EditSubject = React.lazy(() => import("./pages/subjects/edit"));
 
 const CalendarPage = React.lazy(() => import("./pages/calendar"));
-const NotificationsPage = React.lazy(() => import("./pages/notifications/list"));
+const NotificationsPage = React.lazy(
+  () => import("./pages/notifications/list"),
+);
 const AiAssistantPage = React.lazy(() => import("./pages/ai-assistant"));
 const AiStudyLabPage = React.lazy(() => import("./pages/ai-study-lab"));
 const AiHistoryList = React.lazy(() => import("./pages/ai-history/list"));
 const AiHistoryShow = React.lazy(() => import("./pages/ai-history/show"));
 const MessagesPage = React.lazy(() => import("./pages/messages/index"));
-const ProjectGroupsPage = React.lazy(() => import("./pages/project-groups/index"));
-const ShowProjectGroup = React.lazy(() => import("./pages/project-groups/show"));
+const ProjectGroupsPage = React.lazy(
+  () => import("./pages/project-groups/index"),
+);
+const ShowProjectGroup = React.lazy(
+  () => import("./pages/project-groups/show"),
+);
 const GlobalLibraryPage = React.lazy(() => import("./pages/library/index"));
 const TermsList = React.lazy(() => import("./pages/terms/list"));
-const ProfileRequestsList = React.lazy(() => import("./pages/profile-requests/list"));
+const ProfileRequestsList = React.lazy(
+  () => import("./pages/profile-requests/list"),
+);
 const StudyPlanner = React.lazy(() => import("./pages/study-planner"));
-const TeacherApplicationsList = React.lazy(() => import("./pages/teacher-applications/list"));
-const ActivityLogPage = React.lazy(() => import("./pages/dashboard/activity-log"));
-const StudentReportCard = React.lazy(() => import("./pages/student/report-card"));
+const TeacherApplicationsList = React.lazy(
+  () => import("./pages/teacher-applications/list"),
+);
+const ActivityLogPage = React.lazy(
+  () => import("./pages/dashboard/activity-log"),
+);
+const StudentReportCard = React.lazy(
+  () => import("./pages/student/report-card"),
+);
 const StudentProgress = React.lazy(() => import("./pages/progress/list"));
-const TeacherChannelPage = React.lazy(() => import("./pages/teacher-channel/index"));
+const TeacherChannelPage = React.lazy(
+  () => import("./pages/teacher-channel/index"),
+);
 const StudentPortfolio = React.lazy(() => import("./pages/users/portfolio"));
 
 // PUBLIC PAGES
 const LandingPage = React.lazy(() => import("./pages/landing"));
 const PricingPage = React.lazy(() => import("./pages/pricing"));
-const PublicLayout = React.lazy(() => import("./components/public-ui/layout").then(m => ({ default: m.PublicLayout })));
+const PublicLayout = React.lazy(() =>
+  import("./components/public-ui/layout").then((m) => ({
+    default: m.PublicLayout,
+  })),
+);
 
 const Loading = () => (
   <div className="flex h-dvh items-center justify-center">
@@ -108,8 +138,12 @@ const Loading = () => (
 const ErrorComponent = () => (
   <div className="flex flex-col h-dvh items-center justify-center space-y-4">
     <h1 className="text-4xl font-bold">404</h1>
-    <p className="text-muted-foreground">The page you are looking for does not exist.</p>
-    <a href="/dashboard" className="text-primary hover:underline font-medium">Back to Dashboard</a>
+    <p className="text-muted-foreground">
+      The page you are looking for does not exist.
+    </p>
+    <a href="/dashboard" className="text-primary hover:underline font-medium">
+      Back to Dashboard
+    </a>
   </div>
 );
 
@@ -124,7 +158,8 @@ function App() {
   }, [i18n.language, i18n]);
 
   const i18nProvider = {
-    translate: (key: string, params: object) => t(key, { ...params, defaultValue: key }),
+    translate: (key: string, params: object) =>
+      t(key, { ...params, defaultValue: key }),
     changeLocale: (lang: string) => i18n.changeLanguage(lang),
     getLocale: () => i18n.language,
   };
@@ -153,282 +188,592 @@ function App() {
               }}
             >
               <Suspense fallback={<Loading />}>
-                <SocketProvider>
-                  <TermProvider>
-                    <Routes>
-                      {/* PUBLIC ROUTES */}
-                      <Route element={<PublicLayout />}>
-                        <Route path="/" element={<LandingPage />} />
-                        <Route path="/pricing" element={<PricingPage />} />
-                      </Route>
+                <Routes>
+                  {/* PUBLIC ROUTES */}
+                  <Route element={<PublicLayout />}>
+                    <Route path="/" element={<LandingPage />} />
+                    <Route path="/pricing" element={<PricingPage />} />
+                  </Route>
 
-                      {/* AUTH PAGES (REDIRECTS IF LOGGED IN) */}
-                      <Route
-                        element={
-                          <Authenticated
-                            key="auth-pages"
-                            fallback={<Outlet />}
-                          >
-                            <NavigateToResource resource="dashboard" />
-                          </Authenticated>
-                        }
+                  {/* AUTH PAGES (REDIRECTS IF LOGGED IN) */}
+                  <Route
+                    element={
+                      <Authenticated key="auth-pages" fallback={<Outlet />}>
+                        <NavigateToResource resource="dashboard" />
+                      </Authenticated>
+                    }
+                  >
+                    <Route path="/login" element={<LoginPage />} />
+                    <Route path="/register" element={<RegisterPage />} />
+                  </Route>
+
+                  <Route path="/unauthorized" element={<UnauthorizedPage />} />
+
+                  {/* PROTECTED ROUTES */}
+                  <Route
+                    element={
+                      <Authenticated
+                        key="authenticated-layout"
+                        fallback={<CatchAllNavigate to="/login" />}
                       >
-                        <Route path="/login" element={<LoginPage />} />
-                        <Route path="/register" element={<RegisterPage />} />
-                      </Route>
-
-                      <Route path="/unauthorized" element={<UnauthorizedPage />} />
-
-                      {/* PROTECTED ROUTES */}
-                      <Route
-                        element={
-                          <Authenticated
-                            key="authenticated-layout"
-                            fallback={<CatchAllNavigate to="/login" />}
-                          >
+                        {/* 🔥 ARCHITECTURAL FIX: Providers only mount AFTER auth is confirmed! */}
+                        <SocketProvider>
+                          <TermProvider>
                             <Outlet />
-                          </Authenticated>
+                          </TermProvider>
+                        </SocketProvider>
+                      </Authenticated>
+                    }
+                  >
+                    <Route
+                      path="/pending-verification"
+                      element={<PendingVerification />}
+                    />
+
+                    <Route
+                      element={
+                        <VerificationGuard>
+                          <Layout>
+                            <Outlet />
+                          </Layout>
+                        </VerificationGuard>
+                      }
+                    >
+                      <Route
+                        path="/dashboard"
+                        element={
+                          <AuthorizedRoute resource="dashboard" action="list">
+                            <Dashboard />
+                          </AuthorizedRoute>
                         }
-                      >
-                        <Route 
-                            path="/pending-verification" 
-                            element={<PendingVerification />} 
-                        />
-                        
+                      />
+                      <Route
+                        path="/calendar"
+                        element={
+                          <AuthorizedRoute resource="calendar" action="list">
+                            <CalendarPage />
+                          </AuthorizedRoute>
+                        }
+                      />
+                      <Route
+                        path="/notifications"
+                        element={
+                          <AuthorizedRoute
+                            resource="notifications"
+                            action="list"
+                          >
+                            <NotificationsPage />
+                          </AuthorizedRoute>
+                        }
+                      />
+                      <Route
+                        path="/messages"
+                        element={
+                          <AuthorizedRoute resource="messages" action="list">
+                            <MessagesPage />
+                          </AuthorizedRoute>
+                        }
+                      />
+                      <Route path="/project-groups">
                         <Route
-                            element={
-                                <VerificationGuard>
-                                    <Layout>
-                                        <Outlet />
-                                    </Layout>
-                                </VerificationGuard>
-                            }
-                        >
-                            <Route 
-                            path="/dashboard" 
-                            element={
-                                <AuthorizedRoute resource="dashboard" action="list">
-                                <Dashboard />
-                                </AuthorizedRoute>
-                            } 
-                            />
-                            <Route 
-                            path="/calendar" 
-                            element={
-                                <AuthorizedRoute resource="calendar" action="list">
-                                <CalendarPage />
-                                </AuthorizedRoute>
-                            } 
-                            />
-                            <Route 
-                            path="/notifications" 
-                            element={
-                                <AuthorizedRoute resource="notifications" action="list">
-                                <NotificationsPage />
-                                </AuthorizedRoute>
-                            } 
-                            />
-                            <Route 
-                                path="/messages" 
-                                element={
-                                    <AuthorizedRoute resource="messages" action="list">
-                                        <MessagesPage />
-                                    </AuthorizedRoute>
-                                } 
-                            /> 
-                            <Route path="/project-groups">
-                                <Route 
-                                    index 
-                                    element={
-                                        <AuthorizedRoute resource="project-groups" action="list">
-                                            <ProjectGroupsPage />
-                                        </AuthorizedRoute>
-                                    } 
-                                />
-                                <Route 
-                                    path="show/:id" 
-                                    element={
-                                        <AuthorizedRoute resource="project-groups" action="show">
-                                            <ShowProjectGroup />
-                                        </AuthorizedRoute>
-                                    } 
-                                />
-                            </Route>
-                            <Route 
-                                path="/library" 
-                                element={
-                                    <AuthorizedRoute resource="library" action="list">
-                                        <GlobalLibraryPage />
-                                    </AuthorizedRoute>
-                                } 
-                            />
-
-                            {/* AI */}
-                            <Route 
-                            path="/ai-assistant" 
-                            element={
-                                <AuthorizedRoute resource="ai-assistant" action="list">
-                                <AiAssistantPage />
-                                </AuthorizedRoute>
-                            } 
-                            />
-                            <Route 
-                            path="/ai-study-lab" 
-                            element={
-                                <AuthorizedRoute resource="ai-study-lab" action="list">
-                                <AiStudyLabPage />
-                                </AuthorizedRoute>
-                            } 
-                            />
-                            <Route path="/ai-history">
-                                <Route 
-                                    index 
-                                    element={
-                                        <AuthorizedRoute resource="ai-activity-logs" action="list">
-                                            <AiHistoryList />
-                                        </AuthorizedRoute>
-                                    } 
-                                />
-                                <Route 
-                                    path="show/:id" 
-                                    element={
-                                        <AuthorizedRoute resource="ai-activity-logs" action="show">
-                                            <AiHistoryShow />
-                                        </AuthorizedRoute>
-                                    } 
-                                />
-                            </Route>
-                            <Route 
-                            path="/study-planner" 
-                            element={
-                                <AuthorizedRoute resource="study-planner" action="list">
-                                <StudyPlanner />
-                                </AuthorizedRoute>
-                            } 
-                            />
-
-                            {/* CLASSES */}
-                            <Route path="/classes">
-                                <Route index element={<AuthorizedRoute resource="classes" action="list"><ClassesList /></AuthorizedRoute>} />
-                                <Route path="create" element={<AuthorizedRoute resource="classes" action="create"><CreateClass /></AuthorizedRoute>} />
-                                <Route path="edit/:id" element={<AuthorizedRoute resource="classes" action="edit"><EditClass /></AuthorizedRoute>} />
-                                <Route path="show/:id" element={<AuthorizedRoute resource="classes" action="show"><ClassShow /></AuthorizedRoute>} />
-                                <Route path=":classId/lessons/:resourceId" element={<AuthorizedRoute resource="resources" action="show"><LessonReader /></AuthorizedRoute>} />
-                            </Route>
-
-                            {/* ASSIGNMENTS */}
-                            <Route path="/assignments">
-                                <Route index element={<AuthorizedRoute resource="assignments" action="list"><AssignmentsList /></AuthorizedRoute>} />
-                                <Route path="create" element={<AuthorizedRoute resource="assignments" action="create"><CreateAssignment /></AuthorizedRoute>} />
-                                <Route path="show/:id" element={<AuthorizedRoute resource="assignments" action="show"><AssignmentShow /></AuthorizedRoute>} />
-                            </Route>
-
-                            {/* SUBMISSIONS */}
-                            <Route path="/submissions">
-                                <Route index element={<AuthorizedRoute resource="submissions" action="list"><SubmissionsList /></AuthorizedRoute>} />
-                                <Route path="show/:id" element={<AuthorizedRoute resource="submissions" action="show"><SubmissionShow /></AuthorizedRoute>} />
-                            </Route>
-
-                            {/* QUIZZES */}
-                            <Route path="/quizzes">
-                                <Route index element={<AuthorizedRoute resource="quizzes" action="list"><QuizzesList /></AuthorizedRoute>} />
-                                <Route path="create" element={<AuthorizedRoute resource="quizzes" action="create"><CreateQuiz /></AuthorizedRoute>} />
-                                <Route path="show/:id" element={<AuthorizedRoute resource="quizzes" action="show"><QuizShow /></AuthorizedRoute>} />
-                            </Route>
-
-                            {/* OTHERS */}
-                            <Route path="/attendance" element={<AuthorizedRoute resource="attendance" action="list"><AttendanceList /></AuthorizedRoute>} />
-                            <Route path="/enrollments" element={<AuthorizedRoute resource="enrollments" action="list"><EnrollmentList /></AuthorizedRoute>} />
-                            <Route path="/discussions" element={<AuthorizedRoute resource="discussions" action="list"><DiscussionsList /></AuthorizedRoute>} />
-                            <Route path="/modules" element={<AuthorizedRoute resource="modules" action="list"><ModulesList /></AuthorizedRoute>} />
-                            <Route path="/resources" element={<AuthorizedRoute resource="resources" action="list"><ResourcesList /></AuthorizedRoute>} />
-
-                            {/* TEACHER HUB */}
-                            <Route 
-                                path="/teacher/channel" 
-                                element={
-                                    <AuthorizedRoute resource="teacher-channel" action="list">
-                                        <TeacherChannelPage />
-                                    </AuthorizedRoute>
-                                } 
-                            />
-
-                            {/* ADMIN */}
-                            <Route path="/users">
-                                <Route index element={<AuthorizedRoute resource="users" action="list"><UsersList /></AuthorizedRoute>} />
-                                <Route path="create" element={<AuthorizedRoute resource="users" action="create"><CreateUser /></AuthorizedRoute>} />
-                                <Route path="edit/:id" element={<AuthorizedRoute resource="users" action="edit"><EditUser /></AuthorizedRoute>} />
-                                <Route path="show/:id" element={<AuthorizedRoute resource="users" action="show"><ShowUser /></AuthorizedRoute>} />
-                            </Route>
-                            
-                            <Route path="/departments">
-                                <Route index element={<AuthorizedRoute resource="departments" action="list"><DepartmentsList /></AuthorizedRoute>} />
-                                <Route path="create" element={<AuthorizedRoute resource="departments" action="create"><CreateDepartment /></AuthorizedRoute>} />
-                                <Route path="edit/:id" element={<AuthorizedRoute resource="departments" action="edit"><EditDepartment /></AuthorizedRoute>} />
-                            </Route>
-                            <Route path="/subjects">
-                                <Route index element={<AuthorizedRoute resource="subjects" action="list"><SubjectsList /></AuthorizedRoute>} />
-                                <Route path="create" element={<AuthorizedRoute resource="subjects" action="create"><CreateSubject /></AuthorizedRoute>} />
-                                <Route path="edit/:id" element={<AuthorizedRoute resource="subjects" action="edit"><EditSubject /></AuthorizedRoute>} />
-                            </Route>
-                            <Route path="/admin/terms" element={<AuthorizedRoute resource="academic-terms" action="list"><TermsList /></AuthorizedRoute>} />
-                            <Route
-                                path="/profile-requests"
-                                element={<AuthorizedRoute resource="profile-requests" action="list"><ProfileRequestsList /></AuthorizedRoute>}
-                            />
-                            <Route
-                                path="/teacher-applications"
-                                element={<AuthorizedRoute resource="teacher-applications" action="list"><TeacherApplicationsList /></AuthorizedRoute>}
-                            />
-                            <Route path="/activity-log" element={<AuthorizedRoute resource="activity-log" action="list"><ActivityLogPage /></AuthorizedRoute>} />
-                            <Route
-                                path="/student/report-card"
-                                element={<AuthorizedRoute resource="report-card" action="list"><StudentReportCard /></AuthorizedRoute>}
-                            />
-                            <Route path="/progress" element={<AuthorizedRoute resource="progress" action="list"><StudentProgress /></AuthorizedRoute>} />
-                            
-                            <Route path="/portfolio">
-                                <Route index element={<AuthorizedRoute resource="portfolio" action="list"><StudentPortfolio /></AuthorizedRoute>} />
-                                <Route path=":id" element={<AuthorizedRoute resource="portfolio" action="show"><StudentPortfolio /></AuthorizedRoute>} />
-                            </Route>
-
-                            {/* FIXED: Strict catch-all for unmatched nested routes to avoid white screen */}
-                            <Route path="*" element={<ErrorComponent />} />
-                        </Route>
+                          index
+                          element={
+                            <AuthorizedRoute
+                              resource="project-groups"
+                              action="list"
+                            >
+                              <ProjectGroupsPage />
+                            </AuthorizedRoute>
+                          }
+                        />
+                        <Route
+                          path="show/:id"
+                          element={
+                            <AuthorizedRoute
+                              resource="project-groups"
+                              action="show"
+                            >
+                              <ShowProjectGroup />
+                            </AuthorizedRoute>
+                          }
+                        />
                       </Route>
-
-                      {/* REDIRECT ROOT TO DASHBOARD IF AUTHENTICATED */}
                       <Route
+                        path="/library"
                         element={
-                          <Authenticated
-                            key="authenticated-root-redirect"
-                            fallback={<Outlet />}
-                          >
-                            <NavigateToResource resource="dashboard" />
-                          </Authenticated>
+                          <AuthorizedRoute resource="library" action="list">
+                            <GlobalLibraryPage />
+                          </AuthorizedRoute>
                         }
-                      >
-                        <Route path="/" element={<LandingPage />} />
+                      />
+
+                      {/* AI */}
+                      <Route
+                        path="/ai-assistant"
+                        element={
+                          <AuthorizedRoute
+                            resource="ai-assistant"
+                            action="list"
+                          >
+                            <AiAssistantPage />
+                          </AuthorizedRoute>
+                        }
+                      />
+                      <Route
+                        path="/ai-study-lab"
+                        element={
+                          <AuthorizedRoute
+                            resource="ai-study-lab"
+                            action="list"
+                          >
+                            <AiStudyLabPage />
+                          </AuthorizedRoute>
+                        }
+                      />
+                      <Route path="/ai-history">
+                        <Route
+                          index
+                          element={
+                            <AuthorizedRoute
+                              resource="ai-activity-logs"
+                              action="list"
+                            >
+                              <AiHistoryList />
+                            </AuthorizedRoute>
+                          }
+                        />
+                        <Route
+                          path="show/:id"
+                          element={
+                            <AuthorizedRoute
+                              resource="ai-activity-logs"
+                              action="show"
+                            >
+                              <AiHistoryShow />
+                            </AuthorizedRoute>
+                          }
+                        />
+                      </Route>
+                      <Route
+                        path="/study-planner"
+                        element={
+                          <AuthorizedRoute
+                            resource="study-planner"
+                            action="list"
+                          >
+                            <StudyPlanner />
+                          </AuthorizedRoute>
+                        }
+                      />
+
+                      {/* CLASSES */}
+                      <Route path="/classes">
+                        <Route
+                          index
+                          element={
+                            <AuthorizedRoute resource="classes" action="list">
+                              <ClassesList />
+                            </AuthorizedRoute>
+                          }
+                        />
+                        <Route
+                          path="create"
+                          element={
+                            <AuthorizedRoute resource="classes" action="create">
+                              <CreateClass />
+                            </AuthorizedRoute>
+                          }
+                        />
+                        <Route
+                          path="edit/:id"
+                          element={
+                            <AuthorizedRoute resource="classes" action="edit">
+                              <EditClass />
+                            </AuthorizedRoute>
+                          }
+                        />
+                        <Route
+                          path="show/:id"
+                          element={
+                            <AuthorizedRoute resource="classes" action="show">
+                              <ClassShow />
+                            </AuthorizedRoute>
+                          }
+                        />
+                        <Route
+                          path=":classId/lessons/:resourceId"
+                          element={
+                            <AuthorizedRoute resource="resources" action="show">
+                              <LessonReader />
+                            </AuthorizedRoute>
+                          }
+                        />
                       </Route>
 
-                      <Route
-                        element={
-                          <Authenticated
-                            key="authenticated-outer"
-                            fallback={<Outlet />}
-                          >
-                            <NavigateToResource />
-                          </Authenticated>
-                        }
-                      >
-                        <Route path="*" element={<CatchAllNavigate to="/login" />} />
+                      {/* ASSIGNMENTS */}
+                      <Route path="/assignments">
+                        <Route
+                          index
+                          element={
+                            <AuthorizedRoute
+                              resource="assignments"
+                              action="list"
+                            >
+                              <AssignmentsList />
+                            </AuthorizedRoute>
+                          }
+                        />
+                        <Route
+                          path="create"
+                          element={
+                            <AuthorizedRoute
+                              resource="assignments"
+                              action="create"
+                            >
+                              <CreateAssignment />
+                            </AuthorizedRoute>
+                          }
+                        />
+                        <Route
+                          path="show/:id"
+                          element={
+                            <AuthorizedRoute
+                              resource="assignments"
+                              action="show"
+                            >
+                              <AssignmentShow />
+                            </AuthorizedRoute>
+                          }
+                        />
                       </Route>
-                    </Routes>
-                    <Toaster />
-                    <UnsavedChangesNotifier />
-                    <DocumentTitleHandler />
-                  </TermProvider>
-                </SocketProvider>
+
+                      {/* SUBMISSIONS */}
+                      <Route path="/submissions">
+                        <Route
+                          index
+                          element={
+                            <AuthorizedRoute
+                              resource="submissions"
+                              action="list"
+                            >
+                              <SubmissionsList />
+                            </AuthorizedRoute>
+                          }
+                        />
+                        <Route
+                          path="show/:id"
+                          element={
+                            <AuthorizedRoute
+                              resource="submissions"
+                              action="show"
+                            >
+                              <SubmissionShow />
+                            </AuthorizedRoute>
+                          }
+                        />
+                      </Route>
+
+                      {/* QUIZZES */}
+                      <Route path="/quizzes">
+                        <Route
+                          index
+                          element={
+                            <AuthorizedRoute resource="quizzes" action="list">
+                              <QuizzesList />
+                            </AuthorizedRoute>
+                          }
+                        />
+                        <Route
+                          path="create"
+                          element={
+                            <AuthorizedRoute resource="quizzes" action="create">
+                              <CreateQuiz />
+                            </AuthorizedRoute>
+                          }
+                        />
+                        <Route
+                          path="show/:id"
+                          element={
+                            <AuthorizedRoute resource="quizzes" action="show">
+                              <QuizShow />
+                            </AuthorizedRoute>
+                          }
+                        />
+                      </Route>
+
+                      {/* OTHERS */}
+                      <Route
+                        path="/attendance"
+                        element={
+                          <AuthorizedRoute resource="attendance" action="list">
+                            <AttendanceList />
+                          </AuthorizedRoute>
+                        }
+                      />
+                      <Route
+                        path="/enrollments"
+                        element={
+                          <AuthorizedRoute resource="enrollments" action="list">
+                            <EnrollmentList />
+                          </AuthorizedRoute>
+                        }
+                      />
+                      <Route
+                        path="/discussions"
+                        element={
+                          <AuthorizedRoute resource="discussions" action="list">
+                            <DiscussionsList />
+                          </AuthorizedRoute>
+                        }
+                      />
+                      <Route
+                        path="/modules"
+                        element={
+                          <AuthorizedRoute resource="modules" action="list">
+                            <ModulesList />
+                          </AuthorizedRoute>
+                        }
+                      />
+                      <Route
+                        path="/resources"
+                        element={
+                          <AuthorizedRoute resource="resources" action="list">
+                            <ResourcesList />
+                          </AuthorizedRoute>
+                        }
+                      />
+
+                      {/* TEACHER HUB */}
+                      <Route
+                        path="/teacher/channel"
+                        element={
+                          <AuthorizedRoute
+                            resource="teacher-channel"
+                            action="list"
+                          >
+                            <TeacherChannelPage />
+                          </AuthorizedRoute>
+                        }
+                      />
+
+                      {/* ADMIN */}
+                      <Route path="/users">
+                        <Route
+                          index
+                          element={
+                            <AuthorizedRoute resource="users" action="list">
+                              <UsersList />
+                            </AuthorizedRoute>
+                          }
+                        />
+                        <Route
+                          path="create"
+                          element={
+                            <AuthorizedRoute resource="users" action="create">
+                              <CreateUser />
+                            </AuthorizedRoute>
+                          }
+                        />
+                        <Route
+                          path="edit/:id"
+                          element={
+                            <AuthorizedRoute resource="users" action="edit">
+                              <EditUser />
+                            </AuthorizedRoute>
+                          }
+                        />
+                        <Route
+                          path="show/:id"
+                          element={
+                            <AuthorizedRoute resource="users" action="show">
+                              <ShowUser />
+                            </AuthorizedRoute>
+                          }
+                        />
+                      </Route>
+
+                      <Route path="/departments">
+                        <Route
+                          index
+                          element={
+                            <AuthorizedRoute
+                              resource="departments"
+                              action="list"
+                            >
+                              <DepartmentsList />
+                            </AuthorizedRoute>
+                          }
+                        />
+                        <Route
+                          path="create"
+                          element={
+                            <AuthorizedRoute
+                              resource="departments"
+                              action="create"
+                            >
+                              <CreateDepartment />
+                            </AuthorizedRoute>
+                          }
+                        />
+                        <Route
+                          path="edit/:id"
+                          element={
+                            <AuthorizedRoute
+                              resource="departments"
+                              action="edit"
+                            >
+                              <EditDepartment />
+                            </AuthorizedRoute>
+                          }
+                        />
+                      </Route>
+                      <Route path="/subjects">
+                        <Route
+                          index
+                          element={
+                            <AuthorizedRoute resource="subjects" action="list">
+                              <SubjectsList />
+                            </AuthorizedRoute>
+                          }
+                        />
+                        <Route
+                          path="create"
+                          element={
+                            <AuthorizedRoute
+                              resource="subjects"
+                              action="create"
+                            >
+                              <CreateSubject />
+                            </AuthorizedRoute>
+                          }
+                        />
+                        <Route
+                          path="edit/:id"
+                          element={
+                            <AuthorizedRoute resource="subjects" action="edit">
+                              <EditSubject />
+                            </AuthorizedRoute>
+                          }
+                        />
+                      </Route>
+                      <Route
+                        path="/admin/terms"
+                        element={
+                          <AuthorizedRoute
+                            resource="academic-terms"
+                            action="list"
+                          >
+                            <TermsList />
+                          </AuthorizedRoute>
+                        }
+                      />
+                      <Route
+                        path="/profile-requests"
+                        element={
+                          <AuthorizedRoute
+                            resource="profile-requests"
+                            action="list"
+                          >
+                            <ProfileRequestsList />
+                          </AuthorizedRoute>
+                        }
+                      />
+                      <Route
+                        path="/teacher-applications"
+                        element={
+                          <AuthorizedRoute
+                            resource="teacher-applications"
+                            action="list"
+                          >
+                            <TeacherApplicationsList />
+                          </AuthorizedRoute>
+                        }
+                      />
+                      <Route
+                        path="/activity-log"
+                        element={
+                          <AuthorizedRoute
+                            resource="activity-log"
+                            action="list"
+                          >
+                            <ActivityLogPage />
+                          </AuthorizedRoute>
+                        }
+                      />
+                      <Route
+                        path="/student/report-card"
+                        element={
+                          <AuthorizedRoute resource="report-card" action="list">
+                            <StudentReportCard />
+                          </AuthorizedRoute>
+                        }
+                      />
+                      <Route
+                        path="/progress"
+                        element={
+                          <AuthorizedRoute resource="progress" action="list">
+                            <StudentProgress />
+                          </AuthorizedRoute>
+                        }
+                      />
+
+                      <Route path="/portfolio">
+                        <Route
+                          index
+                          element={
+                            <AuthorizedRoute resource="portfolio" action="list">
+                              <StudentPortfolio />
+                            </AuthorizedRoute>
+                          }
+                        />
+                        <Route
+                          path=":id"
+                          element={
+                            <AuthorizedRoute resource="portfolio" action="show">
+                              <StudentPortfolio />
+                            </AuthorizedRoute>
+                          }
+                        />
+                      </Route>
+
+                      {/* FIXED: Strict catch-all for unmatched nested routes to avoid white screen */}
+                      <Route path="*" element={<ErrorComponent />} />
+                    </Route>
+                  </Route>
+
+                  {/* REDIRECT ROOT TO DASHBOARD IF AUTHENTICATED */}
+                  <Route
+                    element={
+                      <Authenticated
+                        key="authenticated-root-redirect"
+                        fallback={<Outlet />}
+                      >
+                        <NavigateToResource resource="dashboard" />
+                      </Authenticated>
+                    }
+                  >
+                    <Route path="/" element={<LandingPage />} />
+                  </Route>
+
+                  <Route
+                    element={
+                      <Authenticated
+                        key="authenticated-outer"
+                        fallback={<Outlet />}
+                      >
+                        <NavigateToResource />
+                      </Authenticated>
+                    }
+                  >
+                    <Route
+                      path="*"
+                      element={<CatchAllNavigate to="/login" />}
+                    />
+                  </Route>
+                </Routes>
+                <Toaster />
+                <UnsavedChangesNotifier />
+                <DocumentTitleHandler />
               </Suspense>
               <RefineKbar />
             </Refine>

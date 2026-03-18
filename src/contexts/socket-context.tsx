@@ -1,11 +1,10 @@
-import React, { createContext, useContext, useEffect, useState, useRef } from "react";
-import { io, Socket } from "socket.io-client";
-import { SOCKET_URL } from "@/config";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import { useGetIdentity } from "@refinedev/core";
 import { User } from "@/types";
+import { socket, connectSocket } from "@/lib/socket"; 
 
 interface SocketContextType {
-  socket: Socket | null;
+  socket: typeof socket | null;
   isConnected: boolean;
 }
 
@@ -18,58 +17,35 @@ export const useSocket = () => useContext(SocketContext);
 
 export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { data: user, isLoading } = useGetIdentity<User>();
-  const [socket, setSocket] = useState<Socket | null>(null);
-  const [isConnected, setIsConnected] = useState(false);
-  const socketRef = useRef<Socket | null>(null);
+  const [isConnected, setIsConnected] = useState(socket.connected);
 
   useEffect(() => {
     if (isLoading) return;
 
-    // Only reconnect if the actual user ID changes (login/logout)
-    if (user?.id && !socketRef.current) {
-      const newSocket = io(SOCKET_URL, {
-        withCredentials: true,
-        transports: ["websocket", "polling"],
-        reconnectionAttempts: 5,
-        reconnectionDelay: 1000,
-      });
+    if (user?.id) {
+      // Establish secure connection using the session token (internal to connectSocket)
+      void connectSocket();
 
-      newSocket.on("connect", () => {
-        setIsConnected(true);
-        console.log("Socket connected:", newSocket.id);
-      });
+      const onConnect = () => setIsConnected(true);
+      const onDisconnect = () => setIsConnected(false);
 
-      newSocket.on("disconnect", () => {
-        setIsConnected(false);
-        console.log("Socket disconnected");
-      });
+      socket.on("connect", onConnect);
+      socket.on("disconnect", onDisconnect);
 
-      newSocket.on("connect_error", (err) => {
-        console.error("Socket connection error:", err.message);
-      });
+      setIsConnected(socket.connected);
 
-      socketRef.current = newSocket;
-      setSocket(newSocket);
-    }
-
-    // Cleanup on logout
-    if (!user?.id && socketRef.current) {
-      socketRef.current.disconnect();
-      socketRef.current = null;
-      setSocket(null);
-      setIsConnected(false);
-    }
-
-    return () => {
-      // Clean up socket on unmount
-      if (socketRef.current) {
-        socketRef.current.disconnect();
-        socketRef.current = null;
-        setSocket(null);
+      return () => {
+        socket.off("connect", onConnect);
+        socket.off("disconnect", onDisconnect);
+        socket.disconnect();
+      };
+    } else {
+      if (socket.connected) {
+        socket.disconnect();
         setIsConnected(false);
       }
-    };
-  }, [user?.id, isLoading]); // Only watch user.id
+    }
+  }, [user?.id, isLoading]);
 
   return (
     <SocketContext.Provider value={{ socket, isConnected }}>

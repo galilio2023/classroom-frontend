@@ -2,7 +2,7 @@ import { useRegister } from "@refinedev/core";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { 
   School, 
@@ -46,6 +46,9 @@ const RegisterPage = () => {
   const { t, i18n } = useTranslation();
   const { mutate: register, isPending } = useRegister();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const inviteCode = searchParams.get("inviteCode");
+  
   const [step, setStep] = useState(1);
   const [isGeneratingBio, setIsGeneratingBio] = useState(false);
 
@@ -82,6 +85,14 @@ const RegisterPage = () => {
   });
 
   const role = form.watch("role");
+
+  useEffect(() => {
+    if (inviteCode) {
+        toast.info(t("classes.show.toast.inviteLinkDetected"), {
+            description: t("classes.show.toast.registerToJoin")
+        });
+    }
+  }, [inviteCode, t]);
 
   const generateAIBio = async () => {
     const name = form.getValues("name");
@@ -120,7 +131,7 @@ const RegisterPage = () => {
 
   const handleFinalSubmit = () => {
     form.handleSubmit((values) => {
-      register(values, {
+      register({ ...values, inviteCode }, {
         onSuccess: () => {
           const successMsg = values.role === "teacher" 
             ? t("auth.register.registrationSuccessTeacher")
@@ -392,7 +403,7 @@ const RegisterPage = () => {
                       {t("buttons.back")}
                     </Button>
                   ) : (
-                    <Link to="/login" className="flex-1">
+                    <Link to={`/login${inviteCode ? `?inviteCode=${inviteCode}` : ''}`} className="flex-1">
                       <Button variant="outline" size="lg" className="w-full h-14 md:h-16 rounded-2xl md:rounded-3xl font-black uppercase tracking-widest text-xs md:text-sm border-2 border-border/40 bg-background/50 shadow-sm">
                         <ArrowLeft className={cn("h-4 w-4 mr-2", isAr && "ml-2 mr-0 rotate-180")} />
                         {t("buttons.signIn")}
@@ -426,7 +437,7 @@ const RegisterPage = () => {
           <CardFooter className="flex justify-center py-8 md:py-12 bg-primary/[0.02] border-t border-border/40 mt-8">
             <p className="text-sm md:text-base font-medium text-muted-foreground/80">
               {t("auth.register.alreadyHaveAccount")}&nbsp;
-              <Link to="/login" className="font-black text-primary hover:underline uppercase tracking-[0.1em] text-xs md:text-sm">{t("buttons.signIn")}</Link>
+              <Link to={`/login${inviteCode ? `?inviteCode=${inviteCode}` : ''}`} className="font-black text-primary hover:underline uppercase tracking-[0.1em] text-xs md:text-sm">{t("buttons.signIn")}</Link>
             </p>
           </CardFooter>
         </Card>

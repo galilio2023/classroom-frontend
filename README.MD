@@ -1,7 +1,7 @@
 <div align="center">
-  <h1 style="font-size: 2.5em; font-weight: bold; margin-bottom: 5px;">Frontend: Tablawy OS Platform</h1>
+  <h1 style="font-size: 2.5em; font-weight: bold; margin-bottom: 5px;">Frontend: Classroom AI Platform</h1>
   <p style="font-size: 1.1em; color: #555;">
-    The modern, responsive, and AI-powered user interface for the Tablawy OS learning ecosystem.
+    The modern, responsive, and AI-powered user interface for the learning ecosystem.
   </p>
 </div>
 
@@ -32,7 +32,7 @@
 
 We chose a **Headless Architecture** powered by **Refine v5**. This approach decouples the UI from the backend, allowing us to build a pixel-perfect, custom interface without being locked into a traditional admin panel framework.
 
-*   **Data Provider (`src/providers/data.ts`)**: Maps Refine's operations to our specific backend REST and custom endpoints.
+*   **Data Provider**: Maps Refine's operations to our specific backend REST and custom endpoints.
 *   **Logic Layer (Refine Hooks)**: Manages all server state, including caching, optimistic updates, and real-time invalidation.
 *   **UI Layer**: Built with **shadcn/ui** and **Tailwind CSS** for maximum flexibility and accessibility.
 
@@ -59,19 +59,10 @@ We chose a **Headless Architecture** powered by **Refine v5**. This approach dec
 
 ---
 
-## 📺 The "Teacher TV" Discovery Engine
-
-Designed to boost platform engagement, the Discovery Engine provides:
-1.  **Immersive Browsing**: High-performance video trailer rendering using Framer Motion.
-2.  **Smart Performance**: Optimized Redis-backed view tracking prevents backend lag during high-traffic browsing sessions.
-3.  **Visual Polish**: Staggered entry animations and smooth layout transitions for a "billion-dollar app" feel.
-
----
-
 ## ⚡ Real-Time Integration
 
 The frontend is connected to the backend's **Socket.io** server to create a live, interactive experience.
-*   **Live Invalidation**: Relevant components re-fetch data instantly when backend state changes (e.g., a new discussion post or a live session start).
+*   **Live Invalidation**: Relevant components re-fetch data instantly when backend state changes.
 *   **Live Toasts**: Immediate actionable feedback for users.
 
 ---

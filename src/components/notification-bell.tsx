@@ -15,25 +15,20 @@ import { formatDistanceToNow } from "date-fns";
 import { ar, enUS } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { socket, connectSocket } from "@/lib/socket";
+import { useLiveNotifications } from "@/hooks/use-live-notifications"; // IMPORT NEW HOOK
+import { socket } from "@/lib/socket"; // Keep for custom events
 import { toast } from "sonner";
 import Confetti from "react-confetti";
 import { useWindowSize } from "react-use";
 import { useTranslation } from "react-i18next";
 
-/**
- * Safely formats notification links to match frontend route structure.
- */
 const formatNotificationLink = (link: string | null) => {
   if (!link) return null;
-  
   const parts = link.split("/").filter(Boolean);
   const resourcesWithShow = ["classes", "users", "assignments"];
-
   if (parts.length === 2 && resourcesWithShow.includes(parts[0])) {
     return `/${parts[0]}/show/${parts[1]}`;
   }
-
   return link;
 };
 
@@ -44,50 +39,30 @@ export const NotificationBell = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { data: identity } = useGetIdentity<User>();
   const queryClient = useQueryClient();
-  const [socketUnreadCount, setSocketUnreadCount] = useState<number | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
   const { width, height } = useWindowSize();
 
-  // Fetch notifications with aggressive caching
+  // NEW: USE THE CENTRALIZED HOOK
+  const { unreadCount: socketUnreadCount, setUnreadCount } = useLiveNotifications(identity?.id);
+
+  // Fetch initial notifications
   const { query } = useCustom<Notification[]>({
     url: "/notifications",
     method: "get",
     queryOptions: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
+      staleTime: 5 * 60 * 1000,
       refetchOnWindowFocus: false,
     }
   });
 
-  const notificationsData = query.data;
-  const refetch = query.refetch;
-  const notifications = notificationsData?.data || [];
+  const notifications = query.data?.data || [];
   
-  const unreadCount = socketUnreadCount !== null 
-    ? socketUnreadCount 
-    : notifications.filter((n: Notification) => !n.isRead).length;
+  // Use socket count if available, otherwise calculate from fetched list
+  const unreadCount = socketUnreadCount > 0 ? socketUnreadCount : notifications.filter((n: Notification) => !n.isRead).length;
 
-  // --- SOCKET.IO INTEGRATION ---
+  // CUSTOM LOGIC (Preserved events not in the general notification flow)
   useEffect(() => {
     if (!identity?.id) return;
-
-    // Use Singleton Socket
-    connectSocket(identity.id);
-
-    const handleNotification = (newNotification: Notification) => {
-      void refetch();
-      const link = formatNotificationLink(newNotification.link);
-      toast.info(newNotification.title, {
-        description: newNotification.message,
-        action: link ? {
-          label: t("notifications.view"),
-          onClick: () => navigate(link),
-        } : undefined,
-      });
-    };
-
-    const handleUnreadCount = (data: { count: number }) => {
-      setSocketUnreadCount(data.count);
-    };
 
     const handleBadgeEarned = (data: any) => {
       setShowConfetti(true);
@@ -122,27 +97,17 @@ export const NotificationBell = () => {
         });
     };
 
-    socket.on("notification", handleNotification);
-    socket.on("unread_count", handleUnreadCount);
     socket.on("badge_earned", handleBadgeEarned);
     socket.on("agent_alert", handleAgentAlert);
     socket.on("live_session_started", handleLiveSessionStarted);
 
-    socket.on("connect", () => {
-      void refetch();
-    });
-
     return () => {
-      socket.off("notification", handleNotification);
-      socket.off("unread_count", handleUnreadCount);
       socket.off("badge_earned", handleBadgeEarned);
       socket.off("agent_alert", handleAgentAlert);
       socket.off("live_session_started", handleLiveSessionStarted);
-      socket.off("connect");
     };
-  }, [identity?.id, refetch, navigate, t]);
+  }, [identity?.id, navigate, t]);
 
-  // Mark as read mutation (Optimistic Update)
   const { mutate: markAsRead } = useCustomMutation({
     mutationOptions: {
         onMutate: async (variables: any) => {
@@ -161,7 +126,7 @@ export const NotificationBell = () => {
                 };
             });
 
-            setSocketUnreadCount(prev => prev !== null ? Math.max(0, prev - 1) : null);
+            setUnreadCount(prev => Math.max(0, prev - 1));
             return { previousNotifications };
         },
         onError: (_err, _variables, context: any) => {
@@ -177,7 +142,6 @@ export const NotificationBell = () => {
     }
   });
 
-  // Mark all as read mutation (Optimistic Update)
   const { mutate: markAllAsRead } = useCustomMutation({
     mutationOptions: {
         onMutate: async () => {
@@ -193,7 +157,7 @@ export const NotificationBell = () => {
                 };
             });
 
-            setSocketUnreadCount(0);
+            setUnreadCount(0);
             return { previousNotifications };
         },
         onError: (_err, _variables, context: any) => {
@@ -332,7 +296,6 @@ export const NotificationBell = () => {
                         </span>
                         <span className="text-[9px] font-bold text-muted-foreground/60 whitespace-nowrap uppercase">
                           {formatDistanceToNow(new Date(notification.createdAt), { 
-                            addSuffix: true,
                             locale: isArabic ? ar : enUS
                           })}
                         </span>

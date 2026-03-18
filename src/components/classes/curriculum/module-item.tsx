@@ -28,6 +28,7 @@ import { TaskItem } from "./task-item";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { useTranslation } from "react-i18next";
+import { CanAccess } from "@/components/auth/can-access";
 
 interface ModuleItemProps {
   module: Module;
@@ -88,24 +89,26 @@ export const ModuleItem = ({
           </div>
         </AccordionTrigger>
         <div className="flex items-center gap-1 md:gap-2 shrink-0">
-          {isTeacher && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8 md:h-10 md:w-10 rounded-lg md:rounded-xl hover:bg-primary/5 text-muted-foreground hover:text-primary transition-all">
-                  <MoreVertical className="h-4 w-4 md:h-5 md:w-5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align={isArabic ? "start" : "end"} className="rounded-xl border-none shadow-2xl p-1.5 min-w-40">
-                <DropdownMenuItem 
-                  className="text-destructive focus:text-destructive font-bold rounded-lg cursor-pointer py-2.5"
-                  onClick={() => onDeleteModule(module.id)}
-                >
-                  <Trash2 className="h-4 w-4 mr-2 rtl:mr-0 rtl:ml-2" />
-                  {t("buttons.deleteModule")}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
+          <CanAccess resource="modules" action="delete" id={module.id}>
+            {isTeacher && (
+                <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 md:h-10 md:w-10 rounded-lg md:rounded-xl hover:bg-primary/5 text-muted-foreground hover:text-primary transition-all">
+                    <MoreVertical className="h-4 w-4 md:h-5 md:w-5" />
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align={isArabic ? "start" : "end"} className="rounded-xl border-none shadow-2xl p-1.5 min-w-40">
+                    <DropdownMenuItem 
+                    className="text-destructive focus:text-destructive font-bold rounded-lg cursor-pointer py-2.5"
+                    onClick={() => onDeleteModule(module.id)}
+                    >
+                    <Trash2 className="h-4 w-4 mr-2 rtl:mr-0 rtl:ml-2" />
+                    {t("buttons.deleteModule")}
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+                </DropdownMenu>
+            )}
+          </CanAccess>
         </div>
       </div>
       
@@ -191,58 +194,65 @@ export const ModuleItem = ({
             animate={{ opacity: 1, y: 0 }}
             className="mt-8 md:mt-10 pt-5 md:pt-6 border-t border-black/3 dark:border-white/3 flex flex-wrap gap-2 md:gap-3"
           >
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="flex-1 sm:flex-none h-9 md:h-10 rounded-lg md:rounded-xl font-black uppercase tracking-widest text-[8px] md:text-[9px] border-ai-primary/20 text-ai-primary hover:bg-ai-primary/5 gap-1.5 md:gap-2 relative overflow-hidden group px-3 md:px-4"
-                >
-                  <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shine_1.5s_ease-in-out] pointer-events-none" />
-                  <Sparkles className="h-3 w-3 md:h-3.5 md:w-3.5" />
-                  {t("buttons.aiMagicBuilder")}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="rounded-xl border-none shadow-2xl p-2 min-w-50">
-                <DropdownMenuItem onClick={() => onMagicAction(module.id, "note")} className="rounded-lg font-bold gap-2 py-2.5 cursor-pointer">
-                  <div className="p-1.5 rounded-md bg-ai-primary/10 text-ai-primary">
-                    <PenLine className="h-3.5 w-3.5" />
-                  </div>
-                  {t("buttons.generateNotes")}
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => onMagicAction(module.id, "quiz")} className="rounded-lg font-bold gap-2 py-2.5 cursor-pointer">
-                  <div className="p-1.5 rounded-md bg-ai-primary/10 text-ai-primary">
-                    <FileQuestion className="h-3.5 w-3.5" />
-                  </div>
-                  {t("buttons.generateQuiz")}
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => onMagicAction(module.id, "assignment")} className="rounded-lg font-bold gap-2 py-2.5 cursor-pointer">
-                  <div className="p-1.5 rounded-md bg-ai-primary/10 text-ai-primary">
-                    <FileText className="h-3.5 w-3.5" />
-                  </div>
-                  {t("buttons.generateAssignment")}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <CanAccess resource="modules" action="create" params={{ classId }}>
+                <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="flex-1 sm:flex-none h-9 md:h-10 rounded-lg md:rounded-xl font-black uppercase tracking-widest text-[8px] md:text-[9px] border-ai-primary/20 text-ai-primary hover:bg-ai-primary/5 gap-1.5 md:gap-2 relative overflow-hidden group px-3 md:px-4"
+                    >
+                    <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shine_1.5s_ease-in-out] pointer-events-none" />
+                    <Sparkles className="h-3 w-3 md:h-3.5 md:w-3.5" />
+                    {t("buttons.aiMagicBuilder")}
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="rounded-xl border-none shadow-2xl p-2 min-w-50">
+                    <DropdownMenuItem onClick={() => onMagicAction(module.id, "note")} className="rounded-lg font-bold gap-2 py-2.5 cursor-pointer">
+                    <div className="p-1.5 rounded-md bg-ai-primary/10 text-ai-primary">
+                        <PenLine className="h-3.5 w-3.5" />
+                    </div>
+                    {t("buttons.generateNotes")}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onMagicAction(module.id, "quiz")} className="rounded-lg font-bold gap-2 py-2.5 cursor-pointer">
+                    <div className="p-1.5 rounded-md bg-ai-primary/10 text-ai-primary">
+                        <FileQuestion className="h-3.5 w-3.5" />
+                    </div>
+                    {t("buttons.generateQuiz")}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onMagicAction(module.id, "assignment")} className="rounded-lg font-bold gap-2 py-2.5 cursor-pointer">
+                    <div className="p-1.5 rounded-md bg-ai-primary/10 text-ai-primary">
+                        <FileText className="h-3.5 w-3.5" />
+                    </div>
+                    {t("buttons.generateAssignment")}
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+                </DropdownMenu>
+            </CanAccess>
 
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="flex-1 sm:flex-none h-9 md:h-10 rounded-lg md:rounded-xl font-black uppercase tracking-widest text-[8px] md:text-[9px] gap-1.5 md:gap-2 border-primary/20 text-primary hover:bg-primary/5 px-3 md:px-4"
-              onClick={() => onAddMaterial(module.id)}
-            >
-              <Plus className="h-3 w-3 md:h-3.5 md:w-3.5" />
-              {t("buttons.addMaterial")}
-            </Button>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="flex-1 sm:flex-none h-9 md:h-10 rounded-lg md:rounded-xl font-black uppercase tracking-widest text-[8px] md:text-[9px] gap-1.5 md:gap-2 border-primary/20 text-primary hover:bg-primary/5 px-3 md:px-4"
-              onClick={() => onAddTask(module.id)}
-            >
-              <Plus className="h-3 w-3 md:h-3.5 md:w-3.5" />
-              {t("buttons.addTask")}
-            </Button>
+            <CanAccess resource="resources" action="create" params={{ classId }}>
+                <Button 
+                variant="outline" 
+                size="sm" 
+                className="flex-1 sm:flex-none h-9 md:h-10 rounded-lg md:rounded-xl font-black uppercase tracking-widest text-[8px] md:text-[9px] gap-1.5 md:gap-2 border-primary/20 text-primary hover:bg-primary/5 px-3 md:px-4"
+                onClick={() => onAddMaterial(module.id)}
+                >
+                <Plus className="h-3 w-3 md:h-3.5 md:w-3.5" />
+                {t("buttons.addMaterial")}
+                </Button>
+            </CanAccess>
+
+            <CanAccess resource="assignments" action="create" params={{ classId }}>
+                <Button 
+                variant="outline" 
+                size="sm" 
+                className="flex-1 sm:flex-none h-9 md:h-10 rounded-lg md:rounded-xl font-black uppercase tracking-widest text-[8px] md:text-[9px] gap-1.5 md:gap-2 border-primary/20 text-primary hover:bg-primary/5 px-3 md:px-4"
+                onClick={() => onAddTask(module.id)}
+                >
+                <Plus className="h-3 w-3 md:h-3.5 md:w-3.5" />
+                {t("buttons.addTask")}
+                </Button>
+            </CanAccess>
           </motion.div>
         )}
       </AccordionContent>
