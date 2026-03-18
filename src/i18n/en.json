@@ -1755,6 +1755,7 @@
     "ai-assistant": { "label": "AI Assistant" },
     "ai-study-lab": { "label": "Study Lab" },
     "study-planner": { "label": "Study Planner" },
+    "ai-history": { "label": "Study History" },
     "classes": { "label": "Classes" },
     "subjects": { "label": "Subjects" },
     "enrollments": { "label": "Enrollments" },
