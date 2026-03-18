@@ -22,8 +22,10 @@ import {
   Compass,
   Briefcase,
   Layers,
+  GraduationCap,
+  Calendar,
 } from "lucide-react";
-import { useMemo, useState, useEffect, useRef, useCallback } from "react";
+import { useMemo, useState, useEffect } from "react";
 import {
   useList,
   HttpError,
@@ -82,6 +84,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import {
   Subject,
+  Department,
   User,
   UserRole,
   ClassListItem,
@@ -98,6 +101,10 @@ import { ApplyTeacherDialog } from "./apply-teacher-dialog";
 import { useTranslation } from "react-i18next";
 import { TeacherDiscoveryList } from "@/components/classes/teacher-discovery-list";
 import { ColumnDef } from "@tanstack/react-table";
+
+const DEFAULT_PAGE_SIZE = 50;
+const DEPARTMENTS_PAGE_SIZE = 100;
+const SUBJECTS_PAGE_SIZE = 1000;
 
 const ClassesList = () => {
   const { t, i18n } = useTranslation();
@@ -123,11 +130,13 @@ const ClassesList = () => {
   );
 
   const { mutate: joinClass, mutation: joinMutation } = useCustomMutation();
+  const { mutate: enrollRequest, mutation: enrollMutation } = useCustomMutation();
   const { mutate: cloneClass, mutation: cloneMutation } = useCustomMutation();
   const { mutate: deleteClass } = useDelete();
   const invalidate = useInvalidate();
 
   const isJoining = joinMutation.isPending;
+  const isEnrolling = enrollMutation.isPending;
   const isCloning = cloneMutation.isPending;
 
   useEffect(() => {
@@ -172,6 +181,25 @@ const ClassesList = () => {
     );
   };
 
+  const handleEnrollRequest = (id: number) => {
+    enrollRequest(
+      {
+        url: `/classes/${id}/enroll`,
+        method: "post",
+        values: {},
+      },
+      {
+        onSuccess: (data: any) => {
+          toast.success(data.data.message);
+          invalidate({ resource: "classes", invalidates: ["list"] });
+        },
+        onError: (error: any) => {
+          toast.error(error?.data?.message || "Failed to send enrollment request.");
+        },
+      }
+    );
+  };
+
   const handleClone = (id: number) => {
     cloneClass(
       {
@@ -207,10 +235,16 @@ const ClassesList = () => {
 
   const { query: subjectsQuery } = useList<Subject, HttpError>({
     resource: "subjects",
-    pagination: { pageSize: 1000 },
+    pagination: { pageSize: SUBJECTS_PAGE_SIZE },
+  });
+
+  const { query: departmentsQuery } = useList<Department, HttpError>({
+    resource: "departments",
+    pagination: { pageSize: DEPARTMENTS_PAGE_SIZE },
   });
 
   const subjects = subjectsQuery.data?.data ?? [];
+  const departmentsList = departmentsQuery.data?.data ?? [];
 
   const columns = useMemo<ColumnDef<ClassListItem>[]>(
     () => [
@@ -233,7 +267,7 @@ const ClassesList = () => {
     columns,
     refineCoreProps: {
       resource: "classes",
-      pagination: { mode: "server", pageSize: 50 },
+      pagination: { mode: "server", pageSize: DEFAULT_PAGE_SIZE },
       sorters: { initial: [{ field: "id", order: "desc" }] },
       queryOptions: {
         staleTime: 0,
@@ -300,6 +334,9 @@ const ClassesList = () => {
   const selectedSubject =
     (filters.find((f) => "field" in f && f.field === "subject") as any)
       ?.value || "all";
+  const selectedDepartment = 
+    (filters.find((f) => "field" in f && f.field === "departmentId") as any)
+      ?.value || "all";
 
   const setSearchQuery = (val: string) => {
     setFilters(
@@ -321,6 +358,19 @@ const ClassesList = () => {
     );
   };
 
+  const setSelectedDepartment = (val: string) => {
+    setFilters(
+      [
+        {
+          field: "departmentId",
+          operator: "eq",
+          value: val === "all" ? undefined : Number(val),
+        },
+      ],
+      "merge",
+    );
+  };
+
   const {
     result: { data: applicationsData },
   } = useList<TeacherApplication>({
@@ -333,8 +383,6 @@ const ClassesList = () => {
   const classes = classesData?.data || [];
   const applications = applicationsData || [];
   const hasData = classes.length > 0;
-
-  const parentRef = useRef<HTMLDivElement>(null);
 
   return (
     <div className="space-y-8 md:space-y-12 max-w-screen-2xl mx-auto">
@@ -527,6 +575,29 @@ const ClassesList = () => {
                   onChange={(event) => setSearchQuery(event.target.value)}
                 />
               </div>
+              
+              {/* Department Filter */}
+              <div className="flex items-center gap-2 bg-background/50 px-4 md:px-6 py-2 rounded-[1.25rem] md:rounded-3xl border border-border/40 shrink-0 shadow-inner">
+                  <Building2 className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground/60" />
+                  <Select
+                    value={selectedDepartment.toString()}
+                    onValueChange={setSelectedDepartment}
+                  >
+                    <SelectTrigger className="w-[180px] md:w-[220px] border-none h-12 focus:ring-0 shadow-none font-black text-xs uppercase tracking-widest bg-transparent">
+                      <SelectValue placeholder="All Departments" />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-2xl border-border/40 shadow-2xl bg-card/95 backdrop-blur-xl">
+                      <SelectItem value="all" className="font-bold py-3">All Departments</SelectItem>
+                      {departmentsList.map((dept: Department) => (
+                        <SelectItem key={dept.id} value={dept.id.toString()} className="font-bold py-3">
+                          {dept.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+              </div>
+
+              {/* Subject Filter */}
               <div className="flex items-center gap-2 bg-background/50 px-4 md:px-6 py-2 rounded-[1.25rem] md:rounded-3xl border border-border/40 shrink-0 shadow-inner">
                   <Filter className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground/60" />
                   <Select
@@ -549,7 +620,7 @@ const ClassesList = () => {
             </div>
           </Card>
 
-          {/* Class List Main Area - Using Grid on Desktop */}
+          {/* Class List Main Area */}
           <div className="relative">
             {isLoading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -614,10 +685,16 @@ const ClassesList = () => {
                   const isAssigned = classItem.teachers?.some(
                     (t: any) => t.teacher.id === identity?.id,
                   );
+                  const isEnrolled = classItem.enrollments?.some(
+                    (e: any) => e.studentId === identity?.id
+                  );
+                  
                   const pendingApp = applications.find(
                     (app) =>
                       app.classId === classItem.id && app.status === "pending",
                   );
+
+                  const firstSchedule = classItem.schedules?.[0];
 
                   return (
                       <motion.div
@@ -629,14 +706,24 @@ const ClassesList = () => {
                         className="group relative flex flex-col h-full p-6 md:p-8 rounded-[2.5rem] bg-card/50 backdrop-blur-3xl border border-border/40 hover:border-primary/30 hover:bg-card/80 transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-primary/5 cursor-pointer"
                         onClick={() => show("classes", classItem.id)}
                       >
-                        {/* Status Line Accent - using logical properties */}
+                        {/* Status Line Accent */}
                         <div 
                            className="absolute start-0 top-1/2 -translate-y-1/2 w-1.5 h-16 rounded-e-full transition-all group-hover:h-24"
                            style={{ backgroundColor: classColor }}
                         />
 
+                        {/* Live Indicator Overlay */}
+                        {classItem.isLive && (
+                          <div className="absolute top-6 end-6 z-10">
+                            <Badge className="bg-red-500 hover:bg-red-600 text-white border-none px-3 py-1 rounded-full flex items-center gap-1.5 shadow-lg shadow-red-500/20 animate-pulse">
+                              <span className="h-1.5 w-1.5 rounded-full bg-white animate-ping" />
+                              <Video className="h-3 w-3" />
+                              <span className="text-[10px] font-black uppercase tracking-widest">Live Now</span>
+                            </Badge>
+                          </div>
+                        )}
+
                         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 md:gap-6 mb-6">
-                            {/* Banner/Icon Container */}
                             <div className="relative shrink-0">
                             {classItem.bannerUrl ? (
                                 <div className="relative p-1 rounded-[1.75rem] bg-background shadow-md group-hover:scale-105 transition-transform duration-500 overflow-hidden">
@@ -660,14 +747,8 @@ const ClassesList = () => {
                                 />
                                 </div>
                             )}
-                            {classItem.isLive && (
-                                <div className="absolute -top-2 -end-2 p-1.5 rounded-full bg-red-500 text-white shadow-lg shadow-red-500/30 border-4 border-background animate-bounce">
-                                <Video className="h-3 w-3 md:h-4 md:w-4" />
-                                </div>
-                            )}
                             </div>
 
-                            {/* Title & Badges */}
                             <div className="flex-1 min-w-0 space-y-2.5 w-full">
                                 <h3 className="text-xl md:text-2xl font-black tracking-tight truncate group-hover:text-primary transition-colors">
                                     {classItem.name}
@@ -676,12 +757,9 @@ const ClassesList = () => {
                                     <Badge variant="ai" className="h-6 text-[9px] md:text-[10px]">
                                         {classItem.subject?.name || t("classes.list.general")}
                                     </Badge>
-                                    {classItem.isLive && (
-                                        <Badge variant="destructive" className="animate-pulse gap-1.5 h-6 text-[9px] md:text-[10px]">
-                                            <span className="h-1.5 w-1.5 rounded-full bg-white" />
-                                            {t("classes.list.live")}
-                                        </Badge>
-                                    )}
+                                    <Badge variant="secondary" className="h-6 text-[9px] md:text-[10px] bg-muted/50 border-none font-bold">
+                                        {classItem.subject?.department?.name || "No Dept"}
+                                    </Badge>
                                 </div>
                             </div>
                         </div>
@@ -702,35 +780,23 @@ const ClassesList = () => {
                                 </div>
                             </div>
 
-                            {primaryTeacher ? (
-                                <div className="flex items-center gap-3 bg-background/50 p-3 rounded-2xl border border-border/40 shadow-sm">
-                                    <div className="p-2 rounded-xl bg-primary/5 text-primary shrink-0">
-                                        <Building2 className="h-4 w-4" />
-                                    </div>
-                                    <div className="flex flex-col min-w-0">
-                                        <span className="text-[9px] uppercase font-bold text-muted-foreground/60 tracking-wider truncate">
-                                            Teacher
-                                        </span>
-                                        <span className="text-xs md:text-sm font-black text-foreground truncate">
-                                            {primaryTeacher.name.split(' ')[0]}
-                                        </span>
-                                    </div>
+                            <div className="flex items-center gap-3 bg-background/50 p-3 rounded-2xl border border-border/40 shadow-sm">
+                                <div className="p-2 rounded-xl bg-primary/5 text-primary shrink-0">
+                                    {primaryTeacher ? <GraduationCap className="h-4 w-4" /> : <Calendar className="h-4 w-4" />}
                                 </div>
-                            ) : classItem.schedules?.[0] ? (
-                                <div className="flex items-center gap-3 bg-background/50 p-3 rounded-2xl border border-border/40 shadow-sm">
-                                    <div className="p-2 rounded-xl bg-primary/5 text-primary shrink-0">
-                                        <Clock className="h-4 w-4" />
-                                    </div>
-                                    <div className="flex flex-col min-w-0">
-                                        <span className="text-[9px] uppercase font-bold text-muted-foreground/60 tracking-wider truncate">
-                                            {classItem.schedules[0].day.substring(0,3)}
-                                        </span>
-                                        <span className="text-xs md:text-sm font-black text-foreground uppercase truncate">
-                                            {classItem.schedules[0].startTime}
-                                        </span>
-                                    </div>
+                                <div className="flex flex-col min-w-0">
+                                    <span className="text-[9px] uppercase font-bold text-muted-foreground/60 tracking-wider truncate">
+                                        {primaryTeacher ? "Teacher" : "Schedule"}
+                                    </span>
+                                    <span className="text-xs md:text-sm font-black text-foreground truncate">
+                                        {primaryTeacher 
+                                          ? primaryTeacher.name.split(' ')[0] 
+                                          : firstSchedule 
+                                            ? `${firstSchedule.day.substring(0,3)} ${firstSchedule.startTime}`
+                                            : "Staff"}
+                                    </span>
                                 </div>
-                            ) : null}
+                            </div>
                         </div>
 
                         {/* Actions Area */}
@@ -750,6 +816,23 @@ const ClassesList = () => {
                             >
                               <Send className="h-4 w-4 me-2 rtl:-scale-x-100" />
                               {pendingApp ? t("buttons.applied") : t("buttons.applyToTeach")}
+                            </Button>
+                          ) : isStudent && !isEnrolled ? (
+                            <Button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleEnrollRequest(classItem.id);
+                              }}
+                              disabled={isEnrolling}
+                              size="lg"
+                              className="w-full rounded-2xl h-12 md:h-14 font-black uppercase tracking-widest text-[10px] md:text-xs transition-all shadow-xl shadow-primary/20 bg-emerald-500 hover:bg-emerald-600 text-white"
+                            >
+                              {isEnrolling ? (
+                                <Loader2 className="h-4 w-4 animate-spin me-2" />
+                              ) : (
+                                <PlusCircle className="h-4 w-4 me-2" />
+                              )}
+                              Request to Join
                             </Button>
                           ) : (
                             <Button
