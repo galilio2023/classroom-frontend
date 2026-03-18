@@ -17,13 +17,15 @@ interface AIStudyBuddyProps {
   subject?: string;
   topic?: string;
   assignment?: string;
-  classId?: string | number; // Support for class-specific knowledge
+  classId?: string | number;
 }
 
 export const AIStudyBuddy = ({ subject, topic, assignment, classId }: AIStudyBuddyProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const {
     messages,
+    streamingMessage,
+    streamingSources,
     input,
     setInput,
     handleSend,
@@ -32,7 +34,7 @@ export const AIStudyBuddy = ({ subject, topic, assignment, classId }: AIStudyBud
   } = useAIChat({
     url: "/ai/chat",
     context: { subject, topic, assignment },
-    classId, // Pass classId to the hook
+    classId,
   });
 
   return (
@@ -40,7 +42,7 @@ export const AIStudyBuddy = ({ subject, topic, assignment, classId }: AIStudyBud
       "fixed z-50 transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)]",
       isOpen 
         ? "inset-0 md:inset-auto md:bottom-6 md:end-6 md:w-auto" 
-        : "bottom-[5rem] md:bottom-6 end-4 md:end-6" // Adjusted for mobile nav and logical RTL
+        : "bottom-[5rem] md:bottom-6 end-4 md:end-6"
     )}>
       {isOpen ? (
         <Card className={cn(
@@ -51,7 +53,7 @@ export const AIStudyBuddy = ({ subject, topic, assignment, classId }: AIStudyBud
           
           <CardContent className="flex-1 p-0 overflow-hidden bg-dot-pattern">
             <ScrollArea ref={scrollAreaRef} className="h-full p-4 md:p-6 custom-scrollbar">
-              {messages.length === 0 && (
+              {messages.length === 0 && !streamingMessage && (
                 <ChatEmptyState subject={subject} />
               )}
               
@@ -59,7 +61,19 @@ export const AIStudyBuddy = ({ subject, topic, assignment, classId }: AIStudyBud
                 {messages.map((msg, i) => (
                   <ChatMessage key={i} message={msg} />
                 ))}
-                {isLoading && (
+                
+                {/* Live Streaming Message */}
+                {streamingMessage && (
+                  <ChatMessage 
+                    message={{ 
+                        role: "model", 
+                        parts: [{ text: streamingMessage }],
+                        sources: streamingSources || undefined
+                    }} 
+                  />
+                )}
+
+                {isLoading && !streamingMessage && (
                   <div className="flex gap-3 md:gap-4 animate-[fade-in_0.3s_ease-out]">
                     <div className="bg-ai-primary h-10 w-10 md:h-12 md:w-12 shrink-0 rounded-2xl md:rounded-[1.25rem] flex items-center justify-center border-2 border-background shadow-md">
                       <Sparkles className="h-4 w-4 md:h-5 md:w-5 text-white" />

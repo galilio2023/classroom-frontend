@@ -1,5 +1,6 @@
 import { io, Socket } from "socket.io-client";
 import { SOCKET_URL } from "@/config";
+import { authClient } from "./auth-client";
 
 /**
  * Singleton Socket instance to prevent multiple connections
@@ -15,24 +16,40 @@ export const socket: Socket = io(SOCKET_URL, {
 });
 
 /**
- * Helper to connect the socket with a specific user ID
+ * Connects the socket using the verified Better Auth session token.
+ * This ensures the backend can cryptographically verify the user's identity.
  */
-export const connectSocket = (userId: string) => {
-  if (socket.connected) {
-    if (socket.io.opts.query && (socket.io.opts.query as any).userId !== userId) {
-      socket.disconnect();
-    } else {
-      return; 
-    }
-  }
+export const connectSocket = async () => {
+  try {
+    const { data: sessionData } = await authClient.getSession();
+    const token = sessionData?.session?.token;
 
-  socket.io.opts.query = { userId };
-  socket.connect();
+    if (!token) {
+      console.warn("Cannot connect socket: No active session token found.");
+      return;
+    }
+
+    if (socket.connected) {
+      // If already connected, check if token changed. If not, skip.
+      if (socket.auth && (socket.auth as any).token === token) return;
+      socket.disconnect();
+    }
+
+    // Attach token to the auth payload for the secure handshake
+    socket.auth = { token };
+    socket.connect();
+  } catch (err) {
+    console.error("Failed to establish secure socket connection:", err);
+  }
 };
 
+/**
+ * Safely retrieves the socket instance.
+ * Note: Does NOT auto-connect to prevent unauthenticated connections.
+ */
 export const getSocket = () => {
-    if (!socket.connected) {
-        socket.connect();
-    }
-    return socket;
+  if (!socket.connected) {
+    console.warn("getSocket called before socket was authenticated or connected.");
+  }
+  return socket;
 };

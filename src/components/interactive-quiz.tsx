@@ -1,7 +1,7 @@
 import React from "react";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "./ui/card";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Users } from "lucide-react";
 import { useGo } from "@refinedev/core";
 import { QuizResult } from "./ai/quiz-result";
 import { useQuiz } from "@/hooks/use-quiz";
@@ -9,14 +9,17 @@ import { QuizProgress } from "./ai/quiz-progress";
 import { QuizOption } from "./ai/quiz-option";
 import { QuizExplanation } from "./ai/quiz-explanation";
 import { useTranslation } from "react-i18next";
+import { Badge } from "./ui/badge";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface InteractiveQuizProps {
   assignmentId: number;
+  classId?: number;
   description: string;
   onComplete?: (score: number) => void;
 }
 
-export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({ assignmentId, description, onComplete }) => {
+export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({ assignmentId, classId, description, onComplete }) => {
   const { t } = useTranslation();
   const go = useGo();
   const {
@@ -28,10 +31,11 @@ export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({ assignmentId, 
     score,
     isFinished,
     progress,
+    activeStudents,
     handleOptionSelect,
     handleCheckAnswer,
     handleNext,
-  } = useQuiz({ assignmentId, description, onComplete });
+  } = useQuiz({ assignmentId, classId, description, onComplete });
 
   if (questions.length === 0) return null;
 
@@ -47,11 +51,29 @@ export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({ assignmentId, 
 
   return (
     <div className="space-y-4 md:space-y-6 animate-in fade-in duration-500">
-      <QuizProgress 
-        currentStep={currentStep} 
-        totalQuestions={questions.length} 
-        progress={progress} 
-      />
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+        <QuizProgress 
+            currentStep={currentStep} 
+            totalQuestions={questions.length} 
+            progress={progress} 
+            className="flex-1 w-full"
+        />
+        
+        <AnimatePresence>
+            {activeStudents > 1 && (
+                <motion.div
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20 }}
+                >
+                    <Badge variant="outline" className="bg-primary/5 text-primary border-primary/20 px-3 py-1.5 rounded-full font-bold gap-2 animate-pulse">
+                        <Users className="h-3.5 w-3.5" />
+                        {activeStudents} {t("classes.quiz.studentsActive", "Students active")}
+                    </Badge>
+                </motion.div>
+            )}
+        </AnimatePresence>
+      </div>
 
       <Card className="border-none shadow-xl bg-white/50 dark:bg-black/20 backdrop-blur-xl overflow-hidden">
         <CardHeader className="bg-primary/5 border-b border-primary/10 p-4 md:p-6">

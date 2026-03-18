@@ -1,37 +1,36 @@
 import { useState, useEffect } from "react";
-import { io, Socket } from "socket.io-client";
-import { SOCKET_URL } from "@/config";
+import { useSocket } from "@/contexts/socket-context";
 
 export const useClassRealtime = (
   userId: string | undefined,
   classId: string,
 ) => {
+  const { socket, isConnected } = useSocket();
   const [isLiveIndicator, setIsLiveIndicator] = useState(false);
 
   useEffect(() => {
-    if (!userId || !classId) return;
+    if (!userId || !classId || !socket || !isConnected) return;
 
-    const socket: Socket = io(SOCKET_URL, {
-      query: { userId },
-      withCredentials: true,
-    });
-
-    socket.on("live_session_started", (data: any) => {
+    const handleStart = (data: any) => {
       if (Number(data.classId) === Number(classId)) {
         setIsLiveIndicator(true);
       }
-    });
+    };
 
-    socket.on("live_session_ended", (data: any) => {
+    const handleEnd = (data: any) => {
       if (Number(data.classId) === Number(classId)) {
         setIsLiveIndicator(false);
       }
-    });
+    };
+
+    socket.on("live_session_started", handleStart);
+    socket.on("live_session_ended", handleEnd);
 
     return () => {
-      socket.disconnect();
+      socket.off("live_session_started", handleStart);
+      socket.off("live_session_ended", handleEnd);
     };
-  }, [userId, classId]);
+  }, [userId, classId, socket, isConnected]);
 
   return {
     isLiveIndicator,

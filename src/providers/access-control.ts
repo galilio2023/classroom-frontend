@@ -52,7 +52,43 @@ export const accessControlProvider: AccessControlProvider = {
       return { can: true };
     }
 
-    // 3. STUDENT PERMISSIONS
+    // 3. TEACHER ASSISTANT (TA) PERMISSIONS
+    if (role === UserRole.TA) {
+      const taAllowedResources = [
+        "dashboard", "ai-assistant", "discussions", "calendar", 
+        "attendance", "submissions", "quizzes", "resources", "classes", 
+        "modules", "notifications", "progress", "enrollments", 
+        "classes/enrollments", "announcements", "messages", "users"
+      ];
+
+      if (taAllowedResources.includes(resourceName)) {
+        // TAs can view (list/show) almost everything allowed to teachers
+        if (["list", "show"].includes(action)) return { can: true };
+
+        // TAs can EDIT/CREATE specific grading and engagement resources
+        const taCanModify = ["submissions", "attendance", "discussions", "announcements", "messages", "progress"];
+        if (taCanModify.includes(resourceName) && ["edit", "create"].includes(action)) {
+          return { can: true };
+        }
+
+        // TAs CANNOT delete anything
+        if (action === "delete") return { can: false, reason: "TAs cannot delete resources." };
+        
+        // TAs CANNOT create or edit classes/modules/quizzes/resources (Teacher-only curriculum management)
+        if (["classes", "modules", "quizzes", "resources"].includes(resourceName) && ["create", "edit"].includes(action)) {
+          return { can: false, reason: "Only Teachers can manage the curriculum." };
+        }
+
+        // Profiles: Can only edit their own
+        if (resourceName === "users" && action === "edit" && params?.id !== identity?.id) return { can: false };
+
+        return { can: true };
+      }
+
+      return { can: false, reason: "Access denied for this resource." };
+    }
+
+    // 4. STUDENT PERMISSIONS
     if (role === UserRole.STUDENT) {
       const studentAllowed = [
         "subjects", "classes", "assignments", "discussions", "calendar", 

@@ -1,40 +1,27 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useCreate, useNotification } from "@refinedev/core";
-
-export interface Question {
-  question: string;
-  options: string[];
-  correctAnswer: string;
-  explanation: string;
-}
+import { parseQuizDescription, ParsedQuestion } from "@/lib/quiz-parser";
+import { useSocket } from "@/contexts/socket-context";
+import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 interface UseQuizProps {
   assignmentId: number;
+  classId?: number;
   description: string;
   onComplete?: (score: number) => void;
 }
 
-export const useQuiz = ({ assignmentId, description, onComplete }: UseQuizProps) => {
+export const useQuiz = ({ assignmentId, classId, description, onComplete }: UseQuizProps) => {
+  const { t } = useTranslation();
   const { mutate: submitScore } = useCreate();
   const { open } = useNotification();
+  const { socket } = useSocket();
 
-  const questions = useMemo(() => {
-    try {
-      const qBlocks = description.split("---").filter(block => block.includes("Q"));
-      return qBlocks.map(block => {
-        const lines = block.trim().split("\n");
-        const question = lines[0].replace(/### Q\d+: /, "").trim();
-        const options = lines.filter(l => l.startsWith("- ")).map(l => l.replace("- ", "").replace(" (Correct)", "").trim());
-        const correctAnswerLine = lines.find(l => l.includes("(Correct)"));
-        const correctAnswer = correctAnswerLine ? correctAnswerLine.replace("- ", "").replace(" (Correct)", "").trim() : "";
-        const explanation = lines.find(l => l.includes("**Explanation:**"))?.replace("**Explanation:**", "").trim() || "";
-        
-        return { question, options, correctAnswer, explanation };
-      }).filter(q => q.question && q.options.length > 0);
-    } catch (error) {
-      console.error("Failed to parse quiz content:", error);
-      return [];
-    }
+  const [activeStudents, setActiveStudents] = useState<number>(0);
+
+  const questions = useMemo<ParsedQuestion[]>(() => {
+    return parseQuizDescription(description);
   }, [description]);
 
   const [currentStep, setCurrentStep] = useState(0);
@@ -45,6 +32,48 @@ export const useQuiz = ({ assignmentId, description, onComplete }: UseQuizProps)
 
   const currentQuestion = questions[currentStep];
   const progress = questions.length > 0 ? (currentStep / questions.length) * 100 : 0;
+
+  // --- LIVE ACTIVITY LOGIC ---
+  useEffect(() => {
+    if (!socket || !assignmentId) return;
+
+    // Join quiz room
+    socket.emit("quiz:start", { quizId: assignmentId, classId });
+
+    const handleRoomCount = (data: { count: number }) => {
+      setActiveStudents(data.count);
+    };
+
+    const handleActiveStudent = (data: { studentName: string; quizId: number }) => {
+      if (data.quizId === assignmentId) {
+        toast(t("classes.quiz.startedToast" as any, { name: data.studentName }), {
+          icon: "✍️",
+          duration: 3000,
+        });
+      }
+    };
+
+    const handleNudge = (data: { teacherName: string; message: string; quizId: number }) => {
+        if (data.quizId === assignmentId) {
+            toast(data.message, {
+                description: t("classes.quiz.nudgeFrom" as any, { name: data.teacherName }),
+                icon: "👋",
+                duration: 5000,
+            });
+        }
+    };
+
+    socket.on("quiz:room_count", handleRoomCount);
+    socket.on("quiz:active_student", handleActiveStudent);
+    socket.on("quiz:nudge_received", handleNudge);
+
+    return () => {
+      socket.emit("quiz:leave", assignmentId);
+      socket.off("quiz:room_count", handleRoomCount);
+      socket.off("quiz:active_student", handleActiveStudent);
+      socket.off("quiz:nudge_received", handleNudge);
+    };
+  }, [socket, assignmentId, classId, t]);
 
   const handleOptionSelect = (option: string) => {
     if (isAnswered) return;
@@ -80,8 +109,8 @@ export const useQuiz = ({ assignmentId, description, onComplete }: UseQuizProps)
         onSuccess: () => {
           open?.({
             type: "success",
-            message: "Quiz Submitted!",
-            description: `Your score of ${finalScore}% has been saved.`,
+            message: t("classes.quiz.submittedTitle", "Quiz Submitted!"),
+            description: t("classes.quiz.submittedDesc" as any, { score: finalScore }),
           });
           onComplete?.(finalScore);
         }
@@ -98,6 +127,7 @@ export const useQuiz = ({ assignmentId, description, onComplete }: UseQuizProps)
     score,
     isFinished,
     progress,
+    activeStudents, // Export live count
     handleOptionSelect,
     handleCheckAnswer,
     handleNext,

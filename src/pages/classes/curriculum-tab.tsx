@@ -13,6 +13,7 @@ import { AddResourceDialog } from "@/components/classes/curriculum/add-resource-
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
+import { CanAccess } from "@/components/auth/can-access";
 
 interface CurriculumTabProps {
   classId: string;
@@ -149,26 +150,31 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
         
         {isTeacher && (
           <div className="flex items-center gap-2 md:gap-3 w-full md:w-auto">
-            <Button 
-              variant="outline" 
-              className="flex-1 md:flex-none rounded-xl h-10 md:h-12 px-4 md:px-8 border-ai-primary/20 text-ai-primary hover:bg-ai-primary/5 font-black uppercase tracking-widest text-[9px] md:text-[10px] gap-2 relative overflow-hidden group shadow-sm"
-              onClick={() => { setMagicConfig({ ...magicConfig, moduleId: null, type: "package" }); setIsMagicModalOpen(true); }}
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-[shine_1.5s_ease-in-out] pointer-events-none" />
-              <Wand2 className="h-3.5 w-3.5 md:h-4 md:w-4" />
-              <span className="truncate">{t("buttons.magicBuilder")}</span>
-            </Button>
-            <Button 
-              onClick={() => {
-                setNewModuleName("");
-                setNewModuleDesc("");
-                setIsCreateModalOpen(true);
-              }}
-              className="flex-1 md:flex-none rounded-xl h-10 md:h-12 px-4 md:px-8 font-black uppercase tracking-widest text-[9px] md:text-[10px] gap-2 shadow-lg shadow-primary/20 transition-all active:scale-95"
-            >
-              <PlusCircle className="h-3.5 w-3.5 md:h-4 md:w-4" />
-              <span className="truncate">{t("buttons.addModule")}</span>
-            </Button>
+            <CanAccess resource="modules" action="create" params={{ classId }}>
+                <Button 
+                variant="outline" 
+                className="flex-1 md:flex-none rounded-xl h-10 md:h-12 px-4 md:px-8 border-ai-primary/20 text-ai-primary hover:bg-ai-primary/5 font-black uppercase tracking-widest text-[9px] md:text-[10px] gap-2 relative overflow-hidden group shadow-sm"
+                onClick={() => { setMagicConfig({ ...magicConfig, moduleId: null, type: "package" }); setIsMagicModalOpen(true); }}
+                >
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-[shine_1.5s_ease-in-out] pointer-events-none" />
+                <Wand2 className="h-3.5 w-3.5 md:h-4 md:w-4" />
+                <span className="truncate">{t("buttons.magicBuilder")}</span>
+                </Button>
+            </CanAccess>
+
+            <CanAccess resource="modules" action="create" params={{ classId }}>
+                <Button 
+                onClick={() => {
+                    setNewModuleName("");
+                    setNewModuleDesc("");
+                    setIsCreateModalOpen(true);
+                }}
+                className="flex-1 md:flex-none rounded-xl h-10 md:h-12 px-4 md:px-8 font-black uppercase tracking-widest text-[9px] md:text-[10px] gap-2 shadow-lg shadow-primary/20 transition-all active:scale-95"
+                >
+                <PlusCircle className="h-3.5 w-3.5 md:h-4 md:w-4" />
+                <span className="truncate">{t("buttons.addModule")}</span>
+                </Button>
+            </CanAccess>
           </div>
         )}
       </div>
@@ -192,21 +198,26 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
               </div>
               {isTeacher && (
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-3 md:gap-4 pt-4 px-6">
-                  <Button 
-                    variant="outline" 
-                    onClick={() => setIsMagicModalOpen(true)}
-                    className="w-full sm:w-auto rounded-xl h-11 md:h-14 px-8 md:px-10 border-ai-primary/20 text-ai-primary hover:bg-ai-primary/5 font-black uppercase tracking-widest text-[9px] md:text-[10px] gap-2"
-                  >
-                    <Wand2 className="h-4 w-4" />
-                    {t("buttons.aiMagicBuilder")}
-                  </Button>
-                  <Button 
-                    onClick={() => setIsCreateModalOpen(true)}
-                    className="w-full sm:w-auto rounded-xl h-11 md:h-14 px-8 md:px-10 font-black uppercase tracking-widest text-[9px] md:text-[10px] gap-2 shadow-xl shadow-primary/20"
-                  >
-                    <PlusCircle className="h-4 w-4" />
-                    {t("buttons.manualCreate")}
-                  </Button>
+                  <CanAccess resource="modules" action="create" params={{ classId }}>
+                    <Button 
+                        variant="outline" 
+                        onClick={() => setIsMagicModalOpen(true)}
+                        className="w-full sm:w-auto rounded-xl h-11 md:h-14 px-8 md:px-10 border-ai-primary/20 text-ai-primary hover:bg-ai-primary/5 font-black uppercase tracking-widest text-[9px] md:text-[10px] gap-2"
+                    >
+                        <Wand2 className="h-4 w-4" />
+                        {t("buttons.aiMagicBuilder")}
+                    </Button>
+                  </CanAccess>
+                  
+                  <CanAccess resource="modules" action="create" params={{ classId }}>
+                    <Button 
+                        onClick={() => setIsCreateModalOpen(true)}
+                        className="w-full sm:w-auto rounded-xl h-11 md:h-14 px-8 md:px-10 font-black uppercase tracking-widest text-[9px] md:text-[10px] gap-2 shadow-xl shadow-primary/20"
+                    >
+                        <PlusCircle className="h-4 w-4" />
+                        {t("buttons.manualCreate")}
+                    </Button>
+                  </CanAccess>
                 </div>
               )}
             </CardContent>

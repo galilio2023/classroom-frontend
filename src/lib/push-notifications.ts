@@ -1,4 +1,5 @@
 import { BACKEND_URL } from "@/config";
+import { authClient } from "./auth-client";
 
 const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY;
 
@@ -46,8 +47,14 @@ export async function subscribeToPush() {
 }
 
 async function sendSubscriptionToBackend(subscription: PushSubscription) {
-  const token = localStorage.getItem("better-auth.session-token");
-  if (!token) return;
+  // Use the authClient singleton to get the session reliably
+  const { data: sessionData } = await authClient.getSession();
+  const token = sessionData?.session?.token;
+
+  if (!token) {
+    console.warn("Attempted to subscribe to push notifications without an active session.");
+    return;
+  }
 
   const response = await fetch(`${BACKEND_URL}/notifications/subscribe`, {
     method: "POST",
