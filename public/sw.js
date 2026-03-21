@@ -49,10 +49,8 @@ self.addEventListener("fetch", (event) => {
           cache.put(request, networkResponse.clone());
           return networkResponse;
         }).catch(() => {
-            // If network fails and no cache, show offline page for navigation
-            if (request.mode === 'navigate') {
-                return cache.match(OFFLINE_URL);
-            }
+            // FALLBACK STRATEGY
+            return cachedResponse || (request.mode === 'navigate' ? cache.match(OFFLINE_URL) : undefined);
         });
 
         return cachedResponse || fetchPromise;

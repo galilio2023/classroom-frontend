@@ -53,11 +53,18 @@ export const useClassDetails = (id: string) => {
   const handleEnroll = () => enroll({ 
     url: `/api/classes/${id}/enroll`, 
     method: "post" 
+  }, {
+    onSuccess: () => {
+      // Logic for side effects: Invalidate queries, show toast, etc.
+      notification.success({ message: "Enrolled successfully!" });
+    }
   });
 
   return { classData: data?.data, isLoading, handleEnroll };
 };
 ```
+
+> **Note:** Always handle post-mutation side effects (e.g., query invalidation for optimistic updates, notifications) in the `onSuccess` or `onError` callbacks of the mutation hook.
 
 ### 2. Modular Orchestration (Thin Pages)
 Pages in this application are "Thin Orchestrators." They do not contain complex logic; instead, they compose headless hooks and specialized UI components.

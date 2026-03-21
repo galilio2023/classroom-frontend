@@ -173,6 +173,31 @@
   z-index: 10;
 }
 
+.ai-card-premium {
+  @apply relative overflow-hidden border-none bg-card/60 backdrop-blur-2xl;
+  box-shadow: 
+    0 20px 40px -15px rgba(0, 0, 0, 0.1),
+    0 0 0 1px rgba(var(--ai-primary), 0.1);
+}
+
+.dark .ai-card-premium {
+  background: linear-gradient(to bottom right, rgba(var(--ai-primary), 0.05), transparent);
+  box-shadow: 
+    0 30px 60px -20px rgba(0, 0, 0, 0.6),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+}
+
+.ai-gradient-border {
+  position: relative;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(to bottom right, var(--color-ai-primary), transparent, var(--color-primary));
+}
+
+.ai-glow {
+  @apply absolute -top-20 -right-20 w-64 h-64 bg-ai-primary/10 blur-[100px] pointer-events-none rounded-full;
+}
+
 /* --- THE BRUTE-FORCE PORTAL FIX --- */
 /* 
   Radix portals (used by Shadcn) render elements at the root of the document body, 
