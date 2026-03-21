@@ -1940,7 +1940,9 @@
     "activity-log": { "label": "Activity Log" },
     "teacher-channel": { "label": "My Channel" },
     "my-teachers": { "label": "My Teachers" },
-    "discovery": { "label": "Teacher TV" }
+    "discovery": { "label": "Teacher TV" },
+    "settings": { "label": "Settings" },
+    "setting": { "label": "Settings" }
   },
   "groups": {
     "teacher-hub": "Teacher Hub",

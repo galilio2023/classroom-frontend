@@ -18,7 +18,7 @@ export const accessControlProvider: AccessControlProvider = {
     // 1. ADMISSION: Admins have specific access
     if (role === UserRole.ADMIN) {
       const adminAllowedResources = [
-        "dashboard", "departments", "users", "activity-log", "system-settings",
+        "dashboard", "departments", "users", "activity-log", "settings",
         "profile-requests", "ai-study-lab", "study-planner",
       ];
       const academicResources = [
@@ -99,7 +99,7 @@ export const accessControlProvider: AccessControlProvider = {
       }
 
       // Forbidden for Teachers
-      const forbidden = ["departments", "profile-requests", "ai-study-lab", "study-planner", "activity-log", "system-settings"]; // Removed academic-terms
+      const forbidden = ["departments", "profile-requests", "ai-study-lab", "study-planner", "activity-log", "settings"]; // Removed academic-terms
       if (forbidden.includes(resourceName)) return { can: false };
 
       return { can: false, reason: "Access denied for this resource." };
