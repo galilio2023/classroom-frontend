@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useCustomMutation, useNotification } from "@refinedev/core";
 
 interface AIResponse {
@@ -11,11 +11,21 @@ export const useAssignmentGeneration = () => {
   const [difficulty, setDifficulty] = useState("intermediate");
   const [tone, setTone] = useState("academic");
   const [objectives, setObjectives] = useState("");
-  const [generatedContent, setGeneratedContent] = useState("");
+  const [generatedContent, setGeneratedContent] = useState(() => {
+    // 🧠 BRAVE PERSISTENCE: Restore from session if exists
+    return sessionStorage.getItem("pending_ai_assignment") || "";
+  });
 
   const { open } = useNotification();
   const { mutate, mutation } = useCustomMutation<AIResponse>();
   const isLoading = mutation.isPending;
+
+  // Save to session whenever content changes
+  useEffect(() => {
+    if (generatedContent) {
+      sessionStorage.setItem("pending_ai_assignment", generatedContent);
+    }
+  }, [generatedContent]);
 
   const handleGenerate = () => {
     if (!subject || !topic) {

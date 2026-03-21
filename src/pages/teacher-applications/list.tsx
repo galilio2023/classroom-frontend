@@ -55,10 +55,10 @@ const TeacherApplicationsList = () => {
   const isAdmin = identity?.role === UserRole.ADMIN;
   
   const { show } = useNavigation();
-  const { mutate: updateStatus, mutation: updateMutation } = useCustomMutation();
+  const { mutate: updateStatus, mutation: updateMutationObj } = useCustomMutation();
   const invalidate = useInvalidate();
 
-  const isUpdating = updateMutation.isPending;
+  const isUpdating = updateMutationObj.isPending;
 
   const [statusFilter, setStatusFilter] = useState<string>("pending");
 
@@ -70,14 +70,15 @@ const TeacherApplicationsList = () => {
     return f;
   }, [statusFilter]);
 
-  const { query: { data: appsData, isLoading } } = useList<TeacherApplication>({
+  const { query } = useList<TeacherApplication>({
     resource: "teacher-applications",
     pagination: { pageSize: 50, mode: "server" }, // Reduced page size for global scroll
     filters,
     sorters: [{ field: "id", order: "desc" }],
   });
 
-  const applications = appsData?.data || [];
+  const applications = query.data?.data || [];
+  const isLoading = query.isLoading;
   const hasData = applications.length > 0;
 
   const handleStatusUpdate = (id: number, status: "approved" | "rejected") => {
@@ -127,7 +128,7 @@ const TeacherApplicationsList = () => {
               <SelectTrigger className="w-[160px] border-none h-10 focus:ring-0 shadow-none font-bold text-[10px] uppercase tracking-wider bg-transparent">
                 <SelectValue placeholder={t("enrollments.allStatus")} />
               </SelectTrigger>
-              <SelectContent className="rounded-2xl">
+              <SelectContent className="rounded-2xl bg-white dark:bg-[#09090b] opacity-100 backdrop-blur-none border border-border/50 shadow-2xl">
                 <SelectItem value="all" className="font-bold">{t("enrollments.allStatus")}</SelectItem>
                 <SelectItem value="pending" className="font-bold">{t("status.upcoming")}</SelectItem>
                 <SelectItem value="approved" className="font-bold">{t("status.active")}</SelectItem>
@@ -141,7 +142,7 @@ const TeacherApplicationsList = () => {
         <div className="relative min-h-[400px]">
           {isLoading ? (
             <div className="space-y-4">
-              {Array.from({ length: 5 }).map((_, i) => (
+              {Array.from({ length: 5 }).map((_, i: any) => (
                 <Card key={i} className="p-6 flex flex-col md:flex-row items-center gap-6 border-border/20 bg-background/50">
                   <Skeleton className="h-20 w-20 rounded-3xl shrink-0" />
                   <div className="flex-1 space-y-4 w-full">
@@ -167,7 +168,7 @@ const TeacherApplicationsList = () => {
           ) : (
             <div className="space-y-4">
               <AnimatePresence mode="popLayout">
-                {applications.map((app, index) => {
+                {applications.map((app: any, index: any) => {
                   const appDate = dayjs(app.createdAt);
                   
                   return (
@@ -290,7 +291,7 @@ const TeacherApplicationsList = () => {
                                       <MoreHorizontal className="h-5 w-5" />
                                   </Button>
                               </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className="w-64 p-2 rounded-3xl">
+                              <DropdownMenuContent align="end" className="w-64 p-2 rounded-3xl bg-white dark:bg-[#09090b] opacity-100 backdrop-blur-none border border-border/50 shadow-2xl">
                                   <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/40 px-3 py-3">{t("assignments.list.labels.options")}</DropdownMenuLabel>
                                   <DropdownMenuItem onClick={() => show("users", app.teacher.id)} className="rounded-xl gap-3 py-3 cursor-pointer">
                                       <div className="p-2 rounded-lg bg-primary/10 text-primary">

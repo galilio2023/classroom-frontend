@@ -180,7 +180,7 @@ export const DetailsTab = ({
                 <Button
                   variant="outline"
                   size="lg"
-                  className="rounded-2xl border-border/40 bg-white dark:bg-zinc-900 shadow-xl group-hover:scale-105 transition-transform font-black uppercase tracking-widest text-[10px] h-12 md:h-14 px-8 md:px-10 gap-2"
+                  className="rounded-2xl border-border/40 bg-white dark:bg-muted/10 shadow-xl group-hover:scale-105 transition-transform font-black uppercase tracking-widest text-[10px] h-12 md:h-14 px-8 md:px-10 gap-2"
                   onClick={handleCopyInviteCode}
                 >
                   {copied ? (

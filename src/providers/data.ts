@@ -17,12 +17,11 @@ const handleError = async (response: Response): Promise<HttpError> => {
     // Not JSON or empty
   }
 
-  // SILENT 401: If unauthorized, we don't want a loud toast during the initial auth check
-  // Refine's authProvider will handle the redirect to /login
-  if (response.status === 401) {
+  // SILENT 401 & 404: We don't want loud toasts for auth checks or missing optional resources
+  if (response.status === 401 || response.status === 404) {
     return {
-      message: "", // Empty message prevents the toast in many UI kits
-      statusCode: 401,
+      message: "", // Empty message prevents the toast
+      statusCode: response.status,
     };
   }
 
@@ -68,8 +67,8 @@ const fetcher = async (url: string, options?: RequestInit) => {
 const resourceFilterMappings: Record<string, Record<string, string>> = {
   departments: { name: "search", code: "search" },
   users: { search: "search", name: "search", email: "search", role: "role" },
-  subjects: { name: "search", code: "search", department: "department" },
-  classes: { name: "search", subject: "subject", teacher: "teacher", status: "status", termId: "termId" },
+  subjects: { name: "search", code: "search", department: "departmentId" },
+  classes: { name: "search", subject: "subjectId", teacher: "teacherId", status: "status", termId: "termId" },
   enrollments: { classId: "classId", studentId: "studentId", status: "status" },
   assignments: { classId: "classId", moduleId: "moduleId" },
   submissions: { assignmentId: "assignmentId", studentId: "studentId" },
@@ -89,19 +88,36 @@ export const dataProvider: DataProvider = {
     let urlPath = resource;
     const url = new URL(`${BACKEND_BASE_URL}/${urlPath}`);
 
+    // Pagination: Map to _start and _end for backend compatibility
     if (pagination?.mode !== "off") {
       const current = (pagination as any)?.current ?? 1;
       const pageSize = (pagination as any)?.pageSize ?? 10;
-      url.searchParams.append("page", current.toString());
-      url.searchParams.append("limit", pageSize.toString());
+      const _start = (current - 1) * pageSize;
+      const _end = _start + pageSize;
+      url.searchParams.append("_start", _start.toString());
+      url.searchParams.append("_end", _end.toString());
     }
 
+    // Filtering: Map operators to backend-compatible suffixes
     if (filters) {
       filters.forEach((filter) => {
         if ("field" in filter) {
           const { field, operator, value } = filter as LogicalFilter;
           const mappedField = resourceFilterMappings[resource]?.[field] || field;
-          const queryKey = operator === "eq" ? mappedField : `${mappedField}_${operator}`;
+          
+          let queryKey = mappedField;
+          if (operator === "contains") {
+            queryKey = `${mappedField}_like`;
+          } else if (operator === "gte") {
+            queryKey = `${mappedField}_gte`;
+          } else if (operator === "lte") {
+            queryKey = `${mappedField}_lte`;
+          } else if (operator === "ne") {
+            queryKey = `${mappedField}_ne`;
+          } else if (operator !== "eq") {
+            queryKey = `${mappedField}_${operator}`;
+          }
+
           if (value !== undefined && value !== null && value !== "") {
             url.searchParams.append(queryKey, String(value));
           }
@@ -109,11 +125,10 @@ export const dataProvider: DataProvider = {
       });
     }
 
+    // Sorting: Map to _sort and _order (single sort supported by current backend)
     if (sorters && sorters.length > 0) {
-      sorters.forEach((sorter, index) => {
-        url.searchParams.append(`sorters[${index}][field]`, sorter.field);
-        url.searchParams.append(`sorters[${index}][order]`, sorter.order);
-      });
+      url.searchParams.append("_sort", sorters[0].field);
+      url.searchParams.append("_order", sorters[0].order);
     }
 
     const response = await fetcher(url.toString());

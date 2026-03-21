@@ -44,7 +44,7 @@ const SubmissionShow = () => {
 
   const submission = submissionQuery.data?.data;
 
-  const { mutate: updateSubmission, mutation } = useUpdate();
+  const { mutate: updateSubmission, mutation: updateMutationObj } = useUpdate();
   const { mutate: aiGrade } = useCustomMutation();
 
   // Sync local state with fetched data
@@ -92,7 +92,7 @@ const SubmissionShow = () => {
     });
   };
 
-  if (submissionQuery.isLoading) {
+  if (submissionQuery.isPending) {
     return (
       <div className="flex justify-center items-center h-screen">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
@@ -177,7 +177,7 @@ const SubmissionShow = () => {
                                 disabled={isAnalyzing}
                                 className="h-7 text-[10px] gap-1.5 border-ai-primary/20 text-ai-primary hover:bg-ai-primary/5"
                             >
-                                {isAnalyzing ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
+                                {isAnalyzing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
                                 {t("buttons.aiAssist")}
                             </Button>
                         </CardTitle>
@@ -223,10 +223,10 @@ const SubmissionShow = () => {
                     <CardFooter className="border-t bg-muted/5 pt-6">
                         <Button 
                             onClick={handleSaveGrade} 
-                            disabled={mutation.isPending}
+                            disabled={updateMutationObj.isPending}
                             className="w-full h-12 rounded-xl font-black uppercase tracking-widest shadow-lg shadow-primary/20"
                         >
-                            {mutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                            {updateMutationObj.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
                             {t("buttons.saveGrade")}
                         </Button>
                     </CardFooter>

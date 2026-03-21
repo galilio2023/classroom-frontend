@@ -94,10 +94,37 @@ The frontend is connected to the backend's **Socket.io** server to create a live
 /
 ├── src/
 │   ├── components/          # UI components (Shadcn + Framer Motion)
-│   │   ├── classes/         # Classroom-specific tools (e.g., DiscoveryList)
-│   │   └── layout/          # Sidebar, Header, etc.
-│   ├── pages/               # Top-level routes
+│   │   ├── ai/              # Specialized AI UI components
+│   │   ├── refine-ui/       # Custom DataTables and Breadcrumbs
+│   │   └── ui/              # Low-level primitives (Button, Input, etc.)
+│   ├── pages/               # Orchestrator components (Thin Pages)
+│   │   └── [feature]/       
+│   │       ├── _components/ # Feature-specific modular components
+│   │       └── _hooks/      # Feature-specific headless logic hooks
+│   ├── hooks/               # Global reusable hooks
 │   ├── providers/           # Refine's Auth and Data Providers
-│   ├── types/               # TypeScript definitions
+│   ├── types/               # Strict TypeScript definitions
 │   └── App.tsx              # Main application router
 ```
+
+---
+
+## 🏛️ Enterprise Development Patterns
+
+To ensure the platform is "Battle-Tested" and scalable, we follow these advanced patterns:
+
+### 1. Headless Logic Hooks (The "Brain")
+We avoid "Fat Components" by extracting all business logic into feature-specific hooks (e.g., `useClassDetails`). This ensures the UI only handles "Displaying" while the hook handles "Thinking."
+
+### 2. High-Fidelity UX (The "Ghost" Pattern)
+Instead of full-page loading spinners, we use **Skeleton Loaders** (`_components/class-skeletons.tsx`) that mimic the exact layout of the page, reducing perceived load time and layout shift.
+
+### 3. Optimistic UI Updates
+For actions like "Enrolling" or "Toggling Live Status," the UI updates **instantly** before the server responds. We use manual cache manipulation via `useQueryClient` to provide a lag-free experience.
+
+### 4. Modular Orchestration
+Pages in `src/pages` act only as orchestrators. Every major UI section is broken into a wrapper (e.g., `ContentTabWrapper`), keeping main files under 200 lines for maximum maintainability.
+
+### 5. Dynamic Navigation
+A centralized **Breadcrumb** system (`src/components/refine-ui/layout/breadcrumb.tsx`) ensures users always know their context within the deep hierarchy of classes and modules.
+

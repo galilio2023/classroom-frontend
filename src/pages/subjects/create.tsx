@@ -171,7 +171,7 @@ const SubjectsCreate = () => {
                                 <SelectValue placeholder="Select a department" />
                               </SelectTrigger>
                             </FormControl>
-                            <SelectContent>
+                            <SelectContent className="bg-white dark:bg-[#09090b] opacity-100 backdrop-blur-none border border-border/50 shadow-2xl">
                               {departmentOptions.map((option) => (
                                 <SelectItem
                                   key={option.value}

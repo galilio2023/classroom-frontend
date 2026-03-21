@@ -1,16 +1,20 @@
 import { Class } from "@/types";
 import { Badge } from "@/components/ui/badge";
-import { Clock, Globe, Timer, Users, Video } from "lucide-react";
+import { Clock, Globe, Timer, Users, Video, Zap, ZapOff } from "lucide-react";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { Fragment, useMemo } from "react";
 import { getSubjectIcon } from "@/lib/subject-icons";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 interface ClassBannerProps {
   aClass: Class;
   approvedCount: number;
   waitlistedCount: number;
   isLiveIndicator: boolean;
+  isStaff?: boolean;
+  onToggleLive?: () => void;
 }
 
 export const ClassBanner = ({
@@ -18,6 +22,8 @@ export const ClassBanner = ({
   approvedCount,
   waitlistedCount,
   isLiveIndicator,
+  isStaff,
+  onToggleLive,
 }: ClassBannerProps) => {
   const { t, i18n } = useTranslation();
   const classColor = aClass.color || "#3b82f6";
@@ -105,18 +111,45 @@ export const ClassBanner = ({
           </div>
         </div>
 
-        {isLiveIndicator && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="flex items-center gap-3 bg-red-500 text-white px-6 md:px-8 py-3 md:py-4 rounded-2xl md:rounded-4xl shadow-2xl shadow-red-500/40 animate-pulse border-2 border-white/20 self-start md:self-end shrink-0"
-          >
-            <Video className="h-5 w-5 md:h-6 md:w-6" />
-            <span className="font-black uppercase tracking-widest text-[10px] md:text-sm whitespace-nowrap">
-              {t("classes.show.banner.liveActive")}
-            </span>
-          </motion.div>
-        )}
+        <div className="flex flex-col gap-3 self-start md:self-end shrink-0">
+            {isStaff && onToggleLive && (
+                <Button
+                    size="lg"
+                    onClick={onToggleLive}
+                    className={cn(
+                        "rounded-2xl h-14 px-8 font-black uppercase tracking-widest text-[10px] shadow-2xl transition-all active:scale-95 border-2",
+                        isLiveIndicator 
+                            ? "bg-white text-red-600 border-white hover:bg-white/90 shadow-red-500/20" 
+                            : "bg-red-600 text-white border-red-600 hover:bg-red-700 shadow-red-600/40"
+                    )}
+                >
+                    {isLiveIndicator ? (
+                        <>
+                            <ZapOff className="h-4 w-4 mr-2" />
+                            {t("buttons.stopLive", "End Live Session")}
+                        </>
+                    ) : (
+                        <>
+                            <Zap className="h-4 w-4 mr-2 animate-pulse" />
+                            {t("buttons.goLive", "Go Live Now")}
+                        </>
+                    )}
+                </Button>
+            )}
+
+            {isLiveIndicator && !isStaff && (
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="flex items-center gap-3 bg-red-500 text-white px-6 md:px-8 py-3 md:py-4 rounded-2xl md:rounded-4xl shadow-2xl shadow-red-500/40 animate-pulse border-2 border-white/20"
+                >
+                    <Video className="h-5 w-5 md:h-6 md:w-6" />
+                    <span className="font-black uppercase tracking-widest text-[10px] md:text-sm whitespace-nowrap">
+                    {t("classes.show.banner.liveActive")}
+                    </span>
+                </motion.div>
+            )}
+        </div>
       </div>
     </motion.div>
   );

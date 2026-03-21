@@ -222,7 +222,7 @@ const DiscussionsListPage = () => {
           ) : (
             <div className="space-y-4">
               <AnimatePresence mode="popLayout">
-                {discussions.map((discussion, index) => {
+                {discussions.map((discussion: any, index: number) => {
                   const lastActivity = dayjs(discussion.updatedAt);
                   const discussionColor = (discussion as any).class?.color || "#6366f1";
                   
@@ -335,7 +335,7 @@ const DiscussionsListPage = () => {
                                     <MoreHorizontal className="h-5 w-5" />
                                 </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-64 p-2 rounded-3xl">
+                            <DropdownMenuContent align="end" className="w-64 p-2 rounded-3xl bg-white dark:bg-[#09090b] opacity-100 backdrop-blur-none border border-border/50 shadow-2xl">
                                 <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/40 px-3 py-3">{t("discussions.labels.options")}</DropdownMenuLabel>
                                 <DropdownMenuItem onClick={() => show("discussions", discussion.id)} className="rounded-xl gap-3 py-3 cursor-pointer">
                                     <div className="p-2 rounded-lg bg-primary/10 text-primary">

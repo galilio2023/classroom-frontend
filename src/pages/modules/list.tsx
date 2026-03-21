@@ -72,10 +72,14 @@ const ModulesListPage = () => {
     if (searchQuery) {
       f.push({ field: "name", operator: "contains" as const, value: searchQuery });
     }
+    // IMPORTANT: Filter modules by teacherId if the current user is a staff member (teacher)
+    if (isStaff && identity?.id) {
+      f.push({ field: "teacherId", operator: "eq" as const, value: identity.id });
+    }
     return f;
-  }, [searchQuery]);
+  }, [searchQuery, isStaff, identity?.id]); // Added isStaff and identity.id to dependencies
 
-  const { query: { data: modulesData, isLoading } } = useList<Module>({
+  const { query } = useList<Module>({
     resource: "modules",
     pagination: { pageSize: 50, mode: "server" },
     filters,
@@ -84,6 +88,8 @@ const ModulesListPage = () => {
       populate: ["class", "assignments", "resources"]
     }
   });
+
+  const { data: modulesData, isPending: isLoading } = query;
 
   const modules = modulesData?.data || [];
   const hasData = modules.length > 0;
@@ -214,7 +220,7 @@ const ModulesListPage = () => {
         <div className="relative min-h-[400px]">
           {isLoading ? (
             <div className="space-y-4">
-              {Array.from({ length: 5 }).map((_, i) => (
+              {Array.from({ length: 5 }).map((_, i: any) => (
                 <Card key={i} className="p-6 flex flex-col md:flex-row items-center gap-6 border-border/20 bg-background/50">
                   <Skeleton className="h-20 w-20 rounded-3xl shrink-0" />
                   <div className="flex-1 space-y-4 w-full">
@@ -244,7 +250,7 @@ const ModulesListPage = () => {
           ) : (
             <div className="space-y-4">
               <AnimatePresence mode="popLayout">
-                {modules.map((module, index) => {
+                {modules.map((module: any, index: any) => {
                   const isPublished = module.id % 2 === 0;
                   const moduleColor = (module as any).class?.color || "#6366f1";
                   
@@ -359,7 +365,7 @@ const ModulesListPage = () => {
                                     <MoreHorizontal className="h-5 w-5" />
                                 </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-64 p-2 rounded-3xl">
+                            <DropdownMenuContent align="end" className="w-64 p-2 rounded-3xl bg-white dark:bg-[#09090b] opacity-100 backdrop-blur-none border border-border/50 shadow-2xl">
                                 <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/40 px-3 py-3">{t("assignments.list.labels.options")}</DropdownMenuLabel>
                                 <DropdownMenuItem onClick={() => show("modules", module.id)} className="rounded-xl gap-3 py-3 cursor-pointer">
                                     <div className="p-2 rounded-lg bg-primary/10 text-primary">

@@ -146,7 +146,7 @@ const ProgressListPage = () => {
                   <MoreHorizontal className="h-5 w-5" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 p-2 rounded-2xl">
+              <DropdownMenuContent align="end" className="w-56 p-2 rounded-2xl bg-white dark:bg-[#09090b] opacity-100 backdrop-blur-none border border-border/50 shadow-2xl">
                 <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-3 py-3">Student Progress</DropdownMenuLabel>
                 <DropdownMenuItem 
                     onClick={() => row.original?.user?.id && navigate(`/portfolio/${row.original.user.id}`)}
@@ -177,7 +177,7 @@ const ProgressListPage = () => {
 
   const {
     refineCore: { tableQuery: query },
-    reactTable,
+    reactTable
   } = useTable<any, HttpError>({
     refineCoreProps: {
       resource: "enrollments", 
@@ -191,7 +191,7 @@ const ProgressListPage = () => {
   });
 
   const progressData = query.data?.data || [];
-  const isLoading = query.isLoading;
+  const isLoading = query.isPending;
   const hasData = progressData.length > 0;
 
   return (
@@ -245,7 +245,7 @@ const ProgressListPage = () => {
         <div className="relative min-h-100">
           {isLoading ? (
             <div className="space-y-4">
-              {Array.from({ length: 5 }).map((_, i) => (
+              {Array.from({ length: 5 }).map((_, i: any) => (
                 <Card key={i} className="p-6 flex items-center gap-6 border-border/20 bg-background/50">
                   <Skeleton className="h-12 w-12 rounded-2xl shrink-0" />
                   <div className="flex-1 space-y-3">

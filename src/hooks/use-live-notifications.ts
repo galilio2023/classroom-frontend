@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { toast } from "sonner"; // Assuming you use sonner for toasts
+import { toast } from "sonner"; 
 import { useSocket } from "@/contexts/socket-context";
+import { useNavigate } from "react-router-dom";
 
 export interface Notification {
   id: number;
@@ -18,6 +19,7 @@ export interface Notification {
  */
 export const useLiveNotifications = (userId: string | undefined) => {
   const { socket, isConnected } = useSocket();
+  const navigate = useNavigate();
   const [unreadCount, setUnreadCount] = useState<number>(0);
   const [latestNotification, setLatestNotification] = useState<Notification | null>(null);
 
@@ -33,7 +35,7 @@ export const useLiveNotifications = (userId: string | undefined) => {
         description: notification.message,
         action: notification.link ? {
           label: "View",
-          onClick: () => window.location.href = notification.link!
+          onClick: () => navigate(notification.link!)
         } : undefined,
       });
     };

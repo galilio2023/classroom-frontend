@@ -74,8 +74,8 @@ const SubjectsList = () => {
   const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
 
   const { edit, show, create } = useNavigation();
-  const { mutate: deleteMutation, mutation } = useDelete();
-  const isDeleteLoading = mutation.isPending;
+  const { mutate: deleteMutation, mutation: deleteMutationObj } = useDelete();
+  const isDeleteLoading = deleteMutationObj.isPending;
 
   const { options: departmentOptions } = useSelect<Department>({
     resource: "departments",
@@ -90,7 +90,8 @@ const SubjectsList = () => {
       tableQuery: query,
       filters,
       setFilters,
-    }
+    },
+    reactTable
   } = useTable<Subject, HttpError>({
     columns,
     refineCoreProps: {
@@ -132,7 +133,7 @@ const SubjectsList = () => {
   };
 
   const subjects = useMemo(() => query.data?.data || [], [query.data?.data]);
-  const isLoading = query.isLoading;
+  const isLoading = query.isPending;
   const hasData = subjects.length > 0;
 
   const handleConfirmDelete = () => {
@@ -282,11 +283,11 @@ const SubjectsList = () => {
                     placeholder={t("departments.filters.allDepartments") as string}
                   />
                 </SelectTrigger>
-                <SelectContent className="rounded-2xl">
+                <SelectContent className="rounded-2xl bg-white dark:bg-[#09090b] opacity-100 backdrop-blur-none border border-border/50 shadow-2xl">
                   <SelectItem value="all" className="font-bold">
                     {t("departments.filters.allDepartments")}
                   </SelectItem>
-                  {departmentOptions.map(({ value, label }) => (
+                  {departmentOptions.map(({ value, label }: any) => (
                     <SelectItem
                       value={String(value)}
                       key={value}
@@ -305,7 +306,7 @@ const SubjectsList = () => {
         <div className="relative min-h-[400px]">
           {isLoading ? (
             <div className="space-y-4">
-              {Array.from({ length: 5 }).map((_, i) => (
+              {Array.from({ length: 5 }).map((_, i: any) => (
                 <Card key={i} className="p-6 flex flex-col md:flex-row items-center gap-6 border-border/20 bg-background/50">
                   <Skeleton className="h-20 w-20 rounded-3xl shrink-0" />
                   <div className="flex-1 space-y-4 w-full">
@@ -339,7 +340,7 @@ const SubjectsList = () => {
           ) : (
             <div className="space-y-4">
               <AnimatePresence mode="popLayout">
-                {subjects.map((subject, index) => {
+                {subjects.map((subject: any, index: any) => {
                   return (
                     <motion.div
                       key={subject.id}
@@ -461,7 +462,7 @@ const SubjectsList = () => {
                               <MoreHorizontal className="h-5 w-5" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-64 p-2 rounded-3xl">
+                          <DropdownMenuContent align="end" className="w-64 p-2 rounded-3xl bg-white dark:bg-[#09090b] opacity-100 backdrop-blur-none border border-border/50 shadow-2xl">
                             <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/40 px-3 py-3">{t("assignments.list.labels.options")}</DropdownMenuLabel>
                             <DropdownMenuItem onClick={() => show("subjects", subject.id)} className="rounded-xl gap-3 py-3 cursor-pointer">
                               <div className="p-2 rounded-lg bg-primary/10 text-primary">

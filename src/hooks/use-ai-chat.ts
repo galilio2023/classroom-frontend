@@ -14,7 +14,7 @@ interface UseAIChatProps {
 }
 
 const ERROR_MESSAGE = "I'm having trouble reading the class materials right now. Please try again in a moment.";
-const THROTTLE_MS = 60; // Update UI at roughly 16fps for smooth typing without lag
+// Removed THROTTLE_MS as requestAnimationFrame will handle timing
 
 export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -22,11 +22,11 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [streamingMessage, setStreamingMessage] = useState("");
   const [streamingSources, setStreamingSources] = useState<any[] | null>(null);
-  
+
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const accumulatorRef = useRef("");
-  const lastUpdateRef = useRef(0);
-  const animationFrameRef = useRef<number | null>(null);
+  // Removed lastUpdateRef as requestAnimationFrame will handle timing
+  const animationFrameRef = useRef<number | null>(null); // Used for requestAnimationFrame
 
   // Auto-scroll logic (Optimized)
   const scrollToBottom = useCallback(() => {
@@ -42,13 +42,16 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
     scrollToBottom();
   }, [messages, streamingMessage, scrollToBottom]);
 
-  const updateUI = useCallback((isFinal = false) => {
-    const now = Date.now();
-    if (isFinal || now - lastUpdateRef.current > THROTTLE_MS) {
-      setStreamingMessage(accumulatorRef.current);
-      lastUpdateRef.current = now;
+  // Modified updateUI to use requestAnimationFrame
+  const updateStreamingMessage = useCallback(() => {
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
     }
-  }, []);
+    animationFrameRef.current = requestAnimationFrame(() => {
+      setStreamingMessage(accumulatorRef.current);
+      animationFrameRef.current = null; // Clear the ref after the update
+    });
+  }, []); // No dependencies needed as setStreamingMessage is stable and accumulatorRef is a ref
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
@@ -110,10 +113,10 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
           if (line.startsWith("data: ")) {
             try {
               const data = JSON.parse(line.replace("data: ", ""));
-              
+
               if (data.text) {
                 accumulatorRef.current += data.text;
-                updateUI();
+                updateStreamingMessage(); // Call the new update function
               }
 
               if (data.sources) {
@@ -128,16 +131,24 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
         }
       }
 
+      // Ensure the final accumulated message is pushed to streamingMessage one last time
+      // before moving it to chat history. This handles cases where the last chunk
+      // arrived but requestAnimationFrame hasn't fired yet.
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+      setStreamingMessage(accumulatorRef.current); // Final update to streamingMessage
+
       // Final push to state
       setMessages((prev) => [
         ...prev,
-        { 
-            role: "model", 
-            parts: [{ text: accumulatorRef.current }], 
-            sources: streamingSources || undefined 
+        {
+            role: "model",
+            parts: [{ text: accumulatorRef.current }],
+            sources: streamingSources || undefined
         }
       ]);
-      setStreamingMessage("");
+      setStreamingMessage(""); // Clear streaming message after it's added to history
       setStreamingSources(null);
 
     } catch (error) {
@@ -145,6 +156,7 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
       setMessages((prev) => [...prev, { role: "model", parts: [{ text: ERROR_MESSAGE }] }]);
     } finally {
       setIsLoading(false);
+      // Ensure any pending animation frame is cancelled on completion or error
       if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
     }
   };

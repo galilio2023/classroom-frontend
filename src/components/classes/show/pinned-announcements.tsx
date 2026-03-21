@@ -73,7 +73,7 @@ export const PinnedAnnouncements = ({
               {announcement.linkUrl && (
                 <Button
                   variant="outline"
-                  className="flex-1 md:flex-none rounded-xl md:rounded-2xl font-black uppercase tracking-widest text-[9px] md:text-[10px] h-10 md:h-12 px-6 bg-white dark:bg-zinc-900 border-amber-500/20 text-amber-700 hover:bg-amber-50 hover:text-amber-800 shadow-sm transition-all"
+                  className="flex-1 md:flex-none rounded-xl md:rounded-2xl font-black uppercase tracking-widest text-[9px] md:text-[10px] h-10 md:h-12 px-6 bg-white dark:bg-muted/10 border-amber-500/20 text-amber-700 hover:bg-amber-50 hover:text-amber-800 shadow-sm transition-all"
                   asChild
                 >
                   <a

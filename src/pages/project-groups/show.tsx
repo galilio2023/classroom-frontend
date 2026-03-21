@@ -42,7 +42,7 @@ const ShowProjectGroup = () => {
   const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState("members");
 
-  const { result: groupResult, query: { isLoading, refetch } } = useShow({
+  const { query } = useShow({
     resource: "project-groups",
     id,
     meta: {
@@ -50,64 +50,62 @@ const ShowProjectGroup = () => {
     }
   });
 
+  const { data: groupResult, isLoading, refetch } = query;
   const group = groupResult?.data as any;
 
-  const { result: classStudentsResult } = useList({
+  const { query: classStudentsQuery } = useList({
     resource: "enrollments",
     filters: [{ field: "classId", operator: "eq", value: group?.class.id }],
     pagination: { mode: "off" },
     queryOptions: { enabled: !!group?.class.id },
   });
 
-  const { mutate: manageMembers, mutation: manageMutation } = useCustomMutation();
-  const isManagingMembers = manageMutation.isPending;
+  const enrolledStudents = classStudentsQuery.data?.data.map((e: any) => e.student) || [];
+  const groupMemberIds = new Set(group?.members.map((m: any) => m.student.id) || []);
+  const availableStudents = enrolledStudents.filter((s: any) => !groupMemberIds.has(s.id));
+
+  const isTeacherOrAdmin = identity?.role === UserRole.TEACHER || identity?.role === UserRole.ADMIN;
+
+  const { mutate: addMembers, mutation: addMutation } = useCustomMutation();
+  const { mutate: removeMember, mutation: removeMutation } = useCustomMutation();
+  const isAdding = addMutation.isPending;
+  const isRemoving = removeMutation.isPending;
+  const isManagingMembers = isAdding || isRemoving;
 
   const handleAddMembers = () => {
-    if (selectedStudents.length === 0) {
-      toast.error(t("projectGroups.show.selectStudents"));
-      return;
-    }
-
-    manageMembers({
+    if (selectedStudents.length === 0) return;
+    addMembers({
       url: `/project-groups/${id}/members`,
-      method: "patch",
-      values: { add: selectedStudents },
+      method: "post",
+      values: { studentIds: selectedStudents },
     }, {
       onSuccess: () => {
         toast.success(t("projectGroups.toasts.membersAdded"));
         setAddMemberOpen(false);
         setSelectedStudents([]);
-        refetch();
+        void refetch();
       },
       onError: (error: any) => {
-        toast.error(error?.response?.data?.message || t("projectGroups.toasts.membersAdded"));
-      },
+        toast.error(error?.response?.data?.message || t("common.error"));
+      }
     });
   };
 
   const handleRemoveMember = (studentId: string) => {
-    if (confirm(t("projectGroups.toasts.deleteConfirm"))) {
-        manageMembers({
-            url: `/project-groups/${id}/members`,
-            method: "patch",
-            values: { remove: [studentId] },
-        }, {
-            onSuccess: () => {
-                toast.success(t("projectGroups.toasts.memberRemoved"));
-                refetch();
-            },
-            onError: (error: any) => {
-                toast.error(error?.response?.data?.message || t("projectGroups.toasts.memberRemoved"));
-            },
-        });
-    }
+    removeMember({
+      url: `/project-groups/${id}/members/${studentId}`,
+      method: "delete",
+      values: {},
+    }, {
+      onSuccess: () => {
+        toast.success(t("projectGroups.toasts.memberRemoved"));
+        void refetch();
+      },
+      onError: (error: any) => {
+        toast.error(error?.response?.data?.message || t("common.error"));
+      }
+    });
   };
-
-  const enrolledStudents = classStudentsResult?.data.map((e: any) => e.student) || [];
-  const groupMemberIds = new Set(group?.members.map((m: any) => m.student.id) || []);
-  const availableStudents = enrolledStudents.filter((s: any) => !groupMemberIds.has(s.id));
-
-  const isTeacherOrAdmin = identity?.role === UserRole.TEACHER || identity?.role === UserRole.ADMIN;
 
   if (isLoading) {
     return (
@@ -285,7 +283,7 @@ const ShowProjectGroup = () => {
                     <ChevronsUpDown className="ml-2 h-5 w-5 shrink-0 opacity-50" />
                     </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-[--radix-popover-trigger-width] p-0 rounded-2xl border-none shadow-2xl bg-card/95 backdrop-blur-xl">
+                <PopoverContent className="w-[--radix-popover-trigger-width] p-0 rounded-2xl shadow-2xl bg-white dark:bg-[#09090b] opacity-100 backdrop-blur-none border border-border/50">
                     <Command>
                     <CommandInput placeholder={t("common.search")} className="h-12 rounded-xl bg-muted/30 border-none shadow-inner px-6 text-base font-black placeholder:text-muted-foreground/30 focus-visible:ring-primary/20" />
                     <CommandList className="max-h-60">

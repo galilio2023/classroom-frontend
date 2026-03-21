@@ -20,9 +20,9 @@ import { Input } from "@/components/ui/input.tsx";
 import { useMemo, useState, useRef, useCallback } from "react";
 import { useList, useNavigation, useGetIdentity } from "@refinedev/core";
 import { User, UserRole } from "@/types";
-import { Badge } from "@/components/ui/badge.tsx";
-import { Button } from "@/components/ui/button.tsx";
-import { QRAttendanceModal } from "../classes/qr-attendance-modal";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { QRAttendanceModal } from "@/features/classes/components/qr-attendance-modal";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { motion, AnimatePresence } from "framer-motion";
@@ -365,7 +365,7 @@ const AttendanceListPage = () => {
                                       <MoreHorizontal className="h-5 w-5" />
                                   </Button>
                               </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className="w-56 rounded-[1.5rem] p-2">
+                              <DropdownMenuContent align="end" className="w-56 rounded-[1.5rem] p-2 bg-white dark:bg-[#09090b] opacity-100 backdrop-blur-none border border-border/50 shadow-2xl">
                                   <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-3 py-2">{t("classes.attendance.governance.sessionOptions")}</DropdownMenuLabel>
                                   <DropdownMenuItem onClick={() => handleRowClick(session)} className="rounded-xl gap-3 py-3 cursor-pointer">
                                       <Eye className="h-4 w-4 text-primary" />

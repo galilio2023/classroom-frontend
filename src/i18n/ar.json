@@ -1,6 +1,83 @@
 {
+  "ai-assistant": {
+    "ai-assistant": "مساعد الذكاء الاصطناعي"
+  },
+  "ai-study-lab": {
+    "ai-study-lab": "مختبر الدراسة"
+  },
+  "study-planner": {
+    "study-planner": "مخطط الدراسة"
+  },
   "app": {
     "title": "كلاس روم ذكي"
+  },
+  "Show": "عرض",
+  "warnWhenUnsavedChanges": "You have unsaved changes. Are you sure you want to leave?",
+  "documentTitle": {
+    "default": "Classroom AI",
+    "suffix": " | Classroom AI",
+    "dashboard": {
+      "list": "لوحة التحكم",
+      "dashboard": "لوحة التحكم"
+    },
+    "subjects": {
+      "list": "المواد الدراسية",
+      "subjects": "المواد الدراسية"
+    },
+    "classes": {
+      "list": "الفصول الدراسية",
+      "show": "مركز الفصل",
+      "edit": "تعديل الفصل"
+    },
+    "assignments": {
+      "list": "المهام والواجبات",
+      "show": "تفاصيل المهمة",
+      "create": "إنشاء مهمة"
+    },
+    "quizzes": {
+      "list": "الاختبارات",
+      "show": "نتائج الاختبار",
+      "create": "إنشاء اختبار"
+    },
+    "enrollments": {
+      "list": "طلبات الانضمام"
+    },
+    "users": {
+      "list": "إدارة المستخدمين"
+    },
+    "profile": {
+      "show": "الملف الشخصي"
+    },
+    "calendar": {
+      "list": "التقويم الأكاديمي",
+      "calendar": "التقويم"
+    },
+    "notifications": {
+      "list": "التنبيهات",
+      "notifications": "التنبيهات"
+    },
+    "messages": {
+      "list": "الرسائل",
+      "messages": "الرسائل"
+    },
+    "ai-assistant": {
+      "ai-assistant": "مساعد الذكاء الاصطناعي",
+      "list": "مساعد الذكاء الاصطناعي"
+    },
+    "ai-study-lab": {
+      "ai-study-lab": "مختبر الدراسة",
+      "list": "مختبر الدراسة"
+    },
+    "study-planner": {
+      "study-planner": "مخطط الدراسة",
+      "list": "مخطط الدراسة"
+    },
+    "attendance": {
+      "list": "إدارة الحضور"
+    },
+    "portfolio": {
+      "list": "ملف الطالب"
+    }
   },
   "actions": {
     "edit": "تعديل",
@@ -23,6 +100,8 @@
     "offline": "أنت غير متصل بالإنترنت — قد تكون بعض الميزات محدودة",
     "details": "التفاصيل",
     "description": "الوصف",
+    "explore": "استكشف",
+    "fastTrack": "المسار السريع",
     "featureComingSoon": "الميزة ستتوفر قريباً!",
     "aiPowered": "مدعوم بالذكاء الاصطناعي",
     "editor": {
@@ -96,6 +175,8 @@
     "error": "حدث خطأ غير متوقع"
   },
   "notifications": {
+    "notifications": "التنبيهات",
+    "error": "خطأ",
     "title": "الإشعارات",
     "markAllRead": "تحديد الكل كمقروء",
     "noNotifications": "لا توجد إشعارات بعد",
@@ -138,6 +219,7 @@
     "dismiss": "تجاهل",
     "getStarted": "ابدأ الآن",
     "joinClass": "انضم للفصل",
+    "joinNow": "Join Now",
     "viewResources": "عرض المصادر",
     "viewAll": "عرض الكل",
     "signIn": "تسجيل الدخول",
@@ -150,6 +232,7 @@
     "change": "تغيير",
     "selectFile": "اختر ملف",
     "contactSupport": "الاتصال بالدعم",
+    "refresh": "تحديث الصفحة",
     "refreshStatus": "تحديث الحالة",
     "signOut": "تسجيل الخروج",
     "joinByCode": "انضمام بواسطة رمز",
@@ -157,6 +240,8 @@
     "browseCatalog": "تصفح الدليل",
     "enterClass": "دخول الفصل",
     "joinLive": "انضم للبث",
+    "goLive": "ابدأ بث مباشر الآن",
+    "stopLive": "إنهاء الجلسة المباشرة",
     "applyToTeach": "طلب تدريس",
     "applied": "تم تقديم الطلب",
     "viewDetails": "عرض التفاصيل",
@@ -282,7 +367,10 @@
     "post": "نشر",
     "createModule": "إنشاء وحدة",
     "generating": "جاري الإنشاء...",
-    "readMore": "اقرأ المزيد"
+    "readMore": "اقرأ المزيد",
+    "confirmRemoval": "تأكيد الإزالة",
+    "copyClassContent": "Copy Class Content",
+    "saveSettings": "Save Settings"
   },
   "roles": {
     "student": "طالب",
@@ -386,58 +474,59 @@
     }
   },
   "classes": {
+    "classes": "الفصول الدراسية",
     "create": {
       "title": "إنشاء فصل",
-      "description": "قدم المعلومات المطلوبة أدناه لإضافة فصل دراسي جديد.",
+      "description": "أدخل المعلومات المطلوبة أدناه لإضافة فصل دراسي جديد.",
       "configuration": "إعدادات الفصل",
-      "identityError": "لا يمكن إنشاء الفصل: لم يتم العثور على بيانات المستخدم.",
-      "inviteNote": "يمكنك دعوة معلمين مساعدين وطلاب بعد الإنشاء"
+      "identityError": "لا يمكن إنشاء الفصل: لم يتم العثور على هوية المستخدم.",
+      "inviteNote": "يمكنك دعوة معلمين مساعدين وطلاب بعد إنشاء الفصل"
     },
     "edit": {
-      "subtitle": "تحديث إعدادات الفصل الدراسي والجدول الزمني والمنهج.",
+      "subtitle": "تحديث إعدادات الفصل والجدول الزمني والمنهج.",
       "configuration": "إعدادات الفصل",
       "editingMode": "وضع التعديل",
-      "editingModeDesc": "سيتم تحديث التغييرات في الجدول والإعدادات فوراً لجميع الطلاب المسجلين.",
+      "editingModeDesc": "التغييرات في الجدول والإعدادات ستحدث فوراً لجميع الطلاب المسجلين.",
       "accessControl": "التحكم في الوصول",
       "inviteCode": "رمز الدعوة",
-      "inviteCodeDesc": "شارك هذا الرمز مع الطلاب للسماح لهم بالانضمام إلى هذا الفصل فوراً.",
+      "inviteCodeDesc": "شارك هذا الرمز مع الطلاب للسماح لهم بالانضمام فوراً لهذا الفصل.",
       "contentActions": "إجراءات المحتوى",
-      "importContent": "استيراد المحتوى",
+      "importContent": "استيراد محتوى",
       "importArchive": "استيراد من الأرشيف",
-      "importArchiveDesc": "انسخ الوحدات والتكليفات والاختبارات من فصل دراسي سابق. سيتم ضبط المحتوى المستورد على وضع \"مسودة\".",
+      "importArchiveDesc": "نسخ الوحدات والتكليفات والاختبارات من فصل دراسي سابق. سيتم تعيين المحتوى المستورد إلى وضع \"مسودة\".",
       "selectSourceTerm": "اختر الفصل الدراسي المصدر",
       "selectTermPlaceholder": "اختر فصلاً دراسياً سابقاً",
       "selectSourceClass": "اختر الفصل المصدر",
       "selectClassPlaceholder": "اختر فصلاً",
-      "importFooterDesc": "قم بتعبئة منهجك بسرعة عن طريق إعادة استخدام المواد من الفصول المؤرشفة."
+      "importFooterDesc": "املأ منهجك بسرعة عن طريق إعادة استخدام المواد من الفصول الدراسية المارشفة."
     },
     "live": {
-      "title": "الفصل المباشر",
+      "title": "فصل مباشر",
       "mainHall": "(القاعة الرئيسية)",
-      "breakoutRoom": "(غرفة فرعية)",
-      "breakoutActive": "جلسات الغرف الفرعية نشطة.",
+      "breakoutRoom": "(غرفة جانبية)",
+      "breakoutActive": "الجلسات الجانبية نشطة.",
       "mainActive": "الجلسة الرئيسية نشطة.",
-      "startBreakouts": "بدء الغرف الفرعية",
-      "endBreakouts": "إنهاء الغرف الفرعية",
-      "readyToJoin": "جاهز للانضمام؟",
-      "breakoutDescription": "جلسات الغرف الفرعية جارية. ستنضم إلى غرفة مجموعتك.",
+      "startBreakouts": "بدء الجلسات الجانبية",
+      "endBreakouts": "إنهاء الجلسات الجانبية",
+      "readyToJoin": "مستعد للانضمام؟",
+      "breakoutDescription": "الجلسات الجانبية جارية. ستنضم إلى غرفة مجموعتك.",
       "mainDescription": "انقر أدناه لدخول الفصل الافتراضي.",
       "joinNow": "انضم للفصل الآن",
       "joinGroup": "انضم لغرفة {{name}}",
-      "videoSession": "جلسة الفيديو",
-      "whiteboard": "السبورة",
-      "startLiveSession": "بدء الجلسة المباشرة",
-      "sessionNotStarted": "لم تبدأ الجلسة المباشرة بعد.",
+      "videoSession": "جلسة فيديو",
+      "whiteboard": "لوحة بيضاء",
+      "startLiveSession": "بدء جلسة مباشرة",
+      "sessionNotStarted": "الجلسة المباشرة لم تبدأ بعد.",
       "toasts": {
         "sessionStarted": "بدأ {{name}} جلسة مباشرة!",
         "sessionEnded": "انتهت الجلسة المباشرة.",
-        "breakoutStarted": "بدأت جلسات الغرف الفرعية!",
+        "breakoutStarted": "بدأت الجلسات الجانبية!",
         "joiningGroup": "جاري الانضمام لمجموعتك: {{name}}",
-        "breakoutEnded": "انتهت جلسات الغرف الفرعية. العودة للقاعة الرئيسية.",
+        "breakoutEnded": "انتهت الجلسات الجانبية. العودة للقاعة الرئيسية.",
         "joinFailed": "فشل الانضمام للجلسة. يرجى المحاولة مرة أخرى.",
         "recordingSaved": "تم حفظ التسجيل في المصادر.",
         "initFailed": "فشل تهيئة مؤتمر الفيديو.",
-        "sessionStartedTeacher": "تم بدء الجلسة المباشرة بنجاح!",
+        "sessionStartedTeacher": "بدأت الجلسة المباشرة بنجاح!",
         "startFailed": "فشل بدء الجلسة المباشرة. يرجى المحاولة مرة أخرى."
       }
     },
@@ -445,17 +534,18 @@
       "updateDetails": "تحديث تفاصيل الفصل",
       "coreInfo": "المعلومات الأساسية",
       "className": "اسم الفصل",
-      "classNamePlaceholder": "مثال: رياضيات 101 - القسم أ",
-      "capacity": "سعة الطلاب",
-      "studentsUnit": "طلاب",
-      "subjectArea": "المجال الدراسي",
+      "classNamePlaceholder": "مثال: فيزياء 101 - المجموعة أ",
+      "capacity": "السعة الطلابية",
+      "capacityHelp": "الحد الأقصى لعدد الطلاب المسموح لهم بالتسجيل. إذا اكتمل العدد، سيتم وضع الطلاب الجدد في قائمة الانتظار.",
+      "studentsUnit": "طالب",
+      "subjectArea": "مجال المادة",
       "selectSubject": "اختر مادة",
       "academicTerm": "الفصل الدراسي",
       "selectTerm": "اختر فصلاً دراسياً",
       "themeColor": "لون السمة",
       "classStatus": "حالة الفصل",
       "description": "الوصف",
-      "descriptionPlaceholder": "قدم لمحة موجزة عن أهداف الفصل...",
+      "descriptionPlaceholder": "قدم نظرة عامة موجزة عن أهداف الفصل...",
       "weeklySchedule": "الجدول الأسبوعي",
       "day": "اليوم",
       "startTime": "وقت البدء",
@@ -464,43 +554,45 @@
         "active": "نشط",
         "inactive": "غير نشط",
         "archived": "مؤرشف"
-      }
+      },
+      "createNewSubject": "إنشاء مادة جديدة",
+      "newSubjectName": "اسم المادة الجديدة"
     },
     "list": {
       "title": "الفصول الدراسية",
-      "discover": "اكتشاف الفصول",
+      "discover": "استكشاف الفصول",
       "myClassrooms": "فصولي الدراسية",
       "browseCatalog": "تصفح الدليل",
-      "discoverDescription": "ابحث وانضم إلى فصول جديدة لتوسيع معرفتك.",
-      "myDescription": "إدارة طلابك، ومنهجك، وأنشطة الفصل.",
-      "browseDescription": "استكشف الفصول المتاحة وتقدم بطلب لتدريسها.",
+      "discoverDescription": "ابحث وانضم لفصول جديدة لتوسيع معرفتك.",
+      "myDescription": "إدارة طلابك ومنهجك وأنشطة الفصل.",
+      "browseDescription": "استكشف الفصول المتاحة واطلب تدريسها.",
       "myClassesTab": "فصولي",
       "browseTab": "تصفح",
       "joinModal": {
-        "title": "الانضمام لفصل",
+        "title": "انضمام لفصل",
         "description": "أدخل رمز الدعوة المكون من 8 أحرف والمقدم من معلمك.",
         "placeholder": "ABC123XY",
         "required": "مطلوب 8 أحرف"
       },
-      "searchPlaceholder": "ابحث عن فصول بالاسم أو المادة...",
+      "searchPlaceholder": "البحث عن فصول بالاسم أو المادة...",
       "allSubjects": "كل المواد",
       "noClasses": "لم يتم العثور على فصول",
-      "noClassesDescriptionStudent": "لم تنضم إلى أي فصل بعد. استخدم رمز الدعوة للبدء.",
-      "noClassesDescriptionTeacher": "لم يتم تعيينك لأي فصل بعد.",
-      "noClassesDescriptionSearch": "لا توجد فصول تطابق معايير البحث.",
+      "noClassesDescriptionStudent": "لم تنضم لأي فصول بعد. استخدم رمز دعوة للبدء.",
+      "noClassesDescriptionTeacher": "لم يتم تعيينك لأي فصول بعد.",
+      "noClassesDescriptionSearch": "لا توجد فصول تطابق معايير بحثك.",
       "live": "مباشر",
       "pendingApproval": "في انتظار الموافقة",
-      "studentsLabel": "الطلاب",
+      "studentsLabel": "طلاب",
       "general": "عام",
       "classOptions": "خيارات الفصل",
       "deleteDialog": {
         "title": "هل أنت متأكد تماماً؟",
-        "description": "سيؤدي هذا إلى حذف الفصل وجميع بيانات المنهج بشكل دائم. لا يمكن التراجع عن هذا الإجراء."
+        "description": "سيؤدي هذا لحذف الفصل وجميع بيانات المنهج نهائياً. لا يمكن التراجع عن هذا الإجراء."
       },
       "toast": {
         "joinRequestSent": "تم إرسال الطلب!",
-        "invalidInviteCode": "رمز الدعوة غير صحيح",
-        "cloned": "تم نسخ المنهج بنجاح!",
+        "invalidInviteCode": "رمز دعوة غير صحيح",
+        "cloned": "تم نسخ منهج الفصل بنجاح!",
         "deleted": "تم حذف الفصل بنجاح"
       }
     },
@@ -522,79 +614,96 @@
       "toast": {
         "linkCopied": "تم نسخ رابط الفصل!",
         "inviteCodeCopied": "تم نسخ رمز الدعوة",
-        "enrollmentStatus": "حالة تسجيل الطالب {{status}}",
+        "enrollmentStatus": "حالة تسجيل الطالب: {{status}}",
         "enrollmentError": "فشل تحديث التسجيل",
         "bulkProcessing": "بدأت معالجة الرسائل الجماعية في الخلفية",
         "bulkError": "فشل إرسال الرسالة",
         "inviteLinkDetected": "تم اكتشاف رابط دعوة",
-        "loginToJoin": "يرجى تسجيل الدخول للانضمام لهذا الفصل",
-        "registerToJoin": "يرجى إنشاء حساب للانضمام لهذا الفصل"
+        "loginToJoin": "يرجى تسجيل الدخول للانضمام للفصل",
+        "registerToJoin": "يرجى التسجيل للانضمام للفصل",
+        "messagesSent": "تم إرسال الرسائل بنجاح!"
       },
       "announcement": {
         "priority": "إعلان هام",
         "viewAttachment": "عرض المرفق"
       },
       "tabs": {
-        "curriculum": "المنهج",
-        "analytics": "التحليلات",
-        "live": "مباشر",
-        "leaderboard": "لوحة الصدارة",
+        "curriculum": "المحاضرات والدروس",
+        "analytics": "مستوى الطالب",
+        "live": "بث مباشر",
+        "leaderboard": "لوحة الشرف",
         "announcements": "الإعلانات",
         "discussions": "النقاشات",
         "resources": "المصادر",
-        "students": "الطلاب",
+        "students": "قائمة الفصل",
         "assignments": "التكليفات",
         "quizzes": "الاختبارات",
         "attendance": "الحضور",
-        "details": "التفاصيل"
+        "details": "التفاصيل",
+        "content": "المحتوى",
+        "assessments": "التقييمات",
+        "engagement": "التفاعل",
+        "roster": "القائمة",
+        "progress": "التقدم",
+        "info": "معلومات"
       },
       "students": {
         "table": {
           "title": "الطلاب المسجلون",
-          "description": "إدارة وصول الطلاب، عرض الرؤى الذكية، ومتابعة المشاركة في الفصل.",
+          "description": "إدارة وصول الطلاب، وعرض رؤى الذكاء الاصطناعي، وتتبع المشاركة.",
           "student": "الطالب",
           "enrolledOn": "تاريخ التسجيل",
-          "waitlist": "رقم الانتظار {{pos}}",
-          "empty": "لم يتم العثور على طلاب في هذا الفصل الدراسي."
+          "waitlist": "انتظار #{{pos}}",
+          "empty": "لا يوجد طلاب في هذا الفصل."
         },
         "pending": {
-          "status": "حالة الانتظار",
+          "status": "حالة الطلب",
           "title": "الطلبات المعلقة",
           "count": "{{count}} معلق",
           "empty": "لا توجد طلبات انضمام معلقة",
-          "requested": "تم الطلب مؤخراً"
+          "requested": "طلب مؤخراً"
         },
         "actions": {
-          "messageAll": "مراسلة الكل",
-          "enrollStudent": "تسجيل طالب"
+          "messageAll": "مراسلة الجميع",
+          "enrollStudent": "تسجيل طالب",
+          "bulkEnroll": "تسجيل جماعي"
+        },
+        "bulk": {
+          "title": "تسجيل الطلاب الجماعي",
+          "description": "قم برفع ملف CSV لتسجيل عدة طلاب في وقت واحد.",
+          "dropzoneTitle": "انقر لرفع ملف CSV",
+          "dropzoneLimit": "أقصى حجم للملف: 5 ميجابايت",
+          "requirementsTitle": "متطلبات ملف CSV",
+          "requirementsText": "يجب أن يتضمن ملف CSV أعمدة 'name' و 'email'. يمكن أيضاً توفير عمود 'password' اختياري."
         }
       },
       "details": {
         "classInfo": "معلومات الفصل",
-        "subjectArea": "المجال الدراسي",
+        "subjectArea": "مجال المادة",
         "classStatus": "حالة الفصل",
-        "studentCapacity": "سعة الطلاب",
+        "studentCapacity": "السعة الطلابية",
         "capacityMax": "الحد الأقصى {{count}} طلاب",
         "department": "القسم",
         "teacherNotes": "ملاحظات المعلم (مشتركة)",
-        "teacherNotesDesc": "مساحة خاصة للكادر التعليمي",
-        "teacherNotesPlaceholder": "ابدأ بكتابة ملاحظاتك هنا...",
-        "notesPlaceholder": "دون تذكيرات، أفكار للدروس، أو ملاحظات عن الطلاب...",
-        "autoSaving": "جاري الحفظ التلقائي",
+        "teacherNotesDesc": "مساحة خاصة للموظفين",
+        "teacherNotesPlaceholder": "اكتب ملاحظات، أفكار للدروس، أو ملاحظات عن الطلاب...",
+        "notesPlaceholder": "اكتب ملاحظات، أفكار للدروس، أو ملاحظات عن الطلاب...",
+        "autoSaving": "جاري الحفظ تلقائياً",
         "accessControl": "التحكم في الوصول",
         "inviteCode": "رمز دعوة الفصل",
-        "teachingStaff": "الكادر التعليمي",
-        "primaryInstructor": "المعلم الأساسي",
+        "teachingStaff": "طاقم التدريس",
+        "primaryInstructor": "المعلم الرئيسي",
         "coInstructor": "معلم مساعد",
-        "lead": "رئيسي"
+        "lead": "رئيس"
       },
       "unenrollDialog": {
         "title": "تأكيد إلغاء التسجيل",
-        "description": "سيؤدي هذا إلى حذف الطالب نهائياً من هذا الفصل. سيفقدون الوصول إلى المنهج والتكليفات والدرجات."
+        "description": "سيؤدي هذا لإزالة الطالب نهائياً من هذا الفصل. سيفقدون الوصول للمنهج والتكليفات والدرجات.",
+        "removeStudentTitle": "إزالة الطالب"
       },
       "messageAllDialog": {
         "title": "مراسلة جميع الطلاب",
-        "description": "إرسال رسالة جماعية إلى جميع الطلاب المسجلين البالغ عددهم {{count}}.",
+        "description": "إرسال رسالة جماعية لجميع الطلاب الـ {{count}} المسجلين.",
         "subject": "الموضوع",
         "subjectPlaceholder": "مثال: تحديث هام للفصل",
         "message": "الرسالة",
@@ -606,7 +715,7 @@
       "courseCurriculum": "منهج الدورة",
       "curriculumDescription": "الدروس والمواد المنظمة لهذا الفصل.",
       "noModules": "لا توجد وحدات بعد",
-      "noModulesDescription": "ابدأ ببناء منهجك بإضافة وحدتك الأولى أو استخدام البناء السحري.",
+      "noModulesDescription": "ابدأ بناء منهجك بإضافة وحدتك الأولى أو استخدام البناء السحري.",
       "modulesPublished": "تم نشر {{count}} وحدات",
       "itemsCompleted": "تم إنجاز {{count}} عناصر",
       "modulesItemsCount": "{{count}} عناصر",
@@ -616,22 +725,22 @@
       }
     },
     "discussion": {
-      "classStream": "ساحة المشاركات",
-      "realTime": "نقاش فوري",
+      "classStream": "ساحة النقاش",
+      "realTime": "نقاش حي",
       "messagesCount": "{{count}} رسائل",
       "aiCatchUp": "ملخص الذكاء الاصطناعي",
-      "aiSummary": "ملخص النقاش بالذكاء الاصطناعي",
-      "loadingStream": "جاري تحميل المشاركات...",
+      "aiSummary": "ملخص نقاش الذكاء الاصطناعي",
+      "loadingStream": "جاري تحميل الساحة...",
       "noMessages": "لا توجد رسائل بعد",
       "startConversation": "كن أول من يبدأ النقاش!",
       "replyingTo": "الرد على",
       "writeReply": "اكتب ردك...",
-      "messageClass": "أرسل رسالة لفصلك...",
+      "messageClass": "راسل فصلك...",
       "pressEnter": "اضغط Enter للإرسال، Shift+Enter لسطر جديد",
       "toast": {
         "replySent": "تم إرسال الرد",
         "messagePosted": "تم نشر الرسالة",
-        "summaryError": "فشل في إنشاء ملخص النقاش."
+        "summaryError": "فشل إنشاء ملخص النقاش."
       }
     },
     "attendance": {
@@ -639,23 +748,23 @@
       "absent": "غائب",
       "late": "متأخر",
       "excused": "بعذر",
-      "rate": "النسبة",
+      "rate": "معدل",
       "markAttendance": "تسجيل الحضور",
       "history": "السجل",
       "dailyAttendance": "الحضور اليومي",
-      "markFor": "تسجيل حضور الطلاب لتاريخ {{date}}",
+      "markFor": "تسجيل حضور الطلاب ليوم {{date}}",
       "fetching": "جاري جلب السجلات...",
       "loadingHistory": "جاري تحميل السجل...",
       "noRecords": "لا توجد سجلات حضور",
       "noRecordsDescription": "سيظهر سجل الحضور هنا بمجرد البدء في تسجيل حضور الطلاب.",
       "noEnrollments": "لا يوجد طلاب مسجلون",
-      "noEnrollmentsDescription": "يجب تسجيل طلاب في هذا الفصل قبل البدء في تسجيل الحضور.",
+      "noEnrollmentsDescription": "يجب تسجيل طلاب في هذا الفصل قبل أن تتمكن من تسجيل الحضور.",
       "dailySummaryTeacher": "عرض ملخصات الحضور اليومية للفصل بأكمله.",
       "personalRecordStudent": "سجل حضورك الشخصي لهذا الفصل.",
       "noRemarks": "لا توجد ملاحظات",
       "toast": {
         "saved": "تم حفظ الحضور",
-        "savedDescription": "تم تحديث حضور تاريخ {{date}} بنجاح."
+        "savedDescription": "تم تحديث حضور يوم {{date}} بنجاح."
       },
       "table": {
         "student": "الطالب",
@@ -667,18 +776,18 @@
         "remarksPlaceholder": "ملاحظات اختيارية..."
       },
       "qr": {
-        "title": "الحضور عبر QR",
-        "description": "يمكن للطلاب مسح رمز QR لتسجيل حضورهم.",
+        "title": "حضور عبر QR",
+        "description": "يمكن للطلاب مسح رمز QR لتسجيل حضورهم بأنفسهم.",
         "active": "جلسة نشطة",
-        "inactive": "غير نشط",
+        "inactive": "غير نشطة",
         "timeRemaining": "الوقت المتبقي",
         "checkedIn": "تم تسجيل الدخول",
-        "ready": "جاهز للبدء؟",
-        "startDescription": "سيؤدي بدء الجلسة إلى إنشاء رمز QR فريد لهذا الفصل."
+        "ready": "مستعد للبدء؟",
+        "startDescription": "بدء الجلسة سيولد رمز QR فريداً لهذا الفصل."
       },
       "governance": {
         "title": "حوكمة الحضور",
-        "descriptionStaff": "مراقبة مشاركة الفصل، وإدارة تسجيلات الوصول عبر QR، والإشراف على سجل الجلسات.",
+        "descriptionStaff": "مراقبة المشاركة في الفصل، وإدارة تسجيلات QR، والإشراف على سجل الجلسات.",
         "descriptionStudent": "تتبع حضورك الأكاديمي وسجل مشاركتك في جميع الفصول.",
         "totalSessions": "إجمالي الجلسات",
         "avgPresence": "متوسط الحضور",
@@ -688,13 +797,13 @@
         "historyFilter": "فلتر السجل",
         "sessionOptions": "خيارات الجلسة",
         "viewFullReport": "عرض التقرير الكامل",
-        "startQrCheckin": "بدء التحقق عبر QR"
+        "startQrCheckin": "بدء تسجيل QR"
       }
     },
     "leaderboard": {
       "calculating": "جاري حساب التصنيفات...",
       "classRankings": "تصنيفات الفصل",
-      "basedOnXp": "بناءً على إجمالي نقاط الخبرة (XP)",
+      "basedOnXp": "بناءً على إجمالي نقاط الخبرة",
       "studentsCount": "{{count}} طلاب",
       "points": "نقاط",
       "topPercent": "أفضل {{percent}}%",
@@ -702,10 +811,10 @@
     },
     "announcements": {
       "history": "سجل الإعلانات",
-      "description": "التحديثات والأخبار الرسمية لهذا الفصل.",
+      "description": "تحديثات وأخبار رسمية لهذا الفصل.",
       "new": "إعلان جديد",
       "createTitle": "إنشاء إعلان",
-      "createDesc": "انشر تحديثاً رسمياً لجميع الطلاب في هذا الفصل.",
+      "createDesc": "نشر تحديث رسمي لجميع الطلاب في هذا الفصل.",
       "fieldTitle": "عنوان الإعلان",
       "fieldContent": "المحتوى التفصيلي",
       "fieldPin": "تثبيت في الأعلى",
@@ -720,7 +829,7 @@
       "delete": "حذف الإعلان",
       "viewReadStatus": "عرض حالة القراءة",
       "reads": {
-        "title": "إيصالات القراءة",
+        "title": "تأكيدات القراءة",
         "description": "الطلاب الذين شاهدوا هذا الإعلان.",
         "empty": "لم يقرأ أحد هذا الإعلان بعد."
       },
@@ -729,25 +838,25 @@
     "resource": {
       "loading": "جاري تحميل المواد...",
       "learningMaterials": "المواد التعليمية",
-      "description": "الوصول إلى جميع الملفات والروابط والملاحظات لهذا الفصل.",
+      "description": "الوصول لجميع الملفات والروابط والملاحظات لهذا الفصل.",
       "noMaterials": "لا توجد مواد بعد",
       "noMaterialsDescription": "يتم تنظيم المواد حسب الوحدات. اطلب من معلمك إضافة بعض المواد!",
       "itemsCount": "{{count}} عناصر",
       "noMaterialsInModule": "لا توجد مواد في هذه الوحدة",
       "addDialog": {
         "title": "إضافة مادة",
-        "description": "شارك ملفاً أو رابطاً أو ملاحظة مع طلابك.",
+        "description": "مشاركة ملف، رابط، أو ملاحظة مع طلابك.",
         "fieldTitle": "العنوان",
         "titlePlaceholder": "مثال: ملاحظات الدرس",
         "fieldType": "النوع",
         "typePlaceholder": "اختر النوع",
         "fieldContent": "المحتوى (Markdown)",
-        "contentPlaceholder": "اكتب ملاحظات الدرس هنا...",
+        "contentPlaceholder": "اكتب ملاحظات درسك هنا...",
         "fieldUpload": "رفع {{type}}",
         "fieldUrl": "رابط",
         "urlPlaceholder": "https://...",
         "fieldDescription": "الوصف (اختياري)",
-        "descPlaceholder": "ملخص موجز",
+        "descPlaceholder": "ملخص بسيط",
         "types": {
           "note": "ملاحظة مكتوبة",
           "file": "ملف (PDF, Doc)",
@@ -759,49 +868,49 @@
       },
       "toast": {
         "fillRequired": "يرجى ملء جميع الحقول المطلوبة",
-        "added": "تمت إضافة المادة للوحدة",
+        "added": "تم إضافة المادة للوحدة",
         "deleted": "تم حذف المادة"
       }
     },
     "reader": {
-      "aiTutor": "مساعد الذكاء الاصطناعي",
-      "hideAiTutor": "إخفاء المساعد",
-      "lessonNotFound": "الدرس غير موجود أو نوعه غير صالح.",
-      "tutorTitle": "مساعد الدرس الذكي",
+      "aiTutor": "المعلم الذكي",
+      "hideAiTutor": "إخفاء المعلم الذكي",
+      "lessonNotFound": "الدرس غير موجود أو نوع المورد غير صحيح.",
+      "tutorTitle": "معلم الدرس الذكي",
       "tutorDescription": "اسألني أي شيء عن هذا الدرس",
-      "welcome": "مرحباً {{name}}! لقد قرأت {{title}}. إذا كنت مرتبكاً بشأن أي جزء أو تريد أمثلة إضافية، فقط اسأل!",
-      "thinking": "المساعد يفكر...",
+      "welcome": "مرحباً {{name}}! أنت تقرأ {{title}}. إذا كنت مشوشاً بشأن أي جزء أو تريد المزيد من الأمثلة، فقط اسأل!",
+      "thinking": "المعلم يفكر...",
       "askPlaceholder": "اسأل سؤالاً...",
       "toast": {
-        "unavailable": "مساعد الذكاء الاصطناعي غير متوفر حالياً."
+        "unavailable": "المعلم الذكي غير متاح حالياً."
       }
     },
     "quiz": {
       "loading": "جاري تحميل الاختبارات...",
       "classQuizzes": "اختبارات الفصل",
-      "description": "يوجد {{count}} تقييمات متاحة لهذا الفصل.",
+      "description": "اختبر معلوماتك من خلال هذه التقييمات المتاحة.",
       "noQuizzes": "لا توجد اختبارات بعد",
-      "noQuizzesDescriptionTeacher": "أنشئ اختبارك الأول لاختبار معرفة طلابك ومتابعة تقدمهم.",
+      "noQuizzesDescriptionTeacher": "أنشئ اختبارك الأول لتجربة معلومات الطلاب وتتبع التقدم.",
       "noQuizzesDescriptionStudent": "لم ينشر معلمك أي اختبارات لهذا الفصل بعد. عد لاحقاً!",
       "minsUnit": "دقيقة",
-      "minsUnitLocalized": "{{count}} دقيقة",
+      "minsUnitLocalized": "{{count}} دقائق",
       "due": "ينتهي في {{date}}",
       "questionsCount": "{{count}} أسئلة",
-      "noDescription": "لا يوجد وصف.",
+      "noDescription": "لا يوجد وصف مقدم.",
       "checkAnswer": "تحقق من الإجابة",
       "finishQuiz": "إنهاء الاختبار",
       "nextQuestion": "السؤال التالي",
       "quizComplete": "اكتمل الاختبار!",
       "finishedAssessment": "لقد انتهيت من التقييم التفاعلي.",
-      "scoreSummary": "{{score}} من أصل {{total}} إجابات صحيحة",
+      "scoreSummary": "{{score}} من {{total}} صحيحة",
       "explanation": "الشرح"
     },
     "dialogs": {
       "applyTeacher": {
         "title": "طلب تدريس",
-        "description": "أنت تطلب إدارة وتدريس <strong>{{className}}</strong>. سيقوم المسؤول بمراجعة طلبك.",
+        "description": "أنت تتقدم لطلب إدارة وتدريس <strong>{{className}}</strong>. سيقوم المسؤول بمراجعة طلبك.",
         "fieldLabel": "مقدمة / مقترح (اختياري)",
-        "fieldPlaceholder": "اشرح بإيجاز خبرتك أو خطتك لهذا الفصل...",
+        "fieldPlaceholder": "اشرح باختصار خبرتك أو خطتك لهذا الفصل...",
         "toast": {
           "success": "تم تقديم الطلب بنجاح!",
           "error": "فشل تقديم الطلب"
@@ -811,7 +920,7 @@
         "title": "دعوة معلم مساعد",
         "description": "اختر زميلاً للمساعدة في إدارة هذا الفصل.",
         "fieldPlaceholder": "اختر معلماً...",
-        "noTeachers": "لا يوجد معلمون آخرون متاحون للدعوة.",
+        "noTeachers": "لا يوجد معلمون متاحون للدعوة.",
         "toast": {
           "selectTeacher": "يرجى اختيار معلم.",
           "success": "تمت دعوة المعلم بنجاح!",
@@ -820,7 +929,7 @@
       },
       "enrollStudent": {
         "title": "تسجيل طالب جديد",
-        "description": "اختر طالباً من القائمة لتسجيله في هذا الفصل.",
+        "description": "اختر طالباً من الدليل لتسجيله في هذا الفصل.",
         "fieldPlaceholder": "اختر طالباً...",
         "noStudents": "جميع الطلاب المتاحين مسجلون بالفعل.",
         "toast": {
@@ -988,9 +1097,11 @@
       "designAndPublish": "صمم وانشر مهمة جديدة لطلابك.",
       "assignmentConfig": "إعدادات التكليف",
       "targetClass": "الفصل المستهدف",
-      "assignmentTitle": "عنوان التكليف",
+      "assignmentTitle": "عنوان المهمة",
+      "titleHelp": "اسم واضح ووصفي للمهمة. مثال: 'بحث منتصف الفصل' أو 'تقرير المختبر للأسبوع الثاني'.",
       "curriculumModule": "وحدة المنهج",
       "submissionDeadline": "موعد التسليم النهائي",
+      "deadlineHelp": "التاريخ والوقت النهائي للطلاب لتسليم عملهم. سيتم تمييز التسليمات المتأخرة.",
       "instructionsAndContent": "التعليمات والمحتوى",
       "groupAssignment": "تكليف جماعي",
       "groupDescription": "تسليم واحد لكل مجموعة. يحصل جميع الأعضاء على نفس الدرجة.",
@@ -1069,6 +1180,7 @@
     }
   },
   "dashboard": {
+    "dashboard": "لوحة التحكم",
     "title": "لوحة التحكم",
     "failedToLoad": "فشل تحميل لوحة التحكم",
     "failedToLoadDescription": "حدث خطأ أثناء جلب بيانات لوحة التحكم.",
@@ -1076,12 +1188,12 @@
     "archiveViewDescription": "أنت تعرض بيانات من {{termName}}. هذا الفصل مؤرشف وللقراءة فقط.",
     "quickActions": "إجراءات سريعة",
     "todaySchedule": "جدول اليوم",
-    "welcomeBack": "مرحباً بعودتك، {{name}}!",
+    "welcomeBack": "أهلاً بك مجدداً، {{name}}! 👋",
     "summary": {
-      "student": "لديك {{count}} مهام مستحقة قريباً. المهمة التالية: {{next}}.",
-      "teacher": "لديك {{count}} تسليمات بانتظار التصحيح. {{active}} فصول مباشرة الآن.",
-      "parent": "أطفالك يحققون نتائج جيدة. لدى {{name}} سلسلة نشاط لمدة {{count}} أيام!",
-      "admin": "النظام يعمل بشكل جيد. هناك {{count}} طلبات توظيف معلمين معلقة."
+      "student": "عندك {{count}} مهام محتاجة تسليم قريب. المهمة الجاية: {{next}}.",
+      "teacher": "عندك {{count}} واجبات محتاجة تصحيح. وفي {{active}} فصول شغالة دلوقتي.",
+      "parent": "أولادك ماشيين كويس جداً. {{name}} بقاله {{count}} أيام نشيط!",
+      "admin": "النظام شغال تمام. فيه {{count}} طلبات انضمام معلمين مستنية موافقتك."
     },
     "schedule": {
       "child": "جدول {{name}}",
@@ -1104,6 +1216,22 @@
       "error": "فشل رفع المستند. يرجى المحاولة مرة أخرى."
     },
     "student": {
+      "actions": {
+        "header": "ماذا بعد؟",
+        "empty": "يوم حر!",
+        "emptyDesc": "لا توجد مهام عاجلة. وقت مثالي للمراجعة.",
+        "emptyBtn": "دخول مختبر الذكاء الاصطناعي",
+        "upcoming": {
+          "title": "مهمة قريبة",
+          "description": "{{title}} تحتاج إلى انتباهك.",
+          "action": "إكمال المهمة"
+        },
+        "aiStudy": {
+          "title": "تدريب يومي",
+          "description": "اكسب نقاط خبرة عبر التدريب في مختبر الذكاء الاصطناعي.",
+          "action": "بدء التدريب"
+        }
+      },
       "academicJourney": "الرحلة الأكاديمية",
       "onFire": "متقد!",
       "eliteStudent": "طالب متميز",
@@ -1136,6 +1264,26 @@
       "recentActivity": "النشاط الأخير"
     },
     "staff": {
+      "actions": {
+        "header": "ماذا بعد؟",
+        "empty": "أنت متابع لكل شيء!",
+        "emptyBtn": "إنشاء اختبار بالذكاء الاصطناعي",
+        "atRisk": {
+          "title": "إجراء مطلوب: {{count}} طلاب",
+          "description": "هؤلاء الطلاب بحاجة إلى تدخل فوري.",
+          "action": "عرض الطلاب"
+        },
+        "grading": {
+          "title": "في انتظار التقييم ({{count}})",
+          "description": "لديك تسليمات تنتظر تقييمك وملاحظاتك.",
+          "action": "بدء التقييم"
+        },
+        "aiQuiz": {
+          "title": "تعزيز التفاعل",
+          "description": "أنشئ اختبارًا جديدًا مدعومًا بالذكاء الاصطناعي لصفوفك.",
+          "action": "فتح منصة الذكاء الاصطناعي"
+        }
+      },
       "engagementAnalytics": "تحليلات التفاعل",
       "atRiskStudents": {
         "title": "طلاب متعثرون",
@@ -1504,6 +1652,7 @@
     }
   },
   "calendar": {
+    "calendar": "التقويم",
     "title": "التقويم الأكاديمي",
     "description": "جدولك الموحد للفصول والتكليفات والاختبارات.",
     "monthlyOverview": "نظرة عامة شهرية",
@@ -1558,6 +1707,7 @@
     }
   },
   "subjects": {
+    "subjects": "المواد الدراسية",
     "title": "المواد الأكاديمية",
     "description": "إدارة الدورات الفردية ورموز المواد والتعيينات القسمية.",
     "create": "إنشاء مادة",
@@ -1675,6 +1825,7 @@
     }
   },
   "users": {
+    "users": "المستخدمين",
     "governance": {
       "title": "حوكمة المستخدمين",
       "description": "إدارة المعلمين والطلاب والمسؤولين. الإشراف على حالة التحقق والحسابات.",
@@ -1753,6 +1904,9 @@
     }
   },
   "resources": {
+    "teacher-subscriptions": {
+      "label": "اشتراكات المعلمين"
+    },
     "dashboard": {
       "label": "لوحة التحكم"
     },
@@ -1823,7 +1977,7 @@
       "label": "الرؤى"
     },
     "users": {
-      "label": "المخدمين"
+      "label": "المستخدمين"
     },
     "departments": {
       "label": "الأقسام"
@@ -1842,28 +1996,36 @@
     },
     "teacher-channel": {
       "label": "قناتي"
+    },
+    "my-teachers": {
+      "label": "معلميني"
+    },
+    "discovery": {
+      "label": "تلفزيون المعلم"
     }
   },
   "groups": {
-    "ai-lab": "AI Lab",
-    "academic": "أكاديمي",
-    "curriculum": "المنهج",
-    "progress": "التقدم",
-    "admin": "الإدارة"
+    "teacher-hub": "مركز المعلم",
+    "student-hub": "مركز الطالب",
+    "ai-lab": "مختبر الذكاء الاصطناعي",
+    "academic": "الشؤون الأكاديمية",
+    "curriculum": "المنهج الدراسي",
+    "progress": "مستوى التقدم",
+    "admin": "الإدارة والنظام"
   },
   "practice": {
     "results": {
       "passed": "ناجح",
-      "practiceNeeded": "بحاجة للممارسة",
-      "masteryAchieved": "تم تحقيق الإتقان!",
+      "practiceNeeded": "تحتاج لممارسة إضافية",
+      "masteryAchieved": "تم الإتقان بنجاح!",
       "keepPracticing": "استمر في الممارسة!",
       "finalScore": "الدرجة النهائية",
-      "correct": "صحيحة",
+      "correct": "صحيح",
       "badgeUnlocked": "تم فتح وسام جديد!",
-      "reviewMaterial": "لا تقلق! راجع المواد وحاول مرة أخرى للحصول على وسامك.",
+      "reviewMaterial": "لا تقلق! راجع المادة وحاول مجدداً للحصول على الوسام.",
       "reviewQuestions": "مراجعة الأسئلة",
       "yourAnswer": "إجابتك",
-      "correctAnswer": "الاجابة الصحيحة",
+      "correctAnswer": "الإجابة الصحيحة",
       "finishSession": "إنهاء الجلسة"
     }
   },
@@ -1958,6 +2120,7 @@
     "teacherOnly": "يمكن للمعلمين فقط إدارة المكتبة العامة."
   },
   "messages": {
+    "messages": "الرسائل",
     "title": "الرسائل",
     "searchPeople": "البحث عن أشخاص...",
     "noConversations": "لا توجد محادثات بعد. ابدأ دردشة من الدليل!",
@@ -1965,7 +2128,7 @@
     "typeMessage": "اكتب رسالة...",
     "selectChat": "رسائلك",
     "selectChatDesc": "اختر محادثة من اليسار أو ابحث عن طالب/معلم لبدء الدردشة.",
-    "description": "وصف الرسائل",
+    "description": "دردش مع طلابك ومعلميك في مكان واحد.",
     "noMessages": "لا توجد رسائل"
   },
   "enrollments": {
@@ -1977,295 +2140,320 @@
       "pending": "في انتظار الموافقة",
       "active": "الطلاب النشطون"
     },
-    "searchPlaceholder": "البحث باسم الطالب أو البريد...",
-    "allStatus": "كل الحالات",
-    "options": "تسجيل خيارات",
-    "viewProfile": "عرض ملف الطالب",
-    "viewClass": "عرض الفصل",
-    "remove": "إزالة التسجيل",
-    "requested": "تم الطلب {{time}}",
+    "searchPlaceholder": "Search by student name or email...",
+    "allStatus": "All Status",
+    "options": "Enrollment Options",
+    "viewProfile": "View Student Profile",
+    "viewClass": "View Classroom",
+    "remove": "Remove Enrollment",
+    "requested": "Requested {{time}}",
     "empty": {
-      "title": "لم يتم العثور على تسجيلات",
-      "desc": "لا توجد طلبات تسجيل نشطة أو معلقة في الوقت الحالي."
+      "title": "No enrollments found",
+      "desc": "There are no active or pending enrollment requests at this time."
     },
     "deleteDialog": {
-      "title": "إزالة التسجيل؟",
-      "desc": "سيؤدي هذا إلى حذف الطالب نهائياً من الفصل الدراسي. سيفقدون الوصول إلى المنهج والتكليفات والدرجات لهذا الفصل تحديداً."
+      "title": "Remove Enrollment?",
+      "desc": "This will permanently remove the student from the classroom. They will lose access to all curriculum, assignments, and grades for this specific class."
     },
     "toasts": {
-      "statusUpdate": "تم {{status}} التسجيل بنجاح",
-      "processing": "جاري معالجة {{count}} تسجيلات...",
-      "bulkSuccess": "تمت معالجة {{count}} تسجيلات بنجاح",
-      "bulkError": "فشل معالجة بعض التسجيلات",
-      "removed": "تم إزالة التسجيل"
+      "statusUpdate": "Enrollment {{status}} successfully",
+      "processing": "Processing {{count}} enrollments...",
+      "bulkSuccess": "Successfully processed {{count}} enrollments",
+      "bulkError": "Failed to process some enrollments",
+      "removed": "Enrollment removed"
     }
   },
   "discussions": {
-    "title": "مركز المجتمع",
-    "description": "تفاعل مع الطلاب والمعلمين في خيوط نقاش على مستوى الفصل.",
-    "start": "بدء نقاش",
+    "title": "Community Hub",
+    "description": "Engage with students and teachers in class-wide discussion threads.",
+    "start": "Start Discussion",
     "stats": {
-      "total": "إجمالي الخيوط",
-      "active": "نشط اليوم",
-      "replies": "إجمالي الردود"
+      "total": "Total Threads",
+      "active": "Active Today",
+      "replies": "Total Replies"
     },
-    "searchPlaceholder": "البحث في النقاشات بالمحتوى أو الكلمات المفتاحية...",
-    "filter": "فلتر المجتمع",
+    "searchPlaceholder": "Search discussions by content or keywords...",
+    "filter": "Community Filter",
     "empty": {
-      "title": "لم يتم العثور على نقاشات",
-      "desc": "ابدأ محادثة جديدة للتفاعل مع مجتمع فصلك."
+      "title": "No discussions found",
+      "desc": "Start a new conversation to engage with your class community."
     },
     "labels": {
-      "trending": "رائج",
-      "replies": "ردود",
-      "active": "نشط {{time}}",
-      "options": "خيارات الخيط",
-      "open": "فتح النقاش",
-      "follow": "متابعة الخيط"
+      "trending": "Trending",
+      "replies": "Replies",
+      "active": "Active {{time}}",
+      "options": "Thread Options",
+      "open": "Open Discussion",
+      "follow": "Follow Thread"
     }
   },
   "progressPage": {
-    "title": "تقدم التعلم",
-    "description": "تتبع أداء الطلاب، وإكمال الوحدات، والوضع الأكاديمي.",
-    "searchPlaceholder": "البحث باسم الطالب...",
+    "title": "Learning Progress",
+    "description": "Track student performance, module completion, and academic standing.",
+    "searchPlaceholder": "Search by student name...",
     "table": {
-      "student": "الطالب",
-      "class": "الفصل",
-      "completion": "الإكمال",
-      "grade": "الدرجة الكلية",
-      "actions": "الإجراءات"
+      "student": "Student",
+      "class": "Class",
+      "completion": "Completion",
+      "grade": "Overall Grade",
+      "actions": "Actions"
     }
   },
   "modulesPage": {
-    "title": "وحدات المنهج",
-    "description": "تنظيم محتوى الدورة في مسارات تعليمية منظمة.",
-    "create": "إنشاء وحدة",
+    "title": "Curriculum Modules",
+    "description": "Organize course content into structured learning pathways.",
+    "create": "Create Module",
     "stats": {
-      "total": "إجمالي الوحدات",
-      "published": "منشورة",
-      "drafts": "مسودات"
+      "total": "Total Modules",
+      "published": "Published",
+      "drafts": "Drafts"
     },
-    "searchPlaceholder": "البحث في الوحدات بالعنوان...",
-    "filter": "فلتر الوحدات",
+    "searchPlaceholder": "Search modules by title...",
+    "filter": "Module Filter",
     "empty": {
-      "title": "لم يتم العثور على وحدات",
-      "desc": "قم بتنظيم منهجك في وحدات تعليمية منظمة."
+      "title": "No modules found",
+      "desc": "Organize your curriculum into structured learning modules."
     },
     "labels": {
-      "resources": "المصادر",
-      "tasks": "المهام",
-      "view": "عرض الوحدة",
-      "options": "خيارات الوحدة"
+      "resources": "Resources",
+      "tasks": "Tasks",
+      "view": "View Module",
+      "options": "Module Options"
     },
     "deleteDialog": {
-      "title": "هل أنت متأكد تماماً؟",
-      "desc": "لا يمكن التراجع عن هذا الإجراء. سيؤدي هذا إلى حذف الوحدة وجميع ارتباطات المحتوى الخاصة بها نهائياً من المنهج."
+      "title": "Are you absolutely sure?",
+      "desc": "This action cannot be undone. This will permanently delete the module and all its content associations from the curriculum."
     }
   },
   "teacherApps": {
-    "title": "طلبات التدريس",
-    "description": "مراجعة وإدارة طلبات المعلمين لتدريس فصول محددة.",
-    "searchPlaceholder": "البحث في الطلبات...",
+    "title": "Teacher Applications",
+    "description": "Review and manage requests from educators to teach specific classes.",
+    "searchPlaceholder": "Search applications...",
     "empty": {
-      "title": "لا توجد طلبات",
-      "desc": "لا توجد طلبات تدريس تطابق الفلتر الحالي."
+      "title": "No applications found",
+      "desc": "There are no teacher applications matching your current filter."
     },
     "labels": {
-      "applyingFor": "متقدم لـ: {{name}}",
-      "applied": "تم التقديم {{time}}",
-      "viewTeacher": "عرض ملف المعلم",
-      "viewClass": "عرض الفصل"
+      "applyingFor": "Applying for: {{name}}",
+      "applied": "Applied {{time}}",
+      "viewTeacher": "View Teacher Profile",
+      "viewClass": "View Classroom"
     },
     "toasts": {
-      "statusUpdate": "تم {{status}} الطلب بنجاح"
+      "statusUpdate": "Application {{status}} successfully"
+    }
+  },
+  "teacherSubscriptions": {
+    "title": "Teacher Subscriptions",
+    "description": "Manage your active subscriptions and billing information.",
+    "empty": {
+      "title": "No Subscriptions Found",
+      "description": "You don't have any active teacher subscriptions yet."
     }
   },
   "resourcesPage": {
-    "title": "مكتبة المصادر",
-    "description": "الوصول إلى المواد التعليمية والمستندات ومحتوى الوسائط المتعددة وإدارتها.",
-    "upload": "رفع مورد",
+    "title": "Resource Library",
+    "description": "Access and manage learning materials, documents, and multimedia content.",
+    "upload": "Upload Resource",
     "stats": {
-      "total": "إجمالي العناصر",
-      "multimedia": "وسائط متعددة",
-      "documents": "مستندات"
+      "total": "Total Items",
+      "multimedia": "Multimedia",
+      "documents": "Documents"
     },
-    "searchPlaceholder": "البحث في المصادر...",
+    "searchPlaceholder": "Search resources...",
     "empty": {
-      "title": "لا توجد مصادر",
-      "desc": "ارفع أول مادة تعليمية للبدء في بناء مكتبة فصلك."
+      "title": "No resources found",
+      "desc": "Upload your first learning material to begin building your class library."
     },
     "labels": {
-      "uploaded": "تم الرفع في {{date}}",
-      "options": "خيارات المورد",
-      "download": "تحميل الملف",
-      "share": "مشاركة الرابط",
-      "edit": "تعديل التفاصيل",
-      "delete": "حذف المورد"
+      "uploaded": "Uploaded {{date}}",
+      "options": "Resource Options",
+      "download": "Download File",
+      "share": "Share Link",
+      "edit": "Edit Details",
+      "delete": "Delete Resource"
     },
     "deleteDialog": {
-      "title": "هل أنت متأكد تماماً؟",
-      "desc": "لا يمكن التراجع عن هذا الإجراء. سيؤدي هذا إلى حذف المورد نهائياً وإزالته من جميع مكتبات الفصول."
+      "title": "Are you absolutely sure?",
+      "desc": "This action cannot be undone. This will permanently delete the resource and remove it from all class libraries."
     }
   },
   "profileRequests": {
-    "title": "حوكمة الملفات الشخصية",
-    "description": "مراجعة واعتماد التغييرات الحساسة في الملفات الشخصية ووثائق التحقق.",
+    "title": "Profile Governance",
+    "description": "Review and approve sensitive profile changes and verification documents.",
     "stats": {
-      "total": "إجمالي الطلبات",
-      "pending": "في انتظار المراجعة",
-      "approved": "تمت الموافقة"
+      "total": "Total Requests",
+      "pending": "Pending Review",
+      "approved": "Approved"
     },
-    "searchPlaceholder": "البحث باسم المستخدم أو البريد...",
+    "searchPlaceholder": "Search by user name or email...",
     "empty": {
-      "title": "لا توجد طلبات معلقة",
-      "desc": "تمت معالجة جميع طلبات تغيير الملفات الشخصية. أنت مطلع على كل شيء!"
+      "title": "No pending requests",
+      "desc": "All profile change requests have been processed. You're all caught up!"
     },
     "labels": {
-      "changes": "{{count}} تغييرات",
-      "requested": "تم الطلب {{time}}",
-      "viewProof": "عرض الإثبات",
-      "empty": "فارغ",
-      "verificationDoc": "وثيقة التحقق"
+      "changes": "{{count}} Changes",
+      "requested": "Requested {{time}}",
+      "viewProof": "View Proof",
+      "empty": "empty",
+      "verificationDoc": "Verification Document"
     },
     "dialogs": {
-      "rejectTitle": "رفض التغييرات",
-      "rejectDesc": "يرجى تقديم سبب محدد لرفض هذه التغييرات.",
-      "rejectionFeedback": "ملاحظات الرفض",
-      "rejectionPlaceholder": "مثال: الوثيقة المرفوعة غير واضحة أو غير صالحة. يرجى إعادة رفع نسخة واضحة من شهادة التدريس الخاصة بك.",
-      "confirmRejection": "تأكيد الرفض"
+      "rejectTitle": "Reject Changes",
+      "rejectDesc": "Please provide a specific reason for rejecting these profile updates.",
+      "rejectionFeedback": "Rejection Feedback",
+      "rejectionPlaceholder": "e.g. The uploaded document is blurry or invalid. Please re-upload a clear copy of your teaching certificate.",
+      "confirmRejection": "Confirm Rejection"
     },
     "toasts": {
-      "approved": "تمت الموافقة على التغييرات وتطبيقها",
-      "rejected": "تم رفض التغييرات"
+      "approved": "Changes approved and applied",
+      "rejected": "Changes rejected"
     }
   },
   "footer": {
     "platform": "المنصة",
     "coreFeatures": "الميزات الأساسية",
     "aiLearning": "مركز تعلم الذكاء الاصطناعي",
-    "whiteboard": "لوحة تعاونية تفاعلية",
+    "whiteboard": "السبورة التفاعلية",
     "studentProgress": "تقدم الطالب",
     "solutions": "الحلول",
     "forSchools": "للمدارس",
     "forTeachers": "للمعلمين",
     "forStudents": "للطلاب",
     "forParents": "لأولياء الأمور",
+    "caseStudies": "دراسات الحالة",
+    "enterprise": "المؤسسات",
     "support": "الدعم",
     "helpCenter": "مركز المساعدة",
     "community": "المجتمع",
     "contactUs": "اتصل بنا",
     "apiDocs": "وثائق API",
-    "joinRevolution": "انضم إلى الثورة",
-    "readyToUpgrade": "هل أنت جاهز لترقية",
+    "joinRevolution": "انضم للثورة",
+    "readyToUpgrade": "هل أنت جاهز لتطوير",
     "learningExperience": "تجربتك التعليمية؟",
-    "subscribeDesc": "اشترك للحصول على رؤى أسبوعية حول الذكاء الاصطناعي في التعليم الحديث.",
+    "subscribeDesc": "اشترك في رؤيتنا الأسبوعية حول الذكاء الاصطناعي في التعليم الحديث.",
     "emailPlaceholder": "you@university.edu",
-    "noSpam": "لا رسائل مزعجة. ابتكار خالص فقط.",
-    "brandDesc": "الجيل القادم من التعليم. أدوات مدعومة بالذكاء الاصطناعي، بيئات تعاونية، وإدارة فصول دراسية بمستوى احترافي.",
+    "noSpam": "لا رسائل مزعجة. فقط ابتكار نقي.",
+    "brandDesc": "الجيل القادم من التعليم. أدوات مدعومة بالذكاء الاصطناعي، بيئات تعاونية، وإدارة فصول دراسية على مستوى المؤسسات.",
     "rightsReserved": "Tablawy OS. جميع الحقوق محفوظة.",
-    "builtWith": "صنع بـ",
-    "byTeam": "بواسطة الفريق الخبير",
+    "builtWith": "بني بـ",
+    "byTeam": "بواسطة فريق سينيور",
     "terms": "شروط الخدمة",
     "privacy": "سياسة الخصوصية",
     "cookie": "سياسة الكوكيز",
     "soc2": "متوافق مع SOC2",
-    "gdpr": "جاهز لـ GDPR"
+    "gdpr": "جاهز للـ GDPR"
   },
   "landing": {
     "nav": {
-      "features": "المميزات",
+      "features": "الميزات",
       "aiHub": "مركز الذكاء الاصطناعي",
       "pricing": "الأسعار"
     },
     "hero": {
-      "badge": "جيل جديد من التعليم",
-      "titlePart1": "الجيل",
-      "titlePart2": "القادم",
-      "titlePart3": "من التعليم",
-      "description": "أدوات مدعومة بالذكاء الاصطناعي، بيئات تعاونية، وإدارة فصول دراسية بمستوى احترافي."
+      "badge": "تعليم عصري",
+      "titlePart1": "درّس",
+      "titlePart2": "بذكاء",
+      "titlePart3": "وانمُ أسرع",
+      "description": "نظام التشغيل البسيط للمدارس المصرية. ذكاء اصطناعي متطور يلتقي مع إدارة غير مجهدة."
+    },
+    "pillars": {
+      "ai": {
+        "title": "مساعد الذكاء الاصطناعي",
+        "desc": "أتمتة التقييم، إنشاء خطط الدروس، وتوفير دروس خصوصية 24/7 لكل طالب."
+      },
+      "manage": {
+        "title": "إدارة سهلة",
+        "desc": "تتبع الحضور، إدارة التسجيلات، وتنسيق الجداول بلمسة واحدة."
+      },
+      "growth": {
+        "title": "نمو الطالب",
+        "desc": "تتبع التقدم المحفز ورؤى الذكاء الاصطناعي تضمن عدم تخلف أي طالب."
+      }
     },
     "stats": {
-      "secure": "دخول آمن",
+      "secure": "وصول آمن",
       "global": "شبكة عالمية",
-      "fast": "سرعة فائقة"
+      "fast": "سرعة البرق"
     },
     "features": {
-      "sectionTitle": "مميزات",
+      "sectionTitle": "ميزات",
       "sectionTitleItalic": "قوية",
       "sectionDesc": "كل ما تحتاجه لإدارة فصل دراسي حديث وتعزيز تفاعل الطلاب.",
-      "exploreAll": "استكشف جميع المميزات",
+      "exploreAll": "استكشف جميع الميزات",
       "whiteboard": {
-        "title": "لوحة تعاونية",
-        "desc": "رسم وعصف ذهني فوري للفرق والفصول الدراسية."
+        "title": "سبورة تعاونية",
+        "desc": "رسم وعصف ذهني في الوقت الفعلي للفرق والفصول."
       },
       "aiLab": {
-        "title": "مختبر الذكاء الاصطناعي",
-        "desc": "مسارات تعلم مخصصة ومواد دراسية منشأة بالذكاء الاصطناعي."
+        "title": "مختبر دراسة ذكي",
+        "desc": "مسارات تعلم مخصصة ومواد دراسية مولدة بالذكاء الاصطناعي."
       },
       "gamification": {
-        "title": "التعلم باللعب",
-        "desc": "أوسمة ونقاط خبرة ولوحات صدارة لإبقاء الطلاب متحفزين."
+        "title": "تعلم محفز",
+        "desc": "أوسمة، نقاط خبرة، ولوحات شرف لتحفيز الطلاب."
       },
       "qr": {
-        "title": "الحضور عبر QR",
-        "desc": "تتبع سريع وآمن للحضور باستخدام رموز QR فريدة."
+        "title": "حضور عبر QR",
+        "desc": "تتبع حضور سريع وآمن باستخدام رموز QR فريدة."
       },
       "analytics": {
         "title": "تحليلات متقدمة",
-        "desc": "رؤى عميقة حول أداء الطلاب وتفاعلهم في الفصل."
+        "desc": "رؤى عميقة في أداء الطلاب وتفاعل الفصل."
       },
       "collaboration": {
         "title": "تعاون الفريق",
-        "desc": "مجموعات مشاريع مدمجة وساحات نقاش فورية."
-      },
-      "smartClassroom": {
-        "title": "سمارت كلاس روم",
-        "desc": "إدارة متكاملة للفصول والتكليفات والاختبارات في مكان واحد."
+        "desc": "مجموعات مشاريع مدمجة وتدفقات نقاش في الوقت الفعلي."
       },
       "community": {
-        "title": "مركز المجتمع",
-        "desc": "ابق على اتصال مع رسائل فورية وساحات نقاش على مستوى الفصل."
+        "title": "مجتمع التعلم",
+        "desc": "تفاعل مع الأقران والمرشدين في بيئة آمنة ومنظمة."
+      },
+      "smartClassroom": {
+        "title": "الفصل الذكي",
+        "desc": "إدارة متكاملة للفصول والتكليفات والاختبارات في مكان واحد."
+      }
+    },
+    "roles": {
+      "sectionTitle": "مصمم لـ",
+      "sectionTitleItalic": "الجميع",
+      "sectionDesc": "منصة توفر أدوات لقيادة الفصول العالمية والإتقان الفردي.",
+      "student": {
+        "f1": "الوصول لجميع فصولك في مركز واحد",
+        "f2": "إتقان المواضيع مع مختبر الدراسة الذكي",
+        "f3": "تتبع رحلتك الأكاديمية ونقاط خبرتك"
+      },
+      "teacher": {
+        "f1": "إدارة فصول دراسية متعددة بسهولة",
+        "f2": "أتمتة التقييم مع المساعد الذكي",
+        "f3": "بث مباشر مع أدوات تعاونية"
       }
     },
     "showcase": {
       "badge": "مركز القيادة",
       "title": "مركز قوي لـ",
-      "desc": "منصة واحدة لإدارة حياتك الأكاديمية بالكامل. من الفصول الدراسية الفورية إلى جلسات الدراسة المدعومة بالذكاء الاصطناعي.",
+      "desc": "منصة واحدة لإدارة حياتك الأكاديمية بالكامل. من الفصول في الوقت الفعلي إلى جلسات الدراسة بالذكاء الاصطناعي.",
       "attendance": "الحضور",
       "verified": "موثق عبر QR",
-      "ai": "مساعد ذكي",
-      "draft": "المسودة جاهزة"
-    },
-    "roles": {
-      "student": {
-        "f1": "مساعد دراسة ومدرب ذكي",
-        "f2": "مسار تعلم محفز",
-        "f3": "تكليفات تفاعلية",
-        "f4": "مخطط دراسة شخصي"
-      },
-      "teacher": {
-        "f1": "منشئ محتوى بالذكاء الاصطناعي",
-        "f2": "تقييم آلي للدرجات",
-        "f3": "حوكمة الفصل الدراسي",
-        "f4": "تحليلات متقدمة"
-      }
+      "ai": "المساعد الذكي",
+      "draft": "جاهز كمسودة"
     },
     "ai": {
       "title1": "مركز دراسة",
       "title2": "مدعوم بالذكاء الاصطناعي",
-      "desc": "رفيق تعليمي متطور يفهم منهجك الدراسي. أنشئ اختبارات، لخص الملاحظات، وأنشئ بطاقات تعليمية على الفور باستخدام Gemini 2.0 Flash.",
+      "desc": "رفيق تعلم متطور يفهم منهجك. أنشئ اختبارات، لخص ملاحظات، وأنشئ بطاقات استذكار فوراً مع Gemini 2.0 Flash.",
       "list": {
-        "assistant": "مساعد تدريس ذكي متاح 24/7",
+        "assistant": "مساعد تدريس ذكي 24/7",
         "quiz": "إنشاء اختبارات تكيفية",
-        "summary": "تلخيص ذكي للمحتوى",
+        "summary": "تلخيص محتوى ذكي",
         "paths": "مسارات تعلم مخصصة"
       },
       "exploreButton": "استكشف مختبر الذكاء الاصطناعي",
       "chat": {
         "header": "مساعد التعلم الذكي",
-        "msg1": "مرحباً! لاحظت أن لديك اختبار فيزياء قادم. هل تود مراجعة ميكانيكا الكم؟",
-        "msg2": "سيكون ذلك رائعاً! هل يمكنك شرح مبدأ عدم اليقين لهايزنبرج ببساطة؟",
-        "msg3": "بالتأكيد! تخيل أنك تحاول التقاط صورة لسيارة مسرعة. إذا استخدمت سرعة غالقة عالية لتجميد موقعها، فلن تتمكن من معرفة مدى سرعتها..."
+        "msg1": "مرحباً! لاحظت أن لديك اختبار فيزياء قريباً. هل تود مراجعة ميكانيكا الكم؟",
+        "msg2": "سيكون ذلك رائعاً! هل يمكنك شرح مبدأ عدم اليقين لهايزنبرغ ببساطة؟",
+        "msg3": "بالتأكيد! تخيل محاولة التقاط صورة لسيارة مسرعة. إذا استخدمت سرعة غالق عالية لتجميد موقعها، فلن تتمكن من معرفة سرعتها..."
       }
     },
     "trust": {
@@ -2273,20 +2461,20 @@
     },
     "cta": {
       "title": "جاهز لتحويل فصلك الدراسي؟",
-      "desc": "انضم إلى آلاف المعلمين والطلاب الذين يستخدمون Classroom CMS لتشكيل مستقبل التعليم.",
+      "desc": "انضم لآلاف المعلمين والطلاب الذين يستخدمون Classroom CMS لتشكيل مستقبل التعليم.",
       "launch": "أطلق فصلك الدراسي",
-      "watchDemo": "شاهد العرض التجريبي"
+      "watchDemo": "شاهد العرض"
     }
   },
   "pricing": {
     "badge": "خطط الأسعار",
-    "titlePart1": "تسعير",
-    "titlePart2": "بسيط",
+    "titlePart1": "أسعار",
+    "titlePart2": "بسيطة",
     "description": "اختر الخطة المثالية لاحتياجاتك التعليمية.",
     "currentPlan": "الخطة الحالية",
     "upgrade": "ترقية الآن",
     "recommended": "موصى به",
-    "whatsIncluded": "ما الذي تشتمل عليه",
+    "whatsIncluded": "ما الذي تتضمنه",
     "toasts": {
       "loginRequired": "يرجى تسجيل الدخول أو إنشاء حساب للترقية.",
       "checkoutError": "فشل بدء عملية الدفع. يرجى المحاولة مرة أخرى."
@@ -2295,20 +2483,20 @@
       "free": {
         "name": "البداية المجانية",
         "desc": "مثالية للطلاب الأفراد الذين يبدأون رحلتهم.",
-        "f1": "الوصول إلى جميع الفصول الأساسية",
+        "f1": "الوصول لجميع الفصول الأساسية",
         "f2": "مساعد دراسة ذكي قياسي",
-        "f3": "نقاط خبرة ولوحات صدارة",
+        "f3": "نقاط خبرة ولوحات شرف",
         "f4": "نقاشات مجتمعية",
         "f5": "مخطط دراسة أساسي"
       },
       "pro": {
         "name": "كلاس روم برو",
         "desc": "ميزات متقدمة للمعلمين والمتعلمين الجادين.",
-        "f1": "أولوية الوصول للمساعد الذكي",
+        "f1": "وصول ذو أولوية للمعلم الذكي",
         "f2": "إنشاء اختبارات غير محدود",
         "f3": "لوحة تحليلات متقدمة",
-        "f4": "تخزين المكتبة العالمية",
-        "f5": "مسارات دراسة قابلة للتخصيص",
+        "f4": "تخزين في المكتبة العالمية",
+        "f5": "مسارات دراسية قابلة للتخصيص",
         "f6": "أدوات البناء السحري للمعلم",
         "f7": "دعم ذو أولوية 24/7"
       }
@@ -2320,10 +2508,10 @@
       "a1": "نعم، يمكنك الإلغاء في أي وقت من إعدادات حسابك.",
       "q2": "ما هي طرق الدفع المدعومة؟",
       "a2": "ندعم جميع البطاقات الائتمانية الرئيسية والمحافظ الرقمية عبر Stripe.",
-      "q3": "هل هناك خصم للطلاب؟",
-      "a3": "خطة البداية المجانية مصممة خصيصاً للطلاب الأفراد.",
+      "q3": "هل يوجد خصم للطلاب؟",
+      "a3": "خطتنا المجانية مصممة خصيصاً للطلاب الأفراد.",
       "q4": "كيف يعمل نظام رصيد الذكاء الاصطناعي؟",
-      "a4": "يحصل مستخدمو البرو على رصيد شهري لأدوات الذكاء الاصطناعي المتقدمة."
+      "a4": "يحصل مستخدمو برو على رصيد شهري لأدوات الذكاء الاصطناعي المتقدمة."
     },
     "features": {
       "payments": {
@@ -2336,43 +2524,49 @@
       },
       "support": {
         "title": "دعم ذو أولوية",
-        "desc": "مكتب مساعدة مخصص على مدار الساعة لجميع احتياجاتك التعليمية."
+        "desc": "مكتب مساعدة مخصص 24/7 لجميع احتياجات التدريس الخاصة بك."
       }
     },
     "cta": {
       "title": "أطلق العنان لإمكانياتك الكاملة",
-      "desc": "انضم إلى مجتمع البرو الخاص بنا وحول تجربتك التعليمية.",
+      "desc": "انضم لمجتمع برو الخاص بنا وحول تجربتك التعليمية.",
       "start": "ابدأ اليوم"
     }
   },
   "portfolioPage": {
-    "pageTitle": "الملف الأكاديمي لـ {{name}}",
-    "fallbackPageTitle": "الملف الأكاديمي للطالب",
-    "loading": "جاري تجميع الملف الأكاديمي...",
+    "pageTitle": "ملف {{name}}",
+    "fallbackPageTitle": "ملف الطالب",
+    "loading": "جاري تجهيز الملف الأكاديمي...",
     "notFound": "الطالب غير موجود",
-    "notFoundDesc": "الملف الأكاديمي الذي تبحث عنه غير متوفر.",
+    "notFoundDesc": "الملف الذي تبحث عنه غير متاح.",
     "title": "الملف الأكاديمي",
     "description": "عرض شامل لتقدم التعلم والإنجازات والمهارات.",
     "level": "المستوى {{level}}",
     "xp": "{{xp}} نقطة خبرة",
-    "progressToLevel": "التقدم إلى المستوى {{level}}",
+    "progressToLevel": "التقدم للمستوى {{level}}",
     "email": "البريد الإلكتروني",
     "phone": "الهاتف",
     "stats": {
       "badges": "الأوسمة",
       "avgGrade": "متوسط الدرجة",
-      "dayStreak": "سلسلة الأيام",
-      "globalRank": "التصنيف العالمي"
+      "dayStreak": "التتابع",
+      "globalRank": "الترتيب العالمي"
     },
-    "learningConsistency": "استمرارية التعلم",
+    "learningConsistency": "ثبات التعلم",
     "academicJourney": "الرحلة الأكاديمية",
+    "submissionActivity": "نشاط التسليمات",
+    "submissionActivityDesc": "تكرار تسليم المهام خلال آخر 6 أشهر.",
+    "heatmapSubmissions": "{{count}} تسليمات",
+    "heatmapOn": "في",
+    "heatmapLess": "أقل",
+    "heatmapMore": "أكثر",
     "unlockedAchievements": "الإنجازات المفتوحة",
-    "badgesEarned": "تم الحصول على {{earned}} / {{total}}"
+    "badgesEarned": "تم الحصول على {{earned}} من {{total}}"
   },
   "badges": {
     "first-submission": {
       "name": "الخطوة الأولى",
-      "desc": "قم بتسليم أول تكليف لك"
+      "desc": "سلم أول تكليف لك"
     },
     "perfect-score": {
       "name": "المثالي",
@@ -2380,15 +2574,220 @@
     },
     "streak-5": {
       "name": "المثابر",
-      "desc": "تسجيل دخول لمدة 5 أيام متتالية"
+      "desc": "تتابع تسجيل دخول لمدة 5 أيام"
     },
     "top-10": {
       "name": "النخبة",
-      "desc": "الوصول إلى أفضل 10 في لوحة الصدارة"
+      "desc": "الوصول لأفضل 10 في لوحة الشرف"
     },
     "fast-learner": {
-      "name": "السريع",
+      "name": "المتعلم السريع",
       "desc": "أكمل وحدة في يوم واحد"
+    }
+  },
+  "portfolio": {
+    "portfolio": "ملف الطالب"
+  },
+  "myTeachers": {
+    "title": "معلميني",
+    "description": "تواصل مع معلميك واطلع على ملفاتهم الشخصية.",
+    "empty": {
+      "title": "لم يتم العثور على معلمين",
+      "description": "لم تتواصل مع أي معلمين بعد."
+    }
+  },
+  "settings": {
+    "title": "الإعدادات",
+    "description": "إدارة إعدادات حسابك وتفضيلاتك.",
+    "toasts": {
+      "success": "تم حفظ الإعدادات بنجاح!",
+      "error": "فشل حفظ الإعدادات."
+    },
+    "form": {
+      "title": "الإعدادات العامة",
+      "description": "تحديث إعدادات التطبيق العامة.",
+      "enableAiFeatures": {
+        "label": "تفعيل ميزات الذكاء الاصطناعي",
+        "description": "السماح بالميزات المدعومة بالذكاء الاصطناعي مثل مختبر الدراسة والبناء السحري."
+      },
+      "defaultRegistrationRole": {
+        "label": "دور التسجيل الافتراضي",
+        "placeholder": "اختر دوراً",
+        "description": "الدور الافتراضي المعين للمستخدمين الجدد عند التسجيل."
+      },
+      "welcomeMessage": {
+        "label": "رسالة الترحيب",
+        "placeholder": "أدخل رسالة ترحيب",
+        "description": "رسالة ترحيب مخصصة تظهر للمستخدمين الجدد."
+      }
+    }
+  },
+  "tooltips": {
+    "magicBuilder": {
+      "title": "الباني السحري",
+      "description": "انقر هنا لترك الذكاء الاصطناعي ينشئ منهجك الدراسي بالكامل، بما في ذلك الملاحظات والاختبارات، تلقائياً."
+    }
+  },
+  "help": {
+    "common": {
+      "howTo": "دليل خطوة بخطوة",
+      "proTips": "نصائح الخبراء",
+      "stillStuck": "هل لا تزال لديك أسئلة؟",
+      "aiChatDesc": "يمكن لمساعدنا الذكي شرح أي ميزة بالتفصيل.",
+      "askAi": "اسأل مساعد جيميناي",
+      "clickToTry": "اضغط للتجربة"
+    },
+    "pages": {
+      "general": {
+        "title": "هل تحتاج مساعدة؟",
+        "description": "نحن هنا لمساعدتك في تحقيق أقصى استفادة من المنصة. استكشف الأدلة أدناه.",
+        "steps": [
+          {
+            "title": "تحقق من التنبيهات",
+            "description": "انقر على أيقونة الجرس لرؤية التنبيهات الهامة من المعلمين والذكاء الاصطناعي."
+          },
+          {
+            "title": "الإجراءات السريعة",
+            "description": "استخدم قائمة الأوامر (Ctrl + K) للتنقل في أي مكان فوراً."
+          }
+        ],
+        "tips": [
+          "يمكنك تغيير اللغة في أي وقت من الشريط العلوي.",
+          "نقاط الخبرة (XP) الخاصة بك تظهر دائماً في الأعلى."
+        ]
+      },
+      "classHub": {
+        "title": "إدارة الفصل",
+        "description": "مرحباً بك في مركز قيادة فصلك. هنا يمكنك إدارة الطلاب، المنهج الدراسي، والتكليفات.",
+        "steps": [
+          { "title": "إضافة الطلاب", "description": "استخدم تبويب 'الأشخاص' لتسجيل الطلاب أو إنشاء رمز انضمام." },
+          { "title": "بناء المنهج", "description": "نظم دروسك ومصادرك في وحدات دراسية." },
+          { "title": "تتبع التقدم", "description": "راقب تفاعل الطلاب وقم بتقييم التسليمات في الوقت الفعلي." }
+        ],
+        "tips": [
+          "يمكنك استخدام البناء السحري لإنشاء مسودات الوحدات فوراً.",
+          "قم بتثبيت الإعلانات المهمة لإبقائها في أعلى القائمة."
+        ]
+      },
+      "dashboard": {
+        "title": "مركز لوحة التحكم",
+        "description": "هذا هو مركز القيادة الأكاديمي الخاص بك. إليك كيفية استخدامه:",
+        "steps": [
+          {
+            "title": "أداة 'ماذا بعد؟'",
+            "description": "تحقق من البطاقات في الأعلى للمهام العاجلة مثل التقييم أو التكليفات."
+          },
+          {
+            "title": "تتبع التقدم",
+            "description": "انزل للأسفل لرؤية مخططات رحلتك الأكاديمية والنشاط الأخير."
+          }
+        ],
+        "tips": [
+          "قسم 'طلاب متعثرون' على اليمين يتم ترتيبه بواسطة الذكاء الاصطناعي.",
+          "انقر على أي عنصر في سجل النشاط للذهاب مباشرة إلى ذلك المورد."
+        ]
+      },
+      "classCurriculum": {
+        "title": "إدارة المنهج الدراسي",
+        "description": "نظم دروسك في وحدات ومواد تعليمية.",
+        "steps": [
+          {
+            "title": "إنشاء وحدة",
+            "description": "انقر على 'إضافة وحدة' لبدء فصل جديد أو قسم لموضوع معين.",
+            "actionId": "guide-add-module"
+          },
+          {
+            "title": "استخدام الباني السحري",
+            "description": "استخدم أيقونة 'العصا' البنفسجية لإنشاء منهج كامل تلقائياً.",
+            "actionId": "guide-magic-builder"
+          }
+        ],
+        "tips": [
+          "يمكنك سحب وإفلات الوحدات لإعادة ترتيبها.",
+          "حدد العناصر كـ 'مسودة' لإخفائها عن الطلاب حتى تصبح جاهزة."
+        ]
+      },
+      "createAssignment": {
+        "title": "إنشاء المهام",
+        "description": "صمم تكليفات تفاعلية لطلابك.",
+        "steps": [
+          {
+            "title": "وضع معايير التقييم",
+            "description": "أضف معايير التقييم (مثل القواعد، المنطق) ليعرف الطلاب ما هو متوقع."
+          },
+          {
+            "title": "مساعد الذكاء الاصطناعي",
+            "description": "استخدم مساعد الكتابة لعمل مسودة للتعليمات بناءً على موضوعك."
+          },
+          {
+            "title": "نشر المهمة",
+            "description": "بمجرد الجاهزية، اضغط على الزر الرئيسي لتنبيه جميع الطلاب.",
+            "actionId": "guide-publish-assignment"
+          }
+        ],
+        "tips": [
+          "تحديد موعد نهائي واضح يساعد الطلاب على ترتيب أولوياتهم.",
+          "أرفق مواد مرجعية لمساعدة الطلاب في إكمال المهمة."
+        ]
+      },
+      "classAttendance": {
+        "title": "تتبع الحضور",
+        "description": "راقب وسجل حضور الطلاب في صفك الدراسي.",
+        "steps": [
+          {
+            "title": "التحضير اليدوي",
+            "description": "انقر على أيقونة الحالة بجانب اسم الطالب للتبديل بين حاضر، غائب، أو متأخر."
+          },
+          {
+            "title": "تسجيل الحضور عبر QR",
+            "description": "ابدأ جلسة QR للسماح للطلاب بتسجيل حضورهم باستخدام هواتفهم."
+          },
+          {
+            "title": "تصدير التقارير",
+            "description": "استخدم زر التصدير لتحميل كشف حضور كامل للفصل الدراسي."
+          }
+        ],
+        "tips": [
+          "جلسات QR محدودة بوقت لضمان الأمان.",
+          "يمكنك إضافة ملاحظات لأي سجل حضور للرجوع إليها لاحقاً."
+        ]
+      },
+      "quizzes": {
+        "title": "الاختبارات والتقييمات",
+        "description": "اختبر المعرفة باستخدام اختبارات تفاعلية مدعومة بالذكاء الاصطناعي.",
+        "steps": [
+          {
+            "title": "الإنشاء بالذكاء الاصطناعي",
+            "description": "ألصق ملاحظات درسك واترك الذكاء الاصطناعي ينشئ أسئلة اختيار من متعدد فوراً."
+          },
+          {
+            "title": "مراجعة النتائج",
+            "description": "اطلع على تحليل مفصل للأسئلة التي واجه الطلاب فيها أكبر صعوبة."
+          }
+        ],
+        "tips": [
+          "فعل خيار ترتيب الأسئلة العشوائي لمنع الطلاب من رؤية نفس الترتيب.",
+          "أضف تفسيرات لكل سؤال لمساعدة الطلاب على التعلم من أخطائهم."
+        ]
+      },
+      "library": {
+        "title": "المكتبة العامة",
+        "description": "سحابتك الشخصية لجميع موارد التدريس الخاصة بك.",
+        "steps": [
+          {
+            "title": "الرفع لمرة واحدة",
+            "description": "ارفع ملفاً لمكتبتك لاستخدامه في أي من صفوفك دون الحاجة لإعادة الرفع."
+          },
+          {
+            "title": "التنظيم حسب الموضوع",
+            "description": "أضف أوصافاً لمواردك لتجدها بسهولة لاحقاً."
+          }
+        ],
+        "tips": [
+          "يمكنك مشاركة روابط المكتبة مباشرة مع معلمين آخرين.",
+          "المكتبة تدعم ملفات PDF، الفيديوهات، ومستندات الأوفيس الشائعة."
+        ]
+      }
     }
   }
 }

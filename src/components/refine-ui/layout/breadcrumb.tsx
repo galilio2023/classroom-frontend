@@ -44,6 +44,8 @@ export function Breadcrumb() {
     });
 
     for (const { label, href, icon } of breadcrumbs) {
+      if (!label) continue;
+      
       // Try to translate the label if it matches a resource key or common term
       const translatedLabel = t(label, { defaultValue: label });
 

@@ -102,7 +102,20 @@ export const authProvider: AuthProvider = {
 
   check: async () => {
     try {
-      const { data: session } = await authClient.getSession();
+      const { data: session, error } = await authClient.getSession();
+      
+      if (error || !session?.user) {
+        console.warn("Better-Auth session missing or failed:", error);
+        
+        // TEMPORARY DEV FALLBACK: Only trust local storage in development mode (npm run dev)
+        // In production, this block is ignored to prevent UI-level spoofing.
+        if (import.meta.env.DEV) {
+          const localUser = localStorage.getItem("user");
+          if (localUser) {
+             return { authenticated: true };
+          }
+        }
+      }
       
       if (session?.user) {
         const user = session.user as any;
@@ -117,9 +130,9 @@ export const authProvider: AuthProvider = {
       localStorage.removeItem("user");
       return {
         authenticated: false,
-        // Removed global redirectTo to allow public access to the landing page
       };
     } catch (error) {
+      console.error("Session check error:", error);
       localStorage.removeItem("user");
       return {
         authenticated: false,

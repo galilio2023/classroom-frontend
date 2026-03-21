@@ -1,3 +1,66 @@
+const CACHE_NAME = "classroom-v1";
+const OFFLINE_URL = "/offline.html";
+
+// Assets to cache immediately on install
+const STATIC_ASSETS = [
+  "/",
+  "/index.html",
+  "/manifest.json",
+  "/logo.svg",
+  "/favicon.ico"
+];
+
+self.addEventListener("install", (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(STATIC_ASSETS);
+    })
+  );
+  self.skipWaiting();
+});
+
+self.addEventListener("activate", (event) => {
+  event.waitUntil(
+    caches.keys().then((keys) => {
+      return Promise.all(
+        keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
+      );
+    })
+  );
+  self.clients.claim();
+});
+
+// --- SMART FETCH STRATEGY ---
+self.addEventListener("fetch", (event) => {
+  const { request } = event;
+  const url = new URL(request.url);
+
+  // 1. Skip non-GET requests and API calls (let them fail or use local state)
+  if (request.method !== "GET" || url.pathname.startsWith("/api")) {
+    return;
+  }
+
+  // 2. Stale-While-Revalidate for Static Assets & UI
+  event.respondWith(
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.match(request).then((cachedResponse) => {
+        const fetchPromise = fetch(request).then((networkResponse) => {
+          cache.put(request, networkResponse.clone());
+          return networkResponse;
+        }).catch(() => {
+            // If network fails and no cache, show offline page for navigation
+            if (request.mode === 'navigate') {
+                return cache.match(OFFLINE_URL);
+            }
+        });
+
+        return cachedResponse || fetchPromise;
+      });
+    })
+  );
+});
+
+// --- PUSH NOTIFICATIONS ---
 self.addEventListener("push", (event) => {
   if (!event.data) return;
 
@@ -7,8 +70,8 @@ self.addEventListener("push", (event) => {
 
     const options = {
       body: message,
-      icon: icon || "/pwa-192x192.png",
-      badge: "/favicon.ico",
+      icon: icon || "/manifest-icon-192.maskable.png",
+      badge: "/logo.svg",
       data: {
         url: link || "/",
       },
@@ -23,19 +86,16 @@ self.addEventListener("push", (event) => {
 
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-
   const urlToOpen = event.notification.data.url;
 
   event.waitUntil(
     clients.matchAll({ type: "window", includeUncontrolled: true }).then((windowClients) => {
-      // Check if there is already a window/tab open with the target URL
       for (let i = 0; i < windowClients.length; i++) {
         const client = windowClients[i];
         if (client.url === urlToOpen && "focus" in client) {
           return client.focus();
         }
       }
-      // If not, open a new window/tab
       if (clients.openWindow) {
         return clients.openWindow(urlToOpen);
       }

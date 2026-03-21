@@ -14,7 +14,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({ onClose }) => {
   const isAr = i18n.language === "ar";
 
   return (
-    <CardHeader className="p-4 md:p-6 border-b border-border/10 ai-header-gradient text-white rounded-t-[calc(var(--radius)*2-1px)] md:rounded-t-[calc(var(--radius)*3-1px)] flex flex-row items-center justify-between space-y-0 relative overflow-hidden">
+    <CardHeader className="p-4 md:p-6 border-b border-border/10 ai-header-gradient text-white rounded-t-2xl flex flex-row items-center justify-between space-y-0 relative overflow-hidden">
       {/* Subtle shine effect */}
       <div
         className={cn(
@@ -26,7 +26,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({ onClose }) => {
       />
 
       <div className="flex items-center gap-3 md:gap-4 relative z-10">
-        <div className="p-2 md:p-2.5 bg-white/20 backdrop-blur-md rounded-xl md:rounded-2xl shadow-inner border border-white/20">
+        <div className="p-2 md:p-2.5 bg-white/10 backdrop-blur-md rounded-xl shadow-inner border border-white/20">
           <Sparkles className="h-5 w-5 md:h-6 md:w-6 animate-pulse text-white" />
         </div>
         <div className="flex flex-col text-start">

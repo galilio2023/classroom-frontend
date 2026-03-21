@@ -42,20 +42,22 @@ const ProjectGroupsPage = () => {
 
     // --- DATA FETCHING ---
     // 1. Fetch Groups
-    const { result: groupsResult, query: { isLoading: isLoadingGroups, refetch: refetchGroups } } = useList({
+    const { query: groupsQueryResult } = useList({
         resource: "project-groups",
         pagination: { pageSize: 50, mode: "server" },
         meta: {
             populate: ["members", "members.student", "class"]
         }
     });
+    const { data: groupsResult, isLoading: isLoadingGroups, refetch: refetchGroups } = groupsQueryResult;
 
     // 2. Fetch Classes (for the dropdown)
-    const { result: classesResult } = useList({
+    const { query: classesQueryResult } = useList({
         resource: "classes",
         pagination: { mode: "off" },
         queryOptions: { enabled: isCreateOpen } // Only fetch when dialog opens
     });
+    const { data: classesResult } = classesQueryResult;
 
     // --- MUTATIONS ---
     const { mutate: createGroup, mutation: createMutation } = useCustomMutation<any>();
@@ -144,7 +146,7 @@ const ProjectGroupsPage = () => {
 
             {isLoadingGroups ? (
                 <div className="grid gap-6 md:gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 px-2">
-                     {[1,2,3,4,5,6].map(i => <Card key={i} className="h-64 rounded-[2rem] bg-muted/20 animate-pulse border-border/20 shadow-sm" />)}
+                     {[1,2,3,4,5,6].map((i: any) => <Card key={i} className="h-64 rounded-[2rem] bg-muted/20 animate-pulse border-border/20 shadow-sm" />)}
                 </div>
             ) : groups.length === 0 ? (
                 <div className="flex items-center justify-center p-16 bg-card/20 rounded-[2.5rem] border border-dashed border-border/40 mx-2">
@@ -164,7 +166,7 @@ const ProjectGroupsPage = () => {
             ) : (
                 <div className="grid gap-6 md:gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 px-2">
                     <AnimatePresence mode="popLayout">
-                        {groups.map((group: any, index) => (
+                        {groups.map((group: any, index: any) => (
                             <motion.div
                                 key={group.id}
                                 initial={{ opacity: 0, y: 20 }}
@@ -268,7 +270,7 @@ const ProjectGroupsPage = () => {
                                     <SelectTrigger className="h-16 rounded-3xl bg-muted/30 border-none shadow-inner px-8 text-lg font-black">
                                         <SelectValue placeholder={t("projectGroups.selectClass")} />
                                     </SelectTrigger>
-                                    <SelectContent className="rounded-2xl border-none shadow-2xl p-2">
+                                    <SelectContent className="rounded-2xl shadow-2xl p-2 bg-white dark:bg-[#09090b] opacity-100 backdrop-blur-none border border-border/50">
                                         {classesList.map((cls: any) => (
                                             <SelectItem key={cls.id} value={String(cls.id)} className="rounded-xl py-3 cursor-pointer">
                                                 <span className="font-bold">{cls.name}</span>
