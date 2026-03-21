@@ -105,7 +105,7 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
         const elements = excalidrawAPI.getSceneElements();
         const appState = excalidrawAPI.getAppState();
 
-        socket.emit("whiteboard:autosave", {
+        socket.emit("whiteboard:save", {
           classId: activeRoomId,
           elements,
           appState,
