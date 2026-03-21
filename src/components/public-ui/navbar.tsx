@@ -78,7 +78,7 @@ export const Navbar = () => {
           : "bg-transparent py-6",
       )}
     >
-      <div className="container mx-auto px-4 flex items-center justify-between">
+      <div className="container-center flex items-center justify-between">
         <Link to="/" className="flex items-center gap-3 group relative">
           <motion.div
             whileHover={{ scale: 1.1, rotate: 5 }}

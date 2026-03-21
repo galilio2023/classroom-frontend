@@ -158,7 +158,7 @@ export const Footer = () => {
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-linear-to-r from-transparent via-primary/50 to-transparent" />
       <div className="absolute top-0 left-0 w-64 h-64 bg-primary/5 blur-[100px] rounded-full pointer-events-none" />
 
-      <div className="container mx-auto px-4">
+      <div className="container-center">
         {/* Newsletter / CTA Section */}
         <div className="bg-muted/30 rounded-[3rem] p-12 md:p-16 mb-24 border border-primary/5 backdrop-blur-sm relative overflow-hidden flex flex-col lg:flex-row items-center justify-between gap-12 group">
           {/* RTL Positioning Fix */}
