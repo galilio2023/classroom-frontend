@@ -25,6 +25,7 @@
 4.  [Real-Time Integration](#-real-time-integration)
 5.  [Setup & Installation](#-setup--installation)
 6.  [Project Structure](#-project-structure)
+7.  [Enterprise Development Patterns](#-enterprise-development-patterns)
 
 ---
 
@@ -35,58 +36,6 @@ We chose a **Headless Architecture** powered by **Refine v5**. This approach dec
 *   **Data Provider**: Maps Refine's operations to our specific backend REST and custom endpoints.
 *   **Logic Layer (Refine Hooks)**: Manages all server state, including caching, optimistic updates, and real-time invalidation.
 *   **UI Layer**: Built with **shadcn/ui** and **Tailwind CSS** for maximum flexibility and accessibility.
-
----
-
-## 🏗️ Enterprise Development Patterns
-
-### 1. Headless Logic Hooks
-We decouple business logic and data fetching from the UI. This ensures that components remain "dumb" and focus only on presentation.
-
-**Example: `useClassDetails` Hook**
-```typescript
-// src/features/classes/hooks/use-class-details.ts
-export const useClassDetails = (id: string) => {
-  const { data, isLoading } = useShow<IClass>({ resource: "classes", id });
-  const { mutate: enroll } = useCustomMutation();
-
-  const handleEnroll = () => enroll({ 
-    url: `/api/classes/${id}/enroll`, 
-    method: "post" 
-  }, {
-    onSuccess: () => {
-      // Logic for side effects: Invalidate queries, show toast, etc.
-      notification.success({ message: "Enrolled successfully!" });
-    }
-  });
-
-  return { classData: data?.data, isLoading, handleEnroll };
-};
-```
-
-> **Note:** Always handle post-mutation side effects (e.g., query invalidation for optimistic updates, notifications) in the `onSuccess` or `onError` callbacks of the mutation hook.
-
-### 2. Modular Orchestration (Thin Pages)
-Pages in this application are "Thin Orchestrators." They do not contain complex logic; instead, they compose headless hooks and specialized UI components.
-
-**Example: `ClassShow` Page**
-```tsx
-// src/pages/classes/show.tsx
-export const ClassShow = () => {
-  const { id } = useParams();
-  const { classData, isLoading, handleEnroll } = useClassDetails(id);
-
-  if (isLoading) return <SkeletonLoader />;
-
-  return (
-    <div className="layout-grid">
-      <ClassHeader data={classData} onEnroll={handleEnroll} />
-      <ModuleList modules={classData.modules} />
-      <AIStudyBuddy classId={id} />
-    </div>
-  );
-};
-```
 
 ---
 
@@ -163,20 +112,79 @@ The frontend is connected to the backend's **Socket.io** server to create a live
 
 ## 🏛️ Enterprise Development Patterns
 
-To ensure the platform is "Battle-Tested" and scalable, we follow these advanced patterns:
+To ensure the platform is "Battle-Tested" and scalable, we follow these advanced architectural patterns:
 
 ### 1. Headless Logic Hooks (The "Brain")
-We avoid "Fat Components" by extracting all business logic into feature-specific hooks (e.g., `useClassDetails`). This ensures the UI only handles "Displaying" while the hook handles "Thinking."
+We avoid "Fat Components" by extracting all business logic into feature-specific hooks. This ensures the UI only handles presentation while the hook handles state and side effects.
+
+**Example: `useClassDetails`**
+```typescript
+export const useClassDetails = (id: string) => {
+  const { query } = useShow<IClass>({ resource: "classes", id });
+  const { mutate: enroll } = useCustomMutation();
+
+  const handleEnroll = () => enroll({ 
+    url: `/api/classes/${id}/enroll`, 
+    method: "post" 
+  }, {
+    onSuccess: () => {
+      // Invalidate queries to refresh state
+      queryClient.invalidateQueries(["classes", "list"]);
+      notification.success({ message: "Enrolled successfully!" });
+    }
+  });
+
+  return { classData: query.data?.data, isLoading: query.isLoading, handleEnroll };
+};
+```
 
 ### 2. High-Fidelity UX (The "Ghost" Pattern)
-Instead of full-page loading spinners, we use **Skeleton Loaders** (`_components/class-skeletons.tsx`) that mimic the exact layout of the page, reducing perceived load time and layout shift.
+Instead of full-page loading spinners, we use **Skeleton Loaders** that mimic the exact layout of the page, reducing perceived load time and layout shift (CLS).
 
 ### 3. Optimistic UI Updates
-For actions like "Enrolling" or "Toggling Live Status," the UI updates **instantly** before the server responds. We use manual cache manipulation via `useQueryClient` to provide a lag-free experience.
+For high-frequency actions, we update the UI **instantly** before the server responds.
 
-### 4. Modular Orchestration
-Pages in `src/pages` act only as orchestrators. Every major UI section is broken into a wrapper (e.g., `ContentTabWrapper`), keeping main files under 200 lines for maximum maintainability.
+**Example: `useQueryClient` for Optimistic Enrollment**
+```typescript
+const queryClient = useQueryClient();
 
-### 5. Dynamic Navigation
-A centralized **Breadcrumb** system (`src/components/refine-ui/layout/breadcrumb.tsx`) ensures users always know their context within the deep hierarchy of classes and modules.
+const { mutate } = useCustomMutation({
+  mutationOptions: {
+    onMutate: async (newEnrollment) => {
+      await queryClient.cancelQueries(["enrollments"]);
+      const previous = queryClient.getQueryData(["enrollments"]);
+      queryClient.setQueryData(["enrollments"], (old) => [...old, newEnrollment]);
+      return { previous };
+    },
+    onError: (err, newEnrollment, context) => {
+      queryClient.setQueryData(["enrollments"], context.previous);
+    }
+  }
+});
+```
 
+### 4. Modular AI Integration
+AI features are exposed via specialized hooks that leverage `useCustomMutation` for standardized API handling and streaming support.
+
+**Example: `useAIChat`**
+```tsx
+export const useAIChat = (classId: string) => {
+  const { mutate, isLoading } = useCustomMutation();
+
+  const sendMessage = (message: string) => {
+    mutate({
+      url: "/api/ai/chat",
+      method: "post",
+      values: { message, classId }
+    });
+  };
+
+  return { sendMessage, isLoading };
+};
+```
+
+### 5. Modular Orchestration (Thin Pages)
+Pages act only as orchestrators. Every major UI section is broken into isolated components, keeping main files under 200 lines for maximum maintainability.
+
+### 6. Dynamic Navigation
+A centralized **Breadcrumb** system ensures users always know their context within the deep hierarchy of classes, modules, and lessons.
