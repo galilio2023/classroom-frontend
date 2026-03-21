@@ -593,7 +593,8 @@
         "joinRequestSent": "Request sent!",
         "invalidInviteCode": "Invalid invite code",
         "cloned": "Class curriculum cloned successfully!",
-        "deleted": "Class deleted successfully"
+        "deleted": "Class deleted successfully",
+        "enrollmentApproved": "Enrollment approved!"
       }
     },
     "show": {

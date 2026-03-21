@@ -34,7 +34,7 @@ export const AssignmentList = ({ classId }: AssignmentListProps) => {
   const isTeacher = identity?.role === "teacher";
   const isStaff = isAdmin || isTeacher;
 
-  const { data, isPending, isError } = useList<Assignment>({
+  const { query: { data, isLoading, isError } } = useList<Assignment>({
     resource: "assignments",
     filters: [{ field: "classId", operator: "eq", value: classId }],
     sorters: [{ field: "createdAt", order: "desc" }],
@@ -59,7 +59,7 @@ export const AssignmentList = ({ classId }: AssignmentListProps) => {
     overscan: 5,
   });
 
-  if (isPending) {
+  if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-4 text-start">
         <Loader2 className="h-10 w-10 animate-spin text-primary/20" />

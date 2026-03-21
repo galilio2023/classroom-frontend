@@ -593,9 +593,9 @@
         "joinRequestSent": "تم إرسال الطلب!",
         "invalidInviteCode": "رمز دعوة غير صحيح",
         "cloned": "تم نسخ منهج الفصل بنجاح!",
-        "deleted": "تم حذف الفصل بنجاح"
-      }
-    },
+        "deleted": "تم حذف الفصل بنجاح",
+        "enrollmentApproved": "تمت الموافقة على طلب الانضمام!"
+        }    },
     "show": {
       "assembling": "جاري تجهيز الفصل...",
       "notFound": "الفصل غير موجود",
