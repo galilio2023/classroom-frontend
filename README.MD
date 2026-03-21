@@ -38,6 +38,51 @@ We chose a **Headless Architecture** powered by **Refine v5**. This approach dec
 
 ---
 
+## 🏗️ Enterprise Development Patterns
+
+### 1. Headless Logic Hooks
+We decouple business logic and data fetching from the UI. This ensures that components remain "dumb" and focus only on presentation.
+
+**Example: `useClassDetails` Hook**
+```typescript
+// src/features/classes/hooks/use-class-details.ts
+export const useClassDetails = (id: string) => {
+  const { data, isLoading } = useShow<IClass>({ resource: "classes", id });
+  const { mutate: enroll } = useCustomMutation();
+
+  const handleEnroll = () => enroll({ 
+    url: `/api/classes/${id}/enroll`, 
+    method: "post" 
+  });
+
+  return { classData: data?.data, isLoading, handleEnroll };
+};
+```
+
+### 2. Modular Orchestration (Thin Pages)
+Pages in this application are "Thin Orchestrators." They do not contain complex logic; instead, they compose headless hooks and specialized UI components.
+
+**Example: `ClassShow` Page**
+```tsx
+// src/pages/classes/show.tsx
+export const ClassShow = () => {
+  const { id } = useParams();
+  const { classData, isLoading, handleEnroll } = useClassDetails(id);
+
+  if (isLoading) return <SkeletonLoader />;
+
+  return (
+    <div className="layout-grid">
+      <ClassHeader data={classData} onEnroll={handleEnroll} />
+      <ModuleList modules={classData.modules} />
+      <AIStudyBuddy classId={id} />
+    </div>
+  );
+};
+```
+
+---
+
 ## ✨ Key Features Implemented
 
 ### 📺 Teacher Discovery Engine (Teacher TV)

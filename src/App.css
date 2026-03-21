@@ -3,6 +3,12 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* 
+  NOTE: Traditional CSS variables like --success, --warning, and specific animation keyframes 
+  have been removed from this file. These are now managed through Tailwind utility classes, 
+  Shadcn/UI components, and Framer Motion for more granular and performant control.
+*/
+
 :root {
   --font-sans: 'Plus Jakarta Sans', sans-serif;
   --font-heading: 'Outfit', sans-serif;
@@ -168,6 +174,12 @@
 }
 
 /* --- THE BRUTE-FORCE PORTAL FIX --- */
+/* 
+  Radix portals (used by Shadcn) render elements at the root of the document body, 
+  outside the main .dark class tree. This causes them to lose access to CSS variables 
+  defined within .dark, leading to unstyled or incorrectly styled popovers/menus. 
+  This fix explicitly targets the portal elements when dark mode is active.
+*/
 /* Target the root HTML tag to ensure variables are available everywhere */
 html.dark [data-radix-portal] {
   --popover: 224 10% 10%;
