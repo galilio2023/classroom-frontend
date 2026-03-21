@@ -119,7 +119,12 @@ We avoid "Fat Components" by extracting all business logic into feature-specific
 
 **Example: `useClassDetails`**
 ```typescript
+import { useShow, useCustomMutation } from "@refinedev/core";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+
 export const useClassDetails = (id: string) => {
+  const queryClient = useQueryClient();
   const { query } = useShow<IClass>({ resource: "classes", id });
   const { mutate: enroll } = useCustomMutation();
 
@@ -130,7 +135,7 @@ export const useClassDetails = (id: string) => {
     onSuccess: () => {
       // Invalidate queries to refresh state
       queryClient.invalidateQueries(["classes", "list"]);
-      notification.success({ message: "Enrolled successfully!" });
+      toast.success("Enrolled successfully!");
     }
   });
 
@@ -153,7 +158,8 @@ const { mutate } = useCustomMutation({
     onMutate: async (newEnrollment) => {
       await queryClient.cancelQueries(["enrollments"]);
       const previous = queryClient.getQueryData(["enrollments"]);
-      queryClient.setQueryData(["enrollments"], (old) => [...old, newEnrollment]);
+      // Safely initialize if cache is empty
+      queryClient.setQueryData(["enrollments"], (old = []) => [...(old as any[]), newEnrollment]);
       return { previous };
     },
     onError: (err, newEnrollment, context) => {
