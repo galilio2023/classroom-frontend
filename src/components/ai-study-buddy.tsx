@@ -47,17 +47,17 @@ export const AIStudyBuddy = ({ subject, topic, assignment, classId }: AIStudyBud
       {isOpen ? (
         <Card className={cn(
           "shadow-2xl flex flex-col ai-gradient-border animate-[zoom-in_0.3s_ease-out] overflow-hidden",
-          "w-full h-full md:w-[400px] md:h-[600px] rounded-none md:rounded-3xl bg-card/90 backdrop-blur-3xl"
+          "w-full h-full md:w-[400px] md:h-[600px] rounded-none md:rounded-2xl bg-card/90 backdrop-blur-3xl"
         )}>
           <ChatHeader onClose={() => setIsOpen(false)} />
           
-          <CardContent className="flex-1 p-0 overflow-hidden bg-dot-pattern">
-            <ScrollArea ref={scrollAreaRef} className="h-full p-4 md:p-6 custom-scrollbar">
+          <CardContent className="flex-1 p-0 overflow-hidden bg-dot-pattern min-h-0">
+            <ScrollArea ref={scrollAreaRef} className="h-full p-4 md:p-6">
               {messages.length === 0 && !streamingMessage && (
                 <ChatEmptyState subject={subject} />
               )}
               
-              <div className="space-y-6">
+              <div className="space-y-6 flex flex-col">
                 {messages.map((msg, i) => (
                   <ChatMessage key={i} message={msg} />
                 ))}
@@ -75,10 +75,10 @@ export const AIStudyBuddy = ({ subject, topic, assignment, classId }: AIStudyBud
 
                 {isLoading && !streamingMessage && (
                   <div className="flex gap-3 md:gap-4 animate-[fade-in_0.3s_ease-out]">
-                    <div className="bg-ai-primary h-10 w-10 md:h-12 md:w-12 shrink-0 rounded-2xl md:rounded-[1.25rem] flex items-center justify-center border-2 border-background shadow-md">
+                    <div className="bg-ai-primary h-10 w-10 md:h-12 md:w-12 shrink-0 rounded-xl md:rounded-2xl flex items-center justify-center border-2 border-background shadow-md">
                       <Sparkles className="h-4 w-4 md:h-5 md:w-5 text-white" />
                     </div>
-                    <div className="bg-card/80 backdrop-blur-md border border-border/40 p-4 md:p-5 rounded-[1.5rem] md:rounded-[2rem] rounded-ts-none shadow-sm flex items-center h-fit">
+                    <div className="bg-card/80 backdrop-blur-md border border-border/40 p-4 md:p-5 rounded-2xl md:rounded-3xl rounded-ts-none shadow-sm flex items-center h-fit">
                       <div className="flex gap-1.5 md:gap-2">
                         <span className="h-1.5 w-1.5 md:h-2 md:w-2 bg-ai-primary/40 rounded-full animate-bounce" />
                         <span className="h-1.5 w-1.5 md:h-2 md:w-2 bg-ai-primary/40 rounded-full animate-bounce [animation-delay:0.2s]" />

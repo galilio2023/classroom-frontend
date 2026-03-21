@@ -35,7 +35,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
         !isModel ? (isAr ? "flex-row" : "flex-row-reverse") : "",
       )}
     >
-      <Avatar className="h-10 w-10 md:h-12 md:w-12 shrink-0 border-2 border-background shadow-md">
+      <Avatar className="h-10 w-10 md:h-12 md:w-12 shrink-0 border-[1.5px] border-background shadow-sm">
         {isModel ? (
           <div className="bg-ai-primary h-full w-full flex items-center justify-center">
             <Sparkles className="h-5 w-5 md:h-6 md:w-6 text-white dark:text-black" />
@@ -55,7 +55,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
       >
         <div
           className={cn(
-            "p-4 md:p-6 rounded-3xl md:rounded-4xl text-sm md:text-base leading-relaxed",
+            "p-4 md:p-5 rounded-2xl md:rounded-3xl text-sm md:text-base leading-relaxed",
             !isModel
               ? cn(
                   "bg-primary/10 text-foreground border border-primary/20",

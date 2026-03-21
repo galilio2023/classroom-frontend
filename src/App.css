@@ -1,77 +1,90 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Cairo:wght@200..900&display=swap');
 @import "tailwindcss";
 
 @custom-variant dark (&:is(.dark *));
 
+/* 
+  NOTE: Traditional CSS variables like --success, --warning, and specific animation keyframes 
+  have been removed from this file. These are now managed through Tailwind utility classes, 
+  Shadcn/UI components, and Framer Motion for more granular and performant control.
+*/
+
 :root {
-  --background: hsl(210 40% 98%);
-  --foreground: hsl(224 71.4% 4.1%);
+  --font-sans: 'Plus Jakarta Sans', sans-serif;
+  --font-heading: 'Outfit', sans-serif;
+  --font-arabic: 'Cairo', sans-serif;
+  
+  --background: hsl(220 33% 98%);
+  --foreground: hsl(224 71% 4%);
+  
+  --primary-hsl: 245 80% 55%;
+  --primary: hsl(var(--primary-hsl));
+  --primary-foreground: hsl(0 0% 100%);
+  
+  --ai-primary-hsl: 270 90% 60%;
+  --ai-primary: hsl(var(--ai-primary-hsl));
+  --ai-secondary: hsl(270 90% 98%);
+  
   --card: hsl(0 0% 100%);
-  --card-foreground: hsl(224 71.4% 4.1%);
+  --card-foreground: hsl(224 71% 4%);
+
   --popover: hsl(0 0% 100%);
-  --popover-foreground: hsl(224 71.4% 4.1%);
-  --primary: hsl(250 80% 60%);
-  --primary-foreground: hsl(210 20% 98%);
-  --secondary: hsl(220 14.3% 95.9%);
-  --secondary-foreground: hsl(220.9 39.3% 11%);
-  --muted: hsl(220 14.3% 95.9%);
-  --muted-foreground: hsl(220 8.9% 46.1%);
-  --accent: hsl(220 14.3% 95.9%);
-  --accent-foreground: hsl(220.9 39.3% 11%);
-  --destructive: hsl(0 84.2% 60.2%);
-  --destructive-foreground: hsl(210 20% 98%);
+  --popover-foreground: hsl(224 71% 4%);
+  
   --border: hsl(220 13% 91%);
   --input: hsl(220 13% 91%);
-  --ring: hsl(250 80% 60%);
-  --radius: 1rem;
-  --ai-gradient-start: #4f46e5; /* indigo-600 */
-  --ai-gradient-middle: #9333ea; /* purple-600 */
-  --ai-gradient-end: #db2777; /* pink-600 */
+  --muted: hsl(220 13% 91%);
+  --muted-foreground: hsl(220 9% 46%);
 
-  /* Semantic Colors */
-  --success: hsl(142.1 70.6% 45.3%);
-  --success-foreground: hsl(144.1 70.6% 96.1%);
-  --warning: hsl(37.7 92.1% 50.2%);
-  --warning-foreground: hsl(38 92% 95%);
+  --accent: hsl(220 13% 91%);
+  --accent-foreground: hsl(224 71% 4%);
 
-  /* AI & Gamification Accents */
-  --ai-primary: hsl(270 95% 60%); /* Purple */
-  --ai-primary-foreground: hsl(0 0% 100%);
-  --ai-secondary: hsl(270 95% 95%); /* Light Purple */
-  --gold-primary: hsl(45 93% 47%); /* Gold */
-  --gold-secondary: hsl(45 93% 95%); /* Light Gold */
+  --secondary: hsl(220 13% 91%);
+  --secondary-foreground: hsl(224 71% 4%);
 
-  /* Focus States */
-  --focus-border: hsl(250 80% 60%);
+  --destructive: hsl(0 84.2% 60.2%);
+  --destructive-foreground: hsl(210 40% 98%);
+
+  --ring: hsl(245 80% 55%);
+  --radius: 0.75rem;
 }
 
-/* --- PRO MIDNIGHT DARK MODE --- */
 .dark {
-  --background: hsl(240 10% 4%);
-  --foreground: hsl(0 0% 98%);
-  --card: hsl(240 10% 6%);
-  --card-foreground: hsl(0 0% 98%);
-  --popover: hsl(240 10% 5%);
-  --popover-foreground: hsl(0 0% 98%);
-  --primary: hsl(250 100% 75%);
-  --primary-foreground: hsl(240 5.9% 10%);
-  --secondary: hsl(240 3.7% 12%);
-  --secondary-foreground: hsl(0 0% 98%);
-  --muted: hsl(240 3.7% 12%);
-  --muted-foreground: hsl(240 5% 60%);
-  --accent: hsl(240 3.7% 12%);
-  --accent-foreground: hsl(0 0% 98%);
-  --destructive: hsl(0 62.8% 35%);
-  --destructive-foreground: hsl(0 0% 98%);
-  --border: hsl(240 5% 15%);
-  --input: hsl(240 5% 15%);
-  --ring: hsl(250 100% 75%);
+  /* PURE MIDNIGHT FOUNDATION - Desaturated for Premium Feel */
+  --background: hsl(224 10% 2%);
+  --foreground: hsl(224 10% 94%); /* Softer white to prevent eye bleed */
+  
+  --card: hsl(224 10% 7%); /* Elevated from background */
+  --card-foreground: hsl(224 10% 94%);
 
-  /* AI & Gamification Accents (Dark Mode) */
-  --ai-primary: hsl(270 95% 75%);
-  --ai-secondary: hsl(270 50% 15%);
+  --popover: hsl(224 10% 10%); /* Highest elevation for modals */
+  --popover-foreground: hsl(224 10% 94%);
+  
+  --primary: hsl(245 90% 70%); /* Balanced saturation */
+  --primary-foreground: hsl(224 10% 4%);
+
+  --secondary: hsl(224 10% 12%);
+  --secondary-foreground: hsl(224 10% 94%);
+
+  --muted: hsl(224 10% 12%);
+  --muted-foreground: hsl(224 10% 60%);
+
+  --accent: hsl(224 10% 12%);
+  --accent-foreground: hsl(224 10% 94%);
+
+  --destructive: hsl(0 62% 40%);
+  --destructive-foreground: hsl(224 10% 94%);
+
+  --border: hsl(224 10% 16%); /* Clean, desaturated borders */
+  --input: hsl(224 10% 16%);
+  --ring: hsla(245, 90%, 70%, 0.3);
 }
 
-@theme inline {
+@theme {
+  --font-sans: var(--font-sans);
+  --font-heading: var(--font-heading);
+  --font-arabic: var(--font-arabic);
+  
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -91,275 +104,191 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-
-  --color-success: var(--success);
-  --color-success-foreground: var(--success-foreground);
-  --color-warning: var(--warning);
-  --color-warning-foreground: var(--warning-foreground);
-
+  
   --color-ai-primary: var(--ai-primary);
   --color-ai-secondary: var(--ai-secondary);
-
-  --radius-lg: var(--radius);
-  --radius-md: calc(var(--radius) - 4px);
-  --radius-sm: calc(var(--radius) - 8px);
-
-  --breakpoint-xs: 475px;
-  --breakpoint-2xl: 1600px; /* Increased to 1600px for larger desktops */
-
-  --animate-in: animate-in 0.3s ease-out;
-  --animate-out: animate-out 0.3s ease-in;
-  --animate-fade-in: fade-in 0.3s ease-out;
-  --animate-zoom-in: zoom-in 0.3s ease-out;
-}
-
-@keyframes animate-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes animate-out {
-  from { opacity: 1; }
-  to { opacity: 0; }
-}
-
-@keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes zoom-in {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
+  
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+  
+  --shadow-premium: 0 10px 30px -10px rgba(0, 0, 0, 0.05);
+  --shadow-glow: 0 0 20px -5px var(--color-primary);
+  --shadow-3xl: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 }
 
 @layer base {
+  * {
+    @apply border-border;
+  }
   body {
-    @apply bg-background text-foreground antialiased selection:bg-primary/20 transition-colors duration-500;
-    font-feature-settings: "cv02", "cv03", "cv04", "ss01";
-    -webkit-tap-highlight-color: transparent;
+    @apply bg-background text-foreground antialiased;
+    font-family: var(--font-sans),sans-serif;
   }
 
-  /* Smooth Custom Scrollbar */
-  ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+  h1, h2, h3, h4 {
+    font-family: var(--font-heading),sans-serif;
+    @apply font-bold tracking-tight;
   }
 
-  ::-webkit-scrollbar-track {
-    background: transparent;
+  [dir="rtl"] body {
+    font-family: var(--font-arabic),sans-serif;
   }
 
-  ::-webkit-scrollbar-thumb {
-    @apply bg-muted-foreground/10 rounded-full transition-colors hover:bg-muted-foreground/20;
-  }
+  /* --- GLOBAL TREE HARMONIZATION --- */
+  
+  /* Tables */
+  table { @apply w-full border-collapse; }
+  th { @apply bg-muted/30 text-muted-foreground font-black uppercase tracking-widest text-[10px] p-4 text-start; }
+  td { @apply p-4 border-b border-border/50; }
+  tr:hover td { @apply bg-primary/[0.02] transition-colors; }
 
-  .dark ::-webkit-scrollbar-thumb {
-    @apply bg-white/5 hover:bg-white/10;
-  }
-
-  .dark body {
-    background-image:
-      radial-gradient(at 0% 0%, hsla(250, 100%, 75%, 0.015) 0px, transparent 50%),
-      radial-gradient(at 100% 100%, hsla(280, 100%, 75%, 0.015) 0px, transparent 50%);
+  /* Inputs & Rings */
+  input, textarea, select {
+    @apply focus-visible:ring-offset-0 focus-visible:ring-4 focus-visible:ring-primary/10 transition-all;
+    outline: none !important;
   }
 }
 
-/* --- PREMIUM UTILITIES --- */
-
-.glass-shine {
-  @apply relative overflow-hidden transition-all duration-300;
-  @apply bg-white/40 border-black/[0.04] shadow-sm;
-  backdrop-filter: blur(16px);
-  box-shadow:
-    0 4px 20px -5px rgba(0, 0, 0, 0.02),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.5);
+@layer utilities {
+  .bg-popover { background-color: var(--popover) !important; }
+  .text-popover-foreground { color: var(--popover-foreground) !important; }
 }
 
-.dark .glass-shine {
-  @apply bg-zinc-900/30 border-white/5 shadow-none;
-  backdrop-filter: blur(24px);
-  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.03);
+/* --- DESIGNER UTILITIES --- */
+
+.glass-card {
+  @apply bg-card/40 backdrop-blur-3xl border border-border/80 dark:border-white/5;
+  box-shadow: 
+    0 20px 50px -15px rgba(0, 0, 0, 0.1),
+    inset 0 1px 1px rgba(255, 255, 255, 0.4);
 }
 
-.page-title {
-  @apply text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black tracking-tight mb-6;
-  background: linear-gradient(135deg, var(--foreground) 60%, var(--primary));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+.dark .glass-card {
+  box-shadow: 
+    0 30px 60px -20px rgba(0, 0, 0, 0.8),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
-.dark .page-title {
-  background: linear-gradient(135deg, #fff 70%, var(--primary));
-  -webkit-background-clip: text;
+.text-gradient {
+  @apply bg-clip-text text-transparent bg-gradient-to-br from-foreground via-foreground to-primary/50;
+  position: relative;
+  z-index: 10;
 }
 
-/* AI PREMIUM CARDS & BORDERS */
 .ai-card-premium {
-  @apply relative border-none shadow-xl;
-  background: linear-gradient(var(--card), var(--card)) padding-box,
-              linear-gradient(135deg, #6366f1, #a855f7, #ec4899) border-box;
-  border: 1px solid transparent;
+  @apply relative overflow-hidden border-none bg-card/60 backdrop-blur-2xl;
+  box-shadow: 
+    0 20px 40px -15px rgba(0, 0, 0, 0.1),
+    0 0 0 1px hsla(var(--ai-primary-hsl), 0.1);
 }
 
 .dark .ai-card-premium {
-  background: linear-gradient(var(--card), var(--card)) padding-box,
-              linear-gradient(135deg, #818cf8, #c084fc, #f472b6) border-box;
-  box-shadow: 0 0 40px -10px rgba(99, 102, 241, 0.1);
+  background: linear-gradient(to bottom right, hsla(var(--ai-primary-hsl), 0.05), transparent);
+  box-shadow: 
+    0 30px 60px -20px rgba(0, 0, 0, 0.6),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.03);
 }
 
 .ai-gradient-border {
-  background: linear-gradient(var(--card), var(--card)) padding-box,
-              linear-gradient(135deg, #6366f1, #a855f7, #ec4899) border-box;
-  border: 1px solid transparent;
-}
-
-.dark .ai-gradient-border {
-  background: linear-gradient(var(--card), var(--card)) padding-box,
-              linear-gradient(135deg, #818cf8, #c084fc, #f472b6) border-box;
-}
-
-/* SHINE ANIMATION */
-@keyframes shine {
-  from { transform: translateX(-100%); }
-  to { transform: translateX(100%); }
-}
-
-@keyframes shine-rtl {
-  from { transform: translateX(100%); }
-  to { transform: translateX(-100%); }
-}
-
-.hover-shine {
   position: relative;
-  overflow: hidden;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(to bottom right, var(--color-ai-primary), transparent, var(--color-primary));
 }
 
-.hover-shine::after {
-  content: "";
+.ai-glow {
+  @apply absolute -top-20 -right-20 w-64 h-64 bg-ai-primary/10 blur-[100px] pointer-events-none rounded-full;
+}
+
+/* --- THE BRUTE-FORCE PORTAL FIX --- */
+/* 
+  Radix portals (used by Shadcn) render elements at the root of the document body, 
+  outside the main .dark class tree. This causes them to lose access to CSS variables 
+  defined within .dark, leading to unstyled or incorrectly styled popovers/menus. 
+  This fix explicitly targets the portal elements when dark mode is active.
+*/
+/* Target the root HTML tag to ensure variables are available everywhere */
+html.dark [data-radix-portal] {
+  --popover: 224 10% 10%;
+  --popover-foreground: 224 10% 94%;
+  --border: 224 10% 16%;
+}
+
+/* Hard-coded selectors for the highest possible priority */
+html.dark [data-slot="select-content"],
+html.dark [data-slot="dropdown-menu-content"],
+html.dark [data-slot="popover-content"] {
+  background-color: hsl(224 10% 10%) !important;
+  color: hsl(224 10% 94%) !important;
+  border: 1px solid hsl(224 10% 16%) !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.9) !important;
+}
+
+html.dark [data-slot="select-item"],
+html.dark [role="option"],
+html.dark [data-slot="dropdown-menu-item"] {
+  color: hsl(224 10% 94%) !important;
+}
+
+html.dark [data-slot="select-item"][data-highlighted],
+html.dark [data-slot="select-item"]:focus,
+html.dark [role="option"][data-highlighted],
+html.dark [data-slot="dropdown-menu-item"]:focus {
+  background-color: hsl(224 10% 12%) !important;
+  color: hsl(224 10% 94%) !important;
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.sidebar-glass {
+  @apply bg-white/95 dark:bg-card backdrop-blur-3xl border-r border-border/80 dark:border-white/5;
+  box-shadow: 10px 0 30px -15px rgba(0, 0, 0, 0.05);
+}
+
+.dark .sidebar-glass {
+  box-shadow: 10px 0 50px -10px rgba(0, 0, 0, 0.8);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@keyframes section-highlight {
+  0% { box-shadow: 0 0 0 0 hsla(var(--primary-hsl), 0); }
+  30% { box-shadow: 0 0 0 10px hsla(var(--primary-hsl), 0.1); border-color: var(--primary); }
+  100% { box-shadow: 0 0 0 0 hsla(var(--primary-hsl), 0); }
+}
+
+.highlight-section {
+  animation: section-highlight 3s ease-out;
+}
+
+/* --- CUSTOM SCROLLBAR --- */
+.custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+.custom-scrollbar::-webkit-scrollbar-track { @apply bg-transparent; }
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  @apply bg-muted-foreground/10 rounded-full hover:bg-muted-foreground/20 transition-colors;
+}
+
+.dark body {
+  background-color: #020203; /* True Premium Midnight */
+  background-image: 
+    radial-gradient(circle at 50% -20%, hsla(245, 100%, 70%, 0.04) 0%, transparent 50%);
+  background-attachment: fixed;
+}
+
+.dashboard-glow {
   position: absolute;
-  top: 0; left: 0; width: 100%; height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.05),
-    transparent
-  );
-  transform: translateX(-100%);
+  top: 0; left: 0; right: 0; height: 500px;
+  background: radial-gradient(circle at 50% 0%, hsla(245, 100%, 70%, 0.02), transparent 70%);
   pointer-events: none;
-}
-
-[dir="rtl"] .hover-shine::after {
-  transform: translateX(100%);
-}
-
-.hover-shine:hover::after {
-  animation: shine 1s ease-in-out;
-}
-
-[dir="rtl"] .hover-shine:hover::after {
-  animation: shine-rtl 1s ease-in-out;
-}
-
-
-/* --- COMPONENT POLISH --- */
-[data-slot="button"] {
-  @apply active:scale-95 transition-all duration-300;
-}
-
-[data-slot="card"] {
-  @apply transition-all duration-300 border-black/[0.05] dark:border-white/[0.05];
-}
-
-[data-slot="table-container"] {
-  @apply border-black/[0.05] dark:border-white/[0.05];
-}
-
-[data-slot="table-row"].cursor-pointer:hover {
-  @apply bg-muted/30 transition-colors;
-}
-
-/* --- TABS REFINEMENT --- */
-[data-slot="tabs-list"] {
-  @apply bg-muted/40 p-1 rounded-xl border border-black/[0.03] dark:border-white/[0.03] gap-1;
-}
-
-[data-slot="tabs-trigger"] {
-  @apply rounded-lg font-bold transition-all duration-300 px-4 py-2;
-}
-
-[data-slot="tabs-trigger"][data-state="active"] {
-  @apply bg-background text-primary shadow-sm border-none;
-}
-
-/* --- SCROLLBAR HIDE UTILITY --- */
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-/* --- DIALOG REFINEMENT --- */
-[data-slot="dialog-content"] {
-  @apply rounded-2xl border-none shadow-2xl bg-background/95 backdrop-blur-xl;
-  animation: zoom-in 0.3s ease-out;
-}
-
-[data-slot="dialog-overlay"] {
-  @apply bg-black/40 backdrop-blur-sm;
-  animation: fade-in 0.3s ease-out;
-}
-
-.bg-dot-pattern {
-  background-image: radial-gradient(circle, var(--border) 1px, transparent 1px);
-  background-size: 24px 24px;
-}
-
-.prose {
-  @apply max-w-none;
-}
-
-.prose p {
-  @apply leading-relaxed mb-4 text-foreground/90;
-}
-
-.prose h1, .prose h2, .prose h3 {
-  @apply font-black tracking-tight text-foreground mt-6 mb-4;
-}
-
-/* --- 3D FLASHCARD SYSTEM --- */
-.perspective-1000 {
-  perspective: 1000px;
-}
-
-.preserve-3d {
-  transform-style: preserve-3d;
-}
-
-.backface-hidden {
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-}
-
-.rotate-y-180 {
-  transform: rotateY(180deg);
-}
-
-/* --- PRINT SYSTEM --- */
-@media print {
-  .no-print {
-    display: none !important;
-  }
-  .print-only {
-    display: block !important;
-  }
-  body {
-    background: white !important;
-    color: black !important;
-  }
-  .page-break {
-    page-break-before: always;
-  }
+  z-index: 0;
 }

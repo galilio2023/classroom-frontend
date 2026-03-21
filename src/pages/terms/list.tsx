@@ -85,11 +85,13 @@ export default function TermsList() {
     sorters: [{ field: "startDate", order: "desc" }],
   });
 
-  const terms = useMemo(() => query.data?.data || [], [query.data?.data]);
-  const isLoading = query.isLoading;
+  const terms = query.data?.data || [];
+  const isLoading = query.isPending;
 
   const { mutate: update, mutation: updateMutation } = useUpdate();
+  
   const { mutate: create, mutation: createMutation } = useCreate();
+  
   const { mutate: deleteMutation } = useDelete();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
 
@@ -166,8 +168,8 @@ export default function TermsList() {
     if (!terms.length) return { total: 0, active: 0, upcoming: 0 };
     return {
       total: terms.length,
-      active: terms.filter((t: AcademicTerm) => t.status === "active").length,
-      upcoming: terms.filter((t: AcademicTerm) => t.status === "upcoming")
+      active: terms.filter((t: any) => t.status === "active").length,
+      upcoming: terms.filter((t: any) => t.status === "upcoming")
         .length,
     };
   }, [terms]);
@@ -348,7 +350,7 @@ export default function TermsList() {
         <div className="relative min-h-[400px]">
           {isLoading ? (
             <div className="space-y-4">
-              {Array.from({ length: 5 }).map((_, i) => (
+              {Array.from({ length: 5 }).map((_: any, i: any) => (
                 <Card key={i} className="p-6 flex flex-col md:flex-row items-center gap-6 border-border/20 bg-background/50">
                   <Skeleton className="h-20 w-20 rounded-3xl shrink-0" />
                   <div className="flex-1 space-y-4 w-full">
@@ -382,7 +384,7 @@ export default function TermsList() {
           ) : (
             <div className="space-y-4">
               <AnimatePresence mode="popLayout">
-                {terms.map((term, index) => {
+                {terms.map((term: any, index: any) => {
                   const startDate = dayjs(term.startDate);
                   const endDate = dayjs(term.endDate);
 
@@ -518,7 +520,7 @@ export default function TermsList() {
                               <MoreHorizontal className="h-5 w-5" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-64 p-2 rounded-3xl">
+                        <DropdownMenuContent align="end" className="w-64 p-2 rounded-3xl bg-white dark:bg-[#09090b] opacity-100 backdrop-blur-none border border-border/50 shadow-2xl">
                             <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/40 px-3 py-3">{t("assignments.list.labels.options")}</DropdownMenuLabel>
                             <DropdownMenuItem className="rounded-xl gap-3 py-3 cursor-pointer">
                               <div className="p-2 rounded-lg bg-primary/10 text-primary">

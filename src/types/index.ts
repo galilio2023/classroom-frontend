@@ -287,6 +287,8 @@ export type ClassListItem = Pick<
   | "color"
   | "enrollments"
 > & {
+  isEnrolled?: boolean;
+  isTeacherAssigned?: boolean;
   subject?: {
     name: string;
     department?: {

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useCustom, useCustomMutation, useGetIdentity } from "@refinedev/core";
 import { User } from "@/types";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
@@ -10,12 +10,12 @@ import { Send, Search, MessageCircle, MoreVertical, Paperclip, ChevronLeft } fro
 import { formatDistanceToNow } from "date-fns";
 import { ar as arLocale, enUS as enLocale } from "date-fns/locale";
 import { cn } from "@/lib/utils";
-import { io, Socket } from "socket.io-client";
-import { SOCKET_URL } from "@/config";
 import { Badge } from "@/components/ui/badge";
 import { useTranslation } from "react-i18next";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import usePageTitle from "@/hooks/use-page-title";
+import { useSearchParams } from "react-router-dom";
+import { socket, connectSocket } from "@/lib/socket";
 
 interface Message {
     id: number;
@@ -51,12 +51,21 @@ const MessagesPage = () => {
     const isAr = i18n.language === 'ar';
     usePageTitle(t("messages.title"));
     const { data: identity } = useGetIdentity<User>();
+    const [searchParams] = useSearchParams();
+    const targetUserId = searchParams.get("userId");
+    
     const [selectedUser, setSelectedUser] = useState<Conversation["user"] | null>(null);
     const [messageInput, setMessageInput] = useState("");
-    const messagesEndRef = useRef<HTMLDivElement>(null); // Renamed for clarity
-    const [_socket, setSocket] = useState<Socket | null>(null);
+    const messagesEndRef = useRef<HTMLDivElement>(null); 
 
     const dateLocale = isAr ? arLocale : enLocale;
+    
+    // Unified Socket Initialization
+    useEffect(() => {
+        if (identity) {
+            void connectSocket();
+        }
+    }, [identity]);
 
     // Fetch Conversations
     const { result: conversationsResult, query: { refetch: refetchConversations, isLoading: isLoadingConversations } } = useCustom<{ data: Conversation[] }>({
@@ -67,6 +76,33 @@ const MessagesPage = () => {
             refetchInterval: 10000 
         }
     });
+
+    const conversations = conversationsResult?.data?.data || [];
+
+    // Auto-select user from searchParams (Notification deep-link)
+    useEffect(() => {
+        if (targetUserId && conversations.length > 0) {
+            const existingConv = conversations.find(c => c.user.id === targetUserId);
+            if (existingConv) {
+                setSelectedUser(existingConv.user);
+            }
+        }
+    }, [targetUserId, conversations]);
+
+    // Fetch Target User if not in conversations (Start new chat)
+    const { result: targetUserResult } = useCustom<{ data: Conversation["user"] }>({
+        url: `/messages/user/${targetUserId}`,
+        method: "get",
+        queryOptions: {
+            enabled: !!targetUserId && !conversations.find(c => c.user.id === targetUserId),
+        }
+    });
+
+    useEffect(() => {
+        if (targetUserResult?.data?.data) {
+            setSelectedUser(targetUserResult.data.data);
+        }
+    }, [targetUserResult]);
 
     // Fetch Messages for Selected User
     const { result: messagesResult, query: { refetch: refetchMessages, isLoading: isLoadingMessages } } = useCustom<{ data: Message[] }>({
@@ -83,18 +119,18 @@ const MessagesPage = () => {
     // Socket Connection
     useEffect(() => {
         if (!identity?.id) return;
-        const newSocket = io(SOCKET_URL, { query: { userId: identity.id }, withCredentials: true });
-        setSocket(newSocket);
 
-        newSocket.on("notification", (notification: any) => {
+        const handleMsgNotification = (notification: any) => {
              if (notification.type === "message") {
                  void refetchConversations();
                  if (selectedUser) void refetchMessages();
              }
-        });
+        };
+
+        socket.on("notification", handleMsgNotification);
 
         return () => {
-            newSocket.disconnect();
+            socket.off("notification", handleMsgNotification);
         };
     }, [identity?.id, selectedUser, refetchConversations, refetchMessages]);
 
@@ -127,7 +163,6 @@ const MessagesPage = () => {
         );
     };
 
-    const conversations = conversationsResult?.data?.data || [];
     const messages = messagesResult?.data?.data || [];
 
     return (
@@ -137,7 +172,6 @@ const MessagesPage = () => {
                 <motion.div
                     initial={{ opacity: 0, x: isAr ? 20 : -20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: isAr ? 20 : -20 }}
                     transition={{ duration: 0.2 }}
                     className={cn(
                         "md:col-span-1 lg:col-span-2 h-full flex flex-col border-none shadow-xl bg-card/50 backdrop-blur-3xl rounded-[2.5rem]",
@@ -218,7 +252,6 @@ const MessagesPage = () => {
                 <motion.div
                     initial={{ opacity: 0, x: isAr ? -20 : 20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: isAr ? -20 : 20 }}
                     transition={{ duration: 0.2 }}
                     className={cn(
                         "md:col-span-3 lg:col-span-3 h-full flex flex-col border-none shadow-xl bg-card/50 backdrop-blur-3xl rounded-[2.5rem]",
@@ -279,7 +312,7 @@ const MessagesPage = () => {
                                                             "max-w-[70%] rounded-2xl px-4 py-2 text-sm md:text-base shadow-sm",
                                                             isMe
                                                                 ? "bg-primary text-primary-foreground ltr:rounded-br-none rtl:rounded-bl-none"
-                                                                : "bg-white dark:bg-zinc-800 border border-border/40 ltr:rounded-bl-none rtl:rounded-br-none"
+                                                                : "bg-white dark:bg-muted/10 border border-border/40 ltr:rounded-bl-none rtl:rounded-br-none"
                                                         )}
                                                     >
                                                         <p className="text-start leading-relaxed">{msg.content}</p>

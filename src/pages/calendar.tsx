@@ -88,7 +88,7 @@ export const CalendarPage = () => {
   const isTeacher = identity?.role === UserRole.TEACHER;
 
   // Custom query to fetch all schedules and deadlines
-  const calendarQuery = useCustom<CalendarEvent[], HttpError>({
+  const { query: calendarQueryResult } = useCustom<CalendarEvent[], HttpError>({
     url: "/calendar/events",
     method: "get",
     queryOptions: {
@@ -101,7 +101,7 @@ export const CalendarPage = () => {
     data: calendarResult,
     isLoading,
     refetch,
-  } = calendarQuery.query;
+  } = calendarQueryResult;
 
   const calendarData = calendarResult?.data || [];
 
@@ -111,7 +111,7 @@ export const CalendarPage = () => {
     }
   }, [identity, refetch]);
 
-  const { result: classesData } = useList<Class>({
+  const { query: { data: classesData } } = useList<Class>({
     resource: "classes",
     queryOptions: {
       enabled: isTeacher,
@@ -125,8 +125,9 @@ export const CalendarPage = () => {
     ],
   });
 
-  const { mutate: generateSchedule, mutation: isGenerating } =
+  const { mutate: generateSchedule, mutation } =
     useCustomMutation<any>();
+  const isGenerating = mutation.isPending;
 
   const handleGenerateSchedule = () => {
     if (!selectedClassId) {
@@ -286,7 +287,7 @@ export const CalendarPage = () => {
                             placeholder={t("calendar.selectClass")}
                         />
                         </SelectTrigger>
-                        <SelectContent className="rounded-2xl border-none shadow-2xl p-2">
+                        <SelectContent className="rounded-2xl bg-white dark:bg-[#09090b] opacity-100 backdrop-blur-none border border-border/50 shadow-2xl p-2">
                         {classesData?.data?.map((c: Class) => (
                             <SelectItem
                             key={c.id}
@@ -316,9 +317,9 @@ export const CalendarPage = () => {
                     size="lg"
                     className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-10 bg-ai-primary hover:bg-ai-primary/90 text-white shadow-xl shadow-ai-primary/20"
                     onClick={handleGenerateSchedule}
-                    disabled={isGenerating.isPending || !selectedClassId}
+                    disabled={isGenerating || !selectedClassId}
                     >
-                    {isGenerating.isPending ? (
+                    {isGenerating ? (
                         <>
                         <Loader2 className="h-5 w-5 mr-3 animate-spin" />
                         {t("buttons.processing")}
@@ -344,7 +345,7 @@ export const CalendarPage = () => {
             animate={{ opacity: 1, x: 0 }}
             className="lg:col-span-8"
         >
-            <Card className="rounded-[2.5rem] border border-border/40 shadow-2xl shadow-black/5 bg-card/40 backdrop-blur-3xl overflow-hidden p-4 md:p-8 lg:p-12">
+            <Card className="rounded-[2.5rem] border border-border/50 shadow-2xl bg-white dark:bg-[#09090b] opacity-100 backdrop-blur-none overflow-hidden p-4 md:p-8 lg:p-12">
             <Calendar
                 mode="single"
                 selected={selectedDate}
@@ -428,7 +429,7 @@ export const CalendarPage = () => {
             animate={{ opacity: 1, x: 0 }}
             className="lg:col-span-4"
         >
-          <Card className="rounded-[2.5rem] border border-border/40 shadow-2xl shadow-black/5 bg-card/40 backdrop-blur-3xl overflow-hidden sticky top-24">
+          <Card className="rounded-[2.5rem] border border-border/50 shadow-2xl bg-white dark:bg-[#09090b] opacity-100 backdrop-blur-none overflow-hidden sticky top-24">
             <CardHeader className="p-8 md:p-10 pb-6 md:pb-8 border-b border-border/40 bg-muted/20">
               <div className="flex flex-col gap-4">
                 <div className="flex items-center gap-3">

@@ -76,10 +76,9 @@ const EnrollmentsList = () => {
   
   const { create, show } = useNavigation();
   const { mutate: unenroll } = useDelete();
-  const { mutate: updateStatus, mutation: updateMutation } = useCustomMutation();
+  const { mutate: updateStatus, mutation } = useCustomMutation();
+  const isUpdating = mutation.isPending;
   const invalidate = useInvalidate();
-
-  const isUpdating = updateMutation.isPending;
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
@@ -266,7 +265,7 @@ const EnrollmentsList = () => {
                     <SelectTrigger className="w-40 border-none h-10 focus:ring-0 shadow-none font-black text-[10px] uppercase tracking-widest">
                       <SelectValue placeholder={t("enrollments.allStatus")} />
                     </SelectTrigger>
-                    <SelectContent className="rounded-2xl border-none shadow-2xl">
+                    <SelectContent className="rounded-2xl bg-white dark:bg-[#09090b] opacity-100 backdrop-blur-none border border-border/50 shadow-2xl">
                       <SelectItem value="all" className="rounded-xl font-bold">{t("enrollments.allStatus")}</SelectItem>
                       <SelectItem value="pending" className="rounded-xl font-bold">{t("status.upcoming")}</SelectItem>
                       <SelectItem value="approved" className="rounded-xl font-bold">{t("status.active")}</SelectItem>
@@ -432,7 +431,7 @@ const EnrollmentsList = () => {
                                       <MoreHorizontal className="h-5 w-5" />
                                   </Button>
                               </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className="w-56 rounded-[1.5rem] p-2">
+                              <DropdownMenuContent align="end" className="w-56 rounded-[1.5rem] p-2 bg-white dark:bg-[#09090b] opacity-100 backdrop-blur-none border border-border/50 shadow-2xl">
                                   <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-3 py-2">{t("enrollments.options")}</DropdownMenuLabel>
                                   <DropdownMenuItem onClick={() => show("users", enrollment.student.id)} className="rounded-xl gap-3 py-3 cursor-pointer">
                                       <Eye className="h-4 w-4 text-primary" />
@@ -464,7 +463,7 @@ const EnrollmentsList = () => {
       </ListView>
 
       <AlertDialog open={deleteTarget !== null} onOpenChange={() => setDeleteTarget(null)}>
-        <AlertDialogContent className="rounded-[2.5rem] border-none shadow-2xl bg-card/95 backdrop-blur-xl">
+        <AlertDialogContent className="rounded-[2.5rem] border border-border/50 shadow-2xl bg-white dark:bg-[#09090b] opacity-100 backdrop-blur-none">
           <AlertDialogHeader className="space-y-4">
             <div className="p-4 rounded-2xl bg-destructive/10 text-destructive w-fit">
               <Trash2 className="h-8 w-8" />

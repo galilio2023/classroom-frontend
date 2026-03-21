@@ -72,7 +72,7 @@ const DepartmentsList = () => {
 
   const { query } = useList<Department>({
     resource: "departments",
-    pagination: { pageSize: 1000, mode: "server" },
+    pagination: { pageSize: 50, mode: "server" },
     filters,
     sorters: [{ field: "id", order: "desc" }],
     meta: {
@@ -346,7 +346,7 @@ const DepartmentsList = () => {
                                       <MoreHorizontal className="h-4 w-4" />
                                   </Button>
                               </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className="w-48 rounded-xl p-1">
+                              <DropdownMenuContent align="end" className="w-48 rounded-xl p-1 bg-white dark:bg-[#09090b] opacity-100 backdrop-blur-none border border-border/50 shadow-2xl">
                                   <DropdownMenuLabel className="text-[9px] font-black uppercase tracking-widest text-muted-foreground px-2 py-1.5">{t("assignments.list.labels.options")}</DropdownMenuLabel>
                                   <DropdownMenuItem onClick={() => edit("departments", department.id)} className="rounded-lg gap-2 py-2 cursor-pointer">
                                       <Pencil className="h-3.5 w-3.5 text-primary" />
@@ -378,7 +378,7 @@ const DepartmentsList = () => {
       </ListView>
 
       <AlertDialog open={deleteTarget !== null} onOpenChange={() => setDeleteTarget(null)}>
-        <AlertDialogContent className="rounded-[2.5rem] border-none shadow-2xl bg-card/95 backdrop-blur-xl text-start">
+        <AlertDialogContent className="rounded-[2.5rem] border border-border/50 shadow-2xl bg-white dark:bg-[#09090b] opacity-100 backdrop-blur-none text-start">
           <AlertDialogHeader className="space-y-4 text-start">
             <div className="p-4 rounded-2xl bg-destructive/10 text-destructive w-fit">
               <Trash2 className="h-8 w-8" />

@@ -71,8 +71,8 @@ const ResourcesListPage = () => {
   const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
 
   const { edit, create, show } = useNavigation();
-  const { mutate: deleteMutation, mutation } = useDelete();
-  const isDeleteLoading = mutation.isPending;
+  const { mutate: deleteMutation, mutation: deleteMutationObj } = useDelete();
+  const isDeleteLoading = deleteMutationObj.isPending;
 
   const filters = useMemo(() => {
     const f = [];
@@ -82,10 +82,14 @@ const ResourcesListPage = () => {
     if (selectedTerm) {
         f.push({ field: "termId", operator: "eq" as const, value: selectedTerm.id });
     }
+    // IMPORTANT: Filter resources by teacherId if the current user is a staff member (teacher)
+    if (isStaff && identity?.id) {
+      f.push({ field: "teacherId", operator: "eq" as const, value: identity.id });
+    }
     return f;
-  }, [searchQuery, selectedTerm]);
+  }, [searchQuery, selectedTerm, isStaff, identity?.id]); // Added isStaff and identity.id to dependencies
 
-  const { query: { data: resourcesData, isLoading } } = useList<Resource>({
+  const { query } = useList<Resource>({
     resource: "resources",
     pagination: { pageSize: 50, mode: "server" },
     filters,
@@ -94,6 +98,8 @@ const ResourcesListPage = () => {
       populate: ["class"]
     }
   });
+
+  const { data: resourcesData, isPending: isLoading } = query;
 
   const resources = resourcesData?.data || [];
   const hasData = resources.length > 0;
@@ -255,7 +261,7 @@ const ResourcesListPage = () => {
         <div className="relative min-h-[400px]">
           {isLoading ? (
             <div className="space-y-4">
-              {Array.from({ length: 5 }).map((_, i) => (
+              {Array.from({ length: 5 }).map((_, i: any) => (
                 <Card key={i} className="p-6 flex flex-col md:flex-row items-center gap-6 border-border/20 bg-background/50">
                   <Skeleton className="h-20 w-20 rounded-3xl shrink-0" />
                   <div className="flex-1 space-y-4 w-full">
@@ -285,7 +291,7 @@ const ResourcesListPage = () => {
           ) : (
             <div className="space-y-4">
               <AnimatePresence mode="popLayout">
-                {resources.map((resource, index) => {
+                {resources.map((resource: any, index: any) => {
                   const uploadDate = dayjs(resource.createdAt);
                   const resourceColor = (resource as any).class?.color || "#6366f1";
                   
@@ -413,7 +419,7 @@ const ResourcesListPage = () => {
                                     <MoreHorizontal className="h-5 w-5" />
                                 </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-64 p-2 rounded-3xl">
+                            <DropdownMenuContent align="end" className="w-64 p-2 rounded-3xl bg-white dark:bg-[#09090b] opacity-100 backdrop-blur-none border border-border/50 shadow-2xl">
                                 <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/40 px-3 py-3">{t("resourcesPage.labels.options")}</DropdownMenuLabel>
                                 <DropdownMenuItem className="rounded-xl gap-3 py-3 cursor-pointer" asChild>
                                     <a href={resource.url} target="_blank" rel="noopener noreferrer">

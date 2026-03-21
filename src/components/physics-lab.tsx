@@ -279,7 +279,7 @@ export const PhysicsLab: React.FC<PhysicsLabProps> = ({
 
         {/* Canvas Area */}
         <div className="lg:col-span-3 relative group">
-          <Card className="rounded-[2.5rem] border-none shadow-2xl bg-white dark:bg-zinc-950 overflow-hidden">
+          <Card className="rounded-[2.5rem] border-none shadow-2xl bg-white dark:bg-muted/10 overflow-hidden">
             <canvas 
               ref={canvasRef} 
               width={800} 

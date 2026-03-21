@@ -75,11 +75,10 @@ const ProfileRequestsList = () => {
 
   const { show } = useNavigation();
   const { mutate: approve, mutation: approveMutation } = useCustomMutation();
-  const { mutate: reject, mutation: rejectMutation } = useCustomMutation();
-  const invalidate = useInvalidate();
-
   const isApproving = approveMutation.isPending;
+  const { mutate: reject, mutation: rejectMutation } = useCustomMutation();
   const isRejecting = rejectMutation.isPending;
+  const invalidate = useInvalidate();
 
   const filters = useMemo(() => {
     const f = [];
@@ -223,7 +222,7 @@ const ProfileRequestsList = () => {
                   <SelectTrigger className="w-40 border-none h-10 focus:ring-0 shadow-none font-black text-[10px] uppercase tracking-widest">
                     <SelectValue placeholder={t("enrollments.allStatus")} />
                   </SelectTrigger>
-                  <SelectContent className="rounded-2xl border-none shadow-2xl">
+                  <SelectContent className="rounded-2xl shadow-2xl bg-white dark:bg-[#09090b] opacity-100 backdrop-blur-none border border-border/50">
                     <SelectItem value="all" className="rounded-xl font-bold">{t("enrollments.allStatus")}</SelectItem>
                     <SelectItem value="pending" className="rounded-xl font-bold">{t("status.upcoming")}</SelectItem>
                     <SelectItem value="approved" className="rounded-xl font-bold">{t("status.active")}</SelectItem>
@@ -241,7 +240,7 @@ const ProfileRequestsList = () => {
           >
             {isLoading ? (
               <div style={{ height: '100%', width: '100%', position: 'relative' }}>
-                {Array.from({ length: 6 }).map((_, i) => (
+                {Array.from({ length: 6 }).map((_, i: any) => (
                   <div key={i} className="flex flex-col md:flex-row items-center p-8 border-b border-primary/5 gap-6">
                     <Skeleton className="h-14 w-14 rounded-2xl shrink-0" />
                     <div className="flex-1 space-y-3 w-full">
@@ -263,7 +262,7 @@ const ProfileRequestsList = () => {
               </div>
             ) : (
               <div style={{ height: `${rowVirtualizer.getTotalSize()}px`, width: '100%', position: 'relative' }}>
-                {rowVirtualizer.getVirtualItems().map((virtualItem) => {
+                {rowVirtualizer.getVirtualItems().map((virtualItem: any) => {
                   const request = requests[virtualItem.index];
                   if (!request) return null;
 
@@ -338,7 +337,7 @@ const ProfileRequestsList = () => {
 
                           {/* Changes Preview */}
                           <div className="mt-3 flex flex-wrap gap-2">
-                              {changedKeys.map(key => {
+                              {changedKeys.map((key: any) => {
                                   const isDoc = key === "verificationDocumentUrl";
                                   return (
                                       <div key={key} className="flex items-center gap-1.5 bg-muted/30 px-2 py-1 rounded-lg border border-primary/5">
@@ -399,7 +398,7 @@ const ProfileRequestsList = () => {
                                       <MoreHorizontal className="h-4 w-4" />
                                   </Button>
                               </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className="w-48 rounded-xl p-1">
+                              <DropdownMenuContent align="end" className="w-48 rounded-xl p-1 bg-white dark:bg-[#09090b] opacity-100 backdrop-blur-none border border-border/50 shadow-2xl">
                                   <DropdownMenuLabel className="text-[9px] font-black uppercase tracking-widest text-muted-foreground px-2 py-1.5">{t("assignments.list.labels.options")}</DropdownMenuLabel>
                                   <DropdownMenuItem onClick={() => show("users", request.user.id)} className="rounded-lg gap-2 py-2 cursor-pointer">
                                       <Eye className="h-3.5 w-3.5 text-primary" />

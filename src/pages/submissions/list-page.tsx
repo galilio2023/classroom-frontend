@@ -25,7 +25,7 @@ import { Submission, User as UserType, UserRole } from "@/types";
 import { Badge } from "@/components/ui/badge.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { GradingDialog } from "@/pages/assignments/grading-dialog";
+import { GradingDialog } from "@/features/assignments/pages/grading-dialog";
 import { useTerm } from "@/contexts/term-context";
 import { Card } from "@/components/ui/card";
 import { motion, AnimatePresence } from "framer-motion";
@@ -77,7 +77,7 @@ const SubmissionsListPage = () => {
     return f;
   }, [searchQuery]);
 
-  const { query: { data: submissionsData, isLoading } } = useList<Submission>({
+  const { query } = useList<Submission>({
     resource: "submissions",
     pagination: { pageSize: 1000, mode: "server" },
     filters,
@@ -87,7 +87,8 @@ const SubmissionsListPage = () => {
     }
   });
 
-  const submissions = submissionsData?.data || [];
+  const submissions = query.data?.data || [];
+  const isLoading = query.isLoading;
   const hasData = submissions.length > 0;
 
   const parentRef = useRef<HTMLDivElement>(null);
@@ -206,7 +207,7 @@ const SubmissionsListPage = () => {
           >
             {isLoading ? (
               <div className="p-8 space-y-6">
-                {Array.from({ length: 6 }).map((_, i) => (
+                {Array.from({ length: 6 }).map((_, i: any) => (
                   <div key={i} className="flex flex-col md:flex-row items-center gap-6">
                     <Skeleton className="h-14 w-14 rounded-2xl shrink-0" />
                     <div className="flex-1 space-y-3 w-full">
@@ -228,7 +229,7 @@ const SubmissionsListPage = () => {
               </div>
             ) : (
               <div style={{ height: `${rowVirtualizer.getTotalSize()}px`, width: '100%', position: 'relative' }}>
-                {rowVirtualizer.getVirtualItems().map((virtualItem) => {
+                {rowVirtualizer.getVirtualItems().map((virtualItem: any) => {
                   const submission = submissions[virtualItem.index];
                   const submissionDate = dayjs(submission.updatedAt);
                   const isGraded = submission.grade !== null;
@@ -351,7 +352,7 @@ const SubmissionsListPage = () => {
                                     <MoreHorizontal className="h-5 w-5" />
                                 </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-56 rounded-[1.5rem] p-2">
+                            <DropdownMenuContent align="end" className="w-56 rounded-[1.5rem] p-2 bg-white dark:bg-[#09090b] opacity-100 backdrop-blur-none border border-border/50 shadow-2xl">
                                 <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-3 py-2">{t("assignments.list.labels.options")}</DropdownMenuLabel>
                                 <DropdownMenuItem onClick={() => handleGradeClick(submission)} className="rounded-xl gap-3 py-3 cursor-pointer">
                                     <Eye className="h-4 w-4 text-primary" />

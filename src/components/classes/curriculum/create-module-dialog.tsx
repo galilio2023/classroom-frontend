@@ -38,17 +38,17 @@ export const CreateModuleDialog = ({
         <DialogHeader><DialogTitle>{t("buttons.createModule")}</DialogTitle></DialogHeader>
         <div className="space-y-4 py-4">
           <div className="grid gap-2">
-            <Label>{t("classes.form.className")}</Label>
+            <Label>{t("classes.curriculum.moduleName")}</Label>
             <Input 
-                placeholder={t("classes.form.classNamePlaceholder")}
+                placeholder={t("classes.curriculum.moduleNamePlaceholder")}
                 value={name} 
                 onChange={(e) => setName(e.target.value)} 
             />
           </div>
           <div className="grid gap-2">
-            <Label>{t("classes.form.description")}</Label>
+            <Label>{t("classes.curriculum.description")}</Label>
             <Textarea 
-                placeholder={t("classes.form.descriptionPlaceholder")}
+                placeholder={t("classes.curriculum.descriptionPlaceholder")}
                 value={description} 
                 onChange={(e) => setDescription(e.target.value)} 
             />

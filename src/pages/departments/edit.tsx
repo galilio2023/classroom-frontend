@@ -145,7 +145,7 @@ const DepartmentsEdit = () => {
                               <SelectValue placeholder="Select a teacher to lead this department" />
                             </SelectTrigger>
                           </FormControl>
-                          <SelectContent>
+                          <SelectContent className="bg-white dark:bg-[#09090b] opacity-100 backdrop-blur-none border border-border/50 shadow-2xl">
                             {teacherOptions.map((option) => (
                               <SelectItem key={option.value} value={option.value.toString()}>
                                 {option.label}

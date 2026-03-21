@@ -17,6 +17,8 @@ interface QRAttendanceProps {
   className?: string;
 }
 
+import { socket, connectSocket } from "@/lib/socket";
+
 export const QRAttendance = ({ classId, className }: QRAttendanceProps) => {
   const { t, i18n } = useTranslation();
   const isArabic = i18n.language === 'ar';
@@ -28,31 +30,24 @@ export const QRAttendance = ({ classId, className }: QRAttendanceProps) => {
   const DURATION = 300; // 5 minutes in seconds
   const { mutate: generateQR } = useCustomMutation();
 
-  useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (isActive && timeLeft > 0) {
-      timer = setInterval(() => {
-        setTimeLeft((prev) => prev - 1);
-      }, 1000);
-    } else if (isActive && timeLeft === 0) {
-      setIsActive(false);
-    }
-    return () => clearInterval(timer);
-  }, [isActive, timeLeft]);
+  // ... (timer logic)
 
   // Socket.io for real-time scan updates
   useEffect(() => {
     if (!isActive) return;
 
-    const socket = io(SOCKET_URL, { query: { classId }, withCredentials: true });
+    void connectSocket().then(() => {
+        socket.emit("join_class", { classId });
 
-    socket.on("attendance_scanned", (data: { studentName: string }) => {
-      setScannedCount((prev) => prev + 1);
-      toast.success(`${data.studentName} checked in!`);
+        socket.on("attendance_scanned", (data: { studentName: string }) => {
+            setScannedCount((prev) => prev + 1);
+            toast.success(`${data.studentName} checked in!`);
+        });
     });
 
     return () => {
-      socket.disconnect();
+      socket.off("attendance_scanned");
+      socket.emit("leave_class", { classId });
     };
   }, [isActive, classId]);
 

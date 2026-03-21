@@ -57,13 +57,13 @@ const GlobalLibraryPage = () => {
   const [fileUrl, setFileUrl] = useState("");
   const [filePublicId, setFilePublicId] = useState("");
 
-  const { result: resourcesResult, query: { isLoading, refetch } } = useList({
+  const { query: { data: resourcesResult, isLoading, refetch } } = useList({
     resource: "resources",
     pagination: { pageSize: 100, mode: "server" }
   });
 
-  const { mutate: createResource, mutation: createMutation } = useCustomMutation();
-  const isCreating = createMutation.isPending;
+  const { mutate: createResource, mutation } = useCustomMutation();
+  const isCreating = mutation.isPending;
   const { mutate: deleteResource } = useDelete();
 
   const handleUploadSuccess = (url: string, publicId: string) => {

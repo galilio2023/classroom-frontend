@@ -33,13 +33,19 @@ export function Layout({ children }: PropsWithChildren) {
     <ThemeProvider>
       <SidebarProvider>
         <Sidebar />
-        <SidebarInset className="flex flex-col min-h-screen bg-background/50">
+        <SidebarInset className="flex flex-col min-h-screen bg-background/50 relative overflow-hidden">
+          {/* Global Mesh Gradient Background */}
+          <div className="absolute inset-0 pointer-events-none -z-10 overflow-hidden">
+            <div className="absolute top-[-10%] start-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px] animate-pulse" />
+            <div className="absolute bottom-[-10%] end-[-10%] w-[40%] h-[40%] bg-ai-primary/5 rounded-full blur-[120px]" />
+          </div>
+          
           <OfflineBanner />
           <Header />
           <main className="flex-1 flex flex-col relative w-full overflow-x-hidden">
             <AnimatePresence mode="popLayout" initial={false}>
               <motion.div
-                key={pathname}
+                key={pathname.split('/')[1] || 'root'}
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -12 }}

@@ -12,7 +12,7 @@ export const scheduleSchema = z.object({
 export const classFormSchema = z.object({
   name: z.string().min(1).max(255),
   description: z.string().optional(),
-  subjectId: z.coerce.number().min(1),
+  subjectId: z.coerce.number().min(1).optional(), // Made optional
   termId: z.coerce.number().min(1),
   teacherId: z.string().min(1),
   capacity: z.coerce.number().min(1),
@@ -23,4 +23,28 @@ export const classFormSchema = z.object({
 
 // This is the schema for the creation form.
 // teacherId is made optional as it's not part of the form fields but added programmatically.
-export const classCreateFormSchema = classFormSchema.partial({ teacherId: true });
+export const classCreateFormSchema = classFormSchema
+  .partial({ teacherId: true })
+  .extend({
+    newSubjectName: z.string().min(1, "New subject name cannot be empty").optional(), // New field for creating a subject
+  })
+  .refine(
+    (data) => {
+      // Ensure either subjectId is provided OR newSubjectName is provided, but not both.
+      // And if newSubjectName is provided, subjectId must be undefined.
+      const hasSubjectId = data.subjectId !== undefined && data.subjectId !== null && data.subjectId !== 0;
+      const hasNewSubjectName = data.newSubjectName !== undefined && data.newSubjectName.trim() !== "";
+
+      if (hasSubjectId && hasNewSubjectName) {
+        return false; // Cannot have both
+      }
+      if (!hasSubjectId && !hasNewSubjectName) {
+        return false; // Must have at least one
+      }
+      return true;
+    },
+    {
+      message: "Please select an existing subject or enter a new subject name.",
+      path: ["subjectId"], // Attach error to subjectId field
+    }
+  );

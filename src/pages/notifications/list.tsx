@@ -113,14 +113,14 @@ const NotificationsListPage = () => {
     return f;
   }, [searchQuery]);
 
-  const {
-    query: { data: notificationsData, isLoading },
-  } = useList<Notification>({
+  const { query } = useList<Notification>({
     resource: "notifications",
     pagination: { pageSize: 50, mode: "server" },
     filters,
     sorters: [{ field: "createdAt", order: "desc" }],
   });
+
+  const { data: notificationsData, isLoading } = query;
 
   const notifications = notificationsData?.data || [];
   const hasData = notifications.length > 0;
@@ -266,7 +266,7 @@ const NotificationsListPage = () => {
         <div className="relative min-h-[400px]">
           {isLoading ? (
             <div className="space-y-4">
-              {Array.from({ length: 6 }).map((_, i) => (
+              {Array.from({ length: 6 }).map((_, i: any) => (
                 <Card key={i} className="p-6 flex items-center gap-6 border-border/20 bg-background/50">
                   <Skeleton className="h-14 w-14 rounded-2xl shrink-0" />
                   <div className="flex-1 space-y-3">
@@ -289,7 +289,7 @@ const NotificationsListPage = () => {
           ) : (
             <div className="space-y-4">
               <AnimatePresence mode="popLayout">
-                {notifications.map((notification, index) => {
+                {notifications.map((notification: any, index: any) => {
                   const createdAt = dayjs(notification.createdAt);
 
                   return (
@@ -433,7 +433,7 @@ const NotificationsListPage = () => {
                               <MoreHorizontal className="h-5 w-5" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-64 p-2 rounded-3xl">
+                          <DropdownMenuContent align="end" className="w-64 p-2 rounded-3xl bg-white dark:bg-[#09090b] opacity-100 backdrop-blur-none border border-border/50 shadow-2xl">
                             <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40 px-3 py-3">
                               {t("notifications.actions.options")}
                             </DropdownMenuLabel>
