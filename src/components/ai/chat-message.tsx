@@ -44,7 +44,8 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
             isPositive,
             metadata: {
                 messageLength: fullText.length,
-                role: message.role
+                role: message.role,
+                contentFingerprint: fullText.substring(0, 100) // Unique snippet for grouping
             }
         }
     });

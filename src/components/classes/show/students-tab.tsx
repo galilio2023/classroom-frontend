@@ -128,6 +128,20 @@ export const StudentsTab = ({
                   <span className="font-black text-xs md:text-sm tracking-tight truncate text-foreground">
                     {student.name}
                   </span>
+                  
+                  {isStaff && row.original.riskAssessment && row.original.riskAssessment.riskLevel !== "low" && (
+                    <Badge 
+                        variant="destructive" 
+                        className={cn(
+                            "border-none text-[7px] md:text-[8px] font-black uppercase tracking-tighter px-1.5 md:px-2 py-0 h-3.5 md:h-4 shrink-0 gap-1",
+                            row.original.riskAssessment.riskLevel === "critical" ? "bg-red-600 text-white animate-pulse" : 
+                            row.original.riskAssessment.riskLevel === "high" ? "bg-orange-600 text-white" : "bg-yellow-500 text-white"
+                        )}
+                    >
+                        <ShieldAlert className="h-2 w-2" />
+                        {row.original.riskAssessment.riskLevel}
+                    </Badge>
+                  )}
 
                   {/* 🧠 LEARNING DNA TOOLTIP (Staff Only) */}
                   {isStaff && student.persona && (

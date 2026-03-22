@@ -1,48 +1,50 @@
 <div align="center">
   <h1 style="font-size: 2.5em; font-weight: bold; margin-bottom: 5px;">Frontend: Tablawy OS (Classroom AI)</h1>
   <p style="font-size: 1.1em; color: #555;">
-    The world's first **Agentic UI** for Education. Decoupled, Intelligent, and Self-Aware.
+    The world's first **Agentic UI** for Education. Powered by **Refine v5** and **Gemini 3.1 Flash Lite**.
   </p>
 </div>
 
 <div align="center" style="margin-top: 20px; margin-bottom: 20px;">
   <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React" />
+  <img src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite" />
+  <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind" />
+  <img src="https://img.shields.io/badge/shadcn/ui-000000?style=for-the-badge&logo=shadcnui&logoColor=white" alt="Shadcn" />
   <img src="https://img.shields.io/badge/refine-1890FF?style=for-the-badge&logo=refine&logoColor=white" alt="Refine" />
-  <img src="https://img.shields.io/badge/Agentic_UI-Active-Gold" alt="Agentic UI" />
-  <img src="https://img.shields.io/badge/Framer_Motion-0055FF?style=for-the-badge&logo=framer&logoColor=white" alt="Framer Motion" />
 </div>
 
 ---
 
 ## 🦾 Agentic UI Features
 
-We have implemented an **Intelligence Bridge** between complex background agents and user-facing dashboards:
-
-*   🧹 **System Self-Reflection Card**: A high-level pulse on the main Admin Dashboard displaying the "Happiness Score" and the **Janitor Agent's** top priority fixes.
-*   🧬 **Student Learning DNA**: A pedagogical tooltip in the student roster that allows teachers to hover over a name and instantly see an AI-generated persona (Learning style, recurring struggles, and preferred tone).
-*   👍 **Feedback Loop**: Integrated 👍/👎 buttons across all AI components (Chat, Study Lab, Intervention) to collect real-time pedagogical sentiment.
+*   🧹 **System Self-Reflection Card**: Real-time health reports from the **Janitor Agent**.
+*   🧬 **Student Learning DNA**: Pedagogical tooltips in the student roster for instant personalization.
+*   👍 **Feedback Loop**: Integrated 👍/👎 sentiment tracking across all AI tools.
 
 ---
 
-## ✨ Core Intelligence Modules
+## 🏗️ Enterprise Development Patterns
 
-### 🛡️ The "Guardian Angel" Dashboard
-*   **Predictive Risk Visuals**: Real-time badges flagging students at risk based on weighted AI analysis.
-*   **AI Insight Modal**: Deep-dive analysis (Strengths, Weaknesses, Improvement Plan) for every at-risk student.
-*   **Agentic Interventions**: One-click AI-suggested encouragement tailored to the student's struggle.
+We strictly adhere to the following patterns:
 
-### 🧠 AI Study Lab & Memory Missions
-*   **Memory Booster**: Personalized **Spaced Repetition** list (SM-2) that greets students with "Daily Memory Missions."
-*   **Infinite Chat Memory**: Context-aware chat buddy that utilizes the backend's **Recursive Summarization** for long-term continuity.
-*   **Premium Visual Language**: Custom `SparkleLoader`, AI-glow borders, and metallic shine animations.
+1.  **Zero-Direct-Call Policy**: The frontend never calls AI SDKs directly. All requests use `useCustomMutation` to hit our secure backend proxy.
+2.  **Compound Component Architecture**: Large features (like the Study Lab) are broken into isolated, reusable pieces.
+3.  **Visual Identity (Rule 4)**: All AI features use `ai-primary`, `Sparkles` icons, and premium Framer Motion animations (`ai-pulse-soft`).
 
 ---
 
-## 🏗️ Architectural Blueprint
+## 📂 Project Structure
 
-*   **Refine v5 Core**: Enterprise-grade data fetching, caching, and state management.
-*   **Headless UI Logic**: Business logic extracted into custom hooks (e.g., `useAIChat`) for extreme maintainability.
-*   **SSE Streaming**: Real-time Server-Sent Events for a responsive, modern AI chat experience.
+```text
+src/
+├── components/       # Shared UI (Shadcn + Compound AI components)
+├── features/         # Domain-specific modules (AI, Dashboard, Classes)
+├── hooks/            # Custom Refine v5 and AI logic hooks
+├── lib/              # Utilities (CN, Axios, Web-Push)
+├── providers/        # Refine Providers (Auth, Data, AccessControl)
+└── types/            # Centralized TypeScript definitions
+```
 
 ---
 
@@ -62,10 +64,3 @@ We have implemented an **Intelligence Bridge** between complex background agents
     ```bash
     npm run dev
     ```
-
----
-
-## 🏛️ Enterprise Patterns
-*   **Optimistic UI Updates**: Instant local state changes for enrollment approvals.
-*   **RTL Optimization**: Full native support for the Arabic educational ecosystem.
-*   **Compound Components**: Reusable, isolated UI pieces for complex AI interactions.
