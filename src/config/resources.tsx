@@ -69,14 +69,14 @@ export const resources: ResourceProps[] = [
   { name: "report-card", list: "/student/report-card", meta: { group: "groups.progress", label: "resources.report-card.label", icon: <FileText />, roles: [UserRole.STUDENT] } }, // Student-specific
   { name: "progress", list: "/progress", meta: { group: "groups.progress", label: "resources.progress.label", icon: <TrendingUp />, roles: [UserRole.TEACHER, UserRole.STUDENT] } },
 
-  // --- TEACHER HUB ---
-  { name: "teacher-channel", list: "/teacher/channel", meta: { group: "groups.teacher-hub", label: "resources.teacher-channel.label", icon: <Tv />, roles: [UserRole.TEACHER] } }, // Removed ADMIN
-  { name: "teacher-subscriptions", list: "/teacher/subscriptions", meta: { group: "groups.teacher-hub", label: "resources.teacher-subscriptions.label", icon: <UserPlus />, roles: [UserRole.TEACHER, UserRole.STUDENT] } }, // Added STUDENT
-
   // --- STUDENT HUB ---
-  { name: "my-teachers", list: "/my-teachers", meta: { group: "groups.student-hub", label: "resources.my-teachers.label", icon: <GraduationCap />, roles: [UserRole.STUDENT] } }, // Removed ADMIN
+  { name: "my-teachers", list: "/my-teachers", meta: { group: "groups.student-hub", label: "resources.my-teachers.label", icon: <GraduationCap />, roles: [UserRole.STUDENT] } }, 
+  { name: "teacher-subscriptions", list: "/teacher/subscriptions", meta: { group: "groups.student-hub", label: "resources.followed-teachers.label", icon: <UserPlus />, roles: [UserRole.STUDENT] } },
   { name: "teacher-channels", list: "/discovery", meta: { group: "groups.student-hub", label: "resources.discovery.label", icon: <Tv />, roles: [UserRole.STUDENT] } },
 
+  // --- TEACHER HUB ---
+  { name: "teacher-channel", list: "/teacher/channel", meta: { group: "groups.teacher-hub", label: "resources.teacher-channel.label", icon: <Tv />, roles: [UserRole.TEACHER] } }, 
+  
   // --- ADMINISTRATION ---
   { name: "users", list: "/users", create: "/users/create", edit: "/users/edit/:id", show: "/users/show/:id", meta: { group: "groups.admin", label: "resources.users.label", icon: <ShieldCheck />, roles: [UserRole.ADMIN] } },
   { name: "departments", list: "/departments", create: "/departments/create", edit: "/departments/edit/:id", meta: { group: "groups.admin", label: "resources.departments.label", icon: <Building2 />, roles: [UserRole.ADMIN] } },

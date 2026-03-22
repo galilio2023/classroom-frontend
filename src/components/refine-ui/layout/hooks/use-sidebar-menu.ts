@@ -8,7 +8,7 @@ const ROLE_GROUP_PERMISSIONS: Record<string, UserRole[]> = {
   "groups.academic": [UserRole.TEACHER, UserRole.STUDENT],
   "groups.curriculum": [UserRole.TEACHER, UserRole.STUDENT],
   "groups.progress": [UserRole.TEACHER, UserRole.STUDENT],
-  "groups.teacher-hub": [UserRole.TEACHER, UserRole.STUDENT], // Added STUDENT for teacher-subscriptions
+  "groups.teacher-hub": [UserRole.TEACHER],
   "groups.student-hub": [UserRole.STUDENT],
 };
 

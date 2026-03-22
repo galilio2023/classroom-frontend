@@ -54,7 +54,7 @@ const SubmissionsListPage = () => {
   
   usePageTitle(t("resources.submissions.label"));
   const { data: identity } = useGetIdentity<UserType>();
-  const isStaff = identity?.role === UserRole.ADMIN || identity?.role === UserRole.TEACHER || identity?.role === UserRole.TA;
+  const isStaff = identity?.role === UserRole.ADMIN || identity?.role === UserRole.TEACHER;
   const { selectedTerm } = useTerm();
 
   const [searchQuery, setSearchQuery] = useState("");
