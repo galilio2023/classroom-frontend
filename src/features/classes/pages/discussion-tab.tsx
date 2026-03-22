@@ -18,6 +18,7 @@ import {
   Info,
   ArrowRight,
   Reply,
+  Trophy,
 } from "lucide-react";
 import { toast } from "sonner";
 import { ChatBubble } from "@/components/classes/chat-bubble";
@@ -84,12 +85,22 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
       void refetch();
     };
 
+    const handleDiscussionSolved = (payload: any) => {
+        toast.success(payload.message || "A question has been solved!", {
+            icon: <Trophy className="w-4 h-4 text-yellow-500" />,
+            duration: 5000,
+        });
+        void refetch();
+    };
+
     socket.on("new_discussion", handleNewDiscussion);
     socket.on("delete_discussion", handleDeleteDiscussion);
+    socket.on("discussion_solved", handleDiscussionSolved);
 
     return () => {
       socket.off("new_discussion", handleNewDiscussion);
       socket.off("delete_discussion", handleDeleteDiscussion);
+      socket.off("discussion_solved", handleDiscussionSolved);
     };
   }, [identity?.id, classId, refetch]);
 

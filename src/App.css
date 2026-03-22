@@ -300,3 +300,34 @@ html {
   pointer-events: none;
   z-index: 0;
 }
+
+/* --- PREMIUM AI ANIMATIONS --- */
+
+@keyframes ai-pulse-soft {
+  0% { box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.2); }
+  70% { box-shadow: 0 0 0 10px rgba(168, 85, 247, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(168, 85, 247, 0); }
+}
+
+.animate-ai-pulse {
+  animation: ai-pulse-soft 2s infinite;
+}
+
+@keyframes solved-shine {
+  from { transform: translateX(-100%) skewX(-15deg); }
+  to { transform: translateX(200%) skewX(-15deg); }
+}
+
+.solved-badge-shine {
+  position: relative;
+  overflow: hidden;
+}
+
+.solved-badge-shine::after {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; width: 50%; height: 100%;
+  background: linear-gradient(to right, transparent, rgba(255,255,255,0.3), transparent);
+  animation: solved-shine 3s infinite;
+}
+
