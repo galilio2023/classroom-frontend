@@ -33,20 +33,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-
-interface SystemHealthReport {
-  id: number;
-  reportDate: string;
-  statusCount: number;
-  feedbackCount: number;
-  diagnosis: string;
-  suggestedFixes: string[];
-  metadata: {
-    happinessScore: number;
-    posCount: number;
-    negCount: number;
-  };
-}
+import { SystemHealthReport } from "../types";
 
 const AIGovernanceList = () => {
   const { t, i18n } = useTranslation();
