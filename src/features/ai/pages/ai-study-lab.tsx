@@ -232,7 +232,7 @@ const AIStudyLab = () => {
               <div className="space-y-4 text-start">
                   <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary flex items-center gap-2">
                     <Zap className="h-3 w-3" />
-                    {t("classes.list.general")}
+                    {t("aiHub.studyLab.context.label")}
                   </Label>
                   <select
                     className="w-full h-12 rounded-xl bg-muted/50 border-none px-4 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none"

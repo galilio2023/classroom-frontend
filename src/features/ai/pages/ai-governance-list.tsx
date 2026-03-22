@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { ListResponse } from "@/types";
 import { HttpError } from "@refinedev/core";
 import { ColumnDef } from "@tanstack/react-table";
@@ -14,7 +14,10 @@ import {
   Calendar, 
   ChevronRight, 
   ShieldCheck,
-  BrainCircuit
+  BrainCircuit,
+  MessageSquare,
+  Wrench,
+  X
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
@@ -22,6 +25,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import dayjs from "dayjs";
 import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
 import usePageTitle from "@/hooks/use-page-title";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface SystemHealthReport {
   id: number;
@@ -41,6 +52,7 @@ const AIGovernanceList = () => {
   const { t, i18n } = useTranslation();
   usePageTitle(t("aiHub.governance.title"));
   const isAr = i18n.language === "ar";
+  const [selectedReport, setSelectedReport] = useState<SystemHealthReport | null>(null);
 
   const columns = useMemo<ColumnDef<SystemHealthReport>[]>(
     () => [
@@ -216,7 +228,10 @@ const AIGovernanceList = () => {
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
                         >
-                            <DataTable table={table} />
+                            <DataTable 
+                                table={table} 
+                                onRowClick={(row) => setSelectedReport(row)}
+                            />
                         </motion.div>
                     )}
                 </AnimatePresence>
@@ -246,6 +261,91 @@ const AIGovernanceList = () => {
               </p>
           </div>
       </div>
+
+      {/* Detail Modal */}
+      <Dialog open={!!selectedReport} onOpenChange={(open) => !open && setSelectedReport(null)}>
+          <DialogContent className="max-w-3xl rounded-[2rem] md:rounded-[3rem] border-none shadow-3xl bg-card/80 backdrop-blur-3xl p-0 overflow-hidden">
+              {selectedReport && (
+                  <div className="flex flex-col h-full max-h-[85vh]">
+                      <div className="p-8 md:p-12 bg-ai-primary/5 border-b border-border/40 relative">
+                          <div className="flex items-center gap-4 mb-4">
+                              <div className="p-3 rounded-2xl bg-ai-primary text-white shadow-lg shadow-ai-primary/20">
+                                  <BrainCircuit className="h-6 w-6" />
+                              </div>
+                              <div>
+                                  <DialogTitle className="text-2xl md:text-3xl font-black tracking-tight">
+                                      {t("aiHub.governance.auditReport")}
+                                  </DialogTitle>
+                                  <DialogDescription className="font-bold text-ai-primary/60 uppercase tracking-widest text-[10px]">
+                                      {dayjs(selectedReport.reportDate).format("MMMM DD, YYYY")}
+                                  </DialogDescription>
+                              </div>
+                          </div>
+
+                          <div className="grid grid-cols-3 gap-4">
+                              <div className="bg-white/50 dark:bg-black/20 p-4 rounded-2xl border border-border/40">
+                                  <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1">
+                                      {t("aiHub.governance.happinessScore")}
+                                  </p>
+                                  <p className="text-2xl font-black text-ai-primary">
+                                      {selectedReport.metadata.happinessScore}%
+                                  </p>
+                              </div>
+                              <div className="bg-white/50 dark:bg-black/20 p-4 rounded-2xl border border-border/40">
+                                  <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1">
+                                      {t("aiHub.governance.techFailures")}
+                                  </p>
+                                  <p className="text-2xl font-black text-destructive">
+                                      {selectedReport.statusCount}
+                                  </p>
+                              </div>
+                              <div className="bg-white/50 dark:bg-black/20 p-4 rounded-2xl border border-border/40">
+                                  <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1">
+                                      {t("aiHub.governance.userFeedback")}
+                                  </p>
+                                  <p className="text-2xl font-black text-blue-600">
+                                      {selectedReport.feedbackCount}
+                                  </p>
+                              </div>
+                          </div>
+                      </div>
+
+                      <ScrollArea className="flex-1 p-8 md:p-12">
+                          <div className="space-y-10">
+                              <div className="space-y-4">
+                                  <h4 className="flex items-center gap-2 text-sm font-black uppercase tracking-widest text-muted-foreground">
+                                      <MessageSquare className="h-4 w-4 text-ai-primary" />
+                                      {t("aiHub.governance.aiDiagnosis")}
+                                  </h4>
+                                  <div className="p-6 rounded-3xl bg-muted/30 border border-border/20">
+                                      <p className="text-sm font-medium leading-relaxed whitespace-pre-wrap">
+                                          {selectedReport.diagnosis}
+                                      </p>
+                                  </div>
+                              </div>
+
+                              <div className="space-y-4 pb-8">
+                                  <h4 className="flex items-center gap-2 text-sm font-black uppercase tracking-widest text-muted-foreground">
+                                      <Wrench className="h-4 w-4 text-ai-primary" />
+                                      {t("aiHub.governance.suggestedFixes")}
+                                  </h4>
+                                  <div className="grid grid-cols-1 gap-3">
+                                      {selectedReport.suggestedFixes.map((fix, idx) => (
+                                          <div key={idx} className="flex items-start gap-3 p-4 rounded-2xl bg-ai-primary/5 border border-ai-primary/10">
+                                              <div className="h-5 w-5 rounded-full bg-ai-primary/20 text-ai-primary flex items-center justify-center shrink-0 mt-0.5">
+                                                  <span className="text-[10px] font-black">{idx + 1}</span>
+                                              </div>
+                                              <p className="text-xs font-bold leading-relaxed">{fix}</p>
+                                          </div>
+                                      ))}
+                                  </div>
+                              </div>
+                          </div>
+                      </ScrollArea>
+                  </div>
+              )}
+          </DialogContent>
+      </Dialog>
     </div>
   );
 };
