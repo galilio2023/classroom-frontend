@@ -20,8 +20,9 @@ import {
 } from "lucide-react";
 import { Input } from "@/components/ui/input.tsx";
 import { useMemo, useState, useRef, useCallback } from "react";
-import { useList, useNavigation, useGetIdentity } from "@refinedev/core";
-import { Submission, User as UserType, UserRole } from "@/types";
+import { useList, useNavigation } from "@refinedev/core";
+import { Submission } from "@/types";
+import { useUserRole } from "@/hooks/use-user-role";
 import { Badge } from "@/components/ui/badge.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -53,8 +54,7 @@ const SubmissionsListPage = () => {
   const isAr = i18n.language === 'ar';
   
   usePageTitle(t("resources.submissions.label"));
-  const { data: identity } = useGetIdentity<UserType>();
-  const isStaff = identity?.role === UserRole.ADMIN || identity?.role === UserRole.TEACHER;
+  const { identity, isStaff } = useUserRole();
   const { selectedTerm } = useTerm();
 
   const [searchQuery, setSearchQuery] = useState("");

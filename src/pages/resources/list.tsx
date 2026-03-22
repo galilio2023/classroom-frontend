@@ -24,8 +24,9 @@ import {
 } from "lucide-react";
 import { Input } from "@/components/ui/input.tsx";
 import { useMemo, useState, useRef } from "react";
-import { useList, useNavigation, useDelete, useGetIdentity } from "@refinedev/core";
-import { Resource, User as UserType, UserRole } from "@/types";
+import { useList, useNavigation, useDelete } from "@refinedev/core";
+import { Resource } from "@/types";
+import { useUserRole } from "@/hooks/use-user-role";
 import { Badge } from "@/components/ui/badge.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import {
@@ -63,8 +64,7 @@ const ResourcesListPage = () => {
   const { t, i18n } = useTranslation();
   const isAr = i18n.language === 'ar';
   usePageTitle(t("resourcesPage.title"));
-  const { data: identity } = useGetIdentity<UserType>();
-  const isStaff = identity?.role === UserRole.ADMIN || identity?.role === UserRole.TEACHER;
+  const { identity, isStaff } = useUserRole();
   const { selectedTerm } = useTerm();
 
   const [searchQuery, setSearchQuery] = useState("");

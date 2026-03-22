@@ -1,7 +1,6 @@
 import * as React from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  useGetIdentity,
   useNavigation,
   useLogout,
   useCustom,
@@ -35,10 +34,10 @@ import {
   CommandSeparator,
   CommandShortcut,
 } from "@/components/ui/command";
-import { User, UserRole } from "@/types";
 import { useTheme } from "@/components/refine-ui/theme/theme-provider";
 import { useDebounce } from "react-use";
 import { useTranslation } from "react-i18next";
+import { useUserRole } from "@/hooks/use-user-role";
 
 const RECENT_SEARCHES_KEY = "classroom_recent_searches";
 const MAX_RECENT_SEARCHES = 5;
@@ -60,15 +59,10 @@ export function CommandMenu() {
   const [recentSearches, setRecentSearches] = React.useState<string[]>([]);
 
   const navigate = useNavigate();
-  const { data: identity } = useGetIdentity<User>();
+  const { identity, isStaff, isStudent } = useUserRole();
   const { show, create, list } = useNavigation();
   const { mutate: logout } = useLogout();
   const { theme, setTheme } = useTheme();
-
-  const isTeacher = identity?.role === UserRole.TEACHER;
-  const isAdmin = identity?.role === UserRole.ADMIN;
-  const isStudent = identity?.role === UserRole.STUDENT;
-  const isStaff = isTeacher || isAdmin;
 
   useDebounce(
     () => {

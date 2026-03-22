@@ -2,19 +2,18 @@ import { useState } from "react";
 import {
   useList,
   useCreate,
-  useGetIdentity,
   useUpdate,
   useDelete,
   useCustomMutation,
 } from "@refinedev/core";
-import { Announcement, User, UserRole } from "@/types";
+import { Announcement } from "@/types";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
+import { useUserRole } from "@/hooks/use-user-role";
 
 export const useAnnouncementTab = (classId: string) => {
   const { t } = useTranslation();
-  const { data: identity } = useGetIdentity<User>();
-  const isStaff = identity?.role === UserRole.TEACHER || identity?.role === UserRole.ADMIN;
+  const { identity, isStaff } = useUserRole();
 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);

@@ -1,9 +1,10 @@
 import { useMemo, useRef } from "react";
-import { Assignment, User, UserRole } from "@/types";
+import { useUserRole } from "@/hooks/use-user-role";
+import { Assignment } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useGo, useGetIdentity, useList } from "@refinedev/core";
-import { PlusCircle, FileText, Calendar, Clock, ChevronRight, Edit3, Eye, ArrowRight, Loader2 } from "lucide-react";
+import { useGo, useList } from "@refinedev/core";
+import { PlusCircle, FileText, Calendar, Clock, Edit3, ArrowRight, Loader2 } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
 import { Badge } from "@/components/ui/badge";
 import dayjs from "dayjs";
@@ -24,15 +25,11 @@ interface AssignmentListProps {
 export const AssignmentList = ({ classId }: AssignmentListProps) => {
   const { t, i18n } = useTranslation();
   const go = useGo();
-  const { data: identity } = useGetIdentity<User>();
+  const { identity, isStaff } = useUserRole();
   const isAr = i18n.language === "ar";
-  
+
   if (isAr) dayjs.locale("ar");
   else dayjs.locale("en");
-
-  const isAdmin = identity?.role === UserRole.ADMIN;
-  const isTeacher = identity?.role === UserRole.TEACHER;
-  const isStaff = isAdmin || isTeacher;
 
   const { query: { data, isLoading, isError } } = useList<Assignment>({
     resource: "assignments",

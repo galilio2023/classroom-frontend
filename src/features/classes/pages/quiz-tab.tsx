@@ -1,14 +1,15 @@
-import { useCustom, useNavigation, useGetIdentity } from "@refinedev/core";
-import { Quiz, User, UserRole } from "@/types";
+import { useCustom, useNavigation } from "@refinedev/core";
+import { Quiz } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, FileQuestion, PlusCircle, ArrowRight, Trophy, Clock, Calendar, LayoutDashboard, Sparkles, Info } from "lucide-react";
+import { Loader2, FileQuestion, PlusCircle, ArrowRight, Trophy, Clock, Calendar, LayoutDashboard } from "lucide-react";
 import React from "react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import dayjs from "dayjs";
 import { useTranslation } from "react-i18next";
+import { useUserRole } from "@/hooks/use-user-role";
 
 import { AssessmentsEmptyState } from "../components/class-empty-states";
 
@@ -19,8 +20,7 @@ interface QuizTabProps {
 export const QuizTab = ({ classId }: QuizTabProps) => {
   const { t, i18n } = useTranslation();
   const { show, create } = useNavigation();
-  const { data: identity } = useGetIdentity<User>();
-  const isStaff = identity?.role === UserRole.TEACHER || identity?.role === UserRole.ADMIN;
+  const { isStaff } = useUserRole();
 
   const { query: quizQuery } = useCustom<Quiz[]>({
     url: `/quizzes`,
