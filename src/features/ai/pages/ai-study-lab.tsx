@@ -65,10 +65,10 @@ const AIStudyLab = () => {
   const { mutate: createHistory } = useCreate();
   const { mutate: sendFeedback } = useCustomMutation();
 
-  const { result: classesResult } = useList({
+  const { data: classesResult } = useList({
     resource: "classes",
     pagination: { pageSize: 100 },
-  });
+  }) as any;
 
   const classesData = classesResult?.data || [];
   const [selectedClassId, setSelectedClassId] = useState<string>("");
@@ -231,14 +231,14 @@ const AIStudyLab = () => {
               <div className="space-y-4 text-start">
                   <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary flex items-center gap-2">
                     <Zap className="h-3 w-3" />
-                    {t("aiHub.studyLab.context.title", { defaultValue: "Study Context" })}
+                    {t("classes.list.general")}
                   </Label>
                   <select
                     className="w-full h-12 rounded-xl bg-muted/50 border-none px-4 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none"
                     value={selectedClassId}
                     onChange={(e) => setSelectedClassId(e.target.value)}
                   >
-                    <option value="">{t("aiHub.studyLab.context.general", { defaultValue: "General Knowledge" })}</option>
+                    <option value="">{t("classes.list.general")}</option>
                     {classesData?.map((cls: any) => (
                         <option key={cls.id} value={cls.id}>{cls.name}</option>
                     ))}
@@ -390,7 +390,7 @@ const AIStudyLab = () => {
                         <div className="p-8 bg-ai-primary/[0.02] border-t border-ai-primary/10 flex flex-col md:flex-row items-center justify-between gap-6">
                             {/* 🔄 AI FEEDBACK LOOP */}
                             <div className="flex items-center gap-3">
-                                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t("aiHub.studyLab.wasHelpful", { defaultValue: "Was this helpful?" })}</span>
+                                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t("aiHub.studyLab.wasHelpful")}</span>
                                 <AnimatePresence mode="wait">
                                     {!feedbackSent ? (
                                         <motion.div key="buttons" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex items-center gap-2">
@@ -404,7 +404,7 @@ const AIStudyLab = () => {
                                     ) : (
                                         <motion.div key="thanks" initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="flex items-center gap-2 px-4 py-2 bg-primary/5 rounded-2xl border border-primary/10">
                                             {feedbackSent === "pos" ? <Heart className="h-4 w-4 text-pink-500 fill-pink-500" /> : <Check className="h-4 w-4 text-primary" />}
-                                            <span className="text-[10px] font-black uppercase tracking-widest text-primary">{t("notifications.thankYou", { defaultValue: "Feedback Sent!" })}</span>
+                                            <span className="text-[10px] font-black uppercase tracking-widest text-primary">{t("notifications.thankYou")}</span>
                                         </motion.div>
                                     )}
                                 </AnimatePresence>

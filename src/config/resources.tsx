@@ -83,5 +83,6 @@ export const resources: ResourceProps[] = [
   { name: "profile-requests", list: "/profile-requests", meta: { group: "groups.admin", label: "resources.profile-requests.label", icon: <ClipboardCheck />, roles: [UserRole.ADMIN] } },
   { name: "teacher-applications", list: "/teacher-applications", meta: { group: "groups.admin", label: "resources.teacher-applications.label", icon: <Briefcase />, roles: [UserRole.ADMIN] } },
   { name: "activity-log", list: "/activity-log", meta: { group: "groups.admin", label: "resources.activity-log.label", icon: <Activity />, roles: [UserRole.ADMIN] } },
+  { name: "ai-health-reports", list: "/ai-governance", meta: { group: "groups.admin", label: "AI Governance", icon: <BrainCircuit />, roles: [UserRole.ADMIN] } },
   { name: "settings", list: "/settings", edit: "/settings/edit", meta: { group: "groups.admin", label: "resources.settings.label", icon: <Settings />, roles: [UserRole.ADMIN] } },
 ];

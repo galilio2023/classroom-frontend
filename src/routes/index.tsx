@@ -70,6 +70,7 @@ const ProfileRequestsList = React.lazy(() => import("@/pages/profile-requests/li
 const StudyPlanner = React.lazy(() => import("@/features/ai/pages/study-planner"));
 const TeacherApplicationsList = React.lazy(() => import("@/pages/teacher-applications/list"));
 const ActivityLogPage = React.lazy(() => import("@/pages/dashboard/activity-log"));
+const AIGovernanceList = React.lazy(() => import("@/features/ai/pages/ai-governance-list"));
 const StudentReportCard = React.lazy(() => import("@/pages/student/report-card"));
 const StudentProgress = React.lazy(() => import("@/pages/progress/list"));
 const TeacherChannelPage = React.lazy(() => import("@/pages/teacher-channel/index"));
@@ -208,6 +209,7 @@ export const AppRouter = () => (
           <Route path="/profile-requests" element={<AuthorizedRoute resource="profile-requests" action="list"><ProfileRequestsList /></AuthorizedRoute>} />
           <Route path="/teacher-applications" element={<AuthorizedRoute resource="teacher-applications" action="list"><TeacherApplicationsList /></AuthorizedRoute>} />
           <Route path="/activity-log" element={<AuthorizedRoute resource="activity-log" action="list"><ActivityLogPage /></AuthorizedRoute>} />
+          <Route path="/ai-governance" element={<AuthorizedRoute resource="ai-health-reports" action="list"><AIGovernanceList /></AuthorizedRoute>} />
           <Route path="/student/report-card" element={<AuthorizedRoute resource="report-card" action="list"><StudentReportCard /></AuthorizedRoute>} />
           <Route path="/progress" element={<AuthorizedRoute resource="progress" action="list"><StudentProgress /></AuthorizedRoute>} />
 

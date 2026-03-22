@@ -253,53 +253,52 @@ const DepartmentsList = () => {
                       >
                         {/* Icon/Code */}
                         <div className="relative shrink-0 mb-4 md:mb-0">
-                          <div className="h-14 w-14 rounded-xl border-2 border-background flex flex-col items-center justify-center shadow-md group-hover:scale-110 transition-transform bg-primary/10 text-primary">
-                              <Building2 className="h-6 w-6 mb-1" />
-                              <span className="text-[9px] font-black uppercase tracking-tighter">{department.code}</span>
+                          <div className="h-14 w-14 rounded-2xl border border-primary/10 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform bg-primary/5 text-primary">
+                              <Building2 className="h-6 w-6" />
                           </div>
                         </div>
 
                         {/* Info */}
-                        <div className={cn("flex-1 text-center min-w-0 w-full", isAr ? "md:mr-6 md:text-right" : "md:ml-6 md:text-left")}>
-                          <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-3">
-                            <h3 className="text-lg font-black tracking-tight truncate group-hover:text-primary transition-colors">
+                        <div className={cn("flex-1 text-start min-w-0 w-full", isAr ? "md:mr-6" : "md:ml-6")}>
+                          <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-3 overflow-hidden">
+                            <h3 className="text-lg font-black tracking-tight truncate group-hover:text-primary transition-colors max-w-[70%]">
                               {department.name}
                             </h3>
-                            <div className="flex items-center justify-center md:justify-start gap-2">
+                            <div className="flex items-center gap-2 shrink-0">
                               <Badge 
                                   variant="outline" 
-                                  className="text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md border-primary/10"
+                                  className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-lg border-primary/10 bg-primary/[0.02] text-primary truncate max-w-[120px]"
                               >
                                   {department.code}
                               </Badge>
                             </div>
                           </div>
                           
-                          <div className="flex flex-wrap items-center justify-center md:justify-start gap-x-4 gap-y-1 mt-2">
+                          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2">
                             {(department as any).headOfDepartment ? (
-                              <div className="flex items-center gap-2 text-muted-foreground">
-                                  <Avatar className="h-5 w-5 border-2 border-background shadow-sm">
+                              <div className="flex items-center gap-2 text-muted-foreground shrink-0">
+                                  <Avatar className="h-5 w-5 border border-border/50">
                                       <AvatarImage src={(department as any).headOfDepartment.image ?? undefined} />
                                       <AvatarFallback className="bg-primary/5 text-primary font-black text-[7px]">
                                           {(department as any).headOfDepartment.name[0]}
                                       </AvatarFallback>
                                   </Avatar>
-                                  <span className="text-[11px] font-bold">
+                                  <span className="text-[11px] font-bold truncate max-w-[150px]">
                                       {t("departments.head")}: <span className="text-foreground/80">{(department as any).headOfDepartment.name}</span>
                                   </span>
                               </div>
                             ) : (
-                              <div className="flex items-center gap-1.5 text-muted-foreground/40 italic">
+                              <div className="flex items-center gap-1.5 text-muted-foreground/40 italic shrink-0">
                                   <UserCircle className="h-3.5 w-3.5" />
                                   <span className="text-[11px] font-medium">{t("departments.noHead")}</span>
                               </div>
                             )}
 
-                            <div className="flex items-center gap-1.5 text-muted-foreground">
-                              <div className="p-1 rounded-lg bg-primary/5">
+                            <div className="flex items-center gap-1.5 text-muted-foreground shrink-0">
+                              <div className="p-1 rounded-md bg-primary/5">
                                   <BookOpen className="h-3 w-3 text-primary" />
                               </div>
-                              <span className="text-[11px] font-bold uppercase tracking-tight">
+                              <span className="text-[10px] font-black uppercase tracking-widest text-primary/60">
                                   {t("departments.unit")}
                               </span>
                             </div>

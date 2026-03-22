@@ -152,6 +152,10 @@
         "allClear": "All Clear",
         "allClearDescription": "No students are currently flagged as at-risk. Great job!",
         "aiDetected": "AI-Detected Intervention",
+        "guardianSummary": "Guardian Angel Insight",
+        "strengths": "Core Strengths",
+        "weaknesses": "Risk Factors",
+        "plan": "Improvement Roadmap",
         "criticalCount": "{{count}} Critical",
         "interventionRecommended": "Immediate intervention recommended",
         "interventionTitle": "Intervention: {{name}}",
@@ -184,7 +188,7 @@
         "aiAssistant": {
           "title": "AI Assistant",
           "badge": "Premium",
-          "description": "Unlock the power of Gemini 2.0 Flash to generate quizzes, assignments, and get instant curriculum help.",
+          "description": "Unlock the power of Gemini 3.1 Flash Lite to generate quizzes, assignments, and get instant curriculum help.",
           "quizGen": "Quiz Gen",
           "aiChat": "AI Chat"
         },

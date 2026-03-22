@@ -43,7 +43,7 @@ export const SystemHealthCard: React.FC = () => {
                 <ShieldCheck className="h-4 w-4" />
               </div>
               <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-ai-primary">
-                AI Janitor Report
+                {t("aiHub.governance.title")}
               </CardTitle>
             </div>
             <Badge className={cn(
@@ -51,7 +51,7 @@ export const SystemHealthCard: React.FC = () => {
                 happinessScore > 80 ? "bg-green-500/10 text-green-600" : "bg-orange-500/10 text-orange-600"
             )}>
                 <Heart className={cn("h-3 w-3", happinessScore > 80 && "fill-green-600")} />
-                {happinessScore}% Happy
+                {happinessScore}% {t("common.happy")}
             </Badge>
           </div>
         </CardHeader>
@@ -59,7 +59,7 @@ export const SystemHealthCard: React.FC = () => {
           <div className="space-y-2">
             <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
                 <Activity className="h-3 w-3" />
-                Latest Diagnosis
+                {t("aiHub.governance.aiDiagnosis")}
             </Label>
             <p className="text-sm font-bold leading-relaxed tracking-tight line-clamp-3">
               {report.diagnosis}
@@ -69,7 +69,7 @@ export const SystemHealthCard: React.FC = () => {
           <div className="space-y-3">
             <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
                 <Sparkles className="h-3 w-3" />
-                Top Priority Fixes
+                {t("dashboard.staff.atRiskStudents.plan")}
             </Label>
             <div className="grid gap-2">
               {report.suggestedFixes?.slice(0, 2).map((fix: string, i: number) => (
