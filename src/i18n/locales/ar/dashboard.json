@@ -156,6 +156,10 @@
         "strengths": "نقاط القوة الأساسية",
         "weaknesses": "عوامل الخطورة",
         "plan": "خارطة طريق التحسين",
+        "tabs": {
+          "analysis": "تحليل الملاك الحارس",
+          "intervention": "التدخل"
+        },
         "criticalCount": "{{count}} حالة حرجة",
         "interventionRecommended": "يوصى بالتدخل الفوري",
         "interventionTitle": "تدخل: {{name}}",

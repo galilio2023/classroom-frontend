@@ -42,6 +42,7 @@ import { useTranslation } from "react-i18next";
 import { useCreate, useList, useNavigation, useCustomMutation } from "@refinedev/core";
 import { MemoryBoosterList } from "../components/memory-booster-list";
 import { SparkleLoader } from "@/components/ai/sparkle-loader";
+import { Class } from "@/types";
 
 const AIStudyLab = () => {
   const { t, i18n } = useTranslation();
@@ -65,10 +66,10 @@ const AIStudyLab = () => {
   const { mutate: createHistory } = useCreate();
   const { mutate: sendFeedback } = useCustomMutation();
 
-  const { data: classesResult } = useList({
+  const { data: classesResult } = useList<Class>({
     resource: "classes",
     pagination: { pageSize: 100 },
-  }) as any;
+  });
 
   const classesData = classesResult?.data || [];
   const [selectedClassId, setSelectedClassId] = useState<string>("");

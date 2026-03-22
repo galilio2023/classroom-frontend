@@ -26,7 +26,8 @@ export const SystemHealthCard: React.FC = () => {
 
   if (!report) return null;
 
-  const happinessScore = report.metadata?.happinessScore || 100;
+  const happinessScore = report.metadata?.happinessScore;
+  const hasData = happinessScore !== undefined && happinessScore !== null;
 
   return (
     <motion.div
@@ -48,10 +49,11 @@ export const SystemHealthCard: React.FC = () => {
             </div>
             <Badge className={cn(
                 "border-none shadow-sm gap-1.5",
+                !hasData ? "bg-muted text-muted-foreground" :
                 happinessScore > 80 ? "bg-green-500/10 text-green-600" : "bg-orange-500/10 text-orange-600"
             )}>
-                <Heart className={cn("h-3 w-3", happinessScore > 80 && "fill-green-600")} />
-                {happinessScore}% {t("common.happy")}
+                <Heart className={cn("h-3 w-3", hasData && happinessScore > 80 && "fill-green-600")} />
+                {hasData ? `${happinessScore}% ${t("common.happy")}` : "---"}
             </Badge>
           </div>
         </CardHeader>
@@ -69,7 +71,7 @@ export const SystemHealthCard: React.FC = () => {
           <div className="space-y-3">
             <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
                 <Sparkles className="h-3 w-3" />
-                {t("dashboard.staff.atRiskStudents.plan")}
+                {t("aiHub.governance.suggestedFixes")}
             </Label>
             <div className="grid gap-2">
               {report.suggestedFixes?.slice(0, 2).map((fix: string, i: number) => (

@@ -226,7 +226,7 @@ export const AtRiskStudentItem: React.FC<AtRiskStudentItemProps> = ({
                 className="rounded-lg font-bold text-[10px] uppercase tracking-widest px-4 h-9"
                 onClick={() => setActiveTab("analysis")}
               >
-                {t("classes.show.tabs.analytics")}
+                {t("dashboard.staff.atRiskStudents.tabs.analysis")}
               </Button>
               <Button 
                 variant={activeTab === "intervention" ? "secondary" : "ghost"} 
@@ -234,7 +234,7 @@ export const AtRiskStudentItem: React.FC<AtRiskStudentItemProps> = ({
                 className="rounded-lg font-bold text-[10px] uppercase tracking-widest px-4 h-9"
                 onClick={() => setActiveTab("intervention")}
               >
-                {t("dashboard.staff.atRiskStudents.status.studentNotified")}
+                {t("dashboard.staff.atRiskStudents.tabs.intervention")}
               </Button>
             </div>
           </div>
@@ -286,9 +286,9 @@ export const AtRiskStudentItem: React.FC<AtRiskStudentItemProps> = ({
                       </Label>
                       <div className="space-y-2">
                         {typeof student.aiAnalysis === 'object' && student.aiAnalysis.weaknesses?.map((w, i) => (
-                          <div key={i} className="flex items-start gap-2 text-[11px] font-medium text-destructive/80">
+                          <div key={i} className="flex items-start gap-2 text-[11px] font-medium text-destructive/80 leading-relaxed break-words">
                             <span className="mt-1.5 w-1 h-1 rounded-full bg-destructive flex-shrink-0" />
-                            {w}
+                            <span className="flex-1 min-w-0">{w}</span>
                           </div>
                         )) || <span className="text-[11px] text-muted-foreground italic">No risk factors identified.</span>}
                       </div>
@@ -307,7 +307,7 @@ export const AtRiskStudentItem: React.FC<AtRiskStudentItemProps> = ({
                           <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[10px] font-black">
                             {i + 1}
                           </div>
-                          <span className="text-xs font-semibold">{p}</span>
+                          <span className="text-xs font-semibold break-words">{p}</span>
                         </div>
                       )) || <span className="text-xs text-muted-foreground italic">Generating roadmap...</span>}
                     </div>
@@ -442,7 +442,7 @@ export const AtRiskStudentItem: React.FC<AtRiskStudentItemProps> = ({
                   className="rounded-xl font-black uppercase tracking-widest h-12 px-8 shadow-lg shadow-primary/20 gap-2"
                   onClick={() => setActiveTab("intervention")}
                 >
-                  {t("buttons.takeAction", { defaultValue: "Take Action" })}
+                  {t("buttons.takeAction")}
                   <ArrowRight className="h-4 w-4 ltr:ml-2 rtl:mr-2 rtl:rotate-180" />
                 </Button>
               )}

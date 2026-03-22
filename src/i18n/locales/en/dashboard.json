@@ -156,6 +156,10 @@
         "strengths": "Core Strengths",
         "weaknesses": "Risk Factors",
         "plan": "Improvement Roadmap",
+        "tabs": {
+          "analysis": "Guardian Analysis",
+          "intervention": "Intervention"
+        },
         "criticalCount": "{{count}} Critical",
         "interventionRecommended": "Immediate intervention recommended",
         "interventionTitle": "Intervention: {{name}}",

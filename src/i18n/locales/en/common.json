@@ -181,6 +181,8 @@
     "aiAnalyzed": "AI Analyzed",
     "solved": "Solved",
     "happy": "Happy",
+    "cases": "Case",
+    "cases_other": "Cases",
     "error": "An unexpected error occurred",
     "errorPage": {
       "title": "404",
@@ -586,6 +588,7 @@
       "happinessScore": "Student Happiness",
       "techFailures": "Tech Failures",
       "aiDiagnosis": "AI Diagnosis",
+      "suggestedFixes": "Top Priority Fixes",
       "selfHealingTitle": "The Self-Healing Loop",
       "selfHealingDesc": "The Janitor Agent analyzes negative pedagogical feedback and technical exceptions every 24 hours. Suggested prompt adjustments are staged for review to maintain institutional tone control.",
       "recursiveTitle": "Recursive Summarization",

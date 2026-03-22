@@ -65,15 +65,19 @@ const AIGovernanceList = () => {
           </p>
         ),
         cell: ({ row }) => {
-          const score = row.original.metadata?.happinessScore || 100;
+          const score = row.original.metadata?.happinessScore;
+          // If score is null or undefined, we show a neutral gray badge instead of assuming 100%
+          const hasData = score !== undefined && score !== null;
+          
           return (
             <div className="flex items-center gap-2">
                 <Badge className={cn(
                     "border-none shadow-sm gap-1.5 h-7 px-3",
+                    !hasData ? "bg-muted text-muted-foreground" :
                     score > 80 ? "bg-green-500/10 text-green-600" : "bg-orange-500/10 text-orange-600"
                 )}>
-                    <Heart className={cn("h-3 w-3", score > 80 && "fill-green-600")} />
-                    {score}%
+                    <Heart className={cn("h-3 w-3", hasData && score > 80 && "fill-green-600")} />
+                    {hasData ? `${score}%` : "---"}
                 </Badge>
             </div>
           );
@@ -94,7 +98,7 @@ const AIGovernanceList = () => {
                         "h-7 px-3 border-border/40 font-bold",
                         count > 0 ? "text-destructive border-destructive/20" : "text-muted-foreground"
                     )}>
-                        {count} {count === 1 ? t("common.cases").slice(0, -1) : t("common.cases")}
+                        {count} {t("common.cases", { count })}
                     </Badge>
                 </div>
             )
