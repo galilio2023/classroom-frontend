@@ -13,7 +13,15 @@ interface AtRiskStudent {
   reason: string;
   value: string;
   riskLevel?: "medium" | "high" | "critical";
-  aiAnalysis?: string;
+  riskAssessmentId?: number;
+  interventionStatus?: string;
+  suggestedResources?: { title: string; url: string }[];
+  aiAnalysis?: {
+    strengths: string[];
+    weaknesses: string[];
+    improvementPlan: string[];
+    summary: string;
+  };
 }
 
 interface AtRiskStudentsProps {

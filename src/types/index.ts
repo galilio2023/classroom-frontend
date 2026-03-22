@@ -55,6 +55,11 @@ export interface User {
   lastActiveAt: string | null;
   enrollments?: Enrollment[];
   teacherChannel?: TeacherChannel;
+  persona?: {
+    learningDNA: string;
+    preferredTone: string;
+    lastSummarizedAt: string;
+  };
 }
 
 export interface Department {
@@ -187,6 +192,16 @@ export type Enrollment = {
   };
   approvedBy?: User;
   lastAccessedAt?: string | null;
+  riskAssessment?: {
+    riskLevel: "low" | "medium" | "high" | "critical";
+    aiAnalysis?: {
+      strengths: string[];
+      weaknesses: string[];
+      improvementPlan: string[];
+      summary: string;
+    };
+    predictedGrade?: number;
+  };
 };
 
 export interface Module {
@@ -343,6 +358,9 @@ export interface Discussion {
   parentId: number | null;
   isEdited: boolean;
   lastEditedAt: string | null;
+  isSolved: boolean;
+  solvedById: string | null;
+  solvedBy?: Pick<User, "id" | "name" | "image">;
   user: Pick<User, "id" | "name" | "image" | "role">;
   replies?: Discussion[];
   createdAt: string;

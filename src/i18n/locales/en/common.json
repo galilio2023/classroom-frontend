@@ -178,6 +178,7 @@
     "liveData": "Live Data",
     "studentPerformance": "Student Performance",
     "aiAnalyzed": "AI Analyzed",
+    "solved": "Solved",
     "error": "An unexpected error occurred",
     "errorPage": {
       "title": "404",
@@ -1482,6 +1483,13 @@
           "The library supports PDFs, Videos, and common Office documents."
         ]
       }
+    }
+  },
+  "gamification": {
+    "levelUp": "Level Up!",
+    "newBadge": "New Badge Unlocked!",
+    "badges": {
+      "juniorTeacher": "Junior Teacher Solution"
     }
   }
 }

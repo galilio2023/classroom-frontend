@@ -1,5 +1,6 @@
 import { EngagementChart } from "./engagement-chart";
 import { PlatformOverview } from "./platform-overview";
+import { SystemHealthCard } from "./system-health-card";
 import { RecentActivity } from "./recent-activity";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { DashboardData } from "@/types/dashboard";
@@ -11,6 +12,7 @@ import {
   ShieldCheck,
   Users,
   GraduationCap,
+  Sparkles,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -136,6 +138,25 @@ export const AdminDashboard = ({
         {/* Sidebar Column */}
         <div className="lg:col-span-4 space-y-16 md:space-y-24 lg:space-y-32">
           <ErrorBoundary>
+            <div className="space-y-8">
+                <div className="flex items-center gap-4 px-2">
+                    <div className="p-3 rounded-2xl bg-ai-primary/10 text-ai-primary border border-ai-primary/5 shadow-sm">
+                        <Sparkles className="h-6 w-6" />
+                    </div>
+                    <div className="flex flex-col text-start">
+                        <h2 className="text-xl md:text-2xl font-black tracking-tight leading-none">
+                            System Self-Reflection
+                        </h2>
+                        <span className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.2em] mt-1.5">
+                            Agentic Evolution
+                        </span>
+                    </div>
+                </div>
+                <SystemHealthCard />
+            </div>
+          </ErrorBoundary>
+
+          <ErrorBoundary>
             <motion.div
               initial={{ opacity: 0, x: 30 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -145,7 +166,7 @@ export const AdminDashboard = ({
                 <div className="p-3 lg:p-4 rounded-2xl lg:rounded-3xl bg-primary/10 text-primary border border-primary/5 shadow-sm">
                   <LayoutDashboard className="h-6 w-6 lg:h-8 lg:w-8" />
                 </div>
-                <div className="flex flex-col">
+                <div className="flex flex-col text-start">
                   <h2 className="text-xl md:text-2xl lg:text-3xl font-black tracking-tight leading-none">
                     {t("dashboard.staff.platformOverview")}
                   </h2>
@@ -172,7 +193,7 @@ export const AdminDashboard = ({
                 <div className="p-3 lg:p-4 rounded-2xl lg:rounded-3xl bg-primary/10 text-primary border border-primary/5 shadow-sm">
                   <History className="h-6 w-6 lg:h-8 lg:w-8" />
                 </div>
-                <div className="flex flex-col">
+                <div className="flex flex-col text-start">
                   <h2 className="text-xl md:text-2xl lg:text-3xl font-black tracking-tight leading-none">
                     {t("dashboard.staff.recentActivity")}
                   </h2>

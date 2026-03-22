@@ -24,6 +24,9 @@ import {
   CheckCircle2,
   XCircle,
   FileSpreadsheet,
+  ShieldAlert,
+  TrendingDown,
+  BrainCircuit,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
@@ -31,6 +34,13 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQueryClient } from "@tanstack/react-query";
 import { BulkEnrollDialog } from "./bulk-enroll-dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import dayjs from "dayjs";
 
 interface StudentsTabProps {
   classId: string;
@@ -97,6 +107,7 @@ export const StudentsTab = ({
           const student = getValue<User>();
           const isWaitlisted = row.original.status === "waitlisted";
           const isPending = row.original.status === "pending";
+          const riskAssessment = row.original.riskAssessment;
 
           return (
             <div className="flex items-center gap-3 py-1">
@@ -117,6 +128,49 @@ export const StudentsTab = ({
                   <span className="font-black text-xs md:text-sm tracking-tight truncate text-foreground">
                     {student.name}
                   </span>
+                  
+                  {isStaff && row.original.riskAssessment && row.original.riskAssessment.riskLevel !== "low" && (
+                    <Badge 
+                        variant="destructive" 
+                        className={cn(
+                            "border-none text-[7px] md:text-[8px] font-black uppercase tracking-tighter px-1.5 md:px-2 py-0 h-3.5 md:h-4 shrink-0 gap-1",
+                            row.original.riskAssessment.riskLevel === "critical" ? "bg-red-600 text-white animate-pulse" : 
+                            row.original.riskAssessment.riskLevel === "high" ? "bg-orange-600 text-white" : "bg-yellow-500 text-white"
+                        )}
+                    >
+                        <ShieldAlert className="h-2 w-2" />
+                        {row.original.riskAssessment.riskLevel}
+                    </Badge>
+                  )}
+
+                  {/* 🧠 LEARNING DNA TOOLTIP (Staff Only) */}
+                  {isStaff && student.persona && (
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <div className="p-1 rounded-md bg-ai-primary/10 text-ai-primary cursor-help hover:bg-ai-primary/20 transition-colors">
+                                    <BrainCircuit className="h-3 w-3" />
+                                </div>
+                            </TooltipTrigger>
+                            <TooltipContent side="right" className="max-w-xs p-4 rounded-2xl bg-card/95 backdrop-blur-xl border-ai-primary/20 shadow-2xl z-50">
+                                <div className="space-y-2">
+                                    <div className="flex items-center gap-2 border-b border-border/40 pb-2 mb-2">
+                                        <Sparkles className="h-3 w-3 text-ai-primary" />
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-ai-primary">Learning DNA</span>
+                                    </div>
+                                    <p className="text-xs font-medium leading-relaxed italic">
+                                        "{student.persona.learningDNA}"
+                                    </p>
+                                    <div className="pt-2 flex justify-between items-center text-[8px] font-bold text-muted-foreground uppercase">
+                                        <span>Tone: {student.persona.preferredTone}</span>
+                                        <span>Updated: {dayjs(student.persona.lastSummarizedAt).fromNow()}</span>
+                                    </div>
+                                </div>
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
+                  )}
+
                   {isWaitlisted && (
                     <Badge
                       variant="outline"
@@ -135,10 +189,31 @@ export const StudentsTab = ({
                       {t("classes.show.students.pending.title")}
                     </Badge>
                   )}
+                  {isStaff && riskAssessment && riskAssessment.riskLevel !== "low" && (
+                    <Badge
+                      variant="destructive"
+                      className={cn(
+                        "border-none text-[7px] md:text-[8px] font-black uppercase tracking-tighter px-1.5 md:px-2 py-0 h-3.5 md:h-4 shrink-0 gap-1",
+                        riskAssessment.riskLevel === "critical" ? "bg-red-600 text-white animate-pulse" : 
+                        riskAssessment.riskLevel === "high" ? "bg-orange-600 text-white" : "bg-yellow-500 text-white"
+                      )}
+                    >
+                      <ShieldAlert className="h-2 w-2" />
+                      {riskAssessment.riskLevel}
+                    </Badge>
+                  )}
                 </div>
-                <span className="text-[9px] md:text-[10px] text-muted-foreground font-bold truncate">
-                  {student.email}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-[9px] md:text-[10px] text-muted-foreground font-bold truncate">
+                    {student.email}
+                  </span>
+                  {isStaff && riskAssessment?.predictedGrade && (
+                    <span className="text-[9px] font-black text-destructive flex items-center gap-0.5">
+                      <TrendingDown className="h-2.5 w-2.5" />
+                      AI: {riskAssessment.predictedGrade}%
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
           );

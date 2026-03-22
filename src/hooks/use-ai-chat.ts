@@ -28,6 +28,34 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
   // Removed lastUpdateRef as requestAnimationFrame will handle timing
   const animationFrameRef = useRef<number | null>(null); // Used for requestAnimationFrame
 
+  // 📜 MEMORY: Load chat history on mount
+  useEffect(() => {
+    if (!classId) return;
+
+    const fetchHistory = async () => {
+        try {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/ai/chat-history/${classId}`, {
+                headers: {
+                    "Authorization": `Bearer ${localStorage.getItem("token")}`,
+                }
+            });
+            const data = await response.json();
+            if (data.data) {
+                const history = data.data.map((m: any) => ({
+                    id: String(m.id),
+                    role: m.role as "user" | "model",
+                    parts: [{ text: m.content }],
+                }));
+                setMessages(history);
+            }
+        } catch (err) {
+            console.error("Failed to fetch chat history:", err);
+        }
+    };
+
+    fetchHistory();
+  }, [classId]);
+
   // Auto-scroll logic (Optimized)
   const scrollToBottom = useCallback(() => {
     if (scrollAreaRef.current) {
