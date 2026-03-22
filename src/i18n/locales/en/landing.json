@@ -111,8 +111,8 @@
     "ai": {
       "title1": "AI-Powered",
       "title2": "Study Hub",
-      "desc": "A cutting-edge learning companion that understands your curriculum. Generate quizzes, summarize notes, and create flashcards instantly with Gemini 2.0 Flash.",
-      "poweredBy": "Gemini 2.0 FLASH Powered",
+      "desc": "A cutting-edge learning companion that understands your curriculum. Generate quizzes, summarize notes, and create flashcards instantly with Gemini 3.1 Flash Lite.",
+      "poweredBy": "Gemini 3.1 FLASH LITE Powered",
       "activeNow": "Active Now",
       "analysisProcessing": "Analysis Processing",
       "list": {

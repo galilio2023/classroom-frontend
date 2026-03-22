@@ -57,13 +57,12 @@ export const PromoCards = ({ isStaff, list }: PromoCardsProps) => {
                       
                       <CardContent className="p-8 pt-2 space-y-8 relative z-10">
                           <p className="text-sm text-muted-foreground font-medium leading-relaxed">
-                              {t("dashboard.staff.promos.aiAssistant.description").split("Gemini 2.0 Flash").map((part, i, arr) => (
+                              {t("dashboard.staff.promos.aiAssistant.description").split("Gemini 3.1 Flash Lite").map((part, i, arr) => (
                                 <React.Fragment key={i}>
-                                    {part}
-                                    {i < arr.length - 1 && <span className="text-ai-primary font-black">Gemini 2.0 Flash</span>}
+                                  {part}
+                                  {i < arr.length - 1 && <span className="text-ai-primary font-black">Gemini 3.1 Flash Lite</span>}
                                 </React.Fragment>
-                              ))}
-                          </p>
+                              ))}                          </p>
                           
                           <div className="grid grid-cols-2 gap-3">
                             {[

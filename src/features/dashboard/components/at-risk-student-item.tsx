@@ -226,7 +226,7 @@ export const AtRiskStudentItem: React.FC<AtRiskStudentItemProps> = ({
                 className="rounded-lg font-bold text-[10px] uppercase tracking-widest px-4 h-9"
                 onClick={() => setActiveTab("analysis")}
               >
-                {t("dashboard.staff.atRiskStudents.tabs.analysis", "Guardian Analysis")}
+                {t("dashboard.staff.atRiskStudents.tabs.analysis")}
               </Button>
               <Button 
                 variant={activeTab === "intervention" ? "secondary" : "ghost"} 
@@ -234,7 +234,7 @@ export const AtRiskStudentItem: React.FC<AtRiskStudentItemProps> = ({
                 className="rounded-lg font-bold text-[10px] uppercase tracking-widest px-4 h-9"
                 onClick={() => setActiveTab("intervention")}
               >
-                {t("dashboard.staff.atRiskStudents.tabs.intervention", "Intervention")}
+                {t("dashboard.staff.atRiskStudents.tabs.intervention")}
               </Button>
             </div>
           </div>
@@ -256,9 +256,9 @@ export const AtRiskStudentItem: React.FC<AtRiskStudentItemProps> = ({
                     </div>
                     <Label className="text-[10px] font-black uppercase tracking-widest text-ai-primary flex items-center gap-2">
                       <Info className="h-3 w-3" />
-                      {t("dashboard.staff.atRiskStudents.guardianSummary", "Guardian Angel Insight")}
+                      {t("dashboard.staff.atRiskStudents.guardianSummary")}
                     </Label>
-                    <p className="text-sm leading-relaxed font-medium">
+                    <p className="text-sm leading-relaxed font-medium break-words whitespace-pre-wrap">
                       {typeof student.aiAnalysis === 'object' ? student.aiAnalysis.summary : student.aiAnalysis || "No analysis available."}
                     </p>
                   </div>
@@ -268,13 +268,13 @@ export const AtRiskStudentItem: React.FC<AtRiskStudentItemProps> = ({
                     <div className="p-5 rounded-3xl bg-success/[0.03] border border-success/10 space-y-4">
                       <Label className="text-[10px] font-black uppercase tracking-widest text-success flex items-center gap-2">
                         <CheckCircle2 className="h-3 w-3" />
-                        {t("dashboard.staff.atRiskStudents.strengths", "Core Strengths")}
+                        {t("dashboard.staff.atRiskStudents.strengths")}
                       </Label>
                       <div className="space-y-2">
                         {typeof student.aiAnalysis === 'object' && student.aiAnalysis.strengths?.map((s, i) => (
-                          <div key={i} className="flex items-start gap-2 text-[11px] font-medium text-success/80">
+                          <div key={i} className="flex items-start gap-2 text-[11px] font-medium text-success/80 leading-relaxed break-words">
                             <span className="mt-1.5 w-1 h-1 rounded-full bg-success flex-shrink-0" />
-                            {s}
+                            <span className="flex-1 min-w-0">{s}</span>
                           </div>
                         )) || <span className="text-[11px] text-muted-foreground italic">No strengths identified yet.</span>}
                       </div>
@@ -282,13 +282,13 @@ export const AtRiskStudentItem: React.FC<AtRiskStudentItemProps> = ({
                     <div className="p-5 rounded-3xl bg-destructive/[0.03] border border-destructive/10 space-y-4">
                       <Label className="text-[10px] font-black uppercase tracking-widest text-destructive flex items-center gap-2">
                         <TrendingDown className="h-3 w-3" />
-                        {t("dashboard.staff.atRiskStudents.weaknesses", "Risk Factors")}
+                        {t("dashboard.staff.atRiskStudents.weaknesses")}
                       </Label>
                       <div className="space-y-2">
                         {typeof student.aiAnalysis === 'object' && student.aiAnalysis.weaknesses?.map((w, i) => (
-                          <div key={i} className="flex items-start gap-2 text-[11px] font-medium text-destructive/80">
+                          <div key={i} className="flex items-start gap-2 text-[11px] font-medium text-destructive/80 leading-relaxed break-words">
                             <span className="mt-1.5 w-1 h-1 rounded-full bg-destructive flex-shrink-0" />
-                            {w}
+                            <span className="flex-1 min-w-0">{w}</span>
                           </div>
                         )) || <span className="text-[11px] text-muted-foreground italic">No risk factors identified.</span>}
                       </div>
@@ -299,7 +299,7 @@ export const AtRiskStudentItem: React.FC<AtRiskStudentItemProps> = ({
                   <div className="p-6 rounded-3xl bg-primary/[0.03] border border-primary/10 space-y-4">
                     <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
                       <Zap className="h-3 w-3" />
-                      {t("dashboard.staff.atRiskStudents.plan", "Improvement Roadmap")}
+                      {t("dashboard.staff.atRiskStudents.plan")}
                     </Label>
                     <div className="grid gap-3">
                       {typeof student.aiAnalysis === 'object' && student.aiAnalysis.improvementPlan?.map((p, i) => (
@@ -307,7 +307,7 @@ export const AtRiskStudentItem: React.FC<AtRiskStudentItemProps> = ({
                           <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[10px] font-black">
                             {i + 1}
                           </div>
-                          <span className="text-xs font-semibold">{p}</span>
+                          <span className="text-xs font-semibold break-words">{p}</span>
                         </div>
                       )) || <span className="text-xs text-muted-foreground italic">Generating roadmap...</span>}
                     </div>
@@ -390,7 +390,7 @@ export const AtRiskStudentItem: React.FC<AtRiskStudentItemProps> = ({
                     {message && !isGenerating && (
                         <div className="flex items-center gap-3 px-2">
                             <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">
-                                {t("aiHub.studyLab.wasHelpful", { defaultValue: "Was this suggestion helpful?" })}
+                                {t("aiHub.studyLab.wasHelpful")}
                             </span>
                             <AnimatePresence mode="wait">
                                 {!feedbackSent ? (
@@ -405,7 +405,7 @@ export const AtRiskStudentItem: React.FC<AtRiskStudentItemProps> = ({
                                 ) : (
                                     <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="flex items-center gap-1.5 text-primary">
                                         <Check className="h-3 w-3" />
-                                        <span className="text-[9px] font-black uppercase tracking-widest">{t("notifications.thankYou", { defaultValue: "Feedback Sent!" })}</span>
+                                        <span className="text-[9px] font-black uppercase tracking-widest">{t("notifications.thankYou")}</span>
                                     </motion.div>
                                 )}
                             </AnimatePresence>
@@ -442,7 +442,7 @@ export const AtRiskStudentItem: React.FC<AtRiskStudentItemProps> = ({
                   className="rounded-xl font-black uppercase tracking-widest h-12 px-8 shadow-lg shadow-primary/20 gap-2"
                   onClick={() => setActiveTab("intervention")}
                 >
-                  {t("buttons.takeAction", "Take Action")}
+                  {t("buttons.takeAction")}
                   <ArrowRight className="h-4 w-4 ltr:ml-2 rtl:mr-2 rtl:rotate-180" />
                 </Button>
               )}

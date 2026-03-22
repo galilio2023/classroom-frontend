@@ -110,6 +110,7 @@
     "fastTrack": "المسار السريع",
     "featureComingSoon": "الميزة ستتوفر قريباً!",
     "aiPowered": "مدعوم بالذكاء الاصطناعي",
+    "date": "التاريخ",
     "editor": {
       "urlPrompt": "أدخل الرابط",
       "bold": "عريض",
@@ -179,6 +180,13 @@
     "studentPerformance": "أداء الطالب",
     "aiAnalyzed": "تم التحليل بالذكاء الاصطناعي",
     "solved": "تم الحل",
+    "happy": "سعيد",
+    "cases_zero": "لا توجد حالات",
+    "cases_one": "حالة واحدة",
+    "cases_two": "حالتان",
+    "cases_few": "{{count}} حالات",
+    "cases_many": "{{count}} حالة",
+    "cases_other": "{{count}} حالة",
     "error": "حدث خطأ غير متوقع",
     "errorPage": {
       "title": "404",
@@ -202,6 +210,7 @@
     "error": "خطأ",
     "title": "الإشعارات",
     "markAllRead": "تحديد الكل كمقروء",
+    "thankYou": "تم إرسال التقييم!",
     "noNotifications": "لا توجد إشعارات بعد",
     "noNotificationsDesc": "ليس لديك أي إشعارات في الوقت الحالي. عد لاحقاً للتحديثات.",
     "liveSessionStarted": "بدأت جلسة مباشرة!",
@@ -242,7 +251,7 @@
     "dismiss": "تجاهل",
     "getStarted": "ابدأ الآن",
     "joinClass": "انضم للفصل",
-    "joinNow": "Join Now",
+    "joinNow": "انضم الآن",
     "viewResources": "عرض المصادر",
     "viewAll": "عرض الكل",
     "signIn": "تسجيل الدخول",
@@ -329,6 +338,7 @@
     "closePreview": "إغلاق المعاينة",
     "open": "فتح",
     "grade": "تقييم",
+    "takeAction": "اتخاذ إجراء",
     "studyHistory": "سجل الدراسة",
     "generateWithAi": "إنشاء بالذكاء الاصطناعي",
     "generateFlashcards": "إنشاء بطاقات استذكار",
@@ -508,6 +518,13 @@
       "aiResponse": "رد الذكاء الاصطناعي",
       "flashcardSession": "جلسة بطاقات الاستذكار",
       "activeRecall": "نمط الاسترجاع النشط",
+      "wasHelpful": "هل كان هذا مفيداً؟",
+      "memoryBooster": {
+        "title": "مهمات الذاكرة اليومية",
+        "subtitle": "بناءً على التكرار المتباعد (SM-2)",
+        "dueToday": "مستحق اليوم",
+        "due": "مستحق الآن"
+      },
       "questions": {
         "understand": "ما الذي تود فهمه؟",
         "test": "ما هو الموضوع الذي نختبره؟",
@@ -564,7 +581,28 @@
         "masterGeneral": "موادك الدراسية",
         "sources": "المصادر",
         "source": "المصدر"
+      },
+      "context": {
+        "label": "سياق الدراسة"
       }
+    },
+    "governance": {
+      "title": "حوكمة الذكاء الاصطناعي",
+      "description": "تتبع التأمل الذاتي والنمو التطوري لوكلاء نظام طبلاوي.",
+      "integrityActive": "نزاهة الوكيل نشطة",
+      "evolutionHistory": "سجل التطور",
+      "evolutionDesc": "تقارير صحة النظام اليومية المفصلة الناتجة عن وكيل التنظيف.",
+      "happinessScore": "سعادة الطلاب",
+      "techFailures": "الأعطال التقنية",
+      "aiDiagnosis": "تشخيص الذكاء الاصطناعي",
+      "suggestedFixes": "إصلاحات ذات أولوية",
+      "auditingSystems": "تدقيق نزاهة الأنظمة...",
+      "auditReport": "تقرير التدقيق",
+      "userFeedback": "تقييمات المستخدمين",
+      "selfHealingTitle": "حلقة الشفاء الذاتي",
+      "selfHealingDesc": "يقوم وكيل التنظيف بتحليل الملاحظات التربوية السلبية والاستثناءات التقنية كل 24 ساعة. يتم عرض تعديلات المطالبات المقترحة للمراجعة للحفاظ على النبرة المؤسسية.",
+      "recursiveTitle": "التلخيص المتكرر",
+      "recursiveDesc": "يتم تحديث ملفات تعريف الطلاب بناءً على نوافذ السياق المتغيرة. هذا يضمن \"ذاكرة لانهائية\" مع الحفاظ على تكاليف استنتاج منخفضة وأهمية استجابة عالية."
     }
   },
   "studyPlanner": {
@@ -632,7 +670,7 @@
     "head": "رئيس القسم",
     "unit": "وحدة أكاديمية",
     "stats": {
-      "total": "إجمالي الأقسام",
+      "total": "التعداد",
       "withHead": "بقيادة إدارية",
       "active": "الحالة النشطة"
     },
@@ -805,7 +843,7 @@
         "phone": "الهاتف",
         "status": "الحالة",
         "verified": "تم التحقق",
-        "pending": "في انتظار الموافقة",
+        "pending": "في انتظار المواقة",
         "document": "وثيقة التحقق",
         "proofTitle": "إثبات مؤهلات التدريس",
         "proofDesc": "تم الرفع بواسطة المعلم للتحقق",
@@ -1043,43 +1081,43 @@
     "deansList": "مرشح لقائمة العميد",
     "goodStanding": "وضع أكاديمى جيد",
     "noStanding": "لا يوجد وضع بعد",
-    "defaultNote": "كان أداؤك هذا الفصل استثنائياً. استمر في التركيز على موادك الأساسية للحفاظ على هذا المعدل المرتفع.",
-    "noNote": "لا توجد ملاحظات معلم متاحة لهذا الفصل بعد."
+    "defaultNote": "Your performance this term has been exceptional. Keep focusing on your core subjects to maintain this high GPA.",
+    "noNote": "No instructor notes available for this term yet."
   },
   "library": {
-    "title": "المكتبة العامة",
+    "title": "Global Library",
     "description": "إدارة مجموعتك الشخصية من المصادر التعليمية.",
-    "searchPlaceholder": "بحث عن ملفات...",
-    "addResource": "إضافة مورد",
-    "addToLibrary": "إضافة للمكتبة",
-    "uploadDesc": "ارفع ملفات إلى مكتبتك الشخصية لإعادة استخدامها عبر الفصول.",
-    "resourceTitle": "عنوان المورد",
-    "optionalDesc": "وصف اختياري",
-    "noDescription": "لا يوجد وصف",
-    "emptyTitle": "المكتبة فارغة",
-    "emptyDesc": "ارفع ملفات هنا للوصول إليها من أي فصل.",
-    "deleteConfirm": "هل أنت متأكد من حذف هذا المورد؟",
+    "searchPlaceholder": "Search files...",
+    "addResource": "Add Resource",
+    "addToLibrary": "Add to Library",
+    "uploadDesc": "Upload files to your personal library for reuse across classes.",
+    "resourceTitle": "Resource Title",
+    "optionalDesc": "Optional description",
+    "noDescription": "No description",
+    "emptyTitle": "Library is Empty",
+    "emptyDesc": "Upload files here to access them from any class.",
+    "deleteConfirm": "Are you sure you want to delete this resource?",
     "toasts": {
-      "fillRequired": "يرجى تقديم عنوان ورفع ملف.",
-      "added": "تم إضافة المورد للمكتبة!",
-      "deleted": "تم حذف المورد.",
-      "error": "فشل إضافة المورد."
+      "fillRequired": "Please provide a title and upload a file.",
+      "added": "Resource added to library!",
+      "deleted": "Resource deleted.",
+      "error": "Failed to add resource."
     },
-    "accessDenied": "تم رفض الوصول",
-    "accessDeniedDesc": "عذراً، ليس لديك الصلاحية للوصول لهذه الصفحة.",
-    "teacherOnly": "يمكن للمعلمين فقط إدارة المكتبة العامة."
+    "accessDenied": "Access Denied",
+    "accessDeniedDesc": "Sorry, you do not have permission to access this page.",
+    "teacherOnly": "Only teachers can manage the Global Library."
   },
   "messages": {
     "messages": "الرسائل",
-    "title": "الرسائل",
-    "searchPeople": "البحث عن أشخاص...",
-    "noConversations": "لا توجد محادثات بعد. ابدأ دردشة من الدليل!",
-    "you": "أنت: ",
-    "typeMessage": "اكتب رسالة...",
-    "selectChat": "رسائلك",
-    "selectChatDesc": "اختر محادثة من اليسار أو ابحث عن طالب/معلم لبدء الدردشة.",
-    "description": "دردش مع طلابك ومعلميك في مكان واحد.",
-    "noMessages": "لا توجد رسائل"
+    "title": "Messages",
+    "searchPeople": "Search people...",
+    "noConversations": "No conversations yet. Start a chat from the directory!",
+    "you": "You: ",
+    "typeMessage": "Type a message...",
+    "selectChat": "Your Messages",
+    "selectChatDesc": "Select a conversation from the left or search for a student/teacher to start chatting.",
+    "description": "Messages description",
+    "noMessages": "No messages"
   },
   "enrollments": {
     "title": "القبول والتسجيل",
@@ -1114,44 +1152,44 @@
     }
   },
   "discussions": {
-    "title": "Community Hub",
-    "description": "Engage with students and teachers in class-wide discussion threads.",
-    "start": "Start Discussion",
+    "title": "مركز النقاشات",
+    "description": "تفاعل مع الطلاب والمعلمين في خيوط النقاش على مستوى الفصل.",
+    "start": "بدء نقاش",
     "stats": {
-      "total": "Total Threads",
-      "active": "Active Today",
-      "replies": "Total Replies"
+      "total": "إجمالي الخيوط",
+      "active": "نشط اليوم",
+      "replies": "إجمالي الردود"
     },
-    "searchPlaceholder": "Search discussions by content or keywords...",
-    "filter": "Community Filter",
+    "searchPlaceholder": "البحث في النقاشات بالمحتوى أو الكلمات المفتاحية...",
+    "filter": "فلتر المجتمع",
     "empty": {
-      "title": "No discussions found",
-      "desc": "Start a new conversation to engage with your class community."
+      "title": "لم يتم العثور على نقاشات",
+      "desc": "ابدأ محادثة جديدة للتفاعل مع مجتمع فصلك."
     },
     "labels": {
-      "trending": "Trending",
-      "replies": "Replies",
-      "active": "Active {{time}}",
-      "options": "Thread Options",
-      "open": "Open Discussion",
-      "follow": "Follow Thread"
+      "trending": "رائج",
+      "replies": "ردود",
+      "active": "نشط {{time}}",
+      "options": "خيارات الخيط",
+      "open": "فتح النقاش",
+      "follow": "متابعة الخيط"
     }
   },
   "progressPage": {
-    "title": "Learning Progress",
-    "description": "Track student performance, module completion, and academic standing.",
-    "searchPlaceholder": "Search by student name...",
+    "title": "تقدم التعلم",
+    "description": "تتبع أداء الطالب وإكمال الوحدات والوضع الأكاديمي.",
+    "searchPlaceholder": "البحث باسم الطالب...",
     "table": {
-      "student": "Student",
-      "class": "Class",
-      "completion": "Completion",
-      "grade": "Overall Grade",
-      "actions": "Actions"
+      "student": "الطالب",
+      "class": "الفصل",
+      "completion": "الإكمال",
+      "grade": "الدرجة الكلية",
+      "actions": "إجراءات"
     }
   },
   "teacherApps": {
-    "title": "Teacher Applications",
-    "description": "Review and manage requests from educators to teach specific classes.",
+    "title": "طلبات التدريس",
+    "description": "مراجعة وإدارة طلبات المعلمين لتدريس فصول محددة.",
     "searchPlaceholder": "Search applications...",
     "empty": {
       "title": "No applications found",
@@ -1168,15 +1206,15 @@
     }
   },
   "teacherSubscriptions": {
-    "title": "Teacher Subscriptions",
-    "description": "Manage your active subscriptions and billing information.",
+    "title": "اشتراكات المعلمين",
+    "description": "إدارة اشتراكاتك النشطة ومعلومات الفوترة.",
     "empty": {
       "title": "No Subscriptions Found",
       "description": "You don't have any active teacher subscriptions yet."
     }
   },
   "profileRequests": {
-    "title": "Profile Governance",
+    "title": "حوكمة الملفات",
     "description": "Review and approve sensitive profile changes and verification documents.",
     "stats": {
       "total": "Total Requests",
@@ -1208,38 +1246,38 @@
     }
   },
   "footer": {
-    "platform": "المنصة",
-    "coreFeatures": "الميزات الأساسية",
-    "aiLearning": "مركز تعلم الذكاء الاصطناعي",
-    "whiteboard": "السبورة التفاعلية",
-    "studentProgress": "تقدم الطالب",
-    "solutions": "الحلول",
-    "forSchools": "للمدارس",
-    "forTeachers": "للمعلمين",
-    "forStudents": "للطلاب",
-    "forParents": "لأولياء الأمور",
-    "caseStudies": "دراسات الحالة",
-    "enterprise": "المؤسسات",
-    "support": "الدعم",
-    "helpCenter": "مركز المساعدة",
-    "community": "المجتمع",
-    "contactUs": "اتصل بنا",
-    "apiDocs": "وثائق API",
-    "joinRevolution": "انضم للثورة",
-    "readyToUpgrade": "هل أنت جاهز لتطوير",
-    "learningExperience": "تجربتك التعليمية؟",
-    "subscribeDesc": "اشترك في رؤيتنا الأسبوعية حول الذكاء الاصطناعي في التعليم الحديث.",
+    "platform": "Platform",
+    "coreFeatures": "Core Features",
+    "aiLearning": "AI Learning Hub",
+    "whiteboard": "Interactive Whiteboard",
+    "studentProgress": "Student Progress",
+    "solutions": "Solutions",
+    "forSchools": "For Schools",
+    "forTeachers": "For Teachers",
+    "forStudents": "For Students",
+    "forParents": "For Parents",
+    "caseStudies": "Case Studies",
+    "enterprise": "Enterprise",
+    "support": "Support",
+    "helpCenter": "Help Center",
+    "community": "Community",
+    "contactUs": "Contact Us",
+    "apiDocs": "API Docs",
+    "joinRevolution": "Join the Revolution",
+    "readyToUpgrade": "Ready to upgrade your",
+    "learningExperience": "Learning Experience?",
+    "subscribeDesc": "Subscribe to our weekly insights on AI in modern education.",
     "emailPlaceholder": "you@university.edu",
-    "noSpam": "لا رسائل مزعجة. فقط ابتكار نقي.",
-    "brandDesc": "الجيل القادم من التعليم. أدوات مدعومة بالذكاء الاصطناعي، بيئات تعاونية، وإدارة فصول دراسية على مستوى المؤسسات.",
-    "rightsReserved": "Tablawy OS. جميع الحقوق محفوظة.",
-    "builtWith": "بني بـ",
-    "byTeam": "بواسطة فريق سينيور",
-    "terms": "شروط الخدمة",
-    "privacy": "سياسة الخصوصية",
-    "cookie": "سياسة الكوكيز",
-    "soc2": "متوافق مع SOC2",
-    "gdpr": "جاهز للـ GDPR"
+    "noSpam": "NO SPAM. JUST PURE INNOVATION.",
+    "brandDesc": "The next generation of education. AI-powered tools, collaborative environments, and enterprise-grade classroom management.",
+    "rightsReserved": "Tablawy OS. All rights reserved.",
+    "builtWith": "Built with",
+    "byTeam": "by Senior Team",
+    "terms": "Terms of Service",
+    "privacy": "Privacy Policy",
+    "cookie": "Cookie Policy",
+    "soc2": "SOC2 COMPLIANT",
+    "gdpr": "GDPR READY"
   },
   "portfolioPage": {
     "pageTitle": "ملف {{name}}",
@@ -1247,39 +1285,39 @@
     "loading": "جاري تجهيز الملف الأكاديمي...",
     "notFound": "الطالب غير موجود",
     "notFoundDesc": "الملف الذي تبحث عنه غير متاح.",
-    "title": "الملف الأكاديمي",
-    "description": "عرض شامل لتقدم التعلم والإنجازات والمهارات.",
-    "level": "المستوى {{level}}",
-    "xp": "{{xp}} نقطة خبرة",
-    "progressToLevel": "التقدم للمستوى {{level}}",
-    "email": "البريد الإلكتروني",
-    "phone": "الهاتف",
+    "title": "Academic Portfolio",
+    "description": "A comprehensive showcase of learning progress, achievements, and skills.",
+    "level": "Level {{level}}",
+    "xp": "{{xp}} XP",
+    "progressToLevel": "Progress to Level {{level}}",
+    "email": "Email",
+    "phone": "Phone",
     "stats": {
-      "badges": "الأوسمة",
-      "avgGrade": "متوسط الدرجة",
-      "dayStreak": "التتابع",
-      "globalRank": "الترتيب العالمي"
+      "badges": "Badges",
+      "avgGrade": "Avg Grade",
+      "dayStreak": "Day Streak",
+      "globalRank": "Global Rank"
     },
-    "learningConsistency": "ثبات التعلم",
-    "academicJourney": "الرحلة الأكاديمية",
-    "submissionActivity": "نشاط التسليمات",
-    "submissionActivityDesc": "تكرار تسليم المهام خلال آخر 6 أشهر.",
-    "heatmapSubmissions": "{{count}} تسليمات",
-    "heatmapOn": "في",
-    "heatmapLess": "أقل",
-    "heatmapMore": "أكثر",
-    "unlockedAchievements": "الإنجازات المفتوحة",
-    "badgesEarned": "تم الحصول على {{earned}} من {{total}}"
+    "learningConsistency": "Learning Consistency",
+    "academicJourney": "Academic Journey",
+    "submissionActivity": "Submission Activity",
+    "submissionActivityDesc": "Your assignment submission frequency over the last 6 months.",
+    "heatmapSubmissions": "{{count}} submissions",
+    "heatmapOn": "on",
+    "heatmapLess": "Less",
+    "heatmapMore": "More",
+    "unlockedAchievements": "Unlocked Achievements",
+    "badgesEarned": "{{earned}} / {{total}} Earned"
   },
   "portfolio": {
     "portfolio": "ملف الطالب"
   },
   "myTeachers": {
     "title": "معلميني",
-    "description": "تواصل مع معلميك واطلع على ملفاتهم الشخصية.",
+    "description": "Connect with your teachers and view their profiles.",
     "empty": {
-      "title": "لم يتم العثور على معلمين",
-      "description": "لم تتواصل مع أي معلمين بعد."
+      "title": "No Teachers Found",
+      "description": "You haven't connected with any teachers yet."
     }
   },
   "settings": {
@@ -1290,21 +1328,21 @@
       "error": "فشل حفظ الإعدادات."
     },
     "form": {
-      "title": "الإعدادات العامة",
-      "description": "تحديث إعدادات التطبيق العامة.",
+      "title": "General Settings",
+      "description": "Update your general application settings.",
       "enableAiFeatures": {
-        "label": "تفعيل ميزات الذكاء الاصطناعي",
-        "description": "السماح بالميزات المدعومة بالذكاء الاصطناعي مثل مختبر الدراسة والبناء السحري."
+        "label": "Enable AI Features",
+        "description": "Allow AI-powered features like the Study Lab and Magic Builder."
       },
       "defaultRegistrationRole": {
-        "label": "دور التسجيل الافتراضي",
-        "placeholder": "اختر دوراً",
-        "description": "الدور الافتراضي المعين للمستخدمين الجدد عند التسجيل."
+        "label": "Default Registration Role",
+        "placeholder": "Select a role",
+        "description": "The default role assigned to new users upon registration."
       },
       "welcomeMessage": {
-        "label": "رسالة الترحيب",
-        "placeholder": "أدخل رسالة ترحيب",
-        "description": "رسالة ترحيب مخصصة تظهر للمستخدمين الجدد."
+        "label": "Welcome Message",
+        "placeholder": "Enter a welcome message",
+        "description": "A custom welcome message displayed to new users."
       }
     }
   },
@@ -1466,7 +1504,7 @@
         ]
       },
       "library": {
-        "title": "المكتبة العامة",
+        "title": "Global Library",
         "description": "سحابتك الشخصية لجميع موارد التدريس الخاصة بك.",
         "steps": [
           {

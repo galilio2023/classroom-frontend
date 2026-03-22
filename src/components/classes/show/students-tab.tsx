@@ -158,7 +158,7 @@ export const StudentsTab = ({
                                         <Sparkles className="h-3 w-3 text-ai-primary" />
                                         <span className="text-[10px] font-black uppercase tracking-widest text-ai-primary">Learning DNA</span>
                                     </div>
-                                    <p className="text-xs font-medium leading-relaxed italic">
+                                    <p className="text-xs font-medium leading-relaxed italic break-words whitespace-pre-wrap">
                                         "{student.persona.learningDNA}"
                                     </p>
                                     <div className="pt-2 flex justify-between items-center text-[8px] font-bold text-muted-foreground uppercase">
