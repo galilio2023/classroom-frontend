@@ -18,6 +18,11 @@ interface ChatBubbleProps {
   isAdmin: boolean;
 }
 
+/**
+ * RECURSIVE PATTERN: ChatBubble renders its own children (replies).
+ * PERFORMANCE NOTE: For extremely deep threads (>50 levels), consider 
+ * switching to a virtualized list or flattening the thread hierarchy.
+ */
 export const ChatBubble = ({ post, isOwn, onDelete, onReply, isAdmin }: ChatBubbleProps) => {
   const { t, i18n } = useTranslation();
   const { data: userIdentity } = useGetIdentity<User>();

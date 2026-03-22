@@ -26,11 +26,13 @@
 
 ## 🏗️ Enterprise Development Patterns
 
-We strictly adhere to the following patterns:
+We strictly adhere to industrial architectural standards to ensure AI security and responsiveness. 
 
-1.  **Zero-Direct-Call Policy**: The frontend never calls AI SDKs directly. All requests use `useCustomMutation` to hit our secure backend proxy.
-2.  **Compound Component Architecture**: Large features (like the Study Lab) are broken into isolated, reusable pieces.
-3.  **Visual Identity (Rule 4)**: All AI features use `ai-primary`, `Sparkles` icons, and premium Framer Motion animations (`ai-pulse-soft`).
+**[Read the Full Code Patterns Guide here](./DEVELOPMENT_PATTERNS.md)**
+
+1.  **Zero-Direct-Call Policy**: The frontend never calls AI SDKs directly.
+2.  **Visual Identity (Rule 4)**: Consistent `ai-primary` branding.
+3.  **Compound Component Architecture**: Large features are broken into reusable atoms.
 
 ---
 
