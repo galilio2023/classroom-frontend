@@ -3,108 +3,132 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 /**
- * i18n Sync Utility
+ * i18n Sync Utility (Namespace Version)
  * 
- * Ensures ar.json stays in sync with en.json (the source of truth).
- * - Adds missing keys to ar.json with English placeholders.
- * - Removes extra keys from ar.json that no longer exist in en.json.
- * - Reports type mismatches.
+ * Ensures Arabic locale files stay in sync with English files (the source of truth).
+ * - Iterates through all namespaces in src/i18n/locales/en/
+ * - Adds missing keys to corresponding ar/ files.
+ * - Removes stale keys from ar/ files.
+ * - Reports mismatches.
  */
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const enPath = path.join(__dirname, '../src/i18n/en.json');
-const arPath = path.join(__dirname, '../src/i18n/ar.json');
-
-const en = JSON.parse(fs.readFileSync(enPath, 'utf8'));
-const ar = JSON.parse(fs.readFileSync(arPath, 'utf8'));
+const enDir = path.join(__dirname, '../src/i18n/locales/en');
+const arDir = path.join(__dirname, '../src/i18n/locales/ar');
 
 const isDryRun = process.argv.includes('--dry-run');
 
-let missingCount = 0;
-let extraCount = 0;
-let mismatchCount = 0;
+let totalMissingCount = 0;
+let totalExtraCount = 0;
+let totalMismatchCount = 0;
 
 /**
  * Reports keys present in source but missing in target.
  */
 function reportMissingKeys(source, target, currentPath = '') {
+  let missing = 0;
+  let mismatches = 0;
+
   Object.keys(source).forEach(key => {
     const fullPath = currentPath ? `${currentPath}.${key}` : key;
     
     if (!(key in target)) {
-      console.log(`❌ Missing in Arabic: ${fullPath}`);
-      missingCount++;
+      console.log(`  ❌ Missing: ${fullPath}`);
+      missing++;
     } else if (typeof source[key] !== typeof target[key]) {
-      console.log(`‼️ Type Mismatch at: ${fullPath} (${typeof source[key]} vs ${typeof target[key]})`);
-      mismatchCount++;
+      console.log(`  ‼️ Type Mismatch: ${fullPath} (${typeof source[key]} vs ${typeof target[key]})`);
+      mismatches++;
     } else if (typeof source[key] === 'object' && source[key] !== null && !Array.isArray(source[key])) {
-      reportMissingKeys(source[key], target[key], fullPath);
+      const res = reportMissingKeys(source[key], target[key], fullPath);
+      missing += res.missing;
+      mismatches += res.mismatches;
     }
   });
+  return { missing, mismatches };
 }
 
 /**
  * Reports keys present in target but missing in source (stale keys).
  */
 function reportExtraKeys(source, target, currentPath = '') {
+  let extra = 0;
   Object.keys(target).forEach(key => {
     const fullPath = currentPath ? `${currentPath}.${key}` : key;
     
     if (!(key in source)) {
-      console.log(`⚠️ Extra in Arabic (Not in English): ${fullPath}`);
-      extraCount++;
+      console.log(`  ⚠️ Extra: ${fullPath}`);
+      extra++;
     } else if (typeof source[key] === 'object' && source[key] !== null && !Array.isArray(source[key])) {
-      reportExtraKeys(source[key], target[key], fullPath);
+      extra += reportExtraKeys(source[key], target[key], fullPath);
     }
   });
+  return extra;
 }
 
 /**
  * Performs a deep sync of target from source.
- * This is an "Exclusive Sync": it only keeps keys present in the source.
  */
 function getSyncedData(source, target) {
-  // If source is not an object or is an array, we just return the source as the new value
-  // (unless we want to preserve the target value if it exists and types match)
   if (typeof source !== 'object' || source === null || Array.isArray(source)) {
     return (typeof target === typeof source) ? target : source;
   }
 
   const synced = {};
-  
   Object.keys(source).forEach(key => {
     if (!(key in target)) {
-      // Key is missing in target, use source value (English placeholder)
       synced[key] = source[key]; 
     } else {
-      // Key exists in both, recurse if it's an object
       synced[key] = getSyncedData(source[key], target[key]);
     }
   });
-  
   return synced;
 }
 
-console.log("--- 🔍 i18n Sync Report ---");
+console.log("--- 🔍 i18n Sync Report (Namespaces) ---");
 if (isDryRun) {
   console.log("🏃 Running in DRY-RUN mode. No files will be changed.\n");
 }
 
-reportMissingKeys(en, ar);
-reportExtraKeys(en, ar);
+// 1. Get all English namespace files
+const namespaces = fs.readdirSync(enDir).filter(file => file.endsWith('.json'));
 
-console.log(`\nResults: ${missingCount} Missing | ${extraCount} Extra | ${mismatchCount} Mismatched`);
+namespaces.forEach(file => {
+  const enPath = path.join(enDir, file);
+  const arPath = path.join(arDir, file);
+
+  console.log(`\n📂 Namespace: ${file}`);
+
+  const enContent = JSON.parse(fs.readFileSync(enPath, 'utf8'));
+  let arContent = {};
+
+  if (fs.existsSync(arPath)) {
+    arContent = JSON.parse(fs.readFileSync(arPath, 'utf8'));
+  } else {
+    console.log(`  🆕 Arabic file does not exist. Will create it.`);
+  }
+
+  const { missing, mismatches } = reportMissingKeys(enContent, arContent);
+  const extra = reportExtraKeys(enContent, arContent);
+
+  totalMissingCount += missing;
+  totalMismatchCount += mismatches;
+  totalExtraCount += extra;
+
+  if (!isDryRun) {
+    const updatedAr = getSyncedData(enContent, arContent);
+    fs.writeFileSync(arPath, JSON.stringify(updatedAr, null, 2), 'utf8');
+  }
+});
+
+console.log(`\n--- Summary ---`);
+console.log(`Total Missing: ${totalMissingCount}`);
+console.log(`Total Extra  : ${totalExtraCount}`);
+console.log(`Total Mismatched: ${totalMismatchCount}`);
 
 if (!isDryRun) {
-  // Auto-sync with cleanup
-  const updatedAr = getSyncedData(en, ar);
-  fs.writeFileSync(arPath, JSON.stringify(updatedAr, null, 2), 'utf8');
-
-  console.log("\n✅ ar.json has been synced.");
-  console.log("- Missing keys were filled with English placeholders.");
-  console.log("- Extra (stale) keys were removed to keep the translation clean.");
+  console.log("\n✅ All Arabic namespaces have been synced with English.");
 } else {
   console.log("\n👀 Dry run complete. No changes made.");
 }

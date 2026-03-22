@@ -1,0 +1,352 @@
+{
+  "analytics": {
+    "title": "تحليلات الفصل",
+    "description": "مقاييس الأداء والتفاعل التفصيلية لهذا الفصل.",
+    "analyzing": "جاري تحليل بيانات الفصل...",
+    "failedToLoad": "فشل تحميل التحليلات",
+    "failedToLoadDescription": "لم نتمكن من جلب بيانات هذا الفصل.",
+    "selectRange": "اختر الفترة",
+    "ranges": {
+      "7": "آخر 7 أيام",
+      "30": "آخر 30 يوماً",
+      "semester": "الفصل الدراسي كاملاً"
+    },
+    "toast": {
+      "preparingPrint": "جاري تجهيز تقرير قابل للطباعة...",
+      "exportingCsv": "جاري تصدير CSV..."
+    },
+    "charts": {
+      "gradeDistribution": "توزيع درجات الفصل",
+      "gradeDescription": "أداء الطلاب في جميع التكليفات في هذا الفصل."
+    },
+    "ai": {
+      "predictions": "توقعات الذكاء الاصطناعي",
+      "predictedOutcomes": "النتائج المتوقعة",
+      "beta": "تجريبي"
+    }
+  },
+  "dashboard": {
+    "dashboard": "لوحة التحكم",
+    "title": "لوحة التحكم",
+    "failedToLoad": "فشل تحميل لوحة التحكم",
+    "failedToLoadDescription": "حدث خطأ أثناء جلب بيانات لوحة التحكم.",
+    "archiveViewActive": "عرض الأرشيف نشط",
+    "archiveViewDescription": "أنت تعرض بيانات من {{termName}}. هذا الفصل مؤرشف وللقراءة فقط.",
+    "quickActions": "إجراءات سريعة",
+    "todaySchedule": "جدول اليوم",
+    "welcomeBack": "أهلاً بك مجدداً، {{name}}! 👋",
+    "summary": {
+      "student": "عندك {{count}} مهام محتاجة تسليم قريب. المهمة الجاية: {{next}}.",
+      "teacher": "عندك {{count}} واجبات محتاجة تصحيح. وفي {{active}} فصول شغالة دلوقتي.",
+      "parent": "أولادك ماشيين كويس جداً. {{name}} بقاله {{count}} أيام نشيط!",
+      "admin": "النظام شغال تمام. فيه {{count}} طلبات انضمام معلمين مستنية موافقتك."
+    },
+    "common": {
+      "className": "اسم الفصل",
+      "avgGrade": "متوسط الدرجات",
+      "attendance": "الحضور",
+      "completion": "نسبة الإكمال",
+      "students": "الطلاب",
+      "excellent": "ممتاز",
+      "good": "جيد",
+      "atRisk": "معرض للخطر",
+      "rate": "معدل"
+    },
+    "schedule": {
+      "child": "جدول {{name}}",
+      "noClasses": "لا توجد فصول مجدولة لليوم.",
+      "noClassesChild": "لا توجد فصول لـ {{name}} اليوم.",
+      "viewFull": "عرض الجدول الكامل",
+      "today": "جدول اليوم",
+      "classesCount": "{{count}} فصول",
+      "freeDay": "يوم راحة!",
+      "enjoyTimeOff": "استمتع بوقت فراغك",
+      "clickClass": "انقر على الفصل لدخول الغرفة"
+    },
+    "readyToContinue": "هل أنت مستعد لمواصلة رحلتك التعليمية؟",
+    "managementOverview": "إليك نظرة عامة على الإدارة لليوم.",
+    "verification": {
+      "required": "مطلوب التحقق من الحساب",
+      "requiredDescription": "حساب المعلم الخاص بك غير مفعل حالياً. يرجى رفع وثائق التدريس أو الهوية لفتح جميع الميزات.",
+      "verifiedEducator": "معلم معتمد",
+      "success": "تم تقديم وثيقة التحقق للمراجعة!",
+      "error": "فشل رفع المستند. يرجى المحاولة مرة أخرى."
+    },
+    "student": {
+      "actions": {
+        "header": "ماذا بعد؟",
+        "empty": "يوم حر!",
+        "emptyDesc": "لا توجد مهام عاجلة. وقت مثالي للمراجعة.",
+        "emptyBtn": "دخول مختبر الذكاء الاصطناعي",
+        "upcoming": {
+          "title": "مهمة قريبة",
+          "description": "{{title}} تحتاج إلى انتباهك.",
+          "action": "إكمال المهمة"
+        },
+        "aiStudy": {
+          "title": "تدريب يومي",
+          "description": "اكسب نقاط خبرة عبر التدريب في مختبر الذكاء الاصطناعي.",
+          "action": "بدء التدريب"
+        }
+      },
+      "academicJourney": "الرحلة الأكاديمية",
+      "onFire": "متقد!",
+      "eliteStudent": "طالب متميز",
+      "keepItUp": "استمر في هذا الأداء، {{name}}!",
+      "xpToNextLevel": "يفصلك {{xp}} نقطة خبرة عن المستوى {{level}}",
+      "level": "المستوى",
+      "dailyStreak": "التتابع اليومي",
+      "days": "أيام",
+      "nextReward": "المكافأة التالية",
+      "profileBadge": "وسام الملف الشخصي",
+      "upcomingTasks": "المهام القادمة",
+      "dontMissDeadlines": "لا تفوت المواعيد النهائية",
+      "pendingCount": "{{count}} قيد الانتظار",
+      "allCaughtUp": "أنهيت كل شيء!",
+      "noUpcoming": "لا توجد تكليفات قادمة. استمتع بوقتك!",
+      "greatJobStudent": "عمل رائع أيها الطالب!",
+      "clickTask": "انقر على المهمة لعرض التفاصيل والتسليم",
+      "welcomeJourney": "مرحباً بك في رحلتك التعليمية!",
+      "welcomeJourneyDesc": "لم تبدأ أي فصول أو تكليفات بعد. سيظهر تقدمك الأكاديمي هنا بمجرد البدء.",
+      "focusArea": "تم تحديد مجال التركيز",
+      "aiRecommendation": "توصية مدعومة بالذكاء الاصطناعي",
+      "actionRequiredBadge": "إجراء مطلوب",
+      "strugglingWith": "لاحظنا أنك قد تواجه صعوبة في {{subject}}. تدرب الآن للحصول على وسام الإتقان وتحسين درجاتك!",
+      "gradeProgress": "تقدم الدرجات",
+      "gradeProgressDesc": "أداء درجاتك بمرور الوقت.",
+      "noGradeData": "لا توجد بيانات للدرجات بعد. أكمل التكليفات لرؤية تقدمك!",
+      "subjectMastery": "إتقان المواد",
+      "subjectMasteryDesc": "متوسط الأداء لكل مادة.",
+      "noSubjectData": "لا توجد بيانات للمواد بعد. سيظهر رادار الإتقان الخاص بك هنا.",
+      "recentActivity": "النشاط الأخير",
+      "attendanceOverview": "نظرة عامة على الحضور",
+      "attendedXofY": "لقد حضرت {{present}} من إجمالي {{total}} جلسة.",
+      "attendedXofY_new": "لقد حضرت <0>{{present}}</0> من إجمالي <1>{{total}}</1> جلسة.",
+      "predictedFinal": "النتيجة المتوقعة",
+      "readyToSubmit": "جاهز للتسليم"
+    },
+    "staff": {
+      "actions": {
+        "header": "ماذا بعد؟",
+        "empty": "أنت متابع لكل شيء!",
+        "emptyBtn": "إنشاء اختبار بالذكاء الاصطناعي",
+        "atRisk": {
+          "title": "إجراء مطلوب: {{count}} طلاب",
+          "description": "هؤلاء الطلاب بحاجة إلى تدخل فوري.",
+          "action": "عرض الطلاب"
+        },
+        "grading": {
+          "title": "في انتظار التقييم ({{count}})",
+          "description": "لديك تسليمات تنتظر تقييمك وملاحظاتك.",
+          "action": "بدء التقييم"
+        },
+        "aiQuiz": {
+          "title": "تعزيز التفاعل",
+          "description": "أنشئ اختبارًا جديدًا مدعومًا بالذكاء الاصطناعي لصفوفك.",
+          "action": "فتح منصة الذكاء الاصطناعي"
+        }
+      },
+      "engagementAnalytics": "تحليلات التفاعل",
+      "atRiskStudents": {
+        "title": "طلاب متعثرون",
+        "allClear": "كل شيء جيد",
+        "allClearDescription": "لا يوجد طلاب متعثرون حالياً. عمل رائع!",
+        "aiDetected": "تدخل مكتشف بالذكاء الاصطناعي",
+        "criticalCount": "{{count}} حالة حرجة",
+        "interventionRecommended": "يوصى بالتدخل الفوري",
+        "interventionTitle": "تدخل: {{name}}",
+        "interventionDescription": "اتخذ إجراءً لدعم هذا الطالب. قام الذكاء الاصطناعي بتحليل أدائهم واقترح موارد.",
+        "aiSupportReady": "دعم الذكاء الاصطناعي جاهز",
+        "aiResources": "مواد دعم مقترحة من الذكاء الاصطناعي",
+        "sendEncouragement": "إرسال تشجيع",
+        "encouragementPlaceholder": "اكتب رسالتك التشجيعية هنا...",
+        "interventionNote": "إرسال هذه الرسالة سيحدث حالة التدخل للطالب إلى \"تم إخطار الطالب\".",
+        "encouragementSent": "تم إرسال التشجيع إلى {{name}}!",
+        "status": {
+          "studentNotified": "تم إخطار الطالب",
+          "parentNotified": "تم إخطار ولي الأمر",
+          "resolved": "تم الحل",
+          "noAction": "لا يوجد إجراء"
+        },
+        "fallbacks": {
+          "lowGrades": "مرحباً {{name}}، لاحظت أن درجاتك الأخيرة كانت أقل من المعتاد. أعلم أنك تستطيع تقديم الأفضل! هل هناك أي شيء يمكنني مساعدتك به؟",
+          "highAbsences": "مرحباً {{name}}، لقد افتقدناك في الفصل مؤخرًا! الحضور المنتظم هو مفتاح النجاح. أتمنى أن يكون كل شيء على ما يرام.",
+          "inactivity": "مرحباً {{name}}، لاحظت أنك لم تسجل الدخول منذ بضعة أيام. لا تتأخر عن الوحدات الأخيرة! أخبرني إذا كنت تواجه أي صعوبة.",
+          "general": "مرحباً {{name}}، أردت فقط الاطمئنان على سير دراستك."
+        }
+      },
+      "pendingSubmissions": {
+        "submitted": "تم التسليم {{time}}",
+        "aiReady": "جاهز للذكاء الاصطناعي",
+        "late": "متأخر"
+      },
+      "promos": {
+        "aiAssistant": {
+          "title": "مساعد المحتوى الذكي",
+          "badge": "نسخة مميزة",
+          "description": "استخدم Gemini 2.0 Flash لإنشاء الاختبارات والتكليفات والحصول على مساعدة فورية في المنهج.",
+          "quizGen": "إنشاء اختبار",
+          "aiChat": "دردشة الذكاء الاصطناعي"
+        },
+        "studentSupport": {
+          "title": "دعم الطالب",
+          "badge": "مساعدة ومصادر",
+          "description": "هل تحتاج لمساعدة في دراستك؟ استخدم مساعد الدراسة الذكي داخل أي من صفحات الفصول للحصول على مساعدة فورية.",
+          "technicalNote": "فريق الدعم الفني لدينا متاح أيضاً 24/7 للمشكلات التقنية."
+        }
+      },
+      "platformOverview": "نظرة عامة على المنصة",
+      "recentActivity": "النشاط الأخير",
+      "pendingGrading": "في انتظار التقييم",
+      "submissionsAwaiting": "تسليمات في انتظار التقييم",
+      "newSubmissions": "{{count}} جديدة",
+      "allCaughtUp": "أنهيت كل شيء!",
+      "allGraded": "لقد قمت بتقييم جميع التسليمات الأخيرة.",
+      "greatJobTeacher": "عمل رائع أيها المعلم!",
+      "teacherTvStats": "إحصائيات المعلم TV",
+      "channelViews": "مشاهدات القناة",
+      "lifetimeViews": "إجمالي المشاهدات",
+      "conversionRate": "معدل التحويل",
+      "enrollmentSuccess": "نجاح التسجيل",
+      "channelStatus": "حالة القناة",
+      "active": "نشط",
+      "manageChannel": "إدارة قناتك العامة"
+    },
+    "stats": {
+      "totalStudents": "إجمالي الطلاب",
+      "totalTeachers": "إجمالي المعلمين",
+      "pendingVerifications": "تحققات معلقة",
+      "activeClasses": "الفصول النشطة"
+    },
+    "onboarding": {
+      "getStarted": "ابدأ الآن",
+      "teacher": {
+        "welcome": "مرحباً بك أيها المعلم! لنبدأ",
+        "description": "أكمل هذه الخطوات لإعداد فصلك الدراسي الرقمي.",
+        "setupProgress": "تقدم الإعداد",
+        "stepsOf": "تم إنجاز {{completed}} من أصل {{total}} خطوات",
+        "steps": {
+          "createClass": {
+            "title": "أنشئ فصلك الأول",
+            "description": "قم بإعداد مساحة لطلابك للتعلم والتعاون."
+          },
+          "addAssignment": {
+            "title": "أضف تكليفاً",
+            "description": "أنشئ مهمتك الأولى للبدء في متابعة تقدم الطلاب."
+          },
+          "inviteStudents": {
+            "title": "دعوة الطلاب",
+            "description": "أضف الطلاب إلى فصولك لبدء الرحلة."
+          }
+        }
+      },
+      "student": {
+        "welcome": "مرحباً بك في رحلتك التعليمية!",
+        "description": "لم تنضم إلى أي فصل بعد. سيظهر تقدمك الأكاديمي هنا فور البدء.",
+        "joinClass": {
+          "title": "انضم لفصلك الأول",
+          "description": "أدخل رمز الدعوة المقدم من معلمك للانضمام لفصل دراسي."
+        },
+        "exploreResources": {
+          "title": "استكشاف المصادر العامة",
+          "description": "اطلع على مواد الدراسة العامة وأدوات الذكاء الاصطناعي المتاحة لجميع الطلاب."
+        }
+      }
+    },
+    "platform": {
+      "overview": "نظرة عامة على المنصة",
+      "stats": {
+        "pendingVerifications": "تحققات معلقة",
+        "totalUsers": "إجمالي المستخدمين",
+        "totalStudents": "إجمالي الطلاب",
+        "totalTeachers": "إجمالي المعلمين",
+        "totalClasses": "إجمالي الفصول",
+        "totalAssignments": "إجمالي التكليفات"
+      }
+    },
+    "activity": {
+      "recent": "النشاط الأخير",
+      "systemLogs": "سجلات النظام",
+      "noActivity": "لا يوجد نشاط بعد",
+      "noActivityDescription": "ستظهر التحديثات هنا فور حدوثها.",
+      "aiInsightAvailable": "رؤية الذكاء الاصطناعي متاحة",
+      "network": "الشبكة",
+      "actions": {
+        "CREATE_CLASS": "تم إنشاء فصل",
+        "DELETE_CLASS": "تم حذف فصل",
+        "JOIN_CLASS": "تم الانضمام لفصل",
+        "APPROVE_ENROLLMENT": "تم قبول تسجيل",
+        "SUBMIT_ASSIGNMENT": "تم تسليم تكليف",
+        "JOIN_ASSIGNMENT": "تم الانضمام للتكليف",
+        "GRADE_SUBMISSION": "تم تقييم تسليم",
+        "USER_LOGIN": "تم تسجيل دخول مستخدم"
+      }
+    },
+    "charts": {
+      "last7Days": "آخر 7 أيام",
+      "activeEngagement": "التفاعل النشط",
+      "aiInsights": "رؤى الذكاء الاصطناعي",
+      "noData": "لا توجد بيانات {{title}} بعد",
+      "attendance": {
+        "title": "اتجاه الحضور",
+        "description": "أنماط حضور الفصل خلال الأسبوع الماضي.",
+        "students": "الطلاب"
+      },
+      "grades": {
+        "title": "توزيع الدرجات",
+        "description": "نظرة عامة على أداء الطلاب في التكليفات.",
+        "students": "الطلاب"
+      }
+    },
+    "cards": {
+      "myClasses": "فصولي",
+      "enrolledClasses": "الفصول المسجلة",
+      "accessActiveClassrooms": "الوصول للفصول النشطة.",
+      "assignments": "التكليفات",
+      "myTasks": "مهامي",
+      "submitYourWork": "سلم عملك.",
+      "calendar": "التقويم",
+      "schedule": "الجدول",
+      "deadlinesEvents": "المواعيد والأحداث.",
+      "family": "العائلة",
+      "myChildren": "أبنائي",
+      "monitorProgress": "متابعة التقدم.",
+      "schoolEvents": "أحداث المدرسة",
+      "importantDates": "تواريخ هامة.",
+      "messages": "الرسائل",
+      "notifications": "الإشعارات",
+      "teacherUpdates": "تحديثات المعلم.",
+      "manageClasses": "إدارة الفصول",
+      "overseeClassrooms": "الإشراف على الفصول.",
+      "curriculum": "المنهج",
+      "tasksGrading": "مهام وتقييم.",
+      "viewAllDeadlines": "عرض المواعيد الأكاديمية.",
+      "users": "المستخدمين",
+      "directory": "دليل المستخدمين",
+      "studentsStaff": "الطلاب والموظفين."
+    },
+    "parent": {
+      "familyOverview": "نظرة عامة على العائلة",
+      "familyDescription": "راقب التقدم الأكاديمي وتفاعل أبنائك.",
+      "childLinked": "طفل واحد مرتبط",
+      "childrenLinked": "{{count}} أطفال مرتبطين",
+      "linkChild": "ربط طفل",
+      "linkStudentAccount": "ربط حساب طالب",
+      "linkDescription": "أدخل البريد الإلكتروني الذي استخدمه طفلك للتسجيل.",
+      "studentEmail": "البريد الإلكتروني للطالب",
+      "linkAccount": "ربط الحساب",
+      "noChildren": "لا يوجد أطفال مرتبطون بعد",
+      "noChildrenDescription": "انقر على زر \"ربط طفل\" أعلاه لربط حسابك بملفات تعريف أبنائك.",
+      "dayStreak": "سلسلة الأيام",
+      "gpaAverage": "المعدل التراكمي / المتوسط",
+      "attendance": "الحضور",
+      "levelProgress": "التقدم في المستوى",
+      "totalXp": "{{count}} إجمالي XP",
+      "contactTeachers": "تواصل مع المعلمين",
+      "fullReport": "التقرير الكامل",
+      "linkSuccess": "تم ربط الطالب بنجاح!",
+      "linkError": "فشل ربط الطالب. يرجى التحقق من البريد الإلكتروني.",
+      "enterEmailError": "يرجى إدخال البريد الإلكتروني للطالب."
+    }
+  }
+}

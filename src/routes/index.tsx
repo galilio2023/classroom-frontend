@@ -88,13 +88,16 @@ const Loading = () => (
   </div>
 );
 
-const ErrorComponent = () => (
-  <div className="flex flex-col h-dvh items-center justify-center space-y-4">
-    <h1 className="text-4xl font-bold">404</h1>
-    <p className="text-muted-foreground">The page you are looking for does not exist.</p>
-    <a href="/dashboard" className="text-primary hover:underline font-medium">Back to Dashboard</a>
-  </div>
-);
+const ErrorComponent = () => {
+  const { t } = useTranslation();
+  return (
+    <div className="flex flex-col h-dvh items-center justify-center space-y-4">
+      <h1 className="text-4xl font-bold">{t("common.errorPage.title")}</h1>
+      <p className="text-muted-foreground">{t("common.errorPage.desc")}</p>
+      <a href="/dashboard" className="text-primary hover:underline font-medium">{t("common.errorPage.back")}</a>
+    </div>
+  );
+};
 
 export const AppRouter = () => (
   <Suspense fallback={<Loading />}>

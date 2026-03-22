@@ -72,10 +72,10 @@ const LandingPage = () => {
                 <div className="flex flex-col md:flex-row items-end justify-between mb-16 md:mb-24 gap-8">
                     <div className="max-w-2xl text-start">
                         <h2 className="text-4xl md:text-7xl font-black tracking-tighter uppercase mb-6 leading-[0.9]">
-                            Design for the <br/>
-                            <span className="text-primary">Next Generation</span>
+                            {t("landing.bento.title1")} <br/>
+                            <span className="text-primary">{t("landing.bento.title2")}</span>
                         </h2>
-                        <p className="text-lg md:text-xl text-muted-foreground font-medium">We've rebuilt classroom management from the ground up with a focus on speed, beauty, and AI-driven insights.</p>
+                        <p className="text-lg md:text-xl text-muted-foreground font-medium">{t("landing.bento.desc")}</p>
                     </div>
                     <div className="hidden md:block h-px flex-1 bg-border/50 mx-12 mb-6" />
                 </div>
@@ -119,10 +119,10 @@ const LandingPage = () => {
                     >
                         <div className="absolute inset-0 bg-gradient-to-r from-primary via-primary to-ai-primary opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
                         <div className="flex-1 text-start relative z-10">
-                            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white/40 mb-4 block">Engineered for Success</span>
-                            <h3 className="text-4xl md:text-6xl font-black tracking-tighter mb-6 leading-none">Unleash Infinite <br/>Potential.</h3>
+                            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white/40 mb-4 block">{t("landing.growth.badge")}</span>
+                            <h3 className="text-4xl md:text-6xl font-black tracking-tighter mb-6 leading-none">{t("landing.growth.title1")} <br/>{t("landing.growth.title2")}</h3>
                             <p className="text-lg text-white/70 font-medium leading-relaxed max-w-lg">
-                                Our proprietary growth engine tracks every micro-achievement, turning the academic journey into a rewarding quest for excellence.
+                                {t("landing.growth.desc")}
                             </p>
                         </div>
                         <div className="relative z-10 h-48 w-full md:w-96 bg-white/10 rounded-[2rem] border border-white/10 p-8 flex items-end gap-3 backdrop-blur-md">
@@ -148,7 +148,7 @@ const LandingPage = () => {
                             <div className="absolute top-[-10%] right-[-10%] opacity-[0.02] group-hover:scale-110 transition-transform duration-700 pointer-events-none">
                                 <Users className="h-96 w-96 text-primary" />
                             </div>
-                            <h2 className="text-5xl md:text-7xl font-black tracking-tighter mb-8 leading-none">Student<br/><span className="text-primary/40">Portal</span></h2>
+                            <h2 className="text-5xl md:text-7xl font-black tracking-tighter mb-8 leading-none">{t("landing.roles.student.title")}<br/><span className="text-primary/40">{t("landing.roles.student.portal")}</span></h2>
                             <div className="flex items-center gap-3 font-black uppercase tracking-widest text-xs mt-12 bg-primary/10 text-primary w-fit px-6 py-3 rounded-full group-hover:bg-primary group-hover:text-white transition-all">
                                 {t("buttons.joinNow")} <ChevronRight className="h-4 w-4 rtl:rotate-180" />
                             </div>
@@ -163,7 +163,7 @@ const LandingPage = () => {
                             <div className="absolute top-[-10%] right-[-10%] opacity-[0.02] group-hover:scale-110 transition-transform duration-700 pointer-events-none">
                                 <GraduationCap className="h-96 w-96 text-primary" />
                             </div>
-                            <h2 className="text-5xl md:text-7xl font-black tracking-tighter mb-8 leading-none">Teacher<br/><span className="text-primary/40">Portal</span></h2>
+                            <h2 className="text-5xl md:text-7xl font-black tracking-tighter mb-8 leading-none">{t("landing.roles.teacher.title")}<br/><span className="text-primary/40">{t("landing.roles.teacher.portal")}</span></h2>
                             <div className="flex items-center gap-3 font-black uppercase tracking-widest text-xs mt-12 bg-foreground text-background w-fit px-6 py-3 rounded-full group-hover:bg-primary group-hover:text-white transition-all">
                                 {t("buttons.applyToTeach")} <ChevronRight className="h-4 w-4 rtl:rotate-180" />
                             </div>
@@ -183,8 +183,8 @@ const LandingPage = () => {
                     className="space-y-16 max-w-5xl mx-auto"
                 >
                     <h2 className="text-7xl md:text-[12rem] font-black tracking-[-0.06em] leading-[0.8] uppercase text-gradient">
-                        Education <br/>
-                        <span className="text-primary">Evolved.</span>
+                        {t("landing.cta.evolved1")} <br/>
+                        <span className="text-primary">{t("landing.cta.evolved2")}</span>
                     </h2>
                     <div className="pt-12">
                         <Button size="lg" className="h-24 px-20 rounded-full text-2xl font-black uppercase tracking-widest shadow-2xl shadow-primary/30 bg-primary hover:scale-110 active:scale-95 transition-all duration-500 group" asChild>

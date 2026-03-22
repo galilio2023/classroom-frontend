@@ -1,0 +1,352 @@
+{
+  "analytics": {
+    "title": "Analytics",
+    "description": "Description",
+    "analyzing": "Analyzing Class Data...",
+    "failedToLoad": "Failed to load analytics",
+    "failedToLoadDescription": "We couldn't fetch the data for this class.",
+    "selectRange": "Select range",
+    "ranges": {
+      "7": "7 Days",
+      "30": "30 Days",
+      "semester": "Full Semester"
+    },
+    "toast": {
+      "preparingPrint": "Preparing print-friendly report...",
+      "exportingCsv": "Exporting CSV..."
+    },
+    "charts": {
+      "gradeDistribution": "Grade Distribution",
+      "gradeDescription": "Grade Distribution"
+    },
+    "ai": {
+      "predictions": "AI Predictions",
+      "predictedOutcomes": "Predicted Outcomes",
+      "beta": "Beta"
+    }
+  },
+  "dashboard": {
+    "dashboard": "Dashboard",
+    "title": "Dashboard",
+    "failedToLoad": "Failed to load dashboard",
+    "failedToLoadDescription": "We encountered an error while fetching your dashboard data.",
+    "archiveViewActive": "Archive View Active",
+    "archiveViewDescription": "You are viewing data from {{termName}}. This term is archived and read-only.",
+    "quickActions": "Quick Actions",
+    "todaySchedule": "Today's Schedule",
+    "welcomeBack": "Welcome back, {{name}}!",
+    "summary": {
+      "student": "You have {{count}} assignments due soon. Next up: {{next}}.",
+      "teacher": "You have {{count}} submissions to grade. {{active}} classes are live now.",
+      "parent": "Your children are performing well. {{name}} has a streak of {{count}} days!",
+      "admin": "System is healthy. {{count}} new teacher applications pending."
+    },
+    "common": {
+      "className": "Class Name",
+      "avgGrade": "Avg Grade",
+      "attendance": "Attendance",
+      "completion": "Completion",
+      "students": "Students",
+      "excellent": "Excellent",
+      "good": "Good",
+      "atRisk": "At Risk",
+      "rate": "Rate"
+    },
+    "schedule": {
+      "child": "{{name}}'s Schedule",
+      "noClasses": "No classes for {{name}} today.",
+      "noClassesChild": "No classes for {{name}} today.",
+      "viewFull": "View Full Schedule",
+      "today": "Today's Schedule",
+      "classesCount": "{{count}} Classes",
+      "freeDay": "Free Day!",
+      "enjoyTimeOff": "Enjoy your time off",
+      "clickClass": "Click a class to enter the room"
+    },
+    "readyToContinue": "Ready to continue your learning journey?",
+    "managementOverview": "Here is your management overview for today.",
+    "verification": {
+      "required": "Account Verification Required",
+      "requiredDescription": "Your teacher account is currently unverified. Please upload your teaching credentials or ID to unlock all features.",
+      "verifiedEducator": "Verified Educator",
+      "success": "Verification document submitted for review!",
+      "error": "Failed to upload document. Please try again."
+    },
+    "student": {
+      "actions": {
+        "header": "What's Next?",
+        "empty": "Free Day!",
+        "emptyDesc": "No urgent tasks. A perfect time to review.",
+        "emptyBtn": "Enter AI Lab",
+        "upcoming": {
+          "title": "Task Due Soon",
+          "description": "{{title}} needs your attention.",
+          "action": "Complete Task"
+        },
+        "aiStudy": {
+          "title": "Daily Practice",
+          "description": "Earn XP by practicing in the AI Study Lab.",
+          "action": "Start Practice"
+        }
+      },
+      "academicJourney": "Academic Journey",
+      "onFire": "On Fire!",
+      "eliteStudent": "Elite Student",
+      "keepItUp": "Keep it up, {{name}}!",
+      "xpToNextLevel": "You are {{xp}} XP away from Level {{level}}",
+      "level": "Level",
+      "dailyStreak": "Daily Streak",
+      "days": "Days",
+      "nextReward": "Next Reward",
+      "profileBadge": "Profile Badge",
+      "upcomingTasks": "Upcoming Tasks",
+      "dontMissDeadlines": "Don't miss your deadlines",
+      "pendingCount": "{{count}} Pending",
+      "allCaughtUp": "All caught up!",
+      "noUpcoming": "No upcoming assignments. Enjoy your time!",
+      "greatJobStudent": "Great job, Student!",
+      "clickTask": "Click a task to view details and submit",
+      "welcomeJourney": "Welcome to Your Learning Journey!",
+      "welcomeJourneyDesc": "You haven't started any classes or assignments yet. Your academic progress will appear here once you begin.",
+      "focusArea": "Focus Area Identified",
+      "aiRecommendation": "AI-Powered Recommendation",
+      "actionRequiredBadge": "Action Required",
+      "strugglingWith": "We noticed you might be struggling with {{subject}}. Practice now to earn a mastery badge and boost your grade!",
+      "gradeProgress": "Grade Progress",
+      "gradeProgressDesc": "Your grade performance over time.",
+      "noGradeData": "No grade data yet. Complete assignments to see your progress!",
+      "subjectMastery": "Subject Mastery",
+      "subjectMasteryDesc": "Average performance per subject.",
+      "noSubjectData": "No subject data yet. Your mastery radar will appear here.",
+      "recentActivity": "Recent Activity",
+      "attendanceOverview": "Attendance Overview",
+      "attendedXofY": "You have attended {{present}} out of {{total}} total sessions.",
+      "attendedXofY_new": "You have attended <0>{{present}}</0> out of <1>{{total}}</1> total sessions.",
+      "predictedFinal": "Predicted Final",
+      "readyToSubmit": "Ready to submit"
+    },
+    "staff": {
+      "actions": {
+        "header": "What's Next?",
+        "empty": "All Caught Up!",
+        "emptyBtn": "Create AI Quiz",
+        "atRisk": {
+          "title": "Action Required: {{count}} Students",
+          "description": "These students need immediate intervention.",
+          "action": "View Students"
+        },
+        "grading": {
+          "title": "Pending Grading ({{count}})",
+          "description": "You have submissions waiting for your feedback.",
+          "action": "Start Grading"
+        },
+        "aiQuiz": {
+          "title": "Boost Engagement",
+          "description": "Create a new AI-powered quiz for your classes.",
+          "action": "Open AI Hub"
+        }
+      },
+      "engagementAnalytics": "Engagement Analytics",
+      "atRiskStudents": {
+        "title": "At-Risk Students",
+        "allClear": "All Clear",
+        "allClearDescription": "No students are currently flagged as at-risk. Great job!",
+        "aiDetected": "AI-Detected Intervention",
+        "criticalCount": "{{count}} Critical",
+        "interventionRecommended": "Immediate intervention recommended",
+        "interventionTitle": "Intervention: {{name}}",
+        "interventionDescription": "Take action to support this student. AI has analyzed their performance and suggested resources.",
+        "aiSupportReady": "AI Support Ready",
+        "aiResources": "AI Recommended Support Materials",
+        "sendEncouragement": "Send Encouragement",
+        "encouragementPlaceholder": "Type your supportive message here...",
+        "interventionNote": "Sending this message will update the student's intervention status to \"Student Notified\".",
+        "encouragementSent": "Encouragement sent to {{name}}!",
+        "status": {
+          "studentNotified": "Student Notified",
+          "parentNotified": "Parent Notified",
+          "resolved": "Resolved",
+          "noAction": "No Action"
+        },
+        "fallbacks": {
+          "lowGrades": "Hi {{name}}, I noticed your recent grades have been a bit lower than usual. I know you can do better! Is there anything I can help you with?",
+          "highAbsences": "Hello {{name}}, we've missed you in class lately! Regular attendance is key to success. Hope everything is okay.",
+          "inactivity": "Hi {{name}}, I noticed you haven't logged in for a few days. Don't fall behind on the latest modules! Let me know if you're stuck.",
+          "general": "Hi {{name}}, just checking in to see how you're doing with your studies."
+        }
+      },
+      "pendingSubmissions": {
+        "submitted": "Submitted {{time}}",
+        "aiReady": "AI Ready",
+        "late": "Late"
+      },
+      "promos": {
+        "aiAssistant": {
+          "title": "AI Assistant",
+          "badge": "Premium",
+          "description": "Unlock the power of Gemini 2.0 Flash to generate quizzes, assignments, and get instant curriculum help.",
+          "quizGen": "Quiz Gen",
+          "aiChat": "AI Chat"
+        },
+        "studentSupport": {
+          "title": "Student Support",
+          "badge": "Help & Resources",
+          "description": "Need help with your studies? Use the AI Study Buddy inside any of your class pages for instant assistance.",
+          "technicalNote": "Our support team is also available 24/7 for technical issues."
+        }
+      },
+      "platformOverview": "Platform Overview",
+      "recentActivity": "Recent Activity",
+      "pendingGrading": "Pending Grading",
+      "submissionsAwaiting": "Submissions awaiting feedback",
+      "newSubmissions": "{{count}} New",
+      "allCaughtUp": "All caught up!",
+      "allGraded": "You've graded all recent submissions.",
+      "greatJobTeacher": "Great job, Teacher!",
+      "teacherTvStats": "Teacher TV Stats",
+      "channelViews": "Channel Views",
+      "lifetimeViews": "Lifetime Views",
+      "conversionRate": "Conversion Rate",
+      "enrollmentSuccess": "Enrollment Success",
+      "channelStatus": "Channel Status",
+      "active": "Active",
+      "manageChannel": "Manage your public channel"
+    },
+    "stats": {
+      "totalStudents": "Total Students",
+      "totalTeachers": "Total Teachers",
+      "pendingVerifications": "Pending Verifications",
+      "activeClasses": "Active Classes"
+    },
+    "onboarding": {
+      "getStarted": "Get Started",
+      "teacher": {
+        "welcome": "Welcome, Teacher! Let's get started",
+        "description": "Complete these steps to set up your digital classroom.",
+        "setupProgress": "Setup Progress",
+        "stepsOf": "{{completed}} of {{total}} steps",
+        "steps": {
+          "createClass": {
+            "title": "Create your first class",
+            "description": "Set up a space for your students to learn and collaborate."
+          },
+          "addAssignment": {
+            "title": "Add an assignment",
+            "description": "Create your first task to start tracking student progress."
+          },
+          "inviteStudents": {
+            "title": "Invite students",
+            "description": "Add students to your classes to begin the journey."
+          }
+        }
+      },
+      "student": {
+        "welcome": "Welcome to Your Learning Journey!",
+        "description": "You haven't joined any classes yet. Your academic progress will appear here once you begin.",
+        "joinClass": {
+          "title": "Join your first class",
+          "description": "Enter an invite code provided by your teacher to join a classroom."
+        },
+        "exploreResources": {
+          "title": "Explore public resources",
+          "description": "Check out public study materials and AI-powered tools available to all students."
+        }
+      }
+    },
+    "platform": {
+      "overview": "Platform Overview",
+      "stats": {
+        "pendingVerifications": "Pending Verifications",
+        "totalUsers": "Total Users",
+        "totalStudents": "Total Students",
+        "totalTeachers": "Total Teachers",
+        "totalClasses": "Total Classes",
+        "totalAssignments": "Total Assignments"
+      }
+    },
+    "activity": {
+      "recent": "Recent Activity",
+      "systemLogs": "System Logs",
+      "noActivity": "No activity yet",
+      "noActivityDescription": "Updates will appear here as they happen.",
+      "aiInsightAvailable": "AI Insight Available",
+      "network": "Network",
+      "actions": {
+        "CREATE_CLASS": "Class Created",
+        "DELETE_CLASS": "Class Deleted",
+        "JOIN_CLASS": "Class Joined",
+        "APPROVE_ENROLLMENT": "Enrollment Approved",
+        "SUBMIT_ASSIGNMENT": "Assignment Submitted",
+        "JOIN_ASSIGNMENT": "Assignment Joined",
+        "GRADE_SUBMISSION": "Submission Graded",
+        "USER_LOGIN": "User Login"
+      }
+    },
+    "charts": {
+      "last7Days": "Last 7 Days",
+      "activeEngagement": "Active Engagement",
+      "aiInsights": "AI Insights",
+      "noData": "No {{title}} data yet",
+      "attendance": {
+        "title": "Attendance Trend",
+        "description": "Class attendance patterns over the past week.",
+        "students": "Students"
+      },
+      "grades": {
+        "title": "Grade Distribution",
+        "description": "Overview of student performance across assignments.",
+        "students": "Students"
+      }
+    },
+    "cards": {
+      "myClasses": "My Classes",
+      "enrolledClasses": "Enrolled Classes",
+      "accessActiveClassrooms": "Access active classrooms.",
+      "assignments": "Assignments",
+      "myTasks": "My Tasks",
+      "submitYourWork": "Submit your work.",
+      "calendar": "Calendar",
+      "schedule": "Schedule",
+      "deadlinesEvents": "Deadlines & events.",
+      "family": "Family",
+      "myChildren": "My Children",
+      "monitorProgress": "Monitor progress.",
+      "schoolEvents": "School Events",
+      "importantDates": "Important dates.",
+      "messages": "Messages",
+      "notifications": "Notifications",
+      "teacherUpdates": "Teacher updates.",
+      "manageClasses": "Manage Classes",
+      "overseeClassrooms": "Oversee classrooms.",
+      "curriculum": "Curriculum",
+      "tasksGrading": "Tasks and grading.",
+      "viewAllDeadlines": "View all academic deadlines.",
+      "users": "Users",
+      "directory": "Directory",
+      "studentsStaff": "Students and staff."
+    },
+    "parent": {
+      "familyOverview": "Family Overview",
+      "familyDescription": "Monitor your children's academic progress and engagement.",
+      "childLinked": "{{count}} Child Linked",
+      "childrenLinked": "{{count}} Children Linked",
+      "linkChild": "Link Child",
+      "linkStudentAccount": "Link Student Account",
+      "linkDescription": "Enter the email address your child used to register.",
+      "studentEmail": "Student Email",
+      "linkAccount": "Link Account",
+      "noChildren": "No children linked yet",
+      "noChildrenDescription": "Click the \"Link Child\" button above to connect your account with your children's student profiles.",
+      "dayStreak": "Day Streak",
+      "gpaAverage": "GPA / Average",
+      "attendance": "Attendance",
+      "levelProgress": "Level Progress",
+      "totalXp": "{{count}} Total XP",
+      "contactTeachers": "Contact Teachers",
+      "fullReport": "Full Report",
+      "linkSuccess": "Student linked successfully!",
+      "linkError": "Failed to link student. Please check the email.",
+      "enterEmailError": "Please enter a student email address."
+    }
+  }
+}

@@ -8,19 +8,40 @@ import { zodI18nMap } from "zod-i18n-map";
 import zodEn from "zod-i18n-map/locales/en/zod.json";
 import zodAr from "zod-i18n-map/locales/ar/zod.json";
 
-import en from "./en.json";
-import ar from "./ar.json";
+import enAuth from "./locales/en/auth.json";
+import enClasses from "./locales/en/classes.json";
+import enCommon from "./locales/en/common.json";
+import enDashboard from "./locales/en/dashboard.json";
+import enLanding from "./locales/en/landing.json";
+
+import arAuth from "./locales/ar/auth.json";
+import arClasses from "./locales/ar/classes.json";
+import arCommon from "./locales/ar/common.json";
+import arDashboard from "./locales/ar/dashboard.json";
+import arLanding from "./locales/ar/landing.json";
 
 export const defaultNS = "translation";
 
 // 2. Add the "zod" namespace to your resources
 export const resources = {
   en: {
-    translation: en,
+    translation: {
+      ...enAuth,
+      ...enClasses,
+      ...enCommon,
+      ...enDashboard,
+      ...enLanding,
+    },
     zod: zodEn, 
   },
   ar: {
-    translation: ar,
+    translation: {
+      ...arAuth,
+      ...arClasses,
+      ...arCommon,
+      ...arDashboard,
+      ...arLanding,
+    },
     zod: zodAr, 
   },
 } as const;

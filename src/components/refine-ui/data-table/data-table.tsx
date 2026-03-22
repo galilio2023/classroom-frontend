@@ -183,12 +183,13 @@ export function DataTable<TData extends BaseRecord>({
 }
 
 function DataTableNoData({ isOverflowing, columnsLength }: { isOverflowing: { horizontal: boolean; vertical: boolean }; columnsLength: number; }) {
+  const { t } = useTranslation();
   return (
     <TableRow className="hover:bg-transparent">
       <TableCell colSpan={columnsLength} className="relative text-center" style={{ height: "200px" }}>
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-background" style={{ position: isOverflowing.horizontal ? "sticky" : "absolute", left: "50%", transform: "translateX(-50%)", zIndex: isOverflowing.horizontal ? 2 : 1, width: isOverflowing.horizontal ? "fit-content" : "100%", minWidth: "300px" }}>
-          <div className="text-lg font-semibold text-foreground">No data to display</div>
-          <div className="text-sm text-muted-foreground">This table is empty for the time being.</div>
+          <div className="text-lg font-semibold text-foreground">{t("common.table.noData")}</div>
+          <div className="text-sm text-muted-foreground">{t("common.table.noDataDesc")}</div>
         </div>
       </TableCell>
     </TableRow>

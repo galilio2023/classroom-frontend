@@ -22,8 +22,10 @@ import {
   useRefineOptions,
   useRegister,
 } from "@refinedev/core";
+import { useTranslation } from "react-i18next";
 
 export const SignUpForm = () => {
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -42,9 +44,8 @@ export const SignUpForm = () => {
     if (password !== confirmPassword) {
       open?.({
         type: "error",
-        message: "Passwords don't match",
-        description:
-          "Please make sure both password fields contain the same value.",
+        message: t("auth.register.passwordsDontMatch"),
+        description: t("auth.register.passwordsDontMatchDesc"),
       });
 
       return;
@@ -100,12 +101,12 @@ export const SignUpForm = () => {
               "font-semibold"
             )}
           >
-            Sign up
+            {t("auth.login.signUp")}
           </CardTitle>
           <CardDescription
             className={cn("text-muted-foreground", "font-medium")}
           >
-            Welcome to lorem ipsum dolor.
+            {t("auth.register.welcomeTo")}
           </CardDescription>
         </CardHeader>
 
@@ -114,11 +115,11 @@ export const SignUpForm = () => {
         <CardContent className={cn("px-0")}>
           <form onSubmit={handleSignUp}>
             <div className={cn("flex", "flex-col", "gap-2")}>
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t("auth.register.emailLabel")}</Label>
               <Input
                 id="email"
                 type="email"
-                placeholder=""
+                placeholder={t("auth.register.emailPlaceholder")}
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -128,7 +129,7 @@ export const SignUpForm = () => {
             <div
               className={cn("relative", "flex", "flex-col", "gap-2", "mt-6")}
             >
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t("auth.register.passwordLabel")}</Label>
               <InputPassword
                 id="password"
                 value={password}
@@ -140,7 +141,7 @@ export const SignUpForm = () => {
             <div
               className={cn("relative", "flex", "flex-col", "gap-2", "mt-6")}
             >
-              <Label htmlFor="confirmPassword">Confirm password</Label>
+              <Label htmlFor="confirmPassword">{t("auth.register.confirmPassword")}</Label>
               <InputPassword
                 id="confirmPassword"
                 value={confirmPassword}
@@ -160,12 +161,12 @@ export const SignUpForm = () => {
                 "text-white"
               )}
             >
-              Sign up
+              {t("auth.login.signUp")}
             </Button>
 
             <div className={cn("flex", "items-center", "gap-4", "mt-6")}>
               <Separator className={cn("flex-1")} />
-              <span className={cn("text-sm", "text-muted-foreground")}>or</span>
+              <span className={cn("text-sm", "text-muted-foreground")}>{t("auth.login.or")}</span>
               <Separator className={cn("flex-1")} />
             </div>
 
@@ -189,6 +190,7 @@ export const SignUpForm = () => {
                       fill="currentColor"
                     />
                   </svg>
+
                   <div>Google</div>
                 </Button>
                 <Button
@@ -223,7 +225,7 @@ export const SignUpForm = () => {
         <CardFooter>
           <div className={cn("w-full", "text-center text-sm")}>
             <span className={cn("text-sm", "text-muted-foreground")}>
-              Have an account?{" "}
+              {t("auth.register.alreadyHaveAccount")}{" "}
             </span>
             <Link
               to="/login"
@@ -234,7 +236,7 @@ export const SignUpForm = () => {
                 "underline"
               )}
             >
-              Sign in
+              {t("auth.login.signIn")}
             </Link>
           </div>
         </CardFooter>

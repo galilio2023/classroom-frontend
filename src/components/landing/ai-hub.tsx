@@ -24,7 +24,7 @@ export const LandingAIHub = ({ isAr }: Props) => {
             >
               <div className="inline-flex items-center gap-3 px-4 py-1.5 rounded-xl bg-primary/10 text-primary text-[10px] md:text-xs font-black uppercase tracking-widest border border-primary/10">
                 <BrainCircuit className="h-4 w-4" />
-                Gemini 2.0 FLASH Powered
+                {t("landing.ai.poweredBy")}
               </div>
               <h2 className="text-4xl md:text-7xl lg:text-8xl font-black uppercase leading-[0.95] md:leading-[0.85]">
                 {t("landing.ai.title1")} <br />
@@ -72,7 +72,7 @@ export const LandingAIHub = ({ isAr }: Props) => {
                       <p className="text-xs md:text-sm font-black uppercase tracking-widest">{t("landing.ai.chat.header")}</p>
                       <div className="flex items-center gap-2">
                         <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
-                        <span className="text-[9px] font-black text-muted-foreground/60 uppercase tracking-widest">Active Now</span>
+                        <span className="text-[9px] font-black text-muted-foreground/60 uppercase tracking-widest">{t("landing.ai.activeNow")}</span>
                       </div>
                     </div>
                   </div>
@@ -89,7 +89,7 @@ export const LandingAIHub = ({ isAr }: Props) => {
                     <p className="text-sm md:text-base font-bold leading-relaxed italic opacity-80">{t("landing.ai.chat.msg3")}</p>
                     <div className="mt-6 space-y-3">
                       <div className="flex justify-between text-[9px] font-black uppercase tracking-widest text-primary">
-                        <span>Analysis Processing</span>
+                        <span>{t("landing.ai.analysisProcessing")}</span>
                         <span>84%</span>
                       </div>
                       <div className="h-1.5 w-full bg-primary/10 rounded-full overflow-hidden shadow-inner">

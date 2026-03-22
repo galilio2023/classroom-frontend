@@ -1,0 +1,1487 @@
+{
+  "ai-assistant": {
+    "ai-assistant": "AI Assistant"
+  },
+  "ai-study-lab": {
+    "ai-study-lab": "AI Study Lab"
+  },
+  "study-planner": {
+    "study-planner": "AI Study Planner"
+  },
+  "app": {
+    "title": "Classroom AI"
+  },
+  "Show": "Show",
+  "warnWhenUnsavedChanges": "You have unsaved changes. Are you sure you want to leave?",
+  "documentTitle": {
+    "default": "Classroom AI",
+    "suffix": " | Classroom AI",
+    "dashboard": {
+      "list": "Dashboard",
+      "dashboard": "Dashboard"
+    },
+    "subjects": {
+      "list": "Subjects",
+      "subjects": "Subjects"
+    },
+    "departments": {
+      "list": "Departments",
+      "departments": "Departments"
+    },
+    "classes": {
+      "list": "Classes",
+      "show": "Classroom Hub",
+      "edit": "Edit Class"
+    },
+    "assignments": {
+      "list": "Assignments",
+      "show": "Assignment Details",
+      "create": "Create Assignment"
+    },
+    "quizzes": {
+      "list": "Quizzes",
+      "show": "Quiz Results",
+      "create": "Create Quiz"
+    },
+    "enrollments": {
+      "list": "Enrollments"
+    },
+    "users": {
+      "list": "User Governance"
+    },
+    "profile": {
+      "show": "User Profile"
+    },
+    "calendar": {
+      "list": "Academic Calendar",
+      "calendar": "Calendar"
+    },
+    "notifications": {
+      "list": "Notifications",
+      "notifications": "Notifications"
+    },
+    "messages": {
+      "list": "Messages",
+      "messages": "Messages"
+    },
+    "ai-assistant": {
+      "ai-assistant": "AI Assistant",
+      "list": "AI Assistant"
+    },
+    "ai-study-lab": {
+      "ai-study-lab": "AI Study Lab",
+      "list": "AI Study Lab"
+    },
+    "study-planner": {
+      "study-planner": "AI Study Planner",
+      "list": "AI Study Planner"
+    },
+    "attendance": {
+      "list": "Attendance Governance"
+    },
+    "portfolio": {
+      "list": "Student Portfolio"
+    }
+  },
+  "actions": {
+    "edit": "Edit",
+    "create": "Create",
+    "show": "Show",
+    "list": "List"
+  },
+  "common": {
+    "dashboard": "Dashboard",
+    "myProfile": "My Profile",
+    "search": "Search...",
+    "typeToSearch": "Type a command or search...",
+    "recentSearches": "Recent Searches",
+    "quickActions": "Quick Actions",
+    "searchResults": "Search Results",
+    "noResults": "No results found.",
+    "searching": "Searching...",
+    "settings": "Settings",
+    "navigation": "Navigation",
+    "language": "Language",
+    "toggleTheme": "Toggle Theme",
+    "offline": "You're offline — some features may be limited",
+    "details": "Details",
+    "description": "Description",
+    "explore": "Explore",
+    "fastTrack": "Fast Track",
+    "featureComingSoon": "Feature coming soon!",
+    "aiPowered": "AI Powered",
+    "editor": {
+      "urlPrompt": "Enter URL",
+      "bold": "Bold",
+      "italic": "Italic",
+      "strike": "Strike",
+      "h1": "Heading 1",
+      "h2": "Heading 2",
+      "bulletList": "Bullet List",
+      "orderedList": "Ordered List",
+      "quote": "Quote",
+      "code": "Code Block",
+      "image": "Image",
+      "link": "Link",
+      "undo": "Undo",
+      "redo": "Redo"
+    },
+    "upload": {
+      "label": "Upload File",
+      "clickOrDrag": "Click or drag to select a file",
+      "maxSize": "Max size: 10MB (PDF, Images, Word)",
+      "uploaded": "Uploaded",
+      "remove": "Remove file",
+      "tooLarge": "File too large",
+      "tooLargeDesc": "Please select a file smaller than 10MB.",
+      "success": "File uploaded successfully!",
+      "removeSuccess": "File removed successfully",
+      "error": "Upload failed",
+      "removeError": "Failed to remove file from server",
+      "video": {
+        "maxSize": "Max size: 100MB (.mp4, .mov)",
+        "label": "Upload Trailer Video"
+      }
+    },
+    "pwa": {
+      "title": "Install Classroom App",
+      "description": "Access your classes faster",
+      "install": "Install",
+      "success": "App installed successfully!"
+    },
+    "progress": "Progress",
+    "xp": "XP",
+    "aiInsightTitle": "AI Student Insight: {{name}}",
+    "aiInsightDesc": "Deep analysis of performance, attendance, and engagement.",
+    "analyzingData": "Analyzing student data with Gemini AI...",
+    "failedInsight": "Failed to generate insight",
+    "aiServiceError": "There was an error connecting to the AI service.",
+    "copyInsight": "Copy Insight",
+    "insightCopied": "Insight copied to clipboard",
+    "sendToStudent": "Send to Student",
+    "strengths": "Strengths",
+    "weaknesses": "Areas for Improvement",
+    "improvementPlan": "Personalized Action Plan",
+    "aiSummary": "AI Summary",
+    "noInsight": "No insight data available.",
+    "certificate": {
+      "title": "Certificate",
+      "ofCompletion": "of Completion",
+      "thisCertifies": "This certifies that",
+      "successfullyCompleted": "has successfully completed the course",
+      "date": "Date",
+      "instructor": "Instructor",
+      "id": "Certificate ID: {{id}}",
+      "passed": "PASSED"
+    },
+    "cases": "Cases",
+    "liveData": "Live Data",
+    "studentPerformance": "Student Performance",
+    "aiAnalyzed": "AI Analyzed",
+    "error": "An unexpected error occurred",
+    "errorPage": {
+      "title": "404",
+      "desc": "The page you are looking for does not exist.",
+      "back": "Back to Dashboard"
+    },
+    "table": {
+      "rowsPerPage": "Rows per page",
+      "noData": "No data to display",
+      "noDataDesc": "This table is empty for the time being.",
+      "rows": "{{count}} row(s)",
+      "pageOf": "Page {{current}} of {{total}}",
+      "firstPage": "Go to first page",
+      "lastPage": "Go to last page",
+      "nextPage": "Go to next page",
+      "prevPage": "Go to previous page"
+    }
+  },
+  "notifications": {
+    "notifications": "Notifications",
+    "error": "Error",
+    "title": "Notifications",
+    "markAllRead": "Mark all as read",
+    "noNotifications": "No notifications yet",
+    "noNotificationsDesc": "You don't have any notifications at the moment. Check back later for updates.",
+    "liveSessionStarted": "Live Session Started!",
+    "liveSessionDescription": "{{name}} has started a live session. Join now!",
+    "view": "View",
+    "joinNow": "Join Now",
+    "viewClass": "View Class",
+    "enablePush": "Enable Push Alerts",
+    "pushEnabled": "Push notifications enabled!",
+    "pushDenied": "Notification permission denied",
+    "stats": {
+      "total": "Total Alerts",
+      "unread": "Unread",
+      "ai": "AI Insights"
+    },
+    "filters": {
+      "label": "Alert Filter"
+    },
+    "actions": {
+      "markRead": "Mark as Read",
+      "viewSource": "View Source",
+      "deleteAlert": "Delete Alert",
+      "options": "Alert Options"
+    },
+    "deleteDialog": {
+      "description": "This will permanently remove this notification from your history. This action cannot be undone."
+    }
+  },
+  "buttons": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "create": "Create",
+    "show": "Show",
+    "tryAgain": "Try Again",
+    "uploadCredentials": "Upload Credentials",
+    "dismiss": "Dismiss",
+    "getStarted": "Get Started",
+    "joinClass": "Join Class",
+    "joinNow": "Join Now",
+    "viewResources": "View Resources",
+    "viewAll": "View All",
+    "signIn": "Sign In",
+    "authenticating": "Authenticating...",
+    "createAccount": "Create Account",
+    "back": "Back",
+    "continue": "Continue",
+    "completeJoin": "Complete Join",
+    "aiAssist": "AI Assist",
+    "change": "Change",
+    "selectFile": "Select File",
+    "contactSupport": "Contact Support",
+    "refresh": "Refresh Page",
+    "refreshStatus": "Refresh Status",
+    "signOut": "Sign Out",
+    "joinByCode": "Join by Code",
+    "createClass": "Create Class",
+    "browseCatalog": "Browse Catalog",
+    "enterClass": "Enter Class",
+    "joinLive": "Join Live",
+    "goLive": "Go Live Now",
+    "stopLive": "End Live Session",
+    "applyToTeach": "Apply to Teach",
+    "applied": "Applied",
+    "viewDetails": "View Details",
+    "editClass": "Edit Class",
+    "duplicateCurriculum": "Duplicate Curriculum",
+    "deleteClass": "Delete Class",
+    "saveChanges": "Save Changes",
+    "addTimeSlot": "Add Time Slot",
+    "saving": "Saving...",
+    "goBack": "Go Back",
+    "creatingClassroom": "Creating Classroom...",
+    "share": "Share",
+    "aiInsight": "AI Insight",
+    "messageAll": "Message All",
+    "enrollStudent": "Enroll Student",
+    "sendBroadcast": "Send Broadcast",
+    "reject": "Reject",
+    "approveStudent": "Approve Student",
+    "invite": "Invite",
+    "copyCode": "Copy Code",
+    "copied": "Copied!",
+    "confirmUnenroll": "Confirm Unenroll",
+    "processing": "Processing...",
+    "magicBuilder": "Magic Builder",
+    "addModule": "Add Module",
+    "aiMagicBuilder": "AI Magic Builder",
+    "manualCreate": "Manual Create",
+    "printReport": "Print Report",
+    "exportData": "Export Data",
+    "startQrAttendance": "Start QR Attendance",
+    "scanToMark": "Scan to Mark Present",
+    "addMaterial": "Add Material",
+    "openLesson": "Open Lesson",
+    "view": "View",
+    "saveMaterial": "Save Material",
+    "createQuiz": "Create Quiz",
+    "results": "Results",
+    "takeQuiz": "Take Quiz",
+    "submitApplication": "Submit Application",
+    "inviteTeacher": "Invite Teacher",
+    "createAssignment": "Create Assignment",
+    "editAssignment": "Edit Assignment",
+    "deleteAssignment": "Delete Assignment",
+    "confirmDelete": "Confirm Delete",
+    "editTask": "Edit Task",
+    "assignPeerReviews": "Assign Peer Reviews",
+    "resubmitAssignment": "Resubmit Assignment",
+    "viewReport": "View Detailed Report",
+    "saveAsDraft": "Save as Draft",
+    "resubmitWork": "Resubmit Work",
+    "turnInNow": "Turn In Now",
+    "sendUpdateStatus": "Send & Update Status",
+    "aiSuggestion": "AI Suggestion",
+    "aiWritingAssistant": "AI Writing Assistant",
+    "addCriteria": "Add Criteria",
+    "publishing": "Publishing...",
+    "publishAssignment": "Publish Assignment",
+    "saveGrade": "Save Grade",
+    "aiAnalyzing": "AI Analyzing...",
+    "aiReanalyze": "AI Re-Analyze",
+    "close": "Close",
+    "closePreview": "Close Preview",
+    "open": "Open",
+    "grade": "Grade",
+    "studyHistory": "Study History",
+    "generateWithAi": "Generate with AI",
+    "generateFlashcards": "Generate Flashcards",
+    "startPracticeQuiz": "Start Practice Quiz",
+    "saveToHistory": "Save to History",
+    "tryItNow": "Try it now",
+    "addNewUser": "Add New User",
+    "reviewProof": "Review Proof",
+    "viewProfile": "View Profile",
+    "editUser": "Edit User",
+    "suspendUser": "Suspend User",
+    "activateUser": "Activate User",
+    "deleteAccount": "Delete Account",
+    "viewFull": "View Full",
+    "approveVerify": "Approve & Verify Teacher",
+    "createDepartment": "Create Department",
+    "manage": "Manage",
+    "editDetails": "Edit Details",
+    "deleteDept": "Delete Dept",
+    "createTerm": "Create New Term",
+    "activate": "Activate",
+    "archive": "Archive",
+    "viewClasses": "View Classes",
+    "editTimeline": "Edit Timeline",
+    "deleteTerm": "Delete Term",
+    "shareProfile": "Share Profile",
+    "editProfile": "Edit Profile",
+    "saveProfile": "Save Profile Changes",
+    "upload": "Upload",
+    "startAttendance": "Start Attendance Session",
+    "stopSession": "Stop Session",
+    "deleteModule": "Delete Module",
+    "generateNotes": "Generate Lesson Notes",
+    "generateQuiz": "Generate Quiz",
+    "generateAssignment": "Generate Assignment",
+    "addTask": "Add Task",
+    "uploading": "Uploading...",
+    "addMembers": "Add Members",
+    "viewDetailsAndMembers": "View Details & Members",
+    "confirmDeleteGroup": "Are you sure you want to delete this group?",
+    "addSelected": "Add Selected",
+    "postAnnouncement": "Post Announcement",
+    "addResource": "Add Resource",
+    "addToLibrary": "Add to Library",
+    "download": "Download",
+    "sendMessage": "Send Message",
+    "searchPeople": "Search people...",
+    "approve": "Approve",
+    "portfolio": "Portfolio",
+    "topPerformers": "Top Performers",
+    "createChannel": "Create Channel",
+    "updateChannel": "Update Channel",
+    "viewChannel": "View Channel",
+    "contactUser": "Contact User",
+    "openFullRes": "Open Full Resolution",
+    "exploreClasses": "Explore Your Classes",
+    "practiceLevelUp": "Practice & Level Up",
+    "reply": "Reply",
+    "post": "Post",
+    "createModule": "Create Module",
+    "generating": "Generating...",
+    "readMore": "Read More",
+    "confirmRemoval": "Confirm Removal",
+    "copyClassContent": "Copy Class Content",
+    "saveSettings": "Save Settings",
+    "notAccessTitle": "Access Denied",
+    "notAccessDescription": "You don't have permission to view this resource.",
+    "notAccessBack": "Back to Safety"
+  },
+  "roles": {
+    "student": "Student",
+    "teacher": "Teacher",
+    "parent": "Parent",
+    "admin": "Admin"
+  },
+  "status": {
+    "active": "Active",
+    "inactive": "Inactive",
+    "suspended": "Suspended",
+    "archived": "Archived",
+    "upcoming": "Upcoming",
+    "completed": "Completed",
+    "published": "Published",
+    "draft": "Draft"
+  },
+  "days": {
+    "Mon": "Mon",
+    "Tue": "Tue",
+    "Wed": "Wed",
+    "Thu": "Thu",
+    "Fri": "Fri",
+    "Sat": "Sat",
+    "Sun": "Sun",
+    "Monday": "Monday",
+    "Tuesday": "Tuesday",
+    "Wednesday": "Wednesday",
+    "Thursday": "Thursday",
+    "Friday": "Friday",
+    "Saturday": "Saturday",
+    "Sunday": "Sunday"
+  },
+  "aiHub": {
+    "assistant": {
+      "title": "AI Content Assistant",
+      "description": "Leverage Gemini AI to architect high-quality educational content in seconds.",
+      "architect": "Assignment Architect",
+      "generator": "Quiz Generator",
+      "capabilities": "AI Capabilities",
+      "rubrics": "Smart Rubrics",
+      "rubricsDesc": "Generate detailed grading criteria and learning objectives automatically.",
+      "quizzes": "Adaptive Quizzes",
+      "quizzesDesc": "Create multiple-choice questions with varying difficulty levels based on your topic.",
+      "drafts": "Instant Drafts",
+      "draftsDesc": "Get a complete assignment draft including description and instructions in seconds.",
+      "proTip": "Pro Tip",
+      "proTipDesc": "Be specific with your topics. Instead of \"History\", try \"The impact of the Industrial Revolution on urban development.\"",
+      "helper": {
+        "title": "AI Assignment Helper",
+        "desc": "Use Gemini AI to draft a structured assignment description.",
+        "generate": "Generate Draft",
+        "generating": "Generating...",
+        "subject": "Subject",
+        "level": "Level",
+        "topic": "Topic",
+        "tone": "Tone & Style",
+        "objectives": "Learning Objectives (Optional)",
+        "placeholders": {
+          "subject": "e.g. History",
+          "topic": "e.g. The French Revolution",
+          "objectives": "What should students learn? (e.g. Critical thinking, Data analysis)"
+        },
+        "levels": {
+          "beginner": "Beginner",
+          "intermediate": "Intermediate",
+          "advanced": "Advanced"
+        },
+        "tones": {
+          "academic": "Academic & Formal",
+          "creative": "Creative & Engaging",
+          "practical": "Practical & Hands-on",
+          "strict": "Strict & Detailed"
+        }
+      },
+      "quizGen": {
+        "title": "AI Quiz Generator",
+        "desc": "Generate high-quality assessments instantly.",
+        "generate": "Generate Quiz",
+        "saveAsAssignment": "Save as Assignment",
+        "generating": "Generating...",
+        "saving": "Saving...",
+        "topic": "Topic",
+        "difficulty": "Difficulty",
+        "format": "Format",
+        "questions": "Number of Questions",
+        "placeholders": {
+          "topic": "e.g. Quantum Physics"
+        },
+        "difficulties": {
+          "easy": "Easy",
+          "medium": "Medium",
+          "hard": "Hard"
+        },
+        "formats": {
+          "multiple_choice": "Multiple Choice",
+          "true_false": "True / False",
+          "mixed": "Mixed Format"
+        }
+      }
+    },
+    "studyLab": {
+      "title": "AI Study Lab",
+      "description": "Your private space to practice, learn, and master any topic with AI assistance.",
+      "studyTip": "Study Tip",
+      "studyTipDesc": "Use the **Summarizer** first to get key points, then generate **Flashcards** from those points for the best retention.",
+      "inputLabel": "Input Content",
+      "placeholderNotes": "Paste your notes or textbook content here...",
+      "aiResponse": "AI Response",
+      "flashcardSession": "Flashcard Session",
+      "activeRecall": "Active Recall Mode",
+      "questions": {
+        "understand": "What would you like to understand?",
+        "test": "What topic should we test?",
+        "summary": "Paste the text you want to summarize",
+        "cards": "What topic or text should we turn into cards?",
+        "sub": "Provide the subject or content below and our AI will handle the rest."
+      },
+      "placeholders": {
+        "quiz": "e.g., Photosynthesis, Quantum Physics...",
+        "flashcards": "e.g., French Revolution, Human Anatomy...",
+        "explain": "e.g., How do black holes work?"
+      },
+      "tools": {
+        "explain": {
+          "title": "Concept Explainer",
+          "desc": "Simplify difficult topics instantly."
+        },
+        "quiz": {
+          "title": "Practice Quiz",
+          "desc": "Test your knowledge privately."
+        },
+        "summary": {
+          "title": "Smart Summarizer",
+          "desc": "Turn long notes into key points."
+        },
+        "flashcards": {
+          "title": "Flashcard Gen",
+          "desc": "Generate cards for active recall."
+        }
+      },
+      "toasts": {
+        "enterTopic": "Please enter a topic or text first.",
+        "flashcardsGenerated": "Flashcards generated!",
+        "aiFinished": "AI has finished processing!",
+        "error": "Failed to generate content. Please try again."
+      },
+      "flashcards": {
+        "sessionComplete": "Session Complete!",
+        "reviewedCount": "You've reviewed all {{count}} flashcards.",
+        "restart": "Restart",
+        "backToLab": "Back to Lab",
+        "cardOf": "Card {{current}} of {{total}}",
+        "flipHint": "Click or Space to flip",
+        "flipBackHint": "Click or Space to flip back",
+        "finishSession": "Finish Session",
+        "nextCard": "Next Card",
+        "keyboardNav": "Use arrow keys to navigate"
+      },
+      "studyBuddy": {
+        "title": "AI Study Buddy",
+        "poweredBy": "Gemini",
+        "personalTutor": "Your Personal Tutor",
+        "masterSubject": "I'm here to help you master {{subject}}. What should we explore today?",
+        "masterGeneral": "your subjects",
+        "sources": "Sources",
+        "source": "Source"
+      }
+    }
+  },
+  "studyPlanner": {
+    "description": "Your personalized weekly study schedule, powered by AI.",
+    "buttons": {
+      "generate": "Generate My Plan",
+      "regenerate": "Regenerate Plan"
+    },
+    "empty": {
+      "title": "No Study Plan Yet",
+      "desc": "Click the button above to let AI analyze your upcoming assignments and create a custom schedule for you."
+    },
+    "slots": {
+      "morning": "Morning",
+      "afternoon": "Afternoon",
+      "evening": "Evening"
+    },
+    "labels": {
+      "free": "Free",
+      "coachTip": "Coach's Tip",
+      "tipText": "\"Consistency is key! Try to stick to your Morning blocks for heavy reading and use Evening blocks for review. You've got this!\"",
+      "blockCompleted": "Study Block Completed"
+    },
+    "toasts": {
+      "generated": "AI has generated your personalized study plan!",
+      "error": "Failed to generate study plan. Please try again.",
+      "completed": "Study block completed! +20 XP"
+    }
+  },
+  "calendar": {
+    "calendar": "Calendar",
+    "title": "Academic Calendar",
+    "description": "Your unified schedule for classes, assignments, and quizzes.",
+    "monthlyOverview": "Monthly Overview",
+    "generatePlan": "Generate My Monthly Plan",
+    "generateTitle": "Generate Monthly Schedule",
+    "generateDesc": "This will automatically create class sessions for the entire month based on the recurring schedule rules.",
+    "targetClass": "Target Class (Group)",
+    "selectClass": "Select a class",
+    "noClasses": "No classes found",
+    "month": "Month",
+    "year": "Year",
+    "generating": "Generating...",
+    "generateSessions": "Generate Sessions",
+    "noEvents": "Quiet day!",
+    "noEventsDesc": "No classes or deadlines found.",
+    "syncInfo": "This calendar automatically syncs with your **enrolled classes** and **upcoming tasks**. Recurring classes are expanded for the current month view. Click any event to view details.",
+    "eventTypes": {
+      "classes": "Classes",
+      "tasks": "Tasks"
+    },
+    "eventsSelectedDay": "Events on {{date}}",
+    "selectDate": "Select a date to view events",
+    "toasts": {
+      "selectClass": "Please select a class",
+      "generated": "Monthly plan generated successfully!"
+    }
+  },
+  "departments": {
+    "departments": "Departments",
+    "title": "Institutional Structure",
+    "description": "Manage academic departments, faculties, and departmental leadership.",
+    "create": "Create Department",
+    "noHead": "No Head Assigned",
+    "head": "Head",
+    "unit": "Academic Unit",
+    "stats": {
+      "total": "Total Departments",
+      "withHead": "With Leadership",
+      "active": "Active Status"
+    },
+    "filters": {
+      "searchPlaceholder": "Search by department name or code...",
+      "structure": "Structure Filter",
+      "allDepartments": "All Departments"
+    },
+    "empty": {
+      "title": "No departments found",
+      "desc": "Create your first academic department to begin organizing your curriculum."
+    },
+    "delete": {
+      "warning": "Warning:",
+      "warningDesc": "You cannot delete a department if it still has subjects or staff assigned to it."
+    }
+  },
+  "subjects": {
+    "subjects": "Subjects",
+    "title": "Academic Subjects",
+    "description": "Manage individual courses, subject codes, and departmental assignments.",
+    "create": "Create Subject",
+    "empty": {
+      "title": "No subjects found",
+      "desc": "Add subjects to your departments to build your academic catalog.",
+      "generalDepartment": "General Department"
+    },
+    "stats": {
+      "total": "Total Subjects",
+      "weighted": "Weighted Grading",
+      "archived": "Archived Courses"
+    },
+    "academicSubject": "Academic Subject",
+    "filters": {
+      "searchPlaceholder": "Search by subject name or code...",
+      "allDepartments": "All Departments",
+      "generalDepartment": "General Department"
+    }
+  },
+  "terms": {
+    "title": "Academic Calendar",
+    "description": "Manage school years, semesters, and institutional timelines.",
+    "create": "Create New Term",
+    "newTitle": "New Academic Term",
+    "newDesc": "Define the timeline for a new semester or school year.",
+    "form": {
+      "name": "Term Name",
+      "namePlaceholder": "e.g. Fall Semester 2024",
+      "start": "Start Date",
+      "end": "End Date",
+      "nameRequired": "Name is required",
+      "startRequired": "Start date is required",
+      "endRequired": "End date is required"
+    },
+    "stats": {
+      "total": "Total Terms",
+      "active": "Active Now",
+      "upcoming": "Upcoming"
+    },
+    "empty": {
+      "title": "No academic terms",
+      "desc": "Define your first academic term to begin organizing classes and curriculum."
+    },
+    "relative": {
+      "ends": "Ends {{time}}",
+      "starts": "Starts {{time}}",
+      "completed": "Completed"
+    },
+    "deleteDialog": {
+      "title": "Are you sure you want to delete this term?",
+      "description": "This will affect all classes linked to it."
+    },
+    "toasts": {
+      "activated": "Term activated successfully",
+      "archived": "Term archived successfully",
+      "deleted": "Term deleted successfully",
+      "created": "Term created successfully",
+      "error": "An error occurred"
+    }
+  },
+  "profile": {
+    "title": "User Profile",
+    "description": "Detailed overview of account information and achievements.",
+    "editTitle": "Edit Profile",
+    "editDesc": "Update account details and contact information for {{name}}.",
+    "notFound": "User not found",
+    "notFoundDesc": "The profile you are looking for does not exist or has been removed.",
+    "loading": "Loading Profile...",
+    "sections": {
+      "core": "Core Information",
+      "contact": "Contact & Bio",
+      "achievements": "Achievements",
+      "certificates": "Certificates",
+      "report": "Academic Report"
+    },
+    "labels": {
+      "fullName": "Full Name",
+      "email": "Email Address",
+      "role": "System Role",
+      "status": "Account Status",
+      "department": "Department Assignment",
+      "phone": "Phone Number",
+      "address": "Physical Address",
+      "bio": "Biography",
+      "memberSince": "Member Since",
+      "level": "Level",
+      "totalXp": "Total XP",
+      "currentStreak": "Current Streak",
+      "longestStreak": "Best Streak",
+      "earned": "{{count}} / {{total}} Earned",
+      "currentTerm": "Current Term"
+    },
+    "placeholders": {
+      "bio": "Tell us a bit about this user...",
+      "noBio": "This user hasn't shared a biography yet. A biography helps others learn about their background, interests, and expertise."
+    },
+    "privacy": {
+      "note": "Privacy Note",
+      "desc": "Contact information and physical addresses are only visible to administrators and the user themselves.",
+      "adminOnly": "Private Information - Only visible to you and administrators",
+      "reportHidden": "Academic reports are only visible to the student and administrators."
+    },
+    "tips": {
+      "title": "Profile Tips",
+      "contact": "Contact Data",
+      "contactDesc": "Providing a phone number and address helps administrators reach out in case of emergencies.",
+      "bio": "Biography",
+      "bioDesc": "This is a great place to list academic interests, teaching specialties, or personal achievements."
+    },
+    "statusBadge": "Verified & Active",
+    "toasts": {
+      "linkCopied": "Profile link copied!",
+      "saving": "Saving Changes..."
+    }
+  },
+  "users": {
+    "users": "Users",
+    "governance": {
+      "title": "User Governance",
+      "description": "Manage teachers, students, and administrators. Oversee verification and account status.",
+      "stats": {
+        "totalUsers": "Total Users",
+        "pendingVerification": "Pending Verification",
+        "activeAccounts": "Active Accounts"
+      },
+      "filters": {
+        "searchPlaceholder": "Search by name or email...",
+        "verification": "Verification",
+        "allVerification": "All Verification",
+        "pendingTeachers": "Pending Teachers",
+        "role": "Role",
+        "status": "Status",
+        "allRoles": "All Roles",
+        "allStatus": "All Status"
+      },
+      "table": {
+        "noUsers": "No users found",
+        "noUsersDesc": "Try adjusting your filters or search query to find what you're looking for.",
+        "studentId": "Student ID: {{id}}",
+        "actions": "Actions",
+        "suspend": "Suspend User",
+        "activate": "Activate User",
+        "delete": "Delete Account"
+      },
+      "verification": {
+        "title": "Verification Review",
+        "description": "Review the credentials for {{name}}.",
+        "fullName": "Full Name",
+        "email": "Email",
+        "phone": "Phone",
+        "status": "Status",
+        "verified": "Verified",
+        "pending": "Pending Approval",
+        "document": "Verification Document",
+        "proofTitle": "Teaching Credentials Proof",
+        "proofDesc": "Uploaded by teacher for verification",
+        "noDocument": "No document uploaded."
+      },
+      "deleteDialog": {
+        "title": "Are you absolutely sure?",
+        "description": "This action cannot be undone. This will permanently delete the user account and all associated data from the system."
+      },
+      "toasts": {
+        "verified": "Teacher verified successfully!",
+        "rejected": "Verification rejected.",
+        "statusUpdated": "User status updated to {{status}}"
+      }
+    }
+  },
+  "teacherChannel": {
+    "title": "My Channel",
+    "description": "Manage your public profile and introductory content for students.",
+    "setup": "Channel Setup",
+    "setupDesc": "Configure how students see your professional profile and trailers.",
+    "labels": {
+      "headline": "Professional Headline",
+      "bio": "Channel Biography",
+      "trailer": "Introductory Trailer",
+      "thumbnail": "Video Thumbnail",
+      "stats": "Channel Performance",
+      "views": "Total Views",
+      "conversion": "Conversion Rate",
+      "preview": "Card Preview",
+      "livePreview": "How students see you in the catalog"
+    },
+    "placeholders": {
+      "headline": "e.g. Expert Physics Educator with 10+ years experience",
+      "bio": "Tell students what they will learn from you and why they should enroll in your classes..."
+    },
+    "toasts": {
+      "success": "Channel updated successfully!",
+      "error": "Failed to update channel."
+    }
+  },
+  "resources": {
+    "teacher-subscriptions": {
+      "label": "Teacher Subscriptions"
+    },
+    "dashboard": {
+      "label": "Dashboard"
+    },
+    "calendar": {
+      "label": "Calendar"
+    },
+    "notifications": {
+      "label": "Notifications"
+    },
+    "messages": {
+      "label": "Messages"
+    },
+    "ai-assistant": {
+      "label": "AI Assistant"
+    },
+    "ai-study-lab": {
+      "label": "Study Lab"
+    },
+    "study-planner": {
+      "label": "Study Planner"
+    },
+    "ai-history": {
+      "label": "Study History"
+    },
+    "classes": {
+      "label": "Classes"
+    },
+    "subjects": {
+      "label": "Subjects"
+    },
+    "enrollments": {
+      "label": "Enrollments"
+    },
+    "attendance": {
+      "label": "Attendance"
+    },
+    "project-groups": {
+      "label": "Project Groups"
+    },
+    "assignments": {
+      "label": "Assignments"
+    },
+    "quizzes": {
+      "label": "Quizzes"
+    },
+    "submissions": {
+      "label": "Submissions"
+    },
+    "modules": {
+      "label": "Modules"
+    },
+    "resources": {
+      "label": "Resources"
+    },
+    "library": {
+      "label": "Global Library"
+    },
+    "discussions": {
+      "label": "Discussions"
+    },
+    "portfolio": {
+      "label": "My Portfolio"
+    },
+    "report-card": {
+      "label": "Report Card"
+    },
+    "progress": {
+      "label": "Insights"
+    },
+    "users": {
+      "label": "Users"
+    },
+    "departments": {
+      "label": "Departments"
+    },
+    "academic-terms": {
+      "label": "Terms"
+    },
+    "profile-requests": {
+      "label": "Profile Requests"
+    },
+    "teacher-applications": {
+      "label": "Teacher Apps"
+    },
+    "activity-log": {
+      "label": "Activity Log"
+    },
+    "teacher-channel": {
+      "label": "My Channel"
+    },
+    "my-teachers": {
+      "label": "My Teachers"
+    },
+    "discovery": {
+      "label": "Teacher TV"
+    },
+    "settings": {
+      "label": "Settings"
+    },
+    "setting": {
+      "label": "Settings"
+    }
+  },
+  "groups": {
+    "teacher-hub": "Teacher Hub",
+    "student-hub": "Student Hub",
+    "ai-lab": "AI Lab",
+    "academic": "Academic",
+    "curriculum": "Curriculum",
+    "progress": "Progress",
+    "admin": "Admin"
+  },
+  "practice": {
+    "results": {
+      "passed": "Passed",
+      "practiceNeeded": "Practice Needed",
+      "masteryAchieved": "Mastery Achieved!",
+      "keepPracticing": "Keep Practicing!",
+      "finalScore": "Final Score",
+      "correct": "Correct",
+      "badgeUnlocked": "New Badge Unlocked!",
+      "reviewMaterial": "Don't worry! Review the material and try again to earn your badge.",
+      "reviewQuestions": "Review Questions",
+      "yourAnswer": "Your Answer",
+      "correctAnswer": "Correct Answer",
+      "finishSession": "Finish Session"
+    }
+  },
+  "sidebar": {
+    "title": "Sidebar",
+    "description": "Navigation links and app controls",
+    "toggle": "Toggle Sidebar"
+  },
+  "projectGroups": {
+    "title": "Project Groups",
+    "description": "Manage collaborative student teams.",
+    "createGroup": "Create Group",
+    "noGroups": "No Project Groups",
+    "noGroupsDescTeacher": "Create groups to facilitate team-based assignments.",
+    "noGroupsDescStudent": "You haven't been assigned to any project groups yet.",
+    "unknownClass": "Unknown Class",
+    "members": "Members",
+    "noMembers": "No members assigned",
+    "createDialogTitle": "Create New Project Group",
+    "createDialogDesc": "Groups are linked to a specific class. You can add members after creating the group.",
+    "groupName": "Group Name",
+    "groupNamePlaceholder": "e.g., Team Alpha, Group 1",
+    "classLabel": "Class",
+    "selectClass": "Select a class",
+    "show": {
+      "projectGroupFor": "Project group for class:",
+      "whiteboard": "Group Whiteboard",
+      "groupMembers": "Group Members",
+      "addMembers": "Add Members",
+      "addMembersTo": "Add Members to {{name}}",
+      "addMembersDesc": "Select students from the class roster to add to this group.",
+      "selectStudents": "Select students...",
+      "noStudentsFound": "No students found.",
+      "studentsSelected": "{{count}} student(s) selected"
+    },
+    "toasts": {
+      "fillFields": "Please fill in all fields",
+      "created": "Group created successfully",
+      "deleteConfirm": "Are you sure you want to delete this group?",
+      "deleted": "Group deleted",
+      "membersAdded": "Members added successfully!",
+      "memberRemoved": "Member removed."
+    }
+  },
+  "reportCard": {
+    "title": "Academic Report Card",
+    "academicYear": "{{year}} Academic Year",
+    "gpa": "Cumulative GPA",
+    "coursePerformance": "Course Performance",
+    "coursePerformanceDesc": "Detailed breakdown of your grades across all subjects.",
+    "coursesCount": "{{count}} Courses",
+    "subjectAndClass": "Subject & Class",
+    "tasks": "Tasks",
+    "avgScore": "Avg. Score",
+    "grade": "Grade",
+    "graded": "{{count}} Graded",
+    "noData": "No Report Data",
+    "noDataDesc": "We couldn't find any academic records for the selected term.",
+    "noGradedCourses": "No Graded Courses",
+    "noGradedCoursesDesc": "You haven't received any grades for the selected term yet. Check back once your assignments are marked.",
+    "insights": "Academic Insights",
+    "topSubject": "Top Subject",
+    "termStanding": "Term Standing",
+    "instructorNote": "Instructor Note",
+    "deansList": "Dean's List Candidate",
+    "goodStanding": "Good Academic Standing",
+    "noStanding": "No Standing Yet",
+    "defaultNote": "Your performance this term has been exceptional. Keep focusing on your core subjects to maintain this high GPA.",
+    "noNote": "No instructor notes available for this term yet."
+  },
+  "library": {
+    "title": "Global Library",
+    "description": "Manage your personal collection of teaching resources.",
+    "searchPlaceholder": "Search files...",
+    "addResource": "Add Resource",
+    "addToLibrary": "Add to Library",
+    "uploadDesc": "Upload files to your personal library for reuse across classes.",
+    "resourceTitle": "Resource Title",
+    "optionalDesc": "Optional description",
+    "noDescription": "No description",
+    "emptyTitle": "Library is Empty",
+    "emptyDesc": "Upload files here to access them from any class.",
+    "deleteConfirm": "Are you sure you want to delete this resource?",
+    "toasts": {
+      "fillRequired": "Please provide a title and upload a file.",
+      "added": "Resource added to library!",
+      "deleted": "Resource deleted.",
+      "error": "Failed to add resource."
+    },
+    "accessDenied": "Access Denied",
+    "accessDeniedDesc": "Sorry, you do not have permission to access this page.",
+    "teacherOnly": "Only teachers can manage the Global Library."
+  },
+  "messages": {
+    "messages": "Messages",
+    "title": "Messages",
+    "searchPeople": "Search people...",
+    "noConversations": "No conversations yet. Start a chat from the directory!",
+    "you": "You: ",
+    "typeMessage": "Type a message...",
+    "selectChat": "Your Messages",
+    "selectChatDesc": "Select a conversation from the left or search for a student/teacher to start chatting.",
+    "description": "Messages description",
+    "noMessages": "No messages"
+  },
+  "enrollments": {
+    "title": "Admissions & Enrollments",
+    "description": "Manage student applications, class placements, and enrollment status.",
+    "enrollStudent": "Enroll Student",
+    "stats": {
+      "total": "Total Requests",
+      "pending": "Pending Approval",
+      "active": "Active Students"
+    },
+    "searchPlaceholder": "Search by student name or email...",
+    "allStatus": "All Status",
+    "options": "Enrollment Options",
+    "viewProfile": "View Student Profile",
+    "viewClass": "View Classroom",
+    "remove": "Remove Enrollment",
+    "requested": "Requested {{time}}",
+    "empty": {
+      "title": "No enrollments found",
+      "desc": "There are no active or pending enrollment requests at this time."
+    },
+    "deleteDialog": {
+      "title": "Remove Enrollment?",
+      "desc": "This will permanently remove the student from the classroom. They will lose access to all curriculum, assignments, and grades for this specific class."
+    },
+    "toasts": {
+      "statusUpdate": "Enrollment {{status}} successfully",
+      "processing": "Processing {{count}} enrollments...",
+      "bulkSuccess": "Successfully processed {{count}} enrollments",
+      "bulkError": "Failed to process some enrollments",
+      "removed": "Enrollment removed"
+    }
+  },
+  "discussions": {
+    "title": "Community Hub",
+    "description": "Engage with students and teachers in class-wide discussion threads.",
+    "start": "Start Discussion",
+    "stats": {
+      "total": "Total Threads",
+      "active": "Active Today",
+      "replies": "Total Replies"
+    },
+    "searchPlaceholder": "Search discussions by content or keywords...",
+    "filter": "Community Filter",
+    "empty": {
+      "title": "No discussions found",
+      "desc": "Start a new conversation to engage with your class community."
+    },
+    "labels": {
+      "trending": "Trending",
+      "replies": "Replies",
+      "active": "Active {{time}}",
+      "options": "Thread Options",
+      "open": "Open Discussion",
+      "follow": "Follow Thread"
+    }
+  },
+  "progressPage": {
+    "title": "Learning Progress",
+    "description": "Track student performance, module completion, and academic standing.",
+    "searchPlaceholder": "Search by student name...",
+    "table": {
+      "student": "Student",
+      "class": "Class",
+      "completion": "Completion",
+      "grade": "Overall Grade",
+      "actions": "Actions"
+    }
+  },
+  "teacherApps": {
+    "title": "Teacher Applications",
+    "description": "Review and manage requests from educators to teach specific classes.",
+    "searchPlaceholder": "Search applications...",
+    "empty": {
+      "title": "No applications found",
+      "desc": "There are no teacher applications matching your current filter."
+    },
+    "labels": {
+      "applyingFor": "Applying for: {{name}}",
+      "applied": "Applied {{time}}",
+      "viewTeacher": "View Teacher Profile",
+      "viewClass": "View Classroom"
+    },
+    "toasts": {
+      "statusUpdate": "Application {{status}} successfully"
+    }
+  },
+  "teacherSubscriptions": {
+    "title": "Teacher Subscriptions",
+    "description": "Manage your active subscriptions and billing information.",
+    "empty": {
+      "title": "No Subscriptions Found",
+      "description": "You don't have any active teacher subscriptions yet."
+    }
+  },
+  "profileRequests": {
+    "title": "Profile Governance",
+    "description": "Review and approve sensitive profile changes and verification documents.",
+    "stats": {
+      "total": "Total Requests",
+      "pending": "Pending Review",
+      "approved": "Approved"
+    },
+    "searchPlaceholder": "Search by user name or email...",
+    "empty": {
+      "title": "No pending requests",
+      "desc": "All profile change requests have been processed. You're all caught up!"
+    },
+    "labels": {
+      "changes": "{{count}} Changes",
+      "requested": "Requested {{time}}",
+      "viewProof": "View Proof",
+      "empty": "empty",
+      "verificationDoc": "Verification Document"
+    },
+    "dialogs": {
+      "rejectTitle": "Reject Changes",
+      "rejectDesc": "Please provide a specific reason for rejecting these profile updates.",
+      "rejectionFeedback": "Rejection Feedback",
+      "rejectionPlaceholder": "e.g. The uploaded document is blurry or invalid. Please re-upload a clear copy of your teaching certificate.",
+      "confirmRejection": "Confirm Rejection"
+    },
+    "toasts": {
+      "approved": "Changes approved and applied",
+      "rejected": "Changes rejected"
+    }
+  },
+  "footer": {
+    "platform": "Platform",
+    "coreFeatures": "Core Features",
+    "aiLearning": "AI Learning Hub",
+    "whiteboard": "Interactive Whiteboard",
+    "studentProgress": "Student Progress",
+    "solutions": "Solutions",
+    "forSchools": "For Schools",
+    "forTeachers": "For Teachers",
+    "forStudents": "For Students",
+    "forParents": "For Parents",
+    "caseStudies": "Case Studies",
+    "enterprise": "Enterprise",
+    "support": "Support",
+    "helpCenter": "Help Center",
+    "community": "Community",
+    "contactUs": "Contact Us",
+    "apiDocs": "API Docs",
+    "joinRevolution": "Join the Revolution",
+    "readyToUpgrade": "Ready to upgrade your",
+    "learningExperience": "Learning Experience?",
+    "subscribeDesc": "Subscribe to our weekly insights on AI in modern education.",
+    "emailPlaceholder": "you@university.edu",
+    "noSpam": "NO SPAM. JUST PURE INNOVATION.",
+    "brandDesc": "The next generation of education. AI-powered tools, collaborative environments, and enterprise-grade classroom management.",
+    "rightsReserved": "Tablawy OS. All rights reserved.",
+    "builtWith": "Built with",
+    "byTeam": "by Senior Team",
+    "terms": "Terms of Service",
+    "privacy": "Privacy Policy",
+    "cookie": "Cookie Policy",
+    "soc2": "SOC2 COMPLIANT",
+    "gdpr": "GDPR READY"
+  },
+  "portfolioPage": {
+    "pageTitle": "{{name}}'s Portfolio",
+    "fallbackPageTitle": "Student Portfolio",
+    "loading": "Assembling Portfolio...",
+    "notFound": "Student not found",
+    "notFoundDesc": "The portfolio you are looking for is unavailable.",
+    "title": "Academic Portfolio",
+    "description": "A comprehensive showcase of learning progress, achievements, and skills.",
+    "level": "Level {{level}}",
+    "xp": "{{xp}} XP",
+    "progressToLevel": "Progress to Level {{level}}",
+    "email": "Email",
+    "phone": "Phone",
+    "stats": {
+      "badges": "Badges",
+      "avgGrade": "Avg Grade",
+      "dayStreak": "Day Streak",
+      "globalRank": "Global Rank"
+    },
+    "learningConsistency": "Learning Consistency",
+    "academicJourney": "Academic Journey",
+    "submissionActivity": "Submission Activity",
+    "submissionActivityDesc": "Your assignment submission frequency over the last 6 months.",
+    "heatmapSubmissions": "{{count}} submissions",
+    "heatmapOn": "on",
+    "heatmapLess": "Less",
+    "heatmapMore": "More",
+    "unlockedAchievements": "Unlocked Achievements",
+    "badgesEarned": "{{earned}} / {{total}} Earned"
+  },
+  "portfolio": {
+    "portfolio": "Portfolio"
+  },
+  "myTeachers": {
+    "title": "My Teachers",
+    "description": "Connect with your teachers and view their profiles.",
+    "empty": {
+      "title": "No Teachers Found",
+      "description": "You haven't connected with any teachers yet."
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "description": "Manage your account settings and preferences.",
+    "toasts": {
+      "success": "Settings saved successfully!",
+      "error": "Failed to save settings."
+    },
+    "form": {
+      "title": "General Settings",
+      "description": "Update your general application settings.",
+      "enableAiFeatures": {
+        "label": "Enable AI Features",
+        "description": "Allow AI-powered features like the Study Lab and Magic Builder."
+      },
+      "defaultRegistrationRole": {
+        "label": "Default Registration Role",
+        "placeholder": "Select a role",
+        "description": "The default role assigned to new users upon registration."
+      },
+      "welcomeMessage": {
+        "label": "Welcome Message",
+        "placeholder": "Enter a welcome message",
+        "description": "A custom welcome message displayed to new users."
+      }
+    }
+  },
+  "tooltips": {
+    "magicBuilder": {
+      "title": "AI Magic Builder",
+      "description": "Click here to let AI generate your entire lesson curriculum, including notes and quizzes, automatically."
+    }
+  },
+  "help": {
+    "common": {
+      "howTo": "Step-by-Step Guide",
+      "proTips": "Expert Tips",
+      "stillStuck": "Still have questions?",
+      "aiChatDesc": "Our AI Assistant can explain any feature in more detail.",
+      "askAi": "Ask Gemini Assistant",
+      "clickToTry": "Click to try"
+    },
+    "pages": {
+      "general": {
+        "title": "Need Help?",
+        "description": "We're here to help you make the most of Tablawy OS. Explore the guides below.",
+        "steps": [
+          {
+            "title": "Check Notifications",
+            "description": "Click the bell icon to see important alerts from your teachers and AI."
+          },
+          {
+            "title": "Quick Actions",
+            "description": "Use the command menu (Ctrl + K) to navigate anywhere instantly."
+          }
+        ],
+        "tips": [
+          "Change your language anytime in the top header.",
+          "Your XP progress is always visible at the top."
+        ]
+      },
+      "classHub": {
+        "title": "Class Management",
+        "description": "Welcome to your class command center. Here you can manage students, curriculum, and assignments.",
+        "steps": [
+          {
+            "title": "Add Students",
+            "description": "Use the People tab to enroll students or generate a join code."
+          },
+          {
+            "title": "Build Curriculum",
+            "description": "Organize your lessons and resources into modules."
+          },
+          {
+            "title": "Track Progress",
+            "description": "Monitor student engagement and grade submissions in real-time."
+          }
+        ],
+        "tips": [
+          "You can use the Magic Builder to generate module drafts instantly.",
+          "Pin important announcements to keep them at the top of the feed."
+        ]
+      },
+      "dashboard": {
+        "title": "Dashboard Hub",
+        "description": "This is your academic command center. Here's how to use it:",
+        "steps": [
+          {
+            "title": "The 'What's Next' Widget",
+            "description": "Check the cards at the top for urgent tasks like grading or assignments."
+          },
+          {
+            "title": "Track Progress",
+            "description": "Scroll down to see your academic journey charts and recent activity."
+          }
+        ],
+        "tips": [
+          "The 'At-Risk' section on the right is prioritized by AI.",
+          "Click any activity log item to go directly to that resource."
+        ]
+      },
+      "classCurriculum": {
+        "title": "Managing Curriculum",
+        "description": "Organize your lessons into modules and materials.",
+        "steps": [
+          {
+            "title": "Create a Module",
+            "description": "Click 'Add Module' to start a new chapter or topic section.",
+            "actionId": "guide-add-module"
+          },
+          {
+            "title": "Use AI Magic Builder",
+            "description": "Use the purple 'Wand' icon to generate an entire curriculum automatically.",
+            "actionId": "guide-magic-builder"
+          }
+        ],
+        "tips": [
+          "You can drag and drop modules to reorder them.",
+          "Mark items as 'Draft' to hide them from students until they are ready."
+        ]
+      },
+      "createAssignment": {
+        "title": "Creating Tasks",
+        "description": "Design engaging assignments for your students.",
+        "steps": [
+          {
+            "title": "Set a Rubric",
+            "description": "Add grading criteria (e.g., Grammar, Logic) so students know what to expect."
+          },
+          {
+            "title": "AI Assistant",
+            "description": "Use the AI writing assistant to draft instructions based on your topic."
+          },
+          {
+            "title": "Publish Task",
+            "description": "Once ready, click the main button to notify all students.",
+            "actionId": "guide-publish-assignment"
+          }
+        ],
+        "tips": [
+          "Setting a clear deadline helps students prioritize their work.",
+          "Attach reference materials to help students complete the task."
+        ]
+      },
+      "classAttendance": {
+        "title": "Attendance Tracking",
+        "description": "Monitor and record student presence in your classroom.",
+        "steps": [
+          {
+            "title": "Manual Marking",
+            "description": "Click the status icon next to a student's name to toggle between Present, Absent, or Late."
+          },
+          {
+            "title": "QR Check-in",
+            "description": "Start a QR session to let students mark themselves present using their phones."
+          },
+          {
+            "title": "Export Reports",
+            "description": "Use the export button to download a full attendance sheet for the term."
+          }
+        ],
+        "tips": [
+          "QR sessions are time-limited for security.",
+          "You can add remarks to any attendance record for future reference."
+        ]
+      },
+      "quizzes": {
+        "title": "Quizzes & Assessments",
+        "description": "Test knowledge with interactive AI-powered quizzes.",
+        "steps": [
+          {
+            "title": "Generate with AI",
+            "description": "Paste your lesson notes and let AI create multiple-choice questions instantly."
+          },
+          {
+            "title": "Review Results",
+            "description": "See a detailed breakdown of which questions students struggled with most."
+          }
+        ],
+        "tips": [
+          "Shuffle questions to prevent students from seeing the same order.",
+          "Add explanations to each question to help students learn from their mistakes."
+        ]
+      },
+      "library": {
+        "title": "Global Library",
+        "description": "Your personal cloud for all teaching resources.",
+        "steps": [
+          {
+            "title": "Upload Once",
+            "description": "Upload a file to your library to use it in any of your classes without re-uploading."
+          },
+          {
+            "title": "Organize by Topic",
+            "description": "Add descriptions to your resources to find them easily later."
+          }
+        ],
+        "tips": [
+          "You can share library links directly with other teachers.",
+          "The library supports PDFs, Videos, and common Office documents."
+        ]
+      }
+    }
+  }
+}

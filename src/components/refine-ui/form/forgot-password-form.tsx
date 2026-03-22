@@ -15,8 +15,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { useForgotPassword, useLink, useRefineOptions } from "@refinedev/core";
+import { useTranslation } from "react-i18next";
 
 export const ForgotPasswordForm = () => {
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
 
   const Link = useLink();
@@ -65,24 +67,24 @@ export const ForgotPasswordForm = () => {
               "font-semibold"
             )}
           >
-            Forgot password
+            {t("auth.forgotPassword.title")}
           </CardTitle>
           <CardDescription
             className={cn("text-muted-foreground", "font-medium")}
           >
-            Enter your email to change your password.
+            {t("auth.forgotPassword.description")}
           </CardDescription>
         </CardHeader>
 
         <CardContent className={cn("px-0")}>
           <form onSubmit={handleForgotPassword}>
             <div className={cn("flex", "flex-col", "gap-2")}>
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t("auth.login.emailLabel")}</Label>
               <div className={cn("flex", "gap-2")}>
                 <Input
                   id="email"
                   type="email"
-                  placeholder=""
+                  placeholder={t("auth.login.emailPlaceholder")}
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -97,7 +99,7 @@ export const ForgotPasswordForm = () => {
                     "px-6"
                   )}
                 >
-                  Send
+                  {t("auth.forgotPassword.send")}
                 </Button>
               </div>
             </div>
@@ -117,7 +119,7 @@ export const ForgotPasswordForm = () => {
               )}
             >
               <ArrowLeft className={cn("w-4", "h-4")} />
-              <span>Back</span>
+              <span>{t("auth.forgotPassword.back")}</span>
             </Link>
           </div>
         </CardContent>

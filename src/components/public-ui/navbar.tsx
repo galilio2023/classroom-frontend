@@ -280,7 +280,7 @@ export const Navbar = () => {
               <div className="flex-1 overflow-y-auto p-6 space-y-8">
                 <div className="space-y-2">
                   <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground mb-4">
-                    Navigation
+                    {t("common.navigation")}
                   </p>
                   {navLinks.map((link) => (
                     <Link
@@ -320,7 +320,7 @@ export const Navbar = () => {
                   <div className="flex items-center justify-between px-4">
                     <div className="flex flex-col gap-1">
                       <span className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">
-                        Settings
+                        {t("common.settings")}
                       </span>
                       <div className="flex gap-2">
                         <ThemeToggle />
@@ -328,7 +328,7 @@ export const Navbar = () => {
                     </div>
                     <div className="flex flex-col gap-1 items-end">
                       <span className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground">
-                        Language
+                        {t("common.language")}
                       </span>
                       <div className="flex gap-2">
                         <Button
@@ -388,7 +388,7 @@ export const Navbar = () => {
                     >
                       <Button className="w-full font-black uppercase tracking-widest h-14 rounded-2xl shadow-lg shadow-primary/20 gap-3">
                         <LayoutDashboard className="h-5 w-5" />
-                        Dashboard
+                        {t("common.dashboard")}
                       </Button>
                     </Link>
                     <Button

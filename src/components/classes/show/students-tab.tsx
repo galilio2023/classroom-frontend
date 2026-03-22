@@ -260,7 +260,7 @@ export const StudentsTab = ({
                   <span className="hidden xs:inline">
                     {t("classes.show.students.actions.messageAll")}
                   </span>
-                  <span className="xs:hidden">Message</span>
+                  <span className="xs:hidden">{t("classes.show.students.actions.message")}</span>
                 </Button>
                 <Button
                   variant="outline"
@@ -272,7 +272,7 @@ export const StudentsTab = ({
                   <span className="hidden xs:inline">
                     {t("classes.show.students.actions.bulkEnroll", "Bulk Enroll")}
                   </span>
-                  <span className="xs:hidden">CSV</span>
+                  <span className="xs:hidden">{t("classes.show.students.actions.csv")}</span>
                 </Button>
                 <Button
                   size="lg"
@@ -283,7 +283,7 @@ export const StudentsTab = ({
                   <span className="hidden xs:inline">
                     {t("classes.show.students.actions.enrollStudent")}
                   </span>
-                  <span className="xs:hidden">Enroll</span>
+                  <span className="xs:hidden">{t("classes.show.students.actions.enroll")}</span>
                 </Button>
               </div>
             )}

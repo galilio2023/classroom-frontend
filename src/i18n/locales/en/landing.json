@@ -1,0 +1,214 @@
+{
+  "landing": {
+    "nav": {
+      "features": "Features",
+      "aiHub": "AI Hub",
+      "pricing": "Pricing"
+    },
+    "hero": {
+      "badge": "Modern Education",
+      "titlePart1": "Teach",
+      "titlePart2": "Smarter",
+      "titlePart3": "Grow Faster",
+      "description": "The minimalist operating system for Egyptian schools. Advanced AI met with effortless management."
+    },
+    "pillars": {
+      "ai": {
+        "title": "AI Assistant",
+        "desc": "Automate grading, generate lesson plans, and provide 24/7 tutoring for every student."
+      },
+      "manage": {
+        "title": "Easy Management",
+        "desc": "Track attendance, manage enrollments, and coordinate schedules with a single tap."
+      },
+      "growth": {
+        "title": "Student Growth",
+        "desc": "Gamified progress tracking and AI insights ensure no student is left behind."
+      }
+    },
+    "bento": {
+      "title1": "Design for the",
+      "title2": "Next Generation",
+      "desc": "We've rebuilt classroom management from the ground up with a focus on speed, beauty, and AI-driven insights."
+    },
+    "growth": {
+      "badge": "Engineered for Success",
+      "title1": "Unleash Infinite",
+      "title2": "Potential.",
+      "desc": "Our proprietary growth engine tracks every micro-achievement, turning the academic journey into a rewarding quest for excellence."
+    },
+    "stats": {
+      "secure": "Secure Access",
+      "global": "Global Network",
+      "fast": "Lightning Fast"
+    },
+    "features": {
+      "sectionTitle": "Powerful",
+      "sectionTitleItalic": "Features",
+      "sectionDesc": "Everything you need to manage a modern classroom and boost student engagement.",
+      "exploreAll": "Explore All Features",
+      "whiteboard": {
+        "title": "Collaborative Whiteboard",
+        "desc": "Real-time drawing and brainstorming for teams and classes."
+      },
+      "aiLab": {
+        "title": "AI Study Lab",
+        "desc": "Personalized learning paths and AI-generated study materials."
+      },
+      "gamification": {
+        "title": "Gamified Learning",
+        "desc": "Badges, XP, and leaderboards to keep students motivated."
+      },
+      "qr": {
+        "title": "QR Attendance",
+        "desc": "Fast and secure attendance tracking with unique QR codes."
+      },
+      "analytics": {
+        "title": "Advanced Analytics",
+        "desc": "Deep insights into student performance and class engagement."
+      },
+      "collaboration": {
+        "title": "Team Collaboration",
+        "desc": "Built-in project groups and real-time discussion streams."
+      },
+      "community": {
+        "title": "Learning Community",
+        "desc": "Engage with peers and mentors in a safe, moderated environment."
+      },
+      "smartClassroom": {
+        "title": "Smart Classroom",
+        "desc": "Integrated management for classes, assignments, and quizzes in one place."
+      }
+    },
+    "roles": {
+      "sectionTitle": "Tailored for",
+      "sectionTitleItalic": "Everyone",
+      "sectionDesc": "Platform providing tools for both lead global classes and individual mastery.",
+      "student": {
+        "title": "Student",
+        "portal": "Portal",
+        "f1": "Access all your classes in one hub",
+        "f2": "Master topics with AI Study Lab",
+        "f3": "Track your academic journey & XP"
+      },
+      "teacher": {
+        "title": "Teacher",
+        "portal": "Portal",
+        "f1": "Manage multiple classrooms with ease",
+        "f2": "Automate grading with AI Assistant",
+        "f3": "Go live with collaborative tools"
+      }
+    },
+    "showcase": {
+      "badge": "The Command Center",
+      "title": "A Powerful Hub for",
+      "desc": "One platform to manage your entire academic life. From real-time classes to AI-powered study sessions.",
+      "attendance": "Attendance",
+      "verified": "Verified via QR",
+      "ai": "AI Assistant",
+      "draft": "Draft Ready"
+    },
+    "ai": {
+      "title1": "AI-Powered",
+      "title2": "Study Hub",
+      "desc": "A cutting-edge learning companion that understands your curriculum. Generate quizzes, summarize notes, and create flashcards instantly with Gemini 2.0 Flash.",
+      "poweredBy": "Gemini 2.0 FLASH Powered",
+      "activeNow": "Active Now",
+      "analysisProcessing": "Analysis Processing",
+      "list": {
+        "assistant": "24/7 AI Teaching Assistant",
+        "quiz": "Adaptive Quiz Generation",
+        "summary": "Smart Content Summarization",
+        "paths": "Personalized Learning Paths"
+      },
+      "exploreButton": "Explore AI Lab",
+      "chat": {
+        "header": "AI Learning Assistant",
+        "msg1": "Hey there! I noticed you have a Physics test coming up. Want to review Quantum Mechanics?",
+        "msg2": "That would be great! Can you explain the Heisenberg Uncertainty Principle simply?",
+        "msg3": "Absolutely! Imagine trying to take a photo of a speeding car. If you use a fast shutter speed to freeze its position, you can't tell how fast it's going..."
+      }
+    },
+    "trust": {
+      "title": "Empowering Modern Classrooms"
+    },
+    "cta": {
+      "title": "Ready to Transform Your Classroom?",
+      "desc": "Join thousands of educators and students using Classroom CMS to shape the future of education.",
+      "launch": "Launch Your Classroom",
+      "watchDemo": "Watch Demo",
+      "evolved1": "Education",
+      "evolved2": "Evolved."
+    }
+  },
+  "pricing": {
+    "badge": "Pricing Plans",
+    "titlePart1": "Simple",
+    "titlePart2": "Pricing",
+    "description": "Choose the perfect plan for your learning needs.",
+    "currentPlan": "Current Plan",
+    "upgrade": "Upgrade Now",
+    "recommended": "Recommended",
+    "whatsIncluded": "What's Included",
+    "perMonth": "/ month",
+    "toasts": {
+      "loginRequired": "Please login or create an account to upgrade.",
+      "checkoutError": "Failed to start checkout. Please try again."
+    },
+    "plans": {
+      "free": {
+        "name": "Free Starter",
+        "desc": "Perfect for individual students starting their journey.",
+        "f1": "Access to all basic classes",
+        "f2": "Standard AI Study Buddy",
+        "f3": "Gamified XP & Leaderboards",
+        "f4": "Community Discussions",
+        "f5": "Basic Study Planner"
+      },
+      "pro": {
+        "name": "Classroom Pro",
+        "desc": "Advanced features for educators and serious learners.",
+        "f1": "Priority AI Tutor access",
+        "f2": "Unlimited Quiz Generation",
+        "f3": "Advanced Analytics Dashboard",
+        "f4": "Global Library Storage",
+        "f5": "Customizable Study Tracks",
+        "f6": "Teacher Magic Builder tools",
+        "f7": "Priority Support 24/7"
+      }
+    },
+    "faq": {
+      "badge": "Common Questions",
+      "title1": "Common",
+      "title2": "Questions",
+      "q1": "Can I cancel my subscription?",
+      "a1": "Yes, you can cancel at any time from your account settings.",
+      "q2": "What payment methods are supported?",
+      "a2": "We support all major credit cards and digital wallets via Stripe.",
+      "q3": "Is there a student discount?",
+      "a3": "Our Free plan is specifically designed for individual students.",
+      "q4": "How does AI credit system work?",
+      "a4": "Pro users get monthly credits for advanced AI tools like quiz generation."
+    },
+    "features": {
+      "payments": {
+        "title": "Secure Payments",
+        "desc": "Industry-standard encryption for all your transactions."
+      },
+      "credits": {
+        "title": "AI Credits",
+        "desc": "Generous monthly allowance for all premium features."
+      },
+      "support": {
+        "title": "Priority Support",
+        "desc": "24/7 dedicated help desk for all your teaching needs."
+      }
+    },
+    "cta": {
+      "title1": "Ready to",
+      "title2": "Start?",
+      "desc": "Join thousands of educators and students transforming the future of learning today.",
+      "start": "Get Started Today"
+    }
+  }
+}

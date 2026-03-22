@@ -348,7 +348,7 @@ const Pricing = () => {
                             {t("pricing.faq.badge")}
                         </motion.div>
                         <h2 className="text-5xl md:text-7xl font-black tracking-tighter uppercase leading-[0.9]">
-                            Common <br/><span className="text-primary">Questions</span>
+                            {t("pricing.faq.title1")} <br/><span className="text-primary">{t("pricing.faq.title2")}</span>
                         </h2>
                     </div>
                     <div className="glass-card rounded-[4rem] p-8 md:p-16">
@@ -372,10 +372,10 @@ const Pricing = () => {
                     <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent pointer-events-none" />
                     <div className="relative space-y-8">
                         <h2 className="text-5xl md:text-9xl font-black tracking-tighter leading-[0.85] uppercase">
-                            Ready to<br/> Start?
+                            {t("pricing.cta.title1")}<br/> {t("pricing.cta.title2")}
                         </h2>
                         <p className="text-primary-foreground/80 font-medium text-xl md:text-2xl max-w-2xl mx-auto leading-relaxed">
-                            Join thousands of educators and students transforming the future of learning today.
+                            {t("pricing.cta.desc")}
                         </p>
                         <div className="pt-8">
                             <Link to="/register" className="inline-block w-full sm:w-auto">
