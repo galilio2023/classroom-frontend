@@ -66,7 +66,7 @@ const AIStudyLab = () => {
   const { mutate: createHistory } = useCreate();
   const { mutate: sendFeedback } = useCustomMutation();
 
-  const { data: classesResult } = useList<Class>({
+  const { result: classesResult } = useList<Class>({
     resource: "classes",
     pagination: { pageSize: 100 },
   });
