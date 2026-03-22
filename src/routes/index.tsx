@@ -1,4 +1,5 @@
 import React, { Suspense } from "react";
+import { useTranslation } from "react-i18next";
 import { Authenticated } from "@refinedev/core";
 import { CatchAllNavigate, NavigateToResource } from "@refinedev/react-router";
 import { Outlet, Route, Routes } from "react-router-dom";

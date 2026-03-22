@@ -7,6 +7,7 @@ import { flexRender } from "@tanstack/react-table";
 import { Loader2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslation } from "react-i18next";
 
 import { DataTablePagination } from "@/components/refine-ui/data-table/data-table-pagination";
 import {
