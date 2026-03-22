@@ -589,6 +589,7 @@
       "techFailures": "Tech Failures",
       "aiDiagnosis": "AI Diagnosis",
       "suggestedFixes": "Top Priority Fixes",
+      "auditingSystems": "Auditing System Integrity...",
       "selfHealingTitle": "The Self-Healing Loop",
       "selfHealingDesc": "The Janitor Agent analyzes negative pedagogical feedback and technical exceptions every 24 hours. Suggested prompt adjustments are staged for review to maintain institutional tone control.",
       "recursiveTitle": "Recursive Summarization",

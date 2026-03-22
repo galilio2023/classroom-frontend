@@ -4,6 +4,7 @@ import { HttpError } from "@refinedev/core";
 import { ColumnDef } from "@tanstack/react-table";
 import { useTable } from "@refinedev/react-table";
 import { DataTable } from "@/components/refine-ui/data-table/data-table";
+import { SparkleLoader } from "@/components/ai/sparkle-loader";
 import { Badge } from "@/components/ui/badge";
 import { 
   Sparkles, 
@@ -17,7 +18,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import dayjs from "dayjs";
 import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
 import usePageTitle from "@/hooks/use-page-title";
@@ -140,6 +141,12 @@ const AIGovernanceList = () => {
     },
   });
 
+  const {
+    refineCore: { tableQuery },
+  } = table;
+
+  const isLoading = tableQuery?.isLoading;
+
   return (
     <div className="space-y-10 md:space-y-16 pb-20 max-w-7xl mx-auto px-4">
       {/* Header */}
@@ -177,8 +184,9 @@ const AIGovernanceList = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
+        className="relative"
       >
-        <div className="rounded-4xl md:rounded-[2.5rem] border border-border/40 shadow-3xl shadow-black/5 overflow-hidden bg-card/50 backdrop-blur-3xl group">
+        <div className="rounded-4xl md:rounded-[2.5rem] border border-border/40 shadow-3xl shadow-black/5 overflow-hidden bg-card/50 backdrop-blur-3xl group min-h-[400px]">
             <div className="p-8 md:p-10 border-b border-border/40 bg-muted/20 flex items-center justify-between">
                 <div className="space-y-1">
                     <h3 className="text-lg font-black tracking-tight flex items-center gap-2">
@@ -188,11 +196,34 @@ const AIGovernanceList = () => {
                     <p className="text-xs text-muted-foreground font-medium">{t("aiHub.governance.evolutionDesc")}</p>
                 </div>
             </div>
-            <div className="p-0 overflow-x-auto relative">
-                <DataTable table={table} />
+            
+            <div className="p-0 overflow-x-auto relative min-h-[300px]">
+                <AnimatePresence mode="wait">
+                    {isLoading ? (
+                        <motion.div
+                            key="loader"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-card/40 backdrop-blur-sm"
+                        >
+                            <SparkleLoader message={t("aiHub.governance.auditingSystems")} />
+                        </motion.div>
+                    ) : (
+                        <motion.div
+                            key="table"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                        >
+                            <DataTable table={table} />
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </div>
         </div>
       </motion.div>
+
 
       {/* Evolutionary Safeguards Info */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12">
