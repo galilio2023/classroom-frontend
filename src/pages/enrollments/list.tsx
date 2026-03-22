@@ -72,6 +72,7 @@ const EnrollmentsList = () => {
   usePageTitle(t("enrollments.title"));
   const { data: identity } = useGetIdentity<User>();
   const isStaff = identity?.role === UserRole.ADMIN || identity?.role === UserRole.TEACHER;
+
   const { selectedTerm } = useTerm();
   
   const { create, show } = useNavigation();

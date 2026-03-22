@@ -25,7 +25,7 @@ export const useDashboard = () => {
     url: `/dashboard`,
     method: "get",
     queryOptions: {
-      enabled: !!identity && !!selectedTerm && !isParent, 
+      enabled: !!identity && !!selectedTerm && !isParent,
       staleTime: 30000, // 30 seconds cache
     },
     config: {
@@ -62,7 +62,7 @@ export const useDashboard = () => {
   // Socket Logic
   useEffect(() => {
     if (!identity?.id) return;
-    
+
     const handleRefresh = () => {
       void refetchDashboard();
       void refetchIdentity();

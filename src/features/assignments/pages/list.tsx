@@ -1,5 +1,5 @@
 import { useMemo, useRef } from "react";
-import { Assignment, User } from "@/types";
+import { Assignment, User, UserRole } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useGo, useGetIdentity, useList } from "@refinedev/core";
@@ -30,8 +30,8 @@ export const AssignmentList = ({ classId }: AssignmentListProps) => {
   if (isAr) dayjs.locale("ar");
   else dayjs.locale("en");
 
-  const isAdmin = identity?.role === "admin";
-  const isTeacher = identity?.role === "teacher";
+  const isAdmin = identity?.role === UserRole.ADMIN;
+  const isTeacher = identity?.role === UserRole.TEACHER;
   const isStaff = isAdmin || isTeacher;
 
   const { query: { data, isLoading, isError } } = useList<Assignment>({

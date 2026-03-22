@@ -1,5 +1,5 @@
 import { useCustom, useNavigation, useGetIdentity } from "@refinedev/core";
-import { Quiz, User } from "@/types";
+import { Quiz, User, UserRole } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2, FileQuestion, PlusCircle, ArrowRight, Trophy, Clock, Calendar, LayoutDashboard, Sparkles, Info } from "lucide-react";
@@ -20,7 +20,7 @@ export const QuizTab = ({ classId }: QuizTabProps) => {
   const { t, i18n } = useTranslation();
   const { show, create } = useNavigation();
   const { data: identity } = useGetIdentity<User>();
-  const isStaff = identity?.role === "teacher" || identity?.role === "admin";
+  const isStaff = identity?.role === UserRole.TEACHER || identity?.role === UserRole.ADMIN;
 
   const { query: quizQuery } = useCustom<Quiz[]>({
     url: `/quizzes`,

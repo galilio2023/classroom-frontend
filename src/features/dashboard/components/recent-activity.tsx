@@ -1,6 +1,6 @@
 import { useCustom, HttpError, useGetIdentity } from "@refinedev/core";
 import { Bell, CheckCheck, Info, GraduationCap, ClipboardCheck, Trophy, BrainCircuit, ArrowRight, History, Sparkles, Clock, UserCog, BookOpen, Trash2, Edit3, PlusCircle } from "lucide-react";
-import { Notification, User } from "@/types";
+import { Notification, User, UserRole } from "@/types";
 import { formatDistanceToNow } from "date-fns";
 import { ar } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -19,7 +19,7 @@ export const RecentActivity = ({ limit = 5 }: RecentActivityProps) => {
   const { data: identity } = useGetIdentity<User>();
   
   // Choose endpoint based on role: Admins/Teachers get System Logs, Students get Notifications
-  const isStaff = identity?.role === 'admin' || identity?.role === 'teacher';
+  const isStaff = identity?.role === UserRole.ADMIN || identity?.role === UserRole.TEACHER;
   const endpoint = isStaff ? "/activity-log" : "/notifications";
 
   const { query } = useCustom<any[], HttpError>({

@@ -7,14 +7,14 @@ import {
   useDelete,
   useCustomMutation,
 } from "@refinedev/core";
-import { Announcement, User } from "@/types";
+import { Announcement, User, UserRole } from "@/types";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 
 export const useAnnouncementTab = (classId: string) => {
   const { t } = useTranslation();
   const { data: identity } = useGetIdentity<User>();
-  const isStaff = identity?.role === "teacher" || identity?.role === "admin";
+  const isStaff = identity?.role === UserRole.TEACHER || identity?.role === UserRole.ADMIN;
 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
