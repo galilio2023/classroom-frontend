@@ -18,8 +18,8 @@ import {
 } from "lucide-react";
 import { Input } from "@/components/ui/input.tsx";
 import { useMemo, useState, useRef, useCallback } from "react";
-import { useList, useNavigation, useGetIdentity } from "@refinedev/core";
-import { User, UserRole } from "@/types";
+import { useList, useNavigation } from "@refinedev/core";
+import { useUserRole } from "@/hooks/use-user-role";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { QRAttendanceModal } from "@/features/classes/components/qr-attendance-modal";
@@ -49,8 +49,7 @@ dayjs.extend(relativeTime);
 const AttendanceListPage = () => {
   const { t } = useTranslation();
   usePageTitle(t("classes.attendance.governance.title"));
-  const { data: identity } = useGetIdentity<User>();
-  const isStaff = identity?.role === UserRole.ADMIN || identity?.role === UserRole.TEACHER;
+  const { identity, isStaff } = useUserRole();
   const { selectedTerm } = useTerm();
   const navigate = useNavigate();
 

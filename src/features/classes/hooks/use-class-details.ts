@@ -1,23 +1,25 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { 
   useShow, 
-  useGetIdentity, 
   useOne, 
   useUpdate, 
   useList, 
   useDelete, 
-  useCreate 
+  useCreate,
+  useInvalidate
 } from "@refinedev/core";
-import { Class, User, UserRole, Announcement, Enrollment } from "@/types";
+import { Class, Announcement, Enrollment } from "@/types";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import debounce from "lodash/debounce";
 import { useQueryClient } from "@tanstack/react-query";
+import { useUserRole } from "@/hooks/use-user-role";
 
 export const useClassDetails = (classId: string) => {
   const { t } = useTranslation();
-  const { data: identity } = useGetIdentity<User>();
+  const { identity, isAdmin, isTeacher, isStaff } = useUserRole();
   const queryClient = useQueryClient();
+  const invalidate = useInvalidate();
 
   // --- Data Fetching ---
   const { query } = useShow<Class>({
@@ -27,13 +29,9 @@ export const useClassDetails = (classId: string) => {
   });
 
   const aClass = query?.data?.data;
-  const { isAdmin, isTeacher, isStaff, isOwner } = useMemo(() => {
-    const isAdmin = identity?.role === UserRole.ADMIN;
-    const isTeacher = identity?.role === UserRole.TEACHER;
-    const isStaff = isAdmin || isTeacher;
-    const isOwner = isAdmin || aClass?.teachers?.find((t: any) => t.teacher.id === identity?.id)?.isPrimary;
-    return { isAdmin, isTeacher, isStaff, isOwner };
-  }, [identity, aClass]);
+  const isOwner = useMemo(() => {
+    return isAdmin || aClass?.teachers?.find((t: any) => t.teacher.id === identity?.id)?.isPrimary;
+  }, [identity, aClass, isAdmin]);
 
   // --- Announcements Logic ---
   const { query: { data: announcementsResult } } = useList<Announcement>({
@@ -183,6 +181,8 @@ export const useClassDetails = (classId: string) => {
     isLoading: query?.isPending,
     isError: query?.isError,
     isStaff,
+    isAdmin,
+    isTeacher,
     isOwner,
     announcements,
     dismissedAnnouncements,

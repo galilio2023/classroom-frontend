@@ -22,8 +22,9 @@ import {
 } from "lucide-react";
 import { Input } from "@/components/ui/input.tsx";
 import { useMemo, useState, useRef } from "react";
-import { useList, useNavigation, useDelete, useGetIdentity, useCustomMutation, useInvalidate } from "@refinedev/core";
-import { Enrollment, User, UserRole } from "@/types";
+import { useList, useNavigation, useDelete, useCustomMutation, useInvalidate } from "@refinedev/core";
+import { Enrollment } from "@/types";
+import { useUserRole } from "@/hooks/use-user-role";
 import { Badge } from "@/components/ui/badge.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import {
@@ -70,8 +71,8 @@ dayjs.extend(relativeTime);
 const EnrollmentsList = () => {
   const { t } = useTranslation();
   usePageTitle(t("enrollments.title"));
-  const { data: identity } = useGetIdentity<User>();
-  const isStaff = identity?.role === UserRole.ADMIN || identity?.role === UserRole.TEACHER;
+  const { identity, isStaff } = useUserRole();
+
   const { selectedTerm } = useTerm();
   
   const { create, show } = useNavigation();

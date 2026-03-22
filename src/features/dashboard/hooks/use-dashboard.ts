@@ -1,31 +1,31 @@
 import { useEffect } from "react";
-import { useList, useNavigation, useGetIdentity, useCustom } from "@refinedev/core";
-import { User, UserRole, Class } from "@/types";
+import { useList, useNavigation, useCustom } from "@refinedev/core";
+import { User, Class } from "@/types";
 import { DashboardData } from "@/types/dashboard";
 import { useTerm } from "@/contexts/term-context";
 import { socket, connectSocket } from "@/lib/socket";
+import { useUserRole } from "@/hooks/use-user-role";
 
 export const useDashboard = () => {
   const { list, show } = useNavigation();
   const { selectedTerm } = useTerm();
   const {
-    data: identity,
+    identity,
     isLoading: isIdentityLoading,
     refetch: refetchIdentity,
-  } = useGetIdentity<User>();
-
-  const isStaff = identity?.role === UserRole.TEACHER || identity?.role === UserRole.ADMIN;
-  const isAdmin = identity?.role === UserRole.ADMIN;
-  const isTeacher = identity?.role === UserRole.TEACHER;
-  const isStudent = identity?.role === UserRole.STUDENT;
-  const isParent = identity?.role === UserRole.PARENT;
+    isStaff,
+    isAdmin,
+    isTeacher,
+    isStudent,
+    isParent,
+  } = useUserRole();
 
   // Unified Dashboard Query (Merged Core + Analytics for better performance)
   const { query: dashboardQuery } = useCustom<DashboardData>({
     url: `/dashboard`,
     method: "get",
     queryOptions: {
-      enabled: !!identity && !!selectedTerm && !isParent, 
+      enabled: !!identity && !!selectedTerm && !isParent,
       staleTime: 30000, // 30 seconds cache
     },
     config: {
@@ -62,7 +62,7 @@ export const useDashboard = () => {
   // Socket Logic
   useEffect(() => {
     if (!identity?.id) return;
-    
+
     const handleRefresh = () => {
       void refetchDashboard();
       void refetchIdentity();

@@ -24,7 +24,6 @@ import { Slider } from "@/components/ui/slider";
 import {
   useCustomMutation,
   useNotification,
-  useGetIdentity,
   useUpdate,
   HttpError,
 } from "@refinedev/core";
@@ -33,8 +32,6 @@ import {
   Submission,
   Assignment,
   AIFeedbackResponse,
-  User,
-  UserRole,
 } from "@/types";
 import { useEffect, useState } from "react";
 import {
@@ -62,6 +59,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
+import { useUserRole } from "@/hooks/use-user-role";
 
 const gradingSchema = (t: any) =>
   z.object({
@@ -92,11 +90,8 @@ export const GradingDialog = ({
   const { t, i18n } = useTranslation();
   const { open } = useNotification();
   const { width, height } = useWindowSize();
-  const { data: identity } = useGetIdentity<User>();
-  const isStaff =
-    (identity?.role === UserRole.TEACHER ||
-      identity?.role === UserRole.ADMIN) &&
-    !readOnly;
+  const { isStaff: _isStaff } = useUserRole();
+  const isStaff = _isStaff && !readOnly;
 
   const [hasAutoAnalyzed, setHasAutoAnalyzed] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);

@@ -3,7 +3,6 @@ import {
   useCustom,
   useCustomMutation,
   useNotification,
-  useGetIdentity,
 } from "@refinedev/core";
 import { useSearchParams } from "react-router-dom";
 import { format } from "date-fns";
@@ -11,10 +10,9 @@ import {
   Enrollment,
   AttendanceStatus,
   Attendance,
-  User,
-  UserRole,
 } from "@/types";
 import { useTranslation } from "react-i18next";
+import { useUserRole } from "@/hooks/use-user-role";
 
 interface AttendanceHistoryGroup {
   date: string;
@@ -27,8 +25,7 @@ interface AttendanceHistoryGroup {
 
 export const useAttendanceDetails = (classId: string, enrollments: Enrollment[], date?: Date) => {
   const { t } = useTranslation();
-  const { data: identity } = useGetIdentity<User>();
-  const isStaff = identity?.role === UserRole.TEACHER || identity?.role === UserRole.ADMIN;
+  const { isStaff } = useUserRole();
   const [searchParams] = useSearchParams();
   const { open } = useNotification();
 
