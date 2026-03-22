@@ -1,13 +1,14 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Discussion } from "@/types";
+import { Discussion, User } from "@/types";
 import { Trash2, Reply, CheckCircle2, Trophy, Sparkles } from "lucide-react";
 import dayjs from "dayjs";
 import { cn } from "@/lib/utils";
 import { MarkdownRenderer } from "@/components/ui/markdown-renderer";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
+import { useGetIdentity } from "@refinedev/core";
 
 interface ChatBubbleProps {
   post: Discussion;
@@ -19,6 +20,7 @@ interface ChatBubbleProps {
 
 export const ChatBubble = ({ post, isOwn, onDelete, onReply, isAdmin }: ChatBubbleProps) => {
   const { t, i18n } = useTranslation();
+  const { data: userIdentity } = useGetIdentity<User>();
   dayjs.locale(i18n.language);
 
   return (
@@ -119,7 +121,7 @@ export const ChatBubble = ({ post, isOwn, onDelete, onReply, isAdmin }: ChatBubb
                  <ChatBubble 
                     key={reply.id} 
                     post={{...reply, solvedBy: post.solvedBy}} 
-                    isOwn={isOwn} // In this context usually false for replies unless nested
+                    isOwn={reply.user?.id === userIdentity?.id} 
                     onDelete={onDelete} 
                     onReply={onReply} 
                     isAdmin={isAdmin} 
