@@ -1,19 +1,119 @@
 {
+  "attendance": {
+    "attendance": "الحضور",
+    "label": "الحضور"
+  },
+  "enrollments": {
+    "enrollments": "التسجيلات",
+    "label": "التسجيلات"
+  },
+  "project-groups": {
+    "project-groups": "مجموعات المشاريع",
+    "label": "مجموعات المشاريع"
+  },
+  "library": {
+    "library": "المكتبة العامة",
+    "label": "المكتبة العامة",
+    "title": "المكتبة العامة",
+    "description": "إدارة مجموعتك الشخصية من المصادر التعليمية.",
+    "searchPlaceholder": "البحث في الملفات...",
+    "addResource": "إضافة مورد",
+    "addToLibrary": "إضافة للمكتبة",
+    "uploadDesc": "قم برفع الملفات إلى مكتبتك الشخصية لإعادة استخدامها في فصولك.",
+    "resourceTitle": "عنوان المورد",
+    "optionalDesc": "وصف اختياري",
+    "noDescription": "لا يوجد وصف",
+    "emptyTitle": "المكتبة فارغة",
+    "emptyDesc": "ارفع الملفات هنا للوصول إليها من أي فصل.",
+    "deleteConfirm": "هل أنت متأكد من حذف هذا المورد؟",
+    "toasts": {
+      "fillRequired": "يرجى تقديم عنوان ورفع ملف.",
+      "added": "تمت إضافة المورد للمكتبة!",
+      "deleted": "تم حذف المورد.",
+      "error": "فشل إضافة المورد."
+    },
+    "accessDenied": "تم رفض الوصول",
+    "accessDeniedDesc": "عذراً، ليس لديك إذن للوصول إلى هذه الصفحة.",
+    "teacherOnly": "يمكن للمعلمين فقط إدارة المكتبة العامة."
+  },
+  "assignments": {
+    "assignments": "المهام والواجبات",
+    "label": "المهام والواجبات",
+    "list": {
+      "title": "التكليفات الأكاديمية",
+      "description": "تتبع وإدارة وتسليم مهامك الدراسية.",
+      "stats": {
+        "total": "إجمالي المهام",
+        "active": "قيد التنفيذ",
+        "overdue": "متأخرة"
+      },
+      "filters": {
+        "searchPlaceholder": "البحث في المهام...",
+        "active": "النشطة فقط"
+      },
+      "table": {
+        "pending": "في انتظار المراجعة"
+      },
+      "noAssignments": "لا توجد مهام حالياً",
+      "noAssignmentsDescriptionStudent": "لقد أنجزت كل شيء! لا توجد مهام جديدة لك في الوقت الحالي.",
+      "noAssignmentsDescriptionTeacher": "لم تقم بإنشاء أي مهام لهذا الفصل بعد.",
+      "deleteDialog": {
+        "title": "حذف المهمة؟",
+        "description": "هل أنت متأكد أنك تريد حذف هذه المهمة؟ سيؤدي ذلك إلى إزالة جميع تسليمات الطلاب نهائياً ولا يمكن التراجع عن هذا الإجراء."
+      }
+    }
+  },
+  "submissions": {
+    "submissions": "التسليمات",
+    "label": "التسليمات"
+  },
+  "modules": {
+    "modules": "الوحدات الدراسية",
+    "label": "الوحدات"
+  },
+  "quizzes": {
+    "quizzes": "الاختبارات",
+    "label": "الاختبارات"
+  },
   "ai-assistant": {
-    "ai-assistant": "مساعد الذكاء الاصطناعي"
+    "ai-assistant": "مساعد الذكاء الاصطناعي",
+    "label": "مساعد الذكاء الاصطناعي"
   },
   "ai-study-lab": {
-    "ai-study-lab": "مختبر الدراسة"
+    "ai-study-lab": "مختبر الدراسة",
+    "label": "مختبر الدراسة"
   },
   "study-planner": {
-    "study-planner": "مخطط الدراسة"
+    "study-planner": "مخطط الدراسة",
+    "label": "مخطط الدراسة"
+  },
+  "ai-activity-logs": {
+    "ai-activity-logs": "سجل الدراسة",
+    "label": "سجل الدراسة"
   },
   "app": {
     "title": "كلاس روم ذكي"
   },
   "Show": "عرض",
   "warnWhenUnsavedChanges": "You have unsaved changes. Are you sure you want to leave?",
+  "discovery": {
+    "label": "تلفزيون المعلم"
+  },
+  "teacher-channels": {
+    "teacher-channels": "تلفزيون المعلم",
+    "label": "تلفزيون المعلم"
+  },
+  "channels": {
+    "label": "تلفزيون المعلم",
+    "channels": "تلفزيون المعلم"
+  },
   "documentTitle": {
+    "channels": {
+      "list": "تلفزيون المعلم"
+    },
+    "teacher-channels": {
+      "list": "تلفزيون المعلم"
+    },
     "default": "Classroom AI",
     "suffix": " | Classroom AI",
     "dashboard": {
@@ -43,44 +143,29 @@
       "show": "نتائج الاختبار",
       "create": "إنشاء اختبار"
     },
-    "enrollments": {
-      "list": "طلبات الانضمام"
+    "modules": {
+      "list": "الوحدات الدراسية"
     },
-    "users": {
-      "list": "إدارة المستخدمين"
+    "resources": {
+      "list": "المصادر"
     },
-    "profile": {
-      "show": "الملف الشخصي"
+    "library": {
+      "list": "المكتبة العامة"
     },
-    "calendar": {
-      "list": "التقويم الأكاديمي",
-      "calendar": "التقويم"
-    },
-    "notifications": {
-      "list": "التنبيهات",
-      "notifications": "التنبيهات"
-    },
-    "messages": {
-      "list": "الرسائل",
-      "messages": "الرسائل"
-    },
-    "ai-assistant": {
-      "ai-assistant": "مساعد الذكاء الاصطناعي",
-      "list": "مساعد الذكاء الاصطناعي"
-    },
-    "ai-study-lab": {
-      "ai-study-lab": "مختبر الدراسة",
-      "list": "مختبر الدراسة"
-    },
-    "study-planner": {
-      "study-planner": "مخطط الدراسة",
-      "list": "مخطط الدراسة"
+    "submissions": {
+      "list": "التسليمات"
     },
     "attendance": {
       "list": "إدارة الحضور"
     },
+    "project-groups": {
+      "list": "مجموعات المشاريع"
+    },
     "portfolio": {
       "list": "ملف الطالب"
+    },
+    "ai-activity-logs": {
+      "list": "سجل الدراسة"
     }
   },
   "actions": {
@@ -181,11 +266,6 @@
     "aiAnalyzed": "تم التحليل بالذكاء الاصطناعي",
     "solved": "تم الحل",
     "happy": "سعيد",
-    "cases_zero": "لا توجد حالات",
-    "cases_one": "حالة واحدة",
-    "cases_two": "حالتان",
-    "cases_few": "{{count}} حالات",
-    "cases_many": "{{count}} حالة",
     "cases_other": "{{count}} حالة",
     "error": "حدث خطأ غير متوقع",
     "errorPage": {
@@ -247,6 +327,7 @@
     "create": "إنشاء",
     "show": "عرض",
     "tryAgain": "إعادة المحاولة",
+    "search": "بحث في السجل...",
     "uploadCredentials": "تحميل وثائق الإثبات",
     "dismiss": "تجاهل",
     "getStarted": "ابدأ الآن",
@@ -603,6 +684,15 @@
       "selfHealingDesc": "يقوم وكيل التنظيف بتحليل الملاحظات التربوية السلبية والاستثناءات التقنية كل 24 ساعة. يتم عرض تعديلات المطالبات المقترحة للمراجعة للحفاظ على النبرة المؤسسية.",
       "recursiveTitle": "التلخيص المتكرر",
       "recursiveDesc": "يتم تحديث ملفات تعريف الطلاب بناءً على نوافذ السياق المتغيرة. هذا يضمن \"ذاكرة لانهائية\" مع الحفاظ على تكاليف استنتاج منخفضة وأهمية استجابة عالية."
+    },
+    "history": {
+      "loading": "جاري تحميل السجل الخاص بك...",
+      "description": "راجع وقم بزيارة جلسات التعلم السابقة المدعومة بالذكاء الاصطناعي.",
+      "empty": {
+        "title": "لم يتم العثور على سجل",
+        "description": "لم تقم بحفظ أي جلسات دراسة بالذكاء الاصطناعي بعد. ابدأ باستكشاف مختبر الدراسة بالذكاء الاصطناعي!",
+        "cta": "اذهب لمختبر الدراسة"
+      }
     }
   },
   "studyPlanner": {
@@ -887,7 +977,7 @@
   },
   "resources": {
     "teacher-subscriptions": {
-      "label": "اشتراكات المعلمين"
+      "label": "المعلمون المتابعون"
     },
     "dashboard": {
       "label": "لوحة التحكم"
@@ -940,11 +1030,11 @@
     "modules": {
       "label": "الوحدات"
     },
-    "resources": {
-      "label": "المصادر"
-    },
     "library": {
       "label": "المكتبة العامة"
+    },
+    "progress": {
+      "label": "الرؤى"
     },
     "discussions": {
       "label": "النقاشات"
@@ -954,9 +1044,6 @@
     },
     "report-card": {
       "label": "الشهادة"
-    },
-    "progress": {
-      "label": "الرؤى"
     },
     "users": {
       "label": "المستخدمين"
@@ -973,11 +1060,23 @@
     "teacher-applications": {
       "label": "طلبات التدريس"
     },
+    "resources": {
+      "label": "المصادر"
+    },
     "activity-log": {
       "label": "سجل النشاط"
     },
     "teacher-channel": {
       "label": "قناتي"
+    },
+    "channels": {
+      "label": "تلفزيون المعلم"
+    },
+    "followed-teachers": {
+      "label": "المعلمون المتابعون"
+    },
+    "followed-teacher": {
+      "label": "معلم متابع"
     },
     "my-teachers": {
       "label": "معلميني"
@@ -1034,10 +1133,10 @@
     "noMembers": "لم يتم تعيين أعضاء",
     "createDialogTitle": "إنشاء مجموعة مشاريع جديدة",
     "createDialogDesc": "المجموعات مرتبطة بفصل معين. يمكنك إضافة أعضاء بعد إنشاء المجموعة.",
-    "groupName": "اسم المجموعة",
-    "groupNamePlaceholder": "مثال: فريق ألفا، المجموعة 1",
+    "groupName": "Group Name",
+    "groupNamePlaceholder": "e.g., Team Alpha, Group 1",
     "classLabel": "الفصل",
-    "selectClass": "اختر فصلاً",
+    "selectClass": "Select a class",
     "show": {
       "projectGroupFor": "مجموعة مشاريع لفصل:",
       "whiteboard": "لوحة المجموعة",
@@ -1045,9 +1144,9 @@
       "addMembers": "إضافة أعضاء",
       "addMembersTo": "إضافة أعضاء إلى {{name}}",
       "addMembersDesc": "اختر طلاباً من قائمة الفصل لإضافتهم لهذه المجموعة.",
-      "selectStudents": "اختر طلاباً...",
-      "noStudentsFound": "لم يتم العثور على طلاب.",
-      "studentsSelected": "تم اختيار {{count}} طالب/طلاب"
+      "selectStudents": "Select students...",
+      "noStudentsFound": "No students found.",
+      "studentsSelected": "{{count}} student(s) selected"
     },
     "toasts": {
       "fillFields": "يرجى ملء جميع الحقول",
@@ -1070,15 +1169,15 @@
     "avgScore": "متوسط الدرجة",
     "grade": "التقدير",
     "graded": "تم تقييم {{count}}",
-    "noData": "لا توجد بيانات للشهادة",
-    "noDataDesc": "لم نتمكن من العثور على أي سجلات أكاديمية للفصل الدراسي المختار.",
-    "noGradedCourses": "لا توجد مواد مقيمة",
-    "noGradedCoursesDesc": "لم تستلم أي درجات للفصل الدراسي المختار بعد. عد لاحقاً بمجرد تقييم تكليفاتك.",
-    "insights": "رؤى أكاديمية",
-    "topSubject": "أفضل مادة",
-    "termStanding": "الوضع الأكاديمي",
-    "instructorNote": "ملاحظة المعلم",
-    "deansList": "مرشح لقائمة العميد",
+    "noData": "No Report Data",
+    "noDataDesc": "We couldn't find any academic records for the selected term.",
+    "noGradedCourses": "No Graded Courses",
+    "noGradedCoursesDesc": "You haven't received any grades for the selected term yet. Check back once your assignments are marked.",
+    "insights": "Academic Insights",
+    "topSubject": "Top Subject",
+    "termStanding": "Term Standing",
+    "instructorNote": "Instructor Note",
+    "deansList": "Dean's List Candidate",
     "goodStanding": "وضع أكاديمى جيد",
     "noStanding": "لا يوجد وضع بعد",
     "defaultNote": "Your performance this term has been exceptional. Keep focusing on your core subjects to maintain this high GPA.",
@@ -1121,12 +1220,12 @@
   },
   "enrollments": {
     "title": "القبول والتسجيل",
-    "description": "إدارة طلبات الطلاب، وتوزيع الفصول، وحالة التسجيل.",
-    "enrollStudent": "تسجيل طالب",
+    "description": "Manage student applications, class placements, and enrollment status.",
+    "enrollStudent": "Enroll Student",
     "stats": {
-      "total": "إجمالي الطلبات",
-      "pending": "في انتظار الموافقة",
-      "active": "الطلاب النشطون"
+      "total": "Total Requests",
+      "pending": "Pending Approval",
+      "active": "Active Students"
     },
     "searchPlaceholder": "Search by student name or email...",
     "allStatus": "All Status",
@@ -1152,33 +1251,33 @@
     }
   },
   "discussions": {
-    "title": "مركز النقاشات",
-    "description": "تفاعل مع الطلاب والمعلمين في خيوط النقاش على مستوى الفصل.",
-    "start": "بدء نقاش",
+    "title": "Community Hub",
+    "description": "Engage with students and teachers in class-wide discussion threads.",
+    "start": "Start Discussion",
     "stats": {
-      "total": "إجمالي الخيوط",
-      "active": "نشط اليوم",
-      "replies": "إجمالي الردود"
+      "total": "Total Threads",
+      "active": "Active Today",
+      "replies": "Total Replies"
     },
-    "searchPlaceholder": "البحث في النقاشات بالمحتوى أو الكلمات المفتاحية...",
-    "filter": "فلتر المجتمع",
+    "searchPlaceholder": "Search discussions by content or keywords...",
+    "filter": "Community Filter",
     "empty": {
-      "title": "لم يتم العثور على نقاشات",
-      "desc": "ابدأ محادثة جديدة للتفاعل مع مجتمع فصلك."
+      "title": "No discussions found",
+      "desc": "Start a new conversation to engage with your class community."
     },
     "labels": {
-      "trending": "رائج",
-      "replies": "ردود",
-      "active": "نشط {{time}}",
-      "options": "خيارات الخيط",
-      "open": "فتح النقاش",
-      "follow": "متابعة الخيط"
+      "trending": "Trending",
+      "replies": "Replies",
+      "active": "Active {{time}}",
+      "options": "Thread Options",
+      "open": "Open Discussion",
+      "follow": "Follow Thread"
     }
   },
   "progressPage": {
     "title": "تقدم التعلم",
-    "description": "تتبع أداء الطالب وإكمال الوحدات والوضع الأكاديمي.",
-    "searchPlaceholder": "البحث باسم الطالب...",
+    "description": "Track student performance, module completion, and academic standing.",
+    "searchPlaceholder": "Search by student name...",
     "table": {
       "student": "الطالب",
       "class": "الفصل",
@@ -1189,7 +1288,7 @@
   },
   "teacherApps": {
     "title": "طلبات التدريس",
-    "description": "مراجعة وإدارة طلبات المعلمين لتدريس فصول محددة.",
+    "description": "Review and manage requests from educators to teach specific classes.",
     "searchPlaceholder": "Search applications...",
     "empty": {
       "title": "No applications found",
@@ -1207,7 +1306,7 @@
   },
   "teacherSubscriptions": {
     "title": "اشتراكات المعلمين",
-    "description": "إدارة اشتراكاتك النشطة ومعلومات الفوترة.",
+    "description": "Manage your active subscriptions and billing information.",
     "empty": {
       "title": "No Subscriptions Found",
       "description": "You don't have any active teacher subscriptions yet."
@@ -1281,10 +1380,10 @@
   },
   "portfolioPage": {
     "pageTitle": "ملف {{name}}",
-    "fallbackPageTitle": "ملف الطالب",
+    "fallbackPageTitle": "Student Portfolio",
     "loading": "جاري تجهيز الملف الأكاديمي...",
-    "notFound": "الطالب غير موجود",
-    "notFoundDesc": "الملف الذي تبحث عنه غير متاح.",
+    "notFound": "Student not found",
+    "notFoundDesc": "The portfolio you are looking for is unavailable.",
     "title": "Academic Portfolio",
     "description": "A comprehensive showcase of learning progress, achievements, and skills.",
     "level": "Level {{level}}",
@@ -1309,62 +1408,19 @@
     "unlockedAchievements": "Unlocked Achievements",
     "badgesEarned": "{{earned}} / {{total}} Earned"
   },
-  "portfolio": {
-    "portfolio": "ملف الطالب"
-  },
-  "myTeachers": {
-    "title": "معلميني",
-    "description": "Connect with your teachers and view their profiles.",
-    "empty": {
-      "title": "No Teachers Found",
-      "description": "You haven't connected with any teachers yet."
-    }
-  },
-  "settings": {
-    "title": "الإعدادات",
-    "description": "إدارة إعدادات حسابك وتفضيلاتك.",
-    "toasts": {
-      "success": "تم حفظ الإعدادات بنجاح!",
-      "error": "فشل حفظ الإعدادات."
-    },
-    "form": {
-      "title": "General Settings",
-      "description": "Update your general application settings.",
-      "enableAiFeatures": {
-        "label": "Enable AI Features",
-        "description": "Allow AI-powered features like the Study Lab and Magic Builder."
-      },
-      "defaultRegistrationRole": {
-        "label": "Default Registration Role",
-        "placeholder": "Select a role",
-        "description": "The default role assigned to new users upon registration."
-      },
-      "welcomeMessage": {
-        "label": "Welcome Message",
-        "placeholder": "Enter a welcome message",
-        "description": "A custom welcome message displayed to new users."
-      }
-    }
-  },
-  "tooltips": {
-    "magicBuilder": {
-      "title": "الباني السحري",
-      "description": "انقر هنا لترك الذكاء الاصطناعي ينشئ منهجك الدراسي بالكامل، بما في ذلك الملاحظات والاختبارات، تلقائياً."
-    }
-  },
   "help": {
     "common": {
-      "howTo": "دليل خطوة بخطوة",
-      "proTips": "نصائح الخبراء",
-      "stillStuck": "هل لا تزال لديك أسئلة؟",
+      "howTo": " Step-by-Step Guide",
+      "proTips": "Expert Tips",
+      "stillStuck": "Still have questions?",
       "aiChatDesc": "يمكن لمساعدنا الذكي شرح أي ميزة بالتفصيل.",
       "askAi": "اسأل مساعد جيميناي",
       "clickToTry": "اضغط للتجربة"
     },
     "pages": {
       "general": {
-        "title": "هل تحتاج مساعدة؟",
-        "description": "نحن هنا لمساعدتك في تحقيق أقصى استفادة من المنصة. استكشف الأدلة أدناه.",
+        "title": "Need Help?",
+        "description": "We're here to help you make the most of Tablawy OS. Explore the guides below.",
         "steps": [
           {
             "title": "تحقق من التنبيهات",
@@ -1376,13 +1432,35 @@
           }
         ],
         "tips": [
-          "يمكنك تغيير اللغة في أي وقت من الشريط العلوي.",
-          "نقاط الخبرة (XP) الخاصة بك تظهر دائماً في الأعلى."
+          "تغيير لغتك في أي وقت من خلال الجزء العلوي.",
+          "تقدم XP الخاص بك مرئي دائمًا في الأعلى."
+        ]
+      },
+      "studyLab": {
+        "title": "مختبر الدراسة",
+        "description": "Master any topic with your private AI-powered learning space.",
+        "steps": [
+          {
+            "title": "اختر أداة",
+            "description": "Choose between Explain, Quiz, Summarize, or Flashcards based on your goal."
+          },
+          {
+            "title": "Provide Context",
+            "description": "Paste your notes or type a specific topic to let Gemini analyze it."
+          },
+          {
+            "title": "Active Recall",
+            "description": "Use the generated flashcards or quizzes to test your knowledge and earn XP."
+          }
+        ],
+        "tips": [
+          "Summarize long text first to get the key points before generating quizzes.",
+          "Flashcards use Spaced Repetition to help you remember longer."
         ]
       },
       "classHub": {
         "title": "إدارة الفصل",
-        "description": "مرحباً بك في مركز قيادة فصلك. هنا يمكنك إدارة الطلاب، المنهج الدراسي، والتكليفات.",
+        "description": "Welcome to your class command center. Here you can manage students, curriculum, and assignments.",
         "steps": [
           {
             "title": "إضافة الطلاب",
@@ -1394,112 +1472,112 @@
           },
           {
             "title": "تتبع التقدم",
-            "description": "راقب تفاعل الطلاب وقم بتقييم التسليمات في الوقت الفعلي."
+            "description": "Monitor student engagement and grade submissions in real-time."
           }
         ],
         "tips": [
-          "يمكنك استخدام البناء السحري لإنشاء مسودات الوحدات فوراً.",
-          "قم بتثبيت الإعلانات المهمة لإبقائها في أعلى القائمة."
+          "You can use the Magic Builder to generate module drafts instantly.",
+          "Pin important announcements to keep them at the top of the feed."
         ]
       },
       "dashboard": {
-        "title": "مركز لوحة التحكم",
-        "description": "هذا هو مركز القيادة الأكاديمي الخاص بك. إليك كيفية استخدامه:",
+        "title": "Dashboard Hub",
+        "description": "This is your academic command center. Here's how to use it:",
         "steps": [
           {
             "title": "أداة 'ماذا بعد؟'",
-            "description": "تحقق من البطاقات في الأعلى للمهام العاجلة مثل التقييم أو التكليفات."
+            "description": "Check the cards at the top for urgent tasks like grading or assignments."
           },
           {
-            "title": "تتبع التقدم",
-            "description": "انزل للأسفل لرؤية مخططات رحلتك الأكاديمية والنشاط الأخير."
+            "title": "Track Progress",
+            "description": "Scroll down to see your academic journey charts and recent activity."
           }
         ],
         "tips": [
-          "قسم 'طلاب متعثرون' على اليمين يتم ترتيبه بواسطة الذكاء الاصطناعي.",
-          "انقر على أي عنصر في سجل النشاط للذهاب مباشرة إلى ذلك المورد."
+          "The 'At-Risk' section on the right is prioritized by AI.",
+          "Click any activity log item to go directly to that resource."
         ]
       },
       "classCurriculum": {
         "title": "إدارة المنهج الدراسي",
-        "description": "نظم دروسك في وحدات ومواد تعليمية.",
+        "description": "Organize your lessons into modules and materials.",
         "steps": [
           {
-            "title": "إنشاء وحدة",
-            "description": "انقر على 'إضافة وحدة' لبدء فصل جديد أو قسم لموضوع معين.",
+            "title": "Create a Module",
+            "description": "Click 'Add Module' to start a new chapter or topic section.",
             "actionId": "guide-add-module"
           },
           {
             "title": "استخدام الباني السحري",
-            "description": "استخدم أيقونة 'العصا' البنفسجية لإنشاء منهج كامل تلقائياً.",
+            "description": "Use the purple 'Wand' icon to generate an entire curriculum automatically.",
             "actionId": "guide-magic-builder"
           }
         ],
         "tips": [
-          "يمكنك سحب وإفلات الوحدات لإعادة ترتيبها.",
-          "حدد العناصر كـ 'مسودة' لإخفائها عن الطلاب حتى تصبح جاهزة."
+          "You can drag and drop modules to reorder them.",
+          "Mark items as 'Draft' to hide them from students until they are ready."
         ]
       },
       "createAssignment": {
-        "title": "إنشاء المهام",
-        "description": "صمم تكليفات تفاعلية لطلابك.",
+        "title": "Creating Tasks",
+        "description": "Design engaging assignments for your students.",
         "steps": [
           {
             "title": "وضع معايير التقييم",
-            "description": "أضف معايير التقييم (مثل القواعد، المنطق) ليعرف الطلاب ما هو متوقع."
+            "description": "Add grading criteria (e.g., Grammar, Logic) so students know what to expect."
           },
           {
-            "title": "مساعد الذكاء الاصطناعي",
-            "description": "استخدم مساعد الكتابة لعمل مسودة للتعليمات بناءً على موضوعك."
+            "title": "AI Assistant",
+            "description": "Use the AI writing assistant to draft instructions based on your topic."
           },
           {
             "title": "نشر المهمة",
-            "description": "بمجرد الجاهزية، اضغط على الزر الرئيسي لتنبيه جميع الطلاب.",
+            "description": "Once ready, click the main button to notify all students.",
             "actionId": "guide-publish-assignment"
           }
         ],
         "tips": [
-          "تحديد موعد نهائي واضح يساعد الطلاب على ترتيب أولوياتهم.",
-          "أرفق مواد مرجعية لمساعدة الطلاب في إكمال المهمة."
+          "Setting a clear deadline helps students prioritize their work.",
+          "Attach reference materials to help students complete the task."
         ]
       },
       "classAttendance": {
         "title": "تتبع الحضور",
-        "description": "راقب وسجل حضور الطلاب في صفك الدراسي.",
+        "description": "Monitor and record student presence in your classroom.",
         "steps": [
           {
-            "title": "التحضير اليدوي",
-            "description": "انقر على أيقونة الحالة بجانب اسم الطالب للتبديل بين حاضر، غائب، أو متأخر."
+            "title": "Manual Marking",
+            "description": "Click the status icon next to a student's name to toggle between Present, Absent, or Late."
           },
           {
-            "title": "تسجيل الحضور عبر QR",
-            "description": "ابدأ جلسة QR للسماح للطلاب بتسجيل حضورهم باستخدام هواتفهم."
+            "title": "QR Check-in",
+            "description": "Start a QR session to let students mark themselves present using their phones."
           },
           {
-            "title": "تصدير التقارير",
-            "description": "استخدم زر التصدير لتحميل كشف حضور كامل للفصل الدراسي."
+            "title": "Export Reports",
+            "description": "Use the export button to download a full attendance sheet for the term."
           }
         ],
         "tips": [
-          "جلسات QR محدودة بوقت لضمان الأمان.",
+          "QR sessions are time-limited for security.",
           "يمكنك إضافة ملاحظات لأي سجل حضور للرجوع إليها لاحقاً."
         ]
       },
       "quizzes": {
         "title": "الاختبارات والتقييمات",
-        "description": "اختبر المعرفة باستخدام اختبارات تفاعلية مدعومة بالذكاء الاصطناعي.",
+        "description": "Test knowledge with interactive AI-powered quizzes.",
         "steps": [
           {
             "title": "الإنشاء بالذكاء الاصطناعي",
-            "description": "ألصق ملاحظات درسك واترك الذكاء الاصطناعي ينشئ أسئلة اختيار من متعدد فوراً."
+            "description": "Paste your lesson notes and let AI create multiple-choice questions instantly."
           },
           {
-            "title": "مراجعة النتائج",
-            "description": "اطلع على تحليل مفصل للأسئلة التي واجه الطلاب فيها أكبر صعوبة."
+            "title": "Review Results",
+            "description": "See a detailed breakdown of which questions students struggled with most."
           }
         ],
         "tips": [
-          "فعل خيار ترتيب الأسئلة العشوائي لمنع الطلاب من رؤية نفس الترتيب.",
+          "Shuffle questions to prevent students from seeing the same order.",
           "أضف تفسيرات لكل سؤال لمساعدة الطلاب على التعلم من أخطائهم."
         ]
       },
@@ -1509,11 +1587,11 @@
         "steps": [
           {
             "title": "الرفع لمرة واحدة",
-            "description": "ارفع ملفاً لمكتبتك لاستخدامه في أي من صفوفك دون الحاجة لإعادة الرفع."
+            "description": "Upload a file to your library to use it in any of your classes without re-uploading."
           },
           {
             "title": "التنظيم حسب الموضوع",
-            "description": "أضف أوصافاً لمواردك لتجدها بسهولة لاحقاً."
+            "description": "Add descriptions to your resources to find them easily later."
           }
         ],
         "tips": [
@@ -1527,7 +1605,7 @@
     "levelUp": "ارتقاء في المستوى!",
     "newBadge": "تم فتح وسام جديد!",
     "badges": {
-      "juniorTeacher": "حل المعلم الناشئ"
+      "juniorTeacher": "Junior Teacher Solution"
     }
   }
 }

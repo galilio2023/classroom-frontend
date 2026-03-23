@@ -81,11 +81,15 @@ const resourceFilterMappings: Record<string, Record<string, string>> = {
   progress: { classId: "classId", userId: "userId" },
   "users/children": { parentId: "parentId" },
   "teacher-applications": { status: "status", teacherId: "teacherId", classId: "classId" },
+  channels: { headline: "headline", teacherId: "teacherId" },
 };
 
 export const dataProvider: DataProvider = {
   getList: async ({ resource, pagination, filters, sorters }) => {
     let urlPath = resource;
+    if (resource === "teacher-channels") urlPath = "channels";
+    if (resource === "teacher-subscriptions") urlPath = "enrollments";
+    
     const url = new URL(`${BACKEND_BASE_URL}/${urlPath}`);
 
     // Pagination: Map to _start and _end for backend compatibility
@@ -145,7 +149,11 @@ export const dataProvider: DataProvider = {
   },
 
   getOne: async ({ resource, id }) => {
-    const url = `${BACKEND_BASE_URL}/${resource}/${id}`;
+    let urlPath = resource;
+    if (resource === "teacher-channels") urlPath = "channels";
+    if (resource === "teacher-subscriptions") urlPath = "enrollments";
+
+    const url = `${BACKEND_BASE_URL}/${urlPath}/${id}`;
     const response = await fetcher(url);
 
     if (!response.ok) {
@@ -159,7 +167,11 @@ export const dataProvider: DataProvider = {
   },
 
   create: async ({ resource, variables }) => {
-    const url = `${BACKEND_BASE_URL}/${resource}`;
+    let urlPath = resource;
+    if (resource === "teacher-channels") urlPath = "channels";
+    if (resource === "teacher-subscriptions") urlPath = "enrollments";
+
+    const url = `${BACKEND_BASE_URL}/${urlPath}`;
     const response = await fetcher(url, {
       method: "POST",
       body: JSON.stringify(variables),
@@ -176,7 +188,11 @@ export const dataProvider: DataProvider = {
   },
 
   update: async ({ resource, id, variables }) => {
-    const url = `${BACKEND_BASE_URL}/${resource}/${id}`;
+    let urlPath = resource;
+    if (resource === "teacher-channels") urlPath = "channels";
+    if (resource === "teacher-subscriptions") urlPath = "enrollments";
+
+    const url = `${BACKEND_BASE_URL}/${urlPath}/${id}`;
     const response = await fetcher(url, {
       method: "PATCH",
       body: JSON.stringify(variables),
@@ -193,7 +209,11 @@ export const dataProvider: DataProvider = {
   },
 
   deleteOne: async ({ resource, id }) => {
-    const url = `${BACKEND_BASE_URL}/${resource}/${id}`;
+    let urlPath = resource;
+    if (resource === "teacher-channels") urlPath = "channels";
+    if (resource === "teacher-subscriptions") urlPath = "enrollments";
+
+    const url = `${BACKEND_BASE_URL}/${urlPath}/${id}`;
     const response = await fetcher(url, {
       method: "DELETE",
     });
@@ -211,7 +231,11 @@ export const dataProvider: DataProvider = {
   getApiUrl: () => BACKEND_BASE_URL,
 
   getMany: async ({ resource, ids }) => {
-    const url = new URL(`${BACKEND_BASE_URL}/${resource}`);
+    let urlPath = resource;
+    if (resource === "teacher-channels") urlPath = "channels";
+    if (resource === "teacher-subscriptions") urlPath = "enrollments";
+
+    const url = new URL(`${BACKEND_BASE_URL}/${urlPath}`);
     ids.forEach((id) => {
       url.searchParams.append("id", String(id));
     });

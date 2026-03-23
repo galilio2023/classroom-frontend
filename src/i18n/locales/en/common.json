@@ -1,19 +1,119 @@
 {
+  "attendance": {
+    "attendance": "Attendance",
+    "label": "Attendance"
+  },
+  "enrollments": {
+    "enrollments": "Enrollments",
+    "label": "Enrollments"
+  },
+  "project-groups": {
+    "project-groups": "Project Groups",
+    "label": "Project Groups"
+  },
+  "library": {
+    "library": "Global Library",
+    "label": "Global Library",
+    "title": "Global Library",
+    "description": "Manage your personal collection of teaching resources.",
+    "searchPlaceholder": "Search files...",
+    "addResource": "Add Resource",
+    "addToLibrary": "Add to Library",
+    "uploadDesc": "Upload files to your personal library for reuse across classes.",
+    "resourceTitle": "Resource Title",
+    "optionalDesc": "Optional description",
+    "noDescription": "No description",
+    "emptyTitle": "Library is Empty",
+    "emptyDesc": "Upload files here to access them from any class.",
+    "deleteConfirm": "Are you sure you want to delete this resource?",
+    "toasts": {
+      "fillRequired": "Please provide a title and upload a file.",
+      "added": "Resource added to library!",
+      "deleted": "Resource deleted.",
+      "error": "Failed to add resource."
+    },
+    "accessDenied": "Access Denied",
+    "accessDeniedDesc": "Sorry, you do not have permission to access this page.",
+    "teacherOnly": "Only teachers can manage the Global Library."
+  },
+  "assignments": {
+    "assignments": "Assignments",
+    "label": "Assignments",
+    "list": {
+      "title": "Academic Assignments",
+      "description": "Track, manage, and submit your coursework tasks.",
+      "stats": {
+        "total": "Total Tasks",
+        "active": "In Progress",
+        "overdue": "Overdue"
+      },
+      "filters": {
+        "searchPlaceholder": "Search tasks...",
+        "active": "Active Only"
+      },
+      "table": {
+        "pending": "Pending Review"
+      },
+      "noAssignments": "No Assignments Found",
+      "noAssignmentsDescriptionStudent": "You're all caught up! There are no assignments for you at the moment.",
+      "noAssignmentsDescriptionTeacher": "You haven't created any assignments for this class yet.",
+      "deleteDialog": {
+        "title": "Delete Assignment?",
+        "description": "Are you sure you want to delete this assignment? This will permanently remove all student submissions and cannot be undone."
+      }
+    }
+  },
+  "submissions": {
+    "submissions": "Submissions",
+    "label": "Submissions"
+  },
+  "modules": {
+    "modules": "Modules",
+    "label": "Modules"
+  },
+  "quizzes": {
+    "quizzes": "Quizzes",
+    "label": "Quizzes"
+  },
   "ai-assistant": {
-    "ai-assistant": "AI Assistant"
+    "ai-assistant": "AI Assistant",
+    "label": "AI Assistant"
   },
   "ai-study-lab": {
-    "ai-study-lab": "AI Study Lab"
+    "ai-study-lab": "AI Study Lab",
+    "label": "AI Study Lab"
   },
   "study-planner": {
-    "study-planner": "AI Study Planner"
+    "study-planner": "AI Study Planner",
+    "label": "AI Study Planner"
+  },
+  "ai-activity-logs": {
+    "ai-activity-logs": "Study History",
+    "label": "Study History"
   },
   "app": {
     "title": "Classroom AI"
   },
   "Show": "Show",
   "warnWhenUnsavedChanges": "You have unsaved changes. Are you sure you want to leave?",
+  "discovery": {
+    "label": "Teacher TV"
+  },
+  "teacher-channels": {
+    "teacher-channels": "Teacher TV",
+    "label": "Teacher TV"
+  },
+  "channels": {
+    "label": "Teacher TV",
+    "channels": "Teacher TV"
+  },
   "documentTitle": {
+    "channels": {
+      "list": "Teacher TV"
+    },
+    "teacher-channels": {
+      "list": "Teacher TV"
+    },
     "default": "Classroom AI",
     "suffix": " | Classroom AI",
     "dashboard": {
@@ -43,44 +143,29 @@
       "show": "Quiz Results",
       "create": "Create Quiz"
     },
-    "enrollments": {
-      "list": "Enrollments"
+    "modules": {
+      "list": "Modules"
     },
-    "users": {
-      "list": "User Governance"
+    "resources": {
+      "list": "Lessons"
     },
-    "profile": {
-      "show": "User Profile"
+    "library": {
+      "list": "Global Library"
     },
-    "calendar": {
-      "list": "Academic Calendar",
-      "calendar": "Calendar"
-    },
-    "notifications": {
-      "list": "Notifications",
-      "notifications": "Notifications"
-    },
-    "messages": {
-      "list": "Messages",
-      "messages": "Messages"
-    },
-    "ai-assistant": {
-      "ai-assistant": "AI Assistant",
-      "list": "AI Assistant"
-    },
-    "ai-study-lab": {
-      "ai-study-lab": "AI Study Lab",
-      "list": "AI Study Lab"
-    },
-    "study-planner": {
-      "study-planner": "AI Study Planner",
-      "list": "AI Study Planner"
+    "submissions": {
+      "list": "Submissions"
     },
     "attendance": {
       "list": "Attendance Governance"
     },
+    "project-groups": {
+      "list": "Project Groups"
+    },
     "portfolio": {
       "list": "Student Portfolio"
+    },
+    "ai-activity-logs": {
+      "list": "Study History"
     }
   },
   "actions": {
@@ -175,14 +260,12 @@
       "id": "Certificate ID: {{id}}",
       "passed": "PASSED"
     },
-    "cases": "Cases",
     "liveData": "Live Data",
     "studentPerformance": "Student Performance",
     "aiAnalyzed": "AI Analyzed",
     "solved": "Solved",
     "happy": "Happy",
-    "cases": "Case",
-    "cases_other": "Cases",
+    "cases_other": "{{count}} cases",
     "error": "An unexpected error occurred",
     "errorPage": {
       "title": "404",
@@ -243,6 +326,7 @@
     "create": "Create",
     "show": "Show",
     "tryAgain": "Try Again",
+    "search": "Search history...",
     "uploadCredentials": "Upload Credentials",
     "dismiss": "Dismiss",
     "getStarted": "Get Started",
@@ -580,6 +664,14 @@
       },
       "context": {
         "label": "Study Context"
+      },
+      "history": {
+        "description": "Review and revisit your previous AI-powered learning sessions.",
+        "empty": {
+          "title": "No history found",
+          "description": "You haven't saved any AI study sessions yet. Start exploring the AI Study Lab!",
+          "cta": "Go to Study Lab"
+        }
       }
     },
     "governance": {
@@ -599,6 +691,15 @@
       "selfHealingDesc": "The Janitor Agent analyzes negative pedagogical feedback and technical exceptions every 24 hours. Suggested prompt adjustments are staged for review to maintain institutional tone control.",
       "recursiveTitle": "Recursive Summarization",
       "recursiveDesc": "Student personas are updated based on rolling context windows. This ensures \"Infinite Memory\" while keeping inference costs low and response relevance high."
+    },
+    "history": {
+      "loading": "Loading your history...",
+      "description": "Review and revisit your previous AI-powered learning sessions.",
+      "empty": {
+        "title": "No history found",
+        "description": "You haven't saved any AI study sessions yet. Start exploring the AI Study Lab!",
+        "cta": "Go to Study Lab"
+      }
     }
   },
   "studyPlanner": {
@@ -936,11 +1037,11 @@
     "modules": {
       "label": "Modules"
     },
-    "resources": {
-      "label": "Resources"
-    },
     "library": {
       "label": "Global Library"
+    },
+    "progress": {
+      "label": "Insights"
     },
     "discussions": {
       "label": "Discussions"
@@ -950,9 +1051,6 @@
     },
     "report-card": {
       "label": "Report Card"
-    },
-    "progress": {
-      "label": "Insights"
     },
     "users": {
       "label": "Users"
@@ -969,11 +1067,23 @@
     "teacher-applications": {
       "label": "Teacher Apps"
     },
+    "resources": {
+      "label": "Lessons"
+    },
     "activity-log": {
       "label": "Activity Log"
     },
     "teacher-channel": {
       "label": "My Channel"
+    },
+    "channels": {
+      "label": "Teacher TV"
+    },
+    "followed-teachers": {
+      "label": "Followed Teachers"
+    },
+    "followed-teacher": {
+      "label": "Followed Teacher"
     },
     "my-teachers": {
       "label": "My Teachers"
@@ -1305,49 +1415,6 @@
     "unlockedAchievements": "Unlocked Achievements",
     "badgesEarned": "{{earned}} / {{total}} Earned"
   },
-  "portfolio": {
-    "portfolio": "Portfolio"
-  },
-  "myTeachers": {
-    "title": "My Teachers",
-    "description": "Connect with your teachers and view their profiles.",
-    "empty": {
-      "title": "No Teachers Found",
-      "description": "You haven't connected with any teachers yet."
-    }
-  },
-  "settings": {
-    "title": "Settings",
-    "description": "Manage your account settings and preferences.",
-    "toasts": {
-      "success": "Settings saved successfully!",
-      "error": "Failed to save settings."
-    },
-    "form": {
-      "title": "General Settings",
-      "description": "Update your general application settings.",
-      "enableAiFeatures": {
-        "label": "Enable AI Features",
-        "description": "Allow AI-powered features like the Study Lab and Magic Builder."
-      },
-      "defaultRegistrationRole": {
-        "label": "Default Registration Role",
-        "placeholder": "Select a role",
-        "description": "The default role assigned to new users upon registration."
-      },
-      "welcomeMessage": {
-        "label": "Welcome Message",
-        "placeholder": "Enter a welcome message",
-        "description": "A custom welcome message displayed to new users."
-      }
-    }
-  },
-  "tooltips": {
-    "magicBuilder": {
-      "title": "AI Magic Builder",
-      "description": "Click here to let AI generate your entire lesson curriculum, including notes and quizzes, automatically."
-    }
-  },
   "help": {
     "common": {
       "howTo": "Step-by-Step Guide",
@@ -1374,6 +1441,28 @@
         "tips": [
           "Change your language anytime in the top header.",
           "Your XP progress is always visible at the top."
+        ]
+      },
+      "studyLab": {
+        "title": "AI Study Lab",
+        "description": "Master any topic with your private AI-powered learning space.",
+        "steps": [
+          {
+            "title": "Pick a Tool",
+            "description": "Choose between Explain, Quiz, Summarize, or Flashcards based on your goal."
+          },
+          {
+            "title": "Provide Context",
+            "description": "Paste your notes or type a specific topic to let Gemini analyze it."
+          },
+          {
+            "title": "Active Recall",
+            "description": "Use the generated flashcards or quizzes to test your knowledge and earn XP."
+          }
+        ],
+        "tips": [
+          "Summarize long text first to get the key points before generating quizzes.",
+          "Flashcards use Spaced Repetition to help you remember longer."
         ]
       },
       "classHub": {

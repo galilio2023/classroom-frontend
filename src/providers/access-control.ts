@@ -25,7 +25,7 @@ export const accessControlProvider: AccessControlProvider = {
         "classes", "assignments", "quizzes", "modules", "resources", "academic-terms",
         "subjects", "attendance", "submissions", "enrollments", "announcements",
         "teacher-subscriptions", "teacher-applications", "discussions", "calendar",
-        "notifications", "progress", "report-card", "portfolio", "messages", "my-teachers"
+        "notifications", "progress", "report-card", "portfolio", "messages", "my-teachers", "channels"
       ];
 
       if (adminAllowedResources.includes(resourceName)) {
@@ -112,7 +112,7 @@ export const accessControlProvider: AccessControlProvider = {
         "attendance", "submissions", "quizzes", "resources",
         "modules", "ai-study-lab", "study-planner", "notifications", "progress",
         "report-card", "portfolio", "messages", "users",
-        "teacher-subscriptions", "my-teachers", "teacher-channels", "project-groups", "library", "enrollments"
+        "teacher-subscriptions", "my-teachers", "teacher-channels", "project-groups", "library", "enrollments", "ai-activity-logs"
       ];
 
       if (!studentAllowed.includes(resourceName)) return { can: false };

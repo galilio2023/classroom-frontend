@@ -70,12 +70,12 @@ export const resources: ResourceProps[] = [
   { name: "progress", list: "/progress", meta: { group: "groups.progress", label: "resources.progress.label", icon: <TrendingUp />, roles: [UserRole.TEACHER, UserRole.STUDENT] } },
 
   // --- STUDENT HUB ---
-  { name: "my-teachers", list: "/my-teachers", meta: { group: "groups.student-hub", label: "resources.my-teachers.label", icon: <GraduationCap />, roles: [UserRole.STUDENT] } }, 
-  { name: "teacher-subscriptions", list: "/teacher/subscriptions", meta: { group: "groups.student-hub", label: "resources.followed-teachers.label", icon: <UserPlus />, roles: [UserRole.STUDENT] } },
+  { name: "my-teachers", list: "/my-teachers", meta: { group: "groups.student-hub", label: "resources.my-teachers.label", icon: <GraduationCap />, roles: [UserRole.STUDENT] } },
+  { name: "teacher-subscriptions", list: "/enrollments", meta: { group: "groups.student-hub", label: "resources.followed-teachers.label", icon: <UserPlus />, roles: [UserRole.STUDENT] } },
   { name: "teacher-channels", list: "/discovery", meta: { group: "groups.student-hub", label: "resources.discovery.label", icon: <Tv />, roles: [UserRole.STUDENT] } },
-
   // --- TEACHER HUB ---
   { name: "teacher-channel", list: "/teacher/channel", meta: { group: "groups.teacher-hub", label: "resources.teacher-channel.label", icon: <Tv />, roles: [UserRole.TEACHER] } }, 
+
   
   // --- ADMINISTRATION ---
   { name: "users", list: "/users", create: "/users/create", edit: "/users/edit/:id", show: "/users/show/:id", meta: { group: "groups.admin", label: "resources.users.label", icon: <ShieldCheck />, roles: [UserRole.ADMIN] } },

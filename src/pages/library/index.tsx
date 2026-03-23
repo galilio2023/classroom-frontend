@@ -129,20 +129,6 @@ const GlobalLibraryPage = () => {
 
   const isTeacherOrAdmin = identity?.role === UserRole.TEACHER || identity?.role === UserRole.ADMIN;
 
-  if (!isTeacherOrAdmin) {
-      return (
-          <div className="container mx-auto py-32 text-center space-y-8">
-              <div className="p-8 rounded-[2.5rem] bg-destructive/5 text-destructive w-fit mx-auto border border-destructive/10">
-                <FolderOpen className="h-20 w-20" />
-              </div>
-              <div className="space-y-3">
-                <h2 className="text-4xl font-black tracking-tight">{t("library.accessDenied")}</h2>
-                <p className="text-muted-foreground font-medium max-w-md mx-auto text-lg">{t("library.teacherOnly")}</p>
-              </div>
-          </div>
-      );
-  }
-
   return (
     <div className="space-y-8 md:space-y-12 pb-20">
       {/* Header Section */}
@@ -165,67 +151,69 @@ const GlobalLibraryPage = () => {
             </p>
           </div>
         </div>
-        <div className="w-full md:w-auto">
-            <Dialog open={isUploadOpen} onOpenChange={setUploadOpen}>
-                <DialogTrigger asChild>
-                    <Button size="lg" className="w-full md:w-auto rounded-2xl h-12 md:h-14 px-10 font-bold uppercase tracking-widest text-[10px] gap-2 shadow-lg shadow-primary/25 hover:translate-y-[-2px] transition-all">
-                        <Plus className="h-5 w-5" /> {t("library.addResource")}
-                    </Button>
-                </DialogTrigger>
-                <DialogContent className="rounded-[2.5rem] border-none shadow-2xl bg-card/95 backdrop-blur-xl max-w-lg p-0 overflow-hidden text-start">
-                    <div className="p-8 md:p-12 space-y-8">
-                        <DialogHeader className="space-y-4 text-start">
-                            <div className="p-5 rounded-2xl bg-primary/10 text-primary w-fit mx-auto">
-                                <Plus className="h-10 w-10" />
-                            </div>
-                            <div className="space-y-2 text-center">
-                                <DialogTitle className="text-3xl font-black tracking-tight">{t("library.addToLibrary")}</DialogTitle>
-                                <DialogDescription className="font-medium text-base text-muted-foreground">{t("library.uploadDesc")}</DialogDescription>
-                            </div>
-                        </DialogHeader>
-                        <div className="space-y-6">
-                            <div className="space-y-3">
-                                <Label htmlFor="title" className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ms-2">{t("library.resourceTitle")}</Label>
-                                <Input 
-                                    id="title" 
-                                    placeholder={t("library.resourceTitle")} 
-                                    value={title}
-                                    onChange={(e) => setTitle(e.target.value)}
-                                    className="h-16 rounded-3xl bg-muted/30 border-none shadow-inner px-8 text-lg font-black"
-                                />
-                            </div>
-                            <div className="space-y-3">
-                                <Label htmlFor="description" className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ms-2">{t("common.description")}</Label>
-                                <Input 
-                                    id="description" 
-                                    placeholder={t("library.optionalDesc")} 
-                                    value={description}
-                                    onChange={(e) => setDescription(e.target.value)}
-                                    className="h-16 rounded-3xl bg-muted/30 border-none shadow-inner px-8 font-bold"
-                                />
-                            </div>
-                            <div className="space-y-3">
-                                <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ms-2">{t("common.upload.label")}</Label>
-                                <div className="p-1 rounded-[2rem] bg-muted/30 shadow-inner">
-                                    <FileUpload 
-                                        label={t("common.upload.label")}
-                                        folder="library"
-                                        onUploadSuccess={handleUploadSuccess}
+        {isTeacherOrAdmin && (
+            <div className="w-full md:w-auto">
+                <Dialog open={isUploadOpen} onOpenChange={setUploadOpen}>
+                    <DialogTrigger asChild>
+                        <Button size="lg" className="w-full md:w-auto rounded-2xl h-12 md:h-14 px-10 font-bold uppercase tracking-widest text-[10px] gap-2 shadow-lg shadow-primary/25 hover:translate-y-[-2px] transition-all">
+                            <Plus className="h-5 w-5" /> {t("library.addResource")}
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent className="rounded-[2.5rem] border-none shadow-2xl bg-card/95 backdrop-blur-xl max-w-lg p-0 overflow-hidden text-start">
+                        <div className="p-8 md:p-12 space-y-8">
+                            <DialogHeader className="space-y-4 text-start">
+                                <div className="p-5 rounded-2xl bg-primary/10 text-primary w-fit mx-auto">
+                                    <Plus className="h-10 w-10" />
+                                </div>
+                                <div className="space-y-2 text-center">
+                                    <DialogTitle className="text-3xl font-black tracking-tight">{t("library.addToLibrary")}</DialogTitle>
+                                    <DialogDescription className="font-medium text-base text-muted-foreground">{t("library.uploadDesc")}</DialogDescription>
+                                </div>
+                            </DialogHeader>
+                            <div className="space-y-6">
+                                <div className="space-y-3">
+                                    <Label htmlFor="title" className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ms-2">{t("library.resourceTitle")}</Label>
+                                    <Input 
+                                        id="title" 
+                                        placeholder={t("library.resourceTitle")} 
+                                        value={title}
+                                        onChange={(e) => setTitle(e.target.value)}
+                                        className="h-16 rounded-3xl bg-muted/30 border-none shadow-inner px-8 text-lg font-black"
                                     />
                                 </div>
+                                <div className="space-y-3">
+                                    <Label htmlFor="description" className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ms-2">{t("common.description")}</Label>
+                                    <Input 
+                                        id="description" 
+                                        placeholder={t("library.optionalDesc")} 
+                                        value={description}
+                                        onChange={(e) => setDescription(e.target.value)}
+                                        className="h-16 rounded-3xl bg-muted/30 border-none shadow-inner px-8 font-bold"
+                                    />
+                                </div>
+                                <div className="space-y-3">
+                                    <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ms-2">{t("common.upload.label")}</Label>
+                                    <div className="p-1 rounded-[2rem] bg-muted/30 shadow-inner">
+                                        <FileUpload 
+                                            label={t("common.upload.label")}
+                                            folder="library"
+                                            onUploadSuccess={handleUploadSuccess}
+                                        />
+                                    </div>
+                                </div>
                             </div>
+                            <DialogFooter className="flex-col sm:flex-row gap-3 pt-4">
+                                <Button variant="ghost" className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-8 order-2 sm:order-1" onClick={() => setUploadOpen(false)}>{t("buttons.cancel")}</Button>
+                                <Button onClick={handleCreate} disabled={isCreating || !fileUrl} size="lg" className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-12 shadow-xl shadow-primary/20 order-1 sm:order-2">
+                                    {isCreating ? <Loader2 className="me-3 h-5 w-5 animate-spin" /> : <Plus className="h-5 w-5 me-3" />}
+                                    {t("library.addToLibrary")}
+                                </Button>
+                            </DialogFooter>
                         </div>
-                        <DialogFooter className="flex-col sm:flex-row gap-3 pt-4">
-                            <Button variant="ghost" className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-8 order-2 sm:order-1" onClick={() => setUploadOpen(false)}>{t("buttons.cancel")}</Button>
-                            <Button onClick={handleCreate} disabled={isCreating || !fileUrl} size="lg" className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-12 shadow-xl shadow-primary/20 order-1 sm:order-2">
-                                {isCreating ? <Loader2 className="me-3 h-5 w-5 animate-spin" /> : <Plus className="h-5 w-5 me-3" />}
-                                {t("library.addToLibrary")}
-                            </Button>
-                        </DialogFooter>
-                    </div>
-                </DialogContent>
-            </Dialog>
-        </div>
+                    </DialogContent>
+                </Dialog>
+            </div>
+        )}
       </motion.div>
 
       {/* Search & View Controls - Sticky */}
@@ -311,14 +299,16 @@ const GlobalLibraryPage = () => {
                                             <FileText className="h-7 w-7" />}
                                         </div>
                                         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
-                                            <Button 
-                                                variant="ghost" 
-                                                size="icon" 
-                                                className="h-10 w-10 rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                                                onClick={(e) => { e.stopPropagation(); handleDelete(resource.id); }}
-                                            >
-                                                <Trash2 className="h-5 w-5" />
-                                            </Button>
+                                            {(isTeacherOrAdmin || resource.ownerId === identity?.id) && (
+                                                <Button 
+                                                    variant="ghost" 
+                                                    size="icon" 
+                                                    className="h-10 w-10 rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                                                    onClick={(e) => { e.stopPropagation(); handleDelete(resource.id); }}
+                                                >
+                                                    <Trash2 className="h-5 w-5" />
+                                                </Button>
+                                            )}
                                         </div>
                                     </div>
 
