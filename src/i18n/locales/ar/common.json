@@ -1076,6 +1076,12 @@
     "discovery": {
       "label": "تلفزيون المعلم"
     },
+    "ai-health-reports": {
+      "label": "حوكمة الذكاء الاصطناعي"
+    },
+    "settings": {
+      "label": "الإعدادات"
+    },
     "setting": {
       "label": "الإعدادات"
     }
@@ -1399,17 +1405,17 @@
   },
   "help": {
     "common": {
-      "howTo": " Step-by-Step Guide",
-      "proTips": "Expert Tips",
-      "stillStuck": "Still have questions?",
+      "howTo": "دليل خطوة بخطوة",
+      "proTips": "نصائح الخبراء",
+      "stillStuck": "هل لا تزال لديك أسئلة؟",
       "aiChatDesc": "يمكن لمساعدنا الذكي شرح أي ميزة بالتفصيل.",
       "askAi": "اسأل مساعد جيميناي",
       "clickToTry": "اضغط للتجربة"
     },
     "pages": {
       "general": {
-        "title": "Need Help?",
-        "description": "We're here to help you make the most of Tablawy OS. Explore the guides below.",
+        "title": "هل تحتاج للمساعدة؟",
+        "description": "نحن هنا لمساعدتك في تحقيق أقصى استفادة من نظام طبلاوي. استكشف الأدلة أدناه.",
         "steps": [
           {
             "title": "تحقق من التنبيهات",
@@ -1427,29 +1433,29 @@
       },
       "studyLab": {
         "title": "مختبر الدراسة",
-        "description": "Master any topic with your private AI-powered learning space.",
+        "description": "أتقن أي موضوع مع مساحة التعلم الخاصة بك والمدعومة بالذكاء الاصطناعي.",
         "steps": [
           {
             "title": "اختر أداة",
-            "description": "Choose between Explain, Quiz, Summarize, or Flashcards based on your goal."
+            "description": "اختر بين الشرح، الاختبار، التلخيص، أو البطاقات التعليمية بناءً على هدفك."
           },
           {
-            "title": "Provide Context",
-            "description": "Paste your notes or type a specific topic to let Gemini analyze it."
+            "title": "تقديم السياق",
+            "description": "قم بلصق ملاحظاتك أو كتابة موضوع محدد ليقوم جيميناي بتحليله."
           },
           {
-            "title": "Active Recall",
-            "description": "Use the generated flashcards or quizzes to test your knowledge and earn XP."
+            "title": "الاسترجاع النشط",
+            "description": "استخدم البطاقات التعليمية أو الاختبارات الناتجة لاختبار معرفتك وكسب نقاط الخبرة (XP)."
           }
         ],
         "tips": [
-          "Summarize long text first to get the key points before generating quizzes.",
-          "Flashcards use Spaced Repetition to help you remember longer."
+          "قم بتلخيص النصوص الطويلة أولاً للحصول على النقاط الرئيسية قبل إنشاء الاختبارات.",
+          "تستخدم البطاقات التعليمية تقنية 'التكرار المتباعد' لمساعدتك على التذكر لفترة أطول."
         ]
       },
       "classHub": {
-        "title": "إدارة الفصل",
-        "description": "Welcome to your class command center. Here you can manage students, curriculum, and assignments.",
+        "title": "إدارة الفصول",
+        "description": "مرحباً بك في مركز قيادة فصلك. هنا يمكنك إدارة الطلاب والمناهج والتكليفات.",
         "steps": [
           {
             "title": "إضافة الطلاب",
@@ -1461,126 +1467,126 @@
           },
           {
             "title": "تتبع التقدم",
-            "description": "Monitor student engagement and grade submissions in real-time."
+            "description": "راقب تفاعل الطلاب وقم بتصحيح التسليمات في الوقت الفعلي."
           }
         ],
         "tips": [
-          "You can use the Magic Builder to generate module drafts instantly.",
-          "Pin important announcements to keep them at the top of the feed."
+          "يمكنك استخدام 'الباني السحري' لإنشاء مسودات الوحدات الدراسية فوراً.",
+          "قم بتثبيت الإعلانات الهامة لإبقائها في مقدمة التغذية الإخبارية."
         ]
       },
       "dashboard": {
-        "title": "Dashboard Hub",
-        "description": "This is your academic command center. Here's how to use it:",
+        "title": "لوحة التحكم",
+        "description": "هذا هو مركز قيادتك الأكاديمي. إليك كيفية استخدامه:",
         "steps": [
           {
             "title": "أداة 'ماذا بعد؟'",
-            "description": "Check the cards at the top for urgent tasks like grading or assignments."
+            "description": "تحقق من البطاقات في الأعلى للمهام العاجلة مثل التصحيح أو التكليفات."
           },
           {
-            "title": "Track Progress",
-            "description": "Scroll down to see your academic journey charts and recent activity."
+            "title": "تتبع التقدم",
+            "description": "قم بالتمرير لأسفل لرؤية مخططات رحلتك الأكاديمية والنشاط الأخير."
           }
         ],
         "tips": [
-          "The 'At-Risk' section on the right is prioritized by AI.",
-          "Click any activity log item to go directly to that resource."
+          "قسم 'المعرضون للخطر' على اليمين يتم ترتيبه حسب الأولوية بواسطة الذكاء الاصطناعي.",
+          "انقر على أي عنصر في سجل النشاط للانتقال مباشرة إلى ذلك المصدر."
         ]
       },
       "classCurriculum": {
         "title": "إدارة المنهج الدراسي",
-        "description": "Organize your lessons into modules and materials.",
+        "description": "نظم دروسك في وحدات ومواد دراسية.",
         "steps": [
           {
-            "title": "Create a Module",
-            "description": "Click 'Add Module' to start a new chapter or topic section.",
+            "title": "إنشاء وحدة دراسية",
+            "description": "انقر على 'إضافة وحدة' لبدء فصل جديد أو قسم لموضوع معين.",
             "actionId": "guide-add-module"
           },
           {
             "title": "استخدام الباني السحري",
-            "description": "Use the purple 'Wand' icon to generate an entire curriculum automatically.",
+            "description": "استخدم أيقونة 'العصا السحرية' الأرجوانية لإنشاء منهج كامل تلقائياً.",
             "actionId": "guide-magic-builder"
           }
         ],
         "tips": [
-          "You can drag and drop modules to reorder them.",
-          "Mark items as 'Draft' to hide them from students until they are ready."
+          "يمكنك سحب وإفلات الوحدات لإعادة ترتيبها.",
+          "قم بتمييز العناصر كـ 'مسودة' لإخفائها عن الطلاب حتى تصبح جاهزة."
         ]
       },
       "createAssignment": {
-        "title": "Creating Tasks",
-        "description": "Design engaging assignments for your students.",
+        "title": "إنشاء المهام",
+        "description": "صمم تكليفات جذابة لطلابك.",
         "steps": [
           {
             "title": "وضع معايير التقييم",
-            "description": "Add grading criteria (e.g., Grammar, Logic) so students know what to expect."
+            "description": "أضف معايير التصحيح (مثل القواعد، المنطق) ليعرف الطلاب ما هو متوقع منهم."
           },
           {
-            "title": "AI Assistant",
-            "description": "Use the AI writing assistant to draft instructions based on your topic."
+            "title": "مساعد الذكاء الاصطناعي",
+            "description": "استخدم مساعد الكتابة الذكي لصياغة التعليمات بناءً على موضوعك."
           },
           {
             "title": "نشر المهمة",
-            "description": "Once ready, click the main button to notify all students.",
+            "description": "بمجرد الجاهزية، انقر على الزر الرئيسي لتنبيه جميع الطلاب.",
             "actionId": "guide-publish-assignment"
           }
         ],
         "tips": [
-          "Setting a clear deadline helps students prioritize their work.",
-          "Attach reference materials to help students complete the task."
+          "تحديد موعد نهائي واضح يساعد الطلاب على ترتيب أولويات عملهم.",
+          "أرفق مواد مرجعية لمساعدة الطلاب على إكمال المهمة."
         ]
       },
       "classAttendance": {
         "title": "تتبع الحضور",
-        "description": "Monitor and record student presence in your classroom.",
+        "description": "راقب وسجل حضور الطلاب في فصلك الدراسي.",
         "steps": [
           {
-            "title": "Manual Marking",
-            "description": "Click the status icon next to a student's name to toggle between Present, Absent, or Late."
+            "title": "التسجيل اليدوي",
+            "description": "انقر على أيقونة الحالة بجانب اسم الطالب للتنقل بين حاضر، غائب، أو متأخر."
           },
           {
-            "title": "QR Check-in",
-            "description": "Start a QR session to let students mark themselves present using their phones."
+            "title": "تسجيل الحضور عبر QR",
+            "description": "ابدأ جلسة QR للسماح للطلاب بتسجيل حضورهم باستخدام هواتفهم."
           },
           {
-            "title": "Export Reports",
-            "description": "Use the export button to download a full attendance sheet for the term."
+            "title": "تصدير التقارير",
+            "description": "استخدم زر التصدير لتحميل كشف حضور كامل للفصل الدراسي."
           }
         ],
         "tips": [
-          "QR sessions are time-limited for security.",
+          "جلسات QR محدودة بوقت لضمان الأمان.",
           "يمكنك إضافة ملاحظات لأي سجل حضور للرجوع إليها لاحقاً."
         ]
       },
       "quizzes": {
         "title": "الاختبارات والتقييمات",
-        "description": "Test knowledge with interactive AI-powered quizzes.",
+        "description": "اختبر المعرفة من خلال اختبارات تفاعلية مدعومة بالذكاء الاصطناعي.",
         "steps": [
           {
             "title": "الإنشاء بالذكاء الاصطناعي",
-            "description": "Paste your lesson notes and let AI create multiple-choice questions instantly."
+            "description": "قم بلصق ملاحظات دروسك ودع الذكاء الاصطناعي ينشئ أسئلة اختيار من متعدد فوراً."
           },
           {
-            "title": "Review Results",
-            "description": "See a detailed breakdown of which questions students struggled with most."
+            "title": "مراجعة النتائج",
+            "description": "شاهد تفصيلاً دقيقاً للأسئلة التي واجه الطلاب صعوبة فيها."
           }
         ],
         "tips": [
-          "Shuffle questions to prevent students from seeing the same order.",
+          "قم بتبديل ترتيب الأسئلة عشوائياً لمنع الطلاب من رؤية نفس الترتيب.",
           "أضف تفسيرات لكل سؤال لمساعدة الطلاب على التعلم من أخطائهم."
         ]
       },
       "library": {
-        "title": "Global Library",
+        "title": "المكتبة العامة",
         "description": "سحابتك الشخصية لجميع موارد التدريس الخاصة بك.",
         "steps": [
           {
             "title": "الرفع لمرة واحدة",
-            "description": "Upload a file to your library to use it in any of your classes without re-uploading."
+            "description": "ارفع ملفاً إلى مكتبتك لاستخدامه في أي من فصولك دون إعادة الرفع."
           },
           {
             "title": "التنظيم حسب الموضوع",
-            "description": "Add descriptions to your resources to find them easily later."
+            "description": "أضف أوصافاً لمصادرك لتجدها بسهولة لاحقاً."
           }
         ],
         "tips": [

@@ -19,7 +19,7 @@ export const accessControlProvider: AccessControlProvider = {
     if (role === UserRole.ADMIN) {
       const adminAllowedResources = [
         "dashboard", "departments", "users", "activity-log", "settings",
-        "profile-requests", "ai-study-lab", "study-planner", "ai-assistant", "ai-activity-logs",
+        "profile-requests", "ai-study-lab", "study-planner", "ai-assistant", "ai-activity-logs", "ai-health-reports",
       ];
       const academicResources = [
         "classes", "assignments", "quizzes", "modules", "resources", "academic-terms",

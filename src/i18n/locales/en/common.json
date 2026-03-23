@@ -1090,6 +1090,12 @@
     "discovery": {
       "label": "Teacher TV"
     },
+    "ai-health-reports": {
+      "label": "AI Governance"
+    },
+    "settings": {
+      "label": "Settings"
+    },
     "setting": {
       "label": "Settings"
     }
