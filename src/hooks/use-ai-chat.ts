@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useCustom, useNotification, usePermissions } from "@refinedev/core";
 import { BACKEND_URL } from "@/config";
+import { UserRole } from "@/types";
 
 export interface Message {
   id?: string;
@@ -26,17 +27,14 @@ interface ChatHistoryResponse {
   data: ChatHistoryItem[];
 }
 
-interface AuthPermissions {
-  role?: "student" | "teacher" | "ta" | "admin" | "parent";
-}
-
 const ERROR_MESSAGE = "I'm having trouble reading the class materials right now. Please try again in a moment.";
 
 /**
- * useAIChat Hook (Enterprise Production Version)
+ * useAIChat Hook (Enterprise Hardened Version)
  * 
  * Optimized for Tablawy OS AI Streaming.
- * Handles history syncing, SSE line buffering, and multi-class navigation.
+ * Fixes history race conditions, handles split SSE chunks, and implements 
+ * a robust AbortController pattern to prevent rapid-input state bugs.
  */
 export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -50,41 +48,42 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
   const lineBufferRef = useRef(""); 
   const animationFrameRef = useRef<number | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
-  const hasLoadedHistory = useRef(false);
+  const hasLoadedHistory = useRef<string | number | null>(null); // Track classId to prevent redundant loads
   
   const { open } = useNotification();
-  const { data: permissions, isLoading: isPermissionsLoading, isError: isPermissionsError } = usePermissions<AuthPermissions>({});
+  const { data: permissions, isLoading: isPermissionsLoading, isError: isPermissionsError } = usePermissions<any>({});
 
   // 1. 📜 HISTORY: Standard Refine v5 GET
   const { result: historyResult, query: historyQuery } = useCustom<ChatHistoryResponse>({
     url: `${BACKEND_URL}/ai/chat-history/${classId}`,
     method: "get",
     queryOptions: {
-      enabled: !!classId && !hasLoadedHistory.current,
+      enabled: !!classId && hasLoadedHistory.current !== classId,
     },
   });
 
-  // Reset state when classId changes to support navigation
+  // Support navigation between classes
   useEffect(() => {
-    setMessages([]);
-    hasLoadedHistory.current = false;
-    accumulatorRef.current = "";
-    lineBufferRef.current = "";
+    if (classId && hasLoadedHistory.current !== classId) {
+        setMessages([]);
+        accumulatorRef.current = "";
+        lineBufferRef.current = "";
+    }
   }, [classId]);
 
-  // Sync history exactly once per classId
+  // Sync history messages
   useEffect(() => {
     const historyData = historyResult?.data?.data;
-    if (historyData && !hasLoadedHistory.current) {
+    if (historyData && hasLoadedHistory.current !== classId) {
       const history = historyData.map((m: ChatHistoryItem) => ({
         id: String(m.id),
         role: m.role,
         parts: [{ text: m.content }],
       }));
       setMessages(history);
-      hasLoadedHistory.current = true;
+      hasLoadedHistory.current = classId || null;
     }
-  }, [historyResult]);
+  }, [historyResult, classId]);
 
   // 2. 🧹 CLEANUP
   useEffect(() => {
@@ -121,18 +120,20 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
     if (!input.trim() || isLoading || isPermissionsLoading) return;
 
     if (isPermissionsError) {
-        open?.({ type: "error", message: "Auth Error", description: "Could not verify permissions." });
+        open?.({ type: "error", message: "Auth Error", description: "Could not verify your access permissions." });
         return;
     }
 
-    const role = permissions?.role;
-    if (classId && role === 'parent') {
+    const role = (permissions as any)?.role;
+    if (classId && role === UserRole.PARENT) {
         open?.({ type: "error", message: "Access Denied", description: "Parents cannot interact with the Study Buddy." });
         return;
     }
 
+    // Cancel any ongoing request before starting a new one
     if (abortControllerRef.current) abortControllerRef.current.abort();
-    abortControllerRef.current = new AbortController();
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
 
     const userMessage: Message = { role: "user", parts: [{ text: input }] };
     setMessages((prev) => [...prev, userMessage]);
@@ -149,13 +150,13 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
     const apiUrl = `${BACKEND_URL}${finalUrl}`;
 
     try {
-      const token = localStorage.getItem("token");
       const headers: Record<string, string> = { "Content-Type": "application/json" };
+      const token = localStorage.getItem("token");
       if (token) headers["Authorization"] = `Bearer ${token}`;
 
       const response = await fetch(apiUrl, {
         method: "POST",
-        signal: abortControllerRef.current.signal,
+        signal: controller.signal,
         credentials: "include",
         headers,
         body: JSON.stringify({
@@ -166,7 +167,7 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
         }),
       });
 
-      if (!response.ok) throw new Error("Failed to connect to AI Service");
+      if (!response.ok) throw new Error("Failed to connect to Gemini AI");
 
       if (!classId) {
         const result = await response.json();
@@ -189,6 +190,7 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
         const combinedChunk = lineBufferRef.current + chunk;
         const lines = combinedChunk.split("\n\n");
 
+        // The last element is potentially partial, save it for next read
         lineBufferRef.current = lines.pop() || "";
 
         for (const line of lines) {
@@ -205,7 +207,7 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
               if (data.sources) setStreamingSources(data.sources);
               if (data.done) break;
             } catch (e) {
-              // Partial data buffered for next chunk
+              // Should not happen with buffering, but prevents crash
             }
           }
         }
@@ -227,13 +229,17 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
       setStreamingSources(null);
 
     } catch (error: any) {
-      if (error.name === 'AbortError') return;
+      if (error.name === 'AbortError') return; // Silence abort errors
+      
       console.error("Tablawy AI Error:", error);
       open?.({ type: "error", message: "Connection Error", description: ERROR_MESSAGE });
       setMessages((prev) => [...prev, { role: "model", parts: [{ text: ERROR_MESSAGE }] }]);
     } finally {
-      setIsLoading(false);
-      abortControllerRef.current = null;
+      // 🛡️ Only reset loading if this is still the active request
+      if (abortControllerRef.current === controller) {
+        setIsLoading(false);
+        abortControllerRef.current = null;
+      }
     }
   };
 
