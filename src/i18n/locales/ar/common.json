@@ -3,10 +3,6 @@
     "attendance": "الحضور",
     "label": "الحضور"
   },
-  "enrollments": {
-    "enrollments": "التسجيلات",
-    "label": "التسجيلات"
-  },
   "project-groups": {
     "project-groups": "مجموعات المشاريع",
     "label": "مجموعات المشاريع"
@@ -1008,9 +1004,6 @@
     "subjects": {
       "label": "المواد"
     },
-    "enrollments": {
-      "label": "التسجيلات"
-    },
     "attendance": {
       "label": "الحضور"
     },
@@ -1216,64 +1209,64 @@
   },
   "enrollments": {
     "title": "القبول والتسجيل",
-    "description": "Manage student applications, class placements, and enrollment status.",
-    "enrollStudent": "Enroll Student",
+    "description": "إدارة طلبات الطلاب، وتنسيق الفصول، وحالة التسجيل.",
+    "enrollStudent": "تسجيل طالب",
     "stats": {
-      "total": "Total Requests",
-      "pending": "Pending Approval",
-      "active": "Active Students"
+      "total": "إجمالي الطلبات",
+      "pending": "في انتظار الموافقة",
+      "active": "الطلاب النشطون"
     },
-    "searchPlaceholder": "Search by student name or email...",
-    "allStatus": "All Status",
-    "options": "Enrollment Options",
-    "viewProfile": "View Student Profile",
-    "viewClass": "View Classroom",
-    "remove": "Remove Enrollment",
-    "requested": "Requested {{time}}",
+    "searchPlaceholder": "البحث باسم الطالب أو البريد الإلكتروني...",
+    "allStatus": "كل الحالات",
+    "options": "خيارات التسجيل",
+    "viewProfile": "عرض ملف الطالب",
+    "viewClass": "عرض الفصل الدراسي",
+    "remove": "إلغاء التسجيل",
+    "requested": "تم الطلب منذ {{time}}",
     "empty": {
-      "title": "No enrollments found",
-      "desc": "There are no active or pending enrollment requests at this time."
+      "title": "لم يتم العثور على تسجيلات",
+      "desc": "لا توجد طلبات تسجيل نشطة أو معلقة في الوقت الحالي."
     },
     "deleteDialog": {
-      "title": "Remove Enrollment?",
-      "desc": "This will permanently remove the student from the classroom. They will lose access to all curriculum, assignments, and grades for this specific class."
+      "title": "إلغاء التسجيل؟",
+      "desc": "سيؤدي هذا إلى إزالة الطالب نهائياً من الفصل الدراسي. سيفقد الوصول إلى جميع المناهج والتكليفات والدرجات لهذا الفصل المحدد."
     },
     "toasts": {
-      "statusUpdate": "Enrollment {{status}} successfully",
-      "processing": "Processing {{count}} enrollments...",
-      "bulkSuccess": "Successfully processed {{count}} enrollments",
-      "bulkError": "Failed to process some enrollments",
-      "removed": "Enrollment removed"
+      "statusUpdate": "تم تحديث حالة التسجيل إلى {{status}} بنجاح",
+      "processing": "جاري معالجة {{count}} تسجيل...",
+      "bulkSuccess": "تمت معالجة {{count}} تسجيل بنجاح",
+      "bulkError": "فشلت معالجة بعض التسجيلات",
+      "removed": "تم إزالة التسجيل"
     }
   },
   "discussions": {
-    "title": "Community Hub",
-    "description": "Engage with students and teachers in class-wide discussion threads.",
-    "start": "Start Discussion",
+    "title": "مركز النقاش",
+    "description": "تفاعل مع الطلاب والمعلمين في خيوط نقاش على مستوى الفصل.",
+    "start": "بدء نقاش",
     "stats": {
-      "total": "Total Threads",
-      "active": "Active Today",
-      "replies": "Total Replies"
+      "total": "إجمالي الخيوط",
+      "active": "نشط اليوم",
+      "replies": "إجمالي الردود"
     },
-    "searchPlaceholder": "Search discussions by content or keywords...",
-    "filter": "Community Filter",
+    "searchPlaceholder": "البحث في النقاشات حسب المحتوى أو الكلمات الرئيسية...",
+    "filter": "فلتر المجتمع",
     "empty": {
-      "title": "No discussions found",
-      "desc": "Start a new conversation to engage with your class community."
+      "title": "لم يتم العثور على نقاشات",
+      "desc": "ابدأ محادثة جديدة للتفاعل مع مجتمع فصلك."
     },
     "labels": {
-      "trending": "Trending",
-      "replies": "Replies",
-      "active": "Active {{time}}",
-      "options": "Thread Options",
-      "open": "Open Discussion",
-      "follow": "Follow Thread"
+      "trending": "رائج",
+      "replies": "ردود",
+      "active": "نشط منذ {{time}}",
+      "options": "خيارات الخيط",
+      "open": "فتح النقاش",
+      "follow": "متابعة الخيط"
     }
   },
   "progressPage": {
     "title": "تقدم التعلم",
-    "description": "Track student performance, module completion, and academic standing.",
-    "searchPlaceholder": "Search by student name...",
+    "description": "تتبع أداء الطلاب وإكمال الوحدات والوضع الأكاديمي.",
+    "searchPlaceholder": "البحث باسم الطالب...",
     "table": {
       "student": "الطالب",
       "class": "الفصل",
@@ -1284,95 +1277,95 @@
   },
   "teacherApps": {
     "title": "طلبات التدريس",
-    "description": "Review and manage requests from educators to teach specific classes.",
-    "searchPlaceholder": "Search applications...",
+    "description": "مراجعة وإدارة طلبات المعلمين لتدريس فصول محددة.",
+    "searchPlaceholder": "البحث في الطلبات...",
     "empty": {
-      "title": "No applications found",
-      "desc": "There are no teacher applications matching your current filter."
+      "title": "لم يتم العثور على طلبات",
+      "desc": "لا توجد طلبات معلمين تطابق الفلتر الحالي."
     },
     "labels": {
-      "applyingFor": "Applying for: {{name}}",
-      "applied": "Applied {{time}}",
-      "viewTeacher": "View Teacher Profile",
-      "viewClass": "View Classroom"
+      "applyingFor": "متقدم لـ: {{name}}",
+      "applied": "تم التقديم منذ {{time}}",
+      "viewTeacher": "عرض ملف المعلم",
+      "viewClass": "عرض الفصل الدراسي"
     },
     "toasts": {
-      "statusUpdate": "Application {{status}} successfully"
+      "statusUpdate": "تم تحديث حالة الطلب إلى {{status}} بنجاح"
     }
   },
   "teacherSubscriptions": {
     "title": "اشتراكات المعلمين",
-    "description": "Manage your active subscriptions and billing information.",
+    "description": "إدارة اشتراكاتك النشطة ومعلومات الفواتير.",
     "empty": {
-      "title": "No Subscriptions Found",
-      "description": "You don't have any active teacher subscriptions yet."
+      "title": "لم يتم العثور على اشتراكات",
+      "description": "ليس لديك أي اشتراكات معلمين نشطة بعد."
     }
   },
   "profileRequests": {
-    "title": "حوكمة الملفات",
-    "description": "Review and approve sensitive profile changes and verification documents.",
+    "title": "حوكمة الملفات الشخصية",
+    "description": "مراجعة والموافقة على التغييرات الحساسة في الملفات الشخصية ومستندات التحقق.",
     "stats": {
-      "total": "Total Requests",
-      "pending": "Pending Review",
-      "approved": "Approved"
+      "total": "إجمالي الطلبات",
+      "pending": "في انتظار المراجعة",
+      "approved": "تمت الموافقة"
     },
-    "searchPlaceholder": "Search by user name or email...",
+    "searchPlaceholder": "البحث باسم المستخدم أو البريد الإلكتروني...",
     "empty": {
-      "title": "No pending requests",
-      "desc": "All profile change requests have been processed. You're all caught up!"
+      "title": "لا توجد طلبات معلقة",
+      "desc": "تمت معالجة جميع طلبات تغيير الملفات الشخصية."
     },
     "labels": {
-      "changes": "{{count}} Changes",
-      "requested": "Requested {{time}}",
-      "viewProof": "View Proof",
-      "empty": "empty",
-      "verificationDoc": "Verification Document"
+      "changes": "{{count}} تغييرات",
+      "requested": "تم الطلب منذ {{time}}",
+      "viewProof": "عرض الإثبات",
+      "empty": "فارغ",
+      "verificationDoc": "مستند التحقق"
     },
     "dialogs": {
-      "rejectTitle": "Reject Changes",
-      "rejectDesc": "Please provide a specific reason for rejecting these profile updates.",
-      "rejectionFeedback": "Rejection Feedback",
-      "rejectionPlaceholder": "e.g. The uploaded document is blurry or invalid. Please re-upload a clear copy of your teaching certificate.",
-      "confirmRejection": "Confirm Rejection"
+      "rejectTitle": "رفض التغييرات",
+      "rejectDesc": "يرجى تقديم سبب محدد لرفض تحديثات الملف الشخصي هذه.",
+      "rejectionFeedback": "ملاحظات الرفض",
+      "rejectionPlaceholder": "مثال: المستند المرفوع غير واضح أو غير صالح. يرجى إعادة رفع نسخة واضحة من شهادة التدريس الخاصة بك.",
+      "confirmRejection": "تأكيد الرفض"
     },
     "toasts": {
-      "approved": "Changes approved and applied",
-      "rejected": "Changes rejected"
+      "approved": "تمت الموافقة على التغييرات وتطبيقها",
+      "rejected": "تم رفض التغييرات"
     }
   },
   "footer": {
-    "platform": "Platform",
-    "coreFeatures": "Core Features",
-    "aiLearning": "AI Learning Hub",
-    "whiteboard": "Interactive Whiteboard",
-    "studentProgress": "Student Progress",
-    "solutions": "Solutions",
-    "forSchools": "For Schools",
-    "forTeachers": "For Teachers",
-    "forStudents": "For Students",
-    "forParents": "For Parents",
-    "caseStudies": "Case Studies",
-    "enterprise": "Enterprise",
-    "support": "Support",
-    "helpCenter": "Help Center",
-    "community": "Community",
-    "contactUs": "Contact Us",
-    "apiDocs": "API Docs",
-    "joinRevolution": "Join the Revolution",
-    "readyToUpgrade": "Ready to upgrade your",
-    "learningExperience": "Learning Experience?",
-    "subscribeDesc": "Subscribe to our weekly insights on AI in modern education.",
+    "platform": "المنصة",
+    "coreFeatures": "الميزات الأساسية",
+    "aiLearning": "مركز التعلم بالذكاء الاصطناعي",
+    "whiteboard": "السبورة التفاعلية",
+    "studentProgress": "تقدم الطلاب",
+    "solutions": "الحلول",
+    "forSchools": "للمدارس",
+    "forTeachers": "للمعلمين",
+    "forStudents": "للطلاب",
+    "forParents": "لأولياء الأمور",
+    "caseStudies": "دراسات الحالة",
+    "enterprise": "المؤسسات",
+    "support": "الدعم",
+    "helpCenter": "مركز المساعدة",
+    "community": "المجتمع",
+    "contactUs": "اتصل بنا",
+    "apiDocs": "وثائق API",
+    "joinRevolution": "انضم إلى الثورة",
+    "readyToUpgrade": "هل أنت مستعد لترقية",
+    "learningExperience": "تجربة التعلم الخاصة بك؟",
+    "subscribeDesc": "اشترك في رؤانا الأسبوعية حول الذكاء الاصطناعي في التعليم الحديث.",
     "emailPlaceholder": "you@university.edu",
-    "noSpam": "NO SPAM. JUST PURE INNOVATION.",
-    "brandDesc": "The next generation of education. AI-powered tools, collaborative environments, and enterprise-grade classroom management.",
-    "rightsReserved": "Tablawy OS. All rights reserved.",
-    "builtWith": "Built with",
-    "byTeam": "by Senior Team",
-    "terms": "Terms of Service",
-    "privacy": "Privacy Policy",
-    "cookie": "Cookie Policy",
-    "soc2": "SOC2 COMPLIANT",
-    "gdpr": "GDPR READY"
+    "noSpam": "لا رسائل مزعجة. فقط ابتكارات نقية.",
+    "brandDesc": "الجيل القادم من التعليم. أدوات مدعومة بالذكاء الاصطناعي، بيئات تعاونية، وإدارة فصول دراسية على مستوى المؤسسات.",
+    "rightsReserved": "نظام طبلاوي. جميع الحقوق محفوظة.",
+    "builtWith": "بُني بـ",
+    "byTeam": "بواسطة الفريق الأول",
+    "terms": "شروط الخدمة",
+    "privacy": "سياسة الخصوصية",
+    "cookie": "سياسة ملفات الارتباط",
+    "soc2": "متوافق مع SOC2",
+    "gdpr": "جاهز لـ GDPR"
   },
   "portfolioPage": {
     "pageTitle": "ملف {{name}}",
