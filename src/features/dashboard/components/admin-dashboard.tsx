@@ -152,7 +152,7 @@ export const AdminDashboard = ({
                         </span>
                     </div>
                 </div>
-                <SystemHealthCard />
+                <SystemHealthCard report={data.systemHealth} isLoading={isLoading} />
             </div>
           </ErrorBoundary>
 

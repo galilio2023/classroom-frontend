@@ -35,11 +35,10 @@ interface AuthPermissions {
 const MAX_INPUT_LENGTH = 4000;
 
 /**
- * useAIChat Hook (Final Enterprise Edition)
+ * useAIChat Hook (Final Production Grade)
  * 
  * Optimized for Tablawy OS AI Streaming.
- * Features: SSE Line Buffering, RBAC loading safety, AbortController cleanup,
- * and multi-class navigation support.
+ * Handles SSE Buffering, History Syncing, and Multi-Class Navigation.
  */
 export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
   const { t } = useTranslation();
@@ -69,18 +68,17 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
     },
   });
 
-  // Handle Navigation: Reset state when class changes
+  // Handle Navigation & State Resets
   useEffect(() => {
     if (effectiveClassId !== hasLoadedHistoryFor.current) {
         setMessages([]);
         accumulatorRef.current = "";
         lineBufferRef.current = "";
-        // If we navigated away from a class to a null state, reset the tracker
         if (!effectiveClassId) hasLoadedHistoryFor.current = null;
     }
   }, [effectiveClassId]);
 
-  // Sync history exactly once per class context
+  // Sync history safely
   useEffect(() => {
     const historyData = historyResult?.data?.data;
     if (historyData && effectiveClassId && hasLoadedHistoryFor.current !== effectiveClassId) {
@@ -124,29 +122,29 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
     });
   }, []);
 
-  // 3. 🚀 SEND: Specialized fetch for SSE Streaming
+  // 3. 🚀 SEND: SSE Streaming Engine
   const handleSend = async () => {
     const cleanInput = input.trim();
     if (!cleanInput || isLoading || isPermissionsLoading) return;
 
     // RBAC & Safety Checks
     if (isPermissionsError) {
-        open?.({ type: "error", message: t("common.error"), description: t("auth.errors.permissions") });
+        open?.({ type: "error", message: t("common.error"), description: t("auth.errors.permissions" as any) });
         return;
     }
 
     if (cleanInput.length > MAX_INPUT_LENGTH) {
-        open?.({ type: "error", message: t("common.error"), description: t("aiHub.errors.inputTooLong") });
+        open?.({ type: "error", message: t("common.error"), description: t("aiHub.errors.inputTooLong" as any) });
         return;
     }
 
     const role = permissions?.role;
     if (effectiveClassId && role === UserRole.PARENT) {
-        open?.({ type: "error", message: t("common.accessDenied"), description: t("aiHub.errors.parentRestricted") });
+        open?.({ type: "error", message: t("common.accessDenied" as any), description: t("aiHub.errors.parentRestricted" as any) });
         return;
     }
 
-    // Lifecycle Management
+    // Initialize Request Lifecycle
     if (abortControllerRef.current) abortControllerRef.current.abort();
     const controller = new AbortController();
     abortControllerRef.current = controller;
@@ -184,7 +182,7 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
 
       if (!response.ok) throw new Error("AI_SERVICE_UNAVAILABLE");
 
-      // Handle Standard Response
+      // General Chat (Non-Streaming)
       if (!effectiveClassId) {
         const result = await response.json();
         if (result.data?.response) {
@@ -194,7 +192,7 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
         return;
       }
 
-      // Handle SSE Stream
+      // Study Buddy (Streaming)
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
       if (!reader) throw new Error("STREAM_READER_UNAVAILABLE");
@@ -223,24 +221,29 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
               if (data.sources) setStreamingSources(data.sources);
               if (data.done) break;
             } catch (e) {
-              // Partial JSON handled by lineBuffer
+              // Partial JSON buffered
             }
           }
         }
       }
 
-      // Final UI Synchronization
+      // Final State Push (Guard against empty bubbles)
       if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
-      setStreamingMessage(accumulatorRef.current);
+      const finalResponseText = accumulatorRef.current.trim();
+      
+      if (finalResponseText.length > 0) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: "model",
+            parts: [{ text: finalResponseText }],
+            sources: streamingSources || undefined
+          }
+        ]);
+      } else {
+        throw new Error("EMPTY_RESPONSE");
+      }
 
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "model",
-          parts: [{ text: accumulatorRef.current }],
-          sources: streamingSources || undefined
-        }
-      ]);
       setStreamingMessage("");
       setStreamingSources(null);
 
@@ -251,12 +254,12 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
       open?.({ 
         type: "error", 
         message: t("common.error"), 
-        description: t("aiHub.errors.serviceUnavailable") 
+        description: t("aiHub.errors.serviceUnavailable" as any) 
       });
       
       setMessages((prev) => [...prev, { 
         role: "model", 
-        parts: [{ text: t("aiHub.errors.friendlyFallback") }] 
+        parts: [{ text: t("aiHub.errors.friendlyFallback" as any) }] 
       }]);
     } finally {
       if (abortControllerRef.current === controller) {

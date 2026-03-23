@@ -153,6 +153,22 @@ export interface ChannelStats {
   conversionRate: number;
 }
 
+export interface GlobalConfig {
+  enableAiFeatures: boolean;
+  welcomeMessage?: string;
+}
+
+export interface SystemHealth {
+  diagnosis: string;
+  suggestedFixes: string[];
+  metadata: {
+    happinessScore: number;
+    posCount: number;
+    negCount: number;
+  };
+  reportDate: string;
+}
+
 export interface DashboardData {
   todaySchedule: ScheduleItem[];
   stats?: DashboardStats;
@@ -169,4 +185,6 @@ export interface DashboardData {
   studentTrajectories?: StudentTrajectory[];
   classComparison?: ClassComparison[];
   channelStats?: ChannelStats;
+  systemHealth?: SystemHealth;
+  globalConfig?: GlobalConfig;
 }

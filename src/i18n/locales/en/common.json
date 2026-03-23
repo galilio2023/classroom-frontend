@@ -158,6 +158,7 @@
     "noResults": "No results found.",
     "searching": "Searching...",
     "settings": "Settings",
+    "accessDenied": "Access Denied",
     "navigation": "Navigation",
     "language": "Language",
     "toggleTheme": "Toggle Theme",
@@ -699,6 +700,12 @@
         "description": "You haven't saved any AI study sessions yet. Start exploring the AI Study Lab!",
         "cta": "Go to Study Lab"
       }
+    },
+    "errors": {
+      "inputTooLong": "Message is too long. Please shorten it.",
+      "parentRestricted": "Only students and teachers can interact with the Study Buddy.",
+      "serviceUnavailable": "Gemini AI is currently unavailable. Please try again later.",
+      "friendlyFallback": "I'm having trouble connecting to the AI brain right now. I'll be back soon!"
     }
   },
   "studyPlanner": {

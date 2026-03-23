@@ -12,6 +12,7 @@ import { ChatHeader } from "./ai/chat-header";
 import { ChatEmptyState } from "./ai/chat-empty-state";
 import { ChatInput } from "./ai/chat-input";
 import { cn } from "@/lib/utils";
+import { useDashboard } from "@/features/dashboard/hooks/use-dashboard";
 
 interface AIStudyBuddyProps {
   subject?: string;
@@ -21,6 +22,7 @@ interface AIStudyBuddyProps {
 }
 
 export const AIStudyBuddy = ({ subject, topic, assignment, classId }: AIStudyBuddyProps) => {
+  const { coreData } = useDashboard();
   const [isOpen, setIsOpen] = useState(false);
   const {
     messages,
@@ -36,6 +38,11 @@ export const AIStudyBuddy = ({ subject, topic, assignment, classId }: AIStudyBud
     context: { subject, topic, assignment },
     classId,
   });
+
+  // 🛡️ Global Master Switch: Hide if AI is disabled
+  if (coreData?.globalConfig?.enableAiFeatures === false) {
+    return null;
+  }
 
   return (
     <div className={cn(
