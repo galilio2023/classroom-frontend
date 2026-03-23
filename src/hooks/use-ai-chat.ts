@@ -33,10 +33,10 @@ interface AuthPermissions {
 const ERROR_MESSAGE = "I'm having trouble reading the class materials right now. Please try again in a moment.";
 
 /**
- * useAIChat Hook (Enterprise Refactor)
+ * useAIChat Hook (Enterprise Version)
  * 
- * Final hardening for Tablawy OS.
- * Includes SSE line buffering, RBAC loading safety, and full type safety.
+ * Final polished version for Tablawy OS.
+ * Fixes history race conditions, hardens SSE parsing, and integrates Refine RBAC.
  */
 export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -47,30 +47,33 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
 
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const accumulatorRef = useRef("");
-  const lineBufferRef = useRef(""); // 🛡️ SSE Hardening: Buffer for partial chunks
+  const lineBufferRef = useRef(""); 
   const animationFrameRef = useRef<number | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
+  const hasLoadedHistory = useRef(false); // 🛡️ Prevent history overwrite race condition
   
   const { open } = useNotification();
-  const { data: permissions, isLoading: isPermissionsLoading } = usePermissions<AuthPermissions>({});
+  const { data: permissions, isLoading: isPermissionsLoading, isError: isPermissionsError } = usePermissions<AuthPermissions>({});
 
-  // 1. 📜 HISTORY: Use Refine v5 Pattern
+  // 1. 📜 HISTORY: Standard Refine v5 GET
   const { result: historyResult, query: historyQuery } = useCustom<ChatHistoryResponse>({
     url: `${BACKEND_URL}/ai/chat-history/${classId}`,
     method: "get",
     queryOptions: {
-      enabled: !!classId,
+      enabled: !!classId && !hasLoadedHistory.current,
     },
   });
 
+  // Sync history exactly once
   useEffect(() => {
-    if (historyResult?.data?.data) {
+    if (historyResult?.data?.data && !hasLoadedHistory.current) {
       const history = historyResult.data.data.map((m: ChatHistoryItem) => ({
         id: String(m.id),
         role: m.role,
         parts: [{ text: m.content }],
       }));
       setMessages(history);
+      hasLoadedHistory.current = true;
     }
   }, [historyResult]);
 
@@ -108,26 +111,24 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
   const handleSend = async () => {
     if (!input.trim() || isLoading || isPermissionsLoading) return;
 
-    // RBAC: Loading-safe check
+    // RBAC: Safety Check
+    if (isPermissionsError) {
+        open?.({ type: "error", message: "Auth Error", description: "Could not verify your permissions." });
+        return;
+    }
+
     const role = permissions?.role;
     if (classId && role === 'parent') {
-        open?.({
-            type: "error",
-            message: "Access Denied",
-            description: "Only students and teachers can interact with the Study Buddy."
-        });
+        open?.({ type: "error", message: "Access Denied", description: "Only students and teachers can interact with the Study Buddy." });
         return;
     }
 
     if (abortControllerRef.current) abortControllerRef.current.abort();
     abortControllerRef.current = new AbortController();
 
-    const userMessage: Message = {
-      role: "user",
-      parts: [{ text: input }],
-    };
-
+    const userMessage: Message = { role: "user", parts: [{ text: input }] };
     setMessages((prev) => [...prev, userMessage]);
+    
     const currentInput = input;
     setInput("");
     setIsLoading(true);
@@ -140,14 +141,15 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
     const apiUrl = `${BACKEND_URL}${finalUrl}`;
 
     try {
+      const token = localStorage.getItem("token");
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+
       const response = await fetch(apiUrl, {
         method: "POST",
         signal: abortControllerRef.current.signal,
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem("token")}`, 
-        },
+        credentials: "include", // Essential for Vercel -> Railway cookie auth
+        headers,
         body: JSON.stringify({
           message: currentInput,
           history: messages.map(m => ({ role: m.role, parts: m.parts })),
@@ -176,11 +178,9 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
         if (done) break;
 
         const chunk = decoder.decode(value, { stream: true });
-        // prepend previous remaining buffer
         const combinedChunk = lineBufferRef.current + chunk;
         const lines = combinedChunk.split("\n\n");
 
-        // The last element might be a partial line
         lineBufferRef.current = lines.pop() || "";
 
         for (const line of lines) {
@@ -190,26 +190,22 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
               if (!rawData) continue;
               
               const data = JSON.parse(rawData);
-
               if (data.text) {
                 accumulatorRef.current += data.text;
                 updateStreamingUI();
               }
-
-              if (data.sources) {
-                setStreamingSources(data.sources);
-              }
-
+              if (data.sources) setStreamingSources(data.sources);
               if (data.done) break;
             } catch (e) {
-              // Should not happen with buffering, but for safety:
-              console.warn("Malformed SSE line:", line);
+              // Partial JSON is buffered
             }
           }
         }
       }
 
-      // Final State Push
+      if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
+      setStreamingMessage(accumulatorRef.current);
+
       setMessages((prev) => [
         ...prev,
         {
@@ -223,14 +219,8 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
 
     } catch (error: any) {
       if (error.name === 'AbortError') return;
-      
       console.error("Tablawy AI Error:", error);
-      open?.({
-        type: "error",
-        message: "Connection Error",
-        description: ERROR_MESSAGE
-      });
-      
+      open?.({ type: "error", message: "Connection Error", description: ERROR_MESSAGE });
       setMessages((prev) => [...prev, { role: "model", parts: [{ text: ERROR_MESSAGE }] }]);
     } finally {
       setIsLoading(false);
