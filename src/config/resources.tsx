@@ -14,6 +14,7 @@ import {
   Send,
   CheckSquare,
   Library,
+  Bookmark,
   MessageSquare,
   FolderOpen,
   Bell,
@@ -51,7 +52,7 @@ export const resources: ResourceProps[] = [
   { name: "academic-terms", list: "/admin/terms", meta: { group: "groups.academic", label: "resources.academic-terms.label", icon: <Calendar />, roles: [UserRole.TEACHER] } }, // MOVED TO TEACHER
   { name: "classes", list: "/classes", create: "/classes/create", edit: "/classes/edit/:id", show: "/classes/show/:id", meta: { group: "groups.academic", label: "resources.classes.label", icon: <LayoutGrid />, roles: [UserRole.TEACHER, UserRole.STUDENT] } }, 
   { name: "subjects", list: "/subjects", create: "/subjects/create", edit: "/subjects/edit/:id", meta: { group: "groups.academic", label: "resources.subjects.label", icon: <BookOpen />, roles: [UserRole.TEACHER, UserRole.STUDENT] } }, 
-  { name: "enrollments", list: "/enrollments", meta: { group: "groups.academic", label: "resources.enrollments.label", icon: <UserPlus />, hide: false, roles: [UserRole.TEACHER, UserRole.STUDENT] } }, 
+  { name: "enrollments", list: "/enrollments", meta: { group: "groups.academic", label: "resources.enrollments.label", icon: <Bookmark />, hide: false, roles: [UserRole.STUDENT] } }, 
   { name: "attendance", list: "/attendance", meta: { group: "groups.academic", label: "resources.attendance.label", icon: <CheckSquare />, roles: [UserRole.TEACHER, UserRole.STUDENT] } }, 
   { name: "project-groups", list: "/project-groups", show: "/project-groups/show/:id", meta: { group: "groups.academic", label: "resources.project-groups.label", icon: <Users />, roles: [UserRole.TEACHER, UserRole.STUDENT] } }, 
 
@@ -71,7 +72,7 @@ export const resources: ResourceProps[] = [
 
   // --- STUDENT HUB ---
   { name: "my-teachers", list: "/my-teachers", meta: { group: "groups.student-hub", label: "resources.my-teachers.label", icon: <GraduationCap />, roles: [UserRole.STUDENT] } },
-  { name: "teacher-subscriptions", list: "/enrollments", meta: { group: "groups.student-hub", label: "resources.followed-teachers.label", icon: <UserPlus />, roles: [UserRole.STUDENT] } },
+  { name: "teacher-subscriptions", list: "/enrollments", meta: { group: "groups.student-hub", label: "resources.followed-teachers.label", icon: <Bookmark />, roles: [UserRole.STUDENT] } },
   { name: "teacher-channels", list: "/discovery", meta: { group: "groups.student-hub", label: "resources.discovery.label", icon: <Tv />, roles: [UserRole.STUDENT] } },
   // --- TEACHER HUB ---
   { name: "teacher-channel", list: "/teacher/channel", meta: { group: "groups.teacher-hub", label: "resources.teacher-channel.label", icon: <Tv />, roles: [UserRole.TEACHER] } }, 

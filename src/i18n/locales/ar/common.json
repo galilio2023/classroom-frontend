@@ -1141,8 +1141,8 @@
       "addMembersTo": "إضافة أعضاء إلى {{name}}",
       "addMembersDesc": "اختر طلاباً من قائمة الفصل لإضافتهم لهذه المجموعة.",
       "selectStudents": "اختر الطلاب...",
-      "noStudentsFound": "No students found.",
-      "studentsSelected": "{{count}} student(s) selected"
+      "noStudentsFound": "لم يتم العثور على طلاب.",
+      "studentsSelected": "تم اختيار {{count}} طالب/طلاب"
     },
     "toasts": {
       "fillFields": "يرجى ملء جميع الحقول",
