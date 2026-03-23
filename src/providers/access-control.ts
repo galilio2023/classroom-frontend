@@ -19,13 +19,13 @@ export const accessControlProvider: AccessControlProvider = {
     if (role === UserRole.ADMIN) {
       const adminAllowedResources = [
         "dashboard", "departments", "users", "activity-log", "settings",
-        "profile-requests", "ai-study-lab", "study-planner", "ai-assistant",
+        "profile-requests", "ai-study-lab", "study-planner", "ai-assistant", "ai-activity-logs",
       ];
       const academicResources = [
         "classes", "assignments", "quizzes", "modules", "resources", "academic-terms",
         "subjects", "attendance", "submissions", "enrollments", "announcements",
-        "teacher-subscriptions", "teacher-applications", "discussions", "calendar",
-        "notifications", "progress", "report-card", "portfolio", "messages", "my-teachers"
+        "teacher-applications", "discussions", "calendar",
+        "notifications", "progress", "report-card", "portfolio", "messages", "my-teachers", "channels"
       ];
 
       if (adminAllowedResources.includes(resourceName)) {
@@ -112,7 +112,7 @@ export const accessControlProvider: AccessControlProvider = {
         "attendance", "submissions", "quizzes", "resources",
         "modules", "ai-study-lab", "study-planner", "notifications", "progress",
         "report-card", "portfolio", "messages", "users",
-        "teacher-subscriptions", "my-teachers", "teacher-channels", "project-groups", "library", "enrollments"
+        "teacher-subscriptions", "my-teachers", "teacher-channels", "project-groups", "library", "enrollments", "ai-activity-logs"
       ];
 
       if (!studentAllowed.includes(resourceName)) return { can: false };

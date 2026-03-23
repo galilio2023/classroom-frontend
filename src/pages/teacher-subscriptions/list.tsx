@@ -24,7 +24,7 @@ import { cn } from "@/lib/utils";
 interface Subscription {
   id: number;
   student: User;
-  teacherId: string;
+  classId: number;
   createdAt: string;
 }
 
@@ -37,13 +37,6 @@ const TeacherSubscriptionsList = () => {
 
   const { query } = useList<Subscription>({
     resource: "teacher-subscriptions",
-    filters: [
-      {
-        field: "teacherId",
-        operator: "eq",
-        value: identity?.id,
-      },
-    ],
     queryOptions: {
       enabled: !!identity?.id && identity?.role === UserRole.TEACHER,
     },
@@ -52,10 +45,24 @@ const TeacherSubscriptionsList = () => {
     },
   });
 
-  const isLoading = query.isLoading; // Access isLoading from query
+  const isLoading = query.isLoading;
 
-  const subscriptions = query.data?.data || [];
-  const hasData = subscriptions.length > 0;
+  // Since we mapped to enrollments, and backend now scopes enrollments for teachers
+  // to only show students in their classes, we just need to unique them
+  const students = useMemo(() => {
+    const enrollments = query.data?.data || [];
+    const studentMap = new Map<string, User>();
+    
+    enrollments.forEach(enrollment => {
+        if (enrollment.student) {
+            studentMap.set(enrollment.student.id, enrollment.student);
+        }
+    });
+    
+    return Array.from(studentMap.values());
+  }, [query.data]);
+
+  const hasData = students.length > 0;
 
   return (
     <ListView>
@@ -112,10 +119,10 @@ const TeacherSubscriptionsList = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-              {subscriptions.map(
-                (subscription: any, index: any) => (
+              {students.map(
+                (student: User, index: number) => (
                   <motion.div
-                    key={subscription.id}
+                    key={student.id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05 }}
@@ -124,21 +131,21 @@ const TeacherSubscriptionsList = () => {
                     <div className="flex items-center gap-4 mb-6">
                       <Avatar className="h-16 w-16 rounded-2xl border-4 border-background shadow-lg group-hover:scale-105 transition-transform duration-500">
                         <AvatarImage
-                          src={subscription.student.image ?? undefined}
-                          alt={subscription.student.name}
+                          src={student.image ?? undefined}
+                          alt={student.name}
                         />
                         <AvatarFallback className="bg-primary/10 text-primary font-black text-xl">
-                          {subscription.student.name
+                          {student.name
                             .substring(0, 2)
                             .toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1 min-w-0">
                         <h3 className="text-xl font-black tracking-tight truncate group-hover:text-primary transition-colors leading-tight">
-                          {subscription.student.name}
+                          {student.name}
                         </h3>
                         <p className="text-sm text-muted-foreground truncate">
-                          {subscription.student.email}
+                          {student.email}
                         </p>
                       </div>
                     </div>
@@ -150,7 +157,7 @@ const TeacherSubscriptionsList = () => {
                         variant="outline"
                         className="flex-1 rounded-2xl h-12 font-black uppercase tracking-widest text-[10px] transition-all border-primary/20 hover:bg-primary/5 text-primary"
                       >
-                        <a href={`mailto:${subscription.student.email}`}>
+                        <a href={`mailto:${student.email}`}>
                           <MessageSquare className="h-4 w-4 me-2" />
                           {t("buttons.sendMessage")}
                         </a>
@@ -162,7 +169,7 @@ const TeacherSubscriptionsList = () => {
                       >
                         <a
                           href="#"
-                          onClick={() => show("users", subscription.student.id)}
+                          onClick={() => show("users", student.id)}
                         >
                           {t("buttons.viewProfile")}
                           <Eye

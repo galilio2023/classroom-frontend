@@ -23,7 +23,13 @@ import { cn } from "@/lib/utils";
 
 interface TeacherSubscription {
   id: number;
-  teacher: User;
+  class: {
+    id: number;
+    name: string;
+    teachers: {
+        teacher: User;
+    }[];
+  };
   studentId: string;
   createdAt: string;
 }
@@ -48,14 +54,29 @@ const MyTeachersList = () => {
       enabled: !!identity?.id && identity?.role === UserRole.STUDENT,
     },
     meta: {
-      populate: ["teacher"],
+      populate: ["class", "class.teachers", "class.teachers.teacher"],
     },
   });
 
   const { data: subscriptionsData, isLoading } = query;
 
-  const subscriptions = subscriptionsData?.data || [];
-  const hasData = subscriptions.length > 0;
+  // Flatten the enrollments to get unique teachers
+  const teachers = useMemo(() => {
+    const enrollments = subscriptionsData?.data || [];
+    const teacherMap = new Map<string, User>();
+    
+    enrollments.forEach(enrollment => {
+        enrollment.class?.teachers?.forEach(ct => {
+            if (ct.teacher) {
+                teacherMap.set(ct.teacher.id, ct.teacher);
+            }
+        });
+    });
+    
+    return Array.from(teacherMap.values());
+  }, [subscriptionsData]);
+
+  const hasData = teachers.length > 0;
 
   return (
     <ListView>
@@ -111,10 +132,10 @@ const MyTeachersList = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-              {subscriptions.map(
-                (subscription: any, index: any) => (
+              {teachers.map(
+                (teacher: User, index: number) => (
                   <motion.div
-                    key={subscription.id}
+                    key={teacher.id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05 }}
@@ -123,21 +144,21 @@ const MyTeachersList = () => {
                     <div className="flex items-center gap-4 mb-6">
                       <Avatar className="h-16 w-16 rounded-full border-4 border-background shadow-lg group-hover:scale-105 transition-transform duration-500">
                         <AvatarImage
-                          src={subscription.teacher.image ?? undefined}
-                          alt={subscription.teacher.name}
+                          src={teacher.image ?? undefined}
+                          alt={teacher.name}
                         />
                         <AvatarFallback className="bg-primary/10 text-primary font-black text-xl">
-                          {subscription.teacher.name
+                          {teacher.name
                             .substring(0, 2)
                             .toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1 min-w-0">
                         <h3 className="text-xl font-black tracking-tight truncate group-hover:text-primary transition-colors leading-tight">
-                          {subscription.teacher.name}
+                          {teacher.name}
                         </h3>
                         <p className="text-sm text-muted-foreground truncate">
-                          {subscription.teacher.email}
+                          {teacher.email}
                         </p>
                       </div>
                     </div>
@@ -149,7 +170,7 @@ const MyTeachersList = () => {
                         variant="outline"
                         className="flex-1 rounded-2xl h-12 font-black uppercase tracking-widest text-[10px] transition-all border-primary/20 hover:bg-primary/5 text-primary"
                       >
-                        <a href={`mailto:${subscription.teacher.email}`}>
+                        <a href={`mailto:${teacher.email}`}>
                           <MessageSquare className="h-4 w-4 me-2" />
                           {t("buttons.sendMessage")}
                         </a>
@@ -162,8 +183,8 @@ const MyTeachersList = () => {
                         <a
                           href="#"
                           onClick={(e) => {
-                            e.preventDefault(); // Added to prevent the page from jumping to the top
-                            show("users", subscription.teacher.id);
+                            e.preventDefault(); 
+                            show("users", teacher.id);
                           }}
                         >
                           {t("buttons.viewProfile")}
