@@ -36,33 +36,6 @@
     "accessDeniedDesc": "عذراً، ليس لديك إذن للوصول إلى هذه الصفحة.",
     "teacherOnly": "يمكن للمعلمين فقط إدارة المكتبة العامة."
   },
-  "assignments": {
-    "assignments": "المهام والواجبات",
-    "label": "المهام والواجبات",
-    "list": {
-      "title": "التكليفات الأكاديمية",
-      "description": "تتبع وإدارة وتسليم مهامك الدراسية.",
-      "stats": {
-        "total": "إجمالي المهام",
-        "active": "قيد التنفيذ",
-        "overdue": "متأخرة"
-      },
-      "filters": {
-        "searchPlaceholder": "البحث في المهام...",
-        "active": "النشطة فقط"
-      },
-      "table": {
-        "pending": "في انتظار المراجعة"
-      },
-      "noAssignments": "لا توجد مهام حالياً",
-      "noAssignmentsDescriptionStudent": "لقد أنجزت كل شيء! لا توجد مهام جديدة لك في الوقت الحالي.",
-      "noAssignmentsDescriptionTeacher": "لم تقم بإنشاء أي مهام لهذا الفصل بعد.",
-      "deleteDialog": {
-        "title": "حذف المهمة؟",
-        "description": "هل أنت متأكد أنك تريد حذف هذه المهمة؟ سيؤدي ذلك إلى إزالة جميع تسليمات الطلاب نهائياً ولا يمكن التراجع عن هذا الإجراء."
-      }
-    }
-  },
   "submissions": {
     "submissions": "التسليمات",
     "label": "التسليمات"
@@ -317,6 +290,32 @@
     },
     "deleteDialog": {
       "description": "سيؤدي هذا إلى حذف الإشعار نهائياً من سجلك. لا يمكن التراجع عن هذا الإجراء."
+    }
+  },
+  "settings": {
+    "title": "إعدادات النظام",
+    "description": "تكوين السلوك العام للمنصة والإعدادات الافتراضية.",
+    "toasts": {
+      "success": "تم تحديث الإعدادات بنجاح!",
+      "error": "فشل تحديث الإعدادات: {{message}}"
+    },
+    "form": {
+      "title": "تكوين المنصة",
+      "description": "ضبط كيفية تعامل النظام مع المستخدمين وميزات الذكاء الاصطناعي.",
+      "enableAiFeatures": {
+        "label": "تفعيل ميزات الذكاء الاصطناعي",
+        "description": "تفعيل الميزات المدعومة بـ Gemini عبر المنصة (البناء السحري، مختبر الدراسة، إلخ)."
+      },
+      "defaultRegistrationRole": {
+        "label": "دور التسجيل الافتراضي",
+        "description": "الدور الافتراضي الذي يتم تعيينه للمستخدمين الجدد عند التسجيل.",
+        "placeholder": "اختر دوراً"
+      },
+      "welcomeMessage": {
+        "label": "رسالة ترحيب المنصة",
+        "description": "الرسالة التي تظهر للمستخدمين الجدد في لوحة التحكم الخاصة بهم.",
+        "placeholder": "مرحباً بكم في نظام طبلاوي!"
+      }
     }
   },
   "buttons": {
@@ -1084,9 +1083,6 @@
     "discovery": {
       "label": "تلفزيون المعلم"
     },
-    "settings": {
-      "label": "الإعدادات"
-    },
     "setting": {
       "label": "الإعدادات"
     }
@@ -1133,10 +1129,10 @@
     "noMembers": "لم يتم تعيين أعضاء",
     "createDialogTitle": "إنشاء مجموعة مشاريع جديدة",
     "createDialogDesc": "المجموعات مرتبطة بفصل معين. يمكنك إضافة أعضاء بعد إنشاء المجموعة.",
-    "groupName": "Group Name",
-    "groupNamePlaceholder": "e.g., Team Alpha, Group 1",
+    "groupName": "اسم المجموعة",
+    "groupNamePlaceholder": "مثال: فريق القمة، المجموعة الأولى",
     "classLabel": "الفصل",
-    "selectClass": "Select a class",
+    "selectClass": "اختر فصلاً",
     "show": {
       "projectGroupFor": "مجموعة مشاريع لفصل:",
       "whiteboard": "لوحة المجموعة",
@@ -1144,7 +1140,7 @@
       "addMembers": "إضافة أعضاء",
       "addMembersTo": "إضافة أعضاء إلى {{name}}",
       "addMembersDesc": "اختر طلاباً من قائمة الفصل لإضافتهم لهذه المجموعة.",
-      "selectStudents": "Select students...",
+      "selectStudents": "اختر الطلاب...",
       "noStudentsFound": "No students found.",
       "studentsSelected": "{{count}} student(s) selected"
     },
@@ -1599,6 +1595,20 @@
           "المكتبة تدعم ملفات PDF، الفيديوهات، ومستندات الأوفيس الشائعة."
         ]
       }
+    }
+  },
+  "tooltips": {
+    "magicBuilder": {
+      "title": "البناء السحري",
+      "description": "قم بإنشاء وحدة منهج كاملة فوراً باستخدام ذكاء Gemini الاصطناعي."
+    }
+  },
+  "myTeachers": {
+    "title": "معلميني",
+    "description": "عرض وإدارة المعلمين الذين تتابعهم.",
+    "empty": {
+      "title": "لم يتم العثور على معلمين",
+      "description": "أنت لا تتابع أي معلمين بعد. استكشف صفحة 'تلفزيون المعلم' لتجد مرشدك القادم!"
     }
   },
   "gamification": {

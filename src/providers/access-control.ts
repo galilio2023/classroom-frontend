@@ -24,7 +24,7 @@ export const accessControlProvider: AccessControlProvider = {
       const academicResources = [
         "classes", "assignments", "quizzes", "modules", "resources", "academic-terms",
         "subjects", "attendance", "submissions", "enrollments", "announcements",
-        "teacher-subscriptions", "teacher-applications", "discussions", "calendar",
+        "teacher-applications", "discussions", "calendar",
         "notifications", "progress", "report-card", "portfolio", "messages", "my-teachers", "channels"
       ];
 

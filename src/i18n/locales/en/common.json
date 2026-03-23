@@ -36,33 +36,6 @@
     "accessDeniedDesc": "Sorry, you do not have permission to access this page.",
     "teacherOnly": "Only teachers can manage the Global Library."
   },
-  "assignments": {
-    "assignments": "Assignments",
-    "label": "Assignments",
-    "list": {
-      "title": "Academic Assignments",
-      "description": "Track, manage, and submit your coursework tasks.",
-      "stats": {
-        "total": "Total Tasks",
-        "active": "In Progress",
-        "overdue": "Overdue"
-      },
-      "filters": {
-        "searchPlaceholder": "Search tasks...",
-        "active": "Active Only"
-      },
-      "table": {
-        "pending": "Pending Review"
-      },
-      "noAssignments": "No Assignments Found",
-      "noAssignmentsDescriptionStudent": "You're all caught up! There are no assignments for you at the moment.",
-      "noAssignmentsDescriptionTeacher": "You haven't created any assignments for this class yet.",
-      "deleteDialog": {
-        "title": "Delete Assignment?",
-        "description": "Are you sure you want to delete this assignment? This will permanently remove all student submissions and cannot be undone."
-      }
-    }
-  },
   "submissions": {
     "submissions": "Submissions",
     "label": "Submissions"
@@ -316,6 +289,32 @@
     },
     "deleteDialog": {
       "description": "This will permanently remove this notification from your history. This action cannot be undone."
+    }
+  },
+  "settings": {
+    "title": "System Settings",
+    "description": "Configure global platform behavior and defaults.",
+    "toasts": {
+      "success": "Settings updated successfully!",
+      "error": "Failed to update settings: {{message}}"
+    },
+    "form": {
+      "title": "Platform Configuration",
+      "description": "Adjust how the system handles users and AI features.",
+      "enableAiFeatures": {
+        "label": "Enable AI Features",
+        "description": "Enable Gemini-powered features across the platform (Magic Builder, Study Lab, etc.)."
+      },
+      "defaultRegistrationRole": {
+        "label": "Default Registration Role",
+        "description": "The default role assigned to new users when they sign up.",
+        "placeholder": "Select a role"
+      },
+      "welcomeMessage": {
+        "label": "Platform Welcome Message",
+        "description": "The message displayed to new users on their dashboard.",
+        "placeholder": "Welcome to Tablawy OS!"
+      }
     }
   },
   "buttons": {
@@ -1091,9 +1090,6 @@
     "discovery": {
       "label": "Teacher TV"
     },
-    "settings": {
-      "label": "Settings"
-    },
     "setting": {
       "label": "Settings"
     }
@@ -1606,6 +1602,20 @@
           "The library supports PDFs, Videos, and common Office documents."
         ]
       }
+    }
+  },
+  "tooltips": {
+    "magicBuilder": {
+      "title": "Magic Builder",
+      "description": "Generate an entire curriculum module instantly using Gemini AI."
+    }
+  },
+  "myTeachers": {
+    "title": "My Teachers",
+    "description": "View and manage the teachers you are following.",
+    "empty": {
+      "title": "No Teachers Found",
+      "description": "You aren't following any teachers yet. Explore the discovery page to find your next mentor!"
     }
   },
   "gamification": {
