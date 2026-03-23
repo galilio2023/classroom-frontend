@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { useCustom, useNotification } from "@refinedev/core";
+import { useCustom, useNotification, usePermissions } from "@refinedev/core";
 import { BACKEND_URL } from "@/config";
 
 export interface Message {
@@ -22,6 +22,10 @@ interface ChatHistoryItem {
   createdAt: string;
 }
 
+interface ChatHistoryResponse {
+  data: ChatHistoryItem[];
+}
+
 const ERROR_MESSAGE = "I'm having trouble reading the class materials right now. Please try again in a moment.";
 
 /**
@@ -42,26 +46,30 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
   const accumulatorRef = useRef("");
   const animationFrameRef = useRef<number | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
+  
   const { open } = useNotification();
+  const { data: permissions } = usePermissions({}); // Fixed: Pass empty object as required by Refine v5
 
   // 1. 📜 HISTORY: Use Refine v5 Pattern for standard GET requests
-  const { data: historyData, isLoading: isHistoryLoading } = useCustom<any>({
+  const { result: historyResult, query: historyQuery } = useCustom<ChatHistoryResponse>({
     url: `${BACKEND_URL}/ai/chat-history/${classId}`,
     method: "get",
     queryOptions: {
       enabled: !!classId,
-      onSuccess: (data) => {
-        if (data.data) {
-          const history = data.data.map((m: ChatHistoryItem) => ({
-            id: String(m.id),
-            role: m.role,
-            parts: [{ text: m.content }],
-          }));
-          setMessages(history);
-        }
-      },
     },
   });
+
+  // Sync history messages when data arrives
+  useEffect(() => {
+    if (historyResult?.data?.data) {
+      const history = historyResult.data.data.map((m: ChatHistoryItem) => ({
+        id: String(m.id),
+        role: m.role,
+        parts: [{ text: m.content }],
+      }));
+      setMessages(history);
+    }
+  }, [historyResult]);
 
   // 2. 🧹 CLEANUP: Handle component unmount and race conditions
   useEffect(() => {
@@ -96,6 +104,17 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
   // 3. 🚀 SEND: Specialized fetch for SSE Streaming (Bypasses useCustomMutation for perf)
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
+
+    // RBAC: Basic client-side check (Backend will re-verify)
+    const role = (permissions as any)?.role;
+    if (classId && role === 'parent') {
+        open?.({
+            type: "error",
+            message: "Access Denied",
+            description: "Only students and teachers can interact with the Study Buddy."
+        });
+        return;
+    }
 
     // Reset previous state
     if (abortControllerRef.current) abortControllerRef.current.abort();
@@ -219,7 +238,7 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
     input,
     setInput,
     handleSend,
-    isLoading: isLoading || isHistoryLoading,
+    isLoading: isLoading || historyQuery?.isLoading,
     scrollAreaRef,
   };
 };
