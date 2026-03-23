@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
+import { useCustom, useNotification } from "@refinedev/core";
 import { BACKEND_URL } from "@/config";
 
 export interface Message {
@@ -23,6 +24,13 @@ interface ChatHistoryItem {
 
 const ERROR_MESSAGE = "I'm having trouble reading the class materials right now. Please try again in a moment.";
 
+/**
+ * useAIChat Hook (Refine v5 Pattern)
+ * 
+ * Optimized for Tablawy OS AI Streaming.
+ * Uses Refine's useCustom for history and manual fetch for SSE streaming
+ * to maintain the real-time "typing" effect.
+ */
 export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -33,38 +41,36 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const accumulatorRef = useRef("");
   const animationFrameRef = useRef<number | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const { open } = useNotification();
 
-  // 📜 MEMORY: Load chat history on mount
-  useEffect(() => {
-    if (!classId) return;
-
-    const fetchHistory = async () => {
-        try {
-            const response = await fetch(`${BACKEND_URL}/ai/chat-history/${classId}`, {
-                credentials: "include",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${localStorage.getItem("token")}`, // Defense in depth
-                }
-            });
-            const data = await response.json();
-            if (data.data) {
-                const history = data.data.map((m: ChatHistoryItem) => ({
-                    id: String(m.id),
-                    role: m.role as "user" | "model",
-                    parts: [{ text: m.content }],
-                }));
-                setMessages(history);
-            }
-        } catch (err) {
-            console.error("Failed to fetch chat history:", err);
+  // 1. 📜 HISTORY: Use Refine v5 Pattern for standard GET requests
+  const { data: historyData, isLoading: isHistoryLoading } = useCustom<any>({
+    url: `${BACKEND_URL}/ai/chat-history/${classId}`,
+    method: "get",
+    queryOptions: {
+      enabled: !!classId,
+      onSuccess: (data) => {
+        if (data.data) {
+          const history = data.data.map((m: ChatHistoryItem) => ({
+            id: String(m.id),
+            role: m.role,
+            parts: [{ text: m.content }],
+          }));
+          setMessages(history);
         }
+      },
+    },
+  });
+
+  // 2. 🧹 CLEANUP: Handle component unmount and race conditions
+  useEffect(() => {
+    return () => {
+      if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
+      if (abortControllerRef.current) abortControllerRef.current.abort();
     };
+  }, []);
 
-    fetchHistory();
-  }, [classId]);
-
-  // Auto-scroll logic (Optimized)
   const scrollToBottom = useCallback(() => {
     if (scrollAreaRef.current) {
       const scrollContainer = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
@@ -78,18 +84,22 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
     scrollToBottom();
   }, [messages, streamingMessage, scrollToBottom]);
 
-  const updateStreamingMessage = useCallback(() => {
-    if (animationFrameRef.current) {
-      cancelAnimationFrame(animationFrameRef.current);
-    }
+  const updateStreamingUI = useCallback(() => {
+    if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
+    
     animationFrameRef.current = requestAnimationFrame(() => {
       setStreamingMessage(accumulatorRef.current);
       animationFrameRef.current = null;
     });
   }, []);
 
+  // 3. 🚀 SEND: Specialized fetch for SSE Streaming (Bypasses useCustomMutation for perf)
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
+
+    // Reset previous state
+    if (abortControllerRef.current) abortControllerRef.current.abort();
+    abortControllerRef.current = new AbortController();
 
     const userMessage: Message = {
       role: "user",
@@ -110,10 +120,11 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
     try {
       const response = await fetch(apiUrl, {
         method: "POST",
+        signal: abortControllerRef.current.signal,
         credentials: "include",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem("token")}`,
+          "Authorization": `Bearer ${localStorage.getItem("token")}`, 
         },
         body: JSON.stringify({
           message: currentInput,
@@ -123,22 +134,22 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
         }),
       });
 
-      if (!response.ok) throw new Error("Failed to send message");
+      if (!response.ok) throw new Error("Failed to connect to Gemini AI");
 
-      // Non-Streaming Branch
+      // Branch A: Standard JSON (General Assistant)
       if (!classId) {
-        const data = await response.json();
-        if (data.data?.response) {
-            setMessages((prev) => [...prev, { role: "model", parts: [{ text: data.data.response }] }]);
+        const result = await response.json();
+        if (result.data?.response) {
+          setMessages((prev) => [...prev, { role: "model", parts: [{ text: result.data.response }] }]);
         }
         setIsLoading(false);
         return;
       }
 
-      // Streaming Branch
+      // Branch B: SSE Streaming (Study Buddy)
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
-      if (!reader) throw new Error("No reader");
+      if (!reader) throw new Error("Stream reader not available");
 
       while (true) {
         const { done, value } = await reader.read();
@@ -150,11 +161,14 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
         for (const line of lines) {
           if (line.startsWith("data: ")) {
             try {
-              const data = JSON.parse(line.replace("data: ", ""));
+              const rawData = line.replace("data: ", "").trim();
+              if (!rawData) continue;
+              
+              const data = JSON.parse(rawData);
 
               if (data.text) {
                 accumulatorRef.current += data.text;
-                updateStreamingMessage();
+                updateStreamingUI();
               }
 
               if (data.sources) {
@@ -163,34 +177,38 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
 
               if (data.done) break;
             } catch (e) {
-              // Partial JSON handled by next chunk
+              // Ignore partial JSON chunks - they will be caught by next read
             }
           }
         }
       }
 
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
-      setStreamingMessage(accumulatorRef.current);
-
+      // Final State Push
       setMessages((prev) => [
         ...prev,
         {
-            role: "model",
-            parts: [{ text: accumulatorRef.current }],
-            sources: streamingSources || undefined
+          role: "model",
+          parts: [{ text: accumulatorRef.current }],
+          sources: streamingSources || undefined
         }
       ]);
       setStreamingMessage("");
       setStreamingSources(null);
 
-    } catch (error) {
-      console.error("Chat error:", error);
+    } catch (error: any) {
+      if (error.name === 'AbortError') return;
+      
+      console.error("Tablawy AI Error:", error);
+      open?.({
+        type: "error",
+        message: "Connection Error",
+        description: ERROR_MESSAGE
+      });
+      
       setMessages((prev) => [...prev, { role: "model", parts: [{ text: ERROR_MESSAGE }] }]);
     } finally {
       setIsLoading(false);
-      if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
+      abortControllerRef.current = null;
     }
   };
 
@@ -201,7 +219,7 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
     input,
     setInput,
     handleSend,
-    isLoading,
+    isLoading: isLoading || isHistoryLoading,
     scrollAreaRef,
   };
 };
