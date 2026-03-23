@@ -33,10 +33,10 @@ interface AuthPermissions {
 const ERROR_MESSAGE = "I'm having trouble reading the class materials right now. Please try again in a moment.";
 
 /**
- * useAIChat Hook (Enterprise Version)
+ * useAIChat Hook (Enterprise Production Version)
  * 
- * Final polished version for Tablawy OS.
- * Fixes history race conditions, hardens SSE parsing, and integrates Refine RBAC.
+ * Optimized for Tablawy OS AI Streaming.
+ * Handles history syncing, SSE line buffering, and multi-class navigation.
  */
 export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -50,7 +50,7 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
   const lineBufferRef = useRef(""); 
   const animationFrameRef = useRef<number | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
-  const hasLoadedHistory = useRef(false); // 🛡️ Prevent history overwrite race condition
+  const hasLoadedHistory = useRef(false);
   
   const { open } = useNotification();
   const { data: permissions, isLoading: isPermissionsLoading, isError: isPermissionsError } = usePermissions<AuthPermissions>({});
@@ -64,10 +64,19 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
     },
   });
 
-  // Sync history exactly once
+  // Reset state when classId changes to support navigation
   useEffect(() => {
-    if (historyResult?.data?.data && !hasLoadedHistory.current) {
-      const history = historyResult.data.data.map((m: ChatHistoryItem) => ({
+    setMessages([]);
+    hasLoadedHistory.current = false;
+    accumulatorRef.current = "";
+    lineBufferRef.current = "";
+  }, [classId]);
+
+  // Sync history exactly once per classId
+  useEffect(() => {
+    const historyData = historyResult?.data?.data;
+    if (historyData && !hasLoadedHistory.current) {
+      const history = historyData.map((m: ChatHistoryItem) => ({
         id: String(m.id),
         role: m.role,
         parts: [{ text: m.content }],
@@ -111,15 +120,14 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
   const handleSend = async () => {
     if (!input.trim() || isLoading || isPermissionsLoading) return;
 
-    // RBAC: Safety Check
     if (isPermissionsError) {
-        open?.({ type: "error", message: "Auth Error", description: "Could not verify your permissions." });
+        open?.({ type: "error", message: "Auth Error", description: "Could not verify permissions." });
         return;
     }
 
     const role = permissions?.role;
     if (classId && role === 'parent') {
-        open?.({ type: "error", message: "Access Denied", description: "Only students and teachers can interact with the Study Buddy." });
+        open?.({ type: "error", message: "Access Denied", description: "Parents cannot interact with the Study Buddy." });
         return;
     }
 
@@ -148,7 +156,7 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
       const response = await fetch(apiUrl, {
         method: "POST",
         signal: abortControllerRef.current.signal,
-        credentials: "include", // Essential for Vercel -> Railway cookie auth
+        credentials: "include",
         headers,
         body: JSON.stringify({
           message: currentInput,
@@ -158,7 +166,7 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
         }),
       });
 
-      if (!response.ok) throw new Error("Failed to connect to Gemini AI");
+      if (!response.ok) throw new Error("Failed to connect to AI Service");
 
       if (!classId) {
         const result = await response.json();
@@ -197,12 +205,13 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
               if (data.sources) setStreamingSources(data.sources);
               if (data.done) break;
             } catch (e) {
-              // Partial JSON is buffered
+              // Partial data buffered for next chunk
             }
           }
         }
       }
 
+      // Final Flush
       if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
       setStreamingMessage(accumulatorRef.current);
 
