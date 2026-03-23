@@ -26,14 +26,17 @@ interface ChatHistoryResponse {
   data: ChatHistoryItem[];
 }
 
+interface AuthPermissions {
+  role?: "student" | "teacher" | "ta" | "admin" | "parent";
+}
+
 const ERROR_MESSAGE = "I'm having trouble reading the class materials right now. Please try again in a moment.";
 
 /**
- * useAIChat Hook (Refine v5 Pattern)
+ * useAIChat Hook (Enterprise Refactor)
  * 
- * Optimized for Tablawy OS AI Streaming.
- * Uses Refine's useCustom for history and manual fetch for SSE streaming
- * to maintain the real-time "typing" effect.
+ * Final hardening for Tablawy OS.
+ * Includes SSE line buffering, RBAC loading safety, and full type safety.
  */
 export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -44,13 +47,14 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
 
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const accumulatorRef = useRef("");
+  const lineBufferRef = useRef(""); // 🛡️ SSE Hardening: Buffer for partial chunks
   const animationFrameRef = useRef<number | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   
   const { open } = useNotification();
-  const { data: permissions } = usePermissions({}); // Fixed: Pass empty object as required by Refine v5
+  const { data: permissions, isLoading: isPermissionsLoading } = usePermissions<AuthPermissions>({});
 
-  // 1. 📜 HISTORY: Use Refine v5 Pattern for standard GET requests
+  // 1. 📜 HISTORY: Use Refine v5 Pattern
   const { result: historyResult, query: historyQuery } = useCustom<ChatHistoryResponse>({
     url: `${BACKEND_URL}/ai/chat-history/${classId}`,
     method: "get",
@@ -59,7 +63,6 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
     },
   });
 
-  // Sync history messages when data arrives
   useEffect(() => {
     if (historyResult?.data?.data) {
       const history = historyResult.data.data.map((m: ChatHistoryItem) => ({
@@ -71,7 +74,7 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
     }
   }, [historyResult]);
 
-  // 2. 🧹 CLEANUP: Handle component unmount and race conditions
+  // 2. 🧹 CLEANUP
   useEffect(() => {
     return () => {
       if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
@@ -101,12 +104,12 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
     });
   }, []);
 
-  // 3. 🚀 SEND: Specialized fetch for SSE Streaming (Bypasses useCustomMutation for perf)
+  // 3. 🚀 SEND: Specialized fetch for SSE Streaming
   const handleSend = async () => {
-    if (!input.trim() || isLoading) return;
+    if (!input.trim() || isLoading || isPermissionsLoading) return;
 
-    // RBAC: Basic client-side check (Backend will re-verify)
-    const role = (permissions as any)?.role;
+    // RBAC: Loading-safe check
+    const role = permissions?.role;
     if (classId && role === 'parent') {
         open?.({
             type: "error",
@@ -116,7 +119,6 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
         return;
     }
 
-    // Reset previous state
     if (abortControllerRef.current) abortControllerRef.current.abort();
     abortControllerRef.current = new AbortController();
 
@@ -132,6 +134,7 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
     setStreamingMessage("");
     setStreamingSources(null);
     accumulatorRef.current = "";
+    lineBufferRef.current = ""; 
 
     const finalUrl = classId ? "/ai/study-buddy" : url;
     const apiUrl = `${BACKEND_URL}${finalUrl}`;
@@ -155,7 +158,6 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
 
       if (!response.ok) throw new Error("Failed to connect to Gemini AI");
 
-      // Branch A: Standard JSON (General Assistant)
       if (!classId) {
         const result = await response.json();
         if (result.data?.response) {
@@ -165,7 +167,6 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
         return;
       }
 
-      // Branch B: SSE Streaming (Study Buddy)
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
       if (!reader) throw new Error("Stream reader not available");
@@ -175,7 +176,12 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
         if (done) break;
 
         const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk.split("\n\n");
+        // prepend previous remaining buffer
+        const combinedChunk = lineBufferRef.current + chunk;
+        const lines = combinedChunk.split("\n\n");
+
+        // The last element might be a partial line
+        lineBufferRef.current = lines.pop() || "";
 
         for (const line of lines) {
           if (line.startsWith("data: ")) {
@@ -196,7 +202,8 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
 
               if (data.done) break;
             } catch (e) {
-              // Ignore partial JSON chunks - they will be caught by next read
+              // Should not happen with buffering, but for safety:
+              console.warn("Malformed SSE line:", line);
             }
           }
         }
@@ -238,7 +245,7 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
     input,
     setInput,
     handleSend,
-    isLoading: isLoading || historyQuery?.isLoading,
+    isLoading: isLoading || historyQuery?.isLoading || isPermissionsLoading,
     scrollAreaRef,
   };
 };
