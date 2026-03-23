@@ -14,8 +14,14 @@ interface UseAIChatProps {
   classId?: string | number;
 }
 
+interface ChatHistoryItem {
+  id: string;
+  role: "user" | "model";
+  content: string;
+  createdAt: string;
+}
+
 const ERROR_MESSAGE = "I'm having trouble reading the class materials right now. Please try again in a moment.";
-// Removed THROTTLE_MS as requestAnimationFrame will handle timing
 
 export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -26,8 +32,7 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
 
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const accumulatorRef = useRef("");
-  // Removed lastUpdateRef as requestAnimationFrame will handle timing
-  const animationFrameRef = useRef<number | null>(null); // Used for requestAnimationFrame
+  const animationFrameRef = useRef<number | null>(null);
 
   // 📜 MEMORY: Load chat history on mount
   useEffect(() => {
@@ -39,11 +44,12 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
                 credentials: "include",
                 headers: {
                     "Content-Type": "application/json",
+                    "Authorization": `Bearer ${localStorage.getItem("token")}`, // Defense in depth
                 }
             });
             const data = await response.json();
             if (data.data) {
-                const history = data.data.map((m: any) => ({
+                const history = data.data.map((m: ChatHistoryItem) => ({
                     id: String(m.id),
                     role: m.role as "user" | "model",
                     parts: [{ text: m.content }],
@@ -72,16 +78,15 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
     scrollToBottom();
   }, [messages, streamingMessage, scrollToBottom]);
 
-  // Modified updateUI to use requestAnimationFrame
   const updateStreamingMessage = useCallback(() => {
     if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current);
     }
     animationFrameRef.current = requestAnimationFrame(() => {
       setStreamingMessage(accumulatorRef.current);
-      animationFrameRef.current = null; // Clear the ref after the update
+      animationFrameRef.current = null;
     });
-  }, []); // No dependencies needed as setStreamingMessage is stable and accumulatorRef is a ref
+  }, []);
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
@@ -108,6 +113,7 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
         credentials: "include",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("token")}`,
         },
         body: JSON.stringify({
           message: currentInput,
@@ -119,15 +125,17 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
 
       if (!response.ok) throw new Error("Failed to send message");
 
+      // Non-Streaming Branch
       if (!classId) {
         const data = await response.json();
-        if (data.response) {
-            setMessages((prev) => [...prev, { role: "model", parts: [{ text: data.response }] }]);
+        if (data.data?.response) {
+            setMessages((prev) => [...prev, { role: "model", parts: [{ text: data.data.response }] }]);
         }
         setIsLoading(false);
         return;
       }
 
+      // Streaming Branch
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
       if (!reader) throw new Error("No reader");
@@ -146,7 +154,7 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
 
               if (data.text) {
                 accumulatorRef.current += data.text;
-                updateStreamingMessage(); // Call the new update function
+                updateStreamingMessage();
               }
 
               if (data.sources) {
@@ -155,21 +163,17 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
 
               if (data.done) break;
             } catch (e) {
-              // Ignore partial JSON chunks
+              // Partial JSON handled by next chunk
             }
           }
         }
       }
 
-      // Ensure the final accumulated message is pushed to streamingMessage one last time
-      // before moving it to chat history. This handles cases where the last chunk
-      // arrived but requestAnimationFrame hasn't fired yet.
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
-      setStreamingMessage(accumulatorRef.current); // Final update to streamingMessage
+      setStreamingMessage(accumulatorRef.current);
 
-      // Final push to state
       setMessages((prev) => [
         ...prev,
         {
@@ -178,7 +182,7 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
             sources: streamingSources || undefined
         }
       ]);
-      setStreamingMessage(""); // Clear streaming message after it's added to history
+      setStreamingMessage("");
       setStreamingSources(null);
 
     } catch (error) {
@@ -186,14 +190,13 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
       setMessages((prev) => [...prev, { role: "model", parts: [{ text: ERROR_MESSAGE }] }]);
     } finally {
       setIsLoading(false);
-      // Ensure any pending animation frame is cancelled on completion or error
       if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
     }
   };
 
   return {
     messages,
-    streamingMessage, // The "live" message being typed
+    streamingMessage,
     streamingSources,
     input,
     setInput,
