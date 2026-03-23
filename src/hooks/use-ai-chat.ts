@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
+import { BACKEND_URL } from "@/config";
 
 export interface Message {
   id?: string;
@@ -34,9 +35,10 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
 
     const fetchHistory = async () => {
         try {
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/ai/chat-history/${classId}`, {
+            const response = await fetch(`${BACKEND_URL}/ai/chat-history/${classId}`, {
+                credentials: "include",
                 headers: {
-                    "Authorization": `Bearer ${localStorage.getItem("token")}`,
+                    "Content-Type": "application/json",
                 }
             });
             const data = await response.json();
@@ -98,14 +100,14 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
     accumulatorRef.current = "";
 
     const finalUrl = classId ? "/ai/study-buddy" : url;
-    const apiUrl = `${import.meta.env.VITE_API_URL}${finalUrl}`;
+    const apiUrl = `${BACKEND_URL}${finalUrl}`;
 
     try {
       const response = await fetch(apiUrl, {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem("token")}`,
         },
         body: JSON.stringify({
           message: currentInput,
