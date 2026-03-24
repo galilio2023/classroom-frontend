@@ -52,6 +52,12 @@ export enum VerificationStatus {
   REJECTED = "rejected",
 }
 
+export interface BasePermissions {
+  role?: UserRole;
+  canAccessAi?: boolean;
+  [key: string]: any;
+}
+
 export interface User {
   id: string;
   name: string;

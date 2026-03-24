@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { useCustom, useNotification, usePermissions } from "@refinedev/core";
 import { useTranslation } from "react-i18next";
 import { BACKEND_URL } from "@/config";
-import { UserRole } from "@/types";
+import { BasePermissions, UserRole } from "@/types";
 
 export interface Message {
   id?: string;
@@ -28,9 +28,7 @@ interface ChatHistoryResponse {
   data: ChatHistoryItem[];
 }
 
-interface AuthPermissions {
-  role?: UserRole;
-}
+interface AuthPermissions extends BasePermissions {}
 
 const MAX_INPUT_LENGTH = 4000;
 
@@ -79,12 +77,13 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
   const { data: permissions, isLoading: isPermissionsLoading, isError: isPermissionsError } = usePermissions<AuthPermissions>({});
 
   // 1. 📜 HISTORY: Standard Refine v5 GET
-  const effectiveClassId = classId || null;
+  // Task: Context Safety - Fallback to "global" history if no classId provided
+  const effectiveClassId = classId || 'global';
   const { result: historyResult, query: historyQuery } = useCustom<ChatHistoryResponse>({
     url: `${BACKEND_URL}/ai/chat-history/${effectiveClassId}`,
     method: "get",
     queryOptions: {
-      enabled: !!effectiveClassId && hasLoadedHistoryFor.current !== effectiveClassId,
+      enabled: hasLoadedHistoryFor.current !== effectiveClassId,
     },
   });
 
@@ -94,14 +93,13 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
         setMessages([]);
         accumulatorRef.current = "";
         lineBufferRef.current = "";
-        if (!effectiveClassId) hasLoadedHistoryFor.current = null;
     }
   }, [effectiveClassId]);
 
   // Sync history safely
   useEffect(() => {
     const historyData = historyResult?.data?.data;
-    if (historyData && effectiveClassId && hasLoadedHistoryFor.current !== effectiveClassId) {
+    if (historyData && hasLoadedHistoryFor.current !== effectiveClassId) {
       const history = historyData.map((m: ChatHistoryItem) => ({
         id: String(m.id),
         role: m.role,

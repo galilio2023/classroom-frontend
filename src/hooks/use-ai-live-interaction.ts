@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { useNotification, usePermissions } from "@refinedev/core";
 import { useTranslation } from "react-i18next";
 import { BACKEND_URL } from "@/config";
-import { UserRole } from "@/types";
+import { BasePermissions, UserRole } from "@/types";
 import { usePersistentLive } from "./use-persistent-live";
 import { AI_API } from "@/constants/api";
 
@@ -13,9 +13,7 @@ interface UseAILiveInteractionProps {
   onFinished?: () => void;
 }
 
-interface AuthPermissions {
-  role?: UserRole;
-}
+interface AuthPermissions extends BasePermissions {}
 
 /**
  * 🦾 useAILiveInteraction Hook
@@ -53,6 +51,17 @@ export const useAILiveInteraction = ({
   const speechRef = useRef<SpeechSynthesisUtterance | null>(null);
   const accumulatorRef = useRef("");
   const lineBufferRef = useRef("");
+  const animationFrameRef = useRef<number | null>(null);
+
+  // --- 🦾 BATCHED UPDATES (Pattern Adherence: Typing Efficiency) ---
+  const updateUI = useCallback((script: string, state?: "talking" | "thinking" | "listening") => {
+    if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
+    animationFrameRef.current = requestAnimationFrame(() => {
+        setCurrentScript(script);
+        if (state) setVisualState(state);
+        animationFrameRef.current = null;
+    });
+  }, []);
 
   // 1. 🎙️ SPEECH SYNTHESIS ENGINE (Hardened)
   const speakText = useCallback((text: string) => {
@@ -86,6 +95,17 @@ export const useAILiveInteraction = ({
       speechRef.current = utterance;
       synth.speak(utterance);
   }, [language, onFinished]);
+
+  // 🚀 SESSION TOGGLE (Pattern Adherence: Lifecycle Safety)
+  const toggleJoin = useCallback((val: boolean) => {
+    setIsJoined(val);
+    if (!val) {
+        // Reset local state on leave
+        setCurrentScript(null);
+        setVisualState("talking");
+        if (window.speechSynthesis) window.speechSynthesis.cancel();
+    }
+  }, [setIsJoined]);
 
   // 2. 🚀 SSE STREAMING ENGINE
   const interact = async (question: string) => {
@@ -150,7 +170,7 @@ export const useAILiveInteraction = ({
               if (data.text) {
                 accumulatorRef.current += data.text;
                 // Update local UI script immediately for visual feedback
-                setCurrentScript(accumulatorRef.current);
+                updateUI(accumulatorRef.current);
               }
               
               // 📊 LOGGING: Performance Metadata
@@ -191,6 +211,7 @@ export const useAILiveInteraction = ({
   useEffect(() => {
     return () => {
       isMounted.current = false;
+      if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
       if (abortControllerRef.current) abortControllerRef.current.abort();
       if (window.speechSynthesis) window.speechSynthesis.cancel();
     };
@@ -198,7 +219,7 @@ export const useAILiveInteraction = ({
 
   return {
     isJoined,
-    setIsJoined,
+    setIsJoined: toggleJoin,
     visualState,
     setVisualState,
     isLoading,

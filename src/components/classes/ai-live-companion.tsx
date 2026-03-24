@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useNotification, usePermissions } from "@refinedev/core";
-import { UserRole } from "@/types";
+import { BasePermissions, UserRole } from "@/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAILiveInteraction } from "@/hooks/use-ai-live-interaction";
 
@@ -18,9 +18,7 @@ interface AILiveCompanionProps {
   onFinished?: () => void;
 }
 
-interface AuthPermissions {
-  role?: UserRole;
-}
+interface AuthPermissions extends BasePermissions {}
 
 /**
  * AILiveCompanion Component (Refactored)
@@ -267,9 +265,10 @@ export const AILiveCompanion = ({
               
               <AnimatePresence mode="wait">
                   {!currentScript && !photo ? (
-                      <div className="space-y-2">
-                          <Skeleton className="h-6 w-64 bg-white/10" />
-                          <Skeleton className="h-6 w-48 mx-auto bg-white/10" />
+                      <div className="flex flex-col items-center gap-2 opacity-40 animate-pulse">
+                          <BrainCircuit className="w-8 h-8 text-ai-primary mb-2" />
+                          <div className="h-4 w-48 bg-ai-primary/20 rounded-full" />
+                          <div className="h-4 w-32 bg-ai-primary/20 rounded-full" />
                       </div>
                   ) : (
                       <motion.p 
