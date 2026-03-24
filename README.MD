@@ -1,7 +1,7 @@
 <div align="center">
   <h1 style="font-size: 2.5em; font-weight: bold; margin-bottom: 5px;">Frontend: Tablawy OS (Classroom AI)</h1>
   <p style="font-size: 1.1em; color: #555;">
-    The world's first **Agentic UI** for Education. Powered by **Refine v5** and **Gemini 3.0 Flash**.
+    The world's first **Agentic UI** for Education. Powered by **Refine v5** and **Gemini 3.1 Flash Lite**.
   </p>
 </div>
 
