@@ -3,7 +3,33 @@ import { classFormSchema, scheduleSchema } from "@/schemas/class";
 import { signUpFormSchema } from "@/schemas/auth";
 import { Quiz } from "./quiz";
 
+export interface AIMetadata {
+  classId?: number;
+  conversationId?: number;
+  isAborted?: boolean;
+  errorName?: string;
+  errorCode?: string;
+  model?: string;
+  usage?: {
+    promptTokens: number;
+    candidatesTokens: number;
+    totalTokens: number;
+  };
+  latencyMs?: number;
+  promptVersion?: string;
+  isCached?: boolean;
+  [key: string]: any;
+}
+
+export interface AIResponse<T> {
+  data: T;
+  metadata?: AIMetadata;
+  usage?: AIMetadata['usage'];
+  latencyMs?: number;
+}
+
 export type SignUpPayload = z.infer<typeof signUpFormSchema>;
+
 
 export enum UserRole {
   ADMIN = "admin",

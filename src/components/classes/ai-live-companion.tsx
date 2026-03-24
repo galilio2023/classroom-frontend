@@ -61,8 +61,16 @@ export const AILiveCompanion = ({
   });
 
   const [isListening, setIsListening] = useState(false);
+  const [isBrowserSupported, setIsBrowserSupported] = useState(false);
   const recognitionRef = useRef<any>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // 🛡️ SSR SAFETY: Initialize browser-only features after mount
+  useEffect(() => {
+      const supported = typeof window !== 'undefined' && 
+        (!!(window as any).SpeechRecognition || !!(window as any).webkitSpeechRecognition);
+      setIsBrowserSupported(supported);
+  }, []);
 
   // Sync initial/parent script
   useEffect(() => {
@@ -72,9 +80,6 @@ export const AILiveCompanion = ({
           if (isJoined) speakText(script);
       }
   }, [script, isJoined, speakText, currentScript, setCurrentScript]);
-
-  const isBrowserSupported = typeof window !== 'undefined' && 
-    (!!(window as any).SpeechRecognition || !!(window as any).webkitSpeechRecognition);
 
   // --- 👂 SPEECH RECOGNITION (STUDENT EAR) ---
   const startListening = () => {

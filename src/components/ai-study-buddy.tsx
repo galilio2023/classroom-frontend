@@ -38,7 +38,8 @@ export const AIStudyBuddy = ({ subject, topic, assignment, classId }: AIStudyBud
     scrollAreaRef,
   } = useAIChat({
     url: AI_API.STUDY_BUDDY,
-    context: { subject, topic, assignment, classId },
+    classId,
+    context: { subject, topic, assignment },
   });
 
   // 🛡️ Global Master Switch: Hide if AI is disabled
