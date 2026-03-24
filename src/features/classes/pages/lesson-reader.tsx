@@ -296,7 +296,7 @@ export const LessonReader = () => {
                     </Button>
                   </div>
                   <p className="mt-3 text-[8px] md:text-[9px] text-center font-bold text-muted-foreground/40 uppercase tracking-[0.1em]">
-                    {t("common.aiInsightTitle")} • Gemini 3.1 Flash Lite
+                    {t("common.aiInsightTitle")} • Gemini 3 Flash Preview
                   </p>
                 </div>
               </motion.aside>
