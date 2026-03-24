@@ -9,6 +9,7 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 interface PersistentLiveState {
   activeClassId: string | null;
   isJoined: boolean;
+  isAiDelegated: boolean;
   promotionTrailer: {
       url: string | null;
       teacherName: string | null;
@@ -20,6 +21,7 @@ interface PersistentLiveState {
   };
   setActiveClassId: (id: string | null) => void;
   setIsJoined: (val: boolean) => void;
+  setIsAiDelegated: (val: boolean) => void;
   setPromotionTrailer: (url: string | null, teacherName?: string | null, headline?: string | null) => void;
   setActiveVideo: (url: string | null, title?: string | null) => void;
   reset: () => void;
@@ -30,6 +32,7 @@ export const usePersistentLive = create<PersistentLiveState>()(
     (set) => ({
       activeClassId: null,
       isJoined: false,
+      isAiDelegated: false,
       promotionTrailer: {
           url: null,
           teacherName: null,
@@ -41,6 +44,7 @@ export const usePersistentLive = create<PersistentLiveState>()(
       },
       setActiveClassId: (id: string | null) => set({ activeClassId: id }),
       setIsJoined: (val: boolean) => set({ isJoined: val }),
+      setIsAiDelegated: (val: boolean) => set({ isAiDelegated: val }),
       setPromotionTrailer: (url: string | null, teacherName: string | null = null, headline: string | null = null) => set({ 
           promotionTrailer: { url, teacherName, headline } 
       }),
@@ -50,6 +54,7 @@ export const usePersistentLive = create<PersistentLiveState>()(
       reset: () => set({ 
           activeClassId: null, 
           isJoined: false, 
+          isAiDelegated: false,
           promotionTrailer: { url: null, teacherName: null, headline: null },
           activeVideo: { url: null, title: null }
       }),

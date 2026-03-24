@@ -36,11 +36,13 @@ export const AILiveCompanion = ({
   const speechRef = useRef<SpeechSynthesisUtterance | null>(null);
   const recognitionRef = useRef<any>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isMounted = useRef(true);
 
   const { mutate: askAi } = useCustomMutation();
   const { open } = useNotification();
 
-  const isBrowserSupported = typeof window !== 'undefined' && ('webkitSpeechRecognition' in window);
+  const isBrowserSupported = typeof window !== 'undefined' && 
+    (!!(window as any).SpeechRecognition || !!(window as any).webkitSpeechRecognition);
 
   // --- 🎙️ TEXT TO SPEECH (AI VOICE) ---
 // ... (omitted same as before)
@@ -63,7 +65,12 @@ export const AILiveCompanion = ({
     utterance.onend = () => {
         setIsSpeaking(false);
         setVisualState("listening");
+        speechRef.current = null;
         onFinished?.();
+    };
+    utterance.onerror = () => {
+        setIsSpeaking(false);
+        speechRef.current = null;
     };
 
     speechRef.current = utterance;
@@ -75,6 +82,7 @@ export const AILiveCompanion = ({
   // Cleanup on unmount
   useEffect(() => {
     return () => {
+      isMounted.current = false;
       window.speechSynthesis.cancel();
       if (recognitionRef.current) recognitionRef.current.stop();
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -97,7 +105,7 @@ export const AILiveCompanion = ({
       setIsListening(true);
       setVisualState("listening");
 
-      const SpeechRecognition = (window as any).webkitSpeechRecognition;
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
       const recognition = new SpeechRecognition();
       recognition.lang = language === "Arabic" ? "ar-SA" : "en-US";
       recognition.continuous = false;
@@ -106,8 +114,10 @@ export const AILiveCompanion = ({
       // 🛡️ TIMEOUT: Reset state if user doesn't speak within 10 seconds
       timeoutRef.current = setTimeout(() => {
           recognition.stop();
-          setIsListening(false);
-          setVisualState("talking");
+          if (isMounted.current) {
+            setIsListening(false);
+            setVisualState("talking");
+          }
           open?.({
               type: "error",
               message: "Listening timed out",
@@ -148,7 +158,8 @@ export const AILiveCompanion = ({
   };
 
   const handleAskAI = (question: string) => {
-// ... (rest of handleAskAI as before)
+      if (!question.trim()) return;
+
       setVisualState("thinking");
       askAi({
           url: AI_INTERACT_URL(classId),
@@ -156,10 +167,12 @@ export const AILiveCompanion = ({
           values: { question, language }
       }, {
           onSuccess: (res: any) => {
+              if (!isMounted.current) return;
               setCurrentScript(res.data.script);
               setVisualState("talking");
           },
           onError: () => {
+              if (!isMounted.current) return;
               setVisualState("talking");
               open?.({
                   type: "error",
