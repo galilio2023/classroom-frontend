@@ -1,11 +1,13 @@
 import React, { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Mic, Volume2, BrainCircuit, Play, User as UserIcon, Hand, Loader2, Sparkles } from "lucide-react";
+import { Mic, Volume2, BrainCircuit, Play, User as UserIcon, Hand, Loader2, Sparkles, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useCustomMutation } from "@refinedev/core";
 import { toast } from "sonner";
+import { useUserRole } from "@/hooks/use-user-role";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface AILiveCompanionProps {
   classId: string;
@@ -14,8 +16,10 @@ interface AILiveCompanionProps {
   visualCue: "talking" | "thinking" | "listening";
   language?: string;
   onFinished?: () => void;
-  isTeacher?: boolean;
 }
+
+// 🛡️ SECURITY: Centralized API Endpoints
+const AI_INTERACT_URL = (classId: string) => `/live-session/${classId}/interact`;
 
 export const AILiveCompanion = ({
   classId,
@@ -24,8 +28,8 @@ export const AILiveCompanion = ({
   visualCue: initialVisualCue,
   language = "English",
   onFinished,
-  isTeacher = false
 }: AILiveCompanionProps) => {
+  const { isStaff, isLoading: isIdentityLoading } = useUserRole();
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [currentScript, setCurrentScript] = useState(script);
@@ -42,7 +46,9 @@ export const AILiveCompanion = ({
     const synth = window.speechSynthesis;
     synth.cancel(); // Stop any previous speech
 
-    const utterance = new SpeechSynthesisUtterance(currentScript);
+    // 🛡️ SANITIZATION: Ensure we only pass plain text to the speech engine
+    const cleanText = currentScript.replace(/<[^>]*>?/gm, '');
+    const utterance = new SpeechSynthesisUtterance(cleanText);
     const langCode = language === "Arabic" ? "ar-SA" : "en-US";
     utterance.lang = langCode;
     
@@ -85,9 +91,18 @@ export const AILiveCompanion = ({
           handleAskAI(transcript);
       };
 
-      recognition.onerror = () => {
+      recognition.onerror = (event: any) => {
           setIsListening(false);
           setVisualState("talking");
+          
+          // 🛡️ PERMISSION PROTECTION: Handle specific rejection states
+          if (event.error === 'not-allowed') {
+              toast.error("Microphone access denied. Please enable it to interact with AI.", {
+                  icon: <AlertCircle className="w-4 h-4 text-destructive" />
+              });
+          } else {
+              console.warn("Speech recognition error:", event.error);
+          }
       };
 
       recognition.onend = () => setIsListening(false);
@@ -99,7 +114,7 @@ export const AILiveCompanion = ({
   const handleAskAI = (question: string) => {
       setVisualState("thinking");
       askAi({
-          url: `/live-session/${classId}/interact`,
+          url: AI_INTERACT_URL(classId),
           method: "patch",
           values: { question, language }
       }, {
@@ -113,6 +128,16 @@ export const AILiveCompanion = ({
           }
       });
   };
+
+  if (isIdentityLoading) {
+      return (
+          <div className="w-full h-full min-h-[400px] flex flex-col items-center justify-center bg-black/5 rounded-3xl animate-pulse">
+              <Skeleton className="w-40 h-40 md:w-56 md:h-56 rounded-full mb-8" />
+              <Skeleton className="h-6 w-48 mb-4" />
+              <Skeleton className="h-4 w-32" />
+          </div>
+      );
+  }
 
   return (
     <div className={cn(
@@ -195,18 +220,29 @@ export const AILiveCompanion = ({
                   </span>
               </div>
               
-              <motion.p 
-                key={currentScript}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="text-xl md:text-2xl font-bold text-white leading-relaxed line-clamp-4"
-              >
-                  {currentScript || "Preparing to continue the lesson..."}
-              </motion.p>
+              <AnimatePresence mode="wait">
+                  {!currentScript && !photo ? (
+                      <div className="space-y-2">
+                          <Skeleton className="h-6 w-64 bg-white/10" />
+                          <Skeleton className="h-6 w-48 mx-auto bg-white/10" />
+                      </div>
+                  ) : (
+                      <motion.p 
+                        key={currentScript}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="text-xl md:text-2xl font-bold text-white leading-relaxed line-clamp-4"
+                      >
+                          {currentScript || "Preparing to continue the lesson..."}
+                      </motion.p>
+                  )}
+              </AnimatePresence>
           </div>
 
           {/* Interaction Controls */}
-          {!isTeacher && (
+          {/* 🛡️ RBAC: Only Students (non-staff) can raise hands to interact */}
+          {!isStaff && (
               <div className="flex items-center gap-4 pt-6">
                   <Button 
                     variant="outline" 

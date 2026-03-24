@@ -49,8 +49,14 @@ const fetcher = async (url: string, options?: RequestInit) => {
     ...(options?.headers as Record<string, string>),
   };
 
-  if (["POST", "PUT", "PATCH"].includes(method)) {
+  if (["POST", "PUT", "PATCH", "DELETE"].includes(method)) {
     headers["Content-Type"] = "application/json";
+  }
+
+  // 🛡️ DUAL AUTH: Better Auth (Cookies) + Bearer Token (Authorization Header)
+  const token = localStorage.getItem("token");
+  if (token && !headers["Authorization"]) {
+    headers["Authorization"] = `Bearer ${token}`;
   }
 
   return fetch(url, {

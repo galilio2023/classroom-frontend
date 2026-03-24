@@ -44,7 +44,7 @@ export const LiveClassroom = ({
   const { data: identity } = useGetIdentity<User>();
   const { isJoined, setIsJoined, setActiveClassId, activeClassId } = usePersistentLive();
   const jitsiContainerRef = useRef<HTMLDivElement>(null);
-  const [api, setApi] = useState<any>(null);
+  const apiRef = useRef<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("video");
 
@@ -117,11 +117,11 @@ export const LiveClassroom = ({
   }, [groups, identity, isTeacher]);
 
   useEffect(() => {
-    if (isJoined && numericClassId === Number(activeClassId) && !api && !isLoading) {
+    if (isJoined && numericClassId === Number(activeClassId) && !apiRef.current && !isLoading) {
         // 🚀 AUTO-RESUME: Reconnect if state says we were joined
         void startMeeting();
     }
-  }, [isJoined, activeClassId, numericClassId, api, isLoading]);
+  }, [isJoined, activeClassId, numericClassId, isLoading]);
 
   useEffect(() => {
     if (!window.JitsiMeetExternalAPI) {
@@ -134,7 +134,7 @@ export const LiveClassroom = ({
     // Real-time Socket Listeners
     if (!socket.connected) socket.connect();
 
-    socket.on("live_session_started", (data) => {
+    const handleSessionStarted = (data: any) => {
       if (Number(data.classId) === numericClassId && !isTeacher) {
         toast.info(
           t("classes.live.toasts.sessionStarted", { name: data.startedBy }),
@@ -146,17 +146,20 @@ export const LiveClassroom = ({
           },
         );
       }
-    });
+    };
 
-    socket.on("live_session_ended", (data) => {
+    const handleSessionEnded = (data: any) => {
       if (Number(data.classId) === numericClassId) {
         setIsJoined(false); // 🚀 Global store cleanup
-        if (api) api.dispose();
+        if (apiRef.current) {
+          apiRef.current.dispose();
+          apiRef.current = null;
+        }
         toast.error(t("classes.live.toasts.sessionEnded"));
       }
-    });
+    };
 
-    socket.on("breakout_session_started", (data) => {
+    const handleBreakoutStarted = (data: any) => {
       if (Number(data.classId) === numericClassId) {
         setIsBreakoutActive(true);
         toast.info(t("classes.live.toasts.breakoutStarted"));
@@ -169,9 +172,9 @@ export const LiveClassroom = ({
           joinBreakoutRoom(myGroup.id);
         }
       }
-    });
+    };
 
-    socket.on("breakout_session_ended", (data) => {
+    const handleBreakoutEnded = (data: any) => {
       if (Number(data.classId) === numericClassId) {
         setIsBreakoutActive(false);
         setCurrentGroupId(null);
@@ -179,18 +182,25 @@ export const LiveClassroom = ({
         // Re-join main hall
         startMeeting();
       }
-    });
+    };
+
+    socket.on("live_session_started", handleSessionStarted);
+    socket.on("live_session_ended", handleSessionEnded);
+    socket.on("breakout_session_started", handleBreakoutStarted);
+    socket.on("breakout_session_ended", handleBreakoutEnded);
 
     return () => {
-      if (api) {
-        api.dispose();
+      // 🛡️ HARD CLEANUP: Dispose Jitsi instance on unmount
+      if (apiRef.current) {
+        apiRef.current.dispose();
+        apiRef.current = null;
       }
-      socket.off("live_session_started");
-      socket.off("live_session_ended");
-      socket.off("breakout_session_started");
-      socket.off("breakout_session_ended");
+      socket.off("live_session_started", handleSessionStarted);
+      socket.off("live_session_ended", handleSessionEnded);
+      socket.off("breakout_session_started", handleBreakoutStarted);
+      socket.off("breakout_session_ended", handleBreakoutEnded);
     };
-  }, [api, numericClassId, isTeacher, myGroup, t]);
+  }, [numericClassId, isTeacher, myGroup, t]);
 
   const [generateRoadmap, setGenerateRoadmap] = useState(true);
 
@@ -223,7 +233,10 @@ export const LiveClassroom = ({
       return;
 
     setIsLoading(true);
-    if (api) api.dispose();
+    if (apiRef.current) {
+      apiRef.current.dispose();
+      apiRef.current = null;
+    }
 
     // If joining main hall, clear group ID
     if (!groupId) setCurrentGroupId(null);
@@ -299,7 +312,7 @@ export const LiveClassroom = ({
 
       try {
         const newApi = new window.JitsiMeetExternalAPI(domain, options);
-        setApi(newApi);
+        apiRef.current = newApi;
 
         newApi.addEventListeners({
           videoConferenceJoined: () => {
@@ -317,14 +330,14 @@ export const LiveClassroom = ({
               setCurrentGroupId(null);
             } else {
               setIsJoined(false);
-              setApi(null);
+              apiRef.current = null;
               // 🛡️ REFRESH-SAFE: Do NOT end the session automatically here.
               // This allows teachers to refresh (F5) without kicking everyone out.
             }
           },
           readyToClose: () => {
             setIsJoined(false);
-            setApi(null);
+            apiRef.current = null;
           },
           recordingStatusChanged: (payload: {
             on: boolean;
@@ -397,7 +410,10 @@ export const LiveClassroom = ({
       {
         onSuccess: () => {
           setIsJoined(false);
-          if (api) api.dispose();
+          if (apiRef.current) {
+            apiRef.current.dispose();
+            apiRef.current = null;
+          }
           toast.success("Class session ended successfully.");
           setIsLoading(false);
         },
@@ -410,12 +426,12 @@ export const LiveClassroom = ({
   };
 
   const handleDelegateToAI = async () => {
-    if (!api) return;
+    if (!apiRef.current) return;
     setIsLoading(true);
 
     try {
         // 1. Capture Teacher Frame from Jitsi
-        const { data: snapshot } = await api.captureLargeVideoScreenshot();
+        const { data: snapshot } = await apiRef.current.captureLargeVideoScreenshot();
         
         // 2. Trigger Backend Delegation
         await startLiveSession({
@@ -555,7 +571,7 @@ export const LiveClassroom = ({
                 size="icon" 
                 className="bg-live-primary text-white rounded-full border-none shadow-xl h-8 w-8"
                 onClick={() => {
-                    if (api) api.executeCommand('togglePip');
+                    if (apiRef.current) apiRef.current.executeCommand('togglePip');
                 }}
                 title="Pop Out to System"
               >
