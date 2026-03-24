@@ -155,6 +155,7 @@ export interface ChannelStats {
 
 export interface GlobalConfig {
   enableAiFeatures: boolean;
+  isDryRun?: boolean;
   welcomeMessage?: string;
 }
 

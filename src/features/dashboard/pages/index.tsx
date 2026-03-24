@@ -9,6 +9,7 @@ import {
   ShieldCheck,
   ChevronRight,
   Zap,
+  Bell
 } from "lucide-react";
 import { UserRole } from "@/types";
 import React, { useEffect } from "react";
@@ -147,5 +148,4 @@ const Dashboard = () => {
 );
 };
 
-import { Bell } from "lucide-react";
 export default Dashboard;

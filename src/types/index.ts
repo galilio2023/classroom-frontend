@@ -125,6 +125,7 @@ export interface Submission {
   assignmentId: number;
   studentId: string;
   groupId?: number | null;
+  aiApprovalStatus?: "pending" | "approved" | "rejected";
   createdAt: string;
   updatedAt: string;
   student?: User;
@@ -427,7 +428,16 @@ export interface AiLog {
   prompt: string;
   response: string;
   tokensUsed: number;
+  latencyMs: number;
   model: string;
+  metadata: {
+      classId?: number;
+      conversationId?: number;
+      isAborted?: boolean;
+      errorName?: string;
+      errorCode?: string;
+      [key: string]: any;
+  };
   createdAt: string;
   user?: User;
 }

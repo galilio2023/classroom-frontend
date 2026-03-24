@@ -70,6 +70,7 @@ const gradingSchema = (t: any) =>
     feedback: z.string().optional(),
     requiresResubmission: z.boolean().default(false),
     teacherPrivateNotes: z.string().optional(),
+    aiApprovalStatus: z.string().optional(),
   });
 
 type GradingFormValues = z.infer<ReturnType<typeof gradingSchema>>;
@@ -192,7 +193,10 @@ export const GradingDialog = ({
       {
         resource: "submissions",
         id: submission.id,
-        values: values,
+        values: {
+            ...values,
+            aiApprovalStatus: "approved"
+        },
       },
       {
         onSuccess: () => {

@@ -15,7 +15,9 @@ interface ChatBubbleProps {
   isOwn: boolean;
   onDelete: (id: number) => void;
   onReply: (id: number) => void;
+  onSolve?: (postId: number, solverId: string) => void;
   isAdmin: boolean;
+  isStaff?: boolean;
 }
 
 /**
@@ -23,7 +25,7 @@ interface ChatBubbleProps {
  * PERFORMANCE NOTE: For extremely deep threads (>50 levels), consider 
  * switching to a virtualized list or flattening the thread hierarchy.
  */
-export const ChatBubble = ({ post, isOwn, onDelete, onReply, isAdmin }: ChatBubbleProps) => {
+export const ChatBubble = ({ post, isOwn, onDelete, onReply, onSolve, isAdmin, isStaff }: ChatBubbleProps) => {
   const { t, i18n } = useTranslation();
   const { data: userIdentity } = useGetIdentity<User>();
   dayjs.locale(i18n.language);
@@ -88,16 +90,28 @@ export const ChatBubble = ({ post, isOwn, onDelete, onReply, isAdmin }: ChatBubb
             >
               <Reply className="h-3.5 w-3.5" />
             </Button>
-            {(isOwn || isAdmin) && (
+            {isStaff && post.parentId && post.user?.id !== post.solvedBy?.id && (
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="h-7 w-7 rounded-full hover:bg-destructive/10 hover:text-destructive transition-colors"
+                className="h-7 w-7 rounded-full hover:bg-green-500/10 hover:text-green-600 transition-colors"
+                onClick={() => onSolve?.(post.parentId!, post.user.id)}
+                title="Mark as Solved"
+              >
+                <CheckCircle2 className="h-3.5 w-3.5" />
+              </Button>
+            )}
+            {(isOwn || isAdmin || isStaff) && (
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-7 w-7 rounded-full hover:bg-destructive/10 hover:text-destructive transition-colors text-muted-foreground/40"
                 onClick={() => onDelete(post.id)}
               >
                 <Trash2 className="h-3.5 w-3.5" />
               </Button>
             )}
+
           </div>
         </div>
 
@@ -129,7 +143,9 @@ export const ChatBubble = ({ post, isOwn, onDelete, onReply, isAdmin }: ChatBubb
                     isOwn={reply.user?.id === userIdentity?.id} 
                     onDelete={onDelete} 
                     onReply={onReply} 
+                    onSolve={onSolve}
                     isAdmin={isAdmin} 
+                    isStaff={isStaff}
                  />
              ))}
           </div>

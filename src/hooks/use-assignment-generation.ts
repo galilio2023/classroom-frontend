@@ -52,11 +52,15 @@ export const useAssignmentGeneration = () => {
             description: "Gemini has created a draft for you.",
           });
         },
-        onError: () => {
+        onError: (error: any) => {
+          let description = "There was an error connecting to the AI service.";
+          if (error.status === 429) description = "AI generation limit reached for this period. Please try again later.";
+          if (error.status === 503) description = "AI services are currently offline for maintenance.";
+
           open?.({
             type: "error",
             message: "Generation Failed",
-            description: "There was an error connecting to the AI service.",
+            description,
           });
         },
       }

@@ -58,15 +58,46 @@ export const useAssignmentForm = () => {
       peerReviewWeight: 20,
       rubric: [{ criteria: "Accuracy", maxPoints: 10 }, { criteria: "Clarity", maxPoints: 10 }],
     },
+    warnWhenUnsavedChanges: true,
     refineCoreProps: {
       resource: "assignments",
       action: "create",
       onMutationSuccess: () => {
         const targetClassId = form.getValues("classId");
+        localStorage.removeItem("draft:assignment:new"); // Clear draft on success
         go({ to: `/classes/show/${targetClassId}`, type: "replace" });
       },
     },
   });
+
+  // 🛡️ AUTO-DRAFT PERSISTENCE: Save form state to localStorage
+  const watchedValues = form.watch();
+  useEffect(() => {
+      const draft = {
+          title: watchedValues.title,
+          description: watchedValues.description,
+          classId: watchedValues.classId,
+          moduleId: watchedValues.moduleId
+      };
+      if (draft.title || draft.description) {
+          localStorage.setItem("draft:assignment:new", JSON.stringify(draft));
+      }
+  }, [watchedValues.title, watchedValues.description, watchedValues.classId, watchedValues.moduleId]);
+
+  // 🚀 DRAFT RECOVERY: Restore state on mount
+  useEffect(() => {
+      const savedDraft = localStorage.getItem("draft:assignment:new");
+      if (savedDraft) {
+          try {
+              const parsed = JSON.parse(savedDraft);
+              if (parsed.title && !form.getValues("title")) form.setValue("title", parsed.title);
+              if (parsed.description && !form.getValues("description")) form.setValue("description", parsed.description);
+              if (parsed.classId && !form.getValues("classId")) form.setValue("classId", parsed.classId);
+          } catch (e) {
+              console.error("Draft recovery failed", e);
+          }
+      }
+  }, []);
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,

@@ -3,6 +3,12 @@ import { ListResponse } from "@/types";
 import { HttpError } from "@refinedev/core";
 import { ColumnDef } from "@tanstack/react-table";
 import { useTable } from "@refinedev/react-table";
+import { useCustomMutation, useNotification } from "@refinedev/core";
+import { useDashboard } from "@/features/dashboard/hooks/use-dashboard";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { DataTable } from "@/components/refine-ui/data-table/data-table";
 import { SparkleLoader } from "@/components/ai/sparkle-loader";
 import { Badge } from "@/components/ui/badge";
@@ -37,9 +43,72 @@ import { SystemHealthReport } from "../types";
 
 const AIGovernanceList = () => {
   const { t, i18n } = useTranslation();
+  const { open } = useNotification();
+  const { coreData, navigation: { refetchCore } } = useDashboard();
+  const { mutate: mutateSettings } = useCustomMutation();
+  
   usePageTitle(t("aiHub.governance.title"));
   const isAr = i18n.language === "ar";
   const [selectedReport, setSelectedReport] = useState<SystemHealthReport | null>(null);
+  const [isMutating, setIsMutating] = useState(false);
+
+  // --- ADMIN HANDLERS ---
+  const handleToggleAi = (val: boolean) => {
+    setIsMutating(true);
+    mutateSettings({
+        url: "/settings/global-settings",
+        method: "patch",
+        values: { enableAiFeatures: val },
+        successNotification: () => ({
+            type: "success",
+            message: t("settings.toasts.success"),
+            description: val ? "AI Services Online" : "AI Services Suspended",
+        }),
+    }, {
+        onSettled: () => {
+            setIsMutating(false);
+            void refetchCore();
+        }
+    });
+  };
+
+  const handleToggleDryRun = (val: boolean) => {
+    setIsMutating(true);
+    mutateSettings({
+        url: "/settings/global-settings",
+        method: "patch",
+        values: { isDryRun: val },
+        successNotification: () => ({
+            type: "success",
+            message: t("settings.toasts.success"),
+            description: val ? "Mock Mode Active" : "Live API Active",
+        }),
+    }, {
+        onSettled: () => {
+            setIsMutating(false);
+            void refetchCore();
+        }
+    });
+  };
+
+  const handleResetCircuit = () => {
+    setIsMutating(true);
+    mutateSettings({
+        url: "/settings/global-settings",
+        method: "patch",
+        values: { errorCount: 0, lastErrorAt: null, enableAiFeatures: true },
+        successNotification: () => ({
+            type: "success",
+            message: "Circuit Breaker Reset",
+            description: "System recovered. Error counts cleared.",
+        }),
+    }, {
+        onSettled: () => {
+            setIsMutating(false);
+            void refetchCore();
+        }
+    });
+  };
 
   const columns = useMemo<ColumnDef<SystemHealthReport>[]>(
     () => [
@@ -56,6 +125,27 @@ const AIGovernanceList = () => {
             {dayjs(getValue<string>()).format("MMM DD, YYYY")}
           </div>
         ),
+      },
+      {
+        accessorKey: "severity",
+        header: () => (
+          <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+            {t("aiHub.governance.severity")}
+          </p>
+        ),
+        cell: ({ getValue }) => {
+            const severity = getValue<string>();
+            return (
+                <Badge className={cn(
+                    "h-6 px-2 text-[9px] font-black uppercase tracking-tighter border-none",
+                    severity === "critical" ? "bg-destructive text-destructive-foreground" :
+                    severity === "warning" ? "bg-orange-500 text-white" :
+                    "bg-blue-500 text-white"
+                )}>
+                    {severity}
+                </Badge>
+            )
+        }
       },
       {
         id: "happiness",
@@ -176,6 +266,85 @@ const AIGovernanceList = () => {
                 </Badge>
             </div>
         </div>
+      </motion.div>
+
+      {/* Control Center */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+      >
+        <Card className="rounded-[2rem] border-border/40 shadow-2xl bg-card/50 backdrop-blur-xl overflow-hidden">
+            <CardContent className="p-8 md:p-10">
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-10">
+                    <div className="space-y-6 flex-1">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-xl bg-ai-primary/10 text-ai-primary">
+                                <ShieldCheck className="h-5 w-5" />
+                            </div>
+                            <h3 className="text-xl font-black tracking-tight">{t("settings.form.title")}</h3>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div className="flex items-center justify-between p-6 rounded-2xl bg-muted/30 border border-border/20">
+                                <div className="space-y-1">
+                                    <Label className="font-black text-sm">{t("settings.form.enableAiFeatures.label")}</Label>
+                                    <p className="text-[10px] text-muted-foreground font-medium max-w-[200px]">
+                                        {t("settings.form.enableAiFeatures.description")}
+                                    </p>
+                                </div>
+                                <Switch 
+                                    checked={coreData?.globalConfig?.enableAiFeatures !== false}
+                                    onCheckedChange={handleToggleAi}
+                                    disabled={isMutating}
+                                />
+                            </div>
+
+                            <div className="flex items-center justify-between p-6 rounded-2xl bg-muted/30 border border-border/20">
+                                <div className="space-y-1">
+                                    <Label className="font-black text-sm text-orange-600 flex items-center gap-2">
+                                        <AlertTriangle className="h-3.5 w-3.5" />
+                                        {t("aiHub.assistant.mockMode")}
+                                    </Label>
+                                    <p className="text-[10px] text-muted-foreground font-medium max-w-[200px]">
+                                        {t("aiHub.assistant.mockModeDesc")}
+                                    </p>
+                                </div>
+                                <Switch 
+                                    checked={coreData?.globalConfig?.isDryRun === true}
+                                    onCheckedChange={handleToggleDryRun}
+                                    disabled={isMutating}
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="lg:pl-10 lg:border-l border-border/40 space-y-4">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground text-center">
+                            Emergency Actions
+                        </p>
+                        <Button 
+                            variant="destructive" 
+                            className="w-full h-14 rounded-2xl font-black uppercase tracking-widest text-xs gap-2 shadow-lg shadow-destructive/20"
+                            onClick={handleResetCircuit}
+                            disabled={isMutating}
+                        >
+                            <BrainCircuit className="h-4 w-4" />
+                            Reset Circuit Breaker
+                        </Button>
+                        <Button 
+                            variant="outline" 
+                            className="w-full h-12 rounded-2xl font-bold text-xs gap-2 border-border/40"
+                            onClick={() => void tableQuery?.refetch()}
+                            disabled={isMutating || isLoading}
+                        >
+                            <Activity className={cn("h-4 w-4", isLoading && "animate-spin")} />
+                            Force Audit Now
+                        </Button>
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
       </motion.div>
 
       {/* Main Table */}

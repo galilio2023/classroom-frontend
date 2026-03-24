@@ -1,0 +1,64 @@
+import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
+
+/**
+ * Global State for Persistent Live Sessions.
+ * This allows the teacher's video to survive navigation across ANY page in the app.
+ * PERSISTED: State survives page refresh (F5).
+ */
+interface PersistentLiveState {
+  activeClassId: string | null;
+  isJoined: boolean;
+  promotionTrailer: {
+      url: string | null;
+      teacherName: string | null;
+      headline: string | null;
+  };
+  activeVideo: {
+      url: string | null;
+      title: string | null;
+  };
+  setActiveClassId: (id: string | null) => void;
+  setIsJoined: (val: boolean) => void;
+  setPromotionTrailer: (url: string | null, teacherName?: string | null, headline?: string | null) => void;
+  setActiveVideo: (url: string | null, title?: string | null) => void;
+  reset: () => void;
+}
+
+export const usePersistentLive = create<PersistentLiveState>()(
+  persist(
+    (set) => ({
+      activeClassId: null,
+      isJoined: false,
+      promotionTrailer: {
+          url: null,
+          teacherName: null,
+          headline: null
+      },
+      activeVideo: {
+          url: null,
+          title: null
+      },
+      setActiveClassId: (id: string | null) => set({ activeClassId: id }),
+      setIsJoined: (val: boolean) => set({ isJoined: val }),
+      setPromotionTrailer: (url: string | null, teacherName: string | null = null, headline: string | null = null) => set({ 
+          promotionTrailer: { url, teacherName, headline } 
+      }),
+      setActiveVideo: (url: string | null, title: string | null = null) => set({ 
+          activeVideo: { url, title } 
+      }),
+      reset: () => set({ 
+          activeClassId: null, 
+          isJoined: false, 
+          promotionTrailer: { url: null, teacherName: null, headline: null },
+          activeVideo: { url: null, title: null }
+      }),
+    }),
+    {
+      name: 'tablawy-live-session', // Key in localStorage
+      storage: createJSONStorage(() => localStorage),
+    }
+  )
+);
+
+

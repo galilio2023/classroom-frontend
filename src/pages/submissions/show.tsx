@@ -25,9 +25,11 @@ import ReactMarkdown from "react-markdown";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import dayjs from "dayjs";
+import { useDashboard } from "@/features/dashboard/hooks/use-dashboard";
 
 const SubmissionShow = () => {
   const { t, i18n } = useTranslation();
+  const { coreData } = useDashboard();
   const isAr = i18n.language === 'ar';
   const { id } = useParams();
   const navigate = useNavigate();
@@ -112,6 +114,12 @@ const SubmissionShow = () => {
                 {t("buttons.back")}
             </Button>
             <div className="flex items-center gap-3">
+                {submission.aiApprovalStatus === "pending" && (
+                    <Badge className="bg-ai-primary/10 text-ai-primary border-ai-primary/20 px-4 py-1 rounded-full font-black uppercase tracking-widest text-[10px] animate-pulse">
+                        <Sparkles className="h-3 w-3 mr-1.5" />
+                        {t("assignments.grading.proposedAI")}
+                    </Badge>
+                )}
                 {submission.grade !== null ? (
                     <Badge className="bg-success text-success-foreground px-4 py-1 rounded-full font-black uppercase tracking-widest text-[10px]">
                         {t("status.completed")}
@@ -170,16 +178,18 @@ const SubmissionShow = () => {
                     <CardHeader>
                         <CardTitle className="text-sm font-black uppercase tracking-widest flex items-center justify-between">
                             {t("assignments.grading.gradeSubmission")}
-                            <Button 
-                                variant="outline" 
-                                size="sm" 
-                                onClick={handleAiAnalyze}
-                                disabled={isAnalyzing}
-                                className="h-7 text-[10px] gap-1.5 border-ai-primary/20 text-ai-primary hover:bg-ai-primary/5"
-                            >
-                                {isAnalyzing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
-                                {t("buttons.aiAssist")}
-                            </Button>
+                            {coreData?.globalConfig?.enableAiFeatures !== false && (
+                                <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    onClick={handleAiAnalyze}
+                                    disabled={isAnalyzing}
+                                    className="h-7 text-[10px] gap-1.5 border-ai-primary/20 text-ai-primary hover:bg-ai-primary/5"
+                                >
+                                    {isAnalyzing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
+                                    {t("buttons.aiAssist")}
+                                </Button>
+                            )}
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-6">

@@ -40,7 +40,8 @@ export const AIStudyBuddy = ({ subject, topic, assignment, classId }: AIStudyBud
   });
 
   // 🛡️ Global Master Switch: Hide if AI is disabled
-  if (coreData?.globalConfig?.enableAiFeatures === false) {
+  // 🛡️ CONTEXT GUARD: Hide if no classId is provided (avoids strange behavior on global dashboards)
+  if (coreData?.globalConfig?.enableAiFeatures === false || !classId) {
     return null;
   }
 

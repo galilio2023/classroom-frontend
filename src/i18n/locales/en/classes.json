@@ -660,6 +660,7 @@
       "draftNotice": "This submission is currently a Draft. You can review the student's work, but grading is disabled until they officially turn it in.",
       "finalScore": "Final Score (%)",
       "aiSuggested": "AI Suggested",
+      "proposedAI": "Proposed by AI",
       "feedbackToStudent": "Feedback to Student",
       "feedbackPlaceholder": "Provide constructive feedback...",
       "requiresResubmission": "Requires Resubmission",

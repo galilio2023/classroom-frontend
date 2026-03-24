@@ -44,9 +44,29 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
   const { t } = useTranslation();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
+  
+  // 🛡️ AUTO-DRAFT: AI Assistant Persistence
+  useEffect(() => {
+      const draftKey = `draft:ai-assistant:${classId || 'global'}`;
+      if (input) {
+          localStorage.setItem(draftKey, input);
+      } else {
+          localStorage.removeItem(draftKey);
+      }
+  }, [input, classId]);
+
+  // 🚀 DRAFT RECOVERY
+  useEffect(() => {
+      const draftKey = `draft:ai-assistant:${classId || 'global'}`;
+      const saved = localStorage.getItem(draftKey);
+      if (saved && !input) {
+          setInput(saved);
+      }
+  }, [classId]);
   const [isLoading, setIsLoading] = useState(false);
   const [streamingMessage, setStreamingMessage] = useState("");
   const [streamingSources, setStreamingSources] = useState<any[] | null>(null);
+  const [isDryRun, setIsDryRun] = useState(false);
 
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const accumulatorRef = useRef("");
@@ -180,6 +200,8 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
         }),
       });
 
+      if (response.status === 429) throw new Error("RATE_LIMIT_EXCEEDED");
+      if (response.status === 503) throw new Error("AI_SERVICE_OFFLINE");
       if (!response.ok) throw new Error("AI_SERVICE_UNAVAILABLE");
 
       // General Chat (Non-Streaming)
@@ -187,6 +209,9 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
         const result = await response.json();
         if (result.data?.response) {
           setMessages((prev) => [...prev, { role: "model", parts: [{ text: result.data.response }] }]);
+        }
+        if (result.metadata?.isDryRun) {
+            setIsDryRun(true);
         }
         setIsLoading(false);
         return;
@@ -251,10 +276,15 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
       if (error.name === 'AbortError') return;
       
       console.error("Tablawy AI Error:", error);
+      
+      let description = t("aiHub.errors.serviceUnavailable" as any);
+      if (error.message === "RATE_LIMIT_EXCEEDED") description = t("aiHub.errors.rateLimit" as any);
+      if (error.message === "AI_SERVICE_OFFLINE") description = t("aiHub.errors.maintenance" as any);
+
       open?.({ 
         type: "error", 
         message: t("common.error"), 
-        description: t("aiHub.errors.serviceUnavailable" as any) 
+        description 
       });
       
       setMessages((prev) => [...prev, { 
@@ -278,5 +308,6 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
     handleSend,
     isLoading: isLoading || historyQuery?.isLoading || isPermissionsLoading,
     scrollAreaRef,
+    isDryRun,
   };
 };

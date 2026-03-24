@@ -125,6 +125,10 @@ export const dataProvider: DataProvider = {
           if (value !== undefined && value !== null && value !== "") {
             url.searchParams.append(queryKey, String(value));
           }
+        } else {
+            // ⚠️ GOTCHA: ConditionalFilter (OR/AND) not supported by current flat-mapped backend.
+            // Suppressing to prevent crash, but logging for developer awareness.
+            console.warn("DataProvider: Conditional filters (OR/AND) are not yet supported by the flat-mapping backend.");
         }
       });
     }

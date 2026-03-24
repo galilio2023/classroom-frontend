@@ -1,4 +1,4 @@
-import { useList, useCreate, useDelete, useGetIdentity } from "@refinedev/core";
+import { useList, useCreate, useDelete, useGetIdentity, useCustomMutation } from "@refinedev/core";
 import { useState } from "react";
 import { Module, User, UserRole, Resource } from "@/types";
 import { 
@@ -29,7 +29,8 @@ import {
   LayoutDashboard,
   Info,
   Plus,
-  Save
+  Save,
+  Play
 } from "lucide-react";
 import { 
   Dialog, 
@@ -60,6 +61,8 @@ import { Badge } from "@/components/ui/badge";
 import { useTranslation } from "react-i18next";
 
 import { ResourcesEmptyState } from "../components/class-empty-states";
+
+import { usePersistentLive } from "@/hooks/use-persistent-live";
 
 interface ResourceTabProps {
   classId: string;
@@ -94,6 +97,9 @@ export const ResourceTab = ({ classId }: ResourceTabProps) => {
   const isCreatingResource = createMutation.isPending;
 
   const { mutate: deleteResource } = useDelete();
+  const { mutate: featureResource } = useCustomMutation();
+
+  const { setActiveVideo } = usePersistentLive();
 
   const handleAddResource = () => {
     if (!newResource.title || !activeModuleId) {
@@ -236,6 +242,43 @@ export const ResourceTab = ({ classId }: ResourceTabProps) => {
                               </div>
                             </div>
                             <div className="flex items-center gap-2">
+                              {isTeacher && res.type === 'video' && (
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl text-muted-foreground hover:bg-primary/5 hover:text-primary transition-all">
+                                            <MoreVertical className="h-4 w-4" />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end" className="rounded-xl border-none shadow-2xl p-2 min-w-[180px] bg-card/95 backdrop-blur-xl">
+                                        <DropdownMenuItem 
+                                            className="rounded-lg font-black uppercase tracking-widest text-[9px] gap-2 py-3 cursor-pointer text-ai-primary hover:bg-ai-primary/10 transition-all"
+                                            onClick={() => {
+                                                featureResource({
+                                                    url: "/channels/feature-resource",
+                                                    method: "post",
+                                                    values: { resourceId: res.id },
+                                                    successNotification: () => ({
+                                                        type: "success",
+                                                        message: "Highlighted!",
+                                                        description: "This lesson is now featured on your public Teacher TV channel."
+                                                    })
+                                                });
+                                            }}
+                                        >
+                                            <Sparkles className="h-3.5 w-3.5" />
+                                            {t("buttons.featureOnTv", "Feature on Teacher TV")}
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem 
+                                            className="rounded-lg font-black uppercase tracking-widest text-[9px] gap-2 py-3 cursor-pointer text-destructive hover:bg-destructive/10 transition-all"
+                                            onClick={() => handleDeleteResource(res.id)}
+                                        >
+                                            <Trash2 className="h-3.5 w-3.5" />
+                                            {t("buttons.delete")}
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                              )}
+
                               {res.type === 'note' ? (
                                 <Button variant="ghost" size="sm" asChild className="h-9 rounded-xl px-4 text-[10px] font-black uppercase tracking-widest gap-2 text-primary hover:bg-primary/10 transition-all">
                                   <Link to={`/classes/${classId}/lessons/${res.id}`}>
@@ -243,6 +286,19 @@ export const ResourceTab = ({ classId }: ResourceTabProps) => {
                                     {t("buttons.openLesson")}
                                     <ArrowRight className={cn("h-3 w-3 opacity-0 group-hover/item:opacity-100 transition-all", isAr ? "translate-x-2 group-hover:translate-x-0 rotate-180" : "-translate-x-2 group-hover:translate-x-0")} />
                                   </Link>
+                                </Button>
+                              ) : res.type === 'video' ? (
+                                <Button 
+                                    variant="ghost" 
+                                    size="sm" 
+                                    className="h-9 rounded-xl px-4 text-[10px] font-black uppercase tracking-widest gap-2 text-blue-500 hover:bg-blue-500/10 transition-all"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setActiveVideo(res.url!, res.title);
+                                    }}
+                                >
+                                    <Play className="h-3.5 w-3.5 fill-blue-500" />
+                                    {t("buttons.watchNow", "Watch Now")}
                                 </Button>
                               ) : (
                                 <Button variant="ghost" size="sm" asChild className="h-9 rounded-xl px-4 text-[10px] font-black uppercase tracking-widest gap-2 hover:bg-muted transition-all">

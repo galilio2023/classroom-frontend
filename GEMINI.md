@@ -36,9 +36,10 @@ To transform the educational experience through:
 | Feature | Frontend Component | Primary Hook | Target User |
 | :--- | :--- | :--- | :--- |
 | **Magic Builder** | `MagicBuilderDialog` | `useCustomMutation` | Teacher |
+| **Co-Teacher** | `AILiveCompanion` | `usePersistentLive` | Student |
 | **Study Buddy** | `AIStudyBuddy` | `useAIChat` (Hardened) | Student |
+| **Video PiP** | `VideoMiniPlayer` | `usePersistentLive` | Student |
 | **System Health** | `SystemHealthCard` | `useDashboard` | Admin |
-| **Study History** | `StudyHistoryList` | `useCustom` | Student |
 
 ## 5. CI/CD & GitHub Workflow Integration
 The Gemini API is integrated into the **GitHub Actions** pipeline for automated code reviews and documentation audits.

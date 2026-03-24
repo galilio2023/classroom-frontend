@@ -353,12 +353,12 @@ const QuizShow = () => {
             <CardContent className="p-8 md:p-12 pt-0 space-y-10 md:space-y-12">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div className="p-6 md:p-8 rounded-[2rem] bg-muted/30 border border-primary/5 space-y-2 text-center shadow-inner">
-                  <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">{t("classes.quiz.questionsCount")}</p>
+                  <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">{t("classes.quiz.questionsCount", "Questions")}</p>
                   <p className="text-3xl md:text-4xl font-black text-primary">{quiz.questions?.length || 0}</p>
                 </div>
                 <div className="p-6 md:p-8 rounded-[2rem] bg-muted/30 border border-primary/5 space-y-2 text-center shadow-inner">
-                  <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">{t("classes.quiz.minsUnit")}</p>
-                  <p className="text-3xl md:text-4xl font-black text-primary">{quiz.timeLimit ? `${quiz.timeLimit} ${t("classes.quiz.minsUnit")}` : t("classes.quiz.noDescription")}</p>
+                  <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">{t("classes.quiz.timeLimit", "Time Limit")}</p>
+                  <p className="text-3xl md:text-4xl font-black text-primary">{quiz.timeLimit ? `${quiz.timeLimit} ${t("classes.quiz.minsUnit", "min")}` : t("classes.quiz.noLimit", "Unlimited")}</p>
                 </div>
               </div>
 
@@ -368,9 +368,9 @@ const QuizShow = () => {
                     <ShieldCheck className="h-6 w-6 md:h-7 w-7" />
                   </div>
                   <div className="space-y-1">
-                    <p className="font-black uppercase tracking-widest text-xs text-amber-600">{t("classes.live.videoSession")}</p>
+                    <p className="font-black uppercase tracking-widest text-xs text-amber-600">{t("classes.quiz.integrityPolicy", "Academic Integrity")}</p>
                     <p className="text-sm md:text-base text-amber-800/70 font-medium leading-relaxed">
-                        {t("classes.quiz.noQuizzesDescriptionStudent")}
+                        {t("classes.quiz.integrityDescription", "Your session is monitored. Once started, you cannot pause the timer.")}
                     </p>
                   </div>
                 </div>
@@ -396,7 +396,7 @@ const QuizShow = () => {
                     {t("buttons.viewReport")}
                   </Button>
                   <p className="text-center text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">
-                    {t("classes.live.mainHall")}
+                    {t("classes.quiz.teacherViewNotice", "Only students can take quizzes.")}
                   </p>
                 </div>
               )}
