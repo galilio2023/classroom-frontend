@@ -62,6 +62,7 @@ export const AILiveCompanion = ({
 
   const [isListening, setIsListening] = useState(false);
   const [isBrowserSupported, setIsBrowserSupported] = useState(false);
+  const [isHydrated, setIsHydrated] = useState(false);
   const recognitionRef = useRef<any>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -70,6 +71,19 @@ export const AILiveCompanion = ({
       const supported = typeof window !== 'undefined' && 
         (!!(window as any).SpeechRecognition || !!(window as any).webkitSpeechRecognition);
       setIsBrowserSupported(supported);
+      setIsHydrated(true);
+  }, []);
+
+  // 🧹 CLEANUP: Abort microphone on unmount
+  useEffect(() => {
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.abort();
+      }
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
   }, []);
 
   // Sync initial/parent script
@@ -146,7 +160,7 @@ export const AILiveCompanion = ({
   const isParent = role === UserRole.PARENT;
   const isStaff = role === UserRole.TEACHER || role === UserRole.ADMIN || role === UserRole.TA;
 
-  if (isParent) return null;
+  if (!isHydrated || isParent) return null;
 
   if (isPermissionsLoading) {
       return (
