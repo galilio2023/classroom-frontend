@@ -42,9 +42,15 @@ export const usePersistentLive = create<PersistentLiveState>()(
           url: null,
           title: null
       },
-      setActiveClassId: (id: string | null) => set({ activeClassId: id }),
-      setIsJoined: (val: boolean) => set({ isJoined: val }),
-      setIsAiDelegated: (val: boolean) => set({ isAiDelegated: val }),
+      setActiveClassId: (id: string | null) => {
+          // If switching classes, reset joined state to prevent leakage
+          set((state) => ({ 
+              activeClassId: id,
+              isJoined: id === state.activeClassId ? state.isJoined : false,
+              isAiDelegated: id === state.activeClassId ? state.isAiDelegated : false
+          }));
+      },
+      setIsJoined: (val: boolean) => set({ isJoined: val }),      setIsAiDelegated: (val: boolean) => set({ isAiDelegated: val }),
       setPromotionTrailer: (url: string | null, teacherName: string | null = null, headline: string | null = null) => set({ 
           promotionTrailer: { url, teacherName, headline } 
       }),

@@ -228,6 +228,9 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
         url: "modules/magic-create",
         method: "post",
         values: { classId: Number(classId), ...magicConfig },
+        meta: {
+            invalidates: ["modules"],
+        }
       },
       {
         onSuccess: () => {

@@ -9,12 +9,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useAILiveInteraction } from "@/hooks/use-ai-live-interaction";
 import { useDashboard } from "@/features/dashboard/hooks/use-dashboard";
 import { useAIAuthorization } from "@/hooks/use-ai-authorization";
+import { AIVisualState } from "@/features/ai/types/ai";
 
 interface AILiveCompanionProps {
   classId: string;
   photo: string | null;
   script: string | null;
-  visualCue: "talking" | "thinking" | "listening";
+  visualCue: AIVisualState;
   language?: string;
   onFinished?: () => void;
 }
@@ -112,16 +113,31 @@ export const AILiveCompanion = ({
       
       {!isJoined && (
           <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/40 backdrop-blur-md text-center p-8">
-              <Sparkles className="w-12 h-12 text-ai-primary mb-4 animate-pulse" />
-              <h3 className="text-2xl font-black text-white uppercase tracking-tighter mb-4">Start Interactive AI Session</h3>
-              <p className="text-muted-foreground text-sm mb-8 max-w-xs">Click the button below to allow your AI Co-Teacher to speak and listen for your questions.</p>
-              <Button 
-                size="lg" 
-                onClick={() => setIsJoined(true)}
-                className="rounded-full bg-ai-primary hover:bg-ai-primary/80 text-white font-bold px-12"
-              >
-                  Join AI Session
-              </Button>
+              {!isBrowserSupported && isHydrated ? (
+                  <div className="bg-destructive/10 border border-destructive/20 p-6 rounded-2xl max-w-xs animate-in fade-in zoom-in duration-300">
+                      <AlertCircle className="w-10 h-10 text-destructive mx-auto mb-3" />
+                      <h4 className="text-white font-bold mb-2">Browser Not Supported</h4>
+                      <p className="text-xs text-muted-foreground mb-4">
+                          Speech interaction requires a modern browser like Chrome or Edge.
+                      </p>
+                      <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
+                          Retry Connection
+                      </Button>
+                  </div>
+              ) : (
+                  <>
+                    <Sparkles className="w-12 h-12 text-ai-primary mb-4 animate-pulse" />
+                    <h3 className="text-2xl font-black text-white uppercase tracking-tighter mb-4">Start Interactive AI Session</h3>
+                    <p className="text-muted-foreground text-sm mb-8 max-w-xs">Click the button below to allow your AI Co-Teacher to speak and listen for your questions.</p>
+                    <Button 
+                        size="lg" 
+                        onClick={() => setIsJoined(true)}
+                        className="rounded-full bg-ai-primary hover:bg-ai-primary/80 text-white font-bold px-12"
+                    >
+                        Join AI Session
+                    </Button>
+                  </>
+              )}
           </div>
       )}
 

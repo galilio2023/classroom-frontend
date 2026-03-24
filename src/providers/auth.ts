@@ -93,9 +93,11 @@ export const authProvider: AuthProvider = {
     try {
       await authClient.signOut();
       localStorage.removeItem("user");
+      localStorage.removeItem("tablawy-live-session");
       return { success: true, redirectTo: "/login" };
     } catch (error) {
       localStorage.removeItem("user");
+      localStorage.removeItem("tablawy-live-session");
       return { success: true, redirectTo: "/login" };
     }
   },

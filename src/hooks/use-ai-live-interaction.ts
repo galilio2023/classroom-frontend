@@ -5,11 +5,12 @@ import { BACKEND_URL } from "@/config";
 import { BasePermissions, UserRole } from "@/types";
 import { usePersistentLive } from "./use-persistent-live";
 import { AI_API } from "@/constants/api";
+import { AIVisualState, AI_STREAM_PAYLOAD } from "@/features/ai/types/ai";
 
 interface UseAILiveInteractionProps {
   classId: string;
   language?: string;
-  initialVisualCue?: "talking" | "thinking" | "listening";
+  initialVisualCue?: AIVisualState;
   onFinished?: () => void;
 }
 
@@ -37,10 +38,13 @@ export const useAILiveInteraction = ({
   const { data: permissions } = usePermissions<AuthPermissions>({});
   
   // Zustand Global State
-  const { isJoined, setIsJoined } = usePersistentLive();
+  const { isJoined: globalJoined, setIsJoined, activeClassId, setActiveClassId } = usePersistentLive();
+
+  // 🛡️ MULTI-INSTANCE SAFETY: Scoped isJoined check
+  const isJoined = globalJoined && activeClassId === classId;
 
   // Local UI State
-  const [visualState, setVisualState] = useState<"talking" | "thinking" | "listening">(initialVisualCue);
+  const [visualState, setVisualState] = useState<AIVisualState>(initialVisualCue);
   const [isLoading, setIsLoading] = useState(false);
   const [currentScript, setCurrentScript] = useState<string | null>(null);
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -57,7 +61,7 @@ export const useAILiveInteraction = ({
   const animationFrameRef = useRef<number | null>(null);
 
   // --- 🦾 BATCHED UPDATES (Pattern Adherence: Typing Efficiency) ---
-  const updateUI = useCallback((script: string, state?: "talking" | "thinking" | "listening") => {
+  const updateUI = useCallback((script: string, state?: AIVisualState) => {
     if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
     animationFrameRef.current = requestAnimationFrame(() => {
         setCurrentScript(script);
@@ -70,30 +74,42 @@ export const useAILiveInteraction = ({
   const speakText = useCallback((text: string) => {
       if (!isMounted.current || !window.speechSynthesis) return;
 
-      const synth = window.speechSynthesis;
-      const utterance = new SpeechSynthesisUtterance(text);
-      const langCode = language === "Arabic" ? "ar-SA" : "en-US";
-      utterance.lang = langCode;
+      try {
+          const synth = window.speechSynthesis;
+          
+          // Cancel any ongoing speech before starting new one
+          synth.cancel();
 
-      utterance.onstart = () => {
-          setIsSpeaking(true);
+          const utterance = new SpeechSynthesisUtterance(text);
+          const langCode = language === "Arabic" ? "ar-SA" : "en-US";
+          utterance.lang = langCode;
+
+          utterance.onstart = () => {
+              setIsSpeaking(true);
+              setVisualState("talking");
+          };
+
+          utterance.onend = () => {
+              setIsSpeaking(false);
+              setVisualState("listening");
+              speechRef.current = null;
+              onFinished?.();
+          };
+
+          utterance.onerror = (event: any) => {
+              console.error("Speech Synthesis Error:", event);
+              setIsSpeaking(false);
+              setVisualState("talking"); // Revert to talking (default) on error
+              speechRef.current = null;
+          };
+
+          speechRef.current = utterance;
+          synth.speak(utterance);
+      } catch (error) {
+          console.error("Failed to initialize speech synthesis:", error);
+          setIsSpeaking(false);
           setVisualState("talking");
-      };
-
-      utterance.onend = () => {
-          setIsSpeaking(false);
-          setVisualState("listening");
-          speechRef.current = null;
-          onFinished?.();
-      };
-
-      utterance.onerror = () => {
-          setIsSpeaking(false);
-          speechRef.current = null;
-      };
-
-      speechRef.current = utterance;
-      synth.speak(utterance);
+      }
   }, [language, onFinished]);
 
   // 2. 👂 SPEECH RECOGNITION ENGINE
@@ -109,6 +125,8 @@ export const useAILiveInteraction = ({
       }
 
       if (window.speechSynthesis) window.speechSynthesis.cancel();
+      if (recognitionRef.current) recognitionRef.current.abort();
+
       setIsListening(true);
       setVisualState("listening");
 
@@ -118,6 +136,7 @@ export const useAILiveInteraction = ({
       recognition.interimResults = false;
 
       // ⏱️ TIMEOUT LOGIC: Auto-stop if no voice detected
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
       timeoutRef.current = setTimeout(() => {
           recognition.stop();
           setIsListening(false);
@@ -159,6 +178,7 @@ export const useAILiveInteraction = ({
 
   // 🚀 SESSION TOGGLE (Pattern Adherence: Lifecycle Safety)
   const toggleJoin = useCallback((val: boolean) => {
+    if (val) setActiveClassId(classId);
     setIsJoined(val);
     if (!val) {
         // Reset local state on leave
@@ -167,7 +187,7 @@ export const useAILiveInteraction = ({
         if (window.speechSynthesis) window.speechSynthesis.cancel();
         if (recognitionRef.current) recognitionRef.current.abort();
     }
-  }, [setIsJoined]);
+  }, [setIsJoined, setActiveClassId, classId]);
 
   // 2. 🚀 SSE STREAMING ENGINE
   const interact = async (question: string) => {
@@ -276,6 +296,8 @@ export const useAILiveInteraction = ({
       if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
       if (abortControllerRef.current) abortControllerRef.current.abort();
       if (window.speechSynthesis) window.speechSynthesis.cancel();
+      if (recognitionRef.current) recognitionRef.current.abort();
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
   }, []);
 
