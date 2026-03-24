@@ -1,13 +1,13 @@
 import React, { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Mic, Volume2, BrainCircuit, Play, User as UserIcon, Hand, Loader2, Sparkles, AlertCircle } from "lucide-react";
+import { Mic, User as UserIcon, Hand, Loader2, BrainCircuit, Sparkles, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { cn, stripMarkdown } from "@/lib/utils";
-import { useCustomMutation, useNotification } from "@refinedev/core";
-import { useUserRole } from "@/hooks/use-user-role";
+import { cn } from "@/lib/utils";
+import { useNotification, usePermissions } from "@refinedev/core";
+import { UserRole } from "@/types";
 import { Skeleton } from "@/components/ui/skeleton";
-import { AI_API } from "@/constants/api";
+import { useAILiveInteraction } from "@/hooks/use-ai-live-interaction";
 
 interface AILiveCompanionProps {
   classId: string;
@@ -18,6 +18,19 @@ interface AILiveCompanionProps {
   onFinished?: () => void;
 }
 
+interface AuthPermissions {
+  role?: UserRole;
+}
+
+/**
+ * AILiveCompanion Component (Refactored)
+ * 
+ * Uses the specialized useAILiveInteraction hook for:
+ * - Hardened SSE Streaming
+ * - Lifecycle-safe SpeechSynthesis
+ * - Global session persistence (Zustand)
+ * - Refine v5 Permissions gating
+ */
 export const AILiveCompanion = ({
   classId,
   photo,
@@ -26,71 +39,42 @@ export const AILiveCompanion = ({
   language = "English",
   onFinished,
 }: AILiveCompanionProps) => {
-  const { isStaff, isParent, isLoading: isIdentityLoading } = useUserRole();
-  const [isSpeaking, setIsSpeaking] = useState(false);
+  const { open } = useNotification();
+  const { data: permissions, isLoading: isPermissionsLoading } = usePermissions<AuthPermissions>({});
+  
+  const {
+    isJoined,
+    setIsJoined,
+    visualState,
+    setVisualState,
+    isLoading,
+    currentScript,
+    setCurrentScript,
+    isSpeaking,
+    interact,
+    speakText,
+  } = useAILiveInteraction({ 
+      classId, 
+      language, 
+      initialVisualCue, 
+      onFinished 
+  });
+
   const [isListening, setIsListening] = useState(false);
-  const [isJoined, setIsJoined] = useState(false); // 🛡️ USER GESTURE: Audio won't play until student joins
-  const [currentScript, setCurrentScript] = useState(script);
-  const [visualState, setVisualState] = useState(initialVisualCue);
-  const speechRef = useRef<SpeechSynthesisUtterance | null>(null);
   const recognitionRef = useRef<any>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const isMounted = useRef(true);
 
-  const { mutate: askAi } = useCustomMutation();
-  const { open } = useNotification();
-
-  // 🛡️ SYNC: Ensure local state updates if parent prop changes
+  // Sync initial/parent script
   useEffect(() => {
-      setCurrentScript(script);
-  }, [script]);
+      if (script && !currentScript) {
+          setCurrentScript(script);
+          // Auto-speak if already joined
+          if (isJoined) speakText(script);
+      }
+  }, [script, isJoined, speakText, currentScript, setCurrentScript]);
 
   const isBrowserSupported = typeof window !== 'undefined' && 
     (!!(window as any).SpeechRecognition || !!(window as any).webkitSpeechRecognition);
-
-  // --- 🎙️ TEXT TO SPEECH (AI VOICE) ---
-  useEffect(() => {
-    if (!currentScript || !isJoined) return;
-
-    const synth = window.speechSynthesis;
-    synth.cancel(); // Stop any previous speech
-
-    // 🛡️ SANITIZATION: Ensure we only pass clean text to the speech engine
-    const cleanText = stripMarkdown(currentScript);
-    const utterance = new SpeechSynthesisUtterance(cleanText);
-    const langCode = language === "Arabic" ? "ar-SA" : "en-US";
-    utterance.lang = langCode;
-    
-    utterance.onstart = () => {
-        setIsSpeaking(true);
-        setVisualState("talking");
-    };
-    utterance.onend = () => {
-        setIsSpeaking(false);
-        setVisualState("listening");
-        speechRef.current = null;
-        onFinished?.();
-    };
-    utterance.onerror = () => {
-        setIsSpeaking(false);
-        speechRef.current = null;
-    };
-
-    speechRef.current = utterance;
-    synth.speak(utterance);
-
-    return () => synth.cancel();
-  }, [currentScript, language, onFinished, isJoined]);
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      isMounted.current = false;
-      window.speechSynthesis.cancel();
-      if (recognitionRef.current) recognitionRef.current.stop();
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    };
-  }, []);
 
   // --- 👂 SPEECH RECOGNITION (STUDENT EAR) ---
   const startListening = () => {
@@ -103,8 +87,7 @@ export const AILiveCompanion = ({
           return;
       }
 
-      window.speechSynthesis.cancel(); // AI stops talking to listen
-      setIsSpeaking(false);
+      if (window.speechSynthesis) window.speechSynthesis.cancel(); 
       setIsListening(true);
       setVisualState("listening");
 
@@ -114,13 +97,10 @@ export const AILiveCompanion = ({
       recognition.continuous = false;
       recognition.interimResults = false;
 
-      // 🛡️ TIMEOUT: Reset state if user doesn't speak within 10 seconds
       timeoutRef.current = setTimeout(() => {
           recognition.stop();
-          if (isMounted.current) {
-            setIsListening(false);
-            setVisualState("talking");
-          }
+          setIsListening(false);
+          setVisualState("talking");
           open?.({
               type: "error",
               message: "Listening timed out",
@@ -131,23 +111,19 @@ export const AILiveCompanion = ({
       recognition.onresult = (event: any) => {
           if (timeoutRef.current) clearTimeout(timeoutRef.current);
           const transcript = event.results[0][0].transcript;
-          handleAskAI(transcript);
+          interact(transcript);
       };
 
       recognition.onerror = (event: any) => {
           if (timeoutRef.current) clearTimeout(timeoutRef.current);
           setIsListening(false);
           setVisualState("talking");
-          
-          // 🛡️ PERMISSION PROTECTION: Handle specific rejection states
           if (event.error === 'not-allowed') {
               open?.({
                   type: "error",
                   message: "Microphone Access Denied",
                   description: "Please enable microphone permissions in your browser settings.",
               });
-          } else {
-              console.warn("Speech recognition error:", event.error);
           }
       };
 
@@ -160,60 +136,20 @@ export const AILiveCompanion = ({
       recognition.start();
   };
 
-  const handleAskAI = (question: string) => {
-      if (!question.trim()) return;
+  // 🛡️ SECURITY: RBAC Gating using Refine usePermissions
+  const role = permissions?.role;
+  const isParent = role === UserRole.PARENT;
+  const isStaff = role === UserRole.TEACHER || role === UserRole.ADMIN || role === UserRole.TA;
 
-      setVisualState("thinking");
-      askAi({
-          url: AI_API.INTERACT(classId),
-          method: "patch",
-          values: { question, language }
-      }, {
-          onSuccess: (res: any) => {
-              if (!isMounted.current) return;
-              
-              // 📊 LOGGING: Track AI performance as per contract
-              const { script: newScript, usage, latencyMs } = res.data;
-              console.debug(`[AI Performance] Latency: ${latencyMs}ms | Tokens:`, usage);
-              
-              setCurrentScript(newScript);
-              setVisualState("talking");
-          },
-          onError: () => {
-              if (!isMounted.current) return;
-              setVisualState("talking");
-              open?.({
-                  type: "error",
-                  message: "AI Error",
-                  description: "I was unable to answer. Please try again.",
-              });
-          }
-      });
-  };
-
-  // 🛡️ PARENT GATING: AI interactive features are disabled for Parents
   if (isParent) return null;
 
-  if (isIdentityLoading) {
+  if (isPermissionsLoading) {
       return (
           <div className="w-full h-full min-h-[400px] flex flex-col items-center justify-center bg-black/5 rounded-3xl animate-pulse">
               <Skeleton className="w-40 h-40 md:w-56 md:h-56 rounded-full mb-8" />
               <Skeleton className="h-6 w-48 mb-4" />
               <Skeleton className="h-4 w-32" />
           </div>
-      );
-  }
-
-  // 🛡️ FALLBACK: Non-supported browsers get a graceful message
-  if (!isBrowserSupported && !isStaff) {
-      return (
-        <div className="relative w-full h-[400px] flex flex-col items-center justify-center rounded-3xl bg-red-950/10 border-4 border-red-500/20 text-center px-8">
-            <AlertCircle className="w-16 h-16 text-red-500/40 mb-4" />
-            <h3 className="text-xl font-bold text-white mb-2">AI Interaction Unavailable</h3>
-            <p className="text-muted-foreground text-sm max-w-sm">
-                Your browser does not support voice interaction. Please switch to <b>Google Chrome</b> or <b>Microsoft Edge</b> to interact with your AI Co-Teacher.
-            </p>
-        </div>
       );
   }
 
@@ -226,7 +162,6 @@ export const AILiveCompanion = ({
         "bg-green-950/20 border-green-500/40 shadow-green-500/20"
     )}>
       
-      {/* 🛡️ AUDIO PERMISSION GUARD: Student must click "Join AI Session" to enable auto-play speech */}
       {!isJoined && (
           <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/40 backdrop-blur-md text-center p-8">
               <Sparkles className="w-12 h-12 text-ai-primary mb-4 animate-pulse" />
@@ -242,7 +177,6 @@ export const AILiveCompanion = ({
           </div>
       )}
 
-      {/* Dynamic Background Pulse */}
       <AnimatePresence>
           {isSpeaking && (
               <motion.div 
@@ -265,7 +199,6 @@ export const AILiveCompanion = ({
       </AnimatePresence>
 
       <div className="relative z-10 flex flex-col items-center gap-8 max-w-2xl px-6 text-center">
-          {/* The "Talking Head" Photo */}
           <div className="relative">
               <motion.div 
                 animate={isSpeaking ? { 
@@ -292,7 +225,6 @@ export const AILiveCompanion = ({
                   )}
               </motion.div>
 
-              {/* Status Indicator */}
               <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 z-20 w-max">
                   <Badge className={cn(
                       "px-4 py-1.5 rounded-full font-black uppercase tracking-widest text-[10px] shadow-xl border-none",
@@ -306,7 +238,6 @@ export const AILiveCompanion = ({
               </div>
           </div>
 
-          {/* AI Transcription / Script */}
           <div className="space-y-4">
               <div className="flex items-center justify-center gap-2 text-ai-primary">
                   {visualState === "thinking" ? <Loader2 className="w-5 h-5 animate-spin" /> : <BrainCircuit className="w-5 h-5" />}
@@ -335,7 +266,6 @@ export const AILiveCompanion = ({
               </AnimatePresence>
           </div>
 
-          {/* Interaction Controls */}
           {/* 🛡️ RBAC: Only Students (non-staff) can raise hands to interact */}
           {!isStaff && (
               <div className="flex items-center gap-4 pt-6">
