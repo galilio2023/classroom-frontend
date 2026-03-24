@@ -1,6 +1,6 @@
 # 🤖 Tablawy OS - Frontend AI Integration Patterns (Refine v5)
 
-This document outlines the frontend architecture, patterns, and security protocols for the **Gemini 3.1 Flash Lite** integration within the Tablawy OS ecosystem, optimized for **Refine v5**.
+This document outlines the frontend architecture, patterns, and security protocols for the **Gemini 3.0 Flash** integration within the Tablawy OS ecosystem, optimized for **Refine v5**.
 
 ## 1. Core AI Mission
 To transform the educational experience through:
