@@ -13,8 +13,8 @@ import { ChatEmptyState } from "./ai/chat-empty-state";
 import { ChatInput } from "./ai/chat-input";
 import { cn } from "@/lib/utils";
 import { useDashboard } from "@/features/dashboard/hooks/use-dashboard";
-
 import { useUserRole } from "@/hooks/use-user-role";
+import { AI_API } from "@/constants/api";
 
 interface AIStudyBuddyProps {
   subject?: string;
@@ -37,9 +37,8 @@ export const AIStudyBuddy = ({ subject, topic, assignment, classId }: AIStudyBud
     isLoading,
     scrollAreaRef,
   } = useAIChat({
-    url: "/ai/chat",
-    context: { subject, topic, assignment },
-    classId,
+    url: AI_API.STUDY_BUDDY,
+    context: { subject, topic, assignment, classId },
   });
 
   // 🛡️ Global Master Switch: Hide if AI is disabled

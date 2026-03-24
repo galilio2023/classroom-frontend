@@ -7,6 +7,7 @@ import { cn, stripMarkdown } from "@/lib/utils";
 import { useCustomMutation, useNotification } from "@refinedev/core";
 import { useUserRole } from "@/hooks/use-user-role";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AI_API } from "@/constants/api";
 
 interface AILiveCompanionProps {
   classId: string;
@@ -16,9 +17,6 @@ interface AILiveCompanionProps {
   language?: string;
   onFinished?: () => void;
 }
-
-// 🛡️ SECURITY: Centralized API Endpoints
-const AI_INTERACT_URL = (classId: string) => `/live-session/${classId}/interact`;
 
 export const AILiveCompanion = ({
   classId,
@@ -31,6 +29,7 @@ export const AILiveCompanion = ({
   const { isStaff, isParent, isLoading: isIdentityLoading } = useUserRole();
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isListening, setIsListening] = useState(false);
+  const [isJoined, setIsJoined] = useState(false); // 🛡️ USER GESTURE: Audio won't play until student joins
   const [currentScript, setCurrentScript] = useState(script);
   const [visualState, setVisualState] = useState(initialVisualCue);
   const speechRef = useRef<SpeechSynthesisUtterance | null>(null);
@@ -41,13 +40,17 @@ export const AILiveCompanion = ({
   const { mutate: askAi } = useCustomMutation();
   const { open } = useNotification();
 
+  // 🛡️ SYNC: Ensure local state updates if parent prop changes
+  useEffect(() => {
+      setCurrentScript(script);
+  }, [script]);
+
   const isBrowserSupported = typeof window !== 'undefined' && 
     (!!(window as any).SpeechRecognition || !!(window as any).webkitSpeechRecognition);
 
   // --- 🎙️ TEXT TO SPEECH (AI VOICE) ---
-// ... (omitted same as before)
   useEffect(() => {
-    if (!currentScript) return;
+    if (!currentScript || !isJoined) return;
 
     const synth = window.speechSynthesis;
     synth.cancel(); // Stop any previous speech
@@ -77,7 +80,7 @@ export const AILiveCompanion = ({
     synth.speak(utterance);
 
     return () => synth.cancel();
-  }, [currentScript, language, onFinished]);
+  }, [currentScript, language, onFinished, isJoined]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -95,11 +98,11 @@ export const AILiveCompanion = ({
           open?.({
               type: "error",
               message: "Speech recognition not supported",
-              description: "Please use a Chromium-based browser (Chrome/Edge) for AI interaction.",
+              description: "Please use a Chromium-based browser (Chrome/Edge/Safari) for AI interaction.",
           });
           return;
       }
-// ... (rest of startListening as before)
+
       window.speechSynthesis.cancel(); // AI stops talking to listen
       setIsSpeaking(false);
       setIsListening(true);
@@ -162,13 +165,18 @@ export const AILiveCompanion = ({
 
       setVisualState("thinking");
       askAi({
-          url: AI_INTERACT_URL(classId),
+          url: AI_API.INTERACT(classId),
           method: "patch",
           values: { question, language }
       }, {
           onSuccess: (res: any) => {
               if (!isMounted.current) return;
-              setCurrentScript(res.data.script);
+              
+              // 📊 LOGGING: Track AI performance as per contract
+              const { script: newScript, usage, latencyMs } = res.data;
+              console.debug(`[AI Performance] Latency: ${latencyMs}ms | Tokens:`, usage);
+              
+              setCurrentScript(newScript);
               setVisualState("talking");
           },
           onError: () => {
@@ -187,7 +195,6 @@ export const AILiveCompanion = ({
   if (isParent) return null;
 
   if (isIdentityLoading) {
-// ... (Skeleton)
       return (
           <div className="w-full h-full min-h-[400px] flex flex-col items-center justify-center bg-black/5 rounded-3xl animate-pulse">
               <Skeleton className="w-40 h-40 md:w-56 md:h-56 rounded-full mb-8" />
@@ -211,14 +218,30 @@ export const AILiveCompanion = ({
   }
 
   return (
-// ... (Rest of return)
     <div className={cn(
         "relative w-full h-full min-h-[400px] flex flex-col items-center justify-center rounded-3xl overflow-hidden border-4 shadow-2xl transition-all duration-700",
+        !isJoined ? "bg-black/60 border-white/10" :
         visualState === "talking" ? "bg-black/90 border-ai-primary/40 shadow-ai-primary/20" :
         visualState === "listening" ? "bg-orange-950/20 border-orange-500/40 shadow-orange-500/20" :
         "bg-green-950/20 border-green-500/40 shadow-green-500/20"
     )}>
       
+      {/* 🛡️ AUDIO PERMISSION GUARD: Student must click "Join AI Session" to enable auto-play speech */}
+      {!isJoined && (
+          <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/40 backdrop-blur-md text-center p-8">
+              <Sparkles className="w-12 h-12 text-ai-primary mb-4 animate-pulse" />
+              <h3 className="text-2xl font-black text-white uppercase tracking-tighter mb-4">Start Interactive AI Session</h3>
+              <p className="text-muted-foreground text-sm mb-8 max-w-xs">Click the button below to allow your AI Co-Teacher to speak and listen for your questions.</p>
+              <Button 
+                size="lg" 
+                onClick={() => setIsJoined(true)}
+                className="rounded-full bg-ai-primary hover:bg-ai-primary/80 text-white font-bold px-12"
+              >
+                  Join AI Session
+              </Button>
+          </div>
+      )}
+
       {/* Dynamic Background Pulse */}
       <AnimatePresence>
           {isSpeaking && (
