@@ -14,6 +14,8 @@ import { ChatInput } from "./ai/chat-input";
 import { cn } from "@/lib/utils";
 import { useDashboard } from "@/features/dashboard/hooks/use-dashboard";
 
+import { useUserRole } from "@/hooks/use-user-role";
+
 interface AIStudyBuddyProps {
   subject?: string;
   topic?: string;
@@ -23,6 +25,7 @@ interface AIStudyBuddyProps {
 
 export const AIStudyBuddy = ({ subject, topic, assignment, classId }: AIStudyBuddyProps) => {
   const { coreData } = useDashboard();
+  const { isParent } = useUserRole();
   const [isOpen, setIsOpen] = useState(false);
   const {
     messages,
@@ -41,7 +44,8 @@ export const AIStudyBuddy = ({ subject, topic, assignment, classId }: AIStudyBud
 
   // 🛡️ Global Master Switch: Hide if AI is disabled
   // 🛡️ CONTEXT GUARD: Hide if no classId is provided (avoids strange behavior on global dashboards)
-  if (coreData?.globalConfig?.enableAiFeatures === false || !classId) {
+  // 🛡️ PARENT GATING: AI interactive features are disabled for Parents
+  if (coreData?.globalConfig?.enableAiFeatures === false || !classId || isParent) {
     return null;
   }
 

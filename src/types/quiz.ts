@@ -1,8 +1,3 @@
-/**
- * Quiz API Response Types
- * Mirrored from backend QuizService.
- */
-
 export interface QuizQuestion {
   id: number;
   quizId: number;
@@ -53,26 +48,4 @@ export interface QuizAttempt {
   };
 }
 
-export interface CreateQuizInput {
-  title: string;
-  description?: string;
-  dueDate?: string | null;
-  timeLimit?: number;
-  classId: number;
-  moduleId?: number;
-  categoryId?: number;
-  maxAttempts?: number;
-  gradingPolicy?: "highest" | "latest" | "average";
-  shuffleQuestions?: boolean;
-  showCorrectAnswers?: boolean;
-  questions: {
-    question: string;
-    options: string[];
-    correctAnswer: string;
-    points?: number;
-  }[];
-}
-
-export interface SubmitQuizInput {
-  answers: Record<number, string>;
-}
+export * from "@/schemas/quiz";

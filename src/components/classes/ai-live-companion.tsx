@@ -3,9 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Mic, Volume2, BrainCircuit, Play, User as UserIcon, Hand, Loader2, Sparkles, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
-import { useCustomMutation } from "@refinedev/core";
-import { toast } from "sonner";
+import { cn, stripMarkdown } from "@/lib/utils";
+import { useCustomMutation, useNotification } from "@refinedev/core";
 import { useUserRole } from "@/hooks/use-user-role";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -29,25 +28,30 @@ export const AILiveCompanion = ({
   language = "English",
   onFinished,
 }: AILiveCompanionProps) => {
-  const { isStaff, isLoading: isIdentityLoading } = useUserRole();
+  const { isStaff, isParent, isLoading: isIdentityLoading } = useUserRole();
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [currentScript, setCurrentScript] = useState(script);
   const [visualState, setVisualState] = useState(initialVisualCue);
   const speechRef = useRef<SpeechSynthesisUtterance | null>(null);
   const recognitionRef = useRef<any>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const { mutate: askAi } = useCustomMutation();
+  const { open } = useNotification();
+
+  const isBrowserSupported = typeof window !== 'undefined' && ('webkitSpeechRecognition' in window);
 
   // --- 🎙️ TEXT TO SPEECH (AI VOICE) ---
+// ... (omitted same as before)
   useEffect(() => {
     if (!currentScript) return;
 
     const synth = window.speechSynthesis;
     synth.cancel(); // Stop any previous speech
 
-    // 🛡️ SANITIZATION: Ensure we only pass plain text to the speech engine
-    const cleanText = currentScript.replace(/<[^>]*>?/gm, '');
+    // 🛡️ SANITIZATION: Ensure we only pass clean text to the speech engine
+    const cleanText = stripMarkdown(currentScript);
     const utterance = new SpeechSynthesisUtterance(cleanText);
     const langCode = language === "Arabic" ? "ar-SA" : "en-US";
     utterance.lang = langCode;
@@ -68,13 +72,26 @@ export const AILiveCompanion = ({
     return () => synth.cancel();
   }, [currentScript, language, onFinished]);
 
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      window.speechSynthesis.cancel();
+      if (recognitionRef.current) recognitionRef.current.stop();
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, []);
+
   // --- 👂 SPEECH RECOGNITION (STUDENT EAR) ---
   const startListening = () => {
-      if (!('webkitSpeechRecognition' in window)) {
-          toast.error("Speech recognition not supported in this browser.");
+      if (!isBrowserSupported) {
+          open?.({
+              type: "error",
+              message: "Speech recognition not supported",
+              description: "Please use a Chromium-based browser (Chrome/Edge) for AI interaction.",
+          });
           return;
       }
-
+// ... (rest of startListening as before)
       window.speechSynthesis.cancel(); // AI stops talking to listen
       setIsSpeaking(false);
       setIsListening(true);
@@ -86,32 +103,52 @@ export const AILiveCompanion = ({
       recognition.continuous = false;
       recognition.interimResults = false;
 
+      // 🛡️ TIMEOUT: Reset state if user doesn't speak within 10 seconds
+      timeoutRef.current = setTimeout(() => {
+          recognition.stop();
+          setIsListening(false);
+          setVisualState("talking");
+          open?.({
+              type: "error",
+              message: "Listening timed out",
+              description: "I didn't hear anything. Please try again.",
+          });
+      }, 10000);
+
       recognition.onresult = (event: any) => {
+          if (timeoutRef.current) clearTimeout(timeoutRef.current);
           const transcript = event.results[0][0].transcript;
           handleAskAI(transcript);
       };
 
       recognition.onerror = (event: any) => {
+          if (timeoutRef.current) clearTimeout(timeoutRef.current);
           setIsListening(false);
           setVisualState("talking");
           
           // 🛡️ PERMISSION PROTECTION: Handle specific rejection states
           if (event.error === 'not-allowed') {
-              toast.error("Microphone access denied. Please enable it to interact with AI.", {
-                  icon: <AlertCircle className="w-4 h-4 text-destructive" />
+              open?.({
+                  type: "error",
+                  message: "Microphone Access Denied",
+                  description: "Please enable microphone permissions in your browser settings.",
               });
           } else {
               console.warn("Speech recognition error:", event.error);
           }
       };
 
-      recognition.onend = () => setIsListening(false);
+      recognition.onend = () => {
+          if (timeoutRef.current) clearTimeout(timeoutRef.current);
+          setIsListening(false);
+      };
 
       recognitionRef.current = recognition;
       recognition.start();
   };
 
   const handleAskAI = (question: string) => {
+// ... (rest of handleAskAI as before)
       setVisualState("thinking");
       askAi({
           url: AI_INTERACT_URL(classId),
@@ -124,12 +161,20 @@ export const AILiveCompanion = ({
           },
           onError: () => {
               setVisualState("talking");
-              toast.error("AI was unable to answer. Please try again.");
+              open?.({
+                  type: "error",
+                  message: "AI Error",
+                  description: "I was unable to answer. Please try again.",
+              });
           }
       });
   };
 
+  // 🛡️ PARENT GATING: AI interactive features are disabled for Parents
+  if (isParent) return null;
+
   if (isIdentityLoading) {
+// ... (Skeleton)
       return (
           <div className="w-full h-full min-h-[400px] flex flex-col items-center justify-center bg-black/5 rounded-3xl animate-pulse">
               <Skeleton className="w-40 h-40 md:w-56 md:h-56 rounded-full mb-8" />
@@ -139,7 +184,21 @@ export const AILiveCompanion = ({
       );
   }
 
+  // 🛡️ FALLBACK: Non-supported browsers get a graceful message
+  if (!isBrowserSupported && !isStaff) {
+      return (
+        <div className="relative w-full h-[400px] flex flex-col items-center justify-center rounded-3xl bg-red-950/10 border-4 border-red-500/20 text-center px-8">
+            <AlertCircle className="w-16 h-16 text-red-500/40 mb-4" />
+            <h3 className="text-xl font-bold text-white mb-2">AI Interaction Unavailable</h3>
+            <p className="text-muted-foreground text-sm max-w-sm">
+                Your browser does not support voice interaction. Please switch to <b>Google Chrome</b> or <b>Microsoft Edge</b> to interact with your AI Co-Teacher.
+            </p>
+        </div>
+      );
+  }
+
   return (
+// ... (Rest of return)
     <div className={cn(
         "relative w-full h-full min-h-[400px] flex flex-col items-center justify-center rounded-3xl overflow-hidden border-4 shadow-2xl transition-all duration-700",
         visualState === "talking" ? "bg-black/90 border-ai-primary/40 shadow-ai-primary/20" :
