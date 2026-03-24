@@ -4,10 +4,11 @@ import { Mic, User as UserIcon, Hand, Loader2, BrainCircuit, Sparkles, AlertCirc
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { useNotification, usePermissions } from "@refinedev/core";
-import { BasePermissions, UserRole } from "@/types";
+import { useNotification } from "@refinedev/core";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAILiveInteraction } from "@/hooks/use-ai-live-interaction";
+import { useDashboard } from "@/features/dashboard/hooks/use-dashboard";
+import { useAIAuthorization } from "@/hooks/use-ai-authorization";
 
 interface AILiveCompanionProps {
   classId: string;
@@ -17,8 +18,6 @@ interface AILiveCompanionProps {
   language?: string;
   onFinished?: () => void;
 }
-
-interface AuthPermissions extends BasePermissions {}
 
 /**
  * AILiveCompanion Component (Refactored)
@@ -37,8 +36,8 @@ export const AILiveCompanion = ({
   language = "English",
   onFinished,
 }: AILiveCompanionProps) => {
-  const { open } = useNotification();
-  const { data: permissions, isLoading: isPermissionsLoading } = usePermissions<AuthPermissions>({});
+  const { coreData } = useDashboard();
+  const { isParent, isStaff, isLoading: isAuthLoading } = useAIAuthorization();
   
   const {
     isJoined,
@@ -63,6 +62,9 @@ export const AILiveCompanion = ({
   const [isBrowserSupported, setIsBrowserSupported] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
 
+  // 🛡️ MASTER SWITCH: Global AI Kill-switch enforcement
+  const isAiEnabled = coreData?.globalConfig?.enableAiFeatures !== false;
+
   // 🛡️ SSR SAFETY: Initialize browser-only features after mount
   useEffect(() => {
       const supported = typeof window !== 'undefined' && 
@@ -70,6 +72,13 @@ export const AILiveCompanion = ({
       setIsBrowserSupported(supported);
       setIsHydrated(true);
   }, []);
+
+  // 🛡️ AUTO-LEAVE: If AI is disabled mid-session, kick student out
+  useEffect(() => {
+      if (!isAiEnabled && isJoined) {
+          setIsJoined(false);
+      }
+  }, [isAiEnabled, isJoined, setIsJoined]);
 
   // Sync initial/parent script
   useEffect(() => {
@@ -80,14 +89,9 @@ export const AILiveCompanion = ({
       }
   }, [script, isJoined, speakText, currentScript, setCurrentScript]);
 
-  // 🛡️ SECURITY: RBAC Gating using Refine usePermissions
-  const role = permissions?.role;
-  const isParent = role === UserRole.PARENT;
-  const isStaff = role === UserRole.TEACHER || role === UserRole.ADMIN || role === UserRole.TA;
+  if (!isHydrated || !isAiEnabled || isParent) return null;
 
-  if (!isHydrated || isParent) return null;
-
-  if (isPermissionsLoading) {
+  if (isAuthLoading) {
       return (
           <div className="w-full h-full min-h-[400px] flex flex-col items-center justify-center bg-black/5 rounded-3xl animate-pulse">
               <Skeleton className="w-40 h-40 md:w-56 md:h-56 rounded-full mb-8" />
