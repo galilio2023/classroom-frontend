@@ -49,8 +49,10 @@ export const AILiveCompanion = ({
     currentScript,
     setCurrentScript,
     isSpeaking,
+    isListening,
     interact,
     speakText,
+    startListening,
   } = useAILiveInteraction({ 
       classId, 
       language, 
@@ -58,11 +60,8 @@ export const AILiveCompanion = ({
       onFinished 
   });
 
-  const [isListening, setIsListening] = useState(false);
   const [isBrowserSupported, setIsBrowserSupported] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
-  const recognitionRef = useRef<any>(null);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // 🛡️ SSR SAFETY: Initialize browser-only features after mount
   useEffect(() => {
@@ -70,18 +69,6 @@ export const AILiveCompanion = ({
         (!!(window as any).SpeechRecognition || !!(window as any).webkitSpeechRecognition);
       setIsBrowserSupported(supported);
       setIsHydrated(true);
-  }, []);
-
-  // 🧹 CLEANUP: Abort microphone on unmount
-  useEffect(() => {
-    return () => {
-      if (recognitionRef.current) {
-        recognitionRef.current.abort();
-      }
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
   }, []);
 
   // Sync initial/parent script
@@ -92,66 +79,6 @@ export const AILiveCompanion = ({
           if (isJoined) speakText(script);
       }
   }, [script, isJoined, speakText, currentScript, setCurrentScript]);
-
-  // --- 👂 SPEECH RECOGNITION (STUDENT EAR) ---
-  const startListening = () => {
-      if (!isBrowserSupported) {
-          open?.({
-              type: "error",
-              message: "Speech recognition not supported",
-              description: "Please use a Chromium-based browser (Chrome/Edge/Safari) for AI interaction.",
-          });
-          return;
-      }
-
-      if (window.speechSynthesis) window.speechSynthesis.cancel(); 
-      setIsListening(true);
-      setVisualState("listening");
-
-      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-      const recognition = new SpeechRecognition();
-      recognition.lang = language === "Arabic" ? "ar-SA" : "en-US";
-      recognition.continuous = false;
-      recognition.interimResults = false;
-
-      timeoutRef.current = setTimeout(() => {
-          recognition.stop();
-          setIsListening(false);
-          setVisualState("talking");
-          open?.({
-              type: "error",
-              message: "Listening timed out",
-              description: "I didn't hear anything. Please try again.",
-          });
-      }, 10000);
-
-      recognition.onresult = (event: any) => {
-          if (timeoutRef.current) clearTimeout(timeoutRef.current);
-          const transcript = event.results[0][0].transcript;
-          interact(transcript);
-      };
-
-      recognition.onerror = (event: any) => {
-          if (timeoutRef.current) clearTimeout(timeoutRef.current);
-          setIsListening(false);
-          setVisualState("talking");
-          if (event.error === 'not-allowed') {
-              open?.({
-                  type: "error",
-                  message: "Microphone Access Denied",
-                  description: "Please enable microphone permissions in your browser settings.",
-              });
-          }
-      };
-
-      recognition.onend = () => {
-          if (timeoutRef.current) clearTimeout(timeoutRef.current);
-          setIsListening(false);
-      };
-
-      recognitionRef.current = recognition;
-      recognition.start();
-  };
 
   // 🛡️ SECURITY: RBAC Gating using Refine usePermissions
   const role = permissions?.role;
@@ -288,13 +215,14 @@ export const AILiveCompanion = ({
           {!isStaff && (
               <div className="flex items-center gap-4 pt-6">
                   <Button 
-                    variant="outline" 
                     size="lg"
                     onClick={startListening}
                     disabled={isListening || visualState === "thinking"}
                     className={cn(
-                        "rounded-2xl h-14 px-8 font-black uppercase tracking-widest text-xs gap-3 transition-all",
-                        isListening ? "bg-orange-500 text-white border-none animate-pulse" : "bg-white/5 text-white border-white/10 hover:bg-ai-primary hover:border-none"
+                        "rounded-2xl h-14 px-8 font-black uppercase tracking-widest text-xs gap-3 transition-all shadow-lg",
+                        isListening ? 
+                            "bg-orange-500 hover:bg-orange-600 text-white border-none animate-pulse" : 
+                            "bg-ai-primary hover:bg-ai-primary/90 text-white border-none ai-gradient-border"
                     )}
                   >
                       {isListening ? <Mic className="w-5 h-5" /> : <Hand className="w-5 h-5" />}

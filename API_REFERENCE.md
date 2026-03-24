@@ -22,9 +22,17 @@ This document serves as the **Single Source of Truth** for frontend developers. 
 | :--- | :--- | :--- | :--- | :--- |
 | `POST` | `/chat` | `useAIChat` | 20/hr | `AIResponse` |
 | `POST` | `/study-buddy` | `useAIChat` (SSE) | 20/hr | `Stream` |
+| `PATCH` | `/interact` | `useAILiveInteraction` (SSE) | 60/hr | `Stream` |
 | `POST` | `/generate-*` | `useCustomMutation` | 5/15m | `AIFeedbackResponse` |
 | `POST` | `/feedback` | `useCustomMutation` | 60/hr | - |
 | `GET` | `/health-report` | `useTable` | 1/hr | `SystemHealthReport` |
+
+### 📡 Hardened SSE Pattern
+All streaming endpoints (`/study-buddy`, `/interact`) MUST follow the **JSON Line Buffering** protocol:
+1.  **Transport:** Server-Sent Events (SSE).
+2.  **Format:** Each data chunk must be a valid JSON object prefixed with `data: ` and suffixed with `\n\n`.
+3.  **Buffering:** The frontend hook (`useAIChat`, `useAILiveInteraction`) implements line-buffering to prevent parsing errors from split network packets.
+4.  **Finalization:** The stream must end with a `data: {"done": true}` message.
 
 ### 🧠 Response Metadata
 All AI endpoints return a `metadata` block. Handle it in your hooks:

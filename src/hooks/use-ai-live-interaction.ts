@@ -44,11 +44,14 @@ export const useAILiveInteraction = ({
   const [isLoading, setIsLoading] = useState(false);
   const [currentScript, setCurrentScript] = useState<string | null>(null);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isListening, setIsListening] = useState(false);
 
   // Refs for non-reactive state & lifecycle
   const isMounted = useRef(true);
   const abortControllerRef = useRef<AbortController | null>(null);
   const speechRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const recognitionRef = useRef<any>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const accumulatorRef = useRef("");
   const lineBufferRef = useRef("");
   const animationFrameRef = useRef<number | null>(null);
@@ -67,9 +70,6 @@ export const useAILiveInteraction = ({
   const speakText = useCallback((text: string) => {
       if (!isMounted.current || !window.speechSynthesis) return;
 
-      // 🛡️ RE-RENDER PROTECTION: We don't cancel if already speaking the same text segment
-      // (This prevents the stuttering issues mentioned in the review)
-      
       const synth = window.speechSynthesis;
       const utterance = new SpeechSynthesisUtterance(text);
       const langCode = language === "Arabic" ? "ar-SA" : "en-US";
@@ -96,6 +96,67 @@ export const useAILiveInteraction = ({
       synth.speak(utterance);
   }, [language, onFinished]);
 
+  // 2. 👂 SPEECH RECOGNITION ENGINE
+  const startListening = useCallback(() => {
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+          open?.({
+              type: "error",
+              message: t("aiHub.errors.speechNotSupported" as any),
+              description: t("aiHub.errors.chromeRequired" as any),
+          });
+          return;
+      }
+
+      if (window.speechSynthesis) window.speechSynthesis.cancel();
+      setIsListening(true);
+      setVisualState("listening");
+
+      const recognition = new SpeechRecognition();
+      recognition.lang = language === "Arabic" ? "ar-SA" : "en-US";
+      recognition.continuous = false;
+      recognition.interimResults = false;
+
+      // ⏱️ TIMEOUT LOGIC: Auto-stop if no voice detected
+      timeoutRef.current = setTimeout(() => {
+          recognition.stop();
+          setIsListening(false);
+          setVisualState("talking");
+          open?.({
+              type: "error",
+              message: t("aiHub.errors.listeningTimeout" as any),
+              description: t("aiHub.errors.tryAgain" as any),
+          });
+      }, 8000);
+
+      recognition.onresult = (event: any) => {
+          if (timeoutRef.current) clearTimeout(timeoutRef.current);
+          const transcript = event.results[0][0].transcript;
+          interact(transcript);
+      };
+
+      recognition.onerror = (event: any) => {
+          if (timeoutRef.current) clearTimeout(timeoutRef.current);
+          setIsListening(false);
+          setVisualState("talking");
+          if (event.error === 'not-allowed') {
+              open?.({
+                  type: "error",
+                  message: t("auth.errors.micAccessDenied" as any),
+                  description: t("auth.errors.micSettings" as any),
+              });
+          }
+      };
+
+      recognition.onend = () => {
+          if (timeoutRef.current) clearTimeout(timeoutRef.current);
+          setIsListening(false);
+      };
+
+      recognitionRef.current = recognition;
+      recognition.start();
+  }, [language, open, t]);
+
   // 🚀 SESSION TOGGLE (Pattern Adherence: Lifecycle Safety)
   const toggleJoin = useCallback((val: boolean) => {
     setIsJoined(val);
@@ -104,6 +165,7 @@ export const useAILiveInteraction = ({
         setCurrentScript(null);
         setVisualState("talking");
         if (window.speechSynthesis) window.speechSynthesis.cancel();
+        if (recognitionRef.current) recognitionRef.current.abort();
     }
   }, [setIsJoined]);
 
@@ -226,7 +288,9 @@ export const useAILiveInteraction = ({
     currentScript,
     setCurrentScript,
     isSpeaking,
+    isListening,
     interact,
     speakText,
+    startListening,
   };
 };
