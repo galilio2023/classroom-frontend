@@ -24,6 +24,7 @@ interface PersistentLiveState {
   setIsAiDelegated: (val: boolean) => void;
   setPromotionTrailer: (url: string | null, teacherName?: string | null, headline?: string | null) => void;
   setActiveVideo: (url: string | null, title?: string | null) => void;
+  stopSpeaking: () => void;
   reset: () => void;
 }
 
@@ -57,13 +58,23 @@ export const usePersistentLive = create<PersistentLiveState>()(
       setActiveVideo: (url: string | null, title: string | null = null) => set({ 
           activeVideo: { url, title } 
       }),
-      reset: () => set({ 
-          activeClassId: null, 
-          isJoined: false, 
-          isAiDelegated: false,
-          promotionTrailer: { url: null, teacherName: null, headline: null },
-          activeVideo: { url: null, title: null }
-      }),
+      stopSpeaking: () => {
+          if (typeof window !== 'undefined' && window.speechSynthesis) {
+              window.speechSynthesis.cancel();
+          }
+      },
+      reset: () => {
+          if (typeof window !== 'undefined' && window.speechSynthesis) {
+              window.speechSynthesis.cancel();
+          }
+          set({ 
+              activeClassId: null, 
+              isJoined: false, 
+              isAiDelegated: false,
+              promotionTrailer: { url: null, teacherName: null, headline: null },
+              activeVideo: { url: null, title: null }
+          });
+      },
     }),
     {
       name: 'tablawy-live-session', // Key in localStorage

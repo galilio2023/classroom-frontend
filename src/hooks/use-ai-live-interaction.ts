@@ -12,6 +12,7 @@ interface UseAILiveInteractionProps {
   language?: string;
   initialVisualCue?: AIVisualState;
   onFinished?: () => void;
+  onPermissionDenied?: () => void;
 }
 
 interface AuthPermissions extends BasePermissions {}
@@ -31,14 +32,15 @@ export const useAILiveInteraction = ({
     classId, 
     language = "English", 
     initialVisualCue = "talking",
-    onFinished 
+    onFinished,
+    onPermissionDenied
 }: UseAILiveInteractionProps) => {
   const { t } = useTranslation();
   const { open } = useNotification();
   const { data: permissions } = usePermissions<AuthPermissions>({});
   
   // Zustand Global State
-  const { isJoined: globalJoined, setIsJoined, activeClassId, setActiveClassId } = usePersistentLive();
+  const { isJoined: globalJoined, setIsJoined, activeClassId, setActiveClassId, stopSpeaking } = usePersistentLive();
 
   // 🛡️ MULTI-INSTANCE SAFETY: Scoped isJoined check
   const isJoined = globalJoined && activeClassId === classId;
@@ -75,10 +77,8 @@ export const useAILiveInteraction = ({
       if (!isMounted.current || !window.speechSynthesis) return;
 
       try {
-          const synth = window.speechSynthesis;
-          
-          // Cancel any ongoing speech before starting new one
-          synth.cancel();
+          // 🛡️ ARCHITECTURAL: Coordinate via central manager
+          stopSpeaking();
 
           const utterance = new SpeechSynthesisUtterance(text);
           const langCode = language === "Arabic" ? "ar-SA" : "en-US";
@@ -104,7 +104,7 @@ export const useAILiveInteraction = ({
           };
 
           speechRef.current = utterance;
-          synth.speak(utterance);
+          window.speechSynthesis.speak(utterance);
       } catch (error) {
           console.error("Failed to initialize speech synthesis:", error);
           setIsSpeaking(false);
@@ -159,6 +159,7 @@ export const useAILiveInteraction = ({
           setIsListening(false);
           setVisualState("talking");
           if (event.error === 'not-allowed') {
+              onPermissionDenied?.();
               open?.({
                   type: "error",
                   message: t("auth.errors.micAccessDenied" as any),
@@ -299,11 +300,11 @@ export const useAILiveInteraction = ({
       isMounted.current = false;
       if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
       if (abortControllerRef.current) abortControllerRef.current.abort();
-      if (window.speechSynthesis) window.speechSynthesis.cancel();
+      stopSpeaking();
       if (recognitionRef.current) recognitionRef.current.abort();
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
-  }, []);
+  }, [stopSpeaking]);
 
   return {
     isJoined,

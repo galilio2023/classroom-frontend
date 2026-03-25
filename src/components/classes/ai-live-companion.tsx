@@ -4,7 +4,7 @@ import { Mic, User as UserIcon, Hand, Loader2, BrainCircuit, Sparkles, AlertCirc
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { useNotification } from "@refinedev/core";
+import { useNotification, useCan } from "@refinedev/core";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAILiveInteraction } from "@/hooks/use-ai-live-interaction";
 import { useDashboard } from "@/features/dashboard/hooks/use-dashboard";
@@ -56,6 +56,13 @@ export const AILiveCompanion = ({
 }: AILiveCompanionProps) => {
   const { coreData } = useDashboard();
   const { isParent, isStaff, isLoading: isAuthLoading } = useAIAuthorization();
+
+  // 🛡️ RBAC: Centralized access control via Refine patterns
+  const { data: canAccessAI } = useCan({
+      resource: "ai_features",
+      action: "interact",
+      params: { classId }
+  });
   
   const {
     isJoined,
@@ -74,11 +81,13 @@ export const AILiveCompanion = ({
       classId, 
       language, 
       initialVisualCue, 
-      onFinished 
+      onFinished,
+      onPermissionDenied: () => setIsPermissionDenied(true)
   });
 
   const [isBrowserSupported, setIsBrowserSupported] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
+  const [isPermissionDenied, setIsPermissionDenied] = useState(false);
 
   // 🛡️ MASTER SWITCH: Global AI Kill-switch enforcement
   const isAiEnabled = coreData?.globalConfig?.enableAiFeatures !== false;
@@ -115,7 +124,7 @@ export const AILiveCompanion = ({
       };
   }, []);
 
-  if (!isHydrated || !isAiEnabled || isParent) return null;
+  if (!isHydrated || !isAiEnabled || isParent || canAccessAI?.can === false) return null;
 
   if (isAuthLoading) {
       return (
@@ -138,7 +147,18 @@ export const AILiveCompanion = ({
       
       {!isJoined && (
           <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/40 backdrop-blur-md text-center p-8">
-              {!isBrowserSupported && isHydrated ? (
+              {isPermissionDenied ? (
+                  <div className="bg-destructive/10 border border-destructive/20 p-6 rounded-2xl max-w-xs animate-in fade-in zoom-in duration-300">
+                      <Mic className="w-10 h-10 text-destructive mx-auto mb-3" />
+                      <h4 className="text-white font-bold mb-2">Microphone Access Denied</h4>
+                      <p className="text-xs text-muted-foreground mb-4">
+                          Please enable microphone permissions in your browser settings to interact with the AI Co-Teacher.
+                      </p>
+                      <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
+                          Try Again
+                      </Button>
+                  </div>
+              ) : !isBrowserSupported && isHydrated ? (
                   <div className="bg-destructive/10 border border-destructive/20 p-6 rounded-2xl max-w-xs animate-in fade-in zoom-in duration-300">
                       <AlertCircle className="w-10 h-10 text-destructive mx-auto mb-3" />
                       <h4 className="text-white font-bold mb-2">Browser Not Supported</h4>
@@ -237,10 +257,11 @@ export const AILiveCompanion = ({
               
               <AnimatePresence mode="wait">
                   {!currentScript && !photo ? (
-                      <div className="flex flex-col items-center gap-2 opacity-40 animate-pulse">
+                      <div className="flex flex-col items-center gap-2 opacity-40 animate-pulse w-full max-w-md mx-auto">
                           <BrainCircuit className="w-8 h-8 text-ai-primary mb-2" />
-                          <div className="h-4 w-48 bg-ai-primary/20 rounded-full" />
-                          <div className="h-4 w-32 bg-ai-primary/20 rounded-full" />
+                          <Skeleton className="h-4 w-full bg-ai-primary/20 rounded-full" />
+                          <Skeleton className="h-4 w-3/4 bg-ai-primary/20 rounded-full" />
+                          <Skeleton className="h-4 w-1/2 bg-ai-primary/20 rounded-full" />
                       </div>
                   ) : (
                       <motion.p 
@@ -250,7 +271,12 @@ export const AILiveCompanion = ({
                         exit={{ opacity: 0 }}
                         className="text-xl md:text-2xl font-bold text-white leading-relaxed line-clamp-4"
                       >
-                          {currentScript || "Preparing to continue the lesson..."}
+                          {currentScript || (
+                              <div className="flex flex-col items-center gap-2 opacity-20">
+                                  <Skeleton className="h-6 w-64 bg-white/20 rounded-full" />
+                                  <Skeleton className="h-6 w-48 bg-white/20 rounded-full" />
+                              </div>
+                          )}
                       </motion.p>
                   )}
               </AnimatePresence>

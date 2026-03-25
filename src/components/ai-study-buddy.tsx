@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils";
 import { useDashboard } from "@/features/dashboard/hooks/use-dashboard";
 import { useUserRole } from "@/hooks/use-user-role";
 import { AI_API } from "@/constants/api";
+import { useCan } from "@refinedev/core";
 
 interface AIStudyBuddyProps {
   subject?: string;
@@ -27,6 +28,14 @@ export const AIStudyBuddy = ({ subject, topic, assignment, classId }: AIStudyBud
   const { coreData } = useDashboard();
   const { isParent } = useUserRole();
   const [isOpen, setIsOpen] = useState(false);
+
+  // 🛡️ RBAC: Centralized access control via Refine patterns
+  const { data: canAccessAI } = useCan({
+      resource: "ai_features",
+      action: "interact",
+      params: { classId }
+  });
+
   const {
     messages,
     streamingMessage,
@@ -43,9 +52,9 @@ export const AIStudyBuddy = ({ subject, topic, assignment, classId }: AIStudyBud
   });
 
   // 🛡️ Global Master Switch: Hide if AI is disabled
-  // 🛡️ CONTEXT GUARD: Hide if no classId is provided (avoids strange behavior on global dashboards)
+  // 🛡️ CONTEXT GUARD: Hide if no classId is provided
   // 🛡️ PARENT GATING: AI interactive features are disabled for Parents
-  if (coreData?.globalConfig?.enableAiFeatures === false || !classId || isParent) {
+  if (coreData?.globalConfig?.enableAiFeatures === false || !classId || isParent || canAccessAI?.can === false) {
     return null;
   }
 
