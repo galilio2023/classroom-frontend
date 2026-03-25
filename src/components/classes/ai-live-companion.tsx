@@ -20,6 +20,23 @@ interface AILiveCompanionProps {
   onFinished?: () => void;
 }
 
+interface SpeechRecognitionEvent extends Event {
+  results: SpeechRecognitionResultList;
+  resultIndex: number;
+}
+
+interface SpeechRecognition extends EventTarget {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  onresult: (event: SpeechRecognitionEvent) => void;
+  onerror: (event: any) => void;
+  onend: () => void;
+  start: () => void;
+  stop: () => void;
+  abort: () => void;
+}
+
 /**
  * AILiveCompanion Component (Refactored)
  * 
@@ -68,9 +85,8 @@ export const AILiveCompanion = ({
 
   // 🛡️ SSR SAFETY: Initialize browser-only features after mount
   useEffect(() => {
-      const supported = typeof window !== 'undefined' && 
-        (!!(window as any).SpeechRecognition || !!(window as any).webkitSpeechRecognition);
-      setIsBrowserSupported(supported);
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      setIsBrowserSupported(!!SpeechRecognition);
       setIsHydrated(true);
   }, []);
 
@@ -83,12 +99,21 @@ export const AILiveCompanion = ({
 
   // Sync initial/parent script
   useEffect(() => {
-      if (script && !currentScript) {
+      if (script && script !== currentScript) {
           setCurrentScript(script);
           // Auto-speak if already joined
           if (isJoined) speakText(script);
       }
   }, [script, isJoined, speakText, currentScript, setCurrentScript]);
+
+  // 🧹 CLEANUP: Stop speaking on unmount
+  useEffect(() => {
+      return () => {
+          if (typeof window !== 'undefined' && window.speechSynthesis) {
+              window.speechSynthesis.cancel();
+          }
+      };
+  }, []);
 
   if (!isHydrated || !isAiEnabled || isParent) return null;
 

@@ -9,7 +9,7 @@ To protect our Gemini API keys and enforce rate limiting, the frontend **never**
 
 **❌ AVOID:**
 ```typescript
-const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite-preview" }); // UNSAFE
+const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" }); // UNSAFE
 ```
 
 **✅ PREFER:**

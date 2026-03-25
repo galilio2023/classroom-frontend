@@ -182,7 +182,11 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
 
     try {
       const token = localStorage.getItem("token");
-      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      const correlationId = crypto.randomUUID();
+      const headers: Record<string, string> = { 
+          "Content-Type": "application/json",
+          "X-Correlation-ID": correlationId
+      };
       if (token) headers["Authorization"] = `Bearer ${token}`;
 
       const response = await fetch(apiUrl, {
@@ -195,6 +199,7 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
           history: messages.map(m => ({ role: m.role, parts: m.parts })),
           context,
           classId: effectiveClassId,
+          correlationId, // Also pass in body for non-header compliant middle-layers
         }),
       });
 

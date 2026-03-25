@@ -213,7 +213,11 @@ export const useAILiveInteraction = ({
 
     try {
       const token = localStorage.getItem("token");
-      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      const correlationId = crypto.randomUUID();
+      const headers: Record<string, string> = { 
+          "Content-Type": "application/json",
+          "X-Correlation-ID": correlationId
+      };
       if (token) headers["Authorization"] = `Bearer ${token}`;
 
       const response = await fetch(apiUrl, {
@@ -221,7 +225,7 @@ export const useAILiveInteraction = ({
         signal: controller.signal,
         credentials: "include",
         headers,
-        body: JSON.stringify({ question, language }),
+        body: JSON.stringify({ question, language, correlationId }),
       });
 
       if (response.status === 429) throw new Error("RATE_LIMIT_EXCEEDED");
