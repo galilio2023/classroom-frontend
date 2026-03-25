@@ -89,6 +89,13 @@ export const useAILiveInteraction = ({
           const langCode = language === "Arabic" ? "ar-SA" : "en-US";
           utterance.lang = langCode;
 
+          // 🌐 VOICE LOCALIZATION: Attempt to find a matching voice for the language
+          if (window.speechSynthesis.getVoices) {
+              const voices = window.speechSynthesis.getVoices();
+              const preferredVoice = voices.find(v => v.lang.startsWith(langCode.split('-')[0]));
+              if (preferredVoice) utterance.voice = preferredVoice;
+          }
+
           utterance.onstart = () => {
               setIsSpeaking(true);
               setVisualState("talking");

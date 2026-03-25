@@ -33,7 +33,10 @@ export const AIStudyBuddy = ({ subject, topic, assignment, classId }: AIStudyBud
   const { data: canAccessAI, isLoading: isAccessLoading } = useCan({
       resource: "ai_features",
       action: "interact",
-      params: { classId }
+      params: { classId },
+      queryOptions: {
+          enabled: !!classId,
+      }
   });
 
   const {

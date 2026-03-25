@@ -72,6 +72,19 @@ export const AILiveCompanion = ({
   const [isBrowserSupported, setIsBrowserSupported] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
   const [isPermissionDenied, setIsPermissionDenied] = useState(false);
+  const { open } = useNotification();
+
+  // 🛡️ NOTIFICATION: Trigger persistent toast on permission denial
+  useEffect(() => {
+      if (isPermissionDenied) {
+          open?.({
+              type: "error",
+              message: "Microphone Access Required",
+              description: "Please enable your microphone in browser settings to use the AI Co-Teacher.",
+              key: "mic-denied-companion"
+          });
+      }
+  }, [isPermissionDenied, open]);
 
   // 🛡️ TAB VISIBILITY SAFETY: Stop mic/speech if user leaves tab
   useEffect(() => {
