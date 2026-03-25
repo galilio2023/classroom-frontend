@@ -20,6 +20,7 @@ import { ErrorBoundary } from "./components/error-boundary";
 import { AppRouter } from "./routes";
 
 import "./App.css";
+import "@excalidraw/excalidraw/index.css";
 import "./i18n/i18n";
 
 function App() {
