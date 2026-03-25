@@ -23,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import {
   Calendar as CalendarIcon,
   Clock,
+  ChevronLeft,
   ChevronRight,
   Loader2,
   Info,
@@ -354,43 +355,51 @@ export const CalendarPage = () => {
                 classNames={{
                 months: "w-full",
                 month: "w-full space-y-8 md:space-y-12",
-                caption: "flex justify-center pt-2 relative items-center mb-10 md:mb-16",
+                month_caption: "flex justify-center pt-2 relative items-center mb-10 md:mb-16",
                 caption_label: "text-2xl md:text-3xl font-black tracking-tighter text-foreground",
                 nav: "space-x-2 flex items-center",
-                nav_button: cn(
-                    "h-10 w-10 md:h-12 md:w-12 bg-muted/40 hover:bg-primary/10 rounded-2xl transition-all flex items-center justify-center p-0",
+                button_previous: cn(
+                    "h-10 w-10 md:h-12 md:w-12 bg-muted/40 hover:bg-primary/10 rounded-2xl transition-all flex items-center justify-center p-0 absolute left-2",
                 ),
-                nav_button_previous: "absolute left-2",
-                nav_button_next: "absolute right-2",
-                table: "w-full border-collapse space-y-4",
-                head_row: "flex w-full mb-6",
-                head_cell:
+                button_next: cn(
+                    "h-10 w-10 md:h-12 md:w-12 bg-muted/40 hover:bg-primary/10 rounded-2xl transition-all flex items-center justify-center p-0 absolute right-2",
+                ),
+                month_grid: "w-full border-collapse space-y-4",
+                weekdays: "flex w-full mb-6",
+                weekday:
                     "text-muted-foreground/50 w-full font-black uppercase tracking-[0.2em] text-[9px] md:text-[10px]",
-                row: "flex w-full mt-2 gap-2 md:gap-4",
-                cell: "text-center text-sm p-0 relative w-full h-12 xs:h-16 md:h-20 focus-within:relative focus-within:z-20",
-                day: cn(
+                week: "flex w-full mt-2 gap-2 md:gap-4",
+                day: "text-center text-sm p-0 relative w-full h-12 xs:h-16 md:h-20 focus-within:relative focus-within:z-20",
+                day_button: cn(
                     "h-full w-full p-0 font-bold hover:bg-primary/5 rounded-2xl md:rounded-[1.5rem] transition-all aria-selected:opacity-100",
                 ),
-                day_selected:
+                selected:
                     "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground shadow-2xl shadow-primary/30",
-                day_today: "bg-primary/10 text-primary border border-primary/20",
-                day_outside: "text-muted-foreground/30 opacity-50",
-                day_disabled: "text-muted-foreground opacity-50",
-                day_range_middle:
+                today: "bg-primary/10 text-primary border border-primary/20",
+                outside: "text-muted-foreground/30 opacity-50",
+                disabled: "text-muted-foreground opacity-50",
+                range_middle:
                     "aria-selected:bg-accent aria-selected:text-accent-foreground",
-                day_hidden: "invisible",
+                hidden: "invisible",
                 }}
                 locale={isAr ? ar : undefined}
                 components={{
-                DayContent: ({ date, activeModifiers }) => {
+                Chevron: ({ orientation }) => {
+                    const Icon = orientation === "left" ? ChevronLeft : ChevronRight;
+                    return <Icon className="h-6 w-6" />;
+                },
+                DayButton: ({ day, modifiers, ...props }) => {
+                    const date = day.date;
                     const dateKey = dayjs(date).format("YYYY-MM-DD");
                     const dayEvents = eventsByDate[dateKey] || [];
-                    const isSelected = activeModifiers.selected;
-                    const isToday = activeModifiers.today;
+                    const isSelected = modifiers.selected;
+                    const isToday = modifiers.today;
 
                     return (
-                    <div
+                    <button
+                        {...props}
                         className={cn(
+                        props.className,
                         "flex flex-col items-center justify-center h-full w-full relative group/day",
                         isSelected && "text-primary-foreground",
                         !isSelected && isToday && "text-primary",
@@ -415,7 +424,7 @@ export const CalendarPage = () => {
                             )}
                         </div>
                         )}
-                    </div>
+                    </button>
                     );
                 },
                 }}
