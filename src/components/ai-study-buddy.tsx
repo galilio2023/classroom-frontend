@@ -5,7 +5,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Sparkles, MessageCircle } from "lucide-react";
+import { Sparkles, MessageCircle, Loader2 } from "lucide-react";
 import { ChatMessage } from "./ai/chat-message";
 import { useAIChat } from "@/hooks/use-ai-chat";
 import { ChatHeader } from "./ai/chat-header";
@@ -54,8 +54,27 @@ export const AIStudyBuddy = ({ subject, topic, assignment, classId }: AIStudyBud
   // 🛡️ Global Master Switch: Graceful Degradation
   // 🛡️ CONTEXT GUARD: Hide if no classId is provided
   // 🛡️ PARENT GATING: AI interactive features are disabled for Parents
-  if (!classId || isParent || isAccessLoading || canAccessAI?.can === false) {
+  if (!classId || isParent) {
     return null;
+  }
+
+  // 🛡️ LOADING STATE: Show disabled button to prevent layout flicker
+  if (isAccessLoading) {
+      return (
+        <div className="fixed bottom-[5rem] md:bottom-6 end-4 md:end-6 z-50">
+            <Button 
+                size="lg" 
+                disabled
+                className="rounded-[1.5rem] md:rounded-[2rem] h-14 w-14 md:h-16 md:w-16 opacity-20 grayscale bg-ai-primary border-none text-white p-0"
+            >
+                <Loader2 className="h-6 w-6 md:h-7 md:w-7 animate-spin" />
+            </Button>
+        </div>
+      );
+  }
+
+  if (canAccessAI?.can === false) {
+      return null;
   }
 
   const isAiEnabled = coreData?.globalConfig?.enableAiFeatures !== false;

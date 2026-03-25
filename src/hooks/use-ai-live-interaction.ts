@@ -40,7 +40,7 @@ export const useAILiveInteraction = ({
   const { data: permissions } = usePermissions<AuthPermissions>({});
   
   // Zustand Global State
-  const { isJoined: globalJoined, setIsJoined, activeClassId, setActiveClassId, stopSpeaking } = usePersistentLive();
+  const { isJoined: globalJoined, setIsJoined, activeClassId, setActiveClassId, stopSpeaking, setIsSpeaking: setGlobalSpeaking } = usePersistentLive();
 
   // 🛡️ MULTI-INSTANCE SAFETY: Scoped isJoined check
   const isJoined = globalJoined && activeClassId === classId;
@@ -51,6 +51,11 @@ export const useAILiveInteraction = ({
   const [currentScript, setCurrentScript] = useState<string | null>(null);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isListening, setIsListening] = useState(false);
+
+  // Sync local speaking state to global store
+  useEffect(() => {
+      setGlobalSpeaking(isSpeaking);
+  }, [isSpeaking, setGlobalSpeaking]);
 
   // Refs for non-reactive state & lifecycle
   const isMounted = useRef(true);

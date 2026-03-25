@@ -219,14 +219,29 @@ const SubmissionShow = () => {
                         </div>
 
                         {(submission.suggestedGrade !== undefined && submission.suggestedGrade !== null && !submission.grade) && (
-                            <div className="p-4 bg-ai-secondary/30 rounded-xl border border-ai-primary/10 space-y-2">
-                                <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-ai-primary">
-                                    <Wand2 className="h-3 w-3" />
-                                    {t("assignments.show.aiCoach")}
+                            <div className="p-5 bg-ai-primary/5 rounded-2xl border-2 border-ai-primary/20 space-y-4 animate-in fade-in zoom-in duration-500">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-ai-primary">
+                                        <Sparkles className="h-3 w-3" />
+                                        {t("assignments.grading.aiSuggestion")}
+                                    </div>
+                                    <Badge className="bg-ai-primary text-white text-[10px] font-black">{submission.suggestedGrade}%</Badge>
                                 </div>
-                                <p className="text-xs text-ai-primary/70 leading-relaxed italic">
-                                    {t("assignments.grading.toasts.aiApplied")}
+                                <p className="text-xs text-muted-foreground leading-relaxed italic line-clamp-3">
+                                    "{submission.suggestedFeedback}"
                                 </p>
+                                <Button 
+                                    size="sm" 
+                                    variant="outline"
+                                    className="w-full h-9 text-[10px] font-black uppercase tracking-widest gap-2 border-ai-primary/20 text-ai-primary hover:bg-ai-primary hover:text-white transition-all rounded-lg"
+                                    onClick={() => {
+                                        setGrade(submission.suggestedGrade!);
+                                        setFeedback(submission.suggestedFeedback || "");
+                                    }}
+                                >
+                                    <Wand2 className="h-3 w-3" />
+                                    {t("assignments.grading.applyAI")}
+                                </Button>
                             </div>
                         )}
                     </CardContent>
