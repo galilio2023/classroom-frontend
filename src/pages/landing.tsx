@@ -174,23 +174,23 @@ const LandingPage = () => {
         </section>
 
         {/* Final Statement - CONSTRAINED */}
-        <section className="section-wrapper text-center">
+        <section className="section-wrapper text-center !py-12 md:!py-48">
             <div className="container-center">
                 <motion.div 
                     initial={{ opacity: 0, y: 40 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    className="space-y-10 md:space-y-16 max-w-5xl mx-auto"
+                    className="space-y-6 md:space-y-16 max-w-5xl mx-auto"
                 >
-                    <h2 className="text-4xl sm:text-6xl md:text-8xl lg:text-[10rem] xl:text-[12rem] font-black tracking-[-0.06em] leading-[0.9] uppercase text-gradient">
+                    <h2 className="text-3xl sm:text-6xl md:text-8xl lg:text-[10rem] xl:text-[12rem] font-black tracking-[-0.06em] leading-[0.9] uppercase text-gradient">
                         {t("landing.cta.evolved1")} <br/>
                         <span className="text-primary">{t("landing.cta.evolved2")}</span>
                     </h2>
-                    <div className="pt-12">
-                        <Button size="lg" className="h-16 sm:h-24 px-8 sm:px-20 rounded-full text-lg sm:text-2xl font-black uppercase tracking-widest shadow-2xl shadow-primary/30 bg-primary hover:scale-110 active:scale-95 transition-all duration-500 group" asChild>
+                    <div className="pt-6 md:pt-12">
+                        <Button size="lg" className="h-14 sm:h-24 px-8 sm:px-20 rounded-full text-lg sm:text-2xl font-black uppercase tracking-widest shadow-2xl shadow-primary/30 bg-primary hover:scale-110 active:scale-95 transition-all duration-500 group" asChild>
                             <Link to="/register">
                                 {t("landing.cta.launch")}
-                                <Sparkles className="ml-4 h-8 w-8 animate-pulse" />
+                                <Sparkles className="ml-4 h-6 w-6 sm:h-8 sm:w-8 animate-pulse" />
                             </Link>
                         </Button>
                     </div>

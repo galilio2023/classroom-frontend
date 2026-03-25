@@ -155,7 +155,7 @@
 }
 
 @utility section-wrapper {
-  @apply py-24 md:py-48 relative z-10;
+  @apply py-16 md:py-48 relative z-10;
 }
 
 @utility container-center {
