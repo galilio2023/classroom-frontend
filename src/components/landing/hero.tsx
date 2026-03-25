@@ -65,7 +65,7 @@ export const LandingHero = ({ isAr: _isAr }: Props) => {
         >
           <Button
             size="lg"
-            className="h-16 md:h-20 w-full sm:w-auto px-12 rounded-full text-lg font-black uppercase tracking-widest shadow-2xl shadow-primary/20 bg-primary hover:scale-105 active:scale-95 transition-all duration-500"
+            className="h-14 md:h-20 w-full sm:w-auto px-12 rounded-full text-lg font-black uppercase tracking-widest shadow-2xl shadow-primary/20 bg-primary hover:scale-105 active:scale-95 transition-all duration-500"
             asChild
           >
             <Link to="/register">
@@ -77,7 +77,7 @@ export const LandingHero = ({ isAr: _isAr }: Props) => {
           <Button
             size="lg"
             variant="ghost"
-            className="h-16 md:h-20 w-full sm:w-auto px-12 rounded-full text-lg font-black uppercase tracking-widest hover:bg-muted/50 transition-all duration-500"
+            className="h-14 md:h-20 w-full sm:w-auto px-12 rounded-full text-lg font-black uppercase tracking-widest hover:bg-muted/50 transition-all duration-500"
             asChild
           >
             <Link to="/login">{t("buttons.signIn")}</Link>

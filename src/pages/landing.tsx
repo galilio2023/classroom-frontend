@@ -115,7 +115,7 @@ const LandingPage = () => {
                         whileInView={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.3, duration: 0.8 }}
                         viewport={{ once: true }}
-                        className="col-span-12 p-8 sm:p-10 rounded-[2rem] sm:rounded-[3rem] bg-primary text-primary-foreground flex flex-col md:flex-row items-center gap-12 relative overflow-hidden group shadow-2xl shadow-primary/20"
+                        className="col-span-12 p-8 sm:p-10 rounded-[2rem] sm:rounded-[3rem] bg-primary text-primary-foreground flex flex-col md:flex-row items-center gap-8 md:gap-12 relative overflow-hidden group shadow-2xl shadow-primary/20"
                     >
                         <div className="absolute inset-0 bg-gradient-to-r from-primary via-primary to-ai-primary opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
                         <div className="flex-1 text-start relative z-10">
@@ -143,12 +143,12 @@ const LandingPage = () => {
                     <Link to="/register" className="flex-1 group">
                         <motion.div 
                             whileHover={{ scale: 1.02 }}
-                            className="h-full p-8 sm:p-12 md:p-20 rounded-[2.5rem] sm:rounded-[4rem] bg-card border border-border/40 transition-all duration-500 hover:shadow-3xl text-start relative overflow-hidden"
+                            className="h-full p-6 sm:p-12 md:p-20 rounded-[2.5rem] sm:rounded-[4rem] bg-card border border-border/40 transition-all duration-500 hover:shadow-3xl text-start relative overflow-hidden"
                         >
                             <div className="absolute top-[-10%] right-[-10%] opacity-[0.02] group-hover:scale-110 transition-transform duration-700 pointer-events-none">
                                 <Users className="h-96 w-96 text-primary" />
                             </div>
-                            <h2 className="text-4xl sm:text-5xl md:text-7xl font-black tracking-tighter mb-8 leading-none">{t("landing.roles.student.title")}<br/><span className="text-primary/40">{t("landing.roles.student.portal")}</span></h2>
+                            <h2 className="text-3xl sm:text-5xl md:text-7xl font-black tracking-tighter mb-8 leading-none">{t("landing.roles.student.title")}<br/><span className="text-primary/40">{t("landing.roles.student.portal")}</span></h2>
                             <div className="flex items-center gap-3 font-black uppercase tracking-widest text-xs mt-12 bg-primary/10 text-primary w-fit px-6 py-3 rounded-full group-hover:bg-primary group-hover:text-white transition-all">
                                 {t("buttons.joinNow")} <ChevronRight className="h-4 w-4 rtl:rotate-180" />
                             </div>
@@ -158,12 +158,12 @@ const LandingPage = () => {
                     <Link to="/register" className="flex-1 group">
                         <motion.div 
                             whileHover={{ scale: 1.02 }}
-                            className="h-full p-8 sm:p-12 md:p-20 rounded-[2.5rem] sm:rounded-[4rem] bg-card border border-border/40 transition-all duration-500 hover:shadow-3xl text-start relative overflow-hidden"
+                            className="h-full p-6 sm:p-12 md:p-20 rounded-[2.5rem] sm:rounded-[4rem] bg-card border border-border/40 transition-all duration-500 hover:shadow-3xl text-start relative overflow-hidden"
                         >
                             <div className="absolute top-[-10%] right-[-10%] opacity-[0.02] group-hover:scale-110 transition-transform duration-700 pointer-events-none">
                                 <GraduationCap className="h-96 w-96 text-primary" />
                             </div>
-                            <h2 className="text-4xl sm:text-5xl md:text-7xl font-black tracking-tighter mb-8 leading-none">{t("landing.roles.teacher.title")}<br/><span className="text-primary/40">{t("landing.roles.teacher.portal")}</span></h2>
+                            <h2 className="text-3xl sm:text-5xl md:text-7xl font-black tracking-tighter mb-8 leading-none">{t("landing.roles.teacher.title")}<br/><span className="text-primary/40">{t("landing.roles.teacher.portal")}</span></h2>
                             <div className="flex items-center gap-3 font-black uppercase tracking-widest text-xs mt-12 bg-foreground text-background w-fit px-6 py-3 rounded-full group-hover:bg-primary group-hover:text-white transition-all">
                                 {t("buttons.applyToTeach")} <ChevronRight className="h-4 w-4 rtl:rotate-180" />
                             </div>
@@ -180,14 +180,14 @@ const LandingPage = () => {
                     initial={{ opacity: 0, y: 40 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    className="space-y-16 max-w-5xl mx-auto"
+                    className="space-y-10 md:space-y-16 max-w-5xl mx-auto"
                 >
-                    <h2 className="text-5xl sm:text-7xl md:text-[12rem] font-black tracking-[-0.06em] leading-[0.8] uppercase text-gradient">
+                    <h2 className="text-4xl sm:text-6xl md:text-8xl lg:text-[10rem] xl:text-[12rem] font-black tracking-[-0.06em] leading-[0.9] uppercase text-gradient">
                         {t("landing.cta.evolved1")} <br/>
                         <span className="text-primary">{t("landing.cta.evolved2")}</span>
                     </h2>
                     <div className="pt-12">
-                        <Button size="lg" className="h-20 sm:h-24 px-12 sm:px-20 rounded-full text-xl sm:text-2xl font-black uppercase tracking-widest shadow-2xl shadow-primary/30 bg-primary hover:scale-110 active:scale-95 transition-all duration-500 group" asChild>
+                        <Button size="lg" className="h-16 sm:h-24 px-8 sm:px-20 rounded-full text-lg sm:text-2xl font-black uppercase tracking-widest shadow-2xl shadow-primary/30 bg-primary hover:scale-110 active:scale-95 transition-all duration-500 group" asChild>
                             <Link to="/register">
                                 {t("landing.cta.launch")}
                                 <Sparkles className="ml-4 h-8 w-8 animate-pulse" />
