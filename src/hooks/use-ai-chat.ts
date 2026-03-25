@@ -244,15 +244,20 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
       const decoder = new TextDecoder();
       if (!reader) throw new Error("STREAM_READER_UNAVAILABLE");
 
+      let buffer = "";
+
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
 
         const chunk = decoder.decode(value, { stream: true });
-        const combinedChunk = lineBufferRef.current + chunk;
-        const lines = combinedChunk.split("\n\n");
+        buffer += chunk;
+        
+        // 🛡️ JSON LINE BUFFERING: Split by double newlines (SSE standard)
+        const lines = buffer.split("\n\n");
 
-        lineBufferRef.current = lines.pop() || "";
+        // Keep the last partial line in the buffer
+        buffer = lines.pop() || "";
 
         for (const line of lines) {
           if (line.startsWith("data: ")) {
@@ -268,7 +273,7 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
               if (data.sources) setStreamingSources(data.sources);
               if (data.done) break;
             } catch (e) {
-              // Partial JSON buffered
+              console.error("Partial SSE JSON buffered or malformed:", e);
             }
           }
         }

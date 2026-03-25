@@ -117,6 +117,17 @@ export const useAILiveInteraction = ({
       }
   }, [language, onFinished]);
 
+  // 👂 STOP LISTENING ENGINE
+  const stopListening = useCallback(() => {
+      if (recognitionRef.current) {
+          recognitionRef.current.abort();
+          recognitionRef.current = null;
+      }
+      setIsListening(false);
+      setVisualState("talking");
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+  }, []);
+
   // 2. 👂 SPEECH RECOGNITION ENGINE
   const startListening = useCallback(() => {
       const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -324,5 +335,6 @@ export const useAILiveInteraction = ({
     interact,
     speakText,
     startListening,
+    stopListening,
   };
 };

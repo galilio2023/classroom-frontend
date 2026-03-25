@@ -20,23 +20,6 @@ interface AILiveCompanionProps {
   onFinished?: () => void;
 }
 
-interface SpeechRecognitionEvent extends Event {
-  results: SpeechRecognitionResultList;
-  resultIndex: number;
-}
-
-interface SpeechRecognition extends EventTarget {
-  continuous: boolean;
-  interimResults: boolean;
-  lang: string;
-  onresult: (event: SpeechRecognitionEvent) => void;
-  onerror: (event: any) => void;
-  onend: () => void;
-  start: () => void;
-  stop: () => void;
-  abort: () => void;
-}
-
 /**
  * AILiveCompanion Component (Refactored)
  * 
@@ -77,6 +60,7 @@ export const AILiveCompanion = ({
     interact,
     speakText,
     startListening,
+    stopListening,
   } = useAILiveInteraction({ 
       classId, 
       language, 
@@ -96,11 +80,16 @@ export const AILiveCompanion = ({
               if (typeof window !== 'undefined' && window.speechSynthesis) {
                   window.speechSynthesis.cancel();
               }
+              // 🛡️ PRIVACY GUARD: Stop hardware microphone if tab is hidden
+              if (isListening) {
+                  stopListening();
+                  console.warn("🔒 Tab hidden: Microphone and Speech paused for privacy.");
+              }
           }
       };
       document.addEventListener("visibilitychange", handleVisibilityChange);
       return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
-  }, [isJoined]);
+  }, [isJoined, isListening, stopListening]);
 
   // 🛡️ MASTER SWITCH: Global AI Kill-switch enforcement
   const isAiEnabled = coreData?.globalConfig?.enableAiFeatures !== false;
