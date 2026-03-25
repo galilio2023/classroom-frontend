@@ -59,7 +59,7 @@ i18n
       escapeValue: false,
     },
     returnObjects: true,
-    debug: true,
+    debug: false,
     defaultNS,
   });
 

@@ -107,7 +107,9 @@ export const authProvider: AuthProvider = {
       const { data: session, error } = await authClient.getSession();
       
       if (error || !session?.user) {
-        console.warn("Better-Auth session missing or failed:", error);
+        if (import.meta.env.DEV) {
+          console.warn("Better-Auth session missing or failed:", error);
+        }
         
         // TEMPORARY DEV FALLBACK: Only trust local storage in development mode (npm run dev)
         // In production, this block is ignored to prevent UI-level spoofing.
