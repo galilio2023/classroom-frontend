@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { useCustom, useNotification, usePermissions } from "@refinedev/core";
+import { useCustom, useNotification, usePermissions, useCustomMutation } from "@refinedev/core";
 import { useTranslation } from "react-i18next";
 import { BACKEND_URL } from "@/config";
 import { BasePermissions, UserRole } from "@/types";
@@ -86,6 +86,9 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
       enabled: hasLoadedHistoryFor.current !== effectiveClassId,
     },
   });
+
+  // 1b. 🦾 NON-STREAMING FALLBACK (Refine v5 Pattern Adherence)
+  const { mutate: sendSimpleChat } = useCustomMutation();
 
   // Handle Navigation & State Resets
   useEffect(() => {
@@ -183,6 +186,35 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
     try {
       const token = localStorage.getItem("token");
       const correlationId = crypto.randomUUID();
+
+      // General Chat (Non-Streaming) - Use Refine's useCustomMutation
+      if (!effectiveClassId || effectiveClassId === 'global') {
+        sendSimpleChat({
+            url: apiUrl,
+            method: "post",
+            values: {
+                message: cleanInput,
+                history: messages.map(m => ({ role: m.role, parts: m.parts })),
+                context,
+                correlationId
+            }
+        }, {
+            onSuccess: (result: any) => {
+                if (result.data?.data?.response) {
+                    setMessages((prev) => [...prev, { role: "model", parts: [{ text: result.data.data.response }] }]);
+                }
+                if (result.data?.metadata?.isDryRun) setIsDryRun(true);
+                setIsLoading(false);
+            },
+            onError: (err) => {
+                console.error("Simple Chat Error:", err);
+                setIsLoading(false);
+                open?.({ type: "error", message: t("common.error"), description: t("aiHub.errors.serviceUnavailable" as any) });
+            }
+        });
+        return;
+      }
+
       const headers: Record<string, string> = { 
           "Content-Type": "application/json",
           "X-Correlation-ID": correlationId
@@ -206,19 +238,6 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
       if (response.status === 429) throw new Error("RATE_LIMIT_EXCEEDED");
       if (response.status === 503) throw new Error("AI_SERVICE_OFFLINE");
       if (!response.ok) throw new Error("AI_SERVICE_UNAVAILABLE");
-
-      // General Chat (Non-Streaming)
-      if (!effectiveClassId) {
-        const result = await response.json();
-        if (result.data?.response) {
-          setMessages((prev) => [...prev, { role: "model", parts: [{ text: result.data.response }] }]);
-        }
-        if (result.metadata?.isDryRun) {
-            setIsDryRun(true);
-        }
-        setIsLoading(false);
-        return;
-      }
 
       // Study Buddy (Streaming)
       const reader = response.body?.getReader();
