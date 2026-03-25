@@ -38,7 +38,7 @@ export const LandingHero = ({ isAr: _isAr }: Props) => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1, duration: 0.8 }}
-            className="text-5xl md:text-7xl lg:text-[7.5rem] font-black leading-[0.9] tracking-tighter uppercase text-gradient"
+            className="text-4xl sm:text-6xl md:text-7xl lg:text-[7.5rem] font-black leading-[0.9] tracking-tighter uppercase text-gradient"
           >
             {t("landing.hero.titlePart1")}
             <br />

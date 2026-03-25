@@ -200,7 +200,7 @@ const Pricing = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.1, duration: 0.8 }}
-                        className="text-5xl md:text-7xl lg:text-[8rem] font-black leading-[0.9] tracking-tighter uppercase text-gradient"
+                        className="text-4xl sm:text-6xl md:text-7xl lg:text-[8rem] font-black leading-[0.9] tracking-tighter uppercase text-gradient"
                     >
                         {t("pricing.titlePart1" as any)}<br/>
                         <span className="text-primary">{t("pricing.titlePart2" as any)}</span>
@@ -233,12 +233,12 @@ const Pricing = () => {
                     >
                         <div
                         className={cn(
-                            "relative h-full flex flex-col glass-card p-8 md:p-12 rounded-[3.5rem] transition-all duration-500 group hover:-translate-y-2 hover:shadow-3xl",
+                            "relative h-full flex flex-col glass-card p-6 sm:p-8 md:p-12 rounded-[2rem] sm:rounded-[3.5rem] transition-all duration-500 group hover:-translate-y-2 hover:shadow-3xl",
                             plan.featured && "border-primary/30 ring-1 ring-primary/10 shadow-primary/5 shadow-2xl bg-white/80 dark:bg-muted/10"
                         )}
                         >
                         {plan.featured && (
-                            <div className="absolute top-8 right-8 md:top-12 md:right-12">
+                            <div className="absolute top-6 right-6 sm:top-8 sm:right-8 md:top-12 md:right-12">
                                 <div className="bg-primary text-primary-foreground text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full shadow-lg animate-bounce">
                                     {t("pricing.recommended")}
                                 </div>
@@ -246,19 +246,19 @@ const Pricing = () => {
                         )}
                         
                         <div className="space-y-2">
-                            <h3 className="text-2xl md:text-3xl font-black uppercase tracking-widest flex items-center gap-3">
+                            <h3 className="text-xl sm:text-2xl md:text-3xl font-black uppercase tracking-widest flex items-center gap-3">
                                 {plan.name}
                             </h3>
                             <div className="flex items-baseline gap-2 pt-6">
-                                <span className="text-2xl font-bold text-muted-foreground/40">{plan.symbol}</span>
-                                <span className="text-7xl md:text-8xl font-black tracking-tighter">{plan.price}</span>
+                                <span className="text-xl sm:text-2xl font-bold text-muted-foreground/40">{plan.symbol}</span>
+                                <span className="text-5xl sm:text-7xl md:text-8xl font-black tracking-tighter">{plan.price}</span>
                                 {plan.period && (
                                     <span className="text-muted-foreground font-black uppercase text-[10px] tracking-[0.3em] opacity-60">
                                         {plan.period}
                                     </span>
                                 )}
                             </div>
-                            <p className="text-muted-foreground font-medium text-lg leading-relaxed pt-6 text-start">
+                            <p className="text-muted-foreground font-medium text-base sm:text-lg leading-relaxed pt-6 text-start">
                                 {plan.description}
                             </p>
                         </div>

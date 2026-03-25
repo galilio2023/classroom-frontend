@@ -159,7 +159,7 @@
 }
 
 @utility container-center {
-  @apply max-w-7xl mx-auto px-6 md:px-12 w-full;
+  @apply max-w-7xl mx-auto px-4 md:px-12 w-full;
 }
 
 /* --- DESIGNER UTILITIES --- */
