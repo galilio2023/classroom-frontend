@@ -71,35 +71,10 @@ export default defineConfig({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
+    dedupe: ["react", "react-dom"],
   },
   build: {
-    rollupOptions: {
-      output: {
-        manualChunks: (id) => {
-          if (id.includes("node_modules")) {
-            // 1. Isolate the absolute heaviest dependencies
-            if (id.includes("@excalidraw")) {
-              return "vendor-excalidraw";
-            }
-            
-            // 2. Group the Rich Text Editor ecosystem
-            if (id.includes("@tiptap") || id.includes("prosemirror")) {
-              return "vendor-editor";
-            }
-
-            // 3. Group heavy visualization tools
-            if (id.includes("recharts") || id.includes("framer-motion")) {
-              return "vendor-viz";
-            }
-
-            // 4. Let Vite/Rollup handle React, Refine, and Radix automatically.
-            // This prevents circular dependencies because Vite can intelligently 
-            // share modules between these framework-level libraries.
-          }
-        },
-      },
-    },
-    chunkSizeWarningLimit: 2500, // Adjusted for the combined weight of framework + UI
+    chunkSizeWarningLimit: 5000,
   },
   define: {
     "process.env": {},
