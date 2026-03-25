@@ -29,6 +29,12 @@ export const useClassDetails = (classId: string) => {
   });
 
   const aClass = query?.data?.data;
+  
+  const isModerator = useMemo(() => {
+    if (isAdmin) return false; // Admins are Registrars, not Instructors
+    return !!aClass?.teachers?.some((t: any) => t.teacher.id === identity?.id);
+  }, [identity, aClass, isAdmin]);
+
   const isOwner = useMemo(() => {
     return isAdmin || aClass?.teachers?.find((t: any) => t.teacher.id === identity?.id)?.isPrimary;
   }, [identity, aClass, isAdmin]);
@@ -183,6 +189,7 @@ export const useClassDetails = (classId: string) => {
     isStaff,
     isAdmin,
     isTeacher,
+    isModerator,
     isOwner,
     announcements,
     dismissedAnnouncements,

@@ -10,11 +10,15 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
+import { useDashboard } from "@/features/dashboard/hooks/use-dashboard";
 
 export const AIAssistantPage: React.FC = () => {
   const { t, i18n } = useTranslation();
+  const { coreData } = useDashboard();
   const isAr = i18n.language === 'ar';
   usePageTitle(t("aiHub.assistant.title"));
+
+  const isDryRun = coreData?.globalConfig?.isDryRun;
 
   return (
     <div className="space-y-10 md:space-y-16 pb-20 max-w-7xl mx-auto">
@@ -40,6 +44,18 @@ export const AIAssistantPage: React.FC = () => {
                 </div>
             </div>
         </div>
+
+        {isDryRun && (
+            <Alert className="bg-orange-500/10 border-orange-500/20 text-orange-600 rounded-2xl md:rounded-3xl border-2 border-dashed max-w-2xl">
+                <Info className="h-5 w-5 text-orange-600" />
+                <div className={cn(isAr ? "mr-2" : "ml-2")}>
+                    <AlertTitle className="font-black text-xs uppercase tracking-widest">{t("aiHub.assistant.mockMode")}</AlertTitle>
+                    <AlertDescription className="text-xs font-bold leading-relaxed">
+                        {t("aiHub.assistant.mockModeDesc")}
+                    </AlertDescription>
+                </div>
+            </Alert>
+        )}
       </motion.div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12 items-start">

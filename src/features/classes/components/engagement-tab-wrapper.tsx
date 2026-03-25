@@ -4,6 +4,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { AnnouncementTab } from "../pages/announcement-tab";
 import { DiscussionTab } from "../pages/discussion-tab";
 import { LiveClassroom } from "@/components/classes/live-classroom";
+import { usePersistentLive } from "@/hooks/use-persistent-live";
 import { Megaphone, MessageSquare, Video } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Announcement } from "@/types";
@@ -62,6 +63,8 @@ export const EngagementTabWrapper: React.FC<EngagementTabWrapperProps> = ({
     },
   ];
 
+  const { isJoined, activeClassId, setActiveClassId } = usePersistentLive();
+
   return (
     <div className="space-y-8 md:space-y-12">
       <Tabs value={activeSubTab} onValueChange={handleSubTabChange}>
@@ -109,7 +112,27 @@ export const EngagementTabWrapper: React.FC<EngagementTabWrapperProps> = ({
 
         <TabsContent value="live" className="mt-8">
           {activeSubTab === "live" && (
-            <LiveClassroom classId={classId} className="w-full" />
+            <>
+              {isJoined && activeClassId === classId ? (
+                <div className="h-[600px] w-full bg-muted/5 rounded-3xl border-2 border-dashed flex flex-col items-center justify-center text-muted-foreground gap-4">
+                    <div className="p-4 bg-live-primary/10 rounded-full animate-pulse">
+                        <Video className="h-8 w-8 text-live-primary" />
+                    </div>
+                    <div className="text-center space-y-1">
+                        <p className="font-black uppercase tracking-widest text-xs">{t("classes.live.indicator.activeInBackground", "Live Session Active")}</p>
+                        <p className="text-sm font-medium opacity-60">The video is currently playing in the Picture-in-Picture window.</p>
+                    </div>
+                </div>
+              ) : (
+                <LiveClassroom 
+                    classId={classId} 
+                    className="w-full" 
+                    onJoin={() => {
+                        setActiveClassId(classId);
+                    }}
+                />
+              )}
+            </>
           )}
         </TabsContent>
       </Tabs>

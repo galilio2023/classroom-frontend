@@ -15,13 +15,19 @@ import { motion, AnimatePresence } from "framer-motion";
 import { OfflineBanner } from "@/components/offline-banner";
 import { PWAInstaller } from "@/components/pwa-installer";
 import { AIStudyBuddy } from "@/components/ai-study-buddy";
+import { GlobalLiveIndicator } from "@/components/global-live-indicator";
+import { LiveClassroom } from "@/components/classes/live-classroom";
+import { PromotionMiniPlayer } from "@/components/promotion-mini-player";
+import { VideoMiniPlayer } from "@/components/video-mini-player";
+import { usePersistentLive } from "@/hooks/use-persistent-live";
 import { useGamificationToasts } from "@/hooks/use-gamification-toasts";
 
 export function Layout({ children }: PropsWithChildren) {
-  const { pathname } = useLocation();
+  const { pathname, search } = useLocation();
   const { id } = useParams();
   const { data: identity } = useGetIdentity<User>();
   const isStudent = identity?.role === UserRole.STUDENT;
+  const { activeClassId, isJoined } = usePersistentLive();
 
   // 🚀 GAMIFICATION: Activate listeners for XP, Levels, and Badges
   useGamificationToasts(identity?.id);
@@ -29,11 +35,32 @@ export function Layout({ children }: PropsWithChildren) {
   // Extract classId from URL if present (supports /classes/show/:id or /assignments/show/:id)
   const classIdFromUrl = pathname.includes("/classes/show/") ? id : undefined;
 
+  // Check if we are currently looking at the LIVE tab of the active class
+  const queryParams = new URLSearchParams(search);
+  const isOnLiveTab = classIdFromUrl === activeClassId && queryParams.get("subtab") === "live";
+
   return (
     <ThemeProvider>
       <SidebarProvider>
         <Sidebar />
         <SidebarInset className="flex flex-col min-h-screen bg-background/50 relative overflow-hidden">
+          {/* Global Live Signal */}
+          {isStudent && <GlobalLiveIndicator />}
+
+          {/* 📣 GLOBAL PROMOTION TRAILER (PiP) */}
+          {isStudent && <PromotionMiniPlayer />}
+
+          {/* 🎞️ GLOBAL RECORDED LESSON (PiP) */}
+          {isStudent && <VideoMiniPlayer />}
+
+          {/* 🚀 GLOBAL PERSISTENT LIVE SESSION (PiP) */}
+          {activeClassId && isJoined && (
+              <LiveClassroom 
+                classId={activeClassId} 
+                isMiniMode={!isOnLiveTab} 
+              />
+          )}
+
           {/* Global Mesh Gradient Background */}
           <div className="absolute inset-0 pointer-events-none -z-10 overflow-hidden">
             <div className="absolute top-[-10%] start-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px] animate-pulse" />
@@ -65,8 +92,8 @@ export function Layout({ children }: PropsWithChildren) {
             </AnimatePresence>
           </main>
           
-          {/* PERSISTENT AI STUDY BUDDY */}
-          {identity && (
+          {/* PERSISTENT AI STUDY BUDDY: Gated for academic roles only */}
+          {identity && (identity.role === UserRole.STUDENT || identity.role === UserRole.TEACHER) && !isJoined && (
               <AIStudyBuddy 
                 classId={classIdFromUrl}
               />

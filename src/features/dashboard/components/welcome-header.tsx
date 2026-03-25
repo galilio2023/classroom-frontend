@@ -43,6 +43,11 @@ export const WelcomeHeader = ({
   const isParent = user?.role === UserRole.PARENT;
 
   const getSummaryText = () => {
+    // 🛡️ Global Master Switch: Use platform welcome message if set by admin
+    if (data?.globalConfig?.welcomeMessage) {
+        return data.globalConfig.welcomeMessage;
+    }
+
     if (isStudent) {
       const count = data?.upcomingAssignments?.length || 0;
       const next =

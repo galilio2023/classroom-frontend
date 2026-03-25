@@ -1,4 +1,8 @@
 import { useState, useRef, useEffect, useCallback } from "react";
+import { useCustom, useNotification, usePermissions, useCustomMutation } from "@refinedev/core";
+import { useTranslation } from "react-i18next";
+import { BACKEND_URL } from "@/config";
+import { BasePermissions, UserRole } from "@/types";
 
 export interface Message {
   id?: string;
@@ -10,53 +14,113 @@ export interface Message {
 interface UseAIChatProps {
   url: string;
   context?: Record<string, any>;
-  classId?: string | number;
+  classId?: string | number | null;
 }
 
-const ERROR_MESSAGE = "I'm having trouble reading the class materials right now. Please try again in a moment.";
-// Removed THROTTLE_MS as requestAnimationFrame will handle timing
+interface ChatHistoryItem {
+  id: string;
+  role: "user" | "model";
+  content: string;
+  createdAt: string;
+}
 
+interface ChatHistoryResponse {
+  data: ChatHistoryItem[];
+}
+
+interface AuthPermissions extends BasePermissions {}
+
+const MAX_INPUT_LENGTH = 4000;
+
+/**
+ * useAIChat Hook (Final Production Grade)
+ * 
+ * Optimized for Tablawy OS AI Streaming.
+ * Handles SSE Buffering, History Syncing, and Multi-Class Navigation.
+ */
 export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
+  const { t } = useTranslation();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
+  
+  // 🛡️ AUTO-DRAFT: AI Assistant Persistence
+  useEffect(() => {
+      const draftKey = `draft:ai-assistant:${classId || 'global'}`;
+      if (input) {
+          localStorage.setItem(draftKey, input);
+      } else {
+          localStorage.removeItem(draftKey);
+      }
+  }, [input, classId]);
+
+  // 🚀 DRAFT RECOVERY
+  useEffect(() => {
+      const draftKey = `draft:ai-assistant:${classId || 'global'}`;
+      const saved = localStorage.getItem(draftKey);
+      if (saved && !input) {
+          setInput(saved);
+      }
+  }, [classId]);
   const [isLoading, setIsLoading] = useState(false);
   const [streamingMessage, setStreamingMessage] = useState("");
   const [streamingSources, setStreamingSources] = useState<any[] | null>(null);
+  const [isDryRun, setIsDryRun] = useState(false);
 
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const accumulatorRef = useRef("");
-  // Removed lastUpdateRef as requestAnimationFrame will handle timing
-  const animationFrameRef = useRef<number | null>(null); // Used for requestAnimationFrame
+  const lineBufferRef = useRef(""); 
+  const animationFrameRef = useRef<number | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const hasLoadedHistoryFor = useRef<string | number | null>(null); 
+  
+  const { open } = useNotification();
+  const { data: permissions, isLoading: isPermissionsLoading, isError: isPermissionsError } = usePermissions<AuthPermissions>({});
 
-  // 📜 MEMORY: Load chat history on mount
+  // 1. 📜 HISTORY: Standard Refine v5 GET
+  // Task: Context Safety - Fallback to "global" history if no classId provided
+  const effectiveClassId = classId || 'global';
+  const { result: historyResult, query: historyQuery } = useCustom<ChatHistoryResponse>({
+    url: `${BACKEND_URL}/ai/chat-history/${effectiveClassId}`,
+    method: "get",
+    queryOptions: {
+      enabled: hasLoadedHistoryFor.current !== effectiveClassId,
+    },
+  });
+
+  // 1b. 🦾 NON-STREAMING FALLBACK (Refine v5 Pattern Adherence)
+  const { mutate: sendSimpleChat } = useCustomMutation();
+
+  // Handle Navigation & State Resets
   useEffect(() => {
-    if (!classId) return;
+    if (effectiveClassId !== hasLoadedHistoryFor.current) {
+        setMessages([]);
+        accumulatorRef.current = "";
+        lineBufferRef.current = "";
+    }
+  }, [effectiveClassId]);
 
-    const fetchHistory = async () => {
-        try {
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/ai/chat-history/${classId}`, {
-                headers: {
-                    "Authorization": `Bearer ${localStorage.getItem("token")}`,
-                }
-            });
-            const data = await response.json();
-            if (data.data) {
-                const history = data.data.map((m: any) => ({
-                    id: String(m.id),
-                    role: m.role as "user" | "model",
-                    parts: [{ text: m.content }],
-                }));
-                setMessages(history);
-            }
-        } catch (err) {
-            console.error("Failed to fetch chat history:", err);
-        }
+  // Sync history safely
+  useEffect(() => {
+    const historyData = historyResult?.data?.data;
+    if (historyData && hasLoadedHistoryFor.current !== effectiveClassId) {
+      const history = historyData.map((m: ChatHistoryItem) => ({
+        id: String(m.id),
+        role: m.role,
+        parts: [{ text: m.content }],
+      }));
+      setMessages(history);
+      hasLoadedHistoryFor.current = effectiveClassId;
+    }
+  }, [historyResult, effectiveClassId]);
+
+  // 2. 🧹 CLEANUP
+  useEffect(() => {
+    return () => {
+      if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
+      if (abortControllerRef.current) abortControllerRef.current.abort();
     };
+  }, []);
 
-    fetchHistory();
-  }, [classId]);
-
-  // Auto-scroll logic (Optimized)
   const scrollToBottom = useCallback(() => {
     if (scrollAreaRef.current) {
       const scrollContainer = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
@@ -70,133 +134,207 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
     scrollToBottom();
   }, [messages, streamingMessage, scrollToBottom]);
 
-  // Modified updateUI to use requestAnimationFrame
-  const updateStreamingMessage = useCallback(() => {
-    if (animationFrameRef.current) {
-      cancelAnimationFrame(animationFrameRef.current);
-    }
+  const updateStreamingUI = useCallback(() => {
+    if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
+    
     animationFrameRef.current = requestAnimationFrame(() => {
       setStreamingMessage(accumulatorRef.current);
-      animationFrameRef.current = null; // Clear the ref after the update
+      animationFrameRef.current = null;
     });
-  }, []); // No dependencies needed as setStreamingMessage is stable and accumulatorRef is a ref
+  }, []);
 
+  // 3. 🚀 SEND: SSE Streaming Engine
   const handleSend = async () => {
-    if (!input.trim() || isLoading) return;
+    const cleanInput = input.trim();
+    if (!cleanInput || isLoading || isPermissionsLoading) return;
 
-    const userMessage: Message = {
-      role: "user",
-      parts: [{ text: input }],
-    };
+    // RBAC & Safety Checks
+    if (isPermissionsError) {
+        open?.({ type: "error", message: t("common.error"), description: t("auth.errors.permissions" as any) });
+        return;
+    }
 
+    if (cleanInput.length > MAX_INPUT_LENGTH) {
+        open?.({ type: "error", message: t("common.error"), description: t("aiHub.errors.inputTooLong" as any) });
+        return;
+    }
+
+    const role = permissions?.role;
+    if (effectiveClassId && role === UserRole.PARENT) {
+        open?.({ type: "error", message: t("common.accessDenied" as any), description: t("aiHub.errors.parentRestricted" as any) });
+        return;
+    }
+
+    // Initialize Request Lifecycle
+    if (abortControllerRef.current) abortControllerRef.current.abort();
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
+    const userMessage: Message = { role: "user", parts: [{ text: cleanInput }] };
     setMessages((prev) => [...prev, userMessage]);
-    const currentInput = input;
+    
     setInput("");
     setIsLoading(true);
     setStreamingMessage("");
     setStreamingSources(null);
     accumulatorRef.current = "";
+    lineBufferRef.current = ""; 
 
-    const finalUrl = classId ? "/ai/study-buddy" : url;
-    const apiUrl = `${import.meta.env.VITE_API_URL}${finalUrl}`;
+    const finalUrl = effectiveClassId ? "/ai/study-buddy" : url;
+    const apiUrl = `${BACKEND_URL}${finalUrl}`;
 
     try {
-      const response = await fetch(apiUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify({
-          message: currentInput,
-          history: messages.map(m => ({ role: m.role, parts: m.parts })),
-          context,
-          classId,
-        }),
-      });
+      const token = localStorage.getItem("token");
+      const correlationId = crypto.randomUUID();
 
-      if (!response.ok) throw new Error("Failed to send message");
-
-      if (!classId) {
-        const data = await response.json();
-        if (data.response) {
-            setMessages((prev) => [...prev, { role: "model", parts: [{ text: data.response }] }]);
-        }
-        setIsLoading(false);
+      // General Chat (Non-Streaming) - Use Refine's useCustomMutation
+      if (!effectiveClassId || effectiveClassId === 'global') {
+        sendSimpleChat({
+            url: apiUrl,
+            method: "post",
+            values: {
+                message: cleanInput,
+                history: messages.map(m => ({ role: m.role, parts: m.parts })),
+                context,
+                correlationId
+            }
+        }, {
+            onSuccess: (result: any) => {
+                if (result.data?.data?.response) {
+                    setMessages((prev) => [...prev, { role: "model", parts: [{ text: result.data.data.response }] }]);
+                }
+                if (result.data?.metadata?.isDryRun) setIsDryRun(true);
+                setIsLoading(false);
+            },
+            onError: (err) => {
+                console.error("Simple Chat Error:", err);
+                setIsLoading(false);
+                open?.({ type: "error", message: t("common.error"), description: t("aiHub.errors.serviceUnavailable" as any) });
+            }
+        });
         return;
       }
 
+      const headers: Record<string, string> = { 
+          "Content-Type": "application/json",
+          "X-Correlation-ID": correlationId
+      };
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+
+      const response = await fetch(apiUrl, {
+        method: "POST",
+        signal: controller.signal,
+        credentials: "include",
+        headers,
+        body: JSON.stringify({
+          message: cleanInput,
+          history: messages.map(m => ({ role: m.role, parts: m.parts })),
+          context,
+          classId: effectiveClassId,
+          correlationId, // Also pass in body for non-header compliant middle-layers
+        }),
+      });
+
+      if (response.status === 429) throw new Error("RATE_LIMIT_EXCEEDED");
+      if (response.status === 503) throw new Error("AI_SERVICE_OFFLINE");
+      if (!response.ok) throw new Error("AI_SERVICE_UNAVAILABLE");
+
+      // Study Buddy (Streaming)
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
-      if (!reader) throw new Error("No reader");
+      if (!reader) throw new Error("STREAM_READER_UNAVAILABLE");
+
+      let buffer = "";
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
 
         const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk.split("\n\n");
+        buffer += chunk;
+        
+        // 🛡️ JSON LINE BUFFERING: Split by double newlines (SSE standard)
+        const lines = buffer.split("\n\n");
+
+        // Keep the last partial line in the buffer
+        buffer = lines.pop() || "";
 
         for (const line of lines) {
           if (line.startsWith("data: ")) {
             try {
-              const data = JSON.parse(line.replace("data: ", ""));
-
+              const rawData = line.replace("data: ", "").trim();
+              if (!rawData) continue;
+              
+              const data = JSON.parse(rawData);
               if (data.text) {
                 accumulatorRef.current += data.text;
-                updateStreamingMessage(); // Call the new update function
+                updateStreamingUI();
               }
-
-              if (data.sources) {
-                setStreamingSources(data.sources);
-              }
-
+              if (data.sources) setStreamingSources(data.sources);
               if (data.done) break;
             } catch (e) {
-              // Ignore partial JSON chunks
+              console.error("Partial SSE JSON buffered or malformed:", e);
             }
           }
         }
       }
 
-      // Ensure the final accumulated message is pushed to streamingMessage one last time
-      // before moving it to chat history. This handles cases where the last chunk
-      // arrived but requestAnimationFrame hasn't fired yet.
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
-      setStreamingMessage(accumulatorRef.current); // Final update to streamingMessage
-
-      // Final push to state
-      setMessages((prev) => [
-        ...prev,
-        {
+      // Final State Push (Guard against empty bubbles)
+      if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
+      const finalResponseText = accumulatorRef.current.trim();
+      
+      if (finalResponseText.length > 0) {
+        setMessages((prev) => [
+          ...prev,
+          {
             role: "model",
-            parts: [{ text: accumulatorRef.current }],
+            parts: [{ text: finalResponseText }],
             sources: streamingSources || undefined
-        }
-      ]);
-      setStreamingMessage(""); // Clear streaming message after it's added to history
+          }
+        ]);
+      } else {
+        throw new Error("EMPTY_RESPONSE");
+      }
+
+      setStreamingMessage("");
       setStreamingSources(null);
 
-    } catch (error) {
-      console.error("Chat error:", error);
-      setMessages((prev) => [...prev, { role: "model", parts: [{ text: ERROR_MESSAGE }] }]);
+    } catch (error: any) {
+      if (error.name === 'AbortError') return;
+      
+      console.error("Tablawy AI Error:", error);
+      
+      let description = t("aiHub.errors.serviceUnavailable" as any);
+      if (error.message === "RATE_LIMIT_EXCEEDED") description = t("aiHub.errors.rateLimit" as any);
+      if (error.message === "AI_SERVICE_OFFLINE") description = t("aiHub.errors.maintenance" as any);
+
+      open?.({ 
+        type: "error", 
+        message: t("common.error"), 
+        description 
+      });
+      
+      setMessages((prev) => [...prev, { 
+        role: "model", 
+        parts: [{ text: t("aiHub.errors.friendlyFallback" as any) }] 
+      }]);
     } finally {
-      setIsLoading(false);
-      // Ensure any pending animation frame is cancelled on completion or error
-      if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
+      if (abortControllerRef.current === controller) {
+        setIsLoading(false);
+        abortControllerRef.current = null;
+      }
     }
   };
 
   return {
     messages,
-    streamingMessage, // The "live" message being typed
+    streamingMessage,
     streamingSources,
     input,
     setInput,
     handleSend,
-    isLoading,
+    isLoading: isLoading || historyQuery?.isLoading || isPermissionsLoading,
     scrollAreaRef,
+    isDryRun,
   };
 };

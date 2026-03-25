@@ -25,9 +25,11 @@ import ReactMarkdown from "react-markdown";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import dayjs from "dayjs";
+import { useDashboard } from "@/features/dashboard/hooks/use-dashboard";
 
 const SubmissionShow = () => {
   const { t, i18n } = useTranslation();
+  const { coreData } = useDashboard();
   const isAr = i18n.language === 'ar';
   const { id } = useParams();
   const navigate = useNavigate();
@@ -112,6 +114,12 @@ const SubmissionShow = () => {
                 {t("buttons.back")}
             </Button>
             <div className="flex items-center gap-3">
+                {submission.aiApprovalStatus === "pending" && (
+                    <Badge className="bg-ai-primary/10 text-ai-primary border-ai-primary/20 px-4 py-1 rounded-full font-black uppercase tracking-widest text-[10px] animate-pulse">
+                        <Sparkles className="h-3 w-3 mr-1.5" />
+                        {t("assignments.grading.proposedAI")}
+                    </Badge>
+                )}
                 {submission.grade !== null ? (
                     <Badge className="bg-success text-success-foreground px-4 py-1 rounded-full font-black uppercase tracking-widest text-[10px]">
                         {t("status.completed")}
@@ -170,16 +178,18 @@ const SubmissionShow = () => {
                     <CardHeader>
                         <CardTitle className="text-sm font-black uppercase tracking-widest flex items-center justify-between">
                             {t("assignments.grading.gradeSubmission")}
-                            <Button 
-                                variant="outline" 
-                                size="sm" 
-                                onClick={handleAiAnalyze}
-                                disabled={isAnalyzing}
-                                className="h-7 text-[10px] gap-1.5 border-ai-primary/20 text-ai-primary hover:bg-ai-primary/5"
-                            >
-                                {isAnalyzing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
-                                {t("buttons.aiAssist")}
-                            </Button>
+                            {coreData?.globalConfig?.enableAiFeatures !== false && (
+                                <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    onClick={handleAiAnalyze}
+                                    disabled={isAnalyzing}
+                                    className="h-7 text-[10px] gap-1.5 border-ai-primary/20 text-ai-primary hover:bg-ai-primary/5"
+                                >
+                                    {isAnalyzing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
+                                    {t("buttons.aiAssist")}
+                                </Button>
+                            )}
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-6">
@@ -209,14 +219,29 @@ const SubmissionShow = () => {
                         </div>
 
                         {(submission.suggestedGrade !== undefined && submission.suggestedGrade !== null && !submission.grade) && (
-                            <div className="p-4 bg-ai-secondary/30 rounded-xl border border-ai-primary/10 space-y-2">
-                                <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-ai-primary">
-                                    <Wand2 className="h-3 w-3" />
-                                    {t("assignments.show.aiCoach")}
+                            <div className="p-5 bg-ai-primary/5 rounded-2xl border-2 border-ai-primary/20 space-y-4 animate-in fade-in zoom-in duration-500">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-ai-primary">
+                                        <Sparkles className="h-3 w-3" />
+                                        {t("assignments.grading.aiSuggestion")}
+                                    </div>
+                                    <Badge className="bg-ai-primary text-white text-[10px] font-black">{submission.suggestedGrade}%</Badge>
                                 </div>
-                                <p className="text-xs text-ai-primary/70 leading-relaxed italic">
-                                    {t("assignments.grading.toasts.aiApplied")}
+                                <p className="text-xs text-muted-foreground leading-relaxed italic line-clamp-3">
+                                    "{submission.suggestedFeedback}"
                                 </p>
+                                <Button 
+                                    size="sm" 
+                                    variant="outline"
+                                    className="w-full h-9 text-[10px] font-black uppercase tracking-widest gap-2 border-ai-primary/20 text-ai-primary hover:bg-ai-primary hover:text-white transition-all rounded-lg"
+                                    onClick={() => {
+                                        setGrade(submission.suggestedGrade!);
+                                        setFeedback(submission.suggestedFeedback || "");
+                                    }}
+                                >
+                                    <Wand2 className="h-3 w-3" />
+                                    {t("assignments.grading.applyAI")}
+                                </Button>
                             </div>
                         )}
                     </CardContent>

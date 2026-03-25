@@ -49,8 +49,14 @@ const fetcher = async (url: string, options?: RequestInit) => {
     ...(options?.headers as Record<string, string>),
   };
 
-  if (["POST", "PUT", "PATCH"].includes(method)) {
+  if (["POST", "PUT", "PATCH", "DELETE"].includes(method)) {
     headers["Content-Type"] = "application/json";
+  }
+
+  // 🛡️ DUAL AUTH: Better Auth (Cookies) + Bearer Token (Authorization Header)
+  const token = localStorage.getItem("token");
+  if (token && !headers["Authorization"]) {
+    headers["Authorization"] = `Bearer ${token}`;
   }
 
   return fetch(url, {
@@ -125,6 +131,10 @@ export const dataProvider: DataProvider = {
           if (value !== undefined && value !== null && value !== "") {
             url.searchParams.append(queryKey, String(value));
           }
+        } else {
+            // ⚠️ GOTCHA: ConditionalFilter (OR/AND) not supported by current flat-mapped backend.
+            // Suppressing to prevent crash, but logging for developer awareness.
+            console.warn("DataProvider: Conditional filters (OR/AND) are not yet supported by the flat-mapping backend.");
         }
       });
     }

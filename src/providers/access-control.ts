@@ -34,9 +34,9 @@ export const accessControlProvider: AccessControlProvider = {
       }
 
       if (academicResources.includes(resourceName)) {
-        // Admins can OBSERVE (list/show) but NOT MODIFY academic data
-        if (["list", "show"].includes(action)) return { can: true };
-        return { can: false, reason: "Admins are not allowed to modify academic resources." };
+        // 🏛️ REGISTRAR AUTHORITY: Admins can manage the infrastructure 
+        // (Create classes, assign teachers, manage enrollment)
+        return { can: true };
       }
 
       // Default for any other resource not explicitly listed

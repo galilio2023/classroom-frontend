@@ -8,17 +8,25 @@ import {
 import { User, UserRole } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Grid, Loader2, Presentation, Users, Video } from "lucide-react";
+import { Grid, Loader2, Presentation, Users, Video, ExternalLink, MonitorUp, ListChecks, Bot, RotateCcw, Sparkles, BrainCircuit } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { socket } from "@/lib/socket";
 import { Whiteboard } from "./whiteboard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
+import { usePersistentLive } from "@/hooks/use-persistent-live";
+
+import { Badge } from "@/components/ui/badge";
+import { AILiveCompanion } from "./ai-live-companion";
 
 interface LiveClassroomProps {
   classId: string;
   className?: string;
+  isMiniMode?: boolean;
+  onJoin?: () => void;
 }
 
 declare global {
@@ -29,12 +37,14 @@ declare global {
 
 export const LiveClassroom = ({
   classId: classIdString,
+  isMiniMode = false,
+  onJoin,
 }: LiveClassroomProps) => {
   const { t, i18n } = useTranslation();
   const { data: identity } = useGetIdentity<User>();
+  const { isJoined, setIsJoined, setActiveClassId, activeClassId } = usePersistentLive();
   const jitsiContainerRef = useRef<HTMLDivElement>(null);
-  const [api, setApi] = useState<any>(null);
-  const [isJoined, setIsJoined] = useState(false);
+  const apiRef = useRef<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("video");
 
@@ -107,6 +117,13 @@ export const LiveClassroom = ({
   }, [groups, identity, isTeacher]);
 
   useEffect(() => {
+    if (isJoined && numericClassId === Number(activeClassId) && !apiRef.current && !isLoading) {
+        // 🚀 AUTO-RESUME: Reconnect if state says we were joined
+        void startMeeting();
+    }
+  }, [isJoined, activeClassId, numericClassId, isLoading]);
+
+  useEffect(() => {
     if (!window.JitsiMeetExternalAPI) {
       const script = document.createElement("script");
       script.src = "https://meet.jit.si/external_api.js";
@@ -117,7 +134,7 @@ export const LiveClassroom = ({
     // Real-time Socket Listeners
     if (!socket.connected) socket.connect();
 
-    socket.on("live_session_started", (data) => {
+    const handleSessionStarted = (data: any) => {
       if (Number(data.classId) === numericClassId && !isTeacher) {
         toast.info(
           t("classes.live.toasts.sessionStarted", { name: data.startedBy }),
@@ -129,17 +146,20 @@ export const LiveClassroom = ({
           },
         );
       }
-    });
+    };
 
-    socket.on("live_session_ended", (data) => {
+    const handleSessionEnded = (data: any) => {
       if (Number(data.classId) === numericClassId) {
-        setIsJoined(false);
-        if (api) api.dispose();
+        setIsJoined(false); // 🚀 Global store cleanup
+        if (apiRef.current) {
+          apiRef.current.dispose();
+          apiRef.current = null;
+        }
         toast.error(t("classes.live.toasts.sessionEnded"));
       }
-    });
+    };
 
-    socket.on("breakout_session_started", (data) => {
+    const handleBreakoutStarted = (data: any) => {
       if (Number(data.classId) === numericClassId) {
         setIsBreakoutActive(true);
         toast.info(t("classes.live.toasts.breakoutStarted"));
@@ -152,9 +172,9 @@ export const LiveClassroom = ({
           joinBreakoutRoom(myGroup.id);
         }
       }
-    });
+    };
 
-    socket.on("breakout_session_ended", (data) => {
+    const handleBreakoutEnded = (data: any) => {
       if (Number(data.classId) === numericClassId) {
         setIsBreakoutActive(false);
         setCurrentGroupId(null);
@@ -162,18 +182,27 @@ export const LiveClassroom = ({
         // Re-join main hall
         startMeeting();
       }
-    });
+    };
+
+    socket.on("live_session_started", handleSessionStarted);
+    socket.on("live_session_ended", handleSessionEnded);
+    socket.on("breakout_session_started", handleBreakoutStarted);
+    socket.on("breakout_session_ended", handleBreakoutEnded);
 
     return () => {
-      if (api) {
-        api.dispose();
+      // 🛡️ HARD CLEANUP: Dispose Jitsi instance on unmount
+      if (apiRef.current) {
+        apiRef.current.dispose();
+        apiRef.current = null;
       }
-      socket.off("live_session_started");
-      socket.off("live_session_ended");
-      socket.off("breakout_session_started");
-      socket.off("breakout_session_ended");
+      socket.off("live_session_started", handleSessionStarted);
+      socket.off("live_session_ended", handleSessionEnded);
+      socket.off("breakout_session_started", handleBreakoutStarted);
+      socket.off("breakout_session_ended", handleBreakoutEnded);
     };
-  }, [api, numericClassId, isTeacher, myGroup, t]);
+  }, [numericClassId, isTeacher, myGroup, t]);
+
+  const [generateRoadmap, setGenerateRoadmap] = useState(true);
 
   const handleStartLiveSession = () => {
     setIsLoading(true);
@@ -181,7 +210,7 @@ export const LiveClassroom = ({
       {
         url: "/live-session/start",
         method: "post",
-        values: { classId: numericClassId },
+        values: { classId: numericClassId, generateRoadmap },
       },
       {
         onSuccess: () => {
@@ -204,7 +233,10 @@ export const LiveClassroom = ({
       return;
 
     setIsLoading(true);
-    if (api) api.dispose();
+    if (apiRef.current) {
+      apiRef.current.dispose();
+      apiRef.current = null;
+    }
 
     // If joining main hall, clear group ID
     if (!groupId) setCurrentGroupId(null);
@@ -245,6 +277,7 @@ export const LiveClassroom = ({
     if (!window.JitsiMeetExternalAPI || !identity) return;
 
     setIsJoined(true);
+    onJoin?.(); // 🚀 Notify global store that we've joined
 
     setTimeout(() => {
       if (!jitsiContainerRef.current) {
@@ -279,7 +312,7 @@ export const LiveClassroom = ({
 
       try {
         const newApi = new window.JitsiMeetExternalAPI(domain, options);
-        setApi(newApi);
+        apiRef.current = newApi;
 
         newApi.addEventListeners({
           videoConferenceJoined: () => {
@@ -297,19 +330,14 @@ export const LiveClassroom = ({
               setCurrentGroupId(null);
             } else {
               setIsJoined(false);
-              setApi(null);
-              if (isTeacher) {
-                endLiveSession({
-                  url: "/live-session/end",
-                  method: "post",
-                  values: { classId: numericClassId },
-                });
-              }
+              apiRef.current = null;
+              // 🛡️ REFRESH-SAFE: Do NOT end the session automatically here.
+              // This allows teachers to refresh (F5) without kicking everyone out.
             }
           },
           readyToClose: () => {
             setIsJoined(false);
-            setApi(null);
+            apiRef.current = null;
           },
           recordingStatusChanged: (payload: {
             on: boolean;
@@ -369,44 +397,191 @@ export const LiveClassroom = ({
     );
   };
 
+  const handleEndSession = () => {
+    if (!window.confirm("Are you sure you want to end the class for everyone? This will stop the video and clear the live status.")) return;
+    
+    setIsLoading(true);
+    endLiveSession(
+      {
+        url: "/live-session/end",
+        method: "post",
+        values: { classId: numericClassId },
+      },
+      {
+        onSuccess: () => {
+          setIsJoined(false);
+          if (apiRef.current) {
+            apiRef.current.dispose();
+            apiRef.current = null;
+          }
+          toast.success("Class session ended successfully.");
+          setIsLoading(false);
+        },
+        onError: () => {
+          setIsLoading(false);
+          toast.error("Failed to end the session. Please try again.");
+        }
+      }
+    );
+  };
+
+  const handleDelegateToAI = async () => {
+    if (!apiRef.current) return;
+    setIsLoading(true);
+
+    try {
+        // 1. Capture Teacher Frame from Jitsi
+        const { data: snapshot } = await apiRef.current.captureLargeVideoScreenshot();
+        
+        // 2. Trigger Backend Delegation
+        await startLiveSession({
+            url: `/${numericClassId}/delegate`,
+            method: "patch",
+            values: { 
+                photo: snapshot,
+                language: i18n.language === "ar" ? "Arabic" : "English",
+                lastPoint: "The current topic in the roadmap"
+            }
+        });
+        toast.success("Lesson delegated to AI Co-Teacher");
+    } catch (err) {
+        console.error("Delegation failed:", err);
+        toast.error("Failed to hand off to AI.");
+    } finally {
+        setIsLoading(false);
+    }
+  };
+
+  const handleResumeSession = async () => {
+      setIsLoading(true);
+      try {
+          await startLiveSession({
+              url: `/${numericClassId}/resume`,
+              method: "patch",
+              values: {}
+          });
+          toast.success("You have resumed control.");
+      } catch (err) {
+          toast.error("Failed to resume session.");
+      } finally {
+          setIsLoading(false);
+      }
+  };
+
   const isClassLive = classData?.isLive;
+  const isDelegated = classData?.isAiDelegated;
+
+  // 🚀 MINI-PLAYER LOGIC: Hide completely if in mini-mode but not joined
+  if (isMiniMode && !isJoined) return null;
 
   return (
-    <div className="space-y-6" dir={isAr ? "rtl" : "ltr"}>
-      <div className="flex items-center justify-between">
-        <div>
-          <h3 className="text-lg font-semibold flex items-center gap-2">
-            <Video className="h-5 w-5 text-live-primary" />
-            {t("classes.live.title")}{" "}
-            {currentGroupId
-              ? t("classes.live.breakoutRoom")
-              : t("classes.live.mainHall")}
-          </h3>
-          <p className="text-sm text-muted-foreground">
-            {isBreakoutActive
-              ? t("classes.live.breakoutActive")
-              : t("classes.live.mainActive")}
-          </p>
-        </div>
+    <div 
+        className={cn(
+            "transition-all duration-500 ease-in-out",
+            isMiniMode ? "fixed bottom-6 right-6 w-72 md:w-96 z-[9999] group shadow-2xl scale-100" : "w-full space-y-6"
+        )} 
+        dir={isAr ? "rtl" : "ltr"}
+    >
+      {!isMiniMode && (
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h3 className="text-lg font-semibold flex items-center gap-2">
+                <Video className="h-5 w-5 text-live-primary" />
+                {t("classes.live.title")}{" "}
+                {currentGroupId
+                  ? t("classes.live.breakoutRoom")
+                  : t("classes.live.mainHall")}
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                {isBreakoutActive
+                  ? t("classes.live.breakoutActive")
+                  : t("classes.live.mainActive")}
+              </p>
+            </div>
 
-        {isTeacher && isJoined && (
-          <div className="flex gap-2">
-            <Button
-              variant={isBreakoutActive ? "destructive" : "secondary"}
-              size="sm"
-              onClick={handleToggleBreakout}
-            >
-              <Grid className={cn("h-4 w-4", isAr ? "ml-2" : "mr-2")} />
-              {isBreakoutActive
-                ? t("classes.live.endBreakouts")
-                : t("classes.live.startBreakouts")}
-            </Button>
+            {isTeacher && isJoined && (
+              <div className="flex gap-2">
+                {!isDelegated ? (
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleDelegateToAI}
+                        disabled={isLoading || !classData?.liveLessonRoadmap?.sessionTitle}
+                        className="bg-ai-primary/10 text-ai-primary border-ai-primary/20 hover:bg-ai-primary hover:text-white rounded-2xl"
+                    >
+                        <Bot className="h-4 w-4 mr-2" />
+                        {t("classes.live.delegateAi", "Delegate to AI")}
+                    </Button>
+                ) : (
+                    <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={handleResumeSession}
+                        disabled={isLoading}
+                        className="rounded-2xl"
+                    >
+                        <RotateCcw className="h-4 w-4 mr-2" />
+                        {t("classes.live.resumeLesson", "Resume Lesson")}
+                    </Button>
+                )}
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={handleEndSession}
+                  disabled={isLoading}
+                >
+                  {isLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Video className="h-4 w-4 mr-2" />}
+                  {t("classes.live.endLiveSession", "Finish Session")}
+                </Button>
+                <Button
+                  variant={isBreakoutActive ? "destructive" : "secondary"}
+                  size="sm"
+                  onClick={handleToggleBreakout}
+                >
+                  <Grid className={cn("h-4 w-4", isAr ? "ml-2" : "mr-2")} />
+                  {isBreakoutActive
+                    ? t("classes.live.endBreakouts")
+                    : t("classes.live.startBreakouts")}
+                </Button>
+              </div>
+            )}
           </div>
-        )}
-      </div>
+      )}
 
-      {isTeacher && isBreakoutActive && isJoined && (
-        <div className="flex gap-2 overflow-x-auto pb-2">
+      {/* Mini-Player Overlay (Only shows on hover in mini-mode) */}
+      {isMiniMode && (
+          <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity z-20 flex items-center justify-center rounded-2xl backdrop-blur-sm">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="bg-white text-black font-black uppercase tracking-widest text-[10px] gap-2 rounded-full border-none shadow-xl"
+                onClick={() => {
+                    const params = new URLSearchParams(window.location.search);
+                    params.set("subtab", "live");
+                    window.history.replaceState({}, '', `${window.location.pathname}?${params.toString()}`);
+                    // Force a re-render by notifying parent or using search params
+                    window.dispatchEvent(new PopStateEvent('popstate'));
+                }}
+              >
+                  <ExternalLink className="h-3 w-3" />
+                  {t("classes.live.indicator.backToSession", "Back to Session")}
+              </Button>
+              <Button 
+                variant="outline" 
+                size="icon" 
+                className="bg-live-primary text-white rounded-full border-none shadow-xl h-8 w-8"
+                onClick={() => {
+                    if (apiRef.current) apiRef.current.executeCommand('togglePip');
+                }}
+                title="Pop Out to System"
+              >
+                  <MonitorUp className="h-4 w-4" />
+              </Button>
+          </div>
+      )}
+
+      {!isMiniMode && isTeacher && isBreakoutActive && isJoined && (
+        <div className="flex gap-2 overflow-x-auto pb-2 mb-4">
           <Button
             variant={currentGroupId === null ? "default" : "outline"}
             size="sm"
@@ -428,7 +603,7 @@ export const LiveClassroom = ({
       )}
 
       {!isJoined ? (
-        <Card className="border-dashed py-12 text-center bg-muted/10">
+        <Card className="border-dashed py-12 text-center bg-muted/10 rounded-2xl md:rounded-[2rem]">
           <CardContent className="flex flex-col items-center gap-4">
             <div className="p-4 bg-live-secondary rounded-full">
               <Users className="h-8 w-8 text-live-primary" />
@@ -446,26 +621,46 @@ export const LiveClassroom = ({
               </p>
             </div>
 
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-4">
               {isTeacher && !isClassLive ? (
-                <Button
-                  size="lg"
-                  onClick={handleStartLiveSession}
-                  disabled={isLoading}
-                  className="bg-live-primary hover:bg-live-primary/90 text-white shadow-lg shadow-live-primary/20"
-                >
-                  {isLoading ? (
-                    <Loader2
-                      className={cn(
-                        "h-4 w-4 animate-spin",
-                        isAr ? "ml-2" : "mr-2",
+                <div className="space-y-6">
+                    <div className="flex items-center space-x-3 bg-ai-primary/5 p-4 rounded-2xl border border-ai-primary/10 max-w-sm mx-auto">
+                        <Checkbox 
+                            id="roadmap-toggle" 
+                            checked={generateRoadmap} 
+                            onCheckedChange={(checked) => setGenerateRoadmap(!!checked)}
+                            className="border-ai-primary data-[state=checked]:bg-ai-primary"
+                        />
+                        <div className="grid gap-1.5 leading-none text-start">
+                            <Label htmlFor="roadmap-toggle" className="text-sm font-black flex items-center gap-2">
+                                <Sparkles className="h-3 w-3 text-ai-primary" />
+                                {t("classes.live.roadmap.generate", "Generate AI Roadmap")}
+                            </Label>
+                            <p className="text-[10px] text-muted-foreground font-medium">
+                                Create a time-boxed outline and key concepts automatically.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <Button
+                      size="lg"
+                      onClick={handleStartLiveSession}
+                      disabled={isLoading}
+                      className="bg-live-primary hover:bg-live-primary/90 text-white shadow-lg shadow-live-primary/20 rounded-2xl w-full"
+                    >
+                      {isLoading ? (
+                        <Loader2
+                          className={cn(
+                            "h-4 w-4 animate-spin",
+                            isAr ? "ml-2" : "mr-2",
+                          )}
+                        />
+                      ) : (
+                        <Video className={cn("h-4 w-4", isAr ? "ml-2" : "mr-2")} />
                       )}
-                    />
-                  ) : (
-                    <Video className={cn("h-4 w-4", isAr ? "ml-2" : "mr-2")} />
-                  )}
-                  {t("classes.live.startLiveSession")}
-                </Button>
+                      {t("classes.live.startLiveSession")}
+                    </Button>
+                </div>
               ) : (
                 <Button
                   size="lg"
@@ -475,7 +670,7 @@ export const LiveClassroom = ({
                       : startMeeting()
                   }
                   disabled={isLoading || !isClassLive}
-                  className="bg-live-primary hover:bg-live-primary/90 text-white shadow-lg shadow-live-primary/20"
+                  className="bg-live-primary hover:bg-live-primary/90 text-white shadow-lg shadow-live-primary/20 rounded-2xl"
                 >
                   {isLoading ? (
                     <Loader2
@@ -496,53 +691,168 @@ export const LiveClassroom = ({
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-4">
-          <Tabs
-            value={activeTab}
-            onValueChange={setActiveTab}
-            className="w-full"
-          >
-            <TabsList className="grid w-full grid-cols-2 max-w-100">
-              <TabsTrigger value="video" className="flex items-center gap-2">
-                <Video className="h-4 w-4" />
-                {t("classes.live.videoSession")}
-              </TabsTrigger>
-              <TabsTrigger
-                value="whiteboard"
-                className="flex items-center gap-2"
+        <div className={cn("space-y-4", isMiniMode && "space-y-0")}>
+          {!isMiniMode && (
+              <Tabs
+                value={activeTab}
+                onValueChange={setActiveTab}
+                className="w-full"
               >
-                <Presentation className="h-4 w-4" />
-                {t("classes.live.whiteboard")}
-              </TabsTrigger>
-            </TabsList>
+                <TabsList className="grid w-full grid-cols-3 max-w-150 rounded-full bg-muted/20 p-1">
+                  <TabsTrigger value="video" className="flex items-center gap-2 rounded-full font-bold">
+                    <Video className="h-4 w-4" />
+                    {t("classes.live.videoSession")}
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="whiteboard"
+                    className="flex items-center gap-2 rounded-full font-bold"
+                  >
+                    <Presentation className="h-4 w-4" />
+                    {t("classes.live.whiteboard")}
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="roadmap"
+                    className="flex items-center gap-2 rounded-full font-bold"
+                  >
+                    <ListChecks className="h-4 w-4" />
+                    {t("classes.live.roadmap", "AI Roadmap")}
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+          )}
 
-            <div className="mt-4">
-              <TabsContent
-                value="video"
-                forceMount
-                className={cn("m-0", activeTab !== "video" && "hidden")}
-              >
-                <div className="rounded-xl overflow-hidden border shadow-2xl bg-black">
-                  <div ref={jitsiContainerRef} className="w-full h-150" />
-                </div>
-              </TabsContent>
+          <div className={cn("mt-4 relative", isMiniMode && "mt-0")}>
+              {/* VIDEO LAYER */}
+              <div className={cn(
+                  "rounded-2xl md:rounded-[2rem] overflow-hidden border shadow-2xl bg-black transition-all duration-500 relative",
+                  activeTab !== "video" && !isMiniMode && "hidden",
+                  isMiniMode ? "h-48 md:h-60" : "h-150"
+              )}>
+                {/* 🚀 AI CO-TEACHER COMPANION (Overlays Jitsi during delegation) */}
+                {isDelegated && (
+                    <div className="absolute inset-0 z-50">
+                        <AILiveCompanion 
+                            classId={classIdString}
+                            photo={classData?.aiDelegationPhoto}
+                            script={classData?.aiDelegationContext?.script}
+                            visualCue={classData?.aiDelegationContext?.visualCue || "talking"}
+                            language={i18n.language === "ar" ? "Arabic" : "English"}
+                            onFinished={() => {
+                                if (isTeacher) {
+                                    // Optionally auto-resume or wait for teacher
+                                    toast.info("AI Co-teacher has finished the segment.");
+                                }
+                            }}
+                        />
+                    </div>
+                )}
+                
+                <div ref={jitsiContainerRef} className="w-full h-full" />
+              </div>
 
-              <TabsContent
-                value="whiteboard"
-                forceMount
-                className={cn("m-0", activeTab !== "whiteboard" && "hidden")}
-              >
-                <div className="h-162.5">
-                  <Whiteboard
-                    classId={classIdString}
-                    roomId={
-                      currentGroupId ? `group-${currentGroupId}` : classIdString
-                    }
-                  />
-                </div>
-              </TabsContent>
-            </div>
-          </Tabs>
+              {/* WHITEBOARD LAYER (Only in full mode) */}
+              {!isMiniMode && (
+                  <div className={cn(
+                      "h-162.5",
+                      activeTab !== "whiteboard" && "hidden"
+                  )}>
+                    <Whiteboard
+                      classId={classIdString}
+                      roomId={
+                        currentGroupId ? `group-${currentGroupId}` : classIdString
+                      }
+                    />
+                  </div>
+              )}
+
+              {/* ROADMAP LAYER */}
+              {!isMiniMode && activeTab === "roadmap" && (
+                  <div className="bg-card/50 backdrop-blur-xl border-border/40 border rounded-[2rem] p-8 md:p-10 space-y-8 h-150 overflow-y-auto custom-scrollbar">
+                      {classData?.liveLessonRoadmap?.sessionTitle ? (
+                          <div className="space-y-10">
+                              <div className="space-y-2">
+                                  <Badge className="bg-ai-primary/10 text-ai-primary border-ai-primary/20 font-black uppercase tracking-widest text-[10px] px-4 py-1.5 rounded-full mb-2">
+                                      {t("classes.live.roadmap.sessionTitle", "Session Title")}
+                                  </Badge>
+                                  <h2 className="text-3xl md:text-4xl font-black tracking-tight">{classData.liveLessonRoadmap.sessionTitle}</h2>
+                              </div>
+
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                                  <div className="space-y-6">
+                                      <div className="flex items-center gap-3">
+                                          <div className="p-2 rounded-xl bg-orange-500/10 text-orange-600">
+                                              <Sparkles className="h-5 w-5" />
+                                          </div>
+                                          <h3 className="text-xl font-black tracking-tight">{t("classes.live.roadmap.icebreaker", "Icebreaker")}</h3>
+                                      </div>
+                                      <p className="p-6 rounded-2xl bg-orange-500/5 border border-orange-500/10 text-orange-700/80 font-medium italic italic-leading-relaxed">
+                                          "{classData.liveLessonRoadmap.icebreaker}"
+                                      </p>
+                                  </div>
+
+                                  <div className="space-y-6">
+                                      <div className="flex items-center gap-3">
+                                          <div className="p-2 rounded-xl bg-primary/10 text-primary">
+                                              <Presentation className="h-5 w-5" />
+                                          </div>
+                                          <h3 className="text-xl font-black tracking-tight">{t("classes.live.roadmap.keyConcepts", "Key Concepts")}</h3>
+                                      </div>
+                                      <div className="flex flex-wrap gap-2">
+                                          {classData.liveLessonRoadmap.keyConcepts?.map((concept: string, idx: number) => (
+                                              <Badge key={idx} variant="outline" className="rounded-full px-4 py-2 border-primary/20 bg-primary/5 font-bold text-xs">
+                                                  {concept}
+                                              </Badge>
+                                          ))}
+                                      </div>
+                                  </div>
+                              </div>
+
+                              <div className="space-y-6">
+                                  <div className="flex items-center gap-3">
+                                      <div className="p-2 rounded-xl bg-ai-primary/10 text-ai-primary">
+                                          <ListChecks className="h-5 w-5" />
+                                      </div>
+                                      <h3 className="text-xl font-black tracking-tight">{t("classes.live.roadmap.outline", "Lesson Outline")}</h3>
+                                  </div>
+                                  <div className="space-y-4">
+                                      {classData.liveLessonRoadmap.outline?.map((item: any, idx: number) => (
+                                          <div key={idx} className="flex items-start gap-6 p-6 rounded-2xl bg-muted/30 border border-border/20 group hover:border-primary/30 transition-all">
+                                              <div className="text-sm font-black text-primary bg-primary/10 px-3 py-1 rounded-lg shrink-0">
+                                                  {item.time}
+                                              </div>
+                                              <div className="space-y-1">
+                                                  <h4 className="font-black text-lg group-hover:text-primary transition-colors">{item.topic}</h4>
+                                                  <p className="text-sm text-muted-foreground font-medium leading-relaxed">{item.goal}</p>
+                                              </div>
+                                          </div>
+                                      ))}
+                                  </div>
+                              </div>
+
+                              <div className="p-8 rounded-3xl bg-destructive/5 border-2 border-dashed border-destructive/20 space-y-3">
+                                  <h4 className="font-black uppercase tracking-widest text-[10px] text-destructive flex items-center gap-2">
+                                      <Users className="h-3 w-3" />
+                                      {t("classes.live.roadmap.watchouts", "Student Watch-outs")}
+                                  </h4>
+                                  <p className="text-sm font-bold text-destructive/80 leading-relaxed">
+                                      {classData.liveLessonRoadmap.studentWatchouts}
+                                  </p>
+                              </div>
+                          </div>
+                      ) : (
+                          <div className="flex flex-col items-center justify-center h-full text-center space-y-4 opacity-40">
+                              <div className="p-6 bg-muted rounded-full">
+                                  <BrainCircuit className="h-12 w-12" />
+                              </div>
+                              <div className="space-y-1">
+                                  <h3 className="font-black uppercase tracking-widest text-xs">No Roadmap Generated</h3>
+                                  <p className="text-sm font-medium">Teacher can enable AI Roadmap when starting the session.</p>
+                              </div>
+                          </div>
+                      )}
+                  </div>
+              )}
+          </div>
         </div>
       )}
     </div>

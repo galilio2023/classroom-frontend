@@ -192,7 +192,7 @@
         "aiAssistant": {
           "title": "AI Assistant",
           "badge": "Premium",
-          "description": "Unlock the power of Gemini 3.1 Flash Lite to generate quizzes, assignments, and get instant curriculum help.",
+          "description": "Unlock the power of Gemini 3 Flash Preview to generate quizzes, assignments, and get instant curriculum help.",
           "quizGen": "Quiz Gen",
           "aiChat": "AI Chat"
         },

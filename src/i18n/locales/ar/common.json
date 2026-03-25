@@ -154,6 +154,7 @@
     "noResults": "لم يتم العثور على نتائج.",
     "searching": "جاري البحث...",
     "settings": "الإعدادات",
+    "accessDenied": "تم رفض الوصول",
     "navigation": "التنقل",
     "language": "اللغة",
     "toggleTheme": "تغيير المظهر",
@@ -531,6 +532,8 @@
       "draftsDesc": "احصل على مسودة تكليف كاملة تتضمن الوصف والتعليمات في ثوانٍ.",
       "proTip": "نصيحة الخبراء",
       "proTipDesc": "كن دقيقاً في مواضيعك. بدلاً من \"التاريخ\"، جرب \"أثر الثورة الصناعية على التطور العمراني\".",
+      "mockMode": "وضع المحاكاة نشط",
+      "mockModeDesc": "المنصة حالياً في وضع المحاكاة. جميع استجابات الذكاء الاصطناعي هي نماذج معدة مسبقاً لتوفير تكاليف API أثناء التطوير والاختبار.",
       "helper": {
         "title": "مساعد التكليفات الذكي",
         "desc": "استخدم Gemini AI لكتابة مسودة وصف التكليف.",
@@ -665,6 +668,7 @@
     "governance": {
       "title": "حوكمة الذكاء الاصطناعي",
       "description": "تتبع التأمل الذاتي والنمو التطوري لوكلاء نظام طبلاوي.",
+      "severity": "الخطورة",
       "integrityActive": "نزاهة الوكيل نشطة",
       "evolutionHistory": "سجل التطور",
       "evolutionDesc": "تقارير صحة النظام اليومية المفصلة الناتجة عن وكيل التنظيف.",
@@ -688,6 +692,14 @@
         "description": "لم تقم بحفظ أي جلسات دراسة بالذكاء الاصطناعي بعد. ابدأ باستكشاف مختبر الدراسة بالذكاء الاصطناعي!",
         "cta": "اذهب لمختبر الدراسة"
       }
+    },
+    "errors": {
+      "inputTooLong": "الرسالة طويلة جداً. يرجى اختصارها.",
+      "parentRestricted": "يمكن للطلاب والمعلمين فقط التفاعل مع مساعد الدراسة.",
+      "serviceUnavailable": "خدمة Gemini AI غير متوفرة حالياً. يرجى المحاولة لاحقاً.",
+      "rateLimit": "تم الوصول إلى الحد الأقصى للاستخدام بالساعة. يرجى أخذ استراحة قصيرة والمحاولة لاحقاً.",
+      "maintenance": "ميزات الذكاء الاصطناعي متوقفة مؤقتاً للصيانة.",
+      "friendlyFallback": "أواجه مشكلة في الاتصال بعقل الذكاء الاصطناعي حالياً. سأعود قريباً!"
     }
   },
   "studyPlanner": {
@@ -1375,33 +1387,33 @@
   },
   "portfolioPage": {
     "pageTitle": "ملف {{name}}",
-    "fallbackPageTitle": "Student Portfolio",
+    "fallbackPageTitle": "الملف الأكاديمي للطالب",
     "loading": "جاري تجهيز الملف الأكاديمي...",
-    "notFound": "Student not found",
-    "notFoundDesc": "The portfolio you are looking for is unavailable.",
-    "title": "Academic Portfolio",
-    "description": "A comprehensive showcase of learning progress, achievements, and skills.",
-    "level": "Level {{level}}",
-    "xp": "{{xp}} XP",
-    "progressToLevel": "Progress to Level {{level}}",
-    "email": "Email",
-    "phone": "Phone",
+    "notFound": "الطالب غير موجود",
+    "notFoundDesc": "الملف الذي تبحث عنه غير متاح حالياً.",
+    "title": "الملف الأكاديمي",
+    "description": "عرض شامل لتقدم التعلم والإنجازات والمهارات.",
+    "level": "المستوى {{level}}",
+    "xp": "{{xp}} نقطة خبرة",
+    "progressToLevel": "التقدم للمستوى {{level}}",
+    "email": "البريد الإلكتروني",
+    "phone": "الهاتف",
     "stats": {
-      "badges": "Badges",
-      "avgGrade": "Avg Grade",
-      "dayStreak": "Day Streak",
-      "globalRank": "Global Rank"
+      "badges": "الأوسمة",
+      "avgGrade": "متوسط الدرجات",
+      "dayStreak": "سلسلة الأيام",
+      "globalRank": "الترتيب العالمي"
     },
-    "learningConsistency": "Learning Consistency",
-    "academicJourney": "Academic Journey",
-    "submissionActivity": "Submission Activity",
-    "submissionActivityDesc": "Your assignment submission frequency over the last 6 months.",
-    "heatmapSubmissions": "{{count}} submissions",
-    "heatmapOn": "on",
-    "heatmapLess": "Less",
-    "heatmapMore": "More",
-    "unlockedAchievements": "Unlocked Achievements",
-    "badgesEarned": "{{earned}} / {{total}} Earned"
+    "learningConsistency": "استمرارية التعلم",
+    "academicJourney": "الرحلة الأكاديمية",
+    "submissionActivity": "نشاط التسليم",
+    "submissionActivityDesc": "تكرار تسليم التكليفات الخاصة بك خلال الـ 6 أشهر الماضية.",
+    "heatmapSubmissions": "{{count}} تسليمات",
+    "heatmapOn": "في",
+    "heatmapLess": "أقل",
+    "heatmapMore": "أكثر",
+    "unlockedAchievements": "الإنجازات المفتوحة",
+    "badgesEarned": "تم الحصول على {{earned}} / {{total}}"
   },
   "help": {
     "common": {

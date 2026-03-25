@@ -1,20 +1,17 @@
 import React from "react";
-import { useCustom } from "@refinedev/core";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Sparkles, ShieldCheck, Activity, AlertTriangle, ArrowRight, Loader2, Heart, Check } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Sparkles, ShieldCheck, Activity, Loader2, Heart } from "lucide-react";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 
-export const SystemHealthCard: React.FC = () => {
+interface SystemHealthCardProps {
+  report?: any;
+  isLoading?: boolean;
+}
+
+export const SystemHealthCard: React.FC<SystemHealthCardProps> = ({ report, isLoading }) => {
   const { t } = useTranslation();
-
-  const { data: result, isLoading } = useCustom<any>({
-    url: "/ai/health-report",
-    method: "get",
-  }) as any;
-
-  const report = result?.data;
 
   if (isLoading) {
     return (

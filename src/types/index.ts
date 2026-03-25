@@ -3,7 +3,33 @@ import { classFormSchema, scheduleSchema } from "@/schemas/class";
 import { signUpFormSchema } from "@/schemas/auth";
 import { Quiz } from "./quiz";
 
+export interface AIMetadata {
+  classId?: number;
+  conversationId?: number;
+  isAborted?: boolean;
+  errorName?: string;
+  errorCode?: string;
+  model?: string;
+  usage?: {
+    promptTokens: number;
+    candidatesTokens: number;
+    totalTokens: number;
+  };
+  latencyMs?: number;
+  promptVersion?: string;
+  isCached?: boolean;
+  [key: string]: any;
+}
+
+export interface AIResponse<T> {
+  data: T;
+  metadata?: AIMetadata;
+  usage?: AIMetadata['usage'];
+  latencyMs?: number;
+}
+
 export type SignUpPayload = z.infer<typeof signUpFormSchema>;
+
 
 export enum UserRole {
   ADMIN = "admin",
@@ -24,6 +50,12 @@ export enum VerificationStatus {
   PENDING = "pending",
   VERIFIED = "verified",
   REJECTED = "rejected",
+}
+
+export interface BasePermissions {
+  role?: UserRole;
+  canAccessAi?: boolean;
+  [key: string]: any;
 }
 
 export interface User {
@@ -125,6 +157,7 @@ export interface Submission {
   assignmentId: number;
   studentId: string;
   groupId?: number | null;
+  aiApprovalStatus?: "pending" | "approved" | "rejected";
   createdAt: string;
   updatedAt: string;
   student?: User;
@@ -427,7 +460,16 @@ export interface AiLog {
   prompt: string;
   response: string;
   tokensUsed: number;
+  latencyMs: number;
   model: string;
+  metadata: {
+      classId?: number;
+      conversationId?: number;
+      isAborted?: boolean;
+      errorName?: string;
+      errorCode?: string;
+      [key: string]: any;
+  };
   createdAt: string;
   user?: User;
 }

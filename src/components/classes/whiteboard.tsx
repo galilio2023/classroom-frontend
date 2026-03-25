@@ -80,11 +80,15 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
 
     socket.on("whiteboard:lock-status", (data) => {
       setIsLocked(data.isLocked);
+      if (!isTeacher) {
+          toast.info(data.isLocked ? "Teacher has locked the board" : "Teacher has unlocked the board");
+      }
     });
 
     socket.on("whiteboard:clear", () => {
       if (excalidrawAPI) {
         excalidrawAPI.updateScene({ elements: [] });
+        if (!isTeacher) toast.warning("The teacher has cleared the whiteboard");
       }
     });
 

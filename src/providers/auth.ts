@@ -93,9 +93,11 @@ export const authProvider: AuthProvider = {
     try {
       await authClient.signOut();
       localStorage.removeItem("user");
+      localStorage.removeItem("tablawy-live-session");
       return { success: true, redirectTo: "/login" };
     } catch (error) {
       localStorage.removeItem("user");
+      localStorage.removeItem("tablawy-live-session");
       return { success: true, redirectTo: "/login" };
     }
   },
@@ -152,17 +154,19 @@ export const authProvider: AuthProvider = {
   },
 
   getPermissions: async () => {
-    const user = localStorage.getItem("user");
-    if (!user) return null;
-    try {
-      const parsedUser: User = JSON.parse(user);
-      return { role: parsedUser.role };
-    } catch (e) {
-      return null;
-    }
+    // 🛡️ SECURITY: Prefer session over localStorage if possible
+    const { data: session } = await authClient.getSession();
+    const role = (session?.user as any)?.role || JSON.parse(localStorage.getItem("user") || "{}")?.role;
+    return { role };
   },
 
   getIdentity: async () => {
+    // 🛡️ SECURITY: Fetch fresh session to prevent local spoofing
+    const { data: session } = await authClient.getSession();
+    if (session?.user) {
+        return session.user;
+    }
+    
     const user = localStorage.getItem("user");
     if (!user) return null;
     try {

@@ -30,6 +30,7 @@ import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { useTranslation } from "react-i18next";
+import { useUserRole } from "@/hooks/use-user-role";
 
 interface DiscussionTabProps {
   classId: string;
@@ -38,8 +39,29 @@ interface DiscussionTabProps {
 export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
   const { t, i18n } = useTranslation();
   const { data: identity } = useGetIdentity<User>();
+  const { isStaff } = useUserRole();
   const [newPost, setNewPost] = useState("");
   const [replyTo, setReplyTo] = useState<number | null>(null);
+  
+  // 🛡️ AUTO-DRAFT: Discussion Persistence
+  useEffect(() => {
+      const draftKey = `draft:discussion:${classId}${replyTo ? `:${replyTo}` : ''}`;
+      if (newPost && newPost !== "<p></p>") {
+          localStorage.setItem(draftKey, newPost);
+      } else {
+          localStorage.removeItem(draftKey);
+      }
+  }, [newPost, classId, replyTo]);
+
+  // 🚀 DRAFT RECOVERY
+  useEffect(() => {
+      const draftKey = `draft:discussion:${classId}${replyTo ? `:${replyTo}` : ''}`;
+      const saved = localStorage.getItem(draftKey);
+      if (saved && !newPost) {
+          setNewPost(saved);
+      }
+  }, [classId, replyTo]);
+
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const [summary, setSummary] = useState<string | null>(null);
@@ -61,6 +83,7 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
 
   const { mutate: createPost, mutation } = useCreate<Discussion, any, any>();
   const { mutate: deletePost } = useDelete();
+  const { mutate: solvePost } = useCustomMutation();
   const { mutate: generateSummary } = useCustomMutation();
 
   useEffect(() => {
@@ -127,6 +150,18 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
         },
       },
     );
+  };
+
+  const handleSolve = (postId: number, solverId: string) => {
+      solvePost({
+          url: `/discussions/${postId}/solve`,
+          method: "patch",
+          values: { solvedById: solverId }
+      }, {
+          onSuccess: () => {
+              void refetch();
+          }
+      });
   };
 
   const handleGenerateSummary = () => {
@@ -251,10 +286,12 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
                 post={discussion}
                 isOwn={discussion.user.id === identity?.id}
                 isAdmin={identity?.role === UserRole.ADMIN}
+                isStaff={isStaff}
                 onReply={(id) => {
                   setReplyTo(id);
                   // Scroll to editor
                 }}
+                onSolve={handleSolve}
                 onDelete={(id) => {
                   deletePost({ resource: "discussions", id });
                 }}

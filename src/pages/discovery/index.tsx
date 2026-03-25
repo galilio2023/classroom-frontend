@@ -19,6 +19,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { TeacherChannel, User } from "@/types";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
+import { usePersistentLive } from "@/hooks/use-persistent-live";
 
 const TeacherCard = ({ channel, onShow }: { channel: TeacherChannel & { teacher: User }, onShow: (id: string) => void }) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -108,6 +109,7 @@ const TeacherCard = ({ channel, onShow }: { channel: TeacherChannel & { teacher:
 const DiscoveryPage = () => {
   const { t } = useTranslation();
   const { show } = useNavigation();
+  const { setPromotionTrailer } = usePersistentLive();
   const [search, setSearch] = useState("");
 
   const { query: channelsQuery } = useList<TeacherChannel & { teacher: User }>({
@@ -119,6 +121,15 @@ const DiscoveryPage = () => {
 
   const channels = channelsQuery.data;
   const isLoading = channelsQuery.isLoading;
+
+  const handleShowChannel = (teacherId: string) => {
+      // Find the specific channel data to set the trailer
+      const channel = channels?.data.find(c => c.teacher.id === teacherId);
+      if (channel?.trailerVideoUrl) {
+          setPromotionTrailer(channel.trailerVideoUrl, channel.teacher.name, channel.headline);
+      }
+      show("users", teacherId);
+  };
 
   return (
     <div className="container-center section-wrapper !pt-10">
@@ -176,7 +187,7 @@ const DiscoveryPage = () => {
                     <TeacherCard 
                         key={channel.id} 
                         channel={channel} 
-                        onShow={(id) => show("users", id)} 
+                        onShow={handleShowChannel} 
                     />
                 ))}
             </div>

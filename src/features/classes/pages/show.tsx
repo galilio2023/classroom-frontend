@@ -62,6 +62,7 @@ const ClassesShow = () => {
     isDeleting,
     createMutation,
     isMessaging,
+    isModerator,
     refetch
   } = useClassDetails(classId);
 
@@ -95,7 +96,7 @@ const ClassesShow = () => {
           approvedCount={approvedEnrollments.length}
           waitlistedCount={aClass.enrollments?.filter((e: any) => e.status === "waitlisted").length ?? 0}
           isLiveIndicator={isLiveIndicator}
-          isStaff={isStaff}
+          isStaff={isModerator}
           onToggleLive={handleToggleLive}
         />
 
@@ -108,7 +109,7 @@ const ClassesShow = () => {
           <ClassTabNavigation 
             activePrimaryTab={activePrimaryTab}
             isLiveIndicator={isLiveIndicator}
-            isStaff={isStaff}
+            isStaff={isModerator}
             pendingCount={pendingCount}
             classColor={aClass.color || "#6366f1"}
           />
