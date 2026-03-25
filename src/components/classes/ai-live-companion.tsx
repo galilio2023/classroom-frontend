@@ -58,7 +58,7 @@ export const AILiveCompanion = ({
   const { isParent, isStaff, isLoading: isAuthLoading } = useAIAuthorization();
 
   // 🛡️ RBAC: Centralized access control via Refine patterns
-  const { data: canAccessAI } = useCan({
+  const { data: canAccessAI, isLoading: isAccessLoading } = useCan({
       resource: "ai_features",
       action: "interact",
       params: { classId }
@@ -88,6 +88,19 @@ export const AILiveCompanion = ({
   const [isBrowserSupported, setIsBrowserSupported] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
   const [isPermissionDenied, setIsPermissionDenied] = useState(false);
+
+  // 🛡️ TAB VISIBILITY SAFETY: Stop mic/speech if user leaves tab
+  useEffect(() => {
+      const handleVisibilityChange = () => {
+          if (document.visibilityState === "hidden" && isJoined) {
+              if (typeof window !== 'undefined' && window.speechSynthesis) {
+                  window.speechSynthesis.cancel();
+              }
+          }
+      };
+      document.addEventListener("visibilitychange", handleVisibilityChange);
+      return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, [isJoined]);
 
   // 🛡️ MASTER SWITCH: Global AI Kill-switch enforcement
   const isAiEnabled = coreData?.globalConfig?.enableAiFeatures !== false;
@@ -124,7 +137,22 @@ export const AILiveCompanion = ({
       };
   }, []);
 
-  if (!isHydrated || !isAiEnabled || isParent || canAccessAI?.can === false) return null;
+  if (!isHydrated || isParent || isAccessLoading || canAccessAI?.can === false) return null;
+
+  // 🛡️ Global Master Switch: Graceful Degradation
+  if (!isAiEnabled) {
+      return (
+          <div className="w-full h-full min-h-[400px] flex flex-col items-center justify-center bg-black/60 border-white/10 rounded-3xl p-8 text-center border-4">
+              <div className="bg-destructive/10 p-6 rounded-full mb-6">
+                  <BrainCircuit className="w-12 h-12 text-destructive grayscale" />
+              </div>
+              <h3 className="text-2xl font-bold text-white mb-4">AI Co-Teacher Offline</h3>
+              <p className="text-muted-foreground max-w-xs mx-auto">
+                  The AI Co-teacher features are currently undergoing maintenance to improve your experience.
+              </p>
+          </div>
+      );
+  }
 
   if (isAuthLoading) {
       return (

@@ -30,7 +30,7 @@ export const AIStudyBuddy = ({ subject, topic, assignment, classId }: AIStudyBud
   const [isOpen, setIsOpen] = useState(false);
 
   // 🛡️ RBAC: Centralized access control via Refine patterns
-  const { data: canAccessAI } = useCan({
+  const { data: canAccessAI, isLoading: isAccessLoading } = useCan({
       resource: "ai_features",
       action: "interact",
       params: { classId }
@@ -51,11 +51,42 @@ export const AIStudyBuddy = ({ subject, topic, assignment, classId }: AIStudyBud
     context: { subject, topic, assignment },
   });
 
-  // 🛡️ Global Master Switch: Hide if AI is disabled
+  // 🛡️ Global Master Switch: Graceful Degradation
   // 🛡️ CONTEXT GUARD: Hide if no classId is provided
   // 🛡️ PARENT GATING: AI interactive features are disabled for Parents
-  if (coreData?.globalConfig?.enableAiFeatures === false || !classId || isParent || canAccessAI?.can === false) {
+  if (!classId || isParent || isAccessLoading || canAccessAI?.can === false) {
     return null;
+  }
+
+  const isAiEnabled = coreData?.globalConfig?.enableAiFeatures !== false;
+
+  if (!isAiEnabled) {
+      if (!isOpen) return (
+        <div className="fixed bottom-[5rem] md:bottom-6 end-4 md:end-6 z-50">
+            <Button 
+                size="lg" 
+                disabled
+                className="rounded-[1.5rem] md:rounded-[2rem] h-14 w-14 md:h-16 md:w-16 opacity-50 grayscale transition-all duration-500 bg-ai-primary border-none text-white p-0"
+            >
+                <MessageCircle className="h-6 w-6 md:h-7 md:w-7" />
+            </Button>
+        </div>
+      );
+
+      return (
+        <div className="fixed inset-0 md:inset-auto md:bottom-6 md:end-6 md:w-[400px] z-50">
+            <Card className="shadow-2xl flex flex-col ai-gradient-border overflow-hidden rounded-none md:rounded-2xl bg-card/90 backdrop-blur-3xl p-8 text-center items-center gap-4">
+                <div className="bg-destructive/10 p-4 rounded-full">
+                    <Sparkles className="w-8 h-8 text-destructive grayscale" />
+                </div>
+                <h3 className="text-xl font-bold">AI Under Maintenance</h3>
+                <p className="text-sm text-muted-foreground">
+                    Our AI Study Buddy is currently undergoing scheduled maintenance. Please try again later.
+                </p>
+                <Button variant="outline" onClick={() => setIsOpen(false)}>Close</Button>
+            </Card>
+        </div>
+      );
   }
 
   return (
