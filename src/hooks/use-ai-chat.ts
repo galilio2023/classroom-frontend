@@ -102,7 +102,6 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
   } = usePermissions<BasePermissions>({});
 
   // 1. 📜 HISTORY: Standard Refine v5 GET
-  // Task: Context Safety - Fallback to "global" history if no classId provided
   const effectiveClassId = classId || "global";
   const { result: historyResult, query: historyQuery } =
     useCustom<ChatHistoryResponse>({
@@ -113,7 +112,7 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
       },
     });
 
-  // 1b. 🦾 NON-STREAMING FALLBACK (Refine v5 Pattern Adherence)
+  // 1b. 🦾 NON-STREAMING FALLBACK
   const { mutate: sendSimpleChat } = useCustomMutation();
 
   // Handle Navigation & State Resets
@@ -182,8 +181,8 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
     if (isPermissionsError) {
       open?.({
         type: "error",
-        message: (t as any)("common.error"),
-        description: (t as any)("auth.errors.permissions") as string,
+        message: t("common.error"),
+        description: t("auth.errors.permissions"),
       });
       return;
     }
@@ -191,8 +190,8 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
     if (cleanInput.length > MAX_INPUT_LENGTH) {
       open?.({
         type: "error",
-        message: (t as any)("common.error"),
-        description: (t as any)("aiHub.errors.inputTooLong") as string,
+        message: t("common.error"),
+        description: t("aiHub.errors.inputTooLong"),
       });
       return;
     }
@@ -201,8 +200,8 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
     if (effectiveClassId && role === UserRole.PARENT) {
       open?.({
         type: "error",
-        message: (t as any)("common.accessDenied") as string,
-        description: (t as any)("aiHub.errors.parentRestricted") as string,
+        message: t("common.accessDenied"),
+        description: t("aiHub.errors.parentRestricted"),
       });
       return;
     }
@@ -268,10 +267,8 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
               setIsLoading(false);
               open?.({
                 type: "error",
-                message: (t as any)("common.error"),
-                description: (t as any)(
-                  "aiHub.errors.serviceUnavailable",
-                ) as string,
+                message: t("common.error"),
+                description: t("aiHub.errors.serviceUnavailable"),
               });
             },
           },
@@ -295,7 +292,7 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
           history: messages.map((m) => ({ role: m.role, parts: m.parts })),
           context,
           classId: effectiveClassId,
-          correlationId, // Also pass in body for non-header compliant middle-layers
+          correlationId,
         }),
       });
 
@@ -317,10 +314,7 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
         const chunk = decoder.decode(value, { stream: true });
         buffer += chunk;
 
-        // 🛡️ JSON LINE BUFFERING: Split by double newlines (SSE standard)
         const lines = buffer.split("\n\n");
-
-        // Keep the last partial line in the buffer
         buffer = lines.pop() || "";
 
         for (const line of lines) {
@@ -343,7 +337,6 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
         }
       }
 
-      // Final State Push (Guard against empty bubbles)
       if (animationFrameRef.current)
         cancelAnimationFrame(animationFrameRef.current);
       const finalResponseText = accumulatorRef.current.trim();
@@ -369,17 +362,15 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
 
       console.error("Tablawy AI Error:", error);
 
-      let description: string = (t as any)(
-        "aiHub.errors.serviceUnavailable",
-      ) as string;
+      let description: string = t("aiHub.errors.serviceUnavailable");
       if (error.message === "RATE_LIMIT_EXCEEDED")
-        description = (t as any)("aiHub.errors.rateLimit") as string;
+        description = t("aiHub.errors.rateLimit");
       if (error.message === "AI_SERVICE_OFFLINE")
-        description = (t as any)("aiHub.errors.maintenance") as string;
+        description = t("aiHub.errors.maintenance");
 
       open?.({
         type: "error",
-        message: (t as any)("common.error"),
+        message: t("common.error"),
         description,
       });
 
@@ -388,7 +379,7 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
         {
           role: "model",
           parts: [
-            { text: (t as any)("aiHub.errors.friendlyFallback") as string },
+            { text: t("aiHub.errors.friendlyFallback") },
           ],
         },
       ]);

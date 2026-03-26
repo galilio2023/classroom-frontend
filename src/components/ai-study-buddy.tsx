@@ -9,12 +9,11 @@ import { ChatHeader } from "./ai/chat-header";
 import { ChatEmptyState } from "./ai/chat-empty-state";
 import { ChatInput } from "./ai/chat-input";
 import { cn } from "@/lib/utils";
-import { useDashboard } from "@/features/dashboard/hooks/use-dashboard";
-import { useUserRole } from "@/hooks/use-user-role";
 import { AI_API } from "@/constants/api";
 import { useCan } from "@refinedev/core";
 import { useTranslation } from "react-i18next";
 import { AIFeatureDisabled } from "./ai/ai-feature-disabled";
+import { useAiAccess } from "@/hooks/use-ai-access";
 
 interface AIStudyBuddyProps {
   subject?: string;
@@ -30,17 +29,16 @@ export const AIStudyBuddy = ({
   classId,
 }: AIStudyBuddyProps) => {
   const { t } = useTranslation();
-  const { coreData } = useDashboard();
-  const { isParent } = useUserRole();
+  const { isAiEnabled, isAllowed, isLoading: isAccessLoading } = useAiAccess();
   const [isOpen, setIsOpen] = useState(false);
 
-  // 🛡️ RBAC: Centralized access control via Refine patterns
-  const { data: canAccessAI, isLoading: isAccessLoading } = useCan({
+  // 🛡️ RBAC: Centralized access control via Refine patterns (Extra layer)
+  const { data: canAccessAI, isLoading: isCanLoading } = useCan({
     resource: "ai_features",
     action: "interact",
     params: { classId },
     queryOptions: {
-      enabled: !!classId,
+      enabled: !!classId && isAllowed,
     },
   });
 
@@ -62,12 +60,12 @@ export const AIStudyBuddy = ({
   // 🛡️ Global Master Switch: Graceful Degradation
   // 🛡️ CONTEXT GUARD: Hide if no classId is provided
   // 🛡️ PARENT GATING: AI interactive features are disabled for Parents
-  if (!classId || isParent) {
+  if (!classId || !isAllowed) {
     return null;
   }
 
   // 🛡️ LOADING STATE: Show disabled button to prevent layout flicker
-  if (isAccessLoading) {
+  if (isAccessLoading || isCanLoading) {
     return (
       <div className="fixed bottom-[5rem] md:bottom-6 end-4 md:end-6 z-50">
         <Button
@@ -84,8 +82,6 @@ export const AIStudyBuddy = ({
   if (canAccessAI?.can === false) {
     return null;
   }
-
-  const isAiEnabled = !!coreData?.globalConfig && coreData.globalConfig.enableAiFeatures === true;
 
   if (!isAiEnabled) {
     if (!isOpen)

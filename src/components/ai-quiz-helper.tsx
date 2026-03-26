@@ -2,17 +2,17 @@ import React from "react";
 import { useQuizGeneration, QuizQuestion } from "@/hooks/use-quiz-generation";
 import { QuizHelperForm } from "./ai/quiz-helper-form";
 import { QuizHelperPreview } from "./ai/quiz-helper-preview";
-import { useDashboard } from "@/features/dashboard/hooks/use-dashboard";
-import { useUserRole } from "@/hooks/use-user-role";
 import { AIFeatureDisabled } from "./ai/ai-feature-disabled";
+import { useAiAccess } from "@/hooks/use-ai-access";
 
 interface AIQuizHelperProps {
   onUseQuestions?: (questions: (QuizQuestion & { points: number })[]) => void;
 }
 
-export const AIQuizHelper: React.FC<AIQuizHelperProps> = ({ onUseQuestions }) => {
-  const { coreData } = useDashboard();
-  const { isParent } = useUserRole();
+export const AIQuizHelper: React.FC<AIQuizHelperProps> = ({
+  onUseQuestions,
+}) => {
+  const { isAiEnabled, isAllowed } = useAiAccess();
   const {
     topic,
     setTopic,
@@ -23,10 +23,8 @@ export const AIQuizHelper: React.FC<AIQuizHelperProps> = ({ onUseQuestions }) =>
     isLoading,
   } = useQuizGeneration(5);
 
-  const isAiEnabled = !!coreData?.globalConfig && coreData.globalConfig.enableAiFeatures === true;
-
   // 🛡️ PARENT GATING: AI interactive features are disabled for Parents
-  if (isParent) return null;
+  if (!isAllowed) return null;
 
   // 🛡️ Global Master Switch: Graceful Degradation
   if (!isAiEnabled) {
@@ -35,7 +33,7 @@ export const AIQuizHelper: React.FC<AIQuizHelperProps> = ({ onUseQuestions }) =>
 
   const handleUseAll = () => {
     if (onUseQuestions) {
-      onUseQuestions(generatedQuestions.map(q => ({ ...q, points: 10 })));
+      onUseQuestions(generatedQuestions.map((q) => ({ ...q, points: 10 })));
     }
   };
 
@@ -49,9 +47,9 @@ export const AIQuizHelper: React.FC<AIQuizHelperProps> = ({ onUseQuestions }) =>
         handleGenerate={handleGenerate}
         isLoading={isLoading}
       />
-      <QuizHelperPreview 
-        questions={generatedQuestions} 
-        onUseAll={handleUseAll} 
+      <QuizHelperPreview
+        questions={generatedQuestions}
+        onUseAll={handleUseAll}
       />
     </div>
   );

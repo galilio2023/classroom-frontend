@@ -15,8 +15,6 @@ interface UseAILiveInteractionProps {
   onPermissionDenied?: () => void;
 }
 
-interface AuthPermissions extends BasePermissions {}
-
 interface LiveStreamData {
   text?: string;
   latencyMs?: number;
@@ -165,8 +163,8 @@ export const useAILiveInteraction = ({
       if (permissions?.role === UserRole.PARENT) {
         open?.({
           type: "error",
-          message: t("common.accessDenied") as string,
-          description: t("aiHub.errors.parentRestricted") as string,
+          message: t("common.accessDenied"),
+          description: t("aiHub.errors.parentRestricted"),
         });
         return;
       }
@@ -256,11 +254,9 @@ export const useAILiveInteraction = ({
         if (error.name === "AbortError") return;
 
         console.error("Co-Teacher Error:", error);
-        let description: string = t(
-          "aiHub.errors.serviceUnavailable",
-        ) as string;
+        let description: string = t("aiHub.errors.serviceUnavailable");
         if (error.message === "RATE_LIMIT_EXCEEDED")
-          description = t("aiHub.errors.rateLimit") as string;
+          description = t("aiHub.errors.rateLimit");
 
         open?.({ type: "error", message: t("common.error"), description });
         setVisualState("talking");
@@ -290,8 +286,8 @@ export const useAILiveInteraction = ({
     if (!SpeechRecognitionClass) {
       open?.({
         type: "error",
-        message: t("aiHub.errors.speechNotSupported") as string,
-        description: t("aiHub.errors.chromeRequired") as string,
+        message: t("aiHub.errors.speechNotSupported"),
+        description: t("aiHub.errors.chromeRequired"),
       });
       return;
     }
@@ -317,8 +313,8 @@ export const useAILiveInteraction = ({
       setVisualState("talking");
       open?.({
         type: "error",
-        message: t("aiHub.errors.listeningTimeout") as string,
-        description: t("aiHub.errors.tryAgain") as string,
+        message: t("aiHub.errors.listeningTimeout"),
+        description: t("aiHub.errors.tryAgain"),
       });
     }, 8000);
 
@@ -336,8 +332,8 @@ export const useAILiveInteraction = ({
         onPermissionDenied?.();
         open?.({
           type: "error",
-          message: t("auth.errors.micAccessDenied") as string,
-          description: t("auth.errors.micSettings") as string,
+          message: t("auth.errors.micAccessDenied"),
+          description: t("auth.errors.micSettings"),
         });
       }
     };

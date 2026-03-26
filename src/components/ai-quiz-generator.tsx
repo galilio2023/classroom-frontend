@@ -3,9 +3,8 @@ import { useNotification, useCreate } from "@refinedev/core";
 import { useQuizGeneration } from "@/hooks/use-quiz-generation";
 import { QuizGeneratorForm } from "./ai/quiz-generator-form";
 import { QuizPreview } from "./ai/quiz-preview";
-import { useDashboard } from "@/features/dashboard/hooks/use-dashboard";
-import { useUserRole } from "@/hooks/use-user-role";
 import { AIFeatureDisabled } from "./ai/ai-feature-disabled";
+import { useAiAccess } from "@/hooks/use-ai-access";
 import { addDays, format } from "date-fns";
 
 interface AIQuizGeneratorProps {
@@ -13,8 +12,7 @@ interface AIQuizGeneratorProps {
 }
 
 export const AIQuizGenerator: React.FC<AIQuizGeneratorProps> = ({ classId }) => {
-  const { coreData } = useDashboard();
-  const { isParent } = useUserRole();
+  const { isAiEnabled, isAllowed } = useAiAccess();
   const {
     topic,
     setTopic,
@@ -33,10 +31,8 @@ export const AIQuizGenerator: React.FC<AIQuizGeneratorProps> = ({ classId }) => 
   const { mutate: createAssignment, mutation: createMutation } = useCreate();
   const isSaving = createMutation.isPending;
 
-  const isAiEnabled = !!coreData?.globalConfig && coreData.globalConfig.enableAiFeatures === true;
-
   // 🛡️ PARENT GATING: AI interactive features are disabled for Parents
-  if (isParent) return null;
+  if (!isAllowed) return null;
 
   // 🛡️ Global Master Switch: Graceful Degradation
   if (!isAiEnabled) {

@@ -2,17 +2,17 @@ import React from "react";
 import { useAssignmentGeneration } from "@/hooks/use-assignment-generation";
 import { AssignmentGeneratorForm } from "./ai/assignment-generator-form";
 import { AssignmentPreview } from "./ai/assignment-preview";
-import { useDashboard } from "@/features/dashboard/hooks/use-dashboard";
-import { useUserRole } from "@/hooks/use-user-role";
 import { AIFeatureDisabled } from "./ai/ai-feature-disabled";
+import { useAiAccess } from "@/hooks/use-ai-access";
 
 interface AIAssignmentHelperProps {
   onUseContent?: (content: string) => void;
 }
 
-export const AIAssignmentHelper: React.FC<AIAssignmentHelperProps> = ({ onUseContent }) => {
-  const { coreData } = useDashboard();
-  const { isParent } = useUserRole();
+export const AIAssignmentHelper: React.FC<AIAssignmentHelperProps> = ({
+  onUseContent,
+}) => {
+  const { isAiEnabled, isAllowed } = useAiAccess();
   const {
     subject,
     setSubject,
@@ -29,10 +29,8 @@ export const AIAssignmentHelper: React.FC<AIAssignmentHelperProps> = ({ onUseCon
     isLoading,
   } = useAssignmentGeneration();
 
-  const isAiEnabled = !!coreData?.globalConfig && coreData.globalConfig.enableAiFeatures === true;
-
   // 🛡️ PARENT GATING: AI interactive features are disabled for Parents
-  if (isParent) return null;
+  if (!isAllowed) return null;
 
   // 🛡️ Global Master Switch: Graceful Degradation
   if (!isAiEnabled) {
@@ -55,9 +53,9 @@ export const AIAssignmentHelper: React.FC<AIAssignmentHelperProps> = ({ onUseCon
         handleGenerate={handleGenerate}
         isLoading={isLoading}
       />
-      <AssignmentPreview 
-        content={generatedContent} 
-        onUseContent={onUseContent} 
+      <AssignmentPreview
+        content={generatedContent}
+        onUseContent={onUseContent}
       />
     </div>
   );

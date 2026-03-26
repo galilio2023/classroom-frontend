@@ -97,7 +97,7 @@ const StudyPlanner = () => {
         }),
         errorNotification: (error) => ({
           message:
-            (error?.response?.data as any)?.message ||
+            (error?.response?.data as { message?: string })?.message ||
             error?.message ||
             t("studyPlanner.toasts.error"),
           type: "error",

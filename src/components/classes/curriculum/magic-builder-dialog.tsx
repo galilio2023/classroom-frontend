@@ -26,15 +26,12 @@ import {
   MessageSquare,
   Target,
   Sparkles,
-  BrainCircuit,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { socket, connectSocket } from "@/lib/socket";
 import { motion, AnimatePresence } from "framer-motion";
-
-import { useDashboard } from "@/features/dashboard/hooks/use-dashboard";
-import { useUserRole } from "@/hooks/use-user-role";
 import { AIFeatureDisabled } from "../../ai/ai-feature-disabled";
+import { useAiAccess } from "@/hooks/use-ai-access";
 
 export type MagicBuilderLevel = "primary" | "high_school" | "university";
 export type MagicBuilderTone = "academic" | "creative" | "practical";
@@ -68,12 +65,9 @@ export const MagicBuilderDialog = ({
   classId,
 }: MagicBuilderDialogProps) => {
   const { t } = useTranslation();
-  const { coreData } = useDashboard();
-  const { isParent } = useUserRole();
+  const { isAiEnabled, isAllowed } = useAiAccess();
   const [progress, setProgress] = useState(0);
   const [step, setStep] = useState("");
-
-  const isAiEnabled = !!coreData?.globalConfig && coreData.globalConfig.enableAiFeatures === true;
 
   useEffect(() => {
     if (isGenerating && isOpen && isAiEnabled) {
@@ -101,7 +95,7 @@ export const MagicBuilderDialog = ({
   }, [isGenerating, isOpen, classId, isAiEnabled]);
 
   // 🛡️ PARENT GATING: AI interactive features are disabled for Parents
-  if (isParent) return null;
+  if (!isAllowed) return null;
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>

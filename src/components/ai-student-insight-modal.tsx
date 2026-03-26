@@ -53,7 +53,7 @@ export const AIStudentInsightModal = ({
     useCustomMutation();
   const isSending = sendMutation.isPending;
 
-  const { query } = useCustom<AIInsight>({
+  const { result, query } = useCustom<AIInsight>({
     url: `/ai/student-insight/${studentId}/${classId}`,
     method: "get",
     queryOptions: {
@@ -67,14 +67,14 @@ export const AIStudentInsightModal = ({
     },
   });
 
-  const { data: insightData, isLoading, isError, refetch } = query;
-  const insight = insightData?.data;
+  const { isLoading, isError, refetch } = query;
+  const insight = result?.data;
 
   const handleCopy = () => {
     if (!insight) return;
     const text = `${t("common.aiInsightTitle", { name: studentName })}:\n\n${t("common.strengths")}:\n${insight.strengths.join("\n")}\n\n${t("common.weaknesses")}:\n${insight.weaknesses.join("\n")}\n\n${t("common.improvementPlan")}:\n${insight.improvementPlan}\n\n${t("common.aiSummary")}:\n${insight.summary}`;
     navigator.clipboard.writeText(text);
-    
+
     setIsCopied(true);
     toast.success(t("common.insightCopied"));
     setTimeout(() => setIsCopied(false), 2000);
@@ -84,8 +84,9 @@ export const AIStudentInsightModal = ({
     if (!insight) return;
 
     // 🛡️ PAYLOAD SAFETY: Truncate message for notification system limits
-    const safeSummary = insight.summary.length > 200 
-        ? `${insight.summary.substring(0, 200)}...` 
+    const safeSummary =
+      insight.summary.length > 200
+        ? `${insight.summary.substring(0, 200)}...`
         : insight.summary;
 
     sendNotification(
@@ -123,20 +124,22 @@ export const AIStudentInsightModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] flex flex-col">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] flex flex-col border-none shadow-2xl bg-card/95 backdrop-blur-xl rounded-[2.5rem]">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-xl">
-            <Sparkles className="h-5 w-5 text-ai-primary animate-pulse" />
+          <DialogTitle className="flex items-center gap-2 text-2xl font-black tracking-tight text-start">
+            <Sparkles className="h-6 w-6 text-ai-primary animate-pulse" />
             {t("common.aiInsightTitle", { name: studentName })}
           </DialogTitle>
-          <DialogDescription>{t("common.aiInsightDesc")}</DialogDescription>
+          <DialogDescription className="font-medium text-start">
+            {t("common.aiInsightDesc")}
+          </DialogDescription>
         </DialogHeader>
 
         <ScrollArea className="flex-1 pe-4 rtl:pe-0 rtl:ps-4">
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-20 space-y-4">
               <Loader2 className="h-10 w-10 animate-spin text-ai-primary" />
-              <p className="text-sm text-muted-foreground animate-pulse">
+              <p className="text-sm font-black uppercase tracking-widest text-ai-primary animate-pulse">
                 {t("common.analyzingData")}
               </p>
             </div>
@@ -144,44 +147,48 @@ export const AIStudentInsightModal = ({
             <div className="flex flex-col items-center justify-center py-20 space-y-4 text-center">
               <AlertCircle className="h-10 w-10 text-destructive" />
               <div className="space-y-1">
-                <p className="font-semibold">{t("common.failedInsight")}</p>
-                <p className="text-sm text-muted-foreground">
+                <p className="font-bold">{t("common.failedInsight")}</p>
+                <p className="text-sm text-muted-foreground font-medium">
                   {t("common.aiServiceError")}
                 </p>
               </div>
-              <Button variant="outline" onClick={() => refetch()}>
+              <Button
+                variant="outline"
+                onClick={() => refetch()}
+                className="rounded-xl font-bold"
+              >
                 {t("buttons.tryAgain")}
               </Button>
             </div>
           ) : insight ? (
             <StudentInsightContent insight={insight} />
           ) : (
-            <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
+            <div className="flex flex-col items-center justify-center py-20 text-muted-foreground italic font-medium">
               <p>{t("common.noInsight")}</p>
             </div>
           )}
         </ScrollArea>
 
-        <div className="flex items-center justify-end gap-2 pt-4 border-t">
+        <div className="flex items-center justify-end gap-3 pt-6 border-t border-border/40 mt-4">
           <Button
             variant="outline"
-            size="sm"
+            size="lg"
             onClick={handleCopy}
             disabled={!insight || isCopied}
-            className="rounded-xl"
+            className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-12 px-6"
           >
             {isCopied ? (
-                <CheckCircle2 className="h-4 w-4 me-2 rtl:me-0 rtl:ms-2 text-green-500" />
+              <CheckCircle2 className="h-4 w-4 me-2 rtl:me-0 rtl:ms-2 text-green-500" />
             ) : (
-                <ClipboardCopy className="h-4 w-4 me-2 rtl:me-0 rtl:ms-2" />
+              <ClipboardCopy className="h-4 w-4 me-2 rtl:me-0 rtl:ms-2" />
             )}
             {isCopied ? t("common.copied") : t("common.copyInsight")}
           </Button>
           <Button
-            size="sm"
+            size="lg"
             disabled={!insight || isSending || isSent}
             onClick={handleSendToStudent}
-            className="rounded-xl"
+            className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-12 px-8 shadow-xl shadow-primary/20"
           >
             {isSending ? (
               <Loader2 className="h-4 w-4 animate-spin me-2 rtl:me-0 rtl:ms-2" />
