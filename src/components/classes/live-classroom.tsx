@@ -47,18 +47,9 @@ interface BreakoutEndedData {
   classId: string | number;
 }
 
-interface JitsiMeetExternalAPI {
-  dispose: () => void;
-  on: (event: string, callback: (payload: any) => void) => void;
-  executeCommand: (command: any, ...args: any[]) => void;
-  captureLargeVideoScreenshot: () => Promise<string>;
-}
-
 declare global {
   interface Window {
-    JitsiMeetExternalAPI: {
-      new (domain: string, options: any): JitsiMeetExternalAPI;
-    };
+    JitsiMeetExternalAPI: typeof JitsiMeetExternalAPI;
   }
 }
 
@@ -76,7 +67,7 @@ export const LiveClassroom = ({
   const { data: identity } = useGetIdentity<User>();
   const { isJoined, setIsJoined, activeClassId } = usePersistentLive();
   const jitsiContainerRef = useRef<HTMLDivElement>(null);
-  const apiRef = useRef<Jitsi.JitsiMeetExternalAPI | null>(null);
+  const apiRef = useRef<JitsiMeetExternalAPI | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("video");
 
