@@ -68,9 +68,9 @@ export const PendingGradingList = ({
             <motion.div
               initial={{ opacity: 0, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="text-center py-16 border-none shadow-2xl bg-card/50 backdrop-blur-xl rounded-[2rem] flex flex-col items-center gap-4 group overflow-hidden relative"
+              className="text-center py-16 border-none shadow-2xl bg-card/50 backdrop-blur-xl rounded-4xl flex flex-col items-center gap-4 group overflow-hidden relative"
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-success/5 to-transparent pointer-events-none" />
+              <div className="absolute inset-0 bg-linear-to-br from-success/5 to-transparent pointer-events-none" />
               <div className="relative">
                 <div className="absolute inset-0 bg-success/20 rounded-full blur-2xl animate-pulse" />
                 <div className="relative p-5 rounded-full bg-success/10 text-success group-hover:scale-110 transition-transform duration-500">

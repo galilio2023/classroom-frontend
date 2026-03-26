@@ -75,11 +75,11 @@ export const UserCard = ({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ delay: index * 0.05 }}
-      className="group relative flex flex-col md:flex-row items-center p-5 md:p-6 rounded-[2rem] bg-card/50 backdrop-blur-sm border border-border/40 hover:border-primary/30 hover:bg-card/80 transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-primary/5 cursor-pointer"
+      className="group relative flex flex-col md:flex-row items-center p-5 md:p-6 rounded-4xl bg-card/50 backdrop-blur-sm border border-border/40 hover:border-primary/30 hover:bg-card/80 transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-primary/5 cursor-pointer"
       onClick={() => onShow(user.id)}
     >
       <div
-        className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-12 rounded-r-full transition-all group-hover:h-20"
+        className="absolute start-0 top-1/2 -translate-y-1/2 w-1.5 h-12 rounded-e-full transition-all group-hover:h-20"
         style={{
           backgroundColor:
             user.role === UserRole.TEACHER
@@ -97,11 +97,11 @@ export const UserCard = ({
         </Avatar>
         {user.role === UserRole.TEACHER &&
           (user.verificationStatus === VerificationStatus.VERIFIED ? (
-            <div className="absolute -top-3 -right-3 p-1.5 rounded-full bg-green-500 text-white shadow-lg border-4 border-background">
+            <div className="absolute -top-3 -end-3 p-1.5 rounded-full bg-green-500 text-white shadow-lg border-4 border-background">
               <ShieldCheck className="h-4 w-4" />
             </div>
           ) : (
-            <div className="absolute -top-3 -right-3 p-1.5 rounded-full bg-amber-500 text-white shadow-lg border-4 border-background animate-pulse">
+            <div className="absolute -top-3 -end-3 p-1.5 rounded-full bg-amber-500 text-white shadow-lg border-4 border-background animate-pulse">
               <ShieldAlert className="h-4 w-4" />
             </div>
           ))}
@@ -110,7 +110,7 @@ export const UserCard = ({
       <div
         className={cn(
           "flex-1 min-w-0 w-full",
-          isAr ? "md:mr-8 md:text-right" : "md:ml-8 md:text-left",
+          isAr ? "md:me-8 md:text-end" : "md:ms-8 md:text-start",
         )}
       >
         <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 mb-2">

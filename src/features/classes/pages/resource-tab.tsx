@@ -197,11 +197,11 @@ export const ResourceTab = ({ classId }: ResourceTabProps) => {
               >
                 <AccordionItem
                   value={`module-${module.id}`}
-                  className="border-none shadow-xl bg-card/50 backdrop-blur-xl rounded-[2rem] overflow-hidden group transition-all hover:shadow-2xl hover:bg-card/80 text-start"
+                  className="border-none shadow-xl bg-card/50 backdrop-blur-xl rounded-4xl overflow-hidden group transition-all hover:shadow-2xl hover:bg-card/80 text-start"
                 >
                   <div className="flex items-center justify-between w-full px-6">
                     <AccordionTrigger className="hover:no-underline py-6 flex-1 group/trigger">
-                      <div className="flex items-center gap-4 text-left">
+                      <div className="flex items-center gap-4 text-start">
                         <div className="p-3 rounded-2xl bg-primary/10 text-primary group-hover/trigger:scale-110 transition-transform">
                           <BookOpen className="h-6 w-6" />
                         </div>
@@ -225,7 +225,7 @@ export const ResourceTab = ({ classId }: ResourceTabProps) => {
                         size="sm"
                         className={cn(
                           "h-10 rounded-xl font-black uppercase tracking-widest text-[9px] gap-2 border-primary/20 text-primary hover:bg-primary/5",
-                          isAr ? "mr-4" : "ml-4",
+                          "ms-4",
                         )}
                         onClick={() => {
                           setActiveModuleId(module.id);
@@ -243,7 +243,7 @@ export const ResourceTab = ({ classId }: ResourceTabProps) => {
                         module.resources.map((res) => (
                           <div
                             key={res.id}
-                            className="flex items-center justify-between p-4 rounded-2xl border border-black/[0.03] dark:border-white/[0.03] bg-muted/20 hover:bg-primary/5 transition-all cursor-pointer group/item"
+                            className="flex items-center justify-between p-4 rounded-2xl border border-black/3 dark:border-white/3 bg-muted/20 hover:bg-primary/5 transition-all cursor-pointer group/item"
                           >
                             <div className="flex items-center gap-4 overflow-hidden">
                               <div
@@ -417,7 +417,7 @@ export const ResourceTab = ({ classId }: ResourceTabProps) => {
 
       {/* Add Resource Dialog */}
       <Dialog open={isAddResourceOpen} onOpenChange={setIsAddResourceOpen}>
-        <DialogContent className="sm:max-w-[650px] rounded-[2rem] border-none shadow-2xl bg-card/95 backdrop-blur-xl text-start">
+        <DialogContent className="sm:max-w-[650px] rounded-4xl border-none shadow-2xl bg-card/95 backdrop-blur-xl text-start">
           <DialogHeader className="space-y-3">
             <div className="p-3 rounded-2xl bg-primary/10 text-primary w-fit">
               <PlusCircle className="h-6 w-6" />
@@ -434,7 +434,7 @@ export const ResourceTab = ({ classId }: ResourceTabProps) => {
               <div className="space-y-2.5">
                 <Label
                   htmlFor="title"
-                  className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1"
+                  className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ms-1"
                 >
                   {t("classes.resource.addDialog.fieldTitle")}
                 </Label>
@@ -451,7 +451,7 @@ export const ResourceTab = ({ classId }: ResourceTabProps) => {
               <div className="space-y-2.5">
                 <Label
                   htmlFor="type"
-                  className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1"
+                  className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ms-1"
                 >
                   {t("classes.resource.addDialog.fieldType")}
                 </Label>
@@ -506,7 +506,7 @@ export const ResourceTab = ({ classId }: ResourceTabProps) => {
 
             {newResource.type === "note" && (
               <div className="space-y-2.5">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ms-1">
                   {t("classes.resource.addDialog.fieldContent")}
                 </Label>
                 <Textarea
@@ -524,7 +524,7 @@ export const ResourceTab = ({ classId }: ResourceTabProps) => {
 
             {(newResource.type === "file" || newResource.type === "image") && (
               <div className="space-y-2.5">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ms-1">
                   {t("classes.resource.addDialog.fieldUpload", {
                     type:
                       newResource.type === "image"
@@ -546,7 +546,7 @@ export const ResourceTab = ({ classId }: ResourceTabProps) => {
               <div className="space-y-2.5">
                 <Label
                   htmlFor="url"
-                  className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1"
+                  className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ms-1"
                 >
                   {t("classes.resource.addDialog.fieldUrl")}
                 </Label>
@@ -560,13 +560,13 @@ export const ResourceTab = ({ classId }: ResourceTabProps) => {
                     }
                     className={cn(
                       "h-12 rounded-xl bg-muted/20 border-none focus-visible:ring-primary font-bold",
-                      isAr ? "pr-10" : "pl-10",
+                      isAr ? "pe-10" : "ps-10",
                     )}
                   />
                   <LinkIcon
                     className={cn(
                       "absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors",
-                      isAr ? "right-3.5" : "left-3.5",
+                      "start-3.5",
                     )}
                   />
                 </div>
@@ -576,7 +576,7 @@ export const ResourceTab = ({ classId }: ResourceTabProps) => {
             <div className="space-y-2.5">
               <Label
                 htmlFor="desc"
-                className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1"
+                className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ms-1"
               >
                 {t("classes.resource.addDialog.fieldDescription")}
               </Label>
@@ -608,9 +608,9 @@ export const ResourceTab = ({ classId }: ResourceTabProps) => {
               className="rounded-xl font-black uppercase tracking-widest h-12 px-8 shadow-lg shadow-primary/20"
             >
               {isCreatingResource ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                <Loader2 className="h-4 w-4 me-2 animate-spin" />
               ) : (
-                <Save className="h-4 w-4 mr-2" />
+                <Save className="h-4 w-4 me-2" />
               )}
               {t("buttons.saveMaterial")}
             </Button>

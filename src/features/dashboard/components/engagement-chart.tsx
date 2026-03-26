@@ -65,9 +65,9 @@ const ChartCard = ({
       transition={{ delay, duration: 0.5 }}
       className="h-full"
     >
-      <Card className="h-full border-none shadow-2xl overflow-hidden bg-card/50 backdrop-blur-xl rounded-[2rem] md:rounded-[2.5rem] group">
+      <Card className="h-full border-none shadow-2xl overflow-hidden bg-card/50 backdrop-blur-xl rounded-4xl md:rounded-[2.5rem] group">
         {/* Top Accent Bar */}
-        <div className="h-1.5 bg-gradient-to-r from-primary via-ai-primary to-primary w-full opacity-20 group-hover:opacity-100 transition-opacity duration-500" />
+        <div className="h-1.5 bg-linear-to-r from-primary via-ai-primary to-primary w-full opacity-20 group-hover:opacity-100 transition-opacity duration-500" />
 
         <CardHeader className="p-6 md:p-8 pb-2 text-start">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

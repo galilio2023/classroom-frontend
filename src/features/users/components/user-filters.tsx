@@ -44,7 +44,7 @@ export const UserFilters = ({
           <Search
             className={cn(
               "absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60 group-focus-within:text-primary transition-colors",
-              isAr ? "right-4" : "left-4",
+              "start-4",
             )}
           />
           <Input
@@ -52,7 +52,7 @@ export const UserFilters = ({
             placeholder={t("users.governance.filters.searchPlaceholder")}
             className={cn(
               "h-12 rounded-2xl border-none bg-background/50 shadow-none font-medium",
-              isAr ? "pr-11 pl-4" : "pl-11 pr-4",
+              "ps-11 pe-4",
             )}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}

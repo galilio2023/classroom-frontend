@@ -305,7 +305,7 @@ const AIGovernanceList = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
       >
-        <Card className="rounded-[2rem] border-border/40 shadow-2xl bg-card/50 backdrop-blur-xl overflow-hidden">
+        <Card className="rounded-4xl border-border/40 shadow-2xl bg-card/50 backdrop-blur-xl overflow-hidden">
           <CardContent className="p-8 md:p-10">
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-10">
               <div className="space-y-6 flex-1">
@@ -356,7 +356,7 @@ const AIGovernanceList = () => {
                 </div>
               </div>
 
-              <div className="lg:pl-10 lg:border-l border-border/40 space-y-4">
+              <div className="lg:ps-10 lg:border-l border-border/40 space-y-4">
                 <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground text-center">
                   Emergency Actions
                 </p>
@@ -440,7 +440,7 @@ const AIGovernanceList = () => {
 
       {/* Evolutionary Safeguards Info */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12">
-        <div className="p-8 rounded-[2rem] bg-ai-primary/5 border border-ai-primary/10 space-y-4">
+        <div className="p-8 rounded-4xl bg-ai-primary/5 border border-ai-primary/10 space-y-4">
           <div className="flex items-center gap-3 text-ai-primary">
             <Sparkles className="h-5 w-5" />
             <h4 className="font-black uppercase tracking-widest text-xs">
@@ -451,7 +451,7 @@ const AIGovernanceList = () => {
             {t("aiHub.governance.selfHealingDesc")}
           </p>
         </div>
-        <div className="p-8 rounded-[2rem] bg-primary/5 border border-primary/10 space-y-4">
+        <div className="p-8 rounded-4xl bg-primary/5 border border-primary/10 space-y-4">
           <div className="flex items-center gap-3 text-primary">
             <Activity className="h-5 w-5" />
             <h4 className="font-black uppercase tracking-widest text-xs">
@@ -469,7 +469,7 @@ const AIGovernanceList = () => {
         open={!!selectedReport}
         onOpenChange={(open) => !open && setSelectedReport(null)}
       >
-        <DialogContent className="max-w-3xl rounded-[2rem] md:rounded-[3rem] border-none shadow-3xl bg-card/80 backdrop-blur-3xl p-0 overflow-hidden">
+        <DialogContent className="max-w-3xl rounded-4xl md:rounded-[3rem] border-none shadow-3xl bg-card/80 backdrop-blur-3xl p-0 overflow-hidden">
           {selectedReport && (
             <div className="flex flex-col h-full max-h-[85vh]">
               <div className="p-8 md:p-12 bg-ai-primary/5 border-b border-border/40 relative">

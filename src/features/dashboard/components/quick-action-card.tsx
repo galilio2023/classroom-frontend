@@ -43,8 +43,8 @@ export const QuickActionCard: React.FC<QuickActionCardProps> = ({
           className={cn(
             "absolute p-4 opacity-[0.02] group-hover:opacity-[0.06] transition-all duration-700 pointer-events-none",
             isRtl
-              ? "-left-6 -top-6 -rotate-12 group-hover:rotate-0"
-              : "-right-6 -top-6 rotate-12 group-hover:rotate-0",
+              ? "-start-6 -top-6 -rotate-12 group-hover:rotate-0"
+              : "-end-6 -top-6 rotate-12 group-hover:rotate-0",
             "group-hover:scale-125 group-hover:text-primary",
           )}
         >
@@ -80,7 +80,7 @@ export const QuickActionCard: React.FC<QuickActionCardProps> = ({
               variant="ghost"
               size="sm"
               className={cn(
-                "rounded-xl transition-all font-black uppercase tracking-widest text-[10px] h-10 md:h-12 px-5 md:px-8 gap-2 shadow-sm ml-auto",
+                "rounded-xl transition-all font-black uppercase tracking-widest text-[10px] h-10 md:h-12 px-5 md:px-8 gap-2 shadow-sm ms-auto",
                 "bg-primary/10 dark:bg-primary/20 hover:bg-primary hover:text-primary-foreground group-hover:shadow-lg group-hover:shadow-primary/20",
                 "border border-primary/10 dark:border-primary/20 hover:border-primary",
               )}

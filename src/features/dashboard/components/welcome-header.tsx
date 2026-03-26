@@ -153,7 +153,7 @@ export const WelcomeHeader = ({
       {isUnverifiedTeacher && (
         <Alert className="border-amber-500/20 bg-amber-500/5 animate-in slide-in-from-top-4 duration-500 p-4 md:p-8 rounded-[1.5rem] md:rounded-[2.5rem]">
           <ShieldAlert className="h-6 w-6 text-amber-600 shrink-0 mt-1" />
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 w-full ml-3">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 w-full ms-3">
             <div className="space-y-1.5">
               <AlertTitle className="text-amber-800 font-black uppercase tracking-[0.15em] text-[10px] md:text-xs">
                 {t("dashboard.verification.required")}

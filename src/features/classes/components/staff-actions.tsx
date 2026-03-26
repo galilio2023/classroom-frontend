@@ -185,7 +185,7 @@ export const StaffActions: React.FC<StaffActionsProps> = ({
                 placeholder={t(
                   "classes.show.messageAllDialog.messagePlaceholder",
                 )}
-                className="min-h-60 rounded-[2rem] p-8 text-lg bg-muted/30 border-none shadow-inner"
+                className="min-h-60 rounded-4xl p-8 text-lg bg-muted/30 border-none shadow-inner"
               />
             </div>
           </div>

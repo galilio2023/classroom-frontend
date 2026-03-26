@@ -101,7 +101,7 @@ export const QuizTab = ({ classId }: QuizTabProps) => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.2 }}
               >
-                <Card className="border-none shadow-2xl bg-card/50 backdrop-blur-xl rounded-[2rem] overflow-hidden group hover:shadow-2xl transition-all hover:-translate-y-1 text-start">
+                <Card className="border-none shadow-2xl bg-card/50 backdrop-blur-xl rounded-4xl overflow-hidden group hover:shadow-2xl transition-all hover:-translate-y-1 text-start">
                   <CardHeader className="p-8 pb-4">
                     <div className="flex items-start justify-between">
                       <div className="p-3 rounded-2xl bg-primary/10 text-primary group-hover:scale-110 transition-transform">
@@ -149,7 +149,7 @@ export const QuizTab = ({ classId }: QuizTabProps) => {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="p-8 pt-4">
-                    <div className="flex items-center justify-between pt-6 border-t border-black/[0.03] dark:border-white/[0.03]">
+                    <div className="flex items-center justify-between pt-6 border-t border-black/3 dark:border-white/3">
                       <div className="flex items-center gap-2">
                         <div className="p-1.5 rounded-lg bg-muted/50 text-muted-foreground">
                           <LayoutDashboard className="h-3.5 w-3.5" />

@@ -26,9 +26,9 @@ export const StudentOnboarding = () => {
     >
       <Card className="border-border/40 bg-primary/5 backdrop-blur-xl shadow-2xl rounded-[2.5rem] md:rounded-[3.5rem] overflow-hidden relative group border-2 border-dashed">
         {/* Background Effects - Refined */}
-        <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-primary via-ai-primary to-primary opacity-20 group-hover:opacity-100 transition-opacity duration-500" />
-        <div className="absolute -top-24 -right-24 w-64 h-64 bg-primary/10 rounded-full blur-[80px] animate-pulse opacity-50" />
-        <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-ai-primary/10 rounded-full blur-[80px] animate-pulse delay-700 opacity-50" />
+        <div className="absolute top-0 start-0 w-full h-1.5 bg-linear-to-r from-primary via-ai-primary to-primary opacity-20 group-hover:opacity-100 transition-opacity duration-500" />
+        <div className="absolute -top-24 -end-24 w-64 h-64 bg-primary/10 rounded-full blur-[80px] animate-pulse opacity-50" />
+        <div className="absolute -bottom-24 -start-24 w-64 h-64 bg-ai-primary/10 rounded-full blur-[80px] animate-pulse delay-700 opacity-50" />
 
         <CardHeader className="text-center pt-12 md:pt-16 pb-8 md:pb-10 relative z-10">
           <motion.div
@@ -58,7 +58,7 @@ export const StudentOnboarding = () => {
           <div className="grid gap-6 md:gap-8 grid-cols-1 sm:grid-cols-2 max-w-4xl w-full">
             <motion.div
               whileHover={{ y: -8 }}
-              className="bg-background/40 backdrop-blur-md p-8 md:p-10 rounded-[2rem] md:rounded-[2.5rem] border border-border/40 shadow-xl flex flex-col items-center text-center group/card hover:border-primary/20 transition-all duration-500"
+              className="bg-background/40 backdrop-blur-md p-8 md:p-10 rounded-4xl md:rounded-[2.5rem] border border-border/40 shadow-xl flex flex-col items-center text-center group/card hover:border-primary/20 transition-all duration-500"
             >
               <div className="p-4 rounded-2xl mb-6 group-hover/card:scale-110 transition-transform duration-500 bg-blue-500/10 text-blue-500 border border-blue-500/5 shadow-sm">
                 <PlusCircle className="h-8 w-8" />
@@ -75,13 +75,13 @@ export const StudentOnboarding = () => {
                 onClick={() => list("classes")}
               >
                 {t("buttons.joinClass")}
-                <ArrowRight className="h-4 w-4 ml-2 rtl:rotate-180" />
+                <ArrowRight className="h-4 w-4 ms-2 rtl:rotate-180" />
               </Button>
             </motion.div>
 
             <motion.div
               whileHover={{ y: -8 }}
-              className="bg-background/40 backdrop-blur-md p-8 md:p-10 rounded-[2rem] md:rounded-[2.5rem] border border-border/40 shadow-xl flex flex-col items-center text-center group/card hover:border-purple-500/20 transition-all duration-500"
+              className="bg-background/40 backdrop-blur-md p-8 md:p-10 rounded-4xl md:rounded-[2.5rem] border border-border/40 shadow-xl flex flex-col items-center text-center group/card hover:border-purple-500/20 transition-all duration-500"
             >
               <div className="p-4 rounded-2xl mb-6 group-hover/card:scale-110 transition-transform duration-500 bg-purple-500/10 text-purple-500 border border-purple-500/5 shadow-sm">
                 <Sparkles className="h-8 w-8" />
@@ -99,7 +99,7 @@ export const StudentOnboarding = () => {
                 onClick={() => list("resources")}
               >
                 {t("buttons.viewResources")}
-                <ArrowRight className="h-4 w-4 ml-2 rtl:rotate-180" />
+                <ArrowRight className="h-4 w-4 ms-2 rtl:rotate-180" />
               </Button>
             </motion.div>
           </div>

@@ -41,7 +41,7 @@ export const PendingSubmissionCard: React.FC<PendingSubmissionCardProps> = ({
       <Card
         className={cn(
           "group overflow-hidden transition-all duration-500 border-none shadow-xl bg-card/50 backdrop-blur-xl rounded-[1.5rem] cursor-pointer",
-          "hover:shadow-2xl hover:bg-card/80 border border-transparent hover:border-primary/20 text-left rtl:text-right",
+          "hover:shadow-2xl hover:bg-card/80 border border-transparent hover:border-primary/20 text-start rtl:text-end",
         )}
         onClick={() => onGrade(submission.assignmentId.toString())}
       >
@@ -60,7 +60,7 @@ export const PendingSubmissionCard: React.FC<PendingSubmissionCardProps> = ({
               </AvatarFallback>
             </Avatar>
             {submission.isLate && (
-              <div className="absolute -top-1 -right-1 h-5 w-5 bg-destructive rounded-full border-2 border-background flex items-center justify-center z-20 shadow-lg animate-pulse">
+              <div className="absolute -top-1 -end-1 h-5 w-5 bg-destructive rounded-full border-2 border-background flex items-center justify-center z-20 shadow-lg animate-pulse">
                 <Clock className="h-2.5 w-2.5 text-white" />
               </div>
             )}
@@ -81,7 +81,7 @@ export const PendingSubmissionCard: React.FC<PendingSubmissionCardProps> = ({
                   variant="destructive"
                   className="text-[9px] h-5 px-2 rounded-full font-black uppercase tracking-widest border-none bg-destructive/10 text-destructive shadow-sm"
                 >
-                  <AlertCircle className="h-2.5 w-2.5 ltr:mr-1 rtl:ml-1" />
+                  <AlertCircle className="h-2.5 w-2.5 ltr:me-1 rtl:ms-1" />
                   {t("dashboard.staff.pendingSubmissions.late")}
                 </Badge>
               )}

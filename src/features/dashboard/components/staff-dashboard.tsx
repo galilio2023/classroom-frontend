@@ -57,7 +57,7 @@ export const StaffDashboard = ({
             "ring-2",
             "ring-destructive",
             "ring-offset-8",
-            "rounded-[2rem]",
+            "rounded-4xl",
           );
           setTimeout(
             () =>
@@ -142,10 +142,10 @@ export const StaffDashboard = ({
             <h2 className="text-2xl font-black tracking-tight">
               {t("dashboard.staff.teacherTvStats")}
             </h2>
-            <div className="h-px flex-1 bg-gradient-to-r from-ai-primary/20 to-transparent" />
+            <div className="h-px flex-1 bg-linear-to-r from-ai-primary/20 to-transparent" />
           </div>
 
-          <Card className="rounded-[2rem] border-black/[0.05] dark:border-white/[0.05] bg-card/50 backdrop-blur-xl shadow-2xl shadow-black/5 overflow-hidden group">
+          <Card className="rounded-4xl border-black/5 dark:border-white/5 bg-card/50 backdrop-blur-xl shadow-2xl shadow-black/5 overflow-hidden group">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">
                 {t("dashboard.staff.channelViews")}
@@ -164,7 +164,7 @@ export const StaffDashboard = ({
             </CardContent>
           </Card>
 
-          <Card className="rounded-[2rem] border-black/[0.05] dark:border-white/[0.05] bg-card/50 backdrop-blur-xl shadow-2xl shadow-black/5 overflow-hidden group">
+          <Card className="rounded-4xl border-black/5 dark:border-white/5 bg-card/50 backdrop-blur-xl shadow-2xl shadow-black/5 overflow-hidden group">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">
                 {t("dashboard.staff.conversionRate")}
@@ -187,7 +187,7 @@ export const StaffDashboard = ({
           </Card>
 
           <Card
-            className="rounded-[2rem] border-black/[0.05] dark:border-white/[0.05] bg-card/50 backdrop-blur-xl shadow-2xl shadow-black/5 overflow-hidden group cursor-pointer"
+            className="rounded-4xl border-black/5 dark:border-white/5 bg-card/50 backdrop-blur-xl shadow-2xl shadow-black/5 overflow-hidden group cursor-pointer"
             onClick={() => show("channels", "me")}
           >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -227,7 +227,7 @@ export const StaffDashboard = ({
                 <h2 className="text-2xl font-black tracking-tight">
                   {t("dashboard.staff.engagementAnalytics")}
                 </h2>
-                <div className="h-px flex-1 bg-gradient-to-r from-primary/20 to-transparent" />
+                <div className="h-px flex-1 bg-linear-to-r from-primary/20 to-transparent" />
               </div>
               <EngagementChart
                 attendanceData={data.attendanceTrend ?? []}

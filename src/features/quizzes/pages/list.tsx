@@ -206,7 +206,7 @@ const QuizzesListPage = () => {
 
         {/* Stats Row - Adaptive */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
-          <Card className="p-6 md:p-8 bg-card/40 backdrop-blur-3xl border-border/40 rounded-[2rem] md:rounded-[2.5rem] flex items-center gap-5 shadow-sm">
+          <Card className="p-6 md:p-8 bg-card/40 backdrop-blur-3xl border-border/40 rounded-4xl md:rounded-[2.5rem] flex items-center gap-5 shadow-sm">
             <div className="p-3.5 rounded-2xl bg-primary/10 text-primary">
               <FileQuestion className="h-6 w-6 md:h-7 md:w-7" />
             </div>
@@ -219,7 +219,7 @@ const QuizzesListPage = () => {
               </p>
             </div>
           </Card>
-          <Card className="p-6 md:p-8 bg-card/40 backdrop-blur-3xl border-border/40 rounded-[2rem] md:rounded-[2.5rem] flex items-center gap-5 shadow-sm">
+          <Card className="p-6 md:p-8 bg-card/40 backdrop-blur-3xl border-border/40 rounded-4xl md:rounded-[2.5rem] flex items-center gap-5 shadow-sm">
             <div className="p-3.5 rounded-2xl bg-indigo-500/10 text-indigo-600">
               <Sparkles className="h-6 w-6 md:h-7 md:w-7" />
             </div>
@@ -232,7 +232,7 @@ const QuizzesListPage = () => {
               </p>
             </div>
           </Card>
-          <Card className="p-6 md:p-8 bg-card/40 backdrop-blur-3xl border-border/40 rounded-[2rem] md:rounded-[2.5rem] flex items-center gap-5 shadow-sm">
+          <Card className="p-6 md:p-8 bg-card/40 backdrop-blur-3xl border-border/40 rounded-4xl md:rounded-[2.5rem] flex items-center gap-5 shadow-sm">
             <div className="p-3.5 rounded-2xl bg-green-500/10 text-green-600">
               <CheckCircle2 className="h-6 w-6 md:h-7 md:w-7" />
             </div>
@@ -284,7 +284,7 @@ const QuizzesListPage = () => {
               initial={{ opacity: 0, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.98 }}
-              className="bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 p-6 md:p-8 rounded-[2rem] flex flex-col sm:flex-row items-center sm:items-start gap-5 backdrop-blur-sm text-center sm:text-start"
+              className="bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 p-6 md:p-8 rounded-4xl flex flex-col sm:flex-row items-center sm:items-start gap-5 backdrop-blur-sm text-center sm:text-start"
             >
               <div className="p-3 rounded-[1.25rem] bg-amber-500/20 shrink-0">
                 <AlertCircle className="h-6 w-6 md:h-8 md:w-8" />
@@ -362,7 +362,7 @@ const QuizzesListPage = () => {
                       exit={{ opacity: 0, scale: 0.95 }}
                       transition={{ delay: index * 0.05 }}
                       className={cn(
-                        "group relative flex flex-col md:flex-row items-center p-5 md:p-6 rounded-[2rem] bg-card/50 backdrop-blur-sm border border-border/40 hover:border-primary/30 hover:bg-card/80 transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-primary/5 cursor-pointer",
+                        "group relative flex flex-col md:flex-row items-center p-5 md:p-6 rounded-4xl bg-card/50 backdrop-blur-sm border border-border/40 hover:border-primary/30 hover:bg-card/80 transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-primary/5 cursor-pointer",
                       )}
                       onClick={() => show("quizzes", quiz.id)}
                     >

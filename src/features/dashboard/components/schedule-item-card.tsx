@@ -40,15 +40,15 @@ export const ScheduleItemCard: React.FC<ScheduleItemCardProps> = ({
         className={cn(
           "relative p-5 rounded-2xl border transition-all duration-500 cursor-pointer group overflow-hidden",
           isLive
-            ? "bg-primary/[0.03] border-primary/30 shadow-lg shadow-primary/5"
-            : "bg-background/50 border-black/[0.03] dark:border-white/[0.03] hover:border-primary/20 hover:bg-primary/[0.02]",
+            ? "bg-primary/3 border-primary/30 shadow-lg shadow-primary/5"
+            : "bg-background/50 border-black/3 dark:border-white/3 hover:border-primary/20 hover:bg-primary/2",
         )}
         onClick={() => onClick(item.id.toString())}
       >
         {/* Left Accent Bar */}
         <div
           className={cn(
-            "absolute left-0 top-0 w-1 h-full transition-all duration-500",
+            "absolute start-0 top-0 w-1 h-full transition-all duration-500",
             isLive
               ? "bg-primary shadow-[0_0_10px_rgba(59,130,246,0.5)]"
               : "bg-muted-foreground/10 group-hover:bg-primary/40",
@@ -89,7 +89,7 @@ export const ScheduleItemCard: React.FC<ScheduleItemCardProps> = ({
                     variant="default"
                     className="h-5 px-2 text-[9px] uppercase font-black animate-pulse bg-primary text-primary-foreground border-none shadow-lg shadow-primary/20"
                   >
-                    <Radio className="h-2.5 w-2.5 mr-1" /> Live Now
+                    <Radio className="h-2.5 w-2.5 me-1" /> Live Now
                   </Badge>
                 )}
               </div>

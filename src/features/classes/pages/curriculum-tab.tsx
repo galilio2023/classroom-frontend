@@ -353,7 +353,7 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
                     </TooltipTrigger>
                     <TooltipContent className="max-w-xs text-center border-ai-primary/20 bg-background/95 backdrop-blur-xl p-3 shadow-2xl rounded-xl">
                       <div className="flex items-center justify-center mb-1">
-                        <Sparkles className="h-4 w-4 text-ai-primary animate-pulse mr-2" />
+                        <Sparkles className="h-4 w-4 text-ai-primary animate-pulse me-2" />
                         <span className="font-bold">
                           {t("tooltips.magicBuilder.title")}
                         </span>

@@ -41,7 +41,7 @@ const QuizCreate = () => {
     <CreateView>
       <div className="grid gap-6 lg:grid-cols-3 text-start">
         <div className="lg:col-span-2">
-          <Card className="border-none shadow-xl bg-card/50 backdrop-blur-sm rounded-[2rem] overflow-hidden">
+          <Card className="border-none shadow-xl bg-card/50 backdrop-blur-sm rounded-4xl overflow-hidden">
             <CardHeader className="flex flex-row items-center justify-between p-8 border-b bg-primary/5">
               <CardTitle className="text-xl font-black uppercase tracking-widest">
                 {t("classes.show.tabs.quizzes")}
@@ -223,7 +223,7 @@ const QuizCreate = () => {
                   >
                     {form.refineCore.formLoading ? (
                       <>
-                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                        <Loader2 className="me-2 h-5 w-5 animate-spin" />
                         {t("buttons.publishing")}
                       </>
                     ) : (
@@ -236,8 +236,8 @@ const QuizCreate = () => {
           </Card>
         </div>
         <div className="hidden lg:block space-y-6 text-start">
-          <Card className="rounded-[2rem] border-primary/10 bg-primary/5 p-6 shadow-sm overflow-hidden relative group">
-            <div className="absolute -right-4 -top-4 opacity-5 group-hover:opacity-10 transition-opacity">
+          <Card className="rounded-4xl border-primary/10 bg-primary/5 p-6 shadow-sm overflow-hidden relative group">
+            <div className="absolute -end-4 -top-4 opacity-5 group-hover:opacity-10 transition-opacity">
               <Sparkles className="h-32 w-32" />
             </div>
             <CardHeader className="p-0 mb-4">

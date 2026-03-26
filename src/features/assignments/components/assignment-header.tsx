@@ -56,7 +56,7 @@ export const AssignmentHeader = ({ assignment, isStaff }: Props) => {
               asChild
             >
               <Link to={`/assignments/edit/${assignment.id}`}>
-                <Pencil className="w-4 h-4 mr-2" />
+                <Pencil className="w-4 h-4 me-2" />
                 {t("buttons.editTask")}
               </Link>
             </Button>

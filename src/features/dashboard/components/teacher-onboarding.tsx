@@ -100,11 +100,11 @@ export const TeacherOnboarding = ({ stats }: { stats?: any }) => {
     >
       <Card className="border-border/40 bg-primary/5 backdrop-blur-xl shadow-2xl rounded-[2.5rem] md:rounded-[3rem] overflow-hidden relative border-2 border-dashed">
         {/* Decorative Sparkles */}
-        <div className="absolute top-6 right-20 pointer-events-none opacity-20">
+        <div className="absolute top-6 end-20 pointer-events-none opacity-20">
           <Sparkles className="h-12 w-12 text-primary animate-pulse" />
         </div>
 
-        <div className="absolute top-6 right-6">
+        <div className="absolute top-6 end-6">
           <Button
             variant="ghost"
             size="icon"
@@ -154,9 +154,9 @@ export const TeacherOnboarding = ({ stats }: { stats?: any }) => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 + index * 0.05 }}
                 className={cn(
-                  "relative p-6 md:p-8 rounded-[2rem] border transition-all duration-500 flex flex-col group hover-shine",
+                  "relative p-6 md:p-8 rounded-4xl border transition-all duration-500 flex flex-col group hover-shine",
                   step.completed
-                    ? "bg-emerald-500/[0.03] border-emerald-500/20 grayscale-[0.5]"
+                    ? "bg-emerald-500/3 border-emerald-500/20 grayscale-[0.5]"
                     : "bg-background/40 backdrop-blur-sm border-border/40 hover:border-primary/30 hover:bg-background shadow-sm hover:shadow-xl hover:shadow-primary/5",
                 )}
               >

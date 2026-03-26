@@ -209,7 +209,7 @@ const AIHistoryShow = () => {
           <Button
             variant="ghost"
             onClick={() => list("ai-activity-logs")}
-            className="group rounded-xl font-bold gap-2 -ml-2"
+            className="group rounded-xl font-bold gap-2 -ms-2"
           >
             <ArrowLeft
               className={cn(

@@ -226,7 +226,7 @@ const ClassesList = () => {
                 {Array.from({ length: 6 }).map((_, i) => (
                   <Card
                     key={i}
-                    className="p-6 md:p-8 flex flex-col gap-6 border-border/20 bg-background/50 rounded-[2rem]"
+                    className="p-6 md:p-8 flex flex-col gap-6 border-border/20 bg-background/50 rounded-4xl"
                   >
                     <div className="flex items-center gap-4">
                       <Skeleton className="h-20 w-20 rounded-2xl shrink-0" />

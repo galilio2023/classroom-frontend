@@ -45,9 +45,9 @@ export const GradeDistributionChart = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <Card className="border-none shadow-2xl overflow-hidden bg-card/50 backdrop-blur-xl rounded-[2rem] group">
+      <Card className="border-none shadow-2xl overflow-hidden bg-card/50 backdrop-blur-xl rounded-4xl group">
         {/* Top Accent Bar */}
-        <div className="h-1.5 bg-gradient-to-r from-primary via-ai-primary to-primary w-full opacity-20 group-hover:opacity-100 transition-opacity duration-500" />
+        <div className="h-1.5 bg-linear-to-r from-primary via-ai-primary to-primary w-full opacity-20 group-hover:opacity-100 transition-opacity duration-500" />
 
         <CardHeader className="p-8 pb-2">
           <div className="flex items-center justify-between">
@@ -67,7 +67,7 @@ export const GradeDistributionChart = ({
                 variant="secondary"
                 className="rounded-full px-3 py-1 font-black text-[10px] uppercase tracking-widest bg-primary/5 text-primary border-none"
               >
-                <TrendingUp className="h-3 w-3 mr-1.5" />
+                <TrendingUp className="h-3 w-3 me-1.5" />
                 Live Data
               </Badge>
             </div>

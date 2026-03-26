@@ -51,7 +51,7 @@ export const AssignmentBanner = ({
       animate={{ opacity: 1, scale: 1 }}
       className="relative overflow-hidden rounded-[2.5rem] md:rounded-[3rem] border border-border/40 bg-card/50 backdrop-blur-3xl shadow-2xl text-start"
     >
-      <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-primary via-ai-primary to-primary" />
+      <div className="absolute top-0 start-0 w-full h-2 bg-linear-to-r from-primary via-ai-primary to-primary" />
       <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5" />
 
       <div className="p-8 md:p-12 flex flex-col lg:flex-row lg:items-center justify-between gap-8 md:gap-10">
@@ -190,7 +190,7 @@ export const AssignmentBanner = ({
           )}
         >
           <div
-            className={cn("absolute opacity-5", isAr ? "left-0" : "right-0")}
+            className={cn("absolute opacity-5", "end-0")}
           >
             <FileText className="h-32 w-32 md:h-48 md:w-48" />
           </div>

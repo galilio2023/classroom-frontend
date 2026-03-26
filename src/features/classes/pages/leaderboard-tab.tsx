@@ -78,7 +78,7 @@ export function LeaderboardTab({ classId }: LeaderboardTabProps) {
     <div className="space-y-12 pb-10">
       {/* Podium Section */}
       <div className="relative pt-10">
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent rounded-[3rem] -z-10" />
+        <div className="absolute inset-0 bg-linear-to-b from-primary/5 to-transparent rounded-[3rem] -z-10" />
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-end max-w-4xl mx-auto px-4">
           <AnimatePresence mode="popLayout">
             {podiumOrder.map((student, pIndex) => {
@@ -112,7 +112,7 @@ export function LeaderboardTab({ classId }: LeaderboardTabProps) {
                     )}
                   >
                     {isFirst && (
-                      <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-yellow-400 via-yellow-600 to-yellow-400 animate-[shine_3s_infinite]" />
+                      <div className="absolute top-0 start-0 w-full h-1.5 bg-linear-to-r from-yellow-400 via-yellow-600 to-yellow-400 animate-[shine_3s_infinite]" />
                     )}
                     <CardContent className="p-8 flex flex-col items-center text-center gap-6">
                       <div className="relative">
@@ -154,7 +154,7 @@ export function LeaderboardTab({ classId }: LeaderboardTabProps) {
                           }}
                           className={cn(
                             "absolute -top-6 z-20",
-                            isAr ? "-left-6" : "-right-6",
+                            isAr ? "-start-6" : "-end-6",
                           )}
                         >
                           {getRankIcon(originalIndex)}
@@ -240,7 +240,7 @@ export function LeaderboardTab({ classId }: LeaderboardTabProps) {
                         "flex items-center justify-between p-4 rounded-2xl transition-all group cursor-pointer",
                         isTopThree
                           ? "bg-primary/5 border border-primary/10"
-                          : "hover:bg-muted/50 border border-transparent hover:border-black/[0.03] dark:hover:border-white/[0.03]",
+                          : "hover:bg-muted/50 border border-transparent hover:border-black/3 dark:hover:border-white/3",
                       )}
                     >
                       <div className="flex items-center gap-6">
@@ -268,7 +268,7 @@ export function LeaderboardTab({ classId }: LeaderboardTabProps) {
                               <div
                                 className={cn(
                                   "absolute -bottom-1 size-4 bg-success rounded-full border-2 border-background flex items-center justify-center",
-                                  isAr ? "-left-1" : "-right-1",
+                                  isAr ? "-start-1" : "-end-1",
                                 )}
                               >
                                 <Star className="h-2 w-2 text-white fill-white" />

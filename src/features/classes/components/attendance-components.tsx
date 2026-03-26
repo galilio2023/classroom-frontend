@@ -189,7 +189,7 @@ export const AttendanceMarkTable = ({
                 key={student.id}
                 initial={{ opacity: 0, x: isAr ? 5 : -5 }}
                 animate={{ opacity: 1, x: 0 }}
-                className="group hover:bg-primary/[0.02] transition-colors border-b border-black/[0.03] dark:border-white/[0.03] text-start"
+                className="group hover:bg-primary/2 transition-colors border-b border-black/3 dark:border-white/3 text-start"
               >
                 <TableCell className="py-4">
                   <div className="flex items-center gap-4">
@@ -256,13 +256,13 @@ export const AttendanceMarkTable = ({
                       }
                       className={cn(
                         "h-11 rounded-xl bg-muted/10 border-none font-black text-center",
-                        isAr ? "pl-8" : "pr-8",
+                        isAr ? "ps-8" : "pe-8",
                       )}
                     />
                     <Timer
                       className={cn(
                         "absolute top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/40",
-                        isAr ? "left-2.5" : "right-2.5",
+                        "end-2.5",
                       )}
                     />
                   </div>
@@ -283,13 +283,13 @@ export const AttendanceMarkTable = ({
                       }
                       className={cn(
                         "h-11 rounded-xl bg-muted/10 border-none font-black text-center",
-                        isAr ? "pl-8" : "pr-8",
+                        isAr ? "ps-8" : "pe-8",
                       )}
                     />
                     <Zap
                       className={cn(
                         "absolute top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-yellow-500/40",
-                        isAr ? "left-2.5" : "right-2.5",
+                        "end-2.5",
                       )}
                     />
                   </div>
@@ -365,7 +365,7 @@ export const AttendanceHistoryTable = ({
           {historyData.map((group) => (
             <TableRow
               key={group.date}
-              className="group hover:bg-primary/[0.02] transition-colors border-b border-black/[0.03] dark:border-white/[0.03] text-start"
+              className="group hover:bg-primary/2 transition-colors border-b border-black/3 dark:border-white/3 text-start"
             >
               <TableCell className="py-6 font-black text-sm tracking-tight">
                 <div className="flex items-center gap-3">

@@ -68,7 +68,7 @@ export const ClassTabNavigation: React.FC<ClassTabNavigationProps> = ({
 
   return (
     <div className="sticky top-16 md:top-20 z-40">
-      <div className="bg-background/80 backdrop-blur-3xl border border-border/40 rounded-[2rem] md:rounded-[2.5rem] p-1.5 md:p-2 shadow-2xl shadow-black/5 mx-auto w-full overflow-hidden">
+      <div className="bg-background/80 backdrop-blur-3xl border border-border/40 rounded-4xl md:rounded-[2.5rem] p-1.5 md:p-2 shadow-2xl shadow-black/5 mx-auto w-full overflow-hidden">
         <ScrollArea className="w-full whitespace-nowrap scrollbar-hide">
           <TabsList className="flex h-auto md:h-14 items-center justify-start rounded-full p-1 bg-muted/20 gap-1">
             {primaryTabs.map((tab) => {

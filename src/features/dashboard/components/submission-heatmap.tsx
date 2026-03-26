@@ -68,7 +68,7 @@ export const SubmissionHeatmap = ({ data }: SubmissionHeatmapProps) => {
       <CardContent>
         <div className="flex flex-col gap-1 overflow-x-auto pb-2">
           <div className="flex gap-1">
-            <div className="grid grid-rows-7 gap-1 pr-2">
+            <div className="grid grid-rows-7 gap-1 pe-2">
               {days.map((day) => (
                 <span
                   key={day}

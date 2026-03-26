@@ -125,16 +125,16 @@ const UsersCreate = () => {
                       name="name"
                       render={({ field }) => (
                         <FormItem className="space-y-3">
-                          <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                          <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ms-1">
                             Full Name
                           </FormLabel>
                           <FormControl>
                             <div className="relative group">
-                              <User className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                              <User className="absolute start-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                               <Input
                                 placeholder="e.g. John Doe"
                                 {...field}
-                                className="pl-11 h-12 rounded-2xl border-primary/10 bg-background/50 focus:bg-background transition-all"
+                                className="ps-11 h-12 rounded-2xl border-primary/10 bg-background/50 focus:bg-background transition-all"
                               />
                             </div>
                           </FormControl>
@@ -149,16 +149,16 @@ const UsersCreate = () => {
                       name="email"
                       render={({ field }) => (
                         <FormItem className="space-y-3">
-                          <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                          <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ms-1">
                             Email Address
                           </FormLabel>
                           <FormControl>
                             <div className="relative group">
-                              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                              <Mail className="absolute start-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                               <Input
                                 placeholder="e.g. john@school.com"
                                 {...field}
-                                className="pl-11 h-12 rounded-2xl border-primary/10 bg-background/50 focus:bg-background transition-all"
+                                className="ps-11 h-12 rounded-2xl border-primary/10 bg-background/50 focus:bg-background transition-all"
                               />
                             </div>
                           </FormControl>
@@ -175,7 +175,7 @@ const UsersCreate = () => {
                       name="role"
                       render={({ field }) => (
                         <FormItem className="space-y-3">
-                          <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                          <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ms-1">
                             System Role
                           </FormLabel>
                           <Select
@@ -222,7 +222,7 @@ const UsersCreate = () => {
                       name="status"
                       render={({ field }) => (
                         <FormItem className="space-y-3">
-                          <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                          <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ms-1">
                             Initial Status
                           </FormLabel>
                           <Select
@@ -270,7 +270,7 @@ const UsersCreate = () => {
                     name="departmentId"
                     render={({ field }) => (
                       <FormItem className="space-y-3">
-                        <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                        <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ms-1">
                           Department Assignment
                         </FormLabel>
                         <Select
@@ -305,7 +305,7 @@ const UsersCreate = () => {
                   />
                 </CardContent>
 
-                <CardFooter className="p-8 bg-primary/[0.02] border-t border-primary/5 flex justify-end">
+                <CardFooter className="p-8 bg-primary/2 border-t border-primary/5 flex justify-end">
                   <Button
                     type="submit"
                     size="lg"
@@ -313,15 +313,15 @@ const UsersCreate = () => {
                     className="h-14 px-10 rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl shadow-primary/20 group"
                   >
                     {formLoading ? (
-                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                      <Loader2 className="h-4 w-4 animate-spin me-2" />
                     ) : (
-                      <UserPlus className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform" />
+                      <UserPlus className="h-4 w-4 me-2 group-hover:scale-110 transition-transform" />
                     )}
                     {formLoading
                       ? "Creating Account..."
                       : "Create User Account"}
                     {!formLoading && (
-                      <ArrowRight className="h-4 w-4 ml-2 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+                      <ArrowRight className="h-4 w-4 ms-2 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
                     )}
                   </Button>
                 </CardFooter>
@@ -337,7 +337,7 @@ const UsersCreate = () => {
           transition={{ delay: 0.2 }}
           className="space-y-8"
         >
-          <Card className="border-primary/10 shadow-lg rounded-[2rem] overflow-hidden bg-card/50 backdrop-blur-sm">
+          <Card className="border-primary/10 shadow-lg rounded-4xl overflow-hidden bg-card/50 backdrop-blur-sm">
             <CardHeader className="bg-primary/5 pb-6">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-xl bg-primary/10 text-primary">
@@ -396,9 +396,9 @@ const UsersCreate = () => {
             </CardContent>
           </Card>
 
-          <Alert className="rounded-[2rem] border-primary/10 bg-primary/5 p-6">
+          <Alert className="rounded-4xl border-primary/10 bg-primary/5 p-6">
             <Info className="h-5 w-5 text-primary" />
-            <div className="ml-2">
+            <div className="ms-2">
               <AlertTitle className="font-black text-sm uppercase tracking-widest mb-2">
                 Next Steps
               </AlertTitle>

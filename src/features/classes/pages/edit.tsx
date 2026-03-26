@@ -162,8 +162,8 @@ const ClassesEdit = () => {
             animate={{ opacity: 1, x: 0 }}
             className="lg:col-span-8"
           >
-            <Card className="border-none shadow-2xl bg-card/50 backdrop-blur-xl rounded-[2rem] overflow-hidden">
-              <div className="h-1.5 bg-gradient-to-r from-primary via-ai-primary to-primary w-full" />
+            <Card className="border-none shadow-2xl bg-card/50 backdrop-blur-xl rounded-4xl overflow-hidden">
+              <div className="h-1.5 bg-linear-to-r from-primary via-ai-primary to-primary w-full" />
               <CardHeader className="p-8 pb-4">
                 <CardTitle className="text-sm font-black uppercase tracking-widest flex items-center gap-2 opacity-60">
                   <LayoutDashboard className="h-4 w-4" />
@@ -196,7 +196,7 @@ const ClassesEdit = () => {
             className="lg:col-span-4 space-y-10"
           >
             {/* Editing Mode Info */}
-            <Card className="border-none shadow-xl bg-primary/5 rounded-[2rem] overflow-hidden">
+            <Card className="border-none shadow-xl bg-primary/5 rounded-4xl overflow-hidden">
               <CardHeader className="p-6 pb-2">
                 <CardTitle className="text-xs font-black uppercase tracking-widest flex items-center gap-2 text-primary">
                   <Info className="h-4 w-4" />
@@ -211,7 +211,7 @@ const ClassesEdit = () => {
             </Card>
 
             {/* Invite Code Card */}
-            <Card className="border-none shadow-xl bg-card/50 backdrop-blur-xl rounded-[2rem] overflow-hidden">
+            <Card className="border-none shadow-xl bg-card/50 backdrop-blur-xl rounded-4xl overflow-hidden">
               <CardHeader className="p-6 pb-2">
                 <CardTitle className="text-xs font-black uppercase tracking-widest flex items-center gap-2 opacity-60">
                   <Key className="h-4 w-4" />
@@ -219,7 +219,7 @@ const ClassesEdit = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6 pt-2 space-y-4">
-                <div className="p-4 rounded-2xl bg-muted/20 border border-black/[0.03] dark:border-white/[0.03] flex flex-col items-center justify-center gap-2">
+                <div className="p-4 rounded-2xl bg-muted/20 border border-black/3 dark:border-white/3 flex flex-col items-center justify-center gap-2">
                   <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">
                     {t("classes.edit.inviteCode")}
                   </span>
@@ -234,7 +234,7 @@ const ClassesEdit = () => {
             </Card>
 
             {/* Content Actions Card */}
-            <Card className="border-none shadow-2xl bg-ai-primary/[0.02] backdrop-blur-xl rounded-[2rem] overflow-hidden border border-ai-primary/10">
+            <Card className="border-none shadow-2xl bg-ai-primary/2 backdrop-blur-xl rounded-4xl overflow-hidden border border-ai-primary/10">
               <CardHeader className="p-6 pb-2">
                 <CardTitle className="text-xs font-black uppercase tracking-widest flex items-center gap-2 text-ai-primary">
                   <Sparkles className="h-4 w-4" />
@@ -248,12 +248,12 @@ const ClassesEdit = () => {
                       variant="outline"
                       className="w-full h-12 rounded-xl font-black uppercase tracking-widest text-[10px] gap-2 border-ai-primary/20 text-ai-primary hover:bg-ai-primary/5 relative overflow-hidden group shadow-sm"
                     >
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shine_1.5s_ease-in-out] pointer-events-none" />
+                      <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shine_1.5s_ease-in-out] pointer-events-none" />
                       <Import className="h-4 w-4" />
                       {t("classes.edit.importContent")}
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="sm:max-w-[550px] rounded-[2rem] border-none shadow-2xl bg-card/95 backdrop-blur-xl">
+                  <DialogContent className="sm:max-w-[550px] rounded-4xl border-none shadow-2xl bg-card/95 backdrop-blur-xl">
                     <DialogHeader className="space-y-3">
                       <div className="p-3 rounded-2xl bg-ai-primary/10 text-ai-primary w-fit">
                         <Import className="h-6 w-6" />
@@ -267,7 +267,7 @@ const ClassesEdit = () => {
                     </DialogHeader>
                     <div className="space-y-6 py-6">
                       <div className="space-y-2.5">
-                        <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                        <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ms-1">
                           {t("classes.edit.selectSourceTerm")}
                         </Label>
                         <Select
@@ -301,7 +301,7 @@ const ClassesEdit = () => {
                       </div>
 
                       <div className="space-y-2.5">
-                        <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                        <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ms-1">
                           {t("classes.edit.selectSourceClass")}
                         </Label>
                         <Select
@@ -347,9 +347,9 @@ const ClassesEdit = () => {
                         className="rounded-xl font-black uppercase tracking-widest h-12 px-8 shadow-lg shadow-ai-primary/20 bg-ai-primary text-white hover:bg-ai-primary/90"
                       >
                         {isImporting ? (
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          <Loader2 className="h-4 w-4 me-2 animate-spin" />
                         ) : (
-                          <Sparkles className="h-4 w-4 mr-2" />
+                          <Sparkles className="h-4 w-4 me-2" />
                         )}
                         {t("classes.edit.importContent")}
                       </Button>

@@ -281,7 +281,7 @@ const AIStudyLab = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12 items-start px-2">
         {/* Sidebar */}
         <div className="lg:col-span-4 space-y-6 md:space-y-8">
-          <Card className="glass-card rounded-[2rem] p-6 shadow-sm border-none">
+          <Card className="glass-card rounded-4xl p-6 shadow-sm border-none">
             <div className="space-y-4 text-start">
               <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary flex items-center gap-2">
                 <Zap className="h-3 w-3" />
@@ -311,7 +311,7 @@ const AIStudyLab = () => {
               >
                 <Card
                   className={cn(
-                    "h-full cursor-pointer transition-all duration-500 border border-border/40 shadow-sm rounded-[1.5rem] md:rounded-[2rem] overflow-hidden group relative",
+                    "h-full cursor-pointer transition-all duration-500 border border-border/40 shadow-sm rounded-[1.5rem] md:rounded-4xl overflow-hidden group relative",
                     activeTool === tool.id
                       ? "bg-primary text-primary-foreground shadow-2xl shadow-primary/20"
                       : "bg-card/50 backdrop-blur-3xl hover:bg-primary/5 hover:border-primary/20",
@@ -393,7 +393,7 @@ const AIStudyLab = () => {
                   </CardHeader>
                   <CardContent className="p-8 md:p-12 space-y-8 text-start">
                     <div className="space-y-4">
-                      <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 ml-2">
+                      <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 ms-2">
                         {t("aiHub.studyLab.inputLabel")}
                       </Label>
                       {activeTool !== "summary" ? (
@@ -410,7 +410,7 @@ const AIStudyLab = () => {
                           placeholder={t("aiHub.studyLab.placeholderNotes")}
                           value={input}
                           onChange={(e) => setInput(e.target.value)}
-                          className="min-h-[300px] rounded-[2rem] bg-muted/30 border-none shadow-inner p-8 text-base md:text-lg leading-relaxed font-medium resize-none"
+                          className="min-h-[300px] rounded-4xl bg-muted/30 border-none shadow-inner p-8 text-base md:text-lg leading-relaxed font-medium resize-none"
                         />
                       )}
                     </div>
@@ -516,7 +516,7 @@ const AIStudyLab = () => {
                   <CardContent className="p-8 md:p-12 prose prose-base lg:prose-xl dark:prose-invert max-w-none text-start">
                     <ReactMarkdown>{result}</ReactMarkdown>
                   </CardContent>
-                  <div className="p-8 bg-ai-primary/[0.02] border-t border-ai-primary/10 flex flex-col md:flex-row items-center justify-between gap-6">
+                  <div className="p-8 bg-ai-primary/2 border-t border-ai-primary/10 flex flex-col md:flex-row items-center justify-between gap-6">
                     {/* 🔄 AI FEEDBACK LOOP */}
                     <div className="flex items-center gap-3">
                       <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">

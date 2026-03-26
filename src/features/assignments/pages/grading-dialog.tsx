@@ -263,7 +263,7 @@ export const GradingDialog = ({
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent
-        className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto border-none shadow-2xl p-0 overflow-hidden text-left bg-background/95 backdrop-blur-xl"
+        className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto border-none shadow-2xl p-0 overflow-hidden text-start bg-background/95 backdrop-blur-xl"
         style={{ direction: isAr ? "rtl" : "ltr" }}
       >
         {showConfetti && (
@@ -277,7 +277,7 @@ export const GradingDialog = ({
           />
         )}
 
-        <div className="h-1.5 bg-gradient-to-r from-primary via-ai-primary to-primary w-full" />
+        <div className="h-1.5 bg-linear-to-r from-primary via-ai-primary to-primary w-full" />
 
         <div className="p-0 space-y-0 relative">
           {/* Success Overlay */}
@@ -363,7 +363,7 @@ export const GradingDialog = ({
                   onClick={handleAIGrade}
                   disabled={isAILoading}
                 >
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shine_1.5s_ease-in-out] pointer-events-none" />
+                  <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shine_1.5s_ease-in-out] pointer-events-none" />
                   {isAILoading ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
@@ -522,7 +522,7 @@ export const GradingDialog = ({
                                       value={field.value ?? 0}
                                       className="h-20 text-4xl font-black text-center rounded-2xl bg-muted/20 border-2 border-transparent focus-visible:ring-primary focus-visible:border-primary/20 transition-all"
                                     />
-                                    <span className="absolute right-6 top-1/2 -translate-y-1/2 text-2xl font-black opacity-20 group-focus-within:opacity-40 transition-opacity">
+                                    <span className="absolute end-6 top-1/2 -translate-y-1/2 text-2xl font-black opacity-20 group-focus-within:opacity-40 transition-opacity">
                                       %
                                     </span>
                                   </div>
@@ -562,7 +562,7 @@ export const GradingDialog = ({
                                     className={cn(
                                       "min-h-[120px] rounded-2xl resize-none bg-muted/10 border-2 border-transparent focus-visible:ring-primary p-5 text-sm leading-relaxed shadow-inner transition-all",
                                       isAISuggested &&
-                                        "border-ai-primary/10 bg-ai-primary/[0.02]",
+                                        "border-ai-primary/10 bg-ai-primary/2",
                                     )}
                                     {...field}
                                   />
@@ -570,7 +570,7 @@ export const GradingDialog = ({
                                     <motion.div
                                       initial={{ opacity: 0, scale: 0.5 }}
                                       animate={{ opacity: 0.2, scale: 1 }}
-                                      className="absolute bottom-3 right-3"
+                                      className="absolute bottom-3 end-3"
                                     >
                                       <Sparkles className="h-5 w-5 text-ai-primary" />
                                     </motion.div>
@@ -668,15 +668,15 @@ export const GradingDialog = ({
                       animate={{ scale: 1, opacity: 1 }}
                       className="h-40 flex flex-col items-center justify-center rounded-3xl bg-primary/5 border-2 border-primary/10 shadow-inner relative overflow-hidden group"
                     >
-                      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent pointer-events-none" />
-                      <div className="absolute -right-4 -top-4 opacity-5 group-hover:opacity-10 transition-opacity rotate-12">
+                      <div className="absolute inset-0 bg-linear-to-br from-primary/10 to-transparent pointer-events-none" />
+                      <div className="absolute -end-4 -top-4 opacity-5 group-hover:opacity-10 transition-opacity rotate-12">
                         <Trophy className="h-32 w-32 text-primary" />
                       </div>
                       <div className="flex items-baseline relative z-10">
                         <span className="text-7xl font-black text-primary tracking-tighter">
                           {submission.grade ?? "--"}
                         </span>
-                        <span className="text-2xl font-black text-primary/40 ml-1">
+                        <span className="text-2xl font-black text-primary/40 ms-1">
                           %
                         </span>
                       </div>
@@ -702,7 +702,7 @@ export const GradingDialog = ({
                       transition={{ delay: 0.1 }}
                       className="p-6 rounded-2xl bg-muted/20 border border-muted-foreground/10 min-h-[180px] text-sm leading-relaxed italic shadow-sm relative"
                     >
-                      <MessageSquareQuote className="absolute top-4 right-4 h-5 w-5 text-muted-foreground/10" />
+                      <MessageSquareQuote className="absolute top-4 end-4 h-5 w-5 text-muted-foreground/10" />
                       {submission.feedback ||
                         t("assignments.grading.noFeedback")}
                     </motion.div>

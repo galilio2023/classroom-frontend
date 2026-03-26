@@ -124,7 +124,7 @@ export const StudentAcademicJourney = ({
                 className="mt-4 rounded-2xl h-14 px-10 font-black uppercase tracking-widest text-[10px] gap-2 shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95"
               >
                 {t("buttons.exploreClasses")}
-                <ArrowRight className="h-4 w-4 ml-2" />
+                <ArrowRight className="h-4 w-4 ms-2" />
               </Button>
             </CardContent>
           </Card>
@@ -139,7 +139,7 @@ export const StudentAcademicJourney = ({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
           >
-            <Card className="border-border/40 shadow-2xl bg-orange-500/[0.03] backdrop-blur-xl rounded-[2.5rem] md:rounded-[3rem] overflow-hidden border-2 border-dashed group">
+            <Card className="border-border/40 shadow-2xl bg-orange-500/3 backdrop-blur-xl rounded-[2.5rem] md:rounded-[3rem] overflow-hidden border-2 border-dashed group">
               <div className="h-1.5 bg-orange-500/20 w-full animate-pulse" />
               <CardHeader className="p-8 md:p-10 pb-4">
                 <div className="flex items-center justify-between">

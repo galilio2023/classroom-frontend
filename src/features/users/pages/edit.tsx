@@ -148,7 +148,7 @@ const UsersEdit = () => {
                         name="name"
                         render={({ field }) => (
                           <FormItem className="space-y-3">
-                            <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                            <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ms-1">
                               {t("profile.labels.fullName")}
                             </FormLabel>
                             <FormControl>
@@ -169,7 +169,7 @@ const UsersEdit = () => {
                         name="email"
                         render={({ field }) => (
                           <FormItem className="space-y-3">
-                            <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                            <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ms-1">
                               {t("profile.labels.email")}
                             </FormLabel>
                             <FormControl>
@@ -177,7 +177,7 @@ const UsersEdit = () => {
                                 <Mail
                                   className={cn(
                                     "absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors",
-                                    isAr ? "right-4" : "left-4",
+                                    "start-4",
                                   )}
                                 />
                                 <Input
@@ -186,7 +186,7 @@ const UsersEdit = () => {
                                   disabled={!isAdmin}
                                   className={cn(
                                     "h-12 rounded-2xl border-primary/10 bg-background/50 focus:bg-background transition-all font-bold disabled:opacity-50 disabled:cursor-not-allowed",
-                                    isAr ? "pr-11" : "pl-11",
+                                    isAr ? "pe-11" : "ps-11",
                                   )}
                                 />
                               </div>
@@ -204,7 +204,7 @@ const UsersEdit = () => {
                         name="role"
                         render={({ field }) => (
                           <FormItem className="space-y-3">
-                            <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                            <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ms-1">
                               {t("profile.labels.role")}
                             </FormLabel>
                             <Select
@@ -244,7 +244,7 @@ const UsersEdit = () => {
                               </SelectContent>
                             </Select>
                             {!isAdmin && (
-                              <p className="text-[10px] font-bold text-muted-foreground/60 mt-1 ml-1">
+                              <p className="text-[10px] font-bold text-muted-foreground/60 mt-1 ms-1">
                                 {t("auth.pending.reason")}
                               </p>
                             )}
@@ -259,7 +259,7 @@ const UsersEdit = () => {
                         name="status"
                         render={({ field }) => (
                           <FormItem className="space-y-3">
-                            <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                            <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ms-1">
                               {t("profile.labels.status")}
                             </FormLabel>
                             <Select
@@ -319,7 +319,7 @@ const UsersEdit = () => {
                         name="departmentId"
                         render={({ field }) => (
                           <FormItem className="space-y-3">
-                            <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                            <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ms-1">
                               {t("profile.labels.department")}
                             </FormLabel>
                             <Select
@@ -364,7 +364,7 @@ const UsersEdit = () => {
                         name="phoneNumber"
                         render={({ field }) => (
                           <FormItem className="space-y-3">
-                            <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                            <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ms-1">
                               {t("profile.labels.phone")}
                             </FormLabel>
                             <FormControl>
@@ -372,7 +372,7 @@ const UsersEdit = () => {
                                 <Phone
                                   className={cn(
                                     "absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors",
-                                    isAr ? "right-4" : "left-4",
+                                    "start-4",
                                   )}
                                 />
                                 <Input
@@ -381,7 +381,7 @@ const UsersEdit = () => {
                                   value={field.value || ""}
                                   className={cn(
                                     "h-12 rounded-2xl border-primary/10 bg-background/50 focus:bg-background transition-all font-bold",
-                                    isAr ? "pr-11" : "pl-11",
+                                    isAr ? "pe-11" : "ps-11",
                                   )}
                                 />
                               </div>
@@ -398,7 +398,7 @@ const UsersEdit = () => {
                       name="address"
                       render={({ field }) => (
                         <FormItem className="space-y-3">
-                          <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                          <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ms-1">
                             {t("profile.labels.address")}
                           </FormLabel>
                           <FormControl>
@@ -406,7 +406,7 @@ const UsersEdit = () => {
                               <MapPin
                                 className={cn(
                                   "absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors",
-                                  isAr ? "right-4" : "left-4",
+                                  "start-4",
                                 )}
                               />
                               <Input
@@ -415,7 +415,7 @@ const UsersEdit = () => {
                                 value={field.value || ""}
                                 className={cn(
                                   "h-12 rounded-2xl border-primary/10 bg-background/50 focus:bg-background transition-all font-bold",
-                                  isAr ? "pr-11" : "pl-11",
+                                  isAr ? "pe-11" : "ps-11",
                                 )}
                               />
                             </div>
@@ -431,7 +431,7 @@ const UsersEdit = () => {
                       name="bio"
                       render={({ field }) => (
                         <FormItem className="space-y-3">
-                          <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                          <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ms-1">
                             {t("profile.labels.bio")}
                           </FormLabel>
                           <FormControl>
@@ -449,7 +449,7 @@ const UsersEdit = () => {
                   </div>
                 </CardContent>
 
-                <CardFooter className="p-8 bg-primary/[0.02] border-t border-primary/5 flex justify-end">
+                <CardFooter className="p-8 bg-primary/2 border-t border-primary/5 flex justify-end">
                   <Button
                     type="submit"
                     size="lg"
@@ -457,9 +457,9 @@ const UsersEdit = () => {
                     className="h-14 px-10 rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl shadow-primary/20 group"
                   >
                     {formLoading ? (
-                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                      <Loader2 className="h-4 w-4 animate-spin me-2" />
                     ) : (
-                      <Save className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform" />
+                      <Save className="h-4 w-4 me-2 group-hover:scale-110 transition-transform" />
                     )}
                     {formLoading
                       ? t("profile.toasts.saving")
@@ -467,7 +467,7 @@ const UsersEdit = () => {
                     {!formLoading && (
                       <ArrowRight
                         className={cn(
-                          "h-4 w-4 ml-2 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all",
+                          "h-4 w-4 ms-2 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all",
                           isAr && "rotate-180",
                         )}
                       />
@@ -486,7 +486,7 @@ const UsersEdit = () => {
           transition={{ delay: 0.2 }}
           className="space-y-8"
         >
-          <Card className="border-primary/10 shadow-lg rounded-[2rem] overflow-hidden bg-card/50 backdrop-blur-sm">
+          <Card className="border-primary/10 shadow-lg rounded-4xl overflow-hidden bg-card/50 backdrop-blur-sm">
             <CardHeader className="bg-primary/5 pb-6">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-xl bg-primary/10 text-primary">
@@ -528,9 +528,9 @@ const UsersEdit = () => {
             </CardContent>
           </Card>
 
-          <Alert className="rounded-[2rem] border-primary/10 bg-primary/5 p-6">
+          <Alert className="rounded-4xl border-primary/10 bg-primary/5 p-6">
             <Info className="h-5 w-5 text-primary" />
-            <div className={cn(isAr ? "mr-2" : "ml-2")}>
+            <div className={cn("ms-2")}>
               <AlertTitle className="font-black text-sm uppercase tracking-widest mb-2">
                 {t("profile.privacy.note")}
               </AlertTitle>
@@ -541,7 +541,7 @@ const UsersEdit = () => {
           </Alert>
 
           {user?.status === UserStatus.ACTIVE && (
-            <Card className="border-green-500/10 bg-green-500/5 rounded-[2rem] p-6 flex items-center gap-4">
+            <Card className="border-green-500/10 bg-green-500/5 rounded-4xl p-6 flex items-center gap-4">
               <div className="p-3 rounded-2xl bg-green-500/10 text-green-600">
                 <UserCheck className="h-6 w-6" />
               </div>

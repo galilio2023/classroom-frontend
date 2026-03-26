@@ -35,7 +35,7 @@ export const AssignmentSettingsForm = ({ form, rubric, isAr }: Props) => {
   return (
     <div className="space-y-8">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="p-6 bg-card rounded-[2rem] border border-border shadow-sm space-y-4">
+        <div className="p-6 bg-card rounded-4xl border border-border shadow-sm space-y-4">
           <div className="flex items-center justify-between text-start">
             <div className="space-y-1">
               <FormLabel className="text-base font-bold flex items-center gap-2">
@@ -64,7 +64,7 @@ export const AssignmentSettingsForm = ({ form, rubric, isAr }: Props) => {
           </div>
         </div>
 
-        <div className="p-6 bg-card rounded-[2rem] border border-border shadow-sm space-y-4">
+        <div className="p-6 bg-card rounded-4xl border border-border shadow-sm space-y-4">
           <div className="flex items-center justify-between text-start">
             <div className="space-y-1">
               <FormLabel className="text-base font-bold flex items-center gap-2">
@@ -102,7 +102,7 @@ export const AssignmentSettingsForm = ({ form, rubric, isAr }: Props) => {
             exit={{ opacity: 0, height: 0 }}
             className="space-y-8 relative z-10 overflow-hidden"
           >
-            <div className="p-8 bg-primary/5 rounded-[2rem] border border-primary/10 space-y-8 relative overflow-hidden text-start">
+            <div className="p-8 bg-primary/5 rounded-4xl border border-primary/10 space-y-8 relative overflow-hidden text-start">
               <FormField
                 control={form.control}
                 name="peerReviewWeight"
@@ -121,7 +121,7 @@ export const AssignmentSettingsForm = ({ form, rubric, isAr }: Props) => {
                         <span
                           className={cn(
                             "absolute top-1/2 -translate-y-1/2 text-xl font-black opacity-20",
-                            isAr ? "left-6" : "right-6",
+                            "end-6",
                           )}
                         >
                           %
@@ -150,7 +150,7 @@ export const AssignmentSettingsForm = ({ form, rubric, isAr }: Props) => {
                     }
                     className="h-9 rounded-xl text-[10px] font-black uppercase tracking-widest border-primary/20 text-primary hover:bg-primary/5"
                   >
-                    <Plus className="h-3.5 w-3.5 mr-1.5" />{" "}
+                    <Plus className="h-3.5 w-3.5 me-1.5" />{" "}
                     {t("buttons.addCriteria")}
                   </Button>
                 </div>
@@ -160,7 +160,7 @@ export const AssignmentSettingsForm = ({ form, rubric, isAr }: Props) => {
                       key={field.id}
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
-                      className="flex gap-4 items-start p-4 rounded-2xl bg-background/50 border border-black/[0.03] dark:border-white/[0.03] shadow-sm group"
+                      className="flex gap-4 items-start p-4 rounded-2xl bg-background/50 border border-black/3 dark:border-white/3 shadow-sm group"
                     >
                       <FormField
                         control={form.control}
@@ -198,7 +198,7 @@ export const AssignmentSettingsForm = ({ form, rubric, isAr }: Props) => {
                                 <span
                                   className={cn(
                                     "absolute top-1/2 -translate-y-1/2 text-[9px] font-black opacity-20",
-                                    isAr ? "left-3" : "right-3",
+                                    "end-3",
                                   )}
                                 >
                                   PTS

@@ -86,8 +86,8 @@ export const AssignmentList = ({ classId }: AssignmentListProps) => {
   }
 
   return (
-    <Card className="border border-border/80 dark:border-white/5 shadow-2xl bg-card/50 backdrop-blur-xl overflow-hidden rounded-[2rem]">
-      <CardHeader className="p-8 pb-4 flex flex-row items-center justify-between border-b border-black/[0.03] dark:border-white/[0.03]">
+    <Card className="border border-border/80 dark:border-white/5 shadow-2xl bg-card/50 backdrop-blur-xl overflow-hidden rounded-4xl">
+      <CardHeader className="p-8 pb-4 flex flex-row items-center justify-between border-b border-black/3 dark:border-white/3">
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-xl bg-primary/10 text-primary">
             <FileText className="h-5 w-5" />
@@ -117,7 +117,7 @@ export const AssignmentList = ({ classId }: AssignmentListProps) => {
         {assignments.length > 0 ? (
           <div
             ref={parentRef}
-            className="h-[500px] overflow-auto pr-2 custom-scrollbar"
+            className="h-[500px] overflow-auto pe-2 custom-scrollbar"
           >
             <div
               style={{
@@ -150,7 +150,7 @@ export const AssignmentList = ({ classId }: AssignmentListProps) => {
                       height: `${virtualItem.size}px`,
                       transform: `translateY(${virtualItem.start}px)`,
                     }}
-                    className="flex items-center px-8 py-4 border-b border-primary/5 hover:bg-primary/[0.02] transition-colors group cursor-pointer"
+                    className="flex items-center px-8 py-4 border-b border-primary/5 hover:bg-primary/2 transition-colors group cursor-pointer"
                     onClick={() =>
                       go({
                         to: `/assignments/show/${assignment.id}`,
@@ -205,7 +205,7 @@ export const AssignmentList = ({ classId }: AssignmentListProps) => {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-6 ml-4">
+                    <div className="flex items-center gap-6 ms-4">
                       <Badge
                         variant={isOverdue ? "destructive" : "secondary"}
                         className={cn(

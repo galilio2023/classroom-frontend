@@ -58,14 +58,14 @@ export const StatCard: React.FC<StatCardProps> = ({
     >
       <Card
         className={cn(
-          "h-full border border-border/80 dark:border-white/5 shadow-xl hover:shadow-2xl transition-all duration-500 overflow-hidden group bg-card/50 backdrop-blur-2xl rounded-[1.5rem] md:rounded-[2rem] relative",
+          "h-full border border-border/80 dark:border-white/5 shadow-xl hover:shadow-2xl transition-all duration-500 overflow-hidden group bg-card/50 backdrop-blur-2xl rounded-[1.5rem] md:rounded-4xl relative",
           "after:absolute after:inset-0 after:rounded-[inherit] after:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] dark:after:shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] after:pointer-events-none",
           className,
         )}
       >
         <div
           className={cn(
-            "absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent pointer-events-none transition-all duration-1000",
+            "absolute inset-0 bg-linear-to-r from-transparent via-white/10 to-transparent pointer-events-none transition-all duration-1000",
             isArabic
               ? "translate-x-full group-hover:animate-[shine-rtl_2s_infinite]"
               : "-translate-x-full group-hover:animate-[shine_2s_infinite]",
@@ -82,7 +82,7 @@ export const StatCard: React.FC<StatCardProps> = ({
               <div
                 className={cn(
                   "p-2.5 md:p-3.5 rounded-xl md:rounded-2xl transition-all duration-500 group-hover:scale-110 shadow-lg",
-                  "bg-background/80 backdrop-blur-md border border-black/[0.03] dark:border-white/[0.03] text-foreground",
+                  "bg-background/80 backdrop-blur-md border border-black/3 dark:border-white/3 text-foreground",
                 )}
               >
                 <Icon className={cn("h-5 w-5 md:h-6 md:w-6", color)} />

@@ -212,7 +212,7 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
           <h2 className="text-xl font-bold tracking-tight">
             {t("classes.discussion.classStream")}
           </h2>
-          <Badge variant="outline" className="ml-2 font-mono">
+          <Badge variant="outline" className="ms-2 font-mono">
             {discussions.length}
           </Badge>
         </div>
@@ -371,9 +371,9 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
               className="px-6 rounded-xl shadow-md transition-all hover:translate-y-[-1px] active:translate-y-[0px]"
             >
               {mutation.isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                <Loader2 className="h-4 w-4 animate-spin me-2" />
               ) : (
-                <Send className="h-4 w-4 mr-2" />
+                <Send className="h-4 w-4 me-2" />
               )}
               {replyTo ? t("buttons.reply") : t("buttons.post")}
             </Button>

@@ -84,7 +84,7 @@ const ChildSchedule = ({
   const schedule: ScheduleItem[] = response?.data || [];
 
   return (
-    <Card className="border-border/40 bg-primary/[0.02] rounded-[2rem] overflow-hidden shadow-inner">
+    <Card className="border-border/40 bg-primary/2 rounded-4xl overflow-hidden shadow-inner">
       <CardHeader className="p-6 pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/60">
@@ -309,7 +309,7 @@ export const ParentDashboard = ({ isLoading, show }: ParentDashboardProps) => {
         >
           <Card className="border-2 border-dashed border-border/40 bg-card/20 rounded-[2.5rem] md:rounded-[3.5rem] overflow-hidden">
             <CardContent className="flex flex-col items-center justify-center py-20 md:py-32 text-center space-y-6">
-              <div className="p-8 rounded-[2rem] bg-primary/5 text-primary/30">
+              <div className="p-8 rounded-4xl bg-primary/5 text-primary/30">
                 <Users className="h-16 w-16" />
               </div>
               <div className="space-y-2">
@@ -349,7 +349,7 @@ export const ParentDashboard = ({ isLoading, show }: ParentDashboardProps) => {
                   <CardHeader className="p-8 md:p-10 lg:p-12 pb-4 md:pb-6 flex flex-row items-center gap-6">
                     <div className="relative shrink-0">
                       <div className="absolute inset-0 bg-primary/20 rounded-[1.5rem] blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                      <Avatar className="h-16 w-16 md:h-20 md:w-20 lg:h-24 lg:w-24 border-4 border-background shadow-xl rounded-[1.5rem] md:rounded-[2rem] group-hover:scale-105 transition-transform duration-500 relative z-10">
+                      <Avatar className="h-16 w-16 md:h-20 md:w-20 lg:h-24 lg:w-24 border-4 border-background shadow-xl rounded-[1.5rem] md:rounded-4xl group-hover:scale-105 transition-transform duration-500 relative z-10">
                         <AvatarImage
                           src={child.image ?? ""}
                           className="object-cover"
@@ -397,7 +397,7 @@ export const ParentDashboard = ({ isLoading, show }: ParentDashboardProps) => {
                   <CardContent className="p-8 md:p-10 lg:p-12 pt-4 md:pt-6 space-y-8 md:space-y-10">
                     {/* Quick Stats Grid - More Sophisticated */}
                     <div className="grid grid-cols-2 gap-4 md:gap-6 lg:gap-8">
-                      <div className="p-5 md:p-6 lg:p-8 rounded-[1.75rem] md:rounded-[2rem] bg-primary/[0.03] border border-primary/10 space-y-3 group/stat hover:bg-primary/[0.06] transition-colors shadow-inner">
+                      <div className="p-5 md:p-6 lg:p-8 rounded-[1.75rem] md:rounded-4xl bg-primary/3 border border-primary/10 space-y-3 group/stat hover:bg-primary/6 transition-colors shadow-inner">
                         <div className="flex items-center gap-2.5 text-primary/60">
                           <div className="p-1.5 md:p-2 rounded-xl bg-primary/10">
                             <GraduationCap className="h-4 w-4 md:h-5 md:w-5" />
@@ -410,7 +410,7 @@ export const ParentDashboard = ({ isLoading, show }: ParentDashboardProps) => {
                           {child.gpa || "88%"}
                         </p>
                       </div>
-                      <div className="p-5 md:p-6 lg:p-8 rounded-[1.75rem] md:rounded-[2rem] bg-emerald-500/[0.03] border border-emerald-500/10 space-y-3 group/stat hover:bg-emerald-500/[0.06] transition-colors shadow-inner">
+                      <div className="p-5 md:p-6 lg:p-8 rounded-[1.75rem] md:rounded-4xl bg-emerald-500/3 border border-emerald-500/10 space-y-3 group/stat hover:bg-emerald-500/6 transition-colors shadow-inner">
                         <div className="flex items-center gap-2.5 text-emerald-600/60">
                           <div className="p-1.5 md:p-2 rounded-xl bg-emerald-500/10">
                             <ShieldCheck className="h-4 w-4 md:h-5 md:w-5" />

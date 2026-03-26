@@ -169,7 +169,7 @@ const ClassesCreate = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          <Card className="border-none shadow-2xl bg-card/50 backdrop-blur-xl rounded-[2rem] overflow-hidden text-start">
+          <Card className="border-none shadow-2xl bg-card/50 backdrop-blur-xl rounded-4xl overflow-hidden text-start">
             <div
               className="h-1.5 w-full transition-colors duration-500"
               style={{ backgroundColor: selectedColor }}
@@ -371,7 +371,7 @@ const ClassesCreate = () => {
                                   <span
                                     className={cn(
                                       "absolute top-1/2 -translate-y-1/2 text-[10px] font-black opacity-20 group-focus-within:opacity-40 transition-opacity",
-                                      isAr ? "left-4" : "right-4",
+                                      "end-4",
                                     )}
                                   >
                                     {t("classes.form.studentsUnit")}
@@ -392,7 +392,7 @@ const ClassesCreate = () => {
                                 {t("classes.form.themeColor")}
                               </FormLabel>
                               <FormControl>
-                                <div className="flex flex-wrap gap-3 p-4 rounded-2xl bg-muted/10 border border-black/[0.03] dark:border-white/[0.03]">
+                                <div className="flex flex-wrap gap-3 p-4 rounded-2xl bg-muted/10 border border-black/3 dark:border-white/3">
                                   {PRESET_COLORS.map((color) => (
                                     <button
                                       key={color}
@@ -442,7 +442,7 @@ const ClassesCreate = () => {
                                 <div
                                   className={cn(
                                     "absolute bottom-4 opacity-10 group-focus-within:opacity-30 transition-opacity",
-                                    isAr ? "left-4" : "right-4",
+                                    "end-4",
                                   )}
                                 >
                                   <Sparkles className="h-8 w-8" />
@@ -456,14 +456,14 @@ const ClassesCreate = () => {
                     </div>
                   </div>
 
-                  <div className="pt-6 border-t border-black/[0.03] dark:border-white/[0.03]">
+                  <div className="pt-6 border-t border-black/3 dark:border-white/3">
                     <Button
                       type="submit"
                       size="lg"
                       className="w-full h-16 rounded-[1.5rem] font-black uppercase tracking-[0.3em] shadow-2xl shadow-primary/30 transition-all hover:scale-[1.01] active:scale-[0.99] relative overflow-hidden group"
                       disabled={isSubmitting}
                     >
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-[shine_2s_infinite] pointer-events-none" />
+                      <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-[shine_2s_infinite] pointer-events-none" />
                       {isSubmitting ? (
                         <div className="flex gap-3 items-center">
                           <Loader2 className="h-6 w-6 animate-spin" />

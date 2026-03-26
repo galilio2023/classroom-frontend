@@ -22,7 +22,7 @@ export const UserStats = ({
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
-      <Card className="p-6 md:p-8 bg-card/40 backdrop-blur-3xl border-border/40 rounded-[2rem] md:rounded-[2.5rem] flex items-center gap-5 shadow-sm">
+      <Card className="p-6 md:p-8 bg-card/40 backdrop-blur-3xl border-border/40 rounded-4xl md:rounded-[2.5rem] flex items-center gap-5 shadow-sm">
         <div className="p-3.5 rounded-2xl bg-primary/10 text-primary">
           <UsersIcon className="h-6 w-6 md:h-7 md:w-7" />
         </div>
@@ -35,7 +35,7 @@ export const UserStats = ({
           </p>
         </div>
       </Card>
-      <Card className="p-6 md:p-8 bg-card/40 backdrop-blur-3xl border-border/40 rounded-[2rem] md:rounded-[2.5rem] flex items-center gap-5 shadow-sm">
+      <Card className="p-6 md:p-8 bg-card/40 backdrop-blur-3xl border-border/40 rounded-4xl md:rounded-[2.5rem] flex items-center gap-5 shadow-sm">
         <div className="p-3.5 rounded-2xl bg-amber-500/10 text-amber-600">
           <ShieldAlert className="h-6 w-6 md:h-7 md:w-7" />
         </div>
@@ -48,7 +48,7 @@ export const UserStats = ({
           </p>
         </div>
       </Card>
-      <Card className="p-6 md:p-8 bg-card/40 backdrop-blur-3xl border-border/40 rounded-[2rem] md:rounded-[2.5rem] flex items-center gap-5 shadow-sm">
+      <Card className="p-6 md:p-8 bg-card/40 backdrop-blur-3xl border-border/40 rounded-4xl md:rounded-[2.5rem] flex items-center gap-5 shadow-sm">
         <div className="p-3.5 rounded-2xl bg-green-500/10 text-green-600">
           <UserCheck className="h-6 w-6 md:h-7 md:w-7" />
         </div>

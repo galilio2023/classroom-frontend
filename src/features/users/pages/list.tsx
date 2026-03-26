@@ -78,7 +78,7 @@ const UsersList = () => {
             <div className="w-full md:w-auto">
               {data.isAdmin && (
                 <CreateButton className="w-full md:w-auto rounded-2xl h-12 md:h-14 px-10 font-black uppercase tracking-widest text-[10px] shadow-lg shadow-primary/25">
-                  <UserPlus className="h-5 w-5 mr-2 rtl:mr-0 rtl:ml-2" />{" "}
+                  <UserPlus className="h-5 w-5 me-2 rtl:me-0 rtl:ms-2" />{" "}
                   {t("buttons.addNewUser")}
                 </CreateButton>
               )}
@@ -189,7 +189,7 @@ const UsersList = () => {
             </DialogHeader>
 
             <div className="space-y-6 py-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 bg-muted/30 p-8 rounded-[2rem] border border-border/40 text-start">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 bg-muted/30 p-8 rounded-4xl border border-border/40 text-start">
                 <div>
                   <p className="text-[10px] font-black uppercase text-muted-foreground/60">
                     {t("users.governance.verification.fullName")}
@@ -228,7 +228,7 @@ const UsersList = () => {
               </div>
 
               {state.verificationTarget?.verificationDocumentUrl && (
-                <div className="border-2 border-primary/10 rounded-[2rem] p-8 flex flex-col items-center gap-6 bg-card relative overflow-hidden text-start">
+                <div className="border-2 border-primary/10 rounded-4xl p-8 flex flex-col items-center gap-6 bg-card relative overflow-hidden text-start">
                   <div className="flex flex-col sm:flex-row items-center gap-4 w-full">
                     <div className="p-4 bg-primary/10 rounded-2xl shrink-0">
                       <FileText className="h-10 w-10 text-primary" />
@@ -252,7 +252,7 @@ const UsersList = () => {
                         target="_blank"
                         rel="noreferrer"
                       >
-                        <ExternalLink className="h-4 w-4 mr-2" />{" "}
+                        <ExternalLink className="h-4 w-4 me-2" />{" "}
                         {t("buttons.viewFull")}
                       </a>
                     </Button>
@@ -271,7 +271,7 @@ const UsersList = () => {
                 }
                 disabled={status.isUpdating}
               >
-                <XCircle className="h-4 w-4 mr-2" /> {t("buttons.reject")}
+                <XCircle className="h-4 w-4 me-2" /> {t("buttons.reject")}
               </Button>
               <Button
                 size="lg"
@@ -282,9 +282,9 @@ const UsersList = () => {
                 disabled={status.isUpdating}
               >
                 {status.isUpdating ? (
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  <Loader2 className="h-4 w-4 animate-spin me-2" />
                 ) : (
-                  <CheckCircle2 className="h-4 w-4 mr-2" />
+                  <CheckCircle2 className="h-4 w-4 me-2" />
                 )}{" "}
                 {t("buttons.approveVerify")}
               </Button>

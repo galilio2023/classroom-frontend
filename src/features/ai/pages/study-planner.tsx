@@ -192,7 +192,7 @@ const StudyPlanner = () => {
         >
           <Card className="border-2 border-dashed border-border/40 bg-card/20 rounded-[2.5rem] md:rounded-[3.5rem] overflow-hidden">
             <CardContent className="flex flex-col items-center justify-center py-20 md:py-32 text-center space-y-6">
-              <div className="p-8 rounded-[2rem] bg-primary/5 text-primary/30">
+              <div className="p-8 rounded-4xl bg-primary/5 text-primary/30">
                 <BookOpen className="h-16 w-16" />
               </div>
               <div className="space-y-2">
@@ -208,7 +208,7 @@ const StudyPlanner = () => {
                 onClick={generatePlan}
                 className="rounded-2xl h-14 px-10 font-black uppercase tracking-widest text-[10px] shadow-xl shadow-primary/20 mt-4"
               >
-                <Sparkles className="h-4 w-4 mr-2" />
+                <Sparkles className="h-4 w-4 me-2" />
                 {t("studyPlanner.buttons.generate")}
               </Button>
             </CardContent>
@@ -246,12 +246,12 @@ const StudyPlanner = () => {
                         <Card
                           key={slot}
                           className={cn(
-                            "group relative overflow-hidden transition-all duration-500 border border-border/40 shadow-sm rounded-[1.5rem] md:rounded-[2rem] bg-card/50 backdrop-blur-3xl cursor-default",
+                            "group relative overflow-hidden transition-all duration-500 border border-border/40 shadow-sm rounded-[1.5rem] md:rounded-4xl bg-card/50 backdrop-blur-3xl cursor-default",
                             block
                               ? "min-h-[12rem] hover:shadow-xl hover:shadow-primary/5 hover:border-primary/20"
                               : "h-24 opacity-30 bg-muted/10 border-dashed",
                             isCompleted &&
-                              "bg-primary/[0.03] border-primary/20 shadow-none grayscale-[0.5]",
+                              "bg-primary/3 border-primary/20 shadow-none grayscale-[0.5]",
                           )}
                         >
                           {block ? (
@@ -322,7 +322,7 @@ const StudyPlanner = () => {
                                       rotate: 0,
                                     }}
                                     exit={{ scale: 0.5, opacity: 0 }}
-                                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+                                    className="absolute top-1/2 start-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
                                   >
                                     <div className="p-4 rounded-full bg-background/80 backdrop-blur-md shadow-2xl border border-primary/20 text-primary opacity-20">
                                       <CheckCircle2 className="h-16 w-16" />
@@ -354,7 +354,7 @@ const StudyPlanner = () => {
             viewport={{ once: true }}
             className="flex justify-center"
           >
-            <Card className="border-border/40 shadow-2xl rounded-[2.5rem] md:rounded-[3rem] bg-indigo-500/[0.03] backdrop-blur-3xl max-w-3xl w-full overflow-hidden border-2 border-dashed">
+            <Card className="border-border/40 shadow-2xl rounded-[2.5rem] md:rounded-[3rem] bg-indigo-500/3 backdrop-blur-3xl max-w-3xl w-full overflow-hidden border-2 border-dashed">
               <CardHeader className="p-8 md:p-10 pb-4 border-b border-indigo-500/10 text-start bg-indigo-500/5">
                 <div className="flex items-center gap-4">
                   <div className="p-3 rounded-2xl bg-indigo-500/10 text-indigo-600 border border-indigo-500/20 shadow-sm">

@@ -18,7 +18,7 @@ export const ClassHeaderSkeleton = () => (
 export const ClassBannerSkeleton = () => (
   <Card className="relative h-48 md:h-64 rounded-[2.5rem] overflow-hidden border-none mb-8">
     <Skeleton className="absolute inset-0 h-full w-full" />
-    <div className="absolute bottom-8 left-8 space-y-3 z-10">
+    <div className="absolute bottom-8 start-8 space-y-3 z-10">
       <Skeleton className="h-10 w-64 rounded-xl bg-white/20" />
       <div className="flex gap-2">
         <Skeleton className="h-6 w-32 rounded-full bg-white/10" />
@@ -45,12 +45,12 @@ export const ClassShowSkeleton = () => (
     <TabsNavigationSkeleton />
     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
       <div className="md:col-span-2 space-y-6">
-        <Skeleton className="h-64 w-full rounded-[2rem]" />
-        <Skeleton className="h-64 w-full rounded-[2rem]" />
+        <Skeleton className="h-64 w-full rounded-4xl" />
+        <Skeleton className="h-64 w-full rounded-4xl" />
       </div>
       <div className="space-y-6">
-        <Skeleton className="h-48 w-full rounded-[2rem]" />
-        <Skeleton className="h-96 w-full rounded-[2rem]" />
+        <Skeleton className="h-48 w-full rounded-4xl" />
+        <Skeleton className="h-96 w-full rounded-4xl" />
       </div>
     </div>
   </div>

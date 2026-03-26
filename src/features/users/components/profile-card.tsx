@@ -36,21 +36,21 @@ export const ProfileCard = ({ user, isAr, isStudent, isTeacher }: Props) => {
       case VerificationStatus.VERIFIED:
         return (
           <Badge className="bg-green-500/10 text-green-600 border border-green-500/20 font-black px-3 py-1 rounded-full text-[10px] tracking-widest shadow-sm">
-            <CheckCircle2 className={cn("w-3 h-3", isAr ? "ml-1" : "mr-1")} />
+            <CheckCircle2 className={cn("w-3 h-3", "me-1")} />
             {t("users.governance.verification.verified" as any)}
           </Badge>
         );
       case VerificationStatus.PENDING:
         return (
           <Badge className="bg-amber-500/10 text-amber-600 border border-amber-500/20 font-black px-3 py-1 rounded-full text-[10px] tracking-widest shadow-sm">
-            <Clock className={cn("w-3 h-3", isAr ? "ml-1" : "mr-1")} />
+            <Clock className={cn("w-3 h-3", "me-1")} />
             {t("users.governance.verification.pending" as any)}
           </Badge>
         );
       case VerificationStatus.REJECTED:
         return (
           <Badge className="bg-red-500/10 text-red-600 border border-red-500/20 font-black px-3 py-1 rounded-full text-[10px] tracking-widest shadow-sm">
-            <XCircle className={cn("w-3 h-3", isAr ? "ml-1" : "mr-1")} />
+            <XCircle className={cn("w-3 h-3", "me-1")} />
             {t("users.governance.toasts.rejected" as any)}
           </Badge>
         );

@@ -75,9 +75,9 @@ export const AnnouncementItem = ({
       <Card
         ref={itemRef}
         className={cn(
-          "relative transition-all duration-300 border-none shadow-xl bg-card/50 backdrop-blur-xl rounded-[2rem] overflow-hidden group",
+          "relative transition-all duration-300 border-none shadow-xl bg-card/50 backdrop-blur-xl rounded-4xl overflow-hidden group",
           announcement.isPinned
-            ? "border-2 border-primary/20 bg-primary/[0.02]"
+            ? "border-2 border-primary/20 bg-primary/2"
             : "hover:shadow-2xl hover:-translate-y-1",
           isRead === false && !isStaff
             ? "ring-2 ring-primary/20"
@@ -85,7 +85,7 @@ export const AnnouncementItem = ({
         )}
       >
         {isRead === false && !isStaff && (
-          <div className="absolute left-0 top-0 w-1.5 h-full bg-primary shadow-[0_0_15px_rgba(59,130,246,0.5)]" />
+          <div className="absolute start-0 top-0 w-1.5 h-full bg-primary shadow-[0_0_15px_rgba(59,130,246,0.5)]" />
         )}
         <CardHeader className="p-8 pb-4">
           <div className="flex justify-between items-start">
@@ -186,7 +186,7 @@ export const AnnouncementItem = ({
             {announcement.content}
           </p>
           {announcement.fileUrl && (
-            <div className="pt-4 border-t border-black/[0.03] dark:border-white/[0.03]">
+            <div className="pt-4 border-t border-black/3 dark:border-white/3">
               <Button
                 variant="outline"
                 size="sm"
@@ -200,7 +200,7 @@ export const AnnouncementItem = ({
                 >
                   <FileText className="h-4 w-4" />
                   {t("classes.announcements.viewAttachment")}
-                  <ArrowRight className="h-3 w-3 ml-1" />
+                  <ArrowRight className="h-3 w-3 ms-1" />
                 </a>
               </Button>
             </div>

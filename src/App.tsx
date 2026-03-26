@@ -36,21 +36,15 @@ function App() {
     translate: (key: string, params?: object) => {
       if (!key) return "";
 
-      // 🛡️ Upstream Guard: If a dynamic key was constructed with 'undefined',
-      // try to fallback to a 'general' equivalent only if it's a nested key.
-      if (key.includes("undefined") && key.includes(".")) {
-        if (import.meta.env.DEV) {
-          console.warn(`[i18n] Malformed translation key detected: "${key}". Falling back to 'general'.`);
-        }
-        const fallbackKey = key.replace("undefined", "general");
-        const translatedFallback = t(fallbackKey, {
-          ...params,
-          defaultValue: "",
-        });
+      // 🛡️ Upstream Guard: Robustly handle cases where a segment of a key is 'undefined'.
+      // e.g., "classes.undefined.title" -> "classes.general.title"
+      if (key.includes("undefined.")) {
+        const fallbackKey = key.replace("undefined.", "general.");
+        const translatedFallback = t(fallbackKey, { ...params, defaultValue: "" });
         if (translatedFallback) return translatedFallback;
       }
 
-      // If key is exactly "undefined" or fallback failed, return defaultValue or key itself
+      // Final fallback to the key itself or its basic translation
       return t(key, { ...params, defaultValue: key });
     },
     changeLocale: (lang: string) => i18n.changeLanguage(lang),

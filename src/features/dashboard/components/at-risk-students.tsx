@@ -51,7 +51,7 @@ export const AtRiskStudents = ({ students }: AtRiskStudentsProps) => {
         initial={{ opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}
       >
-        <Card className="border-none shadow-2xl bg-success/[0.02] backdrop-blur-xl rounded-[2rem] overflow-hidden group">
+        <Card className="border-none shadow-2xl bg-success/2 backdrop-blur-xl rounded-4xl overflow-hidden group">
           <div className="h-1.5 bg-success/20 w-full" />
           <CardHeader className="p-8">
             <div className="flex items-center gap-4">
@@ -80,7 +80,7 @@ export const AtRiskStudents = ({ students }: AtRiskStudentsProps) => {
 
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-      <Card className="border-none shadow-2xl bg-destructive/[0.02] backdrop-blur-xl rounded-[2rem] overflow-hidden group">
+      <Card className="border-none shadow-2xl bg-destructive/2 backdrop-blur-xl rounded-4xl overflow-hidden group">
         <div className="h-1.5 bg-destructive/20 w-full animate-pulse" />
         <CardHeader className="p-8 pb-4">
           <div className="flex items-center justify-between">
@@ -132,7 +132,7 @@ export const AtRiskStudents = ({ students }: AtRiskStudentsProps) => {
             </AnimatePresence>
           </div>
 
-          <div className="pt-4 border-t border-black/[0.03] dark:border-white/[0.03] flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">
+          <div className="pt-4 border-t border-black/3 dark:border-white/3 flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">
             <Info className="h-3 w-3" />
             <span>
               {t("dashboard.staff.atRiskStudents.interventionRecommended")}

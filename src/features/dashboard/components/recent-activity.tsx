@@ -151,7 +151,7 @@ export const RecentActivity = ({ limit = 5 }: RecentActivityProps) => {
         </Button>
       </div>
 
-      <div className="bg-card/50 backdrop-blur-xl rounded-[2rem] border border-black/[0.05] dark:border-white/[0.05] overflow-hidden shadow-2xl">
+      <div className="bg-card/50 backdrop-blur-xl rounded-4xl border border-black/5 dark:border-white/5 overflow-hidden shadow-2xl">
         <ScrollArea className="h-[400px]">
           {isLoading ? (
             <div className="p-6 space-y-6">
@@ -201,9 +201,9 @@ export const RecentActivity = ({ limit = 5 }: RecentActivityProps) => {
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.05 }}
                       className={cn(
-                        "flex gap-5 p-6 transition-all duration-300 hover:bg-primary/[0.02] group cursor-pointer relative",
+                        "flex gap-5 p-6 transition-all duration-300 hover:bg-primary/2 group cursor-pointer relative",
                         index !== data.length - 1 &&
-                          "border-b border-black/[0.03] dark:border-white/[0.03]",
+                          "border-b border-black/3 dark:border-white/3",
                       )}
                     >
                       <div className="shrink-0">

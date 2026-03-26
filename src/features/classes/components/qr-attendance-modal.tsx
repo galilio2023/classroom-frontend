@@ -186,7 +186,7 @@ export const QRAttendanceModal = ({
 
             {/* Refresh Indicator */}
             {!isExpired && (
-              <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-2 shadow-lg border-2 border-background">
+              <div className="absolute -bottom-3 start-1/2 -translate-x-1/2 bg-primary text-primary-foreground px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-2 shadow-lg border-2 border-background">
                 <RefreshCw
                   className={cn(
                     "h-3 w-3",
@@ -234,7 +234,7 @@ export const QRAttendanceModal = ({
                   {scannedStudents.map((record) => (
                     <div
                       key={record.id}
-                      className="flex items-center justify-between p-2.5 rounded-xl bg-background border shadow-sm animate-in slide-in-from-right-4 duration-300"
+                      className="flex items-center justify-between p-2.5 rounded-xl bg-background border shadow-sm animate-in slide-in-from-end-4 duration-300"
                     >
                       <div className="flex items-center gap-3">
                         <Avatar className="h-8 w-8 border-2 border-primary/10">

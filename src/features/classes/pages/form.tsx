@@ -105,7 +105,7 @@ export const ClassForm = ({
   return (
     <div className="space-y-10">
       {/* Basic Details Card */}
-      <Card className="border-none shadow-2xl bg-card/50 backdrop-blur-xl rounded-[2rem] overflow-hidden">
+      <Card className="border-none shadow-2xl bg-card/50 backdrop-blur-xl rounded-4xl overflow-hidden">
         <div
           className="h-1.5 w-full transition-colors duration-500"
           style={{ backgroundColor: selectedColor }}
@@ -178,7 +178,7 @@ export const ClassForm = ({
                       <span
                         className={cn(
                           "absolute top-1/2 -translate-y-1/2 text-[10px] font-black opacity-20 group-focus-within:opacity-40 transition-opacity",
-                          isAr ? "left-4" : "right-4",
+                          "end-4",
                         )}
                       >
                         {t("classes.form.studentsUnit")}
@@ -279,7 +279,7 @@ export const ClassForm = ({
                     {t("classes.form.themeColor")}
                   </FormLabel>
                   <FormControl>
-                    <div className="flex flex-wrap gap-3 p-4 rounded-2xl bg-muted/10 border border-black/[0.03] dark:border-white/[0.03]">
+                    <div className="flex flex-wrap gap-3 p-4 rounded-2xl bg-muted/10 border border-black/3 dark:border-white/3">
                       {PRESET_COLORS.map((color) => (
                         <button
                           key={color}
@@ -368,7 +368,7 @@ export const ClassForm = ({
                     <div
                       className={cn(
                         "absolute bottom-4 opacity-10 group-focus-within:opacity-30 transition-opacity",
-                        isAr ? "left-4" : "right-4",
+                        "end-4",
                       )}
                     >
                       <Sparkles className="h-6 w-6" />
@@ -383,7 +383,7 @@ export const ClassForm = ({
       </Card>
 
       {/* Schedule Builder Card */}
-      <Card className="border-none shadow-2xl bg-card/50 backdrop-blur-xl rounded-[2rem] overflow-hidden">
+      <Card className="border-none shadow-2xl bg-card/50 backdrop-blur-xl rounded-4xl overflow-hidden">
         <CardHeader className="p-8 pb-4">
           <CardTitle className="text-sm font-black uppercase tracking-widest flex items-center gap-2 opacity-60 text-start">
             <Calendar className="h-4 w-4" />
@@ -399,7 +399,7 @@ export const ClassForm = ({
                   initial={{ opacity: 0, x: isAr ? 10 : -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: isAr ? -10 : 10 }}
-                  className="flex flex-col md:flex-row items-end gap-4 p-6 rounded-2xl bg-muted/10 border border-black/[0.03] dark:border-white/[0.03] group text-start"
+                  className="flex flex-col md:flex-row items-end gap-4 p-6 rounded-2xl bg-muted/10 border border-black/3 dark:border-white/3 group text-start"
                 >
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 w-full">
                     <FormField
@@ -407,7 +407,7 @@ export const ClassForm = ({
                       name={`schedules.${index}.day`}
                       render={({ field }) => (
                         <FormItem className="space-y-2">
-                          <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                          <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ms-1">
                             {t("classes.form.day")}
                           </FormLabel>
                           <Select
@@ -448,7 +448,7 @@ export const ClassForm = ({
                       name={`schedules.${index}.startTime`}
                       render={({ field }) => (
                         <FormItem className="space-y-2">
-                          <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                          <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ms-1">
                             {t("classes.form.startTime")}
                           </FormLabel>
                           <FormControl>
@@ -456,14 +456,14 @@ export const ClassForm = ({
                               <Clock
                                 className={cn(
                                   "absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within/input:text-primary transition-colors",
-                                  isAr ? "right-3" : "left-3",
+                                  "start-3",
                                 )}
                               />
                               <Input
                                 type="time"
                                 className={cn(
                                   "h-12 rounded-xl bg-background border-none focus-visible:ring-primary font-bold",
-                                  isAr ? "pr-10" : "pl-10",
+                                  isAr ? "pe-10" : "ps-10",
                                 )}
                                 {...field}
                               />
@@ -478,7 +478,7 @@ export const ClassForm = ({
                       name={`schedules.${index}.endTime`}
                       render={({ field }) => (
                         <FormItem className="space-y-2">
-                          <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                          <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ms-1">
                             {t("classes.form.endTime")}
                           </FormLabel>
                           <FormControl>
@@ -486,14 +486,14 @@ export const ClassForm = ({
                               <Clock
                                 className={cn(
                                   "absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within/input:text-primary transition-colors",
-                                  isAr ? "right-3" : "left-3",
+                                  "start-3",
                                 )}
                               />
                               <Input
                                 type="time"
                                 className={cn(
                                   "h-12 rounded-xl bg-background border-none focus-visible:ring-primary font-bold",
-                                  isAr ? "pr-10" : "pl-10",
+                                  isAr ? "pe-10" : "ps-10",
                                 )}
                                 {...field}
                               />
@@ -540,7 +540,7 @@ export const ClassForm = ({
           disabled={formLoading}
           className="h-16 rounded-[1.5rem] px-12 font-black uppercase tracking-[0.3em] shadow-2xl shadow-primary/30 transition-all hover:scale-[1.05] active:scale-[0.95] relative overflow-hidden group"
         >
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-[shine_2s_infinite] pointer-events-none" />
+          <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-[shine_2s_infinite] pointer-events-none" />
           {formLoading ? (
             <div className="flex gap-3 items-center">
               <Loader2 className="h-6 w-6 animate-spin" />

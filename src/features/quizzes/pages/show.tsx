@@ -182,10 +182,10 @@ const QuizShow = () => {
           animate={{ opacity: 1, scale: 1 }}
         >
           <Card className="text-center border-none shadow-2xl bg-card/50 backdrop-blur-xl rounded-[2.5rem] md:rounded-[3rem] overflow-hidden">
-            <div className="h-3 bg-gradient-to-r from-primary via-indigo-500 to-primary" />
+            <div className="h-3 bg-linear-to-r from-primary via-indigo-500 to-primary" />
             <CardHeader className="p-8 md:p-12">
               <div className="flex justify-center mb-6">
-                <div className="p-6 rounded-[2rem] bg-yellow-500/10 text-yellow-500 shadow-xl shadow-yellow-500/10">
+                <div className="p-6 rounded-4xl bg-yellow-500/10 text-yellow-500 shadow-xl shadow-yellow-500/10">
                   <Trophy className="h-16 w-16 md:h-20 md:w-20 animate-bounce" />
                 </div>
               </div>
@@ -201,7 +201,7 @@ const QuizShow = () => {
                 <span className="text-6xl md:text-7xl font-black text-primary tracking-tighter">
                   {score}
                 </span>
-                <span className="text-lg md:text-xl font-black text-muted-foreground/60 uppercase tracking-widest ml-4">
+                <span className="text-lg md:text-xl font-black text-muted-foreground/60 uppercase tracking-widest ms-4">
                   {t("common.xp")}
                 </span>
               </div>
@@ -209,14 +209,14 @@ const QuizShow = () => {
                 {t("classes.live.toasts.recordingSaved")}
               </p>
             </CardContent>
-            <CardFooter className="p-8 md:p-12 bg-primary/[0.02] border-t border-primary/5 flex justify-center">
+            <CardFooter className="p-8 md:p-12 bg-primary/2 border-t border-primary/5 flex justify-center">
               <Button
                 onClick={() => list("classes")}
                 size="lg"
                 className="rounded-2xl h-14 px-10 font-black uppercase tracking-widest text-[10px] shadow-xl shadow-primary/20"
               >
                 {t("buttons.goBack")}
-                <ArrowRight className="h-4 w-4 ml-2" />
+                <ArrowRight className="h-4 w-4 ms-2" />
               </Button>
             </CardFooter>
           </Card>
@@ -235,9 +235,9 @@ const QuizShow = () => {
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex flex-col md:flex-row items-center justify-between gap-6 bg-card/50 backdrop-blur-xl p-6 md:p-8 rounded-[2rem] border border-primary/5 shadow-xl sticky top-20 z-40"
+          className="flex flex-col md:flex-row items-center justify-between gap-6 bg-card/50 backdrop-blur-xl p-6 md:p-8 rounded-4xl border border-primary/5 shadow-xl sticky top-20 z-40"
         >
-          <div className="space-y-1 text-center md:text-left">
+          <div className="space-y-1 text-center md:text-start">
             <h2 className="text-2xl md:text-3xl font-black tracking-tight leading-tight">
               {quiz.title}
             </h2>
@@ -318,7 +318,7 @@ const QuizShow = () => {
                             "flex items-center space-x-4 p-5 md:p-6 rounded-[1.5rem] border-2 transition-all cursor-pointer group",
                             isSelected
                               ? "border-primary bg-primary/5 shadow-lg shadow-primary/5"
-                              : "border-border/40 bg-muted/20 hover:bg-primary/[0.02] hover:border-primary/20",
+                              : "border-border/40 bg-muted/20 hover:bg-primary/2 hover:border-primary/20",
                           )}
                           onClick={() =>
                             handleAnswer(currentQuestion.id, option)
@@ -353,7 +353,7 @@ const QuizShow = () => {
                   )}
                 </RadioGroup>
               </CardContent>
-              <CardFooter className="p-8 md:p-10 bg-primary/[0.02] border-t border-primary/5 flex flex-col sm:flex-row justify-between gap-4">
+              <CardFooter className="p-8 md:p-10 bg-primary/2 border-t border-primary/5 flex flex-col sm:flex-row justify-between gap-4">
                 <Button
                   variant="ghost"
                   size="lg"
@@ -361,7 +361,7 @@ const QuizShow = () => {
                   onClick={() => setCurrentQuestionIndex((prev) => prev - 1)}
                   disabled={currentQuestionIndex === 0}
                 >
-                  <ChevronLeft className="mr-2 h-4 w-4" /> {t("buttons.back")}
+                  <ChevronLeft className="me-2 h-4 w-4" /> {t("buttons.back")}
                 </Button>
 
                 {currentQuestionIndex === quiz.questions.length - 1 ? (
@@ -374,9 +374,9 @@ const QuizShow = () => {
                     className="w-full sm:w-auto rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-10 bg-green-600 hover:bg-green-700 shadow-xl shadow-green-600/20"
                   >
                     {submitMutation.isPending ? (
-                      <Loader2 className="animate-spin h-4 w-4 mr-2" />
+                      <Loader2 className="animate-spin h-4 w-4 me-2" />
                     ) : (
-                      <CheckCircle2 className="mr-2 h-4 w-4" />
+                      <CheckCircle2 className="me-2 h-4 w-4" />
                     )}
                     {t("buttons.save")}
                   </Button>
@@ -388,7 +388,7 @@ const QuizShow = () => {
                     className="w-full sm:w-auto rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-10 shadow-xl shadow-primary/20"
                   >
                     {t("classes.quiz.nextQuestion")}{" "}
-                    <ChevronRight className="ml-2 h-4 w-4" />
+                    <ChevronRight className="ms-2 h-4 w-4" />
                   </Button>
                 )}
               </CardFooter>
@@ -407,9 +407,9 @@ const QuizShow = () => {
         animate={{ opacity: 1, y: 0 }}
       >
         <Card className="border-none shadow-2xl bg-card/50 backdrop-blur-xl rounded-[2.5rem] md:rounded-[3rem] overflow-hidden">
-          <div className="h-3 bg-gradient-to-r from-primary via-ai-primary to-primary" />
+          <div className="h-3 bg-linear-to-r from-primary via-ai-primary to-primary" />
           <CardHeader className="p-8 md:p-12 text-center space-y-6">
-            <div className="mx-auto p-5 rounded-[2rem] bg-primary/10 text-primary shadow-xl shadow-primary/5 w-fit">
+            <div className="mx-auto p-5 rounded-4xl bg-primary/10 text-primary shadow-xl shadow-primary/5 w-fit">
               <FileQuestion className="h-12 w-12 md:h-16 md:w-16" />
             </div>
             <div className="space-y-2">
@@ -423,7 +423,7 @@ const QuizShow = () => {
           </CardHeader>
           <CardContent className="p-8 md:p-12 pt-0 space-y-10 md:space-y-12">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <div className="p-6 md:p-8 rounded-[2rem] bg-muted/30 border border-primary/5 space-y-2 text-center shadow-inner">
+              <div className="p-6 md:p-8 rounded-4xl bg-muted/30 border border-primary/5 space-y-2 text-center shadow-inner">
                 <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">
                   {t("classes.quiz.questionsCount", "Questions")}
                 </p>
@@ -431,7 +431,7 @@ const QuizShow = () => {
                   {quiz.questions?.length || 0}
                 </p>
               </div>
-              <div className="p-6 md:p-8 rounded-[2rem] bg-muted/30 border border-primary/5 space-y-2 text-center shadow-inner">
+              <div className="p-6 md:p-8 rounded-4xl bg-muted/30 border border-primary/5 space-y-2 text-center shadow-inner">
                 <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">
                   {t("classes.quiz.timeLimit", "Time Limit")}
                 </p>
@@ -444,7 +444,7 @@ const QuizShow = () => {
             </div>
 
             {isStudent && (
-              <div className="bg-amber-500/5 border-2 border-dashed border-amber-500/20 p-6 md:p-8 rounded-[2rem] flex flex-col sm:flex-row gap-5 items-start shadow-sm">
+              <div className="bg-amber-500/5 border-2 border-dashed border-amber-500/20 p-6 md:p-8 rounded-4xl flex flex-col sm:flex-row gap-5 items-start shadow-sm">
                 <div className="p-3 rounded-xl bg-amber-500/10 text-amber-600 shrink-0">
                   <ShieldCheck className="h-6 w-6 md:h-7 w-7" />
                 </div>
@@ -462,13 +462,13 @@ const QuizShow = () => {
               </div>
             )}
           </CardContent>
-          <CardFooter className="p-8 md:p-12 bg-primary/[0.02] border-t border-primary/5 flex flex-col gap-4">
+          <CardFooter className="p-8 md:p-12 bg-primary/2 border-t border-primary/5 flex flex-col gap-4">
             {isStudent ? (
               <Button
                 className="w-full h-14 md:h-16 text-sm md:text-base font-black uppercase tracking-widest rounded-2xl shadow-2xl shadow-primary/20"
                 onClick={handleStart}
               >
-                <Sparkles className="h-5 w-5 mr-2" />
+                <Sparkles className="h-5 w-5 me-2" />
                 {t("buttons.takeQuiz")}
               </Button>
             ) : (
@@ -482,7 +482,7 @@ const QuizShow = () => {
                     })
                   }
                 >
-                  <LayoutDashboard className="h-4 w-4 mr-2" />
+                  <LayoutDashboard className="h-4 w-4 me-2" />
                   {t("buttons.viewReport")}
                 </Button>
                 <p className="text-center text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">
@@ -498,7 +498,7 @@ const QuizShow = () => {
               className="w-full h-12 rounded-xl font-black uppercase tracking-widest text-[10px] text-muted-foreground"
               onClick={() => list("classes")}
             >
-              <ArrowLeft className="h-4 w-4 mr-2" />
+              <ArrowLeft className="h-4 w-4 me-2" />
               {t("buttons.goBack")}
             </Button>
           </CardFooter>

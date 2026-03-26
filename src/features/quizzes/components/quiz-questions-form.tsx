@@ -50,7 +50,7 @@ export const QuizQuestionsForm = ({ form, questions }: Props) => {
         {questions.fields.map((field: any, index: number) => (
           <Card
             key={field.id}
-            className="border-primary/10 bg-primary/[0.02] rounded-2xl overflow-hidden shadow-sm text-start"
+            className="border-primary/10 bg-primary/2 rounded-2xl overflow-hidden shadow-sm text-start"
           >
             <CardHeader className="flex flex-row items-center justify-between py-3 px-6 border-b bg-primary/5">
               <CardTitle className="text-[10px] font-black uppercase tracking-widest opacity-60">

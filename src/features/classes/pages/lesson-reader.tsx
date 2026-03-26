@@ -198,8 +198,8 @@ export const LessonReader = () => {
                     className={cn(
                       "text-lg md:text-xl text-muted-foreground italic py-2 md:py-3 leading-relaxed",
                       isAr
-                        ? "border-r-4 pr-4 md:pr-6"
-                        : "border-l-4 pl-4 md:pl-6",
+                        ? "border-e-4 pe-4 md:pe-6"
+                        : "border-s-4 ps-4 md:ps-6",
                     )}
                   >
                     {resource.description}
@@ -233,7 +233,7 @@ export const LessonReader = () => {
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
             className={cn(
               "fixed top-0 bottom-0 w-full md:w-[400px] lg:w-[400px] border-l bg-card/95 backdrop-blur-3xl z-[50] shadow-2xl flex flex-col overflow-hidden",
-              isAr ? "left-0 border-r border-l-0" : "right-0 border-l",
+              isAr ? "start-0 border-r border-s-0" : "end-0 border-l",
             )}
           >
             {/* AI Tutor Header */}
@@ -263,7 +263,7 @@ export const LessonReader = () => {
 
             <ScrollArea className="flex-1 p-4 md:p-6" ref={scrollRef}>
               <div className="space-y-6">
-                <div className="bg-muted/50 p-4 rounded-2xl text-[11px] md:text-xs leading-relaxed text-start font-medium border border-black/[0.03] dark:border-white/[0.03]">
+                <div className="bg-muted/50 p-4 rounded-2xl text-[11px] md:text-xs leading-relaxed text-start font-medium border border-black/3 dark:border-white/3">
                   {t("classes.reader.welcome", {
                     name: identity?.name,
                     title: resource.title,
@@ -332,14 +332,14 @@ export const LessonReader = () => {
                   }}
                   className={cn(
                     "min-h-24 md:min-h-28 resize-none rounded-2xl md:rounded-3xl p-4 md:p-6 text-sm transition-all border-border/50 focus:border-primary/30 bg-muted/20",
-                    isAr ? "pl-14 pr-4" : "pr-14 pl-4",
+                    isAr ? "ps-14 pe-4" : "pe-14 ps-4",
                   )}
                 />
                 <Button
                   size="icon"
                   className={cn(
                     "absolute bottom-4 h-9 w-9 md:h-11 md:w-11 rounded-xl md:rounded-2xl shadow-lg shadow-primary/20 transition-all active:scale-90",
-                    isAr ? "left-4" : "right-4",
+                    "end-4",
                   )}
                   onClick={handleSendMessage}
                   disabled={!chatMessage.trim() || isTyping}

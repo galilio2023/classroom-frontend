@@ -104,12 +104,12 @@ export const MemoryBoosterList: React.FC<MemoryBoosterListProps> = ({
               onClick={() => onSelectTopic(item.topic)}
             >
               <div className="ai-glow" />
-              <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+              <div className="absolute top-0 end-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
                 <Brain className="w-12 h-12 text-ai-primary" />
               </div>
               <CardContent className="p-6">
                 <div className="flex items-start justify-between gap-4">
-                  <div className="space-y-3 flex-1 text-left rtl:text-right">
+                  <div className="space-y-3 flex-1 text-start rtl:text-end">
                     <div className="flex items-center gap-2">
                       <Trophy className="w-3 h-3 text-orange-500 fill-orange-500" />
                       <span className="text-[10px] font-black text-orange-600 uppercase tracking-[0.2em]">

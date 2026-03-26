@@ -75,7 +75,7 @@ export const ActionCenter = ({
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
       >
-        <Card className="border-none bg-gradient-to-br from-background via-background to-primary/5 shadow-2xl rounded-[2.5rem] overflow-hidden group">
+        <Card className="border-none bg-linear-to-br from-background via-background to-primary/5 shadow-2xl rounded-[2.5rem] overflow-hidden group">
           <div className="absolute inset-0 bg-dot-pattern opacity-[0.03] pointer-events-none" />
           <CardContent className="p-10 md:p-16 flex flex-col items-center justify-center text-center relative z-10">
             <motion.div
@@ -100,7 +100,7 @@ export const ActionCenter = ({
                 size="lg"
                 className="rounded-2xl font-black uppercase tracking-widest h-14 px-10 shadow-xl shadow-primary/20 hover:scale-105 transition-transform"
               >
-                <Sparkles className="mr-2 h-5 w-5 animate-pulse" />
+                <Sparkles className="me-2 h-5 w-5 animate-pulse" />
                 {emptyActionText}
               </Button>
             )}
@@ -116,7 +116,7 @@ export const ActionCenter = ({
         <h2 className="text-xs font-black uppercase tracking-[0.3em] text-muted-foreground/60">
           {title}
         </h2>
-        <div className="h-px flex-1 bg-gradient-to-r from-muted-foreground/10 to-transparent" />
+        <div className="h-px flex-1 bg-linear-to-r from-muted-foreground/10 to-transparent" />
       </div>
 
       <div className="grid gap-6 grid-cols-[repeat(auto-fit,minmax(320px,1fr))]">
@@ -139,11 +139,11 @@ export const ActionCenter = ({
                 }}
                 whileHover={{ y: -8, transition: { duration: 0.2 } }}
                 className={cn(
-                  "relative p-6 rounded-[2rem] border shadow-lg flex flex-col group cursor-pointer overflow-hidden transition-all duration-500",
+                  "relative p-6 rounded-4xl border shadow-lg flex flex-col group cursor-pointer overflow-hidden transition-all duration-500",
                   action.priority === "urgent"
-                    ? "bg-destructive/[0.01] border-destructive/10 hover:border-destructive/30 hover:shadow-destructive/5"
+                    ? "bg-destructive/1 border-destructive/10 hover:border-destructive/30 hover:shadow-destructive/5"
                     : action.priority === "ai"
-                      ? "bg-ai-primary/[0.01] border-ai-primary/10 hover:border-ai-primary/30 hover:shadow-ai-primary/5"
+                      ? "bg-ai-primary/1 border-ai-primary/10 hover:border-ai-primary/30 hover:shadow-ai-primary/5"
                       : "bg-background/40 border-border/40 hover:border-primary/30 hover:shadow-primary/5",
                 )}
                 onClick={action.onClick}
@@ -151,7 +151,7 @@ export const ActionCenter = ({
                 {/* Visual Glow */}
                 <div
                   className={cn(
-                    "absolute -top-24 -right-24 w-48 h-48 rounded-full blur-[80px] opacity-0 group-hover:opacity-20 transition-opacity duration-700",
+                    "absolute -top-24 -end-24 w-48 h-48 rounded-full blur-[80px] opacity-0 group-hover:opacity-20 transition-opacity duration-700",
                     action.priority === "urgent"
                       ? "bg-destructive"
                       : action.priority === "ai"

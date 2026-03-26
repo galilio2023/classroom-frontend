@@ -74,7 +74,7 @@ export const PlatformOverview = ({
                     value={stats.pendingVerifications}
                     icon={ShieldAlert}
                     color="text-amber-500"
-                    className="border-2 border-amber-500/20 bg-amber-500/[0.02] shadow-amber-500/5"
+                    className="border-2 border-amber-500/20 bg-amber-500/2 shadow-amber-500/5"
                     trend={{ value: 100, isUp: true }}
                   />
                 </motion.div>
@@ -138,7 +138,7 @@ export const PlatformOverview = ({
           {[1, 2, 3, 4, 5].map((i) => (
             <div
               key={i}
-              className="p-8 rounded-[2rem] bg-muted/20 border border-black/[0.03] dark:border-white/[0.03] space-y-4"
+              className="p-8 rounded-4xl bg-muted/20 border border-black/3 dark:border-white/3 space-y-4"
             >
               <div className="flex items-center justify-between">
                 <Skeleton className="h-12 w-12 rounded-2xl" />

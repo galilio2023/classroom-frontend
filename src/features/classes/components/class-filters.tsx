@@ -35,7 +35,7 @@ export const ClassFilters = ({
   const { t } = useTranslation();
 
   return (
-    <Card className="p-2 border-border/40 bg-muted/20 rounded-[1.5rem] md:rounded-[2rem] backdrop-blur-xl sticky top-20 z-30 shadow-sm">
+    <Card className="p-2 border-border/40 bg-muted/20 rounded-[1.5rem] md:rounded-4xl backdrop-blur-xl sticky top-20 z-30 shadow-sm">
       <div className="flex flex-col lg:flex-row gap-2">
         <div className="relative flex-1 group">
           <Search className="absolute top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground/60 group-focus-within:text-primary transition-colors start-4 md:start-6" />

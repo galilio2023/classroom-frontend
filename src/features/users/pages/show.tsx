@@ -160,7 +160,7 @@ const UserShow = () => {
                 variant="outline"
                 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/50 border-primary/5 px-6 py-2 rounded-full shadow-sm"
               >
-                <Shield className={cn("w-3 h-3", isAr ? "ml-2" : "mr-2")} />
+                <Shield className={cn("w-3 h-3", "me-2")} />
                 {t("profile.privacy.adminOnly" as any)}
               </Badge>
             </div>

@@ -69,7 +69,7 @@ export const AnnouncementReadsModal = ({
               {t("classes.announcements.reads.empty")}
             </div>
           ) : (
-            <ScrollArea className="h-[300px] pr-4">
+            <ScrollArea className="h-[300px] pe-4">
               <div className="space-y-4">
                 {reads.map((read: ReadReceipt) => (
                   <div

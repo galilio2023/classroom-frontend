@@ -244,7 +244,7 @@ export const QRScannerModal = ({
                 <div className="space-y-4">
                   <div className="relative">
                     <Loader2 className="h-16 w-16 animate-spin text-primary opacity-20" />
-                    <Sparkles className="h-8 w-8 text-primary absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-pulse" />
+                    <Sparkles className="h-8 w-8 text-primary absolute top-1/2 start-1/2 -translate-x-1/2 -translate-y-1/2 animate-pulse" />
                   </div>
                   <p className="text-sm font-black uppercase tracking-widest text-primary animate-pulse">
                     Verifying Check-in...

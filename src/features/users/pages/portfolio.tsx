@@ -315,7 +315,7 @@ const StudentPortfolio = () => {
               Outcomes & Growth
             </span>
           </div>
-          <div className="hidden sm:block h-px flex-1 bg-linear-to-r from-primary/10 to-transparent ml-6" />
+          <div className="hidden sm:block h-px flex-1 bg-linear-to-r from-primary/10 to-transparent ms-6" />
         </div>
 
         <StudentAcademicJourney

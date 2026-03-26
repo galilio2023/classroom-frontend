@@ -146,7 +146,7 @@ export const AnalyticsTab = ({ classId }: AnalyticsTabProps) => {
               <Calendar
                 className={cn(
                   "h-4 w-4 text-primary/60",
-                  isAr ? "ml-2" : "mr-2",
+                  "me-2",
                 )}
               />
               <SelectValue placeholder={t("analytics.selectRange")} />
@@ -272,7 +272,7 @@ export const AnalyticsTab = ({ classId }: AnalyticsTabProps) => {
                     {t("analytics.ai.beta")}
                   </Badge>
                 </div>
-                <div className="space-y-4 max-h-125 overflow-y-auto pr-2 custom-scrollbar">
+                <div className="space-y-4 max-h-125 overflow-y-auto pe-2 custom-scrollbar">
                   {analytics.studentTrajectories.map((student, idx) => (
                     <motion.div
                       key={student.studentId}

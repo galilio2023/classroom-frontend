@@ -60,9 +60,9 @@ export const AnnouncementTab = ({
             {pinnedAnnouncements.map((announcement) => (
               <div
                 key={announcement.id}
-                className="relative overflow-hidden rounded-4xl border border-primary/20 bg-primary/5 backdrop-blur-xl p-8 pr-14 shadow-xl shadow-primary/5 group"
+                className="relative overflow-hidden rounded-4xl border border-primary/20 bg-primary/5 backdrop-blur-xl p-8 pe-14 shadow-xl shadow-primary/5 group"
               >
-                <div className="absolute top-0 left-0 w-1.5 h-full bg-primary" />
+                <div className="absolute top-0 start-0 w-1.5 h-full bg-primary" />
                 <div className="flex items-center gap-3 mb-3">
                   <div className="p-2 rounded-xl bg-primary/10 text-primary">
                     <Pin className="h-4 w-4" />
@@ -96,7 +96,7 @@ export const AnnouncementTab = ({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="absolute top-6 right-6 h-10 w-10 rounded-full hover:bg-primary/10 text-primary/40 hover:text-primary transition-all"
+                  className="absolute top-6 end-6 h-10 w-10 rounded-full hover:bg-primary/10 text-primary/40 hover:text-primary transition-all"
                   onClick={() => handleDismissAnnouncement(announcement.id)}
                 >
                   <X className="h-6 w-6" />

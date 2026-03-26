@@ -38,12 +38,12 @@ export const PromoCards = ({ isStaff, list }: PromoCardsProps) => {
           transition={{ type: "spring", stiffness: 400, damping: 25 }}
         >
           <Card
-            className="relative group cursor-pointer overflow-hidden border-none shadow-2xl bg-ai-primary/[0.03] backdrop-blur-xl rounded-[2rem] border border-ai-primary/10 text-start"
+            className="relative group cursor-pointer overflow-hidden border-none shadow-2xl bg-ai-primary/3 backdrop-blur-xl rounded-4xl border border-ai-primary/10 text-start"
             onClick={() => list("ai-assistant")}
           >
             {/* Premium Background Effects */}
             <div className="absolute top-0 end-0 w-64 h-64 bg-ai-primary/10 rounded-full blur-[80px] -me-32 -mt-32 pointer-events-none group-hover:bg-ai-primary/20 transition-colors duration-700" />
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:animate-[shine_3s_infinite] pointer-events-none" />
+            <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:animate-[shine_3s_infinite] pointer-events-none" />
 
             <div className="absolute end-[-1rem] top-[-1rem] p-4 opacity-[0.05] group-hover:opacity-[0.1] transition-all duration-700 rtl:-rotate-12 ltr:rotate-12 group-hover:rotate-0 group-hover:scale-125 pointer-events-none">
               <Sparkles className="h-32 w-32 text-ai-primary" />
@@ -113,7 +113,7 @@ export const PromoCards = ({ isStaff, list }: PromoCardsProps) => {
               </div>
 
               <Button className="w-full h-14 bg-ai-primary hover:bg-ai-primary/90 border-none font-black uppercase tracking-[0.2em] text-[10px] rounded-2xl shadow-xl shadow-ai-primary/20 group-hover:gap-4 transition-all text-white relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-[shine_2s_infinite] pointer-events-none" />
+                <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-[shine_2s_infinite] pointer-events-none" />
                 {t("buttons.tryItNow")}
                 <ArrowRight
                   className={cn(
@@ -132,7 +132,7 @@ export const PromoCards = ({ isStaff, list }: PromoCardsProps) => {
           whileHover={{ y: -5, scale: 1.01 }}
           transition={{ type: "spring", stiffness: 400, damping: 25 }}
         >
-          <Card className="border-none shadow-2xl bg-card/50 backdrop-blur-xl rounded-[2rem] overflow-hidden group text-start">
+          <Card className="border-none shadow-2xl bg-card/50 backdrop-blur-xl rounded-4xl overflow-hidden group text-start">
             <div className="h-1.5 bg-primary/20 w-full transition-all duration-500 group-hover:bg-primary" />
             <CardHeader className="p-8 pb-4">
               <div className="flex items-center gap-4">

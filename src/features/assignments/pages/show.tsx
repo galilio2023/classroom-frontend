@@ -171,13 +171,13 @@ const AssignmentShow = () => {
                     />
                   ) : (
                     <div className="space-y-10">
-                      <div className="p-6 rounded-[2rem] bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-5">
+                      <div className="p-6 rounded-4xl bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-5">
                         <CheckCircle2 className="text-emerald-600 h-8 w-8" />
                         <span className="font-black text-xl text-emerald-600">
                           {t("assignments.show.successfullyTurnedIn")}
                         </span>
                       </div>
-                      <div className="p-8 bg-muted/20 rounded-[2rem] italic border border-border/40 font-medium">
+                      <div className="p-8 bg-muted/20 rounded-4xl italic border border-border/40 font-medium">
                         {mySubmission.content}
                       </div>
                       <Button
@@ -204,7 +204,7 @@ const AssignmentShow = () => {
                     {assignedReviews.map((review: PeerReview) => (
                       <div
                         key={review.id}
-                        className="p-8 rounded-[2rem] border-2 border-dashed border-amber-500/20 space-y-6"
+                        className="p-8 rounded-4xl border-2 border-dashed border-amber-500/20 space-y-6"
                       >
                         <div className="flex items-center gap-4">
                           <Avatar className="h-12 w-12">

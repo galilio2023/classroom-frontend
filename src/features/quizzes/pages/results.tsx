@@ -130,10 +130,10 @@ const QuizResults = () => {
         <TabsContent value="submissions">
           <div className="space-y-6">
             <div className="relative group max-w-md">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+              <Search className="absolute start-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
               <Input
                 placeholder="Search student results..."
-                className="pl-12 h-14 rounded-2xl bg-card/50 border-none shadow-sm focus-visible:ring-primary/20 font-bold"
+                className="ps-12 h-14 rounded-2xl bg-card/50 border-none shadow-sm focus-visible:ring-primary/20 font-bold"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
@@ -144,7 +144,7 @@ const QuizResults = () => {
                 filteredAttempts.map((attempt: QuizAttempt) => (
                   <Card
                     key={attempt.id}
-                    className="overflow-hidden border-none shadow-xl bg-card/50 backdrop-blur-xl rounded-[2rem] hover:scale-[1.02] transition-all duration-300"
+                    className="overflow-hidden border-none shadow-xl bg-card/50 backdrop-blur-xl rounded-4xl hover:scale-[1.02] transition-all duration-300"
                   >
                     <div className="flex items-center p-6 gap-4">
                       <Avatar className="h-14 w-14 border-2 border-background shadow-lg rounded-2xl">
@@ -175,7 +175,7 @@ const QuizResults = () => {
                         </span>
                         <p className="text-2xl font-black text-primary">
                           {attempt.score}
-                          <span className="text-xs text-muted-foreground/40 font-bold ml-1">
+                          <span className="text-xs text-muted-foreground/40 font-bold ms-1">
                             / {totalPoints}
                           </span>
                         </p>

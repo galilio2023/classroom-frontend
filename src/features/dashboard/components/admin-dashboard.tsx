@@ -125,7 +125,7 @@ export const AdminDashboard = ({
                     Overview
                   </span>
                 </div>
-                <div className="hidden sm:block h-px flex-1 bg-linear-to-r from-primary/10 to-transparent ml-6 lg:ml-10" />
+                <div className="hidden sm:block h-px flex-1 bg-linear-to-r from-primary/10 to-transparent ms-6 lg:ms-10" />
               </div>
               <EngagementChart
                 attendanceData={data.attendanceTrend ?? []}

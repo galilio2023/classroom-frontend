@@ -107,11 +107,11 @@ export const StudentDashboard = ({
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5, type: "spring" }}
       >
-        <Card className="border-none bg-gradient-to-br from-primary via-ai-primary to-ai-secondary text-white shadow-2xl overflow-hidden relative rounded-[2.5rem] md:rounded-[3rem] group">
+        <Card className="border-none bg-linear-to-br from-primary via-ai-primary to-ai-secondary text-white shadow-2xl overflow-hidden relative rounded-[2.5rem] md:rounded-[3rem] group">
           {/* Animated Background Elements */}
-          <div className="absolute top-0 right-0 w-64 md:w-96 lg:w-[500px] h-64 md:h-96 lg:h-[500px] bg-white/10 rounded-full blur-[80px] md:blur-[100px] -mr-32 -mt-32 pointer-events-none animate-pulse" />
-          <div className="absolute bottom-0 left-0 w-48 md:w-64 lg:w-96 h-48 md:h-64 lg:h-96 bg-black/10 rounded-full blur-[60px] md:blur-[80px] -ml-16 -mb-16 pointer-events-none" />
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:animate-[shine_3s_infinite] pointer-events-none" />
+          <div className="absolute top-0 end-0 w-64 md:w-96 lg:w-[500px] h-64 md:h-96 lg:h-[500px] bg-white/10 rounded-full blur-[80px] md:blur-[100px] -me-32 -mt-32 pointer-events-none animate-pulse" />
+          <div className="absolute bottom-0 start-0 w-48 md:w-64 lg:w-96 h-48 md:h-64 lg:h-96 bg-black/10 rounded-full blur-[60px] md:blur-[80px] -ms-16 -mb-16 pointer-events-none" />
+          <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:animate-[shine_3s_infinite] pointer-events-none" />
 
           <CardContent className="p-8 md:p-12 lg:p-16 xl:p-20 relative z-10">
             <div className="flex flex-col lg:flex-row items-center gap-8 md:gap-12 lg:gap-16">
@@ -124,7 +124,7 @@ export const StudentDashboard = ({
                   initial={{ scale: 0, rotate: -45 }}
                   animate={{ scale: 1, rotate: 0 }}
                   transition={{ delay: 0.5, type: "spring" }}
-                  className="absolute -bottom-2 -right-2 bg-gold-primary text-white font-black text-xs md:text-sm lg:text-base px-3 md:px-4 py-1.5 md:py-2 rounded-full border-4 border-white shadow-xl z-20"
+                  className="absolute -bottom-2 -end-2 bg-gold-primary text-white font-black text-xs md:text-sm lg:text-base px-3 md:px-4 py-1.5 md:py-2 rounded-full border-4 border-white shadow-xl z-20"
                 >
                   {t("dashboard.student.level")} {currentLevel}
                 </motion.div>
@@ -173,7 +173,7 @@ export const StudentDashboard = ({
                     xp={currentXP}
                     showLabel={false}
                     className="h-4 md:h-5 lg:h-6 rounded-full bg-white/10 border border-white/10 p-1 shadow-inner"
-                    indicatorClassName="bg-gradient-to-r from-gold-primary via-yellow-400 to-gold-secondary shadow-[0_0_15px_rgba(234,179,8,0.5)]"
+                    indicatorClassName="bg-linear-to-r from-gold-primary via-yellow-400 to-gold-secondary shadow-[0_0_15px_rgba(234,179,8,0.5)]"
                   />
                   <div className="flex justify-between items-center text-[10px] lg:text-xs font-black uppercase tracking-[0.2em] text-white/40 px-2">
                     <span>
@@ -271,7 +271,7 @@ export const StudentDashboard = ({
                     Performance & Growth
                   </span>
                 </div>
-                <div className="hidden sm:block h-px flex-1 bg-gradient-to-r from-primary/10 to-transparent ml-6 lg:ml-10" />
+                <div className="hidden sm:block h-px flex-1 bg-linear-to-r from-primary/10 to-transparent ms-6 lg:ms-10" />
               </div>
               <StudentAcademicJourney
                 gradeTrends={data.gradeTrends ?? []}

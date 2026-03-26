@@ -27,7 +27,7 @@ export const WelcomeHeaderSkeleton = () => (
 
 export const ChartSkeleton = () => (
   <SkeletonWrapper>
-    <Card className="border-none shadow-xl bg-card/50 backdrop-blur-2xl rounded-[2rem] overflow-hidden text-start">
+    <Card className="border-none shadow-xl bg-card/50 backdrop-blur-2xl rounded-4xl overflow-hidden text-start">
       <CardHeader className="p-8 pb-4">
         <Skeleton className="h-6 w-48" />
       </CardHeader>
@@ -49,7 +49,7 @@ export const ListSkeleton = ({ count = 3 }: { count?: number }) => (
         {Array.from({ length: count }).map((_, i) => (
           <Card
             key={i}
-            className="p-8 space-y-6 border-none shadow-xl bg-card/50 backdrop-blur-2xl rounded-[2rem]"
+            className="p-8 space-y-6 border-none shadow-xl bg-card/50 backdrop-blur-2xl rounded-4xl"
           >
             <div className="flex items-start justify-between">
               <Skeleton className="h-12 w-12 rounded-2xl" />
@@ -59,7 +59,7 @@ export const ListSkeleton = ({ count = 3 }: { count?: number }) => (
               <Skeleton className="h-6 w-full rounded-lg" />
               <Skeleton className="h-4 w-3/4 rounded-lg" />
             </div>
-            <div className="pt-4 border-t border-black/[0.03] dark:border-white/[0.03]">
+            <div className="pt-4 border-t border-black/3 dark:border-white/3">
               <Skeleton className="h-10 w-full rounded-xl" />
             </div>
           </Card>
@@ -71,7 +71,7 @@ export const ListSkeleton = ({ count = 3 }: { count?: number }) => (
 
 export const ScheduleSkeleton = () => (
   <SkeletonWrapper>
-    <Card className="border-none shadow-xl bg-card/50 backdrop-blur-2xl rounded-[2rem] overflow-hidden text-start">
+    <Card className="border-none shadow-xl bg-card/50 backdrop-blur-2xl rounded-4xl overflow-hidden text-start">
       <CardHeader className="p-8 pb-4">
         <Skeleton className="h-6 w-40" />
       </CardHeader>
@@ -92,7 +92,7 @@ export const ScheduleSkeleton = () => (
 
 export const StatsSkeleton = () => (
   <SkeletonWrapper>
-    <Card className="border-none shadow-xl bg-card/50 backdrop-blur-2xl rounded-[2rem] overflow-hidden text-start">
+    <Card className="border-none shadow-xl bg-card/50 backdrop-blur-2xl rounded-4xl overflow-hidden text-start">
       <CardHeader className="p-8 pb-4">
         <Skeleton className="h-6 w-32" />
       </CardHeader>

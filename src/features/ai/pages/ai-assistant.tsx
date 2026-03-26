@@ -54,7 +54,7 @@ export const AIAssistantPage: React.FC = () => {
         {isDryRun && (
           <Alert className="bg-orange-500/10 border-orange-500/20 text-orange-600 rounded-2xl md:rounded-3xl border-2 border-dashed max-w-2xl">
             <Info className="h-5 w-5 text-orange-600" />
-            <div className={cn(isAr ? "mr-2" : "ml-2")}>
+            <div className={cn("ms-2")}>
               <AlertTitle className="font-black text-xs uppercase tracking-widest">
                 {t("aiHub.assistant.mockMode")}
               </AlertTitle>
@@ -185,7 +185,7 @@ export const AIAssistantPage: React.FC = () => {
 
             <Alert className="rounded-[2.5rem] border-primary/20 bg-primary/5 p-8 shadow-xl shadow-primary/5 backdrop-blur-sm border-2 border-dashed">
               <Info className="h-6 w-6 text-primary mt-1" />
-              <div className={cn(isAr ? "mr-4" : "ml-4")}>
+              <div className={cn("ms-4")}>
                 <AlertTitle className="font-black text-xs uppercase tracking-[0.2em] mb-3 text-primary">
                   {t("aiHub.assistant.proTip")}
                 </AlertTitle>

@@ -106,8 +106,8 @@ export const AssignmentCreate = () => {
               data.showAI ? "xl:col-span-7" : "xl:col-span-8 xl:col-start-3",
             )}
           >
-            <Card className="shadow-2xl border-none bg-card/50 backdrop-blur-xl overflow-hidden rounded-[2rem]">
-              <div className="h-1.5 bg-gradient-to-r from-primary via-ai-primary to-primary w-full" />
+            <Card className="shadow-2xl border-none bg-card/50 backdrop-blur-xl overflow-hidden rounded-4xl">
+              <div className="h-1.5 bg-linear-to-r from-primary via-ai-primary to-primary w-full" />
               <CardHeader className="p-8 pb-4">
                 <CardTitle className="text-sm font-black uppercase tracking-widest flex items-center gap-2 opacity-60">
                   <LayoutDashboard className="h-4 w-4" />
@@ -313,7 +313,7 @@ export const AssignmentCreate = () => {
                       isAr={data.isAr}
                     />
 
-                    <div className="p-8 bg-muted/30 rounded-[2rem] border-2 border-dashed border-muted-foreground/10 space-y-4 text-start">
+                    <div className="p-8 bg-muted/30 rounded-4xl border-2 border-dashed border-muted-foreground/10 space-y-4 text-start">
                       <div className="flex items-center gap-2">
                         <Paperclip className="h-4 w-4 text-muted-foreground" />
                         <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
@@ -354,11 +354,11 @@ export const AssignmentCreate = () => {
                         size="lg"
                         className="w-full h-16 rounded-[1.5rem] font-black uppercase tracking-[0.3em] shadow-2xl shadow-primary/30 transition-all hover:scale-[1.01] active:scale-[0.98] relative overflow-hidden group"
                       >
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-[shine_2s_infinite] pointer-events-none" />
+                        <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-[shine_2s_infinite] pointer-events-none" />
                         {formLoading ? (
-                          <Loader2 className="mr-3 h-6 w-6 animate-spin" />
+                          <Loader2 className="me-3 h-6 w-6 animate-spin" />
                         ) : (
-                          <Wand2 className="mr-3 h-6 w-6" />
+                          <Wand2 className="me-3 h-6 w-6" />
                         )}
                         {formLoading
                           ? t("buttons.publishing")
@@ -386,7 +386,7 @@ export const AssignmentCreate = () => {
                 exit={{ opacity: 0, x: 50 }}
                 className="xl:col-span-5 sticky top-24"
               >
-                <Card className="border-none shadow-2xl bg-card/80 backdrop-blur-2xl overflow-hidden rounded-[2rem] border border-ai-primary/20">
+                <Card className="border-none shadow-2xl bg-card/80 backdrop-blur-2xl overflow-hidden rounded-4xl border border-ai-primary/20">
                   <div className="h-1.5 bg-ai-primary w-full" />
                   <CardHeader className="bg-ai-primary/5 border-b border-ai-primary/10 p-6 flex flex-row items-center justify-between">
                     <div className="flex items-center gap-3">

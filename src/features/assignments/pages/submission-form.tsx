@@ -317,7 +317,7 @@ export const SubmissionForm = ({
                       <div
                         className={cn(
                           "absolute bottom-4 opacity-10 group-focus-within:opacity-30 transition-opacity",
-                          isAr ? "left-4" : "right-4",
+                          "end-4",
                         )}
                       >
                         <FileText className="h-8 w-8" />
@@ -330,7 +330,7 @@ export const SubmissionForm = ({
             />
 
             <div className="space-y-4 text-start">
-              <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2 ml-1">
+              <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2 ms-1">
                 <span className="w-1 h-1 rounded-full bg-primary" />
                 {t("assignments.form.supportingDocs")}
               </Label>

@@ -61,7 +61,7 @@ export const CreateAnnouncementDialog = ({
           {t("classes.announcements.new")}
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px] rounded-[2rem] border-none shadow-2xl bg-card/95 backdrop-blur-xl">
+      <DialogContent className="sm:max-w-[600px] rounded-4xl border-none shadow-2xl bg-card/95 backdrop-blur-xl">
         <DialogHeader className="space-y-3">
           <div className="p-3 rounded-2xl bg-primary/10 text-primary w-fit">
             <Megaphone className="h-6 w-6" />
@@ -75,7 +75,7 @@ export const CreateAnnouncementDialog = ({
         </DialogHeader>
         <div className="space-y-6 py-6">
           <div className="space-y-2.5">
-            <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+            <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ms-1">
               {t("classes.announcements.fieldTitle")}
             </Label>
             <Input
@@ -86,7 +86,7 @@ export const CreateAnnouncementDialog = ({
             />
           </div>
           <div className="space-y-2.5">
-            <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+            <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ms-1">
               {t("classes.announcements.fieldContent")}
             </Label>
             <Textarea
@@ -98,7 +98,7 @@ export const CreateAnnouncementDialog = ({
             />
           </div>
           <div className="space-y-2.5">
-            <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+            <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ms-1">
               {t("classes.announcements.fieldAttachment")}
             </Label>
             <div className="flex items-center gap-3 p-4 rounded-2xl border-2 border-dashed border-muted-foreground/10 bg-muted/10">
@@ -164,9 +164,9 @@ export const CreateAnnouncementDialog = ({
             disabled={isCreating || isUploading || !data.title || !data.content}
           >
             {isCreating ? (
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              <Loader2 className="h-4 w-4 me-2 animate-spin" />
             ) : (
-              <Send className="h-4 w-4 mr-2" />
+              <Send className="h-4 w-4 me-2" />
             )}
             {t("buttons.postAnnouncement")}
           </Button>

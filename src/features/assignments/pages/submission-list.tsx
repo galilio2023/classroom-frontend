@@ -107,7 +107,7 @@ export const SubmissionList = ({
                       .toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
-                <div className="absolute -bottom-0.5 -right-0.5 size-3.5 bg-success rounded-full border-2 border-background" />
+                <div className="absolute -bottom-0.5 -end-0.5 size-3.5 bg-success rounded-full border-2 border-background" />
               </div>
               <div className="flex flex-col">
                 <span className="font-bold text-sm md:text-base tracking-tight group-hover:text-primary transition-colors">
@@ -140,7 +140,7 @@ export const SubmissionList = ({
                   variant="destructive"
                   className="w-fit text-[9px] h-5 px-2 uppercase font-black tracking-tighter shadow-sm"
                 >
-                  <AlertCircle className="h-3 w-3 mr-1" />
+                  <AlertCircle className="h-3 w-3 me-1" />
                   {t("assignments.list.table.late")}
                 </Badge>
               ) : (
@@ -148,7 +148,7 @@ export const SubmissionList = ({
                   variant="secondary"
                   className="w-fit text-[9px] h-5 px-2 uppercase font-black tracking-tighter bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 shadow-sm"
                 >
-                  <CheckCircle2 className="h-3 w-3 mr-1" />
+                  <CheckCircle2 className="h-3 w-3 me-1" />
                   {t("assignments.list.table.onTime")}
                 </Badge>
               )}
@@ -195,7 +195,7 @@ export const SubmissionList = ({
                   {Math.round((completed / total) * 100)}%
                 </span>
               </div>
-              <div className="h-2 w-full bg-muted rounded-full overflow-hidden border border-black/[0.03] dark:border-white/10 shadow-inner">
+              <div className="h-2 w-full bg-muted rounded-full overflow-hidden border border-black/3 dark:border-white/10 shadow-inner">
                 <div
                   className={cn(
                     "h-full transition-all duration-500 rounded-full",
@@ -307,7 +307,7 @@ export const SubmissionList = ({
         </Badge>
       </div>
 
-      <div className="rounded-[1.5rem] md:rounded-[2rem] border border-border/40 overflow-x-auto bg-card/50 backdrop-blur-xl shadow-lg">
+      <div className="rounded-[1.5rem] md:rounded-4xl border border-border/40 overflow-x-auto bg-card/50 backdrop-blur-xl shadow-lg">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (

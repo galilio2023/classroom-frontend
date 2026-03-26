@@ -123,12 +123,12 @@ const AIHistoryList = () => {
       {/* Search and Filters */}
       <div className="flex items-center gap-4 max-w-md bg-card/50 backdrop-blur-xl p-2 rounded-2xl border border-border/40 shadow-sm">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder={t("buttons.search", {
               defaultValue: "Search history...",
             })}
-            className="pl-10 border-none bg-transparent shadow-none focus-visible:ring-0 font-bold"
+            className="ps-10 border-none bg-transparent shadow-none focus-visible:ring-0 font-bold"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -184,7 +184,7 @@ const AIHistoryList = () => {
                 transition={{ delay: index * 0.05 }}
               >
                 <Card
-                  className="group h-full border-border/40 bg-card/40 backdrop-blur-3xl hover:bg-card/60 transition-all duration-300 rounded-[2rem] overflow-hidden cursor-pointer shadow-sm hover:shadow-xl hover:-translate-y-1"
+                  className="group h-full border-border/40 bg-card/40 backdrop-blur-3xl hover:bg-card/60 transition-all duration-300 rounded-4xl overflow-hidden cursor-pointer shadow-sm hover:shadow-xl hover:-translate-y-1"
                   onClick={() => show("ai-activity-logs", log.id)}
                 >
                   <CardHeader className="p-6 pb-4">

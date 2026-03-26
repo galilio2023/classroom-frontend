@@ -226,7 +226,7 @@ export const AtRiskStudentItem: React.FC<AtRiskStudentItemProps> = ({
     <>
       <motion.div
         whileHover={{ x: isArabic ? -5 : 5 }}
-        className="flex items-center justify-between p-4 rounded-2xl bg-background/50 border border-black/[0.03] dark:border-white/[0.03] hover:border-destructive/20 hover:bg-destructive/[0.02] transition-all group cursor-pointer shadow-sm text-left rtl:text-right"
+        className="flex items-center justify-between p-4 rounded-2xl bg-background/50 border border-black/3 dark:border-white/3 hover:border-destructive/20 hover:bg-destructive/2 transition-all group cursor-pointer shadow-sm text-start rtl:text-end"
         onClick={() => setIsModalOpen(true)}
       >
         <div className="flex items-center gap-4">
@@ -237,7 +237,7 @@ export const AtRiskStudentItem: React.FC<AtRiskStudentItemProps> = ({
                 {student.name[0]}
               </AvatarFallback>
             </Avatar>
-            <div className="absolute -bottom-1 -right-1 size-4 bg-destructive rounded-full border-2 border-background flex items-center justify-center">
+            <div className="absolute -bottom-1 -end-1 size-4 bg-destructive rounded-full border-2 border-background flex items-center justify-center">
               <TrendingDown className="h-2 w-2 text-white" />
             </div>
           </div>
@@ -275,7 +275,7 @@ export const AtRiskStudentItem: React.FC<AtRiskStudentItemProps> = ({
       </motion.div>
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="sm:max-w-[650px] rounded-[2rem] border-none shadow-2xl bg-card/95 backdrop-blur-xl max-h-[90vh] overflow-y-auto text-left rtl:text-right p-0">
+        <DialogContent className="sm:max-w-[650px] rounded-4xl border-none shadow-2xl bg-card/95 backdrop-blur-xl max-h-[90vh] overflow-y-auto text-start rtl:text-end p-0">
           <div className="p-8 pb-4">
             <DialogHeader className="space-y-3">
               <div className="flex items-center justify-between">
@@ -284,7 +284,7 @@ export const AtRiskStudentItem: React.FC<AtRiskStudentItemProps> = ({
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge className="bg-ai-primary/10 text-ai-primary border-none font-black text-[10px] uppercase tracking-widest px-3 py-1 rounded-lg">
-                    <Sparkles className="w-3 h-3 ltr:mr-1 rtl:ml-1" />
+                    <Sparkles className="w-3 h-3 ltr:me-1 rtl:ms-1" />
                     {t("dashboard.staff.atRiskStudents.aiSupportReady")}
                   </Badge>
                 </div>
@@ -335,8 +335,8 @@ export const AtRiskStudentItem: React.FC<AtRiskStudentItemProps> = ({
                   className="space-y-8"
                 >
                   {/* SUMMARY SECTION */}
-                  <div className="p-6 rounded-3xl bg-ai-primary/[0.03] border border-ai-primary/10 space-y-3 relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                  <div className="p-6 rounded-3xl bg-ai-primary/3 border border-ai-primary/10 space-y-3 relative overflow-hidden group">
+                    <div className="absolute top-0 end-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
                       <Sparkles className="w-12 h-12 text-ai-primary" />
                     </div>
                     <Label className="text-[10px] font-black uppercase tracking-widest text-ai-primary flex items-center gap-2">
@@ -352,7 +352,7 @@ export const AtRiskStudentItem: React.FC<AtRiskStudentItemProps> = ({
 
                   {/* STRENGTHS & WEAKNESSES GRID */}
                   <div className="grid md:grid-cols-2 gap-4">
-                    <div className="p-5 rounded-3xl bg-success/[0.03] border border-success/10 space-y-4">
+                    <div className="p-5 rounded-3xl bg-success/3 border border-success/10 space-y-4">
                       <Label className="text-[10px] font-black uppercase tracking-widest text-success flex items-center gap-2">
                         <CheckCircle2 className="h-3 w-3" />
                         {t("dashboard.staff.atRiskStudents.strengths")}
@@ -374,7 +374,7 @@ export const AtRiskStudentItem: React.FC<AtRiskStudentItemProps> = ({
                         )}
                       </div>
                     </div>
-                    <div className="p-5 rounded-3xl bg-destructive/[0.03] border border-destructive/10 space-y-4">
+                    <div className="p-5 rounded-3xl bg-destructive/3 border border-destructive/10 space-y-4">
                       <Label className="text-[10px] font-black uppercase tracking-widest text-destructive flex items-center gap-2">
                         <TrendingDown className="h-3 w-3" />
                         {t("dashboard.staff.atRiskStudents.weaknesses")}
@@ -399,7 +399,7 @@ export const AtRiskStudentItem: React.FC<AtRiskStudentItemProps> = ({
                   </div>
 
                   {/* IMPROVEMENT PLAN */}
-                  <div className="p-6 rounded-3xl bg-primary/[0.03] border border-primary/10 space-y-4">
+                  <div className="p-6 rounded-3xl bg-primary/3 border border-primary/10 space-y-4">
                     <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
                       <Zap className="h-3 w-3" />
                       {t("dashboard.staff.atRiskStudents.plan")}
@@ -409,7 +409,7 @@ export const AtRiskStudentItem: React.FC<AtRiskStudentItemProps> = ({
                         student.aiAnalysis.improvementPlan?.map((p, i) => (
                           <div
                             key={i}
-                            className="flex items-center gap-3 p-3 rounded-xl bg-background border border-black/[0.03] shadow-sm"
+                            className="flex items-center gap-3 p-3 rounded-xl bg-background border border-black/3 shadow-sm"
                           >
                             <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[10px] font-black">
                               {i + 1}
@@ -487,7 +487,7 @@ export const AtRiskStudentItem: React.FC<AtRiskStudentItemProps> = ({
                         onClick={generateEncouragement}
                         disabled={isGenerating}
                       >
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shine_1.5s_ease-in-out] pointer-events-none" />
+                        <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shine_1.5s_ease-in-out] pointer-events-none" />
                         {isGenerating ? (
                           <Loader2 className="h-3.5 w-3.5 animate-spin" />
                         ) : (
@@ -510,7 +510,7 @@ export const AtRiskStudentItem: React.FC<AtRiskStudentItemProps> = ({
                           <motion.div
                             initial={{ opacity: 0, scale: 0.5 }}
                             animate={{ opacity: 0.1, scale: 1 }}
-                            className="absolute bottom-4 right-4"
+                            className="absolute bottom-4 end-4"
                           >
                             <Sparkles className="h-8 w-8 text-ai-primary" />
                           </motion.div>
@@ -599,7 +599,7 @@ export const AtRiskStudentItem: React.FC<AtRiskStudentItemProps> = ({
                   onClick={() => setActiveTab("intervention")}
                 >
                   {t("buttons.takeAction")}
-                  <ArrowRight className="h-4 w-4 ltr:ml-2 rtl:mr-2 rtl:rotate-180" />
+                  <ArrowRight className="h-4 w-4 ltr:ms-2 rtl:me-2 rtl:rotate-180" />
                 </Button>
               )}
             </DialogFooter>

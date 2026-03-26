@@ -89,7 +89,7 @@ export const SystemHealthCard: React.FC<SystemHealthCardProps> = ({
                 .map((fix: string, i: number) => (
                   <div
                     key={i}
-                    className="flex items-center gap-3 p-3 rounded-xl bg-ai-primary/[0.03] border border-ai-primary/5 group-hover:bg-ai-primary/[0.06] transition-colors"
+                    className="flex items-center gap-3 p-3 rounded-xl bg-ai-primary/3 border border-ai-primary/5 group-hover:bg-ai-primary/6 transition-colors"
                   >
                     <div className="h-1.5 w-1.5 rounded-full bg-ai-primary shrink-0" />
                     <span className="text-xs font-medium truncate">{fix}</span>
