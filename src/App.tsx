@@ -35,16 +35,19 @@ function App() {
   const i18nProvider = {
     translate: (key: string, params?: object) => {
       if (!key) return "";
-      
-      // 🛡️ Upstream Guard: If a dynamic key was constructed with 'undefined', 
-      // try to fallback to a 'general' equivalent or return the key itself for debugging.
-      if (key.includes("undefined")) {
+
+      // 🛡️ Upstream Guard: If a dynamic key was constructed with 'undefined',
+      // try to fallback to a 'general' equivalent only if it's a nested key.
+      if (key.includes("undefined") && key.includes(".")) {
         const fallbackKey = key.replace("undefined", "general");
-        const translatedFallback = t(fallbackKey, { ...params, defaultValue: "" });
+        const translatedFallback = t(fallbackKey, {
+          ...params,
+          defaultValue: "",
+        });
         if (translatedFallback) return translatedFallback;
-        return ""; // Still return empty if no general fallback exists to avoid UI clutter
       }
 
+      // If key is exactly "undefined" or fallback failed, return defaultValue or key itself
       return t(key, { ...params, defaultValue: key });
     },
     changeLocale: (lang: string) => i18n.changeLanguage(lang),

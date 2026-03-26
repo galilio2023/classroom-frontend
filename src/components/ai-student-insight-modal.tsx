@@ -48,12 +48,7 @@ export const AIStudentInsightModal = ({
     useCustomMutation();
   const isSending = sendMutation.isPending;
 
-  const {
-    data: insightData,
-    isLoading,
-    isError,
-    refetch,
-  } = useCustom<AIInsight>({
+  const { query } = useCustom<AIInsight>({
     url: `/ai/student-insight/${studentId}/${classId}`,
     method: "get",
     queryOptions: {
@@ -63,9 +58,9 @@ export const AIStudentInsightModal = ({
         !!classId &&
         coreData?.globalConfig?.enableAiFeatures !== false,
     },
-  }) as any;
+  });
 
-  const isAiEnabled = coreData?.globalConfig?.enableAiFeatures !== false;
+  const { data: insightData, isLoading, isError, refetch } = query;
   const insight = insightData?.data;
 
   const handleCopy = () => {

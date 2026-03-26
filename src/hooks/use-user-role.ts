@@ -9,8 +9,8 @@ import { useMemo } from "react";
  * Optimized: Wraps usePermissions to benefit from Refine's centralized caching.
  */
 export const useUserRole = () => {
-  const { data: identity, isLoading: isIdentityLoading, refetch } = useGetIdentity<User>();
-  const { data: permissions, isLoading: isPermissionsLoading } = usePermissions<BasePermissions>();
+  const { data: identity, isLoading: isIdentityLoading, refetch } = useGetIdentity<User>({});
+  const { data: permissions, isLoading: isPermissionsLoading } = usePermissions<BasePermissions>({});
 
   const roles = useMemo(() => {
     // Prefer permissions role for cached consistency, fallback to identity

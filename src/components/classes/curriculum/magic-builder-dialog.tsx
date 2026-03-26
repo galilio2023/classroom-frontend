@@ -26,6 +26,7 @@ import {
   MessageSquare,
   Target,
   Sparkles,
+  BrainCircuit,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { socket, connectSocket } from "@/lib/socket";
@@ -33,7 +34,7 @@ import { motion, AnimatePresence } from "framer-motion";
 
 import { useDashboard } from "@/features/dashboard/hooks/use-dashboard";
 import { useUserRole } from "@/hooks/use-user-role";
-import { BrainCircuit } from "lucide-react";
+import { AIFeatureDisabled } from "../../ai/ai-feature-disabled";
 
 export type MagicBuilderLevel = "primary" | "high_school" | "university";
 export type MagicBuilderTone = "academic" | "creative" | "practical";
@@ -106,23 +107,15 @@ export const MagicBuilderDialog = ({
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-125 border-none shadow-2xl bg-background/95 backdrop-blur-xl">
         {!isAiEnabled ? (
-          <div className="py-12 flex flex-col items-center justify-center space-y-6 text-center">
-            <div className="bg-destructive/10 p-6 rounded-full">
-              <BrainCircuit className="w-12 h-12 text-destructive grayscale" />
-            </div>
-            <div className="space-y-2">
-              <h3 className="text-2xl font-bold italic">
-                Magic Builder Offline
-              </h3>
-              <p className="text-sm text-muted-foreground max-w-xs mx-auto">
-                Curriculum generation is currently disabled. Please contact your
-                administrator.
-              </p>
-            </div>
+          <div className="py-6 flex flex-col items-center">
+            <AIFeatureDisabled
+              title="Magic Builder Offline"
+              description="Curriculum generation is currently disabled. Please contact your administrator."
+            />
             <Button
               variant="outline"
               onClick={() => onOpenChange(false)}
-              className="rounded-xl font-bold"
+              className="mt-6 rounded-xl font-bold"
             >
               {t("buttons.close")}
             </Button>
@@ -130,11 +123,11 @@ export const MagicBuilderDialog = ({
         ) : (
           <>
             <DialogHeader>
-              <DialogTitle className="flex items-center gap-2 text-2xl font-black tracking-tight">
+              <DialogTitle className="flex items-center gap-2 text-2xl font-black tracking-tight text-start">
                 <Zap className="h-6 w-6 text-ai-primary fill-ai-primary/10" />
                 {t("buttons.aiMagicBuilder")}
               </DialogTitle>
-              <DialogDescription className="font-medium">
+              <DialogDescription className="font-medium text-start">
                 {t("aiHub.assistant.description")}
               </DialogDescription>
             </DialogHeader>
@@ -159,10 +152,7 @@ export const MagicBuilderDialog = ({
                       </span>
                       <span>{progress}%</span>
                     </div>
-                    <Progress
-                      value={progress}
-                      className="h-2 bg-ai-primary/10"
-                    />
+                    <Progress value={progress} className="h-2 bg-ai-primary/10" />
                     <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-tight italic">
                       Gemini is architecting your curriculum...
                     </p>
@@ -175,13 +165,11 @@ export const MagicBuilderDialog = ({
                   className="space-y-4 py-4"
                 >
                   <div className="space-y-2">
-                    <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                    <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground block text-start">
                       {t("aiHub.assistant.helper.topic")}
                     </Label>
                     <Input
-                      placeholder={t(
-                        "aiHub.assistant.helper.placeholders.topic",
-                      )}
+                      placeholder={t("aiHub.assistant.helper.placeholders.topic")}
                       value={config.topic}
                       onChange={(e) =>
                         setConfig({ ...config, topic: e.target.value })
@@ -192,7 +180,7 @@ export const MagicBuilderDialog = ({
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                      <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground block text-start">
                         {t("classes.resource.addDialog.fieldType")}
                       </Label>
                       <Select
@@ -225,7 +213,7 @@ export const MagicBuilderDialog = ({
                       </Select>
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                      <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground block text-start">
                         {t("aiHub.assistant.helper.level")}
                       </Label>
                       <Select
@@ -260,7 +248,7 @@ export const MagicBuilderDialog = ({
                   </div>
 
                   <div className="space-y-2">
-                    <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                    <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground block text-start">
                       {t("aiHub.assistant.helper.tone")}
                     </Label>
                     <Select
@@ -294,7 +282,7 @@ export const MagicBuilderDialog = ({
                   </div>
 
                   <div className="space-y-2">
-                    <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
+                    <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2 block text-start">
                       <Target className="h-3.5 w-3.5 text-primary" />
                       {t("aiHub.assistant.helper.objectives")}
                     </Label>

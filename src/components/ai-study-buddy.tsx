@@ -13,6 +13,8 @@ import { useDashboard } from "@/features/dashboard/hooks/use-dashboard";
 import { useUserRole } from "@/hooks/use-user-role";
 import { AI_API } from "@/constants/api";
 import { useCan } from "@refinedev/core";
+import { useTranslation } from "react-i18next";
+import { AIFeatureDisabled } from "./ai/ai-feature-disabled";
 
 interface AIStudyBuddyProps {
   subject?: string;
@@ -27,6 +29,7 @@ export const AIStudyBuddy = ({
   assignment,
   classId,
 }: AIStudyBuddyProps) => {
+  const { t } = useTranslation();
   const { coreData } = useDashboard();
   const { isParent } = useUserRole();
   const [isOpen, setIsOpen] = useState(false);
@@ -99,19 +102,23 @@ export const AIStudyBuddy = ({
       );
 
     return (
-      <div className="fixed inset-0 md:inset-auto md:bottom-6 md:end-6 md:w-[400px] z-50">
-        <Card className="shadow-2xl flex flex-col ai-gradient-border overflow-hidden rounded-none md:rounded-2xl bg-card/90 backdrop-blur-3xl p-8 text-center items-center gap-4">
-          <div className="bg-destructive/10 p-4 rounded-full">
-            <Sparkles className="w-8 h-8 text-destructive grayscale" />
+      <div className="fixed inset-0 md:inset-auto md:bottom-6 md:end-6 md:w-[400px] z-50 animate-[zoom-in_0.3s_ease-out]">
+        <Card className="shadow-2xl flex flex-col ai-gradient-border overflow-hidden rounded-none md:rounded-2xl bg-card/90 backdrop-blur-3xl p-0">
+          <div className="p-8">
+            <AIFeatureDisabled
+              title="AI Buddy Maintenance"
+              description="Our AI Study Buddy is currently undergoing scheduled maintenance. Please try again later."
+            />
+            <div className="mt-6 flex justify-center">
+              <Button
+                variant="outline"
+                onClick={() => setIsOpen(false)}
+                className="rounded-xl font-bold"
+              >
+                {t("buttons.close")}
+              </Button>
+            </div>
           </div>
-          <h3 className="text-xl font-bold">AI Under Maintenance</h3>
-          <p className="text-sm text-muted-foreground">
-            Our AI Study Buddy is currently undergoing scheduled maintenance.
-            Please try again later.
-          </p>
-          <Button variant="outline" onClick={() => setIsOpen(false)}>
-            Close
-          </Button>
         </Card>
       </div>
     );
