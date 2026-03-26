@@ -19,4 +19,6 @@ jobs:
       - run: npm ci
       - name: Lint Check
         run: npm run lint
+      - name: Format Check
+        run: npm run format:check
       - run: npm run build
