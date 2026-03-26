@@ -5,11 +5,7 @@ import type { Column } from "@tanstack/react-table";
 import { ListFilter, X } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
 export type DataTableFilterDropdownProps<TData> = {
@@ -44,16 +40,13 @@ export function DataTableFilterDropdown<TData>({
               "text-primary": isFiltered,
               "text-muted-foreground": !isFiltered,
             },
-            triggerClassName,
+            triggerClassName
           )}
         >
           <ListFilter className="!h-3 !w-3" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent
-        align="start"
-        className={cn("w-full shadow-sm", contentClassName)}
-      >
+      <PopoverContent align="start" className={cn("w-full shadow-sm", contentClassName)}>
         {children({ isOpen, setIsOpen })}
       </PopoverContent>
     </Popover>
@@ -78,12 +71,7 @@ export function DataTableFilterDropdownActions({
   const t = useTranslate();
 
   return (
-    <div
-      className={cn(
-        "flex items-center justify-between w-full gap-2",
-        className,
-      )}
-    >
+    <div className={cn("flex items-center justify-between w-full gap-2", className)}>
       <Button
         size="sm"
         variant="ghost"

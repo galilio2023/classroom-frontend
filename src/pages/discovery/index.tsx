@@ -103,9 +103,7 @@ const TeacherCard = ({
             </AvatarFallback>
           </Avatar>
           <div className="text-start">
-            <p className="text-sm font-black text-white">
-              {channel.teacher.name}
-            </p>
+            <p className="text-sm font-black text-white">{channel.teacher.name}</p>
             <p className="text-[9px] font-black uppercase tracking-widest text-white/40">
               {channel.totalViews.toLocaleString()} Views
             </p>
@@ -134,9 +132,7 @@ const DiscoveryPage = () => {
   const { query: channelsQuery } = useList<TeacherChannel & { teacher: User }>({
     resource: "teacher-channels",
     pagination: { pageSize: 20 },
-    filters: search
-      ? [{ field: "headline", operator: "contains", value: search }]
-      : [],
+    filters: search ? [{ field: "headline", operator: "contains", value: search }] : [],
     meta: { populate: ["teacher"] },
   });
 
@@ -147,11 +143,7 @@ const DiscoveryPage = () => {
     // Find the specific channel data to set the trailer
     const channel = channels?.data.find((c) => c.teacher.id === teacherId);
     if (channel?.trailerVideoUrl) {
-      setPromotionTrailer(
-        channel.trailerVideoUrl,
-        channel.teacher.name,
-        channel.headline,
-      );
+      setPromotionTrailer(channel.trailerVideoUrl, channel.teacher.name, channel.headline);
     }
     show("users", teacherId);
   };
@@ -172,8 +164,8 @@ const DiscoveryPage = () => {
               Teacher <span className="text-primary/30">TV</span>
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground font-medium max-w-xl">
-              Discover the best educators in Egypt through high-definition
-              channels and immersive trailers.
+              Discover the best educators in Egypt through high-definition channels and immersive
+              trailers.
             </p>
           </div>
 
@@ -192,14 +184,7 @@ const DiscoveryPage = () => {
         </div>
 
         <div className="flex items-center gap-8 overflow-x-auto pb-4 scrollbar-hide">
-          {[
-            "All",
-            "Physics",
-            "Mathematics",
-            "Biology",
-            "Chemistry",
-            "Languages",
-          ].map((cat) => (
+          {["All", "Physics", "Mathematics", "Biology", "Chemistry", "Languages"].map((cat) => (
             <button
               key={cat}
               className="shrink-0 px-8 py-3 rounded-full border border-border/40 bg-card hover:bg-primary hover:text-white hover:border-primary transition-all font-black uppercase tracking-widest text-[10px]"
@@ -221,15 +206,9 @@ const DiscoveryPage = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 md:gap-10">
-            {channels?.data.map(
-              (channel: TeacherChannel & { teacher: User }) => (
-                <TeacherCard
-                  key={channel.id}
-                  channel={channel}
-                  onShow={handleShowChannel}
-                />
-              ),
-            )}
+            {channels?.data.map((channel: TeacherChannel & { teacher: User }) => (
+              <TeacherCard key={channel.id} channel={channel} onShow={handleShowChannel} />
+            ))}
           </div>
         )}
       </div>
@@ -240,9 +219,7 @@ const DiscoveryPage = () => {
           <div className="p-8 rounded-full bg-muted/30 w-fit mx-auto">
             <Video className="h-12 w-12 text-muted-foreground/20" />
           </div>
-          <h2 className="text-2xl font-black uppercase tracking-tighter">
-            No Broadcasters Found
-          </h2>
+          <h2 className="text-2xl font-black uppercase tracking-tighter">No Broadcasters Found</h2>
           <p className="text-muted-foreground font-medium">
             Try searching for a different subject or teacher name.
           </p>

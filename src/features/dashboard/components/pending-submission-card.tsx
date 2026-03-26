@@ -3,14 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import {
-  Clock,
-  User as UserIcon,
-  ArrowRight,
-  FileText,
-  Sparkles,
-  AlertCircle,
-} from "lucide-react";
+import { Clock, User as UserIcon, ArrowRight, FileText, Sparkles, AlertCircle } from "lucide-react";
 import { PendingSubmission } from "@/types/dashboard";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -41,7 +34,7 @@ export const PendingSubmissionCard: React.FC<PendingSubmissionCardProps> = ({
       <Card
         className={cn(
           "group overflow-hidden transition-all duration-500 border-none shadow-xl bg-card/50 backdrop-blur-xl rounded-[1.5rem] cursor-pointer",
-          "hover:shadow-2xl hover:bg-card/80 border border-transparent hover:border-primary/20 text-start rtl:text-end",
+          "hover:shadow-2xl hover:bg-card/80 border border-transparent hover:border-primary/20 text-start rtl:text-end"
         )}
         onClick={() => onGrade(submission.assignmentId.toString())}
       >
@@ -49,14 +42,9 @@ export const PendingSubmissionCard: React.FC<PendingSubmissionCardProps> = ({
           <div className="relative">
             <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <Avatar className="h-14 w-14 border-2 border-background shadow-lg relative z-10 transition-transform duration-500 group-hover:scale-110">
-              <AvatarImage
-                src={submission.student?.image}
-                className="object-cover"
-              />
+              <AvatarImage src={submission.student?.image} className="object-cover" />
               <AvatarFallback className="bg-primary/5 text-primary font-bold">
-                {submission.student?.name?.[0] || (
-                  <UserIcon className="h-6 w-6" />
-                )}
+                {submission.student?.name?.[0] || <UserIcon className="h-6 w-6" />}
               </AvatarFallback>
             </Avatar>
             {submission.isLate && (
@@ -71,7 +59,7 @@ export const PendingSubmissionCard: React.FC<PendingSubmissionCardProps> = ({
               <p
                 className={cn(
                   "text-base transition-colors truncate",
-                  isArabic ? "font-bold" : "font-black tracking-tight",
+                  isArabic ? "font-bold" : "font-black tracking-tight"
                 )}
               >
                 {submission.student?.name}

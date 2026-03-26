@@ -21,8 +21,7 @@ export const useLiveNotifications = (userId: string | undefined) => {
   const { socket, isConnected } = useSocket();
   const navigate = useNavigate();
   const [unreadCount, setUnreadCount] = useState<number>(0);
-  const [latestNotification, setLatestNotification] =
-    useState<Notification | null>(null);
+  const [latestNotification, setLatestNotification] = useState<Notification | null>(null);
 
   useEffect(() => {
     if (!userId || !socket || !isConnected) return;

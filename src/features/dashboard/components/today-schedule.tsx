@@ -53,10 +53,7 @@ export const TodaySchedule = ({ schedule, show }: TodayScheduleProps) => {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: idx * 0.05 }}
                   >
-                    <ScheduleItemCard
-                      item={item}
-                      onClick={(id) => show("classes", id)}
-                    />
+                    <ScheduleItemCard item={item} onClick={(id) => show("classes", id)} />
                   </motion.div>
                 ))}
               </div>
@@ -92,9 +89,7 @@ export const TodaySchedule = ({ schedule, show }: TodayScheduleProps) => {
           {schedule.length > 0 && (
             <div className="pt-3 md:pt-4 border-t border-black/3 dark:border-white/3 flex items-center justify-center gap-2 text-[9px] md:text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">
               <Info className="h-3 w-3 shrink-0" />
-              <span className="truncate">
-                {t("dashboard.schedule.clickClass")}
-              </span>
+              <span className="truncate">{t("dashboard.schedule.clickClass")}</span>
             </div>
           )}
         </CardContent>

@@ -23,13 +23,7 @@ interface TaskItemProps {
   onToggleProgress: (id: number) => void;
 }
 
-export const TaskItem = ({
-  item,
-  type,
-  isStudent,
-  completed,
-  onToggleProgress,
-}: TaskItemProps) => {
+export const TaskItem = ({ item, type, isStudent, completed, onToggleProgress }: TaskItemProps) => {
   const { t, i18n } = useTranslation();
   const isQuiz = type === "quiz";
 
@@ -69,7 +63,7 @@ export const TaskItem = ({
         "group flex items-center justify-between p-3 md:p-4 rounded-xl md:rounded-2xl border transition-all duration-300",
         styles.bg,
         styles.border,
-        !completed && "hover:border-primary/20 hover:bg-card hover:shadow-md",
+        !completed && "hover:border-primary/20 hover:bg-card hover:shadow-md"
       )}
     >
       <div className="flex items-center gap-3 md:gap-4 overflow-hidden flex-1">
@@ -106,17 +100,13 @@ export const TaskItem = ({
           <div
             className={cn(
               "p-1.5 md:p-2 rounded-lg md:rounded-xl shrink-0 transition-transform group-hover:scale-110",
-              styles.iconBg,
+              styles.iconBg
             )}
           >
             {isQuiz ? (
-              <FileQuestion
-                className={cn("h-3.5 w-3.5 md:h-4 md:w-4", styles.iconColor)}
-              />
+              <FileQuestion className={cn("h-3.5 w-3.5 md:h-4 md:w-4", styles.iconColor)} />
             ) : (
-              <FileText
-                className={cn("h-3.5 w-3.5 md:h-4 md:w-4", styles.iconColor)}
-              />
+              <FileText className={cn("h-3.5 w-3.5 md:h-4 md:w-4", styles.iconColor)} />
             )}
           </div>
 
@@ -126,7 +116,7 @@ export const TaskItem = ({
                 "text-xs md:text-sm font-black tracking-tight truncate transition-all",
                 completed
                   ? "text-success/60 line-through decoration-success/30"
-                  : "text-foreground group-hover:text-primary",
+                  : "text-foreground group-hover:text-primary"
               )}
             >
               {item.title}
@@ -136,9 +126,7 @@ export const TaskItem = ({
                 <div
                   className={cn(
                     "flex items-center gap-1 text-[8px] md:text-[9px] font-black uppercase tracking-widest",
-                    isOverdue && !completed
-                      ? "text-destructive"
-                      : "text-muted-foreground/40",
+                    isOverdue && !completed ? "text-destructive" : "text-muted-foreground/40"
                   )}
                 >
                   <Calendar className="h-2.5 w-2.5" />
@@ -152,9 +140,7 @@ export const TaskItem = ({
               {isQuiz && !completed && (
                 <div className="flex items-center gap-1 text-[8px] md:text-[9px] font-black uppercase tracking-widest text-orange-500/60">
                   <Clock className="h-2.5 w-2.5" />
-                  <span>
-                    {t("classes.quiz.minsUnitLocalized", { count: 15 })}
-                  </span>
+                  <span>{t("classes.quiz.minsUnitLocalized", { count: 15 })}</span>
                 </div>
               )}
             </div>
@@ -171,13 +157,11 @@ export const TaskItem = ({
               ? "bg-success/10 text-success"
               : isQuiz
                 ? "bg-orange-500/10 text-orange-600"
-                : "bg-blue-500/10 text-blue-600",
+                : "bg-blue-500/10 text-blue-600"
           )}
         >
           <span className="hidden xs:inline">
-            {isQuiz
-              ? t("classes.show.tabs.quizzes")
-              : t("classes.show.tabs.assignments")}
+            {isQuiz ? t("classes.show.tabs.quizzes") : t("classes.show.tabs.assignments")}
           </span>
           <span className="xs:hidden">{isQuiz ? "Q" : "A"}</span>
         </Badge>

@@ -29,12 +29,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import dayjs from "dayjs";
 import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
 import usePageTitle from "@/hooks/use-page-title";
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { SystemHealthReport } from "../types";
 
@@ -48,8 +43,7 @@ const AIGovernanceList = () => {
 
   usePageTitle(t("aiHub.governance.title"));
   const isAr = i18n.language === "ar";
-  const [selectedReport, setSelectedReport] =
-    useState<SystemHealthReport | null>(null);
+  const [selectedReport, setSelectedReport] = useState<SystemHealthReport | null>(null);
   const [isMutating, setIsMutating] = useState(false);
 
   // --- ADMIN HANDLERS ---
@@ -71,7 +65,7 @@ const AIGovernanceList = () => {
           setIsMutating(false);
           void refetchCore();
         },
-      },
+      }
     );
   };
 
@@ -93,7 +87,7 @@ const AIGovernanceList = () => {
           setIsMutating(false);
           void refetchCore();
         },
-      },
+      }
     );
   };
 
@@ -115,7 +109,7 @@ const AIGovernanceList = () => {
           setIsMutating(false);
           void refetchCore();
         },
-      },
+      }
     );
   };
 
@@ -152,7 +146,7 @@ const AIGovernanceList = () => {
                   ? "bg-destructive text-destructive-foreground"
                   : severity === "warning"
                     ? "bg-orange-500 text-white"
-                    : "bg-blue-500 text-white",
+                    : "bg-blue-500 text-white"
               )}
             >
               {severity}
@@ -181,15 +175,10 @@ const AIGovernanceList = () => {
                     ? "bg-muted text-muted-foreground"
                     : score > 80
                       ? "bg-green-500/10 text-green-600"
-                      : "bg-orange-500/10 text-orange-600",
+                      : "bg-orange-500/10 text-orange-600"
                 )}
               >
-                <Heart
-                  className={cn(
-                    "h-3 w-3",
-                    hasData && score > 80 && "fill-green-600",
-                  )}
-                />
+                <Heart className={cn("h-3 w-3", hasData && score > 80 && "fill-green-600")} />
                 {hasData ? `${score}%` : "---"}
               </Badge>
             </div>
@@ -211,9 +200,7 @@ const AIGovernanceList = () => {
                 variant="outline"
                 className={cn(
                   "h-7 px-3 border-border/40 font-bold",
-                  count > 0
-                    ? "text-destructive border-destructive/20"
-                    : "text-muted-foreground",
+                  count > 0 ? "text-destructive border-destructive/20" : "text-muted-foreground"
                 )}
               >
                 {count} {t("common.cases", { count })}
@@ -247,7 +234,7 @@ const AIGovernanceList = () => {
         ),
       },
     ],
-    [t, isAr],
+    [t, isAr]
   );
 
   const table = useTable<SystemHealthReport, HttpError>({
@@ -313,9 +300,7 @@ const AIGovernanceList = () => {
                   <div className="p-2 rounded-xl bg-ai-primary/10 text-ai-primary">
                     <ShieldCheck className="h-5 w-5" />
                   </div>
-                  <h3 className="text-xl font-black tracking-tight">
-                    {t("settings.form.title")}
-                  </h3>
+                  <h3 className="text-xl font-black tracking-tight">{t("settings.form.title")}</h3>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -329,9 +314,7 @@ const AIGovernanceList = () => {
                       </p>
                     </div>
                     <Switch
-                      checked={
-                        coreData?.globalConfig?.enableAiFeatures !== false
-                      }
+                      checked={coreData?.globalConfig?.enableAiFeatures !== false}
                       onCheckedChange={handleToggleAi}
                       disabled={isMutating}
                     />
@@ -375,9 +358,7 @@ const AIGovernanceList = () => {
                   onClick={() => void tableQuery?.refetch()}
                   disabled={isMutating || isLoading}
                 >
-                  <Activity
-                    className={cn("h-4 w-4", isLoading && "animate-spin")}
-                  />
+                  <Activity className={cn("h-4 w-4", isLoading && "animate-spin")} />
                   Force Audit Now
                 </Button>
               </div>
@@ -416,9 +397,7 @@ const AIGovernanceList = () => {
                   exit={{ opacity: 0 }}
                   className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-card/40 backdrop-blur-sm"
                 >
-                  <SparkleLoader
-                    message={t("aiHub.governance.auditingSystems")}
-                  />
+                  <SparkleLoader message={t("aiHub.governance.auditingSystems")} />
                 </motion.div>
               ) : (
                 <motion.div
@@ -427,10 +406,7 @@ const AIGovernanceList = () => {
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                 >
-                  <DataTable
-                    table={table}
-                    onRowClick={(row) => setSelectedReport(row)}
-                  />
+                  <DataTable table={table} onRowClick={(row) => setSelectedReport(row)} />
                 </motion.div>
               )}
             </AnimatePresence>
@@ -465,10 +441,7 @@ const AIGovernanceList = () => {
       </div>
 
       {/* Detail Modal */}
-      <Dialog
-        open={!!selectedReport}
-        onOpenChange={(open) => !open && setSelectedReport(null)}
-      >
+      <Dialog open={!!selectedReport} onOpenChange={(open) => !open && setSelectedReport(null)}>
         <DialogContent className="max-w-3xl rounded-4xl md:rounded-[3rem] border-none shadow-3xl bg-card/80 backdrop-blur-3xl p-0 overflow-hidden">
           {selectedReport && (
             <div className="flex flex-col h-full max-h-[85vh]">
@@ -541,13 +514,9 @@ const AIGovernanceList = () => {
                           className="flex items-start gap-3 p-4 rounded-2xl bg-ai-primary/5 border border-ai-primary/10"
                         >
                           <div className="h-5 w-5 rounded-full bg-ai-primary/20 text-ai-primary flex items-center justify-center shrink-0 mt-0.5">
-                            <span className="text-[10px] font-black">
-                              {idx + 1}
-                            </span>
+                            <span className="text-[10px] font-black">{idx + 1}</span>
                           </div>
-                          <p className="text-xs font-bold leading-relaxed">
-                            {fix}
-                          </p>
+                          <p className="text-xs font-bold leading-relaxed">{fix}</p>
                         </div>
                       ))}
                     </div>

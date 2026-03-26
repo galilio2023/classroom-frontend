@@ -47,7 +47,7 @@ export const connectSocket = async () => {
         "🔗 Attempting socket connection to:",
         SOCKET_URL,
         "with token:",
-        token.substring(0, 10) + "...",
+        token.substring(0, 10) + "..."
       );
       socket.connect();
 
@@ -56,7 +56,7 @@ export const connectSocket = async () => {
         const timeout = setTimeout(() => {
           console.error(
             "⏳ Socket connection timeout after 15s. Socket status:",
-            socket.connected ? "connected" : "disconnected",
+            socket.connected ? "connected" : "disconnected"
           );
           reject(new Error("Socket connection timeout (15s)"));
         }, 15000);
@@ -89,9 +89,7 @@ export const connectSocket = async () => {
  */
 export const getSocket = () => {
   if (!socket.connected) {
-    console.warn(
-      "getSocket called before socket was authenticated or connected.",
-    );
+    console.warn("getSocket called before socket was authenticated or connected.");
   }
   return socket;
 };

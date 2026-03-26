@@ -8,8 +8,7 @@ import { cn } from "@/lib/utils";
 
 export const VideoMiniPlayer = () => {
   const { t, i18n } = useTranslation();
-  const { activeVideo, setActiveVideo, isJoined, promotionTrailer } =
-    usePersistentLive();
+  const { activeVideo, setActiveVideo, isJoined, promotionTrailer } = usePersistentLive();
   const isAr = i18n.language === "ar";
 
   // 🛡️ PRIORITY GUARD: Live Classes > Promotion > Recorded Videos
@@ -25,12 +24,7 @@ export const VideoMiniPlayer = () => {
       >
         {/* Video Container */}
         <div className="aspect-video relative overflow-hidden bg-black">
-          <video
-            src={activeVideo.url}
-            autoPlay
-            controls
-            className="w-full h-full object-contain"
-          />
+          <video src={activeVideo.url} autoPlay controls className="w-full h-full object-contain" />
 
           {/* Close Button */}
           <Button
@@ -53,9 +47,7 @@ export const VideoMiniPlayer = () => {
               <p className="text-[10px] font-black uppercase tracking-widest text-blue-400 leading-none mb-1">
                 {t("classes.resource.recordedLesson", "Revision Mode")}
               </p>
-              <h4 className="text-xs font-bold text-white truncate pe-2">
-                {activeVideo.title}
-              </h4>
+              <h4 className="text-xs font-bold text-white truncate pe-2">{activeVideo.title}</h4>
             </div>
           </div>
 

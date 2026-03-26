@@ -18,7 +18,7 @@ interface EngagementTabWrapperProps {
   activeSubTab: string;
   setSearchParams: (
     setter: (prev: URLSearchParams) => URLSearchParams,
-    options?: { replace: boolean },
+    options?: { replace: boolean }
   ) => void;
 }
 
@@ -40,7 +40,7 @@ export const EngagementTabWrapper: React.FC<EngagementTabWrapperProps> = ({
         newParams.set("subtab", value);
         return newParams;
       },
-      { replace: true },
+      { replace: true }
     );
   };
 
@@ -81,7 +81,7 @@ export const EngagementTabWrapper: React.FC<EngagementTabWrapperProps> = ({
                     "px-4 md:px-6 py-2 md:py-2.5 rounded-full font-bold text-xs transition-all duration-300 gap-2 h-9 md:h-10",
                     isActive
                       ? "bg-background shadow-sm text-primary"
-                      : "text-muted-foreground hover:bg-primary/5 hover:text-primary",
+                      : "text-muted-foreground hover:bg-primary/5 hover:text-primary"
                   )}
                 >
                   <Icon className="h-4 w-4" />
@@ -107,9 +107,7 @@ export const EngagementTabWrapper: React.FC<EngagementTabWrapperProps> = ({
         </TabsContent>
 
         <TabsContent value="discussions" className="mt-8">
-          {activeSubTab === "discussions" && (
-            <DiscussionTab classId={classId} />
-          )}
+          {activeSubTab === "discussions" && <DiscussionTab classId={classId} />}
         </TabsContent>
 
         <TabsContent value="live" className="mt-8">
@@ -122,14 +120,10 @@ export const EngagementTabWrapper: React.FC<EngagementTabWrapperProps> = ({
                   </div>
                   <div className="text-center space-y-1">
                     <p className="font-black uppercase tracking-widest text-xs">
-                      {t(
-                        "classes.live.indicator.activeInBackground",
-                        "Live Session Active",
-                      )}
+                      {t("classes.live.indicator.activeInBackground", "Live Session Active")}
                     </p>
                     <p className="text-sm font-medium opacity-60">
-                      The video is currently playing in the Picture-in-Picture
-                      window.
+                      The video is currently playing in the Picture-in-Picture window.
                     </p>
                   </div>
                 </div>

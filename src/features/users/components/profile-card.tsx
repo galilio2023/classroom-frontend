@@ -144,9 +144,7 @@ export const ProfileCard = ({ user, isStudent, isTeacher }: Props) => {
                 <span className="text-[10px] uppercase font-black text-muted-foreground/60 tracking-widest">
                   {t("profile.labels.email" as any)}
                 </span>
-                <span className="font-bold truncate text-sm md:text-base">
-                  {user.email}
-                </span>
+                <span className="font-bold truncate text-sm md:text-base">{user.email}</span>
               </div>
             </div>
             {user.phoneNumber && (
@@ -158,9 +156,7 @@ export const ProfileCard = ({ user, isStudent, isTeacher }: Props) => {
                   <span className="text-[10px] uppercase font-black text-muted-foreground/60 tracking-widest">
                     {t("profile.labels.phone" as any)}
                   </span>
-                  <span className="font-bold text-sm md:text-base">
-                    {user.phoneNumber}
-                  </span>
+                  <span className="font-bold text-sm md:text-base">{user.phoneNumber}</span>
                 </div>
               </div>
             )}
@@ -173,9 +169,7 @@ export const ProfileCard = ({ user, isStudent, isTeacher }: Props) => {
                   <span className="text-[10px] uppercase font-black text-muted-foreground/60 tracking-widest">
                     {t("profile.labels.department" as any)}
                   </span>
-                  <span className="font-bold text-sm md:text-base">
-                    {user.department.name}
-                  </span>
+                  <span className="font-bold text-sm md:text-base">{user.department.name}</span>
                 </div>
               </div>
             )}
@@ -190,7 +184,7 @@ export const ProfileCard = ({ user, isStudent, isTeacher }: Props) => {
                 <span className="font-bold text-sm md:text-base">
                   {new Date(user.createdAt).toLocaleDateString(
                     i18n.language === "ar" ? "ar-EG" : "en-US",
-                    { month: "long", year: "numeric" },
+                    { month: "long", year: "numeric" }
                   )}
                 </span>
               </div>

@@ -72,9 +72,7 @@ export const CalendarPage = () => {
   usePageTitle(t("calendar.title"));
   const { data: identity } = useGetIdentity<User>();
   const go = useGo();
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(
-    new Date(),
-  );
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
 
   const [isGenerateDialogOpen, setIsGenerateDialogOpen] = useState(false);
   const [selectedClassId, setSelectedClassId] = useState<string>("");
@@ -146,7 +144,7 @@ export const CalendarPage = () => {
         onError: (error: HttpError) => {
           toast.error(error.message || t("common.error"));
         },
-      },
+      }
     );
   };
 
@@ -199,12 +197,8 @@ export const CalendarPage = () => {
     return grouped;
   }, [calendarData]);
 
-  const selectedDateKey = selectedDate
-    ? dayjs(selectedDate).format("YYYY-MM-DD")
-    : null;
-  const selectedDayEvents = selectedDateKey
-    ? eventsByDate[selectedDateKey] || []
-    : [];
+  const selectedDateKey = selectedDate ? dayjs(selectedDate).format("YYYY-MM-DD") : null;
+  const selectedDayEvents = selectedDateKey ? eventsByDate[selectedDateKey] || [] : [];
 
   const handleEventClick = (event: CalendarEvent) => {
     if (event.classId) {
@@ -239,10 +233,7 @@ export const CalendarPage = () => {
         </div>
 
         {isTeacher && (
-          <Dialog
-            open={isGenerateDialogOpen}
-            onOpenChange={setIsGenerateDialogOpen}
-          >
+          <Dialog open={isGenerateDialogOpen} onOpenChange={setIsGenerateDialogOpen}>
             <DialogTrigger asChild>
               <Button
                 size="lg"
@@ -272,10 +263,7 @@ export const CalendarPage = () => {
                     <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ms-1">
                       {t("calendar.selectClass")}
                     </label>
-                    <Select
-                      value={selectedClassId}
-                      onValueChange={setSelectedClassId}
-                    >
+                    <Select value={selectedClassId} onValueChange={setSelectedClassId}>
                       <SelectTrigger className="h-14 rounded-2xl bg-muted/30 border-none shadow-inner px-6 text-lg">
                         <SelectValue placeholder={t("calendar.selectClass")} />
                       </SelectTrigger>
@@ -294,9 +282,7 @@ export const CalendarPage = () => {
                   </div>
                   <div className="p-6 rounded-2xl bg-primary/5 text-xs text-primary/70 border border-primary/10 flex items-start gap-4">
                     <Info className="h-5 w-5 shrink-0 mt-0.5" />
-                    <p className="font-medium leading-relaxed">
-                      {t("calendar.syncInfo")}
-                    </p>
+                    <p className="font-medium leading-relaxed">{t("calendar.syncInfo")}</p>
                   </div>
                 </div>
                 <DialogFooter className="flex-col sm:flex-row gap-3">
@@ -348,16 +334,14 @@ export const CalendarPage = () => {
               classNames={{
                 months: "w-full",
                 month: "w-full space-y-8 md:space-y-12",
-                month_caption:
-                  "flex justify-center pt-2 relative items-center mb-10 md:mb-16",
-                caption_label:
-                  "text-2xl md:text-3xl font-black tracking-tighter text-foreground",
+                month_caption: "flex justify-center pt-2 relative items-center mb-10 md:mb-16",
+                caption_label: "text-2xl md:text-3xl font-black tracking-tighter text-foreground",
                 nav: "space-x-2 flex items-center",
                 button_previous: cn(
-                  "h-10 w-10 md:h-12 md:w-12 bg-muted/40 hover:bg-primary/10 rounded-2xl transition-all flex items-center justify-center p-0 absolute start-2",
+                  "h-10 w-10 md:h-12 md:w-12 bg-muted/40 hover:bg-primary/10 rounded-2xl transition-all flex items-center justify-center p-0 absolute start-2"
                 ),
                 button_next: cn(
-                  "h-10 w-10 md:h-12 md:w-12 bg-muted/40 hover:bg-primary/10 rounded-2xl transition-all flex items-center justify-center p-0 absolute end-2",
+                  "h-10 w-10 md:h-12 md:w-12 bg-muted/40 hover:bg-primary/10 rounded-2xl transition-all flex items-center justify-center p-0 absolute end-2"
                 ),
                 month_grid: "w-full border-collapse space-y-4",
                 weekdays: "flex w-full mb-6",
@@ -366,22 +350,20 @@ export const CalendarPage = () => {
                 week: "flex w-full mt-2 gap-2 md:gap-4",
                 day: "text-center text-sm p-0 relative w-full h-12 xs:h-16 md:h-20 focus-within:relative focus-within:z-20",
                 day_button: cn(
-                  "h-full w-full p-0 font-bold hover:bg-primary/5 rounded-2xl md:rounded-[1.5rem] transition-all aria-selected:opacity-100",
+                  "h-full w-full p-0 font-bold hover:bg-primary/5 rounded-2xl md:rounded-[1.5rem] transition-all aria-selected:opacity-100"
                 ),
                 selected:
                   "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground shadow-2xl shadow-primary/30",
                 today: "bg-primary/10 text-primary border border-primary/20",
                 outside: "text-muted-foreground/30 opacity-50",
                 disabled: "text-muted-foreground opacity-50",
-                range_middle:
-                  "aria-selected:bg-accent aria-selected:text-accent-foreground",
+                range_middle: "aria-selected:bg-accent aria-selected:text-accent-foreground",
                 hidden: "invisible",
               }}
               locale={undefined}
               components={{
                 Chevron: ({ orientation }) => {
-                  const Icon =
-                    orientation === "left" ? ChevronLeft : ChevronRight;
+                  const Icon = orientation === "left" ? ChevronLeft : ChevronRight;
                   return <Icon className="h-6 w-6" />;
                 },
                 DayButton: ({ day, modifiers, ...props }) => {
@@ -398,7 +380,7 @@ export const CalendarPage = () => {
                         props.className,
                         "flex flex-col items-center justify-center h-full w-full relative group/day",
                         isSelected && "text-primary-foreground",
-                        !isSelected && isToday && "text-primary",
+                        !isSelected && isToday && "text-primary"
                       )}
                     >
                       <span className="text-sm md:text-lg lg:text-xl font-black">
@@ -446,9 +428,7 @@ export const CalendarPage = () => {
                   <CardTitle className="text-xl md:text-2xl font-black tracking-tight">
                     {selectedDate
                       ? dayjs(selectedDate).format(
-                          i18n.language === "ar"
-                            ? "DD MMMM YYYY"
-                            : "MMMM D, YYYY",
+                          i18n.language === "ar" ? "DD MMMM YYYY" : "MMMM D, YYYY"
                         )
                       : t("calendar.selectDate")}
                   </CardTitle>
@@ -500,7 +480,7 @@ export const CalendarPage = () => {
                             "group flex flex-col p-6 rounded-4xl border transition-all duration-300 cursor-pointer shadow-sm hover:shadow-xl hover:shadow-primary/5",
                             event.classId
                               ? "hover:-translate-y-1"
-                              : "hover:bg-muted/50 cursor-default",
+                              : "hover:bg-muted/50 cursor-default"
                           )}
                           style={{
                             borderColor: `${color}20`,
@@ -524,8 +504,7 @@ export const CalendarPage = () => {
                                 <Clock className="h-3.5 w-3.5" />
                                 <span>
                                   {dayjs(event.startTime).format("HH:mm")}
-                                  {event.endTime &&
-                                    ` - ${dayjs(event.endTime).format("HH:mm")}`}
+                                  {event.endTime && ` - ${dayjs(event.endTime).format("HH:mm")}`}
                                 </span>
                               </div>
                             )}
@@ -538,9 +517,7 @@ export const CalendarPage = () => {
                               <div className="p-1.5 rounded-lg bg-primary/5">
                                 <Users className="h-3 w-3 text-primary" />
                               </div>
-                              <span className="truncate">
-                                {event.className}
-                              </span>
+                              <span className="truncate">{event.className}</span>
                             </div>
                           )}
 

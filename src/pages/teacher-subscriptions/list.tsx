@@ -1,13 +1,6 @@
 import { ListView } from "@/components/refine-ui/views/list-view";
 import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
-import {
-  UserPlus,
-  Loader2,
-  Users as UsersIcon,
-  MessageSquare,
-  Eye,
-  Layers,
-} from "lucide-react";
+import { UserPlus, Loader2, Users as UsersIcon, MessageSquare, Eye, Layers } from "lucide-react";
 import { useMemo } from "react";
 import { useList, useGetIdentity, useNavigation } from "@refinedev/core";
 import { User, UserRole } from "@/types";
@@ -127,10 +120,7 @@ const TeacherSubscriptionsList = () => {
                 >
                   <div className="flex items-center gap-4 mb-6">
                     <Avatar className="h-16 w-16 rounded-2xl border-4 border-background shadow-lg group-hover:scale-105 transition-transform duration-500">
-                      <AvatarImage
-                        src={student.image ?? undefined}
-                        alt={student.name}
-                      />
+                      <AvatarImage src={student.image ?? undefined} alt={student.name} />
                       <AvatarFallback className="bg-primary/10 text-primary font-black text-xl">
                         {student.name.substring(0, 2).toUpperCase()}
                       </AvatarFallback>
@@ -139,9 +129,7 @@ const TeacherSubscriptionsList = () => {
                       <h3 className="text-xl font-black tracking-tight truncate group-hover:text-primary transition-colors leading-tight">
                         {student.name}
                       </h3>
-                      <p className="text-sm text-muted-foreground truncate">
-                        {student.email}
-                      </p>
+                      <p className="text-sm text-muted-foreground truncate">{student.email}</p>
                     </div>
                   </div>
 
@@ -164,9 +152,7 @@ const TeacherSubscriptionsList = () => {
                     >
                       <a href="#" onClick={() => show("users", student.id)}>
                         {t("buttons.viewProfile")}
-                        <Eye
-                          className={cn("h-4 w-4 ms-2", isAr && "me-2 ms-0")}
-                        />
+                        <Eye className={cn("h-4 w-4 ms-2", isAr && "me-2 ms-0")} />
                       </a>
                     </Button>
                   </div>

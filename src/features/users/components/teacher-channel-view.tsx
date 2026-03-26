@@ -142,8 +142,7 @@ export const TeacherChannelView = ({ user, teacherClasses }: Props) => {
                   </h4>
                   <div className="flex items-center gap-2 text-muted-foreground text-xs md:text-sm font-bold">
                     <Users className="h-3.5 w-3.5" />
-                    {(classItem as any).enrollments?.length || 0} /{" "}
-                    {classItem.capacity}{" "}
+                    {(classItem as any).enrollments?.length || 0} / {classItem.capacity}{" "}
                     {t("classes.list.studentsLabel" as any)}
                   </div>
                 </div>

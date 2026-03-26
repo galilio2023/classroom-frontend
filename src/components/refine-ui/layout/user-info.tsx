@@ -32,15 +32,7 @@ export function UserInfo() {
   return (
     <div className={cn("flex", "items-center", "gap-x-2")}>
       <UserAvatar />
-      <div
-        className={cn(
-          "flex",
-          "flex-col",
-          "justify-between",
-          "h-10",
-          "text-start",
-        )}
-      >
+      <div className={cn("flex", "flex-col", "justify-between", "h-10", "text-start")}>
         <span className={cn("text-sm", "font-medium", "text-muted-foreground")}>
           {firstName} {lastName}
         </span>

@@ -1,10 +1,4 @@
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { BarChart as BarChartIcon, Sparkles, TrendingUp } from "lucide-react";
 import { CartesianGrid, XAxis, YAxis, BarChart, Bar, Cell } from "recharts";
 import { GradeDistribution } from "@/types/dashboard";
@@ -77,22 +71,11 @@ export const GradeDistributionChart = ({
         <CardContent className="h-[350px] p-8 pt-6">
           {hasData ? (
             <ChartContainer config={gradeConfig} className="h-full w-full">
-              <BarChart
-                data={data}
-                margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
-              >
+              <BarChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <defs>
                   <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop
-                      offset="0%"
-                      stopColor="hsl(var(--primary))"
-                      stopOpacity={1}
-                    />
-                    <stop
-                      offset="100%"
-                      stopColor="hsl(var(--primary))"
-                      stopOpacity={0.6}
-                    />
+                    <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={1} />
+                    <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0.6} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid
@@ -141,10 +124,7 @@ export const GradeDistributionChart = ({
               </BarChart>
             </ChartContainer>
           ) : (
-            <NoChartData
-              icon={BarChartIcon}
-              message="No grade distribution data yet"
-            />
+            <NoChartData icon={BarChartIcon} message="No grade distribution data yet" />
           )}
         </CardContent>
 

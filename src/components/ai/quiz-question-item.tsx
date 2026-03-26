@@ -33,9 +33,7 @@ export const QuizQuestionItem: React.FC<QuizQuestionItemProps> = ({
                 : "bg-muted/50 border-transparent"
             }`}
           >
-            {option === question.correctAnswer && (
-              <CheckCircle2 className="h-4 w-4" />
-            )}
+            {option === question.correctAnswer && <CheckCircle2 className="h-4 w-4" />}
             {option}
           </div>
         ))}
@@ -45,9 +43,7 @@ export const QuizQuestionItem: React.FC<QuizQuestionItemProps> = ({
           <p className="text-xs font-semibold text-blue-800 dark:text-blue-400 uppercase mb-1">
             {t("classes.quiz.explanation")}
           </p>
-          <p className="text-sm text-blue-700 dark:text-blue-300">
-            {question.explanation}
-          </p>
+          <p className="text-sm text-blue-700 dark:text-blue-300">{question.explanation}</p>
         </div>
       )}
     </div>

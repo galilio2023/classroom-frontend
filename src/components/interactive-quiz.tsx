@@ -1,12 +1,6 @@
 import React from "react";
 import { Button } from "./ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "./ui/card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "./ui/card";
 import { ArrowRight, Users } from "lucide-react";
 import { useGo } from "@refinedev/core";
 import { QuizResult } from "./ai/quiz-result";
@@ -82,8 +76,7 @@ export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({
                 className="bg-primary/5 text-primary border-primary/20 px-3 py-1.5 rounded-full font-bold gap-2 animate-pulse"
               >
                 <Users className="h-3.5 w-3.5" />
-                {activeStudents}{" "}
-                {t("classes.quiz.studentsActive", "Students active")}
+                {activeStudents} {t("classes.quiz.studentsActive", "Students active")}
               </Badge>
             </motion.div>
           )}

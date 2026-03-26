@@ -93,9 +93,7 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
 
   useEffect(() => {
     if (scrollRef.current) {
-      const viewport = scrollRef.current.querySelector(
-        "[data-radix-scroll-area-viewport]",
-      );
+      const viewport = scrollRef.current.querySelector("[data-radix-scroll-area-viewport]");
       if (viewport) viewport.scrollTop = viewport.scrollHeight;
     }
   }, [discussions]);
@@ -150,10 +148,10 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
           toast.success(
             replyTo
               ? t("classes.discussion.toast.replySent")
-              : t("classes.discussion.toast.messagePosted"),
+              : t("classes.discussion.toast.messagePosted")
           );
         },
-      },
+      }
     );
   };
 
@@ -168,7 +166,7 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
         onSuccess: () => {
           void refetch();
         },
-      },
+      }
     );
   };
 
@@ -191,7 +189,7 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
           toast.error(t("classes.discussion.toast.summaryError"));
           setIsSummarizing(false);
         },
-      },
+      }
     );
   };
 
@@ -284,9 +282,7 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
               <div className="p-4 bg-muted rounded-full">
                 <MessageCircle className="w-8 h-8 opacity-20" />
               </div>
-              <p className="text-sm font-medium">
-                {t("classes.discussion.noMessages")}
-              </p>
+              <p className="text-sm font-medium">{t("classes.discussion.noMessages")}</p>
             </div>
           ) : (
             discussions.map((discussion) => (
@@ -339,10 +335,8 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
         <div
           className={cn(
             "bg-background rounded-2xl border-2 transition-all duration-200 shadow-lg",
-            mutation.isPending
-              ? "opacity-70 pointer-events-none"
-              : "hover:border-primary/30",
-            replyTo ? "rounded-t-none border-t-0" : "",
+            mutation.isPending ? "opacity-70 pointer-events-none" : "hover:border-primary/30",
+            replyTo ? "rounded-t-none border-t-0" : ""
           )}
         >
           <RichTextEditor
@@ -364,9 +358,7 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
             </div>
             <Button
               onClick={handlePost}
-              disabled={
-                mutation.isPending || !newPost.trim() || newPost === "<p></p>"
-              }
+              disabled={mutation.isPending || !newPost.trim() || newPost === "<p></p>"}
               size="sm"
               className="px-6 rounded-xl shadow-md transition-all hover:translate-y-[-1px] active:translate-y-[0px]"
             >

@@ -44,18 +44,14 @@ export function UndoableNotification({
         "border",
         "border-border",
         "min-w-[320px]",
-        "max-w-md",
+        "max-w-md"
       )}
     >
       <div className={cn("flex", "items-center", "justify-between")}>
         <div className={cn("flex-1", "me-4")}>
-          <div className={cn("font-medium", "text-foreground", "text-sm")}>
-            {message}
-          </div>
+          <div className={cn("font-medium", "text-foreground", "text-sm")}>{message}</div>
           {description && (
-            <div className={cn("text-muted-foreground", "text-sm", "mt-1")}>
-              {description}
-            </div>
+            <div className={cn("text-muted-foreground", "text-sm", "mt-1")}>{description}</div>
           )}
         </div>
         <Button
@@ -71,7 +67,7 @@ export function UndoableNotification({
             "py-2",
             "text-sm",
             "font-medium",
-            "rounded-md",
+            "rounded-md"
           )}
         >
           {t("buttons.undo", "Undo")}

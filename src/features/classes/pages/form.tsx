@@ -1,10 +1,4 @@
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -44,12 +38,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useList } from "@refinedev/core";
 import { AcademicTerm } from "@/types";
 import { useTranslation } from "react-i18next";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Info } from "lucide-react";
 
 interface ClassFormProps {
@@ -113,9 +102,7 @@ export const ClassForm = ({
         <CardHeader className="p-8 pb-4">
           <CardTitle className="text-sm font-black uppercase tracking-widest flex items-center gap-2 opacity-60 text-start">
             <BookOpen className="h-4 w-4" />
-            {isEdit
-              ? t("classes.form.updateDetails")
-              : t("classes.form.coreInfo")}
+            {isEdit ? t("classes.form.updateDetails") : t("classes.form.coreInfo")}
           </CardTitle>
         </CardHeader>
         <CardContent className="p-8 pt-4 space-y-8">
@@ -167,18 +154,14 @@ export const ClassForm = ({
                         type="number"
                         {...field}
                         onChange={(e) =>
-                          field.onChange(
-                            e.target.value === ""
-                              ? undefined
-                              : Number(e.target.value),
-                          )
+                          field.onChange(e.target.value === "" ? undefined : Number(e.target.value))
                         }
                         className="h-14 rounded-2xl bg-muted/20 border-none focus-visible:ring-primary font-black text-center text-xl"
                       />
                       <span
                         className={cn(
                           "absolute top-1/2 -translate-y-1/2 text-[10px] font-black opacity-20 group-focus-within:opacity-40 transition-opacity",
-                          "end-4",
+                          "end-4"
                         )}
                       >
                         {t("classes.form.studentsUnit")}
@@ -207,9 +190,7 @@ export const ClassForm = ({
                   >
                     <FormControl>
                       <SelectTrigger className="h-14 rounded-2xl bg-muted/20 border-none focus:ring-primary transition-all font-bold">
-                        <SelectValue
-                          placeholder={t("classes.form.selectSubject")}
-                        />
+                        <SelectValue placeholder={t("classes.form.selectSubject")} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent className="rounded-xl border-none shadow-2xl">
@@ -245,9 +226,7 @@ export const ClassForm = ({
                   >
                     <FormControl>
                       <SelectTrigger className="h-14 rounded-2xl bg-muted/20 border-none focus:ring-primary transition-all font-bold">
-                        <SelectValue
-                          placeholder={t("classes.form.selectTerm")}
-                        />
+                        <SelectValue placeholder={t("classes.form.selectTerm")} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent className="rounded-xl border-none shadow-2xl">
@@ -288,14 +267,12 @@ export const ClassForm = ({
                             "h-10 w-10 rounded-full border-4 transition-all hover:scale-110 flex items-center justify-center shadow-sm",
                             field.value === color
                               ? "border-white dark:border-white/5 scale-110 ring-2 ring-primary"
-                              : "border-transparent",
+                              : "border-transparent"
                           )}
                           style={{ backgroundColor: color }}
                           onClick={() => field.onChange(color)}
                         >
-                          {field.value === color && (
-                            <Check className="h-5 w-5 text-white" />
-                          )}
+                          {field.value === color && <Check className="h-5 w-5 text-white" />}
                         </button>
                       ))}
                     </div>
@@ -368,7 +345,7 @@ export const ClassForm = ({
                     <div
                       className={cn(
                         "absolute bottom-4 opacity-10 group-focus-within:opacity-30 transition-opacity",
-                        "end-4",
+                        "end-4"
                       )}
                     >
                       <Sparkles className="h-6 w-6" />
@@ -410,25 +387,14 @@ export const ClassForm = ({
                           <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ms-1">
                             {t("classes.form.day")}
                           </FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            value={field.value}
-                          >
+                          <Select onValueChange={field.onChange} value={field.value}>
                             <FormControl>
                               <SelectTrigger className="h-12 rounded-xl bg-background border-none focus:ring-primary transition-all font-bold">
                                 <SelectValue />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent className="rounded-xl border-none shadow-2xl">
-                              {[
-                                "Mon",
-                                "Tue",
-                                "Wed",
-                                "Thu",
-                                "Fri",
-                                "Sat",
-                                "Sun",
-                              ].map((day) => (
+                              {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day) => (
                                 <SelectItem
                                   key={day}
                                   value={day}
@@ -456,14 +422,14 @@ export const ClassForm = ({
                               <Clock
                                 className={cn(
                                   "absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within/input:text-primary transition-colors",
-                                  "start-3",
+                                  "start-3"
                                 )}
                               />
                               <Input
                                 type="time"
                                 className={cn(
                                   "h-12 rounded-xl bg-background border-none focus-visible:ring-primary font-bold",
-                                  isAr ? "pe-10" : "ps-10",
+                                  isAr ? "pe-10" : "ps-10"
                                 )}
                                 {...field}
                               />
@@ -486,14 +452,14 @@ export const ClassForm = ({
                               <Clock
                                 className={cn(
                                   "absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within/input:text-primary transition-colors",
-                                  "start-3",
+                                  "start-3"
                                 )}
                               />
                               <Input
                                 type="time"
                                 className={cn(
                                   "h-12 rounded-xl bg-background border-none focus-visible:ring-primary font-bold",
-                                  isAr ? "pe-10" : "ps-10",
+                                  isAr ? "pe-10" : "ps-10"
                                 )}
                                 {...field}
                               />
@@ -522,9 +488,7 @@ export const ClassForm = ({
               variant="outline"
               size="sm"
               className="w-full h-14 rounded-2xl border-2 border-dashed border-primary/20 text-primary hover:bg-primary/5 font-black uppercase tracking-widest text-[10px] gap-2 transition-all"
-              onClick={() =>
-                append({ day: "Mon", startTime: "09:00", endTime: "10:30" })
-              }
+              onClick={() => append({ day: "Mon", startTime: "09:00", endTime: "10:30" })}
             >
               <PlusCircle className="h-4 w-4" />
               {t("buttons.addTimeSlot")}
@@ -549,9 +513,7 @@ export const ClassForm = ({
           ) : (
             <div className="flex gap-3 items-center">
               <Save className="h-6 w-6" />
-              <span>
-                {isEdit ? t("buttons.saveChanges") : t("buttons.createClass")}
-              </span>
+              <span>{isEdit ? t("buttons.saveChanges") : t("buttons.createClass")}</span>
             </div>
           )}
         </Button>

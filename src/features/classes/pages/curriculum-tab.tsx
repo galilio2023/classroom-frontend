@@ -9,26 +9,11 @@ import {
 } from "@refinedev/core";
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import {
-  Module,
-  Progress,
-  Resource,
-  User,
-  UserRole,
-  ListResponse,
-} from "@/types";
+import { Module, Progress, Resource, User, UserRole, ListResponse } from "@/types";
 import { CurriculumEmptyState } from "../components/class-empty-states";
 import { Accordion } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import {
-  BookOpen,
-  LayoutDashboard,
-  Loader2,
-  PlusCircle,
-  Sparkles,
-  Wand2,
-  Zap,
-} from "lucide-react";
+import { BookOpen, LayoutDashboard, Loader2, PlusCircle, Sparkles, Wand2, Zap } from "lucide-react";
 import { toast } from "sonner";
 import { ModuleItem } from "@/components/classes/curriculum/module-item";
 import {
@@ -37,12 +22,7 @@ import {
 } from "@/components/classes/curriculum/magic-builder-dialog";
 import { CreateModuleDialog } from "@/components/classes/curriculum/create-module-dialog";
 import { AddResourceDialog } from "@/components/classes/curriculum/add-resource-dialog";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { AnimatePresence, motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { CanAccess } from "@/components/auth/can-access";
@@ -57,8 +37,7 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
   const { coreData } = useDashboard();
   const isAr = i18n.language === "ar";
   const { data: identity } = useGetIdentity<User>();
-  const isTeacher =
-    identity?.role === UserRole.TEACHER || identity?.role === UserRole.ADMIN;
+  const isTeacher = identity?.role === UserRole.TEACHER || identity?.role === UserRole.ADMIN;
   const isStudent = identity?.role === UserRole.STUDENT;
   const go = useGo();
 
@@ -90,17 +69,13 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
 
   const { query: modulesQuery } = useList<Module>({
     resource: "modules",
-    filters: [
-      { field: "classId", operator: "eq" as const, value: Number(classId) },
-    ],
+    filters: [{ field: "classId", operator: "eq" as const, value: Number(classId) }],
     queryOptions: { enabled: !!classId },
   });
 
   const { query: progressQuery } = useList<Progress>({
     resource: "progress",
-    filters: [
-      { field: "classId", operator: "eq" as const, value: Number(classId) },
-    ],
+    filters: [{ field: "classId", operator: "eq" as const, value: Number(classId) }],
     queryOptions: { enabled: !!classId && isStudent },
   });
 
@@ -114,31 +89,26 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
   const { mutate: customMutation } = useCustomMutation();
   const queryClient = useQueryClient();
 
-  const isItemCompleted = (
-    type: "resource" | "assignment" | "quiz",
-    id: number,
-  ) => {
+  const isItemCompleted = (type: "resource" | "assignment" | "quiz", id: number) => {
     return userProgress.some(
       (p: Progress) =>
         p.isCompleted &&
         ((type === "resource" && p.resourceId === id) ||
           (type === "assignment" && p.assignmentId === id) ||
-          (type === "quiz" && p.quizId === id)),
+          (type === "quiz" && p.quizId === id))
     );
   };
 
   const handleToggleProgress = async (
     type: "resource" | "assignment" | "quiz",
     id: number,
-    moduleId: number,
+    moduleId: number
   ) => {
     const currentStatus = isItemCompleted(type, id);
     const queryKey: [string, { filters: CrudFilter[] }] = [
       "progress",
       {
-        filters: [
-          { field: "classId", operator: "eq" as const, value: Number(classId) },
-        ],
+        filters: [{ field: "classId", operator: "eq" as const, value: Number(classId) }],
       },
     ];
 
@@ -146,45 +116,41 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
     await queryClient.cancelQueries({ queryKey });
 
     // 2. Snapshot the previous value
-    const previousProgress =
-      queryClient.getQueryData<ListResponse<Progress>>(queryKey);
+    const previousProgress = queryClient.getQueryData<ListResponse<Progress>>(queryKey);
 
     // 3. Optimistically update to the new value
-    queryClient.setQueryData(
-      queryKey,
-      (old: ListResponse<Progress> | undefined) => {
-        if (!old || !old.data) return old;
+    queryClient.setQueryData(queryKey, (old: ListResponse<Progress> | undefined) => {
+      if (!old || !old.data) return old;
 
-        let newData = [...old.data];
-        if (!currentStatus) {
-          // Add a temporary progress record
-          newData.push({
-            id: Math.random(), // Temp ID
-            classId: Number(classId),
-            moduleId,
-            resourceId: type === "resource" ? id : null,
-            assignmentId: type === "assignment" ? id : null,
-            quizId: type === "quiz" ? id : null,
-            isCompleted: true,
-            completedAt: new Date().toISOString(),
-            userId: identity?.id || "",
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          } as Progress);
-        } else {
-          // Remove the record
-          newData = newData.filter(
-            (p: Progress) =>
-              !(
-                (type === "resource" && p.resourceId === id) ||
-                (type === "assignment" && p.assignmentId === id) ||
-                (type === "quiz" && p.quizId === id)
-              ),
-          );
-        }
-        return { ...old, data: newData };
-      },
-    );
+      let newData = [...old.data];
+      if (!currentStatus) {
+        // Add a temporary progress record
+        newData.push({
+          id: Math.random(), // Temp ID
+          classId: Number(classId),
+          moduleId,
+          resourceId: type === "resource" ? id : null,
+          assignmentId: type === "assignment" ? id : null,
+          quizId: type === "quiz" ? id : null,
+          isCompleted: true,
+          completedAt: new Date().toISOString(),
+          userId: identity?.id || "",
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        } as Progress);
+      } else {
+        // Remove the record
+        newData = newData.filter(
+          (p: Progress) =>
+            !(
+              (type === "resource" && p.resourceId === id) ||
+              (type === "assignment" && p.assignmentId === id) ||
+              (type === "quiz" && p.quizId === id)
+            )
+        );
+      }
+      return { ...old, data: newData };
+    });
 
     // 4. Perform the actual mutation
     customMutation(
@@ -207,7 +173,7 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
           toast.success(
             !currentStatus
               ? t("classes.curriculum.toast.completed")
-              : t("classes.curriculum.toast.incomplete"),
+              : t("classes.curriculum.toast.incomplete")
           );
         },
         onError: () => {
@@ -215,7 +181,7 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
           queryClient.setQueryData(queryKey, previousProgress);
           toast.error("Failed to update progress.");
         },
-      },
+      }
     );
   };
 
@@ -238,7 +204,7 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
           setNewModuleDesc("");
           void modulesQuery.refetch();
         },
-      },
+      }
     );
   };
 
@@ -261,7 +227,7 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
           void modulesQuery.refetch();
         },
         onError: () => setIsMagicCreating(false),
-      },
+      }
     );
   };
 
@@ -289,7 +255,7 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
           });
           void modulesQuery.refetch();
         },
-      },
+      }
     );
   };
 
@@ -323,11 +289,7 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
         {isTeacher && (
           <div className="flex items-center gap-2 md:gap-3 w-full md:w-auto">
             {coreData?.globalConfig?.enableAiFeatures !== false && (
-              <CanAccess
-                resource="modules"
-                action="create"
-                params={{ classId }}
-              >
+              <CanAccess resource="modules" action="create" params={{ classId }}>
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -346,17 +308,13 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
                       >
                         <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-[shine_1.5s_ease-in-out] pointer-events-none" />
                         <Wand2 className="h-3.5 w-3.5 md:h-4 md:w-4" />
-                        <span className="truncate">
-                          {t("buttons.magicBuilder")}
-                        </span>
+                        <span className="truncate">{t("buttons.magicBuilder")}</span>
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent className="max-w-xs text-center border-ai-primary/20 bg-background/95 backdrop-blur-xl p-3 shadow-2xl rounded-xl">
                       <div className="flex items-center justify-center mb-1">
                         <Sparkles className="h-4 w-4 text-ai-primary animate-pulse me-2" />
-                        <span className="font-bold">
-                          {t("tooltips.magicBuilder.title")}
-                        </span>
+                        <span className="font-bold">{t("tooltips.magicBuilder.title")}</span>
                       </div>
                       <p className="text-sm text-muted-foreground">
                         {t("tooltips.magicBuilder.description")}
@@ -435,18 +393,14 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
                           onSuccess: () => {
                             void modulesQuery.refetch();
                           },
-                        },
+                        }
                       )
                     }
                     onMagicAction={(moduleId, type) => {
                       setMagicConfig({
                         ...magicConfig,
                         moduleId,
-                        type: type as
-                          | "package"
-                          | "note"
-                          | "quiz"
-                          | "assignment",
+                        type: type as "package" | "note" | "quiz" | "assignment",
                       });
                       setIsMagicModalOpen(true);
                     }}

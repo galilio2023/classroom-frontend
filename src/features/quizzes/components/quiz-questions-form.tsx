@@ -1,10 +1,5 @@
 import { Plus, Trash2, CheckCircle2 } from "lucide-react";
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-} from "@/components/ui/form";
+import { FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -74,9 +69,7 @@ export const QuizQuestionsForm = ({ form, questions }: Props) => {
                   <FormItem>
                     <FormControl>
                       <Input
-                        placeholder={t(
-                          "aiHub.assistant.quizGen.placeholders.topic",
-                        )}
+                        placeholder={t("aiHub.assistant.quizGen.placeholders.topic")}
                         {...field}
                         className="h-12 rounded-xl bg-background border-none shadow-inner focus-visible:ring-primary font-bold"
                       />
@@ -104,24 +97,21 @@ export const QuizQuestionsForm = ({ form, questions }: Props) => {
                           <Button
                             type="button"
                             variant={
-                              form.watch(`questions.${index}.correctAnswer`) ===
-                                field.value && field.value !== ""
+                              form.watch(`questions.${index}.correctAnswer`) === field.value &&
+                              field.value !== ""
                                 ? "default"
                                 : "outline"
                             }
                             size="icon"
                             className={cn(
                               "shrink-0 rounded-xl h-11 w-11 transition-all",
-                              form.watch(`questions.${index}.correctAnswer`) ===
-                                field.value && field.value !== ""
+                              form.watch(`questions.${index}.correctAnswer`) === field.value &&
+                                field.value !== ""
                                 ? "bg-green-500 hover:bg-green-600 shadow-lg shadow-green-500/20"
-                                : "hover:bg-primary/5",
+                                : "hover:bg-primary/5"
                             )}
                             onClick={() =>
-                              form.setValue(
-                                `questions.${index}.correctAnswer`,
-                                field.value,
-                              )
+                              form.setValue(`questions.${index}.correctAnswer`, field.value)
                             }
                           >
                             <CheckCircle2 className="h-4 w-4" />

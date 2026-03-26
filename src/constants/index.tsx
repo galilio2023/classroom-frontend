@@ -22,9 +22,4 @@ export const ROLE_OPTIONS = [
 
 // --- File Upload Constants ---
 export const MAX_FILE_SIZE = 3 * 1024 * 1024; // 3MB in bytes
-export const ALLOWED_TYPES = [
-  "image/png",
-  "image/jpeg",
-  "image/jpg",
-  "image/webp",
-];
+export const ALLOWED_TYPES = ["image/png", "image/jpeg", "image/jpg", "image/webp"];

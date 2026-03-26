@@ -1,12 +1,6 @@
 import React from "react";
 import { GraduationCap, PlusCircle, ArrowRight, Sparkles } from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useNavigation } from "@refinedev/core";
 import { motion } from "framer-motion";

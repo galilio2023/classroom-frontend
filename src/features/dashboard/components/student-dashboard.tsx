@@ -7,15 +7,7 @@ import { StatsSkeleton } from "./dashboard-skeletons";
 import { useGetIdentity } from "@refinedev/core";
 import { User } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Trophy,
-  Star,
-  Zap,
-  Sparkles,
-  History,
-  TrendingUp,
-  Flame,
-} from "lucide-react";
+import { Trophy, Star, Zap, Sparkles, History, TrendingUp, Flame } from "lucide-react";
 import { XPProgressBar } from "@/components/xp-progress-bar";
 import { getLevelProgress } from "@/lib/xp";
 import { StudentOnboarding } from "./student-onboarding";
@@ -32,18 +24,12 @@ interface StudentDashboardProps {
   show: (resource: string, id: string | number) => void;
 }
 
-export const StudentDashboard = ({
-  data,
-  isLoading,
-  list,
-  show,
-}: StudentDashboardProps) => {
+export const StudentDashboard = ({ data, isLoading, list, show }: StudentDashboardProps) => {
   const { t } = useTranslation();
   const { data: identity } = useGetIdentity<User>();
 
   const currentXP = identity?.xp || 0;
-  const { currentLevel, xpRequiredForNextLevel, xpInCurrentLevel } =
-    getLevelProgress(currentXP);
+  const { currentLevel, xpRequiredForNextLevel, xpInCurrentLevel } = getLevelProgress(currentXP);
   const xpNeeded = xpRequiredForNextLevel - xpInCurrentLevel;
 
   const hasClasses = (identity?.enrollments?.length || 0) > 0;
@@ -93,10 +79,7 @@ export const StudentDashboard = ({
   return (
     <div className="space-y-16 md:space-y-24 lg:space-y-32">
       {!hasClasses && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
           <StudentOnboarding />
         </motion.div>
       )}
@@ -180,8 +163,7 @@ export const StudentDashboard = ({
                       {t("dashboard.student.level")} {currentLevel}
                     </span>
                     <span className="text-white/60">
-                      {Math.floor(xpInCurrentLevel)} / {xpRequiredForNextLevel}{" "}
-                      XP
+                      {Math.floor(xpInCurrentLevel)} / {xpRequiredForNextLevel} XP
                     </span>
                     <span>
                       {t("dashboard.student.level")} {currentLevel + 1}

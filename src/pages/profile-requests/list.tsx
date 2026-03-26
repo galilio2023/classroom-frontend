@@ -20,12 +20,7 @@ import {
 } from "lucide-react";
 import { Input } from "@/components/ui/input.tsx";
 import { useMemo, useState, useRef, useCallback } from "react";
-import {
-  useList,
-  useNavigation,
-  useCustomMutation,
-  useInvalidate,
-} from "@refinedev/core";
+import { useList, useNavigation, useCustomMutation, useInvalidate } from "@refinedev/core";
 import { ProfileChangeRequest } from "@/types";
 import { Badge } from "@/components/ui/badge.tsx";
 import { Button } from "@/components/ui/button.tsx";
@@ -124,7 +119,7 @@ const ProfileRequestsList = () => {
           toast.success(t("profileRequests.toasts.approved"));
           invalidate({ resource: "profile-requests", invalidates: ["list"] });
         },
-      },
+      }
     );
   };
 
@@ -144,7 +139,7 @@ const ProfileRequestsList = () => {
           setRejectReason("");
           invalidate({ resource: "profile-requests", invalidates: ["list"] });
         },
-      },
+      }
     );
   };
 
@@ -164,12 +159,8 @@ const ProfileRequestsList = () => {
     if (!requests.length) return { total: 0, pending: 0, approved: 0 };
     return {
       total: requests.length,
-      pending: requests.filter(
-        (r: ProfileChangeRequest) => r.status === "pending",
-      ).length,
-      approved: requests.filter(
-        (r: ProfileChangeRequest) => r.status === "approved",
-      ).length,
+      pending: requests.filter((r: ProfileChangeRequest) => r.status === "pending").length,
+      approved: requests.filter((r: ProfileChangeRequest) => r.status === "approved").length,
     };
   }, [requests]);
 
@@ -185,9 +176,7 @@ const ProfileRequestsList = () => {
             <Breadcrumb />
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div>
-                <h1 className="text-4xl font-black tracking-tight">
-                  {t("profileRequests.title")}
-                </h1>
+                <h1 className="text-4xl font-black tracking-tight">{t("profileRequests.title")}</h1>
                 <p className="text-muted-foreground font-medium mt-1">
                   {t("profileRequests.description")}
                 </p>
@@ -205,9 +194,7 @@ const ProfileRequestsList = () => {
                 <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                   {t("profileRequests.stats.total")}
                 </p>
-                <p className="text-2xl font-black">
-                  {isLoading ? "..." : stats.total}
-                </p>
+                <p className="text-2xl font-black">{isLoading ? "..." : stats.total}</p>
               </div>
             </Card>
             <Card className="p-6 border-amber-500/10 bg-card/50 backdrop-blur-sm flex items-center gap-4 rounded-4xl shadow-lg shadow-amber-500/5">
@@ -261,22 +248,13 @@ const ProfileRequestsList = () => {
                     <SelectItem value="all" className="rounded-xl font-bold">
                       {t("enrollments.allStatus")}
                     </SelectItem>
-                    <SelectItem
-                      value="pending"
-                      className="rounded-xl font-bold"
-                    >
+                    <SelectItem value="pending" className="rounded-xl font-bold">
                       {t("status.upcoming")}
                     </SelectItem>
-                    <SelectItem
-                      value="approved"
-                      className="rounded-xl font-bold"
-                    >
+                    <SelectItem value="approved" className="rounded-xl font-bold">
                       {t("status.active")}
                     </SelectItem>
-                    <SelectItem
-                      value="rejected"
-                      className="rounded-xl font-bold"
-                    >
+                    <SelectItem value="rejected" className="rounded-xl font-bold">
                       {t("buttons.reject")}
                     </SelectItem>
                   </SelectContent>
@@ -291,9 +269,7 @@ const ProfileRequestsList = () => {
             className="h-150 overflow-auto pe-2 custom-scrollbar rounded-[2.5rem] border border-primary/5 bg-card/30 backdrop-blur-sm relative"
           >
             {isLoading ? (
-              <div
-                style={{ height: "100%", width: "100%", position: "relative" }}
-              >
+              <div style={{ height: "100%", width: "100%", position: "relative" }}>
                 {Array.from({ length: 6 }).map((_, i: any) => (
                   <div
                     key={i}
@@ -332,9 +308,7 @@ const ProfileRequestsList = () => {
                   const requestDate = dayjs(request.createdAt);
                   const oldData = request.oldData || {};
                   const newData = request.newData || {};
-                  const changedKeys = Object.keys(newData).filter(
-                    (k) => newData[k] !== oldData[k],
-                  );
+                  const changedKeys = Object.keys(newData).filter((k) => newData[k] !== oldData[k]);
 
                   return (
                     <div
@@ -384,8 +358,7 @@ const ProfileRequestsList = () => {
                                 }
                                 className={cn(
                                   "text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md border-none",
-                                  request.status === "pending" &&
-                                    "bg-amber-500/10 text-amber-600",
+                                  request.status === "pending" && "bg-amber-500/10 text-amber-600"
                                 )}
                               >
                                 {request.status}
@@ -404,9 +377,7 @@ const ProfileRequestsList = () => {
                           <div className="flex flex-wrap items-center justify-center md:justify-start gap-x-4 gap-y-1 mt-2">
                             <div className="flex items-center gap-1.5 text-muted-foreground">
                               <Mail className="h-3 w-3 text-primary" />
-                              <span className="text-[11px] font-bold">
-                                {request.user.email}
-                              </span>
+                              <span className="text-[11px] font-bold">{request.user.email}</span>
                             </div>
 
                             <div className="flex items-center gap-1.5 text-muted-foreground">
@@ -429,18 +400,14 @@ const ProfileRequestsList = () => {
                                   className="flex items-center gap-1.5 bg-muted/30 px-2 py-1 rounded-lg border border-primary/5"
                                 >
                                   <span className="text-[7px] font-black uppercase tracking-widest text-muted-foreground/60">
-                                    {key
-                                      .replace("Url", "")
-                                      .replace(/([A-Z])/g, " $1")}
+                                    {key.replace("Url", "").replace(/([A-Z])/g, " $1")}
                                   </span>
                                   {isDoc ? (
                                     <Button
                                       variant="link"
                                       size="sm"
                                       className="h-auto p-0 text-[9px] font-black gap-1 text-primary"
-                                      onClick={() =>
-                                        setPreviewUrl(String(newData[key]))
-                                      }
+                                      onClick={() => setPreviewUrl(String(newData[key]))}
                                     >
                                       <FileText className="h-2.5 w-2.5" />
                                       {t("profileRequests.labels.viewProof")}
@@ -448,10 +415,7 @@ const ProfileRequestsList = () => {
                                   ) : (
                                     <div className="flex items-center gap-1 text-[9px] font-bold">
                                       <span className="text-muted-foreground/40 line-through truncate max-w-15">
-                                        {String(
-                                          oldData[key] ||
-                                            t("profileRequests.labels.empty"),
-                                        )}
+                                        {String(oldData[key] || t("profileRequests.labels.empty"))}
                                       </span>
                                       <ArrowRight className="h-2 w-2 text-primary/40" />
                                       <span className="text-primary truncate max-w-15">
@@ -498,11 +462,7 @@ const ProfileRequestsList = () => {
 
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-9 w-9 rounded-lg"
-                              >
+                              <Button variant="ghost" size="icon" className="h-9 w-9 rounded-lg">
                                 <MoreHorizontal className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
@@ -542,10 +502,7 @@ const ProfileRequestsList = () => {
       </ListView>
 
       {/* Document Preview Dialog */}
-      <Dialog
-        open={previewUrl !== null}
-        onOpenChange={() => setPreviewUrl(null)}
-      >
+      <Dialog open={previewUrl !== null} onOpenChange={() => setPreviewUrl(null)}>
         <DialogContent className="max-w-4xl h-[85vh] flex flex-col rounded-[2.5rem] border-none shadow-2xl bg-card/95 backdrop-blur-xl">
           <DialogHeader className="p-6 pb-0">
             <div className="flex items-center justify-between">
@@ -561,11 +518,7 @@ const ProfileRequestsList = () => {
           </DialogHeader>
           <div className="flex-1 bg-muted/30 rounded-4xl overflow-hidden border border-primary/5 mt-6 relative group">
             {previewUrl?.endsWith(".pdf") ? (
-              <iframe
-                src={previewUrl}
-                className="w-full h-full"
-                title="PDF Preview"
-              />
+              <iframe src={previewUrl} className="w-full h-full" title="PDF Preview" />
             ) : (
               <div className="w-full h-full flex items-center justify-center p-8">
                 <img
@@ -598,10 +551,7 @@ const ProfileRequestsList = () => {
       </Dialog>
 
       {/* Rejection Dialog */}
-      <Dialog
-        open={rejectTarget !== null}
-        onOpenChange={() => setRejectTarget(null)}
-      >
+      <Dialog open={rejectTarget !== null} onOpenChange={() => setRejectTarget(null)}>
         <DialogContent className="rounded-[2.5rem] border-none shadow-2xl bg-card/95 backdrop-blur-xl max-w-md">
           <DialogHeader className="space-y-4">
             <div className="p-4 rounded-2xl bg-destructive/10 text-destructive w-fit">

@@ -5,12 +5,14 @@ import { useMemo } from "react";
 /**
  * Custom hook to centralize role-based logic and staff detection.
  * Adheres to the Tablawy OS - Frontend AI Integration Patterns (Refine v5).
- * 
+ *
  * Optimized: Wraps usePermissions to benefit from Refine's centralized caching.
  */
 export const useUserRole = () => {
   const { data: identity, isLoading: isIdentityLoading, refetch } = useGetIdentity<User>({});
-  const { data: permissions, isLoading: isPermissionsLoading } = usePermissions<BasePermissions>({});
+  const { data: permissions, isLoading: isPermissionsLoading } = usePermissions<BasePermissions>(
+    {}
+  );
 
   const roles = useMemo(() => {
     // Prefer permissions role for cached consistency, fallback to identity

@@ -13,12 +13,7 @@ interface ChatInputProps {
   isLoading: boolean;
 }
 
-export const ChatInput: React.FC<ChatInputProps> = ({
-  input,
-  setInput,
-  handleSend,
-  isLoading,
-}) => {
+export const ChatInput: React.FC<ChatInputProps> = ({ input, setInput, handleSend, isLoading }) => {
   const { t, i18n } = useTranslation();
   const isAr = i18n.language === "ar";
 

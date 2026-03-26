@@ -56,11 +56,10 @@ export const ApplyTeacherDialog = ({
         onError: (err) => {
           const error = err as HttpError;
           toast.error(
-            (error?.response?.data as any)?.message ||
-              t("classes.dialogs.applyTeacher.toast.error"),
+            (error?.response?.data as any)?.message || t("classes.dialogs.applyTeacher.toast.error")
           );
         },
-      },
+      }
     );
   };
 
@@ -80,14 +79,13 @@ export const ApplyTeacherDialog = ({
             <DialogDescription className="font-medium text-base">
               {isAr ? (
                 <>
-                  أنت تطلب إدارة وتدريس فصل <strong>{className}</strong>. سيقوم
-                  المسؤول بمراجعة طلبك.
+                  أنت تطلب إدارة وتدريس فصل <strong>{className}</strong>. سيقوم المسؤول بمراجعة
+                  طلبك.
                 </>
               ) : (
                 <>
-                  You are requesting to manage and teach{" "}
-                  <strong>{className}</strong>. The administrator will review
-                  your request.
+                  You are requesting to manage and teach <strong>{className}</strong>. The
+                  administrator will review your request.
                 </>
               )}
             </DialogDescription>
@@ -108,7 +106,7 @@ export const ApplyTeacherDialog = ({
               <div
                 className={cn(
                   "absolute bottom-4 opacity-10 group-focus-within:opacity-30 transition-opacity",
-                  "end-4",
+                  "end-4"
                 )}
               >
                 <Sparkles className="h-6 w-6" />

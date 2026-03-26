@@ -30,10 +30,7 @@ interface CertificateGalleryProps {
   isOwner: boolean;
 }
 
-export const CertificateGallery = ({
-  studentName,
-  isOwner,
-}: CertificateGalleryProps) => {
+export const CertificateGallery = ({ studentName, isOwner }: CertificateGalleryProps) => {
   const { t } = useTranslation();
   const [selectedCert, setSelectedCert] = useState(MOCK_CERTIFICATES[0]);
   const printRef = useRef<HTMLDivElement>(null);
@@ -99,10 +96,7 @@ export const CertificateGallery = ({
                         />
                       </div>
                       <div className="flex gap-4 mt-4 no-print">
-                        <Button
-                          onClick={handlePrint}
-                          className="gap-2 shadow-xl"
-                        >
+                        <Button onClick={handlePrint} className="gap-2 shadow-xl">
                           <Printer className="w-4 h-4" />
                           {t("buttons.printReport")}
                         </Button>

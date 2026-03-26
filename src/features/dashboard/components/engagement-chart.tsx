@@ -1,10 +1,4 @@
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { TrendingUp, BarChart, Sparkles, Activity } from "lucide-react";
 import {
   AreaChart,
@@ -75,7 +69,7 @@ const ChartCard = ({
               <CardTitle
                 className={cn(
                   "flex items-center gap-3 text-xl md:text-2xl tracking-tighter",
-                  isArabic ? "font-bold" : "font-black",
+                  isArabic ? "font-bold" : "font-black"
                 )}
               >
                 <div className="p-2.5 rounded-xl bg-primary/10 text-primary group-hover:scale-110 transition-transform duration-500">
@@ -128,10 +122,7 @@ const ChartCard = ({
   );
 };
 
-export const EngagementChart = ({
-  attendanceData,
-  gradeData,
-}: EngagementChartProps) => {
+export const EngagementChart = ({ attendanceData, gradeData }: EngagementChartProps) => {
   const { t, i18n } = useTranslation();
   const isArabic = i18n.language === "ar";
 
@@ -160,22 +151,11 @@ export const EngagementChart = ({
       >
         <ChartContainer config={attendanceConfig} className="h-full w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart
-              data={attendanceData}
-              margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
-            >
+            <AreaChart data={attendanceData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <defs>
                 <linearGradient id="fillPresent" x1="0" y1="0" x2="0" y2="1">
-                  <stop
-                    offset="5%"
-                    stopColor="hsl(var(--primary))"
-                    stopOpacity={0.4}
-                  />
-                  <stop
-                    offset="95%"
-                    stopColor="hsl(var(--primary))"
-                    stopOpacity={0}
-                  />
+                  <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.4} />
+                  <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid
@@ -193,7 +173,7 @@ export const EngagementChart = ({
                   try {
                     return new Date(str).toLocaleDateString(
                       i18n.language === "ar" ? "ar-EG" : "en-US",
-                      { weekday: "short" },
+                      { weekday: "short" }
                     );
                   } catch {
                     return str;
@@ -208,9 +188,7 @@ export const EngagementChart = ({
                 className="fill-muted-foreground/60 text-[8px] md:text-[10px] font-black uppercase tracking-widest"
                 orientation={isArabic ? "right" : "left"}
                 tickFormatter={(val) =>
-                  new Intl.NumberFormat(isArabic ? "ar-EG" : "en-US").format(
-                    val,
-                  )
+                  new Intl.NumberFormat(isArabic ? "ar-EG" : "en-US").format(val)
                 }
               />
               <ChartTooltip
@@ -254,16 +232,8 @@ export const EngagementChart = ({
               >
                 <defs>
                   <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop
-                      offset="0%"
-                      stopColor="hsl(var(--primary))"
-                      stopOpacity={1}
-                    />
-                    <stop
-                      offset="100%"
-                      stopColor="hsl(var(--primary))"
-                      stopOpacity={0.6}
-                    />
+                    <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={1} />
+                    <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0.6} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid
@@ -286,9 +256,7 @@ export const EngagementChart = ({
                   className="fill-muted-foreground/60 text-[8px] md:text-[10px] font-black uppercase tracking-widest"
                   orientation={isArabic ? "right" : "left"}
                   tickFormatter={(val) =>
-                    new Intl.NumberFormat(isArabic ? "ar-EG" : "en-US").format(
-                      val,
-                    )
+                    new Intl.NumberFormat(isArabic ? "ar-EG" : "en-US").format(val)
                   }
                 />
                 <ChartTooltip

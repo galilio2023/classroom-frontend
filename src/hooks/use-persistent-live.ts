@@ -27,7 +27,7 @@ interface PersistentLiveState {
   setPromotionTrailer: (
     url: string | null,
     teacherName?: string | null,
-    headline?: string | null,
+    headline?: string | null
   ) => void;
   setActiveVideo: (url: string | null, title?: string | null) => void;
   stopSpeaking: () => void;
@@ -55,8 +55,7 @@ export const usePersistentLive = create<PersistentLiveState>()(
         set((state) => ({
           activeClassId: id,
           isJoined: id === state.activeClassId ? state.isJoined : false,
-          isAiDelegated:
-            id === state.activeClassId ? state.isAiDelegated : false,
+          isAiDelegated: id === state.activeClassId ? state.isAiDelegated : false,
         }));
       },
       setIsJoined: (val: boolean) => set({ isJoined: val }),
@@ -65,7 +64,7 @@ export const usePersistentLive = create<PersistentLiveState>()(
       setPromotionTrailer: (
         url: string | null,
         teacherName: string | null = null,
-        headline: string | null = null,
+        headline: string | null = null
       ) =>
         set({
           promotionTrailer: { url, teacherName, headline },
@@ -97,6 +96,6 @@ export const usePersistentLive = create<PersistentLiveState>()(
     {
       name: "tablawy-live-session", // Key in localStorage
       storage: createJSONStorage(() => localStorage),
-    },
-  ),
+    }
+  )
 );

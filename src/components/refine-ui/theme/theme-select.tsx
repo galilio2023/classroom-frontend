@@ -59,7 +59,7 @@ export function ThemeSelect() {
             "hover:text-accent-foreground",
             "focus-visible:outline-none",
             "focus-visible:ring-2",
-            "focus-visible:ring-ring",
+            "focus-visible:ring-ring"
           )}
         >
           <div className="flex items-center gap-2">
@@ -77,18 +77,13 @@ export function ThemeSelect() {
             <DropdownMenuItem
               key={option.value}
               onClick={() => setTheme(option.value)}
-              className={cn(
-                "flex items-center gap-2 cursor-pointer relative pe-8",
-                {
-                  "bg-accent text-accent-foreground": isSelected,
-                },
-              )}
+              className={cn("flex items-center gap-2 cursor-pointer relative pe-8", {
+                "bg-accent text-accent-foreground": isSelected,
+              })}
             >
               {option.icon}
               <span>{option.label}</span>
-              {isSelected && (
-                <Check className="h-4 w-4 absolute end-2 text-primary" />
-              )}
+              {isSelected && <Check className="h-4 w-4 absolute end-2 text-primary" />}
             </DropdownMenuItem>
           );
         })}

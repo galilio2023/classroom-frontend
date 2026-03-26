@@ -1,10 +1,5 @@
 import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useResourceParams, useTranslate } from "@refinedev/core";
 import { ChevronLeft, InfoIcon, Home, RefreshCw } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -28,8 +23,8 @@ export function ErrorComponent() {
             action: action,
             resource: resource?.name,
           },
-          `You may have forgotten to add the "${action}" component to "${resource?.name}" resource.`,
-        ),
+          `You may have forgotten to add the "${action}" component to "${resource?.name}" resource.`
+        )
       );
     }
   }, [resource, action, translate]);
@@ -60,9 +55,7 @@ export function ErrorComponent() {
         <div className="flex justify-center">
           <div className="relative">
             <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full animate-pulse" />
-            <h1 className="relative text-9xl font-black tracking-tighter text-primary/10">
-              404
-            </h1>
+            <h1 className="relative text-9xl font-black tracking-tighter text-primary/10">404</h1>
           </div>
         </div>
 
@@ -75,7 +68,7 @@ export function ErrorComponent() {
             <p className="text-muted-foreground text-sm leading-relaxed">
               {translate(
                 "pages.error.description",
-                "The page you're looking for doesn't exist. It might have been moved or deleted.",
+                "The page you're looking for doesn't exist. It might have been moved or deleted."
               )}
             </p>
             {errorMessage && (

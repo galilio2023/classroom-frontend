@@ -1,17 +1,6 @@
 import React, { useEffect, useState } from "react";
-import {
-  useGetIdentity,
-  useCustom,
-  useCustomMutation,
-  useInvalidate,
-} from "@refinedev/core";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { useGetIdentity, useCustom, useCustomMutation, useInvalidate } from "@refinedev/core";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -73,8 +62,7 @@ const TeacherChannelPage = () => {
   const channelData = query.data;
   const isLoading = query.isPending;
 
-  const { mutate: upsertChannel, mutation: upsertMutation } =
-    useCustomMutation();
+  const { mutate: upsertChannel, mutation: upsertMutation } = useCustomMutation();
 
   const {
     register,
@@ -124,7 +112,7 @@ const TeacherChannelPage = () => {
         onError: () => {
           toast.error(t("teacherChannel.toasts.error"));
         },
-      },
+      }
     );
   };
 
@@ -178,8 +166,8 @@ const TeacherChannelPage = () => {
                 Studio <span className="text-primary/40">Center</span>
               </h1>
               <p className="text-muted-foreground font-medium max-w-xl text-lg">
-                Design your personal "Promotion Channel" to attract students and
-                showcase your teaching style.
+                Design your personal "Promotion Channel" to attract students and showcase your
+                teaching style.
               </p>
             </div>
           </div>
@@ -291,10 +279,7 @@ const TeacherChannelPage = () => {
                 <Button
                   type="submit"
                   size="lg"
-                  disabled={
-                    upsertMutation.isPending ||
-                    (!isDirty && !!channelData?.data)
-                  }
+                  disabled={upsertMutation.isPending || (!isDirty && !!channelData?.data)}
                   className="h-20 w-full md:w-auto px-16 rounded-full font-black uppercase tracking-widest text-sm shadow-2xl shadow-primary/30 transition-all hover:scale-105 active:scale-95 group"
                 >
                   {upsertMutation.isPending ? (
@@ -378,9 +363,7 @@ const TeacherChannelPage = () => {
                     </Badge>
                   </motion.div>
                   <h3 className="text-4xl md:text-5xl font-black text-white tracking-tighter leading-[0.9] text-start uppercase">
-                    {watchedValues.headline ||
-                      identity?.name ||
-                      "Broadcasting..."}
+                    {watchedValues.headline || identity?.name || "Broadcasting..."}
                   </h3>
                 </div>
 
@@ -415,13 +398,11 @@ const TeacherChannelPage = () => {
                   <Sparkles className="h-6 w-6" />
                 </div>
                 <div className="space-y-2">
-                  <h4 className="font-black uppercase tracking-widest text-xs">
-                    Studio Tip
-                  </h4>
+                  <h4 className="font-black uppercase tracking-widest text-xs">Studio Tip</h4>
                   <p className="text-base font-medium text-muted-foreground/80 leading-relaxed">
                     High-quality video trailers increase conversion by{" "}
-                    <span className="text-primary font-black">40%</span>. Hover
-                    the preview card to see your video in action.
+                    <span className="text-primary font-black">40%</span>. Hover the preview card to
+                    see your video in action.
                   </p>
                 </div>
               </div>

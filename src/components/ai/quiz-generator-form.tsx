@@ -2,13 +2,7 @@ import React from "react";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { Slider } from "../ui/slider";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { LoadingButton } from "../ui/loading-button";
 import { AICard } from "./ai-card";
 import { AIActionButton } from "./ai-action-button";
@@ -114,9 +108,7 @@ export const QuizGeneratorForm: React.FC<QuizGeneratorFormProps> = ({
                 <div className="flex items-center gap-2 truncate min-w-0">
                   <BarChart className="h-4 w-4 text-primary shrink-0" />
                   <span className="truncate block">
-                    <SelectValue
-                      placeholder={t("aiHub.assistant.quizGen.difficulty")}
-                    />
+                    <SelectValue placeholder={t("aiHub.assistant.quizGen.difficulty")} />
                   </span>
                 </div>
               </SelectTrigger>
@@ -148,9 +140,7 @@ export const QuizGeneratorForm: React.FC<QuizGeneratorFormProps> = ({
                 <div className="flex items-center gap-2 truncate min-w-0">
                   <ListChecks className="h-4 w-4 text-primary shrink-0" />
                   <span className="truncate block">
-                    <SelectValue
-                      placeholder={t("aiHub.assistant.quizGen.format")}
-                    />
+                    <SelectValue placeholder={t("aiHub.assistant.quizGen.format")} />
                   </span>
                 </div>
               </SelectTrigger>
@@ -175,9 +165,7 @@ export const QuizGeneratorForm: React.FC<QuizGeneratorFormProps> = ({
               {t("aiHub.assistant.quizGen.questions")}
             </Label>
             <span className="text-sm font-black text-primary">
-              {new Intl.NumberFormat(isArabic ? "ar-EG" : "en-US").format(
-                count[0],
-              )}
+              {new Intl.NumberFormat(isArabic ? "ar-EG" : "en-US").format(count[0])}
             </span>
           </div>
           <Slider

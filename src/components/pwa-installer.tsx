@@ -48,9 +48,7 @@ export function PWAInstaller() {
           </div>
           <div>
             <p className="text-sm font-medium">{t("common.pwa.title")}</p>
-            <p className="text-xs text-muted-foreground">
-              {t("common.pwa.description")}
-            </p>
+            <p className="text-xs text-muted-foreground">{t("common.pwa.description")}</p>
           </div>
         </div>
         <div className="flex items-center gap-2">

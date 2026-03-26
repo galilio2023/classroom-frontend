@@ -24,14 +24,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
-import {
-  ArrowLeft,
-  ArrowRight,
-  BookOpen,
-  Loader2,
-  Sparkles,
-  Zap,
-} from "lucide-react";
+import { ArrowLeft, ArrowRight, BookOpen, Loader2, Sparkles, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import axios from "axios";
 import { RoleSelector } from "@/components/auth/role-selector";
@@ -100,13 +93,10 @@ const RegisterPage = () => {
 
     setIsGeneratingBio(true);
     try {
-      const response = await axios.post<{ content: string }>(
-        "/api/ai/generate-content",
-        {
-          prompt: `Generate a professional bio for a ${role} named ${name}. Keywords: passionate, experienced, dedicated. Keep it under 50 words.`,
-          context: "User Registration Bio",
-        },
-      );
+      const response = await axios.post<{ content: string }>("/api/ai/generate-content", {
+        prompt: `Generate a professional bio for a ${role} named ${name}. Keywords: passionate, experienced, dedicated. Keep it under 50 words.`,
+        context: "User Registration Bio",
+      });
 
       form.setValue("bio", response.data.content);
       toast.success(t("auth.register.aiBioGenerated"));
@@ -116,10 +106,7 @@ const RegisterPage = () => {
         student: `Hi, I'm ${name}. I'm an enthusiastic student eager to learn and grow in my academic journey.`,
         parent: `Hello, I'm ${name}. I am a supportive parent dedicated to my child's educational success and well-being.`,
       };
-      form.setValue(
-        "bio",
-        fallbacks[role as keyof typeof fallbacks] || `Hi, I'm ${name}.`,
-      );
+      form.setValue("bio", fallbacks[role as keyof typeof fallbacks] || `Hi, I'm ${name}.`);
       toast.info(t("auth.register.aiBioFallback"));
     } finally {
       setIsGeneratingBio(false);
@@ -148,12 +135,10 @@ const RegisterPage = () => {
           onError: (err) => {
             const error = err as HttpError;
             const errorMessage =
-              (error as any)?.data?.message ||
-              error.message ||
-              t("auth.login.unknownError");
+              (error as any)?.data?.message || error.message || t("auth.login.unknownError");
             toast.error(errorMessage);
           },
-        },
+        }
       );
     })();
   };
@@ -174,10 +159,7 @@ const RegisterPage = () => {
         transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
         className="w-full max-w-xl z-10"
       >
-        <Link
-          to="/"
-          className="flex items-center justify-center gap-3 mb-10 md:mb-14 group"
-        >
+        <Link to="/" className="flex items-center justify-center gap-3 mb-10 md:mb-14 group">
           <div className="bg-primary p-2.5 rounded-2xl group-hover:rotate-6 group-hover:scale-110 transition-all duration-500 shadow-lg shadow-primary/20">
             <BookOpen className="h-7 w-7 text-primary-foreground" />
           </div>
@@ -193,9 +175,7 @@ const RegisterPage = () => {
               {t("auth.register.stepOf", {
                 step,
                 label:
-                  step === 1
-                    ? t("auth.register.accountSetup")
-                    : t("auth.register.profileDetails"),
+                  step === 1 ? t("auth.register.accountSetup") : t("auth.register.profileDetails"),
               })}
             </div>
             <div className="space-y-2">
@@ -230,12 +210,7 @@ const RegisterPage = () => {
                             </FormLabel>
                             <FormControl>
                               <RoleSelector
-                                value={
-                                  field.value as
-                                    | "student"
-                                    | "teacher"
-                                    | "parent"
-                                }
+                                value={field.value as "student" | "teacher" | "parent"}
                                 onChange={(val) => field.onChange(val)}
                               />
                             </FormControl>
@@ -255,9 +230,7 @@ const RegisterPage = () => {
                               </FormLabel>
                               <FormControl>
                                 <Input
-                                  placeholder={t(
-                                    "auth.register.fullNamePlaceholder",
-                                  )}
+                                  placeholder={t("auth.register.fullNamePlaceholder")}
                                   className="h-14 md:h-16 rounded-2xl md:rounded-3xl bg-muted/30 border-none shadow-inner px-6 md:px-8 text-base md:text-lg font-black placeholder:text-muted-foreground/30 focus-visible:ring-primary/20"
                                   {...field}
                                 />
@@ -277,9 +250,7 @@ const RegisterPage = () => {
                               <FormControl>
                                 <Input
                                   type="email"
-                                  placeholder={t(
-                                    "auth.register.emailPlaceholder",
-                                  )}
+                                  placeholder={t("auth.register.emailPlaceholder")}
                                   className="h-14 md:h-16 rounded-2xl md:rounded-3xl bg-muted/30 border-none shadow-inner px-6 md:px-8 text-base md:text-lg font-black placeholder:text-muted-foreground/30 focus-visible:ring-primary/20"
                                   {...field}
                                 />
@@ -300,9 +271,7 @@ const RegisterPage = () => {
                             <FormControl>
                               <Input
                                 type="password"
-                                placeholder={t(
-                                  "auth.register.passwordPlaceholder",
-                                )}
+                                placeholder={t("auth.register.passwordPlaceholder")}
                                 className="h-14 md:h-16 rounded-2xl md:rounded-3xl bg-muted/30 border-none shadow-inner px-6 md:px-8 text-base md:text-lg font-black placeholder:text-muted-foreground/30 focus-visible:ring-primary/20"
                                 {...field}
                               />
@@ -339,9 +308,7 @@ const RegisterPage = () => {
                               </FormLabel>
                               <FormControl>
                                 <Input
-                                  placeholder={t(
-                                    "auth.register.phoneNumberPlaceholder",
-                                  )}
+                                  placeholder={t("auth.register.phoneNumberPlaceholder")}
                                   className="h-14 md:h-16 rounded-2xl md:rounded-3xl bg-muted/30 border-none shadow-inner px-6 md:px-8 text-base md:text-lg font-black placeholder:text-muted-foreground/30 focus-visible:ring-primary/20"
                                   {...field}
                                 />
@@ -383,9 +350,7 @@ const RegisterPage = () => {
                                   </FormLabel>
                                   <FormControl>
                                     <Input
-                                      placeholder={t(
-                                        "auth.register.fullNamePlaceholder",
-                                      )}
+                                      placeholder={t("auth.register.fullNamePlaceholder")}
                                       className="h-14 md:h-16 rounded-2xl md:rounded-3xl bg-muted/30 border-none shadow-inner px-6 md:px-8 text-base md:text-lg font-black placeholder:text-muted-foreground/30 focus-visible:ring-primary/20"
                                       {...field}
                                     />
@@ -404,9 +369,7 @@ const RegisterPage = () => {
                                   </FormLabel>
                                   <FormControl>
                                     <Input
-                                      placeholder={t(
-                                        "auth.register.phoneNumberPlaceholder",
-                                      )}
+                                      placeholder={t("auth.register.phoneNumberPlaceholder")}
                                       className="h-14 md:h-16 rounded-2xl md:rounded-3xl bg-muted/30 border-none shadow-inner px-6 md:px-8 text-base md:text-lg font-black placeholder:text-muted-foreground/30 focus-visible:ring-primary/20"
                                       {...field}
                                     />
@@ -448,9 +411,7 @@ const RegisterPage = () => {
                                 </div>
                                 <FormControl>
                                   <Textarea
-                                    placeholder={t(
-                                      "auth.register.bioPlaceholder",
-                                    )}
+                                    placeholder={t("auth.register.bioPlaceholder")}
                                     className="min-h-32 md:min-h-40 rounded-2xl md:rounded-3xl bg-muted/30 border-none shadow-inner px-6 md:px-8 text-base md:text-lg font-medium p-6 resize-none focus-visible:ring-primary/20 leading-relaxed italic"
                                     {...field}
                                   />
@@ -473,17 +434,11 @@ const RegisterPage = () => {
                                     url={field.value || ""}
                                     onUpload={(url, publicId) => {
                                       field.onChange(url);
-                                      form.setValue(
-                                        "verificationDocumentCldPubId",
-                                        publicId,
-                                      );
+                                      form.setValue("verificationDocumentCldPubId", publicId);
                                     }}
                                     onClear={() => {
                                       field.onChange("");
-                                      form.setValue(
-                                        "verificationDocumentCldPubId",
-                                        "",
-                                      );
+                                      form.setValue("verificationDocumentCldPubId", "");
                                     }}
                                   />
                                 </FormControl>
@@ -509,12 +464,7 @@ const RegisterPage = () => {
                       className="flex-1 h-14 md:h-16 rounded-2xl md:rounded-3xl font-black uppercase tracking-widest text-xs md:text-sm border-2 border-border/40 bg-background/50 shadow-sm"
                       onClick={() => setStep(1)}
                     >
-                      <ArrowLeft
-                        className={cn(
-                          "h-4 w-4 me-2",
-                          isAr && "ms-2 me-0 rotate-180",
-                        )}
-                      />
+                      <ArrowLeft className={cn("h-4 w-4 me-2", isAr && "ms-2 me-0 rotate-180")} />
                       {t("buttons.back")}
                     </Button>
                   ) : (
@@ -527,12 +477,7 @@ const RegisterPage = () => {
                         size="lg"
                         className="w-full h-14 md:h-16 rounded-2xl md:rounded-3xl font-black uppercase tracking-widest text-xs md:text-sm border-2 border-border/40 bg-background/50 shadow-sm"
                       >
-                        <ArrowLeft
-                          className={cn(
-                            "h-4 w-4 me-2",
-                            isAr && "ms-2 me-0 rotate-180",
-                          )}
-                        />
+                        <ArrowLeft className={cn("h-4 w-4 me-2", isAr && "ms-2 me-0 rotate-180")} />
                         {t("buttons.signIn")}
                       </Button>
                     </Link>
@@ -548,8 +493,7 @@ const RegisterPage = () => {
                       <ArrowRight
                         className={cn(
                           "h-4 w-4 ms-2 group-hover:translate-x-1 transition-transform",
-                          isAr &&
-                            "me-2 ms-0 rotate-180 group-hover:-translate-x-1",
+                          isAr && "me-2 ms-0 rotate-180 group-hover:-translate-x-1"
                         )}
                       />
                     </Button>
@@ -572,7 +516,7 @@ const RegisterPage = () => {
                           <Zap
                             className={cn(
                               "h-5 w-5 fill-current group-hover:scale-125 transition-transform",
-                              isAr && "rotate-180",
+                              isAr && "rotate-180"
                             )}
                           />
                         </div>

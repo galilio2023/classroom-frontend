@@ -1,10 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import {
-  useCustom,
-  useNotification,
-  usePermissions,
-  useCustomMutation,
-} from "@refinedev/core";
+import { useCustom, useNotification, usePermissions, useCustomMutation } from "@refinedev/core";
 import { useTranslation } from "react-i18next";
 import { BACKEND_URL } from "@/config";
 import { BasePermissions, UserRole } from "@/types";
@@ -82,9 +77,7 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [streamingMessage, setStreamingMessage] = useState("");
-  const [streamingSources, setStreamingSources] = useState<ChatSource[] | null>(
-    null,
-  );
+  const [streamingSources, setStreamingSources] = useState<ChatSource[] | null>(null);
   const [isDryRun, setIsDryRun] = useState(false);
 
   const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -103,14 +96,13 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
 
   // 1. 📜 HISTORY: Standard Refine v5 GET
   const effectiveClassId = classId || "global";
-  const { result: historyResult, query: historyQuery } =
-    useCustom<ChatHistoryResponse>({
-      url: `${BACKEND_URL}/ai/chat-history/${effectiveClassId}`,
-      method: "get",
-      queryOptions: {
-        enabled: hasLoadedHistoryFor.current !== effectiveClassId,
-      },
-    });
+  const { result: historyResult, query: historyQuery } = useCustom<ChatHistoryResponse>({
+    url: `${BACKEND_URL}/ai/chat-history/${effectiveClassId}`,
+    method: "get",
+    queryOptions: {
+      enabled: hasLoadedHistoryFor.current !== effectiveClassId,
+    },
+  });
 
   // 1b. 🦾 NON-STREAMING FALLBACK
   const { mutate: sendSimpleChat } = useCustomMutation();
@@ -141,8 +133,7 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
   // 2. 🧹 CLEANUP
   useEffect(() => {
     return () => {
-      if (animationFrameRef.current)
-        cancelAnimationFrame(animationFrameRef.current);
+      if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
       if (abortControllerRef.current) abortControllerRef.current.abort();
     };
   }, []);
@@ -150,7 +141,7 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
   const scrollToBottom = useCallback(() => {
     if (scrollAreaRef.current) {
       const scrollContainer = scrollAreaRef.current.querySelector(
-        "[data-radix-scroll-area-viewport]",
+        "[data-radix-scroll-area-viewport]"
       );
       if (scrollContainer) {
         scrollContainer.scrollTop = scrollContainer.scrollHeight;
@@ -163,8 +154,7 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
   }, [messages, streamingMessage, scrollToBottom]);
 
   const updateStreamingUI = useCallback(() => {
-    if (animationFrameRef.current)
-      cancelAnimationFrame(animationFrameRef.current);
+    if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
 
     animationFrameRef.current = requestAnimationFrame(() => {
       setStreamingMessage(accumulatorRef.current);
@@ -271,7 +261,7 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
                 description: t("aiHub.errors.serviceUnavailable"),
               });
             },
-          },
+          }
         );
         return;
       }
@@ -337,8 +327,7 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
         }
       }
 
-      if (animationFrameRef.current)
-        cancelAnimationFrame(animationFrameRef.current);
+      if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
       const finalResponseText = accumulatorRef.current.trim();
 
       if (finalResponseText.length > 0) {
@@ -363,10 +352,8 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
       console.error("Tablawy AI Error:", error);
 
       let description: string = t("aiHub.errors.serviceUnavailable");
-      if (error.message === "RATE_LIMIT_EXCEEDED")
-        description = t("aiHub.errors.rateLimit");
-      if (error.message === "AI_SERVICE_OFFLINE")
-        description = t("aiHub.errors.maintenance");
+      if (error.message === "RATE_LIMIT_EXCEEDED") description = t("aiHub.errors.rateLimit");
+      if (error.message === "AI_SERVICE_OFFLINE") description = t("aiHub.errors.maintenance");
 
       open?.({
         type: "error",
@@ -378,9 +365,7 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
         ...prev,
         {
           role: "model",
-          parts: [
-            { text: t("aiHub.errors.friendlyFallback") },
-          ],
+          parts: [{ text: t("aiHub.errors.friendlyFallback") }],
         },
       ]);
     } finally {

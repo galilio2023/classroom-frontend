@@ -131,9 +131,7 @@ export const RecentActivity = ({ limit = 5 }: RecentActivityProps) => {
             <History className="h-3.5 w-3.5" />
           </div>
           <h3 className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-[0.2em]">
-            {isStaff
-              ? t("dashboard.activity.systemLogs")
-              : t("dashboard.activity.recent")}
+            {isStaff ? t("dashboard.activity.systemLogs") : t("dashboard.activity.recent")}
           </h3>
         </div>
         <Button
@@ -145,7 +143,7 @@ export const RecentActivity = ({ limit = 5 }: RecentActivityProps) => {
           <ArrowRight
             className={cn(
               "h-3 w-3 group-hover:translate-x-1 transition-transform",
-              i18n.language === "ar" && "rotate-180 group-hover:-translate-x-1",
+              i18n.language === "ar" && "rotate-180 group-hover:-translate-x-1"
             )}
           />
         </Button>
@@ -187,9 +185,7 @@ export const RecentActivity = ({ limit = 5 }: RecentActivityProps) => {
               <AnimatePresence mode="popLayout">
                 {data.map((item: any, index: number) => {
                   const { icon: Icon, color, bg } = getIcon(item);
-                  const title = isStaff
-                    ? item.action?.replace(/_/g, " ") || "Action"
-                    : item.title;
+                  const title = isStaff ? item.action?.replace(/_/g, " ") || "Action" : item.title;
                   const message = isStaff
                     ? `${item.user?.name || "System"} ${item.action?.toLowerCase().includes("create") ? "created" : "modified"} ${item.entityType}`
                     : item.message;
@@ -202,15 +198,14 @@ export const RecentActivity = ({ limit = 5 }: RecentActivityProps) => {
                       transition={{ delay: index * 0.05 }}
                       className={cn(
                         "flex gap-5 p-6 transition-all duration-300 hover:bg-primary/2 group cursor-pointer relative",
-                        index !== data.length - 1 &&
-                          "border-b border-black/3 dark:border-white/3",
+                        index !== data.length - 1 && "border-b border-black/3 dark:border-white/3"
                       )}
                     >
                       <div className="shrink-0">
                         <div
                           className={cn(
                             "p-3 rounded-2xl shadow-sm transition-all duration-500 group-hover:scale-110 group-hover:rotate-3",
-                            bg,
+                            bg
                           )}
                         >
                           <Icon className={cn("h-5 w-5", color)} />

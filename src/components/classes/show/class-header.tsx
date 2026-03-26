@@ -52,11 +52,7 @@ export const ClassHeader = ({ classId, isOwner }: ClassHeaderProps) => {
             className="w-full md:w-auto rounded-2xl font-black uppercase tracking-widest text-[10px] h-12 md:h-14 px-6 md:px-8 gap-2 border-primary/20 bg-primary/5 hover:bg-primary/10 shadow-sm transition-all"
             onClick={handleCopyLink}
           >
-            {copied ? (
-              <Check className="w-4 h-4 text-success" />
-            ) : (
-              <Share2 className="w-4 h-4" />
-            )}
+            {copied ? <Check className="w-4 h-4 text-success" /> : <Share2 className="w-4 h-4" />}
             {copied ? t("buttons.copied") : t("buttons.share")}
           </Button>
 

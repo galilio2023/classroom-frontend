@@ -1,11 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  CheckCircle2,
-  ClipboardCheck,
-  Sparkles,
-  ArrowRight,
-} from "lucide-react";
+import { CheckCircle2, ClipboardCheck, Sparkles, ArrowRight } from "lucide-react";
 import { PendingSubmission } from "@/types/dashboard";
 import { PendingSubmissionCard } from "./pending-submission-card";
 import { motion, AnimatePresence } from "framer-motion";
@@ -17,10 +12,7 @@ interface PendingGradingListProps {
   show: (resource: string, id: string) => void;
 }
 
-export const PendingGradingList = ({
-  submissions,
-  show,
-}: PendingGradingListProps) => {
+export const PendingGradingList = ({ submissions, show }: PendingGradingListProps) => {
   const { t } = useTranslation();
 
   return (

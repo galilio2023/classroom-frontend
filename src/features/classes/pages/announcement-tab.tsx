@@ -27,9 +27,7 @@ export const AnnouncementTab = ({
   const { isLoading, isCreating, isUploading, isStaff, state, actions } =
     useAnnouncementTab(classId);
 
-  const [selectedAnnouncementId, setSelectedAnnouncementId] = useState<
-    number | null
-  >(null);
+  const [selectedAnnouncementId, setSelectedAnnouncementId] = useState<number | null>(null);
   const [isReadsModalOpen, setIsReadsModalOpen] = useState(false);
 
   if (isLoading)
@@ -43,7 +41,7 @@ export const AnnouncementTab = ({
     );
 
   const pinnedAnnouncements = announcements.filter(
-    (a) => a.isPinned && !dismissedAnnouncements.includes(a.id),
+    (a) => a.isPinned && !dismissedAnnouncements.includes(a.id)
   );
 
   return (
@@ -71,9 +69,7 @@ export const AnnouncementTab = ({
                     {t("classes.announcements.pinnedLabel")}
                   </span>
                 </div>
-                <h4 className="font-black text-2xl tracking-tight">
-                  {announcement.title}
-                </h4>
+                <h4 className="font-black text-2xl tracking-tight">{announcement.title}</h4>
                 <p className="text-sm mt-3 text-muted-foreground font-medium leading-relaxed line-clamp-2">
                   {announcement.content}
                 </p>
@@ -83,11 +79,7 @@ export const AnnouncementTab = ({
                     className="p-0 h-auto mt-4 text-xs font-black uppercase tracking-widest text-primary gap-2"
                     asChild
                   >
-                    <a
-                      href={announcement.fileUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
+                    <a href={announcement.fileUrl} target="_blank" rel="noopener noreferrer">
                       <Paperclip className="h-4 w-4" />
                       {t("classes.announcements.viewAttachment")}
                     </a>
@@ -145,10 +137,7 @@ export const AnnouncementTab = ({
       </div>
 
       {announcements.length === 0 ? (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.98 }}
-          animate={{ opacity: 1, scale: 1 }}
-        >
+        <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }}>
           <Card className="border-none shadow-2xl bg-card/50 backdrop-blur-xl rounded-4xl overflow-hidden py-20 text-center">
             <CardContent className="space-y-6">
               <div className="relative mx-auto w-fit">

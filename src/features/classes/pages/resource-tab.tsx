@@ -1,10 +1,4 @@
-import {
-  useList,
-  useCreate,
-  useDelete,
-  useGetIdentity,
-  useCustomMutation,
-} from "@refinedev/core";
+import { useList, useCreate, useDelete, useGetIdentity, useCustomMutation } from "@refinedev/core";
 import { useState } from "react";
 import { Module, User, UserRole, Resource } from "@/types";
 import {
@@ -74,8 +68,7 @@ interface ResourceTabProps {
 export const ResourceTab = ({ classId }: ResourceTabProps) => {
   const { t, i18n } = useTranslation();
   const { data: identity } = useGetIdentity<User>();
-  const isTeacher =
-    identity?.role === UserRole.TEACHER || identity?.role === UserRole.ADMIN;
+  const isTeacher = identity?.role === UserRole.TEACHER || identity?.role === UserRole.ADMIN;
 
   const [isAddResourceOpen, setIsAddResourceOpen] = useState(false);
   const [activeModuleId, setActiveModuleId] = useState<number | null>(null);
@@ -97,8 +90,7 @@ export const ResourceTab = ({ classId }: ResourceTabProps) => {
   const modules = query.data?.data || [];
   const isLoading = query.isPending;
 
-  const { mutate: createResource, mutation: createMutation } =
-    useCreate<Resource>();
+  const { mutate: createResource, mutation: createMutation } = useCreate<Resource>();
   const isCreatingResource = createMutation.isPending;
 
   const { mutate: deleteResource } = useDelete();
@@ -136,7 +128,7 @@ export const ResourceTab = ({ classId }: ResourceTabProps) => {
           query.refetch();
           toast.success(t("classes.resource.toast.added"));
         },
-      },
+      }
     );
   };
 
@@ -148,7 +140,7 @@ export const ResourceTab = ({ classId }: ResourceTabProps) => {
           toast.success(t("classes.resource.toast.deleted"));
           query.refetch();
         },
-      },
+      }
     );
   };
 
@@ -225,7 +217,7 @@ export const ResourceTab = ({ classId }: ResourceTabProps) => {
                         size="sm"
                         className={cn(
                           "h-10 rounded-xl font-black uppercase tracking-widest text-[9px] gap-2 border-primary/20 text-primary hover:bg-primary/5",
-                          "ms-4",
+                          "ms-4"
                         )}
                         onClick={() => {
                           setActiveModuleId(module.id);
@@ -257,7 +249,7 @@ export const ResourceTab = ({ classId }: ResourceTabProps) => {
                                         ? "bg-purple-500/10 text-purple-500"
                                         : res.type === "image"
                                           ? "bg-pink-500/10 text-pink-500"
-                                          : "bg-orange-500/10 text-orange-500",
+                                          : "bg-orange-500/10 text-orange-500"
                                 )}
                               >
                                 {res.type === "video" ? (
@@ -320,9 +312,7 @@ export const ResourceTab = ({ classId }: ResourceTabProps) => {
                                     </DropdownMenuItem>
                                     <DropdownMenuItem
                                       className="rounded-lg font-black uppercase tracking-widest text-[9px] gap-2 py-3 cursor-pointer text-destructive hover:bg-destructive/10 transition-all"
-                                      onClick={() =>
-                                        handleDeleteResource(res.id)
-                                      }
+                                      onClick={() => handleDeleteResource(res.id)}
                                     >
                                       <Trash2 className="h-3.5 w-3.5" />
                                       {t("buttons.delete")}
@@ -338,9 +328,7 @@ export const ResourceTab = ({ classId }: ResourceTabProps) => {
                                   asChild
                                   className="h-9 rounded-xl px-4 text-[10px] font-black uppercase tracking-widest gap-2 text-primary hover:bg-primary/10 transition-all"
                                 >
-                                  <Link
-                                    to={`/classes/${classId}/lessons/${res.id}`}
-                                  >
+                                  <Link to={`/classes/${classId}/lessons/${res.id}`}>
                                     <ExternalLink className="h-3.5 w-3.5" />
                                     {t("buttons.openLesson")}
                                     <ArrowRight
@@ -348,7 +336,7 @@ export const ResourceTab = ({ classId }: ResourceTabProps) => {
                                         "h-3 w-3 opacity-0 group-hover/item:opacity-100 transition-all",
                                         isAr
                                           ? "translate-x-2 group-hover:translate-x-0 rotate-180"
-                                          : "-translate-x-2 group-hover:translate-x-0",
+                                          : "-translate-x-2 group-hover:translate-x-0"
                                       )}
                                     />
                                   </Link>
@@ -375,11 +363,7 @@ export const ResourceTab = ({ classId }: ResourceTabProps) => {
                                   asChild
                                   className="h-9 rounded-xl px-4 text-[10px] font-black uppercase tracking-widest gap-2 hover:bg-muted transition-all"
                                 >
-                                  <a
-                                    href={res.url}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                  >
+                                  <a href={res.url} target="_blank" rel="noreferrer">
                                     <ExternalLink className="h-3.5 w-3.5" />
                                     {t("buttons.view")}
                                   </a>
@@ -442,9 +426,7 @@ export const ResourceTab = ({ classId }: ResourceTabProps) => {
                   id="title"
                   placeholder={t("classes.resource.addDialog.titlePlaceholder")}
                   value={newResource.title}
-                  onChange={(e) =>
-                    setNewResource({ ...newResource, title: e.target.value })
-                  }
+                  onChange={(e) => setNewResource({ ...newResource, title: e.target.value })}
                   className="h-12 rounded-xl bg-muted/20 border-none focus-visible:ring-primary font-bold"
                 />
               </div>
@@ -457,46 +439,25 @@ export const ResourceTab = ({ classId }: ResourceTabProps) => {
                 </Label>
                 <Select
                   value={newResource.type}
-                  onValueChange={(v: any) =>
-                    setNewResource({ ...newResource, type: v })
-                  }
+                  onValueChange={(v: any) => setNewResource({ ...newResource, type: v })}
                 >
                   <SelectTrigger className="h-12 rounded-xl bg-muted/20 border-none focus:ring-primary transition-all font-bold">
-                    <SelectValue
-                      placeholder={t(
-                        "classes.resource.addDialog.typePlaceholder",
-                      )}
-                    />
+                    <SelectValue placeholder={t("classes.resource.addDialog.typePlaceholder")} />
                   </SelectTrigger>
                   <SelectContent className="rounded-xl border-none shadow-2xl">
-                    <SelectItem
-                      value="note"
-                      className="rounded-lg font-bold text-start"
-                    >
+                    <SelectItem value="note" className="rounded-lg font-bold text-start">
                       {t("classes.resource.addDialog.types.note")}
                     </SelectItem>
-                    <SelectItem
-                      value="file"
-                      className="rounded-lg font-bold text-start"
-                    >
+                    <SelectItem value="file" className="rounded-lg font-bold text-start">
                       {t("classes.resource.addDialog.types.file")}
                     </SelectItem>
-                    <SelectItem
-                      value="image"
-                      className="rounded-lg font-bold text-start"
-                    >
+                    <SelectItem value="image" className="rounded-lg font-bold text-start">
                       {t("classes.resource.addDialog.types.image")}
                     </SelectItem>
-                    <SelectItem
-                      value="link"
-                      className="rounded-lg font-bold text-start"
-                    >
+                    <SelectItem value="link" className="rounded-lg font-bold text-start">
                       {t("classes.resource.addDialog.types.link")}
                     </SelectItem>
-                    <SelectItem
-                      value="video"
-                      className="rounded-lg font-bold text-start"
-                    >
+                    <SelectItem value="video" className="rounded-lg font-bold text-start">
                       {t("classes.resource.addDialog.types.video")}
                     </SelectItem>
                   </SelectContent>
@@ -510,13 +471,9 @@ export const ResourceTab = ({ classId }: ResourceTabProps) => {
                   {t("classes.resource.addDialog.fieldContent")}
                 </Label>
                 <Textarea
-                  placeholder={t(
-                    "classes.resource.addDialog.contentPlaceholder",
-                  )}
+                  placeholder={t("classes.resource.addDialog.contentPlaceholder")}
                   value={newResource.content}
-                  onChange={(e) =>
-                    setNewResource({ ...newResource, content: e.target.value })
-                  }
+                  onChange={(e) => setNewResource({ ...newResource, content: e.target.value })}
                   className="min-h-[250px] rounded-2xl bg-muted/20 border-none focus-visible:ring-primary p-5 text-sm leading-relaxed font-mono shadow-inner"
                 />
               </div>
@@ -555,18 +512,16 @@ export const ResourceTab = ({ classId }: ResourceTabProps) => {
                     id="url"
                     placeholder={t("classes.resource.addDialog.urlPlaceholder")}
                     value={newResource.url}
-                    onChange={(e) =>
-                      setNewResource({ ...newResource, url: e.target.value })
-                    }
+                    onChange={(e) => setNewResource({ ...newResource, url: e.target.value })}
                     className={cn(
                       "h-12 rounded-xl bg-muted/20 border-none focus-visible:ring-primary font-bold",
-                      isAr ? "pe-10" : "ps-10",
+                      isAr ? "pe-10" : "ps-10"
                     )}
                   />
                   <LinkIcon
                     className={cn(
                       "absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors",
-                      "start-3.5",
+                      "start-3.5"
                     )}
                   />
                 </div>

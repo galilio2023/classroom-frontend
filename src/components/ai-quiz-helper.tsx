@@ -9,9 +9,7 @@ interface AIQuizHelperProps {
   onUseQuestions?: (questions: (QuizQuestion & { points: number })[]) => void;
 }
 
-export const AIQuizHelper: React.FC<AIQuizHelperProps> = ({
-  onUseQuestions,
-}) => {
+export const AIQuizHelper: React.FC<AIQuizHelperProps> = ({ onUseQuestions }) => {
   const { isAiEnabled, isAllowed } = useAiAccess();
   const {
     topic,
@@ -47,10 +45,7 @@ export const AIQuizHelper: React.FC<AIQuizHelperProps> = ({
         handleGenerate={handleGenerate}
         isLoading={isLoading}
       />
-      <QuizHelperPreview
-        questions={generatedQuestions}
-        onUseAll={handleUseAll}
-      />
+      <QuizHelperPreview questions={generatedQuestions} onUseAll={handleUseAll} />
     </div>
   );
 };

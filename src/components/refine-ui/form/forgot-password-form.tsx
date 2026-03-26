@@ -4,13 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
@@ -44,34 +38,23 @@ export const ForgotPasswordForm = () => {
         "justify-center",
         "px-6",
         "py-8",
-        "min-h-svh",
+        "min-h-svh"
       )}
     >
       <div className={cn("flex", "items-center", "justify-center", "gap-2")}>
         {title.icon && (
-          <div
-            className={cn("text-foreground", "[&>svg]:w-12", "[&>svg]:h-12")}
-          >
-            {title.icon}
-          </div>
+          <div className={cn("text-foreground", "[&>svg]:w-12", "[&>svg]:h-12")}>{title.icon}</div>
         )}
       </div>
 
       <Card className={cn("sm:w-[456px]", "p-12", "mt-6")}>
         <CardHeader className={cn("px-0")}>
           <CardTitle
-            className={cn(
-              "text-blue-600",
-              "dark:text-blue-400",
-              "text-3xl",
-              "font-semibold",
-            )}
+            className={cn("text-blue-600", "dark:text-blue-400", "text-3xl", "font-semibold")}
           >
             {t("auth.forgotPassword.title")}
           </CardTitle>
-          <CardDescription
-            className={cn("text-muted-foreground", "font-medium")}
-          >
+          <CardDescription className={cn("text-muted-foreground", "font-medium")}>
             {t("auth.forgotPassword.description")}
           </CardDescription>
         </CardHeader>
@@ -92,12 +75,7 @@ export const ForgotPasswordForm = () => {
                 />
                 <Button
                   type="submit"
-                  className={cn(
-                    "bg-blue-600",
-                    "hover:bg-blue-700",
-                    "text-white",
-                    "px-6",
-                  )}
+                  className={cn("bg-blue-600", "hover:bg-blue-700", "text-white", "px-6")}
                 >
                   {t("auth.forgotPassword.send")}
                 </Button>
@@ -115,7 +93,7 @@ export const ForgotPasswordForm = () => {
                 "text-sm",
                 "text-muted-foreground",
                 "hover:text-foreground",
-                "transition-colors",
+                "transition-colors"
               )}
             >
               <ArrowLeft className={cn("w-4", "h-4")} />

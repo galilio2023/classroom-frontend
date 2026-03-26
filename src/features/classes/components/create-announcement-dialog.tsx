@@ -1,11 +1,4 @@
-import {
-  Megaphone,
-  Loader2,
-  Send,
-  PlusCircle,
-  Paperclip,
-  CheckCircle2,
-} from "lucide-react";
+import { Megaphone, Loader2, Send, PlusCircle, Paperclip, CheckCircle2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -114,15 +107,11 @@ export const CreateAnnouncementDialog = ({
                     <Paperclip className="h-4 w-4" />
                   </div>
                   <span className="text-xs font-bold uppercase tracking-widest">
-                    {isUploading
-                      ? t("buttons.uploading")
-                      : t("buttons.selectFile")}
+                    {isUploading ? t("buttons.uploading") : t("buttons.selectFile")}
                   </span>
                 </div>
               </div>
-              {isUploading && (
-                <Loader2 className="h-5 w-5 animate-spin text-primary" />
-              )}
+              {isUploading && <Loader2 className="h-5 w-5 animate-spin text-primary" />}
               {data.fileUrl && (
                 <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-success bg-success/10 px-3 py-1.5 rounded-full">
                   <CheckCircle2 className="h-3 w-3" />
@@ -138,10 +127,7 @@ export const CreateAnnouncementDialog = ({
               onCheckedChange={(c) => setData({ ...data, isPinned: !!c })}
             />
             <div className="space-y-0.5">
-              <Label
-                htmlFor="pin"
-                className="text-sm font-black tracking-tight cursor-pointer"
-              >
+              <Label htmlFor="pin" className="text-sm font-black tracking-tight cursor-pointer">
                 {t("classes.announcements.fieldPin")}
               </Label>
               <p className="text-[10px] text-muted-foreground font-medium">

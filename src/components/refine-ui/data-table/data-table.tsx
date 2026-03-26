@@ -72,12 +72,7 @@ export function DataTable<TData extends BaseRecord>({
   }
 
   const {
-    reactTable: {
-      getHeaderGroups,
-      getRowModel,
-      getAllColumns,
-      getAllLeafColumns,
-    },
+    reactTable: { getHeaderGroups, getRowModel, getAllColumns, getAllLeafColumns },
   } = tableResult;
 
   const columns = getAllColumns();
@@ -110,10 +105,7 @@ export function DataTable<TData extends BaseRecord>({
                     >
                       {header.isPlaceholder ? null : (
                         <div className="flex items-center gap-1">
-                          {flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
+                          {flexRender(header.column.columnDef.header, header.getContext())}
                         </div>
                       )}
                     </TableHead>
@@ -163,7 +155,7 @@ export function DataTable<TData extends BaseRecord>({
                       transition={{ duration: 0.15 }}
                       className={cn(
                         "group border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted",
-                        onRowClick && "cursor-pointer",
+                        onRowClick && "cursor-pointer"
                       )}
                       onClick={() => onRowClick?.(row.original)}
                     >
@@ -182,20 +174,14 @@ export function DataTable<TData extends BaseRecord>({
                             whileHover={onRowClick ? { x: 4 } : {}}
                             className="max-w-[400px] truncate"
                           >
-                            {flexRender(
-                              cell.column.columnDef.cell,
-                              cell.getContext(),
-                            )}
+                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
                           </motion.div>
                         </TableCell>
                       ))}
                     </motion.tr>
                   ))
                 ) : (
-                  <DataTableNoData
-                    isOverflowing={isOverflowing}
-                    columnsLength={columns.length}
-                  />
+                  <DataTableNoData isOverflowing={isOverflowing} columnsLength={columns.length} />
                 )}
               </AnimatePresence>
             </TableBody>
@@ -246,12 +232,8 @@ function DataTableNoData({
             minWidth: "300px",
           }}
         >
-          <div className="text-lg font-semibold text-foreground">
-            {t("common.table.noData")}
-          </div>
-          <div className="text-sm text-muted-foreground">
-            {t("common.table.noDataDesc")}
-          </div>
+          <div className="text-lg font-semibold text-foreground">{t("common.table.noData")}</div>
+          <div className="text-sm text-muted-foreground">{t("common.table.noDataDesc")}</div>
         </div>
       </TableCell>
     </TableRow>
@@ -266,10 +248,8 @@ function getCommonStyles<TData>({
   isOverflowing: { horizontal: boolean; vertical: boolean };
 }): React.CSSProperties {
   const isPinned = column.getIsPinned();
-  const isLastLeftPinnedColumn =
-    isPinned === "left" && column.getIsLastColumn("left");
-  const isFirstRightPinnedColumn =
-    isPinned === "right" && column.getIsFirstColumn("right");
+  const isLastLeftPinnedColumn = isPinned === "left" && column.getIsLastColumn("left");
+  const isFirstRightPinnedColumn = isPinned === "right" && column.getIsFirstColumn("right");
   return {
     boxShadow:
       isOverflowing.horizontal && isLastLeftPinnedColumn
@@ -278,9 +258,7 @@ function getCommonStyles<TData>({
           ? "4px 0 4px -4px var(--border) inset"
           : undefined,
     left:
-      isOverflowing.horizontal && isPinned === "left"
-        ? `${column.getStart("left")}px`
-        : undefined,
+      isOverflowing.horizontal && isPinned === "left" ? `${column.getStart("left")}px` : undefined,
     right:
       isOverflowing.horizontal && isPinned === "right"
         ? `${column.getAfter("right")}px`
@@ -289,21 +267,13 @@ function getCommonStyles<TData>({
     position: isOverflowing.horizontal && isPinned ? "sticky" : "relative",
     background: isOverflowing.horizontal && isPinned ? "var(--background)" : "",
     borderTopRightRadius:
-      isOverflowing.horizontal && isPinned === "right"
-        ? "var(--radius)"
-        : undefined,
+      isOverflowing.horizontal && isPinned === "right" ? "var(--radius)" : undefined,
     borderBottomRightRadius:
-      isOverflowing.horizontal && isPinned === "right"
-        ? "var(--radius)"
-        : undefined,
+      isOverflowing.horizontal && isPinned === "right" ? "var(--radius)" : undefined,
     borderTopLeftRadius:
-      isOverflowing.horizontal && isPinned === "left"
-        ? "var(--radius)"
-        : undefined,
+      isOverflowing.horizontal && isPinned === "left" ? "var(--radius)" : undefined,
     borderBottomLeftRadius:
-      isOverflowing.horizontal && isPinned === "left"
-        ? "var(--radius)"
-        : undefined,
+      isOverflowing.horizontal && isPinned === "left" ? "var(--radius)" : undefined,
     width: column.getSize(),
     zIndex: isOverflowing.horizontal && isPinned ? 1 : 0,
   };

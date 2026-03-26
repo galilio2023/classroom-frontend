@@ -141,7 +141,7 @@ const EnrollmentsList = () => {
           toast.success(t("enrollments.toasts.statusUpdate", { status }));
           invalidate({ resource: "enrollments", invalidates: ["list"] });
         },
-      },
+      }
     );
   };
 
@@ -157,9 +157,9 @@ const EnrollmentsList = () => {
               method: "patch",
               values: { status },
             },
-            { onSuccess: resolve, onError: resolve },
+            { onSuccess: resolve, onError: resolve }
           );
-        }),
+        })
     );
 
     toast.promise(Promise.all(promises), {
@@ -178,9 +178,7 @@ const EnrollmentsList = () => {
   };
 
   const toggleSelect = (id: number) => {
-    setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id],
-    );
+    setSelectedIds((prev) => (prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]));
   };
 
   const parentRef = useRef<HTMLDivElement>(null);
@@ -197,10 +195,8 @@ const EnrollmentsList = () => {
     if (!enrollments.length) return { total: 0, pending: 0, approved: 0 };
     return {
       total: enrollments.length,
-      pending: enrollments.filter((e: Enrollment) => e.status === "pending")
-        .length,
-      approved: enrollments.filter((e: Enrollment) => e.status === "approved")
-        .length,
+      pending: enrollments.filter((e: Enrollment) => e.status === "pending").length,
+      approved: enrollments.filter((e: Enrollment) => e.status === "approved").length,
     };
   }, [enrollments]);
 
@@ -216,9 +212,7 @@ const EnrollmentsList = () => {
             <Breadcrumb />
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div>
-                <h1 className="text-4xl font-black tracking-tight">
-                  {t("enrollments.title")}
-                </h1>
+                <h1 className="text-4xl font-black tracking-tight">{t("enrollments.title")}</h1>
                 <p className="text-muted-foreground font-medium mt-1">
                   {t("enrollments.description")}
                 </p>
@@ -247,9 +241,7 @@ const EnrollmentsList = () => {
                 <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                   {t("enrollments.stats.total")}
                 </p>
-                <p className="text-2xl font-black">
-                  {isLoading ? "..." : stats.total}
-                </p>
+                <p className="text-2xl font-black">{isLoading ? "..." : stats.total}</p>
               </div>
             </Card>
             <Card className="p-6 border-amber-500/10 bg-card/50 backdrop-blur-sm flex items-center gap-4 rounded-4xl shadow-lg shadow-amber-500/5">
@@ -327,22 +319,13 @@ const EnrollmentsList = () => {
                       <SelectItem value="all" className="rounded-xl font-bold">
                         {t("enrollments.allStatus")}
                       </SelectItem>
-                      <SelectItem
-                        value="pending"
-                        className="rounded-xl font-bold"
-                      >
+                      <SelectItem value="pending" className="rounded-xl font-bold">
                         {t("status.upcoming")}
                       </SelectItem>
-                      <SelectItem
-                        value="approved"
-                        className="rounded-xl font-bold"
-                      >
+                      <SelectItem value="approved" className="rounded-xl font-bold">
                         {t("status.active")}
                       </SelectItem>
-                      <SelectItem
-                        value="rejected"
-                        className="rounded-xl font-bold"
-                      >
+                      <SelectItem value="rejected" className="rounded-xl font-bold">
                         {t("buttons.reject")}
                       </SelectItem>
                     </SelectContent>
@@ -360,10 +343,7 @@ const EnrollmentsList = () => {
             {isLoading ? (
               <div className="p-8 space-y-6">
                 {Array.from({ length: 6 }).map((_, i) => (
-                  <div
-                    key={i}
-                    className="flex flex-col md:flex-row items-center gap-6"
-                  >
+                  <div key={i} className="flex flex-col md:flex-row items-center gap-6">
                     <Skeleton className="h-14 w-14 rounded-2xl shrink-0" />
                     <div className="flex-1 space-y-3 w-full">
                       <Skeleton className="h-6 w-62.5" />
@@ -414,7 +394,7 @@ const EnrollmentsList = () => {
                         transition={{ duration: 0.2 }}
                         className={cn(
                           "flex flex-col md:flex-row items-center h-full border-b border-primary/5 transition-all group",
-                          isSelected ? "bg-primary/4" : "hover:bg-primary/2",
+                          isSelected ? "bg-primary/4" : "hover:bg-primary/2"
                         )}
                       >
                         {/* Selection & Avatar */}
@@ -475,9 +455,7 @@ const EnrollmentsList = () => {
                               <div className="p-1.5 rounded-lg bg-primary/5">
                                 <Mail className="h-3.5 w-3.5 text-primary" />
                               </div>
-                              <span className="text-xs font-bold">
-                                {enrollment.student.email}
-                              </span>
+                              <span className="text-xs font-bold">{enrollment.student.email}</span>
                             </div>
 
                             {enrollment.student.phoneNumber && (
@@ -512,9 +490,7 @@ const EnrollmentsList = () => {
                                 variant="outline"
                                 size="sm"
                                 className="h-10 rounded-xl font-black uppercase tracking-widest text-[10px] border-green-500/20 text-green-600 bg-green-500/5 hover:bg-green-500/10 px-4"
-                                onClick={() =>
-                                  handleStatusUpdate(enrollment.id, "approved")
-                                }
+                                onClick={() => handleStatusUpdate(enrollment.id, "approved")}
                                 disabled={isUpdating}
                               >
                                 <CheckCircle2 className="h-4 w-4 me-2" />
@@ -524,9 +500,7 @@ const EnrollmentsList = () => {
                                 variant="outline"
                                 size="sm"
                                 className="h-10 rounded-xl font-black uppercase tracking-widest text-[10px] border-destructive/20 text-destructive bg-destructive/5 hover:bg-destructive/10 px-4"
-                                onClick={() =>
-                                  handleStatusUpdate(enrollment.id, "rejected")
-                                }
+                                onClick={() => handleStatusUpdate(enrollment.id, "rejected")}
                                 disabled={isUpdating}
                               >
                                 <XCircle className="h-4 w-4 me-2" />
@@ -537,11 +511,7 @@ const EnrollmentsList = () => {
 
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-10 w-10 rounded-xl"
-                              >
+                              <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl">
                                 <MoreHorizontal className="h-5 w-5" />
                               </Button>
                             </DropdownMenuTrigger>
@@ -553,26 +523,18 @@ const EnrollmentsList = () => {
                                 {t("enrollments.options")}
                               </DropdownMenuLabel>
                               <DropdownMenuItem
-                                onClick={() =>
-                                  show("users", enrollment.student.id)
-                                }
+                                onClick={() => show("users", enrollment.student.id)}
                                 className="rounded-xl gap-3 py-3 cursor-pointer"
                               >
                                 <Eye className="h-4 w-4 text-primary" />
-                                <span className="font-bold">
-                                  {t("enrollments.viewProfile")}
-                                </span>
+                                <span className="font-bold">{t("enrollments.viewProfile")}</span>
                               </DropdownMenuItem>
                               <DropdownMenuItem
-                                onClick={() =>
-                                  show("classes", enrollment.class.id)
-                                }
+                                onClick={() => show("classes", enrollment.class.id)}
                                 className="rounded-xl gap-3 py-3 cursor-pointer"
                               >
                                 <LayoutGrid className="h-4 w-4 text-primary" />
-                                <span className="font-bold">
-                                  {t("enrollments.viewClass")}
-                                </span>
+                                <span className="font-bold">{t("enrollments.viewClass")}</span>
                               </DropdownMenuItem>
                               <DropdownMenuSeparator className="my-2" />
                               <DropdownMenuItem
@@ -580,9 +542,7 @@ const EnrollmentsList = () => {
                                 className="rounded-xl gap-3 py-3 cursor-pointer text-destructive focus:text-destructive"
                               >
                                 <UserMinus className="h-4 w-4" />
-                                <span className="font-bold">
-                                  {t("enrollments.remove")}
-                                </span>
+                                <span className="font-bold">{t("enrollments.remove")}</span>
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
@@ -597,10 +557,7 @@ const EnrollmentsList = () => {
         </div>
       </ListView>
 
-      <AlertDialog
-        open={deleteTarget !== null}
-        onOpenChange={() => setDeleteTarget(null)}
-      >
+      <AlertDialog open={deleteTarget !== null} onOpenChange={() => setDeleteTarget(null)}>
         <AlertDialogContent className="rounded-[2.5rem] border border-border/50 shadow-2xl bg-white dark:bg-[#09090b] opacity-100 backdrop-blur-none">
           <AlertDialogHeader className="space-y-4">
             <div className="p-4 rounded-2xl bg-destructive/10 text-destructive w-fit">
@@ -629,7 +586,7 @@ const EnrollmentsList = () => {
                         toast.success(t("enrollments.toasts.removed"));
                         setDeleteTarget(null);
                       },
-                    },
+                    }
                   );
                 }
               }}

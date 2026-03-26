@@ -9,8 +9,7 @@ import { useTranslation } from "react-i18next";
 export const useAssignment = (id?: string) => {
   const { i18n } = useTranslation();
   const isAr = i18n.language === "ar";
-  const { data: identity, isLoading: isIdentityLoading } =
-    useGetIdentity<User>();
+  const { data: identity, isLoading: isIdentityLoading } = useGetIdentity<User>();
 
   const [isResubmitting, setIsResubmitting] = useState(false);
   const [isMonitoring, setIsMonitoring] = useState(false);
@@ -29,18 +28,15 @@ export const useAssignment = (id?: string) => {
     void refetchSubmissions();
   }, [refetchSubmissions]);
 
-  useAssignmentSocket(
-    identity?.id,
-    identity?.role,
-    assignment?.classId,
-    onAlert,
+  useAssignmentSocket(identity?.id, identity?.role, assignment?.classId, onAlert);
+
+  const { mySubmission, isQuiz, isPhysicsLab, blendedGrade } = useAssignmentLogic(
+    assignment,
+    submissions,
+    identity?.id
   );
 
-  const { mySubmission, isQuiz, isPhysicsLab, blendedGrade } =
-    useAssignmentLogic(assignment, submissions, identity?.id);
-
-  const isStaff =
-    identity?.role === UserRole.ADMIN || identity?.role === UserRole.TEACHER;
+  const isStaff = identity?.role === UserRole.ADMIN || identity?.role === UserRole.TEACHER;
 
   return {
     assignment,

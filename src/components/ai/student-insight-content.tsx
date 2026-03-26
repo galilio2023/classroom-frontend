@@ -1,11 +1,6 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  TrendingUp,
-  TrendingDown,
-  Lightbulb,
-  CheckCircle2,
-} from "lucide-react";
+import { TrendingUp, TrendingDown, Lightbulb, CheckCircle2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 interface AIInsight {
@@ -19,9 +14,7 @@ interface StudentInsightContentProps {
   insight: AIInsight;
 }
 
-export const StudentInsightContent: React.FC<StudentInsightContentProps> = ({
-  insight,
-}) => {
+export const StudentInsightContent: React.FC<StudentInsightContentProps> = ({ insight }) => {
   const { t } = useTranslation();
   return (
     <div className="space-y-6 py-4">

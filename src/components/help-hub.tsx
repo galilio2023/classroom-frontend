@@ -11,14 +11,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import {
-  HelpCircle,
-  BookOpen,
-  Sparkles,
-  CheckCircle2,
-  ArrowRight,
-  Lightbulb,
-} from "lucide-react";
+import { HelpCircle, BookOpen, Sparkles, CheckCircle2, ArrowRight, Lightbulb } from "lucide-react";
 import { motion } from "framer-motion";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
@@ -83,7 +76,7 @@ export const HelpHub = () => {
           "ring-offset-4",
           "transition-all",
           "duration-500",
-          "z-50",
+          "z-50"
         );
 
         // Trigger click if it's a button
@@ -160,7 +153,7 @@ export const HelpHub = () => {
                         "p-4 rounded-2xl bg-muted/30 border border-border/20 flex gap-4 group transition-all cursor-pointer",
                         step.actionId
                           ? "hover:bg-primary/3 hover:border-primary/30"
-                          : "hover:bg-muted/50",
+                          : "hover:bg-muted/50"
                       )}
                     >
                       <div
@@ -168,7 +161,7 @@ export const HelpHub = () => {
                           "flex-shrink-0 h-6 w-6 rounded-full border shadow-sm flex items-center justify-center text-xs font-black transition-colors",
                           step.actionId
                             ? "bg-primary/10 border-primary/20 text-primary group-hover:bg-primary group-hover:text-white"
-                            : "bg-background border-border/50 text-muted-foreground",
+                            : "bg-background border-border/50 text-muted-foreground"
                         )}
                       >
                         {index + 1}

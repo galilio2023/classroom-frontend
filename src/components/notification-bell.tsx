@@ -1,16 +1,7 @@
 import { useState, useEffect } from "react";
-import {
-  useCustom,
-  useCustomMutation,
-  useGetIdentity,
-  useNavigation,
-} from "@refinedev/core";
+import { useCustom, useCustomMutation, useGetIdentity, useNavigation } from "@refinedev/core";
 import { useQueryClient } from "@tanstack/react-query";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -73,8 +64,7 @@ export const NotificationBell = () => {
   };
 
   // NEW: USE THE CENTRALIZED HOOK
-  const { unreadCount: socketUnreadCount, setUnreadCount } =
-    useLiveNotifications(identity?.id);
+  const { unreadCount: socketUnreadCount, setUnreadCount } = useLiveNotifications(identity?.id);
 
   // Fetch initial notifications
   const { query } = useCustom<Notification[]>({
@@ -159,7 +149,7 @@ export const NotificationBell = () => {
           return {
             ...old,
             data: old.data.map((n: Notification) =>
-              n.id === Number(id) ? { ...n, isRead: true } : n,
+              n.id === Number(id) ? { ...n, isRead: true } : n
             ),
           };
         });
@@ -170,10 +160,7 @@ export const NotificationBell = () => {
       onError: (_err, _variables, context: any) => {
         if (context?.previousNotifications) {
           const queryKey = ["custom", "get", "/notifications"];
-          queryClient.setQueriesData(
-            { queryKey },
-            context.previousNotifications,
-          );
+          queryClient.setQueriesData({ queryKey }, context.previousNotifications);
         }
       },
       onSettled: () => {
@@ -204,10 +191,7 @@ export const NotificationBell = () => {
       onError: (_err, _variables, context: any) => {
         if (context?.previousNotifications) {
           const queryKey = ["custom", "get", "/notifications"];
-          queryClient.setQueriesData(
-            { queryKey },
-            context.previousNotifications,
-          );
+          queryClient.setQueriesData({ queryKey }, context.previousNotifications);
         }
       },
       onSettled: () => {
@@ -242,7 +226,7 @@ export const NotificationBell = () => {
             setIsOpen(false);
           }
         },
-      },
+      }
     );
   };
 
@@ -276,12 +260,7 @@ export const NotificationBell = () => {
   return (
     <>
       {showConfetti && (
-        <Confetti
-          width={width}
-          height={height}
-          recycle={false}
-          numberOfPieces={500}
-        />
+        <Confetti width={width} height={height} recycle={false} numberOfPieces={500} />
       )}
       <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild>
@@ -290,24 +269,17 @@ export const NotificationBell = () => {
             size="icon"
             className={cn(
               "relative h-10 w-10 rounded-full transition-all duration-200",
-              isOpen
-                ? "bg-primary/10 text-primary shadow-inner"
-                : "hover:bg-primary/5",
+              isOpen ? "bg-primary/10 text-primary shadow-inner" : "hover:bg-primary/5"
             )}
           >
-            <Bell
-              className={cn(
-                "h-5 w-5 transition-transform",
-                isOpen && "scale-110",
-              )}
-            />
+            <Bell className={cn("h-5 w-5 transition-transform", isOpen && "scale-110")} />
             {unreadCount > 0 && (
               <Badge
                 variant="destructive"
                 className="absolute -top-0.5 -end-0.5 h-5 min-w-5 flex items-center justify-center p-1 text-[10px] font-black border-2 border-background shadow-sm"
               >
                 {new Intl.NumberFormat(isArabic ? "ar-EG" : "en-US").format(
-                  unreadCount > 9 ? 9 : unreadCount,
+                  unreadCount > 9 ? 9 : unreadCount
                 )}
                 {unreadCount > 9 && "+"}
               </Badge>
@@ -319,9 +291,7 @@ export const NotificationBell = () => {
           align="end"
         >
           <div className="flex items-center justify-between p-4 border-b border-border/50 bg-muted/20">
-            <h4 className="font-bold text-sm tracking-tight">
-              {t("notifications.title")}
-            </h4>
+            <h4 className="font-bold text-sm tracking-tight">{t("notifications.title")}</h4>
             {unreadCount > 0 && (
               <Button
                 variant="ghost"
@@ -352,7 +322,7 @@ export const NotificationBell = () => {
                       "flex gap-3 p-4 border-b border-border/50 cursor-pointer transition-all duration-200 hover:bg-muted/50",
                       !notification.isRead
                         ? "bg-primary/5 ltr:border-s-2 rtl:border-e-2 ltr:border-s-primary rtl:border-e-primary"
-                        : "",
+                        : ""
                     )}
                     onClick={() => handleMarkAsRead(notification)}
                   >
@@ -368,18 +338,15 @@ export const NotificationBell = () => {
                             "text-xs truncate",
                             !notification.isRead
                               ? "font-bold text-foreground"
-                              : "font-medium text-muted-foreground",
+                              : "font-medium text-muted-foreground"
                           )}
                         >
                           {notification.title}
                         </span>
                         <span className="text-[9px] font-bold text-muted-foreground/60 whitespace-nowrap uppercase">
-                          {formatDistanceToNow(
-                            new Date(notification.createdAt),
-                            {
-                              locale: isArabic ? ar : enUS,
-                            },
-                          )}
+                          {formatDistanceToNow(new Date(notification.createdAt), {
+                            locale: isArabic ? ar : enUS,
+                          })}
                         </span>
                       </div>
                       <p className="text-[11px] text-muted-foreground line-clamp-2 leading-relaxed">

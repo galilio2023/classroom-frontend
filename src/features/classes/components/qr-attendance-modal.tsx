@@ -34,11 +34,7 @@ interface QRAttendanceModalProps {
 
 import { socket, connectSocket } from "@/lib/socket";
 
-export const QRAttendanceModal = ({
-  isOpen,
-  onClose,
-  classId,
-}: QRAttendanceModalProps) => {
+export const QRAttendanceModal = ({ isOpen, onClose, classId }: QRAttendanceModalProps) => {
   const { data: identity } = useGetIdentity<User>();
   const [token, setToken] = useState<string | null>(null);
   const [scannedStudents, setScannedStudents] = useState<Attendance[]>([]);
@@ -81,8 +77,7 @@ export const QRAttendanceModal = ({
 
       socket.on("attendance_marked", (newRecord: Attendance) => {
         setScannedStudents((prev) => {
-          if (prev.find((r) => r.studentId === newRecord.studentId))
-            return prev;
+          if (prev.find((r) => r.studentId === newRecord.studentId)) return prev;
           return [newRecord, ...prev];
         });
       });
@@ -130,20 +125,14 @@ export const QRAttendanceModal = ({
                 <div className="flex items-center gap-1.5">
                   <Clock className="h-3 w-3" />
                   Session Ends In:{" "}
-                  <span className="text-foreground font-mono">
-                    {formatTime(sessionTimeLeft)}
-                  </span>
+                  <span className="text-foreground font-mono">{formatTime(sessionTimeLeft)}</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <Users className="h-3 w-3" />
-                  Checked In:{" "}
-                  <span className="text-primary">{scannedStudents.length}</span>
+                  Checked In: <span className="text-primary">{scannedStudents.length}</span>
                 </div>
               </div>
-              <Progress
-                value={(sessionTimeLeft / DURATION) * 100}
-                className="h-1.5"
-              />
+              <Progress value={(sessionTimeLeft / DURATION) * 100} className="h-1.5" />
             </div>
           )}
 
@@ -187,12 +176,7 @@ export const QRAttendanceModal = ({
             {/* Refresh Indicator */}
             {!isExpired && (
               <div className="absolute -bottom-3 start-1/2 -translate-x-1/2 bg-primary text-primary-foreground px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-2 shadow-lg border-2 border-background">
-                <RefreshCw
-                  className={cn(
-                    "h-3 w-3",
-                    tokenTimeLeft === 10 ? "animate-spin" : "",
-                  )}
-                />
+                <RefreshCw className={cn("h-3 w-3", tokenTimeLeft === 10 ? "animate-spin" : "")} />
                 Refreshing in {tokenTimeLeft}s
               </div>
             )}

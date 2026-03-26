@@ -22,14 +22,14 @@ export const AttendanceStatCard: React.FC<AttendanceStatCardProps> = ({
     <Card
       className={cn(
         "bg-card/50 backdrop-blur-sm border-border/50 transition-colors group",
-        hoverBorderClass,
+        hoverBorderClass
       )}
     >
       <CardContent className="p-4 flex flex-col items-center justify-center text-center">
         <div
           className={cn(
             "p-2 rounded-full mb-2 group-hover:scale-110 transition-transform",
-            colorClass,
+            colorClass
           )}
         >
           <Icon className="h-5 w-5" />

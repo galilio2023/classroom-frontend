@@ -9,13 +9,7 @@ import {
   X,
   Sparkles,
 } from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
@@ -46,9 +40,7 @@ export const TeacherOnboarding = ({ stats }: { stats?: any }) => {
     {
       id: "create-class",
       title: t("dashboard.onboarding.teacher.steps.createClass.title"),
-      description: t(
-        "dashboard.onboarding.teacher.steps.createClass.description",
-      ),
+      description: t("dashboard.onboarding.teacher.steps.createClass.description"),
       icon: Plus,
       action: () => create("classes"),
       completed: (stats?.totalClasses || 0) > 0,
@@ -56,9 +48,7 @@ export const TeacherOnboarding = ({ stats }: { stats?: any }) => {
     {
       id: "add-assignment",
       title: t("dashboard.onboarding.teacher.steps.addAssignment.title"),
-      description: t(
-        "dashboard.onboarding.teacher.steps.addAssignment.description",
-      ),
+      description: t("dashboard.onboarding.teacher.steps.addAssignment.description"),
       icon: BookOpen,
       action: () => create("assignments"),
       completed: (stats?.totalAssignments || 0) > 0,
@@ -66,9 +56,7 @@ export const TeacherOnboarding = ({ stats }: { stats?: any }) => {
     {
       id: "invite-students",
       title: t("dashboard.onboarding.teacher.steps.inviteStudents.title"),
-      description: t(
-        "dashboard.onboarding.teacher.steps.inviteStudents.description",
-      ),
+      description: t("dashboard.onboarding.teacher.steps.inviteStudents.description"),
       icon: UserPlus,
       action: () => list("users"),
       completed: (stats?.totalStudents || 0) > 0,
@@ -79,10 +67,7 @@ export const TeacherOnboarding = ({ stats }: { stats?: any }) => {
   const progress = (completedSteps / steps.length) * 100;
   const allCompleted = completedSteps === steps.length;
 
-  if (
-    dismissed ||
-    (allCompleted && localStorage.getItem("teacher-onboarding-dismissed"))
-  ) {
+  if (dismissed || (allCompleted && localStorage.getItem("teacher-onboarding-dismissed"))) {
     return null;
   }
 
@@ -138,10 +123,7 @@ export const TeacherOnboarding = ({ stats }: { stats?: any }) => {
                 {Math.round(progress)}%
               </span>
             </div>
-            <Progress
-              value={progress}
-              className="h-3 rounded-full bg-primary/10 shadow-inner"
-            />
+            <Progress value={progress} className="h-3 rounded-full bg-primary/10 shadow-inner" />
           </div>
         </CardHeader>
 
@@ -157,7 +139,7 @@ export const TeacherOnboarding = ({ stats }: { stats?: any }) => {
                   "relative p-6 md:p-8 rounded-4xl border transition-all duration-500 flex flex-col group hover-shine",
                   step.completed
                     ? "bg-emerald-500/3 border-emerald-500/20 grayscale-[0.5]"
-                    : "bg-background/40 backdrop-blur-sm border-border/40 hover:border-primary/30 hover:bg-background shadow-sm hover:shadow-xl hover:shadow-primary/5",
+                    : "bg-background/40 backdrop-blur-sm border-border/40 hover:border-primary/30 hover:bg-background shadow-sm hover:shadow-xl hover:shadow-primary/5"
                 )}
               >
                 <div className="flex items-start justify-between mb-6">
@@ -166,7 +148,7 @@ export const TeacherOnboarding = ({ stats }: { stats?: any }) => {
                       "p-3.5 rounded-2xl transition-all duration-500 shadow-sm",
                       step.completed
                         ? "bg-emerald-500/10 text-emerald-600"
-                        : "bg-primary/10 text-primary border border-primary/5 group-hover:scale-110",
+                        : "bg-primary/10 text-primary border border-primary/5 group-hover:scale-110"
                     )}
                   >
                     <step.icon className="h-6 w-6" />
@@ -185,7 +167,7 @@ export const TeacherOnboarding = ({ stats }: { stats?: any }) => {
                       "text-lg font-black tracking-tight transition-colors",
                       step.completed
                         ? "text-emerald-600/70"
-                        : "text-foreground group-hover:text-primary",
+                        : "text-foreground group-hover:text-primary"
                     )}
                   >
                     {step.title}

@@ -3,16 +3,7 @@ import { User } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import {
-  Trophy,
-  Medal,
-  Crown,
-  Zap,
-  Loader2,
-  Star,
-  TrendingUp,
-  ChevronRight,
-} from "lucide-react";
+import { Trophy, Medal, Crown, Zap, Loader2, Star, TrendingUp, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getLevelProgress } from "@/lib/xp";
 import { motion, AnimatePresence } from "framer-motion";
@@ -62,11 +53,7 @@ export function LeaderboardTab({ classId }: LeaderboardTabProps) {
           <Medal className="h-8 w-8 text-amber-600 fill-amber-600 drop-shadow-[0_0_10_rgba(217,119,6,0.5)]" />
         );
       default:
-        return (
-          <span className="text-lg font-black text-muted-foreground/20">
-            #{index + 1}
-          </span>
-        );
+        return <span className="text-lg font-black text-muted-foreground/20">#{index + 1}</span>;
     }
   };
 
@@ -82,9 +69,7 @@ export function LeaderboardTab({ classId }: LeaderboardTabProps) {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-end max-w-4xl mx-auto px-4">
           <AnimatePresence mode="popLayout">
             {podiumOrder.map((student, pIndex) => {
-              const originalIndex = rankedStudents.findIndex(
-                (s: User) => s.id === student.id,
-              );
+              const originalIndex = rankedStudents.findIndex((s: User) => s.id === student.id);
               const { currentLevel } = getLevelProgress(student.xp || 0);
               const isFirst = originalIndex === 0;
 
@@ -96,11 +81,7 @@ export function LeaderboardTab({ classId }: LeaderboardTabProps) {
                   transition={{ duration: 0.4, type: "spring" }}
                   className={cn(
                     "relative group",
-                    isFirst
-                      ? "order-1 md:order-2"
-                      : pIndex === 0
-                        ? "order-2 md:order-1"
-                        : "order-3",
+                    isFirst ? "order-1 md:order-2" : pIndex === 0 ? "order-2 md:order-1" : "order-3"
                   )}
                 >
                   <Card
@@ -108,7 +89,7 @@ export function LeaderboardTab({ classId }: LeaderboardTabProps) {
                       "relative overflow-hidden border-none shadow-2xl transition-all duration-500 rounded-[2.5rem]",
                       isFirst
                         ? "bg-card/80 backdrop-blur-2xl md:scale-110 z-20 border-2 border-yellow-500/20"
-                        : "bg-card/40 backdrop-blur-xl z-10",
+                        : "bg-card/40 backdrop-blur-xl z-10"
                     )}
                   >
                     {isFirst && (
@@ -123,7 +104,7 @@ export function LeaderboardTab({ classId }: LeaderboardTabProps) {
                               ? "bg-yellow-500"
                               : originalIndex === 1
                                 ? "bg-slate-400"
-                                : "bg-amber-600",
+                                : "bg-amber-600"
                           )}
                         />
                         <Avatar
@@ -133,13 +114,10 @@ export function LeaderboardTab({ classId }: LeaderboardTabProps) {
                               ? "border-yellow-500 shadow-2xl shadow-yellow-500/40"
                               : originalIndex === 1
                                 ? "border-slate-400 shadow-xl shadow-slate-400/20"
-                                : "border-amber-600 shadow-xl shadow-amber-600/20",
+                                : "border-amber-600 shadow-xl shadow-amber-600/20"
                           )}
                         >
-                          <AvatarImage
-                            src={student.image || ""}
-                            className="object-cover"
-                          />
+                          <AvatarImage src={student.image || ""} className="object-cover" />
                           <AvatarFallback className="text-2xl font-black bg-muted">
                             {student.name[0]}
                           </AvatarFallback>
@@ -152,10 +130,7 @@ export function LeaderboardTab({ classId }: LeaderboardTabProps) {
                             type: "spring",
                             stiffness: 200,
                           }}
-                          className={cn(
-                            "absolute -top-6 z-20",
-                            isAr ? "-start-6" : "-end-6",
-                          )}
+                          className={cn("absolute -top-6 z-20", isAr ? "-start-6" : "-end-6")}
                         >
                           {getRankIcon(originalIndex)}
                         </motion.div>
@@ -165,7 +140,7 @@ export function LeaderboardTab({ classId }: LeaderboardTabProps) {
                         <h3
                           className={cn(
                             "font-black tracking-tighter text-xl line-clamp-1",
-                            isFirst ? "text-foreground" : "text-foreground/80",
+                            isFirst ? "text-foreground" : "text-foreground/80"
                           )}
                         >
                           {student.name}
@@ -240,7 +215,7 @@ export function LeaderboardTab({ classId }: LeaderboardTabProps) {
                         "flex items-center justify-between p-4 rounded-2xl transition-all group cursor-pointer",
                         isTopThree
                           ? "bg-primary/5 border border-primary/10"
-                          : "hover:bg-muted/50 border border-transparent hover:border-black/3 dark:hover:border-white/3",
+                          : "hover:bg-muted/50 border border-transparent hover:border-black/3 dark:hover:border-white/3"
                       )}
                     >
                       <div className="flex items-center gap-6">
@@ -256,10 +231,7 @@ export function LeaderboardTab({ classId }: LeaderboardTabProps) {
                         <div className="flex items-center gap-4">
                           <div className="relative">
                             <Avatar className="h-12 w-12 border-2 border-background shadow-sm group-hover:scale-110 transition-transform">
-                              <AvatarImage
-                                src={student.image || ""}
-                                className="object-cover"
-                              />
+                              <AvatarImage src={student.image || ""} className="object-cover" />
                               <AvatarFallback className="font-black bg-muted">
                                 {student.name[0]}
                               </AvatarFallback>
@@ -268,7 +240,7 @@ export function LeaderboardTab({ classId }: LeaderboardTabProps) {
                               <div
                                 className={cn(
                                   "absolute -bottom-1 size-4 bg-success rounded-full border-2 border-background flex items-center justify-center",
-                                  isAr ? "-start-1" : "-end-1",
+                                  isAr ? "-start-1" : "-end-1"
                                 )}
                               >
                                 <Star className="h-2 w-2 text-white fill-white" />
@@ -291,9 +263,7 @@ export function LeaderboardTab({ classId }: LeaderboardTabProps) {
                               <div className="flex items-center gap-1 text-[9px] font-bold text-muted-foreground/40 uppercase tracking-widest">
                                 <TrendingUp className="h-2.5 w-2.5" />
                                 {t("classes.leaderboard.topPercent", {
-                                  percent: Math.round(
-                                    ((index + 1) / rankedStudents.length) * 100,
-                                  ),
+                                  percent: Math.round(((index + 1) / rankedStudents.length) * 100),
                                 })}
                               </div>
                             </div>
@@ -316,7 +286,7 @@ export function LeaderboardTab({ classId }: LeaderboardTabProps) {
                         <ChevronRight
                           className={cn(
                             "h-4 w-4 text-muted-foreground/20 group-hover:text-primary transition-colors",
-                            isAr && "rotate-180",
+                            isAr && "rotate-180"
                           )}
                         />
                       </div>

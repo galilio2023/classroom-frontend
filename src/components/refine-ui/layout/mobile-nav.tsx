@@ -35,8 +35,7 @@ export const MobileNav = () => {
       {navItems.map((item) => {
         const isActive =
           location.pathname === item.path ||
-          (item.path !== "/dashboard" &&
-            location.pathname.startsWith(item.path));
+          (item.path !== "/dashboard" && location.pathname.startsWith(item.path));
 
         return (
           <Link
@@ -44,16 +43,14 @@ export const MobileNav = () => {
             to={item.path}
             className={cn(
               "flex flex-col items-center gap-1 transition-all duration-300 relative py-1 px-3 rounded-xl",
-              isActive
-                ? "text-primary"
-                : "text-muted-foreground hover:text-foreground",
+              isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
             )}
           >
             <motion.div whileTap={{ scale: 0.85 }} className="relative">
               <item.icon
                 className={cn(
                   "h-5 w-5 md:h-6 md:w-6 transition-transform",
-                  isActive && "scale-110",
+                  isActive && "scale-110"
                 )}
               />
               {isActive && (
@@ -67,7 +64,7 @@ export const MobileNav = () => {
             <span
               className={cn(
                 "text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-opacity",
-                isActive ? "opacity-100" : "opacity-60",
+                isActive ? "opacity-100" : "opacity-60"
               )}
             >
               {t(item.label as any)}

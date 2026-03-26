@@ -21,12 +21,7 @@ import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { Button } from "./button";
 import { useTranslation } from "react-i18next";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "./tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./tooltip";
 import { useMemo } from "react";
 
 interface RichTextEditorProps {
@@ -160,11 +155,7 @@ const EditorToolbar = ({ editor }: { editor: Editor | null }) => {
 
       <Separator orientation="vertical" className="mx-1 h-6" />
 
-      <EditorButton
-        onClick={addImage}
-        icon={ImageIcon}
-        label={t("common.editor.image")}
-      />
+      <EditorButton onClick={addImage} icon={ImageIcon} label={t("common.editor.image")} />
       <EditorButton
         onClick={setLink}
         isActive={editor.isActive("link")}
@@ -188,11 +179,7 @@ const EditorToolbar = ({ editor }: { editor: Editor | null }) => {
   );
 };
 
-export const RichTextEditor = ({
-  value,
-  onChange,
-  className,
-}: RichTextEditorProps) => {
+export const RichTextEditor = ({ value, onChange, className }: RichTextEditorProps) => {
   // Memoize extensions to prevent duplicate registration on re-renders
   const extensions = useMemo(
     () => [
@@ -213,7 +200,7 @@ export const RichTextEditor = ({
         },
       }),
     ],
-    [],
+    []
   );
 
   const editor = useEditor(
@@ -227,12 +214,12 @@ export const RichTextEditor = ({
         attributes: {
           class: cn(
             "prose prose-sm dark:prose-invert max-w-none min-h-[150px] p-4 focus:outline-none",
-            className,
+            className
           ),
         },
       },
     },
-    [],
+    []
   ); // Static dependency array
 
   return (

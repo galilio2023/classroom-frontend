@@ -65,12 +65,10 @@ const LoginPage = () => {
         onError: (err) => {
           const error = err as HttpError;
           const errorMessage =
-            (error as any)?.data?.message ||
-            error.message ||
-            t("auth.login.unknownError");
+            (error as any)?.data?.message || error.message || t("auth.login.unknownError");
           toast.error(errorMessage);
         },
-      },
+      }
     );
   };
 
@@ -88,10 +86,7 @@ const LoginPage = () => {
         transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
         className="w-full max-w-md z-10"
       >
-        <Link
-          to="/"
-          className="flex items-center justify-center gap-3 mb-10 md:mb-14 group"
-        >
+        <Link to="/" className="flex items-center justify-center gap-3 mb-10 md:mb-14 group">
           <div className="bg-primary p-2.5 rounded-2xl group-hover:rotate-6 group-hover:scale-110 transition-all duration-500 shadow-lg shadow-primary/20">
             <BookOpen className="h-7 w-7 text-primary-foreground" />
           </div>
@@ -117,10 +112,7 @@ const LoginPage = () => {
           </CardHeader>
           <CardContent className="px-6 md:px-12">
             <Form {...form}>
-              <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-6 md:space-y-8"
-              >
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 md:space-y-8">
                 <FormField
                   control={form.control}
                   name="email"
@@ -178,7 +170,7 @@ const LoginPage = () => {
                       <Zap
                         className={cn(
                           "h-5 w-5 fill-current group-hover:scale-125 transition-transform",
-                          isAr && "rotate-180",
+                          isAr && "rotate-180"
                         )}
                       />
                     </div>
@@ -196,10 +188,7 @@ const LoginPage = () => {
               >
                 {t("buttons.createAccount")}{" "}
                 <ArrowRight
-                  className={cn(
-                    "inline h-4 w-4 ms-1 mb-0.5",
-                    isAr && "me-1 ms-0 rotate-180",
-                  )}
+                  className={cn("inline h-4 w-4 ms-1 mb-0.5", isAr && "me-1 ms-0 rotate-180")}
                 />
               </Link>
             </p>

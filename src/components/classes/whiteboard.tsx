@@ -1,11 +1,4 @@
-import {
-  lazy,
-  Suspense,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { socket } from "@/lib/socket";
 import { useCustomMutation, useGetIdentity } from "@refinedev/core";
 import { User } from "@/types";
@@ -82,9 +75,7 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
       setIsLocked(data.isLocked);
       if (!isTeacher) {
         toast.info(
-          data.isLocked
-            ? "Teacher has locked the board"
-            : "Teacher has unlocked the board",
+          data.isLocked ? "Teacher has locked the board" : "Teacher has unlocked the board"
         );
       }
     });
@@ -146,7 +137,7 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
         lastUpdateRef.current = now;
       }
     },
-    [activeRoomId, excalidrawAPI, isLocked, isTeacher],
+    [activeRoomId, excalidrawAPI, isLocked, isTeacher]
   );
 
   const toggleLock = () => {
@@ -188,11 +179,9 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
         files: excalidrawAPI.getFiles(),
       });
 
-      const file = new File(
-        [blob],
-        `whiteboard-${activeRoomId}-${Date.now()}.png`,
-        { type: "image/png" },
-      );
+      const file = new File([blob], `whiteboard-${activeRoomId}-${Date.now()}.png`, {
+        type: "image/png",
+      });
 
       const formData = new FormData();
       formData.append("file", file);
@@ -232,14 +221,14 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
                   toast.error("Failed to save resource entry");
                   setIsSaving(false);
                 },
-              },
+              }
             );
           },
           onError: () => {
             toast.error("Failed to upload image");
             setIsSaving(false);
           },
-        },
+        }
       );
     } catch (error) {
       console.error("Save snapshot error:", error);
@@ -257,20 +246,9 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
           </h4>
           {isTeacher && (
             <div className="flex items-center space-x-2">
-              <Switch
-                id="lock-mode"
-                checked={isLocked}
-                onCheckedChange={toggleLock}
-              />
-              <Label
-                htmlFor="lock-mode"
-                className="text-xs flex items-center gap-1"
-              >
-                {isLocked ? (
-                  <Lock className="h-3 w-3" />
-                ) : (
-                  <Unlock className="h-3 w-3" />
-                )}
+              <Switch id="lock-mode" checked={isLocked} onCheckedChange={toggleLock} />
+              <Label htmlFor="lock-mode" className="text-xs flex items-center gap-1">
+                {isLocked ? <Lock className="h-3 w-3" /> : <Unlock className="h-3 w-3" />}
                 {isLocked ? "Students Locked" : "Students Can Draw"}
               </Label>
             </div>
@@ -284,12 +262,7 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
         </div>
         <div className="flex items-center gap-2">
           {isTeacher && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={clearWhiteboard}
-              className="h-8"
-            >
+            <Button variant="outline" size="sm" onClick={clearWhiteboard} className="h-8">
               <Trash2 className="h-4 w-4 me-1" />
               Clear
             </Button>

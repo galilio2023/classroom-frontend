@@ -308,14 +308,9 @@ const Dashboard = () => {
                       </div>
                     </div>
                   </div>
-                  <TodaySchedule
-                    schedule={coreData?.todaySchedule ?? []}
-                    show={navigation.show}
-                  />
+                  <TodaySchedule schedule={coreData?.todaySchedule ?? []} show={navigation.show} />
                 </ErrorBoundary>
-                {!roles.isStudent && (
-                  <PromoCards isStaff={roles.isStaff} list={navigation.list} />
-                )}
+                {!roles.isStudent && <PromoCards isStaff={roles.isStaff} list={navigation.list} />}
               </div>
             </div>
           </div>

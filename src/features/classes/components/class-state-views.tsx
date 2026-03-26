@@ -40,9 +40,7 @@ export const ClassErrorView = () => {
         <XCircle className="h-20 w-20" />
       </div>
       <div className="space-y-3">
-        <h2 className="text-4xl font-black tracking-tight">
-          {t("classes.show.notFound")}
-        </h2>
+        <h2 className="text-4xl font-black tracking-tight">{t("classes.show.notFound")}</h2>
         <p className="text-muted-foreground font-medium max-w-md mx-auto text-lg">
           {t("classes.show.notFoundDescription")}
         </p>

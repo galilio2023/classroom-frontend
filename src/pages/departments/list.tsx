@@ -16,12 +16,7 @@ import {
 } from "lucide-react";
 import { Input } from "@/components/ui/input.tsx";
 import { useMemo, useState, useRef, useCallback } from "react";
-import {
-  useList,
-  useNavigation,
-  useDelete,
-  useGetIdentity,
-} from "@refinedev/core";
+import { useList, useNavigation, useDelete, useGetIdentity } from "@refinedev/core";
 import { Department, User, UserRole } from "@/types";
 import { Badge } from "@/components/ui/badge.tsx";
 import { Button } from "@/components/ui/button.tsx";
@@ -140,9 +135,7 @@ const DepartmentsList = () => {
             <Breadcrumb />
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div>
-                <h1 className="text-4xl font-black tracking-tight">
-                  {t("departments.title")}
-                </h1>
+                <h1 className="text-4xl font-black tracking-tight">{t("departments.title")}</h1>
                 <p className="text-muted-foreground font-medium mt-1">
                   {t("departments.description")}
                 </p>
@@ -172,9 +165,7 @@ const DepartmentsList = () => {
                   {t("departments.stats.total")}
                 </p>
                 <p className="text-2xl font-black">
-                  {isLoading
-                    ? "..."
-                    : new Intl.NumberFormat(i18n.language).format(stats.total)}
+                  {isLoading ? "..." : new Intl.NumberFormat(i18n.language).format(stats.total)}
                 </p>
               </div>
             </Card>
@@ -187,11 +178,7 @@ const DepartmentsList = () => {
                   {t("departments.stats.withHead")}
                 </p>
                 <p className="text-2xl font-black text-indigo-600">
-                  {isLoading
-                    ? "..."
-                    : new Intl.NumberFormat(i18n.language).format(
-                        stats.withHead,
-                      )}
+                  {isLoading ? "..." : new Intl.NumberFormat(i18n.language).format(stats.withHead)}
                 </p>
               </div>
             </Card>
@@ -204,9 +191,7 @@ const DepartmentsList = () => {
                   {t("departments.stats.active")}
                 </p>
                 <p className="text-2xl font-black text-green-600">
-                  {isLoading
-                    ? "..."
-                    : new Intl.NumberFormat(i18n.language).format(stats.active)}
+                  {isLoading ? "..." : new Intl.NumberFormat(i18n.language).format(stats.active)}
                 </p>
               </div>
             </Card>
@@ -219,7 +204,7 @@ const DepartmentsList = () => {
                 <Search
                   className={cn(
                     "absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors",
-                    "start-4",
+                    "start-4"
                   )}
                 />
                 <Input
@@ -227,7 +212,7 @@ const DepartmentsList = () => {
                   placeholder={t("departments.filters.searchPlaceholder")}
                   className={cn(
                     "h-14 rounded-2xl border-none bg-background shadow-sm font-medium",
-                    isAr ? "pe-11" : "ps-11",
+                    isAr ? "pe-11" : "ps-11"
                   )}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -248,9 +233,7 @@ const DepartmentsList = () => {
             className="h-[600px] overflow-auto pe-2 custom-scrollbar rounded-[2.5rem] border border-primary/5 bg-card/30 backdrop-blur-sm relative"
           >
             {isLoading ? (
-              <div
-                style={{ height: "100%", width: "100%", position: "relative" }}
-              >
+              <div style={{ height: "100%", width: "100%", position: "relative" }}>
                 {Array.from({ length: 6 }).map((_, i) => (
                   <div
                     key={i}
@@ -323,7 +306,7 @@ const DepartmentsList = () => {
                         <div
                           className={cn(
                             "flex-1 text-start min-w-0 w-full",
-                            isAr ? "md:me-6" : "md:ms-6",
+                            isAr ? "md:me-6" : "md:ms-6"
                           )}
                         >
                           <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-3 overflow-hidden">
@@ -345,10 +328,7 @@ const DepartmentsList = () => {
                               <div className="flex items-center gap-2 text-muted-foreground shrink-0">
                                 <Avatar className="h-5 w-5 border border-border/50">
                                   <AvatarImage
-                                    src={
-                                      department.headOfDepartment.image ??
-                                      undefined
-                                    }
+                                    src={department.headOfDepartment.image ?? undefined}
                                   />
                                   <AvatarFallback className="bg-primary/5 text-primary font-black text-[7px]">
                                     {department.headOfDepartment.name[0]}
@@ -383,15 +363,12 @@ const DepartmentsList = () => {
 
                         {/* Actions */}
                         <div
-                          className={cn(
-                            "flex items-center gap-2 mt-4 md:mt-0 shrink-0",
-                            "ms-4",
-                          )}
+                          className={cn("flex items-center gap-2 mt-4 md:mt-0 shrink-0", "ms-4")}
                         >
                           <div
                             className={cn(
                               "hidden lg:flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all group-hover:translate-x-0",
-                              isAr ? "-translate-x-2" : "translate-x-2",
+                              isAr ? "-translate-x-2" : "translate-x-2"
                             )}
                           >
                             {isAdmin && (
@@ -400,9 +377,7 @@ const DepartmentsList = () => {
                                   variant="ghost"
                                   size="icon"
                                   className="h-9 w-9 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/5"
-                                  onClick={() =>
-                                    edit("departments", department.id)
-                                  }
+                                  onClick={() => edit("departments", department.id)}
                                 >
                                   <Pencil className="h-4 w-4" />
                                 </Button>
@@ -425,10 +400,7 @@ const DepartmentsList = () => {
                           >
                             {t("buttons.manage")}
                             <ArrowRight
-                              className={cn(
-                                "h-3.5 w-3.5 ms-1.5",
-                                isAr && "rotate-180",
-                              )}
+                              className={cn("h-3.5 w-3.5 ms-1.5", isAr && "rotate-180")}
                             />
                           </Button>
 
@@ -450,9 +422,7 @@ const DepartmentsList = () => {
                                 {t("assignments.list.labels.options")}
                               </DropdownMenuLabel>
                               <DropdownMenuItem
-                                onClick={() =>
-                                  edit("departments", department.id)
-                                }
+                                onClick={() => edit("departments", department.id)}
                                 className="rounded-lg gap-2 py-2 cursor-pointer"
                               >
                                 <Pencil className="h-3.5 w-3.5 text-primary" />
@@ -464,9 +434,7 @@ const DepartmentsList = () => {
                                 <>
                                   <DropdownMenuSeparator className="my-1" />
                                   <DropdownMenuItem
-                                    onClick={() =>
-                                      setDeleteTarget(department.id)
-                                    }
+                                    onClick={() => setDeleteTarget(department.id)}
                                     className="rounded-lg gap-2 py-2 cursor-pointer text-destructive focus:text-destructive"
                                   >
                                     <Trash2 className="h-3.5 w-3.5" />
@@ -489,10 +457,7 @@ const DepartmentsList = () => {
         </div>
       </ListView>
 
-      <AlertDialog
-        open={deleteTarget !== null}
-        onOpenChange={() => setDeleteTarget(null)}
-      >
+      <AlertDialog open={deleteTarget !== null} onOpenChange={() => setDeleteTarget(null)}>
         <AlertDialogContent className="rounded-[2.5rem] border border-border/50 shadow-2xl bg-white dark:bg-[#09090b] opacity-100 backdrop-blur-none text-start">
           <AlertDialogHeader className="space-y-4 text-start">
             <div className="p-4 rounded-2xl bg-destructive/10 text-destructive w-fit">
@@ -508,9 +473,7 @@ const DepartmentsList = () => {
                   <span className="font-black text-destructive uppercase tracking-widest text-[10px] bg-destructive/5 px-2 py-1 rounded">
                     {t("departments.delete.warning")}
                   </span>
-                  <span className="text-sm">
-                    {t("departments.delete.warningDesc")}
-                  </span>
+                  <span className="text-sm">{t("departments.delete.warningDesc")}</span>
                 </div>
               </div>
             </div>

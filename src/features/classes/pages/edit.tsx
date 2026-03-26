@@ -138,7 +138,7 @@ const ClassesEdit = () => {
           setSelectedSourceClass("");
           setSelectedSourceTerm("");
         },
-      },
+      }
     );
   };
 
@@ -150,9 +150,7 @@ const ClassesEdit = () => {
       <div className="flex flex-col gap-8">
         <div className="space-y-1">
           <EditViewHeader />
-          <p className="text-muted-foreground font-medium">
-            {t("classes.edit.subtitle")}
-          </p>
+          <p className="text-muted-foreground font-medium">{t("classes.edit.subtitle")}</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
@@ -270,18 +268,11 @@ const ClassesEdit = () => {
                         <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ms-1">
                           {t("classes.edit.selectSourceTerm")}
                         </Label>
-                        <Select
-                          onValueChange={setSelectedSourceTerm}
-                          value={selectedSourceTerm}
-                        >
+                        <Select onValueChange={setSelectedSourceTerm} value={selectedSourceTerm}>
                           <SelectTrigger className="h-12 rounded-xl bg-muted/20 border-none focus:ring-ai-primary transition-all font-bold">
                             <div className="flex items-center gap-2">
                               <History className="h-4 w-4 text-ai-primary/60" />
-                              <SelectValue
-                                placeholder={t(
-                                  "classes.edit.selectTermPlaceholder",
-                                )}
-                              />
+                              <SelectValue placeholder={t("classes.edit.selectTermPlaceholder")} />
                             </div>
                           </SelectTrigger>
                           <SelectContent className="rounded-xl border-none shadow-2xl">
@@ -312,11 +303,7 @@ const ClassesEdit = () => {
                           <SelectTrigger className="h-12 rounded-xl bg-muted/20 border-none focus:ring-ai-primary transition-all font-bold">
                             <div className="flex items-center gap-2">
                               <BookOpen className="h-4 w-4 text-ai-primary/60" />
-                              <SelectValue
-                                placeholder={t(
-                                  "classes.edit.selectClassPlaceholder",
-                                )}
-                              />
+                              <SelectValue placeholder={t("classes.edit.selectClassPlaceholder")} />
                             </div>
                           </SelectTrigger>
                           <SelectContent className="rounded-xl border-none shadow-2xl">

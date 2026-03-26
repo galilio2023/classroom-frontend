@@ -9,9 +9,7 @@ interface AIAssignmentHelperProps {
   onUseContent?: (content: string) => void;
 }
 
-export const AIAssignmentHelper: React.FC<AIAssignmentHelperProps> = ({
-  onUseContent,
-}) => {
+export const AIAssignmentHelper: React.FC<AIAssignmentHelperProps> = ({ onUseContent }) => {
   const { isAiEnabled, isAllowed } = useAiAccess();
   const {
     subject,
@@ -53,10 +51,7 @@ export const AIAssignmentHelper: React.FC<AIAssignmentHelperProps> = ({
         handleGenerate={handleGenerate}
         isLoading={isLoading}
       />
-      <AssignmentPreview
-        content={generatedContent}
-        onUseContent={onUseContent}
-      />
+      <AssignmentPreview content={generatedContent} onUseContent={onUseContent} />
     </div>
   );
 };

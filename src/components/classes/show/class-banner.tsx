@@ -29,10 +29,7 @@ export const ClassBanner = ({
   const classColor = aClass.color || "#3b82f6";
   const isFull = aClass.capacity && approvedCount >= aClass.capacity;
 
-  const SubjectIcon = useMemo(
-    () => getSubjectIcon(aClass.subject?.name),
-    [aClass.subject?.name],
-  );
+  const SubjectIcon = useMemo(() => getSubjectIcon(aClass.subject?.name), [aClass.subject?.name]);
 
   return (
     <motion.div
@@ -56,8 +53,7 @@ export const ClassBanner = ({
               variant="secondary"
               className="bg-white/20 text-white border border-white/10 backdrop-blur-md font-black text-[10px] md:text-xs uppercase tracking-widest px-4 py-1.5 md:py-2 rounded-xl shadow-sm"
             >
-              {aClass.subject?.department?.name ||
-                t("classes.show.banner.academic")}
+              {aClass.subject?.department?.name || t("classes.show.banner.academic")}
             </Badge>
             {isFull && (
               <Badge className="bg-orange-500 text-white border-none font-black text-[10px] md:text-xs uppercase tracking-widest px-4 py-1.5 md:py-2 rounded-xl shadow-lg">
@@ -103,8 +99,7 @@ export const ClassBanner = ({
               >
                 <Clock className="h-4 w-4 text-white/70" />
                 <span>
-                  {t(`days.${schedule.day.substring(0, 3)}` as any)} •{" "}
-                  {schedule.startTime}
+                  {t(`days.${schedule.day.substring(0, 3)}` as any)} • {schedule.startTime}
                 </span>
               </div>
             ))}
@@ -120,7 +115,7 @@ export const ClassBanner = ({
                 "rounded-2xl h-14 px-8 font-black uppercase tracking-widest text-[10px] shadow-2xl transition-all active:scale-95 border-2",
                 isLiveIndicator
                   ? "bg-white text-red-600 border-white hover:bg-white/90 shadow-red-500/20"
-                  : "bg-red-600 text-white border-red-600 hover:bg-red-700 shadow-red-600/40",
+                  : "bg-red-600 text-white border-red-600 hover:bg-red-700 shadow-red-600/40"
               )}
             >
               {isLiveIndicator ? (

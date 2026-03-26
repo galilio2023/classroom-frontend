@@ -35,15 +35,7 @@ interface StudyPlannerData {
   plan: StudyBlock[];
 }
 
-const DAYS = [
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
-  "Sunday",
-];
+const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 const TIME_SLOTS = ["Morning", "Afternoon", "Evening"];
 
 const StudyPlanner = () => {
@@ -52,14 +44,9 @@ const StudyPlanner = () => {
   usePageTitle(t("resources.study-planner.label"));
   const [plan, setPlan] = useState<StudyBlock[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [completedBlocks, setCompletedBlocks] = useState<
-    Record<string, boolean>
-  >({});
+  const [completedBlocks, setCompletedBlocks] = useState<Record<string, boolean>>({});
 
-  const { mutate: generatePlanMutation } = useCustomMutation<
-    StudyPlannerData,
-    HttpError
-  >();
+  const { mutate: generatePlanMutation } = useCustomMutation<StudyPlannerData, HttpError>();
 
   useEffect(() => {
     const savedPlan = localStorage.getItem("study-plan");
@@ -113,7 +100,7 @@ const StudyPlanner = () => {
         onError: () => {
           setIsLoading(false);
         },
-      },
+      }
     );
   };
 
@@ -251,7 +238,7 @@ const StudyPlanner = () => {
                               ? "min-h-[12rem] hover:shadow-xl hover:shadow-primary/5 hover:border-primary/20"
                               : "h-24 opacity-30 bg-muted/10 border-dashed",
                             isCompleted &&
-                              "bg-primary/3 border-primary/20 shadow-none grayscale-[0.5]",
+                              "bg-primary/3 border-primary/20 shadow-none grayscale-[0.5]"
                           )}
                         >
                           {block ? (
@@ -270,7 +257,7 @@ const StudyPlanner = () => {
                                     "size-10 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-sm",
                                     isCompleted
                                       ? "bg-primary text-primary-foreground shadow-lg scale-110"
-                                      : "bg-muted/50 text-muted-foreground hover:bg-primary hover:text-white",
+                                      : "bg-muted/50 text-muted-foreground hover:bg-primary hover:text-white"
                                   )}
                                 >
                                   <CheckCircle2 className="h-5 w-5" />
@@ -282,7 +269,7 @@ const StudyPlanner = () => {
                                   "text-sm md:text-base font-black leading-relaxed flex-grow text-start transition-all duration-500",
                                   isCompleted
                                     ? "opacity-40 line-through decoration-primary/30"
-                                    : "text-foreground group-hover:text-primary",
+                                    : "text-foreground group-hover:text-primary"
                                 )}
                               >
                                 {block.task}

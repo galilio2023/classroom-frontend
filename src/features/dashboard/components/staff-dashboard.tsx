@@ -28,12 +28,7 @@ interface StaffDashboardProps {
   show: (resource: string, id: string | number) => void;
 }
 
-export const StaffDashboard = ({
-  data,
-  isLoading,
-  onRefresh,
-  show,
-}: StaffDashboardProps) => {
+export const StaffDashboard = ({ data, isLoading, onRefresh, show }: StaffDashboardProps) => {
   const { t } = useTranslation();
   const { create, list } = useNavigation();
 
@@ -53,20 +48,10 @@ export const StaffDashboard = ({
         const element = document.getElementById("at-risk-students-section");
         if (element) {
           element.scrollIntoView({ behavior: "smooth" });
-          element.classList.add(
-            "ring-2",
-            "ring-destructive",
-            "ring-offset-8",
-            "rounded-4xl",
-          );
+          element.classList.add("ring-2", "ring-destructive", "ring-offset-8", "rounded-4xl");
           setTimeout(
-            () =>
-              element.classList.remove(
-                "ring-2",
-                "ring-destructive",
-                "ring-offset-8",
-              ),
-            3000,
+            () => element.classList.remove("ring-2", "ring-destructive", "ring-offset-8"),
+            3000
           );
         }
       },
@@ -175,10 +160,7 @@ export const StaffDashboard = ({
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-black">
-                {data.channelStats
-                  ? (data.channelStats.conversionRate * 100).toFixed(1)
-                  : "0.0"}
-                %
+                {data.channelStats ? (data.channelStats.conversionRate * 100).toFixed(1) : "0.0"}%
               </div>
               <p className="text-xs text-muted-foreground mt-1 font-medium">
                 {t("dashboard.staff.enrollmentSuccess")}
@@ -242,10 +224,7 @@ export const StaffDashboard = ({
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
             >
-              <PendingGradingList
-                submissions={data.pendingSubmissions ?? []}
-                show={show}
-              />
+              <PendingGradingList submissions={data.pendingSubmissions ?? []} show={show} />
             </motion.div>
           </ErrorBoundary>
         </div>
@@ -285,11 +264,7 @@ export const StaffDashboard = ({
                   {t("dashboard.staff.platformOverview")}
                 </h2>
               </div>
-              <PlatformOverview
-                stats={data.stats}
-                isLoading={isLoading}
-                onRefresh={onRefresh}
-              />
+              <PlatformOverview stats={data.stats} isLoading={isLoading} onRefresh={onRefresh} />
             </motion.div>
           </ErrorBoundary>
         </div>

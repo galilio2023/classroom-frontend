@@ -1,9 +1,4 @@
-import {
-  useReactTable,
-  getCoreRowModel,
-  ColumnDef,
-  flexRender,
-} from "@tanstack/react-table";
+import { useReactTable, getCoreRowModel, ColumnDef, flexRender } from "@tanstack/react-table";
 import { useMemo, useState } from "react";
 import { Submission, User, PeerReview } from "@/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -48,13 +43,9 @@ interface SubmissionListProps {
   assignmentId?: number;
 }
 
-export const SubmissionList = ({
-  submissions = [],
-  assignmentId,
-}: SubmissionListProps) => {
+export const SubmissionList = ({ submissions = [], assignmentId }: SubmissionListProps) => {
   const { t, i18n } = useTranslation();
-  const [selectedSubmission, setSelectedSubmission] =
-    useState<Submission | null>(null);
+  const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
   const [isGradingOpen, setIsGradingOpen] = useState(false);
 
   dayjs.locale(i18n.language === "ar" ? "ar" : "en");
@@ -93,11 +84,7 @@ export const SubmissionList = ({
               <div className="relative group">
                 <Avatar className="size-10 border-2 border-background shadow-sm group-hover:border-primary/20 transition-all">
                   {student.image && (
-                    <AvatarImage
-                      src={student.image}
-                      alt={student.name}
-                      className="object-cover"
-                    />
+                    <AvatarImage src={student.image} alt={student.name} className="object-cover" />
                   )}
                   <AvatarFallback className="bg-primary/5 text-primary font-bold text-xs">
                     {student.name
@@ -162,11 +149,9 @@ export const SubmissionList = ({
         cell: ({ row }) => {
           const submissionId = row.original.id;
           const reviewsForThis = allReviews.filter(
-            (r: PeerReview) => r.submissionId === submissionId,
+            (r: PeerReview) => r.submissionId === submissionId
           );
-          const completed = reviewsForThis.filter(
-            (r: PeerReview) => !!r.feedback,
-          ).length;
+          const completed = reviewsForThis.filter((r: PeerReview) => !!r.feedback).length;
           const total = reviewsForThis.length;
 
           if (total === 0)
@@ -184,11 +169,7 @@ export const SubmissionList = ({
           return (
             <div className="flex flex-col gap-2 min-w-[120px]">
               <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-tighter">
-                <span
-                  className={cn(
-                    isFullyReviewed ? "text-success" : "text-primary",
-                  )}
-                >
+                <span className={cn(isFullyReviewed ? "text-success" : "text-primary")}>
                   {t("assignments.list.table.reviews", { completed, total })}
                 </span>
                 <span className="text-muted-foreground/40">
@@ -199,7 +180,7 @@ export const SubmissionList = ({
                 <div
                   className={cn(
                     "h-full transition-all duration-500 rounded-full",
-                    isFullyReviewed ? "bg-success" : "bg-primary",
+                    isFullyReviewed ? "bg-success" : "bg-primary"
                   )}
                   style={{ width: `${(completed / total) * 100}%` }}
                 />
@@ -236,14 +217,12 @@ export const SubmissionList = ({
                     ? "bg-primary/10 text-primary border-primary/20"
                     : isLow
                       ? "bg-destructive/10 text-destructive border-destructive/20"
-                      : "bg-muted/50 text-foreground border-border/40",
+                      : "bg-muted/50 text-foreground border-border/40"
                 )}
               >
                 {grade}%
               </div>
-              {isHigh && (
-                <Trophy className="h-4 w-4 text-gold-primary animate-bounce" />
-              )}
+              {isHigh && <Trophy className="h-4 w-4 text-gold-primary animate-bounce" />}
             </div>
           );
         },
@@ -281,7 +260,7 @@ export const SubmissionList = ({
         ),
       },
     ],
-    [allReviews, t],
+    [allReviews, t]
   );
 
   const table = useReactTable({
@@ -317,10 +296,7 @@ export const SubmissionList = ({
                     <TableHead key={header.id}>
                       {header.isPlaceholder
                         ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
+                        : flexRender(header.column.columnDef.header, header.getContext())}
                     </TableHead>
                   );
                 })}
@@ -338,20 +314,14 @@ export const SubmissionList = ({
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
                   ))}
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell
-                  colSpan={submissionColumns.length}
-                  className="h-24 text-center"
-                >
+                <TableCell colSpan={submissionColumns.length} className="h-24 text-center">
                   {t("assignments.list.table.submissionsHeader")}
                 </TableCell>
               </TableRow>

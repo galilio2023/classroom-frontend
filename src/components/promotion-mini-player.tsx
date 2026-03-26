@@ -8,8 +8,7 @@ import { cn } from "@/lib/utils";
 
 export const PromotionMiniPlayer = () => {
   const { t, i18n } = useTranslation();
-  const { promotionTrailer, setPromotionTrailer, isJoined } =
-    usePersistentLive();
+  const { promotionTrailer, setPromotionTrailer, isJoined } = usePersistentLive();
   const isAr = i18n.language === "ar";
 
   // 🛡️ PRIORITY GUARD: Live Classes always take precedence over promotional trailers

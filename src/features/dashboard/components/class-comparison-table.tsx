@@ -1,10 +1,4 @@
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -28,9 +22,7 @@ export const ClassComparisonTable = ({ data }: ClassComparisonTableProps) => {
           <Users className="h-5 w-5 text-primary" />
           Class Comparison
         </CardTitle>
-        <CardDescription>
-          Compare performance across your classes.
-        </CardDescription>
+        <CardDescription>Compare performance across your classes.</CardDescription>
       </CardHeader>
       <CardContent className="pt-4">
         <Table>
@@ -50,12 +42,8 @@ export const ClassComparisonTable = ({ data }: ClassComparisonTableProps) => {
                 <TableCell className="text-end font-bold text-primary">
                   {cls.averageGrade}%
                 </TableCell>
-                <TableCell className="text-end">
-                  {cls.attendanceRate}%
-                </TableCell>
-                <TableCell className="text-end">
-                  {cls.completionRate}%
-                </TableCell>
+                <TableCell className="text-end">{cls.attendanceRate}%</TableCell>
+                <TableCell className="text-end">{cls.completionRate}%</TableCell>
                 <TableCell className="text-end">{cls.studentCount}</TableCell>
               </TableRow>
             ))}

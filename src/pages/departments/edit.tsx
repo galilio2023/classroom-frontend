@@ -29,14 +29,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import {
-  BookOpen,
-  Code2,
-  FileText,
-  Lightbulb,
-  Info,
-  UserCircle,
-} from "lucide-react";
+import { BookOpen, Code2, FileText, Lightbulb, Info, UserCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { departmentFormSchema } from "@/schemas/department";
 import { User, UserRole } from "@/types";
@@ -83,8 +76,7 @@ const DepartmentsEdit = () => {
                     Edit Department
                   </CardTitle>
                   <CardDescription>
-                    Update the details for the department "
-                    {query?.data?.data.name}".
+                    Update the details for the department "{query?.data?.data.name}".
                   </CardDescription>
                 </CardHeader>
 
@@ -103,11 +95,7 @@ const DepartmentsEdit = () => {
                             Department Code
                           </FormLabel>
                           <FormControl>
-                            <Input
-                              placeholder="e.g. CS"
-                              {...field}
-                              className="font-mono"
-                            />
+                            <Input placeholder="e.g. CS" {...field} className="font-mono" />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -125,10 +113,7 @@ const DepartmentsEdit = () => {
                             Department Name
                           </FormLabel>
                           <FormControl>
-                            <Input
-                              placeholder="e.g. Computer Science"
-                              {...field}
-                            />
+                            <Input placeholder="e.g. Computer Science" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -146,10 +131,7 @@ const DepartmentsEdit = () => {
                           <UserCircle className="h-4 w-4 text-muted-foreground" />
                           Head of Department
                         </FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          value={field.value || undefined}
-                        >
+                        <Select onValueChange={field.onChange} value={field.value || undefined}>
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select a teacher to lead this department" />
@@ -157,10 +139,7 @@ const DepartmentsEdit = () => {
                           </FormControl>
                           <SelectContent className="bg-white dark:bg-[#09090b] opacity-100 backdrop-blur-none border border-border/50 shadow-2xl">
                             {teacherOptions.map((option) => (
-                              <SelectItem
-                                key={option.value}
-                                value={option.value.toString()}
-                              >
+                              <SelectItem key={option.value} value={option.value.toString()}>
                                 {option.label}
                               </SelectItem>
                             ))}
@@ -195,12 +174,7 @@ const DepartmentsEdit = () => {
                 <Separator />
 
                 <CardFooter className="flex justify-end pt-6 pb-6 bg-muted/5">
-                  <Button
-                    type="submit"
-                    size="lg"
-                    disabled={formLoading}
-                    className="min-w-[150px]"
-                  >
+                  <Button type="submit" size="lg" disabled={formLoading} className="min-w-[150px]">
                     {formLoading ? "Saving..." : "Save Changes"}
                   </Button>
                 </CardFooter>
@@ -224,8 +198,8 @@ const DepartmentsEdit = () => {
                   <span className="text-xs font-bold text-primary">1</span>
                 </div>
                 <p>
-                  <strong>Short Codes:</strong> Use short, uppercase codes like
-                  "CS", "MATH", or "ENG" for easy reference.
+                  <strong>Short Codes:</strong> Use short, uppercase codes like "CS", "MATH", or
+                  "ENG" for easy reference.
                 </p>
               </div>
               <div className="flex gap-3">
@@ -233,8 +207,7 @@ const DepartmentsEdit = () => {
                   <span className="text-xs font-bold text-primary">2</span>
                 </div>
                 <p>
-                  <strong>Clear Names:</strong> Use the full official name of
-                  the department.
+                  <strong>Clear Names:</strong> Use the full official name of the department.
                 </p>
               </div>
             </CardContent>

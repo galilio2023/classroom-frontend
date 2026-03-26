@@ -25,20 +25,14 @@ import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 import { User, UserRole, UserStatus, VerificationStatus } from "@/types";
 
-const roleVariants: Record<
-  string,
-  "default" | "secondary" | "outline" | "destructive" | "ai"
-> = {
+const roleVariants: Record<string, "default" | "secondary" | "outline" | "destructive" | "ai"> = {
   [UserRole.ADMIN]: "default",
   [UserRole.TEACHER]: "ai",
   [UserRole.STUDENT]: "secondary",
   [UserRole.PARENT]: "outline",
 };
 
-const statusVariants: Record<
-  string,
-  "default" | "secondary" | "outline" | "destructive"
-> = {
+const statusVariants: Record<string, "default" | "secondary" | "outline" | "destructive"> = {
   [UserStatus.ACTIVE]: "default",
   [UserStatus.SUSPENDED]: "destructive",
   [UserStatus.INACTIVE]: "secondary",
@@ -81,10 +75,7 @@ export const UserCard = ({
       <div
         className="absolute start-0 top-1/2 -translate-y-1/2 w-1.5 h-12 rounded-e-full transition-all group-hover:h-20"
         style={{
-          backgroundColor:
-            user.role === UserRole.TEACHER
-              ? "var(--ai-primary)"
-              : "var(--primary)",
+          backgroundColor: user.role === UserRole.TEACHER ? "var(--ai-primary)" : "var(--primary)",
         }}
       />
 
@@ -110,7 +101,7 @@ export const UserCard = ({
       <div
         className={cn(
           "flex-1 min-w-0 w-full",
-          isAr ? "md:me-8 md:text-end" : "md:ms-8 md:text-start",
+          isAr ? "md:me-8 md:text-end" : "md:ms-8 md:text-start"
         )}
       >
         <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 mb-2">
@@ -204,17 +195,13 @@ export const UserCard = ({
                 <DropdownMenuSeparator className="my-2 opacity-50" />
                 {user.status === UserStatus.ACTIVE ? (
                   <DropdownMenuItem
-                    onClick={() =>
-                      onStatusChange(user.id, UserStatus.SUSPENDED)
-                    }
+                    onClick={() => onStatusChange(user.id, UserStatus.SUSPENDED)}
                     className="rounded-xl gap-3 py-3 cursor-pointer text-amber-600 focus:bg-amber-500/10"
                   >
                     <div className="p-2 rounded-lg bg-amber-500/10 text-amber-600">
                       <UserMinus className="h-4 w-4" />
                     </div>
-                    <span className="font-bold">
-                      {t("buttons.suspendUser")}
-                    </span>
+                    <span className="font-bold">{t("buttons.suspendUser")}</span>
                   </DropdownMenuItem>
                 ) : (
                   <DropdownMenuItem
@@ -224,9 +211,7 @@ export const UserCard = ({
                     <div className="p-2 rounded-lg bg-green-500/10 text-green-600">
                       <UserPlus2 className="h-4 w-4" />
                     </div>
-                    <span className="font-bold">
-                      {t("buttons.activateUser")}
-                    </span>
+                    <span className="font-bold">{t("buttons.activateUser")}</span>
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuItem
@@ -236,9 +221,7 @@ export const UserCard = ({
                   <div className="p-2 rounded-lg bg-destructive/10 text-destructive">
                     <Trash2 className="h-4 w-4" />
                   </div>
-                  <span className="font-bold">
-                    {t("buttons.deleteAccount")}
-                  </span>
+                  <span className="font-bold">{t("buttons.deleteAccount")}</span>
                 </DropdownMenuItem>
               </>
             )}

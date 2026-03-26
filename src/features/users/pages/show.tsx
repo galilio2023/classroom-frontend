@@ -1,11 +1,5 @@
 import { Link } from "react-router-dom";
-import {
-  User as UserIcon,
-  Loader2,
-  Share2,
-  XCircle,
-  Shield,
-} from "lucide-react";
+import { User as UserIcon, Loader2, Share2, XCircle, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
@@ -68,9 +62,7 @@ const UserShow = () => {
           <XCircle className="h-20 w-20" />
         </div>
         <div className="space-y-3">
-          <h2 className="text-4xl font-black tracking-tight">
-            {t("profile.notFound" as any)}
-          </h2>
+          <h2 className="text-4xl font-black tracking-tight">{t("profile.notFound" as any)}</h2>
           <p className="text-muted-foreground font-medium max-w-md mx-auto text-lg">
             {t("profile.notFoundDesc" as any)}
           </p>
@@ -125,9 +117,7 @@ const UserShow = () => {
                 className="w-full md:w-auto rounded-2xl font-bold uppercase tracking-widest text-[10px] h-12 md:h-14 px-8 md:px-10 shadow-lg shadow-primary/25"
                 asChild
               >
-                <Link to={`/users/edit/${user.id}`}>
-                  {t("buttons.editProfile" as any)}
-                </Link>
+                <Link to={`/users/edit/${user.id}`}>{t("buttons.editProfile" as any)}</Link>
               </Button>
             )}
           </div>
@@ -136,11 +126,7 @@ const UserShow = () => {
 
       <div className="grid gap-10 md:gap-16 lg:grid-cols-12">
         <div className="lg:col-span-4">
-          <ProfileCard
-            user={user}
-            isStudent={isStudent}
-            isTeacher={isTeacher}
-          />
+          <ProfileCard user={user} isStudent={isStudent} isTeacher={isTeacher} />
         </div>
         <div className="lg:col-span-8 space-y-10 md:space-y-16">
           {isTeacher ? (

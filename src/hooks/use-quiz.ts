@@ -12,12 +12,7 @@ interface UseQuizProps {
   onComplete?: (score: number) => void;
 }
 
-export const useQuiz = ({
-  assignmentId,
-  classId,
-  description,
-  onComplete,
-}: UseQuizProps) => {
+export const useQuiz = ({ assignmentId, classId, description, onComplete }: UseQuizProps) => {
   const { t } = useTranslation();
   const { mutate: submitScore } = useCreate();
   const { open } = useNotification();
@@ -36,8 +31,7 @@ export const useQuiz = ({
   const [isFinished, setIsFinished] = useState(false);
 
   const currentQuestion = questions[currentStep];
-  const progress =
-    questions.length > 0 ? (currentStep / questions.length) * 100 : 0;
+  const progress = questions.length > 0 ? (currentStep / questions.length) * 100 : 0;
 
   // --- LIVE ACTIVITY LOGIC ---
   useEffect(() => {
@@ -50,26 +44,16 @@ export const useQuiz = ({
       setActiveStudents(data.count);
     };
 
-    const handleActiveStudent = (data: {
-      studentName: string;
-      quizId: number;
-    }) => {
+    const handleActiveStudent = (data: { studentName: string; quizId: number }) => {
       if (data.quizId === assignmentId) {
-        toast(
-          (t as any)("classes.quiz.startedToast", { name: data.studentName }),
-          {
-            icon: "✍️",
-            duration: 3000,
-          },
-        );
+        toast((t as any)("classes.quiz.startedToast", { name: data.studentName }), {
+          icon: "✍️",
+          duration: 3000,
+        });
       }
     };
 
-    const handleNudge = (data: {
-      teacherName: string;
-      message: string;
-      quizId: number;
-    }) => {
+    const handleNudge = (data: { teacherName: string; message: string; quizId: number }) => {
       if (data.quizId === assignmentId) {
         toast(data.message, {
           description: (t as any)("classes.quiz.nudgeFrom", {
@@ -136,7 +120,7 @@ export const useQuiz = ({
             });
             onComplete?.(finalScore);
           },
-        },
+        }
       );
     }
   };

@@ -47,9 +47,7 @@ export const AIQuizGenerator: React.FC<AIQuizGeneratorProps> = ({ classId }) => 
         return (
           `### Q${i + 1}: ${q.question}\n\n` +
           q.options
-            .map(
-              (opt) => `- ${opt}${opt === q.correctAnswer ? " (Correct)" : ""}`,
-            )
+            .map((opt) => `- ${opt}${opt === q.correctAnswer ? " (Correct)" : ""}`)
             .join("\n") +
           `\n\n**Explanation:** ${q.explanation}\n\n---`
         );
@@ -71,11 +69,10 @@ export const AIQuizGenerator: React.FC<AIQuizGeneratorProps> = ({ classId }) => 
           open?.({
             type: "success",
             message: "Assignment Created!",
-            description:
-              "The quiz has been saved as an assignment for this class.",
+            description: "The quiz has been saved as an assignment for this class.",
           });
         },
-      },
+      }
     );
   };
 

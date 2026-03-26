@@ -1,11 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -37,12 +31,7 @@ import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
 import usePageTitle from "@/hooks/use-page-title";
 import { Label } from "@/components/ui/label";
 import { useTranslation } from "react-i18next";
-import {
-  useCreate,
-  useList,
-  useNavigation,
-  useCustomMutation,
-} from "@refinedev/core";
+import { useCreate, useList, useNavigation, useCustomMutation } from "@refinedev/core";
 import { MemoryBoosterList } from "../components/memory-booster-list";
 import { SparkleLoader } from "@/components/ai/sparkle-loader";
 import { Class } from "@/types";
@@ -126,7 +115,7 @@ const AIStudyLab = () => {
         const response = await axios.post<{ flashcards: Flashcard[] }>(
           "/api/ai/generate-flashcards",
           { input, locale: i18n.language, classId: selectedClassId },
-          { signal: abortControllerRef.current.signal },
+          { signal: abortControllerRef.current.signal }
         );
         setFlashcards(response.data.flashcards);
         toast.success(t("aiHub.studyLab.toasts.flashcardsGenerated"));
@@ -139,7 +128,7 @@ const AIStudyLab = () => {
         const response = await axios.post<{ content: string }>(
           "/api/ai/generate-content",
           { prompt, classId: selectedClassId },
-          { signal: abortControllerRef.current.signal },
+          { signal: abortControllerRef.current.signal }
         );
         setResult(response.data.content);
         toast.success(t("aiHub.studyLab.toasts.aiFinished"));
@@ -193,15 +182,13 @@ const AIStudyLab = () => {
         onSuccess: () => {
           setIsSaving(false);
           setHasSaved(true);
-          toast.success(
-            t("notifications.success", { defaultValue: "Saved to history!" }),
-          );
+          toast.success(t("notifications.success", { defaultValue: "Saved to history!" }));
         },
         onError: () => {
           setIsSaving(false);
           toast.error("Failed to save to history.");
         },
-      },
+      }
     );
   };
 
@@ -241,10 +228,7 @@ const AIStudyLab = () => {
   ];
 
   return (
-    <div
-      className="space-y-10 md:space-y-16 pb-20 max-w-7xl mx-auto"
-      dir={isAr ? "rtl" : "ltr"}
-    >
+    <div className="space-y-10 md:space-y-16 pb-20 max-w-7xl mx-auto" dir={isAr ? "rtl" : "ltr"}>
       {/* Header Section */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
@@ -304,17 +288,13 @@ const AIStudyLab = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4 md:gap-6">
             {tools.map((tool) => (
-              <motion.div
-                key={tool.id}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
+              <motion.div key={tool.id} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                 <Card
                   className={cn(
                     "h-full cursor-pointer transition-all duration-500 border border-border/40 shadow-sm rounded-[1.5rem] md:rounded-4xl overflow-hidden group relative",
                     activeTool === tool.id
                       ? "bg-primary text-primary-foreground shadow-2xl shadow-primary/20"
-                      : "bg-card/50 backdrop-blur-3xl hover:bg-primary/5 hover:border-primary/20",
+                      : "bg-card/50 backdrop-blur-3xl hover:bg-primary/5 hover:border-primary/20"
                   )}
                   onClick={() => setActiveTool(tool.id)}
                 >
@@ -326,7 +306,7 @@ const AIStudyLab = () => {
                           "p-3 rounded-2xl transition-all duration-500 shrink-0 shadow-sm",
                           activeTool === tool.id
                             ? "bg-white/20 text-white"
-                            : tool.bg + " " + tool.color,
+                            : tool.bg + " " + tool.color
                         )}
                       >
                         <tool.icon className="h-6 w-6 md:h-7 md:w-7" />
@@ -338,9 +318,7 @@ const AIStudyLab = () => {
                         <CardDescription
                           className={cn(
                             "text-xs md:text-sm font-medium leading-tight",
-                            activeTool === tool.id
-                              ? "text-white/70"
-                              : "text-muted-foreground/70",
+                            activeTool === tool.id ? "text-white/70" : "text-muted-foreground/70"
                           )}
                         >
                           {tool.desc}
@@ -380,14 +358,10 @@ const AIStudyLab = () => {
                         <Zap className="h-6 w-6 animate-pulse" />
                       </div>
                       <CardTitle className="text-2xl md:text-3xl font-black tracking-tight">
-                        {activeTool === "explain" &&
-                          t("aiHub.studyLab.questions.understand")}
-                        {activeTool === "quiz" &&
-                          t("aiHub.studyLab.questions.test")}
-                        {activeTool === "summary" &&
-                          t("aiHub.studyLab.questions.summary")}
-                        {activeTool === "flashcards" &&
-                          t("aiHub.studyLab.questions.cards")}
+                        {activeTool === "explain" && t("aiHub.studyLab.questions.understand")}
+                        {activeTool === "quiz" && t("aiHub.studyLab.questions.test")}
+                        {activeTool === "summary" && t("aiHub.studyLab.questions.summary")}
+                        {activeTool === "flashcards" && t("aiHub.studyLab.questions.cards")}
                       </CardTitle>
                     </div>
                   </CardHeader>
@@ -398,9 +372,7 @@ const AIStudyLab = () => {
                       </Label>
                       {activeTool !== "summary" ? (
                         <Input
-                          placeholder={t(
-                            `aiHub.studyLab.placeholders.${activeTool}`,
-                          )}
+                          placeholder={t(`aiHub.studyLab.placeholders.${activeTool}`)}
                           value={input}
                           onChange={(e) => setInput(e.target.value)}
                           className="h-16 md:h-20 rounded-3xl bg-muted/30 border-none shadow-inner px-8 text-lg md:text-2xl font-black focus-visible:ring-ai-primary/20"
@@ -421,9 +393,7 @@ const AIStudyLab = () => {
                       size="lg"
                       className={cn(
                         "w-full h-16 md:h-20 rounded-3xl font-black uppercase tracking-widest text-xs md:text-sm gap-4 shadow-2xl transition-all duration-500",
-                        isLoading
-                          ? "bg-ai-primary animate-ai-pulse"
-                          : "shadow-primary/30",
+                        isLoading ? "bg-ai-primary animate-ai-pulse" : "shadow-primary/30"
                       )}
                     >
                       {isLoading ? (
@@ -474,10 +444,7 @@ const AIStudyLab = () => {
                     </Button>
                   </CardHeader>
                   <CardContent className="p-8 md:p-16">
-                    <FlashcardPlayer
-                      cards={flashcards}
-                      onComplete={() => setFlashcards(null)}
-                    />
+                    <FlashcardPlayer cards={flashcards} onComplete={() => setFlashcards(null)} />
                   </CardContent>
                 </Card>
               </motion.div>
@@ -577,7 +544,7 @@ const AIStudyLab = () => {
                         "w-full md:w-auto rounded-2xl font-black uppercase tracking-widest text-[10px] gap-3 h-14 px-8 transition-all",
                         hasSaved
                           ? "text-green-600 bg-green-50"
-                          : "text-ai-primary hover:bg-ai-primary/10",
+                          : "text-ai-primary hover:bg-ai-primary/10"
                       )}
                     >
                       {isSaving ? (
@@ -587,11 +554,7 @@ const AIStudyLab = () => {
                       ) : (
                         <Save className="h-5 w-5" />
                       )}
-                      <span>
-                        {hasSaved
-                          ? t("buttons.save")
-                          : t("buttons.saveToHistory")}
-                      </span>
+                      <span>{hasSaved ? t("buttons.save") : t("buttons.saveToHistory")}</span>
                     </Button>
                   </div>
                 </Card>
@@ -602,11 +565,7 @@ const AIStudyLab = () => {
       </div>
 
       {practiceTopic && (
-        <PracticeModal
-          topic={practiceTopic}
-          subjectId={0}
-          onClose={() => setPracticeTopic(null)}
-        />
+        <PracticeModal topic={practiceTopic} subjectId={0} onClose={() => setPracticeTopic(null)} />
       )}
     </div>
   );

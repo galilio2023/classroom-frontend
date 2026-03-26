@@ -141,7 +141,7 @@ const ResourcesListPage = () => {
         },
         {
           onSuccess: () => setDeleteTarget(null),
-        },
+        }
       );
     }
   };
@@ -151,9 +151,7 @@ const ResourcesListPage = () => {
     return {
       total: resources.length,
       videos: resources.filter((r: Resource) => r.type === "video").length,
-      documents: resources.filter(
-        (r: Resource) => r.type !== "video" && r.type !== "link",
-      ).length,
+      documents: resources.filter((r: Resource) => r.type !== "video" && r.type !== "link").length,
     };
   }, [resources]);
 
@@ -204,9 +202,7 @@ const ResourcesListPage = () => {
               <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 mb-1">
                 {t("resourcesPage.stats.total")}
               </p>
-              <p className="text-2xl md:text-3xl font-black">
-                {isLoading ? "..." : stats.total}
-              </p>
+              <p className="text-2xl md:text-3xl font-black">{isLoading ? "..." : stats.total}</p>
             </div>
           </Card>
           <Card className="p-6 md:p-8 bg-card/40 backdrop-blur-3xl border-border/40 rounded-4xl md:rounded-[2.5rem] flex items-center gap-5 shadow-sm">
@@ -243,14 +239,14 @@ const ResourcesListPage = () => {
             <div className="relative flex-1 group">
               <Search
                 className={cn(
-                  "absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60 group-focus-within:text-primary transition-colors start-4",
+                  "absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60 group-focus-within:text-primary transition-colors start-4"
                 )}
               />
               <Input
                 type="text"
                 placeholder={t("resourcesPage.searchPlaceholder")}
                 className={cn(
-                  "h-12 rounded-2xl border-none bg-background/50 shadow-none font-medium ps-11 pe-4",
+                  "h-12 rounded-2xl border-none bg-background/50 shadow-none font-medium ps-11 pe-4"
                 )}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -334,8 +330,7 @@ const ResourcesListPage = () => {
               <AnimatePresence mode="popLayout">
                 {resources.map((resource: any, index: any) => {
                   const uploadDate = dayjs(resource.createdAt);
-                  const resourceColor =
-                    (resource as any).class?.color || "#6366f1";
+                  const resourceColor = (resource as any).class?.color || "#6366f1";
 
                   return (
                     <motion.div
@@ -345,7 +340,7 @@ const ResourcesListPage = () => {
                       exit={{ opacity: 0, scale: 0.95 }}
                       transition={{ delay: index * 0.05 }}
                       className={cn(
-                        "group relative flex flex-col md:flex-row items-center p-5 md:p-6 rounded-4xl bg-card/50 backdrop-blur-sm border border-border/40 hover:border-primary/30 hover:bg-card/80 transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-primary/5 cursor-pointer",
+                        "group relative flex flex-col md:flex-row items-center p-5 md:p-6 rounded-4xl bg-card/50 backdrop-blur-sm border border-border/40 hover:border-primary/30 hover:bg-card/80 transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-primary/5 cursor-pointer"
                       )}
                     >
                       {/* Class Color Accent */}
@@ -365,9 +360,7 @@ const ResourcesListPage = () => {
                       <div
                         className={cn(
                           "flex-1 min-w-0 w-full text-start",
-                          isAr
-                            ? "md:me-8 md:text-end"
-                            : "md:ms-8 md:text-start",
+                          isAr ? "md:me-8 md:text-end" : "md:ms-8 md:text-start"
                         )}
                       >
                         <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 mb-2">
@@ -422,7 +415,7 @@ const ResourcesListPage = () => {
                       <div className="flex items-center gap-3 mt-6 md:mt-0 shrink-0">
                         <div
                           className={cn(
-                            "hidden lg:flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 ltr:translate-x-4 rtl:-translate-x-4 group-hover:translate-x-0",
+                            "hidden lg:flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 ltr:translate-x-4 rtl:-translate-x-4 group-hover:translate-x-0"
                           )}
                         >
                           <Button
@@ -432,11 +425,7 @@ const ResourcesListPage = () => {
                             asChild
                             onClick={(e) => e.stopPropagation()}
                           >
-                            <a
-                              href={resource.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
+                            <a href={resource.url} target="_blank" rel="noopener noreferrer">
                               <Download className="h-5 w-5" />
                             </a>
                           </Button>
@@ -474,15 +463,9 @@ const ResourcesListPage = () => {
                           className="w-full md:w-auto rounded-2xl px-8 h-12 font-black uppercase tracking-widest text-[10px] transition-all border-primary/20 text-primary hover:bg-primary/5"
                           asChild
                         >
-                          <a
-                            href={resource.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
+                          <a href={resource.url} target="_blank" rel="noopener noreferrer">
                             {t("buttons.open")}
-                            <ExternalLink
-                              className={cn("h-4 w-4 ms-2 rtl:-scale-x-100")}
-                            />
+                            <ExternalLink className={cn("h-4 w-4 ms-2 rtl:-scale-x-100")} />
                           </a>
                         </Button>
 
@@ -508,11 +491,7 @@ const ResourcesListPage = () => {
                               className="rounded-xl gap-3 py-3 cursor-pointer"
                               asChild
                             >
-                              <a
-                                href={resource.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                              >
+                              <a href={resource.url} target="_blank" rel="noopener noreferrer">
                                 <div className="p-2 rounded-lg bg-primary/10 text-primary">
                                   <Download className="h-4 w-4" />
                                 </div>
@@ -525,9 +504,7 @@ const ResourcesListPage = () => {
                               <div className="p-2 rounded-lg bg-primary/10 text-primary">
                                 <Share2 className="h-4 w-4" />
                               </div>
-                              <span className="font-bold">
-                                {t("resourcesPage.labels.share")}
-                              </span>
+                              <span className="font-bold">{t("resourcesPage.labels.share")}</span>
                             </DropdownMenuItem>
                             {isStaff && (
                               <>
@@ -568,10 +545,7 @@ const ResourcesListPage = () => {
         </div>
       </div>
 
-      <AlertDialog
-        open={deleteTarget !== null}
-        onOpenChange={() => setDeleteTarget(null)}
-      >
+      <AlertDialog open={deleteTarget !== null} onOpenChange={() => setDeleteTarget(null)}>
         <AlertDialogContent className="rounded-[2.5rem]">
           <AlertDialogHeader className="space-y-6">
             <div className="p-5 rounded-2xl bg-destructive/10 text-destructive w-fit mx-auto">
@@ -595,9 +569,7 @@ const ResourcesListPage = () => {
               disabled={isDeleteLoading}
               className="rounded-2xl px-12 h-14 font-black uppercase tracking-widest text-[10px] bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-xl shadow-destructive/20"
             >
-              {isDeleteLoading
-                ? t("buttons.processing")
-                : t("buttons.confirmDelete")}
+              {isDeleteLoading ? t("buttons.processing") : t("buttons.confirmDelete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

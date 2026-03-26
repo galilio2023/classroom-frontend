@@ -61,8 +61,7 @@ const TeacherApplicationsList = () => {
   const isAdmin = identity?.role === UserRole.ADMIN;
 
   const { show } = useNavigation();
-  const { mutate: updateStatus, mutation: updateMutationObj } =
-    useCustomMutation();
+  const { mutate: updateStatus, mutation: updateMutationObj } = useCustomMutation();
   const invalidate = useInvalidate();
 
   const isUpdating = updateMutationObj.isPending;
@@ -104,7 +103,7 @@ const TeacherApplicationsList = () => {
           });
           invalidate({ resource: "classes", invalidates: ["list"] });
         },
-      },
+      }
     );
   };
 
@@ -203,7 +202,7 @@ const TeacherApplicationsList = () => {
                       exit={{ opacity: 0, scale: 0.95 }}
                       transition={{ delay: index * 0.05 }}
                       className={cn(
-                        "group relative flex flex-col md:flex-row items-center p-5 md:p-6 rounded-4xl bg-card/50 backdrop-blur-sm border border-border/40 hover:border-primary/30 hover:bg-card/80 transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-primary/5",
+                        "group relative flex flex-col md:flex-row items-center p-5 md:p-6 rounded-4xl bg-card/50 backdrop-blur-sm border border-border/40 hover:border-primary/30 hover:bg-card/80 transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-primary/5"
                       )}
                     >
                       {/* Status Color Accent */}
@@ -214,7 +213,7 @@ const TeacherApplicationsList = () => {
                             ? "bg-green-500"
                             : app.status === "pending"
                               ? "bg-amber-500"
-                              : "bg-destructive",
+                              : "bg-destructive"
                         )}
                       />
 
@@ -235,9 +234,7 @@ const TeacherApplicationsList = () => {
                       <div
                         className={cn(
                           "flex-1 min-w-0 w-full",
-                          i18n.language === "ar"
-                            ? "md:me-8 md:text-end"
-                            : "md:ms-8 md:text-start",
+                          i18n.language === "ar" ? "md:me-8 md:text-end" : "md:ms-8 md:text-start"
                         )}
                       >
                         <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 mb-2">
@@ -256,7 +253,7 @@ const TeacherApplicationsList = () => {
                               className={cn(
                                 "text-[9px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full shadow-sm",
                                 app.status === "pending" &&
-                                  "bg-amber-500/10 text-amber-600 border border-amber-500/20",
+                                  "bg-amber-500/10 text-amber-600 border border-amber-500/20"
                               )}
                             >
                               {app.status}
@@ -326,9 +323,7 @@ const TeacherApplicationsList = () => {
                               variant="outline"
                               size="lg"
                               className="w-full md:w-auto rounded-2xl px-8 h-12 font-black uppercase tracking-widest text-[10px] border-green-500/20 text-green-600 bg-green-500/5 hover:bg-green-500/10 shadow-sm"
-                              onClick={() =>
-                                handleStatusUpdate(app.id, "approved")
-                              }
+                              onClick={() => handleStatusUpdate(app.id, "approved")}
                               disabled={isUpdating}
                             >
                               <CheckCircle2 className="h-4 w-4 me-2" />
@@ -338,9 +333,7 @@ const TeacherApplicationsList = () => {
                               variant="outline"
                               size="lg"
                               className="w-full md:w-auto rounded-2xl px-8 h-12 font-black uppercase tracking-widest text-[10px] border-destructive/20 text-destructive bg-destructive/5 hover:bg-destructive/10 shadow-sm"
-                              onClick={() =>
-                                handleStatusUpdate(app.id, "rejected")
-                              }
+                              onClick={() => handleStatusUpdate(app.id, "rejected")}
                               disabled={isUpdating}
                             >
                               <XCircle className="h-4 w-4 me-2" />
@@ -384,9 +377,7 @@ const TeacherApplicationsList = () => {
                               <div className="p-2 rounded-lg bg-primary/10 text-primary">
                                 <LayoutGrid className="h-4 w-4" />
                               </div>
-                              <span className="font-bold">
-                                {t("teacherApps.labels.viewClass")}
-                              </span>
+                              <span className="font-bold">{t("teacherApps.labels.viewClass")}</span>
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>

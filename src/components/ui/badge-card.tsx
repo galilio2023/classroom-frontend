@@ -1,14 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import {
-  LucideIcon,
-  Award,
-  Star,
-  Zap,
-  Target,
-  Flame,
-  Trophy,
-} from "lucide-react";
+import { LucideIcon, Award, Star, Zap, Target, Flame, Trophy } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 export interface BadgeData {
@@ -43,14 +35,14 @@ export function BadgeCard({ badge, className }: BadgeCardProps) {
         badge.unlocked
           ? "border-primary/20 bg-primary/5"
           : "border-muted bg-muted/20 grayscale opacity-60",
-        className,
+        className
       )}
     >
       <CardContent className="p-4 flex flex-col items-center text-center gap-2">
         <div
           className={cn(
             "p-3 rounded-2xl transition-transform duration-500 group-hover:scale-110",
-            badge.unlocked ? badge.color : "bg-muted text-muted-foreground",
+            badge.unlocked ? badge.color : "bg-muted text-muted-foreground"
           )}
         >
           <Icon className="h-6 w-6" />
@@ -65,27 +57,24 @@ export function BadgeCard({ badge, className }: BadgeCardProps) {
           </p>
         </div>
 
-        {!badge.unlocked &&
-          badge.progress !== undefined &&
-          badge.threshold !== undefined && (
-            <div className="w-full mt-2 space-y-1">
-              <div className="flex justify-between text-[8px] font-bold uppercase tracking-widest text-muted-foreground">
-                <span>{t("common.progress")}</span>
-                <span>
-                  {formatNumber(badge.progress)} /{" "}
-                  {formatNumber(badge.threshold)}
-                </span>
-              </div>
-              <div className="h-1 w-full bg-muted rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-primary transition-all duration-500"
-                  style={{
-                    width: `${(badge.progress / badge.threshold) * 100}%`,
-                  }}
-                />
-              </div>
+        {!badge.unlocked && badge.progress !== undefined && badge.threshold !== undefined && (
+          <div className="w-full mt-2 space-y-1">
+            <div className="flex justify-between text-[8px] font-bold uppercase tracking-widest text-muted-foreground">
+              <span>{t("common.progress")}</span>
+              <span>
+                {formatNumber(badge.progress)} / {formatNumber(badge.threshold)}
+              </span>
             </div>
-          )}
+            <div className="h-1 w-full bg-muted rounded-full overflow-hidden">
+              <div
+                className="h-full bg-primary transition-all duration-500"
+                style={{
+                  width: `${(badge.progress / badge.threshold) * 100}%`,
+                }}
+              />
+            </div>
+          </div>
+        )}
 
         {badge.unlocked && (
           <div className="absolute top-1 end-1">

@@ -1,13 +1,7 @@
 import React from "react";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { Textarea } from "../ui/textarea";
 import { AICard } from "./ai-card";
 import { AIActionButton } from "./ai-action-button";
@@ -29,9 +23,7 @@ interface AssignmentGeneratorFormProps {
   isLoading: boolean;
 }
 
-export const AssignmentGeneratorForm: React.FC<
-  AssignmentGeneratorFormProps
-> = ({
+export const AssignmentGeneratorForm: React.FC<AssignmentGeneratorFormProps> = ({
   subject,
   setSubject,
   topic,
@@ -94,9 +86,7 @@ export const AssignmentGeneratorForm: React.FC<
                 <div className="flex items-center gap-2 truncate min-w-0">
                   <GraduationCap className="h-4 w-4 text-primary shrink-0" />
                   <span className="truncate block">
-                    <SelectValue
-                      placeholder={t("aiHub.assistant.helper.level")}
-                    />
+                    <SelectValue placeholder={t("aiHub.assistant.helper.level")} />
                   </span>
                 </div>
               </SelectTrigger>

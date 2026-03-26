@@ -10,10 +10,7 @@ interface SystemHealthCardProps {
   isLoading?: boolean;
 }
 
-export const SystemHealthCard: React.FC<SystemHealthCardProps> = ({
-  report,
-  isLoading,
-}) => {
+export const SystemHealthCard: React.FC<SystemHealthCardProps> = ({ report, isLoading }) => {
   const { t } = useTranslation();
 
   if (isLoading) {
@@ -54,14 +51,11 @@ export const SystemHealthCard: React.FC<SystemHealthCardProps> = ({
                   ? "bg-muted text-muted-foreground"
                   : happinessScore > 80
                     ? "bg-green-500/10 text-green-600"
-                    : "bg-orange-500/10 text-orange-600",
+                    : "bg-orange-500/10 text-orange-600"
               )}
             >
               <Heart
-                className={cn(
-                  "h-3 w-3",
-                  hasData && happinessScore > 80 && "fill-green-600",
-                )}
+                className={cn("h-3 w-3", hasData && happinessScore > 80 && "fill-green-600")}
               />
               {hasData ? `${happinessScore}% ${t("common.happy")}` : "---"}
             </Badge>
@@ -84,17 +78,15 @@ export const SystemHealthCard: React.FC<SystemHealthCardProps> = ({
               {t("aiHub.governance.suggestedFixes")}
             </Label>
             <div className="grid gap-2">
-              {report.suggestedFixes
-                ?.slice(0, 2)
-                .map((fix: string, i: number) => (
-                  <div
-                    key={i}
-                    className="flex items-center gap-3 p-3 rounded-xl bg-ai-primary/3 border border-ai-primary/5 group-hover:bg-ai-primary/6 transition-colors"
-                  >
-                    <div className="h-1.5 w-1.5 rounded-full bg-ai-primary shrink-0" />
-                    <span className="text-xs font-medium truncate">{fix}</span>
-                  </div>
-                ))}
+              {report.suggestedFixes?.slice(0, 2).map((fix: string, i: number) => (
+                <div
+                  key={i}
+                  className="flex items-center gap-3 p-3 rounded-xl bg-ai-primary/3 border border-ai-primary/5 group-hover:bg-ai-primary/6 transition-colors"
+                >
+                  <div className="h-1.5 w-1.5 rounded-full bg-ai-primary shrink-0" />
+                  <span className="text-xs font-medium truncate">{fix}</span>
+                </div>
+              ))}
             </div>
           </div>
         </CardContent>
@@ -103,27 +95,17 @@ export const SystemHealthCard: React.FC<SystemHealthCardProps> = ({
   );
 };
 
-const Badge = ({
-  children,
-  className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) => (
+const Badge = ({ children, className }: { children: React.ReactNode; className?: string }) => (
   <div
     className={cn(
       "px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border flex items-center",
-      className,
+      className
     )}
   >
     {children}
   </div>
 );
 
-const Label = ({
-  children,
-  className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) => <span className={cn("block", className)}>{children}</span>;
+const Label = ({ children, className }: { children: React.ReactNode; className?: string }) => (
+  <span className={cn("block", className)}>{children}</span>
+);

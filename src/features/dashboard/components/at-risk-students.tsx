@@ -1,18 +1,5 @@
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
-import {
-  AlertTriangle,
-  Activity,
-  Sparkles,
-  ShieldCheck,
-  Info,
-  ArrowRight,
-} from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { AlertTriangle, Activity, Sparkles, ShieldCheck, Info, ArrowRight } from "lucide-react";
 import { AtRiskStudentItem } from "./at-risk-student-item";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -47,10 +34,7 @@ export const AtRiskStudents = ({ students }: AtRiskStudentsProps) => {
 
   if (students.length === 0) {
     return (
-      <motion.div
-        initial={{ opacity: 0, scale: 0.98 }}
-        animate={{ opacity: 1, scale: 1 }}
-      >
+      <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }}>
         <Card className="border-none shadow-2xl bg-success/2 backdrop-blur-xl rounded-4xl overflow-hidden group">
           <div className="h-1.5 bg-success/20 w-full" />
           <CardHeader className="p-8">
@@ -62,7 +46,7 @@ export const AtRiskStudents = ({ students }: AtRiskStudentsProps) => {
                 <CardTitle
                   className={cn(
                     "text-xl text-success",
-                    isArabic ? "font-bold" : "font-black tracking-tight",
+                    isArabic ? "font-bold" : "font-black tracking-tight"
                   )}
                 >
                   {t("dashboard.staff.atRiskStudents.allClear")}
@@ -92,7 +76,7 @@ export const AtRiskStudents = ({ students }: AtRiskStudentsProps) => {
                 <CardTitle
                   className={cn(
                     "text-xl text-destructive",
-                    isArabic ? "font-bold" : "font-black tracking-tight",
+                    isArabic ? "font-bold" : "font-black tracking-tight"
                   )}
                 >
                   {t("dashboard.staff.atRiskStudents.title")}
@@ -109,9 +93,7 @@ export const AtRiskStudents = ({ students }: AtRiskStudentsProps) => {
               variant="destructive"
               className="rounded-full px-3 py-1 font-black text-[10px] uppercase tracking-widest animate-pulse border-none shadow-lg shadow-destructive/20"
             >
-              {new Intl.NumberFormat(isArabic ? "ar-EG" : "en-US").format(
-                students.length,
-              )}{" "}
+              {new Intl.NumberFormat(isArabic ? "ar-EG" : "en-US").format(students.length)}{" "}
               {isArabic ? "حالات" : "Critical"}
             </Badge>
           </div>
@@ -134,9 +116,7 @@ export const AtRiskStudents = ({ students }: AtRiskStudentsProps) => {
 
           <div className="pt-4 border-t border-black/3 dark:border-white/3 flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">
             <Info className="h-3 w-3" />
-            <span>
-              {t("dashboard.staff.atRiskStudents.interventionRecommended")}
-            </span>
+            <span>{t("dashboard.staff.atRiskStudents.interventionRecommended")}</span>
           </div>
         </CardContent>
       </Card>

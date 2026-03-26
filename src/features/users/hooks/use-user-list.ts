@@ -1,11 +1,5 @@
 import { useState, useMemo } from "react";
-import {
-  useNavigation,
-  useDelete,
-  useGetIdentity,
-  useUpdate,
-  useList,
-} from "@refinedev/core";
+import { useNavigation, useDelete, useGetIdentity, useUpdate, useList } from "@refinedev/core";
 import { User, UserRole, UserStatus, VerificationStatus } from "@/types";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
@@ -21,9 +15,7 @@ export const useUserList = () => {
   const [selectedStatus, setSelectedStatus] = useState("all");
   const [verificationFilter, setVerificationFilter] = useState("all");
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
-  const [verificationTarget, setVerificationTarget] = useState<User | null>(
-    null,
-  );
+  const [verificationTarget, setVerificationTarget] = useState<User | null>(null);
 
   const { show, create } = useNavigation();
   const { mutate: deleteMutation } = useDelete();
@@ -77,11 +69,11 @@ export const useUserList = () => {
         (u: any) =>
           u.role === UserRole.TEACHER &&
           (u.verificationStatus === VerificationStatus.PENDING ||
-            u.verificationStatus === VerificationStatus.UNVERIFIED),
+            u.verificationStatus === VerificationStatus.UNVERIFIED)
       ).length,
       active: users.filter((u: any) => u.status === UserStatus.ACTIVE).length,
     }),
-    [users],
+    [users]
   );
 
   const handleVerify = (id: string, isVerified: boolean) => {
@@ -100,11 +92,11 @@ export const useUserList = () => {
           toast.success(
             isVerified
               ? t("users.governance.toasts.verified")
-              : t("users.governance.toasts.rejected"),
+              : t("users.governance.toasts.rejected")
           );
           setVerificationTarget(null);
         },
-      },
+      }
     );
   };
 
@@ -120,9 +112,9 @@ export const useUserList = () => {
           toast.success(
             t("users.governance.toasts.statusUpdated", {
               status: t(`status.${newStatus.toLowerCase()}` as any),
-            }),
+            })
           ),
-      },
+      }
     );
   };
 

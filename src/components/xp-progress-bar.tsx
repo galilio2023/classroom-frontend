@@ -19,17 +19,11 @@ export function XPProgressBar({
 }: XPProgressBarProps) {
   const { t, i18n } = useTranslation();
   const isArabic = i18n.language === "ar";
-  const {
-    currentLevel,
-    xpInCurrentLevel,
-    xpRequiredForNextLevel,
-    progressPercentage,
-  } = getLevelProgress(xp);
+  const { currentLevel, xpInCurrentLevel, xpRequiredForNextLevel, progressPercentage } =
+    getLevelProgress(xp);
 
   const formatNumber = (num: number) => {
-    return new Intl.NumberFormat(isArabic ? "ar-EG" : "en-US").format(
-      Math.floor(num),
-    );
+    return new Intl.NumberFormat(isArabic ? "ar-EG" : "en-US").format(Math.floor(num));
   };
 
   return (
@@ -43,8 +37,7 @@ export function XPProgressBar({
             </span>
           </div>
           <span>
-            {formatNumber(xpInCurrentLevel)} /{" "}
-            {formatNumber(xpRequiredForNextLevel)} XP
+            {formatNumber(xpInCurrentLevel)} / {formatNumber(xpRequiredForNextLevel)} XP
           </span>
         </div>
       )}
@@ -53,7 +46,7 @@ export function XPProgressBar({
         className="h-2 bg-muted/50 border border-border/50"
         indicatorClassName={cn(
           "bg-linear-to-r from-gold-primary to-gold-secondary",
-          indicatorClassName,
+          indicatorClassName
         )}
       />
     </div>

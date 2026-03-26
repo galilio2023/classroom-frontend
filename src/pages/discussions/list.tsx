@@ -92,16 +92,15 @@ const DiscussionsListPage = () => {
   const hasData = discussions.length > 0;
 
   const stats = useMemo(() => {
-    if (!discussions.length)
-      return { total: 0, activeToday: 0, totalReplies: 0 };
+    if (!discussions.length) return { total: 0, activeToday: 0, totalReplies: 0 };
     return {
       total: discussions.length,
       activeToday: discussions.filter((d: Discussion) =>
-        dayjs(d.updatedAt).isAfter(dayjs().subtract(24, "hour")),
+        dayjs(d.updatedAt).isAfter(dayjs().subtract(24, "hour"))
       ).length,
       totalReplies: discussions.reduce(
         (acc: number, curr: Discussion) => acc + (curr.replies?.length || 0),
-        0,
+        0
       ),
     };
   }, [discussions]);
@@ -151,9 +150,7 @@ const DiscussionsListPage = () => {
               <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 mb-1">
                 {t("discussions.stats.total")}
               </p>
-              <p className="text-2xl md:text-3xl font-black">
-                {isLoading ? "..." : stats.total}
-              </p>
+              <p className="text-2xl md:text-3xl font-black">{isLoading ? "..." : stats.total}</p>
             </div>
           </Card>
           <Card className="p-6 md:p-8 bg-card/40 backdrop-blur-3xl border-border/40 rounded-4xl md:rounded-[2.5rem] flex items-center gap-5 shadow-sm">
@@ -190,14 +187,14 @@ const DiscussionsListPage = () => {
             <div className="relative flex-1 group">
               <Search
                 className={cn(
-                  "absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60 group-focus-within:text-primary transition-colors start-4",
+                  "absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60 group-focus-within:text-primary transition-colors start-4"
                 )}
               />
               <Input
                 type="text"
                 placeholder={t("discussions.searchPlaceholder")}
                 className={cn(
-                  "h-12 rounded-2xl border-none bg-background/50 shadow-none font-medium ps-11 pe-4",
+                  "h-12 rounded-2xl border-none bg-background/50 shadow-none font-medium ps-11 pe-4"
                 )}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -251,8 +248,7 @@ const DiscussionsListPage = () => {
               <AnimatePresence mode="popLayout">
                 {discussions.map((discussion: any, index: number) => {
                   const lastActivity = dayjs(discussion.updatedAt);
-                  const discussionColor =
-                    (discussion as any).class?.color || "#6366f1";
+                  const discussionColor = (discussion as any).class?.color || "#6366f1";
 
                   return (
                     <motion.div
@@ -262,7 +258,7 @@ const DiscussionsListPage = () => {
                       exit={{ opacity: 0, scale: 0.95 }}
                       transition={{ delay: index * 0.05 }}
                       className={cn(
-                        "group relative flex flex-col md:flex-row items-center p-5 md:p-6 rounded-4xl bg-card/50 backdrop-blur-sm border border-border/40 hover:border-primary/30 hover:bg-card/80 transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-primary/5 cursor-pointer",
+                        "group relative flex flex-col md:flex-row items-center p-5 md:p-6 rounded-4xl bg-card/50 backdrop-blur-sm border border-border/40 hover:border-primary/30 hover:bg-card/80 transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-primary/5 cursor-pointer"
                       )}
                       onClick={() => show("discussions", discussion.id)}
                     >
@@ -289,7 +285,7 @@ const DiscussionsListPage = () => {
                               "p-1 rounded-lg",
                               discussion.user.role === UserRole.TEACHER
                                 ? "bg-primary/10 text-primary"
-                                : "bg-muted text-muted-foreground",
+                                : "bg-muted text-muted-foreground"
                             )}
                           >
                             {discussion.user.role === UserRole.TEACHER ? (
@@ -303,10 +299,7 @@ const DiscussionsListPage = () => {
 
                       {/* Info Area */}
                       <div
-                        className={cn(
-                          "flex-1 min-w-0 w-full text-center md:text-start",
-                          "md:ms-8",
-                        )}
+                        className={cn("flex-1 min-w-0 w-full text-center md:text-start", "md:ms-8")}
                       >
                         <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 mb-2">
                           <h3 className="text-xl md:text-2xl font-black tracking-tight truncate group-hover:text-primary transition-colors leading-tight">
@@ -316,12 +309,11 @@ const DiscussionsListPage = () => {
                             <Badge variant="ai" className="h-6">
                               {(discussion as any).class?.name || "General"}
                             </Badge>
-                            {discussion.replies &&
-                              discussion.replies.length > 5 && (
-                                <Badge className="bg-orange-500/10 text-orange-600 border border-orange-500/20 font-black px-2.5 py-0.5 rounded-full text-[9px] tracking-widest uppercase shadow-sm">
-                                  {t("discussions.labels.trending")}
-                                </Badge>
-                              )}
+                            {discussion.replies && discussion.replies.length > 5 && (
+                              <Badge className="bg-orange-500/10 text-orange-600 border border-orange-500/20 font-black px-2.5 py-0.5 rounded-full text-[9px] tracking-widest uppercase shadow-sm">
+                                {t("discussions.labels.trending")}
+                              </Badge>
+                            )}
                           </div>
                         </div>
 
@@ -378,9 +370,7 @@ const DiscussionsListPage = () => {
                           className="w-full md:w-auto rounded-2xl px-8 h-12 font-black uppercase tracking-widest text-[10px] transition-all border-primary/20 text-primary hover:bg-primary/5"
                         >
                           {t("buttons.view")}
-                          <ArrowRight
-                            className={cn("h-4 w-4 ms-2 rtl:-scale-x-100")}
-                          />
+                          <ArrowRight className={cn("h-4 w-4 ms-2 rtl:-scale-x-100")} />
                         </Button>
 
                         <DropdownMenu>
@@ -408,17 +398,13 @@ const DiscussionsListPage = () => {
                               <div className="p-2 rounded-lg bg-primary/10 text-primary">
                                 <Eye className="h-4 w-4" />
                               </div>
-                              <span className="font-bold">
-                                {t("discussions.labels.open")}
-                              </span>
+                              <span className="font-bold">{t("discussions.labels.open")}</span>
                             </DropdownMenuItem>
                             <DropdownMenuItem className="rounded-xl gap-3 py-3 cursor-pointer">
                               <div className="p-2 rounded-lg bg-primary/10 text-primary">
                                 <Activity className="h-4 w-4" />
                               </div>
-                              <span className="font-bold">
-                                {t("discussions.labels.follow")}
-                              </span>
+                              <span className="font-bold">{t("discussions.labels.follow")}</span>
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>

@@ -15,17 +15,10 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { Input } from "@/components/ui/input";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
-import {
-  DataTableFilterDropdown,
-  DataTableFilterDropdownActions,
-} from "./filter-dropdown";
+import { DataTableFilterDropdown, DataTableFilterDropdownActions } from "./filter-dropdown";
 import { DataTableFilterOperatorSelect } from "./operator-select";
 
 export type DataTableFilterInputProps<TData> = {
@@ -47,7 +40,7 @@ export function DataTableFilterInput<TData>({
   renderInput,
 }: DataTableFilterInputProps<TData>) {
   const [filterValue, setFilterValue] = useState(
-    (columnFromProps.getFilterValue() as string | string[]) || "",
+    (columnFromProps.getFilterValue() as string | string[]) || ""
   );
 
   const [operator, setOperator] = useState<CrudOperators>(() => {
@@ -55,8 +48,7 @@ export function DataTableFilterInput<TData>({
     const columnFilter = tableFromProps
       .getState()
       .columnFilters.find((f) => f.id === columnFromProps.id);
-    if (columnFilter && "operator" in columnFilter)
-      return columnFilter.operator as CrudOperators;
+    if (columnFilter && "operator" in columnFilter) return columnFilter.operator as CrudOperators;
     return defaultOperatorFromProps || "eq";
   });
 
@@ -159,9 +151,7 @@ export function DataTableFilterDropdownText<TData>({
       renderInput={({ value, onChange }) => (
         <Input
           type="text"
-          placeholder={
-            placeholder ?? t("table.filter.text.placeholder", "Filter by...")
-          }
+          placeholder={placeholder ?? t("table.filter.text.placeholder", "Filter by...")}
           value={value}
           onChange={(event) => onChange(event.target.value)}
         />
@@ -195,9 +185,7 @@ export function DataTableFilterDropdownNumeric<TData>({
       renderInput={({ value, onChange }) => (
         <Input
           type="number"
-          placeholder={
-            placeholder ?? t("table.filter.numeric.placeholder", "Filter by...")
-          }
+          placeholder={placeholder ?? t("table.filter.numeric.placeholder", "Filter by...")}
           value={value}
           onChange={(event) => onChange(event.target.value)}
         />
@@ -291,15 +279,12 @@ export function DataTableFilterCombobox<TData>({
                         </Badge>
                       ))}
                       {currentValues.length > 3 && (
-                        <span className="text-xs">
-                          +{currentValues.length - 3} more
-                        </span>
+                        <span className="text-xs">+{currentValues.length - 3} more</span>
                       )}
                     </div>
                   ) : (
                     <span className="truncate flex-1 text-start text-xs">
-                      {options.find((o) => o.value === currentValues[0])
-                        ?.label ||
+                      {options.find((o) => o.value === currentValues[0])?.label ||
                         placeholder ||
                         t("table.filter.combobox.placeholder", "Select...")}
                     </span>
@@ -310,16 +295,10 @@ export function DataTableFilterCombobox<TData>({
             </PopoverTrigger>
             <PopoverContent className="w-[200px] p-0" align="start">
               <Command>
-                <CommandInput
-                  placeholder={t("table.filter.combobox.search", "Search...")}
-                />
+                <CommandInput placeholder={t("table.filter.combobox.search", "Search...")} />
                 <CommandList>
                   <CommandEmpty>
-                    {noResultsText ||
-                      t(
-                        "table.filter.combobox.noResults",
-                        "Results not found.",
-                      )}
+                    {noResultsText || t("table.filter.combobox.noResults", "Results not found.")}
                   </CommandEmpty>
                   <CommandGroup>
                     {options.map((o) => (
@@ -332,9 +311,7 @@ export function DataTableFilterCombobox<TData>({
                         <Check
                           className={cn(
                             "ms-auto h-4 w-4",
-                            currentValues.includes(o.value)
-                              ? "opacity-100"
-                              : "opacity-0",
+                            currentValues.includes(o.value) ? "opacity-100" : "opacity-0"
                           )}
                         />
                       </CommandItem>

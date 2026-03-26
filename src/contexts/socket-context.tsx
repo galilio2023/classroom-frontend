@@ -17,9 +17,7 @@ const SocketContext = createContext<SocketContextType>({
 
 export const useSocket = () => useContext(SocketContext);
 
-export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { data: user, isLoading } = useGetIdentity<User>();
   const [isConnected, setIsConnected] = useState(socket.connected);
 
@@ -66,8 +64,6 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [user?.id, isLoading]);
 
   return (
-    <SocketContext.Provider value={{ socket, isConnected }}>
-      {children}
-    </SocketContext.Provider>
+    <SocketContext.Provider value={{ socket, isConnected }}>{children}</SocketContext.Provider>
   );
 };

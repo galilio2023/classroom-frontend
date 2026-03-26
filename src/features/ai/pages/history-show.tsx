@@ -1,11 +1,5 @@
 import { useShow, useNavigation, useDelete } from "@refinedev/core";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   History,
@@ -79,9 +73,7 @@ const AIHistoryShow = () => {
     defaultValue: "AI Study History",
   });
   usePageTitle(
-    record?.prompt
-      ? `${historyLabel}: ${record.prompt.substring(0, 20)}...`
-      : historyLabel,
+    record?.prompt ? `${historyLabel}: ${record.prompt.substring(0, 20)}...` : historyLabel
   );
 
   const getToolIcon = (tool?: string) => {
@@ -133,9 +125,7 @@ const AIHistoryShow = () => {
   const handleCopy = () => {
     if (record?.response) {
       void navigator.clipboard.writeText(record.response);
-      toast.success(
-        t("toasts.copiedToClipboard", { defaultValue: "Copied to clipboard!" }),
-      );
+      toast.success(t("toasts.copiedToClipboard", { defaultValue: "Copied to clipboard!" }));
     }
   };
 
@@ -150,9 +140,7 @@ const AIHistoryShow = () => {
     document.body.appendChild(element);
     element.click();
     document.body.removeChild(element);
-    toast.success(
-      t("toasts.downloadStarted", { defaultValue: "Download started!" }),
-    );
+    toast.success(t("toasts.downloadStarted", { defaultValue: "Download started!" }));
   };
 
   const handleDelete = () => {
@@ -168,11 +156,11 @@ const AIHistoryShow = () => {
           toast.success(
             t("toasts.deletedSuccessfully", {
               defaultValue: "Deleted successfully",
-            }),
+            })
           );
           list("ai-activity-logs");
         },
-      },
+      }
     );
   };
 
@@ -214,7 +202,7 @@ const AIHistoryShow = () => {
             <ArrowLeft
               className={cn(
                 "h-4 w-4 transition-transform group-hover:-translate-x-1",
-                isAr && "rotate-180 group-hover:translate-x-1",
+                isAr && "rotate-180 group-hover:translate-x-1"
               )}
             />
             {t("buttons.backToList", { defaultValue: "Back to History" })}
@@ -229,9 +217,7 @@ const AIHistoryShow = () => {
             className="rounded-xl font-bold gap-2 h-11 border-border/40 bg-card/50"
           >
             <Copy className="h-4 w-4" />
-            <span className="hidden sm:inline">
-              {t("buttons.copy", { defaultValue: "Copy" })}
-            </span>
+            <span className="hidden sm:inline">{t("buttons.copy", { defaultValue: "Copy" })}</span>
           </Button>
           <Button
             variant="outline"
@@ -318,8 +304,7 @@ const AIHistoryShow = () => {
                 </div>
                 <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">
                   <Calendar className="h-3 w-3" />
-                  {record.createdAt &&
-                    format(new Date(record.createdAt), "PPPP")}
+                  {record.createdAt && format(new Date(record.createdAt), "PPPP")}
                 </div>
               </div>
               <CardTitle className="text-2xl md:text-3xl font-black tracking-tight leading-tight">
@@ -328,18 +313,10 @@ const AIHistoryShow = () => {
             </CardHeader>
             <CardContent className="p-8 md:p-10 flex flex-wrap gap-4">
               <div className="flex items-center gap-3 bg-muted/30 px-4 py-2 rounded-2xl border border-border/40">
-                <div
-                  className={cn(
-                    "p-1.5 rounded-lg",
-                    toolInfo.bg,
-                    toolInfo.color,
-                  )}
-                >
+                <div className={cn("p-1.5 rounded-lg", toolInfo.bg, toolInfo.color)}>
                   <toolInfo.icon className="h-4 w-4" />
                 </div>
-                <span className="text-sm font-bold text-muted-foreground">
-                  {toolInfo.label}
-                </span>
+                <span className="text-sm font-bold text-muted-foreground">{toolInfo.label}</span>
               </div>
               {record.metadata?.classId && (
                 <div className="flex items-center gap-3 bg-indigo-500/5 px-4 py-2 rounded-2xl border border-indigo-500/10">
@@ -390,15 +367,11 @@ const AIHistoryShow = () => {
                           <div className="text-[10px] font-black uppercase tracking-widest text-primary/40">
                             Card #{i + 1}
                           </div>
-                          <div className="font-black text-lg leading-tight">
-                            {card.front}
-                          </div>
+                          <div className="font-black text-lg leading-tight">{card.front}</div>
                           <div className="h-px bg-border/40 w-full" />
-                          <div className="text-muted-foreground font-medium">
-                            {card.back}
-                          </div>
+                          <div className="text-muted-foreground font-medium">{card.back}</div>
                         </div>
-                      ),
+                      )
                     )}
                   </div>
                 ) : record.response ? (
@@ -406,9 +379,7 @@ const AIHistoryShow = () => {
                 ) : (
                   <div className="flex flex-col items-center justify-center py-10 text-muted-foreground gap-4">
                     <AlertTriangle className="h-10 w-10 opacity-20" />
-                    <p className="font-bold">
-                      No response recorded for this session.
-                    </p>
+                    <p className="font-bold">No response recorded for this session.</p>
                   </div>
                 )}
               </div>

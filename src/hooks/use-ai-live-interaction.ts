@@ -58,8 +58,7 @@ export const useAILiveInteraction = ({
   const isJoined = globalJoined && activeClassId === classId;
 
   // Local UI State
-  const [visualState, setVisualState] =
-    useState<AIVisualState>(initialVisualCue);
+  const [visualState, setVisualState] = useState<AIVisualState>(initialVisualCue);
   const [isLoading, setIsLoading] = useState(false);
   const [currentScript, setCurrentScript] = useState<string | null>(null);
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -82,8 +81,7 @@ export const useAILiveInteraction = ({
 
   // --- 🦾 BATCHED UPDATES (Pattern Adherence: Typing Efficiency) ---
   const updateUI = useCallback((script: string, state?: AIVisualState) => {
-    if (animationFrameRef.current)
-      cancelAnimationFrame(animationFrameRef.current);
+    if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
     animationFrameRef.current = requestAnimationFrame(() => {
       setCurrentScript(script);
       if (state) setVisualState(state);
@@ -107,9 +105,7 @@ export const useAILiveInteraction = ({
         // 🌐 VOICE LOCALIZATION: Attempt to find a matching voice for the language
         if (window.speechSynthesis.getVoices) {
           const voices = window.speechSynthesis.getVoices();
-          const preferredVoice = voices.find((v) =>
-            v.lang.startsWith(langCode.split("-")[0]),
-          );
+          const preferredVoice = voices.find((v) => v.lang.startsWith(langCode.split("-")[0]));
           if (preferredVoice) utterance.voice = preferredVoice;
         }
 
@@ -140,7 +136,7 @@ export const useAILiveInteraction = ({
         setVisualState("talking");
       }
     },
-    [language, onFinished, stopSpeaking],
+    [language, onFinished, stopSpeaking]
   );
 
   // 👂 STOP LISTENING ENGINE
@@ -233,7 +229,7 @@ export const useAILiveInteraction = ({
                 if (data.latencyMs) {
                   console.debug(
                     `[AI Co-Teacher] Latency: ${data.latencyMs}ms | Tokens:`,
-                    data.usage,
+                    data.usage
                   );
                 }
 
@@ -255,8 +251,7 @@ export const useAILiveInteraction = ({
 
         console.error("Co-Teacher Error:", error);
         let description: string = t("aiHub.errors.serviceUnavailable");
-        if (error.message === "RATE_LIMIT_EXCEEDED")
-          description = t("aiHub.errors.rateLimit");
+        if (error.message === "RATE_LIMIT_EXCEEDED") description = t("aiHub.errors.rateLimit");
 
         open?.({ type: "error", message: t("common.error"), description });
         setVisualState("talking");
@@ -266,16 +261,7 @@ export const useAILiveInteraction = ({
         }
       }
     },
-    [
-      classId,
-      isLoading,
-      language,
-      open,
-      permissions?.role,
-      speakText,
-      t,
-      updateUI,
-    ],
+    [classId, isLoading, language, open, permissions?.role, speakText, t, updateUI]
   );
 
   // 2. 👂 SPEECH RECOGNITION ENGINE
@@ -363,15 +349,14 @@ export const useAILiveInteraction = ({
         if (recognitionRef.current) recognitionRef.current.abort();
       }
     },
-    [setIsJoined, setActiveClassId, classId],
+    [setIsJoined, setActiveClassId, classId]
   );
 
   // 3. 🧹 CLEANUP
   useEffect(() => {
     return () => {
       isMounted.current = false;
-      if (animationFrameRef.current)
-        cancelAnimationFrame(animationFrameRef.current);
+      if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
       if (abortControllerRef.current) abortControllerRef.current.abort();
       stopSpeaking();
       if (recognitionRef.current) recognitionRef.current.abort();

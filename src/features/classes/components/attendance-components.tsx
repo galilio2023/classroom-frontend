@@ -81,15 +81,11 @@ export const AttendanceStats = ({ stats }: AttendanceStatsProps) => {
   return (
     <div className="grid gap-6 md:grid-cols-4">
       {statConfig.map((stat) => (
-        <motion.div
-          key={stat.label}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
+        <motion.div key={stat.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
           <Card
             className={cn(
               "border-none shadow-xl bg-card/50 backdrop-blur-xl rounded-[1.5rem] overflow-hidden group hover:shadow-2xl transition-all",
-              stat.bg,
+              stat.bg
             )}
           >
             <CardContent className="p-6">
@@ -98,19 +94,14 @@ export const AttendanceStats = ({ stats }: AttendanceStatsProps) => {
                   <p className="text-[10px] font-black uppercase tracking-widest opacity-60">
                     {stat.label}
                   </p>
-                  <p
-                    className={cn(
-                      "text-4xl font-black tracking-tighter",
-                      stat.color,
-                    )}
-                  >
+                  <p className={cn("text-4xl font-black tracking-tighter", stat.color)}>
                     {stat.value}
                   </p>
                 </div>
                 <div
                   className={cn(
                     "p-3 rounded-2xl transition-transform group-hover:scale-110",
-                    stat.bg,
+                    stat.bg
                   )}
                 >
                   <stat.icon className={cn("h-6 w-6", stat.color)} />
@@ -136,11 +127,7 @@ interface AttendanceMarkTableProps {
     }
   >;
   onStatusChange: (studentId: string, status: AttendanceStatus) => void;
-  onValueChange: (
-    studentId: string,
-    field: string,
-    value: string | number,
-  ) => void;
+  onValueChange: (studentId: string, field: string, value: string | number) => void;
   isAr: boolean;
 }
 
@@ -194,10 +181,7 @@ export const AttendanceMarkTable = ({
                 <TableCell className="py-4">
                   <div className="flex items-center gap-4">
                     <Avatar className="h-10 w-10 border-2 border-background shadow-sm group-hover:scale-110 transition-transform text-xs">
-                      <AvatarImage
-                        src={student.image || ""}
-                        className="object-cover"
-                      />
+                      <AvatarImage src={student.image || ""} className="object-cover" />
                       <AvatarFallback className="bg-primary/5 text-primary font-bold">
                         {student.name[0]}
                       </AvatarFallback>
@@ -215,9 +199,7 @@ export const AttendanceMarkTable = ({
                 <TableCell className="py-4">
                   <Select
                     value={data.status}
-                    onValueChange={(val) =>
-                      onStatusChange(student.id, val as AttendanceStatus)
-                    }
+                    onValueChange={(val) => onStatusChange(student.id, val as AttendanceStatus)}
                   >
                     <SelectTrigger className="w-[130px] h-11 rounded-xl bg-muted/20 border-none font-bold text-xs">
                       <div className="flex items-center gap-2">
@@ -231,11 +213,7 @@ export const AttendanceMarkTable = ({
                         AttendanceStatus.LATE,
                         AttendanceStatus.EXCUSED,
                       ].map((s) => (
-                        <SelectItem
-                          key={s}
-                          value={s}
-                          className="rounded-lg font-bold text-start"
-                        >
+                        <SelectItem key={s} value={s} className="rounded-lg font-bold text-start">
                           {t(`classes.attendance.${s.toLowerCase()}` as any)}
                         </SelectItem>
                       ))}
@@ -248,21 +226,17 @@ export const AttendanceMarkTable = ({
                       type="number"
                       value={data.minutesPresent}
                       onChange={(e) =>
-                        onValueChange(
-                          student.id,
-                          "minutesPresent",
-                          Number(e.target.value),
-                        )
+                        onValueChange(student.id, "minutesPresent", Number(e.target.value))
                       }
                       className={cn(
                         "h-11 rounded-xl bg-muted/10 border-none font-black text-center",
-                        isAr ? "ps-8" : "pe-8",
+                        isAr ? "ps-8" : "pe-8"
                       )}
                     />
                     <Timer
                       className={cn(
                         "absolute top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/40",
-                        "end-2.5",
+                        "end-2.5"
                       )}
                     />
                   </div>
@@ -275,21 +249,17 @@ export const AttendanceMarkTable = ({
                       max={10}
                       value={data.participationScore}
                       onChange={(e) =>
-                        onValueChange(
-                          student.id,
-                          "participationScore",
-                          Number(e.target.value),
-                        )
+                        onValueChange(student.id, "participationScore", Number(e.target.value))
                       }
                       className={cn(
                         "h-11 rounded-xl bg-muted/10 border-none font-black text-center",
-                        isAr ? "ps-8" : "pe-8",
+                        isAr ? "ps-8" : "pe-8"
                       )}
                     />
                     <Zap
                       className={cn(
                         "absolute top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-yellow-500/40",
-                        "end-2.5",
+                        "end-2.5"
                       )}
                     />
                   </div>
@@ -297,9 +267,7 @@ export const AttendanceMarkTable = ({
                 <TableCell className="py-4">
                   <Input
                     value={data.remarks}
-                    onChange={(e) =>
-                      onValueChange(student.id, "remarks", e.target.value)
-                    }
+                    onChange={(e) => onValueChange(student.id, "remarks", e.target.value)}
                     className="h-11 rounded-xl bg-muted/10 border-none font-medium min-w-[150px]"
                   />
                 </TableCell>
@@ -428,8 +396,7 @@ export const AttendanceHistoryTable = ({
                   <TableCell>
                     <div className="flex items-center gap-2 text-muted-foreground/60 italic text-xs font-medium">
                       <Info className="h-3.5 w-3.5 opacity-40" />
-                      {group.records?.[0]?.remarks ||
-                        t("classes.attendance.noRemarks")}
+                      {group.records?.[0]?.remarks || t("classes.attendance.noRemarks")}
                     </div>
                   </TableCell>
                 </>

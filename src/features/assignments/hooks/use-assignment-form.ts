@@ -18,29 +18,21 @@ const createAssignmentSchema = (t: TFunction) =>
     fileUrl: z.string().optional(),
     fileCldPubId: z.string().optional(),
     moduleId: z.coerce.number().optional().nullable(),
-    classId: z.coerce
-      .number()
-      .min(1, t("assignments.create.validation.classRequired")),
+    classId: z.coerce.number().min(1, t("assignments.create.validation.classRequired")),
     hasPeerReview: z.boolean().default(false),
     isGroupAssignment: z.boolean().default(false),
     peerReviewWeight: z.coerce.number().min(0).max(100).default(20),
     rubric: z
       .array(
         z.object({
-          criteria: z
-            .string()
-            .min(1, t("assignments.create.validation.criteriaRequired")),
-          maxPoints: z.coerce
-            .number()
-            .min(1, t("assignments.create.validation.pointsRequired")),
-        }),
+          criteria: z.string().min(1, t("assignments.create.validation.criteriaRequired")),
+          maxPoints: z.coerce.number().min(1, t("assignments.create.validation.pointsRequired")),
+        })
       )
       .default([]),
   });
 
-export type AssignmentFormValues = z.infer<
-  ReturnType<typeof createAssignmentSchema>
->;
+export type AssignmentFormValues = z.infer<ReturnType<typeof createAssignmentSchema>>;
 
 interface LocationState {
   pendingContent?: string;
@@ -70,9 +62,7 @@ export const useAssignmentForm = () => {
       fileUrl: "",
       fileCldPubId: "",
       moduleId: initialModuleId ? Number(initialModuleId) : null,
-      classId: urlClassId
-        ? Number(urlClassId)
-        : (undefined as unknown as number),
+      classId: urlClassId ? Number(urlClassId) : (undefined as unknown as number),
       hasPeerReview: false,
       isGroupAssignment: false,
       peerReviewWeight: 20,
@@ -118,12 +108,10 @@ export const useAssignmentForm = () => {
     if (savedDraft) {
       try {
         const parsed = JSON.parse(savedDraft);
-        if (parsed.title && !form.getValues("title"))
-          form.setValue("title", parsed.title);
+        if (parsed.title && !form.getValues("title")) form.setValue("title", parsed.title);
         if (parsed.description && !form.getValues("description"))
           form.setValue("description", parsed.description);
-        if (parsed.classId && !form.getValues("classId"))
-          form.setValue("classId", parsed.classId);
+        if (parsed.classId && !form.getValues("classId")) form.setValue("classId", parsed.classId);
       } catch (e) {
         console.error("Draft recovery failed", e);
       }
@@ -161,9 +149,7 @@ export const useAssignmentForm = () => {
   const handleUseAIContent = (content: string) => {
     form.setValue("description", content);
     toast.success(t("assignments.create.toasts.aiContentApplied"));
-    document
-      .getElementById("description")
-      ?.scrollIntoView({ behavior: "smooth" });
+    document.getElementById("description")?.scrollIntoView({ behavior: "smooth" });
   };
 
   const handleFileUpload = (url: string, publicId: string) => {

@@ -20,11 +20,7 @@ const Loading = () => (
  * Strictly enforces verification status based on authoritative server data.
  * Reverted localStorage fallback to prevent security bypass risks as per security review.
  */
-export const VerificationGuard = ({
-  children,
-}: {
-  children: React.ReactNode;
-}) => {
+export const VerificationGuard = ({ children }: { children: React.ReactNode }) => {
   const { data: user, isLoading } = useGetIdentity<User>();
 
   // Security: We MUST wait for the authoritative server-fetched identity.

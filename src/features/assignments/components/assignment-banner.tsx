@@ -86,10 +86,7 @@ export const AssignmentBanner = ({
             <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-muted-foreground font-black text-xs uppercase tracking-widest">
               <div className="flex items-center gap-2">
                 <Calendar
-                  className={cn(
-                    "h-5 w-5",
-                    isOverdue ? "text-destructive" : "text-primary",
-                  )}
+                  className={cn("h-5 w-5", isOverdue ? "text-destructive" : "text-primary")}
                 />
                 <span className={cn(isOverdue && "text-destructive")}>
                   {t("assignments.show.banner.due", {
@@ -101,16 +98,9 @@ export const AssignmentBanner = ({
               </div>
               <div className="w-1.5 h-1.5 rounded-full bg-muted-foreground/30" />
               <div className="flex items-center gap-2">
-                <Clock
-                  className={cn(
-                    "h-5 w-5",
-                    isOverdue ? "text-destructive" : "text-primary",
-                  )}
-                />
+                <Clock className={cn("h-5 w-5", isOverdue ? "text-destructive" : "text-primary")} />
                 <span className={cn(isOverdue && "text-destructive")}>
-                  {dueDate
-                    ? dueDate.fromNow()
-                    : t("assignments.list.labels.open")}
+                  {dueDate ? dueDate.fromNow() : t("assignments.list.labels.open")}
                 </span>
               </div>
               <div className="w-1.5 h-1.5 rounded-full bg-muted-foreground/30" />
@@ -135,16 +125,12 @@ export const AssignmentBanner = ({
                 "rounded-[1.5rem] font-bold uppercase tracking-widest text-[10px] h-14 md:h-16 px-10 gap-3 border-primary/20 transition-all shadow-xl shadow-primary/5",
                 isMonitoring
                   ? "bg-primary text-white"
-                  : "bg-primary/5 text-primary hover:bg-primary/10",
+                  : "bg-primary/5 text-primary hover:bg-primary/10"
               )}
               onClick={() => setIsMonitoring(!isMonitoring)}
             >
-              <Activity
-                className={cn("h-5 w-5", isMonitoring && "animate-pulse")}
-              />
-              {isMonitoring
-                ? t("buttons.stopMonitoring")
-                : t("buttons.liveMonitor")}
+              <Activity className={cn("h-5 w-5", isMonitoring && "animate-pulse")} />
+              {isMonitoring ? t("buttons.stopMonitoring") : t("buttons.liveMonitor")}
             </Button>
           )}
 
@@ -162,13 +148,13 @@ export const AssignmentBanner = ({
                       headers: {
                         Authorization: `Bearer ${localStorage.getItem("refine-auth")}`,
                       },
-                    },
+                    }
                   ),
                   {
                     loading: t("assignments.show.toast.peersLoading"),
                     success: t("assignments.show.toast.peersSuccess"),
                     error: t("assignments.show.toast.peersError"),
-                  },
+                  }
                 );
               }}
             >
@@ -184,12 +170,10 @@ export const AssignmentBanner = ({
         <div
           className={cn(
             "p-8 md:p-12 rounded-[2.5rem] bg-muted/20 border border-border/40 shadow-inner relative overflow-hidden",
-            (isQuiz || isPhysicsLab) && "opacity-40 blur-[0.5px] select-none",
+            (isQuiz || isPhysicsLab) && "opacity-40 blur-[0.5px] select-none"
           )}
         >
-          <div
-            className={cn("absolute opacity-5", "end-0")}
-          >
+          <div className={cn("absolute opacity-5", "end-0")}>
             <FileText className="h-32 w-32 md:h-48 md:w-48" />
           </div>
           {isQuiz || isPhysicsLab ? (

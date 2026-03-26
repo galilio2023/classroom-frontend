@@ -65,7 +65,7 @@ export function CommandMenu() {
       setDebouncedSearch(search);
     },
     300,
-    [search],
+    [search]
   );
 
   // Load recent searches
@@ -84,16 +84,14 @@ export function CommandMenu() {
     if (!term.trim()) return;
     const updated = [term, ...recentSearches.filter((s) => s !== term)].slice(
       0,
-      MAX_RECENT_SEARCHES,
+      MAX_RECENT_SEARCHES
     );
     setRecentSearches(updated);
     localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(updated));
   };
 
   // --- UNIFIED GLOBAL SEARCH ---
-  const { result: searchResult, query: searchQuery } = useCustom<
-    SearchResult[]
-  >({
+  const { result: searchResult, query: searchQuery } = useCustom<SearchResult[]>({
     url: "/search",
     method: "get",
     config: {
@@ -127,27 +125,19 @@ export function CommandMenu() {
       if (term) saveRecentSearch(term);
       command();
     },
-    [recentSearches],
+    [recentSearches]
   );
 
   const getIcon = (type: string) => {
     switch (type) {
       case "class":
-        return (
-          <BookOpen className="me-2 h-4 w-4 text-blue-500 rtl:me-0 rtl:ms-2" />
-        );
+        return <BookOpen className="me-2 h-4 w-4 text-blue-500 rtl:me-0 rtl:ms-2" />;
       case "assignment":
-        return (
-          <Calculator className="me-2 h-4 w-4 text-orange-500 rtl:me-0 rtl:ms-2" />
-        );
+        return <Calculator className="me-2 h-4 w-4 text-orange-500 rtl:me-0 rtl:ms-2" />;
       case "resource":
-        return (
-          <FileText className="me-2 h-4 w-4 text-emerald-500 rtl:me-0 rtl:ms-2" />
-        );
+        return <FileText className="me-2 h-4 w-4 text-emerald-500 rtl:me-0 rtl:ms-2" />;
       case "subject":
-        return (
-          <GraduationCap className="me-2 h-4 w-4 text-purple-500 rtl:me-0 rtl:ms-2" />
-        );
+        return <GraduationCap className="me-2 h-4 w-4 text-purple-500 rtl:me-0 rtl:ms-2" />;
       default:
         return <Search className="me-2 h-4 w-4 rtl:me-0 rtl:ms-2" />;
     }
@@ -182,9 +172,7 @@ export function CommandMenu() {
           )}
         </div>
         <CommandList>
-          <CommandEmpty>
-            {isSearching ? t("common.searching") : t("common.noResults")}
-          </CommandEmpty>
+          <CommandEmpty>{isSearching ? t("common.searching") : t("common.noResults")}</CommandEmpty>
 
           {!search && recentSearches.length > 0 && (
             <CommandGroup heading={t("common.recentSearches")}>
@@ -205,21 +193,15 @@ export function CommandMenu() {
 
             {isStaff && (
               <>
-                <CommandItem
-                  onSelect={() => runCommand(() => create("classes"))}
-                >
+                <CommandItem onSelect={() => runCommand(() => create("classes"))}>
                   <PlusCircle className="me-2 h-4 w-4 text-primary rtl:me-0 rtl:ms-2" />
                   <span>{t("buttons.createClass")}</span>
                 </CommandItem>
-                <CommandItem
-                  onSelect={() => runCommand(() => list("submissions"))}
-                >
+                <CommandItem onSelect={() => runCommand(() => list("submissions"))}>
                   <ClipboardCheck className="me-2 h-4 w-4 text-primary rtl:me-0 rtl:ms-2" />
                   <span>{t("resources.submissions.label")}</span>
                 </CommandItem>
-                <CommandItem
-                  onSelect={() => runCommand(() => navigate("/ai-assistant"))}
-                >
+                <CommandItem onSelect={() => runCommand(() => navigate("/ai-assistant"))}>
                   <Sparkles className="me-2 h-4 w-4 text-primary rtl:me-0 rtl:ms-2" />
                   <span>{t("resources.ai-assistant.label")}</span>
                 </CommandItem>
@@ -233,9 +215,7 @@ export function CommandMenu() {
               </CommandItem>
             )}
 
-            <CommandItem
-              onSelect={() => runCommand(() => navigate("/calendar"))}
-            >
+            <CommandItem onSelect={() => runCommand(() => navigate("/calendar"))}>
               <Calendar className="me-2 h-4 w-4 rtl:me-0 rtl:ms-2" />
               <span>{t("resources.calendar.label")}</span>
             </CommandItem>
@@ -246,9 +226,7 @@ export function CommandMenu() {
               {results.map((res) => (
                 <CommandItem
                   key={`${res.type}-${res.id}`}
-                  onSelect={() =>
-                    runCommand(() => navigate(res.link), res.title)
-                  }
+                  onSelect={() => runCommand(() => navigate(res.link), res.title)}
                 >
                   {getIcon(res.type)}
                   <div className="flex flex-col">
@@ -267,20 +245,14 @@ export function CommandMenu() {
           <CommandSeparator />
           <CommandGroup heading={t("common.settings")}>
             <CommandItem
-              onSelect={() =>
-                runCommand(() => identity?.id && show("users", identity.id))
-              }
+              onSelect={() => runCommand(() => identity?.id && show("users", identity.id))}
             >
               <UserIcon className="me-2 h-4 w-4 rtl:me-0 rtl:ms-2" />
               <span>{t("resources.portfolio.label")}</span>
-              <CommandShortcut className="ltr:block rtl:hidden">
-                ⌘P
-              </CommandShortcut>
+              <CommandShortcut className="ltr:block rtl:hidden">⌘P</CommandShortcut>
             </CommandItem>
             <CommandItem
-              onSelect={() =>
-                runCommand(() => setTheme(theme === "dark" ? "light" : "dark"))
-              }
+              onSelect={() => runCommand(() => setTheme(theme === "dark" ? "light" : "dark"))}
             >
               {theme === "dark" ? (
                 <Sun className="me-2 h-4 w-4 rtl:me-0 rtl:ms-2" />
@@ -288,9 +260,7 @@ export function CommandMenu() {
                 <Moon className="me-2 h-4 w-4 rtl:me-0 rtl:ms-2" />
               )}
               <span>{t("common.toggleTheme")}</span>
-              <CommandShortcut className="ltr:block rtl:hidden">
-                ⌘T
-              </CommandShortcut>
+              <CommandShortcut className="ltr:block rtl:hidden">⌘T</CommandShortcut>
             </CommandItem>
             <CommandItem onSelect={() => runCommand(() => logout())}>
               <LogOut className="me-2 h-4 w-4 text-destructive rtl:me-0 rtl:ms-2" />

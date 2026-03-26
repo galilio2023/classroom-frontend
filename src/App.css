@@ -208,11 +208,7 @@
 }
 
 .dark .ai-card-premium {
-  background: linear-gradient(
-    to bottom right,
-    hsla(var(--ai-primary-hsl), 0.05),
-    transparent
-  );
+  background: linear-gradient(to bottom right, hsla(var(--ai-primary-hsl), 0.05), transparent);
   box-shadow:
     0 30px 60px -20px rgba(0, 0, 0, 0.6),
     inset 0 0 0 1px rgba(255, 255, 255, 0.03);
@@ -341,11 +337,7 @@ html {
   start: 0;
   end: 0;
   height: 500px;
-  background: radial-gradient(
-    circle at 50% 0%,
-    hsla(245, 100%, 70%, 0.02),
-    transparent 70%
-  );
+  background: radial-gradient(circle at 50% 0%, hsla(245, 100%, 70%, 0.02), transparent 70%);
   pointer-events: none;
   z-index: 0;
 }
@@ -391,11 +383,6 @@ html {
   inset-inline-start: 0;
   width: 50%;
   height: 100%;
-  background: linear-gradient(
-    to right,
-    transparent,
-    rgba(255, 255, 255, 0.3),
-    transparent
-  );
+  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.3), transparent);
   animation: solved-shine 3s infinite;
 }

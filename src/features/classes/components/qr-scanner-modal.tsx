@@ -32,11 +32,7 @@ interface ScanResponse {
   message?: string;
 }
 
-export const QRScannerModal = ({
-  isOpen,
-  onClose,
-  classId,
-}: QRScannerModalProps) => {
+export const QRScannerModal = ({ isOpen, onClose, classId }: QRScannerModalProps) => {
   const { open } = useNotification();
   const navigate = useNavigate();
   const [isScanning, setIsScanning] = useState(true);
@@ -48,10 +44,7 @@ export const QRScannerModal = ({
   } | null>(null);
   const scannerRef = useRef<Html5QrcodeScanner | null>(null);
 
-  const { mutate: markAttendance, mutation } = useCustomMutation<
-    ScanResponse,
-    HttpError
-  >();
+  const { mutate: markAttendance, mutation } = useCustomMutation<ScanResponse, HttpError>();
 
   useEffect(() => {
     if (!isOpen || mode !== "camera") {
@@ -79,7 +72,7 @@ export const QRScannerModal = ({
           qrbox: { width: 250, height: 250 },
           aspectRatio: 1.0,
         },
-        /* verbose= */ false,
+        /* verbose= */ false
       );
 
       scannerRef.current = scanner;
@@ -104,7 +97,7 @@ export const QRScannerModal = ({
             });
           }
         },
-        () => {},
+        () => {}
       );
     }, 100);
 
@@ -142,8 +135,7 @@ export const QRScannerModal = ({
           open?.({
             type: "success",
             message: "Attendance Marked",
-            description:
-              "You have been marked as present and are being redirected.",
+            description: "You have been marked as present and are being redirected.",
           });
 
           setTimeout(() => {
@@ -161,7 +153,7 @@ export const QRScannerModal = ({
               "Failed to mark attendance. The code might have expired.",
           });
         },
-      },
+      }
     );
   };
 
@@ -209,9 +201,7 @@ export const QRScannerModal = ({
                     <Input
                       placeholder="ABC123XY"
                       value={manualCode}
-                      onChange={(e) =>
-                        setManualCode(e.target.value.toUpperCase())
-                      }
+                      onChange={(e) => setManualCode(e.target.value.toUpperCase())}
                       className="h-16 text-center text-3xl font-black tracking-[0.3em] font-mono border-2 border-primary/20 bg-primary/5 rounded-2xl focus-visible:ring-primary/30"
                       maxLength={32}
                     />
@@ -233,9 +223,7 @@ export const QRScannerModal = ({
                 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:bg-primary/5"
                 onClick={() => setMode(mode === "camera" ? "manual" : "camera")}
               >
-                {mode === "camera"
-                  ? "Switch to Manual Entry"
-                  : "Switch to Camera Scan"}
+                {mode === "camera" ? "Switch to Manual Entry" : "Switch to Camera Scan"}
               </Button>
             </>
           ) : (
@@ -300,8 +288,8 @@ export const QRScannerModal = ({
           <div className="w-full flex items-center gap-3 p-4 bg-muted/50 rounded-2xl text-[10px] font-medium text-muted-foreground border border-black/5">
             <AlertCircle className="h-4 w-4 shrink-0 text-primary" />
             <p>
-              Camera access requires HTTPS. If you're on a desktop or have
-              issues, use the manual entry code provided by your teacher.
+              Camera access requires HTTPS. If you're on a desktop or have issues, use the manual
+              entry code provided by your teacher.
             </p>
           </div>
         </div>

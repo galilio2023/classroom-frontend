@@ -21,7 +21,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({ onClose }) => {
           "absolute inset-0 bg-linear-to-r from-transparent via-white/10 to-transparent pointer-events-none transition-all duration-1000",
           isAr
             ? "translate-x-full animate-[shine-rtl_3s_infinite]"
-            : "-translate-x-full animate-[shine_3s_infinite]",
+            : "-translate-x-full animate-[shine_3s_infinite]"
         )}
       />
 

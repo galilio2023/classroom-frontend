@@ -1,12 +1,6 @@
 import { useCustom, useNavigation } from "@refinedev/core";
 import { Quiz } from "@/types";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   Loader2,
@@ -69,9 +63,7 @@ export const QuizTab = ({ classId }: QuizTabProps) => {
             <div className="p-1.5 rounded-lg bg-primary/10 text-primary">
               <FileQuestion className="h-4 w-4" />
             </div>
-            <h3 className="text-xl font-black tracking-tight">
-              {t("classes.quiz.classQuizzes")}
-            </h3>
+            <h3 className="text-xl font-black tracking-tight">{t("classes.quiz.classQuizzes")}</h3>
           </div>
           <p className="text-sm text-muted-foreground font-medium">
             {t("classes.quiz.description", { count: quizzes.length })}
@@ -91,8 +83,7 @@ export const QuizTab = ({ classId }: QuizTabProps) => {
       {quizzes.length > 0 ? (
         <div className="grid gap-8 md:grid-cols-2">
           {quizzes.map((quiz: Quiz) => {
-            const isOverdue =
-              quiz.dueDate && dayjs(quiz.dueDate).isBefore(dayjs());
+            const isOverdue = quiz.dueDate && dayjs(quiz.dueDate).isBefore(dayjs());
 
             return (
               <motion.div
@@ -108,10 +99,7 @@ export const QuizTab = ({ classId }: QuizTabProps) => {
                         <FileQuestion className="h-6 w-6" />
                       </div>
                       <div
-                        className={cn(
-                          "flex flex-col gap-2",
-                          isAr ? "items-start" : "items-end",
-                        )}
+                        className={cn("flex flex-col gap-2", isAr ? "items-start" : "items-end")}
                       >
                         {quiz.timeLimit && (
                           <Badge
@@ -126,9 +114,7 @@ export const QuizTab = ({ classId }: QuizTabProps) => {
                           <div
                             className={cn(
                               "flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest",
-                              isOverdue
-                                ? "text-destructive"
-                                : "text-muted-foreground/40",
+                              isOverdue ? "text-destructive" : "text-muted-foreground/40"
                             )}
                           >
                             <Calendar className="h-3 w-3" />
@@ -182,12 +168,7 @@ export const QuizTab = ({ classId }: QuizTabProps) => {
                             className="h-10 rounded-xl font-black uppercase tracking-widest text-[9px] gap-2 shadow-lg shadow-primary/20 px-6"
                           >
                             {t("buttons.takeQuiz")}
-                            <ArrowRight
-                              className={cn(
-                                "h-3.5 w-3.5",
-                                isAr && "rotate-180",
-                              )}
-                            />
+                            <ArrowRight className={cn("h-3.5 w-3.5", isAr && "rotate-180")} />
                           </Button>
                         )}
                       </div>

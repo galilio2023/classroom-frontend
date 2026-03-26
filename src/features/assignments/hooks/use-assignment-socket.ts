@@ -11,7 +11,7 @@ export const useAssignmentSocket = (
   userId?: string,
   userRole?: UserRole,
   classId?: number,
-  onAlert?: () => void,
+  onAlert?: () => void
 ) => {
   useEffect(() => {
     if (!userId || userRole === UserRole.STUDENT) return;

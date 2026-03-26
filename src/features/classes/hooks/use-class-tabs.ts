@@ -4,31 +4,27 @@ import { useSearchParams } from "react-router-dom";
 export const useClassTabs = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const tabMapping: { [key: string]: { primary: string; sub: string } } =
-    useMemo(
-      () => ({
-        curriculum: { primary: "content", sub: "curriculum" },
-        resources: { primary: "content", sub: "resources" },
-        assignments: { primary: "assessments", sub: "assignments" },
-        quizzes: { primary: "assessments", sub: "quizzes" },
-        announcements: { primary: "engagement", sub: "announcements" },
-        discussions: { primary: "engagement", sub: "discussions" },
-        live: { primary: "engagement", sub: "live" },
-        students: { primary: "roster", sub: "students" },
-        attendance: { primary: "roster", sub: "attendance" },
-        analytics: { primary: "progress", sub: "analytics" },
-        leaderboard: { primary: "progress", sub: "leaderboard" },
-        details: { primary: "info", sub: "details" },
-      }),
-      [],
-    );
+  const tabMapping: { [key: string]: { primary: string; sub: string } } = useMemo(
+    () => ({
+      curriculum: { primary: "content", sub: "curriculum" },
+      resources: { primary: "content", sub: "resources" },
+      assignments: { primary: "assessments", sub: "assignments" },
+      quizzes: { primary: "assessments", sub: "quizzes" },
+      announcements: { primary: "engagement", sub: "announcements" },
+      discussions: { primary: "engagement", sub: "discussions" },
+      live: { primary: "engagement", sub: "live" },
+      students: { primary: "roster", sub: "students" },
+      attendance: { primary: "roster", sub: "attendance" },
+      analytics: { primary: "progress", sub: "analytics" },
+      leaderboard: { primary: "progress", sub: "leaderboard" },
+      details: { primary: "info", sub: "details" },
+    }),
+    []
+  );
 
   const activePrimaryTab = useMemo(() => {
     const tabParam = searchParams.get("tab");
-    if (
-      tabParam &&
-      Object.values(tabMapping).some((m) => m.primary === tabParam)
-    ) {
+    if (tabParam && Object.values(tabMapping).some((m) => m.primary === tabParam)) {
       return tabParam;
     } else if (tabParam && tabMapping[tabParam]) {
       return tabMapping[tabParam].primary;
@@ -79,7 +75,7 @@ export const useClassTabs = () => {
           newParams.set("subtab", newSubTab);
           return newParams;
         },
-        { replace: true },
+        { replace: true }
       );
     }
   }, [searchParams, setSearchParams, tabMapping]);
@@ -115,10 +111,10 @@ export const useClassTabs = () => {
           }
           return newParams;
         },
-        { replace: true },
+        { replace: true }
       );
     },
-    [setSearchParams],
+    [setSearchParams]
   );
 
   return {

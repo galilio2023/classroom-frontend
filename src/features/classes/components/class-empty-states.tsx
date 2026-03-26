@@ -1,13 +1,6 @@
 import React from "react";
 import { EmptyState } from "@/components/empty-state";
-import {
-  LayoutGrid,
-  ClipboardCheck,
-  Library,
-  FileQuestion,
-  Wand2,
-  Sparkles,
-} from "lucide-react";
+import { LayoutGrid, ClipboardCheck, Library, FileQuestion, Wand2, Sparkles } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -82,11 +75,7 @@ export const AssessmentsEmptyState: React.FC<
   return (
     <EmptyState
       icon={isQuiz ? FileQuestion : ClipboardCheck}
-      title={
-        isQuiz
-          ? t("classes.quiz.noQuizzes")
-          : t("assignments.list.noAssignments")
-      }
+      title={isQuiz ? t("classes.quiz.noQuizzes") : t("assignments.list.noAssignments")}
       description={
         isQuiz
           ? t("classes.quiz.noQuizzesDescriptionStudent")
@@ -104,10 +93,7 @@ export const AssessmentsEmptyState: React.FC<
   );
 };
 
-export const ResourcesEmptyState: React.FC<ClassEmptyStateProps> = ({
-  isTeacher,
-  onAddClick,
-}) => {
+export const ResourcesEmptyState: React.FC<ClassEmptyStateProps> = ({ isTeacher, onAddClick }) => {
   const { t } = useTranslation();
   return (
     <EmptyState

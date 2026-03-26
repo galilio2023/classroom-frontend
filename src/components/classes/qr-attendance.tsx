@@ -1,13 +1,7 @@
 import { useState, useEffect } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { QrCode, StopCircle, PlayCircle, Clock, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -68,9 +62,7 @@ export const QRAttendance = ({ classId, className }: QRAttendanceProps) => {
       {
         onSuccess: (data: any) => {
           const token = data.data.token;
-          setQrValue(
-            `${window.location.origin}/attendance/scan?token=${token}`,
-          );
+          setQrValue(`${window.location.origin}/attendance/scan?token=${token}`);
           setIsActive(true);
           setTimeLeft(DURATION);
           setScannedCount(0);
@@ -78,13 +70,13 @@ export const QRAttendance = ({ classId, className }: QRAttendanceProps) => {
             t("classes.attendance.toast.savedDescription", {
               date: new Date().toLocaleDateString(),
               defaultValue: `Attendance session started for ${new Date().toLocaleDateString()}`,
-            } as any) as string,
+            } as any) as string
           );
         },
         onError: () => {
           toast.error(t("common.upload.error") as string);
         },
-      },
+      }
     );
   };
 
@@ -97,9 +89,7 @@ export const QRAttendance = ({ classId, className }: QRAttendanceProps) => {
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    const formattedMins = new Intl.NumberFormat(
-      isArabic ? "ar-EG" : "en-US",
-    ).format(mins);
+    const formattedMins = new Intl.NumberFormat(isArabic ? "ar-EG" : "en-US").format(mins);
     const formattedSecs = new Intl.NumberFormat(isArabic ? "ar-EG" : "en-US")
       .format(secs)
       .padStart(2, isArabic ? "٠" : "0");
@@ -109,29 +99,21 @@ export const QRAttendance = ({ classId, className }: QRAttendanceProps) => {
   const progress = (timeLeft / DURATION) * 100;
 
   return (
-    <Card
-      className={cn("border-primary/20 shadow-lg overflow-hidden", className)}
-    >
+    <Card className={cn("border-primary/20 shadow-lg overflow-hidden", className)}>
       <CardHeader className="bg-primary/5 border-b border-primary/10">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <QrCode className="h-5 w-5 text-primary" />
-            <CardTitle className="text-lg">
-              {t("classes.attendance.qr.title")}
-            </CardTitle>
+            <CardTitle className="text-lg">{t("classes.attendance.qr.title")}</CardTitle>
           </div>
           <Badge
             variant={isActive ? "default" : "secondary"}
             className={cn(isActive && "bg-green-500 animate-pulse")}
           >
-            {isActive
-              ? t("classes.attendance.qr.active")
-              : t("classes.attendance.qr.inactive")}
+            {isActive ? t("classes.attendance.qr.active") : t("classes.attendance.qr.inactive")}
           </Badge>
         </div>
-        <CardDescription>
-          {t("classes.attendance.qr.description")}
-        </CardDescription>
+        <CardDescription>{t("classes.attendance.qr.description")}</CardDescription>
       </CardHeader>
       <CardContent className="p-6 flex flex-col items-center gap-6">
         {isActive ? (
@@ -153,9 +135,7 @@ export const QRAttendance = ({ classId, className }: QRAttendanceProps) => {
                   <Users className="h-4 w-4" />
                   {t("classes.attendance.qr.checkedIn")}:{" "}
                   <span className="text-primary font-bold">
-                    {new Intl.NumberFormat(isArabic ? "ar-EG" : "en-US").format(
-                      scannedCount,
-                    )}
+                    {new Intl.NumberFormat(isArabic ? "ar-EG" : "en-US").format(scannedCount)}
                   </span>
                 </div>
               </div>
@@ -182,10 +162,7 @@ export const QRAttendance = ({ classId, className }: QRAttendanceProps) => {
                 {t("classes.attendance.qr.startDescription")}
               </p>
             </div>
-            <Button
-              className="w-full gap-2 h-11 rounded-xl shadow-md"
-              onClick={startSession}
-            >
+            <Button className="w-full gap-2 h-11 rounded-xl shadow-md" onClick={startSession}>
               <PlayCircle className="h-4 w-4" />
               {t("buttons.startAttendance")}
             </Button>

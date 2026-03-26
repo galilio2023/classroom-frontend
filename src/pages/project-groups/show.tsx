@@ -1,18 +1,7 @@
 import React, { useState } from "react";
-import {
-  useShow,
-  useList,
-  useCustomMutation,
-  useGetIdentity,
-} from "@refinedev/core";
+import { useShow, useList, useCustomMutation, useGetIdentity } from "@refinedev/core";
 import { useParams, Link } from "react-router-dom";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
@@ -47,11 +36,7 @@ import {
   LayoutGrid,
   ArrowRight,
 } from "lucide-react";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Whiteboard } from "@/components/classes/whiteboard";
@@ -87,21 +72,14 @@ const ShowProjectGroup = () => {
     queryOptions: { enabled: !!group?.class.id },
   });
 
-  const enrolledStudents =
-    classStudentsQuery.data?.data.map((e: any) => e.student) || [];
-  const groupMemberIds = new Set(
-    group?.members.map((m: any) => m.student.id) || [],
-  );
-  const availableStudents = enrolledStudents.filter(
-    (s: any) => !groupMemberIds.has(s.id),
-  );
+  const enrolledStudents = classStudentsQuery.data?.data.map((e: any) => e.student) || [];
+  const groupMemberIds = new Set(group?.members.map((m: any) => m.student.id) || []);
+  const availableStudents = enrolledStudents.filter((s: any) => !groupMemberIds.has(s.id));
 
-  const isTeacherOrAdmin =
-    identity?.role === UserRole.TEACHER || identity?.role === UserRole.ADMIN;
+  const isTeacherOrAdmin = identity?.role === UserRole.TEACHER || identity?.role === UserRole.ADMIN;
 
   const { mutate: addMembers, mutation: addMutation } = useCustomMutation();
-  const { mutate: removeMember, mutation: removeMutation } =
-    useCustomMutation();
+  const { mutate: removeMember, mutation: removeMutation } = useCustomMutation();
   const isAdding = addMutation.isPending;
   const isRemoving = removeMutation.isPending;
   const isManagingMembers = isAdding || isRemoving;
@@ -124,7 +102,7 @@ const ShowProjectGroup = () => {
         onError: (error: any) => {
           toast.error(error?.response?.data?.message || t("common.error"));
         },
-      },
+      }
     );
   };
 
@@ -143,7 +121,7 @@ const ShowProjectGroup = () => {
         onError: (error: any) => {
           toast.error(error?.response?.data?.message || t("common.error"));
         },
-      },
+      }
     );
   };
 
@@ -240,8 +218,7 @@ const ShowProjectGroup = () => {
                 value="members"
                 className="rounded-xl font-black uppercase tracking-widest text-[9px] md:text-[10px] gap-2 md:gap-3 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-xl transition-all duration-300"
               >
-                <Users className="h-4 w-4 md:h-5 md:w-5" />{" "}
-                {t("projectGroups.members")}
+                <Users className="h-4 w-4 md:h-5 md:w-5" /> {t("projectGroups.members")}
               </TabsTrigger>
               <TabsTrigger
                 value="whiteboard"
@@ -266,8 +243,7 @@ const ShowProjectGroup = () => {
                   size="lg"
                   className="rounded-2xl h-12 md:h-14 px-8 font-bold uppercase tracking-widest text-[10px] gap-2 shadow-lg shadow-primary/25 hover:translate-y-[-2px] transition-all"
                 >
-                  <UserPlus className="h-5 w-5" />{" "}
-                  {t("projectGroups.show.addMembers")}
+                  <UserPlus className="h-5 w-5" /> {t("projectGroups.show.addMembers")}
                 </Button>
               )}
             </CardHeader>
@@ -327,10 +303,7 @@ const ShowProjectGroup = () => {
           <Card className="border-border/40 shadow-2xl bg-card/50 backdrop-blur-xl rounded-[2.5rem] md:rounded-[3rem] overflow-hidden">
             <CardContent className="p-0">
               <div className="h-[500px] md:h-[700px]">
-                <Whiteboard
-                  classId={String(group.class.id)}
-                  roomId={`group-${group.id}`}
-                />
+                <Whiteboard classId={String(group.class.id)} roomId={`group-${group.id}`} />
               </div>
             </CardContent>
           </Card>
@@ -380,9 +353,7 @@ const ShowProjectGroup = () => {
                       className="h-12 rounded-xl bg-muted/30 border-none shadow-inner px-6 text-base font-black placeholder:text-muted-foreground/30 focus-visible:ring-primary/20"
                     />
                     <CommandList className="max-h-60">
-                      <CommandEmpty>
-                        {t("projectGroups.show.noStudentsFound")}
-                      </CommandEmpty>
+                      <CommandEmpty>{t("projectGroups.show.noStudentsFound")}</CommandEmpty>
                       <CommandGroup>
                         {availableStudents.map((student: any) => (
                           <CommandItem
@@ -392,7 +363,7 @@ const ShowProjectGroup = () => {
                               setSelectedStudents((prev) =>
                                 prev.includes(student.id)
                                   ? prev.filter((id) => id !== student.id)
-                                  : [...prev, student.id],
+                                  : [...prev, student.id]
                               );
                             }}
                             className="flex items-center gap-3 py-3 cursor-pointer"
@@ -402,7 +373,7 @@ const ShowProjectGroup = () => {
                                 "h-5 w-5",
                                 selectedStudents.includes(student.id)
                                   ? "opacity-100 text-primary"
-                                  : "opacity-0",
+                                  : "opacity-0"
                               )}
                             />
                             <Avatar className="h-9 w-9 border-2 border-background">
@@ -411,9 +382,7 @@ const ShowProjectGroup = () => {
                                 {student.name[0]}
                               </AvatarFallback>
                             </Avatar>
-                            <span className="font-bold text-base">
-                              {student.name}
-                            </span>
+                            <span className="font-bold text-base">{student.name}</span>
                           </CommandItem>
                         ))}
                       </CommandGroup>

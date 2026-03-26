@@ -1,13 +1,7 @@
 import { useCustom, useGetIdentity } from "@refinedev/core";
 import { User } from "@/types";
 import { useTerm } from "@/contexts/term-context";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -137,9 +131,7 @@ export default function ReportCard() {
               <p className="text-[10px] font-black uppercase tracking-widest opacity-70">
                 {t("reportCard.gpa")}
               </p>
-              <p className="text-5xl font-black tracking-tighter">
-                {report.gpa || "0.00"}
-              </p>
+              <p className="text-5xl font-black tracking-tighter">{report.gpa || "0.00"}</p>
             </div>
           </CardContent>
         </Card>
@@ -239,7 +231,7 @@ export default function ReportCard() {
                                     ? "bg-green-500"
                                     : c.average >= 60
                                       ? "bg-primary"
-                                      : "bg-destructive",
+                                      : "bg-destructive"
                                 )}
                                 style={{ width: `${c.average}%` }}
                               />
@@ -254,7 +246,7 @@ export default function ReportCard() {
                                 ? "bg-green-500 text-white shadow-green-500/20"
                                 : c.letterGrade === "C"
                                   ? "bg-primary text-white shadow-primary/20"
-                                  : "bg-destructive text-white shadow-destructive/20",
+                                  : "bg-destructive text-white shadow-destructive/20"
                             )}
                           >
                             {c.letterGrade}
@@ -293,8 +285,7 @@ export default function ReportCard() {
                   </p>
                   <p className="text-sm text-muted-foreground font-bold">
                     {hasClasses
-                      ? [...classes].sort((a, b) => b.average - a.average)[0]
-                          ?.subject
+                      ? [...classes].sort((a, b) => b.average - a.average)[0]?.subject
                       : "N/A"}
                   </p>
                 </div>
@@ -330,9 +321,7 @@ export default function ReportCard() {
                 </p>
               </div>
               <p className="text-sm text-muted-foreground font-medium leading-relaxed italic">
-                {hasClasses
-                  ? `"${t("reportCard.defaultNote")}"`
-                  : `"${t("reportCard.noNote")}"`}
+                {hasClasses ? `"${t("reportCard.defaultNote")}"` : `"${t("reportCard.noNote")}"`}
               </p>
             </div>
           </Card>

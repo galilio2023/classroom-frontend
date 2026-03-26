@@ -24,11 +24,7 @@ interface AdminDashboardProps {
   show: (resource: string, id: string | number) => void;
 }
 
-export const AdminDashboard = ({
-  data,
-  isLoading,
-  onRefresh,
-}: AdminDashboardProps) => {
+export const AdminDashboard = ({ data, isLoading, onRefresh }: AdminDashboardProps) => {
   const { t } = useTranslation();
 
   return (
@@ -152,10 +148,7 @@ export const AdminDashboard = ({
                   </span>
                 </div>
               </div>
-              <SystemHealthCard
-                report={data.systemHealth}
-                isLoading={isLoading}
-              />
+              <SystemHealthCard report={data.systemHealth} isLoading={isLoading} />
             </div>
           </ErrorBoundary>
 
@@ -178,11 +171,7 @@ export const AdminDashboard = ({
                   </span>
                 </div>
               </div>
-              <PlatformOverview
-                stats={data.stats}
-                isLoading={isLoading}
-                onRefresh={onRefresh}
-              />
+              <PlatformOverview stats={data.stats} isLoading={isLoading} onRefresh={onRefresh} />
             </motion.div>
           </ErrorBoundary>
 

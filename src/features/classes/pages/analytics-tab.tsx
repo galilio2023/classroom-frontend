@@ -105,18 +105,12 @@ export const AnalyticsTab = ({ classId }: AnalyticsTabProps) => {
           <AlertCircle className="h-8 w-8" />
         </div>
         <div className="space-y-1">
-          <h3 className="text-lg font-black tracking-tight">
-            {t("analytics.failedToLoad")}
-          </h3>
+          <h3 className="text-lg font-black tracking-tight">{t("analytics.failedToLoad")}</h3>
           <p className="text-sm text-muted-foreground font-medium">
             {t("analytics.failedToLoadDescription")}
           </p>
         </div>
-        <Button
-          variant="outline"
-          onClick={() => query?.refetch()}
-          className="mt-4"
-        >
+        <Button variant="outline" onClick={() => query?.refetch()} className="mt-4">
           {t("buttons.tryAgain")}
         </Button>
       </div>
@@ -132,39 +126,24 @@ export const AnalyticsTab = ({ classId }: AnalyticsTabProps) => {
             <div className="p-1.5 rounded-lg bg-primary/10 text-primary">
               <BarChart3 className="h-4 w-4" />
             </div>
-            <h2 className="text-2xl font-black tracking-tight">
-              {t("analytics.title")}
-            </h2>
+            <h2 className="text-2xl font-black tracking-tight">{t("analytics.title")}</h2>
           </div>
-          <p className="text-sm text-muted-foreground font-medium">
-            {t("analytics.description")}
-          </p>
+          <p className="text-sm text-muted-foreground font-medium">{t("analytics.description")}</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <Select value={dateRange} onValueChange={setDateRange}>
             <SelectTrigger className="w-45 h-11 rounded-xl bg-card/50 backdrop-blur-xl border-black/5 dark:border-white/5 shadow-sm font-bold">
-              <Calendar
-                className={cn(
-                  "h-4 w-4 text-primary/60",
-                  "me-2",
-                )}
-              />
+              <Calendar className={cn("h-4 w-4 text-primary/60", "me-2")} />
               <SelectValue placeholder={t("analytics.selectRange")} />
             </SelectTrigger>
             <SelectContent className="rounded-xl border-none shadow-2xl">
               <SelectItem value="7" className="rounded-lg font-bold text-start">
                 {t("analytics.ranges.7")}
               </SelectItem>
-              <SelectItem
-                value="30"
-                className="rounded-lg font-bold text-start"
-              >
+              <SelectItem value="30" className="rounded-lg font-bold text-start">
                 {t("analytics.ranges.30")}
               </SelectItem>
-              <SelectItem
-                value="semester"
-                className="rounded-lg font-bold text-start"
-              >
+              <SelectItem value="semester" className="rounded-lg font-bold text-start">
                 {t("analytics.ranges.semester")}
               </SelectItem>
             </SelectContent>
@@ -207,9 +186,7 @@ export const AnalyticsTab = ({ classId }: AnalyticsTabProps) => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
           >
-            <AssignmentCompletionChart
-              data={analytics?.assignmentCompletionTrend ?? []}
-            />
+            <AssignmentCompletionChart data={analytics?.assignmentCompletionTrend ?? []} />
           </motion.div>
 
           <motion.div
@@ -231,16 +208,15 @@ export const AnalyticsTab = ({ classId }: AnalyticsTabProps) => {
             <AtRiskStudents students={analytics?.atRiskStudents ?? []} />
           </motion.div>
 
-          {analytics?.classComparison &&
-            analytics.classComparison.length > 0 && (
-              <motion.div
-                initial={{ opacity: 0, x: isAr ? -20 : 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.3 }}
-              >
-                <ClassComparisonTable data={analytics.classComparison} />
-              </motion.div>
-            )}
+          {analytics?.classComparison && analytics.classComparison.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, x: isAr ? -20 : 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <ClassComparisonTable data={analytics.classComparison} />
+            </motion.div>
+          )}
 
           {isAiEnabled &&
             analytics?.studentTrajectories &&

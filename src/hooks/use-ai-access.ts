@@ -10,8 +10,7 @@ export const useAiAccess = () => {
   const { isParent, isLoading: isRoleLoading } = useUserRole();
 
   // 🛡️ Global Master Switch: Only enabled if coreData is loaded and explicitly true
-  const isAiEnabled =
-    !!coreData?.globalConfig && coreData.globalConfig.enableAiFeatures === true;
+  const isAiEnabled = !!coreData?.globalConfig && coreData.globalConfig.enableAiFeatures === true;
 
   // 🛡️ RBAC: AI interactive features are strictly disabled for the Parent role
   const isAllowed = !isParent;

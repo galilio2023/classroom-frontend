@@ -13,11 +13,7 @@ interface VerificationUploadProps {
   onClear: () => void;
 }
 
-export const VerificationUpload = ({
-  url,
-  onUpload,
-  onClear,
-}: VerificationUploadProps) => {
+export const VerificationUpload = ({ url, onUpload, onClear }: VerificationUploadProps) => {
   const { t } = useTranslation();
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -98,9 +94,7 @@ export const VerificationUpload = ({
             </div>
 
             <div className="space-y-1">
-              <p className="text-sm font-medium">
-                {t("auth.register.verification.uploadLabel")}
-              </p>
+              <p className="text-sm font-medium">{t("auth.register.verification.uploadLabel")}</p>
               <p className="text-xs text-muted-foreground">
                 {t("auth.register.verification.formatLabel")}
               </p>

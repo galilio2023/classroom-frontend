@@ -8,14 +8,7 @@ import { toast } from "sonner";
  */
 export function useNotificationProvider(): NotificationProvider {
   return {
-    open: ({
-      key,
-      type,
-      message,
-      description,
-      undoableTimeout,
-      cancelMutation,
-    }) => {
+    open: ({ key, type, message, description, undoableTimeout, cancelMutation }) => {
       const toastId = key || Date.now().toString();
 
       switch (type) {
@@ -32,8 +25,7 @@ export function useNotificationProvider(): NotificationProvider {
           // Fixed: Changed syntax error '|' to '??' for fallback description
           toast.error(message, {
             id: toastId,
-            description:
-              description ?? "An unexpected error occurred. Please try again.",
+            description: description ?? "An unexpected error occurred. Please try again.",
             richColors: true,
             duration: 6000, // Errors stay longer
             action: {
@@ -58,7 +50,7 @@ export function useNotificationProvider(): NotificationProvider {
               id: toastId,
               duration: (undoableTimeout || 5) * 1000,
               unstyled: true,
-            },
+            }
           );
           return;
         }

@@ -4,14 +4,7 @@ import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import {
-  Info,
-  BookText,
-  GraduationCap,
-  Sparkles,
-  UserRound,
-  Activity,
-} from "lucide-react";
+import { Info, BookText, GraduationCap, Sparkles, UserRound, Activity } from "lucide-react";
 
 interface ClassTabNavigationProps {
   activePrimaryTab: string;
@@ -63,7 +56,7 @@ export const ClassTabNavigation: React.FC<ClassTabNavigationProps> = ({
         },
         { id: "info", label: t("classes.show.tabs.info"), icon: Info },
       ].filter((t) => !t.staffOnly || isStaff),
-    [isLiveIndicator, isStaff, pendingCount, t],
+    [isLiveIndicator, isStaff, pendingCount, t]
   );
 
   return (
@@ -82,7 +75,7 @@ export const ClassTabNavigation: React.FC<ClassTabNavigationProps> = ({
                     "px-4 md:px-8 py-2 md:py-2.5 rounded-full font-black uppercase tracking-widest text-[9px] md:text-[10px] transition-all duration-300 gap-2 md:gap-3 h-10 md:h-12 whitespace-nowrap overflow-hidden",
                     isActive
                       ? "text-white !text-white shadow-xl"
-                      : "text-muted-foreground hover:bg-primary/5 hover:text-primary",
+                      : "text-muted-foreground hover:bg-primary/5 hover:text-primary"
                   )}
                   style={
                     isActive
@@ -96,7 +89,7 @@ export const ClassTabNavigation: React.FC<ClassTabNavigationProps> = ({
                   <Icon
                     className={cn(
                       "h-3.5 w-3.5 md:h-4 md:w-4 shrink-0",
-                      isActive && "animate-pulse",
+                      isActive && "animate-pulse"
                     )}
                   />
                   <span className="shrink-0">{tab.label}</span>

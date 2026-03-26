@@ -34,16 +34,11 @@ export const QuizOption: React.FC<QuizOptionProps> = ({
           isSelected &&
           !isCorrect &&
           "border-destructive bg-destructive/10 text-destructive",
-        isAnswered &&
-          !isSelected &&
-          !isCorrect &&
-          "opacity-50 border-transparent bg-muted/30",
+        isAnswered && !isSelected && !isCorrect && "opacity-50 border-transparent bg-muted/30"
       )}
     >
       <span className="pe-2">{option}</span>
-      {isAnswered && isCorrect && (
-        <CheckCircle2 className="h-4 w-4 md:h-5 md:w-5 shrink-0" />
-      )}
+      {isAnswered && isCorrect && <CheckCircle2 className="h-4 w-4 md:h-5 md:w-5 shrink-0" />}
       {isAnswered && isSelected && !isCorrect && (
         <XCircle className="h-4 w-4 md:h-5 md:w-5 shrink-0" />
       )}

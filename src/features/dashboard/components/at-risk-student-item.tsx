@@ -36,12 +36,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useTranslation } from "react-i18next";
-import {
-  useCreate,
-  useUpdate,
-  useCustom,
-  useCustomMutation,
-} from "@refinedev/core";
+import { useCreate, useUpdate, useCustom, useCustomMutation } from "@refinedev/core";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -67,17 +62,13 @@ interface AtRiskStudentItemProps {
   student: AtRiskStudent;
 }
 
-export const AtRiskStudentItem: React.FC<AtRiskStudentItemProps> = ({
-  student,
-}) => {
+export const AtRiskStudentItem: React.FC<AtRiskStudentItemProps> = ({ student }) => {
   const { t, i18n } = useTranslation();
   const isArabic = i18n.language === "ar";
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
-  const [activeTab, setActiveTab] = useState<"analysis" | "intervention">(
-    "analysis",
-  );
+  const [activeTab, setActiveTab] = useState<"analysis" | "intervention">("analysis");
   const [feedbackSent, setFeedbackSent] = useState<"pos" | "neg" | null>(null);
 
   const { mutate: sendNotification, mutation } = useCreate();
@@ -133,10 +124,9 @@ export const AtRiskStudentItem: React.FC<AtRiskStudentItemProps> = ({
         "Low Grades": t("dashboard.staff.atRiskStudents.fallbacks.lowGrades", {
           name: student.name,
         }),
-        "High Absences": t(
-          "dashboard.staff.atRiskStudents.fallbacks.highAbsences",
-          { name: student.name },
-        ),
+        "High Absences": t("dashboard.staff.atRiskStudents.fallbacks.highAbsences", {
+          name: student.name,
+        }),
         Inactivity: t("dashboard.staff.atRiskStudents.fallbacks.inactivity", {
           name: student.name,
         }),
@@ -145,7 +135,7 @@ export const AtRiskStudentItem: React.FC<AtRiskStudentItemProps> = ({
         fallbacks[student.reason] ||
           t("dashboard.staff.atRiskStudents.fallbacks.general", {
             name: student.name,
-          }),
+          })
       );
     } finally {
       setIsGenerating(false);
@@ -172,7 +162,7 @@ export const AtRiskStudentItem: React.FC<AtRiskStudentItemProps> = ({
           toast.success(
             t("dashboard.staff.atRiskStudents.encouragementSent", {
               name: student.name,
-            }),
+            })
           );
 
           if (student.riskAssessmentId) {
@@ -186,7 +176,7 @@ export const AtRiskStudentItem: React.FC<AtRiskStudentItemProps> = ({
           setIsModalOpen(false);
           setMessage("");
         },
-      },
+      }
     );
   };
 
@@ -212,10 +202,7 @@ export const AtRiskStudentItem: React.FC<AtRiskStudentItemProps> = ({
         );
       default:
         return (
-          <Badge
-            variant="outline"
-            className="text-[8px] font-bold uppercase opacity-40"
-          >
+          <Badge variant="outline" className="text-[8px] font-bold uppercase opacity-40">
             {t("dashboard.staff.atRiskStudents.status.noAction")}
           </Badge>
         );
@@ -246,7 +233,7 @@ export const AtRiskStudentItem: React.FC<AtRiskStudentItemProps> = ({
               <p
                 className={cn(
                   "text-sm transition-colors",
-                  isArabic ? "font-bold" : "font-black tracking-tight",
+                  isArabic ? "font-bold" : "font-black tracking-tight"
                 )}
               >
                 {student.name}
@@ -290,10 +277,7 @@ export const AtRiskStudentItem: React.FC<AtRiskStudentItemProps> = ({
                 </div>
               </div>
               <DialogTitle
-                className={cn(
-                  "text-2xl",
-                  isArabic ? "font-bold" : "font-black tracking-tight",
-                )}
+                className={cn("text-2xl", isArabic ? "font-bold" : "font-black tracking-tight")}
               >
                 {t("dashboard.staff.atRiskStudents.interventionTitle", {
                   name: student.name,
@@ -414,9 +398,7 @@ export const AtRiskStudentItem: React.FC<AtRiskStudentItemProps> = ({
                             <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[10px] font-black">
                               {i + 1}
                             </div>
-                            <span className="text-xs font-semibold break-words">
-                              {p}
-                            </span>
+                            <span className="text-xs font-semibold break-words">{p}</span>
                           </div>
                         ))) || (
                         <span className="text-xs text-muted-foreground italic">
@@ -434,46 +416,39 @@ export const AtRiskStudentItem: React.FC<AtRiskStudentItemProps> = ({
                   exit={{ opacity: 0, y: -10 }}
                   className="space-y-8"
                 >
-                  {student.suggestedResources &&
-                    student.suggestedResources.length > 0 && (
-                      <div className="space-y-4">
-                        <Label className="text-[10px] font-black uppercase tracking-widest text-ai-primary flex items-center gap-2">
-                          <Sparkles className="h-3 w-3" />
-                          {t("dashboard.staff.atRiskStudents.aiResources")}
-                        </Label>
-                        <div className="grid gap-3">
-                          {student.suggestedResources.map((res, i) => (
-                            <div
-                              key={i}
-                              className="flex items-center justify-between p-4 rounded-2xl bg-ai-primary/5 border border-ai-primary/10 group hover:bg-ai-primary/10 transition-all"
-                            >
-                              <div className="flex items-center gap-3">
-                                <div className="p-2 rounded-xl bg-white dark:bg-muted/10 shadow-sm">
-                                  <BookOpen className="h-4 w-4 text-ai-primary" />
-                                </div>
-                                <span className="text-xs font-bold">
-                                  {res.title}
-                                </span>
+                  {student.suggestedResources && student.suggestedResources.length > 0 && (
+                    <div className="space-y-4">
+                      <Label className="text-[10px] font-black uppercase tracking-widest text-ai-primary flex items-center gap-2">
+                        <Sparkles className="h-3 w-3" />
+                        {t("dashboard.staff.atRiskStudents.aiResources")}
+                      </Label>
+                      <div className="grid gap-3">
+                        {student.suggestedResources.map((res, i) => (
+                          <div
+                            key={i}
+                            className="flex items-center justify-between p-4 rounded-2xl bg-ai-primary/5 border border-ai-primary/10 group hover:bg-ai-primary/10 transition-all"
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className="p-2 rounded-xl bg-white dark:bg-muted/10 shadow-sm">
+                                <BookOpen className="h-4 w-4 text-ai-primary" />
                               </div>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 rounded-full text-ai-primary"
-                                asChild
-                              >
-                                <a
-                                  href={res.url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                >
-                                  <ExternalLink className="h-3.5 w-3.5" />
-                                </a>
-                              </Button>
+                              <span className="text-xs font-bold">{res.title}</span>
                             </div>
-                          ))}
-                        </div>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 rounded-full text-ai-primary"
+                              asChild
+                            >
+                              <a href={res.url} target="_blank" rel="noopener noreferrer">
+                                <ExternalLink className="h-3.5 w-3.5" />
+                              </a>
+                            </Button>
+                          </div>
+                        ))}
                       </div>
-                    )}
+                    </div>
+                  )}
 
                   <div className="space-y-4">
                     <div className="flex justify-between items-center px-1">
@@ -498,9 +473,7 @@ export const AtRiskStudentItem: React.FC<AtRiskStudentItemProps> = ({
                     </div>
                     <div className="relative group">
                       <Textarea
-                        placeholder={t(
-                          "dashboard.staff.atRiskStudents.encouragementPlaceholder",
-                        )}
+                        placeholder={t("dashboard.staff.atRiskStudents.encouragementPlaceholder")}
                         className="min-h-[150px] rounded-2xl bg-muted/20 border-none focus-visible:ring-primary p-6 text-sm leading-relaxed shadow-inner transition-all resize-none"
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}

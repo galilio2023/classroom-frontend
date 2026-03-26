@@ -5,11 +5,7 @@ import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
-import {
-  useBack,
-  useResourceParams,
-  useUserFriendlyName,
-} from "@refinedev/core";
+import { useBack, useResourceParams, useUserFriendlyName } from "@refinedev/core";
 import { ArrowLeftIcon } from "lucide-react";
 import type { PropsWithChildren } from "react";
 
@@ -18,9 +14,7 @@ type EditViewProps = PropsWithChildren<{
 }>;
 
 export function EditView({ children, className }: EditViewProps) {
-  return (
-    <div className={cn("flex flex-col", "gap-4", className)}>{children}</div>
-  );
+  return <div className={cn("flex flex-col", "gap-4", className)}>{children}</div>;
 }
 
 type EditViewHeaderProps = PropsWithChildren<{
@@ -51,10 +45,7 @@ export const EditViewHeader = ({
 
   const title =
     titleFromProps ??
-    getUserFriendlyName(
-      resource?.meta?.label ?? identifier ?? resource?.name,
-      "plural",
-    );
+    getUserFriendlyName(resource?.meta?.label ?? identifier ?? resource?.name, "plural");
 
   return (
     <div className={cn("flex flex-col", "gap-4", wrapperClassName)}>
@@ -68,7 +59,7 @@ export const EditViewHeader = ({
           "items-center",
           "justify-between",
           "-ms-2.5",
-          headerClassName,
+          headerClassName
         )}
       >
         <div className="flex items-center gap-1">
@@ -80,11 +71,7 @@ export const EditViewHeader = ({
 
         <div className="flex items-center gap-2">
           {actionsSlot}
-          <RefreshButton
-            variant="outline"
-            recordItemId={recordItemId}
-            resource={resourceName}
-          />
+          <RefreshButton variant="outline" recordItemId={recordItemId} resource={resourceName} />
         </div>
       </div>
     </div>

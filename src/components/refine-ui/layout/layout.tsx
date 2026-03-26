@@ -37,8 +37,7 @@ export function Layout({ children }: PropsWithChildren) {
 
   // Check if we are currently looking at the LIVE tab of the active class
   const queryParams = new URLSearchParams(search);
-  const isOnLiveTab =
-    classIdFromUrl === activeClassId && queryParams.get("subtab") === "live";
+  const isOnLiveTab = classIdFromUrl === activeClassId && queryParams.get("subtab") === "live";
 
   return (
     <ThemeProvider>
@@ -82,7 +81,7 @@ export function Layout({ children }: PropsWithChildren) {
                   "flex-1 flex flex-col w-full mx-auto",
                   "max-w-screen-2xl",
                   "p-4 md:p-6 lg:p-8 xl:p-10",
-                  "pb-28 md:pb-10",
+                  "pb-28 md:pb-10"
                 )}
               >
                 {children}
@@ -92,8 +91,7 @@ export function Layout({ children }: PropsWithChildren) {
 
           {/* PERSISTENT AI STUDY BUDDY: Gated for academic roles only */}
           {identity &&
-            (identity.role === UserRole.STUDENT ||
-              identity.role === UserRole.TEACHER) &&
+            (identity.role === UserRole.STUDENT || identity.role === UserRole.TEACHER) &&
             !isJoined && <AIStudyBuddy classId={classIdFromUrl} />}
 
           {isStudent && <XPGainPopup />}

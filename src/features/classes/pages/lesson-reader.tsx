@@ -2,15 +2,7 @@ import { useOne, useGetIdentity, useCustomMutation } from "@refinedev/core";
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
 import { Resource, User } from "@/types";
-import {
-  Loader2,
-  ArrowLeft,
-  MessageSquare,
-  Sparkles,
-  Send,
-  BookOpen,
-  X,
-} from "lucide-react";
+import { Loader2, ArrowLeft, MessageSquare, Sparkles, Send, BookOpen, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
@@ -86,7 +78,7 @@ export const LessonReader = () => {
           setIsTyping(false);
           toast.error(t("classes.reader.toast.unavailable"));
         },
-      },
+      }
     );
   };
 
@@ -133,7 +125,7 @@ export const LessonReader = () => {
       <div
         className={cn(
           "flex-1 flex flex-col transition-all duration-500 ease-in-out relative min-w-0",
-          isChatOpen ? (isAr ? "lg:ms-100" : "lg:me-100") : "m-0",
+          isChatOpen ? (isAr ? "lg:ms-100" : "lg:me-100") : "m-0"
         )}
       >
         {/* Header */}
@@ -164,14 +156,12 @@ export const LessonReader = () => {
               "rounded-xl font-black uppercase tracking-widest text-[9px] md:text-[10px] h-9 md:h-11 px-3 md:px-5 gap-2 transition-all shadow-sm",
               isChatOpen
                 ? "bg-primary/10 text-primary border-primary/20"
-                : "bg-card/50 border-border/50",
+                : "bg-card/50 border-border/50"
             )}
           >
             <MessageSquare className="h-3.5 w-3.5 md:h-4 md:w-4" />
             <span className="hidden xs:inline">
-              {isChatOpen
-                ? t("classes.reader.hideAiTutor")
-                : t("classes.reader.aiTutor")}
+              {isChatOpen ? t("classes.reader.hideAiTutor") : t("classes.reader.aiTutor")}
             </span>
           </Button>
         </header>
@@ -180,10 +170,7 @@ export const LessonReader = () => {
         <main className="flex-1 overflow-y-auto px-4 md:px-12 lg:px-20 py-10 md:py-20 max-w-5xl mx-auto w-full text-start scroll-smooth">
           <article className="prose prose-sm md:prose-base lg:prose-lg dark:prose-invert max-w-none">
             <header className="mb-10 md:mb-16">
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-              >
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
                 <h1 className="text-3xl md:text-4xl lg:text-5xl font-black tracking-tight mb-4 md:mb-6 leading-tight">
                   {resource.title}
                 </h1>
@@ -197,9 +184,7 @@ export const LessonReader = () => {
                   <p
                     className={cn(
                       "text-lg md:text-xl text-muted-foreground italic py-2 md:py-3 leading-relaxed",
-                      isAr
-                        ? "border-e-4 pe-4 md:pe-6"
-                        : "border-s-4 ps-4 md:ps-6",
+                      isAr ? "border-e-4 pe-4 md:pe-6" : "border-s-4 ps-4 md:ps-6"
                     )}
                   >
                     {resource.description}
@@ -233,7 +218,7 @@ export const LessonReader = () => {
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
             className={cn(
               "fixed top-0 bottom-0 w-full md:w-[400px] lg:w-[400px] border-l bg-card/95 backdrop-blur-3xl z-[50] shadow-2xl flex flex-col overflow-hidden",
-              isAr ? "start-0 border-r border-s-0" : "end-0 border-l",
+              isAr ? "start-0 border-r border-s-0" : "end-0 border-l"
             )}
           >
             {/* AI Tutor Header */}
@@ -281,7 +266,7 @@ export const LessonReader = () => {
                           : "ms-auto items-end"
                         : isAr
                           ? "me-auto items-end"
-                          : "me-auto items-start",
+                          : "me-auto items-start"
                     )}
                   >
                     <div
@@ -289,7 +274,7 @@ export const LessonReader = () => {
                         "p-4 rounded-2xl text-sm shadow-sm transition-all",
                         msg.role === "user"
                           ? "bg-primary text-primary-foreground shadow-primary/20 rounded-tr-none"
-                          : "bg-muted shadow-none rounded-tl-none",
+                          : "bg-muted shadow-none rounded-tl-none"
                       )}
                     >
                       <div className="prose prose-sm dark:prose-invert max-w-none text-start font-medium leading-relaxed">
@@ -332,24 +317,19 @@ export const LessonReader = () => {
                   }}
                   className={cn(
                     "min-h-24 md:min-h-28 resize-none rounded-2xl md:rounded-3xl p-4 md:p-6 text-sm transition-all border-border/50 focus:border-primary/30 bg-muted/20",
-                    isAr ? "ps-14 pe-4" : "pe-14 ps-4",
+                    isAr ? "ps-14 pe-4" : "pe-14 ps-4"
                   )}
                 />
                 <Button
                   size="icon"
                   className={cn(
                     "absolute bottom-4 h-9 w-9 md:h-11 md:w-11 rounded-xl md:rounded-2xl shadow-lg shadow-primary/20 transition-all active:scale-90",
-                    "end-4",
+                    "end-4"
                   )}
                   onClick={handleSendMessage}
                   disabled={!chatMessage.trim() || isTyping}
                 >
-                  <Send
-                    className={cn(
-                      "h-4 w-4 md:h-5 md:w-5",
-                      isAr && "rotate-180",
-                    )}
-                  />
+                  <Send className={cn("h-4 w-4 md:h-5 md:w-5", isAr && "rotate-180")} />
                 </Button>
               </div>
               <p className="mt-3 text-[8px] md:text-[9px] text-center font-bold text-muted-foreground/40 uppercase tracking-[0.1em]">

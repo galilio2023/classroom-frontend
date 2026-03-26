@@ -40,10 +40,15 @@ function App() {
       // e.g., "classes.undefined.title" -> "classes.general.title"
       if (key.includes("undefined.")) {
         if (import.meta.env.DEV) {
-          console.warn(`[i18n] Malformed translation key detected: "${key}". Falling back to 'general'. This usually indicates a data loading race condition or missing ID.`);
+          console.warn(
+            `[i18n] Malformed translation key detected: "${key}". Falling back to 'general'. This usually indicates a data loading race condition or missing ID.`
+          );
         }
         const fallbackKey = key.replace("undefined.", "general.");
-        const translatedFallback = t(fallbackKey, { ...params, defaultValue: "" });
+        const translatedFallback = t(fallbackKey, {
+          ...params,
+          defaultValue: "",
+        });
         if (translatedFallback) return translatedFallback;
       }
 

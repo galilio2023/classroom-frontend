@@ -1,9 +1,4 @@
-import {
-  useShow,
-  useUpdate,
-  useGetIdentity,
-  useCustomMutation,
-} from "@refinedev/core";
+import { useShow, useUpdate, useGetIdentity, useCustomMutation } from "@refinedev/core";
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { ShowView } from "@/components/refine-ui/views/show-view";
@@ -51,9 +46,7 @@ const SubmissionShow = () => {
   const [feedback, setFeedback] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
-  const { query: submissionQuery } = useShow<
-    Submission & { assignment?: Assignment }
-  >({
+  const { query: submissionQuery } = useShow<Submission & { assignment?: Assignment }>({
     resource: "submissions",
     id,
   });
@@ -86,7 +79,7 @@ const SubmissionShow = () => {
           toast.success(t("assignments.grading.gradeSaved"));
           navigate(-1);
         },
-      },
+      }
     );
   };
 
@@ -110,7 +103,7 @@ const SubmissionShow = () => {
           setIsAnalyzing(false);
           toast.error(t("common.aiServiceError"));
         },
-      },
+      }
     );
   };
 
@@ -123,22 +116,14 @@ const SubmissionShow = () => {
   }
 
   if (!submission)
-    return (
-      <div className="p-20 text-center font-bold">
-        {t("assignments.show.notFound")}
-      </div>
-    );
+    return <div className="p-20 text-center font-bold">{t("assignments.show.notFound")}</div>;
 
   return (
     <ShowView>
       <div className="max-w-5xl mx-auto space-y-8 text-start">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <Button
-            variant="ghost"
-            onClick={() => navigate(-1)}
-            className="gap-2"
-          >
+          <Button variant="ghost" onClick={() => navigate(-1)} className="gap-2">
             <ArrowLeft className={cn("h-4 w-4", isAr && "rotate-180")} />
             {t("buttons.back")}
           </Button>
@@ -172,14 +157,10 @@ const SubmissionShow = () => {
                 <div className="flex items-center gap-4">
                   <Avatar className="h-12 w-12 border-2 border-background shadow-sm">
                     <AvatarImage src={submission.student?.image || ""} />
-                    <AvatarFallback>
-                      {submission.student?.name?.[0]}
-                    </AvatarFallback>
+                    <AvatarFallback>{submission.student?.name?.[0]}</AvatarFallback>
                   </Avatar>
                   <div>
-                    <CardTitle className="text-xl font-black">
-                      {submission.student?.name}
-                    </CardTitle>
+                    <CardTitle className="text-xl font-black">{submission.student?.name}</CardTitle>
                     <CardDescription className="flex items-center gap-2">
                       <FileText className="h-3 w-3" />
                       {submission.assignment?.title}
@@ -198,9 +179,7 @@ const SubmissionShow = () => {
                 <div className="flex items-center gap-1">
                   <Calendar className="h-3 w-3" />
                   {t("assignments.show.submittedContent")}:{" "}
-                  {dayjs(submission.createdAt)
-                    .locale(i18n.language)
-                    .format("LLL")}
+                  {dayjs(submission.createdAt).locale(i18n.language).format("LLL")}
                 </div>
                 {submission.isLate && (
                   <div className="flex items-center gap-1 text-destructive">
@@ -254,7 +233,7 @@ const SubmissionShow = () => {
                     <div
                       className={cn(
                         "absolute top-1/2 -translate-y-1/2 text-xl font-black text-muted-foreground/30",
-                        "end-4",
+                        "end-4"
                       )}
                     >
                       %

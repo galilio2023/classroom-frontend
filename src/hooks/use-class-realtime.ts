@@ -5,10 +5,7 @@ interface LiveSessionPayload {
   classId: string | number;
 }
 
-export const useClassRealtime = (
-  userId: string | undefined,
-  classId: string,
-) => {
+export const useClassRealtime = (userId: string | undefined, classId: string) => {
   const { socket, isConnected } = useSocket();
   const [isLiveIndicator, setIsLiveIndicator] = useState(false);
 

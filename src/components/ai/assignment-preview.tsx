@@ -1,21 +1,7 @@
 import React, { useState } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "../ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
-import {
-  Copy,
-  Check,
-  Send,
-  PlusCircle,
-  BookOpen,
-  FileText,
-  HelpCircle,
-} from "lucide-react";
+import { Copy, Check, Send, PlusCircle, BookOpen, FileText, HelpCircle } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -26,10 +12,7 @@ interface AssignmentPreviewProps {
   onUseContent?: (content: string) => void;
 }
 
-export const AssignmentPreview: React.FC<AssignmentPreviewProps> = ({
-  content,
-  onUseContent,
-}) => {
+export const AssignmentPreview: React.FC<AssignmentPreviewProps> = ({ content, onUseContent }) => {
   const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
   const navigate = useNavigate();
@@ -62,11 +45,9 @@ export const AssignmentPreview: React.FC<AssignmentPreviewProps> = ({
             section.toLowerCase().includes("lesson") ||
             section.toLowerCase().includes("introduction");
           const isAssignment =
-            section.toLowerCase().includes("assignment") ||
-            section.toLowerCase().includes("task");
+            section.toLowerCase().includes("assignment") || section.toLowerCase().includes("task");
           const isQuiz =
-            section.toLowerCase().includes("quiz") ||
-            section.toLowerCase().includes("test");
+            section.toLowerCase().includes("quiz") || section.toLowerCase().includes("test");
 
           return (
             <Card
@@ -79,14 +60,12 @@ export const AssignmentPreview: React.FC<AssignmentPreviewProps> = ({
                     ? "border-s-badge-purple bg-badge-purple/5"
                     : isQuiz
                       ? "border-s-badge-pink bg-badge-pink/5"
-                      : "border-s-primary/20",
+                      : "border-s-primary/20"
               )}
             >
               <CardHeader className="py-3 px-4 border-b border-black/5 dark:border-white/5 flex flex-row items-center gap-2">
                 {isLesson && <BookOpen className="h-4 w-4 text-badge-blue" />}
-                {isAssignment && (
-                  <FileText className="h-4 w-4 text-badge-purple" />
-                )}
+                {isAssignment && <FileText className="h-4 w-4 text-badge-purple" />}
                 {isQuiz && <HelpCircle className="h-4 w-4 text-badge-pink" />}
                 <span className="text-[10px] font-black uppercase tracking-widest opacity-50">
                   {isLesson
@@ -143,12 +122,7 @@ export const AssignmentPreview: React.FC<AssignmentPreviewProps> = ({
                   {t("buttons.createAssignment")}
                 </Button>
               )}
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={copyToClipboard}
-                className="h-8 w-8"
-              >
+              <Button variant="outline" size="icon" onClick={copyToClipboard} className="h-8 w-8">
                 {copied ? (
                   <Check className="h-3.5 w-3.5 text-success" />
                 ) : (

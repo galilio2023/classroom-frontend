@@ -25,14 +25,11 @@ const LoadingButton = React.forwardRef<HTMLButtonElement, LoadingButtonProps>(
       disabled,
       ...props
     },
-    ref,
+    ref
   ) => {
     return (
       <Button
-        className={cn(
-          "gap-2 relative overflow-hidden transition-all duration-300",
-          className,
-        )}
+        className={cn("gap-2 relative overflow-hidden transition-all duration-300", className)}
         disabled={isLoading || isSuccess || disabled}
         ref={ref}
         {...props}
@@ -75,7 +72,7 @@ const LoadingButton = React.forwardRef<HTMLButtonElement, LoadingButtonProps>(
         </AnimatePresence>
       </Button>
     );
-  },
+  }
 );
 LoadingButton.displayName = "LoadingButton";
 

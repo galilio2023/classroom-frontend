@@ -35,8 +35,7 @@ const PendingVerificationPage = () => {
 
   useEffect(() => {
     if (!isLoading && identity) {
-      const isVerified =
-        identity.verificationStatus === VerificationStatus.VERIFIED;
+      const isVerified = identity.verificationStatus === VerificationStatus.VERIFIED;
       const isAdmin = identity.role === UserRole.ADMIN;
       const isStudent = identity.role === UserRole.STUDENT;
 
@@ -49,8 +48,7 @@ const PendingVerificationPage = () => {
   const handleCheckStatus = async () => {
     const { data } = await refetch();
     if (data) {
-      const isVerified =
-        data.verificationStatus === VerificationStatus.VERIFIED;
+      const isVerified = data.verificationStatus === VerificationStatus.VERIFIED;
       if (isVerified) {
         toast.success(t("auth.pending.successToast"));
         go({ to: "/" });
@@ -86,7 +84,7 @@ const PendingVerificationPage = () => {
               <div
                 className={cn(
                   "absolute -bottom-2 -end-2 bg-background rounded-full p-1.5 border shadow-md",
-                  isAr && "-start-2 end-auto",
+                  isAr && "-start-2 end-auto"
                 )}
               >
                 <Clock className="h-5 w-5 text-amber-600 animate-spin-slow" />
@@ -138,7 +136,7 @@ const PendingVerificationPage = () => {
                     date: identity?.createdAt
                       ? new Date(identity.createdAt).toLocaleDateString(
                           isAr ? "ar-EG" : undefined,
-                          { dateStyle: "long" },
+                          { dateStyle: "long" }
                         )
                       : "N/A",
                   })}

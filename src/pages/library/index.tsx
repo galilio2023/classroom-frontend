@@ -1,10 +1,5 @@
 import React, { useState } from "react";
-import {
-  useList,
-  useCustomMutation,
-  useDelete,
-  useGetIdentity,
-} from "@refinedev/core";
+import { useList, useCustomMutation, useDelete, useGetIdentity } from "@refinedev/core";
 import { FileUpload } from "@/components/file-upload";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -112,11 +107,9 @@ const GlobalLibraryPage = () => {
           refetch();
         },
         onError: (error: any) => {
-          toast.error(
-            error?.response?.data?.message || t("library.toasts.error"),
-          );
+          toast.error(error?.response?.data?.message || t("library.toasts.error"));
         },
-      },
+      }
     );
   };
 
@@ -132,18 +125,17 @@ const GlobalLibraryPage = () => {
             toast.success(t("library.toasts.deleted"));
             refetch();
           },
-        },
+        }
       );
     }
   };
 
   const resources = resourcesResult?.data || [];
   const filteredResources = resources.filter((r: any) =>
-    r.title.toLowerCase().includes(searchTerm.toLowerCase()),
+    r.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const isTeacherOrAdmin =
-    identity?.role === UserRole.TEACHER || identity?.role === UserRole.ADMIN;
+  const isTeacherOrAdmin = identity?.role === UserRole.TEACHER || identity?.role === UserRole.ADMIN;
 
   return (
     <div className="space-y-8 md:space-y-12 pb-20">
@@ -272,7 +264,7 @@ const GlobalLibraryPage = () => {
           <div className="relative flex-1 group w-full">
             <Search
               className={cn(
-                "absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60 group-focus-within:text-primary transition-colors start-4",
+                "absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60 group-focus-within:text-primary transition-colors start-4"
               )}
             />
             <Input
@@ -280,7 +272,7 @@ const GlobalLibraryPage = () => {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className={cn(
-                "h-12 rounded-2xl border-none bg-background/50 shadow-none font-medium ps-11 pe-4",
+                "h-12 rounded-2xl border-none bg-background/50 shadow-none font-medium ps-11 pe-4"
               )}
             />
           </div>
@@ -291,7 +283,7 @@ const GlobalLibraryPage = () => {
                 size="sm"
                 className={cn(
                   "rounded-xl h-10 px-4 font-black text-[10px] uppercase tracking-widest gap-2",
-                  viewMode === "grid" && "bg-white shadow-sm text-primary",
+                  viewMode === "grid" && "bg-white shadow-sm text-primary"
                 )}
                 onClick={() => setViewMode("grid")}
               >
@@ -303,7 +295,7 @@ const GlobalLibraryPage = () => {
                 size="sm"
                 className={cn(
                   "rounded-xl h-10 px-4 font-black text-[10px] uppercase tracking-widest gap-2",
-                  viewMode === "list" && "bg-white shadow-sm text-primary",
+                  viewMode === "list" && "bg-white shadow-sm text-primary"
                 )}
                 onClick={() => setViewMode("list")}
               >
@@ -341,7 +333,7 @@ const GlobalLibraryPage = () => {
               "grid gap-6 md:gap-8",
               viewMode === "grid"
                 ? "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
-                : "grid-cols-1",
+                : "grid-cols-1"
             )}
           >
             <AnimatePresence mode="popLayout">
@@ -356,9 +348,7 @@ const GlobalLibraryPage = () => {
                   <Card
                     className={cn(
                       "group relative overflow-hidden transition-all duration-500 border border-border/40 bg-card/50 backdrop-blur-sm hover:shadow-2xl hover:shadow-primary/5 hover:border-primary/20 cursor-pointer",
-                      viewMode === "grid"
-                        ? "rounded-4xl h-full"
-                        : "rounded-3xl",
+                      viewMode === "grid" ? "rounded-4xl h-full" : "rounded-3xl"
                     )}
                   >
                     {/* Status Accent */}
@@ -367,8 +357,7 @@ const GlobalLibraryPage = () => {
                     <CardContent
                       className={cn(
                         "p-6 md:p-8",
-                        viewMode === "list" &&
-                          "flex flex-col md:flex-row items-center gap-6",
+                        viewMode === "list" && "flex flex-col md:flex-row items-center gap-6"
                       )}
                     >
                       <div className="flex items-start justify-between mb-6">
@@ -382,8 +371,7 @@ const GlobalLibraryPage = () => {
                           )}
                         </div>
                         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
-                          {(isTeacherOrAdmin ||
-                            resource.ownerId === identity?.id) && (
+                          {(isTeacherOrAdmin || resource.ownerId === identity?.id) && (
                             <Button
                               variant="ghost"
                               size="icon"
@@ -425,11 +413,7 @@ const GlobalLibraryPage = () => {
                             className="rounded-xl font-black uppercase tracking-widest text-[9px] h-9 px-4 gap-2 border-primary/10 text-primary hover:bg-primary hover:text-primary-foreground transition-all shadow-sm"
                             asChild
                           >
-                            <a
-                              href={resource.url}
-                              target="_blank"
-                              rel="noreferrer"
-                            >
+                            <a href={resource.url} target="_blank" rel="noreferrer">
                               {t("buttons.download")}
                               <Download className="h-3 w-3" />
                             </a>

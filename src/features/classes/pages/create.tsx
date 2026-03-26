@@ -21,13 +21,7 @@ import {
 import { CreateView } from "@/components/refine-ui/views/create-view";
 import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  useBack,
-  useList,
-  useGetIdentity,
-  HttpError,
-  BaseRecord,
-} from "@refinedev/core";
+import { useBack, useList, useGetIdentity, HttpError, BaseRecord } from "@refinedev/core";
 import {
   Loader2,
   Check,
@@ -151,9 +145,7 @@ const ClassesCreate = () => {
             <h1 className="text-4xl font-black tracking-tighter leading-none">
               {t("classes.create.title")}
             </h1>
-            <p className="text-muted-foreground font-medium">
-              {t("classes.create.description")}
-            </p>
+            <p className="text-muted-foreground font-medium">{t("classes.create.description")}</p>
           </div>
           <Button
             variant="outline"
@@ -165,10 +157,7 @@ const ClassesCreate = () => {
           </Button>
         </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
           <Card className="border-none shadow-2xl bg-card/50 backdrop-blur-xl rounded-4xl overflow-hidden text-start">
             <div
               className="h-1.5 w-full transition-colors duration-500"
@@ -197,9 +186,7 @@ const ClassesCreate = () => {
                             </FormLabel>
                             <FormControl>
                               <Input
-                                placeholder={t(
-                                  "classes.form.classNamePlaceholder",
-                                )}
+                                placeholder={t("classes.form.classNamePlaceholder")}
                                 {...field}
                                 className="h-14 rounded-2xl bg-muted/20 border-none focus-visible:ring-primary font-bold"
                               />
@@ -240,11 +227,7 @@ const ClassesCreate = () => {
                               >
                                 <FormControl>
                                   <SelectTrigger className="h-14 rounded-2xl bg-muted/20 border-none focus:ring-primary transition-all font-bold">
-                                    <SelectValue
-                                      placeholder={t(
-                                        "classes.form.selectSubject",
-                                      )}
-                                    />
+                                    <SelectValue placeholder={t("classes.form.selectSubject")} />
                                   </SelectTrigger>
                                 </FormControl>
                                 <SelectContent className="rounded-xl border-none shadow-2xl">
@@ -283,9 +266,7 @@ const ClassesCreate = () => {
                                 </FormLabel>
                                 <FormControl>
                                   <Input
-                                    placeholder={t(
-                                      "classes.form.newSubjectName",
-                                    )}
+                                    placeholder={t("classes.form.newSubjectName")}
                                     {...field}
                                     className="h-14 rounded-2xl bg-muted/20 border-none focus-visible:ring-primary font-bold"
                                   />
@@ -307,19 +288,13 @@ const ClassesCreate = () => {
                                   <span className="text-destructive">*</span>
                                 </FormLabel>
                                 <Select
-                                  onValueChange={(value) =>
-                                    field.onChange(Number(value))
-                                  }
+                                  onValueChange={(value) => field.onChange(Number(value))}
                                   value={field.value?.toString()}
                                   disabled={termsLoading}
                                 >
                                   <FormControl>
                                     <SelectTrigger className="h-14 rounded-2xl bg-muted/20 border-none focus:ring-primary transition-all font-bold">
-                                      <SelectValue
-                                        placeholder={t(
-                                          "classes.form.selectTerm",
-                                        )}
-                                      />
+                                      <SelectValue placeholder={t("classes.form.selectTerm")} />
                                     </SelectTrigger>
                                   </FormControl>
                                   <SelectContent className="rounded-xl border-none shadow-2xl">
@@ -361,9 +336,7 @@ const ClassesCreate = () => {
                                     {...field}
                                     onChange={(e) =>
                                       field.onChange(
-                                        e.target.value === ""
-                                          ? undefined
-                                          : Number(e.target.value),
+                                        e.target.value === "" ? undefined : Number(e.target.value)
                                       )
                                     }
                                     className="h-14 rounded-2xl bg-muted/20 border-none focus-visible:ring-primary font-black text-center text-xl"
@@ -371,7 +344,7 @@ const ClassesCreate = () => {
                                   <span
                                     className={cn(
                                       "absolute top-1/2 -translate-y-1/2 text-[10px] font-black opacity-20 group-focus-within:opacity-40 transition-opacity",
-                                      "end-4",
+                                      "end-4"
                                     )}
                                   >
                                     {t("classes.form.studentsUnit")}
@@ -401,7 +374,7 @@ const ClassesCreate = () => {
                                         "h-10 w-10 rounded-full border-4 transition-all hover:scale-110 flex items-center justify-center shadow-sm",
                                         field.value === color
                                           ? "border-white dark:border-white/5 scale-110 ring-2 ring-primary"
-                                          : "border-transparent",
+                                          : "border-transparent"
                                       )}
                                       style={{ backgroundColor: color }}
                                       onClick={() => field.onChange(color)}
@@ -433,16 +406,14 @@ const ClassesCreate = () => {
                             <FormControl>
                               <div className="relative group">
                                 <Textarea
-                                  placeholder={t(
-                                    "classes.form.descriptionPlaceholder",
-                                  )}
+                                  placeholder={t("classes.form.descriptionPlaceholder")}
                                   className="min-h-[280px] rounded-[1.5rem] bg-muted/20 border-none focus-visible:ring-primary p-6 text-sm leading-relaxed shadow-inner transition-all"
                                   {...field}
                                 />
                                 <div
                                   className={cn(
                                     "absolute bottom-4 opacity-10 group-focus-within:opacity-30 transition-opacity",
-                                    "end-4",
+                                    "end-4"
                                   )}
                                 >
                                   <Sparkles className="h-8 w-8" />

@@ -1,19 +1,6 @@
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {
-  Sparkles,
-  ArrowRight,
-  ShieldCheck,
-  Info,
-  Wand2,
-  MessageSquare,
-} from "lucide-react";
+import { Sparkles, ArrowRight, ShieldCheck, Info, Wand2, MessageSquare } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -58,7 +45,7 @@ export const PromoCards = ({ isStaff, list }: PromoCardsProps) => {
                   <CardTitle
                     className={cn(
                       "text-2xl",
-                      isArabic ? "font-bold" : "font-black tracking-tighter",
+                      isArabic ? "font-bold" : "font-black tracking-tighter"
                     )}
                   >
                     {t("dashboard.staff.promos.aiAssistant.title")}
@@ -81,9 +68,7 @@ export const PromoCards = ({ isStaff, list }: PromoCardsProps) => {
                     <React.Fragment key={i}>
                       {part}
                       {i < arr.length - 1 && (
-                        <span className="text-ai-primary font-black">
-                          Gemini 3 Flash Preview
-                        </span>
+                        <span className="text-ai-primary font-black">Gemini 3 Flash Preview</span>
                       )}
                     </React.Fragment>
                   ))}{" "}
@@ -118,7 +103,7 @@ export const PromoCards = ({ isStaff, list }: PromoCardsProps) => {
                 <ArrowRight
                   className={cn(
                     "h-4 w-4 transition-transform group-hover:translate-x-1",
-                    isArabic && "rotate-180 group-hover:-translate-x-1",
+                    isArabic && "rotate-180 group-hover:-translate-x-1"
                   )}
                 />
               </Button>
@@ -141,10 +126,7 @@ export const PromoCards = ({ isStaff, list }: PromoCardsProps) => {
                 </div>
                 <div className="space-y-1">
                   <CardTitle
-                    className={cn(
-                      "text-xl",
-                      isArabic ? "font-bold" : "font-black tracking-tight",
-                    )}
+                    className={cn("text-xl", isArabic ? "font-bold" : "font-black tracking-tight")}
                   >
                     {t("dashboard.staff.promos.studentSupport.title")}
                   </CardTitle>
@@ -162,9 +144,7 @@ export const PromoCards = ({ isStaff, list }: PromoCardsProps) => {
                     <React.Fragment key={i}>
                       {part}
                       {i < arr.length - 1 && (
-                        <span className="text-primary font-black">
-                          AI Study Buddy
-                        </span>
+                        <span className="text-primary font-black">AI Study Buddy</span>
                       )}
                     </React.Fragment>
                   ))}
@@ -180,9 +160,7 @@ export const PromoCards = ({ isStaff, list }: PromoCardsProps) => {
                 className="w-full h-14 rounded-2xl font-black uppercase tracking-widest text-[10px] gap-2 border-primary/20 hover:bg-primary/5 text-primary transition-all shadow-sm"
               >
                 {t("buttons.contactSupport")}
-                <ArrowRight
-                  className={cn("h-4 w-4", isArabic && "rotate-180")}
-                />
+                <ArrowRight className={cn("h-4 w-4", isArabic && "rotate-180")} />
               </Button>
             </CardContent>
           </Card>

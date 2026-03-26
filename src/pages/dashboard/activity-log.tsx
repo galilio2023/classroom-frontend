@@ -46,9 +46,7 @@ const ActivityLogPage = () => {
       () => [
         {
           id: "user",
-          header: () => (
-            <p className="column-title">{t("auth.register.accountSetup")}</p>
-          ),
+          header: () => <p className="column-title">{t("auth.register.accountSetup")}</p>,
           cell: ({ row }) => {
             const user = row.original.user;
             return (
@@ -58,12 +56,8 @@ const ActivityLogPage = () => {
                   <AvatarFallback>{user?.name?.[0] || "U"}</AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col">
-                  <span className="text-xs font-bold">
-                    {user?.name || "System"}
-                  </span>
-                  <span className="text-[10px] text-muted-foreground">
-                    {user?.email}
-                  </span>
+                  <span className="text-xs font-bold">{user?.name || "System"}</span>
+                  <span className="text-[10px] text-muted-foreground">{user?.email}</span>
                 </div>
               </div>
             );
@@ -71,9 +65,7 @@ const ActivityLogPage = () => {
         },
         {
           accessorKey: "action",
-          header: () => (
-            <p className="column-title">{t("dashboard.activity.recent")}</p>
-          ),
+          header: () => <p className="column-title">{t("dashboard.activity.recent")}</p>,
           cell: ({ getValue }) => {
             const action = getValue<string>();
             return (
@@ -81,7 +73,7 @@ const ActivityLogPage = () => {
                 variant="outline"
                 className={cn(
                   "text-[10px] font-black uppercase tracking-wider border-none",
-                  actionVariants[action],
+                  actionVariants[action]
                 )}
               >
                 {t(`activity.actions.${action}`, action.replace("_", " "))}
@@ -95,22 +87,14 @@ const ActivityLogPage = () => {
           cell: ({ row }) => (
             <div className="flex items-center gap-2 text-[10px] font-medium text-muted-foreground">
               <Database className="h-3 w-3" />
-              <span className="capitalize">
-                {row.original.entityType || "N/A"}
-              </span>
-              <span className="opacity-40">
-                ID: {row.original.entityId || "-"}
-              </span>
+              <span className="capitalize">{row.original.entityType || "N/A"}</span>
+              <span className="opacity-40">ID: {row.original.entityId || "-"}</span>
             </div>
           ),
         },
         {
           id: "network",
-          header: () => (
-            <p className="column-title">
-              {t("dashboard.activity.network" as any)}
-            </p>
-          ),
+          header: () => <p className="column-title">{t("dashboard.activity.network" as any)}</p>,
           cell: ({ row }) => (
             <div className="flex flex-col gap-0.5">
               <div className="flex items-center gap-1.5 text-[9px] font-bold text-muted-foreground">
@@ -125,9 +109,7 @@ const ActivityLogPage = () => {
         },
         {
           accessorKey: "createdAt",
-          header: () => (
-            <p className="column-title">{t("common.certificate.date")}</p>
-          ),
+          header: () => <p className="column-title">{t("common.certificate.date")}</p>,
           cell: ({ getValue }) => (
             <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
               <Clock className="h-3.5 w-3.5" />
@@ -141,7 +123,7 @@ const ActivityLogPage = () => {
           ),
         },
       ],
-      [t, isArabic],
+      [t, isArabic]
     ),
     refineCoreProps: {
       resource: "activity-log",
@@ -163,9 +145,7 @@ const ActivityLogPage = () => {
             <Shield className="h-8 w-8 text-primary" />
             {t("resources.activity-log.label")}
           </h1>
-          <p className="text-muted-foreground">
-            {t("users.governance.description")}
-          </p>
+          <p className="text-muted-foreground">{t("users.governance.description")}</p>
         </div>
       </div>
 

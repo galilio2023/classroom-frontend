@@ -20,12 +20,7 @@ import {
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useMemo, useState, useRef, useCallback } from "react";
-import {
-  useList,
-  useNavigation,
-  useDelete,
-  useGetIdentity,
-} from "@refinedev/core";
+import { useList, useNavigation, useDelete, useGetIdentity } from "@refinedev/core";
 import { Quiz, User, UserRole } from "@/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -65,14 +60,13 @@ const QuizzesListPage = () => {
   const { t, i18n } = useTranslation();
   usePageTitle(t("classes.quiz.classQuizzes"));
   const { data: identity } = useGetIdentity<User>();
-  const isStaff =
-    identity?.role === UserRole.ADMIN || identity?.role === UserRole.TEACHER;
+  const isStaff = identity?.role === UserRole.ADMIN || identity?.role === UserRole.TEACHER;
   const { selectedTerm } = useTerm();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
   const [view, setView] = useState<"discovery" | "my">(
-    identity?.role === UserRole.STUDENT ? "discovery" : "my",
+    identity?.role === UserRole.STUDENT ? "discovery" : "my"
   );
 
   const { edit, show, create } = useNavigation();
@@ -142,9 +136,7 @@ const QuizzesListPage = () => {
     return {
       total: quizzes.length,
       aiGenerated: quizzes.filter((q: Quiz) => q.id % 2 === 0).length,
-      active: quizzes.filter(
-        (q: Quiz) => !q.dueDate || dayjs().isBefore(dayjs(q.dueDate)),
-      ).length,
+      active: quizzes.filter((q: Quiz) => !q.dueDate || dayjs().isBefore(dayjs(q.dueDate))).length,
     };
   }, [quizzes]);
 
@@ -214,9 +206,7 @@ const QuizzesListPage = () => {
               <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 mb-1">
                 {t("dashboard.platform.stats.totalAssignments")}
               </p>
-              <p className="text-2xl md:text-3xl font-black">
-                {isLoading ? "..." : stats.total}
-              </p>
+              <p className="text-2xl md:text-3xl font-black">{isLoading ? "..." : stats.total}</p>
             </div>
           </Card>
           <Card className="p-6 md:p-8 bg-card/40 backdrop-blur-3xl border-border/40 rounded-4xl md:rounded-[2.5rem] flex items-center gap-5 shadow-sm">
@@ -254,7 +244,7 @@ const QuizzesListPage = () => {
               <Search
                 className={cn(
                   "absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60 group-focus-within:text-primary transition-colors",
-                  "start-4",
+                  "start-4"
                 )}
               />
               <Input
@@ -262,7 +252,7 @@ const QuizzesListPage = () => {
                 placeholder={t("assignments.list.filters.searchPlaceholder")}
                 className={cn(
                   "h-12 rounded-2xl border-none bg-background/50 shadow-none font-medium",
-                  "ps-11 pe-4",
+                  "ps-11 pe-4"
                 )}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -349,8 +339,7 @@ const QuizzesListPage = () => {
             <div className="space-y-4">
               <AnimatePresence mode="popLayout">
                 {quizzes.map((quiz: any, index: any) => {
-                  const isPast =
-                    quiz.dueDate && dayjs(quiz.dueDate).isBefore(dayjs());
+                  const isPast = quiz.dueDate && dayjs(quiz.dueDate).isBefore(dayjs());
                   const isAI = quiz.id % 2 === 0; // Placeholder for AI generated
                   const quizColor = (quiz as any).class?.color || "#6366f1";
 
@@ -362,7 +351,7 @@ const QuizzesListPage = () => {
                       exit={{ opacity: 0, scale: 0.95 }}
                       transition={{ delay: index * 0.05 }}
                       className={cn(
-                        "group relative flex flex-col md:flex-row items-center p-5 md:p-6 rounded-4xl bg-card/50 backdrop-blur-sm border border-border/40 hover:border-primary/30 hover:bg-card/80 transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-primary/5 cursor-pointer",
+                        "group relative flex flex-col md:flex-row items-center p-5 md:p-6 rounded-4xl bg-card/50 backdrop-blur-sm border border-border/40 hover:border-primary/30 hover:bg-card/80 transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-primary/5 cursor-pointer"
                       )}
                       onClick={() => show("quizzes", quiz.id)}
                     >
@@ -377,9 +366,7 @@ const QuizzesListPage = () => {
                         <div
                           className={cn(
                             "h-20 w-20 rounded-[1.5rem] border-4 border-background flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-500",
-                            isAI
-                              ? "bg-indigo-500/10 text-indigo-600"
-                              : "bg-primary/10 text-primary",
+                            isAI ? "bg-indigo-500/10 text-indigo-600" : "bg-primary/10 text-primary"
                           )}
                         >
                           <FileQuestion className="h-8 w-8 md:h-10 md:w-10" />
@@ -393,10 +380,7 @@ const QuizzesListPage = () => {
 
                       {/* Content Area */}
                       <div
-                        className={cn(
-                          "flex-1 min-w-0 w-full text-center md:text-start",
-                          "md:ms-8",
-                        )}
+                        className={cn("flex-1 min-w-0 w-full text-center md:text-start", "md:ms-8")}
                       >
                         <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 mb-2">
                           <h3 className="text-xl md:text-2xl font-black tracking-tight truncate group-hover:text-primary transition-colors leading-tight">
@@ -404,8 +388,7 @@ const QuizzesListPage = () => {
                           </h3>
                           <div className="flex items-center justify-center md:justify-start gap-2">
                             <Badge variant="ai" className="h-6">
-                              {(quiz as any).class?.name ||
-                                t("assignments.list.labels.general")}
+                              {(quiz as any).class?.name || t("assignments.list.labels.general")}
                             </Badge>
                             {isAI && (
                               <Badge className="bg-indigo-500/10 text-indigo-600 border border-indigo-500/20 font-black px-2.5 py-0.5 rounded-full text-[9px] tracking-widest uppercase shadow-sm">
@@ -457,9 +440,7 @@ const QuizzesListPage = () => {
                               <span
                                 className={cn(
                                   "text-[11px] font-black",
-                                  isPast
-                                    ? "text-destructive"
-                                    : "text-foreground",
+                                  isPast ? "text-destructive" : "text-foreground"
                                 )}
                               >
                                 {quiz.dueDate
@@ -476,7 +457,7 @@ const QuizzesListPage = () => {
                         <div
                           className={cn(
                             "hidden lg:flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:translate-x-0",
-                            "ltr:translate-x-4 rtl:-translate-x-4",
+                            "ltr:translate-x-4 rtl:-translate-x-4"
                           )}
                         >
                           {isStaff && (
@@ -516,7 +497,7 @@ const QuizzesListPage = () => {
                               ? "border-destructive/20 text-destructive hover:bg-destructive/5"
                               : (quiz as any).isEnrolled || isStaff
                                 ? "bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20"
-                                : "bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg shadow-emerald-500/20",
+                                : "bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg shadow-emerald-500/20"
                           )}
                           onClick={(e) => {
                             e.stopPropagation();
@@ -532,9 +513,7 @@ const QuizzesListPage = () => {
                             : (quiz as any).isEnrolled
                               ? t("buttons.takeQuiz")
                               : "Request to Join Class"}
-                          <ArrowRight
-                            className={cn("h-4 w-4", "ms-2 rtl:-scale-x-100")}
-                          />
+                          <ArrowRight className={cn("h-4 w-4", "ms-2 rtl:-scale-x-100")} />
                         </Button>
 
                         <DropdownMenu>
@@ -548,10 +527,7 @@ const QuizzesListPage = () => {
                               <MoreHorizontal className="h-5 w-5" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent
-                            align="end"
-                            className="w-64 p-2 rounded-3xl"
-                          >
+                          <DropdownMenuContent align="end" className="w-64 p-2 rounded-3xl">
                             <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/40 px-3 py-3">
                               {t("assignments.list.labels.options")}
                             </DropdownMenuLabel>
@@ -562,9 +538,7 @@ const QuizzesListPage = () => {
                               <div className="p-2 rounded-lg bg-primary/10 text-primary">
                                 <Eye className="h-4 w-4" />
                               </div>
-                              <span className="font-bold">
-                                {t("buttons.viewDetails")}
-                              </span>
+                              <span className="font-bold">{t("buttons.viewDetails")}</span>
                             </DropdownMenuItem>
                             {isStaff && (
                               <>
@@ -575,9 +549,7 @@ const QuizzesListPage = () => {
                                   <div className="p-2 rounded-lg bg-primary/10 text-primary">
                                     <Pencil className="h-4 w-4" />
                                   </div>
-                                  <span className="font-bold">
-                                    {t("buttons.edit")}
-                                  </span>
+                                  <span className="font-bold">{t("buttons.edit")}</span>
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator className="my-2 opacity-50" />
                                 <DropdownMenuItem
@@ -587,9 +559,7 @@ const QuizzesListPage = () => {
                                   <div className="p-2 rounded-lg bg-destructive/10 text-destructive">
                                     <Trash2 className="h-4 w-4" />
                                   </div>
-                                  <span className="font-bold">
-                                    {t("buttons.delete")}
-                                  </span>
+                                  <span className="font-bold">{t("buttons.delete")}</span>
                                 </DropdownMenuItem>
                               </>
                             )}
@@ -605,10 +575,7 @@ const QuizzesListPage = () => {
         </div>
       </div>
 
-      <AlertDialog
-        open={deleteTarget !== null}
-        onOpenChange={() => setDeleteTarget(null)}
-      >
+      <AlertDialog open={deleteTarget !== null} onOpenChange={() => setDeleteTarget(null)}>
         <AlertDialogContent className="rounded-[2.5rem] border-none shadow-2xl bg-card/95 backdrop-blur-xl">
           <AlertDialogHeader className="space-y-6">
             <div className="p-5 rounded-2xl bg-destructive/10 text-destructive w-fit mx-auto">

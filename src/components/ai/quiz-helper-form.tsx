@@ -51,9 +51,7 @@ export const QuizHelperForm: React.FC<QuizHelperFormProps> = ({
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="count">
-            {t("aiHub.assistant.quizGen.questions")}
-          </Label>
+          <Label htmlFor="count">{t("aiHub.assistant.quizGen.questions")}</Label>
           <Input
             id="count"
             type="number"

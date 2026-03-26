@@ -1,12 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useSocket } from "@/contexts/socket-context";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Users, Activity, Search, ShieldCheck, Send } from "lucide-react";
@@ -27,10 +21,7 @@ interface QuizMonitorProps {
   assignmentTitle: string;
 }
 
-export const QuizMonitor: React.FC<QuizMonitorProps> = ({
-  quizId,
-  assignmentTitle,
-}) => {
+export const QuizMonitor: React.FC<QuizMonitorProps> = ({ quizId, assignmentTitle }) => {
   const { t } = useTranslation();
   const { socket } = useSocket();
   const [activeStudents, setActiveStudents] = useState<LiveStudent[]>([]);
@@ -59,19 +50,14 @@ export const QuizMonitor: React.FC<QuizMonitorProps> = ({
     socket.emit("quiz:nudge", {
       studentId,
       quizId,
-      message: t(
-        "classes.monitor.nudgeMessage",
-        "Need any help with this one?",
-      ),
+      message: t("classes.monitor.nudgeMessage", "Need any help with this one?"),
     });
 
-    toast.success(
-      t("classes.monitor.nudgeSentTo" as any, { name: studentName }),
-    );
+    toast.success(t("classes.monitor.nudgeSentTo" as any, { name: studentName }));
   };
 
   const filteredStudents = activeStudents.filter((s) =>
-    s.name.toLowerCase().includes(searchTerm.toLowerCase()),
+    s.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -122,10 +108,7 @@ export const QuizMonitor: React.FC<QuizMonitorProps> = ({
               >
                 <Users className="h-12 w-12 mx-auto text-muted-foreground" />
                 <p className="text-xs font-black uppercase tracking-widest">
-                  {t(
-                    "classes.monitor.noStudents",
-                    "No students currently active",
-                  )}
+                  {t("classes.monitor.noStudents", "No students currently active")}
                 </p>
               </motion.div>
             ) : (
@@ -140,10 +123,7 @@ export const QuizMonitor: React.FC<QuizMonitorProps> = ({
                 >
                   <div className="flex items-center gap-4 min-w-0">
                     <Avatar className="h-10 w-10 border-2 border-background shadow-sm rounded-xl">
-                      <AvatarImage
-                        src={student.image}
-                        className="object-cover"
-                      />
+                      <AvatarImage src={student.image} className="object-cover" />
                       <AvatarFallback className="bg-primary/5 text-primary font-black text-xs">
                         {student.name[0]}
                       </AvatarFallback>

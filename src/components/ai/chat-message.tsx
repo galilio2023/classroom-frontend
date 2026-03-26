@@ -15,12 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useCustomMutation } from "@refinedev/core";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
 interface Message {
@@ -63,7 +58,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
     <div
       className={cn(
         "flex gap-3 md:gap-4 group",
-        !isModel ? (isAr ? "flex-row" : "flex-row-reverse") : "",
+        !isModel ? (isAr ? "flex-row" : "flex-row-reverse") : ""
       )}
     >
       <Avatar className="h-10 w-10 md:h-12 md:w-12 shrink-0 border-[1.5px] border-background shadow-sm">
@@ -81,7 +76,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
       <div
         className={cn(
           "flex flex-col gap-1.5 max-w-[85%] md:max-w-[75%]",
-          !isModel ? (isAr ? "items-start" : "items-end") : "items-start",
+          !isModel ? (isAr ? "items-start" : "items-end") : "items-start"
         )}
       >
         <div
@@ -90,12 +85,12 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
             !isModel
               ? cn(
                   "bg-primary/10 text-foreground border border-primary/20",
-                  isAr ? "rounded-tr-none" : "rounded-tl-none",
+                  isAr ? "rounded-tr-none" : "rounded-tl-none"
                 )
               : cn(
                   "bg-card border border-border/40 text-foreground shadow-sm",
-                  isAr ? "rounded-tl-none" : "rounded-tr-none",
-                ),
+                  isAr ? "rounded-tl-none" : "rounded-tr-none"
+                )
           )}
         >
           <div className="max-w-none prose prose-sm md:prose-base dark:prose-invert">
@@ -187,9 +182,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
           )}
         </div>
         <span className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 px-2 mt-1">
-          {isModel
-            ? t("aiHub.studyLab.studyBuddy.title")
-            : t("messages.you").replace(": ", "")}
+          {isModel ? t("aiHub.studyLab.studyBuddy.title") : t("messages.you").replace(": ", "")}
         </span>
       </div>
     </div>

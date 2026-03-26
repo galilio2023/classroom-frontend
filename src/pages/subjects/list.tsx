@@ -17,13 +17,7 @@ import {
 } from "lucide-react";
 import { Input } from "@/components/ui/input.tsx";
 import { useMemo, useState } from "react";
-import {
-  useSelect,
-  useNavigation,
-  useDelete,
-  useGetIdentity,
-  HttpError,
-} from "@refinedev/core";
+import { useSelect, useNavigation, useDelete, useGetIdentity, HttpError } from "@refinedev/core";
 import {
   Select,
   SelectContent,
@@ -104,17 +98,12 @@ const SubjectsList = () => {
   });
 
   const searchQuery =
-    (filters.find((f) => "field" in f && f.field === "search") as any)?.value ||
-    "";
+    (filters.find((f) => "field" in f && f.field === "search") as any)?.value || "";
   const selectedDepartment =
-    (filters.find((f) => "field" in f && f.field === "department") as any)
-      ?.value || "all";
+    (filters.find((f) => "field" in f && f.field === "department") as any)?.value || "all";
 
   const setSearchQuery = (val: string) => {
-    setFilters(
-      [{ field: "search", operator: "contains", value: val || undefined }],
-      "merge",
-    );
+    setFilters([{ field: "search", operator: "contains", value: val || undefined }], "merge");
   };
 
   const setSelectedDepartment = (val: string) => {
@@ -126,7 +115,7 @@ const SubjectsList = () => {
           value: val === "all" ? undefined : val,
         },
       ],
-      "merge",
+      "merge"
     );
   };
 
@@ -144,7 +133,7 @@ const SubjectsList = () => {
         },
         {
           onSuccess: () => setDeleteTarget(null),
-        },
+        }
       );
     }
   };
@@ -154,7 +143,7 @@ const SubjectsList = () => {
     if (!subjects.length) return { total: 0, totalCredits: 0, avgCredits: 0 };
     const totalCredits = subjects.reduce(
       (acc: number, curr: SubjectListItem) => acc + (curr.credits || 0),
-      0,
+      0
     );
     return {
       total: subjects.length,
@@ -211,9 +200,7 @@ const SubjectsList = () => {
                 {t("subjects.stats.total")}
               </p>
               <p className="text-2xl md:text-3xl font-black">
-                {isLoading
-                  ? "..."
-                  : new Intl.NumberFormat(i18n.language).format(stats.total)}
+                {isLoading ? "..." : new Intl.NumberFormat(i18n.language).format(stats.total)}
               </p>
             </div>
           </Card>
@@ -228,9 +215,7 @@ const SubjectsList = () => {
               <p className="text-2xl md:text-3xl font-black text-indigo-600">
                 {isLoading
                   ? "..."
-                  : new Intl.NumberFormat(i18n.language).format(
-                      stats.totalCredits,
-                    )}
+                  : new Intl.NumberFormat(i18n.language).format(stats.totalCredits)}
               </p>
             </div>
           </Card>
@@ -243,11 +228,7 @@ const SubjectsList = () => {
                 {t("subjects.stats.archived")}
               </p>
               <p className="text-2xl md:text-3xl font-black text-green-600">
-                {isLoading
-                  ? "..."
-                  : new Intl.NumberFormat(i18n.language).format(
-                      stats.avgCredits,
-                    )}
+                {isLoading ? "..." : new Intl.NumberFormat(i18n.language).format(stats.avgCredits)}
               </p>
             </div>
           </Card>
@@ -260,7 +241,7 @@ const SubjectsList = () => {
               <Search
                 className={cn(
                   "absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60 group-focus-within:text-primary transition-colors",
-                  "start-4",
+                  "start-4"
                 )}
               />
               <Input
@@ -268,7 +249,7 @@ const SubjectsList = () => {
                 placeholder={t("subjects.filters.searchPlaceholder")}
                 className={cn(
                   "h-12 rounded-2xl border-none bg-background/50 shadow-none font-medium",
-                  "ps-11 pe-4",
+                  "ps-11 pe-4"
                 )}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -276,25 +257,16 @@ const SubjectsList = () => {
             </div>
             <div className="flex flex-wrap items-center gap-2 bg-background/50 px-3 py-1 rounded-2xl border border-border/40">
               <Filter className="h-3.5 w-3.5 text-muted-foreground/60" />
-              <Select
-                value={selectedDepartment}
-                onValueChange={setSelectedDepartment}
-              >
+              <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
                 <SelectTrigger className="w-[180px] border-none h-10 focus:ring-0 shadow-none font-bold text-[10px] uppercase tracking-wider bg-transparent">
-                  <SelectValue
-                    placeholder={t("departments.filters.allDepartments")}
-                  />
+                  <SelectValue placeholder={t("departments.filters.allDepartments")} />
                 </SelectTrigger>
                 <SelectContent className="rounded-2xl bg-white dark:bg-[#09090b] opacity-100 backdrop-blur-none border border-border/50 shadow-2xl">
                   <SelectItem value="all" className="font-bold">
                     {t("departments.filters.allDepartments")}
                   </SelectItem>
                   {departmentOptions.map(({ value, label }) => (
-                    <SelectItem
-                      value={String(value)}
-                      key={value}
-                      className="font-bold"
-                    >
+                    <SelectItem value={String(value)} key={value} className="font-bold">
                       {label}
                     </SelectItem>
                   ))}
@@ -354,7 +326,7 @@ const SubjectsList = () => {
                       exit={{ opacity: 0, scale: 0.95 }}
                       transition={{ delay: index * 0.05 }}
                       className={cn(
-                        "group relative flex flex-col md:flex-row items-center p-5 md:p-6 rounded-4xl bg-card/50 backdrop-blur-sm border border-border/40 hover:border-primary/30 hover:bg-card/80 transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-primary/5 cursor-pointer",
+                        "group relative flex flex-col md:flex-row items-center p-5 md:p-6 rounded-4xl bg-card/50 backdrop-blur-sm border border-border/40 hover:border-primary/30 hover:bg-card/80 transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-primary/5 cursor-pointer"
                       )}
                       onClick={() => show("subjects", subject.id)}
                     >
@@ -375,9 +347,7 @@ const SubjectsList = () => {
                       <div
                         className={cn(
                           "flex-1 min-w-0 w-full text-start",
-                          isAr
-                            ? "md:me-8 md:text-end"
-                            : "md:ms-8 md:text-start",
+                          isAr ? "md:me-8 md:text-end" : "md:ms-8 md:text-start"
                         )}
                       >
                         <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 mb-2">
@@ -392,9 +362,7 @@ const SubjectsList = () => {
                               {subject.code}
                             </Badge>
                             <Badge className="bg-primary/10 text-primary border-none font-black px-3 py-0.5 rounded-full text-[9px] tracking-widest uppercase shadow-sm">
-                              {new Intl.NumberFormat(i18n.language).format(
-                                subject.credits || 0,
-                              )}{" "}
+                              {new Intl.NumberFormat(i18n.language).format(subject.credits || 0)}{" "}
                               {t("classes.form.studentsUnit")}
                             </Badge>
                           </div>
@@ -439,7 +407,7 @@ const SubjectsList = () => {
                             "hidden lg:flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300",
                             isAr
                               ? "-translate-x-4 group-hover:translate-x-0"
-                              : "translate-x-4 group-hover:translate-x-0",
+                              : "translate-x-4 group-hover:translate-x-0"
                           )}
                         >
                           {isAdmin && (
@@ -477,10 +445,7 @@ const SubjectsList = () => {
                         >
                           {t("buttons.viewDetails")}
                           <ArrowRight
-                            className={cn(
-                              "h-4 w-4 ms-2",
-                              isAr && "rotate-180 me-2 ms-0",
-                            )}
+                            className={cn("h-4 w-4 ms-2", isAr && "rotate-180 me-2 ms-0")}
                           />
                         </Button>
 
@@ -509,9 +474,7 @@ const SubjectsList = () => {
                               <div className="p-2 rounded-lg bg-primary/10 text-primary">
                                 <Eye className="h-4 w-4" />
                               </div>
-                              <span className="font-bold">
-                                {t("buttons.viewDetails")}
-                              </span>
+                              <span className="font-bold">{t("buttons.viewDetails")}</span>
                             </DropdownMenuItem>
                             {isAdmin && (
                               <>
@@ -522,9 +485,7 @@ const SubjectsList = () => {
                                   <div className="p-2 rounded-lg bg-primary/10 text-primary">
                                     <Pencil className="h-4 w-4" />
                                   </div>
-                                  <span className="font-bold">
-                                    {t("buttons.editAssignment")}
-                                  </span>
+                                  <span className="font-bold">{t("buttons.editAssignment")}</span>
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator className="my-2 opacity-50" />
                                 <DropdownMenuItem
@@ -534,9 +495,7 @@ const SubjectsList = () => {
                                   <div className="p-2 rounded-lg bg-destructive/10 text-destructive">
                                     <Trash2 className="h-4 w-4" />
                                   </div>
-                                  <span className="font-bold">
-                                    {t("buttons.delete")}
-                                  </span>
+                                  <span className="font-bold">{t("buttons.delete")}</span>
                                 </DropdownMenuItem>
                               </>
                             )}
@@ -552,10 +511,7 @@ const SubjectsList = () => {
         </div>
       </div>
 
-      <AlertDialog
-        open={deleteTarget !== null}
-        onOpenChange={() => setDeleteTarget(null)}
-      >
+      <AlertDialog open={deleteTarget !== null} onOpenChange={() => setDeleteTarget(null)}>
         <AlertDialogContent className="rounded-[2.5rem]">
           <AlertDialogHeader className="space-y-6">
             <div className="p-5 rounded-2xl bg-destructive/10 text-destructive w-fit mx-auto">
@@ -579,9 +535,7 @@ const SubjectsList = () => {
               disabled={isDeleteLoading}
               className="rounded-2xl px-12 h-14 font-black uppercase tracking-widest text-[10px] bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-xl shadow-destructive/20"
             >
-              {isDeleteLoading
-                ? t("buttons.processing")
-                : t("buttons.confirmDelete")}
+              {isDeleteLoading ? t("buttons.processing") : t("buttons.confirmDelete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

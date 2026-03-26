@@ -78,8 +78,7 @@ const UsersList = () => {
             <div className="w-full md:w-auto">
               {data.isAdmin && (
                 <CreateButton className="w-full md:w-auto rounded-2xl h-12 md:h-14 px-10 font-black uppercase tracking-widest text-[10px] shadow-lg shadow-primary/25">
-                  <UserPlus className="h-5 w-5 me-2 rtl:me-0 rtl:ms-2" />{" "}
-                  {t("buttons.addNewUser")}
+                  <UserPlus className="h-5 w-5 me-2 rtl:me-0 rtl:ms-2" /> {t("buttons.addNewUser")}
                 </CreateButton>
               )}
             </div>
@@ -193,17 +192,13 @@ const UsersList = () => {
                   <p className="text-[10px] font-black uppercase text-muted-foreground/60">
                     {t("users.governance.verification.fullName")}
                   </p>
-                  <p className="font-black text-lg">
-                    {state.verificationTarget?.name}
-                  </p>
+                  <p className="font-black text-lg">{state.verificationTarget?.name}</p>
                 </div>
                 <div>
                   <p className="text-[10px] font-black uppercase text-muted-foreground/60">
                     {t("users.governance.verification.email")}
                   </p>
-                  <p className="font-black text-lg">
-                    {state.verificationTarget?.email}
-                  </p>
+                  <p className="font-black text-lg">{state.verificationTarget?.email}</p>
                 </div>
                 <div>
                   <p className="text-[10px] font-black uppercase text-muted-foreground/60">
@@ -211,15 +206,13 @@ const UsersList = () => {
                   </p>
                   <Badge
                     variant={
-                      state.verificationTarget?.verificationStatus ===
-                      VerificationStatus.VERIFIED
+                      state.verificationTarget?.verificationStatus === VerificationStatus.VERIFIED
                         ? "default"
                         : "secondary"
                     }
                     className="h-7 uppercase text-[10px] font-black"
                   >
-                    {state.verificationTarget?.verificationStatus ===
-                    VerificationStatus.VERIFIED
+                    {state.verificationTarget?.verificationStatus === VerificationStatus.VERIFIED
                       ? t("users.governance.verification.verified")
                       : t("users.governance.verification.pending")}
                   </Badge>
@@ -251,8 +244,7 @@ const UsersList = () => {
                         target="_blank"
                         rel="noreferrer"
                       >
-                        <ExternalLink className="h-4 w-4 me-2" />{" "}
-                        {t("buttons.viewFull")}
+                        <ExternalLink className="h-4 w-4 me-2" /> {t("buttons.viewFull")}
                       </a>
                     </Button>
                   </div>
@@ -265,9 +257,7 @@ const UsersList = () => {
                 variant="outline"
                 size="lg"
                 className="text-destructive border-destructive/20 h-12 rounded-2xl"
-                onClick={() =>
-                  actions.handleVerify(state.verificationTarget!.id, false)
-                }
+                onClick={() => actions.handleVerify(state.verificationTarget!.id, false)}
                 disabled={status.isUpdating}
               >
                 <XCircle className="h-4 w-4 me-2" /> {t("buttons.reject")}
@@ -275,9 +265,7 @@ const UsersList = () => {
               <Button
                 size="lg"
                 className="h-12 rounded-2xl shadow-xl shadow-primary/20"
-                onClick={() =>
-                  actions.handleVerify(state.verificationTarget!.id, true)
-                }
+                onClick={() => actions.handleVerify(state.verificationTarget!.id, true)}
                 disabled={status.isUpdating}
               >
                 {status.isUpdating ? (

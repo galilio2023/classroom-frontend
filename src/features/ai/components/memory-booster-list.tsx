@@ -1,14 +1,7 @@
 import React from "react";
 import { useCustom } from "@refinedev/core";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Brain,
-  Clock,
-  ArrowRight,
-  Loader2,
-  Trophy,
-  Sparkles,
-} from "lucide-react";
+import { Brain, Clock, ArrowRight, Loader2, Trophy, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import dayjs from "dayjs";
@@ -29,9 +22,7 @@ interface MemoryBoosterListProps {
   onSelectTopic: (topic: string) => void;
 }
 
-export const MemoryBoosterList: React.FC<MemoryBoosterListProps> = ({
-  onSelectTopic,
-}) => {
+export const MemoryBoosterList: React.FC<MemoryBoosterListProps> = ({ onSelectTopic }) => {
   const { t, i18n } = useTranslation();
   const isAr = i18n.language === "ar";
 
@@ -43,10 +34,10 @@ export const MemoryBoosterList: React.FC<MemoryBoosterListProps> = ({
   const boosters = result?.data || [];
   const isLoading = query.isLoading;
   const dueItems = boosters.filter((b: SpacedRepetition) =>
-    dayjs(b.nextReviewAt).isBefore(dayjs().add(1, "hour")),
+    dayjs(b.nextReviewAt).isBefore(dayjs().add(1, "hour"))
   );
   const upcomingItems = boosters.filter((b: SpacedRepetition) =>
-    dayjs(b.nextReviewAt).isAfter(dayjs().add(1, "hour")),
+    dayjs(b.nextReviewAt).isAfter(dayjs().add(1, "hour"))
   );
 
   if (isLoading) {
@@ -71,17 +62,13 @@ export const MemoryBoosterList: React.FC<MemoryBoosterListProps> = ({
               {t("aiHub.studyLab.memoryBooster.title", "Daily Memory Missions")}
             </h2>
             <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-              {t(
-                "aiHub.studyLab.memoryBooster.subtitle",
-                "Based on Spaced Repetition (SM-2)",
-              )}
+              {t("aiHub.studyLab.memoryBooster.subtitle", "Based on Spaced Repetition (SM-2)")}
             </p>
           </div>
         </div>
         {dueItems.length > 0 && (
           <div className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest border bg-orange-500 text-white border-none animate-pulse">
-            {dueItems.length}{" "}
-            {t("aiHub.studyLab.memoryBooster.dueToday", "Due Today")}
+            {dueItems.length} {t("aiHub.studyLab.memoryBooster.dueToday", "Due Today")}
           </div>
         )}
       </div>
@@ -131,9 +118,7 @@ export const MemoryBoosterList: React.FC<MemoryBoosterListProps> = ({
                     </div>
                   </div>
                   <div className="p-3 rounded-2xl bg-ai-primary/10 text-ai-primary group-hover:bg-ai-primary group-hover:text-white transition-all shadow-lg shadow-ai-primary/10">
-                    <ArrowRight
-                      className={cn("w-5 h-5", isAr && "rotate-180")}
-                    />
+                    <ArrowRight className={cn("w-5 h-5", isAr && "rotate-180")} />
                   </div>
                 </div>
               </CardContent>
@@ -142,15 +127,10 @@ export const MemoryBoosterList: React.FC<MemoryBoosterListProps> = ({
         ))}
 
         {upcomingItems.slice(0, 2).map((item: SpacedRepetition) => (
-          <Card
-            key={item.id}
-            className="bg-muted/30 border-border/40 opacity-60"
-          >
+          <Card key={item.id} className="bg-muted/30 border-border/40 opacity-60">
             <CardContent className="p-6 flex items-center justify-between">
               <div className="space-y-1">
-                <h3 className="text-sm font-bold truncate max-w-[150px]">
-                  {item.topic}
-                </h3>
+                <h3 className="text-sm font-bold truncate max-w-[150px]">{item.topic}</h3>
                 <p className="text-[9px] font-bold text-muted-foreground uppercase">
                   Next: {dayjs(item.nextReviewAt).fromNow()}
                 </p>

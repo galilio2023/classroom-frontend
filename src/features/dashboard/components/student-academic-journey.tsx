@@ -1,10 +1,4 @@
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import {
   LineChart,
   Line,
@@ -60,25 +54,18 @@ export const StudentAcademicJourney = ({
   attendanceSummary,
 }: StudentAcademicJourneyProps) => {
   const [practiceTopic, setPracticeTopic] = useState<string | null>(null);
-  const [practiceSubjectId, setPracticeSubjectId] = useState<number | null>(
-    null,
-  );
+  const [practiceSubjectId, setPracticeSubjectId] = useState<number | null>(null);
   const { list } = useNavigation();
   const { t, i18n } = useTranslation();
   const isArabic = i18n.language === "ar";
 
   const weakSubjects = subjectMastery.filter((s) => s.avgGrade < 70);
   const hasData =
-    gradeTrends.length > 0 ||
-    subjectMastery.length > 0 ||
-    (attendanceSummary?.total || 0) > 0;
+    gradeTrends.length > 0 || subjectMastery.length > 0 || (attendanceSummary?.total || 0) > 0;
 
-  const attendedCount =
-    (attendanceSummary?.present || 0) + (attendanceSummary?.late || 0);
+  const attendedCount = (attendanceSummary?.present || 0) + (attendanceSummary?.late || 0);
   const attendanceRate =
-    attendanceSummary?.total > 0
-      ? Math.round((attendedCount / attendanceSummary.total) * 100)
-      : 0;
+    attendanceSummary?.total > 0 ? Math.round((attendedCount / attendanceSummary.total) * 100) : 0;
 
   const gradeConfig = {
     grade: {
@@ -98,10 +85,7 @@ export const StudentAcademicJourney = ({
     <div className="space-y-10 md:space-y-16">
       {/* 1. Onboarding / Welcome State */}
       {!hasData && (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.98 }}
-          animate={{ opacity: 1, scale: 1 }}
-        >
+        <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }}>
           <Card className="border-none shadow-2xl bg-card/50 backdrop-blur-xl rounded-[2.5rem] md:rounded-[3rem] overflow-hidden py-16 md:py-24 text-center group">
             <CardContent className="space-y-6 md:space-y-8">
               <div className="relative mx-auto w-fit">
@@ -242,9 +226,7 @@ export const StudentAcademicJourney = ({
                       className="fill-muted-foreground/60 text-[10px] font-black uppercase tracking-widest"
                       orientation={isArabic ? "right" : "left"}
                       tickFormatter={(val) =>
-                        new Intl.NumberFormat(
-                          isArabic ? "ar-EG" : "en-US",
-                        ).format(val)
+                        new Intl.NumberFormat(isArabic ? "ar-EG" : "en-US").format(val)
                       }
                     />
                     <ChartTooltip
@@ -278,10 +260,7 @@ export const StudentAcademicJourney = ({
                   </LineChart>
                 </ChartContainer>
               ) : (
-                <NoChartData
-                  icon={TrendingUp}
-                  message={t("dashboard.student.noGradeData")}
-                />
+                <NoChartData icon={TrendingUp} message={t("dashboard.student.noGradeData")} />
               )}
             </CardContent>
           </Card>
@@ -311,27 +290,14 @@ export const StudentAcademicJourney = ({
             </CardHeader>
             <CardContent className="h-[300px] p-8 md:p-10 pt-6">
               {subjectMastery.length > 0 ? (
-                <ChartContainer
-                  config={masteryConfig}
-                  className="h-full w-full"
-                >
-                  <RadarChart
-                    cx="50%"
-                    cy="50%"
-                    outerRadius="80%"
-                    data={subjectMastery}
-                  >
+                <ChartContainer config={masteryConfig} className="h-full w-full">
+                  <RadarChart cx="50%" cy="50%" outerRadius="80%" data={subjectMastery}>
                     <PolarGrid className="stroke-muted-foreground/10" />
                     <PolarAngleAxis
                       dataKey="subject"
                       className="fill-muted-foreground/60 text-[9px] font-black uppercase tracking-widest"
                     />
-                    <PolarRadiusAxis
-                      angle={30}
-                      domain={[0, 100]}
-                      tick={false}
-                      axisLine={false}
-                    />
+                    <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
                     <Radar
                       name={t("reportCard.avgScore")}
                       dataKey="avgGrade"
@@ -350,10 +316,7 @@ export const StudentAcademicJourney = ({
                   </RadarChart>
                 </ChartContainer>
               ) : (
-                <NoChartData
-                  icon={BookOpen}
-                  message={t("dashboard.student.noSubjectData")}
-                />
+                <NoChartData icon={BookOpen} message={t("dashboard.student.noSubjectData")} />
               )}
             </CardContent>
           </Card>

@@ -1,32 +1,8 @@
 import React from "react";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  ResponsiveContainer,
-  Cell,
-} from "recharts";
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart";
-import {
-  Brain,
-  TrendingDown,
-  CheckCircle2,
-  XCircle,
-  AlertCircle,
-} from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Cell } from "recharts";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { Brain, TrendingDown, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
@@ -42,10 +18,7 @@ interface QuizAnalyticsProps {
   title: string;
 }
 
-export const QuizAnalytics: React.FC<QuizAnalyticsProps> = ({
-  stats,
-  title,
-}) => {
+export const QuizAnalytics: React.FC<QuizAnalyticsProps> = ({ stats, title }) => {
   const { t } = useTranslation();
 
   // Identify hardest questions (less than 50% correct)
@@ -72,10 +45,7 @@ export const QuizAnalytics: React.FC<QuizAnalyticsProps> = ({
               </div>
               <div>
                 <CardTitle className="text-2xl font-black tracking-tight">
-                  {t(
-                    "classes.analytics.performanceTitle",
-                    "Question Performance",
-                  )}
+                  {t("classes.analytics.performanceTitle", "Question Performance")}
                 </CardTitle>
                 <CardDescription className="font-bold">{title}</CardDescription>
               </div>
@@ -84,10 +54,7 @@ export const QuizAnalytics: React.FC<QuizAnalyticsProps> = ({
           <CardContent className="p-8 pt-0 h-[400px]">
             <ChartContainer config={chartConfig} className="h-full w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={stats}
-                  margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
-                >
+                <BarChart data={stats} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
                   <CartesianGrid
                     vertical={false}
                     strokeDasharray="3 3"
@@ -105,11 +72,7 @@ export const QuizAnalytics: React.FC<QuizAnalyticsProps> = ({
                       <ChartTooltipContent className="rounded-2xl border-none shadow-2xl bg-card/95 backdrop-blur-xl p-4 font-bold" />
                     }
                   />
-                  <Bar
-                    dataKey="correctPercentage"
-                    radius={[12, 12, 0, 0]}
-                    barSize={40}
-                  >
+                  <Bar dataKey="correctPercentage" radius={[12, 12, 0, 0]} barSize={40}>
                     {stats.map((entry, index) => (
                       <Cell
                         key={`cell-${index}`}
@@ -137,10 +100,7 @@ export const QuizAnalytics: React.FC<QuizAnalyticsProps> = ({
               {t("classes.analytics.insights", "Critical Insights")}
             </CardTitle>
             <CardDescription className="font-bold">
-              {t(
-                "classes.analytics.insightsDesc",
-                "Topics needing immediate review",
-              )}
+              {t("classes.analytics.insightsDesc", "Topics needing immediate review")}
             </CardDescription>
           </CardHeader>
           <CardContent className="p-8 pt-0 space-y-4">
@@ -156,18 +116,13 @@ export const QuizAnalytics: React.FC<QuizAnalyticsProps> = ({
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] font-black uppercase tracking-widest text-destructive flex items-center gap-1">
                       <AlertCircle className="h-3 w-3" />
-                      {t(
-                        "classes.analytics.lowPerformance",
-                        "High Failure Rate",
-                      )}
+                      {t("classes.analytics.lowPerformance", "High Failure Rate")}
                     </span>
                     <span className="text-sm font-black text-destructive">
                       {q.correctPercentage}%
                     </span>
                   </div>
-                  <p className="text-xs font-bold leading-relaxed line-clamp-2">
-                    {q.question}
-                  </p>
+                  <p className="text-xs font-bold leading-relaxed line-clamp-2">{q.question}</p>
                 </motion.div>
               ))
             ) : (

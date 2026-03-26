@@ -6,9 +6,7 @@ interface QuizExplanationProps {
   explanation: string;
 }
 
-export const QuizExplanation: React.FC<QuizExplanationProps> = ({
-  explanation,
-}) => {
+export const QuizExplanation: React.FC<QuizExplanationProps> = ({ explanation }) => {
   const { t } = useTranslation();
   return (
     <div className="mt-4 md:mt-6 p-3 md:p-4 rounded-xl bg-blue-500/10 border border-blue-500/20 animate-in zoom-in-95 duration-300">

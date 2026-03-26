@@ -58,8 +58,7 @@ const SubmissionsListPage = () => {
   const { selectedTerm } = useTerm();
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedSubmission, setSelectedSubmission] =
-    useState<Submission | null>(null);
+  const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
   const [isGradingOpen, setIsGradingOpen] = useState(false);
 
   const { show } = useNavigation();
@@ -150,9 +149,7 @@ const SubmissionsListPage = () => {
                   {t("notifications.stats.total")}
                 </p>
                 <p className="text-2xl font-black">
-                  {isLoading
-                    ? "..."
-                    : new Intl.NumberFormat(i18n.language).format(stats.total)}
+                  {isLoading ? "..." : new Intl.NumberFormat(i18n.language).format(stats.total)}
                 </p>
               </div>
             </Card>
@@ -165,9 +162,7 @@ const SubmissionsListPage = () => {
                   {t("status.completed")}
                 </p>
                 <p className="text-2xl font-black text-green-600">
-                  {isLoading
-                    ? "..."
-                    : new Intl.NumberFormat(i18n.language).format(stats.graded)}
+                  {isLoading ? "..." : new Intl.NumberFormat(i18n.language).format(stats.graded)}
                 </p>
               </div>
             </Card>
@@ -180,11 +175,7 @@ const SubmissionsListPage = () => {
                   {t("assignments.list.table.pending")}
                 </p>
                 <p className="text-2xl font-black text-amber-600">
-                  {isLoading
-                    ? "..."
-                    : new Intl.NumberFormat(i18n.language).format(
-                        stats.pending,
-                      )}
+                  {isLoading ? "..." : new Intl.NumberFormat(i18n.language).format(stats.pending)}
                 </p>
               </div>
             </Card>
@@ -197,7 +188,7 @@ const SubmissionsListPage = () => {
                 <Search
                   className={cn(
                     "absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors",
-                    "start-4",
+                    "start-4"
                   )}
                 />
                 <Input
@@ -205,7 +196,7 @@ const SubmissionsListPage = () => {
                   placeholder={t("assignments.list.filters.searchPlaceholder")}
                   className={cn(
                     "h-14 rounded-2xl border-none bg-background shadow-sm font-medium",
-                    isAr ? "pe-11" : "ps-11",
+                    isAr ? "pe-11" : "ps-11"
                   )}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -253,10 +244,7 @@ const SubmissionsListPage = () => {
             {isLoading ? (
               <div className="p-8 space-y-6">
                 {Array.from({ length: 6 }).map((_, i: any) => (
-                  <div
-                    key={i}
-                    className="flex flex-col md:flex-row items-center gap-6"
-                  >
+                  <div key={i} className="flex flex-col md:flex-row items-center gap-6">
                     <Skeleton className="h-14 w-14 rounded-2xl shrink-0" />
                     <div className="flex-1 space-y-3 w-full">
                       <Skeleton className="h-6 w-62.5" />
@@ -271,9 +259,7 @@ const SubmissionsListPage = () => {
                 <EmptyState
                   icon={FileText}
                   title={t("assignments.list.noAssignments")}
-                  description={t(
-                    "assignments.list.noAssignmentsDescriptionTeacher",
-                  )}
+                  description={t("assignments.list.noAssignmentsDescriptionTeacher")}
                   className="border-none bg-transparent min-h-0"
                 />
               </div>
@@ -322,7 +308,7 @@ const SubmissionsListPage = () => {
                           <div
                             className={cn(
                               "absolute -top-2 bg-destructive text-white p-1 rounded-lg border-2 border-background shadow-lg",
-                              isAr ? "-start-2" : "-end-2",
+                              isAr ? "-start-2" : "-end-2"
                             )}
                           >
                             <Timer className="h-3 w-3" />
@@ -334,9 +320,7 @@ const SubmissionsListPage = () => {
                       <div
                         className={cn(
                           "flex-1 text-center min-w-0 w-full",
-                          isAr
-                            ? "md:me-8 md:text-end"
-                            : "md:ms-8 md:text-start",
+                          isAr ? "md:me-8 md:text-end" : "md:ms-8 md:text-start"
                         )}
                       >
                         <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
@@ -350,7 +334,7 @@ const SubmissionsListPage = () => {
                                 "text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-lg border-none",
                                 isGraded
                                   ? "bg-green-500/10 text-green-600"
-                                  : "bg-amber-500/10 text-amber-600",
+                                  : "bg-amber-500/10 text-amber-600"
                               )}
                             >
                               {isGraded
@@ -399,16 +383,11 @@ const SubmissionsListPage = () => {
                       </div>
 
                       {/* Actions */}
-                      <div
-                        className={cn(
-                          "flex items-center gap-3 mt-6 md:mt-0 shrink-0",
-                          "ms-4",
-                        )}
-                      >
+                      <div className={cn("flex items-center gap-3 mt-6 md:mt-0 shrink-0", "ms-4")}>
                         <div
                           className={cn(
                             "flex flex-col",
-                            isAr ? "items-start ms-4" : "items-end me-4",
+                            isAr ? "items-start ms-4" : "items-end me-4"
                           )}
                         >
                           <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">
@@ -417,9 +396,7 @@ const SubmissionsListPage = () => {
                           <p
                             className={cn(
                               "text-2xl font-black",
-                              isGraded
-                                ? "text-primary"
-                                : "text-muted-foreground/20",
+                              isGraded ? "text-primary" : "text-muted-foreground/20"
                             )}
                           >
                             {isGraded
@@ -434,16 +411,12 @@ const SubmissionsListPage = () => {
                             "rounded-2xl px-8 h-12 text-[10px] font-black uppercase tracking-widest transition-all shadow-sm",
                             isGraded
                               ? "border-primary/10 text-primary hover:bg-primary hover:text-primary-foreground"
-                              : "bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20",
+                              : "bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20"
                           )}
                           onClick={() => handleGradeClick(submission)}
                         >
-                          {isGraded
-                            ? t("buttons.reviewProof")
-                            : t("buttons.grade")}
-                          <ArrowRight
-                            className={cn("h-4 w-4 ms-2", isAr && "rotate-180")}
-                          />
+                          {isGraded ? t("buttons.reviewProof") : t("buttons.grade")}
+                          <ArrowRight className={cn("h-4 w-4 ms-2", isAr && "rotate-180")} />
                         </Button>
 
                         <DropdownMenu>
@@ -469,9 +442,7 @@ const SubmissionsListPage = () => {
                               className="rounded-xl gap-3 py-3 cursor-pointer"
                             >
                               <Eye className="h-4 w-4 text-primary" />
-                              <span className="font-bold">
-                                {t("buttons.show")}
-                              </span>
+                              <span className="font-bold">{t("buttons.show")}</span>
                             </DropdownMenuItem>
                             {!isGraded && (
                               <DropdownMenuItem
@@ -479,23 +450,17 @@ const SubmissionsListPage = () => {
                                 className="rounded-xl gap-3 py-3 cursor-pointer"
                               >
                                 <BrainCircuit className="h-4 w-4 text-primary" />
-                                <span className="font-bold">
-                                  {t("buttons.aiAssist")}
-                                </span>
+                                <span className="font-bold">{t("buttons.aiAssist")}</span>
                               </DropdownMenuItem>
                             )}
                             <DropdownMenuSeparator className="my-2" />
                             {submission.student && (
                               <DropdownMenuItem
-                                onClick={() =>
-                                  show("users", submission.student!.id)
-                                }
+                                onClick={() => show("users", submission.student!.id)}
                                 className="rounded-xl gap-3 py-3 cursor-pointer"
                               >
                                 <User className="h-4 w-4 text-primary" />
-                                <span className="font-bold">
-                                  {t("buttons.viewProfile")}
-                                </span>
+                                <span className="font-bold">{t("buttons.viewProfile")}</span>
                               </DropdownMenuItem>
                             )}
                           </DropdownMenuContent>

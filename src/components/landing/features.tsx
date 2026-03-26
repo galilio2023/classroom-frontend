@@ -74,22 +74,17 @@ export const LandingFeatures = ({ isAr }: Props) => {
   ];
 
   return (
-    <section
-      id="features"
-      className="container mx-auto px-4 py-20 md:py-32 text-start"
-    >
+    <section id="features" className="container mx-auto px-4 py-20 md:py-32 text-start">
       <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 md:gap-12 mb-16 md:mb-24">
         <div className="space-y-4 md:space-y-6 max-w-3xl">
           <h2
             className={cn(
               "text-4xl md:text-7xl lg:text-8xl font-black uppercase leading-[0.95] md:leading-[0.9]",
-              !isAr && "tracking-tighter",
+              !isAr && "tracking-tighter"
             )}
           >
             {t("landing.features.sectionTitle")}{" "}
-            <span className="text-primary italic">
-              {t("landing.features.sectionTitleItalic")}
-            </span>
+            <span className="text-primary italic">{t("landing.features.sectionTitleItalic")}</span>
           </h2>
           <p className="text-muted-foreground font-medium text-lg md:text-xl leading-relaxed text-balance">
             {t("landing.features.sectionDesc")}
@@ -122,7 +117,7 @@ export const LandingFeatures = ({ isAr }: Props) => {
             <div
               className={cn(
                 "h-16 w-16 md:h-20 md:w-20 rounded-2xl md:rounded-3xl flex items-center justify-center text-white mb-8 md:mb-10 shadow-xl group-hover:scale-110 transition-transform duration-500",
-                feature.color,
+                feature.color
               )}
             >
               {feature.icon}

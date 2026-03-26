@@ -21,19 +21,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
-import {
-  useCustomMutation,
-  useNotification,
-  useUpdate,
-  HttpError,
-} from "@refinedev/core";
+import { useCustomMutation, useNotification, useUpdate, HttpError } from "@refinedev/core";
 import { useQueryClient } from "@tanstack/react-query";
-import {
-  Submission,
-  Assignment,
-  AIFeedbackResponse,
-  GetOneResponse,
-} from "@/types";
+import { Submission, Assignment, AIFeedbackResponse, GetOneResponse } from "@/types";
 import { useEffect, useState } from "react";
 import {
   Sparkles,
@@ -126,8 +116,7 @@ export const GradingDialog = ({
   const isDraft = submission?.isDraft;
   const isAr = i18n.language === "ar";
 
-  const { mutate: getAIFeedback, mutation: aiMutation } =
-    useCustomMutation<AIFeedbackResponse>();
+  const { mutate: getAIFeedback, mutation: aiMutation } = useCustomMutation<AIFeedbackResponse>();
   const isAILoading = aiMutation.isPending;
 
   useEffect(() => {
@@ -141,14 +130,8 @@ export const GradingDialog = ({
   useEffect(() => {
     if (submission) {
       setValue("grade", submission.grade ?? submission.suggestedGrade ?? 0);
-      setValue(
-        "feedback",
-        submission.feedback ?? submission.suggestedFeedback ?? "",
-      );
-      setValue(
-        "requiresResubmission",
-        submission.requiresResubmission ?? false,
-      );
+      setValue("feedback", submission.feedback ?? submission.suggestedFeedback ?? "");
+      setValue("requiresResubmission", submission.requiresResubmission ?? false);
       setValue("teacherPrivateNotes", submission.teacherPrivateNotes ?? "");
 
       if (
@@ -164,15 +147,7 @@ export const GradingDialog = ({
         setHasAutoAnalyzed(true);
       }
     }
-  }, [
-    submission,
-    setValue,
-    isOpen,
-    isStaff,
-    hasAutoAnalyzed,
-    isAILoading,
-    isDraft,
-  ]);
+  }, [submission, setValue, isOpen, isStaff, hasAutoAnalyzed, isAILoading, isDraft]);
 
   const onSubmit: SubmitHandler<GradingFormValues> = async (values) => {
     if (!isStaff || !submission?.id || isDraft) return;
@@ -183,16 +158,13 @@ export const GradingDialog = ({
     const previousData = queryClient.getQueryData(queryKey);
 
     // Update Cache Immediately
-    queryClient.setQueryData(
-      queryKey,
-      (old: GetOneResponse<Submission> | undefined) => {
-        if (!old || !old.data) return old;
-        return {
-          ...old,
-          data: { ...old.data, ...values, updatedAt: new Date().toISOString() },
-        };
-      },
-    );
+    queryClient.setQueryData(queryKey, (old: GetOneResponse<Submission> | undefined) => {
+      if (!old || !old.data) return old;
+      return {
+        ...old,
+        data: { ...old.data, ...values, updatedAt: new Date().toISOString() },
+      };
+    });
 
     updateSubmission(
       {
@@ -219,7 +191,7 @@ export const GradingDialog = ({
           queryClient.setQueryData(queryKey, previousData);
           toast.error("Failed to save grade.");
         },
-      },
+      }
     );
   };
 
@@ -244,7 +216,7 @@ export const GradingDialog = ({
             description: t("assignments.grading.toasts.aiApplied"),
           });
         },
-      },
+      }
     );
   };
 
@@ -255,8 +227,7 @@ export const GradingDialog = ({
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const wordCount =
-    submission?.content?.trim().split(/\s+/).filter(Boolean).length ?? 0;
+  const wordCount = submission?.content?.trim().split(/\s+/).filter(Boolean).length ?? 0;
 
   if (!submission) return null;
 
@@ -358,7 +329,7 @@ export const GradingDialog = ({
                     "gap-2 rounded-xl transition-all relative overflow-hidden group h-10 px-4",
                     isAILoading
                       ? "border-ai-primary bg-ai-primary/5"
-                      : "border-ai-primary/20 text-ai-primary hover:border-ai-primary/40 hover:bg-ai-primary/5",
+                      : "border-ai-primary/20 text-ai-primary hover:border-ai-primary/40 hover:bg-ai-primary/5"
                   )}
                   onClick={handleAIGrade}
                   disabled={isAILoading}
@@ -370,9 +341,7 @@ export const GradingDialog = ({
                     <Sparkles className="h-4 w-4" />
                   )}
                   <span className="font-bold tracking-tight">
-                    {isAILoading
-                      ? t("buttons.aiAnalyzing")
-                      : t("buttons.aiReanalyze")}
+                    {isAILoading ? t("buttons.aiAnalyzing") : t("buttons.aiReanalyze")}
                   </span>
                 </Button>
               )}
@@ -443,11 +412,7 @@ export const GradingDialog = ({
                     className="h-9 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-sm gap-2"
                     asChild
                   >
-                    <a
-                      href={submission.fileUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
+                    <a href={submission.fileUrl} target="_blank" rel="noopener noreferrer">
                       <Download className="h-3 w-3" />
                       {t("buttons.open")}
                     </a>
@@ -483,10 +448,7 @@ export const GradingDialog = ({
                     </div>
                   ) : (
                     <Form {...form}>
-                      <form
-                        onSubmit={handleSubmit(onSubmit as any)}
-                        className="space-y-6"
-                      >
+                      <form onSubmit={handleSubmit(onSubmit as any)} className="space-y-6">
                         <FormField
                           control={control}
                           name="grade"
@@ -516,9 +478,7 @@ export const GradingDialog = ({
                                     <Input
                                       type="number"
                                       {...field}
-                                      onChange={(e) =>
-                                        field.onChange(Number(e.target.value))
-                                      }
+                                      onChange={(e) => field.onChange(Number(e.target.value))}
                                       value={field.value ?? 0}
                                       className="h-20 text-4xl font-black text-center rounded-2xl bg-muted/20 border-2 border-transparent focus-visible:ring-primary focus-visible:border-primary/20 transition-all"
                                     />
@@ -532,9 +492,7 @@ export const GradingDialog = ({
                                       min={0}
                                       max={100}
                                       step={1}
-                                      onValueChange={(vals) =>
-                                        field.onChange(vals[0])
-                                      }
+                                      onValueChange={(vals) => field.onChange(vals[0])}
                                       className="cursor-pointer"
                                     />
                                   </div>
@@ -556,13 +514,10 @@ export const GradingDialog = ({
                               <FormControl>
                                 <div className="relative">
                                   <Textarea
-                                    placeholder={t(
-                                      "assignments.grading.feedbackPlaceholder",
-                                    )}
+                                    placeholder={t("assignments.grading.feedbackPlaceholder")}
                                     className={cn(
                                       "min-h-[120px] rounded-2xl resize-none bg-muted/10 border-2 border-transparent focus-visible:ring-primary p-5 text-sm leading-relaxed shadow-inner transition-all",
-                                      isAISuggested &&
-                                        "border-ai-primary/10 bg-ai-primary/2",
+                                      isAISuggested && "border-ai-primary/10 bg-ai-primary/2"
                                     )}
                                     {...field}
                                   />
@@ -597,9 +552,7 @@ export const GradingDialog = ({
                                 <div className="space-y-1 leading-none">
                                   <FormLabel className="text-xs font-black uppercase tracking-widest text-orange-700 flex items-center gap-2">
                                     <RotateCcw className="h-3 w-3" />
-                                    {t(
-                                      "assignments.grading.requiresResubmission",
-                                    )}
+                                    {t("assignments.grading.requiresResubmission")}
                                   </FormLabel>
                                   <p className="text-[10px] text-orange-600/60 font-medium">
                                     {t("assignments.grading.resubmissionNote")}
@@ -620,9 +573,7 @@ export const GradingDialog = ({
                                 </FormLabel>
                                 <FormControl>
                                   <Textarea
-                                    placeholder={t(
-                                      "assignments.grading.privatePlaceholder",
-                                    )}
+                                    placeholder={t("assignments.grading.privatePlaceholder")}
                                     className="min-h-[80px] rounded-2xl resize-none bg-muted/5 border-none focus-visible:ring-primary p-4 text-xs leading-relaxed italic"
                                     {...field}
                                   />
@@ -676,9 +627,7 @@ export const GradingDialog = ({
                         <span className="text-7xl font-black text-primary tracking-tighter">
                           {submission.grade ?? "--"}
                         </span>
-                        <span className="text-2xl font-black text-primary/40 ms-1">
-                          %
-                        </span>
+                        <span className="text-2xl font-black text-primary/40 ms-1">%</span>
                       </div>
                       <div className="mt-2 px-3 py-1 rounded-full bg-primary/10 text-[10px] font-black uppercase tracking-widest text-primary relative z-10">
                         {submission.requiresResubmission
@@ -703,8 +652,7 @@ export const GradingDialog = ({
                       className="p-6 rounded-2xl bg-muted/20 border border-muted-foreground/10 min-h-[180px] text-sm leading-relaxed italic shadow-sm relative"
                     >
                       <MessageSquareQuote className="absolute top-4 end-4 h-5 w-5 text-muted-foreground/10" />
-                      {submission.feedback ||
-                        t("assignments.grading.noFeedback")}
+                      {submission.feedback || t("assignments.grading.noFeedback")}
                     </motion.div>
                   </div>
                   <Button

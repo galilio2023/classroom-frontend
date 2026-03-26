@@ -31,10 +31,7 @@ const UnauthorizedPage = ({ reason }: UnauthorizedPageProps) => {
 
         <p className="text-muted-foreground font-medium text-lg leading-relaxed">
           {reason ||
-            t(
-              "library.accessDeniedDesc",
-              "Sorry, you do not have permission to access this page.",
-            )}
+            t("library.accessDeniedDesc", "Sorry, you do not have permission to access this page.")}
         </p>
 
         <div className="pt-8">

@@ -12,11 +12,7 @@ interface AuthorizedRouteProps {
   children: React.ReactNode;
 }
 
-export const AuthorizedRoute = ({
-  children,
-  resource,
-  action,
-}: AuthorizedRouteProps) => {
+export const AuthorizedRoute = ({ children, resource, action }: AuthorizedRouteProps) => {
   const { id } = useParams();
   const location = useLocation();
 

@@ -99,9 +99,7 @@ export function Header() {
               <SelectContent>
                 {terms.map((term) => (
                   <SelectItem key={term.id} value={term.id.toString()}>
-                    {term.name}{" "}
-                    {term.status === "active" &&
-                      `(${t("classes.form.status.active")})`}
+                    {term.name} {term.status === "active" && `(${t("classes.form.status.active")})`}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -121,30 +119,20 @@ export function Header() {
           {/* Language Switcher */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 rounded-full"
-              >
+              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
                 <Languages className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem
                 onClick={() => changeLanguage("en")}
-                className={cn(
-                  i18n.language === "en" && "bg-accent",
-                  "cursor-pointer",
-                )}
+                className={cn(i18n.language === "en" && "bg-accent", "cursor-pointer")}
               >
                 English
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => changeLanguage("ar")}
-                className={cn(
-                  i18n.language === "ar" && "bg-accent",
-                  "cursor-pointer",
-                )}
+                className={cn(i18n.language === "ar" && "bg-accent", "cursor-pointer")}
               >
                 العربية (Arabic)
               </DropdownMenuItem>
@@ -171,14 +159,10 @@ export function Header() {
             <DropdownMenuContent align="end" className="w-56 p-2">
               <DropdownMenuItem
                 className="gap-3 p-3 rounded-xl transition-all"
-                onClick={() =>
-                  changeLanguage(i18n.language === "en" ? "ar" : "en")
-                }
+                onClick={() => changeLanguage(i18n.language === "en" ? "ar" : "en")}
               >
                 <Languages className="h-4 w-4 text-primary" />
-                <span className="font-bold">
-                  {i18n.language === "en" ? "العربية" : "English"}
-                </span>
+                <span className="font-bold">{i18n.language === "en" ? "العربية" : "English"}</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <div className="flex items-center justify-around p-3 bg-muted/20 rounded-2xl mt-2">
@@ -202,9 +186,7 @@ export function Header() {
           <DropdownMenuContent align="end" className="w-64 mt-2">
             <DropdownMenuLabel className="font-normal">
               <div className="flex flex-col space-y-1">
-                <p className="text-sm font-bold leading-none">
-                  {identity?.name}
-                </p>
+                <p className="text-sm font-bold leading-none">{identity?.name}</p>
                 <p className="text-xs leading-none text-muted-foreground truncate">
                   {identity?.email}
                 </p>
@@ -235,10 +217,7 @@ export function Header() {
               <CircleUser className="h-4 w-4" />
               <span>{t("buttons.editProfile")}</span>
             </DropdownMenuItem>
-            <DropdownMenuItem
-              className="gap-2 cursor-pointer"
-              onClick={handleEnablePush}
-            >
+            <DropdownMenuItem className="gap-2 cursor-pointer" onClick={handleEnablePush}>
               <BellRing className="h-4 w-4" />
               <span>{t("notifications.enablePush")}</span>
             </DropdownMenuItem>

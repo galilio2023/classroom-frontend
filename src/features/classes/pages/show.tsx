@@ -32,12 +32,8 @@ const ClassesShow = () => {
   const isAr = i18n.language === "ar";
 
   // --- Logic Orchestration ---
-  const {
-    activePrimaryTab,
-    activeSubTab,
-    handlePrimaryTabChange,
-    setSearchParams,
-  } = useClassTabs();
+  const { activePrimaryTab, activeSubTab, handlePrimaryTabChange, setSearchParams } =
+    useClassTabs();
 
   const {
     identity,
@@ -80,13 +76,10 @@ const ClassesShow = () => {
   if (isError || !aClass) return <ClassErrorView />;
 
   const approvedEnrollments =
-    aClass.enrollments?.filter((e: Enrollment) => e.status === "approved") ??
-    [];
+    aClass.enrollments?.filter((e: Enrollment) => e.status === "approved") ?? [];
   const pendingCount =
-    (aClass.enrollments?.filter((e: Enrollment) => e.status === "pending")
-      .length ?? 0) +
-    (aClass.enrollments?.filter((e: Enrollment) => e.status === "waitlisted")
-      .length ?? 0);
+    (aClass.enrollments?.filter((e: Enrollment) => e.status === "pending").length ?? 0) +
+    (aClass.enrollments?.filter((e: Enrollment) => e.status === "waitlisted").length ?? 0);
 
   return (
     <>
@@ -99,9 +92,7 @@ const ClassesShow = () => {
           aClass={aClass}
           approvedCount={approvedEnrollments.length}
           waitlistedCount={
-            aClass.enrollments?.filter(
-              (e: Enrollment) => e.status === "waitlisted",
-            ).length ?? 0
+            aClass.enrollments?.filter((e: Enrollment) => e.status === "waitlisted").length ?? 0
           }
           isLiveIndicator={isLiveIndicator}
           isStaff={isModerator}
@@ -132,10 +123,7 @@ const ClassesShow = () => {
                 transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
                 className="focus:outline-none"
               >
-                <TabsContent
-                  value="content"
-                  className="mt-0 focus-visible:outline-none"
-                >
+                <TabsContent value="content" className="mt-0 focus-visible:outline-none">
                   {activePrimaryTab === "content" && (
                     <ContentTabWrapper
                       classId={classId}
@@ -145,10 +133,7 @@ const ClassesShow = () => {
                   )}
                 </TabsContent>
 
-                <TabsContent
-                  value="assessments"
-                  className="mt-0 focus-visible:outline-none"
-                >
+                <TabsContent value="assessments" className="mt-0 focus-visible:outline-none">
                   {activePrimaryTab === "assessments" && (
                     <AssessmentsTabWrapper
                       classId={classId}
@@ -158,10 +143,7 @@ const ClassesShow = () => {
                   )}
                 </TabsContent>
 
-                <TabsContent
-                  value="engagement"
-                  className="mt-0 focus-visible:outline-none"
-                >
+                <TabsContent value="engagement" className="mt-0 focus-visible:outline-none">
                   {activePrimaryTab === "engagement" && (
                     <EngagementTabWrapper
                       classId={classId}
@@ -175,18 +157,13 @@ const ClassesShow = () => {
                   )}
                 </TabsContent>
 
-                <TabsContent
-                  value="roster"
-                  className="mt-0 focus-visible:outline-none"
-                >
+                <TabsContent value="roster" className="mt-0 focus-visible:outline-none">
                   {activePrimaryTab === "roster" && (
                     <RosterTabWrapper
                       classId={classId}
                       approvedEnrollments={approvedEnrollments}
                       pendingEnrollments={
-                        aClass.enrollments?.filter(
-                          (e: Enrollment) => e.status === "pending",
-                        ) ?? []
+                        aClass.enrollments?.filter((e: Enrollment) => e.status === "pending") ?? []
                       }
                       isStaff={isStaff}
                       onInsight={setInsightTarget}
@@ -201,10 +178,7 @@ const ClassesShow = () => {
                 </TabsContent>
 
                 {isStaff && (
-                  <TabsContent
-                    value="progress"
-                    className="mt-0 focus-visible:outline-none"
-                  >
+                  <TabsContent value="progress" className="mt-0 focus-visible:outline-none">
                     {activePrimaryTab === "progress" && (
                       <ProgressTabWrapper
                         classId={classId}
@@ -215,10 +189,7 @@ const ClassesShow = () => {
                   </TabsContent>
                 )}
 
-                <TabsContent
-                  value="info"
-                  className="mt-0 focus-visible:outline-none"
-                >
+                <TabsContent value="info" className="mt-0 focus-visible:outline-none">
                   {activePrimaryTab === "info" && (
                     <InfoTabWrapper
                       aClass={aClass}
@@ -258,9 +229,7 @@ const ClassesShow = () => {
           isDeleting={isDeleting}
           isEnrollDialogOpen={isEnrollDialogOpen}
           setIsEnrollDialogOpen={setIsEnrollDialogOpen}
-          enrolledStudentIds={approvedEnrollments.map(
-            (e: Enrollment) => e.student.id,
-          )}
+          enrolledStudentIds={approvedEnrollments.map((e: Enrollment) => e.student.id)}
           isInviteDialogOpen={isInviteDialogOpen}
           setIsInviteDialogOpen={setIsInviteDialogOpen}
           existingTeacherIds={aClass.teachers?.map((t) => t.teacher.id) ?? []}
@@ -283,7 +252,7 @@ const ClassesShow = () => {
                   setBulkMessage({ title: "", message: "" });
                   refetch?.();
                 },
-              },
+              }
             )
           }
           isMessaging={isMessaging}

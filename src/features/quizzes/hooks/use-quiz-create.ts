@@ -18,17 +18,13 @@ const quizSchema = (t: any) =>
     questions: z
       .array(
         z.object({
-          question: z
-            .string()
-            .min(1, t("assignments.create.validation.criteriaRequired")),
+          question: z.string().min(1, t("assignments.create.validation.criteriaRequired")),
           options: z
             .array(z.string())
             .length(4, t("assignments.create.validation.criteriaRequired")),
-          correctAnswer: z
-            .string()
-            .min(1, t("assignments.create.validation.criteriaRequired")),
+          correctAnswer: z.string().min(1, t("assignments.create.validation.criteriaRequired")),
           points: z.coerce.number().min(1).optional().default(1),
-        }),
+        })
       )
       .min(1, t("assignments.create.validation.criteriaRequired")),
   });

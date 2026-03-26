@@ -21,9 +21,7 @@ const CountUp = ({ value, locale }: { value: number; locale: string }) => {
   const count = useMotionValue(0);
   const rounded = useTransform(count, (latest) => {
     const num = Math.round(latest);
-    return new Intl.NumberFormat(locale === "ar" ? "ar-EG" : "en-US").format(
-      num,
-    );
+    return new Intl.NumberFormat(locale === "ar" ? "ar-EG" : "en-US").format(num);
   });
 
   useEffect(() => {
@@ -60,7 +58,7 @@ export const StatCard: React.FC<StatCardProps> = ({
         className={cn(
           "h-full border border-border/80 dark:border-white/5 shadow-xl hover:shadow-2xl transition-all duration-500 overflow-hidden group bg-card/50 backdrop-blur-2xl rounded-[1.5rem] md:rounded-4xl relative",
           "after:absolute after:inset-0 after:rounded-[inherit] after:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] dark:after:shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] after:pointer-events-none",
-          className,
+          className
         )}
       >
         <div
@@ -68,7 +66,7 @@ export const StatCard: React.FC<StatCardProps> = ({
             "absolute inset-0 bg-linear-to-r from-transparent via-white/10 to-transparent pointer-events-none transition-all duration-1000",
             isArabic
               ? "translate-x-full group-hover:animate-[shine-rtl_2s_infinite]"
-              : "-translate-x-full group-hover:animate-[shine_2s_infinite]",
+              : "-translate-x-full group-hover:animate-[shine_2s_infinite]"
           )}
         />
 
@@ -82,7 +80,7 @@ export const StatCard: React.FC<StatCardProps> = ({
               <div
                 className={cn(
                   "p-2.5 md:p-3.5 rounded-xl md:rounded-2xl transition-all duration-500 group-hover:scale-110 shadow-lg",
-                  "bg-background/80 backdrop-blur-md border border-black/3 dark:border-white/3 text-foreground",
+                  "bg-background/80 backdrop-blur-md border border-black/3 dark:border-white/3 text-foreground"
                 )}
               >
                 <Icon className={cn("h-5 w-5 md:h-6 md:w-6", color)} />
@@ -91,17 +89,12 @@ export const StatCard: React.FC<StatCardProps> = ({
                 <div
                   className={cn(
                     "rounded-full px-2 py-0.5 md:px-3 md:py-1 font-black text-[9px] md:text-[10px] uppercase tracking-widest border-none shadow-sm flex items-center gap-1",
-                    trend.isUp
-                      ? "bg-green-500/10 text-green-500"
-                      : "bg-red-500/10 text-red-500",
+                    trend.isUp ? "bg-green-500/10 text-green-500" : "bg-red-500/10 text-red-500"
                   )}
                 >
                   <span dir="ltr">
                     {trend.isUp ? "+" : "-"}
-                    {new Intl.NumberFormat(isArabic ? "ar-EG" : "en-US").format(
-                      trend.value,
-                    )}
-                    %
+                    {new Intl.NumberFormat(isArabic ? "ar-EG" : "en-US").format(trend.value)}%
                   </span>
                 </div>
               )}
@@ -111,7 +104,7 @@ export const StatCard: React.FC<StatCardProps> = ({
               <p
                 className={cn(
                   "text-[9px] md:text-[10px] uppercase tracking-[0.2em] text-muted-foreground/60 truncate",
-                  isArabic ? "font-bold" : "font-black",
+                  isArabic ? "font-bold" : "font-black"
                 )}
               >
                 {label}
@@ -120,14 +113,10 @@ export const StatCard: React.FC<StatCardProps> = ({
                 <h3
                   className={cn(
                     "text-2xl xs:text-3xl md:text-4xl text-foreground",
-                    isArabic ? "font-bold" : "font-black tracking-tighter",
+                    isArabic ? "font-bold" : "font-black tracking-tighter"
                   )}
                 >
-                  {isNumber ? (
-                    <CountUp value={value as number} locale={i18n.language} />
-                  ) : (
-                    value
-                  )}
+                  {isNumber ? <CountUp value={value as number} locale={i18n.language} /> : value}
                 </h3>
                 {isNumber && (value as number) > 0 && (
                   <motion.div

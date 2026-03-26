@@ -21,13 +21,7 @@ import { SubmissionList } from "./submission-list";
 import { InteractiveQuiz } from "@/components/interactive-quiz";
 import { PhysicsLab } from "@/components/physics-lab";
 import { QuizMonitor } from "@/components/classes/quiz-monitor";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PeerReviewForm } from "@/components/peer-review-form";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -56,7 +50,7 @@ const AssignmentShow = () => {
   usePageTitle(
     assignment?.title
       ? `${assignment.title} - ${t("assignments.show.assignmentDetails")}`
-      : t("assignments.show.assignmentDetails"),
+      : t("assignments.show.assignmentDetails")
   );
 
   if (isLoading)
@@ -73,9 +67,7 @@ const AssignmentShow = () => {
     return (
       <div className="container mx-auto py-32 text-center space-y-8">
         <XCircle className="h-20 w-20 text-destructive mx-auto" />
-        <h2 className="text-4xl font-black">
-          {t("assignments.show.notFound")}
-        </h2>
+        <h2 className="text-4xl font-black">{t("assignments.show.notFound")}</h2>
         <Button asChild>
           <Link to="/assignments">{t("buttons.goBack")}</Link>
         </Button>
@@ -104,10 +96,7 @@ const AssignmentShow = () => {
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
             >
-              <QuizMonitor
-                quizId={Number(assignment.id)}
-                assignmentTitle={assignment.title}
-              />
+              <QuizMonitor quizId={Number(assignment.id)} assignmentTitle={assignment.title} />
             </motion.div>
           )}
         </AnimatePresence>
@@ -116,8 +105,7 @@ const AssignmentShow = () => {
           <Card className="rounded-[2.5rem] md:rounded-[3rem] overflow-hidden border-none shadow-2xl text-start">
             <CardHeader className="bg-indigo-500/5 p-8 md:p-10 border-b border-indigo-500/10">
               <CardTitle className="text-indigo-600 flex items-center gap-4 font-black uppercase tracking-widest text-xl">
-                <BrainCircuit className="h-8 w-8" />{" "}
-                {t("assignments.show.interactiveQuiz")}
+                <BrainCircuit className="h-8 w-8" /> {t("assignments.show.interactiveQuiz")}
               </CardTitle>
             </CardHeader>
             <CardContent className="p-8 md:p-10">
@@ -134,10 +122,7 @@ const AssignmentShow = () => {
             <CardHeader className="bg-emerald-500/5 p-8 md:p-10 border-b border-emerald-500/10">
               <CardTitle className="text-emerald-600 flex items-center gap-4 font-black uppercase tracking-widest text-xl">
                 <FlaskConical className="h-8 w-8" />{" "}
-                {t(
-                  "assignments.show.physicsLabTitle",
-                  "Interactive Simulation",
-                )}
+                {t("assignments.show.physicsLabTitle", "Interactive Simulation")}
               </CardTitle>
             </CardHeader>
             <CardContent className="p-8 md:p-10">
@@ -162,11 +147,7 @@ const AssignmentShow = () => {
                       assignmentId={Number(assignment.id)}
                       assignment={assignment}
                       existingSubmission={mySubmission || undefined}
-                      onCancel={
-                        mySubmission
-                          ? () => state.setIsResubmitting(false)
-                          : undefined
-                      }
+                      onCancel={mySubmission ? () => state.setIsResubmitting(false) : undefined}
                     />
                   ) : (
                     <div className="space-y-10">
@@ -195,8 +176,7 @@ const AssignmentShow = () => {
                 <Card className="rounded-[2.5rem] md:rounded-[3rem] overflow-hidden border-none shadow-2xl">
                   <CardHeader className="bg-amber-500/5 p-8 md:p-10 border-b border-amber-500/10">
                     <CardTitle className="text-amber-600 flex items-center gap-4 font-black uppercase tracking-widest text-xl">
-                      <Users className="h-8 w-8" />{" "}
-                      {t("assignments.show.peersAssigned")}
+                      <Users className="h-8 w-8" /> {t("assignments.show.peersAssigned")}
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-8 md:p-10 space-y-10">
@@ -207,13 +187,9 @@ const AssignmentShow = () => {
                       >
                         <div className="flex items-center gap-4">
                           <Avatar className="h-12 w-12">
-                            <AvatarFallback>
-                              {review.submission?.student?.name?.[0]}
-                            </AvatarFallback>
+                            <AvatarFallback>{review.submission?.student?.name?.[0]}</AvatarFallback>
                           </Avatar>
-                          <h4 className="font-black text-lg">
-                            {review.submission?.student?.name}
-                          </h4>
+                          <h4 className="font-black text-lg">{review.submission?.student?.name}</h4>
                         </div>
                         <div className="p-6 bg-muted/20 rounded-2xl italic">
                           {review.submission?.content}
@@ -290,10 +266,7 @@ const AssignmentShow = () => {
               </div>
             </CardHeader>
             <CardContent className="p-8 md:p-10">
-              <SubmissionList
-                submissions={submissions}
-                assignmentId={Number(assignment.id)}
-              />
+              <SubmissionList submissions={submissions} assignmentId={Number(assignment.id)} />
             </CardContent>
           </Card>
         )}

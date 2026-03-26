@@ -7,11 +7,7 @@ import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
-import {
-  useBack,
-  useResourceParams,
-  useUserFriendlyName,
-} from "@refinedev/core";
+import { useBack, useResourceParams, useUserFriendlyName } from "@refinedev/core";
 import { ArrowLeftIcon } from "lucide-react";
 import { EditButton } from "../buttons/edit";
 
@@ -20,9 +16,7 @@ type ShowViewProps = PropsWithChildren<{
 }>;
 
 export function ShowView({ children, className }: ShowViewProps) {
-  return (
-    <div className={cn("flex flex-col", "gap-4", className)}>{children}</div>
-  );
+  return <div className={cn("flex flex-col", "gap-4", className)}>{children}</div>;
 }
 
 type ShowViewHeaderProps = PropsWithChildren<{
@@ -51,10 +45,7 @@ export const ShowViewHeader = ({
 
   const title =
     titleFromProps ??
-    getUserFriendlyName(
-      resource?.meta?.label ?? identifier ?? resource?.name,
-      "singular",
-    );
+    getUserFriendlyName(resource?.meta?.label ?? identifier ?? resource?.name, "singular");
 
   return (
     <div className={cn("flex flex-col", "gap-4", wrapperClassName)}>
@@ -68,7 +59,7 @@ export const ShowViewHeader = ({
           "items-center",
           "justify-between",
           "-ms-2.5",
-          headerClassName,
+          headerClassName
         )}
       >
         <div className="flex items-center gap-1">
@@ -79,16 +70,8 @@ export const ShowViewHeader = ({
         </div>
 
         <div className="flex items-center gap-2">
-          <RefreshButton
-            variant="outline"
-            recordItemId={recordItemId}
-            resource={resourceName}
-          />
-          <EditButton
-            variant="outline"
-            recordItemId={recordItemId}
-            resource={resourceName}
-          />
+          <RefreshButton variant="outline" recordItemId={recordItemId} resource={resourceName} />
+          <EditButton variant="outline" recordItemId={recordItemId} resource={resourceName} />
         </div>
       </div>
     </div>

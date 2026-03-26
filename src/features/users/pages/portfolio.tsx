@@ -60,7 +60,7 @@ const StudentPortfolio = () => {
   usePageTitle(
     user?.name
       ? t("portfolioPage.pageTitle", { name: user.name })
-      : t("portfolioPage.fallbackPageTitle"),
+      : t("portfolioPage.fallbackPageTitle")
   );
 
   if (isUserLoading || isAnalyticsLoading) {
@@ -96,9 +96,7 @@ const StudentPortfolio = () => {
           <GraduationCap className="h-20 w-20 opacity-20" />
         </div>
         <div className="space-y-3">
-          <h2 className="text-4xl font-black tracking-tight">
-            {t("portfolioPage.notFound")}
-          </h2>
+          <h2 className="text-4xl font-black tracking-tight">{t("portfolioPage.notFound")}</h2>
           <p className="text-muted-foreground font-medium max-w-md mx-auto text-lg">
             {t("portfolioPage.notFoundDesc")}
           </p>
@@ -191,9 +189,7 @@ const StudentPortfolio = () => {
                     <span className="text-[10px] uppercase font-black text-muted-foreground/60 tracking-widest">
                       {t("portfolioPage.email")}
                     </span>
-                    <span className="font-bold truncate text-sm md:text-base">
-                      {user.email}
-                    </span>
+                    <span className="font-bold truncate text-sm md:text-base">{user.email}</span>
                   </div>
                 </div>
                 {user.phoneNumber && (
@@ -205,9 +201,7 @@ const StudentPortfolio = () => {
                       <span className="text-[10px] uppercase font-black text-muted-foreground/60 tracking-widest">
                         {t("portfolioPage.phone")}
                       </span>
-                      <span className="font-bold text-sm md:text-base">
-                        {user.phoneNumber}
-                      </span>
+                      <span className="font-bold text-sm md:text-base">{user.phoneNumber}</span>
                     </div>
                   </div>
                 )}
@@ -262,7 +256,7 @@ const StudentPortfolio = () => {
                   className={cn(
                     "p-3.5 rounded-2xl mb-4 group-hover:scale-110 transition-transform duration-500",
                     stat.bg,
-                    stat.color,
+                    stat.color
                   )}
                 >
                   <stat.icon className="h-6 w-6 md:h-7 md:w-7" />

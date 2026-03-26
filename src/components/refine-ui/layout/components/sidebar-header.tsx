@@ -16,7 +16,7 @@ export function SidebarHeader() {
     <ShadcnSidebarHeader
       className={cn(
         "p-0 h-20 border-b border-border/40 flex items-center overflow-hidden bg-transparent transition-all duration-300",
-        !open && !isMobile ? "justify-center" : "flex-row justify-between px-6",
+        !open && !isMobile ? "justify-center" : "flex-row justify-between px-6"
       )}
     >
       <AnimatePresence mode="wait">
@@ -28,10 +28,7 @@ export function SidebarHeader() {
             exit={{ opacity: 0, x: -20, filter: "blur(10px)" }}
             transition={{ duration: 0.4, ease: "easeOut" }}
           >
-            <RouterLink
-              to="/"
-              className="flex flex-row items-center gap-3 whitespace-nowrap group"
-            >
+            <RouterLink to="/" className="flex flex-row items-center gap-3 whitespace-nowrap group">
               <div className="shrink-0 p-2.5 bg-primary/10 rounded-xl transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 shadow-sm">
                 {title.icon}
               </div>
@@ -50,7 +47,7 @@ export function SidebarHeader() {
       <ShadcnSidebarTrigger
         className={cn(
           "text-muted-foreground/60 hover:text-primary transition-all duration-300 shrink-0 opacity-100 pointer-events-auto",
-          { "me-0": !open && !isMobile },
+          { "me-0": !open && !isMobile }
         )}
       />
     </ShadcnSidebarHeader>

@@ -106,9 +106,7 @@ const AttendanceListPage = () => {
   const handleRowClick = (record: AttendanceSession) => {
     if (!record) return;
     if (isStaff) {
-      navigate(
-        `/classes/show/${record.classId}?tab=attendance&date=${record.date}`,
-      );
+      navigate(`/classes/show/${record.classId}?tab=attendance&date=${record.date}`);
     } else {
       show("classes", record.classId.toString());
     }
@@ -127,26 +125,24 @@ const AttendanceListPage = () => {
 
   // Stats calculation
   const stats = useMemo(() => {
-    if (!attendanceSessions.length)
-      return { total: 0, avgPresent: 0, recentAbsence: 0 };
+    if (!attendanceSessions.length) return { total: 0, avgPresent: 0, recentAbsence: 0 };
 
     const totalPresent = attendanceSessions.reduce(
       (acc: number, curr: AttendanceSession) =>
         acc + (curr.presentCount || (curr.status === "present" ? 1 : 0)),
-      0,
+      0
     );
     const totalPossible = attendanceSessions.reduce(
       (acc: number, curr: AttendanceSession) =>
         acc + ((curr.presentCount || 0) + (curr.absentCount || 0) || 1),
-      0,
+      0
     );
 
     return {
       total: attendanceSessions.length,
       avgPresent: Math.round((totalPresent / totalPossible) * 100) || 0,
-      recentAbsence: attendanceSessions.filter(
-        (s: AttendanceSession) => s.status === "absent",
-      ).length,
+      recentAbsence: attendanceSessions.filter((s: AttendanceSession) => s.status === "absent")
+        .length,
     };
   }, [attendanceSessions]);
 
@@ -184,9 +180,7 @@ const AttendanceListPage = () => {
                 <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                   {t("classes.attendance.governance.totalSessions")}
                 </p>
-                <p className="text-2xl font-black">
-                  {isLoading ? "..." : stats.total}
-                </p>
+                <p className="text-2xl font-black">{isLoading ? "..." : stats.total}</p>
               </div>
             </Card>
             <Card className="p-6 border-green-500/10 bg-card/50 backdrop-blur-sm flex items-center gap-4 rounded-4xl shadow-lg shadow-green-500/5">
@@ -226,9 +220,7 @@ const AttendanceListPage = () => {
                 <Search className="absolute start-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                 <Input
                   type="text"
-                  placeholder={t(
-                    "classes.attendance.governance.searchPlaceholder",
-                  )}
+                  placeholder={t("classes.attendance.governance.searchPlaceholder")}
                   className="ps-11 h-14 rounded-2xl border-none bg-background shadow-sm font-medium"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -276,10 +268,7 @@ const AttendanceListPage = () => {
             {isLoading ? (
               <div className="p-8 space-y-6">
                 {Array.from({ length: 6 }).map((_, i) => (
-                  <div
-                    key={i}
-                    className="flex flex-col md:flex-row items-center gap-6"
-                  >
+                  <div key={i} className="flex flex-col md:flex-row items-center gap-6">
                     <Skeleton className="h-14 w-14 rounded-2xl shrink-0" />
                     <div className="flex-1 space-y-3 w-full">
                       <Skeleton className="h-6 w-62.5" />
@@ -395,7 +384,7 @@ const AttendanceListPage = () => {
                                     "p-1.5 rounded-lg",
                                     session.status === "present"
                                       ? "bg-green-500/5"
-                                      : "bg-destructive/5",
+                                      : "bg-destructive/5"
                                   )}
                                 >
                                   {session.status === "present" ? (
@@ -409,7 +398,7 @@ const AttendanceListPage = () => {
                                     "text-xs font-black uppercase tracking-widest",
                                     session.status === "present"
                                       ? "text-green-600"
-                                      : "text-destructive",
+                                      : "text-destructive"
                                   )}
                                 >
                                   {session.status === "present"
@@ -431,9 +420,7 @@ const AttendanceListPage = () => {
                                 className="h-10 w-10 rounded-xl text-muted-foreground hover:text-primary hover:bg-primary/5"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  setQrTargetClassId(
-                                    session.classId.toString(),
-                                  );
+                                  setQrTargetClassId(session.classId.toString());
                                 }}
                               >
                                 <QrCode className="h-4 w-4" />
@@ -465,9 +452,7 @@ const AttendanceListPage = () => {
                               className="w-56 rounded-[1.5rem] p-2 bg-white dark:bg-[#09090b] opacity-100 backdrop-blur-none border border-border/50 shadow-2xl"
                             >
                               <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-3 py-2">
-                                {t(
-                                  "classes.attendance.governance.sessionOptions",
-                                )}
+                                {t("classes.attendance.governance.sessionOptions")}
                               </DropdownMenuLabel>
                               <DropdownMenuItem
                                 onClick={() => handleRowClick(session)}
@@ -475,27 +460,19 @@ const AttendanceListPage = () => {
                               >
                                 <Eye className="h-4 w-4 text-primary" />
                                 <span className="font-bold">
-                                  {t(
-                                    "classes.attendance.governance.viewFullReport",
-                                  )}
+                                  {t("classes.attendance.governance.viewFullReport")}
                                 </span>
                               </DropdownMenuItem>
                               {isStaff && (
                                 <>
                                   <DropdownMenuSeparator className="my-2" />
                                   <DropdownMenuItem
-                                    onClick={() =>
-                                      setQrTargetClassId(
-                                        session.classId.toString(),
-                                      )
-                                    }
+                                    onClick={() => setQrTargetClassId(session.classId.toString())}
                                     className="rounded-xl gap-3 py-3 cursor-pointer"
                                   >
                                     <QrCode className="h-4 w-4 text-primary" />
                                     <span className="font-bold">
-                                      {t(
-                                        "classes.attendance.governance.startQrCheckin",
-                                      )}
+                                      {t("classes.attendance.governance.startQrCheckin")}
                                     </span>
                                   </DropdownMenuItem>
                                 </>

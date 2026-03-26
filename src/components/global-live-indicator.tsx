@@ -75,9 +75,7 @@ export const GlobalLiveIndicator = () => {
             <p className="text-[10px] font-black uppercase tracking-widest opacity-80 leading-none">
               {t("classes.live.indicator.liveNow", "Live Now")}
             </p>
-            <h4 className="text-xs md:text-sm font-bold truncate pe-2">
-              {currentClass.name}
-            </h4>
+            <h4 className="text-xs md:text-sm font-bold truncate pe-2">{currentClass.name}</h4>
           </div>
 
           <Button

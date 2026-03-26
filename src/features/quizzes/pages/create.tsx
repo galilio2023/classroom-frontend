@@ -57,32 +57,22 @@ const QuizCreate = () => {
                     {t("buttons.aiAssist")}
                   </Button>
                 </SheetTrigger>
-                <SheetContent
-                  side="bottom"
-                  className="h-[80vh] sm:h-[90vh] rounded-t-[3rem]"
-                >
+                <SheetContent side="bottom" className="h-[80vh] sm:h-[90vh] rounded-t-[3rem]">
                   <SheetHeader>
                     <SheetTitle className="text-2xl font-black uppercase tracking-tight">
                       {t("aiHub.assistant.quizGen.title")}
                     </SheetTitle>
-                    <SheetDescription>
-                      {t("aiHub.assistant.quizGen.desc")}
-                    </SheetDescription>
+                    <SheetDescription>{t("aiHub.assistant.quizGen.desc")}</SheetDescription>
                   </SheetHeader>
                   <div className="mt-6 overflow-y-auto h-full pb-20 custom-scrollbar">
-                    <AIQuizHelper
-                      onUseQuestions={actions.handleUseAIQuestions}
-                    />
+                    <AIQuizHelper onUseQuestions={actions.handleUseAIQuestions} />
                   </div>
                 </SheetContent>
               </Sheet>
             </CardHeader>
             <CardContent className="p-8 text-start">
               <Form {...form}>
-                <form
-                  onSubmit={form.handleSubmit(actions.onSubmit as any)}
-                  className="space-y-8"
-                >
+                <form onSubmit={form.handleSubmit(actions.onSubmit as any)} className="space-y-8">
                   <div className="space-y-6">
                     <FormField
                       control={form.control}
@@ -94,9 +84,7 @@ const QuizCreate = () => {
                           </FormLabel>
                           <FormControl>
                             <Input
-                              placeholder={t(
-                                "assignments.create.placeholders.title",
-                              )}
+                              placeholder={t("assignments.create.placeholders.title")}
                               {...field}
                               className="h-12 rounded-xl bg-muted/20 border-none focus-visible:ring-primary font-bold"
                             />
@@ -115,24 +103,17 @@ const QuizCreate = () => {
                             <LayoutGrid className="h-3.5 w-3.5" />
                             {t("assignments.create.curriculumModule")}
                           </FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            value={field.value?.toString()}
-                          >
+                          <Select onValueChange={field.onChange} value={field.value?.toString()}>
                             <FormControl>
                               <SelectTrigger className="h-12 rounded-xl bg-muted/20 border-none focus:ring-primary font-bold">
                                 <SelectValue
-                                  placeholder={t(
-                                    "assignments.create.placeholders.selectModule",
-                                  )}
+                                  placeholder={t("assignments.create.placeholders.selectModule")}
                                 />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent className="rounded-xl border-none shadow-2xl">
                               <SelectItem value="0" className="font-bold">
-                                {t(
-                                  "assignments.create.placeholders.noneGlobal",
-                                )}
+                                {t("assignments.create.placeholders.noneGlobal")}
                               </SelectItem>
                               {data.modules.map((m: Module) => (
                                 <SelectItem
@@ -160,9 +141,7 @@ const QuizCreate = () => {
                           </FormLabel>
                           <FormControl>
                             <Textarea
-                              placeholder={t(
-                                "classes.form.descriptionPlaceholder",
-                              )}
+                              placeholder={t("classes.form.descriptionPlaceholder")}
                               {...field}
                               className="min-h-[100px] rounded-xl bg-muted/20 border-none focus-visible:ring-primary p-4 font-medium"
                             />

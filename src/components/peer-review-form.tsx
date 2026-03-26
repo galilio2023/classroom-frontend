@@ -15,15 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PeerReview, Assignment } from "@/types";
 import { useUpdate } from "@refinedev/core";
-import {
-  Loader2,
-  CheckCircle2,
-  Star,
-  MessageSquare,
-  Info,
-  Sparkles,
-  Send,
-} from "lucide-react";
+import { Loader2, CheckCircle2, Star, MessageSquare, Info, Sparkles, Send } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { Label } from "@/components/ui/label";
@@ -42,11 +34,7 @@ interface PeerReviewFormProps {
   onSuccess?: () => void;
 }
 
-export const PeerReviewForm = ({
-  review,
-  assignment,
-  onSuccess,
-}: PeerReviewFormProps) => {
+export const PeerReviewForm = ({ review, assignment, onSuccess }: PeerReviewFormProps) => {
   const { t } = useTranslation();
   const { mutate, mutation } = useUpdate();
   const isLoading = mutation.isPending;
@@ -74,7 +62,7 @@ export const PeerReviewForm = ({
         onSuccess: () => {
           onSuccess?.();
         },
-      },
+      }
     );
   };
 
@@ -180,9 +168,7 @@ export const PeerReviewForm = ({
                   <FormControl>
                     <div className="relative group">
                       <Textarea
-                        placeholder={t(
-                          "assignments.grading.feedbackPlaceholder",
-                        )}
+                        placeholder={t("assignments.grading.feedbackPlaceholder")}
                         className="min-h-[150px] rounded-2xl resize-none bg-muted/10 border-2 border-transparent focus-visible:ring-primary p-5 text-sm leading-relaxed shadow-inner transition-all"
                         {...field}
                       />

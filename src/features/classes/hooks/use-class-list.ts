@@ -9,14 +9,7 @@ import {
   useNavigation,
 } from "@refinedev/core";
 import { useTable } from "@refinedev/react-table";
-import {
-  User,
-  UserRole,
-  ClassListItem,
-  TeacherApplication,
-  Subject,
-  Department,
-} from "@/types";
+import { User, UserRole, ClassListItem, TeacherApplication, Subject, Department } from "@/types";
 import { toast } from "sonner";
 import { socket } from "@/lib/socket";
 import { useTerm } from "@/contexts/term-context";
@@ -45,21 +38,17 @@ export const useClassList = () => {
     id: number;
     name: string;
   } | null>(null);
-  const [view, setView] = useState<"discovery" | "my">(
-    isStudent ? "discovery" : "my",
-  );
+  const [view, setView] = useState<"discovery" | "my">(isStudent ? "discovery" : "my");
 
   const { mutate: joinClass, mutation: joinMutation } = useCustomMutation();
-  const { mutate: enrollRequest, mutation: enrollMutation } =
-    useCustomMutation();
+  const { mutate: enrollRequest, mutation: enrollMutation } = useCustomMutation();
   const { mutate: cloneClass, mutation: cloneMutation } = useCustomMutation();
 
   // --- SOCKET UPDATES ---
   useEffect(() => {
     if (!socket.connected) socket.connect();
 
-    const handleLiveUpdate = () =>
-      invalidate({ resource: "classes", invalidates: ["list"] });
+    const handleLiveUpdate = () => invalidate({ resource: "classes", invalidates: ["list"] });
     const handleEnrollmentApproval = () => {
       toast.success(t("classes.list.toast.enrollmentApproved"));
       invalidate({ resource: "classes", invalidates: ["list"] });
@@ -77,10 +66,7 @@ export const useClassList = () => {
   }, [invalidate, t]);
 
   // --- TABLE LOGIC ---
-  const columns = useMemo<ColumnDef<ClassListItem>[]>(
-    () => [{ id: "id", accessorKey: "id" }],
-    [],
-  );
+  const columns = useMemo<ColumnDef<ClassListItem>[]>(() => [{ id: "id", accessorKey: "id" }], []);
 
   const {
     refineCore: { tableQuery: tableQueryResult, filters, setFilters },
@@ -150,9 +136,7 @@ export const useClassList = () => {
       {
         onSuccess: (data) => {
           const responseData = data.data as { message?: string };
-          toast.success(
-            responseData.message || t("classes.list.toast.joinRequestSent"),
-          );
+          toast.success(responseData.message || t("classes.list.toast.joinRequestSent"));
           setIsJoinModalOpen(false);
           setInviteCode("");
           // SMART FIX: Force refresh of the class lists
@@ -161,11 +145,10 @@ export const useClassList = () => {
         onError: (err) => {
           const error = err as HttpError;
           toast.error(
-            (error?.response?.data as any)?.message ||
-              t("classes.list.toast.invalidInviteCode"),
+            (error?.response?.data as any)?.message || t("classes.list.toast.invalidInviteCode")
           );
         },
-      },
+      }
     );
   };
 
@@ -181,11 +164,10 @@ export const useClassList = () => {
         onError: (err) => {
           const error = err as HttpError;
           toast.error(
-            (error?.response?.data as any)?.message ||
-              "Failed to send enrollment request.",
+            (error?.response?.data as any)?.message || "Failed to send enrollment request."
           );
         },
-      },
+      }
     );
   };
 
@@ -197,7 +179,7 @@ export const useClassList = () => {
           toast.success(t("classes.list.toast.cloned"));
           invalidate({ resource: "classes", invalidates: ["list"] });
         },
-      },
+      }
     );
   };
 
@@ -210,7 +192,7 @@ export const useClassList = () => {
             toast.success(t("classes.list.toast.deleted"));
             setDeleteTarget(null);
           },
-        },
+        }
       );
     }
   };
@@ -238,20 +220,12 @@ export const useClassList = () => {
     filters: {
       view,
       setView,
-      search:
-        (filters.find((f) => "field" in f && f.field === "name") as any)
-          ?.value || "",
-      subject:
-        (filters.find((f) => "field" in f && f.field === "subject") as any)
-          ?.value || "all",
+      search: (filters.find((f) => "field" in f && f.field === "name") as any)?.value || "",
+      subject: (filters.find((f) => "field" in f && f.field === "subject") as any)?.value || "all",
       department:
-        (filters.find((f) => "field" in f && f.field === "departmentId") as any)
-          ?.value || "all",
+        (filters.find((f) => "field" in f && f.field === "departmentId") as any)?.value || "all",
       setSearch: (val: string) =>
-        setFilters(
-          [{ field: "name", operator: "contains", value: val || undefined }],
-          "merge",
-        ),
+        setFilters([{ field: "name", operator: "contains", value: val || undefined }], "merge"),
       setSubject: (val: string) =>
         setFilters(
           [
@@ -261,7 +235,7 @@ export const useClassList = () => {
               value: val === "all" ? undefined : val,
             },
           ],
-          "merge",
+          "merge"
         ),
       setDepartment: (val: string) =>
         setFilters(
@@ -272,7 +246,7 @@ export const useClassList = () => {
               value: val === "all" ? undefined : Number(val),
             },
           ],
-          "merge",
+          "merge"
         ),
     },
     state: {

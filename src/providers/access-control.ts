@@ -94,20 +94,15 @@ export const accessControlProvider: AccessControlProvider = {
       // Teachers can view individual profiles but cannot access global users list
       if (resourceName === "users") {
         if (["show"].includes(action)) return { can: true };
-        if (action === "edit" && params?.id === identity?.id)
-          return { can: true };
+        if (action === "edit" && params?.id === identity?.id) return { can: true };
         return {
           can: false,
-          reason:
-            "Teachers cannot access the global users directory or edit other user profiles.",
+          reason: "Teachers cannot access the global users directory or edit other user profiles.",
         };
       }
 
       // Teachers can view their subscribers (new resource/action)
-      if (
-        resourceName === "teacher-subscriptions" &&
-        ["list", "show"].includes(action)
-      ) {
+      if (resourceName === "teacher-subscriptions" && ["list", "show"].includes(action)) {
         return { can: true };
       }
 
@@ -142,8 +137,7 @@ export const accessControlProvider: AccessControlProvider = {
 
       if (allowedResources.includes(resourceName)) {
         // Teachers can't delete subjects
-        if (resourceName === "subjects" && action === "delete")
-          return { can: false };
+        if (resourceName === "subjects" && action === "delete") return { can: false };
 
         return { can: true };
       }
@@ -203,23 +197,15 @@ export const accessControlProvider: AccessControlProvider = {
       if (["list", "show"].includes(action)) return { can: true };
 
       // Specific Write Actions for Students
-      if (resourceName === "submissions" && action === "create")
-        return { can: true };
-      if (resourceName === "messages" && action === "create")
-        return { can: true };
-      if (resourceName === "discussions" && action === "create")
-        return { can: true };
+      if (resourceName === "submissions" && action === "create") return { can: true };
+      if (resourceName === "messages" && action === "create") return { can: true };
+      if (resourceName === "discussions" && action === "create") return { can: true };
 
       // Students can enroll in classes
-      if (resourceName === "classes" && action === "enroll")
-        return { can: true };
+      if (resourceName === "classes" && action === "enroll") return { can: true };
 
       // Profiles: Can only edit their own
-      if (
-        resourceName === "users" &&
-        action === "edit" &&
-        params?.id === identity?.id
-      )
+      if (resourceName === "users" && action === "edit" && params?.id === identity?.id)
         return { can: true };
 
       return { can: false, reason: "Access denied." };
@@ -253,11 +239,7 @@ export const accessControlProvider: AccessControlProvider = {
       if (["list", "show"].includes(action)) return { can: true };
 
       // Profiles: Can only edit their own
-      if (
-        resourceName === "users" &&
-        action === "edit" &&
-        params?.id === identity?.id
-      )
+      if (resourceName === "users" && action === "edit" && params?.id === identity?.id)
         return { can: true };
 
       return { can: false, reason: "Access denied for Parent role." };

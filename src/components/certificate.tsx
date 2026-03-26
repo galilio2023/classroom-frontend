@@ -13,10 +13,7 @@ interface CertificateProps {
 }
 
 export const Certificate = React.forwardRef<HTMLDivElement, CertificateProps>(
-  (
-    { studentName, courseName, teacherName, date, completionId, className },
-    ref,
-  ) => {
+  ({ studentName, courseName, teacherName, date, completionId, className }, ref) => {
     const { t, i18n } = useTranslation();
     const isArabic = i18n.language === "ar";
 
@@ -26,12 +23,10 @@ export const Certificate = React.forwardRef<HTMLDivElement, CertificateProps>(
         dir={isArabic ? "rtl" : "ltr"}
         className={cn(
           "printable-certificate w-[800px] h-[600px] bg-white text-black p-8 relative overflow-hidden shadow-2xl mx-auto",
-          className,
+          className
         )}
         style={{
-          fontFamily: isArabic
-            ? "'Cairo', sans-serif"
-            : "'Times New Roman', serif",
+          fontFamily: isArabic ? "'Cairo', sans-serif" : "'Times New Roman', serif",
         }}
       >
         {/* Decorative Border */}
@@ -85,9 +80,7 @@ export const Certificate = React.forwardRef<HTMLDivElement, CertificateProps>(
             </p>
 
             <div className="border-b-2 border-primary/20 pb-2 px-8 inline-block min-w-[500px]">
-              <h3 className="text-3xl font-bold text-primary font-serif">
-                {courseName}
-              </h3>
+              <h3 className="text-3xl font-bold text-primary font-serif">{courseName}</h3>
             </div>
           </div>
 
@@ -114,9 +107,7 @@ export const Certificate = React.forwardRef<HTMLDivElement, CertificateProps>(
 
             <div className="flex flex-col items-center gap-2">
               <div className="w-48 border-b border-black/40 mb-1 flex items-end justify-center pb-1">
-                <span className="font-signature text-2xl text-primary">
-                  {teacherName}
-                </span>
+                <span className="font-signature text-2xl text-primary">{teacherName}</span>
               </div>
               <p className="text-lg font-bold font-serif">{teacherName}</p>
               <p className="text-xs uppercase tracking-widest text-muted-foreground">
@@ -134,7 +125,7 @@ export const Certificate = React.forwardRef<HTMLDivElement, CertificateProps>(
         </div>
       </div>
     );
-  },
+  }
 );
 
 Certificate.displayName = "Certificate";

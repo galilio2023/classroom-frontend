@@ -36,9 +36,7 @@ export function DataTableSorter<TData>({
       ) : column.getIsSorted() === "asc" ? (
         <ArrowUp className={cn("text-primary", "!w-3", "!h-3")} />
       ) : (
-        <ChevronsUpDown
-          className={cn("text-muted-foreground", "!w-3", "!h-3")}
-        />
+        <ChevronsUpDown className={cn("text-muted-foreground", "!w-3", "!h-3")} />
       )}
     </Button>
   );

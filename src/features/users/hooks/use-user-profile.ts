@@ -17,12 +17,7 @@ export const useUserProfile = () => {
     id,
     queryOptions: { enabled: !!id },
     meta: {
-      populate: [
-        "department",
-        "userBadges",
-        "userBadges.badge",
-        "teacherChannel",
-      ],
+      populate: ["department", "userBadges", "userBadges.badge", "teacherChannel"],
     },
   });
 
@@ -36,8 +31,7 @@ export const useUserProfile = () => {
     resource: "classes",
     filters: [{ field: "teacherUid", operator: "eq", value: id }],
     queryOptions: {
-      enabled:
-        !!userQuery.data?.data && userQuery.data.data.role === UserRole.TEACHER,
+      enabled: !!userQuery.data?.data && userQuery.data.data.role === UserRole.TEACHER,
     },
   });
 
@@ -45,9 +39,7 @@ export const useUserProfile = () => {
 
   const displayBadges = useMemo(() => {
     if (!user || !badgesQuery.data?.data) return [];
-    const earnedBadgeIds = new Set(
-      user.userBadges?.map((ub: any) => ub.badgeId),
-    );
+    const earnedBadgeIds = new Set(user.userBadges?.map((ub: any) => ub.badgeId));
 
     const earned = (user.userBadges || []).map((ub: any) => ({
       id: ub.badge.id.toString(),
@@ -78,10 +70,7 @@ export const useUserProfile = () => {
     displayBadges,
     identity,
     isAr,
-    isLoading:
-      userQuery.isLoading ||
-      badgesQuery.isLoading ||
-      teacherClassesQuery.isLoading,
+    isLoading: userQuery.isLoading || badgesQuery.isLoading || teacherClassesQuery.isLoading,
     isError: userQuery.isError,
     isSelf: identity?.id === user?.id,
     isAdmin: identity?.role === UserRole.ADMIN,

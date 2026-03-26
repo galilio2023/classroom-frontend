@@ -26,8 +26,7 @@ export const AttendanceSummary = ({ summary }: AttendanceSummaryProps) => {
           {t("dashboard.common.excellent")}
         </Badge>
       );
-    if (rate >= 75)
-      return <Badge variant="secondary">{t("dashboard.common.good")}</Badge>;
+    if (rate >= 75) return <Badge variant="secondary">{t("dashboard.common.good")}</Badge>;
     return <Badge variant="destructive">{t("dashboard.common.atRisk")}</Badge>;
   };
 
@@ -37,9 +36,7 @@ export const AttendanceSummary = ({ summary }: AttendanceSummaryProps) => {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <TrendingUp className="h-5 w-5 text-primary" />
-            <CardTitle className="text-lg">
-              {t("dashboard.student.attendanceOverview")}
-            </CardTitle>
+            <CardTitle className="text-lg">{t("dashboard.student.attendanceOverview")}</CardTitle>
           </div>
           {getStatusBadge(attendanceRate)}
         </div>
@@ -47,10 +44,7 @@ export const AttendanceSummary = ({ summary }: AttendanceSummaryProps) => {
       <CardContent className="p-6 space-y-8">
         <div className="flex flex-col items-center gap-4">
           <div className="relative h-32 w-32 flex items-center justify-center">
-            <svg
-              className="h-full w-full -rotate-90 transform"
-              viewBox="0 0 100 100"
-            >
+            <svg className="h-full w-full -rotate-90 transform" viewBox="0 0 100 100">
               <circle
                 className="text-muted stroke-current"
                 strokeWidth="8"
@@ -72,9 +66,7 @@ export const AttendanceSummary = ({ summary }: AttendanceSummaryProps) => {
               />
             </svg>
             <div className="absolute flex flex-col items-center">
-              <span
-                className={`text-3xl font-black ${getStatusColor(attendanceRate)}`}
-              >
+              <span className={`text-3xl font-black ${getStatusColor(attendanceRate)}`}>
                 {attendanceRate}%
               </span>
               <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
@@ -104,9 +96,7 @@ export const AttendanceSummary = ({ summary }: AttendanceSummaryProps) => {
           </div>
           <div className="flex flex-col items-center gap-1 p-3 rounded-2xl bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/20">
             <XCircle className="h-4 w-4 text-destructive" />
-            <span className="text-lg font-black text-destructive">
-              {absent}
-            </span>
+            <span className="text-lg font-black text-destructive">{absent}</span>
             <span className="text-[9px] font-black text-destructive/60 uppercase tracking-tighter">
               {t("classes.attendance.absent")}
             </span>

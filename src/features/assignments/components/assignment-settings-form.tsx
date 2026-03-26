@@ -120,7 +120,7 @@ export const AssignmentSettingsForm = ({ form, rubric }: Props) => {
                         <span
                           className={cn(
                             "absolute top-1/2 -translate-y-1/2 text-xl font-black opacity-20",
-                            "end-6",
+                            "end-6"
                           )}
                         >
                           %
@@ -144,13 +144,10 @@ export const AssignmentSettingsForm = ({ form, rubric }: Props) => {
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() =>
-                      rubric.append({ criteria: "", maxPoints: 10 })
-                    }
+                    onClick={() => rubric.append({ criteria: "", maxPoints: 10 })}
                     className="h-9 rounded-xl text-[10px] font-black uppercase tracking-widest border-primary/20 text-primary hover:bg-primary/5"
                   >
-                    <Plus className="h-3.5 w-3.5 me-1.5" />{" "}
-                    {t("buttons.addCriteria")}
+                    <Plus className="h-3.5 w-3.5 me-1.5" /> {t("buttons.addCriteria")}
                   </Button>
                 </div>
                 <div className="space-y-4">
@@ -168,9 +165,7 @@ export const AssignmentSettingsForm = ({ form, rubric }: Props) => {
                           <FormItem className="flex-1">
                             <FormControl>
                               <Input
-                                placeholder={t(
-                                  "assignments.create.placeholders.criteriaName",
-                                )}
+                                placeholder={t("assignments.create.placeholders.criteriaName")}
                                 {...field}
                                 className="h-12 rounded-xl bg-muted/20 border-none font-bold"
                               />
@@ -188,16 +183,14 @@ export const AssignmentSettingsForm = ({ form, rubric }: Props) => {
                               <div className="relative">
                                 <Input
                                   type="number"
-                                  placeholder={t(
-                                    "assignments.create.placeholders.max",
-                                  )}
+                                  placeholder={t("assignments.create.placeholders.max")}
                                   {...field}
                                   className="h-12 rounded-xl bg-muted/20 border-none font-black text-center"
                                 />
                                 <span
                                   className={cn(
                                     "absolute top-1/2 -translate-y-1/2 text-[9px] font-black opacity-20",
-                                    "end-3",
+                                    "end-3"
                                   )}
                                 >
                                   PTS

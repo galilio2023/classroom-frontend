@@ -2,13 +2,7 @@ import React, { useState, useRef } from "react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
-import {
-  Loader2,
-  Upload,
-  File as FileIcon,
-  X,
-  CheckCircle2,
-} from "lucide-react";
+import { Loader2, Upload, File as FileIcon, X, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { BACKEND_URL } from "@/config";
 import { useTranslation } from "react-i18next";
@@ -92,8 +86,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       toast.success(t("common.upload.success"));
     } catch (error: any) {
       console.error("Upload Error:", error);
-      const message =
-        error instanceof Error ? error.message : t("common.upload.error");
+      const message = error instanceof Error ? error.message : t("common.upload.error");
       toast.error(message);
     } finally {
       setIsUploading(false);

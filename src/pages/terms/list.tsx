@@ -1,10 +1,4 @@
-import {
-  useCreate,
-  useDelete,
-  useGetIdentity,
-  useList,
-  useUpdate,
-} from "@refinedev/core";
+import { useCreate, useDelete, useGetIdentity, useList, useUpdate } from "@refinedev/core";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -72,7 +66,7 @@ export default function TermsList() {
         startDate: z.string().min(1, t("terms.form.startRequired")),
         endDate: z.string().min(1, t("terms.form.endRequired")),
       }),
-    [t],
+    [t]
   );
 
   type TermFormValues = z.infer<typeof termSchema>;
@@ -111,7 +105,7 @@ export default function TermsList() {
       {
         onSuccess: () => toast.success(t("terms.toasts.activated")),
         onError: () => toast.error(t("terms.toasts.error")),
-      },
+      }
     );
   };
 
@@ -125,18 +119,12 @@ export default function TermsList() {
       {
         onSuccess: () => toast.success(t("terms.toasts.archived")),
         onError: () => toast.error(t("terms.toasts.error")),
-      },
+      }
     );
   };
 
   const handleDelete = (id: number) => {
-    if (
-      window.confirm(
-        t("terms.deleteDialog.title") +
-          " " +
-          t("terms.deleteDialog.description"),
-      )
-    ) {
+    if (window.confirm(t("terms.deleteDialog.title") + " " + t("terms.deleteDialog.description"))) {
       deleteMutation(
         {
           resource: "academic-terms",
@@ -145,7 +133,7 @@ export default function TermsList() {
         {
           onSuccess: () => toast.success(t("terms.toasts.deleted")),
           onError: () => toast.error(t("terms.toasts.error")),
-        },
+        }
       );
     }
   };
@@ -166,7 +154,7 @@ export default function TermsList() {
           form.reset();
         },
         onError: () => toast.error(t("terms.toasts.error")),
-      },
+      }
     );
   };
 
@@ -229,10 +217,7 @@ export default function TermsList() {
                         </DialogDescription>
                       </div>
                     </DialogHeader>
-                    <form
-                      onSubmit={form.handleSubmit(onSubmit)}
-                      className="space-y-8"
-                    >
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
                       <div className="space-y-3">
                         <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ms-2">
                           {t("terms.form.name")}
@@ -322,9 +307,7 @@ export default function TermsList() {
                 {t("terms.stats.total")}
               </p>
               <p className="text-2xl md:text-3xl font-black">
-                {isLoading
-                  ? "..."
-                  : new Intl.NumberFormat(i18n.language).format(stats.total)}
+                {isLoading ? "..." : new Intl.NumberFormat(i18n.language).format(stats.total)}
               </p>
             </div>
           </Card>
@@ -337,9 +320,7 @@ export default function TermsList() {
                 {t("terms.stats.active")}
               </p>
               <p className="text-2xl md:text-3xl font-black text-green-600">
-                {isLoading
-                  ? "..."
-                  : new Intl.NumberFormat(i18n.language).format(stats.active)}
+                {isLoading ? "..." : new Intl.NumberFormat(i18n.language).format(stats.active)}
               </p>
             </div>
           </Card>
@@ -352,9 +333,7 @@ export default function TermsList() {
                 {t("terms.stats.upcoming")}
               </p>
               <p className="text-2xl md:text-3xl font-black text-indigo-600">
-                {isLoading
-                  ? "..."
-                  : new Intl.NumberFormat(i18n.language).format(stats.upcoming)}
+                {isLoading ? "..." : new Intl.NumberFormat(i18n.language).format(stats.upcoming)}
               </p>
             </div>
           </Card>
@@ -413,7 +392,7 @@ export default function TermsList() {
                       exit={{ opacity: 0, scale: 0.95 }}
                       transition={{ delay: index * 0.05 }}
                       className={cn(
-                        "group relative flex flex-col md:flex-row items-center p-5 md:p-6 rounded-4xl bg-card/50 backdrop-blur-sm border border-border/40 hover:border-primary/30 hover:bg-card/80 transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-primary/5 cursor-pointer",
+                        "group relative flex flex-col md:flex-row items-center p-5 md:p-6 rounded-4xl bg-card/50 backdrop-blur-sm border border-border/40 hover:border-primary/30 hover:bg-card/80 transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-primary/5 cursor-pointer"
                       )}
                     >
                       {/* Status Color Accent using logical properties */}
@@ -424,7 +403,7 @@ export default function TermsList() {
                             ? "bg-green-500"
                             : term.status === "upcoming"
                               ? "bg-indigo-500"
-                              : "bg-muted-foreground/40",
+                              : "bg-muted-foreground/40"
                         )}
                       />
 
@@ -437,7 +416,7 @@ export default function TermsList() {
                               ? "bg-green-500/10 text-green-600"
                               : term.status === "upcoming"
                                 ? "bg-indigo-500/10 text-indigo-600"
-                                : "bg-muted/40 text-muted-foreground/60",
+                                : "bg-muted/40 text-muted-foreground/60"
                           )}
                         >
                           {term.status === "archived" ? (
@@ -449,12 +428,7 @@ export default function TermsList() {
                       </div>
 
                       {/* Info Area */}
-                      <div
-                        className={cn(
-                          "flex-1 min-w-0 w-full text-start",
-                          "md:ms-8",
-                        )}
-                      >
+                      <div className={cn("flex-1 min-w-0 w-full text-start", "md:ms-8")}>
                         <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 mb-2">
                           <h3 className="text-xl md:text-2xl font-black tracking-tight truncate group-hover:text-primary transition-colors leading-tight">
                             {term.name}
@@ -485,13 +459,8 @@ export default function TermsList() {
                                 Duration
                               </span>
                               <span className="text-[11px] font-black text-foreground">
-                                {startDate
-                                  .locale(i18n.language)
-                                  .format("MMM D, YYYY")}{" "}
-                                —{" "}
-                                {endDate
-                                  .locale(i18n.language)
-                                  .format("MMM D, YYYY")}
+                                {startDate.locale(i18n.language).format("MMM D, YYYY")} —{" "}
+                                {endDate.locale(i18n.language).format("MMM D, YYYY")}
                               </span>
                             </div>
                           </div>
@@ -507,15 +476,11 @@ export default function TermsList() {
                               <span className="text-[11px] font-black uppercase tracking-tight">
                                 {term.status === "active"
                                   ? t("terms.relative.ends", {
-                                      time: endDate
-                                        .locale(i18n.language)
-                                        .fromNow(),
+                                      time: endDate.locale(i18n.language).fromNow(),
                                     })
                                   : term.status === "upcoming"
                                     ? t("terms.relative.starts", {
-                                        time: startDate
-                                          .locale(i18n.language)
-                                          .fromNow(),
+                                        time: startDate.locale(i18n.language).fromNow(),
                                       })
                                     : t("terms.relative.completed")}
                               </span>
@@ -530,7 +495,7 @@ export default function TermsList() {
                           <div
                             className={cn(
                               "hidden lg:flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:translate-x-0",
-                              "ltr:translate-x-4 rtl:-translate-x-4",
+                              "ltr:translate-x-4 rtl:-translate-x-4"
                             )}
                           >
                             {term.status === "upcoming" && (
@@ -544,9 +509,7 @@ export default function TermsList() {
                                 }}
                                 disabled={updateMutation.isPending}
                               >
-                                <CheckCircle
-                                  className={cn("h-4 w-4", "me-2")}
-                                />
+                                <CheckCircle className={cn("h-4 w-4", "me-2")} />
                                 {t("buttons.activate")}
                               </Button>
                             )}
@@ -588,9 +551,7 @@ export default function TermsList() {
                               <div className="p-2 rounded-lg bg-primary/10 text-primary">
                                 <Eye className="h-4 w-4" />
                               </div>
-                              <span className="font-bold text-xs">
-                                {t("buttons.viewClasses")}
-                              </span>
+                              <span className="font-bold text-xs">{t("buttons.viewClasses")}</span>
                             </DropdownMenuItem>
                             {isAdmin && (
                               <>

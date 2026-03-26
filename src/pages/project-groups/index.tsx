@@ -81,8 +81,7 @@ const ProjectGroupsPage = () => {
   const { data: classesResult } = classesQueryResult;
 
   // --- MUTATIONS ---
-  const { mutate: createGroup, mutation: createMutation } =
-    useCustomMutation<any>();
+  const { mutate: createGroup, mutation: createMutation } = useCustomMutation<any>();
   const isCreating = createMutation.isPending;
   const { mutate: deleteGroup } = useDelete();
 
@@ -111,11 +110,9 @@ const ProjectGroupsPage = () => {
           refetchGroups();
         },
         onError: (error: any) => {
-          toast.error(
-            error?.response?.data?.message || "Failed to create group",
-          );
+          toast.error(error?.response?.data?.message || "Failed to create group");
         },
-      },
+      }
     );
   };
 
@@ -132,15 +129,14 @@ const ProjectGroupsPage = () => {
             refetchGroups();
           },
           onError: () => toast.error("Failed to delete group"),
-        },
+        }
       );
     }
   };
 
   const groups = groupsResult?.data || [];
   const classesList = classesResult?.data || [];
-  const isTeacherOrAdmin =
-    identity?.role === "teacher" || identity?.role === "admin";
+  const isTeacherOrAdmin = identity?.role === "teacher" || identity?.role === "admin";
 
   return (
     <div className="space-y-10 md:space-y-16 pb-20 max-w-screen-2xl mx-auto">
@@ -259,16 +255,14 @@ const ProjectGroupsPage = () => {
                         {t("projectGroups.members")}
                       </span>
                       <span className="font-black text-foreground">
-                        {new Intl.NumberFormat(i18n.language).format(
-                          group.members?.length || 0,
-                        )}
+                        {new Intl.NumberFormat(i18n.language).format(group.members?.length || 0)}
                       </span>
                     </div>
 
                     <div
                       className={cn(
                         "flex overflow-hidden py-1",
-                        isAr ? "-space-x-reverse space-x-2" : "-space-x-2",
+                        isAr ? "-space-x-reverse space-x-2" : "-space-x-2"
                       )}
                     >
                       {group.members?.length > 0 ? (
@@ -288,7 +282,7 @@ const ProjectGroupsPage = () => {
                             <div className="flex items-center justify-center h-10 w-10 rounded-full bg-muted/50 text-sm font-black text-muted-foreground ring-2 ring-background shadow-sm">
                               +
                               {new Intl.NumberFormat(i18n.language).format(
-                                group.members.length - 5,
+                                group.members.length - 5
                               )}
                             </div>
                           )}
@@ -307,8 +301,7 @@ const ProjectGroupsPage = () => {
                       className="w-full rounded-2xl h-12 font-black uppercase tracking-widest text-[10px] gap-2 border-primary/20 hover:bg-primary/5 text-primary shadow-sm"
                       onClick={() => show("project-groups", group.id)}
                     >
-                      <Eye className="h-4 w-4" />{" "}
-                      {t("buttons.viewDetailsAndMembers")}
+                      <Eye className="h-4 w-4" /> {t("buttons.viewDetailsAndMembers")}
                     </Button>
                   </div>
                 </Card>
@@ -355,10 +348,7 @@ const ProjectGroupsPage = () => {
                 <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ms-2">
                   {t("projectGroups.classLabel")}
                 </Label>
-                <Select
-                  onValueChange={setSelectedClassId}
-                  value={selectedClassId}
-                >
+                <Select onValueChange={setSelectedClassId} value={selectedClassId}>
                   <SelectTrigger className="h-16 rounded-3xl bg-muted/30 border-none shadow-inner px-8 text-lg font-black">
                     <SelectValue placeholder={t("projectGroups.selectClass")} />
                   </SelectTrigger>

@@ -40,12 +40,7 @@ import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { motion, AnimatePresence } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { useTranslation } from "react-i18next";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAssignmentForm } from "../hooks/use-assignment-form";
 import { AssignmentSettingsForm } from "../components/assignment-settings-form";
 
@@ -103,7 +98,7 @@ export const AssignmentCreate = () => {
             layout
             className={cn(
               "transition-all duration-500",
-              data.showAI ? "xl:col-span-7" : "xl:col-span-8 xl:col-start-3",
+              data.showAI ? "xl:col-span-7" : "xl:col-span-8 xl:col-start-3"
             )}
           >
             <Card className="shadow-2xl border-none bg-card/50 backdrop-blur-xl overflow-hidden rounded-4xl">
@@ -141,9 +136,7 @@ export const AssignmentCreate = () => {
                               <FormControl>
                                 <SelectTrigger className="h-14 rounded-2xl bg-muted/20 border-none transition-all text-start">
                                   <SelectValue
-                                    placeholder={t(
-                                      "assignments.create.placeholders.selectClass",
-                                    )}
+                                    placeholder={t("assignments.create.placeholders.selectClass")}
                                   />
                                 </SelectTrigger>
                               </FormControl>
@@ -186,9 +179,7 @@ export const AssignmentCreate = () => {
                             </div>
                             <FormControl>
                               <Input
-                                placeholder={t(
-                                  "assignments.create.placeholders.title",
-                                )}
+                                placeholder={t("assignments.create.placeholders.title")}
                                 {...field}
                                 className="h-14 rounded-2xl bg-muted/20 border-none focus-visible:ring-primary font-bold"
                               />
@@ -217,20 +208,13 @@ export const AssignmentCreate = () => {
                               <FormControl>
                                 <SelectTrigger className="h-14 rounded-2xl bg-muted/20 border-none transition-all text-start">
                                   <SelectValue
-                                    placeholder={t(
-                                      "assignments.create.placeholders.selectModule",
-                                    )}
+                                    placeholder={t("assignments.create.placeholders.selectModule")}
                                   />
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent className="rounded-xl border-none shadow-2xl">
-                                <SelectItem
-                                  value="0"
-                                  className="rounded-lg font-bold text-start"
-                                >
-                                  {t(
-                                    "assignments.create.placeholders.noneGlobal",
-                                  )}
+                                <SelectItem value="0" className="rounded-lg font-bold text-start">
+                                  {t("assignments.create.placeholders.noneGlobal")}
                                 </SelectItem>
                                 {data.modules.map((m: Module) => (
                                   <SelectItem
@@ -295,9 +279,7 @@ export const AssignmentCreate = () => {
                               <RichTextEditor
                                 value={field.value || ""}
                                 onChange={field.onChange}
-                                placeholder={t(
-                                  "assignments.create.placeholders.instructions",
-                                )}
+                                placeholder={t("assignments.create.placeholders.instructions")}
                                 className="min-h-[350px]"
                               />
                             </div>
@@ -307,10 +289,7 @@ export const AssignmentCreate = () => {
                       )}
                     />
 
-                    <AssignmentSettingsForm
-                      form={form}
-                      rubric={rubric}
-                    />
+                    <AssignmentSettingsForm form={form} rubric={rubric} />
 
                     <div className="p-8 bg-muted/30 rounded-4xl border-2 border-dashed border-muted-foreground/10 space-y-4 text-start">
                       <div className="flex items-center gap-2">
@@ -359,9 +338,7 @@ export const AssignmentCreate = () => {
                         ) : (
                           <Wand2 className="me-3 h-6 w-6" />
                         )}
-                        {formLoading
-                          ? t("buttons.publishing")
-                          : t("buttons.publishAssignment")}
+                        {formLoading ? t("buttons.publishing") : t("buttons.publishAssignment")}
                       </Button>
                       <div className="mt-4 flex items-center justify-center gap-2 text-muted-foreground/40">
                         <Info className="h-3.5 w-3.5" />
@@ -406,9 +383,7 @@ export const AssignmentCreate = () => {
                     </Button>
                   </CardHeader>
                   <CardContent className="p-6 max-h-[75vh] overflow-y-auto custom-scrollbar text-start">
-                    <AIAssignmentHelper
-                      onUseContent={actions.handleUseAIContent}
-                    />
+                    <AIAssignmentHelper onUseContent={actions.handleUseAIContent} />
                   </CardContent>
                 </Card>
               </motion.div>

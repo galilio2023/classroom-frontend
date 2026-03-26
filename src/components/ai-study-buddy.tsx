@@ -22,12 +22,7 @@ interface AIStudyBuddyProps {
   classId?: string | number;
 }
 
-export const AIStudyBuddy = ({
-  subject,
-  topic,
-  assignment,
-  classId,
-}: AIStudyBuddyProps) => {
+export const AIStudyBuddy = ({ subject, topic, assignment, classId }: AIStudyBuddyProps) => {
   const { t } = useTranslation();
   const { isAiEnabled, isAllowed, isLoading: isAccessLoading } = useAiAccess();
   const [isOpen, setIsOpen] = useState(false);
@@ -126,23 +121,21 @@ export const AIStudyBuddy = ({
         "fixed z-50 transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)]",
         isOpen
           ? "inset-0 md:inset-auto md:bottom-6 md:end-6 md:w-auto"
-          : "bottom-[5rem] md:bottom-6 end-4 md:end-6",
+          : "bottom-[5rem] md:bottom-6 end-4 md:end-6"
       )}
     >
       {isOpen ? (
         <Card
           className={cn(
             "shadow-2xl flex flex-col ai-gradient-border animate-[zoom-in_0.3s_ease-out] overflow-hidden",
-            "w-full h-full md:w-[400px] md:h-[600px] rounded-none md:rounded-2xl bg-card/90 backdrop-blur-3xl",
+            "w-full h-full md:w-[400px] md:h-[600px] rounded-none md:rounded-2xl bg-card/90 backdrop-blur-3xl"
           )}
         >
           <ChatHeader onClose={() => setIsOpen(false)} />
 
           <CardContent className="flex-1 p-0 overflow-hidden bg-dot-pattern min-h-0">
             <ScrollArea ref={scrollAreaRef} className="h-full p-4 md:p-6">
-              {messages.length === 0 && !streamingMessage && (
-                <ChatEmptyState subject={subject} />
-              )}
+              {messages.length === 0 && !streamingMessage && <ChatEmptyState subject={subject} />}
 
               <div className="space-y-6 flex flex-col">
                 {messages.map((msg, i) => (

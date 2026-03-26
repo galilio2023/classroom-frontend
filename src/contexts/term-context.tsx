@@ -12,9 +12,7 @@ interface TermContextType {
 
 const TermContext = createContext<TermContextType | undefined>(undefined);
 
-export const TermProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+export const TermProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [selectedTerm, setSelectedTerm] = useState<AcademicTerm | null>(null);
 
   // Refine useList implementation returns { result, query }
@@ -34,8 +32,7 @@ export const TermProvider: React.FC<{ children: React.ReactNode }> = ({
   const terms = result?.data || [];
   const isLoading = query.isLoading;
 
-  const currentTerm =
-    terms.find((t: AcademicTerm) => t.status === "active") || terms[0] || null;
+  const currentTerm = terms.find((t: AcademicTerm) => t.status === "active") || terms[0] || null;
 
   useEffect(() => {
     if (currentTerm && !selectedTerm) {

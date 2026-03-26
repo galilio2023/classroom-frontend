@@ -1,12 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
-import {
-  useShow,
-  useOne,
-  useUpdate,
-  useList,
-  useDelete,
-  useCreate,
-} from "@refinedev/core";
+import { useShow, useOne, useUpdate, useList, useDelete, useCreate } from "@refinedev/core";
 import { Class, Announcement, Enrollment } from "@/types";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
@@ -34,10 +27,7 @@ export const useClassDetails = (classId: string) => {
   }, [identity, aClass, isAdmin]);
 
   const isOwner = useMemo(() => {
-    return (
-      isAdmin ||
-      aClass?.teachers?.find((t) => t.teacher.id === identity?.id)?.isPrimary
-    );
+    return isAdmin || aClass?.teachers?.find((t) => t.teacher.id === identity?.id)?.isPrimary;
   }, [identity, aClass, isAdmin]);
 
   // --- Announcements Logic ---
@@ -51,14 +41,10 @@ export const useClassDetails = (classId: string) => {
   });
   const announcements = announcementsResult?.data ?? [];
 
-  const [dismissedAnnouncements, setDismissedAnnouncements] = useState<
-    number[]
-  >([]);
+  const [dismissedAnnouncements, setDismissedAnnouncements] = useState<number[]>([]);
   useEffect(() => {
     if (identity?.id) {
-      const dismissed = localStorage.getItem(
-        `dismissed_announcements_${identity.id}`,
-      );
+      const dismissed = localStorage.getItem(`dismissed_announcements_${identity.id}`);
       if (dismissed) setDismissedAnnouncements(JSON.parse(dismissed));
     }
   }, [identity?.id]);
@@ -66,10 +52,7 @@ export const useClassDetails = (classId: string) => {
   const handleDismissAnnouncement = (id: number) => {
     const updated = [...dismissedAnnouncements, id];
     setDismissedAnnouncements(updated);
-    localStorage.setItem(
-      `dismissed_announcements_${identity?.id}`,
-      JSON.stringify(updated),
-    );
+    localStorage.setItem(`dismissed_announcements_${identity?.id}`, JSON.stringify(updated));
   };
 
   // --- Teacher Notes Logic ---
@@ -95,7 +78,7 @@ export const useClassDetails = (classId: string) => {
         values: { content },
       });
     }, 1000),
-    [classId, updateNote],
+    [classId, updateNote]
   );
 
   const handleNoteChange = (val: string) => {
@@ -109,31 +92,25 @@ export const useClassDetails = (classId: string) => {
   const { mutate: createMutation, mutation: createMutationObj } = useCreate();
   const { mutate: updateClass } = useUpdate();
 
-  const handleEnrollmentAction = async (
-    id: number,
-    status: "approved" | "rejected",
-  ) => {
+  const handleEnrollmentAction = async (id: number, status: "approved" | "rejected") => {
     // Optimistic Update
     const queryKey = ["classes", "show", classId];
     await queryClient.cancelQueries({ queryKey });
     const previousClass = queryClient.getQueryData(queryKey);
 
     if (previousClass) {
-      queryClient.setQueryData(
-        queryKey,
-        (old: { data?: Class } | undefined) => {
-          if (!old?.data) return old;
-          return {
-            ...old,
-            data: {
-              ...old.data,
-              enrollments: old.data.enrollments.map((e: Enrollment) =>
-                e.id === id ? { ...e, status } : e,
-              ),
-            },
-          };
-        },
-      );
+      queryClient.setQueryData(queryKey, (old: { data?: Class } | undefined) => {
+        if (!old?.data) return old;
+        return {
+          ...old,
+          data: {
+            ...old.data,
+            enrollments: old.data.enrollments.map((e: Enrollment) =>
+              e.id === id ? { ...e, status } : e
+            ),
+          },
+        };
+      });
     }
 
     updateEnrollment(
@@ -150,7 +127,7 @@ export const useClassDetails = (classId: string) => {
                 status === "approved"
                   ? t("profileRequests.toasts.approved")
                   : t("profileRequests.toasts.rejected"),
-            }),
+            })
           );
         },
         onError: () => {
@@ -161,7 +138,7 @@ export const useClassDetails = (classId: string) => {
         onSettled: () => {
           void query?.refetch();
         },
-      },
+      }
     );
   };
 
@@ -188,24 +165,16 @@ export const useClassDetails = (classId: string) => {
       {
         onError: () => {
           if (previousClass) queryClient.setQueryData(queryKey, previousClass);
-          toast.error(
-            t(
-              "classes.show.toast.liveToggleError",
-              "Failed to update live status",
-            ),
-          );
+          toast.error(t("classes.show.toast.liveToggleError", "Failed to update live status"));
         },
         onSettled: () => {
           void query?.refetch();
         },
-      },
+      }
     );
   };
 
-  const handleConfirmUnenroll = (
-    unenrollTarget: number | null,
-    callback: () => void,
-  ) => {
+  const handleConfirmUnenroll = (unenrollTarget: number | null, callback: () => void) => {
     if (unenrollTarget) {
       deleteMutation(
         { resource: "enrollments", id: unenrollTarget },
@@ -214,7 +183,7 @@ export const useClassDetails = (classId: string) => {
             callback();
             void query?.refetch();
           },
-        },
+        }
       );
     }
   };

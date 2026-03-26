@@ -3,11 +3,7 @@ import { Assignment, Submission, PeerReview } from "@/types";
 import { UserRole } from "@/types";
 import { BACKEND_URL } from "@/config";
 
-export const useAssignmentData = (
-  id?: string,
-  userId?: string,
-  userRole?: UserRole,
-) => {
+export const useAssignmentData = (id?: string, userId?: string, userRole?: UserRole) => {
   const { query: assignmentQuery } = useShow<Assignment, HttpError>({
     resource: "assignments",
     id,

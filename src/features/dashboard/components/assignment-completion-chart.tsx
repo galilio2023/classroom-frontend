@@ -1,10 +1,4 @@
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import {
   LineChart,
   Line,
@@ -22,9 +16,7 @@ interface AssignmentCompletionChartProps {
   data: AssignmentCompletionTrend[];
 }
 
-export const AssignmentCompletionChart = ({
-  data,
-}: AssignmentCompletionChartProps) => {
+export const AssignmentCompletionChart = ({ data }: AssignmentCompletionChartProps) => {
   const hasData = data && data.length > 0;
 
   return (
@@ -36,22 +28,13 @@ export const AssignmentCompletionChart = ({
           </div>
           Assignment Completion Trend
         </CardTitle>
-        <CardDescription>
-          Completion rates over time for recent assignments.
-        </CardDescription>
+        <CardDescription>Completion rates over time for recent assignments.</CardDescription>
       </CardHeader>
       <CardContent className="h-64 pt-4">
         {hasData ? (
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart
-              data={data}
-              margin={{ top: 5, right: 20, bottom: 5, left: 0 }}
-            >
-              <CartesianGrid
-                strokeDasharray="3 3"
-                className="stroke-border/50"
-                vertical={false}
-              />
+            <LineChart data={data} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" className="stroke-border/50" vertical={false} />
               <XAxis
                 dataKey="assignmentTitle"
                 tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
@@ -87,10 +70,7 @@ export const AssignmentCompletionChart = ({
             </LineChart>
           </ResponsiveContainer>
         ) : (
-          <NoChartData
-            icon={TrendingUp}
-            message="No assignment data available"
-          />
+          <NoChartData icon={TrendingUp} message="No assignment data available" />
         )}
       </CardContent>
     </Card>

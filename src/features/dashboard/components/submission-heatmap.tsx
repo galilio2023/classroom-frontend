@@ -1,18 +1,7 @@
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { useMemo } from "react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 
@@ -61,7 +50,7 @@ export const SubmissionHeatmap = ({ data }: SubmissionHeatmapProps) => {
         <CardDescription>
           {t(
             "portfolioPage.submissionActivityDesc",
-            "Your assignment submission frequency over the last 6 months.",
+            "Your assignment submission frequency over the last 6 months."
           )}
         </CardDescription>
       </CardHeader>
@@ -70,10 +59,7 @@ export const SubmissionHeatmap = ({ data }: SubmissionHeatmapProps) => {
           <div className="flex gap-1">
             <div className="grid grid-rows-7 gap-1 pe-2">
               {days.map((day) => (
-                <span
-                  key={day}
-                  className="text-[10px] text-muted-foreground h-3 flex items-center"
-                >
+                <span key={day} className="text-[10px] text-muted-foreground h-3 flex items-center">
                   {t(`days.${day}`, day)}
                 </span>
               ))}
@@ -86,7 +72,7 @@ export const SubmissionHeatmap = ({ data }: SubmissionHeatmapProps) => {
                       <div
                         className={cn(
                           "w-3 h-3 rounded-sm transition-colors cursor-pointer",
-                          getColor(day.count),
+                          getColor(day.count)
                         )}
                       />
                     </TooltipTrigger>

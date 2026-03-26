@@ -67,11 +67,10 @@ export const ClassCard = ({
   const primaryTeacher = classItem.teachers?.find((t) => t.isPrimary)?.teacher;
   const classColor = classItem.color || "#6366f1";
   const isAssigned =
-    classItem.isTeacherAssigned ||
-    classItem.teachers?.some((t) => t.teacher.id === identity?.id);
+    classItem.isTeacherAssigned || classItem.teachers?.some((t) => t.teacher.id === identity?.id);
   const isEnrolled = classItem.isEnrolled;
   const pendingApp = applications.find(
-    (app) => app.classId === classItem.id && app.status === "pending",
+    (app) => app.classId === classItem.id && app.status === "pending"
   );
   const firstSchedule = classItem.schedules?.[0];
 
@@ -94,9 +93,7 @@ export const ClassCard = ({
           <Badge className="bg-red-500 hover:bg-red-600 text-white border-none px-3 py-1 rounded-full flex items-center gap-1.5 shadow-lg shadow-red-500/20 animate-pulse">
             <span className="h-1.5 w-1.5 rounded-full bg-white animate-ping" />
             <Video className="h-3 w-3" />
-            <span className="text-[10px] font-black uppercase tracking-widest">
-              Live Now
-            </span>
+            <span className="text-[10px] font-black uppercase tracking-widest">Live Now</span>
           </Badge>
         </div>
       )}
@@ -223,13 +220,10 @@ export const ClassCard = ({
               "flex-1 rounded-2xl h-12 md:h-14 font-black uppercase tracking-widest text-[10px] md:text-xs transition-all",
               classItem.isLive
                 ? "bg-red-500 hover:bg-red-600 shadow-lg shadow-red-500/30 border-none text-white"
-                : "border-primary/20 hover:bg-primary/5 text-primary",
+                : "border-primary/20 hover:bg-primary/5 text-primary"
             )}
           >
-            <Link
-              to={`/classes/show/${classItem.id}`}
-              onClick={(e) => e.stopPropagation()}
-            >
+            <Link to={`/classes/show/${classItem.id}`} onClick={(e) => e.stopPropagation()}>
               {classItem.isLive ? (
                 <>
                   <Video className="h-4 w-4 me-2" />
@@ -256,10 +250,7 @@ export const ClassCard = ({
               <MoreHorizontal className="h-5 w-5" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent
-            align="end"
-            className="w-56 md:w-64 p-2 rounded-3xl"
-          >
+          <DropdownMenuContent align="end" className="w-56 md:w-64 p-2 rounded-3xl">
             <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/50 px-3 py-3">
               {t("classes.list.classOptions")}
             </DropdownMenuLabel>
@@ -273,9 +264,7 @@ export const ClassCard = ({
               <div className="p-2 rounded-lg bg-primary/10 text-primary">
                 <Eye className="h-4 w-4" />
               </div>
-              <span className="font-bold text-sm">
-                {t("buttons.viewDetails")}
-              </span>
+              <span className="font-bold text-sm">{t("buttons.viewDetails")}</span>
             </DropdownMenuItem>
             {((isTeacher && isAssigned) || isAdmin) && (
               <>
@@ -289,9 +278,7 @@ export const ClassCard = ({
                   <div className="p-2 rounded-lg bg-primary/10 text-primary">
                     <Pencil className="h-4 w-4" />
                   </div>
-                  <span className="font-bold text-sm">
-                    {t("buttons.editClass")}
-                  </span>
+                  <span className="font-bold text-sm">{t("buttons.editClass")}</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator className="my-2 opacity-50" />
                 <DropdownMenuItem
@@ -304,9 +291,7 @@ export const ClassCard = ({
                   <div className="p-2 rounded-lg bg-primary/10 text-primary">
                     <Copy className="h-4 w-4" />
                   </div>
-                  <span className="font-bold text-sm">
-                    {t("buttons.copyClassContent")}
-                  </span>
+                  <span className="font-bold text-sm">{t("buttons.copyClassContent")}</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={(e) => {
@@ -318,9 +303,7 @@ export const ClassCard = ({
                   <div className="p-2 rounded-lg bg-destructive/10 text-destructive">
                     <Trash2 className="h-4 w-4" />
                   </div>
-                  <span className="font-bold text-sm">
-                    {t("buttons.deleteClass")}
-                  </span>
+                  <span className="font-bold text-sm">{t("buttons.deleteClass")}</span>
                 </DropdownMenuItem>
               </>
             )}

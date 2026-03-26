@@ -83,9 +83,7 @@ const UsersCreate = () => {
             <UserPlus className="h-8 w-8" />
           </div>
           <div>
-            <h1 className="text-4xl font-black tracking-tight">
-              Onboard New User
-            </h1>
+            <h1 className="text-4xl font-black tracking-tight">Onboard New User</h1>
             <p className="text-muted-foreground font-medium">
               Create a new account for a student, teacher, or administrator.
             </p>
@@ -112,8 +110,7 @@ const UsersCreate = () => {
                     </CardTitle>
                   </div>
                   <CardDescription className="font-medium">
-                    Enter the essential profile information to set up the new
-                    account.
+                    Enter the essential profile information to set up the new account.
                   </CardDescription>
                 </CardHeader>
 
@@ -178,10 +175,7 @@ const UsersCreate = () => {
                           <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ms-1">
                             System Role
                           </FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            value={field.value}
-                          >
+                          <Select onValueChange={field.onChange} value={field.value}>
                             <FormControl>
                               <SelectTrigger className="h-12 rounded-2xl border-primary/10 bg-background/50 font-bold text-sm">
                                 <div className="flex items-center gap-2">
@@ -191,22 +185,13 @@ const UsersCreate = () => {
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent className="rounded-2xl bg-white dark:bg-[#09090b] opacity-100 backdrop-blur-none border border-border/50 shadow-2xl">
-                              <SelectItem
-                                value={UserRole.STUDENT}
-                                className="rounded-xl font-bold"
-                              >
+                              <SelectItem value={UserRole.STUDENT} className="rounded-xl font-bold">
                                 Student
                               </SelectItem>
-                              <SelectItem
-                                value={UserRole.TEACHER}
-                                className="rounded-xl font-bold"
-                              >
+                              <SelectItem value={UserRole.TEACHER} className="rounded-xl font-bold">
                                 Teacher
                               </SelectItem>
-                              <SelectItem
-                                value={UserRole.ADMIN}
-                                className="rounded-xl font-bold"
-                              >
+                              <SelectItem value={UserRole.ADMIN} className="rounded-xl font-bold">
                                 Admin
                               </SelectItem>
                             </SelectContent>
@@ -225,10 +210,7 @@ const UsersCreate = () => {
                           <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ms-1">
                             Initial Status
                           </FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            value={field.value}
-                          >
+                          <Select onValueChange={field.onChange} value={field.value}>
                             <FormControl>
                               <SelectTrigger className="h-12 rounded-2xl border-primary/10 bg-background/50 font-bold text-sm">
                                 <div className="flex items-center gap-2">
@@ -274,9 +256,7 @@ const UsersCreate = () => {
                           Department Assignment
                         </FormLabel>
                         <Select
-                          onValueChange={(val) =>
-                            field.onChange(val ? Number(val) : null)
-                          }
+                          onValueChange={(val) => field.onChange(val ? Number(val) : null)}
                           value={field.value?.toString()}
                         >
                           <FormControl>
@@ -317,9 +297,7 @@ const UsersCreate = () => {
                     ) : (
                       <UserPlus className="h-4 w-4 me-2 group-hover:scale-110 transition-transform" />
                     )}
-                    {formLoading
-                      ? "Creating Account..."
-                      : "Create User Account"}
+                    {formLoading ? "Creating Account..." : "Create User Account"}
                     {!formLoading && (
                       <ArrowRight className="h-4 w-4 ms-2 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
                     )}
@@ -358,8 +336,7 @@ const UsersCreate = () => {
                     Administrators
                   </p>
                   <p className="text-sm text-muted-foreground font-medium leading-relaxed">
-                    Full system access, user management, and institutional
-                    settings.
+                    Full system access, user management, and institutional settings.
                   </p>
                 </div>
               </div>
@@ -373,8 +350,7 @@ const UsersCreate = () => {
                     Teachers
                   </p>
                   <p className="text-sm text-muted-foreground font-medium leading-relaxed">
-                    Manage classes, curriculum, assignments, and student
-                    grading.
+                    Manage classes, curriculum, assignments, and student grading.
                   </p>
                 </div>
               </div>
@@ -388,8 +364,7 @@ const UsersCreate = () => {
                     Students
                   </p>
                   <p className="text-sm text-muted-foreground font-medium leading-relaxed">
-                    Access enrolled classes, submit assignments, and track
-                    progress.
+                    Access enrolled classes, submit assignments, and track progress.
                   </p>
                 </div>
               </div>
@@ -403,8 +378,8 @@ const UsersCreate = () => {
                 Next Steps
               </AlertTitle>
               <AlertDescription className="text-sm text-muted-foreground font-medium leading-relaxed">
-                Once created, the user will receive an automated invitation
-                email to set their secure password and complete their profile.
+                Once created, the user will receive an automated invitation email to set their
+                secure password and complete their profile.
               </AlertDescription>
             </div>
           </Alert>

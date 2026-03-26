@@ -16,23 +16,8 @@ type ShowButtonProps = {
   hideText?: boolean; // Add this prop
 } & React.ComponentProps<typeof Button>;
 
-export const ShowButton = React.forwardRef<
-  React.ComponentRef<typeof Button>,
-  ShowButtonProps
->(
-  (
-    {
-      resource,
-      recordItemId,
-      accessControl,
-      meta,
-      hideText,
-      children,
-      onClick,
-      ...rest
-    },
-    ref,
-  ) => {
+export const ShowButton = React.forwardRef<React.ComponentRef<typeof Button>, ShowButtonProps>(
+  ({ resource, recordItemId, accessControl, meta, hideText, children, onClick, ...rest }, ref) => {
     const { hidden, disabled, LinkComponent, to, label } = useShowButton({
       resource,
       id: recordItemId,
@@ -70,7 +55,7 @@ export const ShowButton = React.forwardRef<
         </LinkComponent>
       </Button>
     );
-  },
+  }
 );
 
 ShowButton.displayName = "ShowButton";

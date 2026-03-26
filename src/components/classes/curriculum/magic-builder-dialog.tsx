@@ -19,14 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Zap,
-  Loader2,
-  GraduationCap,
-  MessageSquare,
-  Target,
-  Sparkles,
-} from "lucide-react";
+import { Zap, Loader2, GraduationCap, MessageSquare, Target, Sparkles } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { socket, connectSocket } from "@/lib/socket";
 import { motion, AnimatePresence } from "framer-motion";
@@ -73,11 +66,7 @@ export const MagicBuilderDialog = ({
     if (isGenerating && isOpen && isAiEnabled) {
       void connectSocket();
 
-      const handleProgress = (data: {
-        step: string;
-        progress: number;
-        classId: number;
-      }) => {
+      const handleProgress = (data: { step: string; progress: number; classId: number }) => {
         if (data.classId === classId) {
           setStep(data.step);
           setProgress(data.progress);
@@ -141,8 +130,7 @@ export const MagicBuilderDialog = ({
                   <div className="w-full space-y-4 text-center px-8">
                     <div className="flex justify-between text-xs font-black uppercase tracking-widest text-ai-primary">
                       <span className="flex items-center gap-2">
-                        <Sparkles className="h-3 w-3" />{" "}
-                        {step || t("buttons.generating")}
+                        <Sparkles className="h-3 w-3" /> {step || t("buttons.generating")}
                       </span>
                       <span>{progress}%</span>
                     </div>
@@ -165,9 +153,7 @@ export const MagicBuilderDialog = ({
                     <Input
                       placeholder={t("aiHub.assistant.helper.placeholders.topic")}
                       value={config.topic}
-                      onChange={(e) =>
-                        setConfig({ ...config, topic: e.target.value })
-                      }
+                      onChange={(e) => setConfig({ ...config, topic: e.target.value })}
                       className="rounded-xl border-border/40 focus-visible:ring-ai-primary"
                     />
                   </div>
@@ -179,27 +165,21 @@ export const MagicBuilderDialog = ({
                       </Label>
                       <Select
                         value={config.type}
-                        onValueChange={(
-                          v: "package" | "note" | "quiz" | "assignment",
-                        ) => setConfig({ ...config, type: v })}
+                        onValueChange={(v: "package" | "note" | "quiz" | "assignment") =>
+                          setConfig({ ...config, type: v })
+                        }
                       >
                         <SelectTrigger className="rounded-xl border-border/40">
                           <SelectValue
-                            placeholder={t(
-                              "classes.resource.addDialog.typePlaceholder",
-                            )}
+                            placeholder={t("classes.resource.addDialog.typePlaceholder")}
                           />
                         </SelectTrigger>
                         <SelectContent className="rounded-xl border-none shadow-xl">
-                          <SelectItem value="package">
-                            {t("aiHub.assistant.architect")}
-                          </SelectItem>
+                          <SelectItem value="package">{t("aiHub.assistant.architect")}</SelectItem>
                           <SelectItem value="note">
                             {t("classes.resource.addDialog.types.note")}
                           </SelectItem>
-                          <SelectItem value="quiz">
-                            {t("classes.show.tabs.quizzes")}
-                          </SelectItem>
+                          <SelectItem value="quiz">{t("classes.show.tabs.quizzes")}</SelectItem>
                           <SelectItem value="assignment">
                             {t("classes.show.tabs.assignments")}
                           </SelectItem>
@@ -212,17 +192,13 @@ export const MagicBuilderDialog = ({
                       </Label>
                       <Select
                         value={config.level}
-                        onValueChange={(v: MagicBuilderLevel) =>
-                          setConfig({ ...config, level: v })
-                        }
+                        onValueChange={(v: MagicBuilderLevel) => setConfig({ ...config, level: v })}
                       >
                         <SelectTrigger className="rounded-xl border-border/40">
                           <div className="flex items-center gap-2">
                             <GraduationCap className="h-3.5 w-3.5 text-primary" />
                             <SelectValue
-                              placeholder={t(
-                                "classes.resource.addDialog.typePlaceholder",
-                              )}
+                              placeholder={t("classes.resource.addDialog.typePlaceholder")}
                             />
                           </div>
                         </SelectTrigger>
@@ -247,17 +223,13 @@ export const MagicBuilderDialog = ({
                     </Label>
                     <Select
                       value={config.tone}
-                      onValueChange={(v: MagicBuilderTone) =>
-                        setConfig({ ...config, tone: v })
-                      }
+                      onValueChange={(v: MagicBuilderTone) => setConfig({ ...config, tone: v })}
                     >
                       <SelectTrigger className="rounded-xl border-border/40">
                         <div className="flex items-center gap-2">
                           <MessageSquare className="h-3.5 w-3.5 text-primary" />
                           <SelectValue
-                            placeholder={t(
-                              "classes.resource.addDialog.typePlaceholder",
-                            )}
+                            placeholder={t("classes.resource.addDialog.typePlaceholder")}
                           />
                         </div>
                       </SelectTrigger>
@@ -281,13 +253,9 @@ export const MagicBuilderDialog = ({
                       {t("aiHub.assistant.helper.objectives")}
                     </Label>
                     <Textarea
-                      placeholder={t(
-                        "aiHub.assistant.helper.placeholders.objectives",
-                      )}
+                      placeholder={t("aiHub.assistant.helper.placeholders.objectives")}
                       value={config.objectives}
-                      onChange={(e) =>
-                        setConfig({ ...config, objectives: e.target.value })
-                      }
+                      onChange={(e) => setConfig({ ...config, objectives: e.target.value })}
                       className="resize-none h-20 text-xs rounded-xl border-border/40"
                     />
                   </div>

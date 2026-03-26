@@ -1,14 +1,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  Clock,
-  MapPin,
-  ArrowRight,
-  Radio,
-  Video,
-  Sparkles,
-} from "lucide-react";
+import { Clock, MapPin, ArrowRight, Radio, Video, Sparkles } from "lucide-react";
 import { ScheduleItem } from "@/types/dashboard";
 import { cn } from "@/lib/utils";
 import { isWithinInterval, parse } from "date-fns";
@@ -19,10 +12,7 @@ interface ScheduleItemCardProps {
   onClick: (id: string) => void;
 }
 
-export const ScheduleItemCard: React.FC<ScheduleItemCardProps> = ({
-  item,
-  onClick,
-}) => {
+export const ScheduleItemCard: React.FC<ScheduleItemCardProps> = ({ item, onClick }) => {
   const now = new Date();
   let isLive = false;
 
@@ -41,7 +31,7 @@ export const ScheduleItemCard: React.FC<ScheduleItemCardProps> = ({
           "relative p-5 rounded-2xl border transition-all duration-500 cursor-pointer group overflow-hidden",
           isLive
             ? "bg-primary/3 border-primary/30 shadow-lg shadow-primary/5"
-            : "bg-background/50 border-black/3 dark:border-white/3 hover:border-primary/20 hover:bg-primary/2",
+            : "bg-background/50 border-black/3 dark:border-white/3 hover:border-primary/20 hover:bg-primary/2"
         )}
         onClick={() => onClick(item.id.toString())}
       >
@@ -51,7 +41,7 @@ export const ScheduleItemCard: React.FC<ScheduleItemCardProps> = ({
             "absolute start-0 top-0 w-1 h-full transition-all duration-500",
             isLive
               ? "bg-primary shadow-[0_0_10px_rgba(59,130,246,0.5)]"
-              : "bg-muted-foreground/10 group-hover:bg-primary/40",
+              : "bg-muted-foreground/10 group-hover:bg-primary/40"
           )}
         />
 
@@ -62,14 +52,10 @@ export const ScheduleItemCard: React.FC<ScheduleItemCardProps> = ({
                 "p-3 rounded-xl transition-all duration-500 group-hover:scale-110 group-hover:rotate-3 shadow-sm",
                 isLive
                   ? "bg-primary text-primary-foreground"
-                  : "bg-muted/50 text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary",
+                  : "bg-muted/50 text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary"
               )}
             >
-              {isLive ? (
-                <Video className="h-5 w-5" />
-              ) : (
-                <Clock className="h-5 w-5" />
-              )}
+              {isLive ? <Video className="h-5 w-5" /> : <Clock className="h-5 w-5" />}
             </div>
 
             <div className="space-y-1 min-w-0">
@@ -77,9 +63,7 @@ export const ScheduleItemCard: React.FC<ScheduleItemCardProps> = ({
                 <p
                   className={cn(
                     "text-sm font-black tracking-tight transition-colors truncate",
-                    isLive
-                      ? "text-primary"
-                      : "text-foreground group-hover:text-primary",
+                    isLive ? "text-primary" : "text-foreground group-hover:text-primary"
                   )}
                 >
                   {item.name}
@@ -98,8 +82,7 @@ export const ScheduleItemCard: React.FC<ScheduleItemCardProps> = ({
                 <div className="flex items-center gap-1.5">
                   <Clock className="h-3 w-3 opacity-40" />
                   <span>
-                    {item.todaySchedule?.startTime} -{" "}
-                    {item.todaySchedule?.endTime}
+                    {item.todaySchedule?.startTime} - {item.todaySchedule?.endTime}
                   </span>
                 </div>
                 {item.todaySchedule?.room && (
@@ -133,7 +116,7 @@ export const ScheduleItemCard: React.FC<ScheduleItemCardProps> = ({
                 "h-10 w-10 rounded-xl transition-all duration-500 shadow-sm",
                 isLive
                   ? "bg-primary text-primary-foreground shadow-primary/20"
-                  : "bg-muted/50 text-muted-foreground opacity-0 group-hover:opacity-100 hover:bg-primary hover:text-primary-foreground",
+                  : "bg-muted/50 text-muted-foreground opacity-0 group-hover:opacity-100 hover:bg-primary hover:text-primary-foreground"
               )}
             >
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />

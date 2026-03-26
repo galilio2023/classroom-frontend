@@ -13,26 +13,18 @@ interface Props {
   isAr: boolean;
 }
 
-export const PerformanceCard = ({
-  assignment,
-  submission,
-  blendedGrade,
-  isAr,
-}: Props) => {
+export const PerformanceCard = ({ assignment, submission, blendedGrade, isAr }: Props) => {
   const { t } = useTranslation();
 
   return (
     <AnimatePresence>
       {submission?.grade && (
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-        >
+        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
           <Card className="border-none shadow-2xl bg-linear-to-br from-primary to-ai-primary text-primary-foreground overflow-hidden rounded-[2.5rem] md:rounded-[3rem] relative text-start">
             <div
               className={cn(
                 "absolute opacity-10 rotate-12",
-                isAr ? "-start-12 -top-12" : "-end-12 -top-12",
+                isAr ? "-start-12 -top-12" : "-end-12 -top-12"
               )}
             >
               <Trophy className="h-64 w-64" />
@@ -49,9 +41,7 @@ export const PerformanceCard = ({
                   <p className="text-[10px] font-black uppercase tracking-widest opacity-60">
                     {t("assignments.show.instructorGrade")}
                   </p>
-                  <p className="text-5xl md:text-6xl font-black">
-                    {submission.grade}%
-                  </p>
+                  <p className="text-5xl md:text-6xl font-black">{submission.grade}%</p>
                 </div>
                 {blendedGrade && (
                   <div className="space-y-1 pt-6 border-t border-white/10">
@@ -86,9 +76,7 @@ export const PerformanceCard = ({
                 className="w-full rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 bg-white text-primary hover:bg-white/90 shadow-2xl shadow-black/20"
               >
                 {t("buttons.viewReport")}
-                <ArrowRight
-                  className={cn("h-4 w-4 ms-2", isAr && "rotate-180 me-2 ms-0")}
-                />
+                <ArrowRight className={cn("h-4 w-4 ms-2", isAr && "rotate-180 me-2 ms-0")} />
               </Button>
             </CardContent>
           </Card>

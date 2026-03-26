@@ -1,12 +1,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {
-  ChevronLeft,
-  ChevronRight,
-  RotateCcw,
-  CheckCircle2,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, RotateCcw, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 
@@ -20,10 +15,7 @@ interface FlashcardPlayerProps {
   onComplete: () => void;
 }
 
-export const FlashcardPlayer = ({
-  cards,
-  onComplete,
-}: FlashcardPlayerProps) => {
+export const FlashcardPlayer = ({ cards, onComplete }: FlashcardPlayerProps) => {
   const { t, i18n } = useTranslation();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
@@ -98,9 +90,7 @@ export const FlashcardPlayer = ({
               <RotateCcw className="h-4 w-4 me-2 rtl:me-0 rtl:ms-2" />{" "}
               {t("aiHub.studyLab.flashcards.restart")}
             </Button>
-            <Button onClick={onComplete}>
-              {t("aiHub.studyLab.flashcards.backToLab")}
-            </Button>
+            <Button onClick={onComplete}>{t("aiHub.studyLab.flashcards.backToLab")}</Button>
           </div>
         </CardContent>
       </Card>
@@ -126,7 +116,7 @@ export const FlashcardPlayer = ({
                   ? "bg-primary w-8"
                   : i < currentIndex
                     ? "bg-primary/40"
-                    : "bg-muted",
+                    : "bg-muted"
               )}
             />
           ))}
@@ -141,15 +131,13 @@ export const FlashcardPlayer = ({
         <div
           className={cn(
             "relative w-full h-full transition-all duration-500 preserve-3d",
-            isFlipped ? "rotate-y-180" : "",
+            isFlipped ? "rotate-y-180" : ""
           )}
         >
           {/* Front */}
           <Card className="absolute inset-0 backface-hidden border-2 border-primary/10 shadow-xl flex items-center justify-center p-8 text-center bg-card">
             <CardContent className="p-0">
-              <p className="text-xl font-bold leading-relaxed">
-                {currentCard.front}
-              </p>
+              <p className="text-xl font-bold leading-relaxed">{currentCard.front}</p>
               <p className="absolute bottom-4 start-0 end-0 text-[10px] uppercase font-black tracking-tighter opacity-30">
                 {t("aiHub.studyLab.flashcards.flipHint")}
               </p>
@@ -159,9 +147,7 @@ export const FlashcardPlayer = ({
           {/* Back */}
           <Card className="absolute inset-0 backface-hidden rotate-y-180 border-2 border-primary/20 shadow-2xl flex items-center justify-center p-8 text-center bg-primary/5 dark:bg-primary/10">
             <CardContent className="p-0">
-              <p className="text-lg font-medium text-primary leading-relaxed">
-                {currentCard.back}
-              </p>
+              <p className="text-lg font-medium text-primary leading-relaxed">{currentCard.back}</p>
               <p className="absolute bottom-4 start-0 end-0 text-[10px] uppercase font-black tracking-tighter text-primary/40">
                 {t("aiHub.studyLab.flashcards.flipBackHint")}
               </p>

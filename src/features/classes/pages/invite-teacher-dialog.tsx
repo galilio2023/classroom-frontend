@@ -14,12 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  useSelect,
-  useCreate,
-  useGetIdentity,
-  HttpError,
-} from "@refinedev/core";
+import { useSelect, useCreate, useGetIdentity, HttpError } from "@refinedev/core";
 import { User, UserRole } from "@/types";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -41,9 +36,7 @@ export const InviteTeacherDialog = ({
 }: InviteTeacherDialogProps) => {
   const { t } = useTranslation();
   const { data: identity } = useGetIdentity<User>();
-  const [selectedTeacherId, setSelectedTeacherId] = useState<string | null>(
-    null,
-  );
+  const [selectedTeacherId, setSelectedTeacherId] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
 
   const { mutate: addTeacher, mutation } = useCreate();
@@ -84,17 +77,16 @@ export const InviteTeacherDialog = ({
           const error = err as HttpError;
           toast.error(
             (error?.response?.data as any)?.message ||
-              t("classes.dialogs.inviteTeacher.toast.error"),
+              t("classes.dialogs.inviteTeacher.toast.error")
           );
         },
-      },
+      }
     );
   };
 
   const availableTeachers = teacherOptions.filter(
     (option) =>
-      !existingTeacherIds.includes(String(option.value)) &&
-      String(option.value) !== identity?.id,
+      !existingTeacherIds.includes(String(option.value)) && String(option.value) !== identity?.id
   );
 
   return (
@@ -102,21 +94,12 @@ export const InviteTeacherDialog = ({
       <DialogContent className="text-start">
         <DialogHeader>
           <DialogTitle>{t("classes.dialogs.inviteTeacher.title")}</DialogTitle>
-          <DialogDescription>
-            {t("classes.dialogs.inviteTeacher.description")}
-          </DialogDescription>
+          <DialogDescription>{t("classes.dialogs.inviteTeacher.description")}</DialogDescription>
         </DialogHeader>
         <div className="py-4">
-          <Select
-            onValueChange={setSelectedTeacherId}
-            value={selectedTeacherId ?? undefined}
-          >
+          <Select onValueChange={setSelectedTeacherId} value={selectedTeacherId ?? undefined}>
             <SelectTrigger>
-              <SelectValue
-                placeholder={t(
-                  "classes.dialogs.inviteTeacher.fieldPlaceholder",
-                )}
-              />
+              <SelectValue placeholder={t("classes.dialogs.inviteTeacher.fieldPlaceholder")} />
             </SelectTrigger>
             <SelectContent>
               {availableTeachers.length > 0 ? (

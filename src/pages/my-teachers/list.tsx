@@ -1,13 +1,6 @@
 import { ListView } from "@/components/refine-ui/views/list-view";
 import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
-import {
-  GraduationCap,
-  Loader2,
-  MessageSquare,
-  Eye,
-  Layers,
-  UserCheck,
-} from "lucide-react";
+import { GraduationCap, Loader2, MessageSquare, Eye, Layers, UserCheck } from "lucide-react";
 import { useMemo } from "react";
 import { useList, useGetIdentity, useNavigation } from "@refinedev/core";
 import { User, UserRole } from "@/types";
@@ -142,10 +135,7 @@ const MyTeachersList = () => {
                 >
                   <div className="flex items-center gap-4 mb-6">
                     <Avatar className="h-16 w-16 rounded-full border-4 border-background shadow-lg group-hover:scale-105 transition-transform duration-500">
-                      <AvatarImage
-                        src={teacher.image ?? undefined}
-                        alt={teacher.name}
-                      />
+                      <AvatarImage src={teacher.image ?? undefined} alt={teacher.name} />
                       <AvatarFallback className="bg-primary/10 text-primary font-black text-xl">
                         {teacher.name.substring(0, 2).toUpperCase()}
                       </AvatarFallback>
@@ -154,9 +144,7 @@ const MyTeachersList = () => {
                       <h3 className="text-xl font-black tracking-tight truncate group-hover:text-primary transition-colors leading-tight">
                         {teacher.name}
                       </h3>
-                      <p className="text-sm text-muted-foreground truncate">
-                        {teacher.email}
-                      </p>
+                      <p className="text-sm text-muted-foreground truncate">{teacher.email}</p>
                     </div>
                   </div>
 
@@ -185,9 +173,7 @@ const MyTeachersList = () => {
                         }}
                       >
                         {t("buttons.viewProfile")}
-                        <Eye
-                          className={cn("h-4 w-4 ms-2", isAr && "me-2 ms-0")}
-                        />
+                        <Eye className={cn("h-4 w-4 ms-2", isAr && "me-2 ms-0")} />
                       </a>
                     </Button>
                   </div>

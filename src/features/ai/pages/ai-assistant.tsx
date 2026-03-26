@@ -2,13 +2,7 @@ import React from "react";
 import { AIAssignmentHelper } from "@/components/ai-assignment-helper";
 import { AIQuizGenerator } from "@/components/ai-quiz-generator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Sparkles,
-  FileText,
-  BrainCircuit,
-  LayoutDashboard,
-  Info,
-} from "lucide-react";
+import { Sparkles, FileText, BrainCircuit, LayoutDashboard, Info } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
 import usePageTitle from "@/hooks/use-page-title";
@@ -69,10 +63,7 @@ export const AIAssistantPage: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12 items-start">
         {/* Main Content Area */}
         <div className="lg:col-span-8 space-y-10">
-          <Tabs
-            defaultValue="assignment"
-            className="w-full space-y-8 md:space-y-12"
-          >
+          <Tabs defaultValue="assignment" className="w-full space-y-8 md:space-y-12">
             <div className="sticky top-20 z-40">
               <div className="rounded-3xl border border-border/40 bg-background/40 backdrop-blur-3xl p-1.5 shadow-2xl shadow-black/5">
                 <TabsList className="grid w-full grid-cols-2 h-12 md:h-14 bg-muted/20 gap-1 rounded-[1.25rem]">
@@ -101,17 +92,11 @@ export const AIAssistantPage: React.FC = () => {
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
               >
-                <TabsContent
-                  value="assignment"
-                  className="mt-0 focus-visible:outline-none"
-                >
+                <TabsContent value="assignment" className="mt-0 focus-visible:outline-none">
                   <AIAssignmentHelper />
                 </TabsContent>
 
-                <TabsContent
-                  value="quiz"
-                  className="mt-0 focus-visible:outline-none"
-                >
+                <TabsContent value="quiz" className="mt-0 focus-visible:outline-none">
                   <AIQuizGenerator />
                 </TabsContent>
               </motion.div>

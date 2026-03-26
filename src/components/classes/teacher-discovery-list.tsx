@@ -63,13 +63,9 @@ export const TeacherDiscoveryList = () => {
       let targetScroll;
 
       if (direction === "left") {
-        targetScroll = isRtl
-          ? currentScroll + scrollAmount
-          : currentScroll - scrollAmount;
+        targetScroll = isRtl ? currentScroll + scrollAmount : currentScroll - scrollAmount;
       } else {
-        targetScroll = isRtl
-          ? currentScroll - scrollAmount
-          : currentScroll + scrollAmount;
+        targetScroll = isRtl ? currentScroll - scrollAmount : currentScroll + scrollAmount;
       }
 
       scrollContainerRef.current.scrollTo({
@@ -111,9 +107,7 @@ export const TeacherDiscoveryList = () => {
           <div className="p-2 rounded-xl bg-primary/10 text-primary">
             <Tv className="h-6 w-6" />
           </div>
-          <h2 className="text-2xl font-black tracking-tight">
-            {t("classes.list.discover")}
-          </h2>
+          <h2 className="text-2xl font-black tracking-tight">{t("classes.list.discover")}</h2>
         </div>
         <div className="flex gap-2">
           <Button
@@ -209,8 +203,7 @@ export const TeacherDiscoveryList = () => {
                   </span>
                   <div className="flex items-center gap-1 text-white/60 text-[10px] font-bold">
                     <Users className="h-3 w-3" />
-                    {channel.totalViews.toLocaleString()}{" "}
-                    {t("teacherChannel.labels.views")}
+                    {channel.totalViews.toLocaleString()} {t("teacherChannel.labels.views")}
                   </div>
                 </div>
               </div>

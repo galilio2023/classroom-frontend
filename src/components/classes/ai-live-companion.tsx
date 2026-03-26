@@ -85,8 +85,7 @@ export const AILiveCompanion = ({
       open?.({
         type: "error",
         message: "Microphone Access Required",
-        description:
-          "Please enable your microphone in browser settings to use the AI Co-Teacher.",
+        description: "Please enable your microphone in browser settings to use the AI Co-Teacher.",
         key: "mic-denied-companion",
       });
     }
@@ -102,15 +101,12 @@ export const AILiveCompanion = ({
         // 🛡️ PRIVACY GUARD: Stop hardware microphone if tab is hidden
         if (isListening) {
           stopListening();
-          console.warn(
-            "🔒 Tab hidden: Microphone and Speech paused for privacy.",
-          );
+          console.warn("🔒 Tab hidden: Microphone and Speech paused for privacy.");
         }
       }
     };
     document.addEventListener("visibilitychange", handleVisibilityChange);
-    return () =>
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
   }, [isJoined, isListening, stopListening]);
 
   // 🛡️ MASTER SWITCH: Global AI Kill-switch enforcement
@@ -119,8 +115,7 @@ export const AILiveCompanion = ({
   // 🛡️ SSR SAFETY: Initialize browser-only features after mount
   useEffect(() => {
     const SpeechRecognition =
-      (window as any).SpeechRecognition ||
-      (window as any).webkitSpeechRecognition;
+      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     setIsBrowserSupported(!!SpeechRecognition);
     setIsHydrated(true);
   }, []);
@@ -150,8 +145,7 @@ export const AILiveCompanion = ({
     };
   }, []);
 
-  if (!isHydrated || isParent || isAccessLoading || canAccessAI?.can === false)
-    return null;
+  if (!isHydrated || isParent || isAccessLoading || canAccessAI?.can === false) return null;
 
   // 🛡️ Global Master Switch: Graceful Degradation
   if (!isAiEnabled) {
@@ -160,12 +154,10 @@ export const AILiveCompanion = ({
         <div className="bg-destructive/10 p-6 rounded-full mb-6">
           <BrainCircuit className="w-12 h-12 text-destructive grayscale" />
         </div>
-        <h3 className="text-2xl font-bold text-white mb-4">
-          AI Co-Teacher Offline
-        </h3>
+        <h3 className="text-2xl font-bold text-white mb-4">AI Co-Teacher Offline</h3>
         <p className="text-muted-foreground max-w-xs mx-auto">
-          The AI Co-teacher features are currently undergoing maintenance to
-          improve your experience.
+          The AI Co-teacher features are currently undergoing maintenance to improve your
+          experience.
         </p>
       </div>
     );
@@ -191,7 +183,7 @@ export const AILiveCompanion = ({
             ? "bg-black/90 border-ai-primary/40 shadow-ai-primary/20"
             : visualState === "listening"
               ? "bg-orange-950/20 border-orange-500/40 shadow-orange-500/20"
-              : "bg-green-950/20 border-green-500/40 shadow-green-500/20",
+              : "bg-green-950/20 border-green-500/40 shadow-green-500/20"
       )}
     >
       {!isJoined && (
@@ -199,36 +191,23 @@ export const AILiveCompanion = ({
           {isPermissionDenied ? (
             <div className="bg-destructive/10 border border-destructive/20 p-6 rounded-2xl max-w-xs animate-in fade-in zoom-in duration-300">
               <Mic className="w-10 h-10 text-destructive mx-auto mb-3" />
-              <h4 className="text-white font-bold mb-2">
-                Microphone Access Denied
-              </h4>
+              <h4 className="text-white font-bold mb-2">Microphone Access Denied</h4>
               <p className="text-xs text-muted-foreground mb-4">
-                Please enable microphone permissions in your browser settings to
-                interact with the AI Co-Teacher.
+                Please enable microphone permissions in your browser settings to interact with the
+                AI Co-Teacher.
               </p>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => window.location.reload()}
-              >
+              <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
                 Try Again
               </Button>
             </div>
           ) : !isBrowserSupported && isHydrated ? (
             <div className="bg-destructive/10 border border-destructive/20 p-6 rounded-2xl max-w-xs animate-in fade-in zoom-in duration-300">
               <AlertCircle className="w-10 h-10 text-destructive mx-auto mb-3" />
-              <h4 className="text-white font-bold mb-2">
-                Browser Not Supported
-              </h4>
+              <h4 className="text-white font-bold mb-2">Browser Not Supported</h4>
               <p className="text-xs text-muted-foreground mb-4">
-                Speech interaction requires a modern browser like Chrome or
-                Edge.
+                Speech interaction requires a modern browser like Chrome or Edge.
               </p>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => window.location.reload()}
-              >
+              <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
                 Retry Connection
               </Button>
             </div>
@@ -239,8 +218,8 @@ export const AILiveCompanion = ({
                 Start Interactive AI Session
               </h3>
               <p className="text-muted-foreground text-sm mb-8 max-w-xs">
-                Click the button below to allow your AI Co-Teacher to speak and
-                listen for your questions.
+                Click the button below to allow your AI Co-Teacher to speak and listen for your
+                questions.
               </p>
               <Button
                 size="lg"
@@ -306,7 +285,7 @@ export const AILiveCompanion = ({
                 ? "border-white/20"
                 : visualState === "listening"
                   ? "border-orange-500/50"
-                  : "border-green-500/50",
+                  : "border-green-500/50"
             )}
           >
             {photo ? (
@@ -330,7 +309,7 @@ export const AILiveCompanion = ({
                   ? "bg-ai-primary text-white animate-pulse"
                   : visualState === "listening"
                     ? "bg-orange-500 text-white"
-                    : "bg-green-500 text-white",
+                    : "bg-green-500 text-white"
               )}
             >
               {visualState === "talking"
@@ -350,9 +329,7 @@ export const AILiveCompanion = ({
               <BrainCircuit className="w-5 h-5" />
             )}
             <span className="font-black uppercase tracking-tighter text-sm">
-              {visualState === "listening"
-                ? "Voice Captured"
-                : "Synthesizing Lesson"}
+              {visualState === "listening" ? "Voice Captured" : "Synthesizing Lesson"}
             </span>
           </div>
 
@@ -394,14 +371,10 @@ export const AILiveCompanion = ({
                 "rounded-2xl h-14 px-8 font-black uppercase tracking-widest text-xs gap-3 transition-all shadow-lg",
                 isListening
                   ? "bg-orange-500 hover:bg-orange-600 text-white border-none animate-pulse"
-                  : "bg-ai-primary hover:bg-ai-primary/90 text-white border-none ai-gradient-border",
+                  : "bg-ai-primary hover:bg-ai-primary/90 text-white border-none ai-gradient-border"
               )}
             >
-              {isListening ? (
-                <Mic className="w-5 h-5" />
-              ) : (
-                <Hand className="w-5 h-5" />
-              )}
+              {isListening ? <Mic className="w-5 h-5" /> : <Hand className="w-5 h-5" />}
               {isListening ? "Listening..." : "Raise Hand to Ask"}
             </Button>
           </div>

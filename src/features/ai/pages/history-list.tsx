@@ -36,9 +36,7 @@ interface IAIActivityLog {
 
 const AIHistoryList = () => {
   const { t, i18n } = useTranslation();
-  usePageTitle(
-    t("resources.ai-history.label", { defaultValue: "AI Study History" }),
-  );
+  usePageTitle(t("resources.ai-history.label", { defaultValue: "AI Study History" }));
   const { show } = useNavigation();
   const [searchQuery, setSearchQuery] = useState("");
   const isAr = i18n.language === "ar";
@@ -111,8 +109,7 @@ const AIHistoryList = () => {
               </h1>
               <p className="text-muted-foreground font-medium">
                 {t("aiHub.history.description", {
-                  defaultValue:
-                    "Review and revisit your previous AI-powered learning sessions.",
+                  defaultValue: "Review and revisit your previous AI-powered learning sessions.",
                 })}
               </p>
             </div>
@@ -190,18 +187,13 @@ const AIHistoryList = () => {
                   <CardHeader className="p-6 pb-4">
                     <div className="flex items-start justify-between">
                       <div
-                        className={cn(
-                          "p-2.5 rounded-xl shadow-sm",
-                          toolInfo.bg,
-                          toolInfo.color,
-                        )}
+                        className={cn("p-2.5 rounded-xl shadow-sm", toolInfo.bg, toolInfo.color)}
                       >
                         <toolInfo.icon className="h-5 w-5" />
                       </div>
                       <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">
                         <Calendar className="h-3 w-3" />
-                        {log.createdAt &&
-                          format(new Date(log.createdAt), "MMM d, yyyy")}
+                        {log.createdAt && format(new Date(log.createdAt), "MMM d, yyyy")}
                       </div>
                     </div>
                     <CardTitle className="text-lg font-black tracking-tight mt-4 line-clamp-2 min-h-[3.5rem]">

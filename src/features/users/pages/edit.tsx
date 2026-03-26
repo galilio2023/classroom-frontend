@@ -95,9 +95,7 @@ const UsersEdit = () => {
             <Pencil className="h-8 w-8" />
           </div>
           <div>
-            <h1 className="text-4xl font-black tracking-tight">
-              {t("profile.editTitle")}
-            </h1>
+            <h1 className="text-4xl font-black tracking-tight">{t("profile.editTitle")}</h1>
             <p className="text-muted-foreground font-medium">
               {t("profile.editDesc", { name: user?.name || "User" })}
             </p>
@@ -177,7 +175,7 @@ const UsersEdit = () => {
                                 <Mail
                                   className={cn(
                                     "absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors",
-                                    "start-4",
+                                    "start-4"
                                   )}
                                 />
                                 <Input
@@ -186,7 +184,7 @@ const UsersEdit = () => {
                                   disabled={!isAdmin}
                                   className={cn(
                                     "h-12 rounded-2xl border-primary/10 bg-background/50 focus:bg-background transition-all font-bold disabled:opacity-50 disabled:cursor-not-allowed",
-                                    isAr ? "pe-11" : "ps-11",
+                                    isAr ? "pe-11" : "ps-11"
                                   )}
                                 />
                               </div>
@@ -216,9 +214,7 @@ const UsersEdit = () => {
                                 <SelectTrigger className="h-12 rounded-2xl border-primary/10 bg-background/50 font-bold text-sm disabled:opacity-50 disabled:cursor-not-allowed">
                                   <div className="flex items-center gap-2">
                                     <Shield className="h-4 w-4 text-primary" />
-                                    <SelectValue
-                                      placeholder={t("profile.labels.role")}
-                                    />
+                                    <SelectValue placeholder={t("profile.labels.role")} />
                                   </div>
                                 </SelectTrigger>
                               </FormControl>
@@ -235,10 +231,7 @@ const UsersEdit = () => {
                                 >
                                   {t("roles.teacher")}
                                 </SelectItem>
-                                <SelectItem
-                                  value={UserRole.ADMIN}
-                                  className="rounded-xl font-bold"
-                                >
+                                <SelectItem value={UserRole.ADMIN} className="rounded-xl font-bold">
                                   {t("roles.admin")}
                                 </SelectItem>
                               </SelectContent>
@@ -271,9 +264,7 @@ const UsersEdit = () => {
                                 <SelectTrigger className="h-12 rounded-2xl border-primary/10 bg-background/50 font-bold text-sm disabled:opacity-50 disabled:cursor-not-allowed">
                                   <div className="flex items-center gap-2">
                                     <Activity className="h-4 w-4 text-primary" />
-                                    <SelectValue
-                                      placeholder={t("profile.labels.status")}
-                                    />
+                                    <SelectValue placeholder={t("profile.labels.status")} />
                                   </div>
                                 </SelectTrigger>
                               </FormControl>
@@ -323,9 +314,7 @@ const UsersEdit = () => {
                               {t("profile.labels.department")}
                             </FormLabel>
                             <Select
-                              onValueChange={(val) =>
-                                field.onChange(val ? Number(val) : null)
-                              }
+                              onValueChange={(val) => field.onChange(val ? Number(val) : null)}
                               value={field.value?.toString()}
                               disabled={!isAdmin}
                             >
@@ -333,11 +322,7 @@ const UsersEdit = () => {
                                 <SelectTrigger className="h-12 rounded-2xl border-primary/10 bg-background/50 font-bold text-sm disabled:opacity-50 disabled:cursor-not-allowed">
                                   <div className="flex items-center gap-2">
                                     <Building2 className="h-4 w-4 text-primary" />
-                                    <SelectValue
-                                      placeholder={t(
-                                        "profile.labels.department",
-                                      )}
-                                    />
+                                    <SelectValue placeholder={t("profile.labels.department")} />
                                   </div>
                                 </SelectTrigger>
                               </FormControl>
@@ -372,7 +357,7 @@ const UsersEdit = () => {
                                 <Phone
                                   className={cn(
                                     "absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors",
-                                    "start-4",
+                                    "start-4"
                                   )}
                                 />
                                 <Input
@@ -381,7 +366,7 @@ const UsersEdit = () => {
                                   value={field.value || ""}
                                   className={cn(
                                     "h-12 rounded-2xl border-primary/10 bg-background/50 focus:bg-background transition-all font-bold",
-                                    isAr ? "pe-11" : "ps-11",
+                                    isAr ? "pe-11" : "ps-11"
                                   )}
                                 />
                               </div>
@@ -406,7 +391,7 @@ const UsersEdit = () => {
                               <MapPin
                                 className={cn(
                                   "absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors",
-                                  "start-4",
+                                  "start-4"
                                 )}
                               />
                               <Input
@@ -415,7 +400,7 @@ const UsersEdit = () => {
                                 value={field.value || ""}
                                 className={cn(
                                   "h-12 rounded-2xl border-primary/10 bg-background/50 focus:bg-background transition-all font-bold",
-                                  isAr ? "pe-11" : "ps-11",
+                                  isAr ? "pe-11" : "ps-11"
                                 )}
                               />
                             </div>
@@ -461,14 +446,12 @@ const UsersEdit = () => {
                     ) : (
                       <Save className="h-4 w-4 me-2 group-hover:scale-110 transition-transform" />
                     )}
-                    {formLoading
-                      ? t("profile.toasts.saving")
-                      : t("buttons.saveProfile")}
+                    {formLoading ? t("profile.toasts.saving") : t("buttons.saveProfile")}
                     {!formLoading && (
                       <ArrowRight
                         className={cn(
                           "h-4 w-4 ms-2 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all",
-                          isAr && "rotate-180",
+                          isAr && "rotate-180"
                         )}
                       />
                     )}
@@ -549,9 +532,7 @@ const UsersEdit = () => {
                 <p className="text-[10px] font-black uppercase tracking-widest text-green-600">
                   {t("profile.labels.status")}
                 </p>
-                <p className="text-lg font-black text-green-700">
-                  {t("profile.statusBadge")}
-                </p>
+                <p className="text-lg font-black text-green-700">{t("profile.statusBadge")}</p>
               </div>
             </Card>
           )}

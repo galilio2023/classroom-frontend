@@ -104,10 +104,7 @@ export const PhysicsLab: React.FC<PhysicsLabProps> = ({
         setShowWin(true);
         onComplete?.(100);
         toast.success(t("physics.lab.targetHit" as any, "Direct Hit!"), {
-          description: t(
-            "physics.lab.scoreMsg" as any,
-            "You've mastered projectile motion!",
-          ),
+          description: t("physics.lab.scoreMsg" as any, "You've mastered projectile motion!"),
           icon: <Trophy className="text-yellow-500" />,
         });
       } else {
@@ -115,20 +112,13 @@ export const PhysicsLab: React.FC<PhysicsLabProps> = ({
           description:
             x < targetX
               ? t("physics.lab.tooShort" as any, "A bit short. Try more power!")
-              : t(
-                  "physics.lab.tooLong" as any,
-                  "Over-shot the target. Adjust your angle.",
-                ),
+              : t("physics.lab.tooLong" as any, "Over-shot the target. Adjust your angle."),
         });
       }
     }
   };
 
-  const draw = (
-    ctx: CanvasRenderingContext2D,
-    currentX: number,
-    currentY: number,
-  ) => {
+  const draw = (ctx: CanvasRenderingContext2D, currentX: number, currentY: number) => {
     const canvas = canvasRef.current!;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -211,10 +201,7 @@ export const PhysicsLab: React.FC<PhysicsLabProps> = ({
             </h3>
           </div>
           <p className="text-sm text-muted-foreground font-medium">
-            {t(
-              "physics.lab.desc",
-              "Hit the target using the laws of projectile motion.",
-            )}
+            {t("physics.lab.desc", "Hit the target using the laws of projectile motion.")}
           </p>
         </div>
 
@@ -262,9 +249,7 @@ export const PhysicsLab: React.FC<PhysicsLabProps> = ({
                   <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                     {t("physics.lab.velocity", "Initial Velocity")}
                   </label>
-                  <span className="font-black text-primary">
-                    {velocity} m/s
-                  </span>
+                  <span className="font-black text-primary">{velocity} m/s</span>
                 </div>
                 <Slider
                   value={[velocity]}
@@ -308,7 +293,7 @@ export const PhysicsLab: React.FC<PhysicsLabProps> = ({
                 <p className="text-[11px] font-medium text-muted-foreground leading-tight">
                   {t(
                     "physics.lab.tip",
-                    "Try a 45° angle for maximum horizontal range in a vacuum.",
+                    "Try a 45° angle for maximum horizontal range in a vacuum."
                   )}
                 </p>
               </div>
@@ -344,7 +329,7 @@ export const PhysicsLab: React.FC<PhysicsLabProps> = ({
                     <p className="text-emerald-50/80 font-bold max-w-sm">
                       {t(
                         "physics.lab.winMsg",
-                        "You accurately calculated the trajectory and hit the target within tolerance!",
+                        "You accurately calculated the trajectory and hit the target within tolerance!"
                       )}
                     </p>
                   </div>

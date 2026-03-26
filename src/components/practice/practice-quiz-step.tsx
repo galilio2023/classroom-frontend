@@ -46,9 +46,7 @@ export const PracticeQuizStep: React.FC<PracticeQuizStepProps> = ({
       </div>
 
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold leading-relaxed">
-          {currentQuestion.question}
-        </h3>
+        <h3 className="text-lg font-semibold leading-relaxed">{currentQuestion.question}</h3>
         <div className="grid gap-3">
           {currentQuestion.options.map((option, idx) => (
             <button
@@ -58,7 +56,7 @@ export const PracticeQuizStep: React.FC<PracticeQuizStepProps> = ({
                 "p-4 rounded-xl border-2 text-start transition-all hover:bg-accent",
                 selectedOption === option
                   ? "border-primary bg-primary/5 ring-2 ring-primary/20"
-                  : "border-border bg-card",
+                  : "border-border bg-card"
               )}
             >
               <span className="font-medium">{option}</span>
@@ -80,12 +78,7 @@ export const PracticeQuizStep: React.FC<PracticeQuizStepProps> = ({
           ) : (
             <>
               {t("classes.quiz.nextQuestion")}
-              <ArrowRight
-                className={cn(
-                  "h-4 w-4 ms-2",
-                  isArabic && "rotate-180 ms-0 me-2",
-                )}
-              />
+              <ArrowRight className={cn("h-4 w-4 ms-2", isArabic && "rotate-180 ms-0 me-2")} />
             </>
           )}
         </Button>

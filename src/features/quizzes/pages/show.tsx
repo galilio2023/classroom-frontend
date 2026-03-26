@@ -1,9 +1,4 @@
-import {
-  useShow,
-  useGetIdentity,
-  useCustomMutation,
-  useNavigation,
-} from "@refinedev/core";
+import { useShow, useGetIdentity, useCustomMutation, useNavigation } from "@refinedev/core";
 import { Quiz, User } from "@/types";
 import {
   Card,
@@ -48,8 +43,7 @@ const QuizShow = () => {
   const { query } = useShow<Quiz>();
   const { data: identity } = useGetIdentity<User>();
   const { list, show } = useNavigation();
-  const { mutate: submitQuiz, mutation: submitMutation } =
-    useCustomMutation<any>();
+  const { mutate: submitQuiz, mutation: submitMutation } = useCustomMutation<any>();
 
   const quiz = query.data?.data;
   const isLoading = query.isLoading;
@@ -58,7 +52,7 @@ const QuizShow = () => {
   usePageTitle(
     quiz?.title
       ? `${quiz.title} - ${t("classes.quiz.classQuizzes")}`
-      : t("classes.quiz.classQuizzes"),
+      : t("classes.quiz.classQuizzes")
   );
 
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -112,7 +106,7 @@ const QuizShow = () => {
         onError: (error: any) => {
           toast.error(error?.message || t("common.error"));
         },
-      },
+      }
     );
   };
 
@@ -155,9 +149,7 @@ const QuizShow = () => {
           <XCircle className="h-20 w-20" />
         </div>
         <div className="space-y-3">
-          <h2 className="text-4xl font-black tracking-tight">
-            {t("classes.show.notFound")}
-          </h2>
+          <h2 className="text-4xl font-black tracking-tight">{t("classes.show.notFound")}</h2>
           <p className="text-muted-foreground font-medium max-w-md mx-auto text-lg">
             {t("classes.show.notFoundDescription")}
           </p>
@@ -177,10 +169,7 @@ const QuizShow = () => {
   if (isFinished) {
     return (
       <div className="container max-w-2xl mx-auto py-20 px-4 md:px-6">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-        >
+        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}>
           <Card className="text-center border-none shadow-2xl bg-card/50 backdrop-blur-xl rounded-[2.5rem] md:rounded-[3rem] overflow-hidden">
             <div className="h-3 bg-linear-to-r from-primary via-indigo-500 to-primary" />
             <CardHeader className="p-8 md:p-12">
@@ -262,7 +251,7 @@ const QuizShow = () => {
                 "flex items-center gap-3 px-6 md:px-8 py-3 md:py-4 rounded-2xl border-2 transition-all shadow-lg",
                 timeLeft < 60
                   ? "bg-destructive/10 border-destructive text-destructive animate-pulse shadow-destructive/20"
-                  : "bg-primary/5 border-primary/10 text-primary shadow-primary/5",
+                  : "bg-primary/5 border-primary/10 text-primary shadow-primary/5"
               )}
             >
               <Timer className="h-5 w-5 md:h-6 w-6" />
@@ -274,10 +263,7 @@ const QuizShow = () => {
         </motion.div>
 
         <div className="px-2">
-          <Progress
-            value={progress}
-            className="h-3 rounded-full bg-primary/10"
-          />
+          <Progress value={progress} className="h-3 rounded-full bg-primary/10" />
         </div>
 
         <AnimatePresence mode="wait">
@@ -308,49 +294,37 @@ const QuizShow = () => {
                   onValueChange={(val) => handleAnswer(currentQuestion.id, val)}
                   className="grid gap-4 md:gap-6"
                 >
-                  {currentQuestion.options.map(
-                    (option: string, idx: number) => {
-                      const isSelected = answers[currentQuestion.id] === option;
-                      return (
+                  {currentQuestion.options.map((option: string, idx: number) => {
+                    const isSelected = answers[currentQuestion.id] === option;
+                    return (
+                      <div
+                        key={idx}
+                        className={cn(
+                          "flex items-center space-x-4 p-5 md:p-6 rounded-[1.5rem] border-2 transition-all cursor-pointer group",
+                          isSelected
+                            ? "border-primary bg-primary/5 shadow-lg shadow-primary/5"
+                            : "border-border/40 bg-muted/20 hover:bg-primary/2 hover:border-primary/20"
+                        )}
+                        onClick={() => handleAnswer(currentQuestion.id, option)}
+                      >
                         <div
-                          key={idx}
                           className={cn(
-                            "flex items-center space-x-4 p-5 md:p-6 rounded-[1.5rem] border-2 transition-all cursor-pointer group",
-                            isSelected
-                              ? "border-primary bg-primary/5 shadow-lg shadow-primary/5"
-                              : "border-border/40 bg-muted/20 hover:bg-primary/2 hover:border-primary/20",
+                            "size-6 rounded-full border-2 flex items-center justify-center transition-all shrink-0",
+                            isSelected ? "border-primary bg-primary" : "border-primary/20"
                           )}
-                          onClick={() =>
-                            handleAnswer(currentQuestion.id, option)
-                          }
                         >
-                          <div
-                            className={cn(
-                              "size-6 rounded-full border-2 flex items-center justify-center transition-all shrink-0",
-                              isSelected
-                                ? "border-primary bg-primary"
-                                : "border-primary/20",
-                            )}
-                          >
-                            {isSelected && (
-                              <div className="size-2 bg-white rounded-full" />
-                            )}
-                          </div>
-                          <RadioGroupItem
-                            value={option}
-                            id={`opt-${idx}`}
-                            className="sr-only"
-                          />
-                          <Label
-                            htmlFor={`opt-${idx}`}
-                            className="flex-1 cursor-pointer text-base md:text-lg font-bold leading-tight"
-                          >
-                            {option}
-                          </Label>
+                          {isSelected && <div className="size-2 bg-white rounded-full" />}
                         </div>
-                      );
-                    },
-                  )}
+                        <RadioGroupItem value={option} id={`opt-${idx}`} className="sr-only" />
+                        <Label
+                          htmlFor={`opt-${idx}`}
+                          className="flex-1 cursor-pointer text-base md:text-lg font-bold leading-tight"
+                        >
+                          {option}
+                        </Label>
+                      </div>
+                    );
+                  })}
                 </RadioGroup>
               </CardContent>
               <CardFooter className="p-8 md:p-10 bg-primary/2 border-t border-primary/5 flex flex-col sm:flex-row justify-between gap-4">
@@ -368,9 +342,7 @@ const QuizShow = () => {
                   <Button
                     size="lg"
                     onClick={handleFinish}
-                    disabled={
-                      submitMutation.isPending || !answers[currentQuestion.id]
-                    }
+                    disabled={submitMutation.isPending || !answers[currentQuestion.id]}
                     className="w-full sm:w-auto rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-10 bg-green-600 hover:bg-green-700 shadow-xl shadow-green-600/20"
                   >
                     {submitMutation.isPending ? (
@@ -387,8 +359,7 @@ const QuizShow = () => {
                     disabled={!answers[currentQuestion.id]}
                     className="w-full sm:w-auto rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-10 shadow-xl shadow-primary/20"
                   >
-                    {t("classes.quiz.nextQuestion")}{" "}
-                    <ChevronRight className="ms-2 h-4 w-4" />
+                    {t("classes.quiz.nextQuestion")} <ChevronRight className="ms-2 h-4 w-4" />
                   </Button>
                 )}
               </CardFooter>
@@ -402,10 +373,7 @@ const QuizShow = () => {
   // --- PREVIEW / START STATE ---
   return (
     <div className="container max-w-3xl mx-auto py-8 md:py-12 px-4 md:px-6">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-      >
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
         <Card className="border-none shadow-2xl bg-card/50 backdrop-blur-xl rounded-[2.5rem] md:rounded-[3rem] overflow-hidden">
           <div className="h-3 bg-linear-to-r from-primary via-ai-primary to-primary" />
           <CardHeader className="p-8 md:p-12 text-center space-y-6">
@@ -455,7 +423,7 @@ const QuizShow = () => {
                   <p className="text-sm md:text-base text-amber-800/70 font-medium leading-relaxed">
                     {t(
                       "classes.quiz.integrityDescription",
-                      "Your session is monitored. Once started, you cannot pause the timer.",
+                      "Your session is monitored. Once started, you cannot pause the timer."
                     )}
                   </p>
                 </div>
@@ -486,10 +454,7 @@ const QuizShow = () => {
                   {t("buttons.viewReport")}
                 </Button>
                 <p className="text-center text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">
-                  {t(
-                    "classes.quiz.teacherViewNotice",
-                    "Only students can take quizzes.",
-                  )}
+                  {t("classes.quiz.teacherViewNotice", "Only students can take quizzes.")}
                 </p>
               </div>
             )}

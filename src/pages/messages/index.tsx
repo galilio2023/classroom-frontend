@@ -6,14 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import {
-  Send,
-  Search,
-  MessageCircle,
-  MoreVertical,
-  Paperclip,
-  ChevronLeft,
-} from "lucide-react";
+import { Send, Search, MessageCircle, MoreVertical, Paperclip, ChevronLeft } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ar as arLocale, enUS as enLocale } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -61,9 +54,7 @@ const MessagesPage = () => {
   const [searchParams] = useSearchParams();
   const targetUserId = searchParams.get("userId");
 
-  const [selectedUser, setSelectedUser] = useState<Conversation["user"] | null>(
-    null,
-  );
+  const [selectedUser, setSelectedUser] = useState<Conversation["user"] | null>(null);
   const [messageInput, setMessageInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -94,9 +85,7 @@ const MessagesPage = () => {
   // Auto-select user from searchParams (Notification deep-link)
   useEffect(() => {
     if (targetUserId && conversations.length > 0) {
-      const existingConv = conversations.find(
-        (c) => c.user.id === targetUserId,
-      );
+      const existingConv = conversations.find((c) => c.user.id === targetUserId);
       if (existingConv) {
         setSelectedUser(existingConv.user);
       }
@@ -110,9 +99,7 @@ const MessagesPage = () => {
     url: `/messages/user/${targetUserId}`,
     method: "get",
     queryOptions: {
-      enabled:
-        !!targetUserId &&
-        !conversations.find((c) => c.user.id === targetUserId),
+      enabled: !!targetUserId && !conversations.find((c) => c.user.id === targetUserId),
     },
   });
 
@@ -180,7 +167,7 @@ const MessagesPage = () => {
           void refetchMessages();
           void refetchConversations();
         },
-      },
+      }
     );
   };
 
@@ -196,7 +183,7 @@ const MessagesPage = () => {
           transition={{ duration: 0.2 }}
           className={cn(
             "md:col-span-1 lg:col-span-2 h-full flex flex-col border-none shadow-xl bg-card/50 backdrop-blur-3xl rounded-[2.5rem]",
-            selectedUser ? "hidden md:flex" : "flex",
+            selectedUser ? "hidden md:flex" : "flex"
           )}
         >
           <CardHeader className="p-6 md:p-8 pb-4 border-b border-border/40">
@@ -213,14 +200,14 @@ const MessagesPage = () => {
               <Search
                 className={cn(
                   "absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60 group-focus-within:text-primary transition-colors",
-                  "start-4",
+                  "start-4"
                 )}
               />
               <Input
                 placeholder={t("messages.searchPeople")}
                 className={cn(
                   "bg-background/50 border-border/40 h-12 rounded-xl shadow-sm",
-                  "ps-11 pe-4",
+                  "ps-11 pe-4"
                 )}
               />
             </div>
@@ -254,7 +241,7 @@ const MessagesPage = () => {
                       "flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-colors hover:bg-primary/5 border border-transparent hover:border-primary/10 shadow-sm",
                       selectedUser?.id === conv.user.id
                         ? "bg-primary/10 border-primary/20"
-                        : "bg-background/50",
+                        : "bg-background/50"
                     )}
                   >
                     <div className="relative shrink-0">
@@ -270,21 +257,17 @@ const MessagesPage = () => {
                     </div>
                     <div className="flex-1 overflow-hidden">
                       <div className="flex justify-between items-center mb-0.5">
-                        <h3 className="font-bold text-base truncate">
-                          {conv.user.name}
-                        </h3>
+                        <h3 className="font-bold text-base truncate">{conv.user.name}</h3>
                         <span className="text-[10px] text-muted-foreground/60">
-                          {formatDistanceToNow(
-                            new Date(conv.lastMessage.createdAt),
-                            { addSuffix: false, locale: dateLocale },
-                          )}
+                          {formatDistanceToNow(new Date(conv.lastMessage.createdAt), {
+                            addSuffix: false,
+                            locale: dateLocale,
+                          })}
                         </span>
                       </div>
                       <p className="text-sm text-muted-foreground/80 truncate">
                         {conv.lastMessage.isMe && (
-                          <span className="font-bold text-primary/80">
-                            {t("messages.you")}:{" "}
-                          </span>
+                          <span className="font-bold text-primary/80">{t("messages.you")}: </span>
                         )}
                         {conv.lastMessage.content}
                       </p>
@@ -303,7 +286,7 @@ const MessagesPage = () => {
           transition={{ duration: 0.2 }}
           className={cn(
             "md:col-span-3 lg:col-span-3 h-full flex flex-col border-none shadow-xl bg-card/50 backdrop-blur-3xl rounded-[2.5rem]",
-            selectedUser ? "flex" : "hidden md:flex",
+            selectedUser ? "flex" : "hidden md:flex"
           )}
         >
           {selectedUser ? (
@@ -335,11 +318,7 @@ const MessagesPage = () => {
                     </Badge>
                   </div>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-10 w-10 rounded-xl"
-                >
+                <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl">
                   <MoreVertical className="h-5 w-5 text-muted-foreground" />
                 </Button>
               </div>
@@ -351,10 +330,7 @@ const MessagesPage = () => {
                     Array.from({ length: 5 }).map((_, i) => (
                       <div
                         key={i}
-                        className={cn(
-                          "flex",
-                          i % 2 === 0 ? "justify-end" : "justify-start",
-                        )}
+                        className={cn("flex", i % 2 === 0 ? "justify-end" : "justify-start")}
                       >
                         <div className="max-w-[60%] rounded-2xl px-4 py-2 bg-muted/30 animate-pulse h-16 w-full" />
                       </div>
@@ -370,34 +346,27 @@ const MessagesPage = () => {
                       return (
                         <div
                           key={msg.id}
-                          className={cn(
-                            "flex w-full",
-                            isMe ? "justify-end" : "justify-start",
-                          )}
+                          className={cn("flex w-full", isMe ? "justify-end" : "justify-start")}
                         >
                           <div
                             className={cn(
                               "max-w-[70%] rounded-2xl px-4 py-2 text-sm md:text-base shadow-sm",
                               isMe
                                 ? "bg-primary text-primary-foreground ltr:rounded-br-none rtl:rounded-bl-none"
-                                : "bg-white dark:bg-muted/10 border border-border/40 ltr:rounded-bl-none rtl:rounded-br-none",
+                                : "bg-white dark:bg-muted/10 border border-border/40 ltr:rounded-bl-none rtl:rounded-br-none"
                             )}
                           >
-                            <p className="text-start leading-relaxed">
-                              {msg.content}
-                            </p>
+                            <p className="text-start leading-relaxed">{msg.content}</p>
                             <span
                               className={cn(
                                 "text-[10px] block mt-1 opacity-70",
                                 "text-end",
-                                isMe
-                                  ? "text-primary-foreground/80"
-                                  : "text-muted-foreground",
+                                isMe ? "text-primary-foreground/80" : "text-muted-foreground"
                               )}
                             >
                               {new Date(msg.createdAt).toLocaleTimeString(
                                 isAr ? "ar-EG" : "en-US",
-                                { hour: "2-digit", minute: "2-digit" },
+                                { hour: "2-digit", minute: "2-digit" }
                               )}
                             </span>
                           </div>

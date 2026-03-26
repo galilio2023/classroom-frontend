@@ -1,13 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import {
-  Zap,
-  ChevronRight,
-  Sparkles,
-  Users,
-  GraduationCap,
-} from "lucide-react";
+import { Zap, ChevronRight, Sparkles, Users, GraduationCap } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { LandingHero } from "@/components/landing/hero";
@@ -79,9 +73,7 @@ const LandingPage = () => {
               <div className="max-w-2xl text-start">
                 <h2 className="text-4xl md:text-7xl font-black tracking-tighter uppercase mb-6 leading-[0.9]">
                   {t("landing.bento.title1")} <br />
-                  <span className="text-primary">
-                    {t("landing.bento.title2")}
-                  </span>
+                  <span className="text-primary">{t("landing.bento.title2")}</span>
                 </h2>
                 <p className="text-lg md:text-xl text-muted-foreground font-medium">
                   {t("landing.bento.desc")}
@@ -100,7 +92,7 @@ const LandingPage = () => {
                   viewport={{ once: true }}
                   className={cn(
                     "p-6 sm:p-10 rounded-4xl sm:rounded-[3rem] glass-card group flex flex-col relative overflow-hidden",
-                    pillar.colSpan,
+                    pillar.colSpan
                   )}
                 >
                   <div className="absolute top-0 end-0 p-10 opacity-[0.02] group-hover:scale-110 transition-transform duration-700 pointer-events-none">
@@ -190,13 +182,10 @@ const LandingPage = () => {
                   <h2 className="text-3xl sm:text-5xl md:text-7xl font-black tracking-tighter mb-8 leading-none">
                     {t("landing.roles.student.title")}
                     <br />
-                    <span className="text-primary/40">
-                      {t("landing.roles.student.portal")}
-                    </span>
+                    <span className="text-primary/40">{t("landing.roles.student.portal")}</span>
                   </h2>
                   <div className="flex items-center gap-3 font-black uppercase tracking-widest text-xs mt-12 bg-primary/10 text-primary w-fit px-6 py-3 rounded-full group-hover:bg-primary group-hover:text-white transition-all">
-                    {t("buttons.joinNow")}{" "}
-                    <ChevronRight className="h-4 w-4 rtl:rotate-180" />
+                    {t("buttons.joinNow")} <ChevronRight className="h-4 w-4 rtl:rotate-180" />
                   </div>
                 </motion.div>
               </Link>
@@ -212,13 +201,10 @@ const LandingPage = () => {
                   <h2 className="text-3xl sm:text-5xl md:text-7xl font-black tracking-tighter mb-8 leading-none">
                     {t("landing.roles.teacher.title")}
                     <br />
-                    <span className="text-primary/40">
-                      {t("landing.roles.teacher.portal")}
-                    </span>
+                    <span className="text-primary/40">{t("landing.roles.teacher.portal")}</span>
                   </h2>
                   <div className="flex items-center gap-3 font-black uppercase tracking-widest text-xs mt-12 bg-foreground text-background w-fit px-6 py-3 rounded-full group-hover:bg-primary group-hover:text-white transition-all">
-                    {t("buttons.applyToTeach")}{" "}
-                    <ChevronRight className="h-4 w-4 rtl:rotate-180" />
+                    {t("buttons.applyToTeach")} <ChevronRight className="h-4 w-4 rtl:rotate-180" />
                   </div>
                 </motion.div>
               </Link>
@@ -237,9 +223,7 @@ const LandingPage = () => {
             >
               <h2 className="text-3xl sm:text-6xl md:text-8xl lg:text-[10rem] xl:text-[12rem] font-black tracking-[-0.06em] leading-[0.9] uppercase text-gradient">
                 {t("landing.cta.evolved1")} <br />
-                <span className="text-primary">
-                  {t("landing.cta.evolved2")}
-                </span>
+                <span className="text-primary">{t("landing.cta.evolved2")}</span>
               </h2>
               <div className="pt-6 md:pt-12 flex justify-center">
                 <Button

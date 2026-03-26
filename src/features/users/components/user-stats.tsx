@@ -10,13 +10,7 @@ interface Props {
   language: string;
 }
 
-export const UserStats = ({
-  total,
-  pending,
-  active,
-  isLoading,
-  language,
-}: Props) => {
+export const UserStats = ({ total, pending, active, isLoading, language }: Props) => {
   const { t } = useTranslation();
   const formatter = new Intl.NumberFormat(language);
 

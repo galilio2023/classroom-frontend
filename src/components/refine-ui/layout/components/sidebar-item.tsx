@@ -1,11 +1,7 @@
 import React from "react";
 import { useLink, type TreeMenuItem } from "@refinedev/core";
 import { ChevronRight, ListIcon } from "lucide-react";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -58,11 +54,7 @@ function SidebarItemCollapsible({ item, selectedKey }: Props) {
       </CollapsibleTrigger>
       <CollapsibleContent className="ms-8 flex flex-col gap-1.5 mt-1.5 border-l border-border/40 ps-2">
         {children?.map((child: TreeMenuItem) => (
-          <SidebarItem
-            key={child.key || child.name}
-            item={child}
-            selectedKey={selectedKey}
-          />
+          <SidebarItem key={child.key || child.name} item={child} selectedKey={selectedKey} />
         ))}
       </CollapsibleContent>
     </Collapsible>
@@ -96,13 +88,10 @@ function SidebarItemDropdown({ item, selectedKey }: Props) {
                 to={child.route || ""}
                 className={cn(
                   "flex w-full items-center gap-3 p-2",
-                  isSelected && "bg-primary/10 text-primary font-bold",
+                  isSelected && "bg-primary/10 text-primary font-bold"
                 )}
               >
-                <ItemIcon
-                  icon={child.meta?.icon ?? child.icon}
-                  isSelected={isSelected}
-                />
+                <ItemIcon icon={child.meta?.icon ?? child.icon} isSelected={isSelected} />
                 <span className="text-sm">{getDisplayName(child, t)}</span>
               </Link>
             </DropdownMenuItem>
@@ -117,18 +106,12 @@ function SidebarItemLink({ item, selectedKey }: Props) {
   return <SidebarButton item={item} isSelected={item.key === selectedKey} />;
 }
 
-function ItemIcon({
-  icon,
-  isSelected,
-}: {
-  icon: React.ReactNode;
-  isSelected?: boolean;
-}) {
+function ItemIcon({ icon, isSelected }: { icon: React.ReactNode; isSelected?: boolean }) {
   return (
     <div
       className={cn(
         "w-5 h-5 flex items-center justify-center transition-all duration-300",
-        isSelected ? "text-primary scale-110" : "text-muted-foreground/70",
+        isSelected ? "text-primary scale-110" : "text-muted-foreground/70"
       )}
     >
       {icon ?? <ListIcon className="w-4 h-4" />}
@@ -136,13 +119,7 @@ function ItemIcon({
   );
 }
 
-function SidebarButton({
-  item,
-  isSelected,
-  rightIcon,
-  className,
-  onClick,
-}: any) {
+function SidebarButton({ item, isSelected, rightIcon, className, onClick }: any) {
   const Link = useLink();
   const { open } = useShadcnSidebar();
   const { t } = useTranslation();
@@ -153,12 +130,8 @@ function SidebarButton({
       <span
         className={cn(
           "tracking-tight transition-all duration-200",
-          open
-            ? "opacity-100 translate-x-0"
-            : "opacity-0 -translate-x-4 pointer-events-none w-0",
-          isSelected
-            ? "font-bold text-primary"
-            : "font-medium text-muted-foreground",
+          open ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-4 pointer-events-none w-0",
+          isSelected ? "font-bold text-primary" : "font-medium text-muted-foreground"
         )}
       >
         {getDisplayName(item, t)}
@@ -170,26 +143,15 @@ function SidebarButton({
   const buttonClasses = cn(
     "group flex w-full items-center justify-start gap-3.5 py-3 !px-4 text-sm rounded-xl transition-all duration-300",
     isSelected ? "bg-primary/10 text-primary" : "hover:bg-muted/60",
-    className,
+    className
   );
 
   return item.route && !item.children?.length ? (
-    <Button
-      asChild
-      variant="ghost"
-      size="lg"
-      className={buttonClasses}
-      onClick={onClick}
-    >
+    <Button asChild variant="ghost" size="lg" className={buttonClasses} onClick={onClick}>
       <Link to={item.route}>{content}</Link>
     </Button>
   ) : (
-    <Button
-      variant="ghost"
-      size="lg"
-      className={buttonClasses}
-      onClick={onClick}
-    >
+    <Button variant="ghost" size="lg" className={buttonClasses} onClick={onClick}>
       {content}
     </Button>
   );

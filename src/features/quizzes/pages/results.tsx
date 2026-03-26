@@ -1,13 +1,7 @@
 import { useCustom, useNavigation } from "@refinedev/core";
 import { useParams } from "react-router-dom";
 import { QuizAttempt, Quiz } from "@/types/quiz";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   Loader2,
@@ -53,7 +47,7 @@ const QuizResults = () => {
   const isLoading = quizQuery.isLoading || resultsQuery.isLoading;
 
   const filteredAttempts = attempts.filter((attempt: QuizAttempt) =>
-    attempt.student?.name.toLowerCase().includes(search.toLowerCase()),
+    attempt.student?.name.toLowerCase().includes(search.toLowerCase())
   );
 
   if (isLoading) {
@@ -67,8 +61,7 @@ const QuizResults = () => {
   if (!quiz) return null;
 
   const totalPoints =
-    quiz.questions?.reduce((acc: number, q: any) => acc + (q.points || 1), 0) ||
-    0;
+    quiz.questions?.reduce((acc: number, q: any) => acc + (q.points || 1), 0) || 0;
 
   return (
     <div className="container mx-auto py-10 px-4 space-y-8 max-w-7xl">
@@ -84,9 +77,7 @@ const QuizResults = () => {
           </Button>
           <div>
             <h1 className="text-3xl font-black tracking-tight">{quiz.title}</h1>
-            <p className="font-bold text-muted-foreground/60">
-              Class Performance Analytics
-            </p>
+            <p className="font-bold text-muted-foreground/60">Class Performance Analytics</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
@@ -148,10 +139,7 @@ const QuizResults = () => {
                   >
                     <div className="flex items-center p-6 gap-4">
                       <Avatar className="h-14 w-14 border-2 border-background shadow-lg rounded-2xl">
-                        <AvatarImage
-                          src={attempt.student?.image}
-                          className="object-cover"
-                        />
+                        <AvatarImage src={attempt.student?.image} className="object-cover" />
                         <AvatarFallback className="bg-primary/5 text-primary font-black">
                           {attempt.student?.name[0]}
                         </AvatarFallback>
@@ -191,9 +179,7 @@ const QuizResults = () => {
               ) : (
                 <div className="col-span-full text-center py-20 border-2 border-dashed border-primary/10 rounded-[3rem] opacity-40">
                   <User className="h-12 w-12 mx-auto mb-4" />
-                  <p className="font-black uppercase tracking-widest">
-                    No student results found
-                  </p>
+                  <p className="font-black uppercase tracking-widest">No student results found</p>
                 </div>
               )}
             </div>

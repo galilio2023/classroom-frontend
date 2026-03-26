@@ -22,9 +22,7 @@ export const authProvider: AuthProvider = {
       const sanitizedParams = sanitizePayload(params);
       console.log("Attempting registration for:", sanitizedParams.email);
 
-      const { error } = await authClient.signUp.email(
-        sanitizedParams as unknown as SignUpPayload,
-      );
+      const { error } = await authClient.signUp.email(sanitizedParams as unknown as SignUpPayload);
 
       if (error) {
         console.error("Registration error from Better Auth:", error);
@@ -46,8 +44,7 @@ export const authProvider: AuthProvider = {
         success: false,
         error: {
           name: "Registration Error",
-          message:
-            error.message || "Network error. Please check your connection.",
+          message: error.message || "Network error. Please check your connection.",
         },
       };
     }
@@ -89,8 +86,7 @@ export const authProvider: AuthProvider = {
         success: false,
         error: {
           name: "Login Error",
-          message:
-            error.message || "Network error. Please check your connection.",
+          message: error.message || "Network error. Please check your connection.",
         },
       };
     }

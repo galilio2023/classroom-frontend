@@ -48,7 +48,7 @@ export const AttendanceTab = ({ classId, enrollments }: AttendanceTabProps) => {
 
   const activeEnrollments = useMemo(
     () => enrollments.filter((e) => e.status === "approved"),
-    [enrollments],
+    [enrollments]
   );
 
   if (isLoading)
@@ -125,7 +125,7 @@ export const AttendanceTab = ({ classId, enrollments }: AttendanceTabProps) => {
                     "h-9 rounded-full px-5 text-[10px] font-black uppercase tracking-widest transition-all",
                     viewMode === "mark"
                       ? "bg-primary text-white shadow-lg shadow-primary/20"
-                      : "text-muted-foreground hover:bg-primary/5",
+                      : "text-muted-foreground hover:bg-primary/5"
                   )}
                 >
                   <CheckCircle2 className="h-3.5 w-3.5 me-1.5" />
@@ -139,7 +139,7 @@ export const AttendanceTab = ({ classId, enrollments }: AttendanceTabProps) => {
                     "h-9 rounded-full px-5 text-[10px] font-black uppercase tracking-widest transition-all",
                     viewMode === "history"
                       ? "bg-primary text-white shadow-lg shadow-primary/20"
-                      : "text-muted-foreground hover:bg-primary/5",
+                      : "text-muted-foreground hover:bg-primary/5"
                   )}
                 >
                   <History className="h-3.5 w-3.5 me-1.5" />

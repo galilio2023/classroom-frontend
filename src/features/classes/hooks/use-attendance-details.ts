@@ -15,20 +15,14 @@ interface AttendanceHistoryGroup {
   records: Attendance[];
 }
 
-export const useAttendanceDetails = (
-  classId: string,
-  enrollments: Enrollment[],
-  date?: Date,
-) => {
+export const useAttendanceDetails = (classId: string, enrollments: Enrollment[], date?: Date) => {
   const { t } = useTranslation();
   const { isStaff } = useUserRole();
   const [searchParams] = useSearchParams();
   const { open } = useNotification();
 
   const [selectedDate, setSelectedDate] = useState(
-    date
-      ? format(date, "yyyy-MM-dd")
-      : searchParams.get("date") || format(new Date(), "yyyy-MM-dd"),
+    date ? format(date, "yyyy-MM-dd") : searchParams.get("date") || format(new Date(), "yyyy-MM-dd")
   );
 
   useEffect(() => {
@@ -121,21 +115,14 @@ export const useAttendanceDetails = (
 
   const { mutate: saveAttendance, mutation } = useCustomMutation();
 
-  const handleMarkAttendance = (
-    studentId: string,
-    status: AttendanceStatus,
-  ) => {
+  const handleMarkAttendance = (studentId: string, status: AttendanceStatus) => {
     setAttendanceData((prev) => ({
       ...prev,
       [studentId]: { ...prev[studentId], status },
     }));
   };
 
-  const handleValueChange = (
-    studentId: string,
-    field: string,
-    value: string | number,
-  ) => {
+  const handleValueChange = (studentId: string, field: string, value: string | number) => {
     setAttendanceData((prev) => ({
       ...prev,
       [studentId]: { ...prev[studentId], [field]: value },
@@ -173,7 +160,7 @@ export const useAttendanceDetails = (
           });
           refetch();
         },
-      },
+      }
     );
   };
 

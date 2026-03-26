@@ -12,11 +12,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
 const CRUD_OPERATOR_LABELS: Record<
@@ -144,14 +140,13 @@ export function DataTableFilterOperatorSelect({
 
   const operators = useMemo(() => {
     return Object.entries(CRUD_OPERATOR_LABELS).filter(([operator]) =>
-      operatorsFromProps?.includes(operator as CrudOperators),
+      operatorsFromProps?.includes(operator as CrudOperators)
     );
   }, [operatorsFromProps]);
 
   const selectedLabel = t(
     CRUD_OPERATOR_LABELS[value as Exclude<CrudOperators, "or" | "and">].i18nKey,
-    CRUD_OPERATOR_LABELS[value as Exclude<CrudOperators, "or" | "and">]
-      .defaultLabel,
+    CRUD_OPERATOR_LABELS[value as Exclude<CrudOperators, "or" | "and">].defaultLabel
   );
 
   return (
@@ -175,8 +170,7 @@ export function DataTableFilterOperatorSelect({
         <Command>
           <CommandInput
             placeholder={
-              placeholder ??
-              t("table.filter.operator.placeholder", "Search operator...")
+              placeholder ?? t("table.filter.operator.placeholder", "Search operator...")
             }
           />
           <CommandList>
@@ -194,10 +188,7 @@ export function DataTableFilterOperatorSelect({
                   }}
                 >
                   <Check
-                    className={cn(
-                      "me-2 h-4 w-4",
-                      value === op ? "opacity-100" : "opacity-0",
-                    )}
+                    className={cn("me-2 h-4 w-4", value === op ? "opacity-100" : "opacity-0")}
                   />
                   {t(i18nKey, defaultLabel)}
                 </CommandItem>

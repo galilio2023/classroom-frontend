@@ -25,13 +25,7 @@ import {
   X,
   Reply,
 } from "lucide-react";
-import {
-  useGo,
-  useInvalidate,
-  useList,
-  HttpError,
-  BaseRecord,
-} from "@refinedev/core";
+import { useGo, useInvalidate, useList, HttpError, BaseRecord } from "@refinedev/core";
 import { LoadingButton } from "@/components/ui/loading-button";
 import { useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
@@ -111,9 +105,7 @@ export const SubmissionForm = ({
         const isDraft = (data.data as any)?.isDraft;
         setIsSuccess(true);
         setSuccessMessage(
-          isDraft
-            ? t("assignments.form.toast.draftSaved")
-            : t("assignments.form.toast.submitted"),
+          isDraft ? t("assignments.form.toast.draftSaved") : t("assignments.form.toast.submitted")
         );
 
         void invalidate({
@@ -187,10 +179,7 @@ export const SubmissionForm = ({
 
   return (
     <Form {...form}>
-      <form
-        onSubmit={handleSubmit(onSubmit as any)}
-        className="space-y-8 relative text-start"
-      >
+      <form onSubmit={handleSubmit(onSubmit as any)} className="space-y-8 relative text-start">
         <AnimatePresence>
           {isSuccess && (
             <motion.div
@@ -206,9 +195,7 @@ export const SubmissionForm = ({
               >
                 <CheckCircle2 className="h-12 w-12 stroke-3" />
               </motion.div>
-              <h3 className="text-2xl font-black tracking-tight">
-                {successMessage}
-              </h3>
+              <h3 className="text-2xl font-black tracking-tight">{successMessage}</h3>
               <p className="text-muted-foreground font-medium">
                 {t("assignments.form.successRedirecting")}
               </p>
@@ -263,9 +250,7 @@ export const SubmissionForm = ({
                         <FormControl>
                           <SelectTrigger className="h-12 rounded-xl bg-muted/20 border-none focus:ring-primary text-start">
                             <SelectValue
-                              placeholder={t(
-                                "assignments.form.selectGroupPlaceholder",
-                              )}
+                              placeholder={t("assignments.form.selectGroupPlaceholder")}
                             />
                           </SelectTrigger>
                         </FormControl>
@@ -317,7 +302,7 @@ export const SubmissionForm = ({
                       <div
                         className={cn(
                           "absolute bottom-4 opacity-10 group-focus-within:opacity-30 transition-opacity",
-                          "end-4",
+                          "end-4"
                         )}
                       >
                         <FileText className="h-8 w-8" />
@@ -339,14 +324,12 @@ export const SubmissionForm = ({
                   "p-6 rounded-3xl border-2 border-dashed transition-all",
                   fileUrl
                     ? "bg-success/5 border-success/20"
-                    : "bg-muted/10 border-muted-foreground/10 hover:border-primary/20 hover:bg-primary/2",
+                    : "bg-muted/10 border-muted-foreground/10 hover:border-primary/20 hover:bg-primary/2"
                 )}
               >
                 <FileUpload
                   label={
-                    fileUrl
-                      ? t("assignments.form.fileAttached")
-                      : t("assignments.form.uploadFile")
+                    fileUrl ? t("assignments.form.fileAttached") : t("assignments.form.uploadFile")
                   }
                   folder="submissions"
                   onUploadSuccess={handleFileUpload}

@@ -1,20 +1,8 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import {
-  useGetIdentity,
-  useList,
-  useCustomMutation,
-  useGo,
-  useCustom,
-} from "@refinedev/core";
+import { useGetIdentity, useList, useCustomMutation, useGo, useCustom } from "@refinedev/core";
 import { User } from "@/types";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -108,11 +96,7 @@ const ChildSchedule = ({
         ) : schedule.length > 0 ? (
           <div className="grid gap-3">
             {schedule.slice(0, 2).map((item: ScheduleItem) => (
-              <ScheduleItemCard
-                key={item.id}
-                item={item}
-                onClick={(id) => show("classes", id)}
-              />
+              <ScheduleItemCard key={item.id} item={item} onClick={(id) => show("classes", id)} />
             ))}
           </div>
         ) : (
@@ -172,11 +156,9 @@ export const ParentDashboard = ({ isLoading, show }: ParentDashboardProps) => {
           refetch();
         },
         onError: (error: any) => {
-          toast.error(
-            error?.response?.data?.message || t("dashboard.parent.linkError"),
-          );
+          toast.error(error?.response?.data?.message || t("dashboard.parent.linkError"));
         },
-      },
+      }
     );
   };
 
@@ -256,7 +238,7 @@ export const ParentDashboard = ({ isLoading, show }: ParentDashboardProps) => {
                       <Search
                         className={cn(
                           "absolute top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground/40 group-focus-within:text-primary transition-colors",
-                          "start-6",
+                          "start-6"
                         )}
                       />
                       <Input
@@ -266,7 +248,7 @@ export const ParentDashboard = ({ isLoading, show }: ParentDashboardProps) => {
                         onChange={(e) => setStudentEmail(e.target.value)}
                         className={cn(
                           "h-16 rounded-3xl bg-muted/30 border-none shadow-inner text-lg font-black placeholder:text-muted-foreground/30 focus-visible:ring-primary/20",
-                          "ps-14 pe-8",
+                          "ps-14 pe-8"
                         )}
                       />
                     </div>
@@ -350,10 +332,7 @@ export const ParentDashboard = ({ isLoading, show }: ParentDashboardProps) => {
                     <div className="relative shrink-0">
                       <div className="absolute inset-0 bg-primary/20 rounded-[1.5rem] blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                       <Avatar className="h-16 w-16 md:h-20 md:w-20 lg:h-24 lg:w-24 border-4 border-background shadow-xl rounded-[1.5rem] md:rounded-4xl group-hover:scale-105 transition-transform duration-500 relative z-10">
-                        <AvatarImage
-                          src={child.image ?? ""}
-                          className="object-cover"
-                        />
+                        <AvatarImage src={child.image ?? ""} className="object-cover" />
                         <AvatarFallback className="bg-primary/5 text-primary font-black text-2xl md:text-3xl">
                           {child.name[0]}
                         </AvatarFallback>
@@ -386,12 +365,7 @@ export const ParentDashboard = ({ isLoading, show }: ParentDashboardProps) => {
                       className="rounded-2xl h-12 w-12 md:h-14 md:w-14 bg-muted/30 hover:bg-primary hover:text-white transition-all duration-500 shadow-sm shrink-0"
                       onClick={() => show("users", child.id)}
                     >
-                      <ArrowRight
-                        className={cn(
-                          "h-6 w-6 md:h-7 md:w-7",
-                          isAr && "rotate-180",
-                        )}
-                      />
+                      <ArrowRight className={cn("h-6 w-6 md:h-7 md:w-7", isAr && "rotate-180")} />
                     </Button>
                   </CardHeader>
                   <CardContent className="p-8 md:p-10 lg:p-12 pt-4 md:pt-6 space-y-8 md:space-y-10">
@@ -448,11 +422,7 @@ export const ParentDashboard = ({ isLoading, show }: ParentDashboardProps) => {
                     </div>
 
                     <ErrorBoundary>
-                      <ChildSchedule
-                        childId={child.id}
-                        childName={child.name}
-                        show={show}
-                      />
+                      <ChildSchedule childId={child.id} childName={child.name} show={show} />
                     </ErrorBoundary>
 
                     {/* Action Buttons - Fully Polished */}

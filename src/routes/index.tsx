@@ -14,18 +14,14 @@ import { Loader2 } from "lucide-react";
 const Dashboard = React.lazy(() => import("@/features/dashboard/pages/index"));
 const LoginPage = React.lazy(() => import("@/pages/auth/login"));
 const RegisterPage = React.lazy(() => import("@/pages/auth/register"));
-const PendingVerification = React.lazy(
-  () => import("@/pages/auth/pending-verification"),
-);
+const PendingVerification = React.lazy(() => import("@/pages/auth/pending-verification"));
 const UnauthorizedPage = React.lazy(() => import("@/pages/unauthorized"));
 
 const ClassesList = React.lazy(() => import("@/features/classes/pages/list"));
 const ClassShow = React.lazy(() => import("@/features/classes/pages/show"));
 const CreateClass = React.lazy(() => import("@/features/classes/pages/create"));
 const EditClass = React.lazy(() => import("@/features/classes/pages/edit"));
-const LessonReader = React.lazy(
-  () => import("@/features/classes/pages/lesson-reader"),
-);
+const LessonReader = React.lazy(() => import("@/features/classes/pages/lesson-reader"));
 
 const UsersList = React.lazy(() => import("@/features/users/pages/list"));
 const ShowUser = React.lazy(() => import("@/features/users/pages/show"));
@@ -33,21 +29,15 @@ const CreateUser = React.lazy(() => import("@/features/users/pages/create"));
 const EditUser = React.lazy(() => import("@/features/users/pages/edit"));
 
 // FEATURE: ASSIGNMENTS
-const AssignmentsList = React.lazy(
-  () => import("@/features/assignments/pages/list-page"),
-);
+const AssignmentsList = React.lazy(() => import("@/features/assignments/pages/list-page"));
 const CreateAssignment = React.lazy(() =>
   import("@/features/assignments/pages/create").then((m) => ({
     default: m.AssignmentCreate,
-  })),
+  }))
 );
-const AssignmentShow = React.lazy(
-  () => import("@/features/assignments/pages/show"),
-);
+const AssignmentShow = React.lazy(() => import("@/features/assignments/pages/show"));
 
-const SubmissionsList = React.lazy(
-  () => import("@/pages/submissions/list-page"),
-);
+const SubmissionsList = React.lazy(() => import("@/pages/submissions/list-page"));
 const SubmissionShow = React.lazy(() => import("@/pages/submissions/show"));
 
 const AttendanceList = React.lazy(() => import("@/pages/attendance/list"));
@@ -70,59 +60,27 @@ const CreateSubject = React.lazy(() => import("@/pages/subjects/create"));
 const EditSubject = React.lazy(() => import("@/pages/subjects/edit"));
 
 const CalendarPage = React.lazy(() => import("@/pages/calendar"));
-const NotificationsPage = React.lazy(
-  () => import("@/pages/notifications/list"),
-);
-const AiAssistantPage = React.lazy(
-  () => import("@/features/ai/pages/ai-assistant"),
-);
-const AiStudyLabPage = React.lazy(
-  () => import("@/features/ai/pages/ai-study-lab"),
-);
-const AiHistoryList = React.lazy(
-  () => import("@/features/ai/pages/history-list"),
-);
-const AiHistoryShow = React.lazy(
-  () => import("@/features/ai/pages/history-show"),
-);
+const NotificationsPage = React.lazy(() => import("@/pages/notifications/list"));
+const AiAssistantPage = React.lazy(() => import("@/features/ai/pages/ai-assistant"));
+const AiStudyLabPage = React.lazy(() => import("@/features/ai/pages/ai-study-lab"));
+const AiHistoryList = React.lazy(() => import("@/features/ai/pages/history-list"));
+const AiHistoryShow = React.lazy(() => import("@/features/ai/pages/history-show"));
 const MessagesPage = React.lazy(() => import("@/pages/messages/index"));
-const ProjectGroupsPage = React.lazy(
-  () => import("@/pages/project-groups/index"),
-);
-const ShowProjectGroup = React.lazy(
-  () => import("@/pages/project-groups/show"),
-);
+const ProjectGroupsPage = React.lazy(() => import("@/pages/project-groups/index"));
+const ShowProjectGroup = React.lazy(() => import("@/pages/project-groups/show"));
 const GlobalLibraryPage = React.lazy(() => import("@/pages/library/index"));
 const TermsList = React.lazy(() => import("@/pages/terms/list"));
-const ProfileRequestsList = React.lazy(
-  () => import("@/pages/profile-requests/list"),
-);
-const StudyPlanner = React.lazy(
-  () => import("@/features/ai/pages/study-planner"),
-);
-const TeacherApplicationsList = React.lazy(
-  () => import("@/pages/teacher-applications/list"),
-);
-const ActivityLogPage = React.lazy(
-  () => import("@/pages/dashboard/activity-log"),
-);
-const AIGovernanceList = React.lazy(
-  () => import("@/features/ai/pages/ai-governance-list"),
-);
-const StudentReportCard = React.lazy(
-  () => import("@/pages/student/report-card"),
-);
+const ProfileRequestsList = React.lazy(() => import("@/pages/profile-requests/list"));
+const StudyPlanner = React.lazy(() => import("@/features/ai/pages/study-planner"));
+const TeacherApplicationsList = React.lazy(() => import("@/pages/teacher-applications/list"));
+const ActivityLogPage = React.lazy(() => import("@/pages/dashboard/activity-log"));
+const AIGovernanceList = React.lazy(() => import("@/features/ai/pages/ai-governance-list"));
+const StudentReportCard = React.lazy(() => import("@/pages/student/report-card"));
 const StudentProgress = React.lazy(() => import("@/pages/progress/list"));
-const TeacherChannelPage = React.lazy(
-  () => import("@/pages/teacher-channel/index"),
-);
-const StudentPortfolio = React.lazy(
-  () => import("@/features/users/pages/portfolio"),
-);
+const TeacherChannelPage = React.lazy(() => import("@/pages/teacher-channel/index"));
+const StudentPortfolio = React.lazy(() => import("@/features/users/pages/portfolio"));
 const SettingsEditPage = React.lazy(() => import("@/pages/settings/edit"));
-const TeacherSubscriptionsList = React.lazy(
-  () => import("@/pages/teacher-subscriptions/list"),
-);
+const TeacherSubscriptionsList = React.lazy(() => import("@/pages/teacher-subscriptions/list"));
 const MyTeachersList = React.lazy(() => import("@/pages/my-teachers/list"));
 const DiscoveryPage = React.lazy(() => import("@/pages/discovery/index"));
 
@@ -131,7 +89,7 @@ const PricingPage = React.lazy(() => import("@/pages/pricing"));
 const PublicLayout = React.lazy(() =>
   import("@/components/public-ui/layout").then((m) => ({
     default: m.PublicLayout,
-  })),
+  }))
 );
 
 const Loading = () => (
@@ -179,10 +137,7 @@ export const AppRouter = () => (
       {/* PROTECTED ROUTES */}
       <Route
         element={
-          <Authenticated
-            key="authenticated-layout"
-            fallback={<CatchAllNavigate to="/login" />}
-          >
+          <Authenticated key="authenticated-layout" fallback={<CatchAllNavigate to="/login" />}>
             <SocketProvider>
               <TermProvider>
                 <Outlet />
@@ -683,10 +638,7 @@ export const AppRouter = () => (
       {/* REDIRECT ROOT */}
       <Route
         element={
-          <Authenticated
-            key="authenticated-root-redirect"
-            fallback={<Outlet />}
-          >
+          <Authenticated key="authenticated-root-redirect" fallback={<Outlet />}>
             <NavigateToResource resource="dashboard" />
           </Authenticated>
         }

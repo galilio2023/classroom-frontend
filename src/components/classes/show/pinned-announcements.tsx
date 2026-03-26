@@ -21,9 +21,7 @@ export const PinnedAnnouncements = ({
   const isAr = i18n.language === "ar";
 
   const pinnedAnnouncements = announcements.filter((a) => a.isPinned);
-  const visiblePinned = pinnedAnnouncements.filter(
-    (a) => !dismissedAnnouncements.includes(a.id),
-  );
+  const visiblePinned = pinnedAnnouncements.filter((a) => !dismissedAnnouncements.includes(a.id));
 
   if (visiblePinned.length === 0) return null;
 
@@ -76,15 +74,9 @@ export const PinnedAnnouncements = ({
                   className="flex-1 md:flex-none rounded-xl md:rounded-2xl font-black uppercase tracking-widest text-[9px] md:text-[10px] h-10 md:h-12 px-6 bg-white dark:bg-muted/10 border-amber-500/20 text-amber-700 hover:bg-amber-50 hover:text-amber-800 shadow-sm transition-all"
                   asChild
                 >
-                  <a
-                    href={announcement.linkUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
+                  <a href={announcement.linkUrl} target="_blank" rel="noopener noreferrer">
                     {t("buttons.readMore" as any)}
-                    <ChevronRight
-                      className={cn("h-4 w-4 ms-1.5", isAr && "rotate-180")}
-                    />
+                    <ChevronRight className={cn("h-4 w-4 ms-1.5", isAr && "rotate-180")} />
                   </a>
                 </Button>
               )}

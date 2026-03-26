@@ -22,15 +22,13 @@ export const mockSubjects: Subject[] = [
     code: "ARC205",
     name: "Architectural Design Studio I",
     department: "ARCH", // Standard Code
-    description:
-      "Exploration of spatial design principles and drafting techniques.",
+    description: "Exploration of spatial design principles and drafting techniques.",
   },
   {
     id: "3",
     code: "MGT310",
     name: "Organizational Behavior",
     department: "BIZ", // Standard Code
-    description:
-      "A study of human behavior within organizations and team dynamics.",
+    description: "A study of human behavior within organizations and team dynamics.",
   },
 ];

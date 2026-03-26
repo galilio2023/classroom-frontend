@@ -32,11 +32,7 @@ interface Session {
   questions: Question[];
 }
 
-export const PracticeModal = ({
-  topic,
-  subjectId,
-  onClose,
-}: PracticeModalProps) => {
+export const PracticeModal = ({ topic, subjectId, onClose }: PracticeModalProps) => {
   const { t } = useTranslation();
   const [step, setStep] = useState<"loading" | "quiz" | "result">("loading");
   const [session, setSession] = useState<Session | null>(null);
@@ -49,10 +45,8 @@ export const PracticeModal = ({
   const { mutate: startSession } = useCustomMutation<Session>();
 
   // Submit Session Mutation
-  const { mutate: submitSession, mutation: submitMutation } =
-    useCustomMutation<any>();
-  const isSubmitting =
-    (submitMutation as any).isPending || (submitMutation as any).isLoading;
+  const { mutate: submitSession, mutation: submitMutation } = useCustomMutation<any>();
+  const isSubmitting = (submitMutation as any).isPending || (submitMutation as any).isLoading;
 
   useEffect(() => {
     startSession(
@@ -74,7 +68,7 @@ export const PracticeModal = ({
         onError: () => {
           onClose();
         },
-      },
+      }
     );
   }, [topic, subjectId]);
 
@@ -105,25 +99,18 @@ export const PracticeModal = ({
           setResult(data.data);
           setStep("result");
         },
-      },
+      }
     );
   };
 
   const currentQuestion = session?.questions[currentQuestionIndex];
-  const progress = session
-    ? ((currentQuestionIndex + 1) / session.questions.length) * 100
-    : 0;
+  const progress = session ? ((currentQuestionIndex + 1) / session.questions.length) * 100 : 0;
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-2xl">
         {step === "result" && result?.passed && (
-          <Confetti
-            width={width}
-            height={height}
-            recycle={false}
-            numberOfPieces={500}
-          />
+          <Confetti width={width} height={height} recycle={false} numberOfPieces={500} />
         )}
 
         <DialogHeader>
@@ -138,8 +125,7 @@ export const PracticeModal = ({
                 current: currentQuestionIndex + 1,
                 total: session?.questions.length,
               })}
-            {step === "result" &&
-              t("aiHub.studyLab.flashcards.sessionComplete")}
+            {step === "result" && t("aiHub.studyLab.flashcards.sessionComplete")}
           </DialogDescription>
         </DialogHeader>
 
@@ -147,9 +133,7 @@ export const PracticeModal = ({
           {step === "loading" && (
             <div className="flex flex-col items-center justify-center py-10 space-y-4">
               <Loader2 className="h-10 w-10 animate-spin text-primary" />
-              <p className="text-muted-foreground animate-pulse">
-                {t("common.analyzingData")}
-              </p>
+              <p className="text-muted-foreground animate-pulse">{t("common.analyzingData")}</p>
             </div>
           )}
 
@@ -166,9 +150,7 @@ export const PracticeModal = ({
             />
           )}
 
-          {step === "result" && result && (
-            <PracticeResultStep result={result} onClose={onClose} />
-          )}
+          {step === "result" && result && <PracticeResultStep result={result} onClose={onClose} />}
         </div>
       </DialogContent>
     </Dialog>

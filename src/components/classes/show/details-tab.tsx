@@ -115,8 +115,7 @@ export const DetailsTab = ({
                     <Building2 className="h-4 w-4 md:h-5 md:w-5" />
                   </div>
                   <span className="font-black text-sm md:text-base text-foreground">
-                    {aClass.subject?.department?.name ||
-                      t("classes.show.banner.academic")}
+                    {aClass.subject?.department?.name || t("classes.show.banner.academic")}
                   </span>
                 </div>
               </div>

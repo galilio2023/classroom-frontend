@@ -1,12 +1,6 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  ChevronRight,
-  Sparkles,
-  AlertCircle,
-  CheckCircle2,
-  Clock,
-} from "lucide-react";
+import { ChevronRight, Sparkles, AlertCircle, CheckCircle2, Clock } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -86,9 +80,7 @@ export const ActionCenter = ({
             >
               <CheckCircle2 className="h-10 w-10 md:h-12 md:w-12 animate-pulse" />
             </motion.div>
-            <h3 className="text-2xl md:text-3xl font-black tracking-tight mb-3">
-              {emptyMessage}
-            </h3>
+            <h3 className="text-2xl md:text-3xl font-black tracking-tight mb-3">{emptyMessage}</h3>
             {emptyDescription && (
               <p className="text-muted-foreground font-medium mb-8 max-w-md mx-auto leading-relaxed">
                 {emptyDescription}
@@ -144,7 +136,7 @@ export const ActionCenter = ({
                     ? "bg-destructive/1 border-destructive/10 hover:border-destructive/30 hover:shadow-destructive/5"
                     : action.priority === "ai"
                       ? "bg-ai-primary/1 border-ai-primary/10 hover:border-ai-primary/30 hover:shadow-ai-primary/5"
-                      : "bg-background/40 border-border/40 hover:border-primary/30 hover:shadow-primary/5",
+                      : "bg-background/40 border-border/40 hover:border-primary/30 hover:shadow-primary/5"
                 )}
                 onClick={action.onClick}
               >
@@ -156,7 +148,7 @@ export const ActionCenter = ({
                       ? "bg-destructive"
                       : action.priority === "ai"
                         ? "bg-ai-primary"
-                        : "bg-primary",
+                        : "bg-primary"
                   )}
                 />
 
@@ -164,7 +156,7 @@ export const ActionCenter = ({
                   <div
                     className={cn(
                       "p-3.5 rounded-2xl transition-all duration-500 group-hover:scale-110 group-hover:rotate-3",
-                      styles,
+                      styles
                     )}
                   >
                     <Icon className="h-6 w-6" />
@@ -189,7 +181,7 @@ export const ActionCenter = ({
                           ? "text-destructive/60"
                           : action.priority === "ai"
                             ? "text-ai-primary/60"
-                            : "text-primary/60",
+                            : "text-primary/60"
                       )}
                     >
                       Status
@@ -201,7 +193,7 @@ export const ActionCenter = ({
                           ? "text-destructive"
                           : action.priority === "ai"
                             ? "text-ai-primary"
-                            : "text-primary",
+                            : "text-primary"
                       )}
                     >
                       {action.actionText}
@@ -214,7 +206,7 @@ export const ActionCenter = ({
                         ? "border-destructive/10 text-destructive group-hover:bg-destructive"
                         : action.priority === "ai"
                           ? "border-ai-primary/10 text-ai-primary group-hover:bg-ai-primary"
-                          : "border-primary/10 text-primary",
+                          : "border-primary/10 text-primary"
                     )}
                   >
                     <ChevronRight className="h-4 w-4 rtl:rotate-180" />

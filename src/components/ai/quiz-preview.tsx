@@ -1,17 +1,6 @@
 import React from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "../ui/card";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "../ui/accordion";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion";
 import { HelpCircle } from "lucide-react";
 import { QuizQuestionItem } from "./quiz-question-item";
 import { QuizEmptyState } from "./quiz-empty-state";

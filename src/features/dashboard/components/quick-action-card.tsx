@@ -19,10 +19,7 @@ interface QuickActionCardProps {
   onAction: (resource: string) => void;
 }
 
-export const QuickActionCard: React.FC<QuickActionCardProps> = ({
-  action,
-  onAction,
-}) => {
+export const QuickActionCard: React.FC<QuickActionCardProps> = ({ action, onAction }) => {
   const { t, i18n } = useTranslation();
   const isRtl = i18n.dir() === "rtl";
   const Icon = action.icon;
@@ -45,7 +42,7 @@ export const QuickActionCard: React.FC<QuickActionCardProps> = ({
             isRtl
               ? "-start-6 -top-6 -rotate-12 group-hover:rotate-0"
               : "-end-6 -top-6 rotate-12 group-hover:rotate-0",
-            "group-hover:scale-125 group-hover:text-primary",
+            "group-hover:scale-125 group-hover:text-primary"
           )}
         >
           <Icon className="h-32 w-32 md:h-48 md:w-48" />
@@ -82,7 +79,7 @@ export const QuickActionCard: React.FC<QuickActionCardProps> = ({
               className={cn(
                 "rounded-xl transition-all font-black uppercase tracking-widest text-[10px] h-10 md:h-12 px-5 md:px-8 gap-2 shadow-sm ms-auto",
                 "bg-primary/10 dark:bg-primary/20 hover:bg-primary hover:text-primary-foreground group-hover:shadow-lg group-hover:shadow-primary/20",
-                "border border-primary/10 dark:border-primary/20 hover:border-primary",
+                "border border-primary/10 dark:border-primary/20 hover:border-primary"
               )}
             >
               {t("common.explore")}

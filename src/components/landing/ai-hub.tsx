@@ -28,9 +28,7 @@ export const LandingAIHub = ({ isAr }: Props) => {
             </div>
             <h2 className="text-4xl md:text-7xl lg:text-8xl font-black uppercase leading-[0.95] md:leading-[0.85]">
               {t("landing.ai.title1")} <br />
-              <span className="text-primary italic">
-                {t("landing.ai.title2")}
-              </span>
+              <span className="text-primary italic">{t("landing.ai.title2")}</span>
             </h2>
             <p className="text-lg md:text-xl text-muted-foreground font-medium leading-relaxed max-w-xl text-balance">
               {t("landing.ai.desc")}

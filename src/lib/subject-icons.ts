@@ -21,8 +21,7 @@ export const getSubjectIcon = (subjectName?: string | null) => {
   if (/(tech|code|computer|web|software|ai)/.test(name)) return Code;
   if (/(science|bio|chem|phys|lab)/.test(name)) return FlaskConical;
   if (/(math|calc|algebra)/.test(name)) return Calculator;
-  if (/(lang|english|arabic|french|spanish|linguistics)/.test(name))
-    return Languages;
+  if (/(lang|english|arabic|french|spanish|linguistics)/.test(name)) return Languages;
   if (/(art|design|draw|paint)/.test(name)) return Palette;
   if (/(music|band|choir)/.test(name)) return Music;
   if (/(sport|gym|physical|health|athletic)/.test(name)) return Dumbbell;

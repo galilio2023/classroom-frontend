@@ -1,9 +1,5 @@
 import { Module } from "@/types";
-import {
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+import { AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import {
   BookOpen,
@@ -35,14 +31,11 @@ interface ModuleItemProps {
   isTeacher: boolean;
   isStudent: boolean;
   classId: string;
-  isItemCompleted: (
-    type: "resource" | "assignment" | "quiz",
-    id: number,
-  ) => boolean;
+  isItemCompleted: (type: "resource" | "assignment" | "quiz", id: number) => boolean;
   onToggleProgress: (
     type: "resource" | "assignment" | "quiz",
     id: number,
-    moduleId: number,
+    moduleId: number
   ) => void;
   onDeleteModule: (id: number) => void;
   onMagicAction: (moduleId: number, type: string) => void;
@@ -147,7 +140,7 @@ export const ModuleItem = ({
                 className="rounded-full px-2 py-0 h-4 md:h-5 text-[8px] md:text-[9px] font-black bg-primary/5 text-primary border-none"
               >
                 {new Intl.NumberFormat(isArabic ? "ar-EG" : "en-US").format(
-                  module.resources?.length || 0,
+                  module.resources?.length || 0
                 )}
               </Badge>
             </div>
@@ -160,9 +153,7 @@ export const ModuleItem = ({
                     isStudent={isStudent}
                     classId={classId}
                     completed={isItemCompleted("resource", res.id)}
-                    onToggleProgress={(id) =>
-                      onToggleProgress("resource", id, module.id)
-                    }
+                    onToggleProgress={(id) => onToggleProgress("resource", id, module.id)}
                   />
                 ))
               ) : (
@@ -188,8 +179,7 @@ export const ModuleItem = ({
                 className="rounded-full px-2 py-0 h-4 md:h-5 text-[8px] md:text-[9px] font-black bg-primary/5 text-primary border-none"
               >
                 {new Intl.NumberFormat(isArabic ? "ar-EG" : "en-US").format(
-                  (module.assignments?.length || 0) +
-                    (module.quizzes?.length || 0),
+                  (module.assignments?.length || 0) + (module.quizzes?.length || 0)
                 )}
               </Badge>
             </div>
@@ -201,9 +191,7 @@ export const ModuleItem = ({
                   type="assignment"
                   isStudent={isStudent}
                   completed={isItemCompleted("assignment", asn.id)}
-                  onToggleProgress={(id) =>
-                    onToggleProgress("assignment", id, module.id)
-                  }
+                  onToggleProgress={(id) => onToggleProgress("assignment", id, module.id)}
                 />
               ))}
               {module.quizzes?.map((quiz) => (
@@ -213,9 +201,7 @@ export const ModuleItem = ({
                   type="quiz"
                   isStudent={isStudent}
                   completed={isItemCompleted("quiz", quiz.id)}
-                  onToggleProgress={(id) =>
-                    onToggleProgress("quiz", id, module.id)
-                  }
+                  onToggleProgress={(id) => onToggleProgress("quiz", id, module.id)}
                 />
               ))}
               {!module.assignments?.length && !module.quizzes?.length && (
@@ -284,11 +270,7 @@ export const ModuleItem = ({
               </DropdownMenu>
             </CanAccess>
 
-            <CanAccess
-              resource="resources"
-              action="create"
-              params={{ classId }}
-            >
+            <CanAccess resource="resources" action="create" params={{ classId }}>
               <Button
                 variant="outline"
                 size="sm"
@@ -300,11 +282,7 @@ export const ModuleItem = ({
               </Button>
             </CanAccess>
 
-            <CanAccess
-              resource="assignments"
-              action="create"
-              params={{ classId }}
-            >
+            <CanAccess resource="assignments" action="create" params={{ classId }}>
               <Button
                 variant="outline"
                 size="sm"

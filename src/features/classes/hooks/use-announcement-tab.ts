@@ -1,11 +1,5 @@
 import { useState } from "react";
-import {
-  useList,
-  useCreate,
-  useUpdate,
-  useDelete,
-  useCustomMutation,
-} from "@refinedev/core";
+import { useList, useCreate, useUpdate, useDelete, useCustomMutation } from "@refinedev/core";
 import { Announcement } from "@/types";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
@@ -44,7 +38,7 @@ export const useAnnouncementTab = (classId: string) => {
       { url: `announcements/${id}/read`, method: "post", values: {} },
       {
         onSuccess: () => query.refetch(),
-      },
+      }
     );
   };
 
@@ -59,7 +53,7 @@ export const useAnnouncementTab = (classId: string) => {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("refine-auth")}`,
           },
-        },
+        }
       );
       const { data: sigData } = await sigRes.json();
       const formData = new FormData();
@@ -74,7 +68,7 @@ export const useAnnouncementTab = (classId: string) => {
         {
           method: "POST",
           body: formData,
-        },
+        }
       );
       const result = await cloudRes.json();
       if (result.secure_url) {
@@ -114,7 +108,7 @@ export const useAnnouncementTab = (classId: string) => {
           });
           query.refetch();
         },
-      },
+      }
     );
   };
 
@@ -125,15 +119,12 @@ export const useAnnouncementTab = (classId: string) => {
         id: announcement.id,
         values: { isPinned: !announcement.isPinned },
       },
-      { onSuccess: () => query.refetch() },
+      { onSuccess: () => query.refetch() }
     );
   };
 
   const handleDelete = (id: number) => {
-    deleteAnnouncement(
-      { resource: "announcements", id },
-      { onSuccess: () => query.refetch() },
-    );
+    deleteAnnouncement({ resource: "announcements", id }, { onSuccess: () => query.refetch() });
   };
 
   return {

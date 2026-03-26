@@ -3,13 +3,7 @@ import { Button } from "@/components/ui/button";
 import { UpcomingAssignment } from "@/types/dashboard";
 import { AssignmentItemCard } from "./assignment-item-card";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  ClipboardCheck,
-  Sparkles,
-  ArrowRight,
-  Calendar,
-  Info,
-} from "lucide-react";
+import { ClipboardCheck, Sparkles, ArrowRight, Calendar, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { useTranslation } from "react-i18next";
@@ -60,8 +54,7 @@ export const UpcomingAssignmentsList = ({
             <ArrowRight
               className={cn(
                 "h-3 w-3 group-hover:translate-x-1 transition-transform",
-                i18n.language === "ar" &&
-                  "rotate-180 group-hover:-translate-x-1",
+                i18n.language === "ar" && "rotate-180 group-hover:-translate-x-1"
               )}
             />
           </Button>

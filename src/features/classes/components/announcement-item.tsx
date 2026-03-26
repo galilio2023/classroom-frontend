@@ -1,22 +1,8 @@
 import { useRef, useEffect } from "react";
 import { motion } from "framer-motion";
-import {
-  Pin,
-  MoreVertical,
-  Trash2,
-  Calendar,
-  FileText,
-  Eye,
-  ArrowRight,
-} from "lucide-react";
+import { Pin, MoreVertical, Trash2, Calendar, FileText, Eye, ArrowRight } from "lucide-react";
 import { format } from "date-fns";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -60,18 +46,14 @@ export const AnnouncementItem = ({
           observer.disconnect();
         }
       },
-      { threshold: 0.5 },
+      { threshold: 0.5 }
     );
     if (itemRef.current) observer.observe(itemRef.current);
     return () => observer.disconnect();
   }, [announcement.id, isRead, isStaff, onMarkAsRead]);
 
   return (
-    <motion.div
-      layout
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-    >
+    <motion.div layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
       <Card
         ref={itemRef}
         className={cn(
@@ -79,9 +61,7 @@ export const AnnouncementItem = ({
           announcement.isPinned
             ? "border-2 border-primary/20 bg-primary/2"
             : "hover:shadow-2xl hover:-translate-y-1",
-          isRead === false && !isStaff
-            ? "ring-2 ring-primary/20"
-            : "opacity-90",
+          isRead === false && !isStaff ? "ring-2 ring-primary/20" : "opacity-90"
         )}
       >
         {isRead === false && !isStaff && (
@@ -91,10 +71,7 @@ export const AnnouncementItem = ({
           <div className="flex justify-between items-start">
             <div className="flex items-center gap-4">
               <Avatar className="h-12 w-12 border-2 border-background shadow-sm group-hover:scale-110 transition-transform">
-                <AvatarImage
-                  src={announcement.author?.image ?? ""}
-                  className="object-cover"
-                />
+                <AvatarImage src={announcement.author?.image ?? ""} className="object-cover" />
                 <AvatarFallback className="bg-primary/5 text-primary font-bold">
                   {announcement.author?.name?.[0]}
                 </AvatarFallback>
@@ -123,9 +100,7 @@ export const AnnouncementItem = ({
                   )}
                 </div>
                 <CardDescription className="flex items-center gap-3 font-bold text-[10px] uppercase tracking-widest text-muted-foreground/60">
-                  <span className="text-foreground">
-                    {announcement.author?.name}
-                  </span>
+                  <span className="text-foreground">{announcement.author?.name}</span>
                   <div className="w-1 h-1 rounded-full bg-muted-foreground/20" />
                   <span className="flex items-center gap-1.5">
                     <Calendar className="h-3 w-3" />
@@ -193,11 +168,7 @@ export const AnnouncementItem = ({
                 asChild
                 className="h-10 rounded-xl px-5 text-[10px] font-black uppercase tracking-widest gap-2 border-primary/20 text-primary hover:bg-primary/5 transition-all"
               >
-                <a
-                  href={announcement.fileUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
+                <a href={announcement.fileUrl} target="_blank" rel="noopener noreferrer">
                   <FileText className="h-4 w-4" />
                   {t("classes.announcements.viewAttachment")}
                   <ArrowRight className="h-3 w-3 ms-1" />

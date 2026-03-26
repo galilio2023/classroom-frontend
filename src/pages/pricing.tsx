@@ -20,13 +20,7 @@ import { cn } from "@/lib/utils";
 import { useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
-const FAQItem = ({
-  question,
-  answer,
-}: {
-  question: string;
-  answer: string;
-}) => {
+const FAQItem = ({ question, answer }: { question: string; answer: string }) => {
   const [isOpen, setIsOpen] = useState(false);
   return (
     <div className="border-b border-border/40 last:border-0 overflow-hidden">
@@ -41,7 +35,7 @@ const FAQItem = ({
           className={cn(
             "p-2.5 rounded-full bg-muted/30 border border-border/50 transition-all duration-500 shrink-0",
             isOpen &&
-              "rotate-180 bg-primary text-primary-foreground shadow-lg shadow-primary/20 border-primary",
+              "rotate-180 bg-primary text-primary-foreground shadow-lg shadow-primary/20 border-primary"
           )}
         >
           {isOpen ? (
@@ -99,7 +93,7 @@ const Pricing = () => {
         onError: () => {
           toast.error(t("pricing.toasts.checkoutError"));
         },
-      },
+      }
     );
   };
 
@@ -231,7 +225,7 @@ const Pricing = () => {
                     className={cn(
                       "relative h-full flex flex-col glass-card p-6 sm:p-8 md:p-12 rounded-4xl sm:rounded-[3.5rem] transition-all duration-500 group hover:-translate-y-2 hover:shadow-3xl",
                       plan.featured &&
-                        "border-primary/30 ring-1 ring-primary/10 shadow-primary/5 shadow-2xl bg-white/80 dark:bg-muted/10",
+                        "border-primary/30 ring-1 ring-primary/10 shadow-primary/5 shadow-2xl bg-white/80 dark:bg-muted/10"
                     )}
                   >
                     {plan.featured && (
@@ -270,10 +264,7 @@ const Pricing = () => {
                       </p>
                       <div className="space-y-4">
                         {plan.features.map((feature) => (
-                          <div
-                            key={feature}
-                            className="flex items-start gap-4 group/item"
-                          >
+                          <div key={feature} className="flex items-start gap-4 group/item">
                             <div className="mt-1 p-1 rounded-full bg-primary/10 text-primary shrink-0 transition-colors group-hover/item:bg-primary group-hover/item:text-white">
                               <Check className="h-3 w-3" strokeWidth={4} />
                             </div>
@@ -294,7 +285,7 @@ const Pricing = () => {
                           "w-full h-20 rounded-full font-black uppercase tracking-widest text-xs transition-all duration-500",
                           plan.featured
                             ? "bg-primary text-primary-foreground shadow-2xl shadow-primary/20 hover:scale-105"
-                            : "bg-muted text-muted-foreground hover:bg-foreground hover:text-background",
+                            : "bg-muted text-muted-foreground hover:bg-foreground hover:text-background"
                         )}
                       >
                         {plan.cta}
@@ -340,7 +331,7 @@ const Pricing = () => {
                   <div
                     className={cn(
                       "h-16 w-16 rounded-2xl bg-muted/30 flex items-center justify-center transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3",
-                      feature.color,
+                      feature.color
                     )}
                   >
                     <feature.icon className="h-8 w-8" />
@@ -375,9 +366,7 @@ const Pricing = () => {
                 </motion.div>
                 <h2 className="text-5xl md:text-7xl font-black tracking-tighter uppercase leading-[0.9]">
                   {t("pricing.faq.title1")} <br />
-                  <span className="text-primary">
-                    {t("pricing.faq.title2")}
-                  </span>
+                  <span className="text-primary">{t("pricing.faq.title2")}</span>
                 </h2>
               </div>
               <div className="glass-card rounded-[4rem] p-8 md:p-16">
@@ -408,10 +397,7 @@ const Pricing = () => {
                   {t("pricing.cta.desc")}
                 </p>
                 <div className="pt-8">
-                  <Link
-                    to="/register"
-                    className="inline-block w-full sm:w-auto"
-                  >
+                  <Link to="/register" className="inline-block w-full sm:w-auto">
                     <Button
                       size="lg"
                       className="w-full sm:w-auto bg-white text-primary hover:bg-white/90 h-20 px-16 rounded-full text-xl font-black uppercase tracking-widest shadow-2xl hover:scale-110 active:scale-95 transition-all group"

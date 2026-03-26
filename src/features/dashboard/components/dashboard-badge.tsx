@@ -24,7 +24,7 @@ export const DashboardBadge = ({
       className={cn(
         "inline-flex items-center rounded-xl px-3 py-1 text-[10px] font-black uppercase tracking-wider transition-all",
         variants[variant],
-        className,
+        className
       )}
     >
       {children}

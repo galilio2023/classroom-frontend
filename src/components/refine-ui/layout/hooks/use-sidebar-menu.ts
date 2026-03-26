@@ -37,12 +37,7 @@ export const useSidebarMenu = () => {
 
       // 2. Explicit Exclusions
       if (userRole === UserRole.STUDENT) {
-        if (
-          ["ai-assistant", "teacher-channel", "teacher-applications"].includes(
-            item.name,
-          )
-        )
-          return;
+        if (["ai-assistant", "teacher-channel", "teacher-applications"].includes(item.name)) return;
         if (
           [
             "departments",
@@ -58,23 +53,12 @@ export const useSidebarMenu = () => {
 
       if (userRole === UserRole.TEACHER) {
         if (
-          [
-            "departments",
-            "profile-requests",
-            "activity-log",
-            "users",
-            "settings",
-          ].includes(item.name)
+          ["departments", "profile-requests", "activity-log", "users", "settings"].includes(
+            item.name
+          )
         )
           return;
-        if (
-          [
-            "ai-study-lab",
-            "study-planner",
-            "report-card",
-            "portfolio",
-          ].includes(item.name)
-        )
+        if (["ai-study-lab", "study-planner", "report-card", "portfolio"].includes(item.name))
           return;
       }
 
@@ -93,8 +77,7 @@ export const useSidebarMenu = () => {
       }
 
       // 3. Meta Role Check
-      if (item.meta?.roles && userRole && !item.meta.roles.includes(userRole))
-        return;
+      if (item.meta?.roles && userRole && !item.meta.roles.includes(userRole)) return;
 
       if (groupName) {
         if (!groups[groupName]) groups[groupName] = [];

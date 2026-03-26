@@ -2,21 +2,20 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
-const Table = React.forwardRef<
-  HTMLTableElement,
-  React.HTMLAttributes<HTMLTableElement>
->(({ className, ...props }, ref) => (
-  <div
-    data-slot="table-container"
-    className="relative w-full overflow-x-auto rounded-2xl border border-black/8 dark:border-white/10 bg-card/40 backdrop-blur-xl shadow-sm scrollbar-thin scrollbar-thumb-muted"
-  >
-    <table
-      ref={ref}
-      className={cn("w-full caption-bottom text-sm border-collapse", className)}
-      {...props}
-    />
-  </div>
-));
+const Table = React.forwardRef<HTMLTableElement, React.HTMLAttributes<HTMLTableElement>>(
+  ({ className, ...props }, ref) => (
+    <div
+      data-slot="table-container"
+      className="relative w-full overflow-x-auto rounded-2xl border border-black/8 dark:border-white/10 bg-card/40 backdrop-blur-xl shadow-sm scrollbar-thin scrollbar-thumb-muted"
+    >
+      <table
+        ref={ref}
+        className={cn("w-full caption-bottom text-sm border-collapse", className)}
+        {...props}
+      />
+    </div>
+  )
+);
 Table.displayName = "Table";
 
 const TableHeader = React.forwardRef<
@@ -27,7 +26,7 @@ const TableHeader = React.forwardRef<
     ref={ref}
     className={cn(
       "[&_tr]:border-b bg-muted/20 dark:bg-zinc-900/40 backdrop-blur-md sticky top-0 z-10",
-      className,
+      className
     )}
     {...props}
   />
@@ -38,11 +37,7 @@ const TableBody = React.forwardRef<
   HTMLTableSectionElement,
   React.HTMLAttributes<HTMLTableSectionElement>
 >(({ className, ...props }, ref) => (
-  <tbody
-    ref={ref}
-    className={cn("[&_tr:last-child]:border-0", className)}
-    {...props}
-  />
+  <tbody ref={ref} className={cn("[&_tr:last-child]:border-0", className)} {...props} />
 ));
 TableBody.displayName = "TableBody";
 
@@ -52,31 +47,27 @@ const TableFooter = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <tfoot
     ref={ref}
-    className={cn(
-      "border-t bg-muted/50 font-medium [&>tr]:last:border-b-0",
-      className,
-    )}
+    className={cn("border-t bg-muted/50 font-medium [&>tr]:last:border-b-0", className)}
     {...props}
   />
 ));
 TableFooter.displayName = "TableFooter";
 
-const TableRow = React.forwardRef<
-  HTMLTableRowElement,
-  React.HTMLAttributes<HTMLTableRowElement>
->(({ className, ...props }, ref) => (
-  <tr
-    ref={ref}
-    data-slot="table-row"
-    className={cn(
-      "border-b border-border/40 transition-all duration-200",
-      "hover:bg-primary/3 dark:hover:bg-primary/6",
-      "data-[state=selected]:bg-muted/60",
-      className,
-    )}
-    {...props}
-  />
-));
+const TableRow = React.forwardRef<HTMLTableRowElement, React.HTMLAttributes<HTMLTableRowElement>>(
+  ({ className, ...props }, ref) => (
+    <tr
+      ref={ref}
+      data-slot="table-row"
+      className={cn(
+        "border-b border-border/40 transition-all duration-200",
+        "hover:bg-primary/3 dark:hover:bg-primary/6",
+        "data-[state=selected]:bg-muted/60",
+        className
+      )}
+      {...props}
+    />
+  )
+);
 TableRow.displayName = "TableRow";
 
 const TableHead = React.forwardRef<
@@ -88,7 +79,7 @@ const TableHead = React.forwardRef<
     data-slot="table-head"
     className={cn(
       "h-14 px-4 text-start align-middle font-black uppercase tracking-widest text-[10px] text-muted-foreground/80 [&:has([role=checkbox])]:pe-0 whitespace-nowrap",
-      className,
+      className
     )}
     {...props}
   />
@@ -104,7 +95,7 @@ const TableCell = React.forwardRef<
     data-slot="table-cell"
     className={cn(
       "p-4 align-middle font-medium transition-colors [&:has([role=checkbox])]:pe-0",
-      className,
+      className
     )}
     {...props}
   />
@@ -123,13 +114,4 @@ const TableCaption = React.forwardRef<
 ));
 TableCaption.displayName = "TableCaption";
 
-export {
-  Table,
-  TableHeader,
-  TableBody,
-  TableFooter,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableCaption,
-};
+export { Table, TableHeader, TableBody, TableFooter, TableHead, TableRow, TableCell, TableCaption };

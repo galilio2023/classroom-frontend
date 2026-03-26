@@ -2,14 +2,7 @@ import React from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  Calendar,
-  ArrowRight,
-  FileText,
-  Clock,
-  Sparkles,
-  AlertCircle,
-} from "lucide-react";
+import { Calendar, ArrowRight, FileText, Clock, Sparkles, AlertCircle } from "lucide-react";
 import { UpcomingAssignment } from "@/types/dashboard";
 import { formatDistanceToNow, isWithinInterval, addHours } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -20,10 +13,7 @@ interface AssignmentItemCardProps {
   onOpen: (id: string) => void;
 }
 
-export const AssignmentItemCard: React.FC<AssignmentItemCardProps> = ({
-  assignment,
-  onOpen,
-}) => {
+export const AssignmentItemCard: React.FC<AssignmentItemCardProps> = ({ assignment, onOpen }) => {
   const dueDate = new Date(assignment.dueDate);
   const isUrgent = isWithinInterval(dueDate, {
     start: new Date(),
@@ -42,7 +32,7 @@ export const AssignmentItemCard: React.FC<AssignmentItemCardProps> = ({
           "group relative overflow-hidden transition-all duration-500 border-none shadow-xl bg-card/50 backdrop-blur-xl rounded-4xl cursor-pointer",
           isUrgent
             ? "bg-destructive/3 border border-destructive/20 shadow-destructive/5"
-            : "hover:shadow-2xl hover:bg-card/80 border border-transparent hover:border-primary/20",
+            : "hover:shadow-2xl hover:bg-card/80 border border-transparent hover:border-primary/20"
         )}
         onClick={() => onOpen(assignment.id.toString())}
       >
@@ -50,9 +40,7 @@ export const AssignmentItemCard: React.FC<AssignmentItemCardProps> = ({
         <div
           className={cn(
             "absolute top-0 start-0 w-full h-1.5 transition-all duration-500",
-            isUrgent
-              ? "bg-destructive animate-pulse"
-              : "bg-primary/20 group-hover:bg-primary",
+            isUrgent ? "bg-destructive animate-pulse" : "bg-primary/20 group-hover:bg-primary"
           )}
         />
 
@@ -61,9 +49,7 @@ export const AssignmentItemCard: React.FC<AssignmentItemCardProps> = ({
             <div
               className={cn(
                 "p-3 rounded-2xl transition-all duration-500 group-hover:scale-110 group-hover:rotate-3 shadow-sm",
-                isUrgent
-                  ? "bg-destructive/10 text-destructive"
-                  : "bg-primary/10 text-primary",
+                isUrgent ? "bg-destructive/10 text-destructive" : "bg-primary/10 text-primary"
               )}
             >
               <FileText className="h-6 w-6" />
@@ -100,7 +86,7 @@ export const AssignmentItemCard: React.FC<AssignmentItemCardProps> = ({
               <div
                 className={cn(
                   "flex items-center gap-1.5",
-                  isUrgent ? "text-destructive font-black" : "text-primary/60",
+                  isUrgent ? "text-destructive font-black" : "text-primary/60"
                 )}
               >
                 <Clock className="h-3 w-3 opacity-40" />
@@ -121,7 +107,7 @@ export const AssignmentItemCard: React.FC<AssignmentItemCardProps> = ({
                 "h-9 rounded-xl font-black uppercase tracking-widest text-[10px] gap-2 transition-all shadow-sm",
                 isUrgent
                   ? "bg-destructive text-white hover:bg-destructive/90 shadow-destructive/20"
-                  : "bg-primary/5 text-primary hover:bg-primary hover:text-primary-foreground shadow-primary/20",
+                  : "bg-primary/5 text-primary hover:bg-primary hover:text-primary-foreground shadow-primary/20"
               )}
             >
               Open Task

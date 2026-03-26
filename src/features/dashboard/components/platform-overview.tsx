@@ -23,11 +23,7 @@ interface PlatformOverviewProps {
   onRefresh: () => void;
 }
 
-export const PlatformOverview = ({
-  stats,
-  isLoading,
-  onRefresh,
-}: PlatformOverviewProps) => {
+export const PlatformOverview = ({ stats, isLoading, onRefresh }: PlatformOverviewProps) => {
   const { t } = useTranslation();
   const { list } = useNavigation();
 
@@ -59,26 +55,25 @@ export const PlatformOverview = ({
       {!showSkeletons && stats ? (
         <div className="grid grid-cols-1 gap-6">
           <AnimatePresence mode="popLayout">
-            {stats.pendingVerifications !== undefined &&
-              stats.pendingVerifications > 0 && (
-                <motion.div
-                  key="pending"
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  className="cursor-pointer group"
-                  onClick={() => list("users")}
-                >
-                  <StatCard
-                    label={t("dashboard.platform.stats.pendingVerifications")}
-                    value={stats.pendingVerifications}
-                    icon={ShieldAlert}
-                    color="text-amber-500"
-                    className="border-2 border-amber-500/20 bg-amber-500/2 shadow-amber-500/5"
-                    trend={{ value: 100, isUp: true }}
-                  />
-                </motion.div>
-              )}
+            {stats.pendingVerifications !== undefined && stats.pendingVerifications > 0 && (
+              <motion.div
+                key="pending"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="cursor-pointer group"
+                onClick={() => list("users")}
+              >
+                <StatCard
+                  label={t("dashboard.platform.stats.pendingVerifications")}
+                  value={stats.pendingVerifications}
+                  icon={ShieldAlert}
+                  color="text-amber-500"
+                  className="border-2 border-amber-500/20 bg-amber-500/2 shadow-amber-500/5"
+                  trend={{ value: 100, isUp: true }}
+                />
+              </motion.div>
+            )}
 
             {[
               {

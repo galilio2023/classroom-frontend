@@ -21,10 +21,7 @@ export function Sidebar() {
   const { groupedItems, selectedKey, isSidebarLoading } = useSidebarMenu();
 
   return (
-    <ShadcnSidebar
-      collapsible="icon"
-      className={cn("border-none sidebar-glass")}
-    >
+    <ShadcnSidebar collapsible="icon" className={cn("border-none sidebar-glass")}>
       <ShadcnSidebarRail />
       <SidebarHeader />
       <ShadcnSidebarContent
@@ -42,11 +39,7 @@ export function Sidebar() {
             {/* Render default (ungrouped) items first */}
             <div className="flex flex-col gap-1.5">
               {groupedItems.default.map((item: TreeMenuItem) => (
-                <SidebarItem
-                  key={item.key || item.name}
-                  item={item}
-                  selectedKey={selectedKey}
-                />
+                <SidebarItem key={item.key || item.name} item={item} selectedKey={selectedKey} />
               ))}
             </div>
 
@@ -60,7 +53,7 @@ export function Sidebar() {
                     className={cn(
                       "ms-4 mb-4 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40 transition-all duration-300",
                       !open &&
-                        "opacity-0 -translate-x-4 pointer-events-none h-0 mb-0 overflow-hidden",
+                        "opacity-0 -translate-x-4 pointer-events-none h-0 mb-0 overflow-hidden"
                     )}
                   >
                     {t(groupName as any)}

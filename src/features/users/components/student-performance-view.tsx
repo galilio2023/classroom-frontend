@@ -15,12 +15,7 @@ interface Props {
   isAdmin: boolean;
 }
 
-export const StudentPerformanceView = ({
-  user,
-  displayBadges,
-  isSelf,
-  isAdmin,
-}: Props) => {
+export const StudentPerformanceView = ({ user, displayBadges, isSelf, isAdmin }: Props) => {
   const { t } = useTranslation();
 
   return (

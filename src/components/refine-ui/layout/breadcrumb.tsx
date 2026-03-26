@@ -7,12 +7,7 @@ import {
   BreadcrumbPage as ShadcnBreadcrumbPage,
   BreadcrumbSeparator as ShadcnBreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import {
-  matchResourceFromRoute,
-  useBreadcrumb,
-  useLink,
-  useResourceParams,
-} from "@refinedev/core";
+import { matchResourceFromRoute, useBreadcrumb, useLink, useResourceParams } from "@refinedev/core";
 import { Home } from "lucide-react";
 import { Fragment, useMemo } from "react";
 import { useTranslation } from "react-i18next";
@@ -36,9 +31,7 @@ export function Breadcrumb() {
       href: rootRouteResource.matchedRoute ?? "/",
       Component: (
         <Link to={rootRouteResource.matchedRoute ?? "/"}>
-          {rootRouteResource?.resource?.meta?.icon ?? (
-            <Home className="h-4 w-4" />
-          )}
+          {rootRouteResource?.resource?.meta?.icon ?? <Home className="h-4 w-4" />}
         </Link>
       ),
     });
@@ -74,18 +67,12 @@ export function Breadcrumb() {
       <ShadcnBreadcrumbList>
         {breadCrumbItems.map((item, index) => {
           if (index === breadCrumbItems.length - 1) {
-            return (
-              <ShadcnBreadcrumbPage key={item.key}>
-                {item.Component}
-              </ShadcnBreadcrumbPage>
-            );
+            return <ShadcnBreadcrumbPage key={item.key}>{item.Component}</ShadcnBreadcrumbPage>;
           }
 
           return (
             <Fragment key={item.key}>
-              <ShadcnBreadcrumbItem key={item.key}>
-                {item.Component}
-              </ShadcnBreadcrumbItem>
+              <ShadcnBreadcrumbItem key={item.key}>{item.Component}</ShadcnBreadcrumbItem>
               <ShadcnBreadcrumbSeparator />
             </Fragment>
           );

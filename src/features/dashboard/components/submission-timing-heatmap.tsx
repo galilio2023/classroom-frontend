@@ -1,27 +1,14 @@
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Clock } from "lucide-react";
 import { SubmissionTiming } from "@/types/dashboard";
 import { cn } from "@/lib/utils";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface SubmissionTimingHeatmapProps {
   data: SubmissionTiming[];
 }
 
-export const SubmissionTimingHeatmap = ({
-  data,
-}: SubmissionTimingHeatmapProps) => {
+export const SubmissionTimingHeatmap = ({ data }: SubmissionTimingHeatmapProps) => {
   const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const hours = Array.from({ length: 24 }, (_, i) => i);
 
@@ -30,7 +17,7 @@ export const SubmissionTimingHeatmap = ({
     Array.from({ length: 24 }, (_, hour) => {
       const entry = data.find((d) => d.dayOfWeek === day && d.hour === hour);
       return entry ? entry.count : 0;
-    }),
+    })
   );
 
   const maxCount = Math.max(...data.map((d) => d.count), 1);
@@ -49,19 +36,14 @@ export const SubmissionTimingHeatmap = ({
           </div>
           Submission Timing
         </CardTitle>
-        <CardDescription>
-          When do students submit their work? (Hour × Day)
-        </CardDescription>
+        <CardDescription>When do students submit their work? (Hour × Day)</CardDescription>
       </CardHeader>
       <CardContent className="pt-4 overflow-x-auto">
         <div className="min-w-[600px]">
           <div className="flex mb-2">
             <div className="w-10"></div>
             {hours.map((h) => (
-              <div
-                key={h}
-                className="flex-1 text-[10px] text-center text-muted-foreground"
-              >
+              <div key={h} className="flex-1 text-[10px] text-center text-muted-foreground">
                 {h % 6 === 0 ? `${h}:00` : ""}
               </div>
             ))}
@@ -69,9 +51,7 @@ export const SubmissionTimingHeatmap = ({
           <div className="space-y-1">
             {days.map((day, dayIndex) => (
               <div key={day} className="flex items-center h-6">
-                <div className="w-10 text-xs font-medium text-muted-foreground">
-                  {day}
-                </div>
+                <div className="w-10 text-xs font-medium text-muted-foreground">{day}</div>
                 <div className="flex-1 grid grid-cols-24 gap-[1px] h-full">
                   {grid[dayIndex].map((count, hour) => (
                     <TooltipProvider key={hour}>
@@ -85,9 +65,7 @@ export const SubmissionTimingHeatmap = ({
                         <TooltipContent>
                           <p className="text-xs font-medium">
                             {day} at {hour}:00 -{" "}
-                            <span className="text-emerald-500 font-bold">
-                              {count} submissions
-                            </span>
+                            <span className="text-emerald-500 font-bold">{count} submissions</span>
                           </p>
                         </TooltipContent>
                       </Tooltip>

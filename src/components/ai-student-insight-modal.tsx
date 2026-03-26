@@ -7,14 +7,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  Sparkles,
-  Loader2,
-  AlertCircle,
-  ClipboardCopy,
-  Send,
-  CheckCircle2,
-} from "lucide-react";
+import { Sparkles, Loader2, AlertCircle, ClipboardCopy, Send, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { StudentInsightContent } from "./ai/student-insight-content";
@@ -49,8 +42,7 @@ export const AIStudentInsightModal = ({
   const [isCopied, setIsCopied] = useState(false);
   const [isSent, setIsSent] = useState(false);
 
-  const { mutate: sendNotification, mutation: sendMutation } =
-    useCustomMutation();
+  const { mutate: sendNotification, mutation: sendMutation } = useCustomMutation();
   const isSending = sendMutation.isPending;
 
   const { result, query } = useCustom<AIInsight>({
@@ -85,9 +77,7 @@ export const AIStudentInsightModal = ({
 
     // 🛡️ PAYLOAD SAFETY: Truncate message for notification system limits
     const safeSummary =
-      insight.summary.length > 200
-        ? `${insight.summary.substring(0, 200)}...`
-        : insight.summary;
+      insight.summary.length > 200 ? `${insight.summary.substring(0, 200)}...` : insight.summary;
 
     sendNotification(
       {
@@ -108,17 +98,14 @@ export const AIStudentInsightModal = ({
         onSuccess: () => {
           setIsSent(true);
           toast.success(
-            t(
-              "common.insightSentSuccess",
-              "AI Insight shared with student successfully!",
-            ),
+            t("common.insightSentSuccess", "AI Insight shared with student successfully!")
           );
           setTimeout(() => setIsSent(false), 2000);
         },
         onError: () => {
           toast.error(t("common.insightSentError", "Failed to share insight."));
         },
-      },
+      }
     );
   };
 
@@ -152,11 +139,7 @@ export const AIStudentInsightModal = ({
                   {t("common.aiServiceError")}
                 </p>
               </div>
-              <Button
-                variant="outline"
-                onClick={() => refetch()}
-                className="rounded-xl font-bold"
-              >
+              <Button variant="outline" onClick={() => refetch()} className="rounded-xl font-bold">
                 {t("buttons.tryAgain")}
               </Button>
             </div>

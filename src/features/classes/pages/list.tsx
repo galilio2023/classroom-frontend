@@ -1,11 +1,4 @@
-import {
-  Key,
-  PlusCircle,
-  Loader2,
-  AlertCircle,
-  Layers,
-  Trash2,
-} from "lucide-react";
+import { Key, PlusCircle, Loader2, AlertCircle, Layers, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
 import { ListView } from "@/components/refine-ui/views/list-view";
@@ -100,10 +93,7 @@ const ClassesList = () => {
                 </div>
               )}
               {status.isStudent && (
-                <Dialog
-                  open={state.isJoinModalOpen}
-                  onOpenChange={state.setIsJoinModalOpen}
-                >
+                <Dialog open={state.isJoinModalOpen} onOpenChange={state.setIsJoinModalOpen}>
                   <DialogTrigger asChild>
                     <Button
                       variant="outline"
@@ -131,9 +121,7 @@ const ClassesList = () => {
                       <Input
                         placeholder="XXXX-XXXX"
                         value={state.inviteCode}
-                        onChange={(e) =>
-                          state.setInviteCode(e.target.value.toUpperCase())
-                        }
+                        onChange={(e) => state.setInviteCode(e.target.value.toUpperCase())}
                         className="h-24 text-center text-4xl sm:text-5xl font-black font-mono tracking-widest rounded-3xl bg-muted/30 border-none shadow-inner"
                         maxLength={8}
                         dir="ltr"
@@ -152,9 +140,7 @@ const ClassesList = () => {
                         size="lg"
                         className="rounded-xl px-10 shadow-xl shadow-primary/20"
                         onClick={actions.handleJoinByCode}
-                        disabled={
-                          status.isJoining || state.inviteCode.length !== 8
-                        }
+                        disabled={status.isJoining || state.inviteCode.length !== 8}
                       >
                         {status.isJoining ? (
                           <Loader2 className="h-4 w-4 animate-spin me-2" />
@@ -205,9 +191,7 @@ const ClassesList = () => {
             )}
           </AnimatePresence>
 
-          {status.isStudent && filters.view === "my" && (
-            <TeacherDiscoveryList />
-          )}
+          {status.isStudent && filters.view === "my" && <TeacherDiscoveryList />}
 
           <ClassFilters
             searchQuery={filters.search}
@@ -315,9 +299,7 @@ const ClassesList = () => {
             </div>
           </AlertDialogHeader>
           <AlertDialogFooter className="sm:justify-center gap-3 pt-6">
-            <AlertDialogCancel className="rounded-xl px-8">
-              {t("buttons.cancel")}
-            </AlertDialogCancel>
+            <AlertDialogCancel className="rounded-xl px-8">{t("buttons.cancel")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={actions.handleConfirmDelete}
               className="rounded-xl px-10 bg-destructive"

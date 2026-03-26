@@ -11,14 +11,7 @@ import {
 } from "lucide-react";
 import { Input } from "@/components/ui/input.tsx";
 import { useMemo, useState } from "react";
-import {
-  flexRender,
-  ColumnDef,
-  HeaderGroup,
-  Header,
-  Row,
-  Cell,
-} from "@tanstack/react-table";
+import { flexRender, ColumnDef, HeaderGroup, Header, Row, Cell } from "@tanstack/react-table";
 import { useTable } from "@refinedev/react-table";
 import { useNavigation, HttpError } from "@refinedev/core";
 import { User as UserType, Enrollment } from "@/types";
@@ -105,9 +98,7 @@ const ProgressListPage = () => {
             <div className="p-1.5 rounded-lg bg-primary/5">
               <LayoutGrid className="h-3.5 w-3.5 text-primary" />
             </div>
-            <span className="text-xs font-bold truncate max-w-37.5">
-              {getValue<string>()}
-            </span>
+            <span className="text-xs font-bold truncate max-w-37.5">{getValue<string>()}</span>
           </div>
         ),
       },
@@ -124,10 +115,7 @@ const ProgressListPage = () => {
                 </span>
                 <span className="text-primary">{completion}%</span>
               </div>
-              <ProgressBar
-                value={completion}
-                className="h-1.5 rounded-full bg-primary/10"
-              />
+              <ProgressBar value={completion} className="h-1.5 rounded-full bg-primary/10" />
             </div>
           );
         },
@@ -145,7 +133,7 @@ const ProgressListPage = () => {
                   "h-7 px-3 rounded-xl font-black text-[10px] tracking-widest uppercase border-none shadow-sm",
                   isAtRisk
                     ? "bg-destructive/10 text-destructive"
-                    : "bg-emerald-500/10 text-emerald-600",
+                    : "bg-emerald-500/10 text-emerald-600"
                 )}
               >
                 {grade}%
@@ -209,7 +197,7 @@ const ProgressListPage = () => {
         ),
       },
     ],
-    [navigate, show, t],
+    [navigate, show, t]
   );
 
   const {
@@ -273,7 +261,7 @@ const ProgressListPage = () => {
               <Search
                 className={cn(
                   "absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60 group-focus-within:text-primary transition-colors",
-                  "start-4",
+                  "start-4"
                 )}
               />
               <Input
@@ -281,7 +269,7 @@ const ProgressListPage = () => {
                 placeholder={t("progressPage.searchPlaceholder")}
                 className={cn(
                   "h-12 rounded-2xl border-none bg-background/50 shadow-none font-medium",
-                  "ps-11 pe-4",
+                  "ps-11 pe-4"
                 )}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -321,62 +309,46 @@ const ProgressListPage = () => {
             <div className="rounded-3xl md:rounded-[2.5rem] border border-border/40 overflow-hidden bg-card/50 backdrop-blur-3xl shadow-2xl shadow-black/5">
               <Table>
                 <TableHeader>
-                  {reactTable
-                    .getHeaderGroups()
-                    .map((headerGroup: HeaderGroup<Enrollment>) => (
-                      <TableRow
-                        key={headerGroup.id}
-                        className="hover:bg-transparent border-border/40"
-                      >
-                        {headerGroup.headers.map(
-                          (header: Header<Enrollment, unknown>) => (
-                            <TableHead
-                              key={header.id}
-                              className="h-14 px-6 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50"
-                            >
-                              {header.isPlaceholder
-                                ? null
-                                : flexRender(
-                                    header.column.columnDef.header,
-                                    header.getContext(),
-                                  )}
-                            </TableHead>
-                          ),
-                        )}
-                      </TableRow>
-                    ))}
+                  {reactTable.getHeaderGroups().map((headerGroup: HeaderGroup<Enrollment>) => (
+                    <TableRow
+                      key={headerGroup.id}
+                      className="hover:bg-transparent border-border/40"
+                    >
+                      {headerGroup.headers.map((header: Header<Enrollment, unknown>) => (
+                        <TableHead
+                          key={header.id}
+                          className="h-14 px-6 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50"
+                        >
+                          {header.isPlaceholder
+                            ? null
+                            : flexRender(header.column.columnDef.header, header.getContext())}
+                        </TableHead>
+                      ))}
+                    </TableRow>
+                  ))}
                 </TableHeader>
                 <TableBody>
                   <AnimatePresence mode="popLayout">
-                    {reactTable
-                      .getRowModel()
-                      .rows.map((row: Row<Enrollment>, index: number) => (
-                        <motion.tr
-                          key={row.id}
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: index * 0.03 }}
-                          className="group transition-all hover:bg-primary/2 border-border/40 cursor-pointer"
-                          onClick={() => {
-                            if ((row.original?.student as any)?.id) {
-                              navigate(
-                                `/portfolio/${(row.original.student as any).id}`,
-                              );
-                            }
-                          }}
-                        >
-                          {row
-                            .getVisibleCells()
-                            .map((cell: Cell<Enrollment, unknown>) => (
-                              <TableCell key={cell.id} className="px-6 py-4">
-                                {flexRender(
-                                  cell.column.columnDef.cell,
-                                  cell.getContext(),
-                                )}
-                              </TableCell>
-                            ))}
-                        </motion.tr>
-                      ))}
+                    {reactTable.getRowModel().rows.map((row: Row<Enrollment>, index: number) => (
+                      <motion.tr
+                        key={row.id}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.03 }}
+                        className="group transition-all hover:bg-primary/2 border-border/40 cursor-pointer"
+                        onClick={() => {
+                          if ((row.original?.student as any)?.id) {
+                            navigate(`/portfolio/${(row.original.student as any).id}`);
+                          }
+                        }}
+                      >
+                        {row.getVisibleCells().map((cell: Cell<Enrollment, unknown>) => (
+                          <TableCell key={cell.id} className="px-6 py-4">
+                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                          </TableCell>
+                        ))}
+                      </motion.tr>
+                    ))}
                   </AnimatePresence>
                 </TableBody>
               </Table>

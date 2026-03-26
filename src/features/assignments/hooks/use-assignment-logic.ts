@@ -4,7 +4,7 @@ import { Assignment, Submission } from "@/types";
 export const useAssignmentLogic = (
   assignment?: Assignment,
   submissions: Submission[] = [],
-  userId?: string,
+  userId?: string
 ) => {
   const mySubmission = useMemo(() => {
     if (!userId || !submissions.length) return null;
@@ -12,10 +12,7 @@ export const useAssignmentLogic = (
   }, [submissions, userId]);
 
   const isQuiz = useMemo(() => {
-    return (
-      assignment?.description?.includes("### Q1:") &&
-      assignment?.description?.includes("---")
-    );
+    return assignment?.description?.includes("### Q1:") && assignment?.description?.includes("---");
   }, [assignment]);
 
   const isPhysicsLab = useMemo(() => {

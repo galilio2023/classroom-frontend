@@ -125,8 +125,7 @@ export const dataProvider: DataProvider = {
       filters.forEach((filter) => {
         if ("field" in filter) {
           const { field, operator, value } = filter as LogicalFilter;
-          const mappedField =
-            resourceFilterMappings[resource]?.[field] || field;
+          const mappedField = resourceFilterMappings[resource]?.[field] || field;
 
           let queryKey = mappedField;
           if (operator === "contains") {
@@ -148,7 +147,7 @@ export const dataProvider: DataProvider = {
           // ⚠️ GOTCHA: ConditionalFilter (OR/AND) not supported by current flat-mapped backend.
           // Suppressing to prevent crash, but logging for developer awareness.
           console.warn(
-            "DataProvider: Conditional filters (OR/AND) are not yet supported by the flat-mapping backend.",
+            "DataProvider: Conditional filters (OR/AND) are not yet supported by the flat-mapping backend."
           );
         }
       });
