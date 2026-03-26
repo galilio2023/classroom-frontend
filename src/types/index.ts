@@ -327,6 +327,23 @@ export type Class = z.infer<typeof classFormSchema> & {
   gradeCategories?: GradeCategory[];
   isLive?: boolean;
   isBreakoutActive?: boolean;
+  isAiDelegated?: boolean;
+  aiDelegationPhoto?: string | null;
+  aiDelegationContext?: {
+    script?: string;
+    visualCue?: string;
+  };
+  liveLessonRoadmap?: {
+    sessionTitle?: string;
+    icebreaker?: string;
+    keyConcepts?: string[];
+    outline?: {
+      time: string;
+      topic: string;
+      goal: string;
+    }[];
+    studentWatchouts?: string;
+  };
   termId?: number;
   term?: AcademicTerm;
 };

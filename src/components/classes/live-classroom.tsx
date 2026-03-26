@@ -19,6 +19,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 import { usePersistentLive } from "@/hooks/use-persistent-live";
+import type Jitsi from 'jitsi-meet';
 
 import { Badge } from "@/components/ui/badge";
 import { AILiveCompanion } from "./ai-live-companion";
@@ -47,9 +48,18 @@ interface BreakoutEndedData {
   classId: string | number;
 }
 
+interface JitsiMeetExternalAPI {
+  dispose: () => void;
+  on: (event: string, callback: (payload: any) => void) => void;
+  executeCommand: (command: string, ...args: any[]) => void;
+  captureLargeVideoScreenshot: () => Promise<string | { dataURL: string }>;
+}
+
 declare global {
   interface Window {
-    JitsiMeetExternalAPI: typeof JitsiMeetExternalAPI;
+    JitsiMeetExternalAPI: {
+      new (domain: string, options: any): JitsiMeetExternalAPI;
+    };
   }
 }
 
@@ -209,7 +219,7 @@ export const LiveClassroom = ({
           apiRef.current = null;
         });
 
-        newApi.on("recordingStatusChanged", (payload: {
+        newApi.on("recordingStatusChanged" as any, (payload: {
           on: boolean;
           link?: string;
           error?: string;
@@ -268,7 +278,7 @@ export const LiveClassroom = ({
         },
       },
       {
-        onSuccess: (data: GetOneResponse<LiveSessionResponse>) => {
+        onSuccess: (data: any) => {
           const { roomName, token } = data.data;
           initializeJitsi(roomName, token, groupId);
         },
@@ -460,7 +470,7 @@ export const LiveClassroom = ({
             url: `/${numericClassId}/delegate`,
             method: "patch",
             values: { 
-                photo: snapshot.dataURL,
+                photo: typeof snapshot === "string" ? snapshot : snapshot.dataURL,
                 language: i18n.language === "ar" ? "Arabic" : "English",
                 lastPoint: "The current topic in the roadmap"
             }
@@ -755,9 +765,9 @@ export const LiveClassroom = ({
                     <div className="absolute inset-0 z-50">
                         <AILiveCompanion 
                             classId={classIdString}
-                            photo={classData?.aiDelegationPhoto}
-                            script={classData?.aiDelegationContext?.script}
-                            visualCue={classData?.aiDelegationContext?.visualCue || "talking"}
+                            photo={classData?.aiDelegationPhoto ?? null}
+                            script={classData?.aiDelegationContext?.script ?? null}
+                            visualCue={(classData?.aiDelegationContext?.visualCue as any) || "talking"}
                             language={i18n.language === "ar" ? "Arabic" : "English"}
                             onFinished={() => {
                                 if (isTeacher) {

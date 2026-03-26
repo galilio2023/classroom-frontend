@@ -100,8 +100,8 @@ export const dataProvider: DataProvider = {
 
     // Pagination: Map to _start and _end for backend compatibility
     if (pagination?.mode !== "off") {
-      const current = pagination?.current ?? 1;
-      const pageSize = pagination?.pageSize ?? 10;
+      const current = (pagination as any)?.current ?? 1;
+      const pageSize = (pagination as any)?.pageSize ?? 10;
       const _start = (current - 1) * pageSize;
       const _end = _start + pageSize;
       url.searchParams.append("_start", _start.toString());
