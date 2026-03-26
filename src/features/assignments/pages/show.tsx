@@ -94,7 +94,6 @@ const AssignmentShow = () => {
         isPhysicsLab={!!isPhysicsLab}
         isMonitoring={state.isMonitoring}
         setIsMonitoring={state.setIsMonitoring}
-        isAr={isAr}
       />
 
       <div className="grid gap-10 md:gap-16">

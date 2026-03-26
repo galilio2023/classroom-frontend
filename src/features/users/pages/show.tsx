@@ -138,7 +138,6 @@ const UserShow = () => {
         <div className="lg:col-span-4">
           <ProfileCard
             user={user}
-            isAr={isAr}
             isStudent={isStudent}
             isTeacher={isTeacher}
           />

@@ -25,10 +25,9 @@ interface Props {
     append: (value: { criteria: string; maxPoints: number }) => void;
     remove: (index: number) => void;
   };
-  isAr: boolean;
 }
 
-export const AssignmentSettingsForm = ({ form, rubric, isAr }: Props) => {
+export const AssignmentSettingsForm = ({ form, rubric }: Props) => {
   const { t } = useTranslation();
   const hasPeerReview = form.watch("hasPeerReview");
 

@@ -310,7 +310,6 @@ export const AssignmentCreate = () => {
                     <AssignmentSettingsForm
                       form={form}
                       rubric={rubric}
-                      isAr={data.isAr}
                     />
 
                     <div className="p-8 bg-muted/30 rounded-4xl border-2 border-dashed border-muted-foreground/10 space-y-4 text-start">

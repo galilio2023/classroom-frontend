@@ -28,7 +28,6 @@ interface Props {
   isPhysicsLab: boolean;
   isMonitoring: boolean;
   setIsMonitoring: (v: boolean) => void;
-  isAr: boolean;
 }
 
 export const AssignmentBanner = ({
@@ -39,7 +38,6 @@ export const AssignmentBanner = ({
   isPhysicsLab,
   isMonitoring,
   setIsMonitoring,
-  isAr,
 }: Props) => {
   const { t } = useTranslation();
   const dueDate = assignment.dueDate ? dayjs(assignment.dueDate) : null;

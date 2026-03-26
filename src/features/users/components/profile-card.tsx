@@ -21,12 +21,11 @@ import { User, UserRole, VerificationStatus } from "@/types";
 
 interface Props {
   user: User;
-  isAr: boolean;
   isStudent: boolean;
   isTeacher: boolean;
 }
 
-export const ProfileCard = ({ user, isAr, isStudent, isTeacher }: Props) => {
+export const ProfileCard = ({ user, isStudent, isTeacher }: Props) => {
   const { t, i18n } = useTranslation();
   const { currentLevel } = getLevelProgress(user.xp || 0);
   const formatter = new Intl.NumberFormat(i18n.language);

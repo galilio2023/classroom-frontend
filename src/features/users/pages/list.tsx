@@ -102,7 +102,6 @@ const UsersList = () => {
             setSelectedStatus={filters.setSelectedStatus}
             verificationFilter={filters.verificationFilter}
             setVerificationFilter={filters.setVerificationFilter}
-            isAr={data.isAr}
           />
 
           <div className="relative min-h-[400px]">

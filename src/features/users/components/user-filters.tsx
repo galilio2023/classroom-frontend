@@ -21,7 +21,6 @@ interface Props {
   setSelectedStatus: (v: string) => void;
   verificationFilter: string;
   setVerificationFilter: (v: string) => void;
-  isAr: boolean;
 }
 
 export const UserFilters = ({
@@ -33,7 +32,6 @@ export const UserFilters = ({
   setSelectedStatus,
   verificationFilter,
   setVerificationFilter,
-  isAr,
 }: Props) => {
   const { t } = useTranslation();
 
