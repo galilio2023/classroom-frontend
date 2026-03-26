@@ -5,15 +5,14 @@ import { QuizGeneratorForm } from "./ai/quiz-generator-form";
 import { QuizPreview } from "./ai/quiz-preview";
 import { useDashboard } from "@/features/dashboard/hooks/use-dashboard";
 import { useUserRole } from "@/hooks/use-user-role";
-import { AlertCircle, BrainCircuit } from "lucide-react";
+import { AIFeatureDisabled } from "./ai/ai-feature-disabled";
+import { addDays, format } from "date-fns";
 
 interface AIQuizGeneratorProps {
   classId?: string;
 }
 
-export const AIQuizGenerator: React.FC<AIQuizGeneratorProps> = ({
-  classId,
-}) => {
+export const AIQuizGenerator: React.FC<AIQuizGeneratorProps> = ({ classId }) => {
   const { coreData } = useDashboard();
   const { isParent } = useUserRole();
   const {
@@ -41,19 +40,7 @@ export const AIQuizGenerator: React.FC<AIQuizGeneratorProps> = ({
 
   // 🛡️ Global Master Switch: Graceful Degradation
   if (!isAiEnabled) {
-    return (
-      <div className="flex flex-col items-center justify-center py-20 bg-muted/10 rounded-3xl border-2 border-dashed border-border/40 text-center p-8 space-y-4">
-        <div className="bg-destructive/10 p-4 rounded-full">
-          <BrainCircuit className="w-10 h-10 text-destructive grayscale" />
-        </div>
-        <div className="space-y-1">
-          <h3 className="text-xl font-bold">AI Quiz Generator Offline</h3>
-          <p className="text-sm text-muted-foreground max-w-sm mx-auto">
-            AI features are currently disabled by the administrator.
-          </p>
-        </div>
-      </div>
-    );
+    return <AIFeatureDisabled title="AI Quiz Generator Offline" />;
   }
 
   const handleSaveAsAssignment = () => {
@@ -80,9 +67,7 @@ export const AIQuizGenerator: React.FC<AIQuizGeneratorProps> = ({
           title: `Quiz: ${topic}`,
           description,
           classId: Number(classId),
-          dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-            .toISOString()
-            .split("T")[0],
+          dueDate: format(addDays(new Date(), 7), "yyyy-MM-dd"),
         },
       },
       {
