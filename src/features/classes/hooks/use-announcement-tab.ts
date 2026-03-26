@@ -67,7 +67,7 @@ export const useAnnouncementTab = (classId: string) => {
         setNewAnnouncement(prev => ({ ...prev, fileUrl: result.secure_url, fileCldPubId: result.public_id }));
         toast.success(t("common.upload.success"));
       }
-    } catch (err) {
+    } catch {
       toast.error(t("common.upload.error"));
     } finally { setIsUploading(false); }
   };

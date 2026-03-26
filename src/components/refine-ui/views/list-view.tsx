@@ -59,7 +59,7 @@ export const ListViewHeader = ({
   return (
     <div className={cn("flex flex-col gap-6 mb-2", wrapperClassName)}>
       <div className="flex items-center relative gap-2">
-        <Separator className={cn("absolute", "left-0", "right-0", "z-[1] opacity-50")} />
+        <Separator className={cn("absolute", "start-0", "end-0", "z-[1] opacity-50")} />
       </div>
       <div className={cn(
         "flex flex-col sm:flex-row sm:items-center justify-between gap-4", 

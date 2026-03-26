@@ -10,7 +10,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
-import { Submission, Assignment } from "@/types";
+import { Submission, Assignment, ProjectGroup } from "@/types";
 import { FileUpload } from "@/components/file-upload";
 import {
   Paperclip,
@@ -23,9 +23,9 @@ import {
   History,
   Users,
   X,
+  Reply
 } from "lucide-react";
-import { FieldValues } from "react-hook-form";
-import { useGo, useInvalidate, useList } from "@refinedev/core";
+import { useGo, useInvalidate, useList, HttpError, BaseRecord } from "@refinedev/core";
 import { LoadingButton } from "@/components/ui/loading-button";
 import { useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
@@ -41,14 +41,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useTranslation } from "react-i18next";
+import { TFunction } from "i18next";
 
-const submissionSchema = (t: any) =>
+const submissionSchema = (t: TFunction) =>
   z.object({
     content: z.string().min(1, t("assignments.form.toast.contentRequired")),
     fileUrl: z.string().optional(),
     fileCldPubId: z.string().optional(),
     isDraft: z.boolean().default(false),
     groupId: z.coerce.number().optional().nullable(),
+    assignmentId: z.number().optional(),
   });
 
 type SubmissionFormValues = z.infer<ReturnType<typeof submissionSchema>>;
@@ -76,7 +78,7 @@ export const SubmissionForm = ({
   const [successMessage, setSuccessMessage] = useState("");
 
   // Fetch groups for the class if it's a group assignment
-  const { result: groupsData } = useList({
+  const { query: groupsQuery } = useList<ProjectGroup>({
     resource: "project-groups",
     filters: [{ field: "classId", operator: "eq", value: assignment?.classId }],
     queryOptions: {
@@ -84,7 +86,7 @@ export const SubmissionForm = ({
     },
   });
 
-  const groups = groupsData?.data || [];
+  const groups = groupsQuery?.data?.data || [];
 
   const form = useForm<SubmissionFormValues>({
     resolver: zodResolver(submissionSchema(t)) as any,
@@ -99,10 +101,11 @@ export const SubmissionForm = ({
       resource: "submissions",
       action: "create",
       redirect: false,
-      onMutationSuccess: (data: any) => {
+      onMutationSuccess: (data) => {
+        const isDraft = (data.data as any)?.isDraft;
         setIsSuccess(true);
         setSuccessMessage(
-          data?.data?.isDraft
+          isDraft
             ? t("assignments.form.toast.draftSaved")
             : t("assignments.form.toast.submitted"),
         );
@@ -142,7 +145,7 @@ export const SubmissionForm = ({
     return content?.trim().split(/\s+/).filter(Boolean).length ?? 0;
   }, [content]);
 
-  const onSubmit = (values: FieldValues) => {
+  const onSubmit = (values: SubmissionFormValues) => {
     void onFinish({
       ...values,
       assignmentId,
@@ -179,7 +182,7 @@ export const SubmissionForm = ({
   return (
     <Form {...form}>
       <form
-        onSubmit={handleSubmit(onSubmit)}
+        onSubmit={handleSubmit(onSubmit as any)}
         className="space-y-8 relative text-start"
       >
         <AnimatePresence>
@@ -261,7 +264,7 @@ export const SubmissionForm = ({
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {groups.map((group: any) => (
+                          {groups.map((group) => (
                             <SelectItem
                               key={group.id}
                               value={group.id.toString()}

@@ -126,7 +126,7 @@ const TeacherSubscriptionsList = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05 }}
-                    className="group relative flex flex-col p-6 rounded-[2rem] bg-card/50 backdrop-blur-sm border border-border/40 hover:border-primary/30 hover:bg-card/80 transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-primary/5"
+                    className="group relative flex flex-col p-6 rounded-4xl bg-card/50 backdrop-blur-sm border border-border/40 hover:border-primary/30 hover:bg-card/80 transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-primary/5"
                   >
                     <div className="flex items-center gap-4 mb-6">
                       <Avatar className="h-16 w-16 rounded-2xl border-4 border-background shadow-lg group-hover:scale-105 transition-transform duration-500">

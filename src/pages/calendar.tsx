@@ -15,7 +15,6 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -54,8 +53,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useTranslation } from "react-i18next";
-import { ar } from "date-fns/locale";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 
 import usePageTitle from "@/hooks/use-page-title";
 import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
@@ -127,7 +125,7 @@ export const CalendarPage = () => {
   });
 
   const { mutate: generateSchedule, mutation } =
-    useCustomMutation<any>();
+    useCustomMutation<BaseRecord, HttpError, { classId: number }>();
   const isGenerating = mutation.isPending;
 
   const handleGenerateSchedule = () => {
@@ -149,9 +147,9 @@ export const CalendarPage = () => {
           setSelectedClassId("");
           void refetch();
         },
-        onError: (error: any) => {
+        onError: (error: HttpError) => {
           toast.error(
-            error?.response?.data?.message || t("common.error")
+            error.message || t("common.error")
           );
         },
       },
@@ -220,12 +218,10 @@ export const CalendarPage = () => {
     }
   };
 
-  const isAr = i18n.language === "ar";
-
   return (
     <div className="space-y-8 md:space-y-12 pb-20 relative">
       {/* Background Polish */}
-      <div className="hidden sm:block absolute top-0 left-1/4 w-[400px] h-[400px] bg-primary/5 rounded-full blur-[100px] -z-10 animate-pulse" />
+      <div className="hidden sm:block absolute top-0 start-1/4 w-100 h-100 bg-primary/5 rounded-full blur-[100px] -z-10 animate-pulse" />
 
       {/* Header Section */}
       <motion.div 
@@ -276,7 +272,7 @@ export const CalendarPage = () => {
                 </DialogHeader>
                 <div className="space-y-6">
                     <div className="space-y-3">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ms-1">
                         {t("calendar.selectClass")}
                     </label>
                     <Select
@@ -322,12 +318,12 @@ export const CalendarPage = () => {
                     >
                     {isGenerating ? (
                         <>
-                        <Loader2 className="h-5 w-5 mr-3 animate-spin" />
+                        <Loader2 className="h-5 w-5 me-3 animate-spin" />
                         {t("buttons.processing")}
                         </>
                     ) : (
                         <>
-                        <Sparkles className="h-5 w-5 mr-3" />
+                        <Sparkles className="h-5 w-5 me-3" />
                         {t("buttons.create")}
                         </>
                     )}
@@ -346,7 +342,7 @@ export const CalendarPage = () => {
             animate={{ opacity: 1, x: 0 }}
             className="lg:col-span-8"
         >
-            <Card className="rounded-[2.5rem] border border-border/50 shadow-2xl bg-white dark:bg-[#09090b] opacity-100 backdrop-blur-none overflow-hidden p-4 md:p-8 lg:p-12">
+            <Card className="rounded-4xl border border-border/50 shadow-2xl bg-white dark:bg-[#09090b] opacity-100 backdrop-blur-none overflow-hidden p-4 md:p-8 lg:p-12">
             <Calendar
                 mode="single"
                 selected={selectedDate}
@@ -359,10 +355,10 @@ export const CalendarPage = () => {
                 caption_label: "text-2xl md:text-3xl font-black tracking-tighter text-foreground",
                 nav: "space-x-2 flex items-center",
                 button_previous: cn(
-                    "h-10 w-10 md:h-12 md:w-12 bg-muted/40 hover:bg-primary/10 rounded-2xl transition-all flex items-center justify-center p-0 absolute left-2",
+                    "h-10 w-10 md:h-12 md:w-12 bg-muted/40 hover:bg-primary/10 rounded-2xl transition-all flex items-center justify-center p-0 absolute start-2",
                 ),
                 button_next: cn(
-                    "h-10 w-10 md:h-12 md:w-12 bg-muted/40 hover:bg-primary/10 rounded-2xl transition-all flex items-center justify-center p-0 absolute right-2",
+                    "h-10 w-10 md:h-12 md:w-12 bg-muted/40 hover:bg-primary/10 rounded-2xl transition-all flex items-center justify-center p-0 absolute end-2",
                 ),
                 month_grid: "w-full border-collapse space-y-4",
                 weekdays: "flex w-full mb-6",
@@ -382,7 +378,7 @@ export const CalendarPage = () => {
                     "aria-selected:bg-accent aria-selected:text-accent-foreground",
                 hidden: "invisible",
                 }}
-                locale={isAr ? ar : undefined}
+                locale={undefined}
                 components={{
                 Chevron: ({ orientation }) => {
                     const Icon = orientation === "left" ? ChevronLeft : ChevronRight;
@@ -438,7 +434,7 @@ export const CalendarPage = () => {
             animate={{ opacity: 1, x: 0 }}
             className="lg:col-span-4"
         >
-          <Card className="rounded-[2.5rem] border border-border/50 shadow-2xl bg-white dark:bg-[#09090b] opacity-100 backdrop-blur-none overflow-hidden sticky top-24">
+          <Card className="rounded-4xl border border-border/50 shadow-2xl bg-white dark:bg-[#09090b] opacity-100 backdrop-blur-none overflow-hidden sticky top-24">
             <CardHeader className="p-8 md:p-10 pb-6 md:pb-8 border-b border-border/40 bg-muted/20">
               <div className="flex flex-col gap-4">
                 <div className="flex items-center gap-3">
@@ -448,7 +444,7 @@ export const CalendarPage = () => {
                     <CardTitle className="text-xl md:text-2xl font-black tracking-tight">
                         {selectedDate
                         ? dayjs(selectedDate).format(
-                            isAr ? "DD MMMM YYYY" : "MMMM D, YYYY",
+                            i18n.language === "ar" ? "DD MMMM YYYY" : "MMMM D, YYYY",
                             )
                         : t("calendar.selectDate")}
                     </CardTitle>
@@ -475,7 +471,7 @@ export const CalendarPage = () => {
                 </div>
               ) : selectedDayEvents.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-32 text-center px-10 opacity-30 grayscale scale-95 transition-all">
-                  <div className="p-6 rounded-[2rem] bg-muted/50 mb-6">
+                  <div className="p-6 rounded-4xl bg-muted/50 mb-6">
                     <CalendarIcon className="h-16 w-16" />
                   </div>
                   <p className="font-black uppercase tracking-[0.2em] text-[10px]">
@@ -486,8 +482,8 @@ export const CalendarPage = () => {
                   </p>
                 </div>
               ) : (
-                <ScrollArea className="h-[450px] md:h-[600px] p-6 md:p-8">
-                  <div className="space-y-5 pr-2">
+                <ScrollArea className="h-112.5 md:h-150 p-6 md:p-8">
+                  <div className="space-y-5 pe-2">
                     {selectedDayEvents.map((event, index) => {
                       const color = getEventColor(event.type, event.color);
                       return (
@@ -498,7 +494,7 @@ export const CalendarPage = () => {
                           transition={{ delay: index * 0.05 }}
                           onClick={() => handleEventClick(event)}
                           className={cn(
-                            "group flex flex-col p-6 rounded-[2rem] border transition-all duration-300 cursor-pointer shadow-sm hover:shadow-xl hover:shadow-primary/5",
+                            "group flex flex-col p-6 rounded-4xl border transition-all duration-300 cursor-pointer shadow-sm hover:shadow-xl hover:shadow-primary/5",
                             event.classId
                               ? "hover:-translate-y-1"
                               : "hover:bg-muted/50 cursor-default",

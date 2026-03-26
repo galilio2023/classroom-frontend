@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useCustom, useGetIdentity } from "@refinedev/core";
 import {
   Dialog,
@@ -8,8 +8,6 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { QRCodeSVG } from "qrcode.react";
-import { io, Socket } from "socket.io-client";
-import { BACKEND_URL } from "@/config";
 import { User, Attendance } from "@/types";
 import { Loader2, CheckCircle2, Users, RefreshCw, Key, Clock, AlertCircle, RotateCcw } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";

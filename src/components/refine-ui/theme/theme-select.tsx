@@ -51,7 +51,7 @@ export function ThemeSelect() {
             "w-full",
             "justify-between",
             "px-3",
-            "text-left",
+            "text-start",
             "text-sm",
             "font-normal",
             "text-foreground",
@@ -78,7 +78,7 @@ export function ThemeSelect() {
               key={option.value}
               onClick={() => setTheme(option.value)}
               className={cn(
-                "flex items-center gap-2 cursor-pointer relative pr-8",
+                "flex items-center gap-2 cursor-pointer relative pe-8",
                 {
                   "bg-accent text-accent-foreground": isSelected,
                 }
@@ -87,7 +87,7 @@ export function ThemeSelect() {
               {option.icon}
               <span>{option.label}</span>
               {isSelected && (
-                <Check className="h-4 w-4 absolute right-2 text-primary" />
+                <Check className="h-4 w-4 absolute end-2 text-primary" />
               )}
             </DropdownMenuItem>
           );

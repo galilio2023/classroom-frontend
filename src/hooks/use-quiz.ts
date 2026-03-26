@@ -46,7 +46,7 @@ export const useQuiz = ({ assignmentId, classId, description, onComplete }: UseQ
 
     const handleActiveStudent = (data: { studentName: string; quizId: number }) => {
       if (data.quizId === assignmentId) {
-        toast(t("classes.quiz.startedToast" as any, { name: data.studentName }), {
+        toast((t as any)("classes.quiz.startedToast", { name: data.studentName }), {
           icon: "✍️",
           duration: 3000,
         });
@@ -56,7 +56,7 @@ export const useQuiz = ({ assignmentId, classId, description, onComplete }: UseQ
     const handleNudge = (data: { teacherName: string; message: string; quizId: number }) => {
         if (data.quizId === assignmentId) {
             toast(data.message, {
-                description: t("classes.quiz.nudgeFrom" as any, { name: data.teacherName }),
+                description: (t as any)("classes.quiz.nudgeFrom", { name: data.teacherName }),
                 icon: "👋",
                 duration: 5000,
             });
@@ -110,7 +110,7 @@ export const useQuiz = ({ assignmentId, classId, description, onComplete }: UseQ
           open?.({
             type: "success",
             message: t("classes.quiz.submittedTitle", "Quiz Submitted!"),
-            description: t("classes.quiz.submittedDesc" as any, { score: finalScore }),
+            description: (t as any)("classes.quiz.submittedDesc", { score: finalScore }),
           });
           onComplete?.(finalScore);
         }

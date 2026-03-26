@@ -37,7 +37,7 @@ export const QuizAnalytics: React.FC<QuizAnalyticsProps> = ({ stats, title }) =>
     <div className="space-y-6">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Chart */}
-        <Card className="lg:col-span-2 border-none shadow-2xl bg-card/50 backdrop-blur-3xl rounded-[2rem] overflow-hidden">
+        <Card className="lg:col-span-2 border-none shadow-2xl bg-card/50 backdrop-blur-3xl rounded-4xl overflow-hidden">
           <CardHeader className="p-8">
             <div className="flex items-center gap-4">
               <div className="p-3 rounded-2xl bg-primary/10 text-primary">
@@ -86,7 +86,7 @@ export const QuizAnalytics: React.FC<QuizAnalyticsProps> = ({ stats, title }) =>
         </Card>
 
         {/* Insights Panel */}
-        <Card className="border-none shadow-2xl bg-primary/5 backdrop-blur-3xl rounded-[2rem] overflow-hidden border-primary/10">
+        <Card className="border-none shadow-2xl bg-primary/5 backdrop-blur-3xl rounded-4xl overflow-hidden border-primary/10">
           <CardHeader className="p-8">
             <CardTitle className="text-xl font-black tracking-tight flex items-center gap-2">
               <TrendingDown className="h-5 w-5 text-destructive" />
@@ -159,7 +159,7 @@ const StatItem = ({ icon, label, value, color }: { icon: React.ReactNode, label:
   };
 
   return (
-    <div className="p-6 rounded-[2rem] bg-card/50 backdrop-blur-xl border border-black/[0.03] dark:border-white/[0.03] flex items-center gap-4">
+    <div className="p-6 rounded-4xl bg-card/50 backdrop-blur-xl border border-black/3 dark:border-white/3 flex items-center gap-4">
       <div className={cn("p-3 rounded-2xl", bgColorMap[color])}>
         {icon}
       </div>

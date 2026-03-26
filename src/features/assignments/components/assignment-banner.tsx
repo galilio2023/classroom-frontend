@@ -62,12 +62,12 @@ export const AssignmentBanner = ({
               {isPhysicsLab && (
                 <Badge className="bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 px-4 py-1.5 rounded-xl font-black uppercase tracking-widest text-[10px] flex items-center gap-2 shadow-sm">
                   <FlaskConical className="h-4 w-4" />
-                  {t("assignments.show.banner.physicsLab" as any)}
+                  {t("assignments.show.banner.physicsLab")}
                 </Badge>
               )}
               <Badge className="bg-primary/10 text-primary border border-primary/20 px-4 py-1.5 rounded-xl font-black uppercase tracking-widest text-[10px] flex items-center gap-2 shadow-sm">
                 <LayoutDashboard className="h-4 w-4" />
-                {(assignment as any).class?.name || t("assignments.list.labels.general")}
+                {assignment.class?.name || t("assignments.list.labels.general")}
               </Badge>
             </div>
             
@@ -77,7 +77,7 @@ export const AssignmentBanner = ({
                 <div className="flex items-center gap-2">
                   <Calendar className={cn("h-5 w-5", isOverdue ? "text-destructive" : "text-primary")} />
                   <span className={cn(isOverdue && "text-destructive")}>
-                    {t("assignments.show.banner.due" as any, { date: dueDate ? dueDate.format("MMM D, YYYY") : t("assignments.list.labels.noDeadline") })}
+                    {t("assignments.show.banner.due", { date: dueDate ? dueDate.format("MMM D, YYYY") : t("assignments.list.labels.noDeadline") })}
                   </span>
                 </div>
                 <div className="w-1.5 h-1.5 rounded-full bg-muted-foreground/30" />
@@ -108,7 +108,7 @@ export const AssignmentBanner = ({
                     onClick={() => setIsMonitoring(!isMonitoring)}
                 >
                     <Activity className={cn("h-5 w-5", isMonitoring && "animate-pulse")} />
-                    {isMonitoring ? t("buttons.stopMonitoring" as any) : t("buttons.liveMonitor" as any)}
+                    {isMonitoring ? t("buttons.stopMonitoring") : t("buttons.liveMonitor")}
                 </Button>
             )}
 
@@ -152,7 +152,7 @@ export const AssignmentBanner = ({
             {(isQuiz || isPhysicsLab) ? (
               <div className="flex flex-col items-center justify-center py-10 md:py-16 gap-4 text-muted-foreground">
                 <FlaskConical className="h-12 w-12 md:h-16 md:w-16" />
-                <p className="font-black uppercase tracking-widest text-xs md:text-sm">{t("assignments.show.interactiveContentActive" as any)}</p>
+                <p className="font-black uppercase tracking-widest text-xs md:text-sm">{t("assignments.show.interactiveContentActive")}</p>
               </div>
             ) : (
               <div className="prose prose-lg dark:prose-invert max-w-none font-medium leading-relaxed text-start">

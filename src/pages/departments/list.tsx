@@ -25,7 +25,6 @@ import {
   AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
-  AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
@@ -47,6 +46,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/empty-state";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
+
+interface DepartmentWithHead extends Department {
+  headOfDepartment?: User;
+}
 
 const DepartmentsList = () => {
   const { t, i18n } = useTranslation();
@@ -70,7 +73,7 @@ const DepartmentsList = () => {
     return f;
   }, [searchQuery]);
 
-  const { query } = useList<Department>({
+  const { query } = useList<DepartmentWithHead>({
     resource: "departments",
     pagination: { pageSize: 50, mode: "server" },
     filters,
@@ -111,7 +114,7 @@ const DepartmentsList = () => {
     if (!departments.length) return { total: 0, withHead: 0, active: 0 };
     return {
       total: departments.length,
-      withHead: departments.filter((d: any) => d.headId).length,
+      withHead: departments.filter((d) => d.headOfDepartmentId).length,
       active: departments.length 
     };
   }, [departments]);
@@ -147,7 +150,7 @@ const DepartmentsList = () => {
 
           {/* Stats Row */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <Card className="p-6 border-primary/10 bg-card/50 backdrop-blur-sm flex items-center gap-4 rounded-[2rem] shadow-lg shadow-primary/5">
+            <Card className="p-6 border-primary/10 bg-card/50 backdrop-blur-sm flex items-center gap-4 rounded-4xl shadow-lg shadow-primary/5">
               <div className="p-3 rounded-2xl bg-primary/10 text-primary">
                 <Building2 className="h-6 w-6" />
               </div>
@@ -156,7 +159,7 @@ const DepartmentsList = () => {
                 <p className="text-2xl font-black">{isLoading ? "..." : new Intl.NumberFormat(i18n.language).format(stats.total)}</p>
               </div>
             </Card>
-            <Card className="p-6 border-indigo-500/10 bg-card/50 backdrop-blur-sm flex items-center gap-4 rounded-[2rem] shadow-lg shadow-indigo-500/5">
+            <Card className="p-6 border-indigo-500/10 bg-card/50 backdrop-blur-sm flex items-center gap-4 rounded-4xl shadow-lg shadow-indigo-500/5">
               <div className="p-3 rounded-2xl bg-indigo-500/10 text-indigo-600">
                 <ShieldCheck className="h-6 w-6" />
               </div>
@@ -165,7 +168,7 @@ const DepartmentsList = () => {
                 <p className="text-2xl font-black text-indigo-600">{isLoading ? "..." : new Intl.NumberFormat(i18n.language).format(stats.withHead)}</p>
               </div>
             </Card>
-            <Card className="p-6 border-green-500/10 bg-card/50 backdrop-blur-sm flex items-center gap-4 rounded-[2rem] shadow-lg shadow-green-500/5">
+            <Card className="p-6 border-green-500/10 bg-card/50 backdrop-blur-sm flex items-center gap-4 rounded-4xl shadow-lg shadow-green-500/5">
               <div className="p-3 rounded-2xl bg-green-500/10 text-green-600">
                 <Activity className="h-6 w-6" />
               </div>
@@ -177,14 +180,14 @@ const DepartmentsList = () => {
           </div>
           
           {/* Filters & Search */}
-          <Card className="p-4 border-primary/5 bg-muted/30 rounded-[2rem] backdrop-blur-sm">
+          <Card className="p-4 border-primary/5 bg-muted/30 rounded-4xl backdrop-blur-sm">
             <div className="flex flex-col lg:flex-row gap-4">
               <div className="relative flex-1 group">
-                <Search className={cn("absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors", isAr ? "right-4" : "left-4")} />
+                <Search className={cn("absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors", "start-4")} />
                 <Input
                   type="text"
                   placeholder={t("departments.filters.searchPlaceholder")}
-                  className={cn("h-14 rounded-2xl border-none bg-background shadow-sm font-medium", isAr ? "pr-11" : "pl-11")}
+                  className={cn("h-14 rounded-2xl border-none bg-background shadow-sm font-medium", isAr ? "pe-11" : "ps-11")}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -199,7 +202,7 @@ const DepartmentsList = () => {
           {/* Virtualized List Container */}
           <div 
             ref={parentRef} 
-            className="h-[600px] overflow-auto pr-2 custom-scrollbar rounded-[2.5rem] border border-primary/5 bg-card/30 backdrop-blur-sm relative"
+            className="h-[600px] overflow-auto pe-2 custom-scrollbar rounded-[2.5rem] border border-primary/5 bg-card/30 backdrop-blur-sm relative"
           >
             {isLoading ? (
               <div style={{ height: '100%', width: '100%', position: 'relative' }}>
@@ -249,7 +252,7 @@ const DepartmentsList = () => {
                       <motion.div
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
-                        className="flex flex-col md:flex-row items-center h-full border border-primary/5 bg-background/50 rounded-[1.5rem] px-6 hover:bg-primary/[0.02] transition-all group shadow-sm"
+                        className="flex flex-col md:flex-row items-center h-full border border-primary/5 bg-background/50 rounded-[1.5rem] px-6 hover:bg-primary/2 transition-all group shadow-sm"
                       >
                         {/* Icon/Code */}
                         <div className="relative shrink-0 mb-4 md:mb-0">
@@ -259,7 +262,7 @@ const DepartmentsList = () => {
                         </div>
 
                         {/* Info */}
-                        <div className={cn("flex-1 text-start min-w-0 w-full", isAr ? "md:mr-6" : "md:ml-6")}>
+                        <div className={cn("flex-1 text-start min-w-0 w-full", isAr ? "md:me-6" : "md:ms-6")}>
                           <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-3 overflow-hidden">
                             <h3 className="text-lg font-black tracking-tight truncate group-hover:text-primary transition-colors max-w-[70%]">
                               {department.name}
@@ -267,7 +270,7 @@ const DepartmentsList = () => {
                             <div className="flex items-center gap-2 shrink-0">
                               <Badge 
                                   variant="outline" 
-                                  className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-lg border-primary/10 bg-primary/[0.02] text-primary truncate max-w-[120px]"
+                                  className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-lg border-primary/10 bg-primary/2 text-primary truncate max-w-[120px]"
                               >
                                   {department.code}
                               </Badge>
@@ -275,16 +278,16 @@ const DepartmentsList = () => {
                           </div>
                           
                           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2">
-                            {(department as any).headOfDepartment ? (
+                            {department.headOfDepartment ? (
                               <div className="flex items-center gap-2 text-muted-foreground shrink-0">
                                   <Avatar className="h-5 w-5 border border-border/50">
-                                      <AvatarImage src={(department as any).headOfDepartment.image ?? undefined} />
+                                      <AvatarImage src={department.headOfDepartment.image ?? undefined} />
                                       <AvatarFallback className="bg-primary/5 text-primary font-black text-[7px]">
-                                          {(department as any).headOfDepartment.name[0]}
+                                          {department.headOfDepartment.name[0]}
                                       </AvatarFallback>
                                   </Avatar>
                                   <span className="text-[11px] font-bold truncate max-w-[150px]">
-                                      {t("departments.head")}: <span className="text-foreground/80">{(department as any).headOfDepartment.name}</span>
+                                      {t("departments.head")}: <span className="text-foreground/80">{department.headOfDepartment.name}</span>
                                   </span>
                               </div>
                             ) : (
@@ -306,7 +309,7 @@ const DepartmentsList = () => {
                         </div>
 
                         {/* Actions */}
-                        <div className={cn("flex items-center gap-2 mt-4 md:mt-0 shrink-0", isAr ? "mr-4" : "ml-4")}>
+                        <div className={cn("flex items-center gap-2 mt-4 md:mt-0 shrink-0", "ms-4")}>
                           <div className={cn("hidden lg:flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all group-hover:translate-x-0", isAr ? "-translate-x-2" : "translate-x-2")}>
                               {isAdmin && (
                                   <>
@@ -336,7 +339,7 @@ const DepartmentsList = () => {
                             onClick={() => edit("departments", department.id)}
                           >
                             {t("buttons.manage")}
-                            <ArrowRight className={cn("h-3.5 w-3.5 ml-1.5", isAr && "rotate-180")} />
+                            <ArrowRight className={cn("h-3.5 w-3.5 ms-1.5", isAr && "rotate-180")} />
                           </Button>
 
                           <DropdownMenu>

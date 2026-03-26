@@ -80,7 +80,7 @@ export const ChatBubble = ({ post, isOwn, onDelete, onReply, onSolve, isAdmin, i
           {/* Actions Overlay */}
           <div className={cn(
             "absolute top-0 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1 bg-background border rounded-full p-1 shadow-xl -translate-y-1/2 z-10",
-            isOwn ? "right-full mr-2" : "left-full ml-2"
+            isOwn ? "end-full me-2" : "start-full ms-2"
           )}>
             <Button 
               variant="ghost" 
@@ -135,7 +135,7 @@ export const ChatBubble = ({ post, isOwn, onDelete, onReply, onSolve, isAdmin, i
 
         {/* Replies List */}
         {post.replies && post.replies.length > 0 && (
-          <div className="flex flex-col gap-4 mt-4 w-full border-l-2 border-muted/30 ltr:pl-4 rtl:border-l-0 rtl:border-r-2 rtl:pr-4">
+          <div className="flex flex-col gap-4 mt-4 w-full border-s-2 border-muted/30 ltr:ps-4 rtl:border-s-0 rtl:border-e-2 rtl:pe-4">
              {post.replies.map((reply) => (
                  <ChatBubble 
                     key={reply.id} 

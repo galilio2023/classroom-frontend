@@ -4,7 +4,6 @@ import {
   Loader2, 
   Trash2, 
   MessageSquare,
-  XCircle 
 } from "lucide-react";
 import {
   AlertDialog,

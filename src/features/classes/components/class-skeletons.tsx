@@ -1,6 +1,6 @@
 import React from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 
 export const ClassHeaderSkeleton = () => (
   <div className="flex items-center justify-between px-2 mb-8">

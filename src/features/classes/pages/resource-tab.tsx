@@ -8,16 +8,13 @@ import {
   AccordionTrigger 
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { 
   PlusCircle, 
   BookOpen, 
-  FileText, 
   Link as LinkIcon, 
   Video, 
   File,
   Loader2,
-  LayoutGrid,
   Trash2,
   MoreVertical,
   ExternalLink,
@@ -26,9 +23,6 @@ import {
   Library,
   ArrowRight,
   Sparkles,
-  LayoutDashboard,
-  Info,
-  Plus,
   Save,
   Play
 } from "lucide-react";
@@ -37,7 +31,6 @@ import {
   DialogContent, 
   DialogHeader, 
   DialogTitle, 
-  DialogTrigger,
   DialogFooter,
   DialogDescription
 } from "@/components/ui/dialog";
@@ -53,11 +46,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { FileUpload } from "@/components/file-upload";
-import ReactMarkdown from "react-markdown";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
-import { Badge } from "@/components/ui/badge";
 import { useTranslation } from "react-i18next";
 
 import { ResourcesEmptyState } from "../components/class-empty-states";
@@ -266,7 +257,7 @@ export const ResourceTab = ({ classId }: ResourceTabProps) => {
                                             }}
                                         >
                                             <Sparkles className="h-3.5 w-3.5" />
-                                            {t("buttons.featureOnTv", "Feature on Teacher TV")}
+                                            {t("buttons.featureOnTv")}
                                         </DropdownMenuItem>
                                         <DropdownMenuItem 
                                             className="rounded-lg font-black uppercase tracking-widest text-[9px] gap-2 py-3 cursor-pointer text-destructive hover:bg-destructive/10 transition-all"
@@ -294,11 +285,13 @@ export const ResourceTab = ({ classId }: ResourceTabProps) => {
                                     className="h-9 rounded-xl px-4 text-[10px] font-black uppercase tracking-widest gap-2 text-blue-500 hover:bg-blue-500/10 transition-all"
                                     onClick={(e) => {
                                         e.stopPropagation();
-                                        setActiveVideo(res.url!, res.title);
+                                        if (res.url) {
+                                          setActiveVideo(res.url, res.title);
+                                        }
                                     }}
                                 >
                                     <Play className="h-3.5 w-3.5 fill-blue-500" />
-                                    {t("buttons.watchNow", "Watch Now")}
+                                    {t("buttons.watchNow")}
                                 </Button>
                               ) : (
                                 <Button variant="ghost" size="sm" asChild className="h-9 rounded-xl px-4 text-[10px] font-black uppercase tracking-widest gap-2 hover:bg-muted transition-all">

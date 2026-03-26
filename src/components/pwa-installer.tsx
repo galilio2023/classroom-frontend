@@ -40,7 +40,7 @@ export function PWAInstaller() {
   if (!isVisible) return null;
 
   return (
-    <div className="fixed bottom-4 left-4 right-4 z-50 md:left-auto md:right-4 md:w-80">
+    <div className="fixed bottom-4 start-4 end-4 z-50 md:start-auto md:end-4 md:w-80">
       <div className="bg-card border rounded-lg shadow-lg p-4 flex items-center justify-between gap-4 animate-in fade-in slide-in-from-bottom-4">
         <div className="flex items-center gap-3">
           <div className="bg-primary/10 p-2 rounded-full">

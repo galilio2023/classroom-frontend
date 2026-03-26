@@ -1,4 +1,4 @@
-import { useMemo, useRef } from "react";
+import { useRef } from "react";
 import { useUserRole } from "@/hooks/use-user-role";
 import { Assignment } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,7 +25,7 @@ interface AssignmentListProps {
 export const AssignmentList = ({ classId }: AssignmentListProps) => {
   const { t, i18n } = useTranslation();
   const go = useGo();
-  const { identity, isStaff } = useUserRole();
+  const { isStaff } = useUserRole();
   const isAr = i18n.language === "ar";
 
   if (isAr) dayjs.locale("ar");

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useCustomMutation } from "@refinedev/core";
+import { useCustomMutation, HttpError } from "@refinedev/core";
 import {
   Dialog,
   DialogContent,
@@ -53,8 +53,9 @@ export const ApplyTeacherDialog = ({
           setMessage("");
           onSuccess?.();
         },
-        onError: (error: any) => {
-          toast.error(error?.data?.message || t("classes.dialogs.applyTeacher.toast.error"));
+        onError: (err) => {
+          const error = err as HttpError;
+          toast.error((error?.response?.data as any)?.message || t("classes.dialogs.applyTeacher.toast.error"));
         },
       }
     );

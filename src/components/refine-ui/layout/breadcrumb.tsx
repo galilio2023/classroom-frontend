@@ -54,12 +54,12 @@ export function Breadcrumb() {
         href: href ?? "",
         Component: href ? (
           <Link to={href} className="flex items-center gap-2">
-            {icon && <span className="mr-1">{icon}</span>}
+            {icon && <span className="me-1">{icon}</span>}
             {translatedLabel}
           </Link>
         ) : (
           <span className="flex items-center gap-2">
-            {icon && <span className="mr-1">{icon}</span>}
+            {icon && <span className="me-1">{icon}</span>}
             {translatedLabel}
           </span>
         ),

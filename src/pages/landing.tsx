@@ -5,10 +5,8 @@ import {
   Zap, 
   ChevronRight,
   Sparkles,
-  ArrowUpRight,
   Users,
-  GraduationCap,
-  ShieldCheck
+  GraduationCap
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -28,7 +26,7 @@ const LandingPage = () => {
         bg: "bg-ai-primary/10",
         colSpan: "col-span-12 md:col-span-7",
         visual: (
-            <div className="relative h-48 w-full mt-8 bg-ai-primary/5 rounded-[2rem] border border-ai-primary/10 overflow-hidden flex flex-col p-6">
+            <div className="relative h-48 w-full mt-8 bg-ai-primary/5 rounded-4xl border border-ai-primary/10 overflow-hidden flex flex-col p-6">
                 <div className="flex gap-2 mb-4"><div className="h-2 w-2 rounded-full bg-ai-primary animate-bounce" /><div className="h-2 w-2 rounded-full bg-ai-primary animate-bounce [animation-delay:0.2s]" /><div className="h-2 w-2 rounded-full bg-ai-primary animate-bounce [animation-delay:0.4s]" /></div>
                 <div className="space-y-3"><div className="h-3 w-full bg-ai-primary/10 rounded-full"/><div className="h-3 w-4/5 bg-ai-primary/10 rounded-full"/><div className="h-3 w-2/3 bg-ai-primary/10 rounded-full"/></div>
             </div>
@@ -42,7 +40,7 @@ const LandingPage = () => {
         bg: "bg-primary/10",
         colSpan: "col-span-12 md:col-span-5",
         visual: (
-            <div className="relative h-48 w-full mt-8 bg-primary/5 rounded-[2rem] border border-primary/10 p-6 flex items-center justify-center">
+            <div className="relative h-48 w-full mt-8 bg-primary/5 rounded-4xl border border-primary/10 p-6 flex items-center justify-center">
                 <div className="grid grid-cols-2 gap-3 w-full">
                     <div className="h-12 bg-primary/10 rounded-xl" />
                     <div className="h-12 bg-primary/10 rounded-xl" />
@@ -60,7 +58,7 @@ const LandingPage = () => {
       
       {/* Designer Background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        <div className="absolute top-0 left-0 w-full h-full bg-primary/[0.01] blur-[140px]" />
+        <div className="absolute top-0 start-0 w-full h-full bg-primary/1 blur-[140px]" />
       </div>
 
       <div className="relative z-10">
@@ -89,11 +87,11 @@ const LandingPage = () => {
                             transition={{ delay: idx * 0.1, duration: 0.8 }}
                             viewport={{ once: true }}
                             className={cn(
-                                "p-6 sm:p-10 rounded-[2rem] sm:rounded-[3rem] glass-card group flex flex-col relative overflow-hidden",
+                                "p-6 sm:p-10 rounded-4xl sm:rounded-[3rem] glass-card group flex flex-col relative overflow-hidden",
                                 pillar.colSpan
                             )}
                         >
-                            <div className="absolute top-0 right-0 p-10 opacity-[0.02] group-hover:scale-110 transition-transform duration-700 pointer-events-none">
+                            <div className="absolute top-0 end-0 p-10 opacity-[0.02] group-hover:scale-110 transition-transform duration-700 pointer-events-none">
                                 <pillar.icon className="h-64 w-64" />
                             </div>
                             <div className={`p-5 rounded-2xl ${pillar.bg} w-fit transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3 ${pillar.color}`}>
@@ -115,9 +113,9 @@ const LandingPage = () => {
                         whileInView={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.3, duration: 0.8 }}
                         viewport={{ once: true }}
-                        className="col-span-12 p-8 sm:p-10 rounded-[2rem] sm:rounded-[3rem] bg-primary text-primary-foreground flex flex-col md:flex-row items-center gap-8 md:gap-12 relative overflow-hidden group shadow-2xl shadow-primary/20"
+                        className="col-span-12 p-8 sm:p-10 rounded-4xl sm:rounded-[3rem] bg-primary text-primary-foreground flex flex-col md:flex-row items-center gap-8 md:gap-12 relative overflow-hidden group shadow-2xl shadow-primary/20"
                     >
-                        <div className="absolute inset-0 bg-gradient-to-r from-primary via-primary to-ai-primary opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+                        <div className="absolute inset-0 bg-linear-to-r from-primary via-primary to-ai-primary opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
                         <div className="flex-1 text-start relative z-10">
                             <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white/40 mb-4 block">{t("landing.growth.badge")}</span>
                             <h3 className="text-3xl sm:text-4xl md:text-6xl font-black tracking-tighter mb-6 leading-none">{t("landing.growth.title1")} <br/>{t("landing.growth.title2")}</h3>
@@ -125,7 +123,7 @@ const LandingPage = () => {
                                 {t("landing.growth.desc")}
                             </p>
                         </div>
-                        <div className="relative z-10 h-48 w-full md:w-96 bg-white/10 rounded-[2rem] border border-white/10 p-8 flex items-end gap-3 backdrop-blur-md">
+                        <div className="relative z-10 h-48 w-full md:w-96 bg-white/10 rounded-4xl border border-white/10 p-8 flex items-end gap-3 backdrop-blur-md">
                             <motion.div initial={{ height: 0 }} whileInView={{ height: '40%' }} transition={{ delay: 0.5, duration: 1 }} className="flex-1 bg-white/20 rounded-t-xl" />
                             <motion.div initial={{ height: 0 }} whileInView={{ height: '60%' }} transition={{ delay: 0.6, duration: 1 }} className="flex-1 bg-white/40 rounded-t-xl" />
                             <motion.div initial={{ height: 0 }} whileInView={{ height: '90%' }} transition={{ delay: 0.7, duration: 1 }} className="flex-1 bg-white/60 rounded-t-xl" />
@@ -145,7 +143,7 @@ const LandingPage = () => {
                             whileHover={{ scale: 1.02 }}
                             className="h-full p-6 sm:p-12 md:p-20 rounded-[2.5rem] sm:rounded-[4rem] bg-card border border-border/40 transition-all duration-500 hover:shadow-3xl text-start relative overflow-hidden"
                         >
-                            <div className="absolute top-[-10%] right-[-10%] opacity-[0.02] group-hover:scale-110 transition-transform duration-700 pointer-events-none">
+                            <div className="absolute top-[-10%] end-[-10%] opacity-[0.02] group-hover:scale-110 transition-transform duration-700 pointer-events-none">
                                 <Users className="h-96 w-96 text-primary" />
                             </div>
                             <h2 className="text-3xl sm:text-5xl md:text-7xl font-black tracking-tighter mb-8 leading-none">{t("landing.roles.student.title")}<br/><span className="text-primary/40">{t("landing.roles.student.portal")}</span></h2>
@@ -160,7 +158,7 @@ const LandingPage = () => {
                             whileHover={{ scale: 1.02 }}
                             className="h-full p-6 sm:p-12 md:p-20 rounded-[2.5rem] sm:rounded-[4rem] bg-card border border-border/40 transition-all duration-500 hover:shadow-3xl text-start relative overflow-hidden"
                         >
-                            <div className="absolute top-[-10%] right-[-10%] opacity-[0.02] group-hover:scale-110 transition-transform duration-700 pointer-events-none">
+                            <div className="absolute top-[-10%] end-[-10%] opacity-[0.02] group-hover:scale-110 transition-transform duration-700 pointer-events-none">
                                 <GraduationCap className="h-96 w-96 text-primary" />
                             </div>
                             <h2 className="text-3xl sm:text-5xl md:text-7xl font-black tracking-tighter mb-8 leading-none">{t("landing.roles.teacher.title")}<br/><span className="text-primary/40">{t("landing.roles.teacher.portal")}</span></h2>
@@ -174,7 +172,7 @@ const LandingPage = () => {
         </section>
 
         {/* Final Statement - CONSTRAINED */}
-        <section className="section-wrapper text-center !py-12 md:!py-48">
+        <section className="section-wrapper text-center py-12! md:py-48!">
             <div className="container-center">
                 <motion.div 
                     initial={{ opacity: 0, y: 40 }}
@@ -186,11 +184,11 @@ const LandingPage = () => {
                         {t("landing.cta.evolved1")} <br/>
                         <span className="text-primary">{t("landing.cta.evolved2")}</span>
                     </h2>
-                    <div className="pt-6 md:pt-12">
-                        <Button size="lg" className="h-14 sm:h-24 px-8 sm:px-20 rounded-full text-lg sm:text-2xl font-black uppercase tracking-widest shadow-2xl shadow-primary/30 bg-primary hover:scale-110 active:scale-95 transition-all duration-500 group" asChild>
+                    <div className="pt-6 md:pt-12 flex justify-center">
+                        <Button size="lg" className="h-14 sm:h-24 px-6 sm:px-20 rounded-full text-sm xs:text-base sm:text-2xl font-black uppercase tracking-widest shadow-2xl shadow-primary/30 bg-primary hover:scale-110 active:scale-95 transition-all duration-500 group max-w-full w-auto" asChild>
                             <Link to="/register">
-                                {t("landing.cta.launch")}
-                                <Sparkles className="ml-4 h-6 w-6 sm:h-8 sm:w-8 animate-pulse" />
+                                <span className="truncate">{t("landing.cta.launch")}</span>
+                                <Sparkles className="ms-2 sm:ms-4 h-5 w-5 sm:h-8 sm:w-8 animate-pulse shrink-0" />
                             </Link>
                         </Button>
                     </div>

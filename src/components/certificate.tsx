@@ -32,10 +32,10 @@ export const Certificate = React.forwardRef<HTMLDivElement, CertificateProps>(
         <div className="absolute inset-6 border border-primary/20 pointer-events-none" />
         
         {/* Corner Ornaments */}
-        <div className="absolute top-8 left-8 w-16 h-16 border-t-4 border-l-4 border-primary/60" />
-        <div className="absolute top-8 right-8 w-16 h-16 border-t-4 border-r-4 border-primary/60" />
-        <div className="absolute bottom-8 left-8 w-16 h-16 border-b-4 border-l-4 border-primary/60" />
-        <div className="absolute bottom-8 right-8 w-16 h-16 border-b-4 border-r-4 border-primary/60" />
+        <div className="absolute top-8 start-8 w-16 h-16 border-t-4 border-s-4 border-primary/60" />
+        <div className="absolute top-8 end-8 w-16 h-16 border-t-4 border-e-4 border-primary/60" />
+        <div className="absolute bottom-8 start-8 w-16 h-16 border-b-4 border-s-4 border-primary/60" />
+        <div className="absolute bottom-8 end-8 w-16 h-16 border-b-4 border-e-4 border-primary/60" />
 
         {/* Background Watermark */}
         <div className="absolute inset-0 flex items-center justify-center opacity-[0.03] pointer-events-none">
@@ -60,7 +60,7 @@ export const Certificate = React.forwardRef<HTMLDivElement, CertificateProps>(
             </h2>
           </div>
 
-          <div className="w-full max-w-2xl h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent my-4" />
+          <div className="w-full max-w-2xl h-px bg-linear-to-r from-transparent via-primary/40 to-transparent my-4" />
 
           {/* Body */}
           <div className="space-y-8 w-full max-w-3xl">
@@ -110,7 +110,7 @@ export const Certificate = React.forwardRef<HTMLDivElement, CertificateProps>(
           </div>
 
           {/* ID */}
-          <div className="absolute bottom-4 left-0 right-0 text-center">
+          <div className="absolute bottom-4 start-0 end-0 text-center">
             <p className="text-[10px] text-muted-foreground font-mono">
               {t("common.certificate.id", { id: completionId })}
             </p>

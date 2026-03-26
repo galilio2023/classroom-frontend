@@ -165,11 +165,11 @@ const SubmissionsListPage = () => {
           <Card className="p-4 border-primary/5 bg-muted/30 rounded-4xl backdrop-blur-sm">
             <div className="flex flex-col lg:flex-row gap-4">
               <div className="relative flex-1 group">
-                <Search className={cn("absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors", isAr ? "right-4" : "left-4")} />
+                <Search className={cn("absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors", "start-4")} />
                 <Input
                   type="text"
                   placeholder={t("assignments.list.filters.searchPlaceholder")}
-                  className={cn("h-14 rounded-2xl border-none bg-background shadow-sm font-medium", isAr ? "pr-11" : "pl-11")}
+                  className={cn("h-14 rounded-2xl border-none bg-background shadow-sm font-medium", isAr ? "pe-11" : "ps-11")}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -203,7 +203,7 @@ const SubmissionsListPage = () => {
           {/* Virtualized List Container */}
           <div 
             ref={parentRef} 
-            className="h-150 overflow-auto pr-2 custom-scrollbar rounded-[2.5rem] border border-primary/5 bg-card/30 backdrop-blur-sm relative"
+            className="h-150 overflow-auto pe-2 custom-scrollbar rounded-[2.5rem] border border-primary/5 bg-card/30 backdrop-blur-sm relative"
           >
             {isLoading ? (
               <div className="p-8 space-y-6">
@@ -248,7 +248,7 @@ const SubmissionsListPage = () => {
                         height: `${virtualItem.size}px`,
                         transform: `translateY(${virtualItem.start}px)`,
                       }}
-                      className="flex flex-col md:flex-row items-center px-8 py-6 border-b border-primary/5 hover:bg-primary/[0.02] transition-all group cursor-pointer"
+                      className="flex flex-col md:flex-row items-center px-8 py-6 border-b border-primary/5 hover:bg-primary/2 transition-all group cursor-pointer"
                       onClick={() => handleGradeClick(submission)}
                     >
                       {/* Student Avatar */}
@@ -260,14 +260,14 @@ const SubmissionsListPage = () => {
                           </AvatarFallback>
                         </Avatar>
                         {submission.isLate && (
-                          <div className={cn("absolute -top-2 bg-destructive text-white p-1 rounded-lg border-2 border-background shadow-lg", isAr ? "-left-2" : "-right-2")}>
+                          <div className={cn("absolute -top-2 bg-destructive text-white p-1 rounded-lg border-2 border-background shadow-lg", isAr ? "-start-2" : "-end-2")}>
                             <Timer className="h-3 w-3" />
                           </div>
                         )}
                       </div>
 
                       {/* Info */}
-                      <div className={cn("flex-1 text-center min-w-0 w-full", isAr ? "md:mr-8 md:text-right" : "md:ml-8 md:text-left")}>
+                      <div className={cn("flex-1 text-center min-w-0 w-full", isAr ? "md:me-8 md:text-end" : "md:ms-8 md:text-start")}>
                         <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
                           <h3 className="text-xl font-black tracking-tight truncate group-hover:text-primary transition-colors">
                             {submission.student?.name}
@@ -321,8 +321,8 @@ const SubmissionsListPage = () => {
                       </div>
 
                       {/* Actions */}
-                      <div className={cn("flex items-center gap-3 mt-6 md:mt-0 shrink-0", isAr ? "mr-4" : "ml-4")}>
-                        <div className={cn("flex flex-col", isAr ? "items-start ml-4" : "items-end mr-4")}>
+                      <div className={cn("flex items-center gap-3 mt-6 md:mt-0 shrink-0", "ms-4")}>
+                        <div className={cn("flex flex-col", isAr ? "items-start ms-4" : "items-end me-4")}>
                             <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">{t("assignments.grading.finalScore")}</p>
                             <p className={cn(
                                 "text-2xl font-black",
@@ -343,7 +343,7 @@ const SubmissionsListPage = () => {
                           onClick={() => handleGradeClick(submission)}
                         >
                           {isGraded ? t("buttons.reviewProof") : t("buttons.grade")}
-                          <ArrowRight className={cn("h-4 w-4 ml-2", isAr && "rotate-180")} />
+                          <ArrowRight className={cn("h-4 w-4 ms-2", isAr && "rotate-180")} />
                         </Button>
 
                         <DropdownMenu>

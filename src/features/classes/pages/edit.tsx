@@ -10,7 +10,6 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
 import {
   Info,
@@ -18,16 +17,12 @@ import {
   LayoutDashboard,
   Sparkles,
   Key,
-  ArrowRight,
   Loader2,
-  Check,
-  X,
   History,
   BookOpen,
 } from "lucide-react";
 import { classFormSchema } from "@/schemas/class";
 import { Subject, ClassStatus, Class } from "@/types";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ClassForm } from "./form";
 import { Button } from "@/components/ui/button";
 import {
@@ -48,7 +43,7 @@ import {
 } from "@/components/ui/select";
 import { useState } from "react";
 import { useTerm } from "@/contexts/term-context";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
 import { useTranslation } from "react-i18next";

@@ -8,8 +8,7 @@ interface RoleSelectorProps {
 }
 
 export const RoleSelector = ({ value, onChange }: RoleSelectorProps) => {
-  const { t, i18n } = useTranslation();
-  const isArabic = i18n.language === 'ar';
+  const { t } = useTranslation();
 
   return (
     <div className="grid grid-cols-3 gap-4">
@@ -25,7 +24,7 @@ export const RoleSelector = ({ value, onChange }: RoleSelectorProps) => {
           {t("roles.student")}
         </span>
         {value === "student" && (
-            <div className={cn("absolute top-2 h-2 w-2 bg-primary rounded-full", isArabic ? "left-2" : "right-2")} />
+            <div className={cn("absolute top-2 h-2 w-2 bg-primary rounded-full", "end-2")} />
         )}
       </div>
       <div 
@@ -40,7 +39,7 @@ export const RoleSelector = ({ value, onChange }: RoleSelectorProps) => {
           {t("roles.teacher")}
         </span>
         {value === "teacher" && (
-            <div className={cn("absolute top-2 h-2 w-2 bg-primary rounded-full", isArabic ? "left-2" : "right-2")} />
+            <div className={cn("absolute top-2 h-2 w-2 bg-primary rounded-full", "end-2")} />
         )}
       </div>
       <div 
@@ -55,7 +54,7 @@ export const RoleSelector = ({ value, onChange }: RoleSelectorProps) => {
           {t("roles.parent")}
         </span>
         {value === "parent" && (
-            <div className={cn("absolute top-2 h-2 w-2 bg-primary rounded-full", isArabic ? "left-2" : "right-2")} />
+            <div className={cn("absolute top-2 h-2 w-2 bg-primary rounded-full", "end-2")} />
         )}
       </div>
     </div>

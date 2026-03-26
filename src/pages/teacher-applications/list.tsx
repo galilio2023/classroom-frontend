@@ -179,13 +179,13 @@ const TeacherApplicationsList = () => {
                       exit={{ opacity: 0, scale: 0.95 }}
                       transition={{ delay: index * 0.05 }}
                       className={cn(
-                        "group relative flex flex-col md:flex-row items-center p-5 md:p-6 rounded-[2rem] bg-card/50 backdrop-blur-sm border border-border/40 hover:border-primary/30 hover:bg-card/80 transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-primary/5"
+                        "group relative flex flex-col md:flex-row items-center p-5 md:p-6 rounded-4xl bg-card/50 backdrop-blur-sm border border-border/40 hover:border-primary/30 hover:bg-card/80 transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-primary/5"
                       )}
                     >
                       {/* Status Color Accent */}
                       <div 
                         className={cn(
-                          "absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-12 rounded-r-full transition-all group-hover:h-20",
+                          "absolute start-0 top-1/2 -translate-y-1/2 w-1.5 h-12 rounded-e-full transition-all group-hover:h-20",
                           app.status === 'approved' ? 'bg-green-500' : app.status === 'pending' ? 'bg-amber-500' : 'bg-destructive'
                         )}
                       />
@@ -201,7 +201,7 @@ const TeacherApplicationsList = () => {
                       </div>
 
                       {/* Info */}
-                      <div className={cn("flex-1 min-w-0 w-full", i18n.language === 'ar' ? "md:mr-8 md:text-right" : "md:ml-8 md:text-left")}>
+                      <div className={cn("flex-1 min-w-0 w-full", i18n.language === 'ar' ? "md:me-8 md:text-end" : "md:ms-8 md:text-start")}>
                         <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 mb-2">
                           <h3 className="text-xl md:text-2xl font-black tracking-tight truncate group-hover:text-primary transition-colors leading-tight">
                             {app.teacher?.name}
@@ -269,7 +269,7 @@ const TeacherApplicationsList = () => {
                                       onClick={() => handleStatusUpdate(app.id, "approved")}
                                       disabled={isUpdating}
                                   >
-                                      <CheckCircle2 className="h-4 w-4 mr-2" />
+                                      <CheckCircle2 className="h-4 w-4 me-2" />
                                       {t("buttons.approve")}
                                   </Button>
                                   <Button
@@ -279,7 +279,7 @@ const TeacherApplicationsList = () => {
                                       onClick={() => handleStatusUpdate(app.id, "rejected")}
                                       disabled={isUpdating}
                                   >
-                                      <XCircle className="h-4 w-4 mr-2" />
+                                      <XCircle className="h-4 w-4 me-2" />
                                       {t("buttons.reject")}
                                   </Button>
                               </div>

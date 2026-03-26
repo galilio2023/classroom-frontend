@@ -50,10 +50,10 @@ export const CertificateGallery = ({ studentName, isOwner }: CertificateGalleryP
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {MOCK_CERTIFICATES.map((cert) => (
           <Card key={cert.id} className="group hover:shadow-lg transition-all duration-300 border-primary/10 overflow-hidden">
-            <div className="h-32 bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center relative overflow-hidden">
+            <div className="h-32 bg-linear-to-br from-primary/10 to-primary/5 flex items-center justify-center relative overflow-hidden">
               <div className="absolute inset-0 bg-dot-pattern opacity-30" />
               <Award className="w-16 h-16 text-primary/40 group-hover:scale-110 transition-transform duration-500" />
-              <div className="absolute bottom-2 right-2">
+              <div className="absolute bottom-2 end-2">
                 <span className="bg-background/80 backdrop-blur text-[10px] font-bold px-2 py-1 rounded-full border shadow-sm">
                   {cert.date}
                 </span>

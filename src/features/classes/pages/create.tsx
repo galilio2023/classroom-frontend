@@ -2,8 +2,7 @@ import { useForm } from "@refinedev/react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Form,
   FormControl,
@@ -29,10 +28,9 @@ import { Subject, User, ClassStatus, AcademicTerm } from "@/types";
 import { toast } from "sonner";
 import z from "zod";
 import { cn } from "@/lib/utils";
-import { motion, AnimatePresence } from "framer-motion";
-import { Label } from "@/components/ui/label";
+import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import { useState } from "react"; // Import useState
+import { useState } from "react";
 
 type ClassCreateFormValues = z.infer<typeof classCreateFormSchema>;
 
@@ -51,7 +49,7 @@ const ClassesCreate = () => {
   const { t, i18n } = useTranslation();
   const back = useBack();
   const { data: identity } = useGetIdentity<User>();
-  const [isCreatingNewSubject, setIsCreatingNewSubject] = useState(false); // New state for subject creation
+  const [isCreatingNewSubject, setIsCreatingNewSubject] = useState(false);
 
   const form = useForm<BaseRecord, HttpError, ClassCreateFormValues>({
     resolver: zodResolver(classCreateFormSchema) as any,
@@ -69,7 +67,7 @@ const ClassesCreate = () => {
       status: ClassStatus.ACTIVE,
       schedules: [],
       color: PRESET_COLORS[0],
-      newSubjectName: "", // Initialize newSubjectName
+      newSubjectName: "",
     },
   });
 
@@ -82,7 +80,6 @@ const ClassesCreate = () => {
   } = form;
 
   const selectedColor = watch("color");
-  const selectedSubjectId = watch("subjectId");
 
   const onSubmit = async (values: ClassCreateFormValues) => {
     if (!identity?.id) {

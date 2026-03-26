@@ -239,18 +239,18 @@ const EnrollmentsList = () => {
           <Card className="p-4 border-primary/5 bg-muted/30 rounded-4xl backdrop-blur-sm">
             <div className="flex flex-col lg:flex-row gap-4">
               <div className="relative flex-1 group">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                <Search className="absolute start-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                 <Input
                   type="text"
                   placeholder={t("enrollments.searchPlaceholder")}
-                  className="pl-11 h-14 rounded-2xl border-none bg-background shadow-sm font-medium"
+                  className="ps-11 h-14 rounded-2xl border-none bg-background shadow-sm font-medium"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
               <div className="flex flex-wrap gap-3">
                 {selectedIds.length > 0 && (
-                    <div className="flex items-center gap-2 bg-primary/5 px-4 rounded-2xl border border-primary/10 animate-in fade-in slide-in-from-right-4">
+                    <div className="flex items-center gap-2 bg-primary/5 px-4 rounded-2xl border border-primary/10 animate-in fade-in slide-in-from-end-4">
                         <span className="text-[10px] font-black uppercase tracking-widest text-primary">{selectedIds.length} {t("common.cases")}</span>
                         <Button size="sm" variant="ghost" className="h-8 text-green-600 hover:bg-green-50 font-black text-[10px] uppercase tracking-widest" onClick={() => handleBulkAction("approved")}>
                             {t("buttons.approve")}
@@ -281,7 +281,7 @@ const EnrollmentsList = () => {
           {/* Virtualized List Container */}
           <div 
             ref={parentRef} 
-            className="h-150 overflow-auto pr-2 custom-scrollbar rounded-[2.5rem] border border-primary/5 bg-card/30 backdrop-blur-sm relative"
+            className="h-150 overflow-auto pe-2 custom-scrollbar rounded-[2.5rem] border border-primary/5 bg-card/30 backdrop-blur-sm relative"
           >
             {isLoading ? (
               <div className="p-8 space-y-6">
@@ -331,7 +331,7 @@ const EnrollmentsList = () => {
                         transition={{ duration: 0.2 }}
                         className={cn(
                           "flex flex-col md:flex-row items-center h-full border-b border-primary/5 transition-all group",
-                          isSelected ? "bg-primary/[0.04]" : "hover:bg-primary/[0.02]"
+                          isSelected ? "bg-primary/4" : "hover:bg-primary/2"
                         )}
                       >
                         {/* Selection & Avatar */}
@@ -353,7 +353,7 @@ const EnrollmentsList = () => {
                         </div>
 
                         {/* Info */}
-                        <div className="flex-1 md:ml-8 text-center md:text-left min-w-0 w-full">
+                        <div className="flex-1 md:ms-8 text-center md:text-start min-w-0 w-full">
                           <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
                             <h3 className="text-xl font-black tracking-tight truncate group-hover:text-primary transition-colors">
                               {enrollment.student.name}
@@ -410,7 +410,7 @@ const EnrollmentsList = () => {
                                       onClick={() => handleStatusUpdate(enrollment.id, "approved")}
                                       disabled={isUpdating}
                                   >
-                                      <CheckCircle2 className="h-4 w-4 mr-2" />
+                                      <CheckCircle2 className="h-4 w-4 me-2" />
                                       {t("buttons.approve")}
                                   </Button>
                                   <Button
@@ -420,7 +420,7 @@ const EnrollmentsList = () => {
                                       onClick={() => handleStatusUpdate(enrollment.id, "rejected")}
                                       disabled={isUpdating}
                                   >
-                                      <XCircle className="h-4 w-4 mr-2" />
+                                      <XCircle className="h-4 w-4 me-2" />
                                       {t("buttons.reject")}
                                   </Button>
                               </div>

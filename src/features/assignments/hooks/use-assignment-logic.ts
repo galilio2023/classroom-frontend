@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Assignment, Submission, PeerReview, UserRole } from "@/types";
+import { Assignment, Submission } from "@/types";
 
 export const useAssignmentLogic = (
   assignment?: Assignment,
@@ -8,7 +8,7 @@ export const useAssignmentLogic = (
 ) => {
   const mySubmission = useMemo(() => {
     if (!userId || !submissions.length) return null;
-    return submissions.find((s: Submission) => s.studentId === userId) || null;
+    return submissions.find((s) => s.studentId === userId) || null;
   }, [submissions, userId]);
 
   const isQuiz = useMemo(() => {

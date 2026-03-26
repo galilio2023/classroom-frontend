@@ -4,16 +4,22 @@ import { useTranslation } from "react-i18next";
 import { BACKEND_URL } from "@/config";
 import { BasePermissions, UserRole } from "@/types";
 
+export interface ChatSource {
+  title: string;
+  url: string;
+  type: string;
+}
+
 export interface Message {
   id?: string;
   role: "user" | "model";
   parts: { text: string }[];
-  sources?: any[];
+  sources?: ChatSource[];
 }
 
 interface UseAIChatProps {
   url: string;
-  context?: Record<string, any>;
+  context?: Record<string, unknown>;
   classId?: string | number | null;
 }
 
@@ -28,7 +34,14 @@ interface ChatHistoryResponse {
   data: ChatHistoryItem[];
 }
 
-interface AuthPermissions extends BasePermissions {}
+interface StreamData {
+  text?: string;
+  sources?: ChatSource[];
+  done?: boolean;
+  metadata?: {
+    isDryRun?: boolean;
+  };
+}
 
 const MAX_INPUT_LENGTH = 4000;
 
@@ -57,13 +70,14 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
   useEffect(() => {
       const draftKey = `draft:ai-assistant:${classId || 'global'}`;
       const saved = localStorage.getItem(draftKey);
-      if (saved && !input) {
-          setInput(saved);
+      if (saved) {
+          setInput(prev => prev || saved);
       }
   }, [classId]);
+
   const [isLoading, setIsLoading] = useState(false);
   const [streamingMessage, setStreamingMessage] = useState("");
-  const [streamingSources, setStreamingSources] = useState<any[] | null>(null);
+  const [streamingSources, setStreamingSources] = useState<ChatSource[] | null>(null);
   const [isDryRun, setIsDryRun] = useState(false);
 
   const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -74,7 +88,7 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
   const hasLoadedHistoryFor = useRef<string | number | null>(null); 
   
   const { open } = useNotification();
-  const { data: permissions, isLoading: isPermissionsLoading, isError: isPermissionsError } = usePermissions<AuthPermissions>({});
+  const { data: permissions, isLoading: isPermissionsLoading, isError: isPermissionsError } = usePermissions<BasePermissions>({});
 
   // 1. 📜 HISTORY: Standard Refine v5 GET
   // Task: Context Safety - Fallback to "global" history if no classId provided
@@ -150,18 +164,18 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
 
     // RBAC & Safety Checks
     if (isPermissionsError) {
-        open?.({ type: "error", message: t("common.error"), description: t("auth.errors.permissions" as any) });
+        open?.({ type: "error", message: (t as any)("common.error"), description: (t as any)("auth.errors.permissions") as string });
         return;
     }
 
     if (cleanInput.length > MAX_INPUT_LENGTH) {
-        open?.({ type: "error", message: t("common.error"), description: t("aiHub.errors.inputTooLong" as any) });
+        open?.({ type: "error", message: (t as any)("common.error"), description: (t as any)("aiHub.errors.inputTooLong") as string });
         return;
     }
 
     const role = permissions?.role;
     if (effectiveClassId && role === UserRole.PARENT) {
-        open?.({ type: "error", message: t("common.accessDenied" as any), description: t("aiHub.errors.parentRestricted" as any) });
+        open?.({ type: "error", message: (t as any)("common.accessDenied") as string, description: (t as any)("aiHub.errors.parentRestricted") as string });
         return;
     }
 
@@ -199,17 +213,18 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
                 correlationId
             }
         }, {
-            onSuccess: (result: any) => {
-                if (result.data?.data?.response) {
-                    setMessages((prev) => [...prev, { role: "model", parts: [{ text: result.data.data.response }] }]);
+            onSuccess: (result) => {
+                const responseData = result.data as { data?: { response?: string }, metadata?: { isDryRun?: boolean } };
+                if (responseData.data?.response) {
+                    setMessages((prev) => [...prev, { role: "model", parts: [{ text: responseData.data?.response || "" }] }]);
                 }
-                if (result.data?.metadata?.isDryRun) setIsDryRun(true);
+                if (responseData.metadata?.isDryRun) setIsDryRun(true);
                 setIsLoading(false);
             },
             onError: (err) => {
                 console.error("Simple Chat Error:", err);
                 setIsLoading(false);
-                open?.({ type: "error", message: t("common.error"), description: t("aiHub.errors.serviceUnavailable" as any) });
+                open?.({ type: "error", message: (t as any)("common.error"), description: (t as any)("aiHub.errors.serviceUnavailable") as string });
             }
         });
         return;
@@ -265,7 +280,7 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
               const rawData = line.replace("data: ", "").trim();
               if (!rawData) continue;
               
-              const data = JSON.parse(rawData);
+              const data = JSON.parse(rawData) as StreamData;
               if (data.text) {
                 accumulatorRef.current += data.text;
                 updateStreamingUI();
@@ -299,24 +314,25 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
       setStreamingMessage("");
       setStreamingSources(null);
 
-    } catch (error: any) {
+    } catch (err: unknown) {
+      const error = err as Error;
       if (error.name === 'AbortError') return;
       
       console.error("Tablawy AI Error:", error);
       
-      let description = t("aiHub.errors.serviceUnavailable" as any);
-      if (error.message === "RATE_LIMIT_EXCEEDED") description = t("aiHub.errors.rateLimit" as any);
-      if (error.message === "AI_SERVICE_OFFLINE") description = t("aiHub.errors.maintenance" as any);
+      let description: string = (t as any)("aiHub.errors.serviceUnavailable") as string;
+      if (error.message === "RATE_LIMIT_EXCEEDED") description = (t as any)("aiHub.errors.rateLimit") as string;
+      if (error.message === "AI_SERVICE_OFFLINE") description = (t as any)("aiHub.errors.maintenance") as string;
 
       open?.({ 
         type: "error", 
-        message: t("common.error"), 
+        message: (t as any)("common.error"), 
         description 
       });
       
       setMessages((prev) => [...prev, { 
         role: "model", 
-        parts: [{ text: t("aiHub.errors.friendlyFallback" as any) }] 
+        parts: [{ text: (t as any)("aiHub.errors.friendlyFallback") as string }] 
       }]);
     } finally {
       if (abortControllerRef.current === controller) {

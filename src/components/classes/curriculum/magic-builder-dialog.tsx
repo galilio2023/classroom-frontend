@@ -272,7 +272,7 @@ export const MagicBuilderDialog = ({
                 disabled={isGenerating || !config.topic}
                 className="bg-ai-primary hover:bg-ai-primary/90 text-ai-primary-foreground rounded-xl px-8 font-black uppercase tracking-widest text-[10px] shadow-lg shadow-ai-primary/20"
               >
-                <Zap className="h-4 w-4 mr-2" />
+                <Zap className="h-4 w-4 me-2" />
                 {t("buttons.create")}
               </Button>
             </DialogFooter>

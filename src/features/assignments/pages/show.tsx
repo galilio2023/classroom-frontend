@@ -34,7 +34,6 @@ const AssignmentShow = () => {
   const { 
     assignment, 
     submissions, 
-    identity, 
     assignedReviews, 
     mySubmission, 
     blendedGrade, 

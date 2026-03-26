@@ -48,7 +48,7 @@ export function UndoableNotification({
       )}
     >
       <div className={cn("flex", "items-center", "justify-between")}>
-        <div className={cn("flex-1", "mr-4")}>
+        <div className={cn("flex-1", "me-4")}>
           <div className={cn("font-medium", "text-foreground", "text-sm")}>
             {message}
           </div>

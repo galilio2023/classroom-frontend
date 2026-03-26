@@ -62,7 +62,7 @@ export const GlobalLiveIndicator = () => {
         initial={{ opacity: 0, y: -20, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: -20, scale: 0.95 }}
-        className="fixed top-20 left-1/2 -translate-x-1/2 z-[100] w-full max-w-xs md:max-w-sm px-4"
+        className="fixed top-20 start-1/2 -translate-x-1/2 z-[100] w-full max-w-xs md:max-w-sm px-4"
       >
         <div className="bg-live-primary text-white rounded-2xl shadow-2xl shadow-live-primary/40 border border-white/20 p-1 flex items-center gap-3 overflow-hidden backdrop-blur-md">
           <div className="bg-white/20 p-2 rounded-xl animate-pulse">
@@ -73,7 +73,7 @@ export const GlobalLiveIndicator = () => {
             <p className="text-[10px] font-black uppercase tracking-widest opacity-80 leading-none">
               {t("classes.live.indicator.liveNow", "Live Now")}
             </p>
-            <h4 className="text-xs md:text-sm font-bold truncate pr-2">
+            <h4 className="text-xs md:text-sm font-bold truncate pe-2">
               {currentClass.name}
             </h4>
           </div>

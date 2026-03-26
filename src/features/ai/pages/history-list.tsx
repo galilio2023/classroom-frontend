@@ -34,7 +34,7 @@ interface IAIActivityLog {
   response: string;
   model: string;
   tokensUsed: number | null;
-  metadata: any;
+  metadata: Record<string, unknown>;
   createdAt: string;
   updatedAt: string;
 }

@@ -114,8 +114,8 @@ export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({ assignmentId, 
               onClick={handleNext}
             >
               {currentStep === questions.length - 1 ? t("classes.quiz.finishQuiz") : t("classes.quiz.nextQuestion")}
-              <ArrowRight className="ml-2 h-4 w-4 md:h-5 md:w-5 ltr:block rtl:hidden" />
-              <ArrowRight className="mr-2 h-4 w-4 md:h-5 md:w-5 rtl:block ltr:hidden rotate-180" />
+              <ArrowRight className="ms-2 h-4 w-4 md:h-5 md:w-5 ltr:block rtl:hidden" />
+              <ArrowRight className="me-2 h-4 w-4 md:h-5 md:w-5 rtl:block ltr:hidden rotate-180" />
             </Button>
           )}
         </CardFooter>

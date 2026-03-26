@@ -1,6 +1,6 @@
 import React from "react";
 import { EmptyState } from "@/components/empty-state";
-import { LayoutGrid, ClipboardCheck, Library, Wand2, PlusCircle, FileQuestion } from "lucide-react";
+import { LayoutGrid, ClipboardCheck, Library, FileQuestion } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 interface ClassEmptyStateProps {
@@ -17,10 +17,10 @@ export const CurriculumEmptyState: React.FC<ClassEmptyStateProps> = ({
   return (
     <EmptyState
       icon={LayoutGrid}
-      title={t("classes.curriculum.noModules" as any)}
-      description={t("classes.curriculum.noModulesDescription" as any)}
+      title={t("classes.curriculum.noModules")}
+      description={t("classes.curriculum.noModulesDescription")}
       action={isTeacher && onAddClick ? {
-        label: t("buttons.addModule" as any),
+        label: t("buttons.addModule"),
         onClick: onAddClick
       } : undefined}
     />
@@ -38,10 +38,10 @@ export const AssessmentsEmptyState: React.FC<ClassEmptyStateProps & { type: 'ass
   return (
     <EmptyState
       icon={isQuiz ? FileQuestion : ClipboardCheck}
-      title={t((isQuiz ? "classes.quiz.noQuizzes" : "classes.assignments.noAssignments") as any)}
-      description={t((isQuiz ? "classes.quiz.noQuizzesDescription" : "classes.assignments.noAssignmentsDescription") as any)}
+      title={isQuiz ? t("classes.quiz.noQuizzes") : t("assignments.list.noAssignments")}
+      description={isQuiz ? t("classes.quiz.noQuizzesDescriptionStudent") : t("assignments.list.noAssignmentsDescriptionStudent")}
       action={isTeacher && onAddClick ? {
-        label: t((isQuiz ? "buttons.createQuiz" : "buttons.addAssignment") as any),
+        label: t(isQuiz ? "buttons.createQuiz" : "buttons.addAssignment"),
         onClick: onAddClick
       } : undefined}
     />
@@ -56,10 +56,10 @@ export const ResourcesEmptyState: React.FC<ClassEmptyStateProps> = ({
   return (
     <EmptyState
       icon={Library}
-      title={t("classes.resource.noMaterials" as any)}
-      description={t("classes.resource.noMaterialsDescription" as any)}
+      title={t("classes.resource.noMaterials")}
+      description={t("classes.resource.noMaterialsDescription")}
       action={isTeacher && onAddClick ? {
-        label: t("buttons.addResource" as any),
+        label: t("buttons.addResource"),
         onClick: onAddClick
       } : undefined}
     />

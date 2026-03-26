@@ -23,13 +23,12 @@ export const TaskItem = ({
   onToggleProgress 
 }: TaskItemProps) => {
   const { t, i18n } = useTranslation();
-  const isArabic = i18n.language === 'ar';
   const isQuiz = type === 'quiz';
   
   const getTaskStyles = () => {
     if (completed) return { bg: 'bg-success/5', border: 'border-success/20', iconColor: 'text-success', iconBg: 'bg-success/10' };
-    if (isQuiz) return { bg: 'bg-orange-500/[0.03]', border: 'border-orange-500/10', iconColor: 'text-orange-500', iconBg: 'bg-orange-500/10' };
-    return { bg: 'bg-blue-500/[0.03]', border: 'border-blue-500/10', iconColor: 'text-blue-500', iconBg: 'bg-blue-500/10' };
+    if (isQuiz) return { bg: 'bg-orange-500/3', border: 'border-orange-500/10', iconColor: 'text-orange-500', iconBg: 'bg-orange-500/10' };
+    return { bg: 'bg-blue-500/3', border: 'border-blue-500/10', iconColor: 'text-blue-500', iconBg: 'bg-blue-500/10' };
   };
 
   const styles = getTaskStyles();

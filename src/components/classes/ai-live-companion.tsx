@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mic, User as UserIcon, Hand, Loader2, BrainCircuit, Sparkles, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -51,13 +51,10 @@ export const AILiveCompanion = ({
     isJoined,
     setIsJoined,
     visualState,
-    setVisualState,
-    isLoading,
     currentScript,
     setCurrentScript,
     isSpeaking,
     isListening,
-    interact,
     speakText,
     startListening,
     stopListening,
@@ -264,7 +261,7 @@ export const AILiveCompanion = ({
                   )}
               </motion.div>
 
-              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 z-20 w-max">
+              <div className="absolute -bottom-2 start-1/2 -translate-x-1/2 z-20 w-max">
                   <Badge className={cn(
                       "px-4 py-1.5 rounded-full font-black uppercase tracking-widest text-[10px] shadow-xl border-none",
                       visualState === "talking" ? "bg-ai-primary text-white animate-pulse" :

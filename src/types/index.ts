@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { BaseRecord } from "@refinedev/core";
 import { classFormSchema, scheduleSchema } from "@/schemas/class";
 import { signUpFormSchema } from "@/schemas/auth";
 import { Quiz } from "./quiz";
@@ -195,6 +196,15 @@ export interface Assignment {
   hasPeerReview: boolean;
   peerReviewWeight: number;
   rubric: RubricItem[];
+}
+
+export interface ProjectGroup {
+  id: number;
+  classId: number;
+  name: string;
+  description: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface PeerReview {
@@ -435,7 +445,7 @@ export interface AIFeedbackResponse {
   summary: string;
 }
 
-export interface ListResponse<T = any> {
+export interface ListResponse<T = BaseRecord> {
   data: T[];
   pagination: {
     total: number;
@@ -445,11 +455,11 @@ export interface ListResponse<T = any> {
   };
 }
 
-export interface CreateResponse<T = any> {
+export interface CreateResponse<T = BaseRecord> {
   data: T;
 }
 
-export interface GetOneResponse<T = any> {
+export interface GetOneResponse<T = BaseRecord> {
   data: T;
 }
 

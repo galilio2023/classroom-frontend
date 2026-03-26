@@ -1,10 +1,10 @@
 import React from "react";
-import { useQuizGeneration } from "@/hooks/use-quiz-generation";
+import { useQuizGeneration, QuizQuestion } from "@/hooks/use-quiz-generation";
 import { QuizHelperForm } from "./ai/quiz-helper-form";
 import { QuizHelperPreview } from "./ai/quiz-helper-preview";
 
 interface AIQuizHelperProps {
-  onUseQuestions?: (questions: any[]) => void;
+  onUseQuestions?: (questions: (QuizQuestion & { points: number })[]) => void;
 }
 
 export const AIQuizHelper: React.FC<AIQuizHelperProps> = ({ onUseQuestions }) => {

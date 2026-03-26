@@ -1,9 +1,8 @@
 import React, { useMemo, useState } from "react";
-import { ListResponse } from "@/types";
 import { HttpError } from "@refinedev/core";
 import { ColumnDef } from "@tanstack/react-table";
 import { useTable } from "@refinedev/react-table";
-import { useCustomMutation, useNotification } from "@refinedev/core";
+import { useCustomMutation } from "@refinedev/core";
 import { useDashboard } from "@/features/dashboard/hooks/use-dashboard";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -22,8 +21,7 @@ import {
   ShieldCheck,
   BrainCircuit,
   MessageSquare,
-  Wrench,
-  X
+  Wrench
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
@@ -34,7 +32,6 @@ import usePageTitle from "@/hooks/use-page-title";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
@@ -43,7 +40,6 @@ import { SystemHealthReport } from "../types";
 
 const AIGovernanceList = () => {
   const { t, i18n } = useTranslation();
-  const { open } = useNotification();
   const { coreData, navigation: { refetchCore } } = useDashboard();
   const { mutate: mutateSettings } = useCustomMutation();
   

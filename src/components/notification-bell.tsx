@@ -304,7 +304,7 @@ export const NotificationBell = () => {
             {unreadCount > 0 && (
               <Badge
                 variant="destructive"
-                className="absolute -top-0.5 -right-0.5 h-5 min-w-5 flex items-center justify-center p-1 text-[10px] font-black border-2 border-background shadow-sm"
+                className="absolute -top-0.5 -end-0.5 h-5 min-w-5 flex items-center justify-center p-1 text-[10px] font-black border-2 border-background shadow-sm"
               >
                 {new Intl.NumberFormat(isArabic ? "ar-EG" : "en-US").format(
                   unreadCount > 9 ? 9 : unreadCount,
@@ -348,7 +348,7 @@ export const NotificationBell = () => {
                     className={cn(
                       "flex gap-3 p-4 border-b border-border/50 cursor-pointer transition-all duration-200 hover:bg-muted/50",
                       !notification.isRead
-                        ? "bg-primary/5 ltr:border-l-2 rtl:border-r-2 ltr:border-l-primary rtl:border-r-primary"
+                        ? "bg-primary/5 ltr:border-s-2 rtl:border-e-2 ltr:border-s-primary rtl:border-e-primary"
                         : "",
                     )}
                     onClick={() => handleMarkAsRead(notification)}

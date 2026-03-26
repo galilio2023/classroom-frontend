@@ -23,10 +23,9 @@ import {
   PlusCircle,
   Trash2,
   Layers,
-  ArrowRight,
 } from "lucide-react";
 import { AcademicTerm, User, UserRole } from "@/types";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -65,7 +64,6 @@ dayjs.extend(relativeTime);
 
 export default function TermsList() {
   const { t, i18n } = useTranslation();
-  const isAr = i18n.language === 'ar';
 
   const termSchema = useMemo(() => z.object({
     name: z.string().min(1, t("terms.form.nameRequired")),
@@ -168,9 +166,8 @@ export default function TermsList() {
     if (!terms.length) return { total: 0, active: 0, upcoming: 0 };
     return {
       total: terms.length,
-      active: terms.filter((t: any) => t.status === "active").length,
-      upcoming: terms.filter((t: any) => t.status === "upcoming")
-        .length,
+      active: terms.filter((term) => term.status === "active").length,
+      upcoming: terms.filter((term) => term.status === "upcoming").length,
     };
   }, [terms]);
 
@@ -201,7 +198,7 @@ export default function TermsList() {
             {isAdmin && (
               <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
                 <DialogTrigger asChild>
-                  <Button size="lg" className="w-full md:w-auto rounded-2xl h-12 md:h-14 px-10 font-bold uppercase tracking-widest text-[10px] gap-2 shadow-lg shadow-primary/25 hover:translate-y-[-2px] transition-all">
+                  <Button size="lg" className="w-full md:w-auto rounded-2xl h-12 md:h-14 px-10 font-bold uppercase tracking-widest text-[10px] gap-2 shadow-lg shadow-primary/25 hover:-translate-y-0.5 transition-all">
                     <PlusCircle className="h-5 w-5" />
                     {t("terms.create")}
                   </Button>
@@ -305,7 +302,7 @@ export default function TermsList() {
 
         {/* Stats Row - Adaptive */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
-          <Card className="p-6 md:p-8 bg-card/40 backdrop-blur-3xl border-border/40 rounded-[2rem] md:rounded-[2.5rem] flex items-center gap-5 shadow-sm">
+          <Card className="p-6 md:p-8 bg-card/40 backdrop-blur-3xl border-border/40 rounded-4xl md:rounded-[2.5rem] flex items-center gap-5 shadow-sm">
             <div className="p-3.5 rounded-2xl bg-primary/10 text-primary">
               <Calendar className="h-6 w-6 md:h-7 md:w-7" />
             </div>
@@ -318,7 +315,7 @@ export default function TermsList() {
               </p>
             </div>
           </Card>
-          <Card className="p-6 md:p-8 bg-card/40 backdrop-blur-3xl border-border/40 rounded-[2rem] md:rounded-[2.5rem] flex items-center gap-5 shadow-sm">
+          <Card className="p-6 md:p-8 bg-card/40 backdrop-blur-3xl border-border/40 rounded-4xl md:rounded-[2.5rem] flex items-center gap-5 shadow-sm">
             <div className="p-3.5 rounded-2xl bg-green-500/10 text-green-600">
               <Activity className="h-6 w-6 md:h-7 md:w-7" />
             </div>
@@ -331,7 +328,7 @@ export default function TermsList() {
               </p>
             </div>
           </Card>
-          <Card className="p-6 md:p-8 bg-card/40 backdrop-blur-3xl border-border/40 rounded-[2rem] md:rounded-[2.5rem] flex items-center gap-5 shadow-sm">
+          <Card className="p-6 md:p-8 bg-card/40 backdrop-blur-3xl border-border/40 rounded-4xl md:rounded-[2.5rem] flex items-center gap-5 shadow-sm">
             <div className="p-3.5 rounded-2xl bg-indigo-500/10 text-indigo-600">
               <Clock className="h-6 w-6 md:h-7 md:w-7" />
             </div>
@@ -347,14 +344,14 @@ export default function TermsList() {
         </div>
 
         {/* List Container - Global Scroll */}
-        <div className="relative min-h-[400px]">
+        <div className="relative min-h-100">
           {isLoading ? (
             <div className="space-y-4">
-              {Array.from({ length: 5 }).map((_: any, i: any) => (
+              {Array.from({ length: 5 }).map((_, i) => (
                 <Card key={i} className="p-6 flex flex-col md:flex-row items-center gap-6 border-border/20 bg-background/50">
                   <Skeleton className="h-20 w-20 rounded-3xl shrink-0" />
                   <div className="flex-1 space-y-4 w-full">
-                    <Skeleton className="h-8 w-[350px] max-w-full" />
+                    <Skeleton className="h-8 w-87.5 max-w-full" />
                     <div className="flex gap-4">
                        <Skeleton className="h-4 w-24" />
                        <Skeleton className="h-4 w-24" />
@@ -384,7 +381,7 @@ export default function TermsList() {
           ) : (
             <div className="space-y-4">
               <AnimatePresence mode="popLayout">
-                {terms.map((term: any, index: any) => {
+                {terms.map((term, index) => {
                   const startDate = dayjs(term.startDate);
                   const endDate = dayjs(term.endDate);
 
@@ -396,7 +393,7 @@ export default function TermsList() {
                       exit={{ opacity: 0, scale: 0.95 }}
                       transition={{ delay: index * 0.05 }}
                       className={cn(
-                        "group relative flex flex-col md:flex-row items-center p-5 md:p-6 rounded-[2rem] bg-card/50 backdrop-blur-sm border border-border/40 hover:border-primary/30 hover:bg-card/80 transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-primary/5 cursor-pointer"
+                        "group relative flex flex-col md:flex-row items-center p-5 md:p-6 rounded-4xl bg-card/50 backdrop-blur-sm border border-border/40 hover:border-primary/30 hover:bg-card/80 transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-primary/5 cursor-pointer"
                       )}
                     >
                       {/* Status Color Accent using logical properties */}

@@ -61,7 +61,7 @@ export const QuizMonitor: React.FC<QuizMonitorProps> = ({ quizId, assignmentTitl
   );
 
   return (
-    <Card className="border-none shadow-2xl bg-card/50 backdrop-blur-3xl rounded-[2rem] overflow-hidden text-start">
+    <Card className="border-none shadow-2xl bg-card/50 backdrop-blur-3xl rounded-4xl overflow-hidden text-start">
       <CardHeader className="bg-primary/5 border-b border-primary/10 p-6 md:p-8 space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1">
@@ -85,10 +85,10 @@ export const QuizMonitor: React.FC<QuizMonitorProps> = ({ quizId, assignmentTitl
         </div>
 
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input 
             placeholder={t("classes.monitor.search", "Filter students...")} 
-            className="pl-10 h-11 rounded-xl bg-background/50 border-none shadow-inner"
+            className="ps-10 h-11 rounded-xl bg-background/50 border-none shadow-inner"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -115,7 +115,7 @@ export const QuizMonitor: React.FC<QuizMonitorProps> = ({ quizId, assignmentTitl
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.9 }}
-                  className="flex items-center justify-between gap-4 p-4 rounded-2xl bg-background/50 border border-black/[0.03] dark:border-white/[0.03] shadow-sm group hover:border-primary/20 transition-all"
+                  className="flex items-center justify-between gap-4 p-4 rounded-2xl bg-background/50 border border-black/3 dark:border-white/3 shadow-sm group hover:border-primary/20 transition-all"
                 >
                   <div className="flex items-center gap-4 min-w-0">
                     <Avatar className="h-10 w-10 border-2 border-background shadow-sm rounded-xl">

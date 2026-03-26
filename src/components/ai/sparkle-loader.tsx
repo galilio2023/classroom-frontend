@@ -37,7 +37,7 @@ export const SparkleLoader = ({ message }: { message?: string }) => {
               repeat: Infinity,
               ease: "linear",
             }}
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+            className="absolute top-1/2 start-1/2 -translate-x-1/2 -translate-y-1/2"
           >
             <div 
               className="w-1.5 h-1.5 rounded-full bg-ai-primary/40"

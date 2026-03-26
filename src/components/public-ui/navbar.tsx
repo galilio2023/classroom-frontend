@@ -72,7 +72,7 @@ export const Navbar = () => {
   return (
     <nav
       className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-500",
+        "fixed top-0 start-0 end-0 z-50 transition-all duration-500",
         isScrolled
           ? "bg-background/70 backdrop-blur-xl border-b border-primary/10 py-3 shadow-sm"
           : "bg-transparent py-6",
@@ -87,7 +87,7 @@ export const Navbar = () => {
             <div className="bg-primary p-2 rounded-xl shadow-lg shadow-primary/20 group-hover:shadow-primary/40 transition-shadow">
               <BookOpen className="h-6 w-6 text-primary-foreground" />
             </div>
-            <div className="absolute -top-1 -right-1 h-3 w-3 bg-green-500 border-2 border-background rounded-full animate-pulse" />
+            <div className="absolute -top-1 -end-1 h-3 w-3 bg-green-500 border-2 border-background rounded-full animate-pulse" />
           </motion.div>
           <span className="text-2xl font-black tracking-tighter uppercase italic">
             Class<span className="text-primary not-italic">Room</span>
@@ -169,7 +169,7 @@ export const Navbar = () => {
               <Link to="/register">
                 <Button className="font-black uppercase tracking-widest text-[10px] rounded-xl px-6 shadow-xl shadow-primary/20 hover:scale-105 transition-transform active:scale-95">
                   {t("buttons.getStarted")}
-                  <Zap className="ml-2 h-3 w-3 fill-current" />
+                  <Zap className="ms-2 h-3 w-3 fill-current" />
                 </Button>
               </Link>
             </>
@@ -258,7 +258,7 @@ export const Navbar = () => {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="md:hidden fixed top-0 right-0 bottom-0 w-[85%] max-w-sm bg-background border-l border-primary/10 shadow-2xl z-50 flex flex-col"
+              className="md:hidden fixed top-0 end-0 bottom-0 w-[85%] max-w-sm bg-background border-l border-primary/10 shadow-2xl z-50 flex flex-col"
             >
               <div className="p-6 flex items-center justify-between border-b border-primary/5">
                 <div className="flex items-center gap-3">

@@ -62,7 +62,7 @@ const TeacherCard = ({ channel, onShow }: { channel: TeacherChannel & { teacher:
       </AnimatePresence>
 
       {/* Modern Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-90 transition-opacity duration-500" />
+      <div className="absolute inset-0 bg-linear-to-t from-black via-black/20 to-transparent opacity-90 transition-opacity duration-500" />
 
       {/* Content */}
       <div className="absolute inset-x-0 bottom-0 p-8 md:p-10 space-y-6 z-10">
@@ -152,14 +152,14 @@ const DiscoveryPage = () => {
             </div>
 
             <div className="relative group w-full md:w-[400px]">
-                <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-ai-primary/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="absolute -inset-1 bg-linear-to-r from-primary/20 to-ai-primary/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 <div className="relative flex items-center">
-                    <Search className="absolute left-6 h-5 w-5 text-muted-foreground/40" />
+                    <Search className="absolute start-6 h-5 w-5 text-muted-foreground/40" />
                     <Input 
                         placeholder="Search for subjects or teachers..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        className="h-16 pl-16 pr-8 rounded-full bg-card border-border/40 shadow-xl font-bold placeholder:text-muted-foreground/20 focus-visible:ring-primary/20"
+                        className="h-16 ps-16 pe-8 rounded-full bg-card border-border/40 shadow-xl font-bold placeholder:text-muted-foreground/20 focus-visible:ring-primary/20"
                     />
                 </div>
             </div>

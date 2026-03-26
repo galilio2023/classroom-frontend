@@ -28,7 +28,7 @@ export const QuizPreview: React.FC<QuizPreviewProps> = ({ quiz }) => {
           <Accordion type="single" collapsible className="w-full">
             {quiz.map((q, index) => (
               <AccordionItem key={index} value={`item-${index}`}>
-                <AccordionTrigger className="text-left">
+                <AccordionTrigger className="text-start">
                   <span className="font-medium">Q{index + 1}: {q.question}</span>
                 </AccordionTrigger>
                 <AccordionContent>

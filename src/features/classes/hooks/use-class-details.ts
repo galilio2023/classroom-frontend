@@ -6,7 +6,6 @@ import {
   useList, 
   useDelete, 
   useCreate,
-  useInvalidate
 } from "@refinedev/core";
 import { Class, Announcement, Enrollment } from "@/types";
 import { toast } from "sonner";
@@ -19,7 +18,6 @@ export const useClassDetails = (classId: string) => {
   const { t } = useTranslation();
   const { identity, isAdmin, isTeacher, isStaff } = useUserRole();
   const queryClient = useQueryClient();
-  const invalidate = useInvalidate();
 
   // --- Data Fetching ---
   const { query } = useShow<Class>({
@@ -32,11 +30,11 @@ export const useClassDetails = (classId: string) => {
   
   const isModerator = useMemo(() => {
     if (isAdmin) return false; // Admins are Registrars, not Instructors
-    return !!aClass?.teachers?.some((t: any) => t.teacher.id === identity?.id);
+    return !!aClass?.teachers?.some((t) => t.teacher.id === identity?.id);
   }, [identity, aClass, isAdmin]);
 
   const isOwner = useMemo(() => {
-    return isAdmin || aClass?.teachers?.find((t: any) => t.teacher.id === identity?.id)?.isPrimary;
+    return isAdmin || aClass?.teachers?.find((t) => t.teacher.id === identity?.id)?.isPrimary;
   }, [identity, aClass, isAdmin]);
 
   // --- Announcements Logic ---
@@ -64,7 +62,7 @@ export const useClassDetails = (classId: string) => {
 
   // --- Teacher Notes Logic ---
   const [teacherNotes, setTeacherNotes] = useState("");
-  const { query: notesQuery } = useOne({
+  const { query: notesQuery } = useOne<{ content: string }>({
     resource: `classes/${classId}/notes`,
     id: "current",
     queryOptions: { enabled: !!classId && isStaff },
@@ -72,8 +70,8 @@ export const useClassDetails = (classId: string) => {
   const { mutate: updateNote } = useUpdate();
 
   useEffect(() => {
-    if ((notesQuery?.data as any)?.content !== undefined) {
-      setTeacherNotes((notesQuery?.data as any).content);
+    if (notesQuery?.data?.data?.content !== undefined) {
+      setTeacherNotes(notesQuery.data.data.content);
     }
   }, [notesQuery?.data]);
 
@@ -106,7 +104,7 @@ export const useClassDetails = (classId: string) => {
     const previousClass = queryClient.getQueryData(queryKey);
 
     if (previousClass) {
-        queryClient.setQueryData(queryKey, (old: any) => {
+        queryClient.setQueryData(queryKey, (old: { data?: Class } | undefined) => {
             if (!old?.data) return old;
             return {
                 ...old,
@@ -150,7 +148,7 @@ export const useClassDetails = (classId: string) => {
       await queryClient.cancelQueries({ queryKey });
       const previousClass = queryClient.getQueryData(queryKey);
 
-      queryClient.setQueryData(queryKey, (old: any) => {
+      queryClient.setQueryData(queryKey, (old: { data?: Class } | undefined) => {
           if (!old?.data) return old;
           return { ...old, data: { ...old.data, isLive: newLiveStatus } };
       });

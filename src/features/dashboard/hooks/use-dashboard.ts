@@ -44,8 +44,8 @@ export const useDashboard = () => {
   useList<Class>({
     resource: "classes",
     filters: [
-        { field: "my", operator: "eq" as "eq", value: "true" },
-        ...(selectedTerm ? [{ field: "termId", operator: "eq" as "eq", value: selectedTerm.id }] : [])
+        { field: "my", operator: "eq" as const, value: "true" },
+        ...(selectedTerm ? [{ field: "termId", operator: "eq" as const, value: selectedTerm.id }] : [])
     ],
     queryOptions: { enabled: isStudent && !!selectedTerm, staleTime: 60000 }
   });
@@ -53,7 +53,7 @@ export const useDashboard = () => {
   // This makes the 'Pending Verifications' list load instantly for admins
   useList<User>({
     resource: "users",
-    filters: [{ field: "verificationStatus", operator: "eq" as "eq", value: "pending" }],
+    filters: [{ field: "verificationStatus", operator: "eq" as const, value: "pending" }],
     queryOptions: { enabled: isAdmin, staleTime: 60000 }
   });
 

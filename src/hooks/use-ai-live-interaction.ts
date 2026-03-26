@@ -5,7 +5,7 @@ import { BACKEND_URL } from "@/config";
 import { BasePermissions, UserRole } from "@/types";
 import { usePersistentLive } from "./use-persistent-live";
 import { AI_API } from "@/constants/api";
-import { AIVisualState, AI_STREAM_PAYLOAD } from "@/features/ai/types/ai";
+import { AIVisualState } from "@/features/ai/types/ai";
 
 interface UseAILiveInteractionProps {
   classId: string;
@@ -16,6 +16,13 @@ interface UseAILiveInteractionProps {
 }
 
 interface AuthPermissions extends BasePermissions {}
+
+interface LiveStreamData {
+  text?: string;
+  latencyMs?: number;
+  usage?: unknown;
+  done?: boolean;
+}
 
 /**
  * 🦾 useAILiveInteraction Hook
@@ -37,7 +44,7 @@ export const useAILiveInteraction = ({
 }: UseAILiveInteractionProps) => {
   const { t } = useTranslation();
   const { open } = useNotification();
-  const { data: permissions } = usePermissions<AuthPermissions>({});
+  const { data: permissions } = usePermissions<BasePermissions>({});
   
   // Zustand Global State
   const { isJoined: globalJoined, setIsJoined, activeClassId, setActiveClassId, stopSpeaking, setIsSpeaking: setGlobalSpeaking } = usePersistentLive();
@@ -61,7 +68,7 @@ export const useAILiveInteraction = ({
   const isMounted = useRef(true);
   const abortControllerRef = useRef<AbortController | null>(null);
   const speechRef = useRef<SpeechSynthesisUtterance | null>(null);
-  const recognitionRef = useRef<any>(null);
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const accumulatorRef = useRef("");
   const lineBufferRef = useRef("");
@@ -108,7 +115,7 @@ export const useAILiveInteraction = ({
               onFinished?.();
           };
 
-          utterance.onerror = (event: any) => {
+          utterance.onerror = (event) => {
               console.error("Speech Synthesis Error:", event);
               setIsSpeaking(false);
               setVisualState("talking"); // Revert to talking (default) on error
@@ -122,7 +129,7 @@ export const useAILiveInteraction = ({
           setIsSpeaking(false);
           setVisualState("talking");
       }
-  }, [language, onFinished]);
+  }, [language, onFinished, stopSpeaking]);
 
   // 👂 STOP LISTENING ENGINE
   const stopListening = useCallback(() => {
@@ -135,91 +142,13 @@ export const useAILiveInteraction = ({
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
   }, []);
 
-  // 2. 👂 SPEECH RECOGNITION ENGINE
-  const startListening = useCallback(() => {
-      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-      if (!SpeechRecognition) {
-          open?.({
-              type: "error",
-              message: t("aiHub.errors.speechNotSupported" as any),
-              description: t("aiHub.errors.chromeRequired" as any),
-          });
-          return;
-      }
-
-      if (window.speechSynthesis) window.speechSynthesis.cancel();
-      if (recognitionRef.current) recognitionRef.current.abort();
-
-      setIsListening(true);
-      setVisualState("listening");
-
-      const recognition = new SpeechRecognition();
-      recognition.lang = language === "Arabic" ? "ar-SA" : "en-US";
-      recognition.continuous = false;
-      recognition.interimResults = false;
-
-      // ⏱️ TIMEOUT LOGIC: Auto-stop if no voice detected
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      timeoutRef.current = setTimeout(() => {
-          recognition.stop();
-          setIsListening(false);
-          setVisualState("talking");
-          open?.({
-              type: "error",
-              message: t("aiHub.errors.listeningTimeout" as any),
-              description: t("aiHub.errors.tryAgain" as any),
-          });
-      }, 8000);
-
-      recognition.onresult = (event: any) => {
-          if (timeoutRef.current) clearTimeout(timeoutRef.current);
-          const transcript = event.results[0][0].transcript;
-          interact(transcript);
-      };
-
-      recognition.onerror = (event: any) => {
-          if (timeoutRef.current) clearTimeout(timeoutRef.current);
-          setIsListening(false);
-          setVisualState("talking");
-          if (event.error === 'not-allowed') {
-              onPermissionDenied?.();
-              open?.({
-                  type: "error",
-                  message: t("auth.errors.micAccessDenied" as any),
-                  description: t("auth.errors.micSettings" as any),
-              });
-          }
-      };
-
-      recognition.onend = () => {
-          if (timeoutRef.current) clearTimeout(timeoutRef.current);
-          setIsListening(false);
-      };
-
-      recognitionRef.current = recognition;
-      recognition.start();
-  }, [language, open, t]);
-
-  // 🚀 SESSION TOGGLE (Pattern Adherence: Lifecycle Safety)
-  const toggleJoin = useCallback((val: boolean) => {
-    if (val) setActiveClassId(classId);
-    setIsJoined(val);
-    if (!val) {
-        // Reset local state on leave
-        setCurrentScript(null);
-        setVisualState("talking");
-        if (window.speechSynthesis) window.speechSynthesis.cancel();
-        if (recognitionRef.current) recognitionRef.current.abort();
-    }
-  }, [setIsJoined, setActiveClassId, classId]);
-
-  // 2. 🚀 SSE STREAMING ENGINE
-  const interact = async (question: string) => {
+  // 2. 🚀 SEND: SSE STREAMING ENGINE
+  const interact = useCallback(async (question: string) => {
     if (!question.trim() || isLoading) return;
 
     // RBAC: Single Source of Truth
     if (permissions?.role === UserRole.PARENT) {
-        open?.({ type: "error", message: t("common.accessDenied" as any), description: t("aiHub.errors.parentRestricted" as any) });
+        open?.({ type: "error", message: t("common.accessDenied") as string, description: t("aiHub.errors.parentRestricted") as string });
         return;
     }
 
@@ -276,7 +205,7 @@ export const useAILiveInteraction = ({
               const rawData = line.replace("data: ", "").trim();
               if (!rawData) continue;
               
-              const data = JSON.parse(rawData);
+              const data = JSON.parse(rawData) as LiveStreamData;
               if (data.text) {
                 accumulatorRef.current += data.text;
                 // Update local UI script immediately for visual feedback
@@ -289,7 +218,7 @@ export const useAILiveInteraction = ({
               }
 
               if (data.done) break;
-            } catch (e) {
+            } catch {
               // Wait for buffer
             }
           }
@@ -301,12 +230,13 @@ export const useAILiveInteraction = ({
           speakText(accumulatorRef.current);
       }
 
-    } catch (error: any) {
+    } catch (err: unknown) {
+      const error = err as Error;
       if (error.name === 'AbortError') return;
       
       console.error("Co-Teacher Error:", error);
-      let description = t("aiHub.errors.serviceUnavailable" as any);
-      if (error.message === "RATE_LIMIT_EXCEEDED") description = t("aiHub.errors.rateLimit" as any);
+      let description: string = t("aiHub.errors.serviceUnavailable") as string;
+      if (error.message === "RATE_LIMIT_EXCEEDED") description = t("aiHub.errors.rateLimit") as string;
       
       open?.({ type: "error", message: t("common.error"), description });
       setVisualState("talking");
@@ -315,7 +245,85 @@ export const useAILiveInteraction = ({
         setIsLoading(false);
       }
     }
-  };
+  }, [classId, isLoading, language, open, permissions?.role, speakText, t, updateUI]);
+
+  // 2. 👂 SPEECH RECOGNITION ENGINE
+  const startListening = useCallback(() => {
+      const SpeechRecognitionClass = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      if (!SpeechRecognitionClass) {
+          open?.({
+              type: "error",
+              message: t("aiHub.errors.speechNotSupported") as string,
+              description: t("aiHub.errors.chromeRequired") as string,
+          });
+          return;
+      }
+
+      if (window.speechSynthesis) window.speechSynthesis.cancel();
+      if (recognitionRef.current) recognitionRef.current.abort();
+
+      setIsListening(true);
+      setVisualState("listening");
+
+      const recognition = new (SpeechRecognitionClass as { new(): SpeechRecognition })();
+      recognition.lang = language === "Arabic" ? "ar-SA" : "en-US";
+      recognition.continuous = false;
+      recognition.interimResults = false;
+
+      // ⏱️ TIMEOUT LOGIC: Auto-stop if no voice detected
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      timeoutRef.current = setTimeout(() => {
+          recognition.stop();
+          setIsListening(false);
+          setVisualState("talking");
+          open?.({
+              type: "error",
+              message: t("aiHub.errors.listeningTimeout") as string,
+              description: t("aiHub.errors.tryAgain") as string,
+          });
+      }, 8000);
+
+      recognition.onresult = (event: SpeechRecognitionEvent) => {
+          if (timeoutRef.current) clearTimeout(timeoutRef.current);
+          const transcript = event.results[0][0].transcript;
+          void interact(transcript);
+      };
+
+      recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+          if (timeoutRef.current) clearTimeout(timeoutRef.current);
+          setIsListening(false);
+          setVisualState("talking");
+          if (event.error === 'not-allowed') {
+              onPermissionDenied?.();
+              open?.({
+                  type: "error",
+                  message: t("auth.errors.micAccessDenied") as string,
+                  description: t("auth.errors.micSettings") as string,
+              });
+          }
+      };
+
+      recognition.onend = () => {
+          if (timeoutRef.current) clearTimeout(timeoutRef.current);
+          setIsListening(false);
+      };
+
+      recognitionRef.current = recognition;
+      recognition.start();
+  }, [interact, language, open, t, onPermissionDenied]);
+
+  // 🚀 SESSION TOGGLE (Pattern Adherence: Lifecycle Safety)
+  const toggleJoin = useCallback((val: boolean) => {
+    if (val) setActiveClassId(classId);
+    setIsJoined(val);
+    if (!val) {
+        // Reset local state on leave
+        setCurrentScript(null);
+        setVisualState("talking");
+        if (window.speechSynthesis) window.speechSynthesis.cancel();
+        if (recognitionRef.current) recognitionRef.current.abort();
+    }
+  }, [setIsJoined, setActiveClassId, classId]);
 
   // 3. 🧹 CLEANUP
   useEffect(() => {
@@ -327,7 +335,7 @@ export const useAILiveInteraction = ({
       if (recognitionRef.current) recognitionRef.current.abort();
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
-  }, [stopSpeaking]);
+  }, [stopSpeaking, stopListening]);
 
   return {
     isJoined,

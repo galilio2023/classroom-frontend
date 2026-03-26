@@ -72,10 +72,11 @@ export const LessonReader = () => {
         },
       },
       {
-        onSuccess: (data: any) => {
+        onSuccess: (data) => {
+          const responseData = data.data as { response: string };
           setChatHistory((prev) => [
             ...prev,
-            { role: "model", parts: [{ text: data.data.response }] }
+            { role: "model", parts: [{ text: responseData.response }] }
           ]);
           setIsTyping(false);
         },

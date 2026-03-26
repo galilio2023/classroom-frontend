@@ -108,7 +108,7 @@ export const BulkEnrollDialog = ({
         onOpenChange(val);
         if (!val) reset();
     }}>
-      <DialogContent className="sm:max-w-[500px] rounded-[2rem] border-none shadow-2xl p-0 overflow-hidden bg-card/95 backdrop-blur-2xl">
+      <DialogContent className="sm:max-w-[500px] rounded-4xl border-none shadow-2xl p-0 overflow-hidden bg-card/95 backdrop-blur-2xl">
         <div className="p-8 space-y-6">
           <DialogHeader className="space-y-3 text-start">
             <div className="flex items-center gap-4">
@@ -132,7 +132,7 @@ export const BulkEnrollDialog = ({
               <div
                 onClick={() => fileInputRef.current?.click()}
                 className={cn(
-                  "relative group cursor-pointer overflow-hidden rounded-[2rem] border-2 border-dashed transition-all duration-500",
+                  "relative group cursor-pointer overflow-hidden rounded-4xl border-2 border-dashed transition-all duration-500",
                   file 
                     ? "border-primary bg-primary/5" 
                     : "border-muted-foreground/20 hover:border-primary/50 hover:bg-primary/5"
@@ -192,9 +192,9 @@ export const BulkEnrollDialog = ({
                   className="flex-1 h-12 rounded-xl font-black uppercase tracking-widest text-[10px] shadow-xl shadow-primary/20"
                 >
                   {loading ? (
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    <Loader2 className="h-4 w-4 animate-spin me-2" />
                   ) : (
-                    <Upload className="h-4 w-4 mr-2" />
+                    <Upload className="h-4 w-4 me-2" />
                   )}
                   {t("buttons.uploadAndEnroll", "Upload & Enroll")}
                 </Button>
@@ -241,7 +241,7 @@ export const BulkEnrollDialog = ({
                 onClick={() => onOpenChange(false)}
                 className="w-full h-14 rounded-2xl font-black uppercase tracking-widest text-[10px] bg-emerald-600 hover:bg-emerald-700 shadow-xl shadow-emerald-500/20"
               >
-                <CheckCircle2 className="h-4 w-4 mr-2" />
+                <CheckCircle2 className="h-4 w-4 me-2" />
                 {t("buttons.done" as any)}
               </Button>
             </div>

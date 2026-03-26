@@ -143,7 +143,7 @@ const ActivityLogPage = () => {
           <Input
             type="text"
             placeholder={t("common.search")}
-            className="pl-10 w-full h-11 rounded-xl bg-background"
+            className="ps-10 w-full h-11 rounded-xl bg-background"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />

@@ -38,7 +38,7 @@ export function UserInfo() {
           "flex-col",
           "justify-between",
           "h-10",
-          "text-left"
+          "text-start"
         )}
       >
         <span className={cn("text-sm", "font-medium", "text-muted-foreground")}>

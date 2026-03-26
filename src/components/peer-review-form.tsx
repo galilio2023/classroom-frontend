@@ -106,7 +106,7 @@ export const PeerReviewForm = ({ review, assignment, onSuccess }: PeerReviewForm
                   control={form.control}
                   name={`scores.${item.criteria}`}
                   render={({ field }) => (
-                    <FormItem className="space-y-3 p-4 rounded-2xl bg-background/50 border border-black/[0.03] dark:border-white/[0.03] shadow-sm hover:border-primary/20 transition-all group">
+                    <FormItem className="space-y-3 p-4 rounded-2xl bg-background/50 border border-black/3 dark:border-white/3 shadow-sm hover:border-primary/20 transition-all group">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <div className="size-5 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-black text-primary">
@@ -127,7 +127,7 @@ export const PeerReviewForm = ({ review, assignment, onSuccess }: PeerReviewForm
                             {...field} 
                             className="h-12 text-lg font-black text-center rounded-xl bg-muted/20 border-none focus-visible:ring-primary transition-all"
                           />
-                          <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-black opacity-20 uppercase tracking-widest">PTS</div>
+                          <div className="absolute end-3 top-1/2 -translate-y-1/2 text-[10px] font-black opacity-20 uppercase tracking-widest">PTS</div>
                         </div>
                       </FormControl>
                       <FormMessage />
@@ -159,7 +159,7 @@ export const PeerReviewForm = ({ review, assignment, onSuccess }: PeerReviewForm
                         className="min-h-[150px] rounded-2xl resize-none bg-muted/10 border-2 border-transparent focus-visible:ring-primary p-5 text-sm leading-relaxed shadow-inner transition-all"
                         {...field}
                       />
-                      <div className="absolute bottom-4 right-4 opacity-10 group-focus-within:opacity-30 transition-opacity">
+                      <div className="absolute bottom-4 end-4 opacity-10 group-focus-within:opacity-30 transition-opacity">
                         <MessageSquare className="h-6 w-6" />
                       </div>
                     </div>

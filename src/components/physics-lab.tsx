@@ -210,7 +210,7 @@ export const PhysicsLab: React.FC<PhysicsLabProps> = ({
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         {/* Controls */}
-        <Card className="lg:col-span-1 rounded-[2rem] border-none shadow-xl bg-muted/30 backdrop-blur-sm">
+        <Card className="lg:col-span-1 rounded-4xl border-none shadow-xl bg-muted/30 backdrop-blur-sm">
           <CardContent className="p-6 space-y-8">
             <div className="space-y-6">
               <div className="space-y-4 text-start">
@@ -260,7 +260,7 @@ export const PhysicsLab: React.FC<PhysicsLabProps> = ({
                 onClick={resetSim}
                 className="w-full h-12 rounded-xl font-bold uppercase tracking-widest text-[10px] border-muted-foreground/20"
               >
-                <RotateCcw className="h-4 w-4 mr-2" />
+                <RotateCcw className="h-4 w-4 me-2" />
                 {t("buttons.reset" as any)}
               </Button>
             </div>
@@ -318,8 +318,8 @@ export const PhysicsLab: React.FC<PhysicsLabProps> = ({
                       {t("buttons.done" as any)}
                     </Button>
                   </div>
-                  <Sparkles className="absolute top-10 right-10 h-12 w-12 text-white/20 animate-pulse" />
-                  <Sparkles className="absolute bottom-10 left-10 h-8 w-8 text-white/20 animate-pulse delay-700" />
+                  <Sparkles className="absolute top-10 end-10 h-12 w-12 text-white/20 animate-pulse" />
+                  <Sparkles className="absolute bottom-10 start-10 h-8 w-8 text-white/20 animate-pulse delay-700" />
                 </motion.div>
               )}
             </AnimatePresence>

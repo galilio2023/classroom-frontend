@@ -4,7 +4,6 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,23 +11,19 @@ import {
   Sparkles,
   Loader2,
   CheckCircle2,
-  RefreshCw,
   Clock,
   BookOpen,
   Zap,
   ExternalLink,
-  ChevronRight,
   Info,
-  Layers,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
-import { useCustomMutation } from "@refinedev/core";
+import { useCustomMutation, HttpError } from "@refinedev/core";
 import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
 import usePageTitle from "@/hooks/use-page-title";
 
@@ -39,6 +34,10 @@ interface StudyBlock {
   assignmentId?: number;
   duration: string;
   completed?: boolean;
+}
+
+interface StudyPlannerData {
+  plan: StudyBlock[];
 }
 
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
@@ -52,7 +51,7 @@ const StudyPlanner = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [completedBlocks, setCompletedBlocks] = useState<Record<string, boolean>>({});
 
-  const { mutate: generatePlanMutation } = useCustomMutation();
+  const { mutate: generatePlanMutation } = useCustomMutation<StudyPlannerData, HttpError>();
 
   useEffect(() => {
     const savedPlan = localStorage.getItem("study-plan");
@@ -87,12 +86,12 @@ const StudyPlanner = () => {
             message: t("studyPlanner.toasts.generated"),
             type: "success",
         }),
-        errorNotification: (error: any) => ({
-            message: error?.response?.data?.message || error?.message || t("studyPlanner.toasts.error"),
+        errorNotification: (error) => ({
+            message: (error?.response?.data as any)?.message || error?.message || t("studyPlanner.toasts.error"),
             type: "error",
         }),
     }, {
-        onSuccess: (data: any) => {
+        onSuccess: (data) => {
             const newPlan = data.data.plan;
             setPlan(newPlan);
             localStorage.setItem("study-plan", JSON.stringify(newPlan));
@@ -128,7 +127,7 @@ const StudyPlanner = () => {
   };
 
   return (
-    <div className="space-y-10 md:space-y-16 pb-20 max-w-screen-2xl mx-auto">
+    <div className="space-y-10 md:space-y-16 pb-20 max-w-screen-2xl mx-auto" dir={isAr ? "rtl" : "ltr"}>
       {/* Header Section */}
       <motion.div 
         initial={{ opacity: 0, y: -20 }}

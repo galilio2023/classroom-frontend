@@ -26,9 +26,9 @@ export const defaultNS = "translation";
 export const resources = {
   en: {
     translation: {
+      ...enCommon,
       ...enAuth,
       ...enClasses,
-      ...enCommon,
       ...enDashboard,
       ...enLanding,
     },
@@ -36,9 +36,9 @@ export const resources = {
   },
   ar: {
     translation: {
+      ...arCommon,
       ...arAuth,
       ...arClasses,
-      ...arCommon,
       ...arDashboard,
       ...arLanding,
     },

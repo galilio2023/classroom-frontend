@@ -17,16 +17,7 @@ export function ErrorComponent() {
   const [errorMessage, setErrorMessage] = useState<string>();
   const translate = useTranslate();
   const navigate = useNavigate();
-  
-  // Safely handle resource params
-  let resourceParams: any = {};
-  try {
-    resourceParams = useResourceParams();
-  } catch (e) {
-    console.error("Error getting resource params", e);
-  }
-  
-  const { resource, action } = resourceParams;
+  const { resource, action } = useResourceParams();
 
   useEffect(() => {
     if (resource && action) {
@@ -46,7 +37,7 @@ export function ErrorComponent() {
   const handleBackToDashboard = () => {
     try {
         navigate("/");
-    } catch (e) {
+    } catch {
         window.location.href = "/";
     }
   };
@@ -54,7 +45,7 @@ export function ErrorComponent() {
   const handleGoBack = () => {
     try {
         navigate(-1);
-    } catch (e) {
+    } catch {
         window.history.back();
     }
   };
@@ -120,7 +111,7 @@ export function ErrorComponent() {
                     className="text-muted-foreground hover:text-foreground"
                     onClick={handleGoBack}
                 >
-                    <ChevronLeft className="h-4 w-4 mr-1" />
+                    <ChevronLeft className="h-4 w-4 me-1" />
                     Go Back
                 </Button>
 
@@ -130,7 +121,7 @@ export function ErrorComponent() {
                     className="text-muted-foreground hover:text-foreground"
                     onClick={handleHardRefresh}
                 >
-                    <RefreshCw className="h-4 w-4 mr-1" />
+                    <RefreshCw className="h-4 w-4 me-1" />
                     Refresh Page
                 </Button>
             </div>

@@ -1,14 +1,10 @@
 import { useParams } from "react-router-dom";
 import { useState } from "react";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
-import { 
-  AIStudyBuddy 
-} from "@/components/ai-study-buddy";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
 
 import { ClassBanner } from "@/components/classes/show/class-banner";
-import { PinnedAnnouncements } from "@/components/classes/show/pinned-announcements";
 import { ClassHeader } from "@/components/classes/show/class-header";
 import { useClassRealtime } from "@/hooks/use-class-realtime";
 
@@ -20,14 +16,14 @@ import { RosterTabWrapper } from "../components/roster-tab-wrapper";
 import { ProgressTabWrapper } from "../components/progress-tab-wrapper";
 import { InfoTabWrapper } from "../components/info-tab-wrapper";
 import { StaffActions } from "../components/staff-actions";
-import { ClassLoadingView, ClassErrorView } from "../components/class-state-views";
+import { ClassErrorView } from "../components/class-state-views";
 import { ClassTabNavigation } from "../components/class-tab-navigation";
 import { ClassShowSkeleton } from "../components/class-skeletons";
-import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
 
 // Logic Hooks
 import { useClassTabs } from "../hooks/use-class-tabs";
 import { useClassDetails } from "../hooks/use-class-details";
+import { Enrollment } from "@/types";
 
 const ClassesShow = () => {
   const { i18n } = useTranslation();
@@ -80,9 +76,9 @@ const ClassesShow = () => {
   if (isLoading) return <ClassShowSkeleton />;
   if (isError || !aClass) return <ClassErrorView />;
 
-  const approvedEnrollments = aClass.enrollments?.filter((e: any) => e.status === "approved") ?? [];
-  const pendingCount = (aClass.enrollments?.filter((e: any) => e.status === "pending").length ?? 0) + 
-                       (aClass.enrollments?.filter((e: any) => e.status === "waitlisted").length ?? 0);
+  const approvedEnrollments = aClass.enrollments?.filter((e: Enrollment) => e.status === "approved") ?? [];
+  const pendingCount = (aClass.enrollments?.filter((e: Enrollment) => e.status === "pending").length ?? 0) + 
+                       (aClass.enrollments?.filter((e: Enrollment) => e.status === "waitlisted").length ?? 0);
 
   return (
     <>
@@ -94,7 +90,7 @@ const ClassesShow = () => {
         <ClassBanner
           aClass={aClass}
           approvedCount={approvedEnrollments.length}
-          waitlistedCount={aClass.enrollments?.filter((e: any) => e.status === "waitlisted").length ?? 0}
+          waitlistedCount={aClass.enrollments?.filter((e: Enrollment) => e.status === "waitlisted").length ?? 0}
           isLiveIndicator={isLiveIndicator}
           isStaff={isModerator}
           onToggleLive={handleToggleLive}
@@ -146,7 +142,7 @@ const ClassesShow = () => {
                   {activePrimaryTab === "roster" && (
                     <RosterTabWrapper
                       classId={classId} approvedEnrollments={approvedEnrollments}
-                      pendingEnrollments={aClass.enrollments?.filter((e: any) => e.status === "pending") ?? []}
+                      pendingEnrollments={aClass.enrollments?.filter((e: Enrollment) => e.status === "pending") ?? []}
                       isStaff={isStaff} onInsight={setInsightTarget} onUnenroll={setUnenrollTarget}
                       onEnrollClick={() => setIsEnrollDialogOpen(true)} onMessageAllClick={() => setIsMessageAllOpen(true)}
                       onEnrollmentAction={handleEnrollmentAction} activeSubTab={activeSubTab} setSearchParams={setSearchParams}
@@ -189,9 +185,9 @@ const ClassesShow = () => {
           classId={classId} unenrollTarget={unenrollTarget} setUnenrollTarget={setUnenrollTarget}
           handleConfirmUnenroll={() => handleConfirmUnenroll(unenrollTarget, () => setUnenrollTarget(null))}
           isDeleting={isDeleting} isEnrollDialogOpen={isEnrollDialogOpen} setIsEnrollDialogOpen={setIsEnrollDialogOpen}
-          enrolledStudentIds={approvedEnrollments.map((e: any) => e.student.id)}
+          enrolledStudentIds={approvedEnrollments.map((e: Enrollment) => e.student.id)}
           isInviteDialogOpen={isInviteDialogOpen} setIsInviteDialogOpen={setIsInviteDialogOpen}
-          existingTeacherIds={aClass.teachers?.map((t: any) => t.teacher.id) ?? []}
+          existingTeacherIds={aClass.teachers?.map((t) => t.teacher.id) ?? []}
           insightTarget={insightTarget} setInsightTarget={setInsightTarget}
           isMessageAllOpen={isMessageAllOpen} setIsMessageAllOpen={setIsMessageAllOpen}
           approvedCount={approvedEnrollments.length} bulkMessage={bulkMessage} setBulkMessage={setBulkMessage}

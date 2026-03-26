@@ -65,7 +65,7 @@ export const ModuleItem = ({
       className="border-none shadow-xl bg-card/50 backdrop-blur-xl rounded-3xl md:rounded-4xl overflow-hidden group transition-all hover:shadow-2xl hover:bg-card/80"
     >
       <div className="flex items-center justify-between w-full px-4 md:px-6">
-        <AccordionTrigger className="hover:no-underline py-4 md:py-6 flex-1 group/trigger text-left rtl:text-right">
+        <AccordionTrigger className="hover:no-underline py-4 md:py-6 flex-1 group/trigger text-start rtl:text-end">
           <div className="flex items-center gap-3 md:gap-4 min-w-0">
             <div className="p-2 md:p-3 rounded-lg md:rounded-2xl bg-primary/10 text-primary group-hover/trigger:scale-110 transition-transform shrink-0">
               <BookOpen className="h-5 w-5 md:h-6 md:w-6" />
@@ -102,7 +102,7 @@ export const ModuleItem = ({
                     className="text-destructive focus:text-destructive font-bold rounded-lg cursor-pointer py-2.5"
                     onClick={() => onDeleteModule(module.id)}
                     >
-                    <Trash2 className="h-4 w-4 mr-2 rtl:mr-0 rtl:ml-2" />
+                    <Trash2 className="h-4 w-4 me-2 rtl:me-0 rtl:ms-2" />
                     {t("buttons.deleteModule")}
                     </DropdownMenuItem>
                 </DropdownMenuContent>

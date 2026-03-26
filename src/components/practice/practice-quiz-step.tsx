@@ -55,7 +55,7 @@ export const PracticeQuizStep: React.FC<PracticeQuizStepProps> = ({
               key={idx}
               onClick={() => onOptionSelect(option)}
               className={cn(
-                "p-4 rounded-xl border-2 text-left transition-all hover:bg-accent",
+                "p-4 rounded-xl border-2 text-start transition-all hover:bg-accent",
                 selectedOption === option
                   ? "border-primary bg-primary/5 ring-2 ring-primary/20"
                   : "border-border bg-card"
@@ -74,13 +74,13 @@ export const PracticeQuizStep: React.FC<PracticeQuizStepProps> = ({
           className="w-full sm:w-auto"
         >
           {isSubmitting ? (
-            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+            <Loader2 className="h-4 w-4 animate-spin me-2" />
           ) : currentQuestionIndex === totalQuestions - 1 ? (
             t("classes.quiz.finishQuiz")
           ) : (
             <>
               {t("classes.quiz.nextQuestion")} 
-              <ArrowRight className={cn("h-4 w-4 ml-2", isArabic && "rotate-180 ml-0 mr-2")} />
+              <ArrowRight className={cn("h-4 w-4 ms-2", isArabic && "rotate-180 ms-0 me-2")} />
             </>
           )}
         </Button>

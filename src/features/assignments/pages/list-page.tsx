@@ -1,5 +1,4 @@
 import { ListView } from "@/components/refine-ui/views/list-view";
-import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
 import { 
   Search, 
   FileText, 
@@ -18,9 +17,10 @@ import {
   Layers
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { useMemo, useState, useRef } from "react";
+import { useMemo, useState } from "react";
 import { useList, useNavigation, useDelete, useGetIdentity } from "@refinedev/core";
-import { Assignment, User, UserRole } from "@/types";
+import { Assignment, User, UserRole, Class } from "@/types";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -55,6 +55,8 @@ import { useTranslation } from "react-i18next";
 
 dayjs.extend(relativeTime);
 
+type AssignmentListItem = Assignment & { class?: Class; isEnrolled?: boolean };
+
 const AssignmentsListPage = () => {
   const { t, i18n } = useTranslation();
   usePageTitle(t("assignments.list.title"));
@@ -87,9 +89,9 @@ const AssignmentsListPage = () => {
       f.push({ field: "teacherId", operator: "eq" as const, value: identity.id });
     }
     return f;
-  }, [searchQuery, selectedTerm, isStaff, identity?.id, view]); // Added isStaff and identity.id to dependencies
+  }, [searchQuery, selectedTerm, isStaff, identity?.id, view]);
 
-  const { query: { data: assignmentsData, isLoading } } = useList<Assignment>({
+  const { query: { data: assignmentsData, isLoading } } = useList<AssignmentListItem>({
     resource: "assignments",
     pagination: { pageSize: 50, mode: "server" },
     filters,
@@ -117,8 +119,8 @@ const AssignmentsListPage = () => {
     if (!assignments.length) return { total: 0, active: 0, overdue: 0 };
     return {
       total: assignments.length,
-      active: assignments.filter((a: Assignment) => !a.dueDate || dayjs().isBefore(dayjs(a.dueDate))).length,
-      overdue: assignments.filter((a: Assignment) => a.dueDate && dayjs().isAfter(dayjs(a.dueDate))).length
+      active: assignments.filter((a: AssignmentListItem) => !a.dueDate || dayjs().isBefore(dayjs(a.dueDate))).length,
+      overdue: assignments.filter((a: AssignmentListItem) => a.dueDate && dayjs().isAfter(dayjs(a.dueDate))).length
     };
   }, [assignments]);
 
@@ -299,7 +301,7 @@ const AssignmentsListPage = () => {
               <AnimatePresence mode="popLayout">
                 {assignments.map((assignment, index) => {
                   const isPast = assignment.dueDate && dayjs(assignment.dueDate).isBefore(dayjs());
-                  const classColor = (assignment as any).class?.color || "#6366f1";
+                  const classColor = assignment.class?.color || "#6366f1";
                   
                   return (
                     <motion.div
@@ -340,7 +342,7 @@ const AssignmentsListPage = () => {
                                 variant="ai" 
                                 className="h-6"
                             >
-                                {(assignment as any).class?.name || t("assignments.list.labels.general")}
+                                {assignment.class?.name || t("assignments.list.labels.general")}
                             </Badge>
                             {assignment.hasPeerReview && (
                                 <Badge className="bg-amber-500/10 text-amber-600 border border-amber-500/20 font-black px-2.5 py-0.5 rounded-full text-[9px] tracking-widest uppercase shadow-sm">
@@ -412,21 +414,21 @@ const AssignmentsListPage = () => {
                             "w-full md:w-auto rounded-2xl px-8 h-12 font-black uppercase tracking-widest text-[10px] transition-all",
                             isPast ?
                               "border-destructive/20 text-destructive hover:bg-destructive/5" :
-                              ((assignment as any).isEnrolled || isStaff) ? 
+                              (assignment.isEnrolled || isStaff) ? 
                                 "bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20" :
                                 "bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg shadow-emerald-500/20",
                           )}
                           onClick={(e) => {
                               e.stopPropagation();
-                              if (!isStaff && !(assignment as any).isEnrolled) {
+                              if (!isStaff && !assignment.isEnrolled) {
                                   // Navigate to class show to request enrollment
-                                  show("classes", (assignment as any).classId);
+                                  show("classes", assignment.classId);
                               } else {
                                   show("assignments", assignment.id);
                               }
                           }}
                         >
-                          {isStaff ? t("buttons.viewDetails") : ((assignment as any).isEnrolled ? t("buttons.viewDetails") : "Request to Join Class")}
+                          {isStaff ? t("buttons.viewDetails") : (assignment.isEnrolled ? t("buttons.viewDetails") : "Request to Join Class")}
                           <ArrowRight className={cn("h-4 w-4", "ms-2 rtl:-scale-x-100")} />
                         </Button>
 

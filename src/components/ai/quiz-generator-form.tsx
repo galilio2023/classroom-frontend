@@ -77,7 +77,7 @@ export const QuizGeneratorForm: React.FC<QuizGeneratorFormProps> = ({
     >
       <div className="space-y-6 text-start">
         <div className="space-y-2">
-          <Label htmlFor="topic" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">{t("aiHub.assistant.quizGen.topic")}</Label>
+          <Label htmlFor="topic" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ms-1">{t("aiHub.assistant.quizGen.topic")}</Label>
           <Input
             id="topic"
             placeholder={t("aiHub.assistant.quizGen.placeholders.topic")}
@@ -89,7 +89,7 @@ export const QuizGeneratorForm: React.FC<QuizGeneratorFormProps> = ({
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2 min-w-0">
-                <Label htmlFor="difficulty" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">{t("aiHub.assistant.quizGen.difficulty")}</Label>
+                <Label htmlFor="difficulty" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ms-1">{t("aiHub.assistant.quizGen.difficulty")}</Label>
                 <Select value={difficulty} onValueChange={setDifficulty}>
                     <SelectTrigger id="difficulty" className="h-11 w-full rounded-xl bg-muted/30 border-none focus-visible:ring-primary font-bold">
                         <div className="flex items-center gap-2 truncate min-w-0">
@@ -105,7 +105,7 @@ export const QuizGeneratorForm: React.FC<QuizGeneratorFormProps> = ({
                 </Select>
             </div>
             <div className="space-y-2 min-w-0">
-                <Label htmlFor="type" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">{t("aiHub.assistant.quizGen.format")}</Label>
+                <Label htmlFor="type" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ms-1">{t("aiHub.assistant.quizGen.format")}</Label>
                 <Select value={type} onValueChange={setType}>
                     <SelectTrigger id="type" className="h-11 w-full rounded-xl bg-muted/30 border-none focus-visible:ring-primary font-bold">
                         <div className="flex items-center gap-2 truncate min-w-0">

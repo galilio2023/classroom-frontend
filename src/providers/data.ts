@@ -1,4 +1,4 @@
-import { DataProvider, HttpError, LogicalFilter, Pagination } from "@refinedev/core";
+import { DataProvider, HttpError, LogicalFilter } from "@refinedev/core";
 import { BACKEND_URL } from "@/config";
 
 const BACKEND_BASE_URL = BACKEND_URL;
@@ -7,13 +7,13 @@ const BACKEND_BASE_URL = BACKEND_URL;
  * Helper to handle API errors and return Refine-compatible HttpError
  */
 const handleError = async (response: Response): Promise<HttpError> => {
-  let json: any = {};
+  let json: Record<string, unknown> = {};
   try {
     const text = await response.text();
     if (text) {
       json = JSON.parse(text);
     }
-  } catch (e) {
+  } catch {
     // Not JSON or empty
   }
 
@@ -27,15 +27,15 @@ const handleError = async (response: Response): Promise<HttpError> => {
 
   if (json.details) {
     return {
-      message: json.error || "Validation failed",
+      message: (json.error as string) || "Validation failed",
       statusCode: response.status,
-      errors: json.details,
+      errors: json.details as Record<string, string>,
     };
   }
 
   return {
     message:
-      json.error || json.message || `HTTP error! status: ${response.status}`,
+      (json.error as string) || (json.message as string) || `HTTP error! status: ${response.status}`,
     statusCode: response.status,
   };
 };
@@ -100,8 +100,8 @@ export const dataProvider: DataProvider = {
 
     // Pagination: Map to _start and _end for backend compatibility
     if (pagination?.mode !== "off") {
-      const current = (pagination as any)?.current ?? 1;
-      const pageSize = (pagination as any)?.pageSize ?? 10;
+      const current = pagination?.current ?? 1;
+      const pageSize = pagination?.pageSize ?? 10;
       const _start = (current - 1) * pageSize;
       const _end = _start + pageSize;
       url.searchParams.append("_start", _start.toString());
@@ -294,7 +294,7 @@ export const dataProvider: DataProvider = {
     const response = await fetcher(requestUrl, {
       method: method ? method.toUpperCase() : "GET",
       body: payload ? JSON.stringify(payload) : undefined,
-      headers: headers as any,
+      headers: headers as Record<string, string>,
     });
 
     if (!response.ok) {

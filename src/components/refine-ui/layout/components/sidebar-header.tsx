@@ -43,7 +43,7 @@ export function SidebarHeader() {
       <ShadcnSidebarTrigger
         className={cn(
           "text-muted-foreground/60 hover:text-primary transition-all duration-300 shrink-0 opacity-100 pointer-events-auto",
-          { "mr-0": !open && !isMobile },
+          { "me-0": !open && !isMobile },
         )}
       />
     </ShadcnSidebarHeader>

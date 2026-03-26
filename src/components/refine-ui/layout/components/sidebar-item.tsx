@@ -54,7 +54,7 @@ function SidebarItemCollapsible({ item, selectedKey }: Props) {
           className="justify-between"
         />
       </CollapsibleTrigger>
-      <CollapsibleContent className="ml-8 flex flex-col gap-1.5 mt-1.5 border-l border-border/40 pl-2">
+      <CollapsibleContent className="ms-8 flex flex-col gap-1.5 mt-1.5 border-l border-border/40 ps-2">
         {children?.map((child: TreeMenuItem) => (
           <SidebarItem key={child.key || child.name} item={child} selectedKey={selectedKey} />
         ))}

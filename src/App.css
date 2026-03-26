@@ -140,7 +140,7 @@
   table { @apply w-full border-collapse; }
   th { @apply bg-muted/30 text-muted-foreground font-black uppercase tracking-widest text-[10px] p-4 text-start; }
   td { @apply p-4 border-b border-border/50; }
-  tr:hover td { @apply bg-primary/[0.02] transition-colors; }
+  tr:hover td { @apply bg-primary/2 transition-colors; }
 
   /* Inputs & Rings */
   input, textarea, select {
@@ -178,7 +178,7 @@
 }
 
 .text-gradient {
-  @apply bg-clip-text text-transparent bg-gradient-to-br from-foreground via-foreground to-primary/50;
+  @apply bg-clip-text text-transparent bg-linear-to-br from-foreground via-foreground to-primary/50;
   position: relative;
   z-index: 10;
 }
@@ -205,7 +205,7 @@
 }
 
 .ai-glow {
-  @apply absolute -top-20 -right-20 w-64 h-64 bg-ai-primary/10 blur-[100px] pointer-events-none rounded-full;
+  @apply absolute -top-20 -end-20 w-64 h-64 bg-ai-primary/10 blur-[100px] pointer-events-none rounded-full;
 }
 
 /* --- THE BRUTE-FORCE PORTAL FIX --- */
@@ -251,13 +251,8 @@ html.dark [data-slot="dropdown-menu-item"]:focus {
   to { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes fade-in-up {
-  from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
 .sidebar-glass {
-  @apply bg-white/95 dark:bg-card backdrop-blur-3xl border-r border-border/80 dark:border-white/5;
+  @apply bg-white/95 dark:bg-card backdrop-blur-3xl border-e border-border/80 dark:border-white/5;
   box-shadow: 10px 0 30px -15px rgba(0, 0, 0, 0.05);
 }
 
@@ -295,7 +290,7 @@ html {
 
 .dashboard-glow {
   position: absolute;
-  top: 0; left: 0; right: 0; height: 500px;
+  top: 0; start: 0; end: 0; height: 500px;
   background: radial-gradient(circle at 50% 0%, hsla(245, 100%, 70%, 0.02), transparent 70%);
   pointer-events: none;
   z-index: 0;

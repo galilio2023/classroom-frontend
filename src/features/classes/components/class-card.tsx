@@ -64,9 +64,9 @@ export const ClassCard = ({
   onApply
 }: Props) => {
   const { t } = useTranslation();
-  const primaryTeacher = classItem.teachers?.find((t: any) => t.isPrimary)?.teacher;
-  const classColor = (classItem as any).color || "#6366f1";
-  const isAssigned = classItem.isTeacherAssigned || classItem.teachers?.some((t: any) => t.teacher.id === identity?.id);
+  const primaryTeacher = classItem.teachers?.find((t) => t.isPrimary)?.teacher;
+  const classColor = classItem.color || "#6366f1";
+  const isAssigned = classItem.isTeacherAssigned || classItem.teachers?.some((t) => t.teacher.id === identity?.id);
   const isEnrolled = classItem.isEnrolled;
   const pendingApp = applications.find((app) => app.classId === classItem.id && app.status === "pending");
   const firstSchedule = classItem.schedules?.[0];

@@ -53,14 +53,14 @@ export const CreateViewHeader = ({
   return (
     <div className={cn("flex flex-col", "gap-4", wrapperClassName)}>
       <div className="flex items-center relative gap-2">
-        <Separator className={cn("absolute", "left-0", "right-0", "z-[1]")} />
+        <Separator className={cn("absolute", "start-0", "end-0", "z-[1]")} />
       </div>
       <div
         className={cn(
           "flex",
           "gap-1",
           "items-center",
-          "-ml-2.5",
+          "-ms-2.5",
           headerClassName
         )}
       >

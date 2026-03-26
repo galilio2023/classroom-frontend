@@ -52,7 +52,10 @@ interface IAIActivityLog {
   response: string;
   model: string;
   tokensUsed: number | null;
-  metadata: any;
+  metadata: {
+    classId?: number;
+    language?: string;
+  } | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -379,7 +382,7 @@ const AIHistoryShow = () => {
                 {record.action === "flashcards" ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 not-prose mt-4">
                     {JSON.parse(record.response || "[]").map(
-                      (card: any, i: number) => (
+                      (card: { front: string; back: string }, i: number) => (
                         <div
                           key={i}
                           className="p-6 rounded-4xl bg-muted/30 border border-border/40 space-y-4 shadow-sm hover:shadow-md transition-shadow"

@@ -72,7 +72,7 @@ export const AIStudentInsightModal = ({
           </DialogDescription>
         </DialogHeader>
 
-        <ScrollArea className="flex-1 pr-4 rtl:pr-0 rtl:pl-4">
+        <ScrollArea className="flex-1 pe-4 rtl:pe-0 rtl:ps-4">
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-20 space-y-4">
               <Loader2 className="h-10 w-10 animate-spin text-primary" />
@@ -104,11 +104,11 @@ export const AIStudentInsightModal = ({
 
         <div className="flex items-center justify-end gap-2 pt-4 border-t">
           <Button variant="outline" size="sm" onClick={handleCopy} disabled={!insight}>
-            <ClipboardCopy className="h-4 w-4 mr-2 rtl:mr-0 rtl:ml-2" />
+            <ClipboardCopy className="h-4 w-4 me-2 rtl:me-0 rtl:ms-2" />
             {t("common.copyInsight")}
           </Button>
           <Button size="sm" disabled={!insight} onClick={() => toast.info(t("common.featureComingSoon"))}>
-            <Send className="h-4 w-4 mr-2 rtl:mr-0 rtl:ml-2 rtl:rotate-180" />
+            <Send className="h-4 w-4 me-2 rtl:me-0 rtl:ms-2 rtl:rotate-180" />
             {t("common.sendToStudent")}
           </Button>
         </div>

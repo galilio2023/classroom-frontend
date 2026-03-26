@@ -1,31 +1,16 @@
 import { useState, useMemo } from "react";
 import { 
   Users, 
-  Calendar as CalendarIcon, 
   CheckCircle2, 
-  XCircle, 
-  Clock, 
   QrCode, 
   ScanLine, 
-  MoreHorizontal,
-  FileText,
-  TrendingUp,
-  History,
-  LayoutDashboard
+  History
 } from "lucide-react";
-import { 
-  Card, 
-  CardHeader, 
-  CardTitle, 
-  CardDescription, 
-  CardContent 
-} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { motion, AnimatePresence } from "framer-motion";
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
-import { Enrollment } from "@/types";
+import { Enrollment, AttendanceStatus } from "@/types";
 import { QRAttendanceModal } from "../components/qr-attendance-modal";
 import { QRScannerModal } from "../components/qr-scanner-modal";
 import { EmptyState } from "@/components/empty-state";
@@ -49,7 +34,7 @@ export const AttendanceTab = ({ classId, enrollments }: AttendanceTabProps) => {
   const { t, i18n } = useTranslation();
   const isAr = i18n.language === "ar";
   const [viewMode, setViewMode] = useState<"mark" | "history">("mark");
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [selectedDate] = useState<Date>(new Date());
   
   const {
     attendanceData,
@@ -58,8 +43,9 @@ export const AttendanceTab = ({ classId, enrollments }: AttendanceTabProps) => {
     isLoading,
     isUpdating,
     handleMarkAttendance,
+    handleValueChange,
     handleBulkMark,
-    refetch,
+    historyData,
     isQRModalOpen,
     setIsQRModalOpen,
     isScannerModalOpen,
@@ -74,7 +60,7 @@ export const AttendanceTab = ({ classId, enrollments }: AttendanceTabProps) => {
   if (isLoading) return (
     <div className="flex flex-col items-center justify-center py-20 gap-4 text-start">
       <div className="h-10 w-10 border-4 border-primary/10 border-t-primary rounded-full animate-spin" />
-      <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">{t("common.searching")}</p>
+      <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">{(t as any)("common.searching")}</p>
     </div>
   );
 
@@ -87,7 +73,7 @@ export const AttendanceTab = ({ classId, enrollments }: AttendanceTabProps) => {
             <div className="p-1.5 rounded-lg bg-primary/10 text-primary">
               <Users className="h-4 w-4" />
             </div>
-            <h3 className="text-xl font-black tracking-tight">{t("classes.attendance.title" as any)}</h3>
+            <h3 className="text-xl font-black tracking-tight">{(t as any)("classes.attendance.title")}</h3>
           </div>
           <p className="text-sm text-muted-foreground font-medium">
             {format(selectedDate, "EEEE, MMMM do, yyyy", { locale: isAr ? ar : undefined })}
@@ -102,14 +88,14 @@ export const AttendanceTab = ({ classId, enrollments }: AttendanceTabProps) => {
               className="flex-1 md:flex-none h-11 rounded-xl px-6 font-black uppercase tracking-widest text-[10px] gap-2 border-primary/20 text-primary hover:bg-primary/5 transition-all shadow-sm"
             >
               <QrCode className="h-4 w-4" />
-              {t("classes.attendance.generateQR" as any)}
+              {(t as any)("classes.attendance.generateQR")}
             </Button>
             <Button 
               onClick={() => setIsScannerModalOpen(true)}
               className="flex-1 md:flex-none h-11 rounded-xl px-6 font-black uppercase tracking-widest text-[10px] gap-2 shadow-lg shadow-primary/20 transition-all active:scale-95"
             >
               <ScanLine className="h-4 w-4" />
-              {t("classes.attendance.scanQR" as any)}
+              {(t as any)("classes.attendance.scanQR")}
             </Button>
           </div>
         )}
@@ -118,13 +104,13 @@ export const AttendanceTab = ({ classId, enrollments }: AttendanceTabProps) => {
       {activeEnrollments.length === 0 ? (
         <EmptyState 
           icon={Users}
-          title={t("classes.attendance.noStudents" as any)}
-          description={t("classes.attendance.noStudentsDesc" as any)}
+          title={(t as any)("classes.attendance.noStudents")}
+          description={(t as any)("classes.attendance.noStudentsDesc")}
         />
       ) : (
         <div className="space-y-10">
           {/* Dashboard Stats */}
-          <AttendanceStats stats={stats} />
+          <AttendanceStats stats={stats as any} />
 
           {/* Main Content Area */}
           <div className="space-y-6">
@@ -140,7 +126,7 @@ export const AttendanceTab = ({ classId, enrollments }: AttendanceTabProps) => {
                         )}
                     >
                         <CheckCircle2 className="h-3.5 w-3.5 me-1.5" />
-                        {t("classes.attendance.markAttendance" as any)}
+                        {(t as any)("classes.attendance.markAttendance")}
                     </Button>
                     <Button 
                         variant="ghost" 
@@ -152,7 +138,7 @@ export const AttendanceTab = ({ classId, enrollments }: AttendanceTabProps) => {
                         )}
                     >
                         <History className="h-3.5 w-3.5 me-1.5" />
-                        {t("classes.attendance.viewHistory" as any)}
+                        {(t as any)("classes.attendance.viewHistory")}
                     </Button>
                 </div>
 
@@ -161,10 +147,10 @@ export const AttendanceTab = ({ classId, enrollments }: AttendanceTabProps) => {
                         <Button 
                             variant="ghost" 
                             size="sm"
-                            onClick={() => handleBulkMark("present" as any)}
+                            onClick={() => handleBulkMark(AttendanceStatus.PRESENT)}
                             className="h-8 rounded-lg text-[9px] font-black uppercase tracking-widest text-emerald-600 hover:bg-emerald-500/10"
                         >
-                            {t("classes.attendance.markAllPresent" as any)}
+                            {(t as any)("classes.attendance.markAllPresent")}
                         </Button>
                     </div>
                 )}
@@ -182,13 +168,14 @@ export const AttendanceTab = ({ classId, enrollments }: AttendanceTabProps) => {
                         <AttendanceMarkTable 
                             enrollments={activeEnrollments}
                             attendanceData={attendanceData}
-                            onMark={handleMarkAttendance}
-                            isUpdating={isUpdating}
-                            isStaff={isStaff}
+                            onStatusChange={handleMarkAttendance}
+                            onValueChange={handleValueChange}
+                            isAr={isAr}
                         />
                     ) : (
                         <AttendanceHistoryTable 
-                            classId={classId}
+                            historyData={historyData || []}
+                            isTeacher={isStaff}
                             isAr={isAr}
                         />
                     )}

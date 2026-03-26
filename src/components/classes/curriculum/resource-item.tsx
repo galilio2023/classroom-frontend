@@ -156,7 +156,7 @@ export const ResourceItem = ({
       </div>
 
       {resource.type === "note" && resource.content && (
-        <div className="mt-2 md:mt-3 pl-10 md:pl-12 rtl:pl-0 rtl:pr-10 md:rtl:pr-12 text-[10px] md:text-[11px] text-muted-foreground/60 line-clamp-1 italic font-medium text-start">
+        <div className="mt-2 md:mt-3 ps-10 md:ps-12 rtl:ps-0 rtl:pe-10 md:rtl:pe-12 text-[10px] md:text-[11px] text-muted-foreground/60 line-clamp-1 italic font-medium text-start">
           <div className="prose prose-xs dark:prose-invert max-w-none pointer-events-none">
             <ReactMarkdown>{resource.content}</ReactMarkdown>
           </div>

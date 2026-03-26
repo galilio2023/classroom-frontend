@@ -8,8 +8,9 @@ import { useFieldArray } from "react-hook-form";
 import { Module, Class } from "@/types";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { TFunction } from "i18next";
 
-const createAssignmentSchema = (t: any) => z.object({
+const createAssignmentSchema = (t: TFunction) => z.object({
   title: z.string().min(1, t("assignments.create.validation.titleRequired")),
   description: z.string().optional(),
   dueDate: z.string().optional(),
@@ -27,6 +28,10 @@ const createAssignmentSchema = (t: any) => z.object({
 });
 
 export type AssignmentFormValues = z.infer<ReturnType<typeof createAssignmentSchema>>;
+
+interface LocationState {
+  pendingContent?: string;
+}
 
 export const useAssignmentForm = () => {
   const { t, i18n } = useTranslation();
@@ -52,7 +57,7 @@ export const useAssignmentForm = () => {
       fileUrl: "",
       fileCldPubId: "",
       moduleId: initialModuleId ? Number(initialModuleId) : null,
-      classId: urlClassId ? Number(urlClassId) : undefined as any,
+      classId: urlClassId ? Number(urlClassId) : undefined as unknown as number,
       hasPeerReview: false,
       isGroupAssignment: false,
       peerReviewWeight: 20,
@@ -97,7 +102,7 @@ export const useAssignmentForm = () => {
               console.error("Draft recovery failed", e);
           }
       }
-  }, []);
+  }, [form]);
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
@@ -105,7 +110,6 @@ export const useAssignmentForm = () => {
   });
 
   const selectedClassId = form.watch("classId");
-  const hasPeerReview = form.watch("hasPeerReview");
 
   const { query: modulesQuery } = useList<Module>({
     resource: "modules",
@@ -116,7 +120,7 @@ export const useAssignmentForm = () => {
   useEffect(() => {
     if (initialModuleId) form.setValue("moduleId", Number(initialModuleId));
     
-    const stateContent = (location.state as any)?.pendingContent;
+    const stateContent = (location.state as LocationState)?.pendingContent;
     const sessionContent = sessionStorage.getItem("pending_ai_assignment");
     const pendingContent = stateContent || sessionContent;
 
@@ -126,7 +130,7 @@ export const useAssignmentForm = () => {
         toast.info(t("assignments.create.toasts.aiDraftApplied"));
         setShowAI(false);
     }
-  }, [initialModuleId, location.state, t]);
+  }, [initialModuleId, location.state, t, form]);
 
   const handleUseAIContent = (content: string) => {
     form.setValue("description", content);

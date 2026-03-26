@@ -214,16 +214,16 @@ const TeacherChannelPage = () => {
           <div className="space-y-12">
             <form onSubmit={handleSubmit(onFinish)} className="space-y-16">
               <div className="space-y-6 text-start">
-                <Label className="text-[11px] font-black uppercase tracking-[0.4em] text-primary ml-2">
+                <Label className="text-[11px] font-black uppercase tracking-[0.4em] text-primary ms-2">
                   Promotional Headline
                 </Label>
                 <Input
                   {...register("headline")}
                   placeholder="e.g. Master Modern Physics with AI"
-                  className="h-20 rounded-[2rem] bg-muted/20 border-none shadow-inner px-10 text-xl md:text-3xl font-black placeholder:text-muted-foreground/20 focus-visible:ring-primary/20 transition-all"
+                  className="h-20 rounded-4xl bg-muted/20 border-none shadow-inner px-10 text-xl md:text-3xl font-black placeholder:text-muted-foreground/20 focus-visible:ring-primary/20 transition-all"
                 />
                 {errors.headline && (
-                  <p className="text-xs text-destructive font-bold flex items-center gap-2 ml-4">
+                  <p className="text-xs text-destructive font-bold flex items-center gap-2 ms-4">
                     <AlertCircle className="h-4 w-4" />
                     {errors.headline.message}
                   </p>
@@ -231,7 +231,7 @@ const TeacherChannelPage = () => {
               </div>
 
               <div className="space-y-6 text-start">
-                <Label className="text-[11px] font-black uppercase tracking-[0.4em] text-primary ml-2">
+                <Label className="text-[11px] font-black uppercase tracking-[0.4em] text-primary ms-2">
                   Channel Biography
                 </Label>
                 <Textarea
@@ -240,7 +240,7 @@ const TeacherChannelPage = () => {
                   className="min-h-60 md:min-h-80 rounded-[3rem] bg-muted/20 border-none shadow-inner text-lg md:text-xl font-medium p-10 resize-none focus-visible:ring-primary/20 leading-relaxed italic"
                 />
                 {errors.bio && (
-                  <p className="text-xs text-destructive font-bold flex items-center gap-2 ml-4">
+                  <p className="text-xs text-destructive font-bold flex items-center gap-2 ms-4">
                     <AlertCircle className="h-4 w-4" />
                     {errors.bio.message}
                   </p>
@@ -249,7 +249,7 @@ const TeacherChannelPage = () => {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
                 <div className="space-y-6 text-start">
-                  <Label className="text-[11px] font-black uppercase tracking-[0.4em] text-primary ml-2">
+                  <Label className="text-[11px] font-black uppercase tracking-[0.4em] text-primary ms-2">
                     Video Trailer
                   </Label>
                   <div className="p-1 rounded-[2.5rem] bg-muted/20 shadow-inner group hover:bg-muted/30 transition-colors">
@@ -269,7 +269,7 @@ const TeacherChannelPage = () => {
                 </div>
 
                 <div className="space-y-6 text-start">
-                  <Label className="text-[11px] font-black uppercase tracking-[0.4em] text-primary ml-2">
+                  <Label className="text-[11px] font-black uppercase tracking-[0.4em] text-primary ms-2">
                     Cover Thumbnail
                   </Label>
                   <div className="p-1 rounded-[2.5rem] bg-muted/20 shadow-inner group hover:bg-muted/30 transition-colors">
@@ -298,9 +298,9 @@ const TeacherChannelPage = () => {
                   className="h-20 w-full md:w-auto px-16 rounded-full font-black uppercase tracking-widest text-sm shadow-2xl shadow-primary/30 transition-all hover:scale-105 active:scale-95 group"
                 >
                   {upsertMutation.isPending ? (
-                    <Loader2 className="h-6 w-6 animate-spin mr-4" />
+                    <Loader2 className="h-6 w-6 animate-spin me-4" />
                   ) : (
-                    <Save className="h-6 w-6 mr-4 group-hover:rotate-12 transition-transform" />
+                    <Save className="h-6 w-6 me-4 group-hover:rotate-12 transition-transform" />
                   )}
                   {channelData?.data ? "Update Broadcast" : "Launch Channel"}
                 </Button>
@@ -367,7 +367,7 @@ const TeacherChannelPage = () => {
               </AnimatePresence>
 
               {/* Advanced Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-90 group-hover:opacity-100 transition-opacity duration-700" />
+              <div className="absolute inset-0 bg-linear-to-t from-black via-black/40 to-transparent opacity-90 group-hover:opacity-100 transition-opacity duration-700" />
 
               {/* Content Overlay */}
               <div className="absolute inset-x-0 bottom-0 p-10 md:p-14 space-y-8">
@@ -405,9 +405,9 @@ const TeacherChannelPage = () => {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
-              className="mt-10 p-10 rounded-[3rem] bg-primary/[0.03] border-2 border-dashed border-primary/20 backdrop-blur-sm text-start relative overflow-hidden"
+              className="mt-10 p-10 rounded-[3rem] bg-primary/3 border-2 border-dashed border-primary/20 backdrop-blur-sm text-start relative overflow-hidden"
             >
-              <div className="absolute top-0 right-0 p-10 opacity-[0.05]">
+              <div className="absolute top-0 end-0 p-10 opacity-[0.05]">
                 <Radio className="h-20 w-20" />
               </div>
               <div className="flex gap-6 items-start relative z-10">

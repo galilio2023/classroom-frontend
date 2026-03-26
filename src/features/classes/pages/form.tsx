@@ -4,7 +4,6 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-  FormDescription,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -19,17 +18,14 @@ import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { BookOpen, Calendar, Plus, Trash2, Clock, Check, LayoutDashboard, Users, Palette, FileText, Sparkles, PlusCircle, Save, ShieldCheck, Loader2 } from "lucide-react";
+import { BookOpen, Calendar, Clock, Check, LayoutDashboard, Users, Palette, FileText, Sparkles, PlusCircle, Save, ShieldCheck, Loader2, Trash2 } from "lucide-react";
 import { UseFormReturn, FieldArrayWithId, UseFieldArrayAppend, UseFieldArrayRemove } from "react-hook-form";
 import { ClassStatus } from "@/types";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
-import { Label } from "@/components/ui/label";
 import { useList } from "@refinedev/core";
 import { AcademicTerm } from "@/types";
 import { useTranslation } from "react-i18next";
@@ -81,10 +77,8 @@ export const ClassForm = ({
     ],
   });
 
-  const termsData = termsQuery.data;
   const termsLoading = termsQuery.isLoading;
-
-  const terms = termsData?.data || [];
+  const terms = termsQuery.data?.data || [];
 
   const isAr = i18n.language === 'ar';
 
@@ -178,7 +172,7 @@ export const ClassForm = ({
                     </FormControl>
                     <SelectContent className="rounded-xl border-none shadow-2xl">
                       {subjectOptions.map((option) => (
-                        <SelectItem key={option.value} value={String(option.value)} className="rounded-lg font-bold">
+                        <SelectItem key={option.value} value={String(option.value)} className="rounded-lg font-bold text-start">
                           {option.label}
                         </SelectItem>
                       ))}

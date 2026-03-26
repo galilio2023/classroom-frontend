@@ -1,11 +1,12 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import {
   useCustomMutation,
   useGetIdentity,
   useList,
   useOne,
+  GetOneResponse,
 } from "@refinedev/core";
-import { User, UserRole } from "@/types";
+import { User, UserRole, Class } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Grid, Loader2, Presentation, Users, Video, ExternalLink, MonitorUp, ListChecks, Bot, RotateCcw, Sparkles, BrainCircuit } from "lucide-react";
@@ -14,7 +15,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { socket } from "@/lib/socket";
 import { Whiteboard } from "./whiteboard";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 import { usePersistentLive } from "@/hooks/use-persistent-live";
@@ -29,10 +30,41 @@ interface LiveClassroomProps {
   onJoin?: () => void;
 }
 
+interface SessionStartedData {
+  classId: string | number;
+  startedBy: string;
+}
+
+interface SessionEndedData {
+  classId: string | number;
+}
+
+interface BreakoutStartedData {
+  classId: string | number;
+}
+
+interface BreakoutEndedData {
+  classId: string | number;
+}
+
+interface JitsiMeetExternalAPI {
+  dispose: () => void;
+  on: (event: string, callback: (payload: any) => void) => void;
+  executeCommand: (command: any, ...args: any[]) => void;
+  captureLargeVideoScreenshot: () => Promise<string>;
+}
+
 declare global {
   interface Window {
-    JitsiMeetExternalAPI: any;
+    JitsiMeetExternalAPI: {
+      new (domain: string, options: any): JitsiMeetExternalAPI;
+    };
   }
+}
+
+interface LiveSessionResponse {
+  roomName: string;
+  token?: string;
 }
 
 export const LiveClassroom = ({
@@ -42,9 +74,9 @@ export const LiveClassroom = ({
 }: LiveClassroomProps) => {
   const { t, i18n } = useTranslation();
   const { data: identity } = useGetIdentity<User>();
-  const { isJoined, setIsJoined, setActiveClassId, activeClassId } = usePersistentLive();
+  const { isJoined, setIsJoined, activeClassId } = usePersistentLive();
   const jitsiContainerRef = useRef<HTMLDivElement>(null);
-  const apiRef = useRef<any>(null);
+  const apiRef = useRef<Jitsi.JitsiMeetExternalAPI | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("video");
 
@@ -66,7 +98,7 @@ export const LiveClassroom = ({
   const isAr = i18n.language === "ar";
 
   // Sync Class State (for persistence)
-  const { query: classQuery } = useOne({
+  const { query: classQuery } = useOne<Class>({
     resource: "classes",
     id: classIdString,
     queryOptions: {
@@ -89,7 +121,7 @@ export const LiveClassroom = ({
   }, [classData]);
 
   // Fetch groups to determine student's group or list for teacher
-  const { query: groupsQuery } = useList({
+  const { query: groupsQuery } = useList<any>({
     resource: "project-groups",
     filters: [{ field: "classId", operator: "eq", value: numericClassId }],
     queryOptions: {
@@ -104,7 +136,7 @@ export const LiveClassroom = ({
     }
   }, [groupsQuery.isError, groupsQuery.error]);
 
-  const groups = groupsQuery.data?.data || [];
+  const groups = useMemo(() => groupsQuery.data?.data || [], [groupsQuery.data?.data]);
 
   useEffect(() => {
     if (groups.length > 0 && identity && !isTeacher) {
@@ -116,160 +148,7 @@ export const LiveClassroom = ({
     }
   }, [groups, identity, isTeacher]);
 
-  useEffect(() => {
-    if (isJoined && numericClassId === Number(activeClassId) && !apiRef.current && !isLoading) {
-        // 🚀 AUTO-RESUME: Reconnect if state says we were joined
-        void startMeeting();
-    }
-  }, [isJoined, activeClassId, numericClassId, isLoading]);
-
-  useEffect(() => {
-    if (!window.JitsiMeetExternalAPI) {
-      const script = document.createElement("script");
-      script.src = "https://meet.jit.si/external_api.js";
-      script.async = true;
-      document.body.appendChild(script);
-    }
-
-    // Real-time Socket Listeners
-    if (!socket.connected) socket.connect();
-
-    const handleSessionStarted = (data: any) => {
-      if (Number(data.classId) === numericClassId && !isTeacher) {
-        toast.info(
-          t("classes.live.toasts.sessionStarted", { name: data.startedBy }),
-          {
-            action: {
-              label: t("notifications.joinNow"),
-              onClick: () => startMeeting(),
-            },
-          },
-        );
-      }
-    };
-
-    const handleSessionEnded = (data: any) => {
-      if (Number(data.classId) === numericClassId) {
-        setIsJoined(false); // 🚀 Global store cleanup
-        if (apiRef.current) {
-          apiRef.current.dispose();
-          apiRef.current = null;
-        }
-        toast.error(t("classes.live.toasts.sessionEnded"));
-      }
-    };
-
-    const handleBreakoutStarted = (data: any) => {
-      if (Number(data.classId) === numericClassId) {
-        setIsBreakoutActive(true);
-        toast.info(t("classes.live.toasts.breakoutStarted"));
-
-        // Auto-join for students if they are already in the call
-        if (!isTeacher && myGroup) {
-          toast.success(
-            t("classes.live.toasts.joiningGroup", { name: myGroup.name }),
-          );
-          joinBreakoutRoom(myGroup.id);
-        }
-      }
-    };
-
-    const handleBreakoutEnded = (data: any) => {
-      if (Number(data.classId) === numericClassId) {
-        setIsBreakoutActive(false);
-        setCurrentGroupId(null);
-        toast.info(t("classes.live.toasts.breakoutEnded"));
-        // Re-join main hall
-        startMeeting();
-      }
-    };
-
-    socket.on("live_session_started", handleSessionStarted);
-    socket.on("live_session_ended", handleSessionEnded);
-    socket.on("breakout_session_started", handleBreakoutStarted);
-    socket.on("breakout_session_ended", handleBreakoutEnded);
-
-    return () => {
-      // 🛡️ HARD CLEANUP: Dispose Jitsi instance on unmount
-      if (apiRef.current) {
-        apiRef.current.dispose();
-        apiRef.current = null;
-      }
-      socket.off("live_session_started", handleSessionStarted);
-      socket.off("live_session_ended", handleSessionEnded);
-      socket.off("breakout_session_started", handleBreakoutStarted);
-      socket.off("breakout_session_ended", handleBreakoutEnded);
-    };
-  }, [numericClassId, isTeacher, myGroup, t]);
-
-  const [generateRoadmap, setGenerateRoadmap] = useState(true);
-
-  const handleStartLiveSession = () => {
-    setIsLoading(true);
-    startLiveSession(
-      {
-        url: "/live-session/start",
-        method: "post",
-        values: { classId: numericClassId, generateRoadmap },
-      },
-      {
-        onSuccess: () => {
-          toast.success(t("classes.live.toasts.sessionStartedTeacher"));
-          startMeeting();
-        },
-        onError: (error: any) => {
-          setIsLoading(false);
-          toast.error(
-            error?.data?.message || t("classes.live.toasts.startFailed"),
-          );
-          console.error("Failed to start live session:", error);
-        },
-      },
-    );
-  };
-
-  const startMeeting = (groupId?: number) => {
-    if (!window.JitsiMeetExternalAPI || !identity || isNaN(numericClassId))
-      return;
-
-    setIsLoading(true);
-    if (apiRef.current) {
-      apiRef.current.dispose();
-      apiRef.current = null;
-    }
-
-    // If joining main hall, clear group ID
-    if (!groupId) setCurrentGroupId(null);
-
-    getRoomToken(
-      {
-        url: "/live-session/token",
-        method: "post",
-        values: {
-          classId: numericClassId,
-          groupId: groupId, // Optional: if provided, joins breakout room
-        },
-      },
-      {
-        onSuccess: (data: any) => {
-          const { roomName, token } = data.data;
-          initializeJitsi(roomName, token, groupId);
-        },
-        onError: (error: any) => {
-          setIsLoading(false);
-          toast.error(t("classes.live.toasts.joinFailed"));
-          console.error("Live session error:", error);
-        },
-      },
-    );
-  };
-
-  const joinBreakoutRoom = (groupId: number) => {
-    setCurrentGroupId(groupId);
-    startMeeting(groupId);
-  };
-
-  const initializeJitsi = (
+  const initializeJitsi = useCallback((
     roomName: string,
     token?: string,
     groupId?: number,
@@ -314,58 +193,57 @@ export const LiveClassroom = ({
         const newApi = new window.JitsiMeetExternalAPI(domain, options);
         apiRef.current = newApi;
 
-        newApi.addEventListeners({
-          videoConferenceJoined: () => {
-            setIsLoading(false);
-            if (identity.role === UserRole.STUDENT && !groupId) {
-              markLiveAttendance({
-                url: "/attendance/live",
-                method: "post",
-                values: { classId: numericClassId },
-              });
-            }
-          },
-          videoConferenceLeft: () => {
-            if (groupId) {
-              setCurrentGroupId(null);
-            } else {
-              setIsJoined(false);
-              apiRef.current = null;
-              // 🛡️ REFRESH-SAFE: Do NOT end the session automatically here.
-              // This allows teachers to refresh (F5) without kicking everyone out.
-            }
-          },
-          readyToClose: () => {
+        newApi.on("videoConferenceJoined", () => {
+          setIsLoading(false);
+          if (identity.role === UserRole.STUDENT && !groupId) {
+            markLiveAttendance({
+              url: "/attendance/live",
+              method: "post",
+              values: { classId: numericClassId },
+            });
+          }
+        });
+
+        newApi.on("videoConferenceLeft", () => {
+          if (groupId) {
+            setCurrentGroupId(null);
+          } else {
             setIsJoined(false);
             apiRef.current = null;
-          },
-          recordingStatusChanged: (payload: {
-            on: boolean;
-            link?: string;
-            error?: string;
-          }) => {
-            if (!payload.on && payload.link && isTeacher && !groupId) {
-              saveRecording(
-                {
-                  url: "/resources",
-                  method: "post",
-                  values: {
-                    classId: numericClassId,
-                    title: `Live Session Recording - ${new Date().toLocaleDateString()}`,
-                    url: payload.link,
-                    type: "video",
-                    description:
-                      "Recording of the live session held on " +
-                      new Date().toLocaleString(),
-                  },
+          }
+        });
+
+        newApi.on("readyToClose", () => {
+          setIsJoined(false);
+          apiRef.current = null;
+        });
+
+        newApi.on("recordingStatusChanged", (payload: {
+          on: boolean;
+          link?: string;
+          error?: string;
+        }) => {
+          if (!payload.on && payload.link && isTeacher && !groupId) {
+            saveRecording(
+              {
+                url: "/resources",
+                method: "post",
+                values: {
+                  classId: numericClassId,
+                  title: `Live Session Recording - ${new Date().toLocaleDateString()}`,
+                  url: payload.link,
+                  type: "video",
+                  description:
+                    "Recording of the live session held on " +
+                    new Date().toLocaleString(),
                 },
-                {
-                  onSuccess: () =>
-                    toast.success(t("classes.live.toasts.recordingSaved")),
-                },
-              );
-            }
-          },
+              },
+              {
+                onSuccess: () =>
+                  toast.success(t("classes.live.toasts.recordingSaved")),
+              },
+            );
+          }
         });
       } catch (err) {
         console.error("Error initializing Jitsi:", err);
@@ -374,9 +252,162 @@ export const LiveClassroom = ({
         toast.error(t("classes.live.toasts.initFailed"));
       }
     }, 100);
-  };
+  }, [identity, isTeacher, numericClassId, onJoin, setIsJoined, markLiveAttendance, saveRecording, t]);
 
-  const handleToggleBreakout = () => {
+  const startMeeting = useCallback((groupId?: number) => {
+    if (!window.JitsiMeetExternalAPI || !identity || isNaN(numericClassId))
+      return;
+
+    setIsLoading(true);
+    if (apiRef.current) {
+      apiRef.current.dispose();
+      apiRef.current = null;
+    }
+
+    // If joining main hall, clear group ID
+    if (!groupId) setCurrentGroupId(null);
+
+    getRoomToken(
+      {
+        url: "/live-session/token",
+        method: "post",
+        values: {
+          classId: numericClassId,
+          groupId: groupId, // Optional: if provided, joins breakout room
+        },
+      },
+      {
+        onSuccess: (data: GetOneResponse<LiveSessionResponse>) => {
+          const { roomName, token } = data.data;
+          initializeJitsi(roomName, token, groupId);
+        },
+        onError: (error: any) => {
+          setIsLoading(false);
+          toast.error(t("classes.live.toasts.joinFailed"));
+          console.error("Live session error:", error);
+        },
+      },
+    );
+  }, [identity, numericClassId, getRoomToken, initializeJitsi, t]);
+
+  const joinBreakoutRoom = useCallback((groupId: number) => {
+    setCurrentGroupId(groupId);
+    startMeeting(groupId);
+  }, [startMeeting]);
+
+  useEffect(() => {
+    if (isJoined && numericClassId === Number(activeClassId) && !apiRef.current && !isLoading) {
+        // 🚀 AUTO-RESUME: Reconnect if state says we were joined
+        void startMeeting();
+    }
+  }, [isJoined, activeClassId, numericClassId, isLoading, startMeeting]);
+
+  useEffect(() => {
+    if (!window.JitsiMeetExternalAPI) {
+      const script = document.createElement("script");
+      script.src = "https://meet.jit.si/external_api.js";
+      script.async = true;
+      document.body.appendChild(script);
+    }
+
+    // Real-time Socket Listeners
+    if (!socket.connected) socket.connect();
+
+    const handleSessionStarted = (data: SessionStartedData) => {
+      if (Number(data.classId) === numericClassId && !isTeacher) {
+        toast.info(
+          t("classes.live.toasts.sessionStarted", { name: data.startedBy }),
+          {
+            action: {
+              label: t("notifications.joinNow"),
+              onClick: () => startMeeting(),
+            },
+          },
+        );
+      }
+    };
+
+    const handleSessionEnded = (data: SessionEndedData) => {
+      if (Number(data.classId) === numericClassId) {
+        setIsJoined(false); // 🚀 Global store cleanup
+        if (apiRef.current) {
+          apiRef.current.dispose();
+          apiRef.current = null;
+        }
+        toast.error(t("classes.live.toasts.sessionEnded"));
+      }
+    };
+
+    const handleBreakoutStarted = (data: BreakoutStartedData) => {
+      if (Number(data.classId) === numericClassId) {
+        setIsBreakoutActive(true);
+        toast.info(t("classes.live.toasts.breakoutStarted"));
+
+        // Auto-join for students if they are already in the call
+        if (!isTeacher && myGroup) {
+          toast.success(
+            t("classes.live.toasts.joiningGroup", { name: myGroup.name }),
+          );
+          joinBreakoutRoom(myGroup.id);
+        }
+      }
+    };
+
+    const handleBreakoutEnded = (data: BreakoutEndedData) => {
+      if (Number(data.classId) === numericClassId) {
+        setIsBreakoutActive(false);
+        setCurrentGroupId(null);
+        toast.info(t("classes.live.toasts.breakoutEnded"));
+        // Re-join main hall
+        startMeeting();
+      }
+    };
+
+    socket.on("live_session_started", handleSessionStarted);
+    socket.on("live_session_ended", handleSessionEnded);
+    socket.on("breakout_session_started", handleBreakoutStarted);
+    socket.on("breakout_session_ended", handleBreakoutEnded);
+
+    return () => {
+      // 🛡️ HARD CLEANUP: Dispose Jitsi instance on unmount
+      if (apiRef.current) {
+        apiRef.current.dispose();
+        apiRef.current = null;
+      }
+      socket.off("live_session_started", handleSessionStarted);
+      socket.off("live_session_ended", handleSessionEnded);
+      socket.off("breakout_session_started", handleBreakoutStarted);
+      socket.off("breakout_session_ended", handleBreakoutEnded);
+    };
+  }, [numericClassId, isTeacher, myGroup, t, startMeeting, joinBreakoutRoom, setIsJoined]);
+
+  const [generateRoadmap, setGenerateRoadmap] = useState(true);
+
+  const handleStartLiveSession = useCallback(() => {
+    setIsLoading(true);
+    startLiveSession(
+      {
+        url: "/live-session/start",
+        method: "post",
+        values: { classId: numericClassId, generateRoadmap },
+      },
+      {
+        onSuccess: () => {
+          toast.success(t("classes.live.toasts.sessionStartedTeacher"));
+          startMeeting();
+        },
+        onError: (error: any) => {
+          setIsLoading(false);
+          toast.error(
+            error?.data?.message || t("classes.live.toasts.startFailed"),
+          );
+          console.error("Failed to start live session:", error);
+        },
+      },
+    );
+  }, [numericClassId, generateRoadmap, startLiveSession, startMeeting, t]);
+
+  const handleToggleBreakout = useCallback(() => {
     const endpoint = isBreakoutActive ? "/breakout/end" : "/breakout/start";
     manageBreakout(
       {
@@ -395,9 +426,9 @@ export const LiveClassroom = ({
         },
       },
     );
-  };
+  }, [isBreakoutActive, manageBreakout, numericClassId, t]);
 
-  const handleEndSession = () => {
+  const handleEndSession = useCallback(() => {
     if (!window.confirm("Are you sure you want to end the class for everyone? This will stop the video and clear the live status.")) return;
     
     setIsLoading(true);
@@ -423,36 +454,36 @@ export const LiveClassroom = ({
         }
       }
     );
-  };
+  }, [endLiveSession, numericClassId, setIsJoined]);
 
-  const handleDelegateToAI = async () => {
+  const handleDelegateToAI = useCallback(async () => {
     if (!apiRef.current) return;
     setIsLoading(true);
 
     try {
         // 1. Capture Teacher Frame from Jitsi
-        const { data: snapshot } = await apiRef.current.captureLargeVideoScreenshot();
+        const snapshot = await apiRef.current.captureLargeVideoScreenshot();
         
         // 2. Trigger Backend Delegation
         await startLiveSession({
             url: `/${numericClassId}/delegate`,
             method: "patch",
             values: { 
-                photo: snapshot,
+                photo: snapshot.dataURL,
                 language: i18n.language === "ar" ? "Arabic" : "English",
                 lastPoint: "The current topic in the roadmap"
             }
         });
-        toast.success("Lesson delegated to AI Co-Teacher");
+        toast.success(t("classes.live.delegateAi", "Delegate to AI"));
     } catch (err) {
         console.error("Delegation failed:", err);
         toast.error("Failed to hand off to AI.");
     } finally {
         setIsLoading(false);
     }
-  };
+  }, [i18n.language, numericClassId, startLiveSession, t]);
 
-  const handleResumeSession = async () => {
+  const handleResumeSession = useCallback(async () => {
       setIsLoading(true);
       try {
           await startLiveSession({
@@ -466,7 +497,7 @@ export const LiveClassroom = ({
       } finally {
           setIsLoading(false);
       }
-  };
+  }, [numericClassId, startLiveSession]);
 
   const isClassLive = classData?.isLive;
   const isDelegated = classData?.isAiDelegated;
@@ -478,21 +509,21 @@ export const LiveClassroom = ({
     <div 
         className={cn(
             "transition-all duration-500 ease-in-out",
-            isMiniMode ? "fixed bottom-6 right-6 w-72 md:w-96 z-[9999] group shadow-2xl scale-100" : "w-full space-y-6"
+            isMiniMode ? "fixed bottom-6 end-6 w-72 md:w-96 z-[9999] group shadow-2xl scale-100" : "w-full space-y-6"
         )} 
         dir={isAr ? "rtl" : "ltr"}
     >
       {!isMiniMode && (
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h3 className="text-lg font-semibold flex items-center gap-2">
+              <h3 className="text-lg font-semibold flex items-center gap-2 text-start">
                 <Video className="h-5 w-5 text-live-primary" />
                 {t("classes.live.title")}{" "}
                 {currentGroupId
                   ? t("classes.live.breakoutRoom")
                   : t("classes.live.mainHall")}
               </h3>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-muted-foreground text-start">
                 {isBreakoutActive
                   ? t("classes.live.breakoutActive")
                   : t("classes.live.mainActive")}
@@ -509,7 +540,7 @@ export const LiveClassroom = ({
                         disabled={isLoading || !classData?.liveLessonRoadmap?.sessionTitle}
                         className="bg-ai-primary/10 text-ai-primary border-ai-primary/20 hover:bg-ai-primary hover:text-white rounded-2xl"
                     >
-                        <Bot className="h-4 w-4 mr-2" />
+                        <Bot className="h-4 w-4 me-2" />
                         {t("classes.live.delegateAi", "Delegate to AI")}
                     </Button>
                 ) : (
@@ -520,7 +551,7 @@ export const LiveClassroom = ({
                         disabled={isLoading}
                         className="rounded-2xl"
                     >
-                        <RotateCcw className="h-4 w-4 mr-2" />
+                        <RotateCcw className="h-4 w-4 me-2" />
                         {t("classes.live.resumeLesson", "Resume Lesson")}
                     </Button>
                 )}
@@ -530,7 +561,7 @@ export const LiveClassroom = ({
                   onClick={handleEndSession}
                   disabled={isLoading}
                 >
-                  {isLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Video className="h-4 w-4 mr-2" />}
+                  {isLoading ? <Loader2 className="h-4 w-4 animate-spin me-2" /> : <Video className="h-4 w-4 me-2" />}
                   {t("classes.live.endLiveSession", "Finish Session")}
                 </Button>
                 <Button
@@ -538,7 +569,7 @@ export const LiveClassroom = ({
                   size="sm"
                   onClick={handleToggleBreakout}
                 >
-                  <Grid className={cn("h-4 w-4", isAr ? "ml-2" : "mr-2")} />
+                  <Grid className={cn("h-4 w-4", "me-2")} />
                   {isBreakoutActive
                     ? t("classes.live.endBreakouts")
                     : t("classes.live.startBreakouts")}
@@ -603,16 +634,16 @@ export const LiveClassroom = ({
       )}
 
       {!isJoined ? (
-        <Card className="border-dashed py-12 text-center bg-muted/10 rounded-2xl md:rounded-[2rem]">
+        <Card className="border-dashed py-12 text-center bg-muted/10 rounded-2xl md:rounded-4xl">
           <CardContent className="flex flex-col items-center gap-4">
             <div className="p-4 bg-live-secondary rounded-full">
               <Users className="h-8 w-8 text-live-primary" />
             </div>
             <div className="space-y-2">
-              <h4 className="text-xl font-bold">
+              <h4 className="text-xl font-bold text-center">
                 {t("classes.live.readyToJoin")}
               </h4>
-              <p className="text-muted-foreground max-w-md mx-auto">
+              <p className="text-muted-foreground max-w-md mx-auto text-center">
                 {isBreakoutActive && !isTeacher
                   ? t("classes.live.breakoutDescription")
                   : isClassLive
@@ -652,11 +683,11 @@ export const LiveClassroom = ({
                         <Loader2
                           className={cn(
                             "h-4 w-4 animate-spin",
-                            isAr ? "ml-2" : "mr-2",
+                            "me-2",
                           )}
                         />
                       ) : (
-                        <Video className={cn("h-4 w-4", isAr ? "ml-2" : "mr-2")} />
+                        <Video className={cn("h-4 w-4", "me-2")} />
                       )}
                       {t("classes.live.startLiveSession")}
                     </Button>
@@ -676,11 +707,11 @@ export const LiveClassroom = ({
                     <Loader2
                       className={cn(
                         "h-4 w-4 animate-spin",
-                        isAr ? "ml-2" : "mr-2",
+                        "me-2",
                       )}
                     />
                   ) : (
-                    <Video className={cn("h-4 w-4", isAr ? "ml-2" : "mr-2")} />
+                    <Video className={cn("h-4 w-4", "me-2")} />
                   )}
                   {isBreakoutActive && myGroup
                     ? t("classes.live.joinGroup", { name: myGroup.name })
@@ -724,7 +755,7 @@ export const LiveClassroom = ({
           <div className={cn("mt-4 relative", isMiniMode && "mt-0")}>
               {/* VIDEO LAYER */}
               <div className={cn(
-                  "rounded-2xl md:rounded-[2rem] overflow-hidden border shadow-2xl bg-black transition-all duration-500 relative",
+                  "rounded-2xl md:rounded-4xl overflow-hidden border shadow-2xl bg-black transition-all duration-500 relative",
                   activeTab !== "video" && !isMiniMode && "hidden",
                   isMiniMode ? "h-48 md:h-60" : "h-150"
               )}>
@@ -767,7 +798,7 @@ export const LiveClassroom = ({
 
               {/* ROADMAP LAYER */}
               {!isMiniMode && activeTab === "roadmap" && (
-                  <div className="bg-card/50 backdrop-blur-xl border-border/40 border rounded-[2rem] p-8 md:p-10 space-y-8 h-150 overflow-y-auto custom-scrollbar">
+                  <div className="bg-card/50 backdrop-blur-xl border-border/40 border rounded-4xl p-8 md:p-10 space-y-8 h-150 overflow-y-auto custom-scrollbar text-start">
                       {classData?.liveLessonRoadmap?.sessionTitle ? (
                           <div className="space-y-10">
                               <div className="space-y-2">

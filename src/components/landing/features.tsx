@@ -97,7 +97,7 @@ export const LandingFeatures = ({ isAr }: Props) => {
         <motion.div variants={container} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-50px" }} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
           {features.map((feature, index) => (
             <motion.div key={index} variants={item} whileHover={{ y: -8, scale: 1.01 }} className="p-8 md:p-12 bg-card/40 hover:bg-card border-2 border-transparent hover:border-primary/20 rounded-[2.5rem] md:rounded-[3.5rem] shadow-xl transition-all group relative overflow-hidden">
-              <div className="absolute -top-10 -right-10 w-32 h-32 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-colors" />
+              <div className="absolute -top-10 -end-10 w-32 h-32 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-colors" />
               <div className={cn("h-16 w-16 md:h-20 md:w-20 rounded-2xl md:rounded-3xl flex items-center justify-center text-white mb-8 md:mb-10 shadow-xl group-hover:scale-110 transition-transform duration-500", feature.color)}>
                 {feature.icon}
               </div>

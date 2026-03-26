@@ -437,7 +437,11 @@
       "quizComplete": "Quiz Complete!",
       "finishedAssessment": "You have finished the interactive assessment.",
       "scoreSummary": "{{score}} out of {{total}} correct",
-      "explanation": "Explanation"
+      "explanation": "Explanation",
+      "startedToast": "{{name}} started the quiz!",
+      "nudgeFrom": "Nudge from {{name}}",
+      "submittedTitle": "Quiz Submitted!",
+      "submittedDesc": "Your final score is {{score}}%"
     },
     "dialogs": {
       "applyTeacher": {
@@ -532,12 +536,14 @@
       "banner": {
         "peerReviewActive": "Peer Review Active",
         "aiQuizMode": "AI Quiz Mode",
+        "physicsLab": "Physics Lab Mode",
         "groupAssignment": "Group Assignment",
         "due": "Due {{date}}",
         "submissionsReceived": "{{count}} Submissions Received"
       },
       "interactiveQuiz": "Interactive Quiz Player",
       "quizContentActive": "Interactive AI quiz content is active below.",
+      "interactiveContentActive": "Interactive AI content is active below.",
       "yourSubmission": "Your Submission",
       "resubmissionRequired": "Resubmission Required",
       "resubmissionRequiredTitle": "Resubmission Required",

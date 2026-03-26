@@ -88,7 +88,7 @@ export default function ReportCard() {
             </div>
             {t("reportCard.title")}
           </h1>
-          <div className="flex items-center gap-3 text-muted-foreground font-bold text-sm ml-1">
+          <div className="flex items-center gap-3 text-muted-foreground font-bold text-sm ms-1">
             <Calendar className="h-4 w-4 text-primary" />
             <span>{report.term?.name || "Current Term"}</span>
             <div className="w-1 h-1 rounded-full bg-muted-foreground/30" />
@@ -96,8 +96,8 @@ export default function ReportCard() {
           </div>
         </div>
 
-        <Card className="w-full md:w-auto border-none shadow-2xl bg-gradient-to-br from-primary to-ai-primary text-primary-foreground overflow-hidden rounded-[2rem] relative group">
-          <div className="absolute -right-4 -top-4 opacity-10 rotate-12 group-hover:rotate-0 transition-transform duration-500">
+        <Card className="w-full md:w-auto border-none shadow-2xl bg-linear-to-br from-primary to-ai-primary text-primary-foreground overflow-hidden rounded-4xl relative group">
+          <div className="absolute -end-4 -top-4 opacity-10 rotate-12 group-hover:rotate-0 transition-transform duration-500">
             <Trophy className="h-32 w-32" />
           </div>
           <CardContent className="p-8 flex items-center gap-6 relative z-10">
@@ -120,7 +120,7 @@ export default function ReportCard() {
             className="lg:col-span-2"
         >
             <Card className="border-none shadow-2xl bg-card/50 backdrop-blur-xl rounded-[2.5rem] overflow-hidden h-full">
-                <CardHeader className="p-10 pb-6 border-b border-black/[0.03] dark:border-white/[0.03]">
+                <CardHeader className="p-10 pb-6 border-b border-black/3 dark:border-white/3">
                     <div className="flex items-center justify-between">
                         <div className="space-y-1">
                             <CardTitle className="text-2xl font-black tracking-tight flex items-center gap-3">
@@ -151,12 +151,12 @@ export default function ReportCard() {
                                     <TableHead className="h-14 px-10 font-black uppercase tracking-widest text-[10px]">{t("reportCard.subjectAndClass")}</TableHead>
                                     <TableHead className="h-14 text-center font-black uppercase tracking-widest text-[10px]">{t("reportCard.tasks")}</TableHead>
                                     <TableHead className="h-14 text-center font-black uppercase tracking-widest text-[10px]">{t("reportCard.avgScore")}</TableHead>
-                                    <TableHead className="h-14 text-right px-10 font-black uppercase tracking-widest text-[10px]">{t("reportCard.grade")}</TableHead>
+                                    <TableHead className="h-14 text-end px-10 font-black uppercase tracking-widest text-[10px]">{t("reportCard.grade")}</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
                                 {classes.map((c: ReportCardClass) => (
-                                    <TableRow key={c.classId} className="group hover:bg-primary/[0.02] transition-colors border-black/[0.03] dark:border-white/[0.03]">
+                                    <TableRow key={c.classId} className="group hover:bg-primary/2 transition-colors border-black/3 dark:border-white/3">
                                         <TableCell className="py-6 px-10">
                                             <div className="flex flex-col">
                                                 <span className="font-black text-lg tracking-tight group-hover:text-primary transition-colors">{c.subject}</span>
@@ -182,7 +182,7 @@ export default function ReportCard() {
                                                 </div>
                                             </div>
                                         </TableCell>
-                                        <TableCell className="text-right py-6 px-10">
+                                        <TableCell className="text-end py-6 px-10">
                                             <div className={cn(
                                                 "inline-flex items-center justify-center size-12 rounded-2xl font-black text-xl shadow-lg",
                                                 ["A", "B"].includes(c.letterGrade) ? "bg-green-500 text-white shadow-green-500/20" : 
@@ -250,8 +250,8 @@ export default function ReportCard() {
                     </div>
                     <p className="text-sm text-muted-foreground font-medium leading-relaxed italic">
                         {hasClasses 
-                            ? `\"${t("reportCard.defaultNote")}\"`
-                            : `\"${t("reportCard.noNote")}\"`}
+                            ? `"${t("reportCard.defaultNote")}"`
+                            : `"${t("reportCard.noNote")}"`}
                     </p>
                 </div>
             </Card>
@@ -269,7 +269,7 @@ function ReportCardSkeleton() {
           <Skeleton className="h-12 w-80 rounded-2xl" />
           <Skeleton className="h-4 w-48 rounded-lg" />
         </div>
-        <Skeleton className="h-32 w-64 rounded-[2rem]" />
+        <Skeleton className="h-32 w-64 rounded-4xl" />
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <Skeleton className="lg:col-span-2 h-[600px] rounded-[2.5rem]" />

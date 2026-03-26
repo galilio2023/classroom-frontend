@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useCustomMutation, useNotification } from "@refinedev/core";
+import { useCustomMutation, useNotification, HttpError } from "@refinedev/core";
 import {
   Dialog,
   DialogContent,
@@ -12,12 +12,15 @@ import { Loader2, Camera, CheckCircle2, AlertCircle, XCircle, Keyboard, ArrowRig
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
-import { cn } from "@/lib/utils";
 
 interface QRScannerModalProps {
   isOpen: boolean;
   onClose: () => void;
   classId: string;
+}
+
+interface ScanResponse {
+  message?: string;
 }
 
 export const QRScannerModal = ({ isOpen, onClose, classId }: QRScannerModalProps) => {
@@ -29,15 +32,15 @@ export const QRScannerModal = ({ isOpen, onClose, classId }: QRScannerModalProps
   const [scanResult, setScanResult] = useState<{ success: boolean; message: string } | null>(null);
   const scannerRef = useRef<Html5QrcodeScanner | null>(null);
 
-  const { mutate: markAttendance, mutation } = useCustomMutation() as any;
+  const { mutate: markAttendance, mutation } = useCustomMutation<ScanResponse, HttpError>();
 
   useEffect(() => {
     if (!isOpen || mode !== "camera") {
       if (scannerRef.current) {
         try {
             scannerRef.current.clear();
-        } catch (e) {
-            console.warn("Scanner clear failed", e);
+        } catch {
+            console.warn("Scanner clear failed");
         }
         scannerRef.current = null;
       }
@@ -68,11 +71,11 @@ export const QRScannerModal = ({ isOpen, onClose, classId }: QRScannerModalProps
               const data = JSON.parse(decodedText);
               if (String(data.classId) === String(classId) && data.token) {
                 handleScanSuccess(data.token);
-                scanner.clear().catch(e => console.warn(e));
+                scanner.clear().catch(err => console.warn(err));
               } else {
                 setScanResult({ success: false, message: "Invalid QR code for this class." });
               }
-            } catch (e) {
+            } catch {
               setScanResult({ success: false, message: "Invalid QR code format." });
             }
           },
@@ -85,8 +88,8 @@ export const QRScannerModal = ({ isOpen, onClose, classId }: QRScannerModalProps
       if (scannerRef.current) {
         try {
             scannerRef.current.clear();
-        } catch (e) {
-            console.warn(e);
+        } catch {
+            // Ignore clear error
         }
         scannerRef.current = null;
       }
@@ -119,10 +122,11 @@ export const QRScannerModal = ({ isOpen, onClose, classId }: QRScannerModalProps
             navigate(`/classes/show/${classId}`);
           }, 2000);
         },
-        onError: (error: any) => {
+        onError: (err) => {
+          const error = err as HttpError;
           setScanResult({ 
             success: false, 
-            message: error?.response?.data?.message || error?.message || "Failed to mark attendance. The code might have expired."
+            message: (error?.response?.data as any)?.message || error?.message || "Failed to mark attendance. The code might have expired."
           });
         },
       }
@@ -192,7 +196,7 @@ export const QRScannerModal = ({ isOpen, onClose, classId }: QRScannerModalProps
             </>
           ) : (
             <div className="w-full py-12 flex flex-col items-center justify-center space-y-6 text-center">
-              {mutation.isLoading ? (
+              {mutation.isPending ? (
                 <div className="space-y-4">
                   <div className="relative">
                     <Loader2 className="h-16 w-16 animate-spin text-primary opacity-20" />

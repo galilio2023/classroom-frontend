@@ -31,29 +31,14 @@ export function DataTable<TData extends BaseRecord>({
   table: tableResult,
   onRowClick,
 }: DataTableProps<TData>) {
-  // --- SAFETY GUARD ---
-  if (!tableResult?.reactTable || !tableResult.reactTable.getHeaderGroups) {
-    return (
-      <div className="flex justify-center items-center h-40 border rounded-md bg-muted/5">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
-
-  const {
-    reactTable: { getHeaderGroups, getRowModel, getAllColumns, getAllLeafColumns },
-    refineCore,
-  } = tableResult;
-
-  const columns = getAllColumns();
-  const isLoading = refineCore?.tableQuery?.isLoading;
-
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const tableRef = useRef<HTMLTableElement>(null);
   const [isOverflowing, setIsOverflowing] = useState({
     horizontal: false,
     vertical: false,
   });
+
+  const refineCore = tableResult?.refineCore;
 
   useEffect(() => {
     const checkOverflow = () => {
@@ -73,6 +58,22 @@ export function DataTable<TData extends BaseRecord>({
       clearTimeout(timeoutId);
     };
   }, [refineCore?.tableQuery?.data?.data, refineCore?.pageSize]);
+
+  // --- SAFETY GUARD ---
+  if (!tableResult?.reactTable || !tableResult.reactTable.getHeaderGroups) {
+    return (
+      <div className="flex justify-center items-center h-40 border rounded-md bg-muted/5">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  const {
+    reactTable: { getHeaderGroups, getRowModel, getAllColumns, getAllLeafColumns },
+  } = tableResult;
+
+  const columns = getAllColumns();
+  const isLoading = refineCore?.tableQuery?.isLoading;
 
   const headerGroups = getHeaderGroups() || [];
 

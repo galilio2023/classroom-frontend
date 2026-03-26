@@ -34,7 +34,7 @@ export function XPProgressBar({ xp, showLabel = true, className, indicatorClassN
       <Progress 
         value={progressPercentage} 
         className="h-2 bg-muted/50 border border-border/50" 
-        indicatorClassName={cn("bg-gradient-to-r from-gold-primary to-gold-secondary", indicatorClassName)} 
+        indicatorClassName={cn("bg-linear-to-r from-gold-primary to-gold-secondary", indicatorClassName)} 
       />
     </div>
   );

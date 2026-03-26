@@ -32,6 +32,7 @@ import {
   Submission,
   Assignment,
   AIFeedbackResponse,
+  GetOneResponse,
 } from "@/types";
 import { useEffect, useState } from "react";
 import {
@@ -58,10 +59,11 @@ import { useWindowSize } from "react-use";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { useTranslation } from "react-i18next";
+import { TFunction } from "i18next";
 import { toast } from "sonner";
 import { useUserRole } from "@/hooks/use-user-role";
 
-const gradingSchema = (t: any) =>
+const gradingSchema = (t: TFunction) =>
   z.object({
     grade: z.coerce
       .number()
@@ -108,7 +110,7 @@ export const GradingDialog = ({
   const isUpdating = updateMutation.isPending;
   const queryClient = useQueryClient();
 
-  const form = useForm<Submission, HttpError, GradingFormValues>({
+  const form = useForm<GradingFormValues>({
     resolver: zodResolver(gradingSchema(t)) as any,
     defaultValues: {
       grade: submission?.grade ?? 0,
@@ -181,7 +183,7 @@ export const GradingDialog = ({
     const previousData = queryClient.getQueryData(queryKey);
 
     // Update Cache Immediately
-    queryClient.setQueryData(queryKey, (old: any) => {
+    queryClient.setQueryData(queryKey, (old: GetOneResponse<Submission> | undefined) => {
       if (!old || !old.data) return old;
       return {
         ...old,
@@ -479,7 +481,7 @@ export const GradingDialog = ({
                   ) : (
                     <Form {...form}>
                       <form
-                        onSubmit={handleSubmit(onSubmit)}
+                        onSubmit={handleSubmit(onSubmit as any)}
                         className="space-y-6"
                       >
                         <FormField

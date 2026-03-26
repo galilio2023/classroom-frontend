@@ -187,9 +187,9 @@ const SettingsEditPage = () => {
 
                   <Button type="submit" className="w-full" disabled={isUpdatingSettings}>
                     {isUpdatingSettings ? (
-                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                      <Loader2 className="h-4 w-4 animate-spin me-2" />
                     ) : (
-                      <SettingsIcon className="h-4 w-4 mr-2" />
+                      <SettingsIcon className="h-4 w-4 me-2" />
                     )}
                     {t("buttons.saveSettings")}
                   </Button>

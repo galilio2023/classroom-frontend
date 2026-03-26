@@ -18,9 +18,7 @@ import {
   History,
   Layers,
   X,
-  ArrowRight,
   Zap,
-  Lightbulb,
   Save,
   CheckCircle2,
   ThumbsUp,
@@ -44,11 +42,27 @@ import { MemoryBoosterList } from "../components/memory-booster-list";
 import { SparkleLoader } from "@/components/ai/sparkle-loader";
 import { Class } from "@/types";
 
+interface Flashcard {
+  question: string;
+  answer: string;
+}
+
+type ToolId = "explain" | "quiz" | "summary" | "flashcards";
+
+interface ToolDefinition {
+  id: ToolId;
+  title: string;
+  desc: string;
+  icon: React.ElementType;
+  color: string;
+  bg: string;
+}
+
 const AIStudyLab = () => {
   const { t, i18n } = useTranslation();
   usePageTitle(t("aiHub.studyLab.title"));
   const { list } = useNavigation();
-  const [activeTool, setActiveTool] = useState<"explain" | "quiz" | "summary" | "flashcards">(
+  const [activeTool, setActiveTool] = useState<ToolId>(
     "explain",
   );
   const [input, setInput] = useState("");
@@ -60,7 +74,7 @@ const AIStudyLab = () => {
   const isAr = i18n.language === "ar";
 
   const [practiceTopic, setPracticeTopic] = useState<string | null>(null);
-  const [flashcards, setFlashcards] = useState<any[] | null>(null);
+  const [flashcards, setFlashcards] = useState<Flashcard[] | null>(null);
   
   const abortControllerRef = useRef<AbortController | null>(null);
   const { mutate: createHistory } = useCreate();
@@ -106,7 +120,7 @@ const AIStudyLab = () => {
 
     try {
       if (activeTool === "flashcards") {
-        const response = await axios.post(
+        const response = await axios.post<{ flashcards: Flashcard[] }>(
             "/api/ai/generate-flashcards", 
             { input, locale: i18n.language, classId: selectedClassId },
             { signal: abortControllerRef.current.signal }
@@ -119,7 +133,7 @@ const AIStudyLab = () => {
             ? `Explain the following concept in simple terms for a student in ${isAr ? 'Arabic' : 'English'}: ${input}`
             : `Summarize the following text into key bullet points in ${isAr ? 'Arabic' : 'English'}: ${input}`;
 
-        const response = await axios.post(
+        const response = await axios.post<{ content: string }>(
             "/api/ai/generate-content", 
             { prompt, classId: selectedClassId },
             { signal: abortControllerRef.current.signal }
@@ -127,7 +141,7 @@ const AIStudyLab = () => {
         setResult(response.data.content);
         toast.success(t("aiHub.studyLab.toasts.aiFinished"));
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (axios.isCancel(error)) {
         console.log("AI request cancelled.");
       } else {
@@ -183,7 +197,7 @@ const AIStudyLab = () => {
     });
   };
 
-  const tools = [
+  const tools: ToolDefinition[] = [
     { id: "explain", title: t("aiHub.studyLab.tools.explain.title"), desc: t("aiHub.studyLab.tools.explain.desc"), icon: BookOpen, color: "text-blue-500", bg: "bg-blue-500/10" },
     { id: "quiz", title: t("aiHub.studyLab.tools.quiz.title"), desc: t("aiHub.studyLab.tools.quiz.desc"), icon: FileQuestion, color: "text-purple-500", bg: "bg-purple-500/10" },
     { id: "summary", title: t("aiHub.studyLab.tools.summary.title"), desc: t("aiHub.studyLab.tools.summary.desc"), icon: Sparkles, color: "text-green-500", bg: "bg-green-500/10" },
@@ -235,31 +249,30 @@ const AIStudyLab = () => {
                     {t("aiHub.studyLab.context.label")}
                   </Label>
                   <select
-                    className="w-full h-12 rounded-xl bg-muted/50 border-none px-4 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none"
-                    value={selectedClassId}
-                    onChange={(e) => setSelectedClassId(e.target.value)}
+                  className="w-full h-12 rounded-xl bg-muted/50 border-none px-4 text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none"
+                  value={selectedClassId}
+                  onChange={(e) => setSelectedClassId(e.target.value)}
                   >
-                    <option value="">{t("classes.list.general")}</option>
-                    {classesData?.map((cls: any) => (
-                        <option key={cls.id} value={cls.id}>{cls.name}</option>
-                    ))}
+                  <option value="">{t("classes.list.general")}</option>
+                  {classesData?.map((cls: Class) => (
+                      <option key={cls.id} value={cls.id}>{cls.name}</option>
+                  ))}
                   </select>
-              </div>
-          </Card>
+                  </div>
+                  </Card>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4 md:gap-6">
-            {tools.map((tool) => (
-                <motion.div key={tool.id} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                    <Card
-                        className={cn(
-                            "h-full cursor-pointer transition-all duration-500 border border-border/40 shadow-sm rounded-[1.5rem] md:rounded-[2rem] overflow-hidden group relative",
-                            activeTool === tool.id
-                                ? "bg-primary text-primary-foreground shadow-2xl shadow-primary/20"
-                                : "bg-card/50 backdrop-blur-3xl hover:bg-primary/5 hover:border-primary/20"
-                        )}
-                        onClick={() => setActiveTool(tool.id as any)}
-                    >
-                        <CardHeader className="p-6 md:p-8 text-start">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4 md:gap-6">
+                  {tools.map((tool) => (
+                  <motion.div key={tool.id} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <Card
+                      className={cn(
+                          "h-full cursor-pointer transition-all duration-500 border border-border/40 shadow-sm rounded-[1.5rem] md:rounded-[2rem] overflow-hidden group relative",
+                          activeTool === tool.id
+                              ? "bg-primary text-primary-foreground shadow-2xl shadow-primary/20"
+                              : "bg-card/50 backdrop-blur-3xl hover:bg-primary/5 hover:border-primary/20"
+                      )}
+                      onClick={() => setActiveTool(tool.id)}
+                  >                        <CardHeader className="p-6 md:p-8 text-start">
                             <div className="flex items-center gap-4">
                                 <div className={cn(
                                     "p-3 rounded-2xl transition-all duration-500 shrink-0 shadow-sm",
@@ -364,7 +377,7 @@ const AIStudyLab = () => {
                             <Button variant="ghost" size="icon" className="h-12 w-12 rounded-full bg-muted/20" onClick={() => setFlashcards(null)}><X className="h-6 w-6" /></Button>
                         </CardHeader>
                         <CardContent className="p-8 md:p-16">
-                            <FlashcardPlayer cards={flashcards} onComplete={() => setFlashcards(null)} />
+                            <FlashcardPlayer cards={flashcards as any} onComplete={() => setFlashcards(null)} />
                         </CardContent>
                     </Card>
                 </motion.div>

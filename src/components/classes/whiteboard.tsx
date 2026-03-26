@@ -286,7 +286,7 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
               onClick={clearWhiteboard}
               className="h-8"
             >
-              <Trash2 className="h-4 w-4 mr-1" />
+              <Trash2 className="h-4 w-4 me-1" />
               Clear
             </Button>
           )}
@@ -299,9 +299,9 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
               className="h-8 bg-live-primary hover:bg-live-primary/90"
             >
               {isSaving ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                <Loader2 className="h-4 w-4 animate-spin me-1" />
               ) : (
-                <Save className="h-4 w-4 mr-1" />
+                <Save className="h-4 w-4 me-1" />
               )}
               Save Snapshot
             </Button>

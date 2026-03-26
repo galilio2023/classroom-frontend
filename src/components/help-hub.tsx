@@ -97,7 +97,7 @@ export const HelpHub = () => {
         >
           <HelpCircle className="h-5 w-5 md:h-6 md:w-6 transition-transform group-hover:scale-110" />
           <span className="sr-only">Help</span>
-          <span className="absolute -top-1 -right-1 flex h-3 w-3">
+          <span className="absolute -top-1 -end-1 flex h-3 w-3">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-20"></span>
             <span className="relative inline-flex rounded-full h-3 w-3 bg-primary/40"></span>
           </span>
@@ -140,7 +140,7 @@ export const HelpHub = () => {
                     onClick={() => handleStepClick(step.actionId)}
                     className={cn(
                         "p-4 rounded-2xl bg-muted/30 border border-border/20 flex gap-4 group transition-all cursor-pointer",
-                        step.actionId ? "hover:bg-primary/[0.03] hover:border-primary/30" : "hover:bg-muted/50"
+                        step.actionId ? "hover:bg-primary/3 hover:border-primary/30" : "hover:bg-muted/50"
                     )}
                   >
                     <div className={cn(
@@ -185,8 +185,8 @@ export const HelpHub = () => {
 
             {/* AI Assistant Call to Action */}
             <div className="pt-4">
-              <div className="p-6 rounded-[2rem] bg-gradient-to-br from-primary/10 via-ai-primary/5 to-transparent border border-primary/10 relative overflow-hidden group">
-                <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform">
+              <div className="p-6 rounded-4xl bg-linear-to-br from-primary/10 via-ai-primary/5 to-transparent border border-primary/10 relative overflow-hidden group">
+                <div className="absolute top-0 end-0 p-4 opacity-10 group-hover:scale-110 transition-transform">
                   <Sparkles className="h-12 w-12" />
                 </div>
                 <h4 className="text-sm font-black mb-2 flex items-center gap-2 text-start">
@@ -202,7 +202,7 @@ export const HelpHub = () => {
                   onClick={handleAskAi}
                 >
                   {t("help.common.askAi")}
-                  <ArrowRight className="ml-2 h-3.5 w-3.5 rtl:rotate-180" />
+                  <ArrowRight className="ms-2 h-3.5 w-3.5 rtl:rotate-180" />
                 </Button>
               </div>
             </div>

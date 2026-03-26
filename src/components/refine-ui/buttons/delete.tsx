@@ -37,7 +37,7 @@ export const DeleteButton = React.forwardRef<
       {...rest}
     >
       {loading ? (
-        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+        <Loader2 className="me-2 h-4 w-4 animate-spin" />
       ) : (
         children ?? (
           <div className="flex items-center gap-2 font-semibold">

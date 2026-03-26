@@ -9,7 +9,7 @@ import {
 } from "@refinedev/core";
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Module, Progress, Resource, User, UserRole } from "@/types";
+import { Module, Progress, Resource, User, UserRole, ListResponse } from "@/types";
 import { CurriculumEmptyState } from "../components/class-empty-states";
 import { Accordion } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
@@ -83,13 +83,13 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
 
   const { query: modulesQuery } = useList<Module>({
     resource: "modules",
-    filters: [{ field: "classId", operator: "eq" as "eq", value: Number(classId) }],
+    filters: [{ field: "classId", operator: "eq" as const, value: Number(classId) }],
     queryOptions: { enabled: !!classId },
   });
 
   const { query: progressQuery } = useList<Progress>({
     resource: "progress",
-    filters: [{ field: "classId", operator: "eq" as "eq", value: Number(classId) }],
+    filters: [{ field: "classId", operator: "eq" as const, value: Number(classId) }],
     queryOptions: { enabled: !!classId && isStudent },
   });
 
@@ -124,17 +124,17 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
     const currentStatus = isItemCompleted(type, id);
     const queryKey: [string, { filters: CrudFilter[] }] = [
       "progress",
-      { filters: [{ field: "classId", operator: "eq" as "eq", value: Number(classId) }] },
+      { filters: [{ field: "classId", operator: "eq" as const, value: Number(classId) }] },
     ];
 
     // 1. Cancel any outgoing refetches (so they don't overwrite our optimistic update)
     await queryClient.cancelQueries({ queryKey });
 
     // 2. Snapshot the previous value
-    const previousProgress = queryClient.getQueryData(queryKey);
+    const previousProgress = queryClient.getQueryData<ListResponse<Progress>>(queryKey);
 
     // 3. Optimistically update to the new value
-    queryClient.setQueryData(queryKey, (old: any) => {
+    queryClient.setQueryData(queryKey, (old: ListResponse<Progress> | undefined) => {
       if (!old || !old.data) return old;
 
       let newData = [...old.data];
@@ -149,11 +149,14 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
           quizId: type === "quiz" ? id : null,
           isCompleted: true,
           completedAt: new Date().toISOString(),
-        });
+          userId: identity?.id || "",
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        } as Progress);
       } else {
         // Remove the record
         newData = newData.filter(
-          (p: any) =>
+          (p: Progress) =>
             !(
               (type === "resource" && p.resourceId === id) ||
               (type === "assignment" && p.assignmentId === id) ||
@@ -416,7 +419,7 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
                       setMagicConfig({
                         ...magicConfig,
                         moduleId,
-                        type: type as any,
+                        type: type as "package" | "note" | "quiz" | "assignment",
                       });
                       setIsMagicModalOpen(true);
                     }}

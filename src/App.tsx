@@ -33,9 +33,9 @@ function App() {
   }, [i18n.language, i18n]);
 
   const i18nProvider = {
-    translate: (key: any, params: object) => {
-        if (!key || typeof key !== "string" || key.includes("undefined")) return "";
-        return t(key, { ...params, defaultValue: key });
+    translate: (key: string, params?: object) => {
+      if (!key || key.includes("undefined")) return "";
+      return t(key, { ...params, defaultValue: key });
     },
     changeLocale: (lang: string) => i18n.changeLanguage(lang),
     getLocale: () => i18n.language,

@@ -94,7 +94,7 @@ export function DataTableFilterOperatorSelect({
           className={cn("w-full justify-between truncate", triggerClassName)}
         >
           <div className="truncate">{selectedLabel ?? (placeholder ?? t("table.filter.operator.placeholder", "Search operator..."))}</div>
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          <ChevronsUpDown className="ms-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className={cn("p-0", contentClassName)} forceMount>
@@ -112,7 +112,7 @@ export function DataTableFilterOperatorSelect({
                     setOpen(false);
                   }}
                 >
-                  <Check className={cn("mr-2 h-4 w-4", value === op ? "opacity-100" : "opacity-0")} />
+                  <Check className={cn("me-2 h-4 w-4", value === op ? "opacity-100" : "opacity-0")} />
                   {t(i18nKey, defaultLabel)}
                 </CommandItem>
               ))}

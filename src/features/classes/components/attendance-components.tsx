@@ -17,19 +17,28 @@ import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { AttendanceStatus, Enrollment } from "@/types";
+import { AttendanceStatus, Enrollment, Attendance } from "@/types";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
 
+interface AttendanceStatsProps {
+  stats: {
+    present: number;
+    absent: number;
+    late: number;
+    excused: number;
+  };
+}
+
 // --- Stats Component ---
-export const AttendanceStats = ({ stats }: { stats: any }) => {
+export const AttendanceStats = ({ stats }: AttendanceStatsProps) => {
   const { t } = useTranslation();
   const statConfig = [
-    { label: t("classes.attendance.present" as any), value: stats?.present || 0, icon: CheckCircle2, color: "text-success", bg: "bg-success/10" },
-    { label: t("classes.attendance.absent" as any), value: stats?.absent || 0, icon: XCircle, color: "text-destructive", bg: "bg-destructive/10" },
-    { label: t("classes.attendance.late" as any), value: stats?.late || 0, icon: Clock, color: "text-yellow-600", bg: "bg-yellow-500/10" },
-    { label: t("classes.attendance.excused" as any), value: stats?.excused || 0, icon: AlertCircle, color: "text-blue-600", bg: "bg-blue-500/10" },
+    { label: t("classes.attendance.present"), value: stats?.present || 0, icon: CheckCircle2, color: "text-success", bg: "bg-success/10" },
+    { label: t("classes.attendance.absent"), value: stats?.absent || 0, icon: XCircle, color: "text-destructive", bg: "bg-destructive/10" },
+    { label: t("classes.attendance.late"), value: stats?.late || 0, icon: Clock, color: "text-yellow-600", bg: "bg-yellow-500/10" },
+    { label: t("classes.attendance.excused"), value: stats?.excused || 0, icon: AlertCircle, color: "text-blue-600", bg: "bg-blue-500/10" },
   ];
 
   return (
@@ -55,6 +64,19 @@ export const AttendanceStats = ({ stats }: { stats: any }) => {
   );
 };
 
+interface AttendanceMarkTableProps {
+  enrollments: Enrollment[];
+  attendanceData: Record<string, {
+    status: AttendanceStatus;
+    remarks: string;
+    minutesPresent: number;
+    participationScore: number;
+  }>;
+  onStatusChange: (studentId: string, status: AttendanceStatus) => void;
+  onValueChange: (studentId: string, field: string, value: string | number) => void;
+  isAr: boolean;
+}
+
 // --- Mark Table Component ---
 export const AttendanceMarkTable = ({ 
   enrollments, 
@@ -62,18 +84,18 @@ export const AttendanceMarkTable = ({
   onStatusChange, 
   onValueChange, 
   isAr 
-}: any) => {
+}: AttendanceMarkTableProps) => {
   const { t } = useTranslation();
   return (
     <div className="px-4 pb-4 overflow-x-auto">
       <Table>
         <TableHeader>
           <TableRow className="hover:bg-transparent border-none text-start">
-            <TableHead className="text-[10px] font-black uppercase tracking-widest py-6">{t("classes.attendance.table.student" as any)}</TableHead>
-            <TableHead className="text-[10px] font-black uppercase tracking-widest py-6">{t("classes.attendance.table.status" as any)}</TableHead>
-            <TableHead className="text-[10px] font-black uppercase tracking-widest py-6">{t("classes.attendance.table.minutes" as any)}</TableHead>
-            <TableHead className="text-[10px] font-black uppercase tracking-widest py-6">{t("classes.attendance.table.participation" as any)}</TableHead>
-            <TableHead className="text-[10px] font-black uppercase tracking-widest py-6">{t("classes.attendance.table.remarks" as any)}</TableHead>
+            <TableHead className="text-[10px] font-black uppercase tracking-widest py-6">{t("classes.attendance.table.student")}</TableHead>
+            <TableHead className="text-[10px] font-black uppercase tracking-widest py-6">{t("classes.attendance.table.status")}</TableHead>
+            <TableHead className="text-[10px] font-black uppercase tracking-widest py-6">{t("classes.attendance.table.minutes")}</TableHead>
+            <TableHead className="text-[10px] font-black uppercase tracking-widest py-6">{t("classes.attendance.table.participation")}</TableHead>
+            <TableHead className="text-[10px] font-black uppercase tracking-widest py-6">{t("classes.attendance.table.remarks")}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -95,7 +117,7 @@ export const AttendanceMarkTable = ({
                   </div>
                 </TableCell>
                 <TableCell className="py-4">
-                  <Select value={data.status} onValueChange={(val) => onStatusChange(student.id, val)}>
+                  <Select value={data.status} onValueChange={(val) => onStatusChange(student.id, val as AttendanceStatus)}>
                     <SelectTrigger className="w-[130px] h-11 rounded-xl bg-muted/20 border-none font-bold text-xs">
                       <div className="flex items-center gap-2">
                         <SelectValue />
@@ -132,15 +154,30 @@ export const AttendanceMarkTable = ({
   );
 };
 
+interface AttendanceHistoryGroup {
+  date: string;
+  present?: number;
+  absent?: number;
+  late?: number;
+  excused?: number;
+  records?: Attendance[];
+}
+
+interface AttendanceHistoryTableProps {
+  historyData: AttendanceHistoryGroup[];
+  isTeacher: boolean;
+  isAr: boolean;
+}
+
 // --- History Table Component ---
-export const AttendanceHistoryTable = ({ historyData, isTeacher, isAr }: any) => {
+export const AttendanceHistoryTable = ({ historyData, isTeacher, isAr }: AttendanceHistoryTableProps) => {
   const { t } = useTranslation();
   return (
     <div className="px-4 pb-4 overflow-x-auto">
       <Table>
         <TableHeader>
           <TableRow className="hover:bg-transparent border-none text-start">
-            <TableHead className="text-[10px] font-black uppercase tracking-widest py-6">{t("classes.attendance.table.date" as any)}</TableHead>
+            <TableHead className="text-[10px] font-black uppercase tracking-widest py-6">{t("classes.attendance.table.date")}</TableHead>
             {isTeacher ? (
               ["present", "absent", "late", "excused"].map(s => (
                 <TableHead key={s} className="text-[10px] font-black uppercase tracking-widest py-6">{t(`classes.attendance.${s}` as any)}</TableHead>
@@ -153,7 +190,7 @@ export const AttendanceHistoryTable = ({ historyData, isTeacher, isAr }: any) =>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {historyData.map((group: any) => (
+          {historyData.map((group) => (
             <TableRow key={group.date} className="group hover:bg-primary/[0.02] transition-colors border-b border-black/[0.03] dark:border-white/[0.03] text-start">
               <TableCell className="py-6 font-black text-sm tracking-tight">
                 <div className="flex items-center gap-3">
@@ -172,9 +209,9 @@ export const AttendanceHistoryTable = ({ historyData, isTeacher, isAr }: any) =>
                 </>
               ) : (
                 <>
-                  <TableCell><Badge className="bg-primary/10 text-primary border-none">{group.records[0].status}</Badge></TableCell>
-                  <TableCell><div className="flex items-center gap-2 font-black text-xs"><Zap className="h-3 w-3 text-yellow-500" />{group.records[0].participationScore}/10</div></TableCell>
-                  <TableCell><div className="flex items-center gap-2 text-muted-foreground/60 italic text-xs font-medium"><Info className="h-3.5 w-3.5 opacity-40" />{group.records[0].remarks || t("classes.attendance.noRemarks" as any)}</div></TableCell>
+                  <TableCell><Badge className="bg-primary/10 text-primary border-none">{group.records?.[0]?.status}</Badge></TableCell>
+                  <TableCell><div className="flex items-center gap-2 font-black text-xs"><Zap className="h-3 w-3 text-yellow-500" />{group.records?.[0]?.participationScore}/10</div></TableCell>
+                  <TableCell><div className="flex items-center gap-2 text-muted-foreground/60 italic text-xs font-medium"><Info className="h-3.5 w-3.5 opacity-40" />{group.records?.[0]?.remarks || t("classes.attendance.noRemarks")}</div></TableCell>
                 </>
               )}
             </TableRow>

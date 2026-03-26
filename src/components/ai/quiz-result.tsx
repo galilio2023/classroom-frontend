@@ -47,7 +47,7 @@ export const QuizResult: React.FC<QuizResultProps> = ({
           variant="outline"
           className="rounded-xl font-bold w-full max-w-50"
         >
-          <RefreshCw className="mr-2 h-4 w-4 rtl:mr-0 rtl:ml-2" />
+          <RefreshCw className="me-2 h-4 w-4 rtl:me-0 rtl:ms-2" />
           {t("buttons.goBack")}
         </Button>
       </CardFooter>

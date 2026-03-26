@@ -155,14 +155,14 @@ export const Footer = () => {
   return (
     <footer className="relative bg-background pt-32 pb-12 overflow-hidden border-t border-primary/5">
       {/* Decorative background with bg-linear-to-r update */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-linear-to-r from-transparent via-primary/50 to-transparent" />
-      <div className="absolute top-0 left-0 w-64 h-64 bg-primary/5 blur-[100px] rounded-full pointer-events-none" />
+      <div className="absolute top-0 start-1/2 -translate-x-1/2 w-full h-px bg-linear-to-r from-transparent via-primary/50 to-transparent" />
+      <div className="absolute top-0 start-0 w-64 h-64 bg-primary/5 blur-[100px] rounded-full pointer-events-none" />
 
       <div className="container-center">
         {/* Newsletter / CTA Section */}
         <div className="bg-muted/30 rounded-[3rem] p-12 md:p-16 mb-24 border border-primary/5 backdrop-blur-sm relative overflow-hidden flex flex-col lg:flex-row items-center justify-between gap-12 group">
           {/* RTL Positioning Fix */}
-          <div className="absolute -top-10 -right-10 rtl:-left-10 rtl:right-auto w-40 h-40 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-colors" />
+          <div className="absolute -top-10 -end-10 rtl:-start-10 rtl:end-auto w-40 h-40 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-colors" />
 
           <div className="max-w-md space-y-4 text-center lg:text-start">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest">

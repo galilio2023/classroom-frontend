@@ -4,6 +4,7 @@ import {
   useDelete,
   useGetIdentity,
   useCustomMutation,
+  HttpError,
 } from "@refinedev/core";
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
@@ -15,10 +16,10 @@ import {
   X,
   MessageCircle,
   LayoutDashboard,
-  Info,
   ArrowRight,
-  Reply,
   Trophy,
+  Info,
+  Reply,
 } from "lucide-react";
 import { toast } from "sonner";
 import { ChatBubble } from "@/components/classes/chat-bubble";
@@ -37,7 +38,7 @@ interface DiscussionTabProps {
 }
 
 export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { data: identity } = useGetIdentity<User>();
   const { isStaff } = useUserRole();
   const [newPost, setNewPost] = useState("");
@@ -81,7 +82,7 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
   const isLoading = query.isLoading;
   const refetch = query.refetch;
 
-  const { mutate: createPost, mutation } = useCreate<Discussion, any, any>();
+  const { mutate: createPost, mutation } = useCreate<Discussion, HttpError, { content: string; classId: number; parentId: number | null }>();
   const { mutate: deletePost } = useDelete();
   const { mutate: solvePost } = useCustomMutation();
   const { mutate: generateSummary } = useCustomMutation();
@@ -108,7 +109,7 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
       void refetch();
     };
 
-    const handleDiscussionSolved = (payload: any) => {
+    const handleDiscussionSolved = (payload: { message?: string }) => {
         toast.success(payload.message || "A question has been solved!", {
             icon: <Trophy className="w-4 h-4 text-yellow-500" />,
             duration: 5000,
@@ -174,8 +175,9 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
         values: { classId: Number(classId) },
       },
       {
-        onSuccess: (data: any) => {
-          setSummary(data.data.summary);
+        onSuccess: (data) => {
+          const responseData = data.data as { summary: string };
+          setSummary(responseData.summary);
           setIsSummarizing(false);
         },
         onError: () => {

@@ -67,7 +67,7 @@ export function BadgeCard({ badge, className }: BadgeCardProps) {
         )}
         
         {badge.unlocked && (
-          <div className="absolute top-1 right-1">
+          <div className="absolute top-1 end-1">
             <Trophy className="h-3 w-3 text-gold-primary fill-gold-primary animate-pulse" />
           </div>
         )}

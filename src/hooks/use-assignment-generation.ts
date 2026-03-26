@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useCustomMutation, useNotification } from "@refinedev/core";
+import { useCustomMutation, useNotification, HttpError } from "@refinedev/core";
 
 interface AIResponse {
   content: string;
@@ -52,7 +52,7 @@ export const useAssignmentGeneration = () => {
             description: "Gemini has created a draft for you.",
           });
         },
-        onError: (error: any) => {
+        onError: (error: HttpError) => {
           let description = "There was an error connecting to the AI service.";
           if (error.status === 429) description = "AI generation limit reached for this period. Please try again later.";
           if (error.status === 503) description = "AI services are currently offline for maintenance.";

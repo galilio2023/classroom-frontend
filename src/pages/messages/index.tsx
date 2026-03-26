@@ -187,10 +187,10 @@ const MessagesPage = () => {
                     </CardHeader>
                     <div className="p-4 md:p-6 border-b border-border/40">
                         <div className="relative group">
-                            <Search className={cn("absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60 group-focus-within:text-primary transition-colors", isAr ? "right-4" : "left-4")} />
+                            <Search className={cn("absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60 group-focus-within:text-primary transition-colors", "start-4")} />
                             <Input 
                                 placeholder={t("messages.searchPeople")} 
-                                className={cn("bg-background/50 border-border/40 h-12 rounded-xl shadow-sm", isAr ? "pr-11 pl-4" : "pl-11 pr-4")} 
+                                className={cn("bg-background/50 border-border/40 h-12 rounded-xl shadow-sm", "ps-11 pe-4")} 
                             />
                         </div>
                     </div>
@@ -227,7 +227,7 @@ const MessagesPage = () => {
                                                 <AvatarFallback className="bg-primary/10 text-primary font-bold text-sm">{conv.user.name[0]}</AvatarFallback>
                                             </Avatar>
                                             {!conv.lastMessage.isRead && !conv.lastMessage.isMe && (
-                                                <div className="absolute -top-1 -right-1 size-3 bg-red-500 rounded-full border-2 border-background animate-pulse" />
+                                                <div className="absolute -top-1 -end-1 size-3 bg-red-500 rounded-full border-2 border-background animate-pulse" />
                                             )}
                                         </div>
                                         <div className="flex-1 overflow-hidden">
@@ -318,7 +318,7 @@ const MessagesPage = () => {
                                                         <p className="text-start leading-relaxed">{msg.content}</p>
                                                         <span className={cn(
                                                             "text-[10px] block mt-1 opacity-70",
-                                                            isAr ? "text-left" : "text-right",
+                                                            "text-end",
                                                             isMe ? "text-primary-foreground/80" : "text-muted-foreground"
                                                         )}>
                                                             {new Date(msg.createdAt).toLocaleTimeString(isAr ? 'ar-EG' : 'en-US', { hour: '2-digit', minute: '2-digit' })}

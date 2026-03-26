@@ -49,7 +49,7 @@ export function XPGainPopup() {
   return (
     <div className={cn(
         "fixed bottom-8 z-[100] flex flex-col gap-2 pointer-events-none",
-        isArabic ? "left-8" : "right-8"
+        "end-8"
     )}>
       {gains.map((gain) => (
         <div
@@ -64,7 +64,7 @@ export function XPGainPopup() {
           {gain.reason && (
             <span className={cn(
                 "text-[10px] font-bold uppercase opacity-80",
-                isArabic ? "border-r border-white/20 pr-2 order-first" : "border-l border-white/20 pl-2"
+                isArabic ? "border-r border-white/20 pe-2 order-first" : "border-l border-white/20 ps-2"
             )}>
               {gain.reason}
             </span>

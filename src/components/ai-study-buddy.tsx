@@ -68,7 +68,7 @@ export const AIStudyBuddy = ({ subject, topic, assignment, classId }: AIStudyBud
             <Button 
                 size="lg" 
                 disabled
-                className="rounded-[1.5rem] md:rounded-[2rem] h-14 w-14 md:h-16 md:w-16 opacity-20 grayscale bg-ai-primary border-none text-white p-0"
+                className="rounded-[1.5rem] md:rounded-4xl h-14 w-14 md:h-16 md:w-16 opacity-20 grayscale bg-ai-primary border-none text-white p-0"
             >
                 <Loader2 className="h-6 w-6 md:h-7 md:w-7 animate-spin" />
             </Button>
@@ -88,7 +88,7 @@ export const AIStudyBuddy = ({ subject, topic, assignment, classId }: AIStudyBud
             <Button 
                 size="lg" 
                 disabled
-                className="rounded-[1.5rem] md:rounded-[2rem] h-14 w-14 md:h-16 md:w-16 opacity-50 grayscale transition-all duration-500 bg-ai-primary border-none text-white p-0"
+                className="rounded-[1.5rem] md:rounded-4xl h-14 w-14 md:h-16 md:w-16 opacity-50 grayscale transition-all duration-500 bg-ai-primary border-none text-white p-0"
             >
                 <MessageCircle className="h-6 w-6 md:h-7 md:w-7" />
             </Button>
@@ -175,10 +175,10 @@ export const AIStudyBuddy = ({ subject, topic, assignment, classId }: AIStudyBud
       ) : (
         <Button 
           size="lg" 
-          className="rounded-[1.5rem] md:rounded-[2rem] h-14 w-14 md:h-16 md:w-16 shadow-[0_10px_40px_-10px_rgba(var(--ai-primary),0.8)] hover:scale-110 active:scale-95 transition-all duration-500 bg-ai-primary border-none text-white p-0 group overflow-hidden"
+          className="rounded-[1.5rem] md:rounded-4xl h-14 w-14 md:h-16 md:w-16 shadow-[0_10px_40px_-10px_rgba(var(--ai-primary),0.8)] hover:scale-110 active:scale-95 transition-all duration-500 bg-ai-primary border-none text-white p-0 group overflow-hidden"
           onClick={() => setIsOpen(true)}
         >
-          <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/20 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+          <div className="absolute inset-0 bg-linear-to-tr from-white/0 via-white/20 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
           <MessageCircle className="h-6 w-6 md:h-7 md:w-7 group-hover:rotate-12 transition-transform duration-500 relative z-10" />
         </Button>
       )}

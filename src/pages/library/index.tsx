@@ -193,7 +193,7 @@ const GlobalLibraryPage = () => {
                                 </div>
                                 <div className="space-y-3">
                                     <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ms-2">{t("common.upload.label")}</Label>
-                                    <div className="p-1 rounded-[2rem] bg-muted/30 shadow-inner">
+                                    <div className="p-1 rounded-4xl bg-muted/30 shadow-inner">
                                         <FileUpload 
                                             label={t("common.upload.label")}
                                             folder="library"
@@ -258,7 +258,7 @@ const GlobalLibraryPage = () => {
         {isLoading ? (
             <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                 {[1,2,3,4,5,6,7,8].map(i => (
-                    <Card key={i} className="h-64 bg-background/50 animate-pulse rounded-[2rem] border-border/20" />
+                    <Card key={i} className="h-64 bg-background/50 animate-pulse rounded-4xl border-border/20" />
                 ))}
             </div>
         ) : filteredResources.length === 0 ? (
@@ -286,7 +286,7 @@ const GlobalLibraryPage = () => {
                         >
                             <Card className={cn(
                                 "group relative overflow-hidden transition-all duration-500 border border-border/40 bg-card/50 backdrop-blur-sm hover:shadow-2xl hover:shadow-primary/5 hover:border-primary/20 cursor-pointer",
-                                viewMode === "grid" ? "rounded-[2rem] h-full" : "rounded-3xl"
+                                viewMode === "grid" ? "rounded-4xl h-full" : "rounded-3xl"
                             )}>
                                 {/* Status Accent */}
                                 <div className="absolute start-0 top-0 w-1 h-full bg-primary opacity-0 group-hover:opacity-100 transition-opacity" />

@@ -18,10 +18,17 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
+import { FieldArrayWithId } from "react-hook-form";
+import { UseFormReturnType } from "@refinedev/react-hook-form";
+import { AssignmentFormValues } from "../hooks/use-assignment-form";
 
 interface Props {
   form: any;
-  rubric: any;
+  rubric: {
+    fields: any[];
+    append: (value: { criteria: string; maxPoints: number }) => void;
+    remove: (index: number) => void;
+  };
   isAr: boolean;
 }
 
@@ -83,7 +90,7 @@ export const AssignmentSettingsForm = ({ form, rubric, isAr }: Props) => {
                                 </Button>
                             </div>
                             <div className="space-y-4">
-                                {rubric.fields.map((field: any, index: number) => (
+                                {rubric.fields.map((field, index: number) => (
                                     <motion.div key={field.id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="flex gap-4 items-start p-4 rounded-2xl bg-background/50 border border-black/[0.03] dark:border-white/[0.03] shadow-sm group">
                                         <FormField control={form.control} name={`rubric.${index}.criteria`} render={({ field }) => (
                                             <FormItem className="flex-1"><FormControl><Input placeholder={t("assignments.create.placeholders.criteriaName")} {...field} className="h-12 rounded-xl bg-muted/20 border-none font-bold" /></FormControl><FormMessage /></FormItem>

@@ -67,7 +67,7 @@ export const AssignmentGeneratorForm: React.FC<
           <div className="space-y-2 min-w-0">
             <Label
               htmlFor="subject"
-              className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1"
+              className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ms-1"
             >
               {t("aiHub.assistant.helper.subject")}
             </Label>
@@ -82,7 +82,7 @@ export const AssignmentGeneratorForm: React.FC<
           <div className="space-y-2 min-w-0">
             <Label
               htmlFor="difficulty"
-              className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1"
+              className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ms-1"
             >
               {t("aiHub.assistant.helper.level")}
             </Label>
@@ -118,7 +118,7 @@ export const AssignmentGeneratorForm: React.FC<
         <div className="space-y-2">
           <Label
             htmlFor="topic"
-            className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1"
+            className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ms-1"
           >
             {t("aiHub.assistant.helper.topic")}
           </Label>
@@ -134,7 +134,7 @@ export const AssignmentGeneratorForm: React.FC<
         <div className="space-y-2 min-w-0">
           <Label
             htmlFor="tone"
-            className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1"
+            className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ms-1"
           >
             {t("aiHub.assistant.helper.tone")}
           </Label>
@@ -170,7 +170,7 @@ export const AssignmentGeneratorForm: React.FC<
         <div className="space-y-2">
           <Label
             htmlFor="objectives"
-            className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2 ml-1"
+            className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2 ms-1"
           >
             <Target className="h-3.5 w-3.5 text-primary shrink-0" />
             {t("aiHub.assistant.helper.objectives")}

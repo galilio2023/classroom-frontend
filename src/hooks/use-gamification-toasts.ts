@@ -51,7 +51,7 @@ export const useGamificationToasts = (userId: string | undefined) => {
     };
 
     // 3. Listen for Badge Earned
-    const handleBadgeEarned = (data: { badge: any; message: string }) => {
+    const handleBadgeEarned = (data: { badge: unknown; message: string }) => {
       toast("🏆 " + t("gamification.newBadge", "New Badge Unlocked!"), {
         description: data.message,
         duration: 8000,

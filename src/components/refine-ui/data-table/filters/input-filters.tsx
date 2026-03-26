@@ -186,7 +186,7 @@ export function DataTableFilterCombobox<TData>({
                   {multiple && currentValues.length > 0 ? (
                     <div className="flex flex-wrap gap-1 flex-1">
                       {currentValues.slice(0, 3).map((v) => (
-                        <Badge key={v} variant="outline" className="inline-flex items-center gap-0 h-4 pr-0.5 rounded-sm">
+                        <Badge key={v} variant="outline" className="inline-flex items-center gap-0 h-4 pe-0.5 rounded-sm">
                           <span className="text-[10px]">{options.find(o => o.value === v)?.label || v}</span>
                           <span className="cursor-pointer" onClick={(e) => { e.preventDefault(); e.stopPropagation(); onChange(currentValues.filter(i => i !== v)); }}><X className="!h-2 !w-2" /></span>
                         </Badge>
@@ -206,7 +206,7 @@ export function DataTableFilterCombobox<TData>({
                   <CommandGroup>
                     {options.map((o) => (
                       <CommandItem key={o.value} value={o.value} onSelect={() => handleSelect(o.value)}>
-                        {o.label}<Check className={cn("ml-auto h-4 w-4", currentValues.includes(o.value) ? "opacity-100" : "opacity-0")} />
+                        {o.label}<Check className={cn("ms-auto h-4 w-4", currentValues.includes(o.value) ? "opacity-100" : "opacity-0")} />
                       </CommandItem>
                     ))}
                   </CommandGroup>

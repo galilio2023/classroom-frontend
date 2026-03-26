@@ -75,7 +75,7 @@ export const useAttendanceDetails = (classId: string, enrollments: Enrollment[],
   };
 
   useEffect(() => {
-    const initialData: Record<string, any> = {};
+    const initialData: Record<string, { status: AttendanceStatus; remarks: string; minutesPresent: number; participationScore: number }> = {};
     enrollments.forEach((e) => {
       initialData[e.studentId] = {
         status: AttendanceStatus.ABSENT,
@@ -104,7 +104,7 @@ export const useAttendanceDetails = (classId: string, enrollments: Enrollment[],
     setAttendanceData(initialData);
   }, [dailyQuery.data, enrollments, selectedDate]);
 
-  const { mutate: saveAttendance, mutation } = useCustomMutation() as any;
+  const { mutate: saveAttendance, mutation } = useCustomMutation();
 
   const handleMarkAttendance = (studentId: string, status: AttendanceStatus) => {
     setAttendanceData((prev) => ({
@@ -113,7 +113,7 @@ export const useAttendanceDetails = (classId: string, enrollments: Enrollment[],
     }));
   };
 
-  const handleValueChange = (studentId: string, field: string, value: any) => {
+  const handleValueChange = (studentId: string, field: string, value: string | number) => {
     setAttendanceData((prev) => ({
       ...prev,
       [studentId]: { ...prev[studentId], [field]: value },
@@ -142,8 +142,8 @@ export const useAttendanceDetails = (classId: string, enrollments: Enrollment[],
         onSuccess: () => {
           open?.({
             type: "success",
-            message: t("classes.attendance.toast.saved" as any),
-            description: t("classes.attendance.toast.savedDescription" as any, { date: selectedDate }),
+            message: t("classes.attendance.toast.saved"),
+            description: t("classes.attendance.toast.savedDescription", { date: selectedDate }),
           });
           refetch();
         },

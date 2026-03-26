@@ -1,8 +1,7 @@
 import React from "react";
 import { useCustom } from "@refinedev/core";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Brain, Clock, ArrowRight, Loader2, Star, Trophy, Sparkles } from "lucide-react";
+import { Brain, Clock, ArrowRight, Loader2, Trophy, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import dayjs from "dayjs";
@@ -27,12 +26,13 @@ export const MemoryBoosterList: React.FC<MemoryBoosterListProps> = ({ onSelectTo
   const { t, i18n } = useTranslation();
   const isAr = i18n.language === "ar";
 
-  const { data: result, isLoading } = useCustom<SpacedRepetition[]>({
+  const { result, query } = useCustom<SpacedRepetition[]>({
     url: "/ai/memory-boosters",
     method: "get",
-  }) as any;
+  });
 
   const boosters = result?.data || [];
+  const isLoading = query.isLoading;
   const dueItems = boosters.filter((b: SpacedRepetition) => dayjs(b.nextReviewAt).isBefore(dayjs().add(1, 'hour')));
   const upcomingItems = boosters.filter((b: SpacedRepetition) => dayjs(b.nextReviewAt).isAfter(dayjs().add(1, 'hour')));
 

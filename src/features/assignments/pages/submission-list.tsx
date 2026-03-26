@@ -9,8 +9,8 @@ import { Submission, User, PeerReview } from "@/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Eye, Clock, CheckCircle2, AlertCircle, MessageSquare, Trophy, MoreHorizontal, Trash2, Edit3 } from "lucide-react";
-import { HttpError, useCustom } from "@refinedev/core";
+import { Eye, Clock, CheckCircle2, AlertCircle, MessageSquare, Trophy, MoreHorizontal } from "lucide-react";
+import { useCustom } from "@refinedev/core";
 import { GradingDialog } from "./grading-dialog";
 import { SOCKET_URL } from "@/config";
 import dayjs from "dayjs";
@@ -48,7 +48,7 @@ export const SubmissionList = ({ submissions = [], assignmentId }: SubmissionLis
 
   dayjs.locale(i18n.language === "ar" ? "ar" : "en");
 
-  const allReviewsResult = useCustom<PeerReview[]>({
+  const { query: allReviewsQuery } = useCustom<PeerReview[]>({
     url: `${SOCKET_URL.replace("/socket.io", "")}/api/peer-reviews/assignment/${assignmentId}`,
     method: "get",
     queryOptions: {
@@ -56,7 +56,7 @@ export const SubmissionList = ({ submissions = [], assignmentId }: SubmissionLis
     },
   });
 
-  const allReviews = (allReviewsResult.result.data as PeerReview[]) || [];
+  const allReviews = allReviewsQuery?.data?.data || [];
 
   const handleGradeClick = (submission: Submission) => {
     setSelectedSubmission(submission);
@@ -222,7 +222,7 @@ export const SubmissionList = ({ submissions = [], assignmentId }: SubmissionLis
         ),
       },
     ],
-    [allReviews, t, i18n.language],
+    [allReviews, t],
   );
 
   const table = useReactTable({

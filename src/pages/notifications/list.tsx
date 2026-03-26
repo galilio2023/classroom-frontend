@@ -183,7 +183,7 @@ const NotificationsListPage = () => {
               onClick={handleMarkAllAsRead}
               className="w-full md:w-auto rounded-2xl h-12 md:h-14 px-8 border-primary/20 bg-primary/5 hover:bg-primary/10 text-primary font-bold uppercase tracking-widest text-[10px]"
             >
-              <CheckSquare className={cn("h-4 w-4", isAr ? "ml-2" : "mr-2")} />
+              <CheckSquare className={cn("h-4 w-4", "me-2")} />
               {t("notifications.markAllRead")}
             </Button>
           </div>
@@ -191,7 +191,7 @@ const NotificationsListPage = () => {
 
         {/* Stats Row - Adaptive */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
-          <Card className="p-6 md:p-8 bg-card/40 backdrop-blur-3xl border-border/40 rounded-[2rem] md:rounded-[2.5rem] flex items-center gap-5 shadow-sm">
+          <Card className="p-6 md:p-8 bg-card/40 backdrop-blur-3xl border-border/40 rounded-4xl md:rounded-[2.5rem] flex items-center gap-5 shadow-sm">
             <div className="p-3.5 rounded-2xl bg-primary/10 text-primary">
               <Bell className="h-6 w-6 md:h-7 md:w-7" />
             </div>
@@ -204,7 +204,7 @@ const NotificationsListPage = () => {
               </p>
             </div>
           </Card>
-          <Card className="p-6 md:p-8 bg-card/40 backdrop-blur-3xl border-border/40 rounded-[2rem] md:rounded-[2.5rem] flex items-center gap-5 shadow-sm">
+          <Card className="p-6 md:p-8 bg-card/40 backdrop-blur-3xl border-border/40 rounded-4xl md:rounded-[2.5rem] flex items-center gap-5 shadow-sm">
             <div className="p-3.5 rounded-2xl bg-indigo-500/10 text-indigo-600">
               <Mail className="h-6 w-6 md:h-7 md:w-7" />
             </div>
@@ -217,7 +217,7 @@ const NotificationsListPage = () => {
               </p>
             </div>
           </Card>
-          <Card className="p-6 md:p-8 bg-card/40 backdrop-blur-3xl border-border/40 rounded-[2rem] md:rounded-[2.5rem] flex items-center gap-5 shadow-sm">
+          <Card className="p-6 md:p-8 bg-card/40 backdrop-blur-3xl border-border/40 rounded-4xl md:rounded-[2.5rem] flex items-center gap-5 shadow-sm">
             <div className="p-3.5 rounded-2xl bg-purple-500/10 text-purple-600">
               <BrainCircuit className="h-6 w-6 md:h-7 md:w-7" />
             </div>
@@ -239,7 +239,7 @@ const NotificationsListPage = () => {
               <Search
                 className={cn(
                   "absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60 group-focus-within:text-primary transition-colors",
-                  isAr ? "right-4" : "left-4",
+                  "start-4",
                 )}
               />
               <Input
@@ -247,7 +247,7 @@ const NotificationsListPage = () => {
                 placeholder={t("common.search")}
                 className={cn(
                   "h-12 rounded-2xl border-none bg-background/50 shadow-none font-medium",
-                  isAr ? "pr-11 pl-4" : "pl-11 pr-4",
+                  "ps-11 pe-4",
                 )}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -300,15 +300,15 @@ const NotificationsListPage = () => {
                       exit={{ opacity: 0, scale: 0.95 }}
                       transition={{ delay: index * 0.05 }}
                       className={cn(
-                        "group relative flex flex-col md:flex-row items-center p-5 md:p-6 rounded-[2rem] border transition-all duration-300 shadow-sm",
+                        "group relative flex flex-col md:flex-row items-center p-5 md:p-6 rounded-4xl border transition-all duration-300 shadow-sm",
                         !notification.isRead
-                          ? "bg-primary/[0.04] border-primary/20 hover:bg-primary/[0.06] shadow-md"
+                          ? "bg-primary/4 border-primary/20 hover:bg-primary/6 shadow-md"
                           : "bg-card/40 border-border/40 hover:bg-card/80 hover:border-primary/20",
                       )}
                     >
                       {/* Read/Unread Accent */}
                       {!notification.isRead && (
-                          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-12 bg-primary rounded-r-full" />
+                          <div className="absolute start-0 top-1/2 -translate-y-1/2 w-1.5 h-12 bg-primary rounded-e-full" />
                       )}
 
                       {/* Icon */}
@@ -324,12 +324,12 @@ const NotificationsListPage = () => {
                           {getIcon(notification.type)}
                         </div>
                         {!notification.isRead && (
-                          <div className="absolute -top-1 -right-1 size-5 bg-primary rounded-full border-4 border-background shadow-lg animate-pulse" />
+                          <div className="absolute -top-1 -end-1 size-5 bg-primary rounded-full border-4 border-background shadow-lg animate-pulse" />
                         )}
                       </div>
 
                       {/* Info Area */}
-                      <div className={cn("flex-1 text-center min-w-0 w-full", isAr ? "md:mr-8 md:text-right" : "md:ml-8 md:text-left")}>
+                      <div className={cn("flex-1 text-center min-w-0 w-full", isAr ? "md:me-8 md:text-end" : "md:ms-8 md:text-start")}>
                         <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 mb-2">
                           <h3
                             className={cn(
@@ -416,7 +416,7 @@ const NotificationsListPage = () => {
                           >
                             <a href={notification.link}>
                               {t("buttons.viewDetails")}
-                              <ArrowRight className={cn("h-4 w-4", isAr ? "mr-2 rotate-180" : "ml-2")} />
+                              <ArrowRight className={cn("h-4 w-4", isAr ? "me-2 rotate-180" : "ms-2")} />
                             </a>
                           </Button>
                         ) : (

@@ -146,7 +146,7 @@ const ProjectGroupsPage = () => {
 
             {isLoadingGroups ? (
                 <div className="grid gap-6 md:gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 px-2">
-                     {[1,2,3,4,5,6].map((i: any) => <Card key={i} className="h-64 rounded-[2rem] bg-muted/20 animate-pulse border-border/20 shadow-sm" />)}
+                     {[1,2,3,4,5,6].map((i: any) => <Card key={i} className="h-64 rounded-4xl bg-muted/20 animate-pulse border-border/20 shadow-sm" />)}
                 </div>
             ) : groups.length === 0 ? (
                 <div className="flex items-center justify-center p-16 bg-card/20 rounded-[2.5rem] border border-dashed border-border/40 mx-2">
@@ -174,7 +174,7 @@ const ProjectGroupsPage = () => {
                                 exit={{ opacity: 0, scale: 0.95 }}
                                 transition={{ delay: index * 0.05 }}
                             >
-                                <Card className="flex flex-col overflow-hidden border border-border/40 shadow-xl hover:shadow-2xl transition-all duration-300 rounded-[2rem] bg-card/50 backdrop-blur-xl group hover:border-primary/20">
+                                <Card className="flex flex-col overflow-hidden border border-border/40 shadow-xl hover:shadow-2xl transition-all duration-300 rounded-4xl bg-card/50 backdrop-blur-xl group hover:border-primary/20">
                                     <CardHeader className="p-6 md:p-8 pb-4 flex-row justify-between items-start bg-primary/5 border-b border-border/40">
                                         <div>
                                             <CardTitle className="text-xl md:text-2xl font-black tracking-tight group-hover:text-primary transition-colors">{group.name}</CardTitle>
@@ -221,7 +221,7 @@ const ProjectGroupsPage = () => {
                                             )}
                                         </div>
                                     </CardContent>
-                                    <div className="p-4 md:p-6 bg-primary/[0.02] border-t border-border/40 flex justify-end">
+                                    <div className="p-4 md:p-6 bg-primary/2 border-t border-border/40 flex justify-end">
                                         <Button 
                                             variant="outline" 
                                             size="lg" 
@@ -255,7 +255,7 @@ const ProjectGroupsPage = () => {
                         </DialogHeader>
                         <div className="space-y-6">
                             <div className="space-y-3">
-                                <Label htmlFor="name" className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-2">{t("projectGroups.groupName")}</Label>
+                                <Label htmlFor="name" className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ms-2">{t("projectGroups.groupName")}</Label>
                                 <Input 
                                     id="name" 
                                     placeholder={t("projectGroups.groupNamePlaceholder")} 
@@ -265,7 +265,7 @@ const ProjectGroupsPage = () => {
                                 />
                             </div>
                             <div className="space-y-3">
-                                <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-2">{t("projectGroups.classLabel")}</Label>
+                                <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ms-2">{t("projectGroups.classLabel")}</Label>
                                 <Select onValueChange={setSelectedClassId} value={selectedClassId}>
                                     <SelectTrigger className="h-16 rounded-3xl bg-muted/30 border-none shadow-inner px-8 text-lg font-black">
                                         <SelectValue placeholder={t("projectGroups.selectClass")} />
@@ -283,7 +283,7 @@ const ProjectGroupsPage = () => {
                         <DialogFooter className="flex-col sm:flex-row gap-3">
                             <Button variant="ghost" size="lg" className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-8 order-2 sm:order-1" onClick={() => setCreateOpen(false)}>{t("buttons.cancel")}</Button>
                             <Button onClick={handleCreate} disabled={isCreating} size="lg" className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-12 shadow-xl shadow-primary/20 order-1 sm:order-2">
-                                {isCreating ? <Loader2 className="mr-3 h-5 w-5 animate-spin" /> : <Plus className="h-5 w-5 mr-3" />}
+                                {isCreating ? <Loader2 className="me-3 h-5 w-5 animate-spin" /> : <Plus className="h-5 w-5 me-3" />}
                                 {t("buttons.create")}
                             </Button>
                         </DialogFooter>

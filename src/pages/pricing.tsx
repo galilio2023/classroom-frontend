@@ -1,17 +1,8 @@
 import React, { useState } from "react";
 import { useGetIdentity, useCustomMutation } from "@refinedev/core";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardFooter,
-} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   Check,
-  Sparkles,
   Zap,
   Crown,
   ArrowRight,
@@ -43,7 +34,7 @@ const FAQItem = ({
         onClick={() => setIsOpen(!isOpen)}
         className="w-full py-8 flex items-center justify-between text-start group transition-all"
       >
-        <span className="text-lg md:text-xl font-bold tracking-tight group-hover:text-primary transition-colors pr-4">
+        <span className="text-lg md:text-xl font-bold tracking-tight group-hover:text-primary transition-colors pe-4">
           {question}
         </span>
         <div
@@ -78,10 +69,9 @@ const FAQItem = ({
 };
 
 const Pricing = () => {
-  const { t, i18n } = useTranslation();
-  const isAr = i18n.language === "ar";
+  const { t } = useTranslation();
   const { data: identity } = useGetIdentity<User>();
-  const { mutate: createCheckout } = useCustomMutation();
+  const { mutate: createCheckout } = useCustomMutation<{ url?: string }>();
   const navigate = useNavigate();
 
   const handleUpgrade = (priceId: string) => {
@@ -100,7 +90,7 @@ const Pricing = () => {
         values: { priceId },
       },
       {
-        onSuccess: (data: any) => {
+        onSuccess: (data) => {
           if (data.data.url) {
             window.location.href = data.data.url;
           }
@@ -114,37 +104,37 @@ const Pricing = () => {
 
   const plans = [
     {
-      name: t("pricing.plans.free.name" as any),
+      name: t("pricing.plans.free.name"),
       price: "0",
       symbol: "$",
-      description: t("pricing.plans.free.desc" as any),
+      description: t("pricing.plans.free.desc"),
       features: [
-        t("pricing.plans.free.f1" as any),
-        t("pricing.plans.free.f2" as any),
-        t("pricing.plans.free.f3" as any),
-        t("pricing.plans.free.f4" as any),
-        t("pricing.plans.free.f5" as any),
+        t("pricing.plans.free.f1"),
+        t("pricing.plans.free.f2"),
+        t("pricing.plans.free.f3"),
+        t("pricing.plans.free.f4"),
+        t("pricing.plans.free.f5"),
       ],
-      cta: identity ? t("pricing.currentPlan" as any) : (t("buttons.getStarted" as any) as any),
+      cta: identity ? t("pricing.currentPlan") : t("buttons.getStarted"),
       priceId: "free",
       featured: false,
     },
     {
-      name: t("pricing.plans.pro.name" as any),
+      name: t("pricing.plans.pro.name"),
       price: "9.99",
       symbol: "$",
-      period: t("pricing.perMonth" as any) as any,
-      description: t("pricing.plans.pro.desc" as any),
+      period: t("pricing.perMonth"),
+      description: t("pricing.plans.pro.desc"),
       features: [
-        t("pricing.plans.pro.f1" as any),
-        t("pricing.plans.pro.f2" as any),
-        t("pricing.plans.pro.f3" as any),
-        t("pricing.plans.pro.f4" as any),
-        t("pricing.plans.pro.f5" as any),
-        t("pricing.plans.pro.f6" as any),
-        t("pricing.plans.pro.f7" as any),
+        t("pricing.plans.pro.f1"),
+        t("pricing.plans.pro.f2"),
+        t("pricing.plans.pro.f3"),
+        t("pricing.plans.pro.f4"),
+        t("pricing.plans.pro.f5"),
+        t("pricing.plans.pro.f6"),
+        t("pricing.plans.pro.f7"),
       ],
-      cta: t("pricing.upgrade" as any),
+      cta: t("pricing.upgrade"),
       priceId: "price_1P2k3l4m5n6o7p8q",
       featured: true,
     },
@@ -152,20 +142,20 @@ const Pricing = () => {
 
   const faqs = [
     {
-      question: t("pricing.faq.q1" as any),
-      answer: t("pricing.faq.a1" as any),
+      question: t("pricing.faq.q1"),
+      answer: t("pricing.faq.a1"),
     },
     {
-      question: t("pricing.faq.q2" as any),
-      answer: t("pricing.faq.a2" as any),
+      question: t("pricing.faq.q2"),
+      answer: t("pricing.faq.a2"),
     },
     {
-      question: t("pricing.faq.q3" as any),
-      answer: t("pricing.faq.a3" as any),
+      question: t("pricing.faq.q3"),
+      answer: t("pricing.faq.a3"),
     },
     {
-      question: t("pricing.faq.q4" as any),
-      answer: t("pricing.faq.a4" as any),
+      question: t("pricing.faq.q4"),
+      answer: t("pricing.faq.a4"),
     },
   ];
 
@@ -175,9 +165,9 @@ const Pricing = () => {
       
       {/* Cinematic Background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        <div className="absolute top-0 left-0 w-full h-full bg-primary/[0.01] blur-[140px]" />
-        <div className="absolute top-[20%] right-[-10%] w-[600px] h-[600px] bg-primary/5 rounded-full blur-[120px] opacity-50" />
-        <div className="absolute bottom-[10%] left-[-10%] w-[600px] h-[600px] bg-ai-primary/5 rounded-full blur-[120px] opacity-50" />
+        <div className="absolute top-0 start-0 w-full h-full bg-primary/1 blur-[140px]" />
+        <div className="absolute top-[20%] end-[-10%] w-150 h-150 bg-primary/5 rounded-full blur-[120px] opacity-50" />
+        <div className="absolute bottom-[10%] start-[-10%] w-150 h-150 bg-ai-primary/5 rounded-full blur-[120px] opacity-50" />
       </div>
 
       <div className="relative z-10">
@@ -191,19 +181,19 @@ const Pricing = () => {
                 >
                     <Crown className="h-3.5 w-3.5 text-primary animate-pulse" />
                     <span className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-foreground/70">
-                        {t("pricing.badge" as any)}
+                        {t("pricing.badge")}
                     </span>
                 </motion.div>
 
-                <div className="max-w-[1000px] mx-auto space-y-8">
+                <div className="max-w-250 mx-auto space-y-8">
                     <motion.h1
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.1, duration: 0.8 }}
                         className="text-4xl sm:text-6xl md:text-7xl lg:text-[8rem] font-black leading-[0.9] tracking-tighter uppercase text-gradient"
                     >
-                        {t("pricing.titlePart1" as any)}<br/>
-                        <span className="text-primary">{t("pricing.titlePart2" as any)}</span>
+                        {t("pricing.titlePart1")}<br/>
+                        <span className="text-primary">{t("pricing.titlePart2")}</span>
                     </motion.h1>
                     
                     <motion.p
@@ -212,14 +202,14 @@ const Pricing = () => {
                         transition={{ delay: 0.4, duration: 0.8 }}
                         className="text-lg md:text-xl lg:text-2xl text-muted-foreground/80 font-medium max-w-2xl mx-auto leading-relaxed"
                     >
-                        {t("pricing.description" as any)}
+                        {t("pricing.description")}
                     </motion.p>
                 </div>
             </div>
         </section>
 
         {/* Pricing Cards */}
-        <section className="section-wrapper !py-0">
+        <section className="section-wrapper py-0!">
             <div className="container-center">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 max-w-6xl mx-auto items-stretch">
                     {plans.map((plan, index) => (
@@ -233,12 +223,12 @@ const Pricing = () => {
                     >
                         <div
                         className={cn(
-                            "relative h-full flex flex-col glass-card p-6 sm:p-8 md:p-12 rounded-[2rem] sm:rounded-[3.5rem] transition-all duration-500 group hover:-translate-y-2 hover:shadow-3xl",
+                            "relative h-full flex flex-col glass-card p-6 sm:p-8 md:p-12 rounded-4xl sm:rounded-[3.5rem] transition-all duration-500 group hover:-translate-y-2 hover:shadow-3xl",
                             plan.featured && "border-primary/30 ring-1 ring-primary/10 shadow-primary/5 shadow-2xl bg-white/80 dark:bg-muted/10"
                         )}
                         >
                         {plan.featured && (
-                            <div className="absolute top-6 right-6 sm:top-8 sm:right-8 md:top-12 md:right-12">
+                            <div className="absolute top-6 end-6 sm:top-8 sm:end-8 md:top-12 md:end-12">
                                 <div className="bg-primary text-primary-foreground text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full shadow-lg animate-bounce">
                                     {t("pricing.recommended")}
                                 </div>
@@ -316,7 +306,7 @@ const Pricing = () => {
                     <motion.div
                     key={i}
                     whileHover={{ scale: 1.02 }}
-                    className="p-10 glass-card rounded-[3rem] space-y-8 text-start group"
+                    className="p-10 glass-card rounded-4xl space-y-8 text-start group"
                     >
                     <div className={cn("h-16 w-16 rounded-2xl bg-muted/30 flex items-center justify-center transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3", feature.color)}>
                         <feature.icon className="h-8 w-8" />
@@ -369,7 +359,7 @@ const Pricing = () => {
                     viewport={{ once: true }}
                     className="space-y-12 max-w-5xl mx-auto p-12 md:p-24 rounded-[5rem] bg-primary text-primary-foreground relative overflow-hidden group shadow-3xl shadow-primary/20"
                 >
-                    <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent pointer-events-none" />
+                    <div className="absolute inset-0 bg-linear-to-br from-white/10 to-transparent pointer-events-none" />
                     <div className="relative space-y-8">
                         <h2 className="text-5xl md:text-9xl font-black tracking-tighter leading-[0.85] uppercase">
                             {t("pricing.cta.title1")}<br/> {t("pricing.cta.title2")}

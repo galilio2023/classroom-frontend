@@ -22,14 +22,22 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useTranslation } from "react-i18next";
 
+interface AnnouncementData {
+  title: string;
+  content: string;
+  fileUrl?: string | null;
+  fileCldPubId?: string | null;
+  isPinned: boolean;
+}
+
 interface Props {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  data: any;
-  setData: (data: any) => void;
+  data: AnnouncementData;
+  setData: (data: AnnouncementData) => void;
   isCreating: boolean;
   isUploading: boolean;
-  onUpload: (e: any) => void;
+  onUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onCreate: () => void;
 }
 

@@ -55,7 +55,7 @@ export function Sidebar() {
                     <div key={groupName} className="mt-8 mb-2">
                     <div
                         className={cn(
-                        "ml-4 mb-4 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40 transition-all duration-300",
+                        "ms-4 mb-4 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40 transition-all duration-300",
                         !open && "opacity-0 -translate-x-4 pointer-events-none h-0 mb-0 overflow-hidden"
                         )}
                     >

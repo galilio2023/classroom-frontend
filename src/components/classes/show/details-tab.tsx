@@ -151,7 +151,7 @@ export const DetailsTab = ({
                     className="w-full sm:w-auto h-10 md:h-12 rounded-xl md:rounded-2xl font-black uppercase tracking-widest text-[10px] border-primary/20 text-primary hover:bg-primary/5 px-6 shadow-sm"
                     onClick={onInviteClick}
                 >
-                    <UserPlus className={cn("h-4 w-4", isAr ? "ml-2" : "mr-2")} />
+                    <UserPlus className={cn("h-4 w-4", "me-2")} />
                     {t("buttons.invite")}
                 </Button>
                 )}
@@ -173,7 +173,7 @@ export const DetailsTab = ({
                   >
                     {t("classes.show.details.inviteCode")}
                   </p>
-                  <p className="text-4xl md:text-5xl font-black font-mono tracking-[0.3em] ml-[0.3em]">
+                  <p className="text-4xl md:text-5xl font-black font-mono tracking-[0.3em] ms-[0.3em]">
                     {aClass.inviteCode}
                   </p>
                 </div>

@@ -207,11 +207,11 @@ const ProfileRequestsList = () => {
           <Card className="p-4 border-primary/5 bg-muted/30 rounded-4xl backdrop-blur-sm">
             <div className="flex flex-col lg:flex-row gap-4">
               <div className="relative flex-1 group">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                <Search className="absolute start-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                 <Input
                   type="text"
                   placeholder={t("profileRequests.searchPlaceholder")}
-                  className="pl-11 h-14 rounded-2xl border-none bg-background shadow-sm font-medium"
+                  className="ps-11 h-14 rounded-2xl border-none bg-background shadow-sm font-medium"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -236,7 +236,7 @@ const ProfileRequestsList = () => {
           {/* Virtualized List Container */}
           <div 
             ref={parentRef} 
-            className="h-150 overflow-auto pr-2 custom-scrollbar rounded-[2.5rem] border border-primary/5 bg-card/30 backdrop-blur-sm relative"
+            className="h-150 overflow-auto pe-2 custom-scrollbar rounded-[2.5rem] border border-primary/5 bg-card/30 backdrop-blur-sm relative"
           >
             {isLoading ? (
               <div style={{ height: '100%', width: '100%', position: 'relative' }}>
@@ -300,7 +300,7 @@ const ProfileRequestsList = () => {
                         </div>
 
                         {/* Info */}
-                        <div className="flex-1 md:ml-6 text-center md:text-left min-w-0 w-full">
+                        <div className="flex-1 md:ms-6 text-center md:text-start min-w-0 w-full">
                           <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-3">
                             <h3 className="text-lg font-black tracking-tight truncate group-hover:text-primary transition-colors">
                               {request.user.name}
@@ -376,7 +376,7 @@ const ProfileRequestsList = () => {
                                       onClick={() => handleApprove(request.id)}
                                       disabled={isApproving}
                                   >
-                                      {isApproving ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" /> : <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />}
+                                      {isApproving ? <Loader2 className="h-3.5 w-3.5 animate-spin me-1.5" /> : <CheckCircle2 className="h-3.5 w-3.5 me-1.5" />}
                                       {t("buttons.approve")}
                                   </Button>
                                   <Button
@@ -386,7 +386,7 @@ const ProfileRequestsList = () => {
                                       onClick={() => setRejectTarget(request.id)}
                                       disabled={isRejecting}
                                   >
-                                      <XCircle className="h-3.5 w-3.5 mr-1.5" />
+                                      <XCircle className="h-3.5 w-3.5 me-1.5" />
                                       {t("buttons.reject")}
                                   </Button>
                               </div>
@@ -447,7 +447,7 @@ const ProfileRequestsList = () => {
                   <Button variant="ghost" className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-12 px-6" onClick={() => setPreviewUrl(null)}>{t("buttons.closePreview")}</Button>
                   <Button className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-12 px-8 shadow-xl shadow-primary/20" asChild>
                       <a href={previewUrl || ""} target="_blank" rel="noreferrer">
-                          <ExternalLink className="h-4 w-4 mr-2" />
+                          <ExternalLink className="h-4 w-4 me-2" />
                           {t("buttons.openFullRes")}
                       </a>
                   </Button>
@@ -470,7 +470,7 @@ const ProfileRequestsList = () => {
                   </div>
               </DialogHeader>
               <div className="py-8 space-y-3">
-                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">{t("profileRequests.dialogs.rejectionFeedback")}</Label>
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ms-1">{t("profileRequests.dialogs.rejectionFeedback")}</Label>
                   <Textarea 
                       placeholder={t("profileRequests.dialogs.rejectionPlaceholder")}
                       value={rejectReason}
@@ -486,7 +486,7 @@ const ProfileRequestsList = () => {
                       disabled={isRejecting || !rejectReason.trim()}
                       className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-12 shadow-xl shadow-destructive/20"
                   >
-                      {isRejecting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <XCircle className="h-4 w-4 mr-2" />}
+                      {isRejecting ? <Loader2 className="h-4 w-4 animate-spin me-2" /> : <XCircle className="h-4 w-4 me-2" />}
                       {t("profileRequests.dialogs.confirmRejection")}
                   </Button>
               </DialogFooter>

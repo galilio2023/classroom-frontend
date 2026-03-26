@@ -39,6 +39,7 @@ import { ApplyTeacherDialog } from "./apply-teacher-dialog";
 import { useClassList } from "../hooks/use-class-list";
 import { ClassCard } from "../components/class-card";
 import { ClassFilters } from "../components/class-filters";
+import { ClassListItem } from "@/types";
 import usePageTitle from "@/hooks/use-page-title";
 
 const ClassesList = () => {
@@ -187,7 +188,7 @@ const ClassesList = () => {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 md:gap-8">
                 <AnimatePresence mode="popLayout">
-                  {data.classes.map((classItem, index) => (
+                  {(data.classes as ClassListItem[]).map((classItem, index) => (
                     <ClassCard 
                       key={classItem.id}
                       classItem={classItem}

@@ -275,12 +275,12 @@ const ShowProjectGroup = () => {
                 </div>
             </DialogHeader>
             <div className="space-y-6">
-                <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-2">{t("projectGroups.show.selectStudents")}</Label>
+                <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ms-2">{t("projectGroups.show.selectStudents")}</Label>
                 <Popover>
                 <PopoverTrigger asChild>
                     <Button variant="outline" role="combobox" className="w-full justify-between h-14 rounded-2xl bg-muted/30 border-none shadow-inner px-6 text-base font-black placeholder:text-muted-foreground/30 focus-visible:ring-primary/20">
                     {selectedStudents.length > 0 ? t("projectGroups.show.studentsSelected", { count: selectedStudents.length }) : t("projectGroups.show.selectStudents")}
-                    <ChevronsUpDown className="ml-2 h-5 w-5 shrink-0 opacity-50" />
+                    <ChevronsUpDown className="ms-2 h-5 w-5 shrink-0 opacity-50" />
                     </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-[--radix-popover-trigger-width] p-0 rounded-2xl shadow-2xl bg-white dark:bg-[#09090b] opacity-100 backdrop-blur-none border border-border/50">
@@ -324,7 +324,7 @@ const ShowProjectGroup = () => {
             <DialogFooter className="flex-col sm:flex-row gap-3">
                 <Button variant="ghost" size="lg" className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-8 order-2 sm:order-1" onClick={() => setAddMemberOpen(false)}>{t("buttons.cancel")}</Button>
                 <Button onClick={handleAddMembers} disabled={isManagingMembers} size="lg" className="rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 px-12 shadow-xl shadow-primary/20 order-1 sm:order-2">
-                    {isManagingMembers ? <Loader2 className="mr-3 h-5 w-5 animate-spin" /> : <UserPlus className="h-5 w-5 mr-3" />}
+                    {isManagingMembers ? <Loader2 className="me-3 h-5 w-5 animate-spin" /> : <UserPlus className="h-5 w-5 me-3" />}
                     {t("buttons.addSelected")}
                 </Button>
             </DialogFooter>

@@ -86,10 +86,10 @@ export const useClassList = () => {
       syncWithLocation: true,
       filters: {
         permanent: [
-          ...(selectedTerm ? [{ field: "termId", operator: "eq", value: selectedTerm.id }] : []),
-          ...(isTeacher && identity?.id ? [{ field: "teacherUid", operator: "eq", value: identity.id }] : []),
-          ...(isStudent && view === "my" ? [{ field: "my", operator: "eq", value: "true" }] : []),
-        ] as any[],
+          ...(selectedTerm ? [{ field: "termId", operator: "eq" as const, value: selectedTerm.id }] : []),
+          ...(isTeacher && identity?.id ? [{ field: "teacherUid", operator: "eq" as const, value: identity.id }] : []),
+          ...(isStudent && view === "my" ? [{ field: "my", operator: "eq" as const, value: "true" }] : []),
+        ],
       },
     }
   });
@@ -102,24 +102,32 @@ export const useClassList = () => {
   const handleJoinByCode = () => {
     if (!inviteCode.trim()) return;
     joinClass({ url: "/classes/join", method: "post", values: { inviteCode } }, {
-      onSuccess: (data: any) => {
-        toast.success(data.data.message || t("classes.list.toast.joinRequestSent"));
+      onSuccess: (data) => {
+        const responseData = data.data as { message?: string };
+        toast.success(responseData.message || t("classes.list.toast.joinRequestSent"));
         setIsJoinModalOpen(false);
         setInviteCode("");
         // SMART FIX: Force refresh of the class lists
         void invalidate({ resource: "classes", invalidates: ["list"] });
       },
-      onError: (err: any) => toast.error(err?.data?.message || t("classes.list.toast.invalidInviteCode"))
+      onError: (err) => {
+        const error = err as HttpError;
+        toast.error((error?.response?.data as any)?.message || t("classes.list.toast.invalidInviteCode"));
+      }
     });
   };
 
   const handleEnrollRequest = (id: number) => {
     enrollRequest({ url: `/classes/${id}/enroll`, method: "post", values: {} }, {
-      onSuccess: (data: any) => {
-        toast.success(data.data.message);
+      onSuccess: (data) => {
+        const responseData = data.data as { message?: string };
+        toast.success(responseData.message);
         invalidate({ resource: "classes", invalidates: ["list"] });
       },
-      onError: (err: any) => toast.error(err?.data?.message || "Failed to send enrollment request.")
+      onError: (err) => {
+        const error = err as HttpError;
+        toast.error((error?.response?.data as any)?.message || "Failed to send enrollment request.");
+      }
     });
   };
 

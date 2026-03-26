@@ -116,7 +116,7 @@ const SubmissionShow = () => {
             <div className="flex items-center gap-3">
                 {submission.aiApprovalStatus === "pending" && (
                     <Badge className="bg-ai-primary/10 text-ai-primary border-ai-primary/20 px-4 py-1 rounded-full font-black uppercase tracking-widest text-[10px] animate-pulse">
-                        <Sparkles className="h-3 w-3 mr-1.5" />
+                        <Sparkles className="h-3 w-3 me-1.5" />
                         {t("assignments.grading.proposedAI")}
                     </Badge>
                 )}
@@ -204,7 +204,7 @@ const SubmissionShow = () => {
                                     min={0}
                                     max={100}
                                 />
-                                <div className={cn("absolute top-1/2 -translate-y-1/2 text-xl font-black text-muted-foreground/30", isAr ? "left-4" : "right-4")}>%</div>
+                                <div className={cn("absolute top-1/2 -translate-y-1/2 text-xl font-black text-muted-foreground/30", "end-4")}>%</div>
                             </div>
                         </div>
 
@@ -251,7 +251,7 @@ const SubmissionShow = () => {
                             disabled={updateMutationObj.isPending}
                             className="w-full h-12 rounded-xl font-black uppercase tracking-widest shadow-lg shadow-primary/20"
                         >
-                            {updateMutationObj.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                            {updateMutationObj.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Save className="me-2 h-4 w-4" />}
                             {t("buttons.saveGrade")}
                         </Button>
                     </CardFooter>

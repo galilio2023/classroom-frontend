@@ -13,11 +13,15 @@ import { Input } from "@/components/ui/input.tsx";
 import { useMemo, useState } from "react";
 import { 
   flexRender, 
-  ColumnDef 
+  ColumnDef,
+  HeaderGroup,
+  Header,
+  Row,
+  Cell
 } from "@tanstack/react-table";
 import { useTable } from "@refinedev/react-table";
 import { useNavigation, HttpError } from "@refinedev/core";
-import { User as UserType } from "@/types";
+import { User as UserType, Enrollment } from "@/types";
 import { Badge } from "@/components/ui/badge.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import { Progress as ProgressBar } from "@/components/ui/progress";
@@ -46,8 +50,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/empty-state";
 
 const ProgressListPage = () => {
-  const { t, i18n } = useTranslation();
-  const isAr = i18n.language === 'ar';
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -61,11 +64,11 @@ const ProgressListPage = () => {
     return f;
   }, [searchQuery]);
 
-  const columns = useMemo<ColumnDef<any>[]>(
+  const columns = useMemo<ColumnDef<Enrollment>[]>(
     () => [
       {
         id: "student",
-        header: t("progressPage.table.student" as any),
+        header: t("progressPage.table.student"),
         accessorKey: "user",
         cell: ({ getValue }) => {
           const user = getValue<UserType>();
@@ -88,7 +91,7 @@ const ProgressListPage = () => {
       },
       {
         accessorKey: "class.name",
-        header: t("progressPage.table.class" as any),
+        header: t("progressPage.table.class"),
         cell: ({ getValue }) => (
           <div className="flex items-center gap-2 text-muted-foreground">
             <div className="p-1.5 rounded-lg bg-primary/5">
@@ -100,13 +103,13 @@ const ProgressListPage = () => {
       },
       {
         id: "completion",
-        header: t("progressPage.table.completion" as any),
+        header: t("progressPage.table.completion"),
         cell: () => {
           const completion = Math.floor(Math.random() * 100);
           return (
             <div className="flex flex-col gap-2 min-w-30">
               <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-tighter">
-                <span className="text-muted-foreground/60">{t("progressPage.table.completion" as any)}</span>
+                <span className="text-muted-foreground/60">{t("progressPage.table.completion")}</span>
                 <span className="text-primary">{completion}%</span>
               </div>
               <ProgressBar value={completion} className="h-1.5 rounded-full bg-primary/10" />
@@ -116,7 +119,7 @@ const ProgressListPage = () => {
       },
       {
         id: "grade",
-        header: t("progressPage.table.grade" as any),
+        header: t("progressPage.table.grade"),
         cell: () => {
           const grade = 65 + Math.floor(Math.random() * 30);
           const isAtRisk = grade < 70;
@@ -149,22 +152,22 @@ const ProgressListPage = () => {
               <DropdownMenuContent align="end" className="w-56 p-2 rounded-2xl bg-white dark:bg-[#09090b] opacity-100 backdrop-blur-none border border-border/50 shadow-2xl">
                 <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-3 py-3">Student Progress</DropdownMenuLabel>
                 <DropdownMenuItem 
-                    onClick={() => row.original?.user?.id && navigate(`/portfolio/${row.original.user.id}`)}
+                    onClick={() => (row.original?.student as any)?.id && navigate(`/portfolio/${(row.original.student as any).id}`)}
                     className="rounded-xl gap-3 py-3 cursor-pointer"
                 >
                   <div className="p-2 rounded-lg bg-primary/10 text-primary">
                     <UserCircle className="h-4 w-4" />
                   </div>
-                  <span className="font-bold">{t("buttons.portfolio" as any)}</span>
+                  <span className="font-bold">{t("buttons.portfolio")}</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem 
-                    onClick={() => row.original?.user?.id && show("users", row.original.user.id)}
+                    onClick={() => (row.original?.student as any)?.id && show("users", (row.original.student as any).id)}
                     className="rounded-xl gap-3 py-3 cursor-pointer"
                 >
                   <div className="p-2 rounded-lg bg-primary/10 text-primary">
                     <TrendingUp className="h-4 w-4" />
                   </div>
-                  <span className="font-bold">{t("buttons.viewProfile" as any)}</span>
+                  <span className="font-bold">{t("buttons.viewProfile")}</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -178,7 +181,7 @@ const ProgressListPage = () => {
   const {
     refineCore: { tableQuery: query },
     reactTable
-  } = useTable<any, HttpError>({
+  } = useTable<Enrollment, HttpError>({
     refineCoreProps: {
       resource: "enrollments", 
       pagination: { pageSize: 50, mode: "server" },
@@ -210,17 +213,17 @@ const ProgressListPage = () => {
                 <div className="p-3 rounded-2xl bg-primary/10 text-primary border border-primary/5 shadow-sm">
                   <TrendingUp className="h-6 w-6 md:h-8 md:w-8" />
                 </div>
-                {t("progressPage.title" as any)}
+                {t("progressPage.title")}
               </h1>
               <p className="text-muted-foreground font-medium max-w-2xl text-balance">
-                {t("progressPage.description" as any)}
+                {t("progressPage.description")}
               </p>
             </div>
           </div>
           <div className="w-full md:w-auto">
             <Button variant="outline" size="lg" className="w-full md:w-auto rounded-2xl h-12 md:h-14 px-8 border-primary/20 bg-primary/5 hover:bg-primary/10 text-primary font-bold uppercase tracking-widest text-[10px] shadow-sm gap-2">
               <Award className="h-4 w-4" />
-              {t("buttons.topPerformers" as any)}
+              {t("buttons.topPerformers")}
             </Button>
           </div>
         </motion.div>
@@ -229,11 +232,11 @@ const ProgressListPage = () => {
         <Card className="p-2 border-border/40 bg-muted/20 rounded-[1.75rem] md:rounded-3xl backdrop-blur-md sticky top-20 z-30 shadow-sm">
           <div className="flex flex-col lg:flex-row gap-2">
             <div className="relative flex-1 group">
-              <Search className={cn("absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60 group-focus-within:text-primary transition-colors", isAr ? "right-4" : "left-4")} />
+              <Search className={cn("absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60 group-focus-within:text-primary transition-colors", "start-4")} />
               <Input
                 type="text"
-                placeholder={t("progressPage.searchPlaceholder" as any)}
-                className={cn("h-12 rounded-2xl border-none bg-background/50 shadow-none font-medium", isAr ? "pr-11 pl-4" : "pl-11 pr-4")}
+                placeholder={t("progressPage.searchPlaceholder")}
+                className={cn("h-12 rounded-2xl border-none bg-background/50 shadow-none font-medium", "ps-11 pe-4")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -245,7 +248,7 @@ const ProgressListPage = () => {
         <div className="relative min-h-100">
           {isLoading ? (
             <div className="space-y-4">
-              {Array.from({ length: 5 }).map((_, i: any) => (
+              {Array.from({ length: 5 }).map((_, i: number) => (
                 <Card key={i} className="p-6 flex items-center gap-6 border-border/20 bg-background/50">
                   <Skeleton className="h-12 w-12 rounded-2xl shrink-0" />
                   <div className="flex-1 space-y-3">
@@ -269,9 +272,9 @@ const ProgressListPage = () => {
             <div className="rounded-3xl md:rounded-[2.5rem] border border-border/40 overflow-hidden bg-card/50 backdrop-blur-3xl shadow-2xl shadow-black/5">
               <Table>
                 <TableHeader>
-                  {reactTable.getHeaderGroups().map((headerGroup: any) => (
+                  {reactTable.getHeaderGroups().map((headerGroup: HeaderGroup<Enrollment>) => (
                     <TableRow key={headerGroup.id} className="hover:bg-transparent border-border/40">
-                      {headerGroup.headers.map((header: any) => (
+                      {headerGroup.headers.map((header: Header<Enrollment, unknown>) => (
                         <TableHead key={header.id} className="h-14 px-6 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50">
                           {header.isPlaceholder
                             ? null
@@ -286,7 +289,7 @@ const ProgressListPage = () => {
                 </TableHeader>
                 <TableBody>
                   <AnimatePresence mode="popLayout">
-                    {reactTable.getRowModel().rows.map((row: any, index: number) => (
+                    {reactTable.getRowModel().rows.map((row: Row<Enrollment>, index: number) => (
                       <motion.tr
                         key={row.id}
                         initial={{ opacity: 0, y: 10 }}
@@ -294,12 +297,12 @@ const ProgressListPage = () => {
                         transition={{ delay: index * 0.03 }}
                         className="group transition-all hover:bg-primary/2 border-border/40 cursor-pointer"
                         onClick={() => {
-                            if (row.original?.user?.id) {
-                                navigate(`/portfolio/${row.original.user.id}`);
+                            if ((row.original?.student as any)?.id) {
+                                navigate(`/portfolio/${(row.original.student as any).id}`);
                             }
                         }}
                       >
-                        {row.getVisibleCells().map((cell: any) => (
+                        {row.getVisibleCells().map((cell: Cell<Enrollment, unknown>) => (
                           <TableCell key={cell.id} className="px-6 py-4">
                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
                           </TableCell>
