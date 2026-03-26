@@ -39,6 +39,9 @@ function App() {
       // 🛡️ Upstream Guard: If a dynamic key was constructed with 'undefined',
       // try to fallback to a 'general' equivalent only if it's a nested key.
       if (key.includes("undefined") && key.includes(".")) {
+        if (import.meta.env.DEV) {
+          console.warn(`[i18n] Malformed translation key detected: "${key}". Falling back to 'general'.`);
+        }
         const fallbackKey = key.replace("undefined", "general");
         const translatedFallback = t(fallbackKey, {
           ...params,

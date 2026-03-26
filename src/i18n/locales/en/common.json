@@ -215,6 +215,8 @@
     "copyInsight": "Copy Insight",
     "insightCopied": "Insight copied to clipboard",
     "sendToStudent": "Send to Student",
+    "copied": "Copied",
+    "sent": "Sent",
     "strengths": "Strengths",
     "weaknesses": "Areas for Improvement",
     "improvementPlan": "Personalized Action Plan",

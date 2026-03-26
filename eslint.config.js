@@ -33,5 +33,16 @@ export default tseslint.config(
       ],
       "@typescript-eslint/no-empty-object-type": "warn",
     },
+  },
+  {
+    files: [
+      "src/hooks/use-ai-*.ts",
+      "src/hooks/use-assignment-generation.ts",
+      "src/hooks/use-quiz-generation.ts",
+      "src/features/ai/**/*.{ts,tsx}",
+    ],
+    rules: {
+      "@typescript-eslint/no-explicit-any": "error",
+    },
   }
 );

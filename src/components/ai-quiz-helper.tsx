@@ -23,7 +23,7 @@ export const AIQuizHelper: React.FC<AIQuizHelperProps> = ({ onUseQuestions }) =>
     isLoading,
   } = useQuizGeneration(5);
 
-  const isAiEnabled = coreData?.globalConfig?.enableAiFeatures !== false;
+  const isAiEnabled = !!coreData?.globalConfig && coreData.globalConfig.enableAiFeatures === true;
 
   // 🛡️ PARENT GATING: AI interactive features are disabled for Parents
   if (isParent) return null;

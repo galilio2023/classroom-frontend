@@ -85,7 +85,7 @@ export const AIStudyBuddy = ({
     return null;
   }
 
-  const isAiEnabled = coreData?.globalConfig?.enableAiFeatures !== false;
+  const isAiEnabled = !!coreData?.globalConfig && coreData.globalConfig.enableAiFeatures === true;
 
   if (!isAiEnabled) {
     if (!isOpen)

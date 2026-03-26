@@ -73,7 +73,7 @@ export const MagicBuilderDialog = ({
   const [progress, setProgress] = useState(0);
   const [step, setStep] = useState("");
 
-  const isAiEnabled = coreData?.globalConfig?.enableAiFeatures !== false;
+  const isAiEnabled = !!coreData?.globalConfig && coreData.globalConfig.enableAiFeatures === true;
 
   useEffect(() => {
     if (isGenerating && isOpen && isAiEnabled) {

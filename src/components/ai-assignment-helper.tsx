@@ -29,7 +29,7 @@ export const AIAssignmentHelper: React.FC<AIAssignmentHelperProps> = ({ onUseCon
     isLoading,
   } = useAssignmentGeneration();
 
-  const isAiEnabled = coreData?.globalConfig?.enableAiFeatures !== false;
+  const isAiEnabled = !!coreData?.globalConfig && coreData.globalConfig.enableAiFeatures === true;
 
   // 🛡️ PARENT GATING: AI interactive features are disabled for Parents
   if (isParent) return null;

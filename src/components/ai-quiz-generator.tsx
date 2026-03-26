@@ -33,7 +33,7 @@ export const AIQuizGenerator: React.FC<AIQuizGeneratorProps> = ({ classId }) => 
   const { mutate: createAssignment, mutation: createMutation } = useCreate();
   const isSaving = createMutation.isPending;
 
-  const isAiEnabled = coreData?.globalConfig?.enableAiFeatures !== false;
+  const isAiEnabled = !!coreData?.globalConfig && coreData.globalConfig.enableAiFeatures === true;
 
   // 🛡️ PARENT GATING: AI interactive features are disabled for Parents
   if (isParent) return null;
