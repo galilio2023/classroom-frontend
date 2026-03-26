@@ -69,7 +69,7 @@ const NotificationsListPage = () => {
   const { t, i18n } = useTranslation();
   usePageTitle(t("notifications.title"));
   const { data: identity } = useGetIdentity<User>();
-  const isAr = i18n.language === 'ar';
+  const isAr = i18n.language === "ar";
 
   const [searchQuery, setSearchQuery] = useState("");
   const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
@@ -172,7 +172,8 @@ const NotificationsListPage = () => {
                 {t("notifications.title")}
               </h1>
               <p className="text-muted-foreground font-medium max-w-2xl text-balance">
-                Stay updated with class activities, academic performance, and system alerts.
+                Stay updated with class activities, academic performance, and
+                system alerts.
               </p>
             </div>
           </div>
@@ -267,7 +268,10 @@ const NotificationsListPage = () => {
           {isLoading ? (
             <div className="space-y-4">
               {Array.from({ length: 6 }).map((_, i: any) => (
-                <Card key={i} className="p-6 flex items-center gap-6 border-border/20 bg-background/50">
+                <Card
+                  key={i}
+                  className="p-6 flex items-center gap-6 border-border/20 bg-background/50"
+                >
                   <Skeleton className="h-14 w-14 rounded-2xl shrink-0" />
                   <div className="flex-1 space-y-3">
                     <Skeleton className="h-6 w-[250px] max-w-full" />
@@ -308,7 +312,7 @@ const NotificationsListPage = () => {
                     >
                       {/* Read/Unread Accent */}
                       {!notification.isRead && (
-                          <div className="absolute start-0 top-1/2 -translate-y-1/2 w-1.5 h-12 bg-primary rounded-e-full" />
+                        <div className="absolute start-0 top-1/2 -translate-y-1/2 w-1.5 h-12 bg-primary rounded-e-full" />
                       )}
 
                       {/* Icon */}
@@ -329,7 +333,14 @@ const NotificationsListPage = () => {
                       </div>
 
                       {/* Info Area */}
-                      <div className={cn("flex-1 text-center min-w-0 w-full", isAr ? "md:me-8 md:text-end" : "md:ms-8 md:text-start")}>
+                      <div
+                        className={cn(
+                          "flex-1 text-center min-w-0 w-full",
+                          isAr
+                            ? "md:me-8 md:text-end"
+                            : "md:ms-8 md:text-start",
+                        )}
+                      >
                         <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 mb-2">
                           <h3
                             className={cn(
@@ -343,7 +354,11 @@ const NotificationsListPage = () => {
                           </h3>
                           <div className="flex items-center justify-center md:justify-start gap-2">
                             <Badge
-                              variant={notification.type === 'agent_alert' ? 'ai' : 'outline'}
+                              variant={
+                                notification.type === "agent_alert"
+                                  ? "ai"
+                                  : "outline"
+                              }
                               className="text-[9px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full"
                             >
                               {notification.type}
@@ -366,7 +381,9 @@ const NotificationsListPage = () => {
                           <div className="flex items-center gap-2 bg-background/40 px-3 py-1 rounded-full border border-border/20">
                             <Calendar className="h-3.5 w-3.5 text-primary/60" />
                             <span className="text-[10px] font-black uppercase tracking-wider text-muted-foreground/60">
-                              {createdAt.locale(i18n.language).format("MMM D, YYYY")}
+                              {createdAt
+                                .locale(i18n.language)
+                                .format("MMM D, YYYY")}
                             </span>
                           </div>
 
@@ -381,7 +398,14 @@ const NotificationsListPage = () => {
 
                       {/* Action Area */}
                       <div className="flex items-center gap-3 mt-6 md:mt-0 shrink-0">
-                        <div className={cn("hidden lg:flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300", isAr ? "-translate-x-4 group-hover:translate-x-0" : "translate-x-4 group-hover:translate-x-0")}>
+                        <div
+                          className={cn(
+                            "hidden lg:flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300",
+                            isAr
+                              ? "-translate-x-4 group-hover:translate-x-0"
+                              : "translate-x-4 group-hover:translate-x-0",
+                          )}
+                        >
                           {!notification.isRead && (
                             <Button
                               variant="ghost"
@@ -404,23 +428,30 @@ const NotificationsListPage = () => {
 
                         {notification.link ? (
                           <Button
-                            variant={!notification.isRead ? "default" : "outline"}
+                            variant={
+                              !notification.isRead ? "default" : "outline"
+                            }
                             size="lg"
                             className={cn(
                               "rounded-2xl px-8 h-12 font-black uppercase tracking-widest text-[10px] transition-all",
-                              !notification.isRead 
-                                ? "shadow-lg shadow-primary/20" 
-                                : "border-primary/20 text-primary hover:bg-primary/5"
+                              !notification.isRead
+                                ? "shadow-lg shadow-primary/20"
+                                : "border-primary/20 text-primary hover:bg-primary/5",
                             )}
                             asChild
                           >
                             <a href={notification.link}>
                               {t("buttons.viewDetails")}
-                              <ArrowRight className={cn("h-4 w-4", isAr ? "me-2 rotate-180" : "ms-2")} />
+                              <ArrowRight
+                                className={cn(
+                                  "h-4 w-4",
+                                  isAr ? "me-2 rotate-180" : "ms-2",
+                                )}
+                              />
                             </a>
                           </Button>
                         ) : (
-                             <div className="hidden lg:block w-36"></div> // Spacer to keep actions aligned
+                          <div className="hidden lg:block w-36"></div> // Spacer to keep actions aligned
                         )}
 
                         <DropdownMenu>
@@ -433,29 +464,38 @@ const NotificationsListPage = () => {
                               <MoreHorizontal className="h-5 w-5" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-64 p-2 rounded-3xl bg-white dark:bg-[#09090b] opacity-100 backdrop-blur-none border border-border/50 shadow-2xl">
+                          <DropdownMenuContent
+                            align="end"
+                            className="w-64 p-2 rounded-3xl bg-white dark:bg-[#09090b] opacity-100 backdrop-blur-none border border-border/50 shadow-2xl"
+                          >
                             <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40 px-3 py-3">
                               {t("notifications.actions.options")}
                             </DropdownMenuLabel>
                             {!notification.isRead && (
                               <DropdownMenuItem
-                                onClick={() => handleMarkAsRead(notification.id)}
+                                onClick={() =>
+                                  handleMarkAsRead(notification.id)
+                                }
                                 className="rounded-xl gap-3 py-3 cursor-pointer"
                               >
                                 <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-600">
-                                    <MailOpen className="h-4 w-4" />
+                                  <MailOpen className="h-4 w-4" />
                                 </div>
-                                <span className="font-bold">{t("notifications.actions.markRead")}</span>
+                                <span className="font-bold">
+                                  {t("notifications.actions.markRead")}
+                                </span>
                               </DropdownMenuItem>
                             )}
                             <DropdownMenuItem
                               onClick={() => setDeleteTarget(notification.id)}
                               className="rounded-xl gap-3 py-3 cursor-pointer text-destructive focus:bg-destructive/10"
                             >
-                                <div className="p-2 rounded-lg bg-destructive/10 text-destructive">
-                                    <Trash2 className="h-4 w-4" />
-                                </div>
-                                <span className="font-bold">{t("notifications.actions.deleteAlert")}</span>
+                              <div className="p-2 rounded-lg bg-destructive/10 text-destructive">
+                                <Trash2 className="h-4 w-4" />
+                              </div>
+                              <span className="font-bold">
+                                {t("notifications.actions.deleteAlert")}
+                              </span>
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>

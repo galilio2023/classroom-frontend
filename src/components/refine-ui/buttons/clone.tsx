@@ -36,7 +36,7 @@ export const CloneButton = React.forwardRef<
 >(
   (
     { resource, recordItemId, accessControl, meta, children, onClick, ...rest },
-    ref
+    ref,
   ) => {
     const { hidden, disabled, LinkComponent, to, label } = useCloneButton({
       accessControl,
@@ -75,7 +75,7 @@ export const CloneButton = React.forwardRef<
         </LinkComponent>
       </Button>
     );
-  }
+  },
 );
 
 CloneButton.displayName = "CloneButton";

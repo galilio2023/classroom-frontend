@@ -4,24 +4,31 @@ import { useSearchParams } from "react-router-dom";
 export const useClassTabs = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const tabMapping: { [key: string]: { primary: string; sub: string } } = useMemo(() => ({
-    curriculum: { primary: "content", sub: "curriculum" },
-    resources: { primary: "content", sub: "resources" },
-    assignments: { primary: "assessments", sub: "assignments" },
-    quizzes: { primary: "assessments", sub: "quizzes" },
-    announcements: { primary: "engagement", sub: "announcements" },
-    discussions: { primary: "engagement", sub: "discussions" },
-    live: { primary: "engagement", sub: "live" },
-    students: { primary: "roster", sub: "students" },
-    attendance: { primary: "roster", sub: "attendance" },
-    analytics: { primary: "progress", sub: "analytics" },
-    leaderboard: { primary: "progress", sub: "leaderboard" },
-    details: { primary: "info", sub: "details" },
-  }), []);
+  const tabMapping: { [key: string]: { primary: string; sub: string } } =
+    useMemo(
+      () => ({
+        curriculum: { primary: "content", sub: "curriculum" },
+        resources: { primary: "content", sub: "resources" },
+        assignments: { primary: "assessments", sub: "assignments" },
+        quizzes: { primary: "assessments", sub: "quizzes" },
+        announcements: { primary: "engagement", sub: "announcements" },
+        discussions: { primary: "engagement", sub: "discussions" },
+        live: { primary: "engagement", sub: "live" },
+        students: { primary: "roster", sub: "students" },
+        attendance: { primary: "roster", sub: "attendance" },
+        analytics: { primary: "progress", sub: "analytics" },
+        leaderboard: { primary: "progress", sub: "leaderboard" },
+        details: { primary: "info", sub: "details" },
+      }),
+      [],
+    );
 
   const activePrimaryTab = useMemo(() => {
     const tabParam = searchParams.get("tab");
-    if (tabParam && Object.values(tabMapping).some(m => m.primary === tabParam)) {
+    if (
+      tabParam &&
+      Object.values(tabMapping).some((m) => m.primary === tabParam)
+    ) {
       return tabParam;
     } else if (tabParam && tabMapping[tabParam]) {
       return tabMapping[tabParam].primary;
@@ -40,13 +47,20 @@ export const useClassTabs = () => {
     }
 
     switch (activePrimaryTab) {
-      case "content": return "curriculum";
-      case "assessments": return "assignments";
-      case "engagement": return "announcements";
-      case "roster": return "students";
-      case "progress": return "analytics";
-      case "info": return "details";
-      default: return "";
+      case "content":
+        return "curriculum";
+      case "assessments":
+        return "assignments";
+      case "engagement":
+        return "announcements";
+      case "roster":
+        return "students";
+      case "progress":
+        return "analytics";
+      case "info":
+        return "details";
+      default:
+        return "";
     }
   }, [searchParams, activePrimaryTab, tabMapping]);
 
@@ -65,35 +79,52 @@ export const useClassTabs = () => {
           newParams.set("subtab", newSubTab);
           return newParams;
         },
-        { replace: true }
+        { replace: true },
       );
     }
   }, [searchParams, setSearchParams, tabMapping]);
 
-  const handlePrimaryTabChange = useCallback((value: string) => {
-    setSearchParams(
-      (prev) => {
-        const newParams = new URLSearchParams(prev);
-        newParams.set("tab", value);
-        switch (value) {
-          case "content": newParams.set("subtab", "curriculum"); break;
-          case "assessments": newParams.set("subtab", "assignments"); break;
-          case "engagement": newParams.set("subtab", "announcements"); break;
-          case "roster": newParams.set("subtab", "students"); break;
-          case "progress": newParams.set("subtab", "analytics"); break;
-          case "info": newParams.set("subtab", "details"); break;
-          default: newParams.delete("subtab"); break;
-        }
-        return newParams;
-      },
-      { replace: true }
-    );
-  }, [setSearchParams]);
+  const handlePrimaryTabChange = useCallback(
+    (value: string) => {
+      setSearchParams(
+        (prev) => {
+          const newParams = new URLSearchParams(prev);
+          newParams.set("tab", value);
+          switch (value) {
+            case "content":
+              newParams.set("subtab", "curriculum");
+              break;
+            case "assessments":
+              newParams.set("subtab", "assignments");
+              break;
+            case "engagement":
+              newParams.set("subtab", "announcements");
+              break;
+            case "roster":
+              newParams.set("subtab", "students");
+              break;
+            case "progress":
+              newParams.set("subtab", "analytics");
+              break;
+            case "info":
+              newParams.set("subtab", "details");
+              break;
+            default:
+              newParams.delete("subtab");
+              break;
+          }
+          return newParams;
+        },
+        { replace: true },
+      );
+    },
+    [setSearchParams],
+  );
 
   return {
     activePrimaryTab,
     activeSubTab,
     handlePrimaryTabChange,
-    setSearchParams
+    setSearchParams,
   };
 };

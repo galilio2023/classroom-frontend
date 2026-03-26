@@ -21,11 +21,11 @@ export const authProvider: AuthProvider = {
     try {
       const sanitizedParams = sanitizePayload(params);
       console.log("Attempting registration for:", sanitizedParams.email);
-      
+
       const { error } = await authClient.signUp.email(
         sanitizedParams as unknown as SignUpPayload,
       );
-      
+
       if (error) {
         console.error("Registration error from Better Auth:", error);
         return {
@@ -36,7 +36,7 @@ export const authProvider: AuthProvider = {
           },
         };
       }
-      
+
       console.log("Registration successful for:", sanitizedParams.email);
       return { success: true, redirectTo: "/login" };
     } catch (err: unknown) {
@@ -46,7 +46,8 @@ export const authProvider: AuthProvider = {
         success: false,
         error: {
           name: "Registration Error",
-          message: error.message || "Network error. Please check your connection.",
+          message:
+            error.message || "Network error. Please check your connection.",
         },
       };
     }
@@ -67,16 +68,19 @@ export const authProvider: AuthProvider = {
           },
         };
       }
-      
+
       if (data?.user) {
         const user = data.user as unknown as User;
         const userWithVerified = {
-            ...user,
-            isVerified: user.verificationStatus === "verified" || user.role === "admin" || user.role === "student"
+          ...user,
+          isVerified:
+            user.verificationStatus === "verified" ||
+            user.role === "admin" ||
+            user.role === "student",
         };
         localStorage.setItem("user", JSON.stringify(userWithVerified));
       }
-      
+
       // Fixed: Redirect to dashboard instead of landing page
       return { success: true, redirectTo: "/dashboard" };
     } catch (err: unknown) {
@@ -85,7 +89,8 @@ export const authProvider: AuthProvider = {
         success: false,
         error: {
           name: "Login Error",
-          message: error.message || "Network error. Please check your connection.",
+          message:
+            error.message || "Network error. Please check your connection.",
         },
       };
     }
@@ -107,32 +112,35 @@ export const authProvider: AuthProvider = {
   check: async () => {
     try {
       const { data: session, error } = await authClient.getSession();
-      
+
       if (error || !session?.user) {
         if (import.meta.env.DEV) {
           console.warn("Better-Auth session missing or failed:", error);
         }
-        
+
         // TEMPORARY DEV FALLBACK: Only trust local storage in development mode (npm run dev)
         // In production, this block is ignored to prevent UI-level spoofing.
         if (import.meta.env.DEV) {
           const localUser = localStorage.getItem("user");
           if (localUser) {
-             return { authenticated: true };
+            return { authenticated: true };
           }
         }
       }
-      
+
       if (session?.user) {
         const user = session.user as unknown as User;
         const userWithVerified = {
-            ...user,
-            isVerified: user.verificationStatus === "verified" || user.role === "admin" || user.role === "student"
+          ...user,
+          isVerified:
+            user.verificationStatus === "verified" ||
+            user.role === "admin" ||
+            user.role === "student",
         };
         localStorage.setItem("user", JSON.stringify(userWithVerified));
         return { authenticated: true };
       }
-      
+
       localStorage.removeItem("user");
       return {
         authenticated: false,
@@ -159,7 +167,9 @@ export const authProvider: AuthProvider = {
   getPermissions: async () => {
     // 🛡️ SECURITY: Prefer session over localStorage if possible
     const { data: session } = await authClient.getSession();
-    const role = (session?.user as unknown as User)?.role || JSON.parse(localStorage.getItem("user") || "{}")?.role;
+    const role =
+      (session?.user as unknown as User)?.role ||
+      JSON.parse(localStorage.getItem("user") || "{}")?.role;
     return { role };
   },
 
@@ -167,9 +177,9 @@ export const authProvider: AuthProvider = {
     // 🛡️ SECURITY: Fetch fresh session to prevent local spoofing
     const { data: session } = await authClient.getSession();
     if (session?.user) {
-        return session.user as unknown as User;
+      return session.user as unknown as User;
     }
-    
+
     const user = localStorage.getItem("user");
     if (!user) return null;
     try {

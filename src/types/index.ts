@@ -25,12 +25,11 @@ export interface AIMetadata {
 export interface AIResponse<T> {
   data: T;
   metadata?: AIMetadata;
-  usage?: AIMetadata['usage'];
+  usage?: AIMetadata["usage"];
   latencyMs?: number;
 }
 
 export type SignUpPayload = z.infer<typeof signUpFormSchema>;
-
 
 export enum UserRole {
   ADMIN = "admin",
@@ -490,12 +489,12 @@ export interface AiLog {
   latencyMs: number;
   model: string;
   metadata: {
-      classId?: number;
-      conversationId?: number;
-      isAborted?: boolean;
-      errorName?: string;
-      errorCode?: string;
-      [key: string]: any;
+    classId?: number;
+    conversationId?: number;
+    isAborted?: boolean;
+    errorName?: string;
+    errorCode?: string;
+    [key: string]: any;
   };
   createdAt: string;
   user?: User;

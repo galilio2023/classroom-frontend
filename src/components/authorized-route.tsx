@@ -39,19 +39,17 @@ export const AuthorizedRoute = ({
   }
 
   if (data?.can) {
-    return (
-      <div className="flex flex-1 flex-col w-full h-full">
-        {children}
-      </div>
-    );
+    return <div className="flex flex-1 flex-col w-full h-full">{children}</div>;
   }
 
   return (
-    <Suspense fallback={
-      <div className="flex flex-1 items-center justify-center w-full h-full min-h-[400px]">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="flex flex-1 items-center justify-center w-full h-full min-h-[400px]">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      }
+    >
       <UnauthorizedPage reason={data?.reason} />
     </Suspense>
   );

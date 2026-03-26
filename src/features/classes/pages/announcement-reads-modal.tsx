@@ -79,9 +79,7 @@ export const AnnouncementReadsModal = ({
                     <div className="flex items-center gap-3">
                       <Avatar className="h-8 w-8">
                         <AvatarImage src={read.student.image ?? ""} />
-                        <AvatarFallback>
-                          {read.student.name[0]}
-                        </AvatarFallback>
+                        <AvatarFallback>{read.student.name[0]}</AvatarFallback>
                       </Avatar>
                       <div className="flex flex-col">
                         <span className="text-sm font-medium">

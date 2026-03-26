@@ -52,13 +52,13 @@ const TeacherSubscriptionsList = () => {
   const students = useMemo(() => {
     const enrollments = query.data?.data || [];
     const studentMap = new Map<string, User>();
-    
-    enrollments.forEach(enrollment => {
-        if (enrollment.student) {
-            studentMap.set(enrollment.student.id, enrollment.student);
-        }
+
+    enrollments.forEach((enrollment) => {
+      if (enrollment.student) {
+        studentMap.set(enrollment.student.id, enrollment.student);
+      }
     });
-    
+
     return Array.from(studentMap.values());
   }, [query.data]);
 
@@ -111,76 +111,67 @@ const TeacherSubscriptionsList = () => {
               <EmptyState
                 icon={Layers}
                 title={t("teacherSubscriptions.empty.title")}
-                description={t(
-                  "teacherSubscriptions.empty.description",
-                )}
+                description={t("teacherSubscriptions.empty.description")}
                 className="border-none bg-transparent min-h-0"
               />
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-              {students.map(
-                (student: User, index: number) => (
-                  <motion.div
-                    key={student.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                    className="group relative flex flex-col p-6 rounded-4xl bg-card/50 backdrop-blur-sm border border-border/40 hover:border-primary/30 hover:bg-card/80 transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-primary/5"
-                  >
-                    <div className="flex items-center gap-4 mb-6">
-                      <Avatar className="h-16 w-16 rounded-2xl border-4 border-background shadow-lg group-hover:scale-105 transition-transform duration-500">
-                        <AvatarImage
-                          src={student.image ?? undefined}
-                          alt={student.name}
-                        />
-                        <AvatarFallback className="bg-primary/10 text-primary font-black text-xl">
-                          {student.name
-                            .substring(0, 2)
-                            .toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="text-xl font-black tracking-tight truncate group-hover:text-primary transition-colors leading-tight">
-                          {student.name}
-                        </h3>
-                        <p className="text-sm text-muted-foreground truncate">
-                          {student.email}
-                        </p>
-                      </div>
+              {students.map((student: User, index: number) => (
+                <motion.div
+                  key={student.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                  className="group relative flex flex-col p-6 rounded-4xl bg-card/50 backdrop-blur-sm border border-border/40 hover:border-primary/30 hover:bg-card/80 transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-primary/5"
+                >
+                  <div className="flex items-center gap-4 mb-6">
+                    <Avatar className="h-16 w-16 rounded-2xl border-4 border-background shadow-lg group-hover:scale-105 transition-transform duration-500">
+                      <AvatarImage
+                        src={student.image ?? undefined}
+                        alt={student.name}
+                      />
+                      <AvatarFallback className="bg-primary/10 text-primary font-black text-xl">
+                        {student.name.substring(0, 2).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-xl font-black tracking-tight truncate group-hover:text-primary transition-colors leading-tight">
+                        {student.name}
+                      </h3>
+                      <p className="text-sm text-muted-foreground truncate">
+                        {student.email}
+                      </p>
                     </div>
+                  </div>
 
-                    <div className="flex items-center gap-3 pt-4 border-t border-border/40 w-full mt-auto">
-                      <Button
-                        asChild
-                        size="lg"
-                        variant="outline"
-                        className="flex-1 rounded-2xl h-12 font-black uppercase tracking-widest text-[10px] transition-all border-primary/20 hover:bg-primary/5 text-primary"
-                      >
-                        <a href={`mailto:${student.email}`}>
-                          <MessageSquare className="h-4 w-4 me-2" />
-                          {t("buttons.sendMessage")}
-                        </a>
-                      </Button>
-                      <Button
-                        asChild
-                        size="lg"
-                        className="flex-1 rounded-2xl h-12 font-black uppercase tracking-widest text-[10px] shadow-xl shadow-primary/20"
-                      >
-                        <a
-                          href="#"
-                          onClick={() => show("users", student.id)}
-                        >
-                          {t("buttons.viewProfile")}
-                          <Eye
-                            className={cn("h-4 w-4 ms-2", isAr && "me-2 ms-0")}
-                          />
-                        </a>
-                      </Button>
-                    </div>
-                  </motion.div>
-                ),
-              )}
+                  <div className="flex items-center gap-3 pt-4 border-t border-border/40 w-full mt-auto">
+                    <Button
+                      asChild
+                      size="lg"
+                      variant="outline"
+                      className="flex-1 rounded-2xl h-12 font-black uppercase tracking-widest text-[10px] transition-all border-primary/20 hover:bg-primary/5 text-primary"
+                    >
+                      <a href={`mailto:${student.email}`}>
+                        <MessageSquare className="h-4 w-4 me-2" />
+                        {t("buttons.sendMessage")}
+                      </a>
+                    </Button>
+                    <Button
+                      asChild
+                      size="lg"
+                      className="flex-1 rounded-2xl h-12 font-black uppercase tracking-widest text-[10px] shadow-xl shadow-primary/20"
+                    >
+                      <a href="#" onClick={() => show("users", student.id)}>
+                        {t("buttons.viewProfile")}
+                        <Eye
+                          className={cn("h-4 w-4 ms-2", isAr && "me-2 ms-0")}
+                        />
+                      </a>
+                    </Button>
+                  </div>
+                </motion.div>
+              ))}
             </div>
           )}
         </div>

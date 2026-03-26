@@ -66,8 +66,8 @@ const TeacherChannelPage = () => {
     method: "get",
     queryOptions: {
       enabled: !!identity?.id,
-      retry: false
-    }
+      retry: false,
+    },
   });
 
   const channelData = query.data;

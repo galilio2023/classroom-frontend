@@ -18,14 +18,40 @@ export const accessControlProvider: AccessControlProvider = {
     // 1. ADMISSION: Admins have specific access
     if (role === UserRole.ADMIN) {
       const adminAllowedResources = [
-        "dashboard", "departments", "users", "activity-log", "settings",
-        "profile-requests", "ai-study-lab", "study-planner", "ai-assistant", "ai-activity-logs", "ai-health-reports",
+        "dashboard",
+        "departments",
+        "users",
+        "activity-log",
+        "settings",
+        "profile-requests",
+        "ai-study-lab",
+        "study-planner",
+        "ai-assistant",
+        "ai-activity-logs",
+        "ai-health-reports",
       ];
       const academicResources = [
-        "classes", "assignments", "quizzes", "modules", "resources", "academic-terms",
-        "subjects", "attendance", "submissions", "enrollments", "announcements",
-        "teacher-applications", "discussions", "calendar",
-        "notifications", "progress", "report-card", "portfolio", "messages", "my-teachers", "channels"
+        "classes",
+        "assignments",
+        "quizzes",
+        "modules",
+        "resources",
+        "academic-terms",
+        "subjects",
+        "attendance",
+        "submissions",
+        "enrollments",
+        "announcements",
+        "teacher-applications",
+        "discussions",
+        "calendar",
+        "notifications",
+        "progress",
+        "report-card",
+        "portfolio",
+        "messages",
+        "my-teachers",
+        "channels",
       ];
 
       if (adminAllowedResources.includes(resourceName)) {
@@ -34,7 +60,7 @@ export const accessControlProvider: AccessControlProvider = {
       }
 
       if (academicResources.includes(resourceName)) {
-        // 🏛️ REGISTRAR AUTHORITY: Admins can manage the infrastructure 
+        // 🏛️ REGISTRAR AUTHORITY: Admins can manage the infrastructure
         // (Create classes, assign teachers, manage enrollment)
         return { can: true };
       }
@@ -49,10 +75,10 @@ export const accessControlProvider: AccessControlProvider = {
       if (resourceName === "classes") {
         // Teachers can create classes
         if (action === "create") return { can: true };
-        
+
         // Teachers can list and show all classes
         if (["list", "show"].includes(action)) return { can: true };
-        
+
         // Ownership check for sensitive actions
         if (["edit", "delete"].includes(action)) {
           // If we have the record, check if this teacher is the owner
@@ -68,12 +94,20 @@ export const accessControlProvider: AccessControlProvider = {
       // Teachers can view individual profiles but cannot access global users list
       if (resourceName === "users") {
         if (["show"].includes(action)) return { can: true };
-        if (action === "edit" && params?.id === identity?.id) return { can: true };
-        return { can: false, reason: "Teachers cannot access the global users directory or edit other user profiles." };
+        if (action === "edit" && params?.id === identity?.id)
+          return { can: true };
+        return {
+          can: false,
+          reason:
+            "Teachers cannot access the global users directory or edit other user profiles.",
+        };
       }
 
       // Teachers can view their subscribers (new resource/action)
-      if (resourceName === "teacher-subscriptions" && ["list", "show"].includes(action)) {
+      if (
+        resourceName === "teacher-subscriptions" &&
+        ["list", "show"].includes(action)
+      ) {
         return { can: true };
       }
 
@@ -84,22 +118,45 @@ export const accessControlProvider: AccessControlProvider = {
 
       // Sidebar & Core Resources (removed "users" to enforce isolation)
       const allowedResources = [
-        "dashboard", "ai-assistant", "discussions", "calendar", "subjects",
-        "attendance", "submissions", "quizzes", "resources", "classes",
-        "modules", "notifications", "progress", "enrollments",
-        "classes/enrollments", "announcements", "messages",
-        "teacher-channel", "teacher-subscriptions", "academic-terms" // Added academic-terms
+        "dashboard",
+        "ai-assistant",
+        "discussions",
+        "calendar",
+        "subjects",
+        "attendance",
+        "submissions",
+        "quizzes",
+        "resources",
+        "classes",
+        "modules",
+        "notifications",
+        "progress",
+        "enrollments",
+        "classes/enrollments",
+        "announcements",
+        "messages",
+        "teacher-channel",
+        "teacher-subscriptions",
+        "academic-terms", // Added academic-terms
       ];
 
       if (allowedResources.includes(resourceName)) {
         // Teachers can't delete subjects
-        if (resourceName === "subjects" && action === "delete") return { can: false };
+        if (resourceName === "subjects" && action === "delete")
+          return { can: false };
 
         return { can: true };
       }
 
       // Forbidden for Teachers
-      const forbidden = ["departments", "profile-requests", "ai-study-lab", "study-planner", "activity-log", "settings"]; // Removed academic-terms
+      const forbidden = [
+        "departments",
+        "profile-requests",
+        "ai-study-lab",
+        "study-planner",
+        "activity-log",
+        "settings",
+      ]; // Removed academic-terms
       if (forbidden.includes(resourceName)) return { can: false };
 
       return { can: false, reason: "Access denied for this resource." };
@@ -108,30 +165,102 @@ export const accessControlProvider: AccessControlProvider = {
     // 3. STUDENT PERMISSIONS
     if (role === UserRole.STUDENT) {
       const studentAllowed = [
-        "dashboard", "subjects", "classes", "assignments", "discussions", "calendar",
-        "attendance", "submissions", "quizzes", "resources",
-        "modules", "ai-study-lab", "study-planner", "notifications", "progress",
-        "report-card", "portfolio", "messages", "users",
-        "teacher-subscriptions", "my-teachers", "teacher-channels", "project-groups", "library", "enrollments", "ai-activity-logs"
+        "dashboard",
+        "subjects",
+        "classes",
+        "assignments",
+        "discussions",
+        "calendar",
+        "attendance",
+        "submissions",
+        "quizzes",
+        "resources",
+        "modules",
+        "ai-study-lab",
+        "study-planner",
+        "notifications",
+        "progress",
+        "report-card",
+        "portfolio",
+        "messages",
+        "users",
+        "teacher-subscriptions",
+        "my-teachers",
+        "teacher-channels",
+        "project-groups",
+        "library",
+        "enrollments",
+        "ai-activity-logs",
+        "ai_features",
       ];
 
       if (!studentAllowed.includes(resourceName)) return { can: false };
+
+      // AI Features Gating: Students can interact
+      if (resourceName === "ai_features") return { can: true };
 
       // Read-only for most things
       if (["list", "show"].includes(action)) return { can: true };
 
       // Specific Write Actions for Students
-      if (resourceName === "submissions" && action === "create") return { can: true };
-      if (resourceName === "messages" && action === "create") return { can: true };
-      if (resourceName === "discussions" && action === "create") return { can: true };
+      if (resourceName === "submissions" && action === "create")
+        return { can: true };
+      if (resourceName === "messages" && action === "create")
+        return { can: true };
+      if (resourceName === "discussions" && action === "create")
+        return { can: true };
 
       // Students can enroll in classes
-      if (resourceName === "classes" && action === "enroll") return { can: true };
+      if (resourceName === "classes" && action === "enroll")
+        return { can: true };
 
       // Profiles: Can only edit their own
-      if (resourceName === "users" && action === "edit" && params?.id === identity?.id) return { can: true };
+      if (
+        resourceName === "users" &&
+        action === "edit" &&
+        params?.id === identity?.id
+      )
+        return { can: true };
 
       return { can: false, reason: "Access denied." };
+    }
+
+    // 4. PARENT PERMISSIONS
+    if (role === UserRole.PARENT) {
+      const parentAllowed = [
+        "dashboard",
+        "classes",
+        "attendance",
+        "submissions",
+        "progress",
+        "report-card",
+        "calendar",
+        "notifications",
+        "messages",
+        "users",
+      ];
+
+      // 🛡️ PARENT GATING: AI interactive features are explicitly disabled
+      if (resourceName === "ai_features")
+        return {
+          can: false,
+          reason: "Parents are not permitted to use AI interactive tools.",
+        };
+
+      if (!parentAllowed.includes(resourceName)) return { can: false };
+
+      // Read-only for Parents
+      if (["list", "show"].includes(action)) return { can: true };
+
+      // Profiles: Can only edit their own
+      if (
+        resourceName === "users" &&
+        action === "edit" &&
+        params?.id === identity?.id
+      )
+        return { can: true };
+
+      return { can: false, reason: "Access denied for Parent role." };
     }
 
     return { can: false, reason: "Unauthorized." };

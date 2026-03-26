@@ -29,15 +29,22 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { BookOpen, Code2, FileText, Lightbulb, Info, UserCircle } from "lucide-react";
+import {
+  BookOpen,
+  Code2,
+  FileText,
+  Lightbulb,
+  Info,
+  UserCircle,
+} from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { departmentFormSchema } from "@/schemas/department";
 import { User, UserRole } from "@/types";
 
 const DepartmentsCreate = () => {
-  const { 
-    refineCore: { onFinish, formLoading }, 
-    ...form 
+  const {
+    refineCore: { onFinish, formLoading },
+    ...form
   } = useForm({
     resolver: zodResolver(departmentFormSchema),
     refineCoreProps: {
@@ -62,7 +69,7 @@ const DepartmentsCreate = () => {
   return (
     <div className="container mx-auto py-6 max-w-6xl">
       <CreateViewHeader />
-      
+
       <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left Column: The Main Form */}
         <div className="lg:col-span-2">
@@ -78,9 +85,9 @@ const DepartmentsCreate = () => {
                     Enter the core information for the new department.
                   </CardDescription>
                 </CardHeader>
-                
+
                 <Separator />
-                
+
                 <CardContent className="space-y-6 pt-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Code Field */}
@@ -94,7 +101,11 @@ const DepartmentsCreate = () => {
                             Department Code
                           </FormLabel>
                           <FormControl>
-                            <Input placeholder="e.g. CS" {...field} className="font-mono" />
+                            <Input
+                              placeholder="e.g. CS"
+                              {...field}
+                              className="font-mono"
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -112,7 +123,10 @@ const DepartmentsCreate = () => {
                             Department Name
                           </FormLabel>
                           <FormControl>
-                            <Input placeholder="e.g. Computer Science" {...field} />
+                            <Input
+                              placeholder="e.g. Computer Science"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -130,7 +144,10 @@ const DepartmentsCreate = () => {
                           <UserCircle className="h-4 w-4 text-muted-foreground" />
                           Head of Department
                         </FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value || undefined}>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value || undefined}
+                        >
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select a teacher to lead this department" />
@@ -138,7 +155,10 @@ const DepartmentsCreate = () => {
                           </FormControl>
                           <SelectContent className="bg-white dark:bg-[#09090b] opacity-100 backdrop-blur-none border border-border/50 shadow-2xl">
                             {teacherOptions.map((option) => (
-                              <SelectItem key={option.value} value={option.value.toString()}>
+                              <SelectItem
+                                key={option.value}
+                                value={option.value.toString()}
+                              >
                                 {option.label}
                               </SelectItem>
                             ))}
@@ -157,10 +177,10 @@ const DepartmentsCreate = () => {
                       <FormItem>
                         <FormLabel>Description</FormLabel>
                         <FormControl>
-                          <Textarea 
-                            placeholder="Brief description of the department..." 
-                            className="resize-none min-h-[120px]" 
-                            {...field} 
+                          <Textarea
+                            placeholder="Brief description of the department..."
+                            className="resize-none min-h-[120px]"
+                            {...field}
                             value={field.value || ""}
                           />
                         </FormControl>
@@ -169,12 +189,12 @@ const DepartmentsCreate = () => {
                     )}
                   />
                 </CardContent>
-                
+
                 <Separator />
-                
+
                 <CardFooter className="flex justify-end pt-6 pb-6 bg-muted/5">
-                  <Button 
-                    type="submit" 
+                  <Button
+                    type="submit"
                     size="lg"
                     disabled={formLoading}
                     className="min-w-[150px]"
@@ -202,7 +222,8 @@ const DepartmentsCreate = () => {
                   <span className="text-xs font-bold text-primary">1</span>
                 </div>
                 <p>
-                  <strong>Short Codes:</strong> Use short, uppercase codes like "CS", "MATH", or "ENG" for easy reference.
+                  <strong>Short Codes:</strong> Use short, uppercase codes like
+                  "CS", "MATH", or "ENG" for easy reference.
                 </p>
               </div>
               <div className="flex gap-3">
@@ -210,7 +231,8 @@ const DepartmentsCreate = () => {
                   <span className="text-xs font-bold text-primary">2</span>
                 </div>
                 <p>
-                  <strong>Clear Names:</strong> Use the full official name of the department.
+                  <strong>Clear Names:</strong> Use the full official name of
+                  the department.
                 </p>
               </div>
             </CardContent>
@@ -220,7 +242,8 @@ const DepartmentsCreate = () => {
             <Info className="h-4 w-4" />
             <AlertTitle>Did you know?</AlertTitle>
             <AlertDescription className="text-xs text-muted-foreground mt-1">
-              Departments are the top-level organization. You will assign subjects and teachers to them later.
+              Departments are the top-level organization. You will assign
+              subjects and teachers to them later.
             </AlertDescription>
           </Alert>
         </div>

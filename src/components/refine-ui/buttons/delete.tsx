@@ -30,21 +30,16 @@ export const DeleteButton = React.forwardRef<
   }
 
   return (
-    <Button
-      variant="destructive"
-      ref={ref}
-      disabled={loading}
-      {...rest}
-    >
+    <Button variant="destructive" ref={ref} disabled={loading} {...rest}>
       {loading ? (
         <Loader2 className="me-2 h-4 w-4 animate-spin" />
       ) : (
-        children ?? (
+        (children ?? (
           <div className="flex items-center gap-2 font-semibold">
             <Trash className="h-4 w-4" />
             {!hideText && <span>Delete</span>}
           </div>
-        )
+        ))
       )}
     </Button>
   );

@@ -5,12 +5,7 @@ import { useSelect, useOne, useCustomMutation } from "@refinedev/core";
 import { useParams } from "react-router-dom";
 import { useFieldArray } from "react-hook-form";
 import { Form } from "@/components/ui/form";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Info,
   Import,
@@ -148,7 +143,10 @@ const ClassesEdit = () => {
   };
 
   return (
-    <div className="container mx-auto py-10 px-4 md:px-6 max-w-7xl pb-20" dir={isAr ? "rtl" : "ltr"}>
+    <div
+      className="container mx-auto py-10 px-4 md:px-6 max-w-7xl pb-20"
+      dir={isAr ? "rtl" : "ltr"}
+    >
       <div className="flex flex-col gap-8">
         <div className="space-y-1">
           <EditViewHeader />
@@ -279,7 +277,11 @@ const ClassesEdit = () => {
                           <SelectTrigger className="h-12 rounded-xl bg-muted/20 border-none focus:ring-ai-primary transition-all font-bold">
                             <div className="flex items-center gap-2">
                               <History className="h-4 w-4 text-ai-primary/60" />
-                              <SelectValue placeholder={t("classes.edit.selectTermPlaceholder")} />
+                              <SelectValue
+                                placeholder={t(
+                                  "classes.edit.selectTermPlaceholder",
+                                )}
+                              />
                             </div>
                           </SelectTrigger>
                           <SelectContent className="rounded-xl border-none shadow-2xl">
@@ -310,7 +312,11 @@ const ClassesEdit = () => {
                           <SelectTrigger className="h-12 rounded-xl bg-muted/20 border-none focus:ring-ai-primary transition-all font-bold">
                             <div className="flex items-center gap-2">
                               <BookOpen className="h-4 w-4 text-ai-primary/60" />
-                              <SelectValue placeholder={t("classes.edit.selectClassPlaceholder")} />
+                              <SelectValue
+                                placeholder={t(
+                                  "classes.edit.selectClassPlaceholder",
+                                )}
+                              />
                             </div>
                           </SelectTrigger>
                           <SelectContent className="rounded-xl border-none shadow-2xl">

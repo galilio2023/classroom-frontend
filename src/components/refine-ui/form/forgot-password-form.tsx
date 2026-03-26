@@ -44,7 +44,7 @@ export const ForgotPasswordForm = () => {
         "justify-center",
         "px-6",
         "py-8",
-        "min-h-svh"
+        "min-h-svh",
       )}
     >
       <div className={cn("flex", "items-center", "justify-center", "gap-2")}>
@@ -64,7 +64,7 @@ export const ForgotPasswordForm = () => {
               "text-blue-600",
               "dark:text-blue-400",
               "text-3xl",
-              "font-semibold"
+              "font-semibold",
             )}
           >
             {t("auth.forgotPassword.title")}
@@ -96,7 +96,7 @@ export const ForgotPasswordForm = () => {
                     "bg-blue-600",
                     "hover:bg-blue-700",
                     "text-white",
-                    "px-6"
+                    "px-6",
                   )}
                 >
                   {t("auth.forgotPassword.send")}
@@ -115,7 +115,7 @@ export const ForgotPasswordForm = () => {
                 "text-sm",
                 "text-muted-foreground",
                 "hover:text-foreground",
-                "transition-colors"
+                "transition-colors",
               )}
             >
               <ArrowLeft className={cn("w-4", "h-4")} />

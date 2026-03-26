@@ -22,7 +22,7 @@ export const PublicLayout = () => {
   }, [i18n.language, isAr]);
 
   return (
-    <div 
+    <div
       className="min-h-screen flex flex-col bg-background selection:bg-primary/20 selection:text-primary transition-colors duration-300"
       dir={isAr ? "rtl" : "ltr"}
     >

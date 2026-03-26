@@ -1,9 +1,24 @@
 import { useCustom, useNavigation } from "@refinedev/core";
 import { useParams } from "react-router-dom";
 import { QuizAttempt, Quiz } from "@/types/quiz";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, ArrowLeft, User, Calendar, Trophy, Search, LayoutDashboard, ListChecks } from "lucide-react";
+import {
+  Loader2,
+  ArrowLeft,
+  User,
+  Calendar,
+  Trophy,
+  Search,
+  LayoutDashboard,
+  ListChecks,
+} from "lucide-react";
 import React, { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
@@ -23,7 +38,10 @@ const QuizResults = () => {
   });
 
   // Fetch Quiz Results (Attempts & Analytics)
-  const { query: resultsQuery } = useCustom<{ attempts: QuizAttempt[], analytics: any[] }>({
+  const { query: resultsQuery } = useCustom<{
+    attempts: QuizAttempt[];
+    analytics: any[];
+  }>({
     url: `/quizzes/${id}/results`,
     method: "get",
   });
@@ -35,7 +53,7 @@ const QuizResults = () => {
   const isLoading = quizQuery.isLoading || resultsQuery.isLoading;
 
   const filteredAttempts = attempts.filter((attempt: QuizAttempt) =>
-    attempt.student?.name.toLowerCase().includes(search.toLowerCase())
+    attempt.student?.name.toLowerCase().includes(search.toLowerCase()),
   );
 
   if (isLoading) {
@@ -48,15 +66,17 @@ const QuizResults = () => {
 
   if (!quiz) return null;
 
-  const totalPoints = quiz.questions?.reduce((acc: number, q: any) => acc + (q.points || 1), 0) || 0;
+  const totalPoints =
+    quiz.questions?.reduce((acc: number, q: any) => acc + (q.points || 1), 0) ||
+    0;
 
   return (
     <div className="container mx-auto py-10 px-4 space-y-8 max-w-7xl">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
         <div className="flex items-center gap-4">
-          <Button 
-            variant="outline" 
-            size="icon" 
+          <Button
+            variant="outline"
+            size="icon"
             onClick={() => list("classes")}
             className="rounded-xl border-primary/20 hover:bg-primary/5"
           >
@@ -64,26 +84,40 @@ const QuizResults = () => {
           </Button>
           <div>
             <h1 className="text-3xl font-black tracking-tight">{quiz.title}</h1>
-            <p className="font-bold text-muted-foreground/60">Class Performance Analytics</p>
+            <p className="font-bold text-muted-foreground/60">
+              Class Performance Analytics
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-3">
-            <Badge variant="secondary" className="text-xs px-4 py-2 rounded-xl bg-primary/10 text-primary border-none font-black uppercase tracking-widest">
-                {attempts.length} Submissions
-            </Badge>
-            <Badge variant="secondary" className="text-xs px-4 py-2 rounded-xl bg-primary/10 text-primary border-none font-black uppercase tracking-widest">
-                {totalPoints} Total Points
-            </Badge>
+          <Badge
+            variant="secondary"
+            className="text-xs px-4 py-2 rounded-xl bg-primary/10 text-primary border-none font-black uppercase tracking-widest"
+          >
+            {attempts.length} Submissions
+          </Badge>
+          <Badge
+            variant="secondary"
+            className="text-xs px-4 py-2 rounded-xl bg-primary/10 text-primary border-none font-black uppercase tracking-widest"
+          >
+            {totalPoints} Total Points
+          </Badge>
         </div>
       </div>
 
       <Tabs defaultValue="analytics" className="space-y-8">
         <TabsList className="bg-primary/5 p-1 rounded-2xl h-12 border border-primary/10">
-          <TabsTrigger value="analytics" className="rounded-xl font-black uppercase tracking-widest text-[10px] gap-2 px-6 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+          <TabsTrigger
+            value="analytics"
+            className="rounded-xl font-black uppercase tracking-widest text-[10px] gap-2 px-6 data-[state=active]:bg-background data-[state=active]:shadow-sm"
+          >
             <LayoutDashboard className="h-4 w-4" />
             Analytics
           </TabsTrigger>
-          <TabsTrigger value="submissions" className="rounded-xl font-black uppercase tracking-widest text-[10px] gap-2 px-6 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+          <TabsTrigger
+            value="submissions"
+            className="rounded-xl font-black uppercase tracking-widest text-[10px] gap-2 px-6 data-[state=active]:bg-background data-[state=active]:shadow-sm"
+          >
             <ListChecks className="h-4 w-4" />
             Student List
           </TabsTrigger>
@@ -94,62 +128,76 @@ const QuizResults = () => {
         </TabsContent>
 
         <TabsContent value="submissions">
-            <div className="space-y-6">
-                <div className="relative group max-w-md">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                    <Input
-                        placeholder="Search student results..."
-                        className="pl-12 h-14 rounded-2xl bg-card/50 border-none shadow-sm focus-visible:ring-primary/20 font-bold"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                    />
-                </div>
-
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    {filteredAttempts.length > 0 ? (
-                    filteredAttempts.map((attempt: QuizAttempt) => (
-                        <Card key={attempt.id} className="overflow-hidden border-none shadow-xl bg-card/50 backdrop-blur-xl rounded-[2rem] hover:scale-[1.02] transition-all duration-300">
-                        <div className="flex items-center p-6 gap-4">
-                            <Avatar className="h-14 w-14 border-2 border-background shadow-lg rounded-2xl">
-                            <AvatarImage src={attempt.student?.image} className="object-cover" />
-                            <AvatarFallback className="bg-primary/5 text-primary font-black">
-                                {attempt.student?.name[0]}
-                            </AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1 min-w-0">
-                            <p className="font-black text-lg tracking-tight truncate">{attempt.student?.name}</p>
-                            <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
-                                <span className="flex items-center gap-1.5">
-                                <Calendar className="h-3 w-3" />
-                                {new Date(attempt.completedAt).toLocaleDateString()}
-                                </span>
-                            </div>
-                            </div>
-                        </div>
-                        <div className="px-6 pb-6 pt-0 flex items-center justify-between">
-                            <div className="flex flex-col">
-                                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">Raw Score</span>
-                                <p className="text-2xl font-black text-primary">
-                                    {attempt.score}
-                                    <span className="text-xs text-muted-foreground/40 font-bold ml-1">/ {totalPoints}</span>
-                                </p>
-                            </div>
-                            <div className="h-12 w-12 rounded-full border-4 border-primary/10 flex items-center justify-center">
-                                <span className="text-sm font-black text-primary">
-                                    {Math.round((attempt.score / totalPoints) * 100)}%
-                                </span>
-                            </div>
-                        </div>
-                        </Card>
-                    ))
-                    ) : (
-                    <div className="col-span-full text-center py-20 border-2 border-dashed border-primary/10 rounded-[3rem] opacity-40">
-                        <User className="h-12 w-12 mx-auto mb-4" />
-                        <p className="font-black uppercase tracking-widest">No student results found</p>
-                    </div>
-                    )}
-                </div>
+          <div className="space-y-6">
+            <div className="relative group max-w-md">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+              <Input
+                placeholder="Search student results..."
+                className="pl-12 h-14 rounded-2xl bg-card/50 border-none shadow-sm focus-visible:ring-primary/20 font-bold"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
             </div>
+
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {filteredAttempts.length > 0 ? (
+                filteredAttempts.map((attempt: QuizAttempt) => (
+                  <Card
+                    key={attempt.id}
+                    className="overflow-hidden border-none shadow-xl bg-card/50 backdrop-blur-xl rounded-[2rem] hover:scale-[1.02] transition-all duration-300"
+                  >
+                    <div className="flex items-center p-6 gap-4">
+                      <Avatar className="h-14 w-14 border-2 border-background shadow-lg rounded-2xl">
+                        <AvatarImage
+                          src={attempt.student?.image}
+                          className="object-cover"
+                        />
+                        <AvatarFallback className="bg-primary/5 text-primary font-black">
+                          {attempt.student?.name[0]}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-black text-lg tracking-tight truncate">
+                          {attempt.student?.name}
+                        </p>
+                        <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
+                          <span className="flex items-center gap-1.5">
+                            <Calendar className="h-3 w-3" />
+                            {new Date(attempt.completedAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="px-6 pb-6 pt-0 flex items-center justify-between">
+                      <div className="flex flex-col">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">
+                          Raw Score
+                        </span>
+                        <p className="text-2xl font-black text-primary">
+                          {attempt.score}
+                          <span className="text-xs text-muted-foreground/40 font-bold ml-1">
+                            / {totalPoints}
+                          </span>
+                        </p>
+                      </div>
+                      <div className="h-12 w-12 rounded-full border-4 border-primary/10 flex items-center justify-center">
+                        <span className="text-sm font-black text-primary">
+                          {Math.round((attempt.score / totalPoints) * 100)}%
+                        </span>
+                      </div>
+                    </div>
+                  </Card>
+                ))
+              ) : (
+                <div className="col-span-full text-center py-20 border-2 border-dashed border-primary/10 rounded-[3rem] opacity-40">
+                  <User className="h-12 w-12 mx-auto mb-4" />
+                  <p className="font-black uppercase tracking-widest">
+                    No student results found
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
         </TabsContent>
       </Tabs>
     </div>

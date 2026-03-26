@@ -183,21 +183,24 @@ export const GradingDialog = ({
     const previousData = queryClient.getQueryData(queryKey);
 
     // Update Cache Immediately
-    queryClient.setQueryData(queryKey, (old: GetOneResponse<Submission> | undefined) => {
-      if (!old || !old.data) return old;
-      return {
-        ...old,
-        data: { ...old.data, ...values, updatedAt: new Date().toISOString() },
-      };
-    });
+    queryClient.setQueryData(
+      queryKey,
+      (old: GetOneResponse<Submission> | undefined) => {
+        if (!old || !old.data) return old;
+        return {
+          ...old,
+          data: { ...old.data, ...values, updatedAt: new Date().toISOString() },
+        };
+      },
+    );
 
     updateSubmission(
       {
         resource: "submissions",
         id: submission.id,
         values: {
-            ...values,
-            aiApprovalStatus: "approved"
+          ...values,
+          aiApprovalStatus: "approved",
         },
       },
       {

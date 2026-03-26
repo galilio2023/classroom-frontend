@@ -5,7 +5,7 @@ export const useAIAuthorization = () => {
   const { data: permissions, isLoading } = usePermissions<BasePermissions>({});
 
   const role = permissions?.role;
-  
+
   const isStudent = role === UserRole.STUDENT;
   const isTeacher = role === UserRole.TEACHER;
   const isAdmin = role === UserRole.ADMIN;
@@ -27,6 +27,6 @@ export const useAIAuthorization = () => {
     isParent,
     isStaff,
     canInteract,
-    isLoading
+    isLoading,
   };
 };

@@ -24,7 +24,7 @@ export const AIActionButton: React.FC<AIActionButtonProps> = ({
     <LoadingButton
       className={cn(
         "w-full h-11 rounded-xl font-black uppercase tracking-widest text-[10px] gap-2 shadow-lg shadow-primary/20",
-        className
+        className,
       )}
       onClick={onClick}
       isLoading={isLoading}

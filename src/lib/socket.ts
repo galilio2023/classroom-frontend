@@ -13,7 +13,7 @@ export const socket: Socket = io(SOCKET_URL, {
   reconnectionAttempts: 10,
   reconnectionDelay: 2000,
   transports: ["polling"], // Force polling to rule out websocket issues
-  upgrade: false,           // Disable upgrade to websocket
+  upgrade: false, // Disable upgrade to websocket
 });
 
 let connectionPromise: Promise<void> | null = null;
@@ -43,13 +43,21 @@ export const connectSocket = async () => {
 
       // Attach token to the auth payload for the secure handshake
       socket.auth = { token };
-      console.log("🔗 Attempting socket connection to:", SOCKET_URL, "with token:", token.substring(0, 10) + "...");
+      console.log(
+        "🔗 Attempting socket connection to:",
+        SOCKET_URL,
+        "with token:",
+        token.substring(0, 10) + "...",
+      );
       socket.connect();
-      
+
       // Wait for connection to be established or timeout
       await new Promise<void>((resolve, reject) => {
         const timeout = setTimeout(() => {
-          console.error("⏳ Socket connection timeout after 15s. Socket status:", socket.connected ? "connected" : "disconnected");
+          console.error(
+            "⏳ Socket connection timeout after 15s. Socket status:",
+            socket.connected ? "connected" : "disconnected",
+          );
           reject(new Error("Socket connection timeout (15s)"));
         }, 15000);
 
@@ -81,7 +89,9 @@ export const connectSocket = async () => {
  */
 export const getSocket = () => {
   if (!socket.connected) {
-    console.warn("getSocket called before socket was authenticated or connected.");
+    console.warn(
+      "getSocket called before socket was authenticated or connected.",
+    );
   }
   return socket;
 };

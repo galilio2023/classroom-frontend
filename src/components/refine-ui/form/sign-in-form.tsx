@@ -64,7 +64,7 @@ export const SignInForm = () => {
         "justify-center",
         "px-6",
         "py-8",
-        "min-h-svh"
+        "min-h-svh",
       )}
     >
       <div className={cn("flex", "items-center", "justify-center")}>
@@ -84,7 +84,7 @@ export const SignInForm = () => {
               "text-blue-600",
               "dark:text-blue-400",
               "text-3xl",
-              "font-semibold"
+              "font-semibold",
             )}
           >
             {t("auth.login.signIn")}
@@ -127,7 +127,7 @@ export const SignInForm = () => {
                 "flex items-center justify-between",
                 "flex-wrap",
                 "gap-2",
-                "mt-4"
+                "mt-4",
               )}
             >
               <div className={cn("flex items-center", "space-x-2")}>
@@ -149,7 +149,7 @@ export const SignInForm = () => {
                   "gap-2",
                   "text-primary hover:underline",
                   "text-blue-600",
-                  "dark:text-blue-400"
+                  "dark:text-blue-400",
                 )}
               >
                 <span>{t("auth.login.forgotPassword")}</span>
@@ -163,12 +163,16 @@ export const SignInForm = () => {
 
             <div className={cn("flex", "items-center", "gap-4", "mt-6")}>
               <Separator className={cn("flex-1")} />
-              <span className={cn("text-sm", "text-muted-foreground")}>{t("auth.login.or")}</span>
+              <span className={cn("text-sm", "text-muted-foreground")}>
+                {t("auth.login.or")}
+              </span>
               <Separator className={cn("flex-1")} />
             </div>
 
             <div className={cn("flex", "flex-col", "gap-4", "mt-6")}>
-              <p className={cn("text-sm", "font-medium")}>{t("auth.login.signInUsing")}</p>
+              <p className={cn("text-sm", "font-medium")}>
+                {t("auth.login.signInUsing")}
+              </p>
               <div className={cn("grid grid-cols-2", "gap-6")}>
                 <Button
                   variant="outline"
@@ -231,7 +235,7 @@ export const SignInForm = () => {
                 "text-green-600",
                 "dark:text-green-400",
                 "font-semibold",
-                "underline"
+                "underline",
               )}
             >
               {t("auth.login.signUp")}

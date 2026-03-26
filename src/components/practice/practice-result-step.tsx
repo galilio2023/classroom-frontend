@@ -1,6 +1,13 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Trophy, Target, CheckCircle2, XCircle, ChevronDown, ChevronUp } from "lucide-react";
+import {
+  Trophy,
+  Target,
+  CheckCircle2,
+  XCircle,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 
@@ -33,7 +40,7 @@ export const PracticeResultStep: React.FC<PracticeResultStepProps> = ({
 }) => {
   const { t, i18n } = useTranslation();
   const [showReview, setShowReview] = useState(false);
-  const isArabic = i18n.language === 'ar';
+  const isArabic = i18n.language === "ar";
 
   return (
     <div className="space-y-6 py-4 max-h-[70vh] overflow-y-auto pe-2">
@@ -52,24 +59,41 @@ export const PracticeResultStep: React.FC<PracticeResultStepProps> = ({
 
         <div className="space-y-2">
           <div className="inline-flex items-center px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-black uppercase tracking-widest mb-2">
-            {result.passed ? t("practice.results.passed") : t("practice.results.practiceNeeded")}
+            {result.passed
+              ? t("practice.results.passed")
+              : t("practice.results.practiceNeeded")}
           </div>
           <h2 className="text-3xl font-black tracking-tight">
-            {result.passed ? t("practice.results.masteryAchieved") : t("practice.results.keepPracticing")}
+            {result.passed
+              ? t("practice.results.masteryAchieved")
+              : t("practice.results.keepPracticing")}
           </h2>
           <div className="flex items-center justify-center gap-4 mt-4">
             <div className="text-center">
               <p className="text-3xl font-black text-primary">
-                {new Intl.NumberFormat(isArabic ? 'ar-EG' : 'en-US').format(result.score)}%
+                {new Intl.NumberFormat(isArabic ? "ar-EG" : "en-US").format(
+                  result.score,
+                )}
+                %
               </p>
-              <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-tighter">{t("practice.results.finalScore")}</p>
+              <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-tighter">
+                {t("practice.results.finalScore")}
+              </p>
             </div>
             <div className="w-px h-10 bg-border" />
             <div className="text-center">
               <p className="text-3xl font-black text-foreground">
-                {new Intl.NumberFormat(isArabic ? 'ar-EG' : 'en-US').format(result.correctCount)}/{new Intl.NumberFormat(isArabic ? 'ar-EG' : 'en-US').format(result.totalQuestions)}
+                {new Intl.NumberFormat(isArabic ? "ar-EG" : "en-US").format(
+                  result.correctCount,
+                )}
+                /
+                {new Intl.NumberFormat(isArabic ? "ar-EG" : "en-US").format(
+                  result.totalQuestions,
+                )}
               </p>
-              <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-tighter">{t("practice.results.correct")}</p>
+              <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-tighter">
+                {t("practice.results.correct")}
+              </p>
             </div>
           </div>
         </div>
@@ -82,7 +106,9 @@ export const PracticeResultStep: React.FC<PracticeResultStepProps> = ({
               className="h-16 w-16 drop-shadow-md"
             />
             <div className="text-center">
-              <h4 className="font-bold text-yellow-700 dark:text-yellow-500">{t("practice.results.badgeUnlocked")}</h4>
+              <h4 className="font-bold text-yellow-700 dark:text-yellow-500">
+                {t("practice.results.badgeUnlocked")}
+              </h4>
               <p className="text-sm text-yellow-600 dark:text-yellow-400 font-medium">
                 {result.badgeEarned.name}
               </p>
@@ -99,22 +125,31 @@ export const PracticeResultStep: React.FC<PracticeResultStepProps> = ({
 
       {result.review && (
         <div className="space-y-4">
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
             className="w-full justify-between font-bold"
             onClick={() => setShowReview(!showReview)}
           >
             {t("practice.results.reviewQuestions")}
-            {showReview ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+            {showReview ? (
+              <ChevronUp className="h-4 w-4" />
+            ) : (
+              <ChevronDown className="h-4 w-4" />
+            )}
           </Button>
 
           {showReview && (
             <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
               {result.review.map((item, idx) => (
-                <div key={idx} className={cn(
-                  "p-4 rounded-xl border-2 transition-all",
-                  item.isCorrect ? "border-green-500/20 bg-green-500/5" : "border-red-500/20 bg-red-500/5"
-                )}>
+                <div
+                  key={idx}
+                  className={cn(
+                    "p-4 rounded-xl border-2 transition-all",
+                    item.isCorrect
+                      ? "border-green-500/20 bg-green-500/5"
+                      : "border-red-500/20 bg-red-500/5",
+                  )}
+                >
                   <div className="flex items-start gap-3">
                     {item.isCorrect ? (
                       <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5 shrink-0" />
@@ -122,16 +157,33 @@ export const PracticeResultStep: React.FC<PracticeResultStepProps> = ({
                       <XCircle className="h-5 w-5 text-red-500 mt-0.5 shrink-0" />
                     )}
                     <div className="space-y-2">
-                      <p className="font-bold text-sm leading-tight">{item.question}</p>
+                      <p className="font-bold text-sm leading-tight">
+                        {item.question}
+                      </p>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
                         <div className="p-2 rounded-lg bg-background/50 border border-border">
-                          <span className="text-muted-foreground block mb-1 uppercase font-black text-[8px]">{t("practice.results.yourAnswer")}</span>
-                          <span className={cn("font-bold", item.isCorrect ? "text-green-600" : "text-red-600")}>{item.userAnswer}</span>
+                          <span className="text-muted-foreground block mb-1 uppercase font-black text-[8px]">
+                            {t("practice.results.yourAnswer")}
+                          </span>
+                          <span
+                            className={cn(
+                              "font-bold",
+                              item.isCorrect
+                                ? "text-green-600"
+                                : "text-red-600",
+                            )}
+                          >
+                            {item.userAnswer}
+                          </span>
                         </div>
                         {!item.isCorrect && (
                           <div className="p-2 rounded-lg bg-background/50 border border-border">
-                            <span className="text-muted-foreground block mb-1 uppercase font-black text-[8px]">{t("practice.results.correctAnswer")}</span>
-                            <span className="font-bold text-green-600">{item.correctAnswer}</span>
+                            <span className="text-muted-foreground block mb-1 uppercase font-black text-[8px]">
+                              {t("practice.results.correctAnswer")}
+                            </span>
+                            <span className="font-bold text-green-600">
+                              {item.correctAnswer}
+                            </span>
                           </div>
                         )}
                       </div>
@@ -150,7 +202,10 @@ export const PracticeResultStep: React.FC<PracticeResultStepProps> = ({
       )}
 
       <div className="flex justify-center pt-4 sticky bottom-0 bg-background/80 backdrop-blur-sm pb-2">
-        <Button onClick={onClose} className="w-full h-12 text-lg font-black shadow-lg shadow-primary/20">
+        <Button
+          onClick={onClose}
+          className="w-full h-12 text-lg font-black shadow-lg shadow-primary/20"
+        >
           {t("practice.results.finishSession")}
         </Button>
       </div>

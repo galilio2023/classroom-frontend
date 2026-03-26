@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { useGetIdentity } from "@refinedev/core";
 import { User } from "@/types";
-import { socket, connectSocket } from "@/lib/socket"; 
+import { socket, connectSocket } from "@/lib/socket";
 import axios from "axios";
 import { BACKEND_URL } from "@/config";
 
@@ -17,7 +17,9 @@ const SocketContext = createContext<SocketContextType>({
 
 export const useSocket = () => useContext(SocketContext);
 
-export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const { data: user, isLoading } = useGetIdentity<User>();
   const [isConnected, setIsConnected] = useState(socket.connected);
 
@@ -27,17 +29,19 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     if (user?.id) {
       // Establish secure connection
       void connectSocket().then(async () => {
-          // 🚀 GLOBAL SYNC: Join all class rooms for this user
-          try {
-              const response = await axios.get(`${BACKEND_URL}/classes/mine`, { withCredentials: true });
-              const classes = response.data?.data || [];
-              classes.forEach((c: any) => {
-                  socket.emit("join_class", c.id);
-                  console.log(`[Socket] Globally joined class room: ${c.id}`);
-              });
-          } catch (err) {
-              console.error("Failed to auto-join class rooms:", err);
-          }
+        // 🚀 GLOBAL SYNC: Join all class rooms for this user
+        try {
+          const response = await axios.get(`${BACKEND_URL}/classes/mine`, {
+            withCredentials: true,
+          });
+          const classes = response.data?.data || [];
+          classes.forEach((c: any) => {
+            socket.emit("join_class", c.id);
+            console.log(`[Socket] Globally joined class room: ${c.id}`);
+          });
+        } catch (err) {
+          console.error("Failed to auto-join class rooms:", err);
+        }
       });
 
       const onConnect = () => setIsConnected(true);

@@ -39,11 +39,13 @@ export const StaffDashboard = ({
 
   // Generate Action Items dynamically based on data
   const actions: ActionItem[] = [];
-  
+
   if (data.atRiskStudents && data.atRiskStudents.length > 0) {
     actions.push({
       id: "at-risk",
-      title: t("dashboard.staff.actions.atRisk.title", { count: data.atRiskStudents.length }),
+      title: t("dashboard.staff.actions.atRisk.title", {
+        count: data.atRiskStudents.length,
+      }),
       description: t("dashboard.staff.actions.atRisk.description"),
       priority: "urgent",
       actionText: t("dashboard.staff.actions.atRisk.action"),
@@ -51,17 +53,32 @@ export const StaffDashboard = ({
         const element = document.getElementById("at-risk-students-section");
         if (element) {
           element.scrollIntoView({ behavior: "smooth" });
-          element.classList.add("ring-2", "ring-destructive", "ring-offset-8", "rounded-[2rem]");
-          setTimeout(() => element.classList.remove("ring-2", "ring-destructive", "ring-offset-8"), 3000);
+          element.classList.add(
+            "ring-2",
+            "ring-destructive",
+            "ring-offset-8",
+            "rounded-[2rem]",
+          );
+          setTimeout(
+            () =>
+              element.classList.remove(
+                "ring-2",
+                "ring-destructive",
+                "ring-offset-8",
+              ),
+            3000,
+          );
         }
-      }
+      },
     });
   }
 
   if (data.pendingSubmissions && data.pendingSubmissions.length > 0) {
     actions.push({
       id: "grading",
-      title: t("dashboard.staff.actions.grading.title", { count: data.pendingSubmissions.length }),
+      title: t("dashboard.staff.actions.grading.title", {
+        count: data.pendingSubmissions.length,
+      }),
       description: t("dashboard.staff.actions.grading.description"),
       priority: "normal",
       actionText: t("dashboard.staff.actions.grading.action"),
@@ -70,7 +87,7 @@ export const StaffDashboard = ({
         if (data.pendingSubmissions && data.pendingSubmissions[0]) {
           show("submissions", data.pendingSubmissions[0].id);
         }
-      }
+      },
     });
   }
 
@@ -82,7 +99,7 @@ export const StaffDashboard = ({
       description: t("dashboard.staff.actions.aiQuiz.description"),
       priority: "ai",
       actionText: t("dashboard.staff.actions.aiQuiz.action"),
-      onClick: () => list("ai-assistant")
+      onClick: () => list("ai-assistant"),
     });
   }
 
@@ -103,7 +120,7 @@ export const StaffDashboard = ({
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
       >
-        <ActionCenter 
+        <ActionCenter
           title={t("dashboard.staff.actions.header")}
           actions={actions}
           emptyMessage={t("dashboard.staff.actions.empty")}

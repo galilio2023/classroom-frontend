@@ -28,8 +28,15 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { useTranslation } from "react-i18next";
+import { useDashboard } from "@/features/dashboard/hooks/use-dashboard";
 
-import { GradeDistribution, AssignmentCompletionTrend, SubmissionTiming, AtRiskStudent, ClassComparison } from "@/types";
+import {
+  GradeDistribution,
+  AssignmentCompletionTrend,
+  SubmissionTiming,
+  AtRiskStudent,
+  ClassComparison,
+} from "@/types";
 
 interface AnalyticsTabProps {
   classId: string;
@@ -54,7 +61,10 @@ interface ClassAnalytics {
 
 export const AnalyticsTab = ({ classId }: AnalyticsTabProps) => {
   const { t, i18n } = useTranslation();
+  const { coreData } = useDashboard();
   const [dateRange, setDateRange] = useState("30");
+
+  const isAiEnabled = coreData?.globalConfig?.enableAiFeatures !== false;
 
   const { result, query } = useCustom<ClassAnalytics>({
     url: `/classes/${classId}/analytics`,
@@ -232,7 +242,8 @@ export const AnalyticsTab = ({ classId }: AnalyticsTabProps) => {
               </motion.div>
             )}
 
-          {analytics?.studentTrajectories &&
+          {isAiEnabled &&
+            analytics?.studentTrajectories &&
             analytics.studentTrajectories.length > 0 && (
               <motion.div
                 initial={{ opacity: 0, x: isAr ? -20 : 20 }}

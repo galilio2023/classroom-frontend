@@ -139,20 +139,23 @@ export const AdminDashboard = ({
         <div className="lg:col-span-4 space-y-16 md:space-y-24 lg:space-y-32">
           <ErrorBoundary>
             <div className="space-y-8">
-                <div className="flex items-center gap-4 px-2">
-                    <div className="p-3 rounded-2xl bg-ai-primary/10 text-ai-primary border border-ai-primary/5 shadow-sm">
-                        <Sparkles className="h-6 w-6" />
-                    </div>
-                    <div className="flex flex-col text-start">
-                        <h2 className="text-xl md:text-2xl font-black tracking-tight leading-none">
-                            System Self-Reflection
-                        </h2>
-                        <span className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.2em] mt-1.5">
-                            Agentic Evolution
-                        </span>
-                    </div>
+              <div className="flex items-center gap-4 px-2">
+                <div className="p-3 rounded-2xl bg-ai-primary/10 text-ai-primary border border-ai-primary/5 shadow-sm">
+                  <Sparkles className="h-6 w-6" />
                 </div>
-                <SystemHealthCard report={data.systemHealth} isLoading={isLoading} />
+                <div className="flex flex-col text-start">
+                  <h2 className="text-xl md:text-2xl font-black tracking-tight leading-none">
+                    System Self-Reflection
+                  </h2>
+                  <span className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.2em] mt-1.5">
+                    Agentic Evolution
+                  </span>
+                </div>
+              </div>
+              <SystemHealthCard
+                report={data.systemHealth}
+                isLoading={isLoading}
+              />
             </div>
           </ErrorBoundary>
 

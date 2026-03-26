@@ -22,7 +22,7 @@ export const LoadingOverlay = React.forwardRef<
         className={cn(
           "absolute inset-0 z-50 flex items-center justify-center",
           "bg-background/60",
-          className
+          className,
         )}
       >
         <div className="flex flex-col items-center gap-2">

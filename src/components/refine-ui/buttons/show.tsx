@@ -21,8 +21,17 @@ export const ShowButton = React.forwardRef<
   ShowButtonProps
 >(
   (
-    { resource, recordItemId, accessControl, meta, hideText, children, onClick, ...rest },
-    ref
+    {
+      resource,
+      recordItemId,
+      accessControl,
+      meta,
+      hideText,
+      children,
+      onClick,
+      ...rest
+    },
+    ref,
   ) => {
     const { hidden, disabled, LinkComponent, to, label } = useShowButton({
       resource,
@@ -61,7 +70,7 @@ export const ShowButton = React.forwardRef<
         </LinkComponent>
       </Button>
     );
-  }
+  },
 );
 
 ShowButton.displayName = "ShowButton";

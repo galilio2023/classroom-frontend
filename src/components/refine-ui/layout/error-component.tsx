@@ -28,25 +28,25 @@ export function ErrorComponent() {
             action: action,
             resource: resource?.name,
           },
-          `You may have forgotten to add the "${action}" component to "${resource?.name}" resource.`
-        )
+          `You may have forgotten to add the "${action}" component to "${resource?.name}" resource.`,
+        ),
       );
     }
   }, [resource, action, translate]);
 
   const handleBackToDashboard = () => {
     try {
-        navigate("/");
+      navigate("/");
     } catch {
-        window.location.href = "/";
+      window.location.href = "/";
     }
   };
 
   const handleGoBack = () => {
     try {
-        navigate(-1);
+      navigate(-1);
     } catch {
-        window.history.back();
+      window.history.back();
     }
   };
 
@@ -60,7 +60,9 @@ export function ErrorComponent() {
         <div className="flex justify-center">
           <div className="relative">
             <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full animate-pulse" />
-            <h1 className="relative text-9xl font-black tracking-tighter text-primary/10">404</h1>
+            <h1 className="relative text-9xl font-black tracking-tighter text-primary/10">
+              404
+            </h1>
           </div>
         </div>
 
@@ -73,7 +75,7 @@ export function ErrorComponent() {
             <p className="text-muted-foreground text-sm leading-relaxed">
               {translate(
                 "pages.error.description",
-                "The page you're looking for doesn't exist. It might have been moved or deleted."
+                "The page you're looking for doesn't exist. It might have been moved or deleted.",
               )}
             </p>
             {errorMessage && (
@@ -81,8 +83,8 @@ export function ErrorComponent() {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <div className="flex items-center gap-1 text-[10px] text-primary cursor-help mt-2 font-bold uppercase tracking-widest">
-                        <InfoIcon className="h-3 w-3" />
-                        Technical Details
+                      <InfoIcon className="h-3 w-3" />
+                      Technical Details
                     </div>
                   </TooltipTrigger>
                   <TooltipContent side="bottom" className="max-w-xs">
@@ -95,36 +97,36 @@ export function ErrorComponent() {
         </div>
 
         <div className="flex flex-col gap-3">
-            <Button 
-                size="lg" 
-                className="gap-2 rounded-xl px-8 shadow-xl shadow-primary/20 font-bold"
-                onClick={handleBackToDashboard}
-            >
-                <Home className="h-4 w-4" />
-                {translate("pages.error.backHome", "Return to Dashboard")}
-            </Button>
-            
-            <div className="flex gap-2 justify-center">
-                <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="text-muted-foreground hover:text-foreground"
-                    onClick={handleGoBack}
-                >
-                    <ChevronLeft className="h-4 w-4 me-1" />
-                    Go Back
-                </Button>
+          <Button
+            size="lg"
+            className="gap-2 rounded-xl px-8 shadow-xl shadow-primary/20 font-bold"
+            onClick={handleBackToDashboard}
+          >
+            <Home className="h-4 w-4" />
+            {translate("pages.error.backHome", "Return to Dashboard")}
+          </Button>
 
-                <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="text-muted-foreground hover:text-foreground"
-                    onClick={handleHardRefresh}
-                >
-                    <RefreshCw className="h-4 w-4 me-1" />
-                    Refresh Page
-                </Button>
-            </div>
+          <div className="flex gap-2 justify-center">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-muted-foreground hover:text-foreground"
+              onClick={handleGoBack}
+            >
+              <ChevronLeft className="h-4 w-4 me-1" />
+              Go Back
+            </Button>
+
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-muted-foreground hover:text-foreground"
+              onClick={handleHardRefresh}
+            >
+              <RefreshCw className="h-4 w-4 me-1" />
+              Refresh Page
+            </Button>
+          </div>
         </div>
       </div>
     </div>

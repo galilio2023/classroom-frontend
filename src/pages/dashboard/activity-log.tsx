@@ -27,12 +27,16 @@ const actionVariants: Record<string, string> = {
 const ActivityLogPage = () => {
   const { t, i18n } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
-  const isArabic = i18n.language === 'ar';
+  const isArabic = i18n.language === "ar";
 
   const filters = useMemo(() => {
     const f = [];
     if (searchQuery) {
-      f.push({ field: "action", operator: "contains" as const, value: searchQuery });
+      f.push({
+        field: "action",
+        operator: "contains" as const,
+        value: searchQuery,
+      });
     }
     return f;
   }, [searchQuery]);
@@ -42,7 +46,9 @@ const ActivityLogPage = () => {
       () => [
         {
           id: "user",
-          header: () => <p className="column-title">{t("auth.register.accountSetup")}</p>,
+          header: () => (
+            <p className="column-title">{t("auth.register.accountSetup")}</p>
+          ),
           cell: ({ row }) => {
             const user = row.original.user;
             return (
@@ -52,8 +58,12 @@ const ActivityLogPage = () => {
                   <AvatarFallback>{user?.name?.[0] || "U"}</AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col">
-                    <span className="text-xs font-bold">{user?.name || "System"}</span>
-                    <span className="text-[10px] text-muted-foreground">{user?.email}</span>
+                  <span className="text-xs font-bold">
+                    {user?.name || "System"}
+                  </span>
+                  <span className="text-[10px] text-muted-foreground">
+                    {user?.email}
+                  </span>
                 </div>
               </div>
             );
@@ -61,11 +71,19 @@ const ActivityLogPage = () => {
         },
         {
           accessorKey: "action",
-          header: () => <p className="column-title">{t("dashboard.activity.recent")}</p>,
+          header: () => (
+            <p className="column-title">{t("dashboard.activity.recent")}</p>
+          ),
           cell: ({ getValue }) => {
             const action = getValue<string>();
             return (
-              <Badge variant="outline" className={cn("text-[10px] font-black uppercase tracking-wider border-none", actionVariants[action])}>
+              <Badge
+                variant="outline"
+                className={cn(
+                  "text-[10px] font-black uppercase tracking-wider border-none",
+                  actionVariants[action],
+                )}
+              >
                 {t(`activity.actions.${action}`, action.replace("_", " "))}
               </Badge>
             );
@@ -77,36 +95,48 @@ const ActivityLogPage = () => {
           cell: ({ row }) => (
             <div className="flex items-center gap-2 text-[10px] font-medium text-muted-foreground">
               <Database className="h-3 w-3" />
-              <span className="capitalize">{row.original.entityType || "N/A"}</span>
-              <span className="opacity-40">ID: {row.original.entityId || "-"}</span>
+              <span className="capitalize">
+                {row.original.entityType || "N/A"}
+              </span>
+              <span className="opacity-40">
+                ID: {row.original.entityId || "-"}
+              </span>
             </div>
-          )
+          ),
         },
         {
           id: "network",
-          header: () => <p className="column-title">{t("dashboard.activity.network" as any)}</p>,
+          header: () => (
+            <p className="column-title">
+              {t("dashboard.activity.network" as any)}
+            </p>
+          ),
           cell: ({ row }) => (
             <div className="flex flex-col gap-0.5">
-                <div className="flex items-center gap-1.5 text-[9px] font-bold text-muted-foreground">
-                    <Globe className="h-2.5 w-2.5" />
-                    {row.original.ipAddress || "Local"}
-                </div>
-                <div className="text-[8px] text-muted-foreground/60 truncate max-w-[150px]">
-                    {row.original.userAgent}
-                </div>
+              <div className="flex items-center gap-1.5 text-[9px] font-bold text-muted-foreground">
+                <Globe className="h-2.5 w-2.5" />
+                {row.original.ipAddress || "Local"}
+              </div>
+              <div className="text-[8px] text-muted-foreground/60 truncate max-w-[150px]">
+                {row.original.userAgent}
+              </div>
             </div>
-          )
+          ),
         },
         {
           accessorKey: "createdAt",
-          header: () => <p className="column-title">{t("common.certificate.date")}</p>,
+          header: () => (
+            <p className="column-title">{t("common.certificate.date")}</p>
+          ),
           cell: ({ getValue }) => (
             <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
               <Clock className="h-3.5 w-3.5" />
-              <span>{formatDistanceToNow(new Date(getValue<string>()), { 
-                addSuffix: true,
-                locale: isArabic ? ar : enUS
-              })}</span>
+              <span>
+                {formatDistanceToNow(new Date(getValue<string>()), {
+                  addSuffix: true,
+                  locale: isArabic ? ar : enUS,
+                })}
+              </span>
             </div>
           ),
         },
@@ -119,8 +149,8 @@ const ActivityLogPage = () => {
       filters: { permanent: filters },
       sorters: { initial: [{ field: "createdAt", order: "desc" }] },
       meta: {
-        populate: ["user"]
-      }
+        populate: ["user"],
+      },
     },
   });
 
@@ -133,7 +163,9 @@ const ActivityLogPage = () => {
             <Shield className="h-8 w-8 text-primary" />
             {t("resources.activity-log.label")}
           </h1>
-          <p className="text-muted-foreground">{t("users.governance.description")}</p>
+          <p className="text-muted-foreground">
+            {t("users.governance.description")}
+          </p>
         </div>
       </div>
 

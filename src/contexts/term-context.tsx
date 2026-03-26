@@ -16,7 +16,7 @@ export const TermProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [selectedTerm, setSelectedTerm] = useState<AcademicTerm | null>(null);
-  
+
   // Refine useList implementation returns { result, query }
   const { result, query } = useList<AcademicTerm>({
     resource: "academic-terms",
@@ -27,13 +27,13 @@ export const TermProvider: React.FC<{ children: React.ReactNode }> = ({
       },
     ],
     queryOptions: {
-      staleTime: 5 * 60 * 1000, 
-    }
+      staleTime: 5 * 60 * 1000,
+    },
   });
 
   const terms = result?.data || [];
   const isLoading = query.isLoading;
-  
+
   const currentTerm =
     terms.find((t: AcademicTerm) => t.status === "active") || terms[0] || null;
 

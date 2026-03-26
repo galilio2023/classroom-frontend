@@ -1,16 +1,8 @@
 import { useState, useEffect } from "react";
-import {
-  useCustom,
-  useCustomMutation,
-  useNotification,
-} from "@refinedev/core";
+import { useCustom, useCustomMutation, useNotification } from "@refinedev/core";
 import { useSearchParams } from "react-router-dom";
 import { format } from "date-fns";
-import {
-  Enrollment,
-  AttendanceStatus,
-  Attendance,
-} from "@/types";
+import { Enrollment, AttendanceStatus, Attendance } from "@/types";
 import { useTranslation } from "react-i18next";
 import { useUserRole } from "@/hooks/use-user-role";
 
@@ -23,14 +15,20 @@ interface AttendanceHistoryGroup {
   records: Attendance[];
 }
 
-export const useAttendanceDetails = (classId: string, enrollments: Enrollment[], date?: Date) => {
+export const useAttendanceDetails = (
+  classId: string,
+  enrollments: Enrollment[],
+  date?: Date,
+) => {
   const { t } = useTranslation();
   const { isStaff } = useUserRole();
   const [searchParams] = useSearchParams();
   const { open } = useNotification();
 
   const [selectedDate, setSelectedDate] = useState(
-    date ? format(date, "yyyy-MM-dd") : (searchParams.get("date") || format(new Date(), "yyyy-MM-dd")),
+    date
+      ? format(date, "yyyy-MM-dd")
+      : searchParams.get("date") || format(new Date(), "yyyy-MM-dd"),
   );
 
   useEffect(() => {
@@ -38,9 +36,17 @@ export const useAttendanceDetails = (classId: string, enrollments: Enrollment[],
       setSelectedDate(format(date, "yyyy-MM-dd"));
     }
   }, [date]);
-  
+
   const [attendanceData, setAttendanceData] = useState<
-    Record<string, { status: AttendanceStatus; remarks: string; minutesPresent: number; participationScore: number }>
+    Record<
+      string,
+      {
+        status: AttendanceStatus;
+        remarks: string;
+        minutesPresent: number;
+        participationScore: number;
+      }
+    >
   >({});
 
   const [isQRModalOpen, setIsQRModalOpen] = useState(false);
@@ -75,7 +81,15 @@ export const useAttendanceDetails = (classId: string, enrollments: Enrollment[],
   };
 
   useEffect(() => {
-    const initialData: Record<string, { status: AttendanceStatus; remarks: string; minutesPresent: number; participationScore: number }> = {};
+    const initialData: Record<
+      string,
+      {
+        status: AttendanceStatus;
+        remarks: string;
+        minutesPresent: number;
+        participationScore: number;
+      }
+    > = {};
     enrollments.forEach((e) => {
       initialData[e.studentId] = {
         status: AttendanceStatus.ABSENT,
@@ -87,7 +101,8 @@ export const useAttendanceDetails = (classId: string, enrollments: Enrollment[],
 
     if (dailyQuery.data?.data) {
       dailyQuery.data.data.forEach((record: Attendance) => {
-        const recordDateStr = typeof record.date === "string"
+        const recordDateStr =
+          typeof record.date === "string"
             ? record.date.split("T")[0]
             : format(new Date(record.date), "yyyy-MM-dd");
 
@@ -106,14 +121,21 @@ export const useAttendanceDetails = (classId: string, enrollments: Enrollment[],
 
   const { mutate: saveAttendance, mutation } = useCustomMutation();
 
-  const handleMarkAttendance = (studentId: string, status: AttendanceStatus) => {
+  const handleMarkAttendance = (
+    studentId: string,
+    status: AttendanceStatus,
+  ) => {
     setAttendanceData((prev) => ({
       ...prev,
       [studentId]: { ...prev[studentId], status },
     }));
   };
 
-  const handleValueChange = (studentId: string, field: string, value: string | number) => {
+  const handleValueChange = (
+    studentId: string,
+    field: string,
+    value: string | number,
+  ) => {
     setAttendanceData((prev) => ({
       ...prev,
       [studentId]: { ...prev[studentId], [field]: value },
@@ -122,8 +144,8 @@ export const useAttendanceDetails = (classId: string, enrollments: Enrollment[],
 
   const handleBulkMark = (status: AttendanceStatus) => {
     const newData = { ...attendanceData };
-    enrollments.forEach(e => {
-        newData[e.studentId] = { ...newData[e.studentId], status };
+    enrollments.forEach((e) => {
+      newData[e.studentId] = { ...newData[e.studentId], status };
     });
     setAttendanceData(newData);
   };
@@ -134,20 +156,24 @@ export const useAttendanceDetails = (classId: string, enrollments: Enrollment[],
       ...data,
     }));
 
-    saveAttendance({
+    saveAttendance(
+      {
         url: "/attendance/bulk",
         method: "post",
         values: { classId, records, date: selectedDate },
-      }, {
+      },
+      {
         onSuccess: () => {
           open?.({
             type: "success",
             message: t("classes.attendance.toast.saved"),
-            description: t("classes.attendance.toast.savedDescription", { date: selectedDate }),
+            description: t("classes.attendance.toast.savedDescription", {
+              date: selectedDate,
+            }),
           });
           refetch();
         },
-      }
+      },
     );
   };
 
@@ -169,6 +195,6 @@ export const useAttendanceDetails = (classId: string, enrollments: Enrollment[],
     handleValueChange,
     handleBulkMark,
     handleSave,
-    refetch
+    refetch,
   };
 };

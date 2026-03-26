@@ -39,7 +39,7 @@ import {
   FileText,
   Lightbulb,
   Info,
-  GraduationCap
+  GraduationCap,
 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
@@ -98,8 +98,8 @@ const SubjectsEdit = () => {
                     Edit Subject
                   </CardTitle>
                   <CardDescription>
-                    Update the details for the subject "
-                    {query?.data?.data.name}".
+                    Update the details for the subject "{query?.data?.data.name}
+                    ".
                   </CardDescription>
                 </CardHeader>
 
@@ -272,7 +272,8 @@ const SubjectsEdit = () => {
                   <span className="text-xs font-bold text-primary">2</span>
                 </div>
                 <p>
-                  <strong>Credits:</strong> Assign credits based on the workload and importance of the subject.
+                  <strong>Credits:</strong> Assign credits based on the workload
+                  and importance of the subject.
                 </p>
               </div>
             </CardContent>

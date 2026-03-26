@@ -1,6 +1,12 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronRight, Sparkles, AlertCircle, CheckCircle2, Clock } from "lucide-react";
+import {
+  ChevronRight,
+  Sparkles,
+  AlertCircle,
+  CheckCircle2,
+  Clock,
+} from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -42,21 +48,25 @@ const getPriorityStyles = (priority: ActionPriority) => {
 
 const getPriorityIcon = (priority: ActionPriority) => {
   switch (priority) {
-    case "urgent": return AlertCircle;
-    case "success": return CheckCircle2;
-    case "ai": return Sparkles;
+    case "urgent":
+      return AlertCircle;
+    case "success":
+      return CheckCircle2;
+    case "ai":
+      return Sparkles;
     case "normal":
-    default: return Clock;
+    default:
+      return Clock;
   }
 };
 
-export const ActionCenter = ({ 
-  title, 
-  actions, 
-  emptyMessage, 
+export const ActionCenter = ({
+  title,
+  actions,
+  emptyMessage,
   emptyDescription,
   onEmptyAction,
-  emptyActionText
+  emptyActionText,
 }: ActionCenterProps) => {
   if (actions.length === 0) {
     return (
@@ -68,7 +78,7 @@ export const ActionCenter = ({
         <Card className="border-none bg-gradient-to-br from-background via-background to-primary/5 shadow-2xl rounded-[2.5rem] overflow-hidden group">
           <div className="absolute inset-0 bg-dot-pattern opacity-[0.03] pointer-events-none" />
           <CardContent className="p-10 md:p-16 flex flex-col items-center justify-center text-center relative z-10">
-            <motion.div 
+            <motion.div
               initial={{ scale: 0.5, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
@@ -76,12 +86,20 @@ export const ActionCenter = ({
             >
               <CheckCircle2 className="h-10 w-10 md:h-12 md:w-12 animate-pulse" />
             </motion.div>
-            <h3 className="text-2xl md:text-3xl font-black tracking-tight mb-3">{emptyMessage}</h3>
+            <h3 className="text-2xl md:text-3xl font-black tracking-tight mb-3">
+              {emptyMessage}
+            </h3>
             {emptyDescription && (
-              <p className="text-muted-foreground font-medium mb-8 max-w-md mx-auto leading-relaxed">{emptyDescription}</p>
+              <p className="text-muted-foreground font-medium mb-8 max-w-md mx-auto leading-relaxed">
+                {emptyDescription}
+              </p>
             )}
             {onEmptyAction && emptyActionText && (
-              <Button onClick={onEmptyAction} size="lg" className="rounded-2xl font-black uppercase tracking-widest h-14 px-10 shadow-xl shadow-primary/20 hover:scale-105 transition-transform">
+              <Button
+                onClick={onEmptyAction}
+                size="lg"
+                className="rounded-2xl font-black uppercase tracking-widest h-14 px-10 shadow-xl shadow-primary/20 hover:scale-105 transition-transform"
+              >
                 <Sparkles className="mr-2 h-5 w-5 animate-pulse" />
                 {emptyActionText}
               </Button>
@@ -96,11 +114,11 @@ export const ActionCenter = ({
     <div className="space-y-6">
       <div className="flex items-center gap-4 px-2">
         <h2 className="text-xs font-black uppercase tracking-[0.3em] text-muted-foreground/60">
-            {title}
+          {title}
         </h2>
         <div className="h-px flex-1 bg-gradient-to-r from-muted-foreground/10 to-transparent" />
       </div>
-      
+
       <div className="grid gap-6 grid-cols-[repeat(auto-fit,minmax(320px,1fr))]">
         <AnimatePresence mode="popLayout">
           {actions.map((action, index) => {
@@ -114,29 +132,47 @@ export const ActionCenter = ({
                 initial={{ opacity: 0, y: 20, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.4, delay: index * 0.05, ease: [0.23, 1, 0.32, 1] }}
+                transition={{
+                  duration: 0.4,
+                  delay: index * 0.05,
+                  ease: [0.23, 1, 0.32, 1],
+                }}
                 whileHover={{ y: -8, transition: { duration: 0.2 } }}
                 className={cn(
                   "relative p-6 rounded-[2rem] border shadow-lg flex flex-col group cursor-pointer overflow-hidden transition-all duration-500",
-                  action.priority === "urgent" ? "bg-destructive/[0.01] border-destructive/10 hover:border-destructive/30 hover:shadow-destructive/5" : 
-                  action.priority === "ai" ? "bg-ai-primary/[0.01] border-ai-primary/10 hover:border-ai-primary/30 hover:shadow-ai-primary/5" :
-                  "bg-background/40 border-border/40 hover:border-primary/30 hover:shadow-primary/5"
+                  action.priority === "urgent"
+                    ? "bg-destructive/[0.01] border-destructive/10 hover:border-destructive/30 hover:shadow-destructive/5"
+                    : action.priority === "ai"
+                      ? "bg-ai-primary/[0.01] border-ai-primary/10 hover:border-ai-primary/30 hover:shadow-ai-primary/5"
+                      : "bg-background/40 border-border/40 hover:border-primary/30 hover:shadow-primary/5",
                 )}
                 onClick={action.onClick}
               >
                 {/* Visual Glow */}
-                <div className={cn(
-                  "absolute -top-24 -right-24 w-48 h-48 rounded-full blur-[80px] opacity-0 group-hover:opacity-20 transition-opacity duration-700",
-                  action.priority === "urgent" ? "bg-destructive" : 
-                  action.priority === "ai" ? "bg-ai-primary" : "bg-primary"
-                )} />
+                <div
+                  className={cn(
+                    "absolute -top-24 -right-24 w-48 h-48 rounded-full blur-[80px] opacity-0 group-hover:opacity-20 transition-opacity duration-700",
+                    action.priority === "urgent"
+                      ? "bg-destructive"
+                      : action.priority === "ai"
+                        ? "bg-ai-primary"
+                        : "bg-primary",
+                  )}
+                />
 
                 <div className="flex items-start gap-5 mb-6">
-                  <div className={cn("p-3.5 rounded-2xl transition-all duration-500 group-hover:scale-110 group-hover:rotate-3", styles)}>
+                  <div
+                    className={cn(
+                      "p-3.5 rounded-2xl transition-all duration-500 group-hover:scale-110 group-hover:rotate-3",
+                      styles,
+                    )}
+                  >
                     <Icon className="h-6 w-6" />
                   </div>
                   <div className="flex-1 mt-1 text-start">
-                    <h3 className="text-lg font-black leading-tight tracking-tight">{action.title}</h3>
+                    <h3 className="text-lg font-black leading-tight tracking-tight">
+                      {action.title}
+                    </h3>
                   </div>
                 </div>
 
@@ -146,26 +182,41 @@ export const ActionCenter = ({
 
                 <div className="mt-8 flex items-center justify-between">
                   <div className="flex flex-col">
-                    <span className={cn(
+                    <span
+                      className={cn(
                         "text-[9px] font-black uppercase tracking-[0.2em] transition-colors mb-1",
-                        action.priority === "urgent" ? "text-destructive/60" :
-                        action.priority === "ai" ? "text-ai-primary/60" : "text-primary/60"
-                    )}>
-                        Status
+                        action.priority === "urgent"
+                          ? "text-destructive/60"
+                          : action.priority === "ai"
+                            ? "text-ai-primary/60"
+                            : "text-primary/60",
+                      )}
+                    >
+                      Status
                     </span>
-                    <span className={cn(
+                    <span
+                      className={cn(
                         "text-[11px] font-black uppercase tracking-[0.1em] transition-colors",
-                        action.priority === "urgent" ? "text-destructive" :
-                        action.priority === "ai" ? "text-ai-primary" : "text-primary"
-                    )}>
-                        {action.actionText}
+                        action.priority === "urgent"
+                          ? "text-destructive"
+                          : action.priority === "ai"
+                            ? "text-ai-primary"
+                            : "text-primary",
+                      )}
+                    >
+                      {action.actionText}
                     </span>
                   </div>
-                  <div className={cn(
-                    "p-2 rounded-xl bg-background border shadow-sm transition-all duration-500 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 group-hover:bg-primary group-hover:text-white",
-                    action.priority === "urgent" ? "border-destructive/10 text-destructive group-hover:bg-destructive" :
-                    action.priority === "ai" ? "border-ai-primary/10 text-ai-primary group-hover:bg-ai-primary" : "border-primary/10 text-primary"
-                  )}>
+                  <div
+                    className={cn(
+                      "p-2 rounded-xl bg-background border shadow-sm transition-all duration-500 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 group-hover:bg-primary group-hover:text-white",
+                      action.priority === "urgent"
+                        ? "border-destructive/10 text-destructive group-hover:bg-destructive"
+                        : action.priority === "ai"
+                          ? "border-ai-primary/10 text-ai-primary group-hover:bg-ai-primary"
+                          : "border-primary/10 text-primary",
+                    )}
+                  >
                     <ChevronRight className="h-4 w-4 rtl:rotate-180" />
                   </div>
                 </div>

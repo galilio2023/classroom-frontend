@@ -12,18 +12,23 @@ export const useAssignmentLogic = (
   }, [submissions, userId]);
 
   const isQuiz = useMemo(() => {
-    return assignment?.description?.includes("### Q1:") && assignment?.description?.includes("---");
+    return (
+      assignment?.description?.includes("### Q1:") &&
+      assignment?.description?.includes("---")
+    );
   }, [assignment]);
 
   const isPhysicsLab = useMemo(() => {
-    return assignment?.title?.toLowerCase().includes("lab") || 
-           assignment?.description?.toLowerCase().includes("trajectory");
+    return (
+      assignment?.title?.toLowerCase().includes("lab") ||
+      assignment?.description?.toLowerCase().includes("trajectory")
+    );
   }, [assignment]);
 
   const blendedGrade = useMemo(() => {
     if (!mySubmission?.grade || !assignment?.hasPeerReview) return null;
     // Logic for calculating average from reviews could be here or received from API
-    return null; 
+    return null;
   }, [mySubmission, assignment]);
 
   return {

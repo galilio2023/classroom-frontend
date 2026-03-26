@@ -14,7 +14,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useSelect, useCreate, useGetIdentity, HttpError } from "@refinedev/core";
+import {
+  useSelect,
+  useCreate,
+  useGetIdentity,
+  HttpError,
+} from "@refinedev/core";
 import { User, UserRole } from "@/types";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -77,16 +82,19 @@ export const InviteTeacherDialog = ({
         },
         onError: (err) => {
           const error = err as HttpError;
-          toast.error((error?.response?.data as any)?.message || t("classes.dialogs.inviteTeacher.toast.error"));
+          toast.error(
+            (error?.response?.data as any)?.message ||
+              t("classes.dialogs.inviteTeacher.toast.error"),
+          );
         },
       },
     );
   };
 
   const availableTeachers = teacherOptions.filter(
-    (option) => 
-      !existingTeacherIds.includes(String(option.value)) && 
-      String(option.value) !== identity?.id
+    (option) =>
+      !existingTeacherIds.includes(String(option.value)) &&
+      String(option.value) !== identity?.id,
   );
 
   return (
@@ -104,12 +112,20 @@ export const InviteTeacherDialog = ({
             value={selectedTeacherId ?? undefined}
           >
             <SelectTrigger>
-              <SelectValue placeholder={t("classes.dialogs.inviteTeacher.fieldPlaceholder")} />
+              <SelectValue
+                placeholder={t(
+                  "classes.dialogs.inviteTeacher.fieldPlaceholder",
+                )}
+              />
             </SelectTrigger>
             <SelectContent>
               {availableTeachers.length > 0 ? (
                 availableTeachers.map((option) => (
-                  <SelectItem key={option.value} value={String(option.value)} className="text-start">
+                  <SelectItem
+                    key={option.value}
+                    value={String(option.value)}
+                    className="text-start"
+                  >
                     {option.label}
                   </SelectItem>
                 ))

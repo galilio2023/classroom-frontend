@@ -314,7 +314,10 @@ export const NotificationBell = () => {
             )}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-80 p-0 mt-2 bg-white dark:bg-[#09090b] border border-border/50 shadow-2xl opacity-100 backdrop-blur-none animate-in zoom-in-95 duration-200" align="end">
+        <PopoverContent
+          className="w-80 p-0 mt-2 bg-white dark:bg-[#09090b] border border-border/50 shadow-2xl opacity-100 backdrop-blur-none animate-in zoom-in-95 duration-200"
+          align="end"
+        >
           <div className="flex items-center justify-between p-4 border-b border-border/50 bg-muted/20">
             <h4 className="font-bold text-sm tracking-tight">
               {t("notifications.title")}

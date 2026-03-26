@@ -32,7 +32,8 @@ export const useAssignmentGeneration = () => {
       open?.({
         type: "error",
         message: "Please fill in all fields",
-        description: "Subject and Topic are required to generate an assignment.",
+        description:
+          "Subject and Topic are required to generate an assignment.",
       });
       return;
     }
@@ -54,8 +55,11 @@ export const useAssignmentGeneration = () => {
         },
         onError: (error: HttpError) => {
           let description = "There was an error connecting to the AI service.";
-          if (error.status === 429) description = "AI generation limit reached for this period. Please try again later.";
-          if (error.status === 503) description = "AI services are currently offline for maintenance.";
+          if (error.status === 429)
+            description =
+              "AI generation limit reached for this period. Please try again later.";
+          if (error.status === 503)
+            description = "AI services are currently offline for maintenance.";
 
           open?.({
             type: "error",
@@ -63,7 +67,7 @@ export const useAssignmentGeneration = () => {
             description,
           });
         },
-      }
+      },
     );
   };
 

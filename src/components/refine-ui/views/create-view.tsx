@@ -47,7 +47,7 @@ export const CreateViewHeader = ({
     titleFromProps ??
     getUserFriendlyName(
       resource?.meta?.label ?? identifier ?? resource?.name,
-      "plural"
+      "plural",
     );
 
   return (
@@ -61,7 +61,7 @@ export const CreateViewHeader = ({
           "gap-1",
           "items-center",
           "-ms-2.5",
-          headerClassName
+          headerClassName,
         )}
       >
         <Button variant="ghost" size="icon" onClick={back}>

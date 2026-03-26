@@ -1,7 +1,11 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Link as RouterLink } from "react-router-dom";
 import { useRefineOptions } from "@refinedev/core";
-import { SidebarHeader as ShadcnSidebarHeader, SidebarTrigger as ShadcnSidebarTrigger, useSidebar as useShadcnSidebar } from "@/components/ui/sidebar";
+import {
+  SidebarHeader as ShadcnSidebarHeader,
+  SidebarTrigger as ShadcnSidebarTrigger,
+  useSidebar as useShadcnSidebar,
+} from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 
 export function SidebarHeader() {
@@ -24,16 +28,19 @@ export function SidebarHeader() {
             exit={{ opacity: 0, x: -20, filter: "blur(10px)" }}
             transition={{ duration: 0.4, ease: "easeOut" }}
           >
-            <RouterLink to="/" className="flex flex-row items-center gap-3 whitespace-nowrap group">
+            <RouterLink
+              to="/"
+              className="flex flex-row items-center gap-3 whitespace-nowrap group"
+            >
               <div className="shrink-0 p-2.5 bg-primary/10 rounded-xl transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 shadow-sm">
                 {title.icon}
               </div>
               <div className="flex flex-col">
                 <h2 className="text-sm font-black tracking-tight text-foreground leading-none mb-0.5">
-                    {title.text}
+                  {title.text}
                 </h2>
                 <span className="text-[10px] text-muted-foreground/60 font-medium tracking-wide">
-                    {open ? "Learning Management" : ""}
+                  {open ? "Learning Management" : ""}
                 </span>
               </div>
             </RouterLink>

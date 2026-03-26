@@ -1,6 +1,12 @@
 import React from "react";
 import { Button } from "./ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "./ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "./ui/card";
 import { ArrowRight, Users } from "lucide-react";
 import { useGo } from "@refinedev/core";
 import { QuizResult } from "./ai/quiz-result";
@@ -19,7 +25,12 @@ interface InteractiveQuizProps {
   onComplete?: (score: number) => void;
 }
 
-export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({ assignmentId, classId, description, onComplete }) => {
+export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({
+  assignmentId,
+  classId,
+  description,
+  onComplete,
+}) => {
   const { t } = useTranslation();
   const go = useGo();
   const {
@@ -41,10 +52,10 @@ export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({ assignmentId, 
 
   if (isFinished) {
     return (
-      <QuizResult 
-        score={score} 
-        totalQuestions={questions.length} 
-        onBackToDashboard={() => go({ to: "/dashboard" })} 
+      <QuizResult
+        score={score}
+        totalQuestions={questions.length}
+        onBackToDashboard={() => go({ to: "/dashboard" })}
       />
     );
   }
@@ -52,26 +63,30 @@ export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({ assignmentId, 
   return (
     <div className="space-y-4 md:space-y-6 animate-in fade-in duration-500">
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-        <QuizProgress 
-            currentStep={currentStep} 
-            totalQuestions={questions.length} 
-            progress={progress} 
-            className="flex-1 w-full"
+        <QuizProgress
+          currentStep={currentStep}
+          totalQuestions={questions.length}
+          progress={progress}
+          className="flex-1 w-full"
         />
-        
+
         <AnimatePresence>
-            {activeStudents > 1 && (
-                <motion.div
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 20 }}
-                >
-                    <Badge variant="outline" className="bg-primary/5 text-primary border-primary/20 px-3 py-1.5 rounded-full font-bold gap-2 animate-pulse">
-                        <Users className="h-3.5 w-3.5" />
-                        {activeStudents} {t("classes.quiz.studentsActive", "Students active")}
-                    </Badge>
-                </motion.div>
-            )}
+          {activeStudents > 1 && (
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+            >
+              <Badge
+                variant="outline"
+                className="bg-primary/5 text-primary border-primary/20 px-3 py-1.5 rounded-full font-bold gap-2 animate-pulse"
+              >
+                <Users className="h-3.5 w-3.5" />
+                {activeStudents}{" "}
+                {t("classes.quiz.studentsActive", "Students active")}
+              </Badge>
+            </motion.div>
+          )}
         </AnimatePresence>
       </div>
 
@@ -101,19 +116,21 @@ export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({ assignmentId, 
         </CardContent>
         <CardFooter className="bg-muted/30 border-t border-black/5 p-4 md:p-6">
           {!isAnswered ? (
-            <Button 
-              className="w-full rounded-xl font-black h-10 md:h-12 shadow-lg shadow-primary/20" 
+            <Button
+              className="w-full rounded-xl font-black h-10 md:h-12 shadow-lg shadow-primary/20"
               disabled={!selectedOption}
               onClick={handleCheckAnswer}
             >
               {t("classes.quiz.checkAnswer")}
             </Button>
           ) : (
-            <Button 
-              className="w-full rounded-xl font-black h-10 md:h-12 shadow-lg shadow-primary/20" 
+            <Button
+              className="w-full rounded-xl font-black h-10 md:h-12 shadow-lg shadow-primary/20"
               onClick={handleNext}
             >
-              {currentStep === questions.length - 1 ? t("classes.quiz.finishQuiz") : t("classes.quiz.nextQuestion")}
+              {currentStep === questions.length - 1
+                ? t("classes.quiz.finishQuiz")
+                : t("classes.quiz.nextQuestion")}
               <ArrowRight className="ms-2 h-4 w-4 md:h-5 md:w-5 ltr:block rtl:hidden" />
               <ArrowRight className="me-2 h-4 w-4 md:h-5 md:w-5 rtl:block ltr:hidden rotate-180" />
             </Button>

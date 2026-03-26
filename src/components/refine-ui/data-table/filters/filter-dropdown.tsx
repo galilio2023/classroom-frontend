@@ -44,7 +44,7 @@ export function DataTableFilterDropdown<TData>({
               "text-primary": isFiltered,
               "text-muted-foreground": !isFiltered,
             },
-            triggerClassName
+            triggerClassName,
           )}
         >
           <ListFilter className="!h-3 !w-3" />
@@ -78,7 +78,12 @@ export function DataTableFilterDropdownActions({
   const t = useTranslate();
 
   return (
-    <div className={cn("flex items-center justify-between w-full gap-2", className)}>
+    <div
+      className={cn(
+        "flex items-center justify-between w-full gap-2",
+        className,
+      )}
+    >
       <Button
         size="sm"
         variant="ghost"

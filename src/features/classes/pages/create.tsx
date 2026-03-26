@@ -21,8 +21,27 @@ import {
 import { CreateView } from "@/components/refine-ui/views/create-view";
 import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
 import { Textarea } from "@/components/ui/textarea";
-import { useBack, useList, useGetIdentity, HttpError, BaseRecord } from "@refinedev/core";
-import { Loader2, Check, ChevronLeft, LayoutDashboard, BookOpen, Users, Palette, FileText, Sparkles, PlusCircle, Info, Calendar } from "lucide-react";
+import {
+  useBack,
+  useList,
+  useGetIdentity,
+  HttpError,
+  BaseRecord,
+} from "@refinedev/core";
+import {
+  Loader2,
+  Check,
+  ChevronLeft,
+  LayoutDashboard,
+  BookOpen,
+  Users,
+  Palette,
+  FileText,
+  Sparkles,
+  PlusCircle,
+  Info,
+  Calendar,
+} from "lucide-react";
 import { classCreateFormSchema } from "@/schemas/class";
 import { Subject, User, ClassStatus, AcademicTerm } from "@/types";
 import { toast } from "sonner";
@@ -121,7 +140,7 @@ const ClassesCreate = () => {
   const terms = termsQuery.data?.data ?? [];
   const termsLoading = termsQuery.isLoading;
 
-  const isAr = i18n.language === 'ar';
+  const isAr = i18n.language === "ar";
 
   return (
     <CreateView className="class-view pb-20">
@@ -129,11 +148,15 @@ const ClassesCreate = () => {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 text-start">
           <div className="space-y-1">
             <Breadcrumb />
-            <h1 className="text-4xl font-black tracking-tighter leading-none">{t("classes.create.title")}</h1>
-            <p className="text-muted-foreground font-medium">{t("classes.create.description")}</p>
+            <h1 className="text-4xl font-black tracking-tighter leading-none">
+              {t("classes.create.title")}
+            </h1>
+            <p className="text-muted-foreground font-medium">
+              {t("classes.create.description")}
+            </p>
           </div>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={() => back()}
             className="rounded-xl h-11 px-6 font-black uppercase tracking-widest text-[10px] gap-2 border-primary/20 hover:bg-primary/5 text-primary transition-all"
           >
@@ -147,7 +170,10 @@ const ClassesCreate = () => {
           animate={{ opacity: 1, y: 0 }}
         >
           <Card className="border-none shadow-2xl bg-card/50 backdrop-blur-xl rounded-[2rem] overflow-hidden text-start">
-            <div className="h-1.5 w-full transition-colors duration-500" style={{ backgroundColor: selectedColor }} />
+            <div
+              className="h-1.5 w-full transition-colors duration-500"
+              style={{ backgroundColor: selectedColor }}
+            />
             <CardHeader className="p-8 pb-4">
               <CardTitle className="text-sm font-black uppercase tracking-widest flex items-center gap-2 opacity-60">
                 <LayoutDashboard className="h-4 w-4" />
@@ -166,10 +192,17 @@ const ClassesCreate = () => {
                           <FormItem className="space-y-3">
                             <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2">
                               <LayoutDashboard className="h-3 w-3" />
-                              {t("classes.form.className")} <span className="text-destructive">*</span>
+                              {t("classes.form.className")}{" "}
+                              <span className="text-destructive">*</span>
                             </FormLabel>
                             <FormControl>
-                              <Input placeholder={t("classes.form.classNamePlaceholder")} {...field} className="h-14 rounded-2xl bg-muted/20 border-none focus-visible:ring-primary font-bold" />
+                              <Input
+                                placeholder={t(
+                                  "classes.form.classNamePlaceholder",
+                                )}
+                                {...field}
+                                className="h-14 rounded-2xl bg-muted/20 border-none focus-visible:ring-primary font-bold"
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -184,7 +217,8 @@ const ClassesCreate = () => {
                             <FormItem className="space-y-3">
                               <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2">
                                 <BookOpen className="h-3 w-3" />
-                                {t("classes.form.subjectArea")} <span className="text-destructive">*</span>
+                                {t("classes.form.subjectArea")}{" "}
+                                <span className="text-destructive">*</span>
                               </FormLabel>
                               <Select
                                 onValueChange={(value) => {
@@ -197,22 +231,38 @@ const ClassesCreate = () => {
                                     field.onChange(Number(value));
                                   }
                                 }}
-                                value={isCreatingNewSubject ? "new-subject" : (field.value?.toString() || "")}
+                                value={
+                                  isCreatingNewSubject
+                                    ? "new-subject"
+                                    : field.value?.toString() || ""
+                                }
                                 disabled={subjectsLoading}
                               >
                                 <FormControl>
                                   <SelectTrigger className="h-14 rounded-2xl bg-muted/20 border-none focus:ring-primary transition-all font-bold">
-                                    <SelectValue placeholder={t("classes.form.selectSubject")} />
+                                    <SelectValue
+                                      placeholder={t(
+                                        "classes.form.selectSubject",
+                                      )}
+                                    />
                                   </SelectTrigger>
                                 </FormControl>
                                 <SelectContent className="rounded-xl border-none shadow-2xl">
                                   {subjects.map((subject) => (
-                                    <SelectItem key={subject.id} value={subject.id.toString()} className="rounded-lg font-bold text-start">
+                                    <SelectItem
+                                      key={subject.id}
+                                      value={subject.id.toString()}
+                                      className="rounded-lg font-bold text-start"
+                                    >
                                       {subject.name}
                                     </SelectItem>
                                   ))}
-                                  <SelectItem value="new-subject" className="rounded-lg font-bold text-start text-primary">
-                                    <PlusCircle className="inline-block h-4 w-4 me-2" /> {t("classes.form.createNewSubject")}
+                                  <SelectItem
+                                    value="new-subject"
+                                    className="rounded-lg font-bold text-start text-primary"
+                                  >
+                                    <PlusCircle className="inline-block h-4 w-4 me-2" />{" "}
+                                    {t("classes.form.createNewSubject")}
                                   </SelectItem>
                                 </SelectContent>
                               </Select>
@@ -228,10 +278,17 @@ const ClassesCreate = () => {
                               <FormItem className="space-y-3">
                                 <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2">
                                   <BookOpen className="h-3 w-3" />
-                                  {t("classes.form.newSubjectName")} <span className="text-destructive">*</span>
+                                  {t("classes.form.newSubjectName")}{" "}
+                                  <span className="text-destructive">*</span>
                                 </FormLabel>
                                 <FormControl>
-                                  <Input placeholder={t("classes.form.newSubjectName")} {...field} className="h-14 rounded-2xl bg-muted/20 border-none focus-visible:ring-primary font-bold" />
+                                  <Input
+                                    placeholder={t(
+                                      "classes.form.newSubjectName",
+                                    )}
+                                    {...field}
+                                    className="h-14 rounded-2xl bg-muted/20 border-none focus-visible:ring-primary font-bold"
+                                  />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -246,21 +303,32 @@ const ClassesCreate = () => {
                               <FormItem className="space-y-3">
                                 <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2">
                                   <Calendar className="h-3 w-3" />
-                                  {t("classes.form.academicTerm")} <span className="text-destructive">*</span>
+                                  {t("classes.form.academicTerm")}{" "}
+                                  <span className="text-destructive">*</span>
                                 </FormLabel>
                                 <Select
-                                  onValueChange={(value) => field.onChange(Number(value))}
+                                  onValueChange={(value) =>
+                                    field.onChange(Number(value))
+                                  }
                                   value={field.value?.toString()}
                                   disabled={termsLoading}
                                 >
                                   <FormControl>
                                     <SelectTrigger className="h-14 rounded-2xl bg-muted/20 border-none focus:ring-primary transition-all font-bold">
-                                      <SelectValue placeholder={t("classes.form.selectTerm")} />
+                                      <SelectValue
+                                        placeholder={t(
+                                          "classes.form.selectTerm",
+                                        )}
+                                      />
                                     </SelectTrigger>
                                   </FormControl>
                                   <SelectContent className="rounded-xl border-none shadow-2xl">
                                     {terms.map((term) => (
-                                      <SelectItem key={term.id} value={term.id.toString()} className="rounded-lg font-bold text-start">
+                                      <SelectItem
+                                        key={term.id}
+                                        value={term.id.toString()}
+                                        className="rounded-lg font-bold text-start"
+                                      >
                                         {term.name}
                                       </SelectItem>
                                     ))}
@@ -281,7 +349,8 @@ const ClassesCreate = () => {
                             <FormItem className="space-y-3">
                               <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2">
                                 <Users className="h-3 w-3" />
-                                {t("classes.form.capacity")} <span className="text-destructive">*</span>
+                                {t("classes.form.capacity")}{" "}
+                                <span className="text-destructive">*</span>
                               </FormLabel>
                               <FormControl>
                                 <div className="relative group">
@@ -290,10 +359,21 @@ const ClassesCreate = () => {
                                     min={1}
                                     placeholder="30"
                                     {...field}
-                                    onChange={(e) => field.onChange(e.target.value === '' ? undefined : Number(e.target.value))}
+                                    onChange={(e) =>
+                                      field.onChange(
+                                        e.target.value === ""
+                                          ? undefined
+                                          : Number(e.target.value),
+                                      )
+                                    }
                                     className="h-14 rounded-2xl bg-muted/20 border-none focus-visible:ring-primary font-black text-center text-xl"
                                   />
-                                  <span className={cn("absolute top-1/2 -translate-y-1/2 text-[10px] font-black opacity-20 group-focus-within:opacity-40 transition-opacity", isAr ? "left-4" : "right-4")}>
+                                  <span
+                                    className={cn(
+                                      "absolute top-1/2 -translate-y-1/2 text-[10px] font-black opacity-20 group-focus-within:opacity-40 transition-opacity",
+                                      isAr ? "left-4" : "right-4",
+                                    )}
+                                  >
                                     {t("classes.form.studentsUnit")}
                                   </span>
                                 </div>
@@ -302,40 +382,42 @@ const ClassesCreate = () => {
                             </FormItem>
                           )}
                         />
-                         <FormField
-                        control={form.control}
-                        name="color"
-                        render={({ field }) => (
-                          <FormItem className="space-y-4">
-                            <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2">
-                              <Palette className="h-3 w-3" />
-                              {t("classes.form.themeColor")}
-                            </FormLabel>
-                            <FormControl>
-                              <div className="flex flex-wrap gap-3 p-4 rounded-2xl bg-muted/10 border border-black/[0.03] dark:border-white/[0.03]">
-                                {PRESET_COLORS.map((color) => (
-                                  <button
-                                    key={color}
-                                    type="button"
-                                    className={cn(
-                                      "h-10 w-10 rounded-full border-4 transition-all hover:scale-110 flex items-center justify-center shadow-sm",
-                                      field.value === color ? "border-white dark:border-white/5 scale-110 ring-2 ring-primary" : "border-transparent"
-                                    )}
-                                    style={{ backgroundColor: color }}
-                                    onClick={() => field.onChange(color)}
-                                  >
-                                    {field.value === color && <Check className="h-5 w-5 text-white" />}
-                                  </button>
-                                ))}
-                              </div>
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                        <FormField
+                          control={form.control}
+                          name="color"
+                          render={({ field }) => (
+                            <FormItem className="space-y-4">
+                              <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2">
+                                <Palette className="h-3 w-3" />
+                                {t("classes.form.themeColor")}
+                              </FormLabel>
+                              <FormControl>
+                                <div className="flex flex-wrap gap-3 p-4 rounded-2xl bg-muted/10 border border-black/[0.03] dark:border-white/[0.03]">
+                                  {PRESET_COLORS.map((color) => (
+                                    <button
+                                      key={color}
+                                      type="button"
+                                      className={cn(
+                                        "h-10 w-10 rounded-full border-4 transition-all hover:scale-110 flex items-center justify-center shadow-sm",
+                                        field.value === color
+                                          ? "border-white dark:border-white/5 scale-110 ring-2 ring-primary"
+                                          : "border-transparent",
+                                      )}
+                                      style={{ backgroundColor: color }}
+                                      onClick={() => field.onChange(color)}
+                                    >
+                                      {field.value === color && (
+                                        <Check className="h-5 w-5 text-white" />
+                                      )}
+                                    </button>
+                                  ))}
+                                </div>
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
                       </div>
-
-
                     </div>
 
                     <div className="space-y-8">
@@ -350,12 +432,19 @@ const ClassesCreate = () => {
                             </FormLabel>
                             <FormControl>
                               <div className="relative group">
-                                <Textarea 
-                                  placeholder={t("classes.form.descriptionPlaceholder")} 
+                                <Textarea
+                                  placeholder={t(
+                                    "classes.form.descriptionPlaceholder",
+                                  )}
                                   className="min-h-[280px] rounded-[1.5rem] bg-muted/20 border-none focus-visible:ring-primary p-6 text-sm leading-relaxed shadow-inner transition-all"
-                                  {...field} 
+                                  {...field}
                                 />
-                                <div className={cn("absolute bottom-4 opacity-10 group-focus-within:opacity-30 transition-opacity", isAr ? "left-4" : "right-4")}>
+                                <div
+                                  className={cn(
+                                    "absolute bottom-4 opacity-10 group-focus-within:opacity-30 transition-opacity",
+                                    isAr ? "left-4" : "right-4",
+                                  )}
+                                >
                                   <Sparkles className="h-8 w-8" />
                                 </div>
                               </div>
@@ -368,9 +457,9 @@ const ClassesCreate = () => {
                   </div>
 
                   <div className="pt-6 border-t border-black/[0.03] dark:border-white/[0.03]">
-                    <Button 
-                      type="submit" 
-                      size="lg" 
+                    <Button
+                      type="submit"
+                      size="lg"
                       className="w-full h-16 rounded-[1.5rem] font-black uppercase tracking-[0.3em] shadow-2xl shadow-primary/30 transition-all hover:scale-[1.01] active:scale-[0.99] relative overflow-hidden group"
                       disabled={isSubmitting}
                     >
@@ -389,7 +478,9 @@ const ClassesCreate = () => {
                     </Button>
                     <div className="mt-4 flex items-center justify-center gap-2 text-muted-foreground/40">
                       <Info className="h-3.5 w-3.5" />
-                      <span className="text-[9px] font-black uppercase tracking-widest">{t("classes.create.inviteNote")}</span>
+                      <span className="text-[9px] font-black uppercase tracking-widest">
+                        {t("classes.create.inviteNote")}
+                      </span>
                     </div>
                   </div>
                 </form>

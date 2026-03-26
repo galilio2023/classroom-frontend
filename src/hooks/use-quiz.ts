@@ -12,7 +12,12 @@ interface UseQuizProps {
   onComplete?: (score: number) => void;
 }
 
-export const useQuiz = ({ assignmentId, classId, description, onComplete }: UseQuizProps) => {
+export const useQuiz = ({
+  assignmentId,
+  classId,
+  description,
+  onComplete,
+}: UseQuizProps) => {
   const { t } = useTranslation();
   const { mutate: submitScore } = useCreate();
   const { open } = useNotification();
@@ -31,7 +36,8 @@ export const useQuiz = ({ assignmentId, classId, description, onComplete }: UseQ
   const [isFinished, setIsFinished] = useState(false);
 
   const currentQuestion = questions[currentStep];
-  const progress = questions.length > 0 ? (currentStep / questions.length) * 100 : 0;
+  const progress =
+    questions.length > 0 ? (currentStep / questions.length) * 100 : 0;
 
   // --- LIVE ACTIVITY LOGIC ---
   useEffect(() => {
@@ -44,23 +50,35 @@ export const useQuiz = ({ assignmentId, classId, description, onComplete }: UseQ
       setActiveStudents(data.count);
     };
 
-    const handleActiveStudent = (data: { studentName: string; quizId: number }) => {
+    const handleActiveStudent = (data: {
+      studentName: string;
+      quizId: number;
+    }) => {
       if (data.quizId === assignmentId) {
-        toast((t as any)("classes.quiz.startedToast", { name: data.studentName }), {
-          icon: "✍️",
-          duration: 3000,
-        });
+        toast(
+          (t as any)("classes.quiz.startedToast", { name: data.studentName }),
+          {
+            icon: "✍️",
+            duration: 3000,
+          },
+        );
       }
     };
 
-    const handleNudge = (data: { teacherName: string; message: string; quizId: number }) => {
-        if (data.quizId === assignmentId) {
-            toast(data.message, {
-                description: (t as any)("classes.quiz.nudgeFrom", { name: data.teacherName }),
-                icon: "👋",
-                duration: 5000,
-            });
-        }
+    const handleNudge = (data: {
+      teacherName: string;
+      message: string;
+      quizId: number;
+    }) => {
+      if (data.quizId === assignmentId) {
+        toast(data.message, {
+          description: (t as any)("classes.quiz.nudgeFrom", {
+            name: data.teacherName,
+          }),
+          icon: "👋",
+          duration: 5000,
+        });
+      }
     };
 
     socket.on("quiz:room_count", handleRoomCount);
@@ -84,37 +102,42 @@ export const useQuiz = ({ assignmentId, classId, description, onComplete }: UseQ
     if (!selectedOption || !currentQuestion) return;
     setIsAnswered(true);
     if (selectedOption === currentQuestion.correctAnswer) {
-      setScore(prev => prev + 1);
+      setScore((prev) => prev + 1);
     }
   };
 
   const handleNext = () => {
     if (currentStep < questions.length - 1) {
-      setCurrentStep(prev => prev + 1);
+      setCurrentStep((prev) => prev + 1);
       setSelectedOption(null);
       setIsAnswered(false);
     } else {
       setIsFinished(true);
       const finalScore = Math.round((score / questions.length) * 100);
-      
-      submitScore({
-        resource: "submissions",
-        values: {
-          assignmentId,
-          content: `Completed AI Quiz. Final Score: ${finalScore}%`,
-          grade: finalScore,
-          feedback: `Automated grade from interactive quiz. Correct answers: ${score}/${questions.length}`,
-        }
-      }, {
-        onSuccess: () => {
-          open?.({
-            type: "success",
-            message: t("classes.quiz.submittedTitle", "Quiz Submitted!"),
-            description: (t as any)("classes.quiz.submittedDesc", { score: finalScore }),
-          });
-          onComplete?.(finalScore);
-        }
-      });
+
+      submitScore(
+        {
+          resource: "submissions",
+          values: {
+            assignmentId,
+            content: `Completed AI Quiz. Final Score: ${finalScore}%`,
+            grade: finalScore,
+            feedback: `Automated grade from interactive quiz. Correct answers: ${score}/${questions.length}`,
+          },
+        },
+        {
+          onSuccess: () => {
+            open?.({
+              type: "success",
+              message: t("classes.quiz.submittedTitle", "Quiz Submitted!"),
+              description: (t as any)("classes.quiz.submittedDesc", {
+                score: finalScore,
+              }),
+            });
+            onComplete?.(finalScore);
+          },
+        },
+      );
     }
   };
 

@@ -29,7 +29,7 @@ const SIDEBAR_COOKIE_NAME = "sidebar_state";
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
 const SIDEBAR_WIDTH = "18rem";
 const SIDEBAR_WIDTH_MOBILE = "20rem";
-const SIDEBAR_WIDTH_ICON = "4rem"; 
+const SIDEBAR_WIDTH_ICON = "4rem";
 const SIDEBAR_KEYBOARD_SHORTCUT = "b";
 
 type SidebarContextProps = {
@@ -156,7 +156,7 @@ function Sidebar({
 }) {
   const { isMobile, state, openMobile, setOpenMobile } = useSidebar();
   const { t, i18n } = useTranslation();
-  const isAr = i18n.language === 'ar';
+  const isAr = i18n.language === "ar";
 
   // In RTL, "left" logical side is actually "right" visual side.
   // The side prop is usually logical, but here we enforce it visually based on language
@@ -187,7 +187,7 @@ function Sidebar({
           data-mobile="true"
           className={cn(
             "bg-card/60 backdrop-blur-3xl text-sidebar-foreground w-[var(--sidebar-width)] p-0 [&>button]:hidden shadow-2xl",
-            isAr ? "border-l border-border/40" : "border-r border-border/40"
+            isAr ? "border-l border-border/40" : "border-r border-border/40",
           )}
           style={
             {
@@ -208,7 +208,10 @@ function Sidebar({
 
   return (
     <div
-      className={cn("group peer text-sidebar-foreground hidden md:block", className)}
+      className={cn(
+        "group peer text-sidebar-foreground hidden md:block",
+        className,
+      )}
       data-state={state}
       data-collapsible={state === "collapsed" ? collapsible : ""}
       data-variant={variant}
@@ -259,7 +262,7 @@ function SidebarTrigger({
 }: React.ComponentProps<typeof Button>) {
   const { toggleSidebar, state } = useSidebar();
   const { t, i18n } = useTranslation();
-  const isAr = i18n.language === 'ar';
+  const isAr = i18n.language === "ar";
 
   return (
     <Button
@@ -267,7 +270,10 @@ function SidebarTrigger({
       data-slot="sidebar-trigger"
       variant="ghost"
       size="icon"
-      className={cn("h-10 w-10 rounded-xl bg-muted/20 hover:bg-primary/10 hover:text-primary transition-all duration-300 shadow-sm", className)}
+      className={cn(
+        "h-10 w-10 rounded-xl bg-muted/20 hover:bg-primary/10 hover:text-primary transition-all duration-300 shadow-sm",
+        className,
+      )}
       onClick={(event) => {
         onClick?.(event);
         toggleSidebar();
@@ -332,7 +338,10 @@ function SidebarInput({
     <Input
       data-slot="sidebar-input"
       data-sidebar="input"
-      className={cn("bg-background/50 h-10 w-full shadow-inner border-none rounded-xl px-4 font-bold text-sm", className)}
+      className={cn(
+        "bg-background/50 h-10 w-full shadow-inner border-none rounded-xl px-4 font-bold text-sm",
+        className,
+      )}
       {...props}
     />
   );
@@ -354,7 +363,10 @@ function SidebarFooter({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="sidebar-footer"
       data-sidebar="footer"
-      className={cn("flex flex-col gap-2 p-4 md:p-6 mt-auto border-t border-border/40", className)}
+      className={cn(
+        "flex flex-col gap-2 p-4 md:p-6 mt-auto border-t border-border/40",
+        className,
+      )}
       {...props}
     />
   );
@@ -518,7 +530,7 @@ function SidebarMenuButton({
   const Comp = asChild ? Slot : "button";
   const { isMobile, state } = useSidebar();
   const { i18n } = useTranslation();
-  const isAr = i18n.language === 'ar';
+  const isAr = i18n.language === "ar";
 
   const button = (
     <Comp
@@ -620,7 +632,10 @@ function SidebarMenuSkeleton({
     <div
       data-slot="sidebar-menu-skeleton"
       data-sidebar="menu-skeleton"
-      className={cn("flex h-11 items-center gap-3.5 rounded-xl px-3 bg-muted/20", className)}
+      className={cn(
+        "flex h-11 items-center gap-3.5 rounded-xl px-3 bg-muted/20",
+        className,
+      )}
       {...props}
     >
       {showIcon && (

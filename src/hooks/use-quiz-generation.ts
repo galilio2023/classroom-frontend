@@ -55,7 +55,7 @@ export const useQuizGeneration = (initialCount: number = 5) => {
             description: "There was an error connecting to the AI service.",
           });
         },
-      }
+      },
     );
   };
 

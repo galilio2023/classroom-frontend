@@ -4,12 +4,32 @@ import { Settings as SettingsIcon, Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import usePageTitle from "@/hooks/use-page-title";
 import { motion } from "framer-motion";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -22,7 +42,11 @@ import { UserRole } from "@/types"; // Assuming UserRole enum is accessible
 const settingsSchema = z.object({
   enableAiFeatures: z.boolean(),
   defaultRegistrationRole: z.nativeEnum(UserRole),
-  welcomeMessage: z.string().min(1, "Welcome message cannot be empty").max(500, "Welcome message too long").optional(),
+  welcomeMessage: z
+    .string()
+    .min(1, "Welcome message cannot be empty")
+    .max(500, "Welcome message too long")
+    .optional(),
 });
 
 type SettingsFormValues = z.infer<typeof settingsSchema>;
@@ -72,9 +96,13 @@ const SettingsEditPage = () => {
           toast.success(t("settings.toasts.success"));
         },
         onError: (error) => {
-          toast.error(t("settings.toasts.error", { message: error?.message || "Unknown error" }));
+          toast.error(
+            t("settings.toasts.error", {
+              message: error?.message || "Unknown error",
+            }),
+          );
         },
-      }
+      },
     );
   };
 
@@ -118,7 +146,10 @@ const SettingsEditPage = () => {
               </div>
             ) : (
               <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                <form
+                  onSubmit={form.handleSubmit(onSubmit)}
+                  className="space-y-8"
+                >
                   <FormField
                     control={form.control}
                     name="enableAiFeatures"
@@ -147,21 +178,38 @@ const SettingsEditPage = () => {
                     name="defaultRegistrationRole"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t("settings.form.defaultRegistrationRole.label")}</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormLabel>
+                          {t("settings.form.defaultRegistrationRole.label")}
+                        </FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder={t("settings.form.defaultRegistrationRole.placeholder")} />
+                              <SelectValue
+                                placeholder={t(
+                                  "settings.form.defaultRegistrationRole.placeholder",
+                                )}
+                              />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent className="bg-white dark:bg-[#09090b] opacity-100 backdrop-blur-none border border-border/50 shadow-2xl">
-                            <SelectItem value={UserRole.STUDENT}>{t("roles.student")}</SelectItem>
-                            <SelectItem value={UserRole.TEACHER}>{t("roles.teacher")}</SelectItem>
-                            <SelectItem value={UserRole.PARENT}>{t("roles.parent")}</SelectItem>
+                            <SelectItem value={UserRole.STUDENT}>
+                              {t("roles.student")}
+                            </SelectItem>
+                            <SelectItem value={UserRole.TEACHER}>
+                              {t("roles.teacher")}
+                            </SelectItem>
+                            <SelectItem value={UserRole.PARENT}>
+                              {t("roles.parent")}
+                            </SelectItem>
                           </SelectContent>
                         </Select>
                         <FormDescription>
-                          {t("settings.form.defaultRegistrationRole.description")}
+                          {t(
+                            "settings.form.defaultRegistrationRole.description",
+                          )}
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -173,9 +221,16 @@ const SettingsEditPage = () => {
                     name="welcomeMessage"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t("settings.form.welcomeMessage.label")}</FormLabel>
+                        <FormLabel>
+                          {t("settings.form.welcomeMessage.label")}
+                        </FormLabel>
                         <FormControl>
-                          <Input placeholder={t("settings.form.welcomeMessage.placeholder")} {...field} />
+                          <Input
+                            placeholder={t(
+                              "settings.form.welcomeMessage.placeholder",
+                            )}
+                            {...field}
+                          />
                         </FormControl>
                         <FormDescription>
                           {t("settings.form.welcomeMessage.description")}
@@ -185,7 +240,11 @@ const SettingsEditPage = () => {
                     )}
                   />
 
-                  <Button type="submit" className="w-full" disabled={isUpdatingSettings}>
+                  <Button
+                    type="submit"
+                    className="w-full"
+                    disabled={isUpdatingSettings}
+                  >
                     {isUpdatingSettings ? (
                       <Loader2 className="h-4 w-4 animate-spin me-2" />
                     ) : (

@@ -39,7 +39,7 @@ import {
   FileText,
   Lightbulb,
   Info,
-  GraduationCap
+  GraduationCap,
 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
@@ -74,7 +74,7 @@ const SubjectsCreate = () => {
     },
     defaultValues: {
       credits: 0,
-    }
+    },
   });
 
   const { options: departmentOptions } = useSelect<Department>({
@@ -272,7 +272,8 @@ const SubjectsCreate = () => {
                   <span className="text-xs font-bold text-primary">2</span>
                 </div>
                 <p>
-                  <strong>Credits:</strong> Assign credits based on the workload and importance of the subject.
+                  <strong>Credits:</strong> Assign credits based on the workload
+                  and importance of the subject.
                 </p>
               </div>
             </CardContent>

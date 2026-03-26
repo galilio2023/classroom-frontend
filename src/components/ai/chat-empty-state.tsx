@@ -18,10 +18,12 @@ export const ChatEmptyState: React.FC<ChatEmptyStateProps> = ({ subject }) => {
       </div>
       <div className="space-y-2 md:space-y-3">
         <p className="text-xl md:text-2xl font-black tracking-tight text-foreground">
-            {t("aiHub.studyLab.studyBuddy.personalTutor")}
+          {t("aiHub.studyLab.studyBuddy.personalTutor")}
         </p>
         <p className="text-sm md:text-base font-medium text-muted-foreground px-6 md:px-12 leading-relaxed max-w-sm mx-auto text-balance">
-          {t("aiHub.studyLab.studyBuddy.masterSubject", { subject: subject || t("aiHub.studyLab.studyBuddy.masterGeneral") })}
+          {t("aiHub.studyLab.studyBuddy.masterSubject", {
+            subject: subject || t("aiHub.studyLab.studyBuddy.masterGeneral"),
+          })}
         </p>
       </div>
     </div>

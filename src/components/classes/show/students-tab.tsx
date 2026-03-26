@@ -74,22 +74,27 @@ export const StudentsTab = ({
    * ARCHITECTURAL PATTERN: Optimistic Update Helper
    * Manually updates the React Query cache before the server responds.
    */
-  const handleOptimisticEnrollment = async (id: number, status: "approved" | "rejected") => {
+  const handleOptimisticEnrollment = async (
+    id: number,
+    status: "approved" | "rejected",
+  ) => {
     // 1. Trigger the actual mutation (which remains passed from the parent for consistency)
     onEnrollmentAction(id, status);
 
     // 2. Perform manual cache manipulation for instant UI feedback
     const queryKey = ["enrollments", "list"];
-    
+
     // We update both the specific enrollment list and general dashboard stats
     await queryClient.cancelQueries({ queryKey });
-    
+
     queryClient.setQueriesData({ queryKey }, (old: any) => {
-        if (!old?.data) return old;
-        return {
-            ...old,
-            data: old.data.map((e: Enrollment) => e.id === id ? { ...e, status } : e)
-        };
+      if (!old?.data) return old;
+      return {
+        ...old,
+        data: old.data.map((e: Enrollment) =>
+          e.id === id ? { ...e, status } : e,
+        ),
+      };
     });
   };
 
@@ -128,46 +133,61 @@ export const StudentsTab = ({
                   <span className="font-black text-xs md:text-sm tracking-tight truncate text-foreground">
                     {student.name}
                   </span>
-                  
-                  {isStaff && row.original.riskAssessment && row.original.riskAssessment.riskLevel !== "low" && (
-                    <Badge 
-                        variant="destructive" 
+
+                  {isStaff &&
+                    row.original.riskAssessment &&
+                    row.original.riskAssessment.riskLevel !== "low" && (
+                      <Badge
+                        variant="destructive"
                         className={cn(
-                            "border-none text-[7px] md:text-[8px] font-black uppercase tracking-tighter px-1.5 md:px-2 py-0 h-3.5 md:h-4 shrink-0 gap-1",
-                            row.original.riskAssessment.riskLevel === "critical" ? "bg-red-600 text-white animate-pulse" : 
-                            row.original.riskAssessment.riskLevel === "high" ? "bg-orange-600 text-white" : "bg-yellow-500 text-white"
+                          "border-none text-[7px] md:text-[8px] font-black uppercase tracking-tighter px-1.5 md:px-2 py-0 h-3.5 md:h-4 shrink-0 gap-1",
+                          row.original.riskAssessment.riskLevel === "critical"
+                            ? "bg-red-600 text-white animate-pulse"
+                            : row.original.riskAssessment.riskLevel === "high"
+                              ? "bg-orange-600 text-white"
+                              : "bg-yellow-500 text-white",
                         )}
-                    >
+                      >
                         <ShieldAlert className="h-2 w-2" />
                         {row.original.riskAssessment.riskLevel}
-                    </Badge>
-                  )}
+                      </Badge>
+                    )}
 
                   {/* 🧠 LEARNING DNA TOOLTIP (Staff Only) */}
                   {isStaff && student.persona && (
                     <TooltipProvider>
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <div className="p-1 rounded-md bg-ai-primary/10 text-ai-primary cursor-help hover:bg-ai-primary/20 transition-colors">
-                                    <BrainCircuit className="h-3 w-3" />
-                                </div>
-                            </TooltipTrigger>
-                            <TooltipContent side="right" className="max-w-xs p-4 rounded-2xl bg-card/95 backdrop-blur-xl border-ai-primary/20 shadow-2xl z-50">
-                                <div className="space-y-2">
-                                    <div className="flex items-center gap-2 border-b border-border/40 pb-2 mb-2">
-                                        <Sparkles className="h-3 w-3 text-ai-primary" />
-                                        <span className="text-[10px] font-black uppercase tracking-widest text-ai-primary">Learning DNA</span>
-                                    </div>
-                                    <p className="text-xs font-medium leading-relaxed italic break-words whitespace-pre-wrap">
-                                        "{student.persona.learningDNA}"
-                                    </p>
-                                    <div className="pt-2 flex justify-between items-center text-[8px] font-bold text-muted-foreground uppercase">
-                                        <span>Tone: {student.persona.preferredTone}</span>
-                                        <span>Updated: {dayjs(student.persona.lastSummarizedAt).fromNow()}</span>
-                                    </div>
-                                </div>
-                            </TooltipContent>
-                        </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="p-1 rounded-md bg-ai-primary/10 text-ai-primary cursor-help hover:bg-ai-primary/20 transition-colors">
+                            <BrainCircuit className="h-3 w-3" />
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent
+                          side="right"
+                          className="max-w-xs p-4 rounded-2xl bg-card/95 backdrop-blur-xl border-ai-primary/20 shadow-2xl z-50"
+                        >
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-2 border-b border-border/40 pb-2 mb-2">
+                              <Sparkles className="h-3 w-3 text-ai-primary" />
+                              <span className="text-[10px] font-black uppercase tracking-widest text-ai-primary">
+                                Learning DNA
+                              </span>
+                            </div>
+                            <p className="text-xs font-medium leading-relaxed italic break-words whitespace-pre-wrap">
+                              "{student.persona.learningDNA}"
+                            </p>
+                            <div className="pt-2 flex justify-between items-center text-[8px] font-bold text-muted-foreground uppercase">
+                              <span>Tone: {student.persona.preferredTone}</span>
+                              <span>
+                                Updated:{" "}
+                                {dayjs(
+                                  student.persona.lastSummarizedAt,
+                                ).fromNow()}
+                              </span>
+                            </div>
+                          </div>
+                        </TooltipContent>
+                      </Tooltip>
                     </TooltipProvider>
                   )}
 
@@ -189,19 +209,24 @@ export const StudentsTab = ({
                       {t("classes.show.students.pending.title")}
                     </Badge>
                   )}
-                  {isStaff && riskAssessment && riskAssessment.riskLevel !== "low" && (
-                    <Badge
-                      variant="destructive"
-                      className={cn(
-                        "border-none text-[7px] md:text-[8px] font-black uppercase tracking-tighter px-1.5 md:px-2 py-0 h-3.5 md:h-4 shrink-0 gap-1",
-                        riskAssessment.riskLevel === "critical" ? "bg-red-600 text-white animate-pulse" : 
-                        riskAssessment.riskLevel === "high" ? "bg-orange-600 text-white" : "bg-yellow-500 text-white"
-                      )}
-                    >
-                      <ShieldAlert className="h-2 w-2" />
-                      {riskAssessment.riskLevel}
-                    </Badge>
-                  )}
+                  {isStaff &&
+                    riskAssessment &&
+                    riskAssessment.riskLevel !== "low" && (
+                      <Badge
+                        variant="destructive"
+                        className={cn(
+                          "border-none text-[7px] md:text-[8px] font-black uppercase tracking-tighter px-1.5 md:px-2 py-0 h-3.5 md:h-4 shrink-0 gap-1",
+                          riskAssessment.riskLevel === "critical"
+                            ? "bg-red-600 text-white animate-pulse"
+                            : riskAssessment.riskLevel === "high"
+                              ? "bg-orange-600 text-white"
+                              : "bg-yellow-500 text-white",
+                        )}
+                      >
+                        <ShieldAlert className="h-2 w-2" />
+                        {riskAssessment.riskLevel}
+                      </Badge>
+                    )}
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-[9px] md:text-[10px] text-muted-foreground font-bold truncate">
@@ -335,7 +360,9 @@ export const StudentsTab = ({
                   <span className="hidden xs:inline">
                     {t("classes.show.students.actions.messageAll")}
                   </span>
-                  <span className="xs:hidden">{t("classes.show.students.actions.message")}</span>
+                  <span className="xs:hidden">
+                    {t("classes.show.students.actions.message")}
+                  </span>
                 </Button>
                 <Button
                   variant="outline"
@@ -345,9 +372,14 @@ export const StudentsTab = ({
                 >
                   <FileSpreadsheet className="h-4 w-4 md:h-5 md:w-5" />
                   <span className="hidden xs:inline">
-                    {t("classes.show.students.actions.bulkEnroll", "Bulk Enroll")}
+                    {t(
+                      "classes.show.students.actions.bulkEnroll",
+                      "Bulk Enroll",
+                    )}
                   </span>
-                  <span className="xs:hidden">{t("classes.show.students.actions.csv")}</span>
+                  <span className="xs:hidden">
+                    {t("classes.show.students.actions.csv")}
+                  </span>
                 </Button>
                 <Button
                   size="lg"
@@ -358,7 +390,9 @@ export const StudentsTab = ({
                   <span className="hidden xs:inline">
                     {t("classes.show.students.actions.enrollStudent")}
                   </span>
-                  <span className="xs:hidden">{t("classes.show.students.actions.enroll")}</span>
+                  <span className="xs:hidden">
+                    {t("classes.show.students.actions.enroll")}
+                  </span>
                 </Button>
               </div>
             )}
@@ -442,7 +476,10 @@ export const StudentsTab = ({
                                 size="icon"
                                 className="h-9 w-9 md:h-10 md:w-10 rounded-xl text-emerald-600 border-emerald-500/20 bg-emerald-500/5 hover:bg-emerald-500 hover:text-white transition-all shadow-sm"
                                 onClick={() =>
-                                  handleOptimisticEnrollment(enrollment.id, "approved")
+                                  handleOptimisticEnrollment(
+                                    enrollment.id,
+                                    "approved",
+                                  )
                                 }
                               >
                                 <CheckCircle2 className="h-4 w-4 md:h-5 md:w-5" />
@@ -452,7 +489,10 @@ export const StudentsTab = ({
                                 size="icon"
                                 className="h-9 w-9 md:h-10 md:w-10 rounded-xl text-destructive border-destructive/20 bg-destructive/5 hover:bg-destructive hover:text-white transition-all shadow-sm"
                                 onClick={() =>
-                                  handleOptimisticEnrollment(enrollment.id, "rejected")
+                                  handleOptimisticEnrollment(
+                                    enrollment.id,
+                                    "rejected",
+                                  )
                                 }
                               >
                                 <XCircle className="h-4 w-4 md:h-5 md:w-5" />

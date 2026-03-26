@@ -1,10 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { 
-  Loader2, 
-  Trash2, 
-  MessageSquare,
-} from "lucide-react";
+import { Loader2, Trash2, MessageSquare } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -37,18 +33,18 @@ interface StaffActionsProps {
   setUnenrollTarget: (id: number | null) => void;
   handleConfirmUnenroll: () => void;
   isDeleting: boolean;
-  
+
   isEnrollDialogOpen: boolean;
   setIsEnrollDialogOpen: (open: boolean) => void;
   enrolledStudentIds: string[];
-  
+
   isInviteDialogOpen: boolean;
   setIsInviteDialogOpen: (open: boolean) => void;
   existingTeacherIds: string[];
-  
+
   insightTarget: { id: string; name: string } | null;
   setInsightTarget: (target: { id: string; name: string } | null) => void;
-  
+
   isMessageAllOpen: boolean;
   setIsMessageAllOpen: (open: boolean) => void;
   approvedCount: number;
@@ -141,10 +137,7 @@ export const StaffActions: React.FC<StaffActionsProps> = ({
         classId={classId}
       />
 
-      <Dialog
-        open={isMessageAllOpen}
-        onOpenChange={setIsMessageAllOpen}
-      >
+      <Dialog open={isMessageAllOpen} onOpenChange={setIsMessageAllOpen}>
         <DialogContent className="rounded-[2.5rem] border-none shadow-2xl bg-card/95 backdrop-blur-xl max-w-[95vw] sm:max-w-2xl">
           <DialogHeader className="space-y-6">
             <div className="p-5 rounded-2xl bg-primary/10 text-primary w-fit mx-auto">
@@ -216,7 +209,7 @@ export const StaffActions: React.FC<StaffActionsProps> = ({
               {isMessaging ? (
                 <>
                   <Loader2 className="h-5 w-5 me-3 animate-spin" />
-                {t("buttons.processing")}
+                  {t("buttons.processing")}
                 </>
               ) : (
                 t("buttons.sendMessage")

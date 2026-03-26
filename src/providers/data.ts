@@ -35,7 +35,9 @@ const handleError = async (response: Response): Promise<HttpError> => {
 
   return {
     message:
-      (json.error as string) || (json.message as string) || `HTTP error! status: ${response.status}`,
+      (json.error as string) ||
+      (json.message as string) ||
+      `HTTP error! status: ${response.status}`,
     statusCode: response.status,
   };
 };
@@ -74,7 +76,13 @@ const resourceFilterMappings: Record<string, Record<string, string>> = {
   departments: { name: "search", code: "search" },
   users: { search: "search", name: "search", email: "search", role: "role" },
   subjects: { name: "search", code: "search", department: "departmentId" },
-  classes: { name: "search", subject: "subjectId", teacher: "teacherId", status: "status", termId: "termId" },
+  classes: {
+    name: "search",
+    subject: "subjectId",
+    teacher: "teacherId",
+    status: "status",
+    termId: "termId",
+  },
   enrollments: { classId: "classId", studentId: "studentId", status: "status" },
   assignments: { classId: "classId", moduleId: "moduleId" },
   submissions: { assignmentId: "assignmentId", studentId: "studentId" },
@@ -86,7 +94,11 @@ const resourceFilterMappings: Record<string, Record<string, string>> = {
   modules: { classId: "classId" },
   progress: { classId: "classId", userId: "userId" },
   "users/children": { parentId: "parentId" },
-  "teacher-applications": { status: "status", teacherId: "teacherId", classId: "classId" },
+  "teacher-applications": {
+    status: "status",
+    teacherId: "teacherId",
+    classId: "classId",
+  },
   channels: { headline: "headline", teacherId: "teacherId" },
 };
 
@@ -95,7 +107,7 @@ export const dataProvider: DataProvider = {
     let urlPath = resource;
     if (resource === "teacher-channels") urlPath = "channels";
     if (resource === "teacher-subscriptions") urlPath = "enrollments";
-    
+
     const url = new URL(`${BACKEND_BASE_URL}/${urlPath}`);
 
     // Pagination: Map to _start and _end for backend compatibility
@@ -113,8 +125,9 @@ export const dataProvider: DataProvider = {
       filters.forEach((filter) => {
         if ("field" in filter) {
           const { field, operator, value } = filter as LogicalFilter;
-          const mappedField = resourceFilterMappings[resource]?.[field] || field;
-          
+          const mappedField =
+            resourceFilterMappings[resource]?.[field] || field;
+
           let queryKey = mappedField;
           if (operator === "contains") {
             queryKey = `${mappedField}_like`;
@@ -132,9 +145,11 @@ export const dataProvider: DataProvider = {
             url.searchParams.append(queryKey, String(value));
           }
         } else {
-            // ⚠️ GOTCHA: ConditionalFilter (OR/AND) not supported by current flat-mapped backend.
-            // Suppressing to prevent crash, but logging for developer awareness.
-            console.warn("DataProvider: Conditional filters (OR/AND) are not yet supported by the flat-mapping backend.");
+          // ⚠️ GOTCHA: ConditionalFilter (OR/AND) not supported by current flat-mapped backend.
+          // Suppressing to prevent crash, but logging for developer awareness.
+          console.warn(
+            "DataProvider: Conditional filters (OR/AND) are not yet supported by the flat-mapping backend.",
+          );
         }
       });
     }

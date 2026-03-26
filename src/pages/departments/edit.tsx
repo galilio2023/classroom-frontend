@@ -29,7 +29,14 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { BookOpen, Code2, FileText, Lightbulb, Info, UserCircle } from "lucide-react";
+import {
+  BookOpen,
+  Code2,
+  FileText,
+  Lightbulb,
+  Info,
+  UserCircle,
+} from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { departmentFormSchema } from "@/schemas/department";
 import { User, UserRole } from "@/types";
@@ -139,7 +146,10 @@ const DepartmentsEdit = () => {
                           <UserCircle className="h-4 w-4 text-muted-foreground" />
                           Head of Department
                         </FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value || undefined}>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value || undefined}
+                        >
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select a teacher to lead this department" />
@@ -147,7 +157,10 @@ const DepartmentsEdit = () => {
                           </FormControl>
                           <SelectContent className="bg-white dark:bg-[#09090b] opacity-100 backdrop-blur-none border border-border/50 shadow-2xl">
                             {teacherOptions.map((option) => (
-                              <SelectItem key={option.value} value={option.value.toString()}>
+                              <SelectItem
+                                key={option.value}
+                                value={option.value.toString()}
+                              >
                                 {option.label}
                               </SelectItem>
                             ))}

@@ -27,22 +27,22 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { 
-  User as UserIcon, 
-  Mail, 
-  Shield, 
-  Lightbulb, 
-  Info, 
-  Phone, 
-  MapPin, 
-  FileText, 
-  Building2, 
-  Activity, 
-  Pencil, 
-  Loader2, 
-  Save, 
+import {
+  User as UserIcon,
+  Mail,
+  Shield,
+  Lightbulb,
+  Info,
+  Phone,
+  MapPin,
+  FileText,
+  Building2,
+  Activity,
+  Pencil,
+  Loader2,
+  Save,
   ArrowRight,
-  UserCheck
+  UserCheck,
 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { userFormSchema } from "@/schemas/user";
@@ -56,8 +56,8 @@ import { cn } from "@/lib/utils";
 
 const UsersEdit = () => {
   const { t, i18n } = useTranslation();
-  const isAr = i18n.language === 'ar';
-  
+  const isAr = i18n.language === "ar";
+
   usePageTitle(t("profile.editTitle"));
   const { data: identity } = useGetIdentity<User>();
   const isAdmin = identity?.role === "admin";
@@ -84,7 +84,7 @@ const UsersEdit = () => {
 
   return (
     <div className="container mx-auto py-10 max-w-6xl space-y-10 text-start">
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         className="space-y-4"
@@ -95,15 +95,19 @@ const UsersEdit = () => {
             <Pencil className="h-8 w-8" />
           </div>
           <div>
-            <h1 className="text-4xl font-black tracking-tight">{t("profile.editTitle")}</h1>
-            <p className="text-muted-foreground font-medium">{t("profile.editDesc", { name: user?.name || "User" })}</p>
+            <h1 className="text-4xl font-black tracking-tight">
+              {t("profile.editTitle")}
+            </h1>
+            <p className="text-muted-foreground font-medium">
+              {t("profile.editDesc", { name: user?.name || "User" })}
+            </p>
           </div>
         </div>
       </motion.div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
         {/* Left Column: The Main Form */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.1 }}
@@ -120,7 +124,9 @@ const UsersEdit = () => {
                     </AvatarFallback>
                   </Avatar>
                   <div className="space-y-1">
-                    <CardTitle className="text-2xl font-black tracking-tight">{user?.name}</CardTitle>
+                    <CardTitle className="text-2xl font-black tracking-tight">
+                      {user?.name}
+                    </CardTitle>
                     <CardDescription className="font-medium">
                       {t("assignments.list.table.studentId", { id: user?.id })}
                     </CardDescription>
@@ -131,7 +137,9 @@ const UsersEdit = () => {
                   <div className="space-y-6">
                     <div className="flex items-center gap-2 px-1">
                       <UserIcon className="h-4 w-4 text-primary" />
-                      <h3 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t("profile.sections.core")}</h3>
+                      <h3 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                        {t("profile.sections.core")}
+                      </h3>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                       {/* Name Field */}
@@ -144,9 +152,9 @@ const UsersEdit = () => {
                               {t("profile.labels.fullName")}
                             </FormLabel>
                             <FormControl>
-                              <Input 
-                                placeholder="e.g. John Doe" 
-                                {...field} 
+                              <Input
+                                placeholder="e.g. John Doe"
+                                {...field}
                                 className="h-12 rounded-2xl border-primary/10 bg-background/50 focus:bg-background transition-all font-bold"
                               />
                             </FormControl>
@@ -166,12 +174,20 @@ const UsersEdit = () => {
                             </FormLabel>
                             <FormControl>
                               <div className="relative group">
-                                <Mail className={cn("absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors", isAr ? "right-4" : "left-4")} />
+                                <Mail
+                                  className={cn(
+                                    "absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors",
+                                    isAr ? "right-4" : "left-4",
+                                  )}
+                                />
                                 <Input
                                   placeholder="e.g. john@school.com"
                                   {...field}
                                   disabled={!isAdmin}
-                                  className={cn("h-12 rounded-2xl border-primary/10 bg-background/50 focus:bg-background transition-all font-bold disabled:opacity-50 disabled:cursor-not-allowed", isAr ? "pr-11" : "pl-11")}
+                                  className={cn(
+                                    "h-12 rounded-2xl border-primary/10 bg-background/50 focus:bg-background transition-all font-bold disabled:opacity-50 disabled:cursor-not-allowed",
+                                    isAr ? "pr-11" : "pl-11",
+                                  )}
                                 />
                               </div>
                             </FormControl>
@@ -200,14 +216,31 @@ const UsersEdit = () => {
                                 <SelectTrigger className="h-12 rounded-2xl border-primary/10 bg-background/50 font-bold text-sm disabled:opacity-50 disabled:cursor-not-allowed">
                                   <div className="flex items-center gap-2">
                                     <Shield className="h-4 w-4 text-primary" />
-                                    <SelectValue placeholder={t("profile.labels.role")} />
+                                    <SelectValue
+                                      placeholder={t("profile.labels.role")}
+                                    />
                                   </div>
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent className="rounded-2xl bg-white dark:bg-[#09090b] opacity-100 backdrop-blur-none border border-border/50 shadow-2xl">
-                                <SelectItem value={UserRole.STUDENT} className="rounded-xl font-bold">{t("roles.student")}</SelectItem>
-                                <SelectItem value={UserRole.TEACHER} className="rounded-xl font-bold">{t("roles.teacher")}</SelectItem>
-                                <SelectItem value={UserRole.ADMIN} className="rounded-xl font-bold">{t("roles.admin")}</SelectItem>
+                                <SelectItem
+                                  value={UserRole.STUDENT}
+                                  className="rounded-xl font-bold"
+                                >
+                                  {t("roles.student")}
+                                </SelectItem>
+                                <SelectItem
+                                  value={UserRole.TEACHER}
+                                  className="rounded-xl font-bold"
+                                >
+                                  {t("roles.teacher")}
+                                </SelectItem>
+                                <SelectItem
+                                  value={UserRole.ADMIN}
+                                  className="rounded-xl font-bold"
+                                >
+                                  {t("roles.admin")}
+                                </SelectItem>
                               </SelectContent>
                             </Select>
                             {!isAdmin && (
@@ -229,8 +262,8 @@ const UsersEdit = () => {
                             <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
                               {t("profile.labels.status")}
                             </FormLabel>
-                            <Select 
-                              onValueChange={field.onChange} 
+                            <Select
+                              onValueChange={field.onChange}
                               value={field.value}
                               disabled={!isAdmin}
                             >
@@ -238,14 +271,31 @@ const UsersEdit = () => {
                                 <SelectTrigger className="h-12 rounded-2xl border-primary/10 bg-background/50 font-bold text-sm disabled:opacity-50 disabled:cursor-not-allowed">
                                   <div className="flex items-center gap-2">
                                     <Activity className="h-4 w-4 text-primary" />
-                                    <SelectValue placeholder={t("profile.labels.status")} />
+                                    <SelectValue
+                                      placeholder={t("profile.labels.status")}
+                                    />
                                   </div>
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent className="rounded-2xl bg-white dark:bg-[#09090b] opacity-100 backdrop-blur-none border border-border/50 shadow-2xl">
-                                <SelectItem value={UserStatus.ACTIVE} className="rounded-xl font-bold">{t("status.active")}</SelectItem>
-                                <SelectItem value={UserStatus.INACTIVE} className="rounded-xl font-bold">{t("status.inactive")}</SelectItem>
-                                <SelectItem value={UserStatus.SUSPENDED} className="rounded-xl font-bold">{t("status.suspended")}</SelectItem>
+                                <SelectItem
+                                  value={UserStatus.ACTIVE}
+                                  className="rounded-xl font-bold"
+                                >
+                                  {t("status.active")}
+                                </SelectItem>
+                                <SelectItem
+                                  value={UserStatus.INACTIVE}
+                                  className="rounded-xl font-bold"
+                                >
+                                  {t("status.inactive")}
+                                </SelectItem>
+                                <SelectItem
+                                  value={UserStatus.SUSPENDED}
+                                  className="rounded-xl font-bold"
+                                >
+                                  {t("status.suspended")}
+                                </SelectItem>
                               </SelectContent>
                             </Select>
                             <FormMessage className="text-xs font-bold" />
@@ -258,7 +308,9 @@ const UsersEdit = () => {
                   <div className="space-y-6">
                     <div className="flex items-center gap-2 px-1">
                       <Phone className="h-4 w-4 text-primary" />
-                      <h3 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t("profile.sections.contact")}</h3>
+                      <h3 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                        {t("profile.sections.contact")}
+                      </h3>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                       {/* Department Dropdown */}
@@ -270,8 +322,10 @@ const UsersEdit = () => {
                             <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
                               {t("profile.labels.department")}
                             </FormLabel>
-                            <Select 
-                              onValueChange={(val) => field.onChange(val ? Number(val) : null)} 
+                            <Select
+                              onValueChange={(val) =>
+                                field.onChange(val ? Number(val) : null)
+                              }
                               value={field.value?.toString()}
                               disabled={!isAdmin}
                             >
@@ -279,13 +333,21 @@ const UsersEdit = () => {
                                 <SelectTrigger className="h-12 rounded-2xl border-primary/10 bg-background/50 font-bold text-sm disabled:opacity-50 disabled:cursor-not-allowed">
                                   <div className="flex items-center gap-2">
                                     <Building2 className="h-4 w-4 text-primary" />
-                                    <SelectValue placeholder={t("profile.labels.department")} />
+                                    <SelectValue
+                                      placeholder={t(
+                                        "profile.labels.department",
+                                      )}
+                                    />
                                   </div>
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent className="rounded-2xl bg-white dark:bg-[#09090b] opacity-100 backdrop-blur-none border border-border/50 shadow-2xl">
                                 {departmentOptions.map((option) => (
-                                  <SelectItem key={option.value} value={option.value.toString()} className="rounded-xl font-bold">
+                                  <SelectItem
+                                    key={option.value}
+                                    value={option.value.toString()}
+                                    className="rounded-xl font-bold"
+                                  >
                                     {option.label}
                                   </SelectItem>
                                 ))}
@@ -307,12 +369,20 @@ const UsersEdit = () => {
                             </FormLabel>
                             <FormControl>
                               <div className="relative group">
-                                <Phone className={cn("absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors", isAr ? "right-4" : "left-4")} />
-                                <Input 
-                                  placeholder="+1 234 567 890" 
-                                  {...field} 
-                                  value={field.value || ""} 
-                                  className={cn("h-12 rounded-2xl border-primary/10 bg-background/50 focus:bg-background transition-all font-bold", isAr ? "pr-11" : "pl-11")}
+                                <Phone
+                                  className={cn(
+                                    "absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors",
+                                    isAr ? "right-4" : "left-4",
+                                  )}
+                                />
+                                <Input
+                                  placeholder="+1 234 567 890"
+                                  {...field}
+                                  value={field.value || ""}
+                                  className={cn(
+                                    "h-12 rounded-2xl border-primary/10 bg-background/50 focus:bg-background transition-all font-bold",
+                                    isAr ? "pr-11" : "pl-11",
+                                  )}
                                 />
                               </div>
                             </FormControl>
@@ -333,12 +403,20 @@ const UsersEdit = () => {
                           </FormLabel>
                           <FormControl>
                             <div className="relative group">
-                              <MapPin className={cn("absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors", isAr ? "right-4" : "left-4")} />
-                              <Input 
-                                placeholder="123 Education St, City, Country" 
-                                {...field} 
-                                value={field.value || ""} 
-                                className={cn("h-12 rounded-2xl border-primary/10 bg-background/50 focus:bg-background transition-all font-bold", isAr ? "pr-11" : "pl-11")}
+                              <MapPin
+                                className={cn(
+                                  "absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors",
+                                  isAr ? "right-4" : "left-4",
+                                )}
+                              />
+                              <Input
+                                placeholder="123 Education St, City, Country"
+                                {...field}
+                                value={field.value || ""}
+                                className={cn(
+                                  "h-12 rounded-2xl border-primary/10 bg-background/50 focus:bg-background transition-all font-bold",
+                                  isAr ? "pr-11" : "pl-11",
+                                )}
                               />
                             </div>
                           </FormControl>
@@ -357,10 +435,10 @@ const UsersEdit = () => {
                             {t("profile.labels.bio")}
                           </FormLabel>
                           <FormControl>
-                            <Textarea 
+                            <Textarea
                               placeholder={t("profile.placeholders.bio")}
                               className="min-h-[120px] rounded-2xl border-primary/10 bg-background/50 focus:bg-background transition-all font-medium resize-none p-4"
-                              {...field} 
+                              {...field}
                               value={field.value || ""}
                             />
                           </FormControl>
@@ -383,8 +461,17 @@ const UsersEdit = () => {
                     ) : (
                       <Save className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform" />
                     )}
-                    {formLoading ? t("profile.toasts.saving") : t("buttons.saveProfile")}
-                    {!formLoading && <ArrowRight className={cn("h-4 w-4 ml-2 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all", isAr && "rotate-180")} />}
+                    {formLoading
+                      ? t("profile.toasts.saving")
+                      : t("buttons.saveProfile")}
+                    {!formLoading && (
+                      <ArrowRight
+                        className={cn(
+                          "h-4 w-4 ml-2 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all",
+                          isAr && "rotate-180",
+                        )}
+                      />
+                    )}
                   </Button>
                 </CardFooter>
               </Card>
@@ -393,7 +480,7 @@ const UsersEdit = () => {
         </motion.div>
 
         {/* Right Column: Sidebar / Help */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.2 }}
@@ -405,7 +492,9 @@ const UsersEdit = () => {
                 <div className="p-2 rounded-xl bg-primary/10 text-primary">
                   <Lightbulb className="h-5 w-5" />
                 </div>
-                <CardTitle className="text-lg font-black tracking-tight">{t("profile.tips.title")}</CardTitle>
+                <CardTitle className="text-lg font-black tracking-tight">
+                  {t("profile.tips.title")}
+                </CardTitle>
               </div>
             </CardHeader>
             <CardContent className="p-6 space-y-6">
@@ -414,19 +503,23 @@ const UsersEdit = () => {
                   <Phone className="h-5 w-5 text-primary" />
                 </div>
                 <div className="space-y-1">
-                  <p className="font-black text-xs uppercase tracking-widest text-primary">{t("profile.tips.contact")}</p>
+                  <p className="font-black text-xs uppercase tracking-widest text-primary">
+                    {t("profile.tips.contact")}
+                  </p>
                   <p className="text-sm text-muted-foreground font-medium leading-relaxed">
                     {t("profile.tips.contactDesc")}
                   </p>
                 </div>
               </div>
-              
+
               <div className="flex gap-4">
                 <div className="h-10 w-10 rounded-2xl bg-amber-500/10 flex items-center justify-center shrink-0">
                   <FileText className="h-5 w-5 text-amber-600" />
                 </div>
                 <div className="space-y-1">
-                  <p className="font-black text-xs uppercase tracking-widest text-amber-600">{t("profile.tips.bio")}</p>
+                  <p className="font-black text-xs uppercase tracking-widest text-amber-600">
+                    {t("profile.tips.bio")}
+                  </p>
                   <p className="text-sm text-muted-foreground font-medium leading-relaxed">
                     {t("profile.tips.bioDesc")}
                   </p>
@@ -438,7 +531,9 @@ const UsersEdit = () => {
           <Alert className="rounded-[2rem] border-primary/10 bg-primary/5 p-6">
             <Info className="h-5 w-5 text-primary" />
             <div className={cn(isAr ? "mr-2" : "ml-2")}>
-              <AlertTitle className="font-black text-sm uppercase tracking-widest mb-2">{t("profile.privacy.note")}</AlertTitle>
+              <AlertTitle className="font-black text-sm uppercase tracking-widest mb-2">
+                {t("profile.privacy.note")}
+              </AlertTitle>
               <AlertDescription className="text-sm text-muted-foreground font-medium leading-relaxed">
                 {t("profile.privacy.desc")}
               </AlertDescription>
@@ -451,8 +546,12 @@ const UsersEdit = () => {
                 <UserCheck className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-green-600">{t("profile.labels.status")}</p>
-                <p className="text-lg font-black text-green-700">{t("profile.statusBadge")}</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-green-600">
+                  {t("profile.labels.status")}
+                </p>
+                <p className="text-lg font-black text-green-700">
+                  {t("profile.statusBadge")}
+                </p>
               </div>
             </Card>
           )}

@@ -33,7 +33,7 @@ export const PracticeQuizStep: React.FC<PracticeQuizStepProps> = ({
   isSubmitting,
 }) => {
   const { t, i18n } = useTranslation();
-  const isArabic = i18n.language === 'ar';
+  const isArabic = i18n.language === "ar";
 
   return (
     <div className="space-y-6">
@@ -58,7 +58,7 @@ export const PracticeQuizStep: React.FC<PracticeQuizStepProps> = ({
                 "p-4 rounded-xl border-2 text-start transition-all hover:bg-accent",
                 selectedOption === option
                   ? "border-primary bg-primary/5 ring-2 ring-primary/20"
-                  : "border-border bg-card"
+                  : "border-border bg-card",
               )}
             >
               <span className="font-medium">{option}</span>
@@ -79,8 +79,13 @@ export const PracticeQuizStep: React.FC<PracticeQuizStepProps> = ({
             t("classes.quiz.finishQuiz")
           ) : (
             <>
-              {t("classes.quiz.nextQuestion")} 
-              <ArrowRight className={cn("h-4 w-4 ms-2", isArabic && "rotate-180 ms-0 me-2")} />
+              {t("classes.quiz.nextQuestion")}
+              <ArrowRight
+                className={cn(
+                  "h-4 w-4 ms-2",
+                  isArabic && "rotate-180 ms-0 me-2",
+                )}
+              />
             </>
           )}
         </Button>

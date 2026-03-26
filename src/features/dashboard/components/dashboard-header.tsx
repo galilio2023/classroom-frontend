@@ -13,7 +13,11 @@ interface Props {
   analyticsData: DashboardData;
 }
 
-export const DashboardHeader = ({ identity, isStudent, analyticsData }: Props) => {
+export const DashboardHeader = ({
+  identity,
+  isStudent,
+  analyticsData,
+}: Props) => {
   const { i18n } = useTranslation();
 
   return (

@@ -76,7 +76,9 @@ export const EnrollStudentDialog = ({
           }, 1000);
         },
         onError: (error) => {
-          toast.error(error.message || t("classes.dialogs.enrollStudent.toast.error"));
+          toast.error(
+            error.message || t("classes.dialogs.enrollStudent.toast.error"),
+          );
         },
       },
     );
@@ -101,12 +103,20 @@ export const EnrollStudentDialog = ({
             value={selectedStudentId ?? undefined}
           >
             <SelectTrigger>
-              <SelectValue placeholder={t("classes.dialogs.enrollStudent.fieldPlaceholder")} />
+              <SelectValue
+                placeholder={t(
+                  "classes.dialogs.enrollStudent.fieldPlaceholder",
+                )}
+              />
             </SelectTrigger>
             <SelectContent>
               {availableStudents.length > 0 ? (
                 availableStudents.map((option) => (
-                  <SelectItem key={option.value} value={String(option.value)} className="text-start">
+                  <SelectItem
+                    key={option.value}
+                    value={String(option.value)}
+                    className="text-start"
+                  >
                     {option.label}
                   </SelectItem>
                 ))

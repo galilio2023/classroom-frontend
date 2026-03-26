@@ -59,19 +59,19 @@ export const ClassHeader = ({ classId, isOwner }: ClassHeaderProps) => {
             )}
             {copied ? t("buttons.copied") : t("buttons.share")}
           </Button>
-          
+
           <CanAccess resource="classes" action="edit" id={classId}>
             {isOwner && (
-                <Button
+              <Button
                 size="lg"
                 className="w-full md:w-auto rounded-2xl font-black uppercase tracking-widest text-[10px] h-12 md:h-14 px-8 md:px-10 shadow-lg shadow-primary/25 hover:-translate-y-0.5 transition-all"
                 asChild
-                >
+              >
                 <Link to={`/classes/edit/${classId}`}>
-                    <Pencil className="w-4 h-4 me-2" />
-                    {t("buttons.editClass")}
+                  <Pencil className="w-4 h-4 me-2" />
+                  {t("buttons.editClass")}
                 </Link>
-                </Button>
+              </Button>
             )}
           </CanAccess>
         </div>

@@ -43,24 +43,24 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
   const { isStaff } = useUserRole();
   const [newPost, setNewPost] = useState("");
   const [replyTo, setReplyTo] = useState<number | null>(null);
-  
+
   // 🛡️ AUTO-DRAFT: Discussion Persistence
   useEffect(() => {
-      const draftKey = `draft:discussion:${classId}${replyTo ? `:${replyTo}` : ''}`;
-      if (newPost && newPost !== "<p></p>") {
-          localStorage.setItem(draftKey, newPost);
-      } else {
-          localStorage.removeItem(draftKey);
-      }
+    const draftKey = `draft:discussion:${classId}${replyTo ? `:${replyTo}` : ""}`;
+    if (newPost && newPost !== "<p></p>") {
+      localStorage.setItem(draftKey, newPost);
+    } else {
+      localStorage.removeItem(draftKey);
+    }
   }, [newPost, classId, replyTo]);
 
   // 🚀 DRAFT RECOVERY
   useEffect(() => {
-      const draftKey = `draft:discussion:${classId}${replyTo ? `:${replyTo}` : ''}`;
-      const saved = localStorage.getItem(draftKey);
-      if (saved && !newPost) {
-          setNewPost(saved);
-      }
+    const draftKey = `draft:discussion:${classId}${replyTo ? `:${replyTo}` : ""}`;
+    const saved = localStorage.getItem(draftKey);
+    if (saved && !newPost) {
+      setNewPost(saved);
+    }
   }, [classId, replyTo]);
 
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -82,7 +82,11 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
   const isLoading = query.isLoading;
   const refetch = query.refetch;
 
-  const { mutate: createPost, mutation } = useCreate<Discussion, HttpError, { content: string; classId: number; parentId: number | null }>();
+  const { mutate: createPost, mutation } = useCreate<
+    Discussion,
+    HttpError,
+    { content: string; classId: number; parentId: number | null }
+  >();
   const { mutate: deletePost } = useDelete();
   const { mutate: solvePost } = useCustomMutation();
   const { mutate: generateSummary } = useCustomMutation();
@@ -110,11 +114,11 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
     };
 
     const handleDiscussionSolved = (payload: { message?: string }) => {
-        toast.success(payload.message || "A question has been solved!", {
-            icon: <Trophy className="w-4 h-4 text-yellow-500" />,
-            duration: 5000,
-        });
-        void refetch();
+      toast.success(payload.message || "A question has been solved!", {
+        icon: <Trophy className="w-4 h-4 text-yellow-500" />,
+        duration: 5000,
+      });
+      void refetch();
     };
 
     socket.on("new_discussion", handleNewDiscussion);
@@ -154,15 +158,18 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
   };
 
   const handleSolve = (postId: number, solverId: string) => {
-      solvePost({
-          url: `/discussions/${postId}/solve`,
-          method: "patch",
-          values: { solvedById: solverId }
-      }, {
-          onSuccess: () => {
-              void refetch();
-          }
-      });
+    solvePost(
+      {
+        url: `/discussions/${postId}/solve`,
+        method: "patch",
+        values: { solvedById: solverId },
+      },
+      {
+        onSuccess: () => {
+          void refetch();
+        },
+      },
+    );
   };
 
   const handleGenerateSummary = () => {

@@ -3,7 +3,9 @@ const getEnvVar = (key: string, defaultValue?: string): string => {
   const value = import.meta.env[key];
   if (!value) {
     if (defaultValue) return defaultValue;
-    throw new Error(`Configuration Error: Missing environment variable: ${key}`);
+    throw new Error(
+      `Configuration Error: Missing environment variable: ${key}`,
+    );
   }
   return value;
 };

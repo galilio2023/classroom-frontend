@@ -28,11 +28,11 @@ export function PWAInstaller() {
 
     installPrompt.prompt();
     const { outcome } = await installPrompt.userChoice;
-    
+
     if (outcome === "accepted") {
       toast.success(t("common.pwa.success"));
     }
-    
+
     setInstallPrompt(null);
     setIsVisible(false);
   };
@@ -48,14 +48,21 @@ export function PWAInstaller() {
           </div>
           <div>
             <p className="text-sm font-medium">{t("common.pwa.title")}</p>
-            <p className="text-xs text-muted-foreground">{t("common.pwa.description")}</p>
+            <p className="text-xs text-muted-foreground">
+              {t("common.pwa.description")}
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-2">
           <Button size="sm" onClick={handleInstall}>
             {t("common.pwa.install")}
           </Button>
-          <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setIsVisible(false)}>
+          <Button
+            size="icon"
+            variant="ghost"
+            className="h-8 w-8"
+            onClick={() => setIsVisible(false)}
+          >
             <X className="h-4 w-4" />
           </Button>
         </div>

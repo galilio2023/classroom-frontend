@@ -1,6 +1,17 @@
 import React from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../ui/card";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "../ui/accordion";
 import { HelpCircle } from "lucide-react";
 import { QuizQuestionItem } from "./quiz-question-item";
 import { QuizEmptyState } from "./quiz-empty-state";
@@ -19,9 +30,7 @@ export const QuizPreview: React.FC<QuizPreviewProps> = ({ quiz }) => {
           <HelpCircle className="h-5 w-5 text-primary" />
           {t("aiHub.assistant.quizGen.title")}
         </CardTitle>
-        <CardDescription>
-          {t("aiHub.assistant.quizGen.desc")}
-        </CardDescription>
+        <CardDescription>{t("aiHub.assistant.quizGen.desc")}</CardDescription>
       </CardHeader>
       <CardContent>
         {quiz.length > 0 ? (
@@ -29,7 +38,9 @@ export const QuizPreview: React.FC<QuizPreviewProps> = ({ quiz }) => {
             {quiz.map((q, index) => (
               <AccordionItem key={index} value={`item-${index}`}>
                 <AccordionTrigger className="text-start">
-                  <span className="font-medium">Q{index + 1}: {q.question}</span>
+                  <span className="font-medium">
+                    Q{index + 1}: {q.question}
+                  </span>
                 </AccordionTrigger>
                 <AccordionContent>
                   <QuizQuestionItem question={q} index={index} />

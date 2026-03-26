@@ -24,7 +24,9 @@ export const ClassLoadingView = () => {
         <h2 className="text-sm font-black uppercase tracking-[0.3em] text-primary/60 animate-pulse">
           {t("classes.show.assembling")}
         </h2>
-        <p className="text-xs font-medium text-muted-foreground/60 italic">Preparing your immersive classroom...</p>
+        <p className="text-xs font-medium text-muted-foreground/60 italic">
+          Preparing your immersive classroom...
+        </p>
       </div>
     </div>
   );

@@ -78,7 +78,7 @@ export const SignUpForm = () => {
         "justify-center",
         "px-6",
         "py-8",
-        "min-h-svh"
+        "min-h-svh",
       )}
     >
       <div className={cn("flex", "items-center", "justify-center", "gap-2")}>
@@ -98,7 +98,7 @@ export const SignUpForm = () => {
               "text-green-600",
               "dark:text-green-400",
               "text-3xl",
-              "font-semibold"
+              "font-semibold",
             )}
           >
             {t("auth.login.signUp")}
@@ -129,7 +129,9 @@ export const SignUpForm = () => {
             <div
               className={cn("relative", "flex", "flex-col", "gap-2", "mt-6")}
             >
-              <Label htmlFor="password">{t("auth.register.passwordLabel")}</Label>
+              <Label htmlFor="password">
+                {t("auth.register.passwordLabel")}
+              </Label>
               <InputPassword
                 id="password"
                 value={password}
@@ -141,7 +143,9 @@ export const SignUpForm = () => {
             <div
               className={cn("relative", "flex", "flex-col", "gap-2", "mt-6")}
             >
-              <Label htmlFor="confirmPassword">{t("auth.register.confirmPassword")}</Label>
+              <Label htmlFor="confirmPassword">
+                {t("auth.register.confirmPassword")}
+              </Label>
               <InputPassword
                 id="confirmPassword"
                 value={confirmPassword}
@@ -158,7 +162,7 @@ export const SignUpForm = () => {
                 "mt-6",
                 "bg-green-600",
                 "hover:bg-green-700",
-                "text-white"
+                "text-white",
               )}
             >
               {t("auth.login.signUp")}
@@ -166,7 +170,9 @@ export const SignUpForm = () => {
 
             <div className={cn("flex", "items-center", "gap-4", "mt-6")}>
               <Separator className={cn("flex-1")} />
-              <span className={cn("text-sm", "text-muted-foreground")}>{t("auth.login.or")}</span>
+              <span className={cn("text-sm", "text-muted-foreground")}>
+                {t("auth.login.or")}
+              </span>
               <Separator className={cn("flex-1")} />
             </div>
 
@@ -233,7 +239,7 @@ export const SignUpForm = () => {
                 "text-blue-600",
                 "dark:text-blue-400",
                 "font-semibold",
-                "underline"
+                "underline",
               )}
             >
               {t("auth.login.signIn")}

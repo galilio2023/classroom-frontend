@@ -1,10 +1,6 @@
 import * as React from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  useNavigation,
-  useLogout,
-  useCustom,
-} from "@refinedev/core";
+import { useNavigation, useLogout, useCustom } from "@refinedev/core";
 import {
   Calculator,
   Calendar,
@@ -69,7 +65,7 @@ export function CommandMenu() {
       setDebouncedSearch(search);
     },
     300,
-    [search]
+    [search],
   );
 
   // Load recent searches
@@ -86,25 +82,27 @@ export function CommandMenu() {
 
   const saveRecentSearch = (term: string) => {
     if (!term.trim()) return;
-    const updated = [
-      term,
-      ...recentSearches.filter((s) => s !== term),
-    ].slice(0, MAX_RECENT_SEARCHES);
+    const updated = [term, ...recentSearches.filter((s) => s !== term)].slice(
+      0,
+      MAX_RECENT_SEARCHES,
+    );
     setRecentSearches(updated);
     localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(updated));
   };
 
   // --- UNIFIED GLOBAL SEARCH ---
-  const { result: searchResult, query: searchQuery } = useCustom<SearchResult[]>({
+  const { result: searchResult, query: searchQuery } = useCustom<
+    SearchResult[]
+  >({
     url: "/search",
     method: "get",
     config: {
-        query: { q: debouncedSearch }
+      query: { q: debouncedSearch },
     },
-    queryOptions: { 
-        enabled: open && debouncedSearch.length >= 2,
-        // Keep previous data while fetching new results for smoother UX
-        placeholderData: (previousData) => previousData,
+    queryOptions: {
+      enabled: open && debouncedSearch.length >= 2,
+      // Keep previous data while fetching new results for smoother UX
+      placeholderData: (previousData) => previousData,
     },
   });
 
@@ -123,19 +121,35 @@ export function CommandMenu() {
     return () => document.removeEventListener("keydown", down);
   }, []);
 
-  const runCommand = React.useCallback((command: () => void, term?: string) => {
-    setOpen(false);
-    if (term) saveRecentSearch(term);
-    command();
-  }, [recentSearches]);
+  const runCommand = React.useCallback(
+    (command: () => void, term?: string) => {
+      setOpen(false);
+      if (term) saveRecentSearch(term);
+      command();
+    },
+    [recentSearches],
+  );
 
   const getIcon = (type: string) => {
     switch (type) {
-        case "class": return <BookOpen className="me-2 h-4 w-4 text-blue-500 rtl:me-0 rtl:ms-2" />;
-        case "assignment": return <Calculator className="me-2 h-4 w-4 text-orange-500 rtl:me-0 rtl:ms-2" />;
-        case "resource": return <FileText className="me-2 h-4 w-4 text-emerald-500 rtl:me-0 rtl:ms-2" />;
-        case "subject": return <GraduationCap className="me-2 h-4 w-4 text-purple-500 rtl:me-0 rtl:ms-2" />;
-        default: return <Search className="me-2 h-4 w-4 rtl:me-0 rtl:ms-2" />;
+      case "class":
+        return (
+          <BookOpen className="me-2 h-4 w-4 text-blue-500 rtl:me-0 rtl:ms-2" />
+        );
+      case "assignment":
+        return (
+          <Calculator className="me-2 h-4 w-4 text-orange-500 rtl:me-0 rtl:ms-2" />
+        );
+      case "resource":
+        return (
+          <FileText className="me-2 h-4 w-4 text-emerald-500 rtl:me-0 rtl:ms-2" />
+        );
+      case "subject":
+        return (
+          <GraduationCap className="me-2 h-4 w-4 text-purple-500 rtl:me-0 rtl:ms-2" />
+        );
+      default:
+        return <Search className="me-2 h-4 w-4 rtl:me-0 rtl:ms-2" />;
     }
   };
 
@@ -156,29 +170,26 @@ export function CommandMenu() {
       </button>
       <CommandDialog open={open} onOpenChange={setOpen}>
         <div className="relative">
-            <CommandInput 
-                placeholder={t("common.typeToSearch")} 
-                value={search}
-                onValueChange={setSearch}
-            />
-            {isSearching && (
-                <div className="absolute end-4 top-1/2 -translate-y-1/2 rtl:end-auto rtl:start-4">
-                    <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                </div>
-            )}
+          <CommandInput
+            placeholder={t("common.typeToSearch")}
+            value={search}
+            onValueChange={setSearch}
+          />
+          {isSearching && (
+            <div className="absolute end-4 top-1/2 -translate-y-1/2 rtl:end-auto rtl:start-4">
+              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+            </div>
+          )}
         </div>
         <CommandList>
           <CommandEmpty>
             {isSearching ? t("common.searching") : t("common.noResults")}
           </CommandEmpty>
-          
+
           {!search && recentSearches.length > 0 && (
             <CommandGroup heading={t("common.recentSearches")}>
               {recentSearches.map((term) => (
-                <CommandItem
-                  key={term}
-                  onSelect={() => setSearch(term)}
-                >
+                <CommandItem key={term} onSelect={() => setSearch(term)}>
                   <History className="me-2 h-4 w-4 text-muted-foreground rtl:me-0 rtl:ms-2" />
                   <span>{term}</span>
                 </CommandItem>
@@ -194,15 +205,21 @@ export function CommandMenu() {
 
             {isStaff && (
               <>
-                <CommandItem onSelect={() => runCommand(() => create("classes"))}>
+                <CommandItem
+                  onSelect={() => runCommand(() => create("classes"))}
+                >
                   <PlusCircle className="me-2 h-4 w-4 text-primary rtl:me-0 rtl:ms-2" />
                   <span>{t("buttons.createClass")}</span>
                 </CommandItem>
-                <CommandItem onSelect={() => runCommand(() => list("submissions"))}>
+                <CommandItem
+                  onSelect={() => runCommand(() => list("submissions"))}
+                >
                   <ClipboardCheck className="me-2 h-4 w-4 text-primary rtl:me-0 rtl:ms-2" />
                   <span>{t("resources.submissions.label")}</span>
                 </CommandItem>
-                <CommandItem onSelect={() => runCommand(() => navigate("/ai-assistant"))}>
+                <CommandItem
+                  onSelect={() => runCommand(() => navigate("/ai-assistant"))}
+                >
                   <Sparkles className="me-2 h-4 w-4 text-primary rtl:me-0 rtl:ms-2" />
                   <span>{t("resources.ai-assistant.label")}</span>
                 </CommandItem>
@@ -216,7 +233,9 @@ export function CommandMenu() {
               </CommandItem>
             )}
 
-            <CommandItem onSelect={() => runCommand(() => navigate("/calendar"))}>
+            <CommandItem
+              onSelect={() => runCommand(() => navigate("/calendar"))}
+            >
               <Calendar className="me-2 h-4 w-4 rtl:me-0 rtl:ms-2" />
               <span>{t("resources.calendar.label")}</span>
             </CommandItem>
@@ -227,13 +246,17 @@ export function CommandMenu() {
               {results.map((res) => (
                 <CommandItem
                   key={`${res.type}-${res.id}`}
-                  onSelect={() => runCommand(() => navigate(res.link), res.title)}
+                  onSelect={() =>
+                    runCommand(() => navigate(res.link), res.title)
+                  }
                 >
                   {getIcon(res.type)}
                   <div className="flex flex-col">
                     <span>{res.title}</span>
                     {res.description && (
-                        <span className="text-[10px] text-muted-foreground line-clamp-1">{res.description}</span>
+                      <span className="text-[10px] text-muted-foreground line-clamp-1">
+                        {res.description}
+                      </span>
                     )}
                   </div>
                 </CommandItem>
@@ -250,7 +273,9 @@ export function CommandMenu() {
             >
               <UserIcon className="me-2 h-4 w-4 rtl:me-0 rtl:ms-2" />
               <span>{t("resources.portfolio.label")}</span>
-              <CommandShortcut className="ltr:block rtl:hidden">⌘P</CommandShortcut>
+              <CommandShortcut className="ltr:block rtl:hidden">
+                ⌘P
+              </CommandShortcut>
             </CommandItem>
             <CommandItem
               onSelect={() =>
@@ -263,7 +288,9 @@ export function CommandMenu() {
                 <Moon className="me-2 h-4 w-4 rtl:me-0 rtl:ms-2" />
               )}
               <span>{t("common.toggleTheme")}</span>
-              <CommandShortcut className="ltr:block rtl:hidden">⌘T</CommandShortcut>
+              <CommandShortcut className="ltr:block rtl:hidden">
+                ⌘T
+              </CommandShortcut>
             </CommandItem>
             <CommandItem onSelect={() => runCommand(() => logout())}>
               <LogOut className="me-2 h-4 w-4 text-destructive rtl:me-0 rtl:ms-2" />

@@ -1,7 +1,18 @@
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { useMemo } from "react";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 
@@ -13,7 +24,7 @@ export const SubmissionHeatmap = ({ data }: SubmissionHeatmapProps) => {
   const { t } = useTranslation();
   // Using translation keys for days
   const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-  
+
   // Generate last 6 months of dates
   const heatmapData = useMemo(() => {
     const today = new Date();
@@ -21,12 +32,12 @@ export const SubmissionHeatmap = ({ data }: SubmissionHeatmapProps) => {
     for (let i = 180; i >= 0; i--) {
       const d = new Date();
       d.setDate(today.getDate() - i);
-      const dateStr = d.toISOString().split('T')[0];
-      const entry = data.find(item => item.date === dateStr);
+      const dateStr = d.toISOString().split("T")[0];
+      const entry = data.find((item) => item.date === dateStr);
       result.push({
         date: d,
         dateStr,
-        count: entry ? entry.count : 0
+        count: entry ? entry.count : 0,
       });
     }
     return result;
@@ -47,14 +58,22 @@ export const SubmissionHeatmap = ({ data }: SubmissionHeatmapProps) => {
           <CalendarIcon className="h-5 w-5 text-primary" />
           {t("portfolioPage.submissionActivity", "Submission Activity")}
         </CardTitle>
-        <CardDescription>{t("portfolioPage.submissionActivityDesc", "Your assignment submission frequency over the last 6 months.")}</CardDescription>
+        <CardDescription>
+          {t(
+            "portfolioPage.submissionActivityDesc",
+            "Your assignment submission frequency over the last 6 months.",
+          )}
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="flex flex-col gap-1 overflow-x-auto pb-2">
           <div className="flex gap-1">
             <div className="grid grid-rows-7 gap-1 pr-2">
-              {days.map(day => (
-                <span key={day} className="text-[10px] text-muted-foreground h-3 flex items-center">
+              {days.map((day) => (
+                <span
+                  key={day}
+                  className="text-[10px] text-muted-foreground h-3 flex items-center"
+                >
                   {t(`days.${day}`, day)}
                 </span>
               ))}
@@ -64,18 +83,23 @@ export const SubmissionHeatmap = ({ data }: SubmissionHeatmapProps) => {
                 {heatmapData.map((day, i) => (
                   <Tooltip key={i}>
                     <TooltipTrigger asChild>
-                      <div 
+                      <div
                         className={cn(
                           "w-3 h-3 rounded-sm transition-colors cursor-pointer",
-                          getColor(day.count)
+                          getColor(day.count),
                         )}
                       />
                     </TooltipTrigger>
                     <TooltipContent>
                       <p className="text-xs">
                         <span className="font-bold">
-                          {t("portfolioPage.heatmapSubmissions", { count: day.count, defaultValue: "{{count}} submissions" })}
-                        </span> {t("portfolioPage.heatmapOn", { defaultValue: "on" })} {day.date.toLocaleDateString()}
+                          {t("portfolioPage.heatmapSubmissions", {
+                            count: day.count,
+                            defaultValue: "{{count}} submissions",
+                          })}
+                        </span>{" "}
+                        {t("portfolioPage.heatmapOn", { defaultValue: "on" })}{" "}
+                        {day.date.toLocaleDateString()}
                       </p>
                     </TooltipContent>
                   </Tooltip>

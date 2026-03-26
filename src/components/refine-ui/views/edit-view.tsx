@@ -53,7 +53,7 @@ export const EditViewHeader = ({
     titleFromProps ??
     getUserFriendlyName(
       resource?.meta?.label ?? identifier ?? resource?.name,
-      "plural"
+      "plural",
     );
 
   return (
@@ -68,7 +68,7 @@ export const EditViewHeader = ({
           "items-center",
           "justify-between",
           "-ms-2.5",
-          headerClassName
+          headerClassName,
         )}
       >
         <div className="flex items-center gap-1">

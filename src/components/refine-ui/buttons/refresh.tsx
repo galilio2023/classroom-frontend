@@ -34,7 +34,7 @@ export const RefreshButton = React.forwardRef<
 >(
   (
     { resource, recordItemId, dataProviderName, meta, children, ...rest },
-    ref
+    ref,
   ) => {
     const {
       onClick: refresh,
@@ -74,7 +74,7 @@ export const RefreshButton = React.forwardRef<
         )}
       </Button>
     );
-  }
+  },
 );
 
 RefreshButton.displayName = "RefreshButton";

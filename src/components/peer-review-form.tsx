@@ -15,7 +15,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PeerReview, Assignment } from "@/types";
 import { useUpdate } from "@refinedev/core";
-import { Loader2, CheckCircle2, Star, MessageSquare, Info, Sparkles, Send } from "lucide-react";
+import {
+  Loader2,
+  CheckCircle2,
+  Star,
+  MessageSquare,
+  Info,
+  Sparkles,
+  Send,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { Label } from "@/components/ui/label";
@@ -34,7 +42,11 @@ interface PeerReviewFormProps {
   onSuccess?: () => void;
 }
 
-export const PeerReviewForm = ({ review, assignment, onSuccess }: PeerReviewFormProps) => {
+export const PeerReviewForm = ({
+  review,
+  assignment,
+  onSuccess,
+}: PeerReviewFormProps) => {
   const { t } = useTranslation();
   const { mutate, mutation } = useUpdate();
   const isLoading = mutation.isPending;
@@ -48,26 +60,29 @@ export const PeerReviewForm = ({ review, assignment, onSuccess }: PeerReviewForm
   });
 
   const onSubmit = (values: PeerReviewFormValues) => {
-    mutate({
-      resource: "peer-reviews",
-      id: review.id,
-      values,
-      successNotification: {
-        message: t("assignments.show.toast.peersSuccess"),
-        type: "success",
+    mutate(
+      {
+        resource: "peer-reviews",
+        id: review.id,
+        values,
+        successNotification: {
+          message: t("assignments.show.toast.peersSuccess"),
+          type: "success",
+        },
       },
-    }, {
-      onSuccess: () => {
-        onSuccess?.();
-      }
-    });
+      {
+        onSuccess: () => {
+          onSuccess?.();
+        },
+      },
+    );
   };
 
   const isSubmitted = !!review.feedback;
 
   if (isSubmitted) {
     return (
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         className="p-8 rounded-[1.5rem] bg-success/5 border-2 border-success/20 flex flex-col items-center justify-center gap-4 text-center shadow-sm"
@@ -76,8 +91,12 @@ export const PeerReviewForm = ({ review, assignment, onSuccess }: PeerReviewForm
           <CheckCircle2 className="h-8 w-8 stroke-[3]" />
         </div>
         <div className="space-y-1">
-          <h3 className="text-lg font-black tracking-tight text-success">{t("assignments.show.peersAssigned")}</h3>
-          <p className="text-sm text-success/70 font-medium">{t("assignments.show.pendingReview")}</p>
+          <h3 className="text-lg font-black tracking-tight text-success">
+            {t("assignments.show.peersAssigned")}
+          </h3>
+          <p className="text-sm text-success/70 font-medium">
+            {t("assignments.show.pendingReview")}
+          </p>
         </div>
       </motion.div>
     );
@@ -92,7 +111,9 @@ export const PeerReviewForm = ({ review, assignment, onSuccess }: PeerReviewForm
             {t("assignments.create.gradingRubric")}
           </CardTitle>
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">{t("assignments.create.criteria")}: {assignment.rubric.length}</span>
+            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
+              {t("assignments.create.criteria")}: {assignment.rubric.length}
+            </span>
           </div>
         </div>
       </CardHeader>
@@ -112,7 +133,9 @@ export const PeerReviewForm = ({ review, assignment, onSuccess }: PeerReviewForm
                           <div className="size-5 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-black text-primary">
                             {idx + 1}
                           </div>
-                          <FormLabel className="text-xs font-black uppercase tracking-tight group-hover:text-primary transition-colors">{item.criteria}</FormLabel>
+                          <FormLabel className="text-xs font-black uppercase tracking-tight group-hover:text-primary transition-colors">
+                            {item.criteria}
+                          </FormLabel>
                         </div>
                         <div className="px-2 py-0.5 rounded-full bg-muted text-[9px] font-black uppercase tracking-widest text-muted-foreground">
                           {t("assignments.create.maxPoints")}: {item.maxPoints}
@@ -120,14 +143,16 @@ export const PeerReviewForm = ({ review, assignment, onSuccess }: PeerReviewForm
                       </div>
                       <FormControl>
                         <div className="relative">
-                          <Input 
-                            type="number" 
-                            max={item.maxPoints} 
-                            min={0} 
-                            {...field} 
+                          <Input
+                            type="number"
+                            max={item.maxPoints}
+                            min={0}
+                            {...field}
                             className="h-12 text-lg font-black text-center rounded-xl bg-muted/20 border-none focus-visible:ring-primary transition-all"
                           />
-                          <div className="absolute end-3 top-1/2 -translate-y-1/2 text-[10px] font-black opacity-20 uppercase tracking-widest">PTS</div>
+                          <div className="absolute end-3 top-1/2 -translate-y-1/2 text-[10px] font-black opacity-20 uppercase tracking-widest">
+                            PTS
+                          </div>
                         </div>
                       </FormControl>
                       <FormMessage />
@@ -154,8 +179,10 @@ export const PeerReviewForm = ({ review, assignment, onSuccess }: PeerReviewForm
                   </div>
                   <FormControl>
                     <div className="relative group">
-                      <Textarea 
-                        placeholder={t("assignments.grading.feedbackPlaceholder")} 
+                      <Textarea
+                        placeholder={t(
+                          "assignments.grading.feedbackPlaceholder",
+                        )}
                         className="min-h-[150px] rounded-2xl resize-none bg-muted/10 border-2 border-transparent focus-visible:ring-primary p-5 text-sm leading-relaxed shadow-inner transition-all"
                         {...field}
                       />
@@ -175,12 +202,16 @@ export const PeerReviewForm = ({ review, assignment, onSuccess }: PeerReviewForm
               )}
             />
 
-            <Button 
-              type="submit" 
-              disabled={isLoading} 
+            <Button
+              type="submit"
+              disabled={isLoading}
               className="w-full h-12 rounded-xl font-black uppercase tracking-widest shadow-lg shadow-primary/20 gap-2 transition-all hover:scale-[1.02] active:scale-[0.98]"
             >
-              {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+              {isLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Send className="h-4 w-4" />
+              )}
               {t("assignments.show.interactiveQuiz")}
             </Button>
           </form>

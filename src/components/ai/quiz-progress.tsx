@@ -18,7 +18,9 @@ export const QuizProgress: React.FC<QuizProgressProps> = ({
   return (
     <div className={cn("space-y-2 px-1", className)}>
       <div className="flex justify-between text-[10px] md:text-xs font-black uppercase tracking-tighter text-muted-foreground">
-        <span>Question {currentStep + 1} of {totalQuestions}</span>
+        <span>
+          Question {currentStep + 1} of {totalQuestions}
+        </span>
         <span>{Math.round(progress)}% Complete</span>
       </div>
       <Progress value={progress} className="h-1.5 md:h-2" />

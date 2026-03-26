@@ -26,14 +26,21 @@ export const classFormSchema = z.object({
 export const classCreateFormSchema = classFormSchema
   .partial({ teacherId: true })
   .extend({
-    newSubjectName: z.string().min(1, "New subject name cannot be empty").optional(), // New field for creating a subject
+    newSubjectName: z
+      .string()
+      .min(1, "New subject name cannot be empty")
+      .optional(), // New field for creating a subject
   })
   .refine(
     (data) => {
       // Ensure either subjectId is provided OR newSubjectName is provided, but not both.
       // And if newSubjectName is provided, subjectId must be undefined.
-      const hasSubjectId = data.subjectId !== undefined && data.subjectId !== null && data.subjectId !== 0;
-      const hasNewSubjectName = data.newSubjectName !== undefined && data.newSubjectName.trim() !== "";
+      const hasSubjectId =
+        data.subjectId !== undefined &&
+        data.subjectId !== null &&
+        data.subjectId !== 0;
+      const hasNewSubjectName =
+        data.newSubjectName !== undefined && data.newSubjectName.trim() !== "";
 
       if (hasSubjectId && hasNewSubjectName) {
         return false; // Cannot have both
@@ -46,5 +53,5 @@ export const classCreateFormSchema = classFormSchema
     {
       message: "Please select an existing subject or enter a new subject name.",
       path: ["subjectId"], // Attach error to subjectId field
-    }
+    },
   );

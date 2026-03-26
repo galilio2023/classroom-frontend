@@ -1,6 +1,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, ClipboardCheck, Sparkles, ArrowRight } from "lucide-react";
+import {
+  CheckCircle2,
+  ClipboardCheck,
+  Sparkles,
+  ArrowRight,
+} from "lucide-react";
 import { PendingSubmission } from "@/types/dashboard";
 import { PendingSubmissionCard } from "./pending-submission-card";
 import { motion, AnimatePresence } from "framer-motion";
@@ -12,7 +17,10 @@ interface PendingGradingListProps {
   show: (resource: string, id: string) => void;
 }
 
-export const PendingGradingList = ({ submissions, show }: PendingGradingListProps) => {
+export const PendingGradingList = ({
+  submissions,
+  show,
+}: PendingGradingListProps) => {
   const { t } = useTranslation();
 
   return (
@@ -23,11 +31,18 @@ export const PendingGradingList = ({ submissions, show }: PendingGradingListProp
             <ClipboardCheck className="h-5 w-5" />
           </div>
           <div>
-            <h3 className="text-xl font-black tracking-tight">{t("dashboard.staff.pendingGrading")}</h3>
-            <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">{t("dashboard.staff.submissionsAwaiting")}</p>
+            <h3 className="text-xl font-black tracking-tight">
+              {t("dashboard.staff.pendingGrading")}
+            </h3>
+            <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">
+              {t("dashboard.staff.submissionsAwaiting")}
+            </p>
           </div>
         </div>
-        <Badge variant="secondary" className="rounded-full px-3 py-1 font-black text-[10px] uppercase tracking-widest bg-primary/10 text-primary border-none animate-pulse">
+        <Badge
+          variant="secondary"
+          className="rounded-full px-3 py-1 font-black text-[10px] uppercase tracking-widest bg-primary/10 text-primary border-none animate-pulse"
+        >
           {t("dashboard.staff.newSubmissions", { count: submissions.length })}
         </Badge>
       </div>
@@ -43,9 +58,9 @@ export const PendingGradingList = ({ submissions, show }: PendingGradingListProp
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ delay: idx * 0.05 }}
               >
-                <PendingSubmissionCard 
-                  submission={submission} 
-                  onGrade={(id) => show("assignments", id)} 
+                <PendingSubmissionCard
+                  submission={submission}
+                  onGrade={(id) => show("assignments", id)}
                 />
               </motion.div>
             ))
@@ -63,8 +78,12 @@ export const PendingGradingList = ({ submissions, show }: PendingGradingListProp
                 </div>
               </div>
               <div className="space-y-1 relative z-10">
-                <p className="text-xl font-black tracking-tight text-foreground">{t("dashboard.staff.allCaughtUp")}</p>
-                <p className="text-sm font-medium text-muted-foreground/60">{t("dashboard.staff.allGraded")}</p>
+                <p className="text-xl font-black tracking-tight text-foreground">
+                  {t("dashboard.staff.allCaughtUp")}
+                </p>
+                <p className="text-sm font-medium text-muted-foreground/60">
+                  {t("dashboard.staff.allGraded")}
+                </p>
               </div>
               <div className="mt-2 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-success/60 relative z-10">
                 <Sparkles className="h-3 w-3" />

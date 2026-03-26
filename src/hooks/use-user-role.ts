@@ -11,12 +11,12 @@ export const useUserRole = () => {
 
   const roles = useMemo(() => {
     const role = identity?.role;
-    
+
     const isAdmin = role === UserRole.ADMIN;
     const isTeacher = role === UserRole.TEACHER;
     const isStudent = role === UserRole.STUDENT;
     const isParent = role === UserRole.PARENT;
-    
+
     // TA is an AI Agent, but we keep the enum check here for future service-level checks if needed.
     // For human UI, isStaff is strictly Admin or Teacher.
     const isStaff = isAdmin || isTeacher;

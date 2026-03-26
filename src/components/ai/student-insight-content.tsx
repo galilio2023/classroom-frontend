@@ -1,6 +1,11 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { TrendingUp, TrendingDown, Lightbulb, CheckCircle2 } from "lucide-react";
+import {
+  TrendingUp,
+  TrendingDown,
+  Lightbulb,
+  CheckCircle2,
+} from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 interface AIInsight {
@@ -14,7 +19,9 @@ interface StudentInsightContentProps {
   insight: AIInsight;
 }
 
-export const StudentInsightContent: React.FC<StudentInsightContentProps> = ({ insight }) => {
+export const StudentInsightContent: React.FC<StudentInsightContentProps> = ({
+  insight,
+}) => {
   const { t } = useTranslation();
   return (
     <div className="space-y-6 py-4">
@@ -27,9 +34,7 @@ export const StudentInsightContent: React.FC<StudentInsightContentProps> = ({ in
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm leading-relaxed italic">
-            "{insight.summary}"
-          </p>
+          <p className="text-sm leading-relaxed italic">"{insight.summary}"</p>
         </CardContent>
       </Card>
 
@@ -42,7 +47,10 @@ export const StudentInsightContent: React.FC<StudentInsightContentProps> = ({ in
           </h4>
           <ul className="space-y-2">
             {insight.strengths.map((s, i) => (
-              <li key={i} className="text-xs bg-green-500/10 text-green-700 p-2 rounded-md border border-green-500/20">
+              <li
+                key={i}
+                className="text-xs bg-green-500/10 text-green-700 p-2 rounded-md border border-green-500/20"
+              >
                 {s}
               </li>
             ))}
@@ -55,7 +63,10 @@ export const StudentInsightContent: React.FC<StudentInsightContentProps> = ({ in
           </h4>
           <ul className="space-y-2">
             {insight.weaknesses.map((w, i) => (
-              <li key={i} className="text-xs bg-amber-500/10 text-amber-700 p-2 rounded-md border border-amber-500/20">
+              <li
+                key={i}
+                className="text-xs bg-amber-500/10 text-amber-700 p-2 rounded-md border border-amber-500/20"
+              >
                 {w}
               </li>
             ))}

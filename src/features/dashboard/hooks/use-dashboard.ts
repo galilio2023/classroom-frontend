@@ -44,17 +44,25 @@ export const useDashboard = () => {
   useList<Class>({
     resource: "classes",
     filters: [
-        { field: "my", operator: "eq" as const, value: "true" },
-        ...(selectedTerm ? [{ field: "termId", operator: "eq" as const, value: selectedTerm.id }] : [])
+      { field: "my", operator: "eq" as const, value: "true" },
+      ...(selectedTerm
+        ? [{ field: "termId", operator: "eq" as const, value: selectedTerm.id }]
+        : []),
     ],
-    queryOptions: { enabled: isStudent && !!selectedTerm, staleTime: 60000 }
+    queryOptions: { enabled: isStudent && !!selectedTerm, staleTime: 60000 },
   });
 
   // This makes the 'Pending Verifications' list load instantly for admins
   useList<User>({
     resource: "users",
-    filters: [{ field: "verificationStatus", operator: "eq" as const, value: "pending" }],
-    queryOptions: { enabled: isAdmin, staleTime: 60000 }
+    filters: [
+      {
+        field: "verificationStatus",
+        operator: "eq" as const,
+        value: "pending",
+      },
+    ],
+    queryOptions: { enabled: isAdmin, staleTime: 60000 },
   });
 
   const { refetch: refetchDashboard } = dashboardQuery;
@@ -69,8 +77,8 @@ export const useDashboard = () => {
     };
 
     void connectSocket().then(() => {
-        socket.on("notification", handleRefresh);
-        socket.on("new_discussion", handleRefresh);
+      socket.on("notification", handleRefresh);
+      socket.on("new_discussion", handleRefresh);
     });
 
     return () => {
@@ -81,7 +89,14 @@ export const useDashboard = () => {
 
   const dashboardData: DashboardData = dashboardQuery.data?.data || {
     todaySchedule: [],
-    stats: { totalUsers: 0, totalStudents: 0, totalTeachers: 0, totalClasses: 0, totalAssignments: 0, pendingVerifications: 0 },
+    stats: {
+      totalUsers: 0,
+      totalStudents: 0,
+      totalTeachers: 0,
+      totalClasses: 0,
+      totalAssignments: 0,
+      pendingVerifications: 0,
+    },
     attendanceTrend: [],
     gradeDistribution: [],
     pendingSubmissions: [],
@@ -101,6 +116,11 @@ export const useDashboard = () => {
     analyticsData: dashboardData,
     selectedTerm,
     roles: { isStaff, isAdmin, isTeacher, isStudent, isParent },
-    navigation: { list, show, refetchCore: refetchDashboard, refetchAnalytics: refetchDashboard }
+    navigation: {
+      list,
+      show,
+      refetchCore: refetchDashboard,
+      refetchAnalytics: refetchDashboard,
+    },
   };
 };

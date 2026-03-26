@@ -20,7 +20,7 @@ interface RosterTabWrapperProps {
   activeSubTab: string;
   setSearchParams: (
     setter: (prev: URLSearchParams) => URLSearchParams,
-    options?: { replace: boolean }
+    options?: { replace: boolean },
   ) => void;
 }
 
@@ -46,7 +46,7 @@ export const RosterTabWrapper: React.FC<RosterTabWrapperProps> = ({
         newParams.set("subtab", value);
         return newParams;
       },
-      { replace: true }
+      { replace: true },
     );
   };
 
@@ -79,7 +79,7 @@ export const RosterTabWrapper: React.FC<RosterTabWrapperProps> = ({
                     "px-4 md:px-6 py-2 md:py-2.5 rounded-full font-bold text-xs transition-all duration-300 gap-2 h-9 md:h-10",
                     isActive
                       ? "bg-background shadow-sm text-primary"
-                      : "text-muted-foreground hover:bg-primary/5 hover:text-primary"
+                      : "text-muted-foreground hover:bg-primary/5 hover:text-primary",
                   )}
                 >
                   <Icon className="h-4 w-4" />
@@ -108,7 +108,10 @@ export const RosterTabWrapper: React.FC<RosterTabWrapperProps> = ({
 
         <TabsContent value="attendance" className="mt-8">
           {activeSubTab === "attendance" && (
-            <AttendanceTab classId={classId} enrollments={approvedEnrollments} />
+            <AttendanceTab
+              classId={classId}
+              enrollments={approvedEnrollments}
+            />
           )}
         </TabsContent>
       </Tabs>

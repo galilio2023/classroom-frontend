@@ -2,7 +2,13 @@ import React from "react";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { Slider } from "../ui/slider";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 import { LoadingButton } from "../ui/loading-button";
 import { AICard } from "./ai-card";
 import { AIActionButton } from "./ai-action-button";
@@ -43,7 +49,7 @@ export const QuizGeneratorForm: React.FC<QuizGeneratorFormProps> = ({
   classId,
 }) => {
   const { t, i18n } = useTranslation();
-  const isArabic = i18n.language === 'ar';
+  const isArabic = i18n.language === "ar";
 
   return (
     <AICard
@@ -77,7 +83,12 @@ export const QuizGeneratorForm: React.FC<QuizGeneratorFormProps> = ({
     >
       <div className="space-y-6 text-start">
         <div className="space-y-2">
-          <Label htmlFor="topic" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ms-1">{t("aiHub.assistant.quizGen.topic")}</Label>
+          <Label
+            htmlFor="topic"
+            className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ms-1"
+          >
+            {t("aiHub.assistant.quizGen.topic")}
+          </Label>
           <Input
             id="topic"
             placeholder={t("aiHub.assistant.quizGen.placeholders.topic")}
@@ -88,44 +99,86 @@ export const QuizGeneratorForm: React.FC<QuizGeneratorFormProps> = ({
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-2 min-w-0">
-                <Label htmlFor="difficulty" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ms-1">{t("aiHub.assistant.quizGen.difficulty")}</Label>
-                <Select value={difficulty} onValueChange={setDifficulty}>
-                    <SelectTrigger id="difficulty" className="h-11 w-full rounded-xl bg-muted/30 border-none focus-visible:ring-primary font-bold">
-                        <div className="flex items-center gap-2 truncate min-w-0">
-                            <BarChart className="h-4 w-4 text-primary shrink-0" />
-                            <span className="truncate block"><SelectValue placeholder={t("aiHub.assistant.quizGen.difficulty")} /></span>
-                        </div>
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="easy" className="font-bold">{t("aiHub.assistant.quizGen.difficulties.easy")}</SelectItem>
-                        <SelectItem value="medium" className="font-bold">{t("aiHub.assistant.quizGen.difficulties.medium")}</SelectItem>
-                        <SelectItem value="hard" className="font-bold">{t("aiHub.assistant.quizGen.difficulties.hard")}</SelectItem>
-                    </SelectContent>
-                </Select>
-            </div>
-            <div className="space-y-2 min-w-0">
-                <Label htmlFor="type" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ms-1">{t("aiHub.assistant.quizGen.format")}</Label>
-                <Select value={type} onValueChange={setType}>
-                    <SelectTrigger id="type" className="h-11 w-full rounded-xl bg-muted/30 border-none focus-visible:ring-primary font-bold">
-                        <div className="flex items-center gap-2 truncate min-w-0">
-                            <ListChecks className="h-4 w-4 text-primary shrink-0" />
-                            <span className="truncate block"><SelectValue placeholder={t("aiHub.assistant.quizGen.format")} /></span>
-                        </div>
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="multiple_choice" className="font-bold">{t("aiHub.assistant.quizGen.formats.multiple_choice")}</SelectItem>
-                        <SelectItem value="true_false" className="font-bold">{t("aiHub.assistant.quizGen.formats.true_false")}</SelectItem>
-                        <SelectItem value="mixed" className="font-bold">{t("aiHub.assistant.quizGen.formats.mixed")}</SelectItem>
-                    </SelectContent>
-                </Select>
-            </div>
+          <div className="space-y-2 min-w-0">
+            <Label
+              htmlFor="difficulty"
+              className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ms-1"
+            >
+              {t("aiHub.assistant.quizGen.difficulty")}
+            </Label>
+            <Select value={difficulty} onValueChange={setDifficulty}>
+              <SelectTrigger
+                id="difficulty"
+                className="h-11 w-full rounded-xl bg-muted/30 border-none focus-visible:ring-primary font-bold"
+              >
+                <div className="flex items-center gap-2 truncate min-w-0">
+                  <BarChart className="h-4 w-4 text-primary shrink-0" />
+                  <span className="truncate block">
+                    <SelectValue
+                      placeholder={t("aiHub.assistant.quizGen.difficulty")}
+                    />
+                  </span>
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="easy" className="font-bold">
+                  {t("aiHub.assistant.quizGen.difficulties.easy")}
+                </SelectItem>
+                <SelectItem value="medium" className="font-bold">
+                  {t("aiHub.assistant.quizGen.difficulties.medium")}
+                </SelectItem>
+                <SelectItem value="hard" className="font-bold">
+                  {t("aiHub.assistant.quizGen.difficulties.hard")}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2 min-w-0">
+            <Label
+              htmlFor="type"
+              className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ms-1"
+            >
+              {t("aiHub.assistant.quizGen.format")}
+            </Label>
+            <Select value={type} onValueChange={setType}>
+              <SelectTrigger
+                id="type"
+                className="h-11 w-full rounded-xl bg-muted/30 border-none focus-visible:ring-primary font-bold"
+              >
+                <div className="flex items-center gap-2 truncate min-w-0">
+                  <ListChecks className="h-4 w-4 text-primary shrink-0" />
+                  <span className="truncate block">
+                    <SelectValue
+                      placeholder={t("aiHub.assistant.quizGen.format")}
+                    />
+                  </span>
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="multiple_choice" className="font-bold">
+                  {t("aiHub.assistant.quizGen.formats.multiple_choice")}
+                </SelectItem>
+                <SelectItem value="true_false" className="font-bold">
+                  {t("aiHub.assistant.quizGen.formats.true_false")}
+                </SelectItem>
+                <SelectItem value="mixed" className="font-bold">
+                  {t("aiHub.assistant.quizGen.formats.mixed")}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         <div className="space-y-4">
           <div className="flex justify-between px-1">
-            <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t("aiHub.assistant.quizGen.questions")}</Label>
-            <span className="text-sm font-black text-primary">{new Intl.NumberFormat(isArabic ? 'ar-EG' : 'en-US').format(count[0])}</span>
+            <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+              {t("aiHub.assistant.quizGen.questions")}
+            </Label>
+            <span className="text-sm font-black text-primary">
+              {new Intl.NumberFormat(isArabic ? "ar-EG" : "en-US").format(
+                count[0],
+              )}
+            </span>
           </div>
           <Slider
             value={count}

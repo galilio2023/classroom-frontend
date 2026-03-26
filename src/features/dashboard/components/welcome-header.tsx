@@ -45,7 +45,7 @@ export const WelcomeHeader = ({
   const getSummaryText = () => {
     // 🛡️ Global Master Switch: Use platform welcome message if set by admin
     if (data?.globalConfig?.welcomeMessage) {
-        return data.globalConfig.welcomeMessage;
+      return data.globalConfig.welcomeMessage;
     }
 
     if (isStudent) {

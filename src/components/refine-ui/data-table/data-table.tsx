@@ -47,7 +47,10 @@ export function DataTable<TData extends BaseRecord>({
         const container = tableContainerRef.current;
         const horizontalOverflow = tableEl.scrollWidth > container.clientWidth;
         const verticalOverflow = tableEl.scrollHeight > container.clientHeight;
-        setIsOverflowing({ horizontal: horizontalOverflow, vertical: verticalOverflow });
+        setIsOverflowing({
+          horizontal: horizontalOverflow,
+          vertical: verticalOverflow,
+        });
       }
     };
     checkOverflow();
@@ -69,7 +72,12 @@ export function DataTable<TData extends BaseRecord>({
   }
 
   const {
-    reactTable: { getHeaderGroups, getRowModel, getAllColumns, getAllLeafColumns },
+    reactTable: {
+      getHeaderGroups,
+      getRowModel,
+      getAllColumns,
+      getAllLeafColumns,
+    },
   } = tableResult;
 
   const columns = getAllColumns();
@@ -80,27 +88,32 @@ export function DataTable<TData extends BaseRecord>({
   return (
     <div className="flex flex-col flex-1 gap-4 w-full max-w-full overflow-hidden">
       <ScrollArea className="rounded-md border bg-card w-full">
-        <div 
-          ref={tableContainerRef} 
+        <div
+          ref={tableContainerRef}
           className="w-full"
-          style={{ WebkitOverflowScrolling: 'touch' }}
+          style={{ WebkitOverflowScrolling: "touch" }}
         >
-          <Table 
-              ref={tableRef} 
-              className="min-w-[1000px] w-full table-auto"
-          >
+          <Table ref={tableRef} className="min-w-[1000px] w-full table-auto">
             <TableHeader>
               {headerGroups.map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (
-                    <TableHead 
-                      key={header.id} 
+                    <TableHead
+                      key={header.id}
                       className="whitespace-nowrap font-bold bg-muted/30 h-12"
-                      style={{ ...getCommonStyles({ column: header.column, isOverflowing }) }}
+                      style={{
+                        ...getCommonStyles({
+                          column: header.column,
+                          isOverflowing,
+                        }),
+                      }}
                     >
                       {header.isPlaceholder ? null : (
                         <div className="flex items-center gap-1">
-                          {flexRender(header.column.columnDef.header, header.getContext())}
+                          {flexRender(
+                            header.column.columnDef.header,
+                            header.getContext(),
+                          )}
                         </div>
                       )}
                     </TableHead>
@@ -118,10 +131,22 @@ export function DataTable<TData extends BaseRecord>({
                     exit={{ opacity: 0 }}
                   >
                     <td colSpan={columns.length}>
-                      {Array.from({ length: (refineCore?.pageSize || 0) < 1 ? 5 : Math.min(refineCore?.pageSize || 0, 10) }).map((_, rowIndex) => (
-                        <div key={`skeleton-row-${rowIndex}`} className="flex border-b last:border-0">
+                      {Array.from({
+                        length:
+                          (refineCore?.pageSize || 0) < 1
+                            ? 5
+                            : Math.min(refineCore?.pageSize || 0, 10),
+                      }).map((_, rowIndex) => (
+                        <div
+                          key={`skeleton-row-${rowIndex}`}
+                          className="flex border-b last:border-0"
+                        >
                           {getAllLeafColumns().map((column) => (
-                            <div key={`skeleton-cell-${rowIndex}-${column.id}`} style={{ width: column.getSize() }} className="py-4 px-4">
+                            <div
+                              key={`skeleton-cell-${rowIndex}-${column.id}`}
+                              style={{ width: column.getSize() }}
+                              className="py-4 px-4"
+                            >
                               <Skeleton className="h-5 w-full max-w-[150px]" />
                             </div>
                           ))}
@@ -138,28 +163,39 @@ export function DataTable<TData extends BaseRecord>({
                       transition={{ duration: 0.15 }}
                       className={cn(
                         "group border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted",
-                        onRowClick && "cursor-pointer"
+                        onRowClick && "cursor-pointer",
                       )}
                       onClick={() => onRowClick?.(row.original)}
                     >
                       {row.getVisibleCells().map((cell) => (
-                        <TableCell 
-                          key={cell.id} 
+                        <TableCell
+                          key={cell.id}
                           className="whitespace-nowrap py-4"
-                          style={{ ...getCommonStyles({ column: cell.column, isOverflowing }) }}
+                          style={{
+                            ...getCommonStyles({
+                              column: cell.column,
+                              isOverflowing,
+                            }),
+                          }}
                         >
-                          <motion.div 
+                          <motion.div
                             whileHover={onRowClick ? { x: 4 } : {}}
                             className="max-w-[400px] truncate"
                           >
-                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext(),
+                            )}
                           </motion.div>
                         </TableCell>
                       ))}
                     </motion.tr>
                   ))
                 ) : (
-                  <DataTableNoData isOverflowing={isOverflowing} columnsLength={columns.length} />
+                  <DataTableNoData
+                    isOverflowing={isOverflowing}
+                    columnsLength={columns.length}
+                  />
                 )}
               </AnimatePresence>
             </TableBody>
@@ -167,7 +203,7 @@ export function DataTable<TData extends BaseRecord>({
         </div>
         <ScrollBar orientation="horizontal" />
       </ScrollArea>
-      
+
       {!isLoading && getRowModel().rows?.length > 0 && refineCore && (
         <div className="w-full overflow-x-auto pb-2">
           <DataTablePagination
@@ -184,35 +220,90 @@ export function DataTable<TData extends BaseRecord>({
   );
 }
 
-function DataTableNoData({ isOverflowing, columnsLength }: { isOverflowing: { horizontal: boolean; vertical: boolean }; columnsLength: number; }) {
+function DataTableNoData({
+  isOverflowing,
+  columnsLength,
+}: {
+  isOverflowing: { horizontal: boolean; vertical: boolean };
+  columnsLength: number;
+}) {
   const { t } = useTranslation();
   return (
     <TableRow className="hover:bg-transparent">
-      <TableCell colSpan={columnsLength} className="relative text-center" style={{ height: "200px" }}>
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-background" style={{ position: isOverflowing.horizontal ? "sticky" : "absolute", left: "50%", transform: "translateX(-50%)", zIndex: isOverflowing.horizontal ? 2 : 1, width: isOverflowing.horizontal ? "fit-content" : "100%", minWidth: "300px" }}>
-          <div className="text-lg font-semibold text-foreground">{t("common.table.noData")}</div>
-          <div className="text-sm text-muted-foreground">{t("common.table.noDataDesc")}</div>
+      <TableCell
+        colSpan={columnsLength}
+        className="relative text-center"
+        style={{ height: "200px" }}
+      >
+        <div
+          className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-background"
+          style={{
+            position: isOverflowing.horizontal ? "sticky" : "absolute",
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: isOverflowing.horizontal ? 2 : 1,
+            width: isOverflowing.horizontal ? "fit-content" : "100%",
+            minWidth: "300px",
+          }}
+        >
+          <div className="text-lg font-semibold text-foreground">
+            {t("common.table.noData")}
+          </div>
+          <div className="text-sm text-muted-foreground">
+            {t("common.table.noDataDesc")}
+          </div>
         </div>
       </TableCell>
     </TableRow>
   );
 }
 
-function getCommonStyles<TData>({ column, isOverflowing }: { column: Column<TData>; isOverflowing: { horizontal: boolean; vertical: boolean; }; }): React.CSSProperties {
+function getCommonStyles<TData>({
+  column,
+  isOverflowing,
+}: {
+  column: Column<TData>;
+  isOverflowing: { horizontal: boolean; vertical: boolean };
+}): React.CSSProperties {
   const isPinned = column.getIsPinned();
-  const isLastLeftPinnedColumn = isPinned === "left" && column.getIsLastColumn("left");
-  const isFirstRightPinnedColumn = isPinned === "right" && column.getIsFirstColumn("right");
+  const isLastLeftPinnedColumn =
+    isPinned === "left" && column.getIsLastColumn("left");
+  const isFirstRightPinnedColumn =
+    isPinned === "right" && column.getIsFirstColumn("right");
   return {
-    boxShadow: isOverflowing.horizontal && isLastLeftPinnedColumn ? "-4px 0 4px -4px var(--border) inset" : isOverflowing.horizontal && isFirstRightPinnedColumn ? "4px 0 4px -4px var(--border) inset" : undefined,
-    left: isOverflowing.horizontal && isPinned === "left" ? `${column.getStart("left")}px` : undefined,
-    right: isOverflowing.horizontal && isPinned === "right" ? `${column.getAfter("right")}px` : undefined,
+    boxShadow:
+      isOverflowing.horizontal && isLastLeftPinnedColumn
+        ? "-4px 0 4px -4px var(--border) inset"
+        : isOverflowing.horizontal && isFirstRightPinnedColumn
+          ? "4px 0 4px -4px var(--border) inset"
+          : undefined,
+    left:
+      isOverflowing.horizontal && isPinned === "left"
+        ? `${column.getStart("left")}px`
+        : undefined,
+    right:
+      isOverflowing.horizontal && isPinned === "right"
+        ? `${column.getAfter("right")}px`
+        : undefined,
     opacity: 1,
     position: isOverflowing.horizontal && isPinned ? "sticky" : "relative",
     background: isOverflowing.horizontal && isPinned ? "var(--background)" : "",
-    borderTopRightRadius: isOverflowing.horizontal && isPinned === "right" ? "var(--radius)" : undefined,
-    borderBottomRightRadius: isOverflowing.horizontal && isPinned === "right" ? "var(--radius)" : undefined,
-    borderTopLeftRadius: isOverflowing.horizontal && isPinned === "left" ? "var(--radius)" : undefined,
-    borderBottomLeftRadius: isOverflowing.horizontal && isPinned === "left" ? "var(--radius)" : undefined,
+    borderTopRightRadius:
+      isOverflowing.horizontal && isPinned === "right"
+        ? "var(--radius)"
+        : undefined,
+    borderBottomRightRadius:
+      isOverflowing.horizontal && isPinned === "right"
+        ? "var(--radius)"
+        : undefined,
+    borderTopLeftRadius:
+      isOverflowing.horizontal && isPinned === "left"
+        ? "var(--radius)"
+        : undefined,
+    borderBottomLeftRadius:
+      isOverflowing.horizontal && isPinned === "left"
+        ? "var(--radius)"
+        : undefined,
     width: column.getSize(),
     zIndex: isOverflowing.horizontal && isPinned ? 1 : 0,
   };

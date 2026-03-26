@@ -7,16 +7,21 @@ interface AgentAlertData {
   [key: string]: unknown;
 }
 
-export const useAssignmentSocket = (userId?: string, userRole?: UserRole, classId?: number, onAlert?: () => void) => {
+export const useAssignmentSocket = (
+  userId?: string,
+  userRole?: UserRole,
+  classId?: number,
+  onAlert?: () => void,
+) => {
   useEffect(() => {
     if (!userId || userRole === UserRole.STUDENT) return;
 
     void connectSocket().then(() => {
-        socket.on("agent_alert", (data: AgentAlertData) => {
-            if (data.classId === classId) {
-                onAlert?.();
-            }
-        });
+      socket.on("agent_alert", (data: AgentAlertData) => {
+        if (data.classId === classId) {
+          onAlert?.();
+        }
+      });
     });
 
     return () => {

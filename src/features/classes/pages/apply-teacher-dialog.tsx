@@ -55,13 +55,16 @@ export const ApplyTeacherDialog = ({
         },
         onError: (err) => {
           const error = err as HttpError;
-          toast.error((error?.response?.data as any)?.message || t("classes.dialogs.applyTeacher.toast.error"));
+          toast.error(
+            (error?.response?.data as any)?.message ||
+              t("classes.dialogs.applyTeacher.toast.error"),
+          );
         },
-      }
+      },
     );
   };
 
-  const isAr = i18n.language === 'ar';
+  const isAr = i18n.language === "ar";
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -76,9 +79,16 @@ export const ApplyTeacherDialog = ({
             </DialogTitle>
             <DialogDescription className="font-medium text-base">
               {isAr ? (
-                <>أنت تطلب إدارة وتدريس فصل <strong>{className}</strong>. سيقوم المسؤول بمراجعة طلبك.</>
+                <>
+                  أنت تطلب إدارة وتدريس فصل <strong>{className}</strong>. سيقوم
+                  المسؤول بمراجعة طلبك.
+                </>
               ) : (
-                <>You are requesting to manage and teach <strong>{className}</strong>. The administrator will review your request.</>
+                <>
+                  You are requesting to manage and teach{" "}
+                  <strong>{className}</strong>. The administrator will review
+                  your request.
+                </>
               )}
             </DialogDescription>
           </div>
@@ -95,7 +105,12 @@ export const ApplyTeacherDialog = ({
                 onChange={(e) => setMessage(e.target.value)}
                 className="min-h-[150px] rounded-[2rem] bg-muted/30 border-none focus-visible:ring-primary p-6 text-base leading-relaxed font-medium resize-none shadow-inner"
               />
-              <div className={cn("absolute bottom-4 opacity-10 group-focus-within:opacity-30 transition-opacity", isAr ? "left-4" : "right-4")}>
+              <div
+                className={cn(
+                  "absolute bottom-4 opacity-10 group-focus-within:opacity-30 transition-opacity",
+                  isAr ? "left-4" : "right-4",
+                )}
+              >
                 <Sparkles className="h-6 w-6" />
               </div>
             </div>

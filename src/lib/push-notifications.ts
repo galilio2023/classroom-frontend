@@ -24,9 +24,10 @@ export async function subscribeToPush() {
 
   try {
     const registration = await navigator.serviceWorker.ready;
-    
+
     // Check if already subscribed
-    const existingSubscription = await registration.pushManager.getSubscription();
+    const existingSubscription =
+      await registration.pushManager.getSubscription();
     if (existingSubscription) {
       // Even if it exists, we send it to backend to ensure it's synced
       await sendSubscriptionToBackend(existingSubscription);
@@ -52,7 +53,9 @@ async function sendSubscriptionToBackend(subscription: PushSubscription) {
   const token = sessionData?.session?.token;
 
   if (!token) {
-    console.warn("Attempted to subscribe to push notifications without an active session.");
+    console.warn(
+      "Attempted to subscribe to push notifications without an active session.",
+    );
     return;
   }
 
@@ -60,7 +63,7 @@ async function sendSubscriptionToBackend(subscription: PushSubscription) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify(subscription),
   });

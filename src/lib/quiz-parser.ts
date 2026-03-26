@@ -7,7 +7,9 @@ export interface ParsedQuestion {
 
 export const parseQuizDescription = (description: string): ParsedQuestion[] => {
   try {
-    const qBlocks = description.split("---").filter((block) => block.includes("Q"));
+    const qBlocks = description
+      .split("---")
+      .filter((block) => block.includes("Q"));
     return qBlocks
       .map((block) => {
         const lines = block.trim().split("\n");
@@ -20,7 +22,10 @@ export const parseQuizDescription = (description: string): ParsedQuestion[] => {
           ? correctAnswerLine.replace("- ", "").replace(" (Correct)", "").trim()
           : "";
         const explanation =
-          lines.find((l) => l.includes("**Explanation:**"))?.replace("**Explanation:**", "").trim() || "";
+          lines
+            .find((l) => l.includes("**Explanation:**"))
+            ?.replace("**Explanation:**", "")
+            .trim() || "";
 
         return { question, options, correctAnswer, explanation };
       })

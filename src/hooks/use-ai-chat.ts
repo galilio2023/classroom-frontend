@@ -1,5 +1,10 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { useCustom, useNotification, usePermissions, useCustomMutation } from "@refinedev/core";
+import {
+  useCustom,
+  useNotification,
+  usePermissions,
+  useCustomMutation,
+} from "@refinedev/core";
 import { useTranslation } from "react-i18next";
 import { BACKEND_URL } from "@/config";
 import { BasePermissions, UserRole } from "@/types";
@@ -47,7 +52,7 @@ const MAX_INPUT_LENGTH = 4000;
 
 /**
  * useAIChat Hook (Final Production Grade)
- * 
+ *
  * Optimized for Tablawy OS AI Streaming.
  * Handles SSE Buffering, History Syncing, and Multi-Class Navigation.
  */
@@ -55,51 +60,58 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
   const { t } = useTranslation();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
-  
+
   // 🛡️ AUTO-DRAFT: AI Assistant Persistence
   useEffect(() => {
-      const draftKey = `draft:ai-assistant:${classId || 'global'}`;
-      if (input) {
-          localStorage.setItem(draftKey, input);
-      } else {
-          localStorage.removeItem(draftKey);
-      }
+    const draftKey = `draft:ai-assistant:${classId || "global"}`;
+    if (input) {
+      localStorage.setItem(draftKey, input);
+    } else {
+      localStorage.removeItem(draftKey);
+    }
   }, [input, classId]);
 
   // 🚀 DRAFT RECOVERY
   useEffect(() => {
-      const draftKey = `draft:ai-assistant:${classId || 'global'}`;
-      const saved = localStorage.getItem(draftKey);
-      if (saved) {
-          setInput(prev => prev || saved);
-      }
+    const draftKey = `draft:ai-assistant:${classId || "global"}`;
+    const saved = localStorage.getItem(draftKey);
+    if (saved) {
+      setInput((prev) => prev || saved);
+    }
   }, [classId]);
 
   const [isLoading, setIsLoading] = useState(false);
   const [streamingMessage, setStreamingMessage] = useState("");
-  const [streamingSources, setStreamingSources] = useState<ChatSource[] | null>(null);
+  const [streamingSources, setStreamingSources] = useState<ChatSource[] | null>(
+    null,
+  );
   const [isDryRun, setIsDryRun] = useState(false);
 
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const accumulatorRef = useRef("");
-  const lineBufferRef = useRef(""); 
+  const lineBufferRef = useRef("");
   const animationFrameRef = useRef<number | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
-  const hasLoadedHistoryFor = useRef<string | number | null>(null); 
-  
+  const hasLoadedHistoryFor = useRef<string | number | null>(null);
+
   const { open } = useNotification();
-  const { data: permissions, isLoading: isPermissionsLoading, isError: isPermissionsError } = usePermissions<BasePermissions>({});
+  const {
+    data: permissions,
+    isLoading: isPermissionsLoading,
+    isError: isPermissionsError,
+  } = usePermissions<BasePermissions>({});
 
   // 1. 📜 HISTORY: Standard Refine v5 GET
   // Task: Context Safety - Fallback to "global" history if no classId provided
-  const effectiveClassId = classId || 'global';
-  const { result: historyResult, query: historyQuery } = useCustom<ChatHistoryResponse>({
-    url: `${BACKEND_URL}/ai/chat-history/${effectiveClassId}`,
-    method: "get",
-    queryOptions: {
-      enabled: hasLoadedHistoryFor.current !== effectiveClassId,
-    },
-  });
+  const effectiveClassId = classId || "global";
+  const { result: historyResult, query: historyQuery } =
+    useCustom<ChatHistoryResponse>({
+      url: `${BACKEND_URL}/ai/chat-history/${effectiveClassId}`,
+      method: "get",
+      queryOptions: {
+        enabled: hasLoadedHistoryFor.current !== effectiveClassId,
+      },
+    });
 
   // 1b. 🦾 NON-STREAMING FALLBACK (Refine v5 Pattern Adherence)
   const { mutate: sendSimpleChat } = useCustomMutation();
@@ -107,9 +119,9 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
   // Handle Navigation & State Resets
   useEffect(() => {
     if (effectiveClassId !== hasLoadedHistoryFor.current) {
-        setMessages([]);
-        accumulatorRef.current = "";
-        lineBufferRef.current = "";
+      setMessages([]);
+      accumulatorRef.current = "";
+      lineBufferRef.current = "";
     }
   }, [effectiveClassId]);
 
@@ -130,14 +142,17 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
   // 2. 🧹 CLEANUP
   useEffect(() => {
     return () => {
-      if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
+      if (animationFrameRef.current)
+        cancelAnimationFrame(animationFrameRef.current);
       if (abortControllerRef.current) abortControllerRef.current.abort();
     };
   }, []);
 
   const scrollToBottom = useCallback(() => {
     if (scrollAreaRef.current) {
-      const scrollContainer = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
+      const scrollContainer = scrollAreaRef.current.querySelector(
+        "[data-radix-scroll-area-viewport]",
+      );
       if (scrollContainer) {
         scrollContainer.scrollTop = scrollContainer.scrollHeight;
       }
@@ -149,8 +164,9 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
   }, [messages, streamingMessage, scrollToBottom]);
 
   const updateStreamingUI = useCallback(() => {
-    if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
-    
+    if (animationFrameRef.current)
+      cancelAnimationFrame(animationFrameRef.current);
+
     animationFrameRef.current = requestAnimationFrame(() => {
       setStreamingMessage(accumulatorRef.current);
       animationFrameRef.current = null;
@@ -164,19 +180,31 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
 
     // RBAC & Safety Checks
     if (isPermissionsError) {
-        open?.({ type: "error", message: (t as any)("common.error"), description: (t as any)("auth.errors.permissions") as string });
-        return;
+      open?.({
+        type: "error",
+        message: (t as any)("common.error"),
+        description: (t as any)("auth.errors.permissions") as string,
+      });
+      return;
     }
 
     if (cleanInput.length > MAX_INPUT_LENGTH) {
-        open?.({ type: "error", message: (t as any)("common.error"), description: (t as any)("aiHub.errors.inputTooLong") as string });
-        return;
+      open?.({
+        type: "error",
+        message: (t as any)("common.error"),
+        description: (t as any)("aiHub.errors.inputTooLong") as string,
+      });
+      return;
     }
 
     const role = permissions?.role;
     if (effectiveClassId && role === UserRole.PARENT) {
-        open?.({ type: "error", message: (t as any)("common.accessDenied") as string, description: (t as any)("aiHub.errors.parentRestricted") as string });
-        return;
+      open?.({
+        type: "error",
+        message: (t as any)("common.accessDenied") as string,
+        description: (t as any)("aiHub.errors.parentRestricted") as string,
+      });
+      return;
     }
 
     // Initialize Request Lifecycle
@@ -184,15 +212,18 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
     const controller = new AbortController();
     abortControllerRef.current = controller;
 
-    const userMessage: Message = { role: "user", parts: [{ text: cleanInput }] };
+    const userMessage: Message = {
+      role: "user",
+      parts: [{ text: cleanInput }],
+    };
     setMessages((prev) => [...prev, userMessage]);
-    
+
     setInput("");
     setIsLoading(true);
     setStreamingMessage("");
     setStreamingSources(null);
     accumulatorRef.current = "";
-    lineBufferRef.current = ""; 
+    lineBufferRef.current = "";
 
     const finalUrl = effectiveClassId ? "/ai/study-buddy" : url;
     const apiUrl = `${BACKEND_URL}${finalUrl}`;
@@ -202,37 +233,55 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
       const correlationId = crypto.randomUUID();
 
       // General Chat (Non-Streaming) - Use Refine's useCustomMutation
-      if (!effectiveClassId || effectiveClassId === 'global') {
-        sendSimpleChat({
+      if (!effectiveClassId || effectiveClassId === "global") {
+        sendSimpleChat(
+          {
             url: apiUrl,
             method: "post",
             values: {
-                message: cleanInput,
-                history: messages.map(m => ({ role: m.role, parts: m.parts })),
-                context,
-                correlationId
-            }
-        }, {
+              message: cleanInput,
+              history: messages.map((m) => ({ role: m.role, parts: m.parts })),
+              context,
+              correlationId,
+            },
+          },
+          {
             onSuccess: (result) => {
-                const responseData = result.data as { data?: { response?: string }, metadata?: { isDryRun?: boolean } };
-                if (responseData.data?.response) {
-                    setMessages((prev) => [...prev, { role: "model", parts: [{ text: responseData.data?.response || "" }] }]);
-                }
-                if (responseData.metadata?.isDryRun) setIsDryRun(true);
-                setIsLoading(false);
+              const responseData = result.data as {
+                data?: { response?: string };
+                metadata?: { isDryRun?: boolean };
+              };
+              if (responseData.data?.response) {
+                setMessages((prev) => [
+                  ...prev,
+                  {
+                    role: "model",
+                    parts: [{ text: responseData.data?.response || "" }],
+                  },
+                ]);
+              }
+              if (responseData.metadata?.isDryRun) setIsDryRun(true);
+              setIsLoading(false);
             },
             onError: (err) => {
-                console.error("Simple Chat Error:", err);
-                setIsLoading(false);
-                open?.({ type: "error", message: (t as any)("common.error"), description: (t as any)("aiHub.errors.serviceUnavailable") as string });
-            }
-        });
+              console.error("Simple Chat Error:", err);
+              setIsLoading(false);
+              open?.({
+                type: "error",
+                message: (t as any)("common.error"),
+                description: (t as any)(
+                  "aiHub.errors.serviceUnavailable",
+                ) as string,
+              });
+            },
+          },
+        );
         return;
       }
 
-      const headers: Record<string, string> = { 
-          "Content-Type": "application/json",
-          "X-Correlation-ID": correlationId
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+        "X-Correlation-ID": correlationId,
       };
       if (token) headers["Authorization"] = `Bearer ${token}`;
 
@@ -243,7 +292,7 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
         headers,
         body: JSON.stringify({
           message: cleanInput,
-          history: messages.map(m => ({ role: m.role, parts: m.parts })),
+          history: messages.map((m) => ({ role: m.role, parts: m.parts })),
           context,
           classId: effectiveClassId,
           correlationId, // Also pass in body for non-header compliant middle-layers
@@ -267,7 +316,7 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
 
         const chunk = decoder.decode(value, { stream: true });
         buffer += chunk;
-        
+
         // 🛡️ JSON LINE BUFFERING: Split by double newlines (SSE standard)
         const lines = buffer.split("\n\n");
 
@@ -279,7 +328,7 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
             try {
               const rawData = line.replace("data: ", "").trim();
               if (!rawData) continue;
-              
+
               const data = JSON.parse(rawData) as StreamData;
               if (data.text) {
                 accumulatorRef.current += data.text;
@@ -295,17 +344,18 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
       }
 
       // Final State Push (Guard against empty bubbles)
-      if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
+      if (animationFrameRef.current)
+        cancelAnimationFrame(animationFrameRef.current);
       const finalResponseText = accumulatorRef.current.trim();
-      
+
       if (finalResponseText.length > 0) {
         setMessages((prev) => [
           ...prev,
           {
             role: "model",
             parts: [{ text: finalResponseText }],
-            sources: streamingSources || undefined
-          }
+            sources: streamingSources || undefined,
+          },
         ]);
       } else {
         throw new Error("EMPTY_RESPONSE");
@@ -313,27 +363,35 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
 
       setStreamingMessage("");
       setStreamingSources(null);
-
     } catch (err: unknown) {
       const error = err as Error;
-      if (error.name === 'AbortError') return;
-      
-      console.error("Tablawy AI Error:", error);
-      
-      let description: string = (t as any)("aiHub.errors.serviceUnavailable") as string;
-      if (error.message === "RATE_LIMIT_EXCEEDED") description = (t as any)("aiHub.errors.rateLimit") as string;
-      if (error.message === "AI_SERVICE_OFFLINE") description = (t as any)("aiHub.errors.maintenance") as string;
+      if (error.name === "AbortError") return;
 
-      open?.({ 
-        type: "error", 
-        message: (t as any)("common.error"), 
-        description 
+      console.error("Tablawy AI Error:", error);
+
+      let description: string = (t as any)(
+        "aiHub.errors.serviceUnavailable",
+      ) as string;
+      if (error.message === "RATE_LIMIT_EXCEEDED")
+        description = (t as any)("aiHub.errors.rateLimit") as string;
+      if (error.message === "AI_SERVICE_OFFLINE")
+        description = (t as any)("aiHub.errors.maintenance") as string;
+
+      open?.({
+        type: "error",
+        message: (t as any)("common.error"),
+        description,
       });
-      
-      setMessages((prev) => [...prev, { 
-        role: "model", 
-        parts: [{ text: (t as any)("aiHub.errors.friendlyFallback") as string }] 
-      }]);
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "model",
+          parts: [
+            { text: (t as any)("aiHub.errors.friendlyFallback") as string },
+          ],
+        },
+      ]);
     } finally {
       if (abortControllerRef.current === controller) {
         setIsLoading(false);

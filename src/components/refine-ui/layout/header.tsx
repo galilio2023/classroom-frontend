@@ -66,7 +66,7 @@ export function Header() {
 
   const changeLanguage = (lng: string) => {
     void i18n.changeLanguage(lng);
-    document.documentElement.dir = lng === 'ar' ? 'rtl' : 'ltr';
+    document.documentElement.dir = lng === "ar" ? "rtl" : "ltr";
   };
 
   const isStudent = identity?.role === UserRole.STUDENT;
@@ -77,9 +77,9 @@ export function Header() {
 
       <div className="flex-1 flex items-center gap-2 md:gap-6 min-w-0">
         <div className="hidden sm:block flex-1 max-w-md">
-            <CommandMenu />
+          <CommandMenu />
         </div>
-        
+
         {/* Mobile Search Trigger - Optional, can be added if CommandMenu has a mobile version */}
 
         {/* Term Switcher - Optimized for Mobile */}
@@ -132,13 +132,19 @@ export function Header() {
             <DropdownMenuContent align="end">
               <DropdownMenuItem
                 onClick={() => changeLanguage("en")}
-                className={cn(i18n.language === "en" && "bg-accent", "cursor-pointer")}
+                className={cn(
+                  i18n.language === "en" && "bg-accent",
+                  "cursor-pointer",
+                )}
               >
                 English
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => changeLanguage("ar")}
-                className={cn(i18n.language === "ar" && "bg-accent", "cursor-pointer")}
+                className={cn(
+                  i18n.language === "ar" && "bg-accent",
+                  "cursor-pointer",
+                )}
               >
                 العربية (Arabic)
               </DropdownMenuItem>
@@ -149,28 +155,39 @@ export function Header() {
           <HelpHub />
           <ThemeToggle />
         </div>
-        
+
         {/* Small Screen Actions Menu */}
         <div className="xs:hidden">
-             <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full bg-muted/30 border border-border/80 dark:border-white/10">
-                        <MoreVertical className="h-4 w-4" />
-                    </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 p-2">
-                    <DropdownMenuItem className="gap-3 p-3 rounded-xl transition-all" onClick={() => changeLanguage(i18n.language === 'en' ? 'ar' : 'en')}>
-                        <Languages className="h-4 w-4 text-primary" />
-                        <span className="font-bold">{i18n.language === 'en' ? 'العربية' : 'English'}</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <div className="flex items-center justify-around p-3 bg-muted/20 rounded-2xl mt-2">
-                        <NotificationBell />
-                        <HelpHub />
-                        <ThemeToggle />
-                    </div>
-                </DropdownMenuContent>
-             </DropdownMenu>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-9 w-9 rounded-full bg-muted/30 border border-border/80 dark:border-white/10"
+              >
+                <MoreVertical className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56 p-2">
+              <DropdownMenuItem
+                className="gap-3 p-3 rounded-xl transition-all"
+                onClick={() =>
+                  changeLanguage(i18n.language === "en" ? "ar" : "en")
+                }
+              >
+                <Languages className="h-4 w-4 text-primary" />
+                <span className="font-bold">
+                  {i18n.language === "en" ? "العربية" : "English"}
+                </span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <div className="flex items-center justify-around p-3 bg-muted/20 rounded-2xl mt-2">
+                <NotificationBell />
+                <HelpHub />
+                <ThemeToggle />
+              </div>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         <DropdownMenu>
@@ -182,10 +199,7 @@ export function Header() {
               <UserAvatar className="h-9 w-9 md:h-10 md:w-10" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent
-            align="end"
-            className="w-64 mt-2"
-          >
+          <DropdownMenuContent align="end" className="w-64 mt-2">
             <DropdownMenuLabel className="font-normal">
               <div className="flex flex-col space-y-1">
                 <p className="text-sm font-bold leading-none">

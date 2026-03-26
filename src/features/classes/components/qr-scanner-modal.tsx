@@ -8,7 +8,16 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Html5QrcodeScanner } from "html5-qrcode";
-import { Loader2, Camera, CheckCircle2, AlertCircle, XCircle, Keyboard, ArrowRight, Sparkles } from "lucide-react";
+import {
+  Loader2,
+  Camera,
+  CheckCircle2,
+  AlertCircle,
+  XCircle,
+  Keyboard,
+  ArrowRight,
+  Sparkles,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
@@ -23,24 +32,34 @@ interface ScanResponse {
   message?: string;
 }
 
-export const QRScannerModal = ({ isOpen, onClose, classId }: QRScannerModalProps) => {
+export const QRScannerModal = ({
+  isOpen,
+  onClose,
+  classId,
+}: QRScannerModalProps) => {
   const { open } = useNotification();
   const navigate = useNavigate();
   const [isScanning, setIsScanning] = useState(true);
   const [mode, setMode] = useState<"camera" | "manual">("camera");
   const [manualCode, setManualCode] = useState("");
-  const [scanResult, setScanResult] = useState<{ success: boolean; message: string } | null>(null);
+  const [scanResult, setScanResult] = useState<{
+    success: boolean;
+    message: string;
+  } | null>(null);
   const scannerRef = useRef<Html5QrcodeScanner | null>(null);
 
-  const { mutate: markAttendance, mutation } = useCustomMutation<ScanResponse, HttpError>();
+  const { mutate: markAttendance, mutation } = useCustomMutation<
+    ScanResponse,
+    HttpError
+  >();
 
   useEffect(() => {
     if (!isOpen || mode !== "camera") {
       if (scannerRef.current) {
         try {
-            scannerRef.current.clear();
+          scannerRef.current.clear();
         } catch {
-            console.warn("Scanner clear failed");
+          console.warn("Scanner clear failed");
         }
         scannerRef.current = null;
       }
@@ -53,43 +72,49 @@ export const QRScannerModal = ({ isOpen, onClose, classId }: QRScannerModalProps
     }
 
     const timer = setTimeout(() => {
-        const scanner = new Html5QrcodeScanner(
-          "qr-reader",
-          { 
-            fps: 10, 
-            qrbox: { width: 250, height: 250 },
-            aspectRatio: 1.0,
-          },
-          /* verbose= */ false
-        );
-    
-        scannerRef.current = scanner;
-    
-        scanner.render(
-          (decodedText) => {
-            try {
-              const data = JSON.parse(decodedText);
-              if (String(data.classId) === String(classId) && data.token) {
-                handleScanSuccess(data.token);
-                scanner.clear().catch(err => console.warn(err));
-              } else {
-                setScanResult({ success: false, message: "Invalid QR code for this class." });
-              }
-            } catch {
-              setScanResult({ success: false, message: "Invalid QR code format." });
+      const scanner = new Html5QrcodeScanner(
+        "qr-reader",
+        {
+          fps: 10,
+          qrbox: { width: 250, height: 250 },
+          aspectRatio: 1.0,
+        },
+        /* verbose= */ false,
+      );
+
+      scannerRef.current = scanner;
+
+      scanner.render(
+        (decodedText) => {
+          try {
+            const data = JSON.parse(decodedText);
+            if (String(data.classId) === String(classId) && data.token) {
+              handleScanSuccess(data.token);
+              scanner.clear().catch((err) => console.warn(err));
+            } else {
+              setScanResult({
+                success: false,
+                message: "Invalid QR code for this class.",
+              });
             }
-          },
-          () => {}
-        );
+          } catch {
+            setScanResult({
+              success: false,
+              message: "Invalid QR code format.",
+            });
+          }
+        },
+        () => {},
+      );
     }, 100);
 
     return () => {
       clearTimeout(timer);
       if (scannerRef.current) {
         try {
-            scannerRef.current.clear();
+          scannerRef.current.clear();
         } catch {
-            // Ignore clear error
+          // Ignore clear error
         }
         scannerRef.current = null;
       }
@@ -98,7 +123,7 @@ export const QRScannerModal = ({ isOpen, onClose, classId }: QRScannerModalProps
 
   const handleScanSuccess = (token: string) => {
     setIsScanning(false);
-    
+
     markAttendance(
       {
         url: "/attendance/scan",
@@ -110,13 +135,17 @@ export const QRScannerModal = ({ isOpen, onClose, classId }: QRScannerModalProps
       },
       {
         onSuccess: () => {
-          setScanResult({ success: true, message: "You've been marked present!" });
+          setScanResult({
+            success: true,
+            message: "You've been marked present!",
+          });
           open?.({
             type: "success",
             message: "Attendance Marked",
-            description: "You have been marked as present and are being redirected.",
+            description:
+              "You have been marked as present and are being redirected.",
           });
-          
+
           setTimeout(() => {
             onClose();
             navigate(`/classes/show/${classId}`);
@@ -124,12 +153,15 @@ export const QRScannerModal = ({ isOpen, onClose, classId }: QRScannerModalProps
         },
         onError: (err) => {
           const error = err as HttpError;
-          setScanResult({ 
-            success: false, 
-            message: (error?.response?.data as any)?.message || error?.message || "Failed to mark attendance. The code might have expired."
+          setScanResult({
+            success: false,
+            message:
+              (error?.response?.data as any)?.message ||
+              error?.message ||
+              "Failed to mark attendance. The code might have expired.",
           });
         },
-      }
+      },
     );
   };
 
@@ -143,12 +175,16 @@ export const QRScannerModal = ({ isOpen, onClose, classId }: QRScannerModalProps
       <DialogContent className="sm:max-w-[450px] overflow-hidden">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            {mode === "camera" ? <Camera className="h-5 w-5 text-primary" /> : <Keyboard className="h-5 w-5 text-primary" />}
+            {mode === "camera" ? (
+              <Camera className="h-5 w-5 text-primary" />
+            ) : (
+              <Keyboard className="h-5 w-5 text-primary" />
+            )}
             {mode === "camera" ? "Scan QR Attendance" : "Enter Attendance Code"}
           </DialogTitle>
           <DialogDescription>
-            {mode === "camera" 
-              ? "Point your camera at the QR code displayed by your teacher." 
+            {mode === "camera"
+              ? "Point your camera at the QR code displayed by your teacher."
               : "Type the 8-character code shown on the teacher's screen."}
           </DialogDescription>
         </DialogHeader>
@@ -167,31 +203,39 @@ export const QRScannerModal = ({ isOpen, onClose, classId }: QRScannerModalProps
                 <div className="w-full py-8 space-y-6">
                   <div className="space-y-4">
                     <div className="flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-                        <Keyboard className="h-3 w-3" />
-                        Manual Entry
+                      <Keyboard className="h-3 w-3" />
+                      Manual Entry
                     </div>
-                    <Input 
-                      placeholder="ABC123XY" 
+                    <Input
+                      placeholder="ABC123XY"
                       value={manualCode}
-                      onChange={(e) => setManualCode(e.target.value.toUpperCase())}
+                      onChange={(e) =>
+                        setManualCode(e.target.value.toUpperCase())
+                      }
                       className="h-16 text-center text-3xl font-black tracking-[0.3em] font-mono border-2 border-primary/20 bg-primary/5 rounded-2xl focus-visible:ring-primary/30"
                       maxLength={32}
                     />
                   </div>
-                  <Button className="w-full h-12 text-lg font-black gap-2 shadow-lg shadow-primary/20 rounded-xl" onClick={handleManualSubmit} disabled={!manualCode.trim()}>
+                  <Button
+                    className="w-full h-12 text-lg font-black gap-2 shadow-lg shadow-primary/20 rounded-xl"
+                    onClick={handleManualSubmit}
+                    disabled={!manualCode.trim()}
+                  >
                     Check In
                     <ArrowRight className="h-5 w-5" />
                   </Button>
                 </div>
               )}
 
-              <Button 
-                variant="ghost" 
-                size="sm" 
+              <Button
+                variant="ghost"
+                size="sm"
                 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:bg-primary/5"
                 onClick={() => setMode(mode === "camera" ? "manual" : "camera")}
               >
-                {mode === "camera" ? "Switch to Manual Entry" : "Switch to Camera Scan"}
+                {mode === "camera"
+                  ? "Switch to Manual Entry"
+                  : "Switch to Camera Scan"}
               </Button>
             </>
           ) : (
@@ -202,7 +246,9 @@ export const QRScannerModal = ({ isOpen, onClose, classId }: QRScannerModalProps
                     <Loader2 className="h-16 w-16 animate-spin text-primary opacity-20" />
                     <Sparkles className="h-8 w-8 text-primary absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-pulse" />
                   </div>
-                  <p className="text-sm font-black uppercase tracking-widest text-primary animate-pulse">Verifying Check-in...</p>
+                  <p className="text-sm font-black uppercase tracking-widest text-primary animate-pulse">
+                    Verifying Check-in...
+                  </p>
                 </div>
               ) : scanResult?.success ? (
                 <div className="animate-in zoom-in-95 duration-500 space-y-6">
@@ -210,8 +256,12 @@ export const QRScannerModal = ({ isOpen, onClose, classId }: QRScannerModalProps
                     <CheckCircle2 className="h-12 w-12 text-green-500 animate-bounce" />
                   </div>
                   <div className="space-y-2">
-                    <h3 className="text-3xl font-black tracking-tight text-green-600">You're marked present!</h3>
-                    <p className="text-sm font-medium text-muted-foreground">{scanResult.message}</p>
+                    <h3 className="text-3xl font-black tracking-tight text-green-600">
+                      You're marked present!
+                    </h3>
+                    <p className="text-sm font-medium text-muted-foreground">
+                      {scanResult.message}
+                    </p>
                   </div>
                   <div className="flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                     <Loader2 className="h-3 w-3 animate-spin" />
@@ -224,11 +274,15 @@ export const QRScannerModal = ({ isOpen, onClose, classId }: QRScannerModalProps
                     <XCircle className="h-12 w-12 text-destructive" />
                   </div>
                   <div className="space-y-2">
-                    <h3 className="text-2xl font-black tracking-tight text-destructive">Check-in Failed</h3>
-                    <p className="text-sm font-medium text-muted-foreground max-w-[250px] mx-auto">{scanResult?.message}</p>
+                    <h3 className="text-2xl font-black tracking-tight text-destructive">
+                      Check-in Failed
+                    </h3>
+                    <p className="text-sm font-medium text-muted-foreground max-w-[250px] mx-auto">
+                      {scanResult?.message}
+                    </p>
                   </div>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     onClick={() => {
                       setIsScanning(true);
                       setScanResult(null);
@@ -245,7 +299,10 @@ export const QRScannerModal = ({ isOpen, onClose, classId }: QRScannerModalProps
 
           <div className="w-full flex items-center gap-3 p-4 bg-muted/50 rounded-2xl text-[10px] font-medium text-muted-foreground border border-black/5">
             <AlertCircle className="h-4 w-4 shrink-0 text-primary" />
-            <p>Camera access requires HTTPS. If you're on a desktop or have issues, use the manual entry code provided by your teacher.</p>
+            <p>
+              Camera access requires HTTPS. If you're on a desktop or have
+              issues, use the manual entry code provided by your teacher.
+            </p>
           </div>
         </div>
       </DialogContent>

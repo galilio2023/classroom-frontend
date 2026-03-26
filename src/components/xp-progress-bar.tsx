@@ -11,13 +11,25 @@ interface XPProgressBarProps {
   indicatorClassName?: string;
 }
 
-export function XPProgressBar({ xp, showLabel = true, className, indicatorClassName }: XPProgressBarProps) {
+export function XPProgressBar({
+  xp,
+  showLabel = true,
+  className,
+  indicatorClassName,
+}: XPProgressBarProps) {
   const { t, i18n } = useTranslation();
-  const isArabic = i18n.language === 'ar';
-  const { currentLevel, xpInCurrentLevel, xpRequiredForNextLevel, progressPercentage } = getLevelProgress(xp);
+  const isArabic = i18n.language === "ar";
+  const {
+    currentLevel,
+    xpInCurrentLevel,
+    xpRequiredForNextLevel,
+    progressPercentage,
+  } = getLevelProgress(xp);
 
   const formatNumber = (num: number) => {
-    return new Intl.NumberFormat(isArabic ? 'ar-EG' : 'en-US').format(Math.floor(num));
+    return new Intl.NumberFormat(isArabic ? "ar-EG" : "en-US").format(
+      Math.floor(num),
+    );
   };
 
   return (
@@ -26,15 +38,23 @@ export function XPProgressBar({ xp, showLabel = true, className, indicatorClassN
         <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-muted-foreground/80">
           <div className="flex items-center gap-1">
             <Zap className="h-3 w-3 text-gold-primary fill-gold-primary" />
-            <span>{t("dashboard.student.level")} {formatNumber(currentLevel)}</span>
+            <span>
+              {t("dashboard.student.level")} {formatNumber(currentLevel)}
+            </span>
           </div>
-          <span>{formatNumber(xpInCurrentLevel)} / {formatNumber(xpRequiredForNextLevel)} XP</span>
+          <span>
+            {formatNumber(xpInCurrentLevel)} /{" "}
+            {formatNumber(xpRequiredForNextLevel)} XP
+          </span>
         </div>
       )}
-      <Progress 
-        value={progressPercentage} 
-        className="h-2 bg-muted/50 border border-border/50" 
-        indicatorClassName={cn("bg-linear-to-r from-gold-primary to-gold-secondary", indicatorClassName)} 
+      <Progress
+        value={progressPercentage}
+        className="h-2 bg-muted/50 border border-border/50"
+        indicatorClassName={cn(
+          "bg-linear-to-r from-gold-primary to-gold-secondary",
+          indicatorClassName,
+        )}
       />
     </div>
   );

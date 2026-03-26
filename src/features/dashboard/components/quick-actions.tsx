@@ -7,13 +7,9 @@ interface QuickActionsProps {
 }
 
 export const QuickActions = ({ cards, list }: QuickActionsProps) => (
-    <div className="grid gap-4 md:gap-6 grid-cols-[repeat(auto-fit,minmax(280px,1fr))]">
-        {cards.map((card) => (
-            <QuickActionCard 
-                key={card.title} 
-                action={card} 
-                onAction={list} 
-            />
-        ))}
-    </div>
+  <div className="grid gap-4 md:gap-6 grid-cols-[repeat(auto-fit,minmax(280px,1fr))]">
+    {cards.map((card) => (
+      <QuickActionCard key={card.title} action={card} onAction={list} />
+    ))}
+  </div>
 );
