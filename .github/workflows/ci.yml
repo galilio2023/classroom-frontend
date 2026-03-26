@@ -17,4 +17,6 @@ jobs:
           node-version: '20'
           cache: 'npm'
       - run: npm ci
+      - name: Lint Check
+        run: npm run lint
       - run: npm run build
