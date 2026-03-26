@@ -33,7 +33,7 @@ export const AIQuizHelper: React.FC<AIQuizHelperProps> = ({
 
   const handleUseAll = () => {
     if (onUseQuestions) {
-      onUseQuestions(generatedQuestions.map((q) => ({ ...q, points: 10 })));
+      onUseQuestions(generatedQuestions as (QuizQuestion & { points: number })[]);
     }
   };
 

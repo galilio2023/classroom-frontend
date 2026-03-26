@@ -91,7 +91,8 @@
     },
     "subjects": {
       "list": "Subjects",
-      "subjects": "Subjects"
+      "subjects": "Subjects",
+      "general": "Subjects"
     },
     "departments": {
       "list": "Departments",
@@ -100,7 +101,8 @@
     "classes": {
       "list": "Classes",
       "show": "Classroom Hub",
-      "edit": "Edit Class"
+      "edit": "Edit Class",
+      "general": "Classroom Hub"
     },
     "assignments": {
       "list": "Assignments",
@@ -110,7 +112,8 @@
     "quizzes": {
       "list": "Quizzes",
       "show": "Quiz Results",
-      "create": "Create Quiz"
+      "create": "Create Quiz",
+      "general": "Quizzes"
     },
     "modules": {
       "list": "Modules"
@@ -712,6 +715,8 @@
       }
     },
     "errors": {
+      "rateLimitTitle": "Gemini is Resting",
+      "geminiIsResting": "Hourly AI limit reached. Please take a short break and try again later.",
       "inputTooLong": "Message is too long. Please shorten it.",
       "parentRestricted": "Only students and teachers can interact with the Study Buddy.",
       "serviceUnavailable": "Gemini AI is currently unavailable. Please try again later.",

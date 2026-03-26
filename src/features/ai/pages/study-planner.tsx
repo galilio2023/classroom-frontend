@@ -232,6 +232,7 @@ const StudyPlanner = () => {
                       <span className="text-[10px] font-black">{day[0]}</span>
                     </div>
                     <h3 className="font-black text-sm uppercase tracking-[0.2em] text-muted-foreground/60">
+                      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                       {t(`days.${day.substring(0, 3)}` as any)}
                     </h3>
                   </div>
@@ -260,9 +261,8 @@ const StudyPlanner = () => {
                                   variant="ai"
                                   className="px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest shadow-sm"
                                 >
-                                  {t(
-                                    `studyPlanner.slots.${slot.toLowerCase()}` as any,
-                                  )}
+                                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                                  {t(`studyPlanner.slots.${slot.toLowerCase()}` as any)}
                                 </Badge>
                                 <button
                                   onClick={() => toggleComplete(day, slot)}

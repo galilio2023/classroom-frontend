@@ -475,7 +475,7 @@ const AIStudyLab = () => {
                   </CardHeader>
                   <CardContent className="p-8 md:p-16">
                     <FlashcardPlayer
-                      cards={flashcards as any}
+                      cards={flashcards as Flashcard[]}
                       onComplete={() => setFlashcards(null)}
                     />
                   </CardContent>
