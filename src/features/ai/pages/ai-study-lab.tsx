@@ -48,8 +48,8 @@ import { SparkleLoader } from "@/components/ai/sparkle-loader";
 import { Class } from "@/types";
 
 interface Flashcard {
-  question: string;
-  answer: string;
+  front: string;
+  back: string;
 }
 
 type ToolId = "explain" | "quiz" | "summary" | "flashcards";
@@ -475,7 +475,7 @@ const AIStudyLab = () => {
                   </CardHeader>
                   <CardContent className="p-8 md:p-16">
                     <FlashcardPlayer
-                      cards={flashcards as Flashcard[]}
+                      cards={flashcards}
                       onComplete={() => setFlashcards(null)}
                     />
                   </CardContent>
