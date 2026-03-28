@@ -415,7 +415,7 @@ export const dataProvider: DataProvider = {
     throw new Error("updateMany not implemented");
   },
 
-  custom: async ({ url, method, payload, query, headers }) => {
+  custom: async ({ url, method, payload, query, headers, meta }) => {
     let requestUrl = url;
 
     if (!url.startsWith("http")) {
@@ -439,6 +439,7 @@ export const dataProvider: DataProvider = {
       method: method ? method.toUpperCase() : "GET",
       body: payload ? JSON.stringify(payload) : undefined,
       headers: headers as Record<string, string>,
+      signal: meta?.signal,
     });
 
     if (!response.ok) {

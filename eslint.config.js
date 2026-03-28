@@ -3,9 +3,11 @@ import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
 import globals from "globals";
 import tseslint from "typescript-eslint";
+import eslintConfigPrettier from "eslint-config-prettier";
 
 export default tseslint.config(
   { ignores: ["dist"] },
+  eslintConfigPrettier,
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ["**/*.{ts,tsx}"],
@@ -58,19 +60,33 @@ export default tseslint.config(
       "src/lib/*AI*",
     ],
     rules: {
-      "@typescript-eslint/no-explicit-any": [
-        "error",
-        {
-          message:
-            "🛡️ HARDENED SECURITY: Strict typing is required for AI-related code to ensure SSE buffering safety and prevent runtime crashes during stream parsing.",
-        },
-      ],
+      // 🛡️ HARDENED SECURITY: Strict typing is required for AI-related code to ensure SSE buffering safety 
+      // and prevent runtime crashes during stream parsing.
+      "@typescript-eslint/no-explicit-any": "error",
       "@typescript-eslint/no-empty-object-type": "error",
       "@typescript-eslint/no-unused-vars": [
         "error",
         {
           argsIgnorePattern: "^_",
           varsIgnorePattern: "^_",
+        },
+      ],
+      "no-restricted-globals": [
+        "error",
+        {
+          name: "fetch",
+          message: "🛡️ REFINE V5 PATTERN: Do not use native fetch in AI features. Use Refine's useCustom or useCustomMutation for centralized auth and provider logic.",
+        },
+      ],
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            {
+              name: "axios",
+              message: "🛡️ REFINE V5 PATTERN: Do not use axios directly in AI features. Use Refine's useCustom or useCustomMutation.",
+            },
+          ],
         },
       ],
     },

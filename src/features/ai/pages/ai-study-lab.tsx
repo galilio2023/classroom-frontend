@@ -21,7 +21,6 @@ import {
   Check,
 } from "lucide-react";
 import { toast } from "sonner";
-import axios from "axios";
 import ReactMarkdown from "react-markdown";
 import { PracticeModal } from "@/components/practice/practice-modal";
 import { FlashcardPlayer } from "@/components/practice/flashcard-player";
@@ -70,7 +69,7 @@ const AIStudyLab = () => {
 
   const abortControllerRef = useRef<AbortController | null>(null);
   const { mutate: createHistory } = useCreate();
-  const { mutate: sendFeedback } = useCustomMutation();
+  const { mutateAsync: mutateCustom } = useCustomMutation();
 
   const { result: classesResult } = useList<Class>({
     resource: "classes",
@@ -112,12 +111,13 @@ const AIStudyLab = () => {
 
     try {
       if (activeTool === "flashcards") {
-        const response = await axios.post<{ flashcards: Flashcard[] }>(
-          "/api/ai/generate-flashcards",
-          { input, locale: i18n.language, classId: selectedClassId },
-          { signal: abortControllerRef.current.signal }
-        );
-        setFlashcards(response.data.flashcards);
+        const { data } = await mutateCustom({
+          url: "/ai/generate-flashcards",
+          method: "post",
+          values: { input, locale: i18n.language, classId: selectedClassId },
+          meta: { signal: abortControllerRef.current.signal },
+        });
+        setFlashcards((data as { flashcards: Flashcard[] }).flashcards);
         toast.success(t("aiHub.studyLab.toasts.flashcardsGenerated"));
       } else {
         const prompt =
@@ -125,16 +125,25 @@ const AIStudyLab = () => {
             ? `Explain the following concept in simple terms for a student in ${isAr ? "Arabic" : "English"}: ${input}`
             : `Summarize the following text into key bullet points in ${isAr ? "Arabic" : "English"}: ${input}`;
 
-        const response = await axios.post<{ content: string }>(
-          "/api/ai/generate-content",
-          { prompt, classId: selectedClassId },
-          { signal: abortControllerRef.current.signal }
-        );
-        setResult(response.data.content);
+        const { data } = await mutateCustom({
+          url: "/ai/generate-content",
+          method: "post",
+          values: { prompt, classId: selectedClassId },
+          meta: { signal: abortControllerRef.current.signal },
+        });
+        setResult((data as { content: string }).content);
         toast.success(t("aiHub.studyLab.toasts.aiFinished"));
       }
     } catch (error: unknown) {
-      if (axios.isCancel(error)) {
+      const isAbortError =
+        (error instanceof Error && error.name === "AbortError") ||
+        (error instanceof DOMException && error.name === "AbortError") ||
+        (typeof error === "object" &&
+          error !== null &&
+          "name" in error &&
+          error.name === "AbortError");
+
+      if (isAbortError) {
         console.log("AI request cancelled.");
       } else {
         toast.error(t("aiHub.studyLab.toasts.error"));
@@ -146,7 +155,7 @@ const AIStudyLab = () => {
 
   const handleFeedback = (isPositive: boolean) => {
     setFeedbackSent(isPositive ? "pos" : "neg");
-    sendFeedback({
+    mutateCustom({
       url: "/ai/feedback",
       method: "post",
       values: {
