@@ -32,6 +32,18 @@ export default tseslint.config(
         },
       ],
       "@typescript-eslint/no-empty-object-type": "warn",
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            {
+              name: "@google/generative-ai",
+              message:
+                "🛡️ SECURITY: Direct use of the Google AI SDK is forbidden in the frontend. Use the Tablawy secure backend proxy instead.",
+            },
+          ],
+        },
+      ],
     },
   },
   {

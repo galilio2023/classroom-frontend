@@ -1,8 +1,15 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { useCustom, useNotification, usePermissions, useCustomMutation } from "@refinedev/core";
+import {
+  useCustom,
+  useNotification,
+  usePermissions,
+  useCustomMutation,
+  useGetIdentity,
+} from "@refinedev/core";
 import { useTranslation } from "react-i18next";
 import { BACKEND_URL } from "@/config";
-import { BasePermissions, UserRole } from "@/types";
+import { BasePermissions, UserRole, User } from "@/types";
+import { offlineDB } from "@/lib/offline-db";
 
 export interface ChatSource {
   title: string;
@@ -53,8 +60,34 @@ const MAX_INPUT_LENGTH = 4000;
  */
 export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
   const { t } = useTranslation();
+  const { data: identity } = useGetIdentity<User>();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
+
+  const effectiveClassId = String(classId || "global");
+
+  // 🛡️ ADAPTIVE CACHE: Load from local IndexedDB first (Dexie)
+  useEffect(() => {
+    if (!identity?.id) return;
+
+    const loadLocalCache = async () => {
+      try {
+        const cached = await offlineDB.ai_history.get({
+          userId: identity.id,
+          classId: effectiveClassId,
+        });
+        // Only use cache if we haven't loaded from server yet
+        if (cached && hasLoadedHistoryFor.current !== effectiveClassId) {
+          setMessages(cached.messages);
+          hasLoadedHistoryFor.current = effectiveClassId;
+        }
+      } catch (err) {
+        console.warn("Failed to load AI cache:", err);
+      }
+    };
+
+    void loadLocalCache();
+  }, [identity?.id, effectiveClassId]);
 
   // 🛡️ AUTO-DRAFT: AI Assistant Persistence
   useEffect(() => {
@@ -95,12 +128,11 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
   } = usePermissions<BasePermissions>({});
 
   // 1. 📜 HISTORY: Standard Refine v5 GET
-  const effectiveClassId = classId || "global";
   const { result: historyResult, query: historyQuery } = useCustom<ChatHistoryResponse>({
     url: `${BACKEND_URL}/ai/chat-history/${effectiveClassId}`,
     method: "get",
     queryOptions: {
-      enabled: hasLoadedHistoryFor.current !== effectiveClassId,
+      enabled: !!identity?.id && hasLoadedHistoryFor.current !== effectiveClassId,
     },
   });
 
@@ -116,10 +148,10 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
     }
   }, [effectiveClassId]);
 
-  // Sync history safely
+  // Sync history safely and update local cache
   useEffect(() => {
     const historyData = historyResult?.data?.data;
-    if (historyData && hasLoadedHistoryFor.current !== effectiveClassId) {
+    if (historyData && identity?.id && hasLoadedHistoryFor.current !== effectiveClassId) {
       const history = historyData.map((m: ChatHistoryItem) => ({
         id: String(m.id),
         role: m.role,
@@ -127,8 +159,16 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
       }));
       setMessages(history);
       hasLoadedHistoryFor.current = effectiveClassId;
+
+      // Update Dexie Cache
+      void offlineDB.ai_history.put({
+        userId: identity.id,
+        classId: effectiveClassId,
+        messages: history,
+        timestamp: Date.now(),
+      });
     }
-  }, [historyResult, effectiveClassId]);
+  }, [historyResult, effectiveClassId, identity?.id]);
 
   // 2. 🧹 CLEANUP
   useEffect(() => {
@@ -205,7 +245,8 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
       role: "user",
       parts: [{ text: cleanInput }],
     };
-    setMessages((prev) => [...prev, userMessage]);
+    const messagesBeforeModel = [...messages, userMessage];
+    setMessages(messagesBeforeModel);
 
     setInput("");
     setIsLoading(true);
@@ -214,7 +255,7 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
     accumulatorRef.current = "";
     lineBufferRef.current = "";
 
-    const finalUrl = effectiveClassId ? "/ai/study-buddy" : url;
+    const finalUrl = effectiveClassId && effectiveClassId !== "global" ? "/ai/study-buddy" : url;
     const apiUrl = `${BACKEND_URL}${finalUrl}`;
 
     try {
@@ -241,13 +282,22 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
                 metadata?: { isDryRun?: boolean };
               };
               if (responseData.data?.response) {
-                setMessages((prev) => [
-                  ...prev,
-                  {
-                    role: "model",
-                    parts: [{ text: responseData.data?.response || "" }],
-                  },
-                ]);
+                const modelMessage: Message = {
+                  role: "model",
+                  parts: [{ text: responseData.data?.response || "" }],
+                };
+                const updatedMessages = [...messagesBeforeModel, modelMessage];
+                setMessages(updatedMessages);
+
+                // Update Cache
+                if (identity?.id) {
+                  void offlineDB.ai_history.put({
+                    userId: identity.id,
+                    classId: effectiveClassId,
+                    messages: updatedMessages,
+                    timestamp: Date.now(),
+                  });
+                }
               }
               if (responseData.metadata?.isDryRun) setIsDryRun(true);
               setIsLoading(false);
@@ -295,17 +345,17 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
       const decoder = new TextDecoder();
       if (!reader) throw new Error("STREAM_READER_UNAVAILABLE");
 
-      let buffer = "";
+      let streamBuffer = "";
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
 
         const chunk = decoder.decode(value, { stream: true });
-        buffer += chunk;
+        streamBuffer += chunk;
 
-        const lines = buffer.split("\n\n");
-        buffer = lines.pop() || "";
+        const lines = streamBuffer.split("\n\n");
+        streamBuffer = lines.pop() || "";
 
         for (const line of lines) {
           if (line.startsWith("data: ")) {
@@ -331,14 +381,23 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
       const finalResponseText = accumulatorRef.current.trim();
 
       if (finalResponseText.length > 0) {
-        setMessages((prev) => [
-          ...prev,
-          {
-            role: "model",
-            parts: [{ text: finalResponseText }],
-            sources: streamingSources || undefined,
-          },
-        ]);
+        const modelMessage: Message = {
+          role: "model",
+          parts: [{ text: finalResponseText }],
+          sources: streamingSources || undefined,
+        };
+        const updatedMessages = [...messagesBeforeModel, modelMessage];
+        setMessages(updatedMessages);
+
+        // Persistent Cache update
+        if (identity?.id) {
+          void offlineDB.ai_history.put({
+            userId: identity.id,
+            classId: effectiveClassId,
+            messages: updatedMessages,
+            timestamp: Date.now(),
+          });
+        }
       } else {
         throw new Error("EMPTY_RESPONSE");
       }

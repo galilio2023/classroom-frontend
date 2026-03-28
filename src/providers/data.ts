@@ -40,6 +40,15 @@ const handleError = async (response: Response): Promise<HttpError> => {
     };
   }
 
+  // 🛡️ SECURITY & UX: Catch database 'restrict' violations (ON DELETE restrict)
+  if (response.status === 409) {
+    return {
+      message:
+        "Cannot delete: This item has active sub-records. Please reassign or delete them first.",
+      statusCode: 409,
+    };
+  }
+
   if (json.details) {
     return {
       message: (json.error as string) || "Validation failed",

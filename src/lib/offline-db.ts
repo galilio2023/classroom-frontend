@@ -9,17 +9,27 @@ export interface OfflineMutation {
   timestamp: number;
 }
 
+export interface AIChatCache {
+  id?: number;
+  userId: string;
+  classId: string; // 'general' or number
+  messages: any[];
+  timestamp: number;
+}
+
 /**
- * 📦 Offline Outbox Database
- * Stores mission-critical mutations that failed due to network issues.
+ * 📦 Offline Outbox & Cache Database
+ * Stores mission-critical mutations and performance-sensitive AI cache.
  */
 export class OfflineDB extends Dexie {
   outbox!: Table<OfflineMutation>;
+  ai_history!: Table<AIChatCache>;
 
   constructor() {
     super("ClassroomOfflineDB");
-    this.version(1).stores({
+    this.version(2).stores({
       outbox: "++id, resource, action, timestamp",
+      ai_history: "++id, [userId+classId], timestamp",
     });
   }
 
