@@ -52,8 +52,7 @@ export default tseslint.config(
       "src/hooks/**/use*[mM]agic*",
       "src/hooks/**/use*[cC]o[tT]eacher*",
       "src/features/ai/**/*.{ts,tsx}",
-      "src/lib/[aA][iI]-*.ts",
-      "src/lib/*[aA][iI]*",
+      "src/lib/**/*[aA][iI]*",
     ],
     rules: {
       // 🛡️ HARDENED SECURITY: Strict typing is required for AI-related code to ensure SSE buffering safety
