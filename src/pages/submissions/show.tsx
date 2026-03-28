@@ -265,6 +265,7 @@ const SubmissionShow = () => {
                   <div className="relative">
                     <Input
                       type="number"
+                      step="0.01"
                       value={grade}
                       onChange={(e) => setGrade(Number(e.target.value))}
                       className="h-14 text-3xl font-black text-center rounded-xl bg-muted/20 border-none"

@@ -562,6 +562,7 @@ export const GradingDialog = ({
                                   <div className="relative group">
                                     <Input
                                       type="number"
+                                      step="0.01"
                                       {...field}
                                       onChange={(e) => field.onChange(Number(e.target.value))}
                                       value={field.value ?? 0}
@@ -576,7 +577,7 @@ export const GradingDialog = ({
                                       value={[field.value ?? 0]}
                                       min={0}
                                       max={100}
-                                      step={1}
+                                      step={0.01}
                                       onValueChange={(vals) => field.onChange(vals[0])}
                                       className="cursor-pointer"
                                     />

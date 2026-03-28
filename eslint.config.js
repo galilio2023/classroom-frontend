@@ -7,7 +7,6 @@ import eslintConfigPrettier from "eslint-config-prettier";
 
 export default tseslint.config(
   { ignores: ["dist"] },
-  eslintConfigPrettier,
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ["**/*.{ts,tsx}"],
@@ -21,10 +20,7 @@ export default tseslint.config(
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
-      "react-refresh/only-export-components": [
-        "warn",
-        { allowConstantExport: true },
-      ],
+      "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
       "@typescript-eslint/no-explicit-any": "warn",
       "@typescript-eslint/no-unused-vars": [
         "warn",
@@ -50,17 +46,17 @@ export default tseslint.config(
   },
   {
     files: [
-      "src/hooks/**/use*AI*",
-      "src/hooks/**/use*Gemini*",
-      "src/hooks/**/use*AiGeneration*",
-      "src/hooks/**/use*Magic*",
-      "src/hooks/**/use*CoTeacher*",
+      "src/hooks/**/use*[aA][iI]*",
+      "src/hooks/**/use*[gG]emini*",
+      "src/hooks/**/use*[aA][iI][gG]eneration*",
+      "src/hooks/**/use*[mM]agic*",
+      "src/hooks/**/use*[cC]o[tT]eacher*",
       "src/features/ai/**/*.{ts,tsx}",
-      "src/lib/ai-*.ts",
-      "src/lib/*AI*",
+      "src/lib/[aA][iI]-*.ts",
+      "src/lib/*[aA][iI]*",
     ],
     rules: {
-      // 🛡️ HARDENED SECURITY: Strict typing is required for AI-related code to ensure SSE buffering safety 
+      // 🛡️ HARDENED SECURITY: Strict typing is required for AI-related code to ensure SSE buffering safety
       // and prevent runtime crashes during stream parsing.
       "@typescript-eslint/no-explicit-any": "error",
       "@typescript-eslint/no-empty-object-type": "error",
@@ -92,5 +88,15 @@ export default tseslint.config(
         },
       ],
     },
-  }
+  },
+  {
+    // 🎚️ EXCEPTION: Streaming hooks require native fetch for SSE/ReadableStream support
+    // which Refine's useCustom (built on standard fetch but with different return types)
+    // might abstract away too much for the raw reader.
+    files: ["src/hooks/**/use-ai-chat.ts", "src/hooks/**/use-ai-live-interaction.ts"],
+    rules: {
+      "no-restricted-globals": "off",
+    },
+  },
+  eslintConfigPrettier
 );

@@ -160,13 +160,15 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
       setMessages(history);
       hasLoadedHistoryFor.current = effectiveClassId;
 
-      // Update Dexie Cache
-      void offlineDB.ai_history.put({
-        userId: identity.id,
-        classId: effectiveClassId,
-        messages: history,
-        timestamp: Date.now(),
-      });
+        // Update Dexie Cache
+        if (!abortControllerRef.current?.signal.aborted) {
+          void offlineDB.ai_history.put({
+            userId: identity.id,
+            classId: effectiveClassId,
+            messages: history,
+            timestamp: Date.now(),
+          });
+        }
     }
   }, [historyResult, effectiveClassId, identity?.id]);
 
@@ -290,7 +292,7 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
                 setMessages(updatedMessages);
 
                 // Update Cache
-                if (identity?.id) {
+                if (identity?.id && !abortControllerRef.current?.signal.aborted) {
                   void offlineDB.ai_history.put({
                     userId: identity.id,
                     classId: effectiveClassId,
@@ -390,7 +392,7 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
         setMessages(updatedMessages);
 
         // Persistent Cache update
-        if (identity?.id) {
+        if (identity?.id && !abortControllerRef.current?.signal.aborted) {
           void offlineDB.ai_history.put({
             userId: identity.id,
             classId: effectiveClassId,

@@ -133,6 +133,7 @@ export const PeerReviewForm = ({ review, assignment, onSuccess }: PeerReviewForm
                         <div className="relative">
                           <Input
                             type="number"
+                            step="0.01"
                             max={item.maxPoints}
                             min={0}
                             {...field}
