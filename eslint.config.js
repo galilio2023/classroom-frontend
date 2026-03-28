@@ -58,7 +58,13 @@ export default tseslint.config(
       "src/lib/*AI*",
     ],
     rules: {
-      "@typescript-eslint/no-explicit-any": "error",
+      "@typescript-eslint/no-explicit-any": [
+        "error",
+        {
+          message:
+            "🛡️ HARDENED SECURITY: Strict typing is required for AI-related code to ensure SSE buffering safety and prevent runtime crashes during stream parsing.",
+        },
+      ],
       "@typescript-eslint/no-empty-object-type": "error",
       "@typescript-eslint/no-unused-vars": [
         "error",
