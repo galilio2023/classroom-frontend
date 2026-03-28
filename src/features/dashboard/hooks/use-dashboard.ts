@@ -67,6 +67,49 @@ export const useDashboard = () => {
 
   const { refetch: refetchDashboard } = dashboardQuery;
 
+  const dashboardData: DashboardData = dashboardQuery.data?.data || {
+    todaySchedule: [],
+    stats: {
+      totalUsers: 0,
+      totalStudents: 0,
+      totalTeachers: 0,
+      totalClasses: 0,
+      totalAssignments: 0,
+      pendingVerifications: 0,
+    },
+    attendanceTrend: [],
+    gradeDistribution: [],
+    pendingSubmissions: [],
+    atRiskStudents: [],
+    upcomingAssignments: [],
+    gradeTrends: [],
+    subjectMastery: [],
+    rlhf: [],
+  };
+
+  // 🛡️ ADAPTIVE UI: Global AI Cache Cleanup
+  // Rule: Clear local persistence if AI features are disabled platform-wide
+  useEffect(() => {
+    const isAiEnabled = dashboardData.globalConfig?.enableAiFeatures;
+    if (isAiEnabled === false) {
+      console.warn("🛡️ AI Features disabled platform-wide. Purging local AI cache...");
+
+      // 1. Clear LocalStorage Drafts
+      Object.keys(localStorage).forEach((key) => {
+        if (key.startsWith("draft:ai-")) {
+          localStorage.removeItem(key);
+        }
+      });
+
+      // 2. Clear Dexie Cache (If implemented for AI)
+      // Note: dexie is imported via src/lib/offline-db
+      import("@/lib/offline-db").then(({ offlineDB }) => {
+        // If we had an ai_history table in Dexie, we would clear it here
+        // For now, dexie only has 'outbox'
+      });
+    }
+  }, [dashboardData.globalConfig?.enableAiFeatures]);
+
   // Socket Logic
   useEffect(() => {
     if (!identity?.id) return;
