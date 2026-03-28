@@ -27,6 +27,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { CanAccess } from "@/components/auth/can-access";
 import { useDashboard } from "@/features/dashboard/hooks/use-dashboard";
+import { useJobs } from "@/contexts/job-context";
 
 interface CurriculumTabProps {
   classId: string;
@@ -208,6 +209,8 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
     );
   };
 
+  const { addJob } = useJobs();
+
   const handleMagicCreate = () => {
     if (!magicConfig.topic.trim()) return;
     setIsMagicCreating(true);
@@ -221,10 +224,28 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
         },
       },
       {
-        onSuccess: () => {
+        onSuccess: (data: any) => {
           setIsMagicCreating(false);
           setIsMagicModalOpen(false);
-          void modulesQuery.refetch();
+
+          if (data?.data?.jobId) {
+            addJob({
+              id: `magic-builder-${classId}`,
+              type: "magic-builder",
+              title: t("jobs.magic_builder_title", {
+                topic: magicConfig.topic,
+                defaultValue: `Building: ${magicConfig.topic}`,
+              }),
+              metadata: { jobId: data.data.jobId, classId },
+            });
+            toast.info(
+              t("classes.curriculum.toast.magicStarted", {
+                defaultValue: "Magic Builder has started creating your curriculum!",
+              })
+            );
+          } else {
+            void modulesQuery.refetch();
+          }
         },
         onError: () => setIsMagicCreating(false),
       }

@@ -3,10 +3,12 @@ import { PendingGradingList } from "./pending-grading-list";
 import { AtRiskStudents } from "./at-risk-students";
 import { PlatformOverview } from "./platform-overview";
 import { RecentActivity } from "./recent-activity";
+import { RLHFAlignmentChart } from "./rlhf-alignment-chart";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { DashboardData } from "@/types/dashboard";
 import { TeacherOnboarding } from "./teacher-onboarding";
 import { ActionCenter, ActionItem } from "./action-center";
+import { MarketplaceOverview } from "./marketplace-overview";
 import { motion } from "framer-motion";
 import {
   BarChart3,
@@ -112,6 +114,21 @@ export const StaffDashboard = ({ data, isLoading, onRefresh, show }: StaffDashbo
         />
       </motion.div>
 
+      {/* Marketplace & Earnings Overview */}
+      {(data.marketplaceEarnings ||
+        (data.recentTransactions && data.recentTransactions.length > 0)) && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+        >
+          <MarketplaceOverview
+            earnings={data.marketplaceEarnings}
+            transactions={data.recentTransactions}
+          />
+        </motion.div>
+      )}
+
       {/* Teacher TV Stats Row - Visible only if channelStats exists (for teachers) */}
       {data.channelStats && (
         <motion.div
@@ -215,6 +232,25 @@ export const StaffDashboard = ({ data, isLoading, onRefresh, show }: StaffDashbo
                 attendanceData={data.attendanceTrend ?? []}
                 gradeData={data.gradeDistribution ?? []}
               />
+            </motion.div>
+          </ErrorBoundary>
+
+          <ErrorBoundary>
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.15 }}
+            >
+              <div className="flex items-center gap-3 mb-8 px-2">
+                <div className="p-2 rounded-xl bg-ai-primary/10 text-ai-primary">
+                  <TrendingUp className="h-5 w-5" />
+                </div>
+                <h2 className="text-2xl font-black tracking-tight">
+                  {t("dashboard.staff.aiAlignment")}
+                </h2>
+                <div className="h-px flex-1 bg-linear-to-r from-ai-primary/20 to-transparent" />
+              </div>
+              <RLHFAlignmentChart data={data.rlhf ?? []} />
             </motion.div>
           </ErrorBoundary>
 

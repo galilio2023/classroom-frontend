@@ -8,6 +8,7 @@ import { AuthorizedRoute } from "@/components/authorized-route";
 import { VerificationGuard } from "@/components/verification-guard";
 import { SocketProvider } from "@/contexts/socket-context";
 import { TermProvider } from "@/contexts/term-context";
+import { JobProvider } from "@/contexts/job-context";
 import { Loader2 } from "lucide-react";
 
 // Lazy Load Pages
@@ -75,11 +76,14 @@ const StudyPlanner = React.lazy(() => import("@/features/ai/pages/study-planner"
 const TeacherApplicationsList = React.lazy(() => import("@/pages/teacher-applications/list"));
 const ActivityLogPage = React.lazy(() => import("@/pages/dashboard/activity-log"));
 const AIGovernanceList = React.lazy(() => import("@/features/ai/pages/ai-governance-list"));
+const AiMetricsPage = React.lazy(() => import("@/features/ai/pages/ai-metrics"));
 const StudentReportCard = React.lazy(() => import("@/pages/student/report-card"));
 const StudentProgress = React.lazy(() => import("@/pages/progress/list"));
 const TeacherChannelPage = React.lazy(() => import("@/pages/teacher-channel/index"));
 const StudentPortfolio = React.lazy(() => import("@/features/users/pages/portfolio"));
 const SettingsEditPage = React.lazy(() => import("@/pages/settings/edit"));
+const MonetizationSettings = React.lazy(() => import("@/pages/settings/monetization"));
+
 const TeacherSubscriptionsList = React.lazy(() => import("@/pages/teacher-subscriptions/list"));
 const MyTeachersList = React.lazy(() => import("@/pages/my-teachers/list"));
 const DiscoveryPage = React.lazy(() => import("@/pages/discovery/index"));
@@ -138,11 +142,13 @@ export const AppRouter = () => (
       <Route
         element={
           <Authenticated key="authenticated-layout" fallback={<CatchAllNavigate to="/login" />}>
-            <SocketProvider>
-              <TermProvider>
-                <Outlet />
-              </TermProvider>
-            </SocketProvider>
+            <JobProvider>
+              <SocketProvider>
+                <TermProvider>
+                  <Outlet />
+                </TermProvider>
+              </SocketProvider>
+            </JobProvider>
           </Authenticated>
         }
       >
@@ -548,7 +554,7 @@ export const AppRouter = () => (
             />
           </Route>
           <Route
-            path="/admin/terms"
+            path="/terms"
             element={
               <AuthorizedRoute resource="academic-terms" action="list">
                 <TermsList />
@@ -584,6 +590,14 @@ export const AppRouter = () => (
             element={
               <AuthorizedRoute resource="ai-health-reports" action="list">
                 <AIGovernanceList />
+              </AuthorizedRoute>
+            }
+          />
+          <Route
+            path="/ai-metrics"
+            element={
+              <AuthorizedRoute resource="ai-metrics" action="list">
+                <AiMetricsPage />
               </AuthorizedRoute>
             }
           />
@@ -631,6 +645,15 @@ export const AppRouter = () => (
               </AuthorizedRoute>
             }
           />
+          <Route
+            path="/settings/monetization"
+            element={
+              <AuthorizedRoute resource="settings" action="edit">
+                <MonetizationSettings />
+              </AuthorizedRoute>
+            }
+          />
+
           <Route path="*" element={<ErrorComponent />} />
         </Route>
       </Route>

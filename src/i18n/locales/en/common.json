@@ -60,6 +60,10 @@
     "ai-activity-logs": "Study History",
     "label": "Study History"
   },
+  "ai-metrics": {
+    "ai-metrics": "AI Observability",
+    "label": "AI Observability"
+  },
   "app": {
     "title": "Classroom AI"
   },
@@ -306,6 +310,14 @@
       "enableAiFeatures": {
         "label": "Enable AI Features",
         "description": "Enable Gemini-powered features across the platform (Magic Builder, Study Lab, etc.)."
+      },
+      "dailyTokenQuota": {
+        "label": "Daily AI Token Quota",
+        "description": "Total AI tokens allowed per user per day before reset (midnight)."
+      },
+      "maxAiTokenLimit": {
+        "label": "Max Tokens per Request",
+        "description": "Maximum tokens the AI is allowed to use in a single interaction."
       },
       "defaultRegistrationRole": {
         "label": "Default Registration Role",
@@ -877,7 +889,8 @@
       "deleted": "Term deleted successfully",
       "created": "Term created successfully",
       "error": "An error occurred"
-    }
+    },
+    "noTermsFound": "No terms found"
   },
   "profile": {
     "title": "User Profile",

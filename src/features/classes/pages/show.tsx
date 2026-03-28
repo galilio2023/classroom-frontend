@@ -51,6 +51,8 @@ const ClassesShow = () => {
     handleEnrollmentAction,
     handleToggleLive,
     handleConfirmUnenroll,
+    handleCheckout,
+    isCheckingOut,
     isDeleting,
     createMutation,
     isMessaging,
@@ -77,6 +79,9 @@ const ClassesShow = () => {
 
   const approvedEnrollments =
     aClass.enrollments?.filter((e: Enrollment) => e.status === "approved") ?? [];
+
+  const isEnrolled = !!approvedEnrollments.find((e: Enrollment) => e.student.id === identity?.id);
+
   const pendingCount =
     (aClass.enrollments?.filter((e: Enrollment) => e.status === "pending").length ?? 0) +
     (aClass.enrollments?.filter((e: Enrollment) => e.status === "waitlisted").length ?? 0);
@@ -97,6 +102,9 @@ const ClassesShow = () => {
           isLiveIndicator={isLiveIndicator}
           isStaff={isModerator}
           onToggleLive={handleToggleLive}
+          isEnrolled={isEnrolled}
+          onCheckout={handleCheckout}
+          isCheckingOut={isCheckingOut}
         />
 
         <Tabs

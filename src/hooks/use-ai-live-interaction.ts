@@ -123,9 +123,17 @@ export const useAILiveInteraction = ({
 
         utterance.onerror = (event) => {
           console.error("Speech Synthesis Error:", event);
-          setIsSpeaking(false);
-          setVisualState("talking"); // Revert to talking (default) on error
-          speechRef.current = null;
+          if (isMounted.current) {
+            setIsSpeaking(false);
+            // If it's 'not-allowed', the browser blocked it.
+            // We should still allow the UI to finish its "cycle" or wait for user interaction.
+            setVisualState("talking");
+            speechRef.current = null;
+            // Optionally notify parent that we're "done" even if we didn't speak
+            if (event.error === "not-allowed") {
+              onFinished?.();
+            }
+          }
         };
 
         speechRef.current = utterance;

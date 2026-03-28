@@ -1,5 +1,13 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { useShow, useOne, useUpdate, useList, useDelete, useCreate } from "@refinedev/core";
+import {
+  useShow,
+  useOne,
+  useUpdate,
+  useList,
+  useDelete,
+  useCreate,
+  useCustomMutation,
+} from "@refinedev/core";
 import { Class, Announcement, Enrollment } from "@/types";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
@@ -188,6 +196,30 @@ export const useClassDetails = (classId: string) => {
     }
   };
 
+  const { mutate: checkoutMutation, isLoading: isCheckingOut } = useCustomMutation() as any;
+
+  const handleCheckout = () => {
+    checkoutMutation(
+      {
+        url: `marketplace/${classId}/checkout`,
+        method: "post",
+        values: {},
+      },
+      {
+        onSuccess: (data: any) => {
+          if (data?.data?.url) {
+            window.location.href = data.data.url;
+          }
+        },
+        onError: (err: any) => {
+          toast.error(
+            err?.message || "Checkout failed. Please ensure the teacher has connected Stripe."
+          );
+        },
+      }
+    );
+  };
+
   return {
     identity,
     aClass,
@@ -207,6 +239,8 @@ export const useClassDetails = (classId: string) => {
     handleEnrollmentAction,
     handleToggleLive,
     handleConfirmUnenroll,
+    handleCheckout,
+    isCheckingOut,
     isDeleting: deleteMutationObj.isPending,
     createMutation,
     isMessaging: createMutationObj.isPending,

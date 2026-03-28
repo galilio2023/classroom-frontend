@@ -133,6 +133,7 @@ export const accessControlProvider: AccessControlProvider = {
         "teacher-channel",
         "teacher-subscriptions",
         "academic-terms", // Added academic-terms
+        "ai-activity-logs",
       ];
 
       if (allowedResources.includes(resourceName)) {
@@ -243,6 +244,19 @@ export const accessControlProvider: AccessControlProvider = {
         return { can: true };
 
       return { can: false, reason: "Access denied for Parent role." };
+    }
+
+    // 5. DEPARTMENTAL SCOPING (Global Enforcement)
+    // If the record has a departmentId, it MUST match the user's department scope.
+    // (Bypass for global admins)
+    if (role !== UserRole.ADMIN && identity.departmentId) {
+      const record = (params as any)?.record;
+      if (record && record.departmentId && record.departmentId !== identity.departmentId) {
+        return {
+          can: false,
+          reason: `Departmental Isolation: This record belongs to Department ${record.departmentId}.`,
+        };
+      }
     }
 
     return { can: false, reason: "Unauthorized." };

@@ -21,6 +21,7 @@ import { PromotionMiniPlayer } from "@/components/promotion-mini-player";
 import { VideoMiniPlayer } from "@/components/video-mini-player";
 import { usePersistentLive } from "@/hooks/use-persistent-live";
 import { useGamificationToasts } from "@/hooks/use-gamification-toasts";
+import { JobTracker } from "@/components/job-tracker";
 
 export function Layout({ children }: PropsWithChildren) {
   const { pathname, search } = useLocation();
@@ -97,6 +98,7 @@ export function Layout({ children }: PropsWithChildren) {
           {isStudent && <XPGainPopup />}
           {isStudent && <MobileNav />}
           <PWAInstaller />
+          <JobTracker />
         </SidebarInset>
       </SidebarProvider>
     </ThemeProvider>

@@ -30,7 +30,8 @@ import {
   Clock,
   Tv,
   History,
-  Settings, // Added Settings icon
+  Settings,
+  CircleDollarSign,
 } from "lucide-react";
 import { ResourceProps } from "@refinedev/core";
 import { UserRole } from "@/types"; // Assuming UserRole enum is defined here or imported
@@ -120,7 +121,7 @@ export const resources: ResourceProps[] = [
   // --- ACADEMIC ---
   {
     name: "academic-terms",
-    list: "/admin/terms",
+    list: "/terms",
     meta: {
       group: "groups.academic",
       label: "resources.academic-terms.label",
@@ -274,6 +275,7 @@ export const resources: ResourceProps[] = [
       label: "resources.portfolio.label",
       icon: <UserCircle />,
       roles: [UserRole.ADMIN, UserRole.TEACHER, UserRole.STUDENT],
+      resource: "users",
     },
   },
   {
@@ -316,6 +318,7 @@ export const resources: ResourceProps[] = [
       label: "resources.followed-teachers.label",
       icon: <Bookmark />,
       roles: [UserRole.STUDENT],
+      resource: "subscriptions",
     },
   },
   {
@@ -326,6 +329,7 @@ export const resources: ResourceProps[] = [
       label: "resources.discovery.label",
       icon: <Tv />,
       roles: [UserRole.STUDENT],
+      resource: "channels",
     },
   },
   // --- TEACHER HUB ---
@@ -337,6 +341,16 @@ export const resources: ResourceProps[] = [
       label: "resources.teacher-channel.label",
       icon: <Tv />,
       roles: [UserRole.TEACHER],
+    },
+  },
+  {
+    name: "monetization",
+    list: "/settings/monetization",
+    meta: {
+      group: "groups.teacher-hub",
+      label: "resources.monetization.label",
+      icon: <CircleDollarSign />,
+      roles: [UserRole.TEACHER, UserRole.ADMIN],
     },
   },
 
@@ -403,6 +417,16 @@ export const resources: ResourceProps[] = [
       group: "groups.admin",
       label: "resources.ai-health-reports.label",
       icon: <BrainCircuit />,
+      roles: [UserRole.ADMIN],
+    },
+  },
+  {
+    name: "ai-metrics",
+    list: "/ai-metrics",
+    meta: {
+      group: "groups.admin",
+      label: "resources.ai-metrics.label",
+      icon: <Activity />,
       roles: [UserRole.ADMIN],
     },
   },

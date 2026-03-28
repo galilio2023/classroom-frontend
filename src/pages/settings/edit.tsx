@@ -35,6 +35,9 @@ import { UserRole } from "@/types"; // Assuming UserRole enum is accessible
 // Define the schema for global settings
 const settingsSchema = z.object({
   enableAiFeatures: z.boolean(),
+  isDryRun: z.boolean(),
+  dailyTokenQuota: z.coerce.number().min(0).max(1000000),
+  maxAiTokenLimit: z.coerce.number().min(0).max(32000),
   defaultRegistrationRole: z.nativeEnum(UserRole),
   welcomeMessage: z
     .string()
@@ -66,6 +69,9 @@ const SettingsEditPage = () => {
     resolver: zodResolver(settingsSchema),
     defaultValues: {
       enableAiFeatures: true,
+      isDryRun: false,
+      dailyTokenQuota: 50000,
+      maxAiTokenLimit: 8000,
       defaultRegistrationRole: UserRole.STUDENT,
       welcomeMessage: undefined, // Explicitly set to undefined for optional field
     },
@@ -141,25 +147,81 @@ const SettingsEditPage = () => {
             ) : (
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                  <FormField
-                    control={form.control}
-                    name="enableAiFeatures"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                        <div className="space-y-0.5">
-                          <FormLabel className="text-base">
-                            {t("settings.form.enableAiFeatures.label")}
-                          </FormLabel>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <FormField
+                      control={form.control}
+                      name="enableAiFeatures"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                          <div className="space-y-0.5">
+                            <FormLabel className="text-base">
+                              {t("settings.form.enableAiFeatures.label")}
+                            </FormLabel>
+                            <FormDescription>
+                              {t("settings.form.enableAiFeatures.description")}
+                            </FormDescription>
+                          </div>
+                          <FormControl>
+                            <Switch checked={field.value} onCheckedChange={field.onChange} />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="isDryRun"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border border-orange-500/20 bg-orange-500/5 p-4">
+                          <div className="space-y-0.5">
+                            <FormLabel className="text-base text-orange-600">
+                              {t("aiHub.assistant.mockMode")}
+                            </FormLabel>
+                            <FormDescription>{t("aiHub.assistant.mockModeDesc")}</FormDescription>
+                          </div>
+                          <FormControl>
+                            <Switch checked={field.value} onCheckedChange={field.onChange} />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <FormField
+                      control={form.control}
+                      name="dailyTokenQuota"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t("settings.form.dailyTokenQuota.label")}</FormLabel>
+                          <FormControl>
+                            <Input type="number" {...field} />
+                          </FormControl>
                           <FormDescription>
-                            {t("settings.form.enableAiFeatures.description")}
+                            {t("settings.form.dailyTokenQuota.description")}
                           </FormDescription>
-                        </div>
-                        <FormControl>
-                          <Switch checked={field.value} onCheckedChange={field.onChange} />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="maxAiTokenLimit"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t("settings.form.maxAiTokenLimit.label")}</FormLabel>
+                          <FormControl>
+                            <Input type="number" {...field} />
+                          </FormControl>
+                          <FormDescription>
+                            {t("settings.form.maxAiTokenLimit.description")}
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
 
                   <FormField
                     control={form.control}

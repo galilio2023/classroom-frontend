@@ -16,7 +16,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
-import { useCustomMutation, HttpError } from "@refinedev/core";
+import { useCustom, useCustomMutation, HttpError } from "@refinedev/core";
 import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
@@ -28,11 +28,12 @@ interface StudyBlock {
   task: string;
   assignmentId?: number;
   duration: string;
-  completed?: boolean;
 }
 
-interface StudyPlannerData {
+interface StudyPlanResponse {
+  id: number;
   plan: StudyBlock[];
+  completedBlocks: Record<string, boolean>;
 }
 
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
@@ -42,63 +43,51 @@ const StudyPlanner = () => {
   const { t, i18n } = useTranslation();
   const isAr = i18n.language === "ar";
   usePageTitle(t("resources.study-planner.label"));
+
+  // --- FETCH CURRENT PLAN ---
+  const {
+    data: initialData,
+    isLoading: isFetching,
+    refetch,
+  } = useCustom<StudyPlanResponse>({
+    url: "study-planner",
+    method: "get",
+  }) as any;
+
   const [plan, setPlan] = useState<StudyBlock[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [completedBlocks, setCompletedBlocks] = useState<Record<string, boolean>>({});
 
-  const { mutate: generatePlanMutation } = useCustomMutation<StudyPlannerData, HttpError>();
-
   useEffect(() => {
-    const savedPlan = localStorage.getItem("study-plan");
-    const savedCompleted = localStorage.getItem("study-plan-completed");
+    if (initialData?.data) {
+      setPlan(initialData.data.plan || []);
+      setCompletedBlocks(initialData.data.completedBlocks || {});
+    }
+  }, [initialData]);
 
-    if (savedPlan) {
-      try {
-        setPlan(JSON.parse(savedPlan));
-      } catch (e) {
-        console.error("Error parsing saved plan", e);
-      }
-    }
-    if (savedCompleted) {
-      try {
-        setCompletedBlocks(JSON.parse(savedCompleted));
-      } catch (e) {
-        console.error("Error parsing saved completed blocks", e);
-      }
-    }
-  }, []);
+  // --- MUTATIONS ---
+  const { mutate: generatePlanMutation, isLoading: isGenerating } = useCustomMutation<
+    StudyPlanResponse,
+    HttpError
+  >() as any;
+  const { mutate: toggleBlockMutation } = useCustomMutation() as any;
 
   const generatePlan = async () => {
-    setIsLoading(true);
-
     generatePlanMutation(
       {
         url: "ai/generate-study-plan",
         method: "post",
-        values: {
-          action: "generate",
-        },
+        values: {},
         successNotification: () => ({
-          message: t("studyPlanner.toasts.generated"),
+          message: t("studyPlanner.toasts.generated", {
+            defaultValue: "Study plan generated successfully!",
+          }),
           type: "success",
-        }),
-        errorNotification: (error) => ({
-          message:
-            (error?.response?.data as { message?: string })?.message ||
-            error?.message ||
-            t("studyPlanner.toasts.error"),
-          type: "error",
         }),
       },
       {
-        onSuccess: (data) => {
-          const newPlan = data.data.plan;
-          setPlan(newPlan);
-          localStorage.setItem("study-plan", JSON.stringify(newPlan));
-          setIsLoading(false);
-        },
-        onError: () => {
-          setIsLoading(false);
+        onSuccess: (data: any) => {
+          setPlan(data.data.plan);
+          setCompletedBlocks({});
         },
       }
     );
@@ -108,16 +97,26 @@ const StudyPlanner = () => {
     const key = `${day}-${slot}`;
     const isNowCompleted = !completedBlocks[key];
 
-    const newCompleted = { ...completedBlocks, [key]: isNowCompleted };
-    setCompletedBlocks(newCompleted);
-    localStorage.setItem("study-plan-completed", JSON.stringify(newCompleted));
+    // Optimistic Update
+    setCompletedBlocks((prev) => ({ ...prev, [key]: isNowCompleted }));
+
+    toggleBlockMutation({
+      url: "study-planner/toggle",
+      method: "post",
+      values: { day, timeSlot: slot },
+    });
 
     if (isNowCompleted) {
-      toast.success(t("studyPlanner.toasts.completed"), {
+      toast.success(t("studyPlanner.toasts.completed", { defaultValue: "Block completed!" }), {
         icon: <Zap className="h-4 w-4 text-yellow-500 fill-yellow-500" />,
       });
       const event = new CustomEvent("xp_gained_local", {
-        detail: { amount: 20, reason: t("studyPlanner.labels.blockCompleted") },
+        detail: {
+          amount: 20,
+          reason: t("studyPlanner.labels.blockCompleted", {
+            defaultValue: "Study block completed",
+          }),
+        },
       });
       window.dispatchEvent(event);
     }
@@ -126,6 +125,8 @@ const StudyPlanner = () => {
   const getBlock = (day: string, slot: string) => {
     return plan.find((b) => b.day === day && b.timeSlot === slot);
   };
+
+  const isLoading = isFetching || isGenerating;
 
   return (
     <div

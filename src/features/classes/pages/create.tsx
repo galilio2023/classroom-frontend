@@ -276,44 +276,53 @@ const ClassesCreate = () => {
                             )}
                           />
                         )}
-                        {!isCreatingNewSubject && ( // Only show term selector if not creating a new subject
-                          <FormField
-                            control={form.control}
-                            name="termId"
-                            render={({ field }) => (
-                              <FormItem className="space-y-3">
-                                <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2">
-                                  <Calendar className="h-3 w-3" />
-                                  {t("classes.form.academicTerm")}{" "}
-                                  <span className="text-destructive">*</span>
-                                </FormLabel>
-                                <Select
-                                  onValueChange={(value) => field.onChange(Number(value))}
-                                  value={field.value?.toString()}
-                                  disabled={termsLoading}
-                                >
-                                  <FormControl>
-                                    <SelectTrigger className="h-14 rounded-2xl bg-muted/20 border-none focus:ring-primary transition-all font-bold">
-                                      <SelectValue placeholder={t("classes.form.selectTerm")} />
-                                    </SelectTrigger>
-                                  </FormControl>
-                                  <SelectContent className="rounded-xl border-none shadow-2xl">
-                                    {terms.map((term) => (
-                                      <SelectItem
-                                        key={term.id}
-                                        value={term.id.toString()}
-                                        className="rounded-lg font-bold text-start"
-                                      >
-                                        {term.name}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        )}
+                        <FormField
+                          control={form.control}
+                          name="termId"
+                          render={({ field }) => (
+                            <FormItem className="space-y-3">
+                              <FormLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2">
+                                <Calendar className="h-3 w-3" />
+                                {t("classes.form.academicTerm")}{" "}
+                                <span className="text-destructive">*</span>
+                              </FormLabel>
+                              <Select
+                                onValueChange={(value) => field.onChange(Number(value))}
+                                value={field.value?.toString()}
+                                disabled={termsLoading || terms.length === 0}
+                              >
+                                <FormControl>
+                                  <SelectTrigger className="h-14 rounded-2xl bg-muted/20 border-none focus:ring-primary transition-all font-bold">
+                                    <SelectValue
+                                      placeholder={
+                                        terms.length === 0
+                                          ? t("terms.noTermsFound")
+                                          : t("classes.form.selectTerm")
+                                      }
+                                    />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent className="rounded-xl border-none shadow-2xl">
+                                  {terms.map((term) => (
+                                    <SelectItem
+                                      key={term.id}
+                                      value={term.id.toString()}
+                                      className="rounded-lg font-bold text-start"
+                                    >
+                                      {term.name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              {terms.length === 0 && !termsLoading && (
+                                <p className="text-[10px] font-bold text-destructive animate-pulse">
+                                  {t("classes.create.noTermsAlert")}
+                                </p>
+                              )}
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
                       </div>
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">

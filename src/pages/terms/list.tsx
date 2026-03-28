@@ -73,7 +73,7 @@ export default function TermsList() {
 
   usePageTitle(t("terms.title"));
   const { data: identity } = useGetIdentity<User>();
-  const isAdmin = identity?.role === UserRole.ADMIN;
+  const isTeacher = identity?.role === UserRole.TEACHER;
 
   const { query } = useList<AcademicTerm>({
     resource: "academic-terms",
@@ -191,7 +191,7 @@ export default function TermsList() {
             </div>
           </div>
           <div className="w-full md:w-auto">
-            {isAdmin && (
+            {isTeacher && (
               <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
                 <DialogTrigger asChild>
                   <Button
@@ -368,7 +368,7 @@ export default function TermsList() {
                 description={t("terms.empty.desc")}
                 className="border-none bg-transparent min-h-0"
                 action={
-                  isAdmin
+                  isTeacher
                     ? {
                         label: t("terms.create"),
                         onClick: () => setIsCreateOpen(true),
@@ -491,7 +491,7 @@ export default function TermsList() {
 
                       {/* Action Area */}
                       <div className="flex items-center gap-3 mt-6 md:mt-0 shrink-0">
-                        {isAdmin && term.status !== "archived" && (
+                        {isTeacher && term.status !== "archived" && (
                           <div
                             className={cn(
                               "hidden lg:flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:translate-x-0",
@@ -553,7 +553,7 @@ export default function TermsList() {
                               </div>
                               <span className="font-bold text-xs">{t("buttons.viewClasses")}</span>
                             </DropdownMenuItem>
-                            {isAdmin && (
+                            {isTeacher && (
                               <>
                                 <DropdownMenuItem className="rounded-xl gap-3 py-3 cursor-pointer">
                                   <div className="p-2 rounded-lg bg-primary/10 text-primary">

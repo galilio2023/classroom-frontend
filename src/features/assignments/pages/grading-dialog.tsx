@@ -48,6 +48,7 @@ import Confetti from "react-confetti";
 import { useWindowSize } from "react-use";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
+import { useSocket } from "@/contexts/socket-context";
 import { useTranslation } from "react-i18next";
 import { TFunction } from "i18next";
 import { toast } from "sonner";
@@ -85,12 +86,15 @@ export const GradingDialog = ({
   const { width, height } = useWindowSize();
   const { isStaff: _isStaff } = useUserRole();
   const isStaff = _isStaff && !readOnly;
+  const { socket } = useSocket();
 
   const [hasAutoAnalyzed, setHasAutoAnalyzed] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [copied, setCopied] = useState(false);
   const [isAISuggested, setIsAISuggested] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [aiStatus, setAiStatus] = useState<Submission["aiStatus"]>(submission?.aiStatus || "idle");
+  const [aiError, setAiError] = useState<string | null>(submission?.aiError || null);
 
   const { mutate: updateSubmission, mutation: updateMutation } = useUpdate<
     Submission,
@@ -116,16 +120,60 @@ export const GradingDialog = ({
   const isDraft = submission?.isDraft;
   const isAr = i18n.language === "ar";
 
-  const { mutate: getAIFeedback, mutation: aiMutation } = useCustomMutation<AIFeedbackResponse>();
-  const isAILoading = aiMutation.isPending;
+  const { mutate: getAIFeedback, mutation: aiMutation } = useCustomMutation<any>() as any;
+  const isAILoading = aiMutation.isPending || aiStatus === "processing";
 
   useEffect(() => {
     if (isOpen) {
       setHasAutoAnalyzed(false);
       setIsAISuggested(false);
       setShowConfetti(false);
+      setAiStatus(submission?.aiStatus || "idle");
+      setAiError(submission?.aiError || null);
     }
-  }, [isOpen, submission?.id]);
+  }, [isOpen, submission?.id, submission?.aiStatus, submission?.aiError]);
+
+  useEffect(() => {
+    if (isOpen && submission?.id && socket) {
+      socket.emit("join_submission", submission.id);
+
+      const handleAiComplete = (data: { result: AIFeedbackResponse }) => {
+        const { suggestedGrade, feedback } = data.result;
+        setValue("grade", Number(suggestedGrade));
+        setValue("feedback", feedback);
+        setIsAISuggested(true);
+        setAiStatus("completed");
+        setAiError(null);
+        toast.success(
+          t("assignments.grading.toasts.aiComplete", { defaultValue: "AI analysis complete!" })
+        );
+
+        // 🚀 REAL-TIME SYNC: Force Refine to refresh the underlying data
+        queryClient.invalidateQueries({ queryKey: ["submissions"] });
+        queryClient.invalidateQueries({
+          queryKey: ["default", "submissions", "getOne", String(submission.id)],
+        });
+      };
+
+      const handleAiFailed = (data: { error: string }) => {
+        setAiStatus("failed");
+        setAiError(data.error);
+        toast.error(
+          t("assignments.grading.toasts.aiFailed", { defaultValue: "AI analysis failed." })
+        );
+        queryClient.invalidateQueries({ queryKey: ["submissions"] });
+      };
+
+      socket.on("submission:ai-grade:completed", handleAiComplete);
+      socket.on("submission:ai-grade:failed", handleAiFailed);
+
+      return () => {
+        socket.emit("leave_submission", submission.id);
+        socket.off("submission:ai-grade:completed", handleAiComplete);
+        socket.off("submission:ai-grade:failed", handleAiFailed);
+      };
+    }
+  }, [isOpen, submission?.id, socket, setValue, t, queryClient]);
 
   useEffect(() => {
     if (submission) {
@@ -141,13 +189,14 @@ export const GradingDialog = ({
         !submission.suggestedGrade &&
         !hasAutoAnalyzed &&
         !isAILoading &&
-        !isDraft
+        !isDraft &&
+        aiStatus === "idle"
       ) {
         handleAIGrade();
         setHasAutoAnalyzed(true);
       }
     }
-  }, [submission, setValue, isOpen, isStaff, hasAutoAnalyzed, isAILoading, isDraft]);
+  }, [submission, setValue, isOpen, isStaff, hasAutoAnalyzed, isAILoading, isDraft, aiStatus]);
 
   const onSubmit: SubmitHandler<GradingFormValues> = async (values) => {
     if (!isStaff || !submission?.id || isDraft) return;
@@ -198,6 +247,7 @@ export const GradingDialog = ({
   const handleAIGrade = () => {
     if (!submission || !isStaff || isDraft) return;
 
+    setAiStatus("processing");
     getAIFeedback(
       {
         url: `/submissions/${submission.id}/ai-grade`,
@@ -205,16 +255,42 @@ export const GradingDialog = ({
         values: {},
       },
       {
-        onSuccess: (data) => {
-          const { suggestedGrade, feedback } = data.data;
+        onSuccess: (response: any) => {
+          // If response is 202, it means we wait for socket
+          if (response.status === "accepted") {
+            toast.info(
+              t("assignments.grading.toasts.aiProcessing", {
+                defaultValue: "AI analysis started...",
+              })
+            );
+            return;
+          }
+          // Fallback for old/sync behavior
+          const { suggestedGrade, feedback } = response.data;
           setValue("grade", Number(suggestedGrade));
           setValue("feedback", feedback);
           setIsAISuggested(true);
+          setAiStatus("completed");
+          setAiError(null);
           open?.({
             type: "success",
-            message: t("assignments.grading.toasts.aiComplete"),
-            description: t("assignments.grading.toasts.aiApplied"),
+            message: t("assignments.grading.toasts.aiComplete", {
+              defaultValue: "AI analysis complete!",
+            }),
+            description: t("assignments.grading.toasts.aiApplied", {
+              defaultValue: "AI suggestions have been applied to the form.",
+            }),
           });
+        },
+        onError: (err: any) => {
+          setAiStatus("failed");
+          setAiError(
+            err?.message ||
+              t("assignments.grading.toasts.aiFailed", { defaultValue: "AI analysis failed." })
+          );
+          toast.error(
+            t("assignments.grading.toasts.aiFailed", { defaultValue: "AI analysis failed." })
+          );
         },
       }
     );
@@ -388,6 +464,15 @@ export const GradingDialog = ({
                     )}
                   </div>
                 </div>
+
+                {aiStatus === "failed" && aiError && (
+                  <div className="p-4 rounded-xl bg-destructive/5 border border-destructive/20 text-destructive text-xs font-medium animate-in fade-in slide-in-from-top-1 duration-300">
+                    <p className="flex items-center gap-2">
+                      <span className="h-2 w-2 rounded-full bg-destructive animate-pulse" />
+                      {t("assignments.grading.aiError", { defaultValue: "AI Error" })}: {aiError}
+                    </p>
+                  </div>
+                )}
               </div>
 
               {submission.fileUrl && (

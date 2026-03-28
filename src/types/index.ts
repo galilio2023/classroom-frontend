@@ -19,7 +19,6 @@ export interface AIMetadata {
   latencyMs?: number;
   promptVersion?: string;
   isCached?: boolean;
-  [key: string]: any;
 }
 
 export interface AIResponse<T> {
@@ -55,7 +54,6 @@ export enum VerificationStatus {
 export interface BasePermissions {
   role?: UserRole;
   canAccessAi?: boolean;
-  [key: string]: any;
 }
 
 export interface User {
@@ -92,6 +90,8 @@ export interface User {
     preferredTone: string;
     lastSummarizedAt: string;
   };
+  stripeAccountId?: string | null;
+  stripeOnboardingComplete?: boolean;
 }
 
 export interface Department {
@@ -158,6 +158,8 @@ export interface Submission {
   studentId: string;
   groupId?: number | null;
   aiApprovalStatus?: "pending" | "approved" | "rejected";
+  aiStatus: "idle" | "processing" | "completed" | "failed";
+  aiError?: string | null;
   createdAt: string;
   updatedAt: string;
   student?: User;

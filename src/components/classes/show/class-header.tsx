@@ -1,12 +1,14 @@
 import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
 import { Button } from "@/components/ui/button";
-import { Copy, Pencil, Share2, Check, LayoutDashboard } from "lucide-react";
+import { Copy, Pencil, Share2, Check, LayoutDashboard, Brain, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { CanAccess } from "@/components/auth/can-access";
+import { useCustomMutation } from "@refinedev/core";
+import { useJobs } from "@/contexts/job-context";
 
 interface ClassHeaderProps {
   classId: string;
@@ -22,6 +24,36 @@ export const ClassHeader = ({ classId, isOwner }: ClassHeaderProps) => {
     setCopied(true);
     toast.success(t("classes.show.toast.linkCopied"));
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const { mutate: customMutation, isLoading: isGenerating } = useCustomMutation() as any;
+  const { addJob } = useJobs();
+
+  const handleGenerateSummary = () => {
+    customMutation(
+      {
+        url: `classes/${classId}/generate-summary`,
+        method: "post",
+        values: {},
+      },
+      {
+        onSuccess: (data: any) => {
+          if (data?.data?.jobId) {
+            addJob({
+              id: `summary-${classId}`,
+              type: "summary",
+              title: t("jobs.summary_title", { defaultValue: "Generating Class Summary" }),
+              metadata: { jobId: data.data.jobId, classId },
+            });
+            toast.info(
+              t("classes.show.toast.summaryStarted", {
+                defaultValue: "Class summary generation started!",
+              })
+            );
+          }
+        },
+      }
+    );
   };
 
   return (
@@ -46,6 +78,23 @@ export const ClassHeader = ({ classId, isOwner }: ClassHeaderProps) => {
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+          <CanAccess resource="classes" action="edit" id={classId}>
+            <Button
+              variant="outline"
+              size="lg"
+              disabled={isGenerating}
+              className="w-full md:w-auto rounded-2xl font-black uppercase tracking-widest text-[10px] h-12 md:h-14 px-6 md:px-8 gap-2 border-ai-primary/20 bg-ai-primary/5 text-ai-primary hover:bg-ai-primary/10 shadow-sm transition-all"
+              onClick={handleGenerateSummary}
+            >
+              {isGenerating ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Brain className="w-4 h-4" />
+              )}
+              {t("buttons.generateSummary", { defaultValue: "Generate Summary" })}
+            </Button>
+          </CanAccess>
+
           <Button
             variant="outline"
             size="lg"

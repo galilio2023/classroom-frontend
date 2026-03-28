@@ -33,6 +33,7 @@ import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import dayjs from "dayjs";
 import { useDashboard } from "@/features/dashboard/hooks/use-dashboard";
+import { getSocket, connectSocket } from "@/lib/socket";
 
 const SubmissionShow = () => {
   const { t, i18n } = useTranslation();
@@ -52,17 +53,56 @@ const SubmissionShow = () => {
   });
 
   const submission = submissionQuery.data?.data;
+  const { refetch } = submissionQuery;
 
   const { mutate: updateSubmission, mutation: updateMutationObj } = useUpdate();
   const { mutate: aiGrade } = useCustomMutation();
 
+  // Socket.io integration for async AI grading
+  useEffect(() => {
+    const setupSocket = async () => {
+      try {
+        await connectSocket();
+        const socket = getSocket();
+
+        if (socket && id) {
+          // Join the specific submission room (backend emits to submission:${id})
+          // Although backend doesn't have a listener for 'join_submission',
+          // we can assume the room is established or we rely on user room.
+          // For now, let's just listen globally as the event is specific.
+
+          const handleAiComplete = (data: any) => {
+            if (Number(data.submissionId) === Number(id)) {
+              setIsAnalyzing(false);
+              refetch();
+              toast.success(t("assignments.grading.toasts.aiComplete"));
+            }
+          };
+
+          socket.on("submission:ai-grade:completed", handleAiComplete);
+
+          return () => {
+            socket.off("submission:ai-grade:completed", handleAiComplete);
+          };
+        }
+      } catch (err) {
+        console.error("Failed to setup socket for AI updates:", err);
+      }
+    };
+
+    setupSocket();
+  }, [id, refetch, t]);
+
   // Sync local state with fetched data
   useEffect(() => {
     if (submission) {
-      setGrade(submission.grade ?? submission.suggestedGrade ?? 0);
-      setFeedback(submission.feedback ?? submission.suggestedFeedback ?? "");
+      // Only sync if not currently analyzing to prevent UI flicker
+      if (!isAnalyzing) {
+        setGrade(submission.grade ?? submission.suggestedGrade ?? 0);
+        setFeedback(submission.feedback ?? submission.suggestedFeedback ?? "");
+      }
     }
-  }, [submission]);
+  }, [submission, isAnalyzing]);
 
   const handleSaveGrade = () => {
     updateSubmission(
@@ -92,12 +132,13 @@ const SubmissionShow = () => {
         values: {},
       },
       {
-        onSuccess: (data: any) => {
-          const result = data.data;
-          setGrade(result.suggestedGrade);
-          setFeedback(result.feedback);
-          setIsAnalyzing(false);
-          toast.success(t("assignments.grading.toasts.aiComplete"));
+        onSuccess: () => {
+          // In async mode, we just wait for the socket event or poll
+          toast.info(
+            t("assignments.grading.toasts.aiStarted", {
+              defaultValue: "AI analysis started in the background...",
+            })
+          );
         },
         onError: () => {
           setIsAnalyzing(false);

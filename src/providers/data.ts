@@ -1,7 +1,15 @@
 import { DataProvider, HttpError, LogicalFilter } from "@refinedev/core";
 import { BACKEND_URL } from "@/config";
+import { resourceFilterMappings as generatedMappings } from "../generated/resource-metadata";
+import { offlineDB } from "../lib/offline-db";
+import { toast } from "sonner";
 
 const BACKEND_BASE_URL = BACKEND_URL;
+
+/**
+ * 🛰️ NETWORK SENSE: Helper to check for active connectivity.
+ */
+const isOffline = () => !navigator.onLine;
 
 /**
  * Helper to handle API errors and return Refine-compatible HttpError
@@ -17,11 +25,18 @@ const handleError = async (response: Response): Promise<HttpError> => {
     // Not JSON or empty
   }
 
-  // SILENT 401 & 404: We don't want loud toasts for auth checks or missing optional resources
-  if (response.status === 401 || response.status === 404) {
+  // 🛡️ SECURITY & UX: Provide meaningful messages for common errors
+  if (response.status === 401) {
     return {
-      message: "", // Empty message prevents the toast
-      statusCode: response.status,
+      message: "Session expired or unauthorized. Please log in.",
+      statusCode: 401,
+    };
+  }
+
+  if (response.status === 404) {
+    return {
+      message: "The requested resource was not found.",
+      statusCode: 404,
     };
   }
 
@@ -69,46 +84,86 @@ const fetcher = async (url: string, options?: RequestInit) => {
 };
 
 /**
- * Resource Filter Mappings
- * Decouples frontend UI field names from backend query parameters.
+ * 📦 OUTBOX FLUSHER
+ * Automatically replays pending mutations when the network returns.
  */
-const resourceFilterMappings: Record<string, Record<string, string>> = {
-  departments: { name: "search", code: "search" },
-  users: { search: "search", name: "search", email: "search", role: "role" },
-  subjects: { name: "search", code: "search", department: "departmentId" },
-  classes: {
-    name: "search",
-    subject: "subjectId",
-    teacher: "teacherId",
-    status: "status",
-    termId: "termId",
-  },
-  enrollments: { classId: "classId", studentId: "studentId", status: "status" },
-  assignments: { classId: "classId", moduleId: "moduleId" },
-  submissions: { assignmentId: "assignmentId", studentId: "studentId" },
-  discussions: { classId: "classId", parentId: "parentId" },
-  attendance: { classId: "classId", date: "date" },
-  resources: { classId: "classId", moduleId: "moduleId", search: "search" },
-  "profile-requests": { status: "status", userId: "userId" },
-  quizzes: { classId: "classId", moduleId: "moduleId" },
-  modules: { classId: "classId" },
-  progress: { classId: "classId", userId: "userId" },
-  "users/children": { parentId: "parentId" },
+export const flushOutbox = async () => {
+  if (isOffline()) return;
+
+  const pending = await offlineDB.getPending();
+  if (pending.length === 0) return;
+
+  toast.info(`🔄 Syncing ${pending.length} offline changes...`);
+
+  for (const mutation of pending) {
+    try {
+      let response;
+      if (mutation.action === "create") {
+        response = await dataProvider.create({
+          resource: mutation.resource,
+          variables: mutation.variables,
+        });
+      } else if (mutation.action === "update") {
+        response = await dataProvider.update({
+          resource: mutation.resource,
+          id: mutation.variables.id,
+          variables: mutation.variables,
+        });
+      } else if (mutation.action === "delete") {
+        response = await dataProvider.deleteOne({
+          resource: mutation.resource,
+          id: mutation.variables.id,
+        });
+      }
+
+      if (response) {
+        await offlineDB.resolve(mutation.id!);
+      }
+    } catch (err) {
+      console.error(`Failed to sync mutation ${mutation.id}`, err);
+      // Stop flushing if we hit a persistent error (e.g. 401) to avoid infinite loops
+      break;
+    }
+  }
+
+  toast.success("✅ Offline sync complete.");
+};
+
+// Listen for reconnection
+if (typeof window !== "undefined") {
+  window.addEventListener("online", () => void flushOutbox());
+}
+
+/**
+ * Resource Filter Mappings
+ * Standardized mappings for specific UI fields that don't match backend column names.
+ * RESOURCES NO LONGER NEEDED HERE: departments, users, subjects, classes, resources.
+ */
+export const resourceFilterMappings: Record<string, any> = {
+  ...generatedMappings,
   "teacher-applications": {
-    status: "status",
     teacherId: "teacherId",
     classId: "classId",
   },
-  channels: { headline: "headline", teacherId: "teacherId" },
 };
 
 export const dataProvider: DataProvider = {
-  getList: async ({ resource, pagination, filters, sorters }) => {
+  getList: async ({ resource, pagination, filters, sorters, meta }) => {
     let urlPath = resource;
     if (resource === "teacher-channels") urlPath = "channels";
     if (resource === "teacher-subscriptions") urlPath = "enrollments";
 
     const url = new URL(`${BACKEND_BASE_URL}/${urlPath}`);
+
+    // Relations: Support meta.with or meta.populate for dynamic embedding
+    const withRelations = meta?.with || meta?.populate;
+    if (withRelations) {
+      if (typeof withRelations === "string") {
+        url.searchParams.append("_with", withRelations);
+      } else {
+        url.searchParams.append("_with", JSON.stringify(withRelations));
+      }
+    }
 
     // Pagination: Map to _start and _end for backend compatibility
     if (pagination?.mode !== "off") {
@@ -120,37 +175,52 @@ export const dataProvider: DataProvider = {
       url.searchParams.append("_end", _end.toString());
     }
 
-    // Filtering: Map operators to backend-compatible suffixes
-    if (filters) {
-      filters.forEach((filter) => {
-        if ("field" in filter) {
-          const { field, operator, value } = filter as LogicalFilter;
-          const mappedField = resourceFilterMappings[resource]?.[field] || field;
+    // Filtering: Support both flat and recursive (OR/AND) filters
+    if (filters && filters.length > 0) {
+      const hasComplexFilters = filters.some((f) => !("field" in f));
 
-          let queryKey = mappedField;
-          if (operator === "contains") {
-            queryKey = `${mappedField}_like`;
-          } else if (operator === "gte") {
-            queryKey = `${mappedField}_gte`;
-          } else if (operator === "lte") {
-            queryKey = `${mappedField}_lte`;
-          } else if (operator === "ne") {
-            queryKey = `${mappedField}_ne`;
-          } else if (operator !== "eq") {
-            queryKey = `${mappedField}_${operator}`;
+      if (hasComplexFilters) {
+        // 🚀 ADVANCED: Send all filters as a JSON string for the backend to parse recursively
+        const mappedFilters = filters.map((filter) => {
+          if ("field" in filter) {
+            return {
+              ...filter,
+              field: resourceFilterMappings[resource]?.[filter.field] || filter.field,
+            };
           }
+          return filter;
+        });
+        url.searchParams.append("_filters", JSON.stringify(mappedFilters));
+      } else {
+        // 🕵️ LEGACY/SIMPLE: Map operators to backend-compatible suffixes for flat query params
+        filters.forEach((filter) => {
+          if ("field" in filter) {
+            const { field, operator, value } = filter as LogicalFilter;
+            const mappedField = resourceFilterMappings[resource]?.[field] || field;
 
-          if (value !== undefined && value !== null && value !== "") {
-            url.searchParams.append(queryKey, String(value));
+            let queryKey = mappedField;
+            if (operator === "contains") {
+              queryKey = resourceFilterMappings[resource]?.[field]
+                ? `${mappedField}_like`
+                : "search";
+            } else if (operator === "gte") {
+              queryKey = `${mappedField}_gte`;
+            } else if (operator === "lte") {
+              queryKey = `${mappedField}_lte`;
+            } else if (operator === "ne") {
+              queryKey = `${mappedField}_ne`;
+            } else if (operator === "in") {
+              queryKey = `${mappedField}_in`;
+            } else if (operator !== "eq") {
+              queryKey = `${mappedField}_${operator}`;
+            }
+
+            if (value !== undefined && value !== null && value !== "") {
+              url.searchParams.append(queryKey, String(value));
+            }
           }
-        } else {
-          // ⚠️ GOTCHA: ConditionalFilter (OR/AND) not supported by current flat-mapped backend.
-          // Suppressing to prevent crash, but logging for developer awareness.
-          console.warn(
-            "DataProvider: Conditional filters (OR/AND) are not yet supported by the flat-mapping backend."
-          );
-        }
-      });
+        });
+      }
     }
 
     // Sorting: Map to _sort and _order (single sort supported by current backend)
@@ -172,13 +242,24 @@ export const dataProvider: DataProvider = {
     return { data, total };
   },
 
-  getOne: async ({ resource, id }) => {
+  getOne: async ({ resource, id, meta }) => {
     let urlPath = resource;
     if (resource === "teacher-channels") urlPath = "channels";
     if (resource === "teacher-subscriptions") urlPath = "enrollments";
 
-    const url = `${BACKEND_BASE_URL}/${urlPath}/${id}`;
-    const response = await fetcher(url);
+    const url = new URL(`${BACKEND_BASE_URL}/${urlPath}/${id}`);
+
+    // Relations: Support meta.with or meta.populate for dynamic embedding
+    const withRelations = meta?.with || meta?.populate;
+    if (withRelations) {
+      if (typeof withRelations === "string") {
+        url.searchParams.append("_with", withRelations);
+      } else {
+        url.searchParams.append("_with", JSON.stringify(withRelations));
+      }
+    }
+
+    const response = await fetcher(url.toString());
 
     if (!response.ok) {
       throw await handleError(response);
@@ -190,66 +271,106 @@ export const dataProvider: DataProvider = {
     };
   },
 
-  create: async ({ resource, variables }) => {
+  create: async ({ resource, variables, meta }) => {
+    if (isOffline()) {
+      await offlineDB.queue({ resource, action: "create", variables, meta });
+      toast.warning(
+        "📴 Offline: Your changes are saved locally and will sync when you're back online."
+      );
+      return { data: { ...variables, id: `offline-${Date.now()}` } as any };
+    }
+
     let urlPath = resource;
     if (resource === "teacher-channels") urlPath = "channels";
     if (resource === "teacher-subscriptions") urlPath = "enrollments";
 
     const url = `${BACKEND_BASE_URL}/${urlPath}`;
-    const response = await fetcher(url, {
-      method: "POST",
-      body: JSON.stringify(variables),
-    });
+    try {
+      const response = await fetcher(url, {
+        method: "POST",
+        body: JSON.stringify(variables),
+      });
 
-    if (!response.ok) {
-      throw await handleError(response);
+      if (!response.ok) throw await handleError(response);
+
+      const json = await response.json();
+      return { data: json.data ?? json };
+    } catch (err) {
+      if (err instanceof TypeError && err.message === "Failed to fetch") {
+        await offlineDB.queue({ resource, action: "create", variables, meta });
+        toast.warning("📴 Network failed: Mutation queued for retry.");
+        return { data: { ...variables, id: `offline-${Date.now()}` } as any };
+      }
+      throw err;
     }
-
-    const json = await response.json();
-    return {
-      data: json.data ?? json,
-    };
   },
 
-  update: async ({ resource, id, variables }) => {
+  update: async ({ resource, id, variables, meta }) => {
+    if (isOffline()) {
+      await offlineDB.queue({ resource, action: "update", variables: { ...variables, id }, meta });
+      toast.warning("📴 Offline: Edit saved locally.");
+      return { data: { ...variables, id } as any };
+    }
+
     let urlPath = resource;
     if (resource === "teacher-channels") urlPath = "channels";
     if (resource === "teacher-subscriptions") urlPath = "enrollments";
 
     const url = `${BACKEND_BASE_URL}/${urlPath}/${id}`;
-    const response = await fetcher(url, {
-      method: "PATCH",
-      body: JSON.stringify(variables),
-    });
+    try {
+      const response = await fetcher(url, {
+        method: "PATCH",
+        body: JSON.stringify(variables),
+      });
 
-    if (!response.ok) {
-      throw await handleError(response);
+      if (!response.ok) throw await handleError(response);
+
+      const json = await response.json();
+      return { data: json.data ?? json };
+    } catch (err) {
+      if (err instanceof TypeError && err.message === "Failed to fetch") {
+        await offlineDB.queue({
+          resource,
+          action: "update",
+          variables: { ...variables, id },
+          meta,
+        });
+        toast.warning("📴 Network failed: Update queued.");
+        return { data: { ...variables, id } as any };
+      }
+      throw err;
     }
-
-    const json = await response.json();
-    return {
-      data: json.data ?? json,
-    };
   },
 
-  deleteOne: async ({ resource, id }) => {
+  deleteOne: async ({ resource, id, meta }) => {
+    if (isOffline()) {
+      await offlineDB.queue({ resource, action: "delete", variables: { id }, meta });
+      toast.warning("📴 Offline: Delete will sync when online.");
+      return { data: { id } as any };
+    }
+
     let urlPath = resource;
     if (resource === "teacher-channels") urlPath = "channels";
     if (resource === "teacher-subscriptions") urlPath = "enrollments";
 
     const url = `${BACKEND_BASE_URL}/${urlPath}/${id}`;
-    const response = await fetcher(url, {
-      method: "DELETE",
-    });
+    try {
+      const response = await fetcher(url, {
+        method: "DELETE",
+      });
 
-    if (!response.ok) {
-      throw await handleError(response);
+      if (!response.ok) throw await handleError(response);
+
+      const json = await response.json();
+      return { data: json.data || { id } };
+    } catch (err) {
+      if (err instanceof TypeError && err.message === "Failed to fetch") {
+        await offlineDB.queue({ resource, action: "delete", variables: { id }, meta });
+        toast.warning("📴 Network failed: Delete queued.");
+        return { data: { id } as any };
+      }
+      throw err;
     }
-
-    const json = await response.json();
-    return {
-      data: json.data || { id },
-    };
   },
 
   getApiUrl: () => BACKEND_BASE_URL,

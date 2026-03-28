@@ -12,8 +12,8 @@ export const socket: Socket = io(SOCKET_URL, {
   reconnection: true,
   reconnectionAttempts: 10,
   reconnectionDelay: 2000,
-  transports: ["polling"], // Force polling to rule out websocket issues
-  upgrade: false, // Disable upgrade to websocket
+  transports: ["websocket", "polling"], // Allow WebSocket with polling fallback
+  upgrade: true,
 });
 
 let connectionPromise: Promise<void> | null = null;

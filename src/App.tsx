@@ -39,17 +39,19 @@ function App() {
       // 🛡️ Upstream Guard: Robustly handle cases where a segment of a key is 'undefined'.
       // e.g., "classes.undefined.title" -> "classes.general.title"
       if (key.includes("undefined.")) {
-        if (import.meta.env.DEV) {
-          console.warn(
-            `[i18n] Malformed translation key detected: "${key}". Falling back to 'general'. This usually indicates a data loading race condition or missing ID.`
-          );
-        }
         const fallbackKey = key.replace("undefined.", "general.");
         const translatedFallback = t(fallbackKey, {
           ...params,
           defaultValue: "",
         });
+
         if (translatedFallback) return translatedFallback;
+
+        // If fallback fails, return a generic placeholder or the key itself in dev
+        if (import.meta.env.DEV) {
+          console.warn(`[i18n] Malformed key: "${key}". No "general" fallback found.`);
+        }
+        return t(key, { ...params, defaultValue: key });
       }
 
       // Final fallback to the key itself or its basic translation

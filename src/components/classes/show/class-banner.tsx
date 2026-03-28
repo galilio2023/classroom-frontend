@@ -1,6 +1,16 @@
 import { Class } from "@/types";
 import { Badge } from "@/components/ui/badge";
-import { Clock, Globe, Timer, Users, Video, Zap, ZapOff } from "lucide-react";
+import {
+  Clock,
+  Globe,
+  Timer,
+  Users,
+  Video,
+  Zap,
+  ZapOff,
+  CircleDollarSign,
+  Loader2,
+} from "lucide-react";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { Fragment, useMemo } from "react";
@@ -15,6 +25,9 @@ interface ClassBannerProps {
   isLiveIndicator: boolean;
   isStaff?: boolean;
   onToggleLive?: () => void;
+  isEnrolled?: boolean;
+  onCheckout?: () => void;
+  isCheckingOut?: boolean;
 }
 
 export const ClassBanner = ({
@@ -24,12 +37,21 @@ export const ClassBanner = ({
   isLiveIndicator,
   isStaff,
   onToggleLive,
+  isEnrolled,
+  onCheckout,
+  isCheckingOut,
 }: ClassBannerProps) => {
   const { t, i18n } = useTranslation();
   const classColor = aClass.color || "#3b82f6";
   const isFull = aClass.capacity && approvedCount >= aClass.capacity;
 
   const SubjectIcon = useMemo(() => getSubjectIcon(aClass.subject?.name), [aClass.subject?.name]);
+
+  const showEnrollButton = !isStaff && !isEnrolled;
+  const isPaid = aClass.isPaid && aClass.priceAmount > 0;
+  const formattedPrice = isPaid
+    ? `${(aClass.priceAmount / 100).toFixed(2)} ${aClass.currency?.toUpperCase()}`
+    : "";
 
   return (
     <motion.div
@@ -143,6 +165,37 @@ export const ClassBanner = ({
                 {t("classes.show.banner.liveActive")}
               </span>
             </motion.div>
+          )}
+
+          {showEnrollButton && (
+            <Button
+              size="lg"
+              disabled={isCheckingOut || !!isFull}
+              onClick={isPaid ? onCheckout : undefined} // For now, only handle paid, free enrollment usually goes through a dialog
+              className={cn(
+                "rounded-2xl h-14 md:h-16 px-8 md:px-10 font-black uppercase tracking-[0.2em] text-[10px] md:text-xs shadow-2xl transition-all active:scale-95 border-2",
+                isPaid
+                  ? "bg-amber-500 text-white border-amber-400 hover:bg-amber-600 shadow-amber-500/30"
+                  : "bg-white text-primary border-white hover:bg-white/90 shadow-white/20"
+              )}
+            >
+              {isCheckingOut ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : isPaid ? (
+                <>
+                  <CircleDollarSign className="h-5 w-5 me-2" />
+                  {t("buttons.payToEnroll", { defaultValue: "Enroll for {{price}}" }).replace(
+                    "{{price}}",
+                    formattedPrice
+                  )}
+                </>
+              ) : (
+                <>
+                  <Users className="h-5 w-5 me-2" />
+                  {t("buttons.joinForFree", { defaultValue: "Join for Free" })}
+                </>
+              )}
+            </Button>
           )}
         </div>
       </div>

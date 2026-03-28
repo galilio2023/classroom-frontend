@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { AnnouncementTab } from "../pages/announcement-tab";
 import { DiscussionTab } from "../pages/discussion-tab";
 import { LiveClassroom } from "@/components/classes/live-classroom";
 import { usePersistentLive } from "@/hooks/use-persistent-live";
+import { Button } from "@/components/ui/button";
 import { Megaphone, MessageSquare, Video } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Announcement } from "@/types";
@@ -63,7 +64,16 @@ export const EngagementTabWrapper: React.FC<EngagementTabWrapperProps> = ({
     },
   ];
 
-  const { isJoined, activeClassId, setActiveClassId } = usePersistentLive();
+  const { isJoined, activeClassId, setActiveClassId, setIsJoined } = usePersistentLive();
+
+  // 🚀 AUTO-JOIN LOGIC: If tab is active and class is live, ensure store knows we are joining
+  useEffect(() => {
+    if (activeSubTab === "live" && isLiveIndicator && !isJoined) {
+      console.log("[EngagementTab] Auto-activating live session for class:", classId);
+      setActiveClassId(classId);
+      setIsJoined(true);
+    }
+  }, [activeSubTab, isLiveIndicator, isJoined, classId, setActiveClassId, setIsJoined]);
 
   return (
     <div className="space-y-8 md:space-y-12">
@@ -112,31 +122,31 @@ export const EngagementTabWrapper: React.FC<EngagementTabWrapperProps> = ({
 
         <TabsContent value="live" className="mt-8">
           {activeSubTab === "live" && (
-            <>
-              {isJoined && activeClassId === classId ? (
-                <div className="h-[600px] w-full bg-muted/5 rounded-3xl border-2 border-dashed flex flex-col items-center justify-center text-muted-foreground gap-4">
-                  <div className="p-4 bg-live-primary/10 rounded-full animate-pulse">
-                    <Video className="h-8 w-8 text-live-primary" />
-                  </div>
-                  <div className="text-center space-y-1">
-                    <p className="font-black uppercase tracking-widest text-xs">
-                      {t("classes.live.indicator.activeInBackground", "Live Session Active")}
-                    </p>
-                    <p className="text-sm font-medium opacity-60">
-                      The video is currently playing in the Picture-in-Picture window.
-                    </p>
-                  </div>
-                </div>
-              ) : (
-                <LiveClassroom
-                  classId={classId}
-                  className="w-full"
-                  onJoin={() => {
-                    setActiveClassId(classId);
-                  }}
-                />
-              )}
-            </>
+            <div
+              id="live-session-container"
+              className="w-full h-[600px] bg-slate-950 rounded-3xl border-2 border-white/5 flex flex-col items-center justify-center gap-4 shadow-inner"
+            >
+              <div className="p-4 bg-live-primary/20 rounded-full animate-pulse">
+                <Video className="h-8 w-8 text-live-primary" />
+              </div>
+              <div className="text-center space-y-1">
+                <p className="text-slate-400 font-bold tracking-tighter uppercase text-xs">
+                  {isJoined ? "Initializing Session..." : "Session Ready"}
+                </p>
+                {!isJoined && (
+                  <Button
+                    size="lg"
+                    onClick={() => {
+                      setActiveClassId(classId);
+                      setIsJoined(true);
+                    }}
+                    className="mt-6 bg-live-primary hover:bg-live-primary/90 text-white font-black uppercase tracking-widest text-xs rounded-2xl px-10 shadow-2xl shadow-live-primary/40 border-none"
+                  >
+                    Join Live Session
+                  </Button>
+                )}
+              </div>
+            </div>
           )}
         </TabsContent>
       </Tabs>
