@@ -50,7 +50,7 @@ const StudyPlanner = () => {
     method: "get",
   });
 
-  const { data: initialData, isLoading: isFetching, refetch } = planQuery;
+  const { data: initialData, isLoading: isFetching } = planQuery;
 
   const [plan, setPlan] = useState<StudyBlock[]>([]);
   const [completedBlocks, setCompletedBlocks] = useState<Record<string, boolean>>({});

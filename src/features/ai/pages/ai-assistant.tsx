@@ -13,9 +13,8 @@ import { cn } from "@/lib/utils";
 import { useDashboard } from "@/features/dashboard/hooks/use-dashboard";
 
 export const AIAssistantPage: React.FC = () => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { coreData } = useDashboard();
-  const isAr = i18n.language === "ar";
   usePageTitle(t("aiHub.assistant.title"));
 
   const isDryRun = coreData?.globalConfig?.isDryRun;

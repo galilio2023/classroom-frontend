@@ -1,17 +1,6 @@
 import { useApiUrl, useCustom } from "@refinedev/core";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Activity, Zap, BarChart3, AlertCircle, Clock, Database, RefreshCw } from "lucide-react";
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  AreaChart,
-  Area,
-} from "recharts";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
@@ -33,6 +22,7 @@ export default function AiMetricsPage() {
 
   const { data, isLoading, isRefetching, refetch } = metricsQuery;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const metrics = data?.data?.data as any;
 
   if (isLoading) {

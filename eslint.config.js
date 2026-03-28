@@ -39,6 +39,8 @@ export default tseslint.config(
       "src/hooks/**/use*AI*",
       "src/hooks/**/use*Gemini*",
       "src/hooks/**/use*Generation*",
+      "src/hooks/**/use*Magic*",
+      "src/hooks/**/use*CoTeacher*",
       "src/features/ai/**/*.{ts,tsx}",
       "src/lib/ai-*.ts",
       "src/lib/*AI*",
@@ -46,6 +48,13 @@ export default tseslint.config(
     rules: {
       "@typescript-eslint/no-explicit-any": "error",
       "@typescript-eslint/no-empty-object-type": "error",
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+        },
+      ],
     },
   }
 );
