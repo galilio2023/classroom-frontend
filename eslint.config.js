@@ -52,7 +52,7 @@ export default tseslint.config(
     files: [
       "src/hooks/**/use*AI*",
       "src/hooks/**/use*Gemini*",
-      "src/hooks/**/use*Generation*",
+      "src/hooks/**/use*AiGeneration*",
       "src/hooks/**/use*Magic*",
       "src/hooks/**/use*CoTeacher*",
       "src/features/ai/**/*.{ts,tsx}",
@@ -75,7 +75,8 @@ export default tseslint.config(
         "error",
         {
           name: "fetch",
-          message: "🛡️ REFINE V5 PATTERN: Do not use native fetch in AI features. Use Refine's useCustom or useCustomMutation for centralized auth and provider logic.",
+          message:
+            "🛡️ REFINE V5 PATTERN: Do not use native fetch in AI features. Use Refine's useCustom or useCustomMutation for centralized auth, provider logic, and automatic error handling.",
         },
       ],
       "no-restricted-imports": [
@@ -84,7 +85,8 @@ export default tseslint.config(
           paths: [
             {
               name: "axios",
-              message: "🛡️ REFINE V5 PATTERN: Do not use axios directly in AI features. Use Refine's useCustom or useCustomMutation.",
+              message:
+                "🛡️ REFINE V5 PATTERN: Do not use axios directly in AI features. Use Refine's useCustom or useCustomMutation.",
             },
           ],
         },
