@@ -104,8 +104,11 @@ export const useDashboard = () => {
       // 2. Clear Dexie Cache (If implemented for AI)
       // Note: dexie is imported via src/lib/offline-db
       import("@/lib/offline-db").then(({ offlineDB }) => {
-        // If we had an ai_history table in Dexie, we would clear it here
+        // If we had an ai_history table in Dexie, we could clear it here
         // For now, dexie only has 'outbox'
+        if ((offlineDB as any).ai_history) {
+          (offlineDB as any).ai_history.clear();
+        }
       });
     }
   }, [dashboardData.globalConfig?.enableAiFeatures]);
@@ -129,26 +132,6 @@ export const useDashboard = () => {
       socket.off("new_discussion", handleRefresh);
     };
   }, [identity?.id, refetchDashboard, refetchIdentity]);
-
-  const dashboardData: DashboardData = dashboardQuery.data?.data || {
-    todaySchedule: [],
-    stats: {
-      totalUsers: 0,
-      totalStudents: 0,
-      totalTeachers: 0,
-      totalClasses: 0,
-      totalAssignments: 0,
-      pendingVerifications: 0,
-    },
-    attendanceTrend: [],
-    gradeDistribution: [],
-    pendingSubmissions: [],
-    atRiskStudents: [],
-    upcomingAssignments: [],
-    gradeTrends: [],
-    subjectMastery: [],
-    rlhf: [],
-  };
 
   return {
     identity,

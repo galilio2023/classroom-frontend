@@ -26,12 +26,14 @@ export default function AiMetricsPage() {
   const { t } = useTranslation();
   const apiUrl = useApiUrl();
 
-  const { data, isLoading, isRefetching, refetch } = useCustom<AiMetricsResponse>({
+  const { query: metricsQuery } = useCustom<AiMetricsResponse>({
     url: `${apiUrl}/ai/metrics`,
     method: "get",
   });
 
-  const metrics = data?.data?.data;
+  const { data, isLoading, isRefetching, refetch } = metricsQuery;
+
+  const metrics = data?.data?.data as any;
 
   if (isLoading) {
     return (

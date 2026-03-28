@@ -36,11 +36,12 @@ export default tseslint.config(
   },
   {
     files: [
-      "src/hooks/**/use-ai-*.ts",
-      "src/hooks/**/use-gemini-*.ts",
-      "src/hooks/**/use-*-generation.ts",
+      "src/hooks/**/use*AI*",
+      "src/hooks/**/use*Gemini*",
+      "src/hooks/**/use*Generation*",
       "src/features/ai/**/*.{ts,tsx}",
       "src/lib/ai-*.ts",
+      "src/lib/*AI*",
     ],
     rules: {
       "@typescript-eslint/no-explicit-any": "error",

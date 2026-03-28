@@ -45,14 +45,12 @@ const StudyPlanner = () => {
   usePageTitle(t("resources.study-planner.label"));
 
   // --- FETCH CURRENT PLAN ---
-  const {
-    data: initialData,
-    isLoading: isFetching,
-    refetch,
-  } = useCustom<StudyPlanResponse>({
+  const { query: planQuery } = useCustom<StudyPlanResponse>({
     url: "study-planner",
     method: "get",
   });
+
+  const { data: initialData, isLoading: isFetching, refetch } = planQuery;
 
   const [plan, setPlan] = useState<StudyBlock[]>([]);
   const [completedBlocks, setCompletedBlocks] = useState<Record<string, boolean>>({});
@@ -65,10 +63,11 @@ const StudyPlanner = () => {
   }, [initialData]);
 
   // --- MUTATIONS ---
-  const { mutate: generatePlanMutation, isLoading: isGenerating } = useCustomMutation<
+  const { mutate: generatePlanMutation, mutation: generateMutation } = useCustomMutation<
     StudyPlanResponse,
     HttpError
   >();
+  const isGenerating = generateMutation.isPending;
   const { mutate: toggleBlockMutation } = useCustomMutation();
 
   const generatePlan = async () => {
