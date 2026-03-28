@@ -16,14 +16,20 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
 
+interface AiMetricsResponse {
+  data: {
+    data: Record<string, unknown>;
+  };
+}
+
 export default function AiMetricsPage() {
   const { t } = useTranslation();
   const apiUrl = useApiUrl();
 
-  const { data, isLoading, isRefetching, refetch } = useCustom({
+  const { data, isLoading, isRefetching, refetch } = useCustom<AiMetricsResponse>({
     url: `${apiUrl}/ai/metrics`,
     method: "get",
-  }) as any;
+  });
 
   const metrics = data?.data?.data;
 

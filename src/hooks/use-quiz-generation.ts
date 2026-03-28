@@ -26,8 +26,9 @@ export const useQuizGeneration = (initialCount: number = 5) => {
 
   // Listen for background job completion
   useEffect(() => {
-    const handleReady = (event: any) => {
-      const quizData = event.detail.quiz;
+    const handleReady = (event: Event) => {
+      const customEvent = event as CustomEvent<{ quiz: QuizQuestion[] }>;
+      const quizData = customEvent.detail.quiz;
       setQuiz(quizData);
       setIsProcessing(false);
     };

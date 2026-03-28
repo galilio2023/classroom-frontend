@@ -23,8 +23,9 @@ export const useAssignmentGeneration = () => {
 
   // Listen for background job completion
   useEffect(() => {
-    const handleReady = (event: any) => {
-      const content = event.detail.content;
+    const handleReady = (event: Event) => {
+      const customEvent = event as CustomEvent<{ content: string }>;
+      const content = customEvent.detail.content;
       setGeneratedContent(content);
       setIsProcessing(false);
       sessionStorage.setItem("pending_ai_assignment", content);

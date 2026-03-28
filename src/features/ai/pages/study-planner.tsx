@@ -52,7 +52,7 @@ const StudyPlanner = () => {
   } = useCustom<StudyPlanResponse>({
     url: "study-planner",
     method: "get",
-  }) as any;
+  });
 
   const [plan, setPlan] = useState<StudyBlock[]>([]);
   const [completedBlocks, setCompletedBlocks] = useState<Record<string, boolean>>({});
@@ -68,8 +68,8 @@ const StudyPlanner = () => {
   const { mutate: generatePlanMutation, isLoading: isGenerating } = useCustomMutation<
     StudyPlanResponse,
     HttpError
-  >() as any;
-  const { mutate: toggleBlockMutation } = useCustomMutation() as any;
+  >();
+  const { mutate: toggleBlockMutation } = useCustomMutation();
 
   const generatePlan = async () => {
     generatePlanMutation(
@@ -85,7 +85,7 @@ const StudyPlanner = () => {
         }),
       },
       {
-        onSuccess: (data: any) => {
+        onSuccess: (data) => {
           setPlan(data.data.plan);
           setCompletedBlocks({});
         },
