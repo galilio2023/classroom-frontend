@@ -10,6 +10,7 @@ import { useTranslation } from "react-i18next";
 import { BACKEND_URL } from "@/config";
 import { BasePermissions, UserRole, User } from "@/types";
 import { offlineDB } from "@/lib/offline-db";
+import { useAiAccess } from "./use-ai-access";
 
 export interface ChatSource {
   title: string;
@@ -61,6 +62,7 @@ const MAX_INPUT_LENGTH = 4000;
 export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
   const { t } = useTranslation();
   const { data: identity } = useGetIdentity<User>();
+  const { isAiEnabled, isAllowed } = useAiAccess();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
 
@@ -68,7 +70,7 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
 
   // 🛡️ ADAPTIVE CACHE: Load from local IndexedDB first (Dexie)
   useEffect(() => {
-    if (!identity?.id) return;
+    if (!identity?.id || !isAiEnabled || !isAllowed) return;
 
     const loadLocalCache = async () => {
       try {
@@ -160,15 +162,15 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
       setMessages(history);
       hasLoadedHistoryFor.current = effectiveClassId;
 
-        // Update Dexie Cache
-        if (!abortControllerRef.current?.signal.aborted) {
-          void offlineDB.ai_history.put({
-            userId: identity.id,
-            classId: effectiveClassId,
-            messages: history,
-            timestamp: Date.now(),
-          });
-        }
+      // Update Dexie Cache
+      if (!abortControllerRef.current?.signal.aborted) {
+        void offlineDB.ai_history.put({
+          userId: identity.id,
+          classId: effectiveClassId,
+          messages: history,
+          timestamp: Date.now(),
+        });
+      }
     }
   }, [historyResult, effectiveClassId, identity?.id]);
 
@@ -208,6 +210,16 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
   const handleSend = async () => {
     const cleanInput = input.trim();
     if (!cleanInput || isLoading || isPermissionsLoading) return;
+
+    // 🛡️ Global Master Switch & RBAC
+    if (!isAiEnabled || !isAllowed) {
+      open?.({
+        type: "error",
+        message: t("common.accessDenied"),
+        description: t("aiHub.errors.serviceUnavailable"),
+      });
+      return;
+    }
 
     // RBAC & Safety Checks
     if (isPermissionsError) {

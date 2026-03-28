@@ -34,6 +34,8 @@ import { useCreate, useList, useNavigation, useCustomMutation } from "@refinedev
 import { MemoryBoosterList } from "../components/memory-booster-list";
 import { SparkleLoader } from "@/components/ai/sparkle-loader";
 import { Class } from "@/types";
+import { useAiAccess } from "@/hooks/use-ai-access";
+import UnauthorizedPage from "@/pages/unauthorized";
 
 interface Flashcard {
   front: string;
@@ -55,6 +57,7 @@ const AIStudyLab = () => {
   const { t, i18n } = useTranslation();
   usePageTitle(t("aiHub.studyLab.title"));
   const { list } = useNavigation();
+  const { isAiEnabled, isAllowed, isLoading: isAccessLoading } = useAiAccess();
   const [activeTool, setActiveTool] = useState<ToolId>("explain");
   const [input, setInput] = useState("");
   const [result, setResult] = useState("");
@@ -86,6 +89,18 @@ const AIStudyLab = () => {
       }
     };
   }, []);
+
+  if (isAccessLoading) {
+    return (
+      <div className="h-[60vh] flex items-center justify-center">
+        <Loader2 className="h-12 w-12 animate-spin text-primary/20" />
+      </div>
+    );
+  }
+
+  if (!isAiEnabled || !isAllowed) {
+    return <UnauthorizedPage />;
+  }
 
   const handleToolAction = async () => {
     if (!input.trim()) {

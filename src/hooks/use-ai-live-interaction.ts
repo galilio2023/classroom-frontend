@@ -6,6 +6,7 @@ import { BasePermissions, UserRole } from "@/types";
 import { usePersistentLive } from "./use-persistent-live";
 import { AI_API } from "@/constants/api";
 import { AIVisualState } from "@/features/ai/types/ai";
+import { useAiAccess } from "./use-ai-access";
 
 interface UseAILiveInteractionProps {
   classId: string;
@@ -43,6 +44,7 @@ export const useAILiveInteraction = ({
   const { t } = useTranslation();
   const { open } = useNotification();
   const { data: permissions } = usePermissions<BasePermissions>({});
+  const { isAiEnabled, isAllowed } = useAiAccess();
 
   // Zustand Global State
   const {
@@ -162,6 +164,16 @@ export const useAILiveInteraction = ({
   const interact = useCallback(
     async (question: string) => {
       if (!question.trim() || isLoading) return;
+
+      // 🛡️ Global Master Switch & RBAC
+      if (!isAiEnabled || !isAllowed) {
+        open?.({
+          type: "error",
+          message: t("common.accessDenied"),
+          description: t("aiHub.errors.serviceUnavailable"),
+        });
+        return;
+      }
 
       // RBAC: Single Source of Truth
       if (permissions?.role === UserRole.PARENT) {
