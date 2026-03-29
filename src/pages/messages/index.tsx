@@ -99,7 +99,8 @@ const MessagesPage = () => {
     url: `/messages/user/${targetUserId}`,
     method: "get",
     queryOptions: {
-      enabled: !!targetUserId && !conversations.find((c: Conversation) => c.user.id === targetUserId),
+      enabled:
+        !!targetUserId && !conversations.find((c: Conversation) => c.user.id === targetUserId),
     },
   });
 

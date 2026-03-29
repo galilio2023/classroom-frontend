@@ -79,7 +79,9 @@ const AIStudyLab = () => {
     pagination: { pageSize: 100 },
   });
 
-  const classesData = classesResult?.data || [];
+  // Defensive extraction for Refine useList
+  const classesRaw = (classesResult as any)?.data || classesResult;
+  const classesData = Array.isArray(classesRaw) ? classesRaw : [];
   const [selectedClassId, setSelectedClassId] = useState<string>("");
 
   useEffect(() => {

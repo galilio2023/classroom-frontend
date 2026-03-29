@@ -103,8 +103,9 @@ export const PracticeModal = ({ topic, subjectId, onClose }: PracticeModalProps)
     );
   };
 
-  const currentQuestion = session?.questions[currentQuestionIndex];
-  const progress = session ? ((currentQuestionIndex + 1) / session.questions.length) * 100 : 0;
+  const questions = session?.questions || [];
+  const currentQuestion = questions[currentQuestionIndex];
+  const progress = questions.length > 0 ? ((currentQuestionIndex + 1) / questions.length) * 100 : 0;
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
@@ -123,7 +124,7 @@ export const PracticeModal = ({ topic, subjectId, onClose }: PracticeModalProps)
             {step === "quiz" &&
               t("aiHub.studyLab.flashcards.cardOf", {
                 current: currentQuestionIndex + 1,
-                total: session?.questions.length,
+                total: questions.length,
               })}
             {step === "result" && t("aiHub.studyLab.flashcards.sessionComplete")}
           </DialogDescription>
@@ -141,7 +142,7 @@ export const PracticeModal = ({ topic, subjectId, onClose }: PracticeModalProps)
             <PracticeQuizStep
               currentQuestion={currentQuestion}
               currentQuestionIndex={currentQuestionIndex}
-              totalQuestions={session?.questions.length || 0}
+              totalQuestions={questions.length}
               progress={progress}
               selectedOption={answers[currentQuestionIndex]}
               onOptionSelect={handleOptionSelect}

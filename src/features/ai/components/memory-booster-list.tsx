@@ -31,19 +31,22 @@ export const MemoryBoosterList: React.FC<MemoryBoosterListProps> = ({ onSelectTo
     method: "get",
   });
 
-  // Backend returns { success: true, data: [...] }
-  // Refine's result property contains the whole response object in this setup
-  const boostersData = result?.data;
+  // Extremely defensive extraction to prevent "filter is not a function"
+  // result might be the payload, or it might have a data property which is the payload
+  const payload = (result as any)?.data || result;
+  // payload might be the array, or it might be { success, data: [...] }
+  const boostersData = Array.isArray(payload) ? payload : (payload as any)?.data;
   const boosters = Array.isArray(boostersData) ? boostersData : [];
 
   const isLoading = query.isLoading;
-  const dueItems = boosters.filter((b: SpacedRepetition) =>
-    dayjs(b.nextReviewAt).isBefore(dayjs().add(1, "hour"))
+  const dueItems = boosters.filter(
+    (b: SpacedRepetition) =>
+      b && b.nextReviewAt && dayjs(b.nextReviewAt).isBefore(dayjs().add(1, "hour"))
   );
-  const upcomingItems = boosters.filter((b: SpacedRepetition) =>
-    dayjs(b.nextReviewAt).isAfter(dayjs().add(1, "hour"))
+  const upcomingItems = boosters.filter(
+    (b: SpacedRepetition) =>
+      b && b.nextReviewAt && dayjs(b.nextReviewAt).isAfter(dayjs().add(1, "hour"))
   );
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-12">
