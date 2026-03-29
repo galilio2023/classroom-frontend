@@ -1,11 +1,12 @@
 import Dexie, { type Table } from "dexie";
+import { Message } from "@/types/ai";
 
 export interface OfflineMutation {
   id?: number;
   resource: string;
   action: "create" | "update" | "delete";
-  variables: any;
-  meta?: any;
+  variables: unknown;
+  meta?: Record<string, unknown>;
   timestamp: number;
 }
 
@@ -13,7 +14,7 @@ export interface AIChatCache {
   id?: number;
   userId: string;
   classId: string; // 'general' or number
-  messages: any[];
+  messages: Message[];
   timestamp: number;
 }
 

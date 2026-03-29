@@ -8,14 +8,15 @@ import prettier from "eslint-plugin-prettier";
 
 const AI_RELATED_FILES = [
   "src/hooks/ai/**/*.{ts,tsx}",
-  "src/hooks/**/use*Ai*.ts",
-  "src/hooks/**/use*Gemini*.ts",
-  "src/hooks/**/use*AiGeneration*.ts",
-  "src/hooks/**/use*Magic*.ts",
-  "src/hooks/**/use*CoTeacher*.ts",
+  "src/hooks/**/use*Ai*.{ts,tsx}",
+  "src/hooks/**/use*Gemini*.{ts,tsx}",
+  "src/hooks/**/use*AiGeneration*.{ts,tsx}",
+  "src/hooks/**/use*Magic*.{ts,tsx}",
+  "src/hooks/**/use*CoTeacher*.{ts,tsx}",
   "src/features/ai/**/*.{ts,tsx}",
   "src/lib/ai/**/*.{ts,tsx}",
-  "src/lib/**/*Ai*.ts",
+  "src/lib/**/*Ai*.{ts,tsx}",
+  "src/lib/offline-db.ts",
 ];
 
 export default tseslint.config(

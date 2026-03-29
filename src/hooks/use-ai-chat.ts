@@ -9,21 +9,9 @@ import {
 import { useTranslation } from "react-i18next";
 import { BACKEND_URL } from "@/config";
 import { BasePermissions, UserRole, User } from "@/types";
+import { ChatSource, Message } from "@/types/ai";
 import { offlineDB } from "@/lib/offline-db";
 import { useAiAccess } from "./use-ai-access";
-
-export interface ChatSource {
-  title: string;
-  url: string;
-  type: string;
-}
-
-export interface Message {
-  id?: string;
-  role: "user" | "model";
-  parts: { text: string }[];
-  sources?: ChatSource[];
-}
 
 interface UseAIChatProps {
   url: string;

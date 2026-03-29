@@ -21,4 +21,5 @@ jobs:
         run: npm run lint -- --quiet
       - name: Format Check
         run: npm run format:check
-      - run: npm run build
+      - name: Build and Type Check
+        run: npm run build
