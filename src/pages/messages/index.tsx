@@ -69,7 +69,7 @@ const MessagesPage = () => {
 
   // Fetch Conversations
   const {
-    data: conversationsResult,
+    result: conversationsResult,
     query: { refetch: refetchConversations, isLoading: isLoadingConversations },
   } = useCustom<{ data: Conversation[] }>({
     url: "/messages",
@@ -80,12 +80,12 @@ const MessagesPage = () => {
     },
   });
 
-  const conversations = conversationsResult?.data || [];
+  const conversations = conversationsResult?.data?.data || [];
 
   // Auto-select user from searchParams (Notification deep-link)
   useEffect(() => {
     if (targetUserId && conversations.length > 0) {
-      const existingConv = conversations.find((c) => c.user.id === targetUserId);
+      const existingConv = conversations.find((c: Conversation) => c.user.id === targetUserId);
       if (existingConv) {
         setSelectedUser(existingConv.user);
       }
@@ -93,25 +93,25 @@ const MessagesPage = () => {
   }, [targetUserId, conversations]);
 
   // Fetch Target User if not in conversations (Start new chat)
-  const { data: targetUserResult } = useCustom<{
+  const { result: targetUserResult } = useCustom<{
     data: Conversation["user"];
   }>({
     url: `/messages/user/${targetUserId}`,
     method: "get",
     queryOptions: {
-      enabled: !!targetUserId && !conversations.find((c) => c.user.id === targetUserId),
+      enabled: !!targetUserId && !conversations.find((c: Conversation) => c.user.id === targetUserId),
     },
   });
 
   useEffect(() => {
-    if (targetUserResult?.data) {
-      setSelectedUser(targetUserResult.data);
+    if (targetUserResult?.data?.data) {
+      setSelectedUser(targetUserResult.data.data);
     }
   }, [targetUserResult]);
 
   // Fetch Messages for Selected User
   const {
-    data: messagesResult,
+    result: messagesResult,
     query: { refetch: refetchMessages, isLoading: isLoadingMessages },
   } = useCustom<{ data: Message[] }>({
     url: `/messages/${selectedUser?.id}`,

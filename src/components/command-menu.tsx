@@ -91,7 +91,7 @@ export function CommandMenu() {
   };
 
   // --- UNIFIED GLOBAL SEARCH ---
-  const { data: searchResult, query: searchQuery } = useCustom<SearchResult[]>({
+  const { result: searchResult, query: searchQuery } = useCustom<SearchResult[]>({
     url: "/search",
     method: "get",
     config: {
@@ -104,7 +104,7 @@ export function CommandMenu() {
     },
   });
 
-  const results = searchResult?.data || [];
+  const results = (searchResult?.data as SearchResult[]) || [];
   const isSearching = searchQuery.isFetching;
 
   React.useEffect(() => {
@@ -223,7 +223,7 @@ export function CommandMenu() {
 
           {results.length > 0 && (
             <CommandGroup heading={t("common.searchResults")}>
-              {results.map((res) => (
+              {results.map((res: SearchResult) => (
                 <CommandItem
                   key={`${res.type}-${res.id}`}
                   onSelect={() => runCommand(() => navigate(res.link), res.title)}

@@ -33,7 +33,7 @@ export const AnnouncementReadsModal = ({
   onOpenChange,
 }: AnnouncementReadsModalProps) => {
   const { t } = useTranslation();
-  const { data: result, query } = useCustom<ReadReceipt[]>({
+  const { result, query } = useCustom<ReadReceipt[]>({
     url: `announcements/${announcementId}/reads`,
     method: "get",
     queryOptions: {

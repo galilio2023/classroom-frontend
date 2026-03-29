@@ -123,7 +123,7 @@ export const ParentDashboard = ({ isLoading, show }: ParentDashboardProps) => {
   const go = useGo();
 
   const {
-    data: { data: children } = { data: [] },
+    result: { data: children } = { data: [] },
     query: { isLoading: isLoadingChildren, refetch },
   } = useList<User>({
     resource: "users/children",
