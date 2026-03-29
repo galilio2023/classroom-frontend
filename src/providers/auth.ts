@@ -20,16 +20,36 @@ let cachedSessionData: any = null;
 let lastFetchTime = 0;
 const CACHE_TTL = 30000; // 30 seconds
 
+// 🛡️ MOBILE STABILITY: Helper to ensure authClient uses the stored token
+const syncToken = (token?: string | null) => {
+  const finalToken = token || localStorage.getItem("tablawy_auth_token");
+  if (finalToken) {
+    authClient.setHeaders({
+      Authorization: `Bearer ${finalToken}`,
+    });
+  }
+};
+
 export const getFreshSession = async () => {
   const now = Date.now();
   if (cachedSessionData && now - lastFetchTime < CACHE_TTL) {
     return { data: cachedSessionData, error: null };
   }
 
+  // Ensure token is attached before fetching
+  syncToken();
+
   const result = await authClient.getSession();
   if (result.data) {
     cachedSessionData = result.data;
     lastFetchTime = now;
+    
+    // Refresh token in storage if present
+    const sessionToken = result.data.session?.token;
+    if (sessionToken) {
+      localStorage.setItem("tablawy_auth_token", sessionToken);
+      syncToken(sessionToken);
+    }
   } else {
     cachedSessionData = null;
   }
@@ -90,6 +110,14 @@ export const authProvider: AuthProvider = {
         const user = data.user as unknown as User;
         cachedSessionData = data;
         lastFetchTime = Date.now();
+        
+        // 🛡️ MOBILE STABILITY: Explicitly store and sync token
+        const sessionToken = data.session?.token;
+        if (sessionToken) {
+          localStorage.setItem("tablawy_auth_token", sessionToken);
+          syncToken(sessionToken);
+        }
+
         const userWithVerified = {
           ...user,
           isVerified:
@@ -120,12 +148,14 @@ export const authProvider: AuthProvider = {
       cachedSessionData = null;
       lastFetchTime = 0;
       localStorage.removeItem("user");
+      localStorage.removeItem("tablawy_auth_token");
       localStorage.removeItem("tablawy-live-session");
       return { success: true, redirectTo: "/login" };
     } catch {
       cachedSessionData = null;
       lastFetchTime = 0;
       localStorage.removeItem("user");
+      localStorage.removeItem("tablawy_auth_token");
       localStorage.removeItem("tablawy-live-session");
       return { success: true, redirectTo: "/login" };
     }
@@ -136,18 +166,14 @@ export const authProvider: AuthProvider = {
       const { data: session, error } = await getFreshSession();
 
       if (error || !session?.user) {
-        if (import.meta.env.DEV) {
-          console.warn("Better-Auth session missing or failed:", error);
-        }
-
-        // TEMPORARY DEV FALLBACK: Only trust local storage in development mode (npm run dev)
-        // In production, this block is ignored to prevent UI-level spoofing.
+        // ... dev fallback ...
         if (import.meta.env.DEV) {
           const localUser = localStorage.getItem("user");
-          if (localUser) {
-            return { authenticated: true };
-          }
+          if (localUser) return { authenticated: true };
         }
+        
+        // In production, if session check failed, try to clear potential stale token
+        localStorage.removeItem("tablawy_auth_token");
       }
 
       if (session?.user) {
@@ -180,6 +206,7 @@ export const authProvider: AuthProvider = {
       cachedSessionData = null;
       lastFetchTime = 0;
       localStorage.removeItem("user");
+      localStorage.removeItem("tablawy_auth_token");
       return {
         logout: true,
         redirectTo: "/login",

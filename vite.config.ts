@@ -13,10 +13,13 @@ export default defineConfig({
       registerType: "autoUpdate",
       includeAssets: ["logo.svg", "apple-icon-180.png"],
       manifest: {
-        name: "Classroom AI",
-        short_name: "Classroom",
+        name: "Tablawy OS",
+        short_name: "Tablawy",
         description: "A modern classroom management system",
         theme_color: "#ffffff",
+        background_color: "#ffffff",
+        display: "standalone",
+        start_url: "/",
         icons: [
           {
             src: "manifest-icon-192.maskable.png",
