@@ -113,15 +113,17 @@ export const flushOutbox = async () => {
           variables: mutation.variables,
         });
       } else if (mutation.action === "update") {
+        const vars = mutation.variables as { id: string | number };
         response = await dataProvider.update({
           resource: mutation.resource,
-          id: mutation.variables.id,
-          variables: mutation.variables,
+          id: vars.id,
+          variables: mutation.variables as any,
         });
       } else if (mutation.action === "delete") {
+        const vars = mutation.variables as { id: string | number };
         response = await dataProvider.deleteOne({
           resource: mutation.resource,
-          id: mutation.variables.id,
+          id: vars.id,
         });
       }
 
