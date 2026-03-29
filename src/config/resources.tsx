@@ -318,7 +318,6 @@ export const resources: ResourceProps[] = [
       label: "resources.followed-teachers.label",
       icon: <Bookmark />,
       roles: [UserRole.STUDENT],
-      resource: "subscriptions",
     },
   },
   {
