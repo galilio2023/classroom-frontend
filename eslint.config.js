@@ -14,7 +14,8 @@ const AI_RELATED_FILES = [
   "src/hooks/**/use*Magic*.ts",
   "src/hooks/**/use*CoTeacher*.ts",
   "src/features/ai/**/*.{ts,tsx}",
-  "src/lib/**/*[aA][iI]*",
+  "src/lib/ai/**/*.{ts,tsx}",
+  "src/lib/**/*Ai*.ts",
 ];
 
 export default tseslint.config(
