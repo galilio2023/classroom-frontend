@@ -1,6 +1,6 @@
 import React from "react";
 import { useAiAccess } from "@/hooks/use-ai-access";
-import { AlertCircle, Lock } from "lucide-react";
+import { Lock } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 

@@ -18,7 +18,7 @@ jobs:
           cache: 'npm'
       - run: npm ci
       - name: Lint Check
-        run: npm run lint
+        run: npm run lint -- --quiet
       - name: Format Check
         run: npm run format:check
       - run: npm run build

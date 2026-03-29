@@ -16,13 +16,13 @@ interface UseAiStreamOptions<T> {
   onError?: (error: Error) => void;
 }
 
-export function useAiStream<T = any>(endpoint: string, options: UseAiStreamOptions<T> = {}) {
+export function useAiStream<T = unknown>(endpoint: string, options: UseAiStreamOptions<T> = {}) {
   const { isAiEnabled, isAllowed } = useAiAccess();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
   const stream = useCallback(
-    async (body: any) => {
+    async (body: unknown) => {
       // 🛡️ Security Guard: Prevent calls if AI is disabled or unauthorized
       if (!isAiEnabled || !isAllowed) {
         const err = new Error(
@@ -41,8 +41,8 @@ export function useAiStream<T = any>(endpoint: string, options: UseAiStreamOptio
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            // Note: Better Auth handles cookies/headers automatically in the browser,
-            // but if manual tokens are needed, they should be injected here.
+            // 🛡️ SECURITY: Credentials include for Better Auth sessions
+            "X-Tablawy-Client": "Tablawy-Frontend",
           },
           body: JSON.stringify(body),
         });
@@ -68,7 +68,7 @@ export function useAiStream<T = any>(endpoint: string, options: UseAiStreamOptio
         }
 
         // 🛡️ Validation: Ensure the final output matches our expected schema
-        let finalData = fullContent as any;
+        let finalData: T = fullContent as unknown as T;
         if (options.schema) {
           try {
             // Try to parse if it looks like JSON
@@ -87,9 +87,10 @@ export function useAiStream<T = any>(endpoint: string, options: UseAiStreamOptio
 
         options.onSuccess?.(finalData);
         return finalData;
-      } catch (err: any) {
-        setError(err);
-        options.onError?.(err);
+      } catch (err: unknown) {
+        const errorObject = err instanceof Error ? err : new Error(String(err));
+        setError(errorObject);
+        options.onError?.(errorObject);
       } finally {
         setIsLoading(false);
       }

@@ -6,6 +6,17 @@ import tseslint from "typescript-eslint";
 import eslintConfigPrettier from "eslint-config-prettier";
 import prettier from "eslint-plugin-prettier";
 
+const AI_RELATED_FILES = [
+  "src/hooks/ai/**/*.{ts,tsx}",
+  "src/hooks/**/use*[aA][iI]*",
+  "src/hooks/**/use*[gG]emini*",
+  "src/hooks/**/use*[aA][iI][gG]eneration*",
+  "src/hooks/**/use*[mM]agic*",
+  "src/hooks/**/use*[cC]o[tT]eacher*",
+  "src/features/ai/**/*.{ts,tsx}",
+  "src/lib/**/*[aA][iI]*",
+];
+
 export default tseslint.config(
   { ignores: ["dist"] },
   {
@@ -48,16 +59,7 @@ export default tseslint.config(
     },
   },
   {
-    files: [
-      "src/hooks/ai/**/*.{ts,tsx}",
-      "src/hooks/**/use*[aA][iI]*",
-      "src/hooks/**/use*[gG]emini*",
-      "src/hooks/**/use*[aA][iI][gG]eneration*",
-      "src/hooks/**/use*[mM]agic*",
-      "src/hooks/**/use*[cC]o[tT]eacher*",
-      "src/features/ai/**/*.{ts,tsx}",
-      "src/lib/**/*[aA][iI]*",
-    ],
+    files: AI_RELATED_FILES,
     rules: {
       // 🛡️ HARDENED SECURITY: Strict typing is required for AI-related code to ensure SSE buffering safety
       // and prevent runtime crashes during stream parsing.
