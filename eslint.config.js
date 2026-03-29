@@ -77,7 +77,7 @@ export default tseslint.config(
         {
           name: "fetch",
           message:
-            "🛡️ REFINE V5 PATTERN: Do not use native fetch in AI features. Use Refine's useCustom or useCustomMutation for centralized auth, provider logic, and automatic error handling.",
+            "🛡️ REFINE V5 PATTERN: Do not use native fetch in AI features. Use Refine's useCustom for standard requests, or use-ai-stream.ts if you require raw SSE buffering.",
         },
       ],
       "no-restricted-imports": [
