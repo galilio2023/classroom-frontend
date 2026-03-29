@@ -1,6 +1,6 @@
 import { io, Socket } from "socket.io-client";
 import { SOCKET_URL } from "@/config";
-import { authClient } from "./auth-client";
+import { getFreshSession } from "@/providers/auth";
 
 /**
  * Singleton Socket instance to prevent multiple connections
@@ -27,7 +27,7 @@ export const connectSocket = async () => {
 
   connectionPromise = (async () => {
     try {
-      const { data: sessionData } = await authClient.getSession();
+      const { data: sessionData } = await getFreshSession();
       const token = sessionData?.session?.token;
 
       if (!token) {

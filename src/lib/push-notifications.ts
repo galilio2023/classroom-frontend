@@ -1,5 +1,5 @@
 import { BACKEND_URL } from "@/config";
-import { authClient } from "./auth-client";
+import { getFreshSession } from "@/providers/auth";
 
 const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY;
 
@@ -48,7 +48,7 @@ export async function subscribeToPush() {
 
 async function sendSubscriptionToBackend(subscription: PushSubscription) {
   // Use the authClient singleton to get the session reliably
-  const { data: sessionData } = await authClient.getSession();
+  const { data: sessionData } = await getFreshSession();
   const token = sessionData?.session?.token;
 
   if (!token) {

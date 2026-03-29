@@ -16,6 +16,26 @@ const sanitizePayload = (params: Record<string, unknown>) => {
   return sanitized;
 };
 
+let cachedSessionData: any = null;
+let lastFetchTime = 0;
+const CACHE_TTL = 30000; // 30 seconds
+
+export const getFreshSession = async () => {
+  const now = Date.now();
+  if (cachedSessionData && now - lastFetchTime < CACHE_TTL) {
+    return { data: cachedSessionData, error: null };
+  }
+
+  const result = await authClient.getSession();
+  if (result.data) {
+    cachedSessionData = result.data;
+    lastFetchTime = now;
+  } else {
+    cachedSessionData = null;
+  }
+  return result;
+};
+
 export const authProvider: AuthProvider = {
   register: async (params: Record<string, unknown>) => {
     try {
@@ -68,6 +88,8 @@ export const authProvider: AuthProvider = {
 
       if (data?.user) {
         const user = data.user as unknown as User;
+        cachedSessionData = data;
+        lastFetchTime = Date.now();
         const userWithVerified = {
           ...user,
           isVerified:
@@ -95,10 +117,14 @@ export const authProvider: AuthProvider = {
   logout: async () => {
     try {
       await authClient.signOut();
+      cachedSessionData = null;
+      lastFetchTime = 0;
       localStorage.removeItem("user");
       localStorage.removeItem("tablawy-live-session");
       return { success: true, redirectTo: "/login" };
     } catch {
+      cachedSessionData = null;
+      lastFetchTime = 0;
       localStorage.removeItem("user");
       localStorage.removeItem("tablawy-live-session");
       return { success: true, redirectTo: "/login" };
@@ -107,7 +133,7 @@ export const authProvider: AuthProvider = {
 
   check: async () => {
     try {
-      const { data: session, error } = await authClient.getSession();
+      const { data: session, error } = await getFreshSession();
 
       if (error || !session?.user) {
         if (import.meta.env.DEV) {
@@ -151,6 +177,8 @@ export const authProvider: AuthProvider = {
 
   onError: async (error: HttpError | null) => {
     if (error?.status === 401) {
+      cachedSessionData = null;
+      lastFetchTime = 0;
       localStorage.removeItem("user");
       return {
         logout: true,
@@ -162,7 +190,7 @@ export const authProvider: AuthProvider = {
 
   getPermissions: async () => {
     // 🛡️ SECURITY: Prefer session over localStorage if possible
-    const { data: session } = await authClient.getSession();
+    const { data: session } = await getFreshSession();
     const role =
       (session?.user as unknown as User)?.role ||
       JSON.parse(localStorage.getItem("user") || "{}")?.role;
@@ -171,7 +199,7 @@ export const authProvider: AuthProvider = {
 
   getIdentity: async () => {
     // 🛡️ SECURITY: Fetch fresh session to prevent local spoofing
-    const { data: session } = await authClient.getSession();
+    const { data: session } = await getFreshSession();
     if (session?.user) {
       return session.user as unknown as User;
     }
