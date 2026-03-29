@@ -83,6 +83,8 @@ export interface User {
   currentStreak: number;
   longestStreak: number;
   lastActiveAt: string | null;
+  aiTokensUsed?: number;
+  aiMonthlyLimit?: number;
   enrollments?: Enrollment[];
   teacherChannel?: TeacherChannel;
   persona?: {

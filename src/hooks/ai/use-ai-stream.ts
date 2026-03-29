@@ -24,17 +24,18 @@ export function useAiStream<T = unknown>(
   isLoading: boolean;
   error: Error | null;
 } {
-  const { isAiEnabled, isAllowed } = useAiAccess();
+  const { isAiEnabled, isAllowed, isQuotaExceeded } = useAiAccess();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
   const stream = useCallback(
-    async (body: unknown) => {
+    async (body: unknown): Promise<T | void> => {
       // 🛡️ Security Guard: Prevent calls if AI is disabled or unauthorized
-      if (!isAiEnabled || !isAllowed) {
-        const err = new Error(
-          "🛡️ AI features are currently disabled or restricted for your account."
-        );
+      if (!isAiEnabled || !isAllowed || isQuotaExceeded) {
+        const message = isQuotaExceeded
+          ? "🛡️ AI Monthly Quota Exceeded. Please wait for the next billing cycle."
+          : "🛡️ AI features are currently disabled or restricted for your account.";
+        const err = new Error(message);
         setError(err);
         options.onError?.(err);
         return;

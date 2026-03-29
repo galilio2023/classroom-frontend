@@ -25,27 +25,30 @@ export const AiFeatureGuard: React.FC<AiFeatureGuardProps> = ({
   fallback,
   silent = false,
 }) => {
-  const { isAiEnabled, isAllowed, isLoading } = useAiAccess();
+  const { isAiEnabled, isAllowed, isQuotaExceeded, isLoading } = useAiAccess();
 
   if (isLoading) {
     return <Skeleton className="w-full h-32 rounded-lg" />;
   }
 
   // 🛡️ Guard logic
-  if (!isAiEnabled || !isAllowed) {
+  if (!isAiEnabled || !isAllowed || isQuotaExceeded) {
     if (silent) return null;
 
     if (fallback) return <>{fallback}</>;
 
+    const title = isQuotaExceeded ? "Monthly Limit Reached" : "AI Feature Restricted";
+    const description = isQuotaExceeded
+      ? "You have exhausted your AI token quota for this month. Your limit will reset on the 1st of next month."
+      : !isAiEnabled
+        ? "Tablawy AI features are currently disabled by the administrator."
+        : "Your current account role does not have permission to access interactive AI features.";
+
     return (
       <Alert variant="destructive" className="border-dashed border-2">
         <Lock className="h-4 w-4" />
-        <AlertTitle>AI Feature Restricted</AlertTitle>
-        <AlertDescription>
-          {!isAiEnabled
-            ? "Tablawy AI features are currently disabled by the administrator."
-            : "Your current account role does not have permission to access interactive AI features."}
-        </AlertDescription>
+        <AlertTitle>{title}</AlertTitle>
+        <AlertDescription>{description}</AlertDescription>
       </Alert>
     );
   }
