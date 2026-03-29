@@ -10,7 +10,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
-import { Submission, Assignment } from "@/types";
+import { Submission, Assignment, ProjectGroup } from "@/types";
 import { FileUpload } from "@/components/file-upload";
 import {
   Paperclip,
@@ -23,9 +23,9 @@ import {
   History,
   Users,
   X,
+  Reply,
 } from "lucide-react";
-import { FieldValues } from "react-hook-form";
-import { useGo, useInvalidate, useList } from "@refinedev/core";
+import { useGo, useInvalidate, useList, HttpError, BaseRecord } from "@refinedev/core";
 import { LoadingButton } from "@/components/ui/loading-button";
 import { useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
@@ -41,14 +41,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useTranslation } from "react-i18next";
+import { TFunction } from "i18next";
 
-const submissionSchema = (t: any) =>
+const submissionSchema = (t: TFunction) =>
   z.object({
     content: z.string().min(1, t("assignments.form.toast.contentRequired")),
     fileUrl: z.string().optional(),
     fileCldPubId: z.string().optional(),
     isDraft: z.boolean().default(false),
     groupId: z.coerce.number().optional().nullable(),
+    assignmentId: z.number().optional(),
   });
 
 type SubmissionFormValues = z.infer<ReturnType<typeof submissionSchema>>;
@@ -76,7 +78,7 @@ export const SubmissionForm = ({
   const [successMessage, setSuccessMessage] = useState("");
 
   // Fetch groups for the class if it's a group assignment
-  const { result: groupsData } = useList({
+  const { query: groupsQuery } = useList<ProjectGroup>({
     resource: "project-groups",
     filters: [{ field: "classId", operator: "eq", value: assignment?.classId }],
     queryOptions: {
@@ -84,7 +86,7 @@ export const SubmissionForm = ({
     },
   });
 
-  const groups = groupsData?.data || [];
+  const groups = groupsQuery?.data?.data || [];
 
   const form = useForm<SubmissionFormValues>({
     resolver: zodResolver(submissionSchema(t)) as any,
@@ -99,12 +101,11 @@ export const SubmissionForm = ({
       resource: "submissions",
       action: "create",
       redirect: false,
-      onMutationSuccess: (data: any) => {
+      onMutationSuccess: (data) => {
+        const isDraft = (data.data as any)?.isDraft;
         setIsSuccess(true);
         setSuccessMessage(
-          data?.data?.isDraft
-            ? t("assignments.form.toast.draftSaved")
-            : t("assignments.form.toast.submitted"),
+          isDraft ? t("assignments.form.toast.draftSaved") : t("assignments.form.toast.submitted")
         );
 
         void invalidate({
@@ -142,7 +143,7 @@ export const SubmissionForm = ({
     return content?.trim().split(/\s+/).filter(Boolean).length ?? 0;
   }, [content]);
 
-  const onSubmit = (values: FieldValues) => {
+  const onSubmit = (values: SubmissionFormValues) => {
     void onFinish({
       ...values,
       assignmentId,
@@ -178,10 +179,7 @@ export const SubmissionForm = ({
 
   return (
     <Form {...form}>
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="space-y-8 relative text-start"
-      >
+      <form onSubmit={handleSubmit(onSubmit as any)} className="space-y-8 relative text-start">
         <AnimatePresence>
           {isSuccess && (
             <motion.div
@@ -197,9 +195,7 @@ export const SubmissionForm = ({
               >
                 <CheckCircle2 className="h-12 w-12 stroke-3" />
               </motion.div>
-              <h3 className="text-2xl font-black tracking-tight">
-                {successMessage}
-              </h3>
+              <h3 className="text-2xl font-black tracking-tight">{successMessage}</h3>
               <p className="text-muted-foreground font-medium">
                 {t("assignments.form.successRedirecting")}
               </p>
@@ -254,14 +250,12 @@ export const SubmissionForm = ({
                         <FormControl>
                           <SelectTrigger className="h-12 rounded-xl bg-muted/20 border-none focus:ring-primary text-start">
                             <SelectValue
-                              placeholder={t(
-                                "assignments.form.selectGroupPlaceholder",
-                              )}
+                              placeholder={t("assignments.form.selectGroupPlaceholder")}
                             />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {groups.map((group: any) => (
+                          {groups.map((group) => (
                             <SelectItem
                               key={group.id}
                               value={group.id.toString()}
@@ -308,7 +302,7 @@ export const SubmissionForm = ({
                       <div
                         className={cn(
                           "absolute bottom-4 opacity-10 group-focus-within:opacity-30 transition-opacity",
-                          isAr ? "left-4" : "right-4",
+                          "end-4"
                         )}
                       >
                         <FileText className="h-8 w-8" />
@@ -321,7 +315,7 @@ export const SubmissionForm = ({
             />
 
             <div className="space-y-4 text-start">
-              <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2 ml-1">
+              <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2 ms-1">
                 <span className="w-1 h-1 rounded-full bg-primary" />
                 {t("assignments.form.supportingDocs")}
               </Label>
@@ -330,14 +324,12 @@ export const SubmissionForm = ({
                   "p-6 rounded-3xl border-2 border-dashed transition-all",
                   fileUrl
                     ? "bg-success/5 border-success/20"
-                    : "bg-muted/10 border-muted-foreground/10 hover:border-primary/20 hover:bg-primary/2",
+                    : "bg-muted/10 border-muted-foreground/10 hover:border-primary/20 hover:bg-primary/2"
                 )}
               >
                 <FileUpload
                   label={
-                    fileUrl
-                      ? t("assignments.form.fileAttached")
-                      : t("assignments.form.uploadFile")
+                    fileUrl ? t("assignments.form.fileAttached") : t("assignments.form.uploadFile")
                   }
                   folder="submissions"
                   onUploadSuccess={handleFileUpload}

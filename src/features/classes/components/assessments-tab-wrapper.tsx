@@ -74,9 +74,7 @@ export const AssessmentsTabWrapper: React.FC<AssessmentsTabWrapperProps> = ({
         </div>
 
         <TabsContent value="assignments" className="mt-8">
-          {activeSubTab === "assignments" && (
-            <AssignmentList classId={classId} />
-          )}
+          {activeSubTab === "assignments" && <AssignmentList classId={classId} />}
         </TabsContent>
 
         <TabsContent value="quizzes" className="mt-8">

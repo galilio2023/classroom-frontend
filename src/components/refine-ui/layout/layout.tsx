@@ -21,6 +21,7 @@ import { PromotionMiniPlayer } from "@/components/promotion-mini-player";
 import { VideoMiniPlayer } from "@/components/video-mini-player";
 import { usePersistentLive } from "@/hooks/use-persistent-live";
 import { useGamificationToasts } from "@/hooks/use-gamification-toasts";
+import { JobTracker } from "@/components/job-tracker";
 
 export function Layout({ children }: PropsWithChildren) {
   const { pathname, search } = useLocation();
@@ -55,10 +56,7 @@ export function Layout({ children }: PropsWithChildren) {
 
           {/* 🚀 GLOBAL PERSISTENT LIVE SESSION (PiP) */}
           {activeClassId && isJoined && (
-              <LiveClassroom 
-                classId={activeClassId} 
-                isMiniMode={!isOnLiveTab} 
-              />
+            <LiveClassroom classId={activeClassId} isMiniMode={!isOnLiveTab} />
           )}
 
           {/* Global Mesh Gradient Background */}
@@ -66,19 +64,19 @@ export function Layout({ children }: PropsWithChildren) {
             <div className="absolute top-[-10%] start-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px] animate-pulse" />
             <div className="absolute bottom-[-10%] end-[-10%] w-[40%] h-[40%] bg-ai-primary/5 rounded-full blur-[120px]" />
           </div>
-          
+
           <OfflineBanner />
           <Header />
           <main className="flex-1 flex flex-col relative w-full overflow-x-hidden">
             <AnimatePresence mode="popLayout" initial={false}>
               <motion.div
-                key={pathname.split('/')[1] || 'root'}
+                key={pathname.split("/")[1] || "root"}
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -12 }}
-                transition={{ 
-                  duration: 0.3, 
-                  ease: [0.23, 1, 0.32, 1] 
+                transition={{
+                  duration: 0.3,
+                  ease: [0.23, 1, 0.32, 1],
                 }}
                 className={cn(
                   "flex-1 flex flex-col w-full mx-auto",
@@ -91,17 +89,16 @@ export function Layout({ children }: PropsWithChildren) {
               </motion.div>
             </AnimatePresence>
           </main>
-          
+
           {/* PERSISTENT AI STUDY BUDDY: Gated for academic roles only */}
-          {identity && (identity.role === UserRole.STUDENT || identity.role === UserRole.TEACHER) && !isJoined && (
-              <AIStudyBuddy 
-                classId={classIdFromUrl}
-              />
-          )}
+          {identity &&
+            (identity.role === UserRole.STUDENT || identity.role === UserRole.TEACHER) &&
+            !isJoined && <AIStudyBuddy classId={classIdFromUrl} />}
 
           {isStudent && <XPGainPopup />}
           {isStudent && <MobileNav />}
           <PWAInstaller />
+          <JobTracker />
         </SidebarInset>
       </SidebarProvider>
     </ThemeProvider>

@@ -2,15 +2,15 @@ import { useEditor, EditorContent, type Editor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Image from "@tiptap/extension-image";
 import Link from "@tiptap/extension-link";
-import { 
-  Bold, 
-  Italic, 
-  List, 
-  ListOrdered, 
-  Quote, 
-  Undo, 
-  Redo, 
-  Code, 
+import {
+  Bold,
+  Italic,
+  List,
+  ListOrdered,
+  Quote,
+  Undo,
+  Redo,
+  Code,
   Image as ImageIcon,
   Link as LinkIcon,
   Heading1,
@@ -31,16 +31,16 @@ interface RichTextEditorProps {
   className?: string;
 }
 
-const EditorButton = ({ 
-  onClick, 
-  isActive, 
-  icon: Icon, 
-  label 
-}: { 
-  onClick: () => void; 
-  isActive?: boolean; 
-  icon: any; 
-  label: string 
+const EditorButton = ({
+  onClick,
+  isActive,
+  icon: Icon,
+  label,
+}: {
+  onClick: () => void;
+  isActive?: boolean;
+  icon: any;
+  label: string;
 }) => (
   <TooltipProvider>
     <Tooltip>
@@ -107,9 +107,9 @@ const EditorToolbar = ({ editor }: { editor: Editor | null }) => {
         icon={Strikethrough}
         label={t("common.editor.strike")}
       />
-      
+
       <Separator orientation="vertical" className="mx-1 h-6" />
-      
+
       <EditorButton
         onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
         isActive={editor.isActive("heading", { level: 1 })}
@@ -122,9 +122,9 @@ const EditorToolbar = ({ editor }: { editor: Editor | null }) => {
         icon={Heading2}
         label={t("common.editor.h2")}
       />
-      
+
       <Separator orientation="vertical" className="mx-1 h-6" />
-      
+
       <EditorButton
         onClick={() => editor.chain().focus().toggleBulletList().run()}
         isActive={editor.isActive("bulletList")}
@@ -137,9 +137,9 @@ const EditorToolbar = ({ editor }: { editor: Editor | null }) => {
         icon={ListOrdered}
         label={t("common.editor.orderedList")}
       />
-      
+
       <Separator orientation="vertical" className="mx-1 h-6" />
-      
+
       <EditorButton
         onClick={() => editor.chain().focus().toggleBlockquote().run()}
         isActive={editor.isActive("blockquote")}
@@ -152,23 +152,19 @@ const EditorToolbar = ({ editor }: { editor: Editor | null }) => {
         icon={Code}
         label={t("common.editor.code")}
       />
-      
+
       <Separator orientation="vertical" className="mx-1 h-6" />
-      
-      <EditorButton
-        onClick={addImage}
-        icon={ImageIcon}
-        label={t("common.editor.image")}
-      />
+
+      <EditorButton onClick={addImage} icon={ImageIcon} label={t("common.editor.image")} />
       <EditorButton
         onClick={setLink}
         isActive={editor.isActive("link")}
         icon={LinkIcon}
         label={t("common.editor.link")}
       />
-      
+
       <Separator orientation="vertical" className="mx-1 h-6" />
-      
+
       <EditorButton
         onClick={() => editor.chain().focus().undo().run()}
         icon={Undo}
@@ -185,40 +181,46 @@ const EditorToolbar = ({ editor }: { editor: Editor | null }) => {
 
 export const RichTextEditor = ({ value, onChange, className }: RichTextEditorProps) => {
   // Memoize extensions to prevent duplicate registration on re-renders
-  const extensions = useMemo(() => [
-    StarterKit.configure({
-      // Some versions include these by default, causing duplicates if manually added
-      // We'll keep them enabled here but ensure they aren't added again manually
-    }),
-    Image.configure({
-      HTMLAttributes: {
-        class: "rounded-lg border shadow-sm max-w-full h-auto",
-      },
-    }),
-    Link.configure({
-      openOnClick: false,
-      autolink: true,
-      HTMLAttributes: {
-        class: "text-primary underline underline-offset-4 font-medium",
-      },
-    }),
-  ], []);
+  const extensions = useMemo(
+    () => [
+      StarterKit.configure({
+        // Some versions include these by default, causing duplicates if manually added
+        // We'll keep them enabled here but ensure they aren't added again manually
+      }),
+      Image.configure({
+        HTMLAttributes: {
+          class: "rounded-lg border shadow-sm max-w-full h-auto",
+        },
+      }),
+      Link.configure({
+        openOnClick: false,
+        autolink: true,
+        HTMLAttributes: {
+          class: "text-primary underline underline-offset-4 font-medium",
+        },
+      }),
+    ],
+    []
+  );
 
-  const editor = useEditor({
-    extensions,
-    content: value,
-    onUpdate: ({ editor }) => {
-      onChange(editor.getHTML());
-    },
-    editorProps: {
-      attributes: {
-        class: cn(
-          "prose prose-sm dark:prose-invert max-w-none min-h-[150px] p-4 focus:outline-none",
-          className
-        ),
+  const editor = useEditor(
+    {
+      extensions,
+      content: value,
+      onUpdate: ({ editor }) => {
+        onChange(editor.getHTML());
+      },
+      editorProps: {
+        attributes: {
+          class: cn(
+            "prose prose-sm dark:prose-invert max-w-none min-h-[150px] p-4 focus:outline-none",
+            className
+          ),
+        },
       },
     },
-  }, []); // Static dependency array
+    []
+  ); // Static dependency array
 
   return (
     <div className="flex flex-col w-full border rounded-xl bg-background focus-within:ring-1 focus-within:ring-primary/30 transition-all">

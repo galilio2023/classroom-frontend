@@ -33,9 +33,29 @@ function App() {
   }, [i18n.language, i18n]);
 
   const i18nProvider = {
-    translate: (key: any, params: object) => {
-        if (!key || typeof key !== "string" || key.includes("undefined")) return "";
+    translate: (key: string, params?: object) => {
+      if (!key) return "";
+
+      // 🛡️ Upstream Guard: Robustly handle cases where a segment of a key is 'undefined'.
+      // e.g., "classes.undefined.title" -> "classes.general.title"
+      if (key.includes("undefined.")) {
+        const fallbackKey = key.replace("undefined.", "general.");
+        const translatedFallback = t(fallbackKey, {
+          ...params,
+          defaultValue: "",
+        });
+
+        if (translatedFallback) return translatedFallback;
+
+        // If fallback fails, return a generic placeholder or the key itself in dev
+        if (import.meta.env.DEV) {
+          console.warn(`[i18n] Malformed key: "${key}". No "general" fallback found.`);
+        }
         return t(key, { ...params, defaultValue: key });
+      }
+
+      // Final fallback to the key itself or its basic translation
+      return t(key, { ...params, defaultValue: key });
     },
     changeLocale: (lang: string) => i18n.changeLanguage(lang),
     getLocale: () => i18n.language,

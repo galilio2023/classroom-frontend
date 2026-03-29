@@ -12,7 +12,8 @@ export const baseUserSchema = z.object({
   phoneNumber: z.string().regex(phoneRegex).max(20).optional().nullable(),
   bio: z.string().max(500).optional().nullable(),
   address: z.string().max(255).optional().nullable(),
-  dateOfBirth: z.string()
+  dateOfBirth: z
+    .string()
     .refine((date) => !date || !isNaN(Date.parse(date)))
     .refine((date) => !date || new Date(date) < new Date())
     .optional()
@@ -37,14 +38,14 @@ export const userFormSchema = baseUserSchema.superRefine((data, ctx) => {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           path: ["parentName"],
-          params: { i18n: "auth.register.nameRequired" }
+          params: { i18n: "auth.register.nameRequired" },
         });
       }
       if (!data.parentPhone) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           path: ["parentPhone"],
-          params: { i18n: "auth.register.phoneRequired" }
+          params: { i18n: "auth.register.phoneRequired" },
         });
       }
     }

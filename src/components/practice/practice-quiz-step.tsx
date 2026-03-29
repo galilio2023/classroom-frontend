@@ -33,7 +33,7 @@ export const PracticeQuizStep: React.FC<PracticeQuizStepProps> = ({
   isSubmitting,
 }) => {
   const { t, i18n } = useTranslation();
-  const isArabic = i18n.language === 'ar';
+  const isArabic = i18n.language === "ar";
 
   return (
     <div className="space-y-6">
@@ -46,16 +46,14 @@ export const PracticeQuizStep: React.FC<PracticeQuizStepProps> = ({
       </div>
 
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold leading-relaxed">
-          {currentQuestion.question}
-        </h3>
+        <h3 className="text-lg font-semibold leading-relaxed">{currentQuestion.question}</h3>
         <div className="grid gap-3">
           {currentQuestion.options.map((option, idx) => (
             <button
               key={idx}
               onClick={() => onOptionSelect(option)}
               className={cn(
-                "p-4 rounded-xl border-2 text-left transition-all hover:bg-accent",
+                "p-4 rounded-xl border-2 text-start transition-all hover:bg-accent",
                 selectedOption === option
                   ? "border-primary bg-primary/5 ring-2 ring-primary/20"
                   : "border-border bg-card"
@@ -74,13 +72,13 @@ export const PracticeQuizStep: React.FC<PracticeQuizStepProps> = ({
           className="w-full sm:w-auto"
         >
           {isSubmitting ? (
-            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+            <Loader2 className="h-4 w-4 animate-spin me-2" />
           ) : currentQuestionIndex === totalQuestions - 1 ? (
             t("classes.quiz.finishQuiz")
           ) : (
             <>
-              {t("classes.quiz.nextQuestion")} 
-              <ArrowRight className={cn("h-4 w-4 ml-2", isArabic && "rotate-180 ml-0 mr-2")} />
+              {t("classes.quiz.nextQuestion")}
+              <ArrowRight className={cn("h-4 w-4 ms-2", isArabic && "rotate-180 ms-0 me-2")} />
             </>
           )}
         </Button>

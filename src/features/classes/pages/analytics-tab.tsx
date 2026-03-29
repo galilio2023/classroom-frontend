@@ -5,32 +5,75 @@ import { AssignmentCompletionChart } from "@/features/dashboard/components/assig
 import { SubmissionTimingHeatmap } from "@/features/dashboard/components/submission-timing-heatmap";
 import { StudentTrajectoryCard } from "@/features/dashboard/components/student-trajectory-card";
 import { ClassComparisonTable } from "@/features/dashboard/components/class-comparison-table";
-import { Loader2, FileDown, Printer, Calendar, BarChart3, TrendingUp, AlertCircle, Sparkles, LayoutDashboard } from "lucide-react";
+import {
+  Loader2,
+  FileDown,
+  Printer,
+  Calendar,
+  BarChart3,
+  AlertCircle,
+  Sparkles,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { useTranslation } from "react-i18next";
+import { useDashboard } from "@/features/dashboard/hooks/use-dashboard";
+
+import {
+  GradeDistribution,
+  AssignmentCompletionTrend,
+  SubmissionTiming,
+  AtRiskStudent,
+  ClassComparison,
+} from "@/types";
 
 interface AnalyticsTabProps {
   classId: string;
 }
 
+interface StudentTrajectory {
+  studentId: string;
+  studentName: string;
+  currentGrade: number;
+  predictedGrade: number;
+  trend: { date: string; grade: number }[];
+}
+
+interface ClassAnalytics {
+  gradeDistribution: GradeDistribution[];
+  assignmentCompletionTrend: AssignmentCompletionTrend[];
+  submissionTiming: SubmissionTiming[];
+  atRiskStudents: AtRiskStudent[];
+  classComparison: ClassComparison[];
+  studentTrajectories: StudentTrajectory[];
+}
+
 export const AnalyticsTab = ({ classId }: AnalyticsTabProps) => {
   const { t, i18n } = useTranslation();
+  const { coreData } = useDashboard();
   const [dateRange, setDateRange] = useState("30");
 
-  const { result, query } = useCustom({
+  const isAiEnabled = coreData?.globalConfig?.enableAiFeatures !== false;
+
+  const { result, query } = useCustom<ClassAnalytics>({
     url: `/classes/${classId}/analytics`,
     method: "get",
     config: {
       query: {
-        range: dateRange
-      }
-    }
+        range: dateRange,
+      },
+    },
   });
 
   const analytics = result?.data;
@@ -42,13 +85,15 @@ export const AnalyticsTab = ({ classId }: AnalyticsTabProps) => {
     toast.success(t("analytics.toast.preparingPrint"));
   };
 
-  const isAr = i18n.language === 'ar';
+  const isAr = i18n.language === "ar";
 
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-4">
         <Loader2 className="h-10 w-10 animate-spin text-primary/20" />
-        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">{t("analytics.analyzing")}</p>
+        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">
+          {t("analytics.analyzing")}
+        </p>
       </div>
     );
   }
@@ -61,7 +106,9 @@ export const AnalyticsTab = ({ classId }: AnalyticsTabProps) => {
         </div>
         <div className="space-y-1">
           <h3 className="text-lg font-black tracking-tight">{t("analytics.failedToLoad")}</h3>
-          <p className="text-sm text-muted-foreground font-medium">{t("analytics.failedToLoadDescription")}</p>
+          <p className="text-sm text-muted-foreground font-medium">
+            {t("analytics.failedToLoadDescription")}
+          </p>
         </div>
         <Button variant="outline" onClick={() => query?.refetch()} className="mt-4">
           {t("buttons.tryAgain")}
@@ -81,27 +128,38 @@ export const AnalyticsTab = ({ classId }: AnalyticsTabProps) => {
             </div>
             <h2 className="text-2xl font-black tracking-tight">{t("analytics.title")}</h2>
           </div>
-          <p className="text-sm text-muted-foreground font-medium">
-            {t("analytics.description")}
-          </p>
+          <p className="text-sm text-muted-foreground font-medium">{t("analytics.description")}</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <Select value={dateRange} onValueChange={setDateRange}>
-            <SelectTrigger className="w-[180px] h-11 rounded-xl bg-card/50 backdrop-blur-xl border-black/[0.05] dark:border-white/[0.05] shadow-sm font-bold">
-              <Calendar className={cn("h-4 w-4 text-primary/60", isAr ? "ml-2" : "mr-2")} />
+            <SelectTrigger className="w-45 h-11 rounded-xl bg-card/50 backdrop-blur-xl border-black/5 dark:border-white/5 shadow-sm font-bold">
+              <Calendar className={cn("h-4 w-4 text-primary/60", "me-2")} />
               <SelectValue placeholder={t("analytics.selectRange")} />
             </SelectTrigger>
             <SelectContent className="rounded-xl border-none shadow-2xl">
-              <SelectItem value="7" className="rounded-lg font-bold text-start">{t("analytics.ranges.7")}</SelectItem>
-              <SelectItem value="30" className="rounded-lg font-bold text-start">{t("analytics.ranges.30")}</SelectItem>
-              <SelectItem value="semester" className="rounded-lg font-bold text-start">{t("analytics.ranges.semester")}</SelectItem>
+              <SelectItem value="7" className="rounded-lg font-bold text-start">
+                {t("analytics.ranges.7")}
+              </SelectItem>
+              <SelectItem value="30" className="rounded-lg font-bold text-start">
+                {t("analytics.ranges.30")}
+              </SelectItem>
+              <SelectItem value="semester" className="rounded-lg font-bold text-start">
+                {t("analytics.ranges.semester")}
+              </SelectItem>
             </SelectContent>
           </Select>
-          <Button variant="outline" onClick={handleExportPDF} className="h-11 rounded-xl font-black uppercase tracking-widest text-[10px] gap-2 border-primary/20 hover:bg-primary/5 transition-all">
+          <Button
+            variant="outline"
+            onClick={handleExportPDF}
+            className="h-11 rounded-xl font-black uppercase tracking-widest text-[10px] gap-2 border-primary/20 hover:bg-primary/5 transition-all"
+          >
             <Printer className="h-4 w-4" />
             {t("buttons.printReport")}
           </Button>
-          <Button onClick={() => toast.info(t("analytics.toast.exportingCsv"))} className="h-11 rounded-xl font-black uppercase tracking-widest text-[10px] gap-2 shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95">
+          <Button
+            onClick={() => toast.info(t("analytics.toast.exportingCsv"))}
+            className="h-11 rounded-xl font-black uppercase tracking-widest text-[10px] gap-2 shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95"
+          >
             <FileDown className="h-4 w-4" />
             {t("buttons.exportData")}
           </Button>
@@ -116,21 +174,19 @@ export const AnalyticsTab = ({ classId }: AnalyticsTabProps) => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
           >
-            <GradeDistributionChart 
-              data={analytics?.gradeDistribution ?? []} 
+            <GradeDistributionChart
+              data={analytics?.gradeDistribution ?? []}
               title={t("analytics.charts.gradeDistribution")}
               description={t("analytics.charts.gradeDescription")}
             />
           </motion.div>
-          
+
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
           >
-            <AssignmentCompletionChart 
-              data={analytics?.assignmentCompletionTrend ?? []} 
-            />
+            <AssignmentCompletionChart data={analytics?.assignmentCompletionTrend ?? []} />
           </motion.div>
 
           <motion.div
@@ -138,12 +194,10 @@ export const AnalyticsTab = ({ classId }: AnalyticsTabProps) => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
           >
-            <SubmissionTimingHeatmap 
-              data={analytics?.submissionTiming ?? []} 
-            />
+            <SubmissionTimingHeatmap data={analytics?.submissionTiming ?? []} />
           </motion.div>
         </div>
-        
+
         {/* Sidebar Column */}
         <div className="space-y-10 text-start">
           <motion.div
@@ -153,7 +207,7 @@ export const AnalyticsTab = ({ classId }: AnalyticsTabProps) => {
           >
             <AtRiskStudents students={analytics?.atRiskStudents ?? []} />
           </motion.div>
-          
+
           {analytics?.classComparison && analytics.classComparison.length > 0 && (
             <motion.div
               initial={{ opacity: 0, x: isAr ? -20 : 20 }}
@@ -164,45 +218,56 @@ export const AnalyticsTab = ({ classId }: AnalyticsTabProps) => {
             </motion.div>
           )}
 
-          {analytics?.studentTrajectories && analytics.studentTrajectories.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, x: isAr ? -20 : 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.4 }}
-              className="space-y-6"
-            >
-              <div className="flex items-center justify-between px-2">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-xl bg-ai-primary/10 text-ai-primary">
-                    <Sparkles className="h-5 w-5" />
+          {isAiEnabled &&
+            analytics?.studentTrajectories &&
+            analytics.studentTrajectories.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, x: isAr ? -20 : 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.4 }}
+                className="space-y-6"
+              >
+                <div className="flex items-center justify-between px-2">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-xl bg-ai-primary/10 text-ai-primary">
+                      <Sparkles className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-black tracking-tight">
+                        {t("analytics.ai.predictions")}
+                      </h3>
+                      <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">
+                        {t("analytics.ai.predictedOutcomes")}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="text-lg font-black tracking-tight">{t("analytics.ai.predictions")}</h3>
-                    <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest text-ai-primary/60">{t("analytics.ai.predictedOutcomes")}</p>
-                  </div>
-                </div>
-                <Badge variant="secondary" className="rounded-full px-3 py-1 font-black text-[10px] uppercase tracking-widest bg-ai-primary/10 text-ai-primary border-none">
-                  {t("analytics.ai.beta")}
-                </Badge>
-              </div>
-              <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
-                {analytics.studentTrajectories.map((student: any, idx: number) => (
-                  <motion.div
-                    key={student.studentId}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.5 + (idx * 0.05) }}
+                  <Badge
+                    variant="secondary"
+                    className="rounded-full px-3 py-1 font-black text-[10px] uppercase tracking-widest bg-ai-primary/10 text-ai-primary border-none"
                   >
-                    <StudentTrajectoryCard student={student} />
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
-          )}
+                    {t("analytics.ai.beta")}
+                  </Badge>
+                </div>
+                <div className="space-y-4 max-h-125 overflow-y-auto pe-2 custom-scrollbar">
+                  {analytics.studentTrajectories.map((student, idx) => (
+                    <motion.div
+                      key={student.studentId}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.5 + idx * 0.05 }}
+                    >
+                      <StudentTrajectoryCard student={student} />
+                    </motion.div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
         </div>
       </div>
 
-      <style dangerouslySetInnerHTML={{ __html: `
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
         @media print {
           .print\\:hidden { display: none !important; }
           .class-show .tabs-list { display: none !important; }
@@ -213,7 +278,9 @@ export const AnalyticsTab = ({ classId }: AnalyticsTabProps) => {
           .lg\\:col-span-2 { width: 100% !important; margin-bottom: 2rem; }
           .space-y-8 > * { margin-bottom: 2rem; }
         }
-      `}} />
+      `,
+        }}
+      />
     </div>
   );
 };

@@ -12,19 +12,12 @@ import {
   ArrowRight,
   BookOpen,
   Building2,
-  Activity,
   Layers,
   Award,
 } from "lucide-react";
 import { Input } from "@/components/ui/input.tsx";
-import { useMemo, useState, useRef } from "react";
-import {
-  useSelect,
-  useNavigation,
-  useDelete,
-  useGetIdentity,
-  HttpError,
-} from "@refinedev/core";
+import { useMemo, useState } from "react";
+import { useSelect, useNavigation, useDelete, useGetIdentity, HttpError } from "@refinedev/core";
 import {
   Select,
   SelectContent,
@@ -63,6 +56,10 @@ import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 import { ColumnDef } from "@tanstack/react-table";
 
+interface SubjectListItem extends Omit<Subject, "department"> {
+  department?: Department;
+}
+
 const SubjectsList = () => {
   const { t, i18n } = useTranslation();
   const isAr = i18n.language === "ar";
@@ -83,16 +80,11 @@ const SubjectsList = () => {
     optionValue: "name",
   });
 
-  const columns = useMemo<ColumnDef<Subject>[]>(() => [], []);
+  const columns = useMemo<ColumnDef<SubjectListItem>[]>(() => [], []);
 
   const {
-    refineCore: {
-      tableQuery: query,
-      filters,
-      setFilters,
-    },
-    reactTable
-  } = useTable<Subject, HttpError>({
+    refineCore: { tableQuery: query, filters, setFilters },
+  } = useTable<SubjectListItem, HttpError>({
     columns,
     refineCoreProps: {
       resource: "subjects",
@@ -102,21 +94,16 @@ const SubjectsList = () => {
         populate: ["department"],
       },
       syncWithLocation: true,
-    }
+    },
   });
 
   const searchQuery =
-    (filters.find((f) => "field" in f && f.field === "search") as any)?.value ||
-    "";
+    (filters.find((f) => "field" in f && f.field === "search") as any)?.value || "";
   const selectedDepartment =
-    (filters.find((f) => "field" in f && f.field === "department") as any)
-      ?.value || "all";
+    (filters.find((f) => "field" in f && f.field === "department") as any)?.value || "all";
 
   const setSearchQuery = (val: string) => {
-    setFilters(
-      [{ field: "search", operator: "contains", value: val || undefined }],
-      "merge",
-    );
+    setFilters([{ field: "search", operator: "contains", value: val || undefined }], "merge");
   };
 
   const setSelectedDepartment = (val: string) => {
@@ -128,7 +115,7 @@ const SubjectsList = () => {
           value: val === "all" ? undefined : val,
         },
       ],
-      "merge",
+      "merge"
     );
   };
 
@@ -146,7 +133,7 @@ const SubjectsList = () => {
         },
         {
           onSuccess: () => setDeleteTarget(null),
-        },
+        }
       );
     }
   };
@@ -155,8 +142,8 @@ const SubjectsList = () => {
   const stats = useMemo(() => {
     if (!subjects.length) return { total: 0, totalCredits: 0, avgCredits: 0 };
     const totalCredits = subjects.reduce(
-      (acc: number, curr: Subject) => acc + (curr.credits || 0),
-      0,
+      (acc: number, curr: SubjectListItem) => acc + (curr.credits || 0),
+      0
     );
     return {
       total: subjects.length,
@@ -204,7 +191,7 @@ const SubjectsList = () => {
 
         {/* Stats Row - Adaptive */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
-          <Card className="p-6 md:p-8 bg-card/40 backdrop-blur-3xl border-border/40 rounded-[2rem] md:rounded-[2.5rem] flex items-center gap-5 shadow-sm">
+          <Card className="p-6 md:p-8 bg-card/40 backdrop-blur-3xl border-border/40 rounded-4xl md:rounded-[2.5rem] flex items-center gap-5 shadow-sm">
             <div className="p-3.5 rounded-2xl bg-primary/10 text-primary">
               <BookOpen className="h-6 w-6 md:h-7 md:w-7" />
             </div>
@@ -213,13 +200,11 @@ const SubjectsList = () => {
                 {t("subjects.stats.total")}
               </p>
               <p className="text-2xl md:text-3xl font-black">
-                {isLoading
-                  ? "..."
-                  : new Intl.NumberFormat(i18n.language).format(stats.total)}
+                {isLoading ? "..." : new Intl.NumberFormat(i18n.language).format(stats.total)}
               </p>
             </div>
           </Card>
-          <Card className="p-6 md:p-8 bg-card/40 backdrop-blur-3xl border-border/40 rounded-[2rem] md:rounded-[2.5rem] flex items-center gap-5 shadow-sm">
+          <Card className="p-6 md:p-8 bg-card/40 backdrop-blur-3xl border-border/40 rounded-4xl md:rounded-[2.5rem] flex items-center gap-5 shadow-sm">
             <div className="p-3.5 rounded-2xl bg-indigo-500/10 text-indigo-600">
               <Award className="h-6 w-6 md:h-7 md:w-7" />
             </div>
@@ -234,7 +219,7 @@ const SubjectsList = () => {
               </p>
             </div>
           </Card>
-          <Card className="p-6 md:p-8 bg-card/40 backdrop-blur-3xl border-border/40 rounded-[2rem] md:rounded-[2.5rem] flex items-center gap-5 shadow-sm">
+          <Card className="p-6 md:p-8 bg-card/40 backdrop-blur-3xl border-border/40 rounded-4xl md:rounded-[2.5rem] flex items-center gap-5 shadow-sm">
             <div className="p-3.5 rounded-2xl bg-green-500/10 text-green-600">
               <Layers className="h-6 w-6 md:h-7 md:w-7" />
             </div>
@@ -243,9 +228,7 @@ const SubjectsList = () => {
                 {t("subjects.stats.archived")}
               </p>
               <p className="text-2xl md:text-3xl font-black text-green-600">
-                {isLoading
-                  ? "..."
-                  : new Intl.NumberFormat(i18n.language).format(stats.avgCredits)}
+                {isLoading ? "..." : new Intl.NumberFormat(i18n.language).format(stats.avgCredits)}
               </p>
             </div>
           </Card>
@@ -258,15 +241,15 @@ const SubjectsList = () => {
               <Search
                 className={cn(
                   "absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60 group-focus-within:text-primary transition-colors",
-                  isAr ? "right-4" : "left-4",
+                  "start-4"
                 )}
               />
               <Input
                 type="text"
-                placeholder={t("subjects.filters.searchPlaceholder") as string}
+                placeholder={t("subjects.filters.searchPlaceholder")}
                 className={cn(
                   "h-12 rounded-2xl border-none bg-background/50 shadow-none font-medium",
-                  isAr ? "pr-11 pl-4" : "pl-11 pr-4",
+                  "ps-11 pe-4"
                 )}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -274,25 +257,16 @@ const SubjectsList = () => {
             </div>
             <div className="flex flex-wrap items-center gap-2 bg-background/50 px-3 py-1 rounded-2xl border border-border/40">
               <Filter className="h-3.5 w-3.5 text-muted-foreground/60" />
-              <Select
-                value={selectedDepartment}
-                onValueChange={setSelectedDepartment}
-              >
+              <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
                 <SelectTrigger className="w-[180px] border-none h-10 focus:ring-0 shadow-none font-bold text-[10px] uppercase tracking-wider bg-transparent">
-                  <SelectValue
-                    placeholder={t("departments.filters.allDepartments") as string}
-                  />
+                  <SelectValue placeholder={t("departments.filters.allDepartments")} />
                 </SelectTrigger>
                 <SelectContent className="rounded-2xl bg-white dark:bg-[#09090b] opacity-100 backdrop-blur-none border border-border/50 shadow-2xl">
                   <SelectItem value="all" className="font-bold">
                     {t("departments.filters.allDepartments")}
                   </SelectItem>
-                  {departmentOptions.map(({ value, label }: any) => (
-                    <SelectItem
-                      value={String(value)}
-                      key={value}
-                      className="font-bold"
-                    >
+                  {departmentOptions.map(({ value, label }) => (
+                    <SelectItem value={String(value)} key={value} className="font-bold">
                       {label}
                     </SelectItem>
                   ))}
@@ -306,14 +280,17 @@ const SubjectsList = () => {
         <div className="relative min-h-[400px]">
           {isLoading ? (
             <div className="space-y-4">
-              {Array.from({ length: 5 }).map((_, i: any) => (
-                <Card key={i} className="p-6 flex flex-col md:flex-row items-center gap-6 border-border/20 bg-background/50">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Card
+                  key={i}
+                  className="p-6 flex flex-col md:flex-row items-center gap-6 border-border/20 bg-background/50"
+                >
                   <Skeleton className="h-20 w-20 rounded-3xl shrink-0" />
                   <div className="flex-1 space-y-4 w-full">
                     <Skeleton className="h-8 w-[350px] max-w-full" />
                     <div className="flex gap-4">
-                       <Skeleton className="h-4 w-24" />
-                       <Skeleton className="h-4 w-24" />
+                      <Skeleton className="h-4 w-24" />
+                      <Skeleton className="h-4 w-24" />
                     </div>
                   </div>
                   <Skeleton className="h-12 w-36 rounded-2xl" />
@@ -340,7 +317,7 @@ const SubjectsList = () => {
           ) : (
             <div className="space-y-4">
               <AnimatePresence mode="popLayout">
-                {subjects.map((subject: any, index: any) => {
+                {subjects.map((subject, index) => {
                   return (
                     <motion.div
                       key={subject.id}
@@ -349,14 +326,12 @@ const SubjectsList = () => {
                       exit={{ opacity: 0, scale: 0.95 }}
                       transition={{ delay: index * 0.05 }}
                       className={cn(
-                        "group relative flex flex-col md:flex-row items-center p-5 md:p-6 rounded-[2rem] bg-card/50 backdrop-blur-sm border border-border/40 hover:border-primary/30 hover:bg-card/80 transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-primary/5 cursor-pointer"
+                        "group relative flex flex-col md:flex-row items-center p-5 md:p-6 rounded-4xl bg-card/50 backdrop-blur-sm border border-border/40 hover:border-primary/30 hover:bg-card/80 transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-primary/5 cursor-pointer"
                       )}
                       onClick={() => show("subjects", subject.id)}
                     >
                       {/* Status Line Accent */}
-                      <div 
-                        className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-12 bg-primary rounded-r-full transition-all group-hover:h-20"
-                      />
+                      <div className="absolute start-0 top-1/2 -translate-y-1/2 w-1.5 h-12 bg-primary rounded-e-full transition-all group-hover:h-20" />
 
                       {/* Icon/Code */}
                       <div className="relative shrink-0 mb-4 md:mb-0">
@@ -372,7 +347,7 @@ const SubjectsList = () => {
                       <div
                         className={cn(
                           "flex-1 min-w-0 w-full text-start",
-                          isAr ? "md:mr-8 md:text-right" : "md:ml-8 md:text-left",
+                          isAr ? "md:me-8 md:text-end" : "md:ms-8 md:text-start"
                         )}
                       >
                         <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 mb-2">
@@ -387,9 +362,7 @@ const SubjectsList = () => {
                               {subject.code}
                             </Badge>
                             <Badge className="bg-primary/10 text-primary border-none font-black px-3 py-0.5 rounded-full text-[9px] tracking-widest uppercase shadow-sm">
-                              {new Intl.NumberFormat(i18n.language).format(
-                                subject.credits || 0,
-                              )}{" "}
+                              {new Intl.NumberFormat(i18n.language).format(subject.credits || 0)}{" "}
                               {t("classes.form.studentsUnit")}
                             </Badge>
                           </div>
@@ -401,9 +374,12 @@ const SubjectsList = () => {
                               <Building2 className="h-3.5 w-3.5 text-primary" />
                             </div>
                             <div className="flex flex-col">
-                              <span className="text-[9px] uppercase font-bold text-muted-foreground/60 tracking-wider">Department</span>
+                              <span className="text-[9px] uppercase font-bold text-muted-foreground/60 tracking-wider">
+                                Department
+                              </span>
                               <span className="text-[11px] font-black text-foreground truncate max-w-[150px]">
-                                {subject.department?.name || t("subjects.filters.generalDepartment")}
+                                {subject.department?.name ||
+                                  t("subjects.filters.generalDepartment")}
                               </span>
                             </div>
                           </div>
@@ -413,7 +389,9 @@ const SubjectsList = () => {
                               <GraduationCap className="h-3.5 w-3.5 text-primary" />
                             </div>
                             <div className="flex flex-col">
-                              <span className="text-[9px] uppercase font-bold text-muted-foreground/60 tracking-wider">Category</span>
+                              <span className="text-[9px] uppercase font-bold text-muted-foreground/60 tracking-wider">
+                                Category
+                              </span>
                               <span className="text-[11px] font-black text-foreground uppercase tracking-tight">
                                 {t("subjects.academicSubject")}
                               </span>
@@ -424,14 +402,24 @@ const SubjectsList = () => {
 
                       {/* Action Area */}
                       <div className="flex items-center gap-3 mt-6 md:mt-0 shrink-0">
-                        <div className={cn("hidden lg:flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300", isAr ? "-translate-x-4 group-hover:translate-x-0" : "translate-x-4 group-hover:translate-x-0")}>
+                        <div
+                          className={cn(
+                            "hidden lg:flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300",
+                            isAr
+                              ? "-translate-x-4 group-hover:translate-x-0"
+                              : "translate-x-4 group-hover:translate-x-0"
+                          )}
+                        >
                           {isAdmin && (
                             <>
                               <Button
                                 variant="ghost"
                                 size="icon"
                                 className="h-11 w-11 rounded-2xl text-muted-foreground hover:text-primary hover:bg-primary/5 bg-muted/20"
-                                onClick={(e) => { e.stopPropagation(); edit("subjects", subject.id); }}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  edit("subjects", subject.id);
+                                }}
                               >
                                 <Pencil className="h-5 w-5" />
                               </Button>
@@ -439,7 +427,10 @@ const SubjectsList = () => {
                                 variant="ghost"
                                 size="icon"
                                 className="h-11 w-11 rounded-2xl text-destructive hover:bg-destructive/10 bg-muted/20"
-                                onClick={(e) => { e.stopPropagation(); setDeleteTarget(subject.id); }}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setDeleteTarget(subject.id);
+                                }}
                               >
                                 <Trash2 className="h-5 w-5" />
                               </Button>
@@ -453,18 +444,33 @@ const SubjectsList = () => {
                           className="w-full md:w-auto rounded-2xl px-8 h-12 font-black uppercase tracking-widest text-[10px] transition-all border-primary/20 text-primary hover:bg-primary/5"
                         >
                           {t("buttons.viewDetails")}
-                          <ArrowRight className={cn("h-4 w-4 ml-2", isAr && "rotate-180 mr-2 ml-0")} />
+                          <ArrowRight
+                            className={cn("h-4 w-4 ms-2", isAr && "rotate-180 me-2 ms-0")}
+                          />
                         </Button>
 
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-12 w-12 rounded-2xl md:hidden lg:flex bg-muted/30" onClick={(e) => e.stopPropagation()}>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-12 w-12 rounded-2xl md:hidden lg:flex bg-muted/30"
+                              onClick={(e) => e.stopPropagation()}
+                            >
                               <MoreHorizontal className="h-5 w-5" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-64 p-2 rounded-3xl bg-white dark:bg-[#09090b] opacity-100 backdrop-blur-none border border-border/50 shadow-2xl">
-                            <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/40 px-3 py-3">{t("assignments.list.labels.options")}</DropdownMenuLabel>
-                            <DropdownMenuItem onClick={() => show("subjects", subject.id)} className="rounded-xl gap-3 py-3 cursor-pointer">
+                          <DropdownMenuContent
+                            align="end"
+                            className="w-64 p-2 rounded-3xl bg-white dark:bg-[#09090b] opacity-100 backdrop-blur-none border border-border/50 shadow-2xl"
+                          >
+                            <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/40 px-3 py-3">
+                              {t("assignments.list.labels.options")}
+                            </DropdownMenuLabel>
+                            <DropdownMenuItem
+                              onClick={() => show("subjects", subject.id)}
+                              className="rounded-xl gap-3 py-3 cursor-pointer"
+                            >
                               <div className="p-2 rounded-lg bg-primary/10 text-primary">
                                 <Eye className="h-4 w-4" />
                               </div>
@@ -472,14 +478,20 @@ const SubjectsList = () => {
                             </DropdownMenuItem>
                             {isAdmin && (
                               <>
-                                <DropdownMenuItem onClick={() => edit("subjects", subject.id)} className="rounded-xl gap-3 py-3 cursor-pointer">
+                                <DropdownMenuItem
+                                  onClick={() => edit("subjects", subject.id)}
+                                  className="rounded-xl gap-3 py-3 cursor-pointer"
+                                >
                                   <div className="p-2 rounded-lg bg-primary/10 text-primary">
                                     <Pencil className="h-4 w-4" />
                                   </div>
                                   <span className="font-bold">{t("buttons.editAssignment")}</span>
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator className="my-2 opacity-50" />
-                                <DropdownMenuItem onClick={() => setDeleteTarget(subject.id)} className="rounded-xl gap-3 py-3 cursor-pointer text-destructive focus:bg-destructive/10">
+                                <DropdownMenuItem
+                                  onClick={() => setDeleteTarget(subject.id)}
+                                  className="rounded-xl gap-3 py-3 cursor-pointer text-destructive focus:bg-destructive/10"
+                                >
                                   <div className="p-2 rounded-lg bg-destructive/10 text-destructive">
                                     <Trash2 className="h-4 w-4" />
                                   </div>
@@ -506,16 +518,20 @@ const SubjectsList = () => {
               <Trash2 className="h-10 w-10" />
             </div>
             <div className="space-y-2 text-center">
-              <AlertDialogTitle className="text-3xl font-black tracking-tight">{t("assignments.list.deleteDialog.title")}</AlertDialogTitle>
+              <AlertDialogTitle className="text-3xl font-black tracking-tight">
+                {t("assignments.list.deleteDialog.title")}
+              </AlertDialogTitle>
               <AlertDialogDescription className="text-base font-medium px-8 leading-relaxed">
                 {t("assignments.list.deleteDialog.description")}
               </AlertDialogDescription>
             </div>
           </AlertDialogHeader>
           <AlertDialogFooter className="sm:justify-center gap-4 pt-8">
-            <AlertDialogCancel className="rounded-2xl px-10 h-14 font-black uppercase tracking-widest text-[10px]">{t("buttons.cancel")}</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleConfirmDelete} 
+            <AlertDialogCancel className="rounded-2xl px-10 h-14 font-black uppercase tracking-widest text-[10px]">
+              {t("buttons.cancel")}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDelete}
               disabled={isDeleteLoading}
               className="rounded-2xl px-12 h-14 font-black uppercase tracking-widest text-[10px] bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-xl shadow-destructive/20"
             >

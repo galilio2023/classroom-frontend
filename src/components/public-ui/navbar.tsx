@@ -72,22 +72,19 @@ export const Navbar = () => {
   return (
     <nav
       className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-500",
+        "fixed top-0 start-0 end-0 z-50 transition-all duration-500",
         isScrolled
           ? "bg-background/70 backdrop-blur-xl border-b border-primary/10 py-3 shadow-sm"
-          : "bg-transparent py-6",
+          : "bg-transparent py-6"
       )}
     >
       <div className="container-center flex items-center justify-between">
         <Link to="/" className="flex items-center gap-3 group relative">
-          <motion.div
-            whileHover={{ scale: 1.1, rotate: 5 }}
-            className="relative"
-          >
+          <motion.div whileHover={{ scale: 1.1, rotate: 5 }} className="relative">
             <div className="bg-primary p-2 rounded-xl shadow-lg shadow-primary/20 group-hover:shadow-primary/40 transition-shadow">
               <BookOpen className="h-6 w-6 text-primary-foreground" />
             </div>
-            <div className="absolute -top-1 -right-1 h-3 w-3 bg-green-500 border-2 border-background rounded-full animate-pulse" />
+            <div className="absolute -top-1 -end-1 h-3 w-3 bg-green-500 border-2 border-background rounded-full animate-pulse" />
           </motion.div>
           <span className="text-2xl font-black tracking-tighter uppercase italic">
             Class<span className="text-primary not-italic">Room</span>
@@ -104,7 +101,7 @@ export const Navbar = () => {
                 "px-5 py-2 text-[10px] font-black uppercase tracking-[0.2em] transition-all rounded-xl flex items-center gap-2",
                 isActive(link.href)
                   ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
-                  : "hover:bg-primary/5 text-muted-foreground hover:text-primary",
+                  : "hover:bg-primary/5 text-muted-foreground hover:text-primary"
               )}
             >
               {link.icon}
@@ -134,7 +131,7 @@ export const Navbar = () => {
                   onClick={() => changeLanguage("en")}
                   className={cn(
                     "font-black uppercase tracking-widest text-[10px] py-3 cursor-pointer rounded-xl",
-                    i18n.language === "en" && "bg-primary/10 text-primary",
+                    i18n.language === "en" && "bg-primary/10 text-primary"
                   )}
                 >
                   English
@@ -143,7 +140,7 @@ export const Navbar = () => {
                   onClick={() => changeLanguage("ar")}
                   className={cn(
                     "font-black uppercase tracking-widest text-[10px] py-3 cursor-pointer rounded-xl",
-                    i18n.language === "ar" && "bg-primary/10 text-primary",
+                    i18n.language === "ar" && "bg-primary/10 text-primary"
                   )}
                 >
                   العربية
@@ -169,7 +166,7 @@ export const Navbar = () => {
               <Link to="/register">
                 <Button className="font-black uppercase tracking-widest text-[10px] rounded-xl px-6 shadow-xl shadow-primary/20 hover:scale-105 transition-transform active:scale-95">
                   {t("buttons.getStarted")}
-                  <Zap className="ml-2 h-3 w-3 fill-current" />
+                  <Zap className="ms-2 h-3 w-3 fill-current" />
                 </Button>
               </Link>
             </>
@@ -181,10 +178,7 @@ export const Navbar = () => {
                   className="relative h-10 w-10 rounded-xl p-0 hover:bg-primary/10 transition-colors border border-primary/5"
                 >
                   <Avatar className="h-8 w-8 rounded-lg">
-                    <AvatarImage
-                      src={identity?.image || ""}
-                      alt={identity?.name}
-                    />
+                    <AvatarImage src={identity?.image || ""} alt={identity?.name} />
                     <AvatarFallback className="bg-primary/10 text-primary text-[10px] font-black">
                       {identity?.name?.charAt(0).toUpperCase()}
                     </AvatarFallback>
@@ -231,9 +225,7 @@ export const Navbar = () => {
           <button
             className={cn(
               "p-2.5 rounded-xl transition-all",
-              isMobileMenuOpen
-                ? "bg-primary text-primary-foreground"
-                : "bg-muted/50",
+              isMobileMenuOpen ? "bg-primary text-primary-foreground" : "bg-muted/50"
             )}
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
@@ -258,7 +250,7 @@ export const Navbar = () => {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="md:hidden fixed top-0 right-0 bottom-0 w-[85%] max-w-sm bg-background border-l border-primary/10 shadow-2xl z-50 flex flex-col"
+              className="md:hidden fixed top-0 end-0 bottom-0 w-[85%] max-w-sm bg-background border-l border-primary/10 shadow-2xl z-50 flex flex-col"
             >
               <div className="p-6 flex items-center justify-between border-b border-primary/5">
                 <div className="flex items-center gap-3">
@@ -289,9 +281,7 @@ export const Navbar = () => {
                       onClick={() => setIsMobileMenuOpen(false)}
                       className="text-lg font-black uppercase tracking-widest flex items-center gap-4 p-4 rounded-2xl hover:bg-primary/5 transition-colors"
                     >
-                      <div className="p-2.5 rounded-xl bg-primary/10 text-primary">
-                        {link.icon}
-                      </div>
+                      <div className="p-2.5 rounded-xl bg-primary/10 text-primary">{link.icon}</div>
                       {link.name}
                     </Link>
                   ))}
@@ -304,9 +294,7 @@ export const Navbar = () => {
                     <div className="flex items-center gap-4 px-4 py-2 mb-4 bg-primary/5 rounded-2xl">
                       <Avatar className="h-12 w-12 rounded-xl border-2 border-primary/20">
                         <AvatarImage src={identity?.image || ""} />
-                        <AvatarFallback>
-                          {identity?.name?.charAt(0)}
-                        </AvatarFallback>
+                        <AvatarFallback>{identity?.name?.charAt(0)}</AvatarFallback>
                       </Avatar>
                       <div className="overflow-hidden">
                         <p className="text-xs font-black uppercase tracking-widest text-primary">
@@ -332,9 +320,7 @@ export const Navbar = () => {
                       </span>
                       <div className="flex gap-2">
                         <Button
-                          variant={
-                            i18n.language === "en" ? "default" : "outline"
-                          }
+                          variant={i18n.language === "en" ? "default" : "outline"}
                           size="sm"
                           onClick={() => changeLanguage("en")}
                           className="text-[10px] font-black uppercase tracking-widest rounded-lg h-8"
@@ -342,9 +328,7 @@ export const Navbar = () => {
                           EN
                         </Button>
                         <Button
-                          variant={
-                            i18n.language === "ar" ? "default" : "outline"
-                          }
+                          variant={i18n.language === "ar" ? "default" : "outline"}
                           size="sm"
                           onClick={() => changeLanguage("ar")}
                           className="text-[10px] font-black uppercase tracking-widest rounded-lg h-8"
@@ -360,10 +344,7 @@ export const Navbar = () => {
               <div className="p-6 border-t border-primary/5 bg-muted/20">
                 {!identity ? (
                   <div className="grid grid-cols-2 gap-4">
-                    <Link
-                      to="/login"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
+                    <Link to="/login" onClick={() => setIsMobileMenuOpen(false)}>
                       <Button
                         variant="outline"
                         className="w-full font-black uppercase tracking-widest h-14 rounded-2xl border-2"
@@ -371,10 +352,7 @@ export const Navbar = () => {
                         {t("buttons.signIn")}
                       </Button>
                     </Link>
-                    <Link
-                      to="/register"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
+                    <Link to="/register" onClick={() => setIsMobileMenuOpen(false)}>
                       <Button className="w-full font-black uppercase tracking-widest h-14 rounded-2xl shadow-lg shadow-primary/20">
                         {t("buttons.getStarted")}
                       </Button>
@@ -382,10 +360,7 @@ export const Navbar = () => {
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    <Link
-                      to="/dashboard"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
+                    <Link to="/dashboard" onClick={() => setIsMobileMenuOpen(false)}>
                       <Button className="w-full font-black uppercase tracking-widest h-14 rounded-2xl shadow-lg shadow-primary/20 gap-3">
                         <LayoutDashboard className="h-5 w-5" />
                         {t("common.dashboard")}

@@ -26,12 +26,17 @@ const CodeBlock = ({ children, className }: { children: React.ReactNode; classNa
       <Button
         size="icon"
         variant="ghost"
-        className="absolute right-2 top-2 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity bg-background/50 backdrop-blur-sm hover:bg-background/80"
+        className="absolute end-2 top-2 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity bg-background/50 backdrop-blur-sm hover:bg-background/80"
         onClick={onCopy}
       >
         {copied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
       </Button>
-      <pre className={cn("rounded-xl overflow-x-auto p-4 bg-zinc-950 border border-zinc-800", className)}>
+      <pre
+        className={cn(
+          "rounded-xl overflow-x-auto p-4 bg-zinc-950 border border-zinc-800",
+          className
+        )}
+      >
         <code className={className}>{children}</code>
       </pre>
     </div>
@@ -59,14 +64,22 @@ export const MarkdownRenderer = ({ content, className }: MarkdownRendererProps) 
           h2: ({ node, ...props }) => <h2 className="text-xl font-bold mt-5 mb-3" {...props} />,
           h3: ({ node, ...props }) => <h3 className="text-lg font-bold mt-4 mb-2" {...props} />,
           p: ({ node, ...props }) => <p className="leading-relaxed mb-4" {...props} />,
-          ul: ({ node, ...props }) => <ul className="list-disc pl-6 mb-4 space-y-2" {...props} />,
-          ol: ({ node, ...props }) => <ol className="list-decimal pl-6 mb-4 space-y-2" {...props} />,
+          ul: ({ node, ...props }) => <ul className="list-disc ps-6 mb-4 space-y-2" {...props} />,
+          ol: ({ node, ...props }) => (
+            <ol className="list-decimal ps-6 mb-4 space-y-2" {...props} />
+          ),
           li: ({ node, ...props }) => <li className="leading-relaxed" {...props} />,
           blockquote: ({ node, ...props }) => (
-            <blockquote className="border-l-4 border-primary/30 pl-4 italic my-4 text-muted-foreground" {...props} />
+            <blockquote
+              className="border-s-4 border-primary/30 ps-4 italic my-4 text-muted-foreground"
+              {...props}
+            />
           ),
           a: ({ node, ...props }) => (
-            <a className="text-primary underline underline-offset-4 font-medium hover:text-primary/80 transition-colors" {...props} />
+            <a
+              className="text-primary underline underline-offset-4 font-medium hover:text-primary/80 transition-colors"
+              {...props}
+            />
           ),
           img: ({ node, ...props }) => (
             <img className="rounded-xl border shadow-lg my-6 max-w-full h-auto" {...props} />

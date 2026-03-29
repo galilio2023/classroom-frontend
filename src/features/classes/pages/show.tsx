@@ -1,14 +1,10 @@
 import { useParams } from "react-router-dom";
 import { useState } from "react";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
-import { 
-  AIStudyBuddy 
-} from "@/components/ai-study-buddy";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
 
 import { ClassBanner } from "@/components/classes/show/class-banner";
-import { PinnedAnnouncements } from "@/components/classes/show/pinned-announcements";
 import { ClassHeader } from "@/components/classes/show/class-header";
 import { useClassRealtime } from "@/hooks/use-class-realtime";
 
@@ -20,14 +16,14 @@ import { RosterTabWrapper } from "../components/roster-tab-wrapper";
 import { ProgressTabWrapper } from "../components/progress-tab-wrapper";
 import { InfoTabWrapper } from "../components/info-tab-wrapper";
 import { StaffActions } from "../components/staff-actions";
-import { ClassLoadingView, ClassErrorView } from "../components/class-state-views";
+import { ClassErrorView } from "../components/class-state-views";
 import { ClassTabNavigation } from "../components/class-tab-navigation";
 import { ClassShowSkeleton } from "../components/class-skeletons";
-import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
 
 // Logic Hooks
 import { useClassTabs } from "../hooks/use-class-tabs";
 import { useClassDetails } from "../hooks/use-class-details";
+import { Enrollment } from "@/types";
 
 const ClassesShow = () => {
   const { i18n } = useTranslation();
@@ -36,12 +32,8 @@ const ClassesShow = () => {
   const isAr = i18n.language === "ar";
 
   // --- Logic Orchestration ---
-  const {
-    activePrimaryTab,
-    activeSubTab,
-    handlePrimaryTabChange,
-    setSearchParams
-  } = useClassTabs();
+  const { activePrimaryTab, activeSubTab, handlePrimaryTabChange, setSearchParams } =
+    useClassTabs();
 
   const {
     identity,
@@ -59,11 +51,13 @@ const ClassesShow = () => {
     handleEnrollmentAction,
     handleToggleLive,
     handleConfirmUnenroll,
+    handleCheckout,
+    isCheckingOut,
     isDeleting,
     createMutation,
     isMessaging,
     isModerator,
-    refetch
+    refetch,
   } = useClassDetails(classId);
 
   // --- Local UI State ---
@@ -72,7 +66,10 @@ const ClassesShow = () => {
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
   const [isMessageAllOpen, setIsMessageAllOpen] = useState(false);
   const [bulkMessage, setBulkMessage] = useState({ title: "", message: "" });
-  const [insightTarget, setInsightTarget] = useState<{ id: string; name: string } | null>(null);
+  const [insightTarget, setInsightTarget] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
   const [copied, setCopied] = useState(false);
 
   const { isLiveIndicator } = useClassRealtime(identity?.id, classId);
@@ -80,9 +77,14 @@ const ClassesShow = () => {
   if (isLoading) return <ClassShowSkeleton />;
   if (isError || !aClass) return <ClassErrorView />;
 
-  const approvedEnrollments = aClass.enrollments?.filter((e: any) => e.status === "approved") ?? [];
-  const pendingCount = (aClass.enrollments?.filter((e: any) => e.status === "pending").length ?? 0) + 
-                       (aClass.enrollments?.filter((e: any) => e.status === "waitlisted").length ?? 0);
+  const approvedEnrollments =
+    aClass.enrollments?.filter((e: Enrollment) => e.status === "approved") ?? [];
+
+  const isEnrolled = !!approvedEnrollments.find((e: Enrollment) => e.student.id === identity?.id);
+
+  const pendingCount =
+    (aClass.enrollments?.filter((e: Enrollment) => e.status === "pending").length ?? 0) +
+    (aClass.enrollments?.filter((e: Enrollment) => e.status === "waitlisted").length ?? 0);
 
   return (
     <>
@@ -94,10 +96,15 @@ const ClassesShow = () => {
         <ClassBanner
           aClass={aClass}
           approvedCount={approvedEnrollments.length}
-          waitlistedCount={aClass.enrollments?.filter((e: any) => e.status === "waitlisted").length ?? 0}
+          waitlistedCount={
+            aClass.enrollments?.filter((e: Enrollment) => e.status === "waitlisted").length ?? 0
+          }
           isLiveIndicator={isLiveIndicator}
           isStaff={isModerator}
           onToggleLive={handleToggleLive}
+          isEnrolled={isEnrolled}
+          onCheckout={handleCheckout}
+          isCheckingOut={isCheckingOut}
         />
 
         <Tabs
@@ -106,7 +113,7 @@ const ClassesShow = () => {
           className="w-full space-y-8 md:space-y-12"
           dir={isAr ? "rtl" : "ltr"}
         >
-          <ClassTabNavigation 
+          <ClassTabNavigation
             activePrimaryTab={activePrimaryTab}
             isLiveIndicator={isLiveIndicator}
             isStaff={isModerator}
@@ -125,19 +132,35 @@ const ClassesShow = () => {
                 className="focus:outline-none"
               >
                 <TabsContent value="content" className="mt-0 focus-visible:outline-none">
-                  {activePrimaryTab === "content" && <ContentTabWrapper classId={classId} activeSubTab={activeSubTab} setSearchParams={setSearchParams} />}
+                  {activePrimaryTab === "content" && (
+                    <ContentTabWrapper
+                      classId={classId}
+                      activeSubTab={activeSubTab}
+                      setSearchParams={setSearchParams}
+                    />
+                  )}
                 </TabsContent>
 
                 <TabsContent value="assessments" className="mt-0 focus-visible:outline-none">
-                  {activePrimaryTab === "assessments" && <AssessmentsTabWrapper classId={classId} activeSubTab={activeSubTab} setSearchParams={setSearchParams} />}
+                  {activePrimaryTab === "assessments" && (
+                    <AssessmentsTabWrapper
+                      classId={classId}
+                      activeSubTab={activeSubTab}
+                      setSearchParams={setSearchParams}
+                    />
+                  )}
                 </TabsContent>
 
                 <TabsContent value="engagement" className="mt-0 focus-visible:outline-none">
                   {activePrimaryTab === "engagement" && (
                     <EngagementTabWrapper
-                      classId={classId} announcements={announcements}
-                      dismissedAnnouncements={dismissedAnnouncements} handleDismissAnnouncement={handleDismissAnnouncement}
-                      isLiveIndicator={isLiveIndicator} activeSubTab={activeSubTab} setSearchParams={setSearchParams}
+                      classId={classId}
+                      announcements={announcements}
+                      dismissedAnnouncements={dismissedAnnouncements}
+                      handleDismissAnnouncement={handleDismissAnnouncement}
+                      isLiveIndicator={isLiveIndicator}
+                      activeSubTab={activeSubTab}
+                      setSearchParams={setSearchParams}
                     />
                   )}
                 </TabsContent>
@@ -145,27 +168,46 @@ const ClassesShow = () => {
                 <TabsContent value="roster" className="mt-0 focus-visible:outline-none">
                   {activePrimaryTab === "roster" && (
                     <RosterTabWrapper
-                      classId={classId} approvedEnrollments={approvedEnrollments}
-                      pendingEnrollments={aClass.enrollments?.filter((e: any) => e.status === "pending") ?? []}
-                      isStaff={isStaff} onInsight={setInsightTarget} onUnenroll={setUnenrollTarget}
-                      onEnrollClick={() => setIsEnrollDialogOpen(true)} onMessageAllClick={() => setIsMessageAllOpen(true)}
-                      onEnrollmentAction={handleEnrollmentAction} activeSubTab={activeSubTab} setSearchParams={setSearchParams}
+                      classId={classId}
+                      approvedEnrollments={approvedEnrollments}
+                      pendingEnrollments={
+                        aClass.enrollments?.filter((e: Enrollment) => e.status === "pending") ?? []
+                      }
+                      isStaff={isStaff}
+                      onInsight={setInsightTarget}
+                      onUnenroll={setUnenrollTarget}
+                      onEnrollClick={() => setIsEnrollDialogOpen(true)}
+                      onMessageAllClick={() => setIsMessageAllOpen(true)}
+                      onEnrollmentAction={handleEnrollmentAction}
+                      activeSubTab={activeSubTab}
+                      setSearchParams={setSearchParams}
                     />
                   )}
                 </TabsContent>
 
                 {isStaff && (
                   <TabsContent value="progress" className="mt-0 focus-visible:outline-none">
-                    {activePrimaryTab === "progress" && <ProgressTabWrapper classId={classId} activeSubTab={activeSubTab} setSearchParams={setSearchParams} />}
+                    {activePrimaryTab === "progress" && (
+                      <ProgressTabWrapper
+                        classId={classId}
+                        activeSubTab={activeSubTab}
+                        setSearchParams={setSearchParams}
+                      />
+                    )}
                   </TabsContent>
                 )}
 
                 <TabsContent value="info" className="mt-0 focus-visible:outline-none">
                   {activePrimaryTab === "info" && (
                     <InfoTabWrapper
-                      aClass={aClass} isOwner={!!isOwner} isStaff={isStaff}
-                      teacherNotes={teacherNotes} isLoadingNotes={isLoadingNotes}
-                      handleNoteChange={handleNoteChange} activeSubTab={activeSubTab} setSearchParams={setSearchParams}
+                      aClass={aClass}
+                      isOwner={!!isOwner}
+                      isStaff={isStaff}
+                      teacherNotes={teacherNotes}
+                      isLoadingNotes={isLoadingNotes}
+                      handleNoteChange={handleNoteChange}
+                      activeSubTab={activeSubTab}
+                      setSearchParams={setSearchParams}
                       onInviteClick={() => setIsInviteDialogOpen(true)}
                       handleCopyInviteCode={() => {
                         if (aClass.inviteCode) {
@@ -186,16 +228,41 @@ const ClassesShow = () => {
 
       {isStaff && (
         <StaffActions
-          classId={classId} unenrollTarget={unenrollTarget} setUnenrollTarget={setUnenrollTarget}
-          handleConfirmUnenroll={() => handleConfirmUnenroll(unenrollTarget, () => setUnenrollTarget(null))}
-          isDeleting={isDeleting} isEnrollDialogOpen={isEnrollDialogOpen} setIsEnrollDialogOpen={setIsEnrollDialogOpen}
-          enrolledStudentIds={approvedEnrollments.map((e: any) => e.student.id)}
-          isInviteDialogOpen={isInviteDialogOpen} setIsInviteDialogOpen={setIsInviteDialogOpen}
-          existingTeacherIds={aClass.teachers?.map((t: any) => t.teacher.id) ?? []}
-          insightTarget={insightTarget} setInsightTarget={setInsightTarget}
-          isMessageAllOpen={isMessageAllOpen} setIsMessageAllOpen={setIsMessageAllOpen}
-          approvedCount={approvedEnrollments.length} bulkMessage={bulkMessage} setBulkMessage={setBulkMessage}
-          handleMessageAll={() => createMutation({ resource: `classes/${classId}/message-all`, values: bulkMessage }, { onSuccess: () => { setIsMessageAllOpen(false); setBulkMessage({ title: "", message: "" }); refetch?.(); } })}
+          classId={classId}
+          unenrollTarget={unenrollTarget}
+          setUnenrollTarget={setUnenrollTarget}
+          handleConfirmUnenroll={() =>
+            handleConfirmUnenroll(unenrollTarget, () => setUnenrollTarget(null))
+          }
+          isDeleting={isDeleting}
+          isEnrollDialogOpen={isEnrollDialogOpen}
+          setIsEnrollDialogOpen={setIsEnrollDialogOpen}
+          enrolledStudentIds={approvedEnrollments.map((e: Enrollment) => e.student.id)}
+          isInviteDialogOpen={isInviteDialogOpen}
+          setIsInviteDialogOpen={setIsInviteDialogOpen}
+          existingTeacherIds={aClass.teachers?.map((t) => t.teacher.id) ?? []}
+          insightTarget={insightTarget}
+          setInsightTarget={setInsightTarget}
+          isMessageAllOpen={isMessageAllOpen}
+          setIsMessageAllOpen={setIsMessageAllOpen}
+          approvedCount={approvedEnrollments.length}
+          bulkMessage={bulkMessage}
+          setBulkMessage={setBulkMessage}
+          handleMessageAll={() =>
+            createMutation(
+              {
+                resource: `classes/${classId}/message-all`,
+                values: bulkMessage,
+              },
+              {
+                onSuccess: () => {
+                  setIsMessageAllOpen(false);
+                  setBulkMessage({ title: "", message: "" });
+                  refetch?.();
+                },
+              }
+            )
+          }
           isMessaging={isMessaging}
         />
       )}

@@ -4,14 +4,14 @@ import { TeacherChannel } from "@/types";
 import { motion, AnimatePresence } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { 
-  Tv, 
-  PlayCircle, 
-  ChevronRight, 
+import {
+  Tv,
+  PlayCircle,
+  ChevronRight,
   ChevronLeft,
   Sparkles,
   Users,
-  PlusCircle
+  PlusCircle,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTranslation } from "react-i18next";
@@ -19,11 +19,11 @@ import { cn } from "@/lib/utils";
 
 export const TeacherDiscoveryList = () => {
   const { t, i18n } = useTranslation();
-  const isAr = i18n.language === 'ar';
+  const isAr = i18n.language === "ar";
   const { show } = useNavigation();
   const [hoveredId, setHoveredId] = useState<number | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  
+
   const { mutate: recordView } = useCustomMutation();
 
   const { query } = useCustom<TeacherChannel[]>({
@@ -59,15 +59,15 @@ export const TeacherDiscoveryList = () => {
       const currentScroll = scrollContainerRef.current.scrollLeft;
       // In RTL, "right" means scrolling towards the origin (which is positive left in some browsers, negative in others)
       // Standardize scrolling by checking dir
-      const isRtl = document.documentElement.dir === 'rtl';
+      const isRtl = document.documentElement.dir === "rtl";
       let targetScroll;
-      
+
       if (direction === "left") {
-          targetScroll = isRtl ? currentScroll + scrollAmount : currentScroll - scrollAmount;
+        targetScroll = isRtl ? currentScroll + scrollAmount : currentScroll - scrollAmount;
       } else {
-          targetScroll = isRtl ? currentScroll - scrollAmount : currentScroll + scrollAmount;
+        targetScroll = isRtl ? currentScroll - scrollAmount : currentScroll + scrollAmount;
       }
-        
+
       scrollContainerRef.current.scrollTo({
         left: targetScroll,
         behavior: "smooth",
@@ -90,14 +90,14 @@ export const TeacherDiscoveryList = () => {
     show: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1
-      }
-    }
+        staggerChildren: 0.1,
+      },
+    },
   };
 
   const item = {
     hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0 }
+    show: { opacity: 1, y: 0 },
   };
 
   return (
@@ -110,17 +110,17 @@ export const TeacherDiscoveryList = () => {
           <h2 className="text-2xl font-black tracking-tight">{t("classes.list.discover")}</h2>
         </div>
         <div className="flex gap-2">
-          <Button 
-            variant="outline" 
-            size="icon" 
+          <Button
+            variant="outline"
+            size="icon"
             className="rounded-full h-10 w-10 border-primary/10"
             onClick={() => scroll("left")}
           >
             <ChevronLeft className={cn("h-5 w-5", isAr && "rotate-180")} />
           </Button>
-          <Button 
-            variant="outline" 
-            size="icon" 
+          <Button
+            variant="outline"
+            size="icon"
             className="rounded-full h-10 w-10 border-primary/10"
             onClick={() => scroll("right")}
           >
@@ -129,7 +129,7 @@ export const TeacherDiscoveryList = () => {
         </div>
       </div>
 
-      <motion.div 
+      <motion.div
         variants={container}
         initial="hidden"
         animate="show"
@@ -165,7 +165,11 @@ export const TeacherDiscoveryList = () => {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  src={channel.thumbnailUrl || channel.teacher?.image || "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&q=80&w=1000"}
+                  src={
+                    channel.thumbnailUrl ||
+                    channel.teacher?.image ||
+                    "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&q=80&w=1000"
+                  }
                   className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                 />
               )}
@@ -176,15 +180,15 @@ export const TeacherDiscoveryList = () => {
 
             {/* Hover Play Indicator */}
             <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                {!hoveredId && <PlayCircle className="h-16 w-16 text-white/80" />}
+              {!hoveredId && <PlayCircle className="h-16 w-16 text-white/80" />}
             </div>
 
             {/* Top Badge */}
             <div className="absolute top-6 start-6 flex gap-2">
-                <Badge className="bg-primary text-white border-none rounded-lg px-3 py-1 font-black uppercase tracking-widest text-[8px] flex items-center gap-1 shadow-lg">
-                    <Sparkles className="h-3 w-3" />
-                    Trending
-                </Badge>
+              <Badge className="bg-primary text-white border-none rounded-lg px-3 py-1 font-black uppercase tracking-widest text-[8px] flex items-center gap-1 shadow-lg">
+                <Sparkles className="h-3 w-3" />
+                Trending
+              </Badge>
             </div>
 
             {/* Content Overlay */}
@@ -209,21 +213,21 @@ export const TeacherDiscoveryList = () => {
               </p>
 
               <div className="flex gap-2 pt-2">
-                <Button 
-                    className="flex-1 h-12 rounded-2xl font-black uppercase tracking-widest bg-white text-black hover:bg-primary hover:text-white border-none transition-all shadow-xl shadow-black/20 text-[10px]"
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        show("users", channel.teacherId);
-                    }}
+                <Button
+                  className="flex-1 h-12 rounded-2xl font-black uppercase tracking-widest bg-white text-black hover:bg-primary hover:text-white border-none transition-all shadow-xl shadow-black/20 text-[10px]"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    show("users", channel.teacherId);
+                  }}
                 >
                   {t("buttons.viewProfile")}
                 </Button>
-                <Button 
-                    variant="outline" 
-                    size="icon" 
-                    className="h-12 w-12 rounded-2xl border-white/20 bg-black/20 backdrop-blur-md text-white hover:bg-white hover:text-black transition-all shrink-0"
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-12 w-12 rounded-2xl border-white/20 bg-black/20 backdrop-blur-md text-white hover:bg-white hover:text-black transition-all shrink-0"
                 >
-                    <PlusCircle className="h-5 w-5" />
+                  <PlusCircle className="h-5 w-5" />
                 </Button>
               </div>
             </div>

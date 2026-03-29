@@ -44,9 +44,9 @@ export const VerificationUpload = ({ url, onUpload, onClear }: VerificationUploa
         setIsUploading(false);
         return;
       }
-      
+
       const result = await response.json();
-      
+
       onUpload(result.data.url, result.data.publicId);
       toast.success(t("auth.register.verification.success"));
     } catch (error) {
@@ -67,7 +67,7 @@ export const VerificationUpload = ({ url, onUpload, onClear }: VerificationUploa
         <ShieldCheck className="h-4 w-4 text-primary" />
         {t("auth.register.verification.title")}
       </Label>
-      
+
       <div className="border-2 border-dashed rounded-xl p-6 flex flex-col items-center justify-center text-center space-y-3 bg-muted/20 hover:bg-muted/30 transition-colors">
         {url ? (
           <div className="flex flex-col items-center gap-3 w-full">
@@ -75,11 +75,11 @@ export const VerificationUpload = ({ url, onUpload, onClear }: VerificationUploa
               <FileCheck className="h-5 w-5" />
               <span>{t("auth.register.verification.documentUploaded")}</span>
             </div>
-            
-            <Button 
-              type="button" 
-              variant="outline" 
-              size="sm" 
+
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
               className="text-xs w-full gap-2 text-destructive hover:text-destructive"
               onClick={handleClear}
             >
@@ -92,26 +92,28 @@ export const VerificationUpload = ({ url, onUpload, onClear }: VerificationUploa
             <div className="p-3 bg-primary/10 rounded-full">
               <UploadCloud className="h-6 w-6 text-primary" />
             </div>
-            
+
             <div className="space-y-1">
               <p className="text-sm font-medium">{t("auth.register.verification.uploadLabel")}</p>
-              <p className="text-xs text-muted-foreground">{t("auth.register.verification.formatLabel")}</p>
+              <p className="text-xs text-muted-foreground">
+                {t("auth.register.verification.formatLabel")}
+              </p>
             </div>
-            
-            <Input 
-              type="file" 
-              className="hidden" 
+
+            <Input
+              type="file"
+              className="hidden"
               ref={fileInputRef}
-              id="doc-upload" 
+              id="doc-upload"
               accept=".pdf,.jpg,.jpeg,.png"
               onChange={handleFileUpload}
               disabled={isUploading}
             />
-            
-            <Button 
-              type="button" 
-              variant="default" 
-              size="sm" 
+
+            <Button
+              type="button"
+              variant="default"
+              size="sm"
               className="mt-2 w-full max-w-50"
               onClick={() => {
                 fileInputRef.current?.click();
@@ -120,7 +122,7 @@ export const VerificationUpload = ({ url, onUpload, onClear }: VerificationUploa
             >
               {isUploading ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  <Loader2 className="h-4 w-4 animate-spin me-2" />
                   {t("buttons.uploading")}
                 </>
               ) : (

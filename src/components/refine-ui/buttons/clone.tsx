@@ -30,14 +30,8 @@ type CloneButtonProps = {
   meta?: Record<string, unknown>;
 } & React.ComponentProps<typeof Button>;
 
-export const CloneButton = React.forwardRef<
-  React.ComponentRef<typeof Button>,
-  CloneButtonProps
->(
-  (
-    { resource, recordItemId, accessControl, meta, children, onClick, ...rest },
-    ref
-  ) => {
+export const CloneButton = React.forwardRef<React.ComponentRef<typeof Button>, CloneButtonProps>(
+  ({ resource, recordItemId, accessControl, meta, children, onClick, ...rest }, ref) => {
     const { hidden, disabled, LinkComponent, to, label } = useCloneButton({
       accessControl,
       resource,

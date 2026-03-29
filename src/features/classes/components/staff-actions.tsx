@@ -1,11 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { 
-  Loader2, 
-  Trash2, 
-  MessageSquare,
-  XCircle 
-} from "lucide-react";
+import { Loader2, Trash2, MessageSquare } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -38,18 +33,18 @@ interface StaffActionsProps {
   setUnenrollTarget: (id: number | null) => void;
   handleConfirmUnenroll: () => void;
   isDeleting: boolean;
-  
+
   isEnrollDialogOpen: boolean;
   setIsEnrollDialogOpen: (open: boolean) => void;
   enrolledStudentIds: string[];
-  
+
   isInviteDialogOpen: boolean;
   setIsInviteDialogOpen: (open: boolean) => void;
   existingTeacherIds: string[];
-  
+
   insightTarget: { id: string; name: string } | null;
   setInsightTarget: (target: { id: string; name: string } | null) => void;
-  
+
   isMessageAllOpen: boolean;
   setIsMessageAllOpen: (open: boolean) => void;
   approvedCount: number;
@@ -85,10 +80,7 @@ export const StaffActions: React.FC<StaffActionsProps> = ({
 
   return (
     <>
-      <AlertDialog
-        open={unenrollTarget !== null}
-        onOpenChange={() => setUnenrollTarget(null)}
-      >
+      <AlertDialog open={unenrollTarget !== null} onOpenChange={() => setUnenrollTarget(null)}>
         <AlertDialogContent className="rounded-[2.5rem] border-none shadow-2xl bg-card/95 backdrop-blur-xl max-w-[95vw] sm:max-w-lg">
           <AlertDialogHeader className="space-y-6">
             <div className="p-5 rounded-2xl bg-destructive/10 text-destructive w-fit mx-auto">
@@ -112,9 +104,7 @@ export const StaffActions: React.FC<StaffActionsProps> = ({
               disabled={isDeleting}
               className="rounded-2xl px-12 h-14 font-black uppercase tracking-widest text-[10px] bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-xl shadow-destructive/20"
             >
-              {isDeleting
-                ? t("buttons.processing")
-                : t("buttons.confirmRemoval")}
+              {isDeleting ? t("buttons.processing") : t("buttons.confirmRemoval")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -142,10 +132,7 @@ export const StaffActions: React.FC<StaffActionsProps> = ({
         classId={classId}
       />
 
-      <Dialog
-        open={isMessageAllOpen}
-        onOpenChange={setIsMessageAllOpen}
-      >
+      <Dialog open={isMessageAllOpen} onOpenChange={setIsMessageAllOpen}>
         <DialogContent className="rounded-[2.5rem] border-none shadow-2xl bg-card/95 backdrop-blur-xl max-w-[95vw] sm:max-w-2xl">
           <DialogHeader className="space-y-6">
             <div className="p-5 rounded-2xl bg-primary/10 text-primary w-fit mx-auto">
@@ -169,12 +156,8 @@ export const StaffActions: React.FC<StaffActionsProps> = ({
               </Label>
               <Input
                 value={bulkMessage.title}
-                onChange={(e) =>
-                  setBulkMessage({ ...bulkMessage, title: e.target.value })
-                }
-                placeholder={t(
-                  "classes.show.messageAllDialog.subjectPlaceholder",
-                )}
+                onChange={(e) => setBulkMessage({ ...bulkMessage, title: e.target.value })}
+                placeholder={t("classes.show.messageAllDialog.subjectPlaceholder")}
                 className="h-16 rounded-3xl text-lg px-8 bg-muted/30 border-none shadow-inner"
               />
             </div>
@@ -190,10 +173,8 @@ export const StaffActions: React.FC<StaffActionsProps> = ({
                     message: e.target.value,
                   })
                 }
-                placeholder={t(
-                  "classes.show.messageAllDialog.messagePlaceholder",
-                )}
-                className="min-h-60 rounded-[2rem] p-8 text-lg bg-muted/30 border-none shadow-inner"
+                placeholder={t("classes.show.messageAllDialog.messagePlaceholder")}
+                className="min-h-60 rounded-4xl p-8 text-lg bg-muted/30 border-none shadow-inner"
               />
             </div>
           </div>
@@ -209,15 +190,13 @@ export const StaffActions: React.FC<StaffActionsProps> = ({
             <Button
               onClick={handleMessageAll}
               size="lg"
-              disabled={
-                isMessaging || !bulkMessage.title || !bulkMessage.message
-              }
+              disabled={isMessaging || !bulkMessage.title || !bulkMessage.message}
               className="rounded-2xl px-14 h-14 font-black uppercase tracking-widest text-[10px] shadow-xl shadow-primary/20"
             >
               {isMessaging ? (
                 <>
                   <Loader2 className="h-5 w-5 me-3 animate-spin" />
-                {t("buttons.processing")}
+                  {t("buttons.processing")}
                 </>
               ) : (
                 t("buttons.sendMessage")

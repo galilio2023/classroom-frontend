@@ -7,13 +7,7 @@ import { DataTable } from "@/components/refine-ui/data-table/data-table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import {
   Calendar,
   Sparkles,
@@ -34,12 +28,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQueryClient } from "@tanstack/react-query";
 import { BulkEnrollDialog } from "./bulk-enroll-dialog";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import dayjs from "dayjs";
 
 interface StudentsTabProps {
@@ -80,16 +69,16 @@ export const StudentsTab = ({
 
     // 2. Perform manual cache manipulation for instant UI feedback
     const queryKey = ["enrollments", "list"];
-    
+
     // We update both the specific enrollment list and general dashboard stats
     await queryClient.cancelQueries({ queryKey });
-    
+
     queryClient.setQueriesData({ queryKey }, (old: any) => {
-        if (!old?.data) return old;
-        return {
-            ...old,
-            data: old.data.map((e: Enrollment) => e.id === id ? { ...e, status } : e)
-        };
+      if (!old?.data) return old;
+      return {
+        ...old,
+        data: old.data.map((e: Enrollment) => (e.id === id ? { ...e, status } : e)),
+      };
     });
   };
 
@@ -113,11 +102,7 @@ export const StudentsTab = ({
             <div className="flex items-center gap-3 py-1">
               <Avatar className="size-9 md:size-10 border-2 border-background shadow-sm rounded-lg md:rounded-xl">
                 {student.image && (
-                  <AvatarImage
-                    src={student.image}
-                    alt={student.name}
-                    className="object-cover"
-                  />
+                  <AvatarImage src={student.image} alt={student.name} className="object-cover" />
                 )}
                 <AvatarFallback className="bg-primary/5 text-primary font-black text-[10px] md:text-xs">
                   {student.name?.[0]}
@@ -128,46 +113,58 @@ export const StudentsTab = ({
                   <span className="font-black text-xs md:text-sm tracking-tight truncate text-foreground">
                     {student.name}
                   </span>
-                  
-                  {isStaff && row.original.riskAssessment && row.original.riskAssessment.riskLevel !== "low" && (
-                    <Badge 
-                        variant="destructive" 
+
+                  {isStaff &&
+                    row.original.riskAssessment &&
+                    row.original.riskAssessment.riskLevel !== "low" && (
+                      <Badge
+                        variant="destructive"
                         className={cn(
-                            "border-none text-[7px] md:text-[8px] font-black uppercase tracking-tighter px-1.5 md:px-2 py-0 h-3.5 md:h-4 shrink-0 gap-1",
-                            row.original.riskAssessment.riskLevel === "critical" ? "bg-red-600 text-white animate-pulse" : 
-                            row.original.riskAssessment.riskLevel === "high" ? "bg-orange-600 text-white" : "bg-yellow-500 text-white"
+                          "border-none text-[7px] md:text-[8px] font-black uppercase tracking-tighter px-1.5 md:px-2 py-0 h-3.5 md:h-4 shrink-0 gap-1",
+                          row.original.riskAssessment.riskLevel === "critical"
+                            ? "bg-red-600 text-white animate-pulse"
+                            : row.original.riskAssessment.riskLevel === "high"
+                              ? "bg-orange-600 text-white"
+                              : "bg-yellow-500 text-white"
                         )}
-                    >
+                      >
                         <ShieldAlert className="h-2 w-2" />
                         {row.original.riskAssessment.riskLevel}
-                    </Badge>
-                  )}
+                      </Badge>
+                    )}
 
                   {/* 🧠 LEARNING DNA TOOLTIP (Staff Only) */}
                   {isStaff && student.persona && (
                     <TooltipProvider>
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <div className="p-1 rounded-md bg-ai-primary/10 text-ai-primary cursor-help hover:bg-ai-primary/20 transition-colors">
-                                    <BrainCircuit className="h-3 w-3" />
-                                </div>
-                            </TooltipTrigger>
-                            <TooltipContent side="right" className="max-w-xs p-4 rounded-2xl bg-card/95 backdrop-blur-xl border-ai-primary/20 shadow-2xl z-50">
-                                <div className="space-y-2">
-                                    <div className="flex items-center gap-2 border-b border-border/40 pb-2 mb-2">
-                                        <Sparkles className="h-3 w-3 text-ai-primary" />
-                                        <span className="text-[10px] font-black uppercase tracking-widest text-ai-primary">Learning DNA</span>
-                                    </div>
-                                    <p className="text-xs font-medium leading-relaxed italic break-words whitespace-pre-wrap">
-                                        "{student.persona.learningDNA}"
-                                    </p>
-                                    <div className="pt-2 flex justify-between items-center text-[8px] font-bold text-muted-foreground uppercase">
-                                        <span>Tone: {student.persona.preferredTone}</span>
-                                        <span>Updated: {dayjs(student.persona.lastSummarizedAt).fromNow()}</span>
-                                    </div>
-                                </div>
-                            </TooltipContent>
-                        </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="p-1 rounded-md bg-ai-primary/10 text-ai-primary cursor-help hover:bg-ai-primary/20 transition-colors">
+                            <BrainCircuit className="h-3 w-3" />
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent
+                          side="right"
+                          className="max-w-xs p-4 rounded-2xl bg-card/95 backdrop-blur-xl border-ai-primary/20 shadow-2xl z-50"
+                        >
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-2 border-b border-border/40 pb-2 mb-2">
+                              <Sparkles className="h-3 w-3 text-ai-primary" />
+                              <span className="text-[10px] font-black uppercase tracking-widest text-ai-primary">
+                                Learning DNA
+                              </span>
+                            </div>
+                            <p className="text-xs font-medium leading-relaxed italic break-words whitespace-pre-wrap">
+                              "{student.persona.learningDNA}"
+                            </p>
+                            <div className="pt-2 flex justify-between items-center text-[8px] font-bold text-muted-foreground uppercase">
+                              <span>Tone: {student.persona.preferredTone}</span>
+                              <span>
+                                Updated: {dayjs(student.persona.lastSummarizedAt).fromNow()}
+                              </span>
+                            </div>
+                          </div>
+                        </TooltipContent>
+                      </Tooltip>
                     </TooltipProvider>
                   )}
 
@@ -194,8 +191,11 @@ export const StudentsTab = ({
                       variant="destructive"
                       className={cn(
                         "border-none text-[7px] md:text-[8px] font-black uppercase tracking-tighter px-1.5 md:px-2 py-0 h-3.5 md:h-4 shrink-0 gap-1",
-                        riskAssessment.riskLevel === "critical" ? "bg-red-600 text-white animate-pulse" : 
-                        riskAssessment.riskLevel === "high" ? "bg-orange-600 text-white" : "bg-yellow-500 text-white"
+                        riskAssessment.riskLevel === "critical"
+                          ? "bg-red-600 text-white animate-pulse"
+                          : riskAssessment.riskLevel === "high"
+                            ? "bg-orange-600 text-white"
+                            : "bg-yellow-500 text-white"
                       )}
                     >
                       <ShieldAlert className="h-2 w-2" />
@@ -230,10 +230,11 @@ export const StudentsTab = ({
           <div className="hidden sm:flex items-center gap-2 text-[10px] md:text-xs font-bold text-muted-foreground">
             <Calendar className="h-3 md:h-3.5 w-3 md:w-3.5 opacity-40" />
             <span className="whitespace-nowrap">
-              {new Date(getValue<string>()).toLocaleDateString(
-                isAr ? "ar-EG" : "en-US",
-                { month: "short", day: "numeric", year: "numeric" },
-              )}
+              {new Date(getValue<string>()).toLocaleDateString(isAr ? "ar-EG" : "en-US", {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              })}
             </span>
           </div>
         ),
@@ -256,9 +257,7 @@ export const StudentsTab = ({
                 }
               >
                 <Sparkles className="h-3 w-3 md:h-3.5 md:w-3.5" />
-                <span className="hidden xs:inline">
-                  {t("buttons.aiInsight")}
-                </span>
+                <span className="hidden xs:inline">{t("buttons.aiInsight")}</span>
               </Button>
             )}
             {isStaff && (
@@ -275,7 +274,7 @@ export const StudentsTab = ({
         ),
       },
     ],
-    [isStaff, t, isAr, onInsight, onUnenroll],
+    [isStaff, t, isAr, onInsight, onUnenroll]
   );
 
   const enrollmentsTable = useTable<Enrollment, HttpError>({
@@ -404,63 +403,57 @@ export const StudentsTab = ({
                     </div>
                   ) : (
                     <AnimatePresence mode="popLayout">
-                      {pendingEnrollments.map(
-                        (enrollment: Enrollment, index: number) => (
-                          <motion.div
-                            key={enrollment.id}
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.95 }}
-                            transition={{ delay: index * 0.05 }}
-                            className="flex items-center justify-between p-4 md:p-5 rounded-2xl md:rounded-3xl bg-orange-500/3 border border-orange-500/10 transition-all hover:bg-orange-500/10 hover:border-orange-500/20 group shadow-sm"
-                          >
-                            <div className="flex items-center gap-3 md:gap-4 min-w-0">
-                              <Avatar className="h-10 w-10 md:h-12 md:w-12 border-2 border-background shadow-sm rounded-xl md:rounded-2xl group-hover:scale-105 transition-transform duration-500">
-                                {enrollment.student.image && (
-                                  <AvatarImage
-                                    src={enrollment.student.image}
-                                    alt={enrollment.student.name}
-                                    className="object-cover"
-                                  />
-                                )}
-                                <AvatarFallback className="bg-orange-500/10 text-orange-600 font-black text-xs md:text-sm">
-                                  {enrollment.student.name?.[0]}
-                                </AvatarFallback>
-                              </Avatar>
-                              <div className="flex flex-col text-start min-w-0">
-                                <span className="text-sm md:text-base font-black tracking-tight truncate text-foreground group-hover:text-orange-700 transition-colors">
-                                  {enrollment.student.name}
-                                </span>
-                                <span className="text-[9px] md:text-[10px] text-muted-foreground/80 font-bold uppercase tracking-widest truncate mt-0.5">
-                                  {t("classes.show.students.pending.requested")}
-                                </span>
-                              </div>
+                      {pendingEnrollments.map((enrollment: Enrollment, index: number) => (
+                        <motion.div
+                          key={enrollment.id}
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.95 }}
+                          transition={{ delay: index * 0.05 }}
+                          className="flex items-center justify-between p-4 md:p-5 rounded-2xl md:rounded-3xl bg-orange-500/3 border border-orange-500/10 transition-all hover:bg-orange-500/10 hover:border-orange-500/20 group shadow-sm"
+                        >
+                          <div className="flex items-center gap-3 md:gap-4 min-w-0">
+                            <Avatar className="h-10 w-10 md:h-12 md:w-12 border-2 border-background shadow-sm rounded-xl md:rounded-2xl group-hover:scale-105 transition-transform duration-500">
+                              {enrollment.student.image && (
+                                <AvatarImage
+                                  src={enrollment.student.image}
+                                  alt={enrollment.student.name}
+                                  className="object-cover"
+                                />
+                              )}
+                              <AvatarFallback className="bg-orange-500/10 text-orange-600 font-black text-xs md:text-sm">
+                                {enrollment.student.name?.[0]}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex flex-col text-start min-w-0">
+                              <span className="text-sm md:text-base font-black tracking-tight truncate text-foreground group-hover:text-orange-700 transition-colors">
+                                {enrollment.student.name}
+                              </span>
+                              <span className="text-[9px] md:text-[10px] text-muted-foreground/80 font-bold uppercase tracking-widest truncate mt-0.5">
+                                {t("classes.show.students.pending.requested")}
+                              </span>
                             </div>
-                            <div className="flex items-center gap-1 md:gap-2 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <Button
-                                variant="outline"
-                                size="icon"
-                                className="h-9 w-9 md:h-10 md:w-10 rounded-xl text-emerald-600 border-emerald-500/20 bg-emerald-500/5 hover:bg-emerald-500 hover:text-white transition-all shadow-sm"
-                                onClick={() =>
-                                  handleOptimisticEnrollment(enrollment.id, "approved")
-                                }
-                              >
-                                <CheckCircle2 className="h-4 w-4 md:h-5 md:w-5" />
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="icon"
-                                className="h-9 w-9 md:h-10 md:w-10 rounded-xl text-destructive border-destructive/20 bg-destructive/5 hover:bg-destructive hover:text-white transition-all shadow-sm"
-                                onClick={() =>
-                                  handleOptimisticEnrollment(enrollment.id, "rejected")
-                                }
-                              >
-                                <XCircle className="h-4 w-4 md:h-5 md:w-5" />
-                              </Button>
-                            </div>
-                          </motion.div>
-                        ),
-                      )}
+                          </div>
+                          <div className="flex items-center gap-1 md:gap-2 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              className="h-9 w-9 md:h-10 md:w-10 rounded-xl text-emerald-600 border-emerald-500/20 bg-emerald-500/5 hover:bg-emerald-500 hover:text-white transition-all shadow-sm"
+                              onClick={() => handleOptimisticEnrollment(enrollment.id, "approved")}
+                            >
+                              <CheckCircle2 className="h-4 w-4 md:h-5 md:w-5" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              className="h-9 w-9 md:h-10 md:w-10 rounded-xl text-destructive border-destructive/20 bg-destructive/5 hover:bg-destructive hover:text-white transition-all shadow-sm"
+                              onClick={() => handleOptimisticEnrollment(enrollment.id, "rejected")}
+                            >
+                              <XCircle className="h-4 w-4 md:h-5 md:w-5" />
+                            </Button>
+                          </div>
+                        </motion.div>
+                      ))}
                     </AnimatePresence>
                   )}
                 </div>
@@ -470,11 +463,7 @@ export const StudentsTab = ({
         </div>
       )}
 
-      <BulkEnrollDialog
-        open={bulkDialogOpen}
-        onOpenChange={setBulkDialogOpen}
-        classId={classId}
-      />
+      <BulkEnrollDialog open={bulkDialogOpen} onOpenChange={setBulkDialogOpen} classId={classId} />
     </div>
   );
 };

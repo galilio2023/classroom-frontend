@@ -1,23 +1,24 @@
 import { useState, useEffect } from "react";
 import { useSocket } from "@/contexts/socket-context";
 
-export const useClassRealtime = (
-  userId: string | undefined,
-  classId: string,
-) => {
+interface LiveSessionPayload {
+  classId: string | number;
+}
+
+export const useClassRealtime = (userId: string | undefined, classId: string) => {
   const { socket, isConnected } = useSocket();
   const [isLiveIndicator, setIsLiveIndicator] = useState(false);
 
   useEffect(() => {
     if (!userId || !classId || !socket || !isConnected) return;
 
-    const handleStart = (data: any) => {
+    const handleStart = (data: LiveSessionPayload) => {
       if (Number(data.classId) === Number(classId)) {
         setIsLiveIndicator(true);
       }
     };
 
-    const handleEnd = (data: any) => {
+    const handleEnd = (data: LiveSessionPayload) => {
       if (Number(data.classId) === Number(classId)) {
         setIsLiveIndicator(false);
       }

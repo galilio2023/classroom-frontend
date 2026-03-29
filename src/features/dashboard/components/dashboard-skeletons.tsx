@@ -18,8 +18,8 @@ export const WelcomeHeaderSkeleton = () => (
     <div className="flex flex-col gap-4 mb-10 text-start">
       <Skeleton className="h-10 md:h-12 w-[70%] md:w-64 rounded-2xl" />
       <div className="flex items-center gap-3">
-         <Skeleton className="h-8 w-8 rounded-lg" />
-         <Skeleton className="h-4 w-[40%] md:w-48" />
+        <Skeleton className="h-8 w-8 rounded-lg" />
+        <Skeleton className="h-4 w-[40%] md:w-48" />
       </div>
     </div>
   </SkeletonWrapper>
@@ -27,7 +27,7 @@ export const WelcomeHeaderSkeleton = () => (
 
 export const ChartSkeleton = () => (
   <SkeletonWrapper>
-    <Card className="border-none shadow-xl bg-card/50 backdrop-blur-2xl rounded-[2rem] overflow-hidden text-start">
+    <Card className="border-none shadow-xl bg-card/50 backdrop-blur-2xl rounded-4xl overflow-hidden text-start">
       <CardHeader className="p-8 pb-4">
         <Skeleton className="h-6 w-48" />
       </CardHeader>
@@ -47,7 +47,10 @@ export const ListSkeleton = ({ count = 3 }: { count?: number }) => (
       </div>
       <div className="grid gap-6 sm:grid-cols-2">
         {Array.from({ length: count }).map((_, i) => (
-          <Card key={i} className="p-8 space-y-6 border-none shadow-xl bg-card/50 backdrop-blur-2xl rounded-[2rem]">
+          <Card
+            key={i}
+            className="p-8 space-y-6 border-none shadow-xl bg-card/50 backdrop-blur-2xl rounded-4xl"
+          >
             <div className="flex items-start justify-between">
               <Skeleton className="h-12 w-12 rounded-2xl" />
               <Skeleton className="h-5 w-24 rounded-full" />
@@ -56,8 +59,8 @@ export const ListSkeleton = ({ count = 3 }: { count?: number }) => (
               <Skeleton className="h-6 w-full rounded-lg" />
               <Skeleton className="h-4 w-3/4 rounded-lg" />
             </div>
-            <div className="pt-4 border-t border-black/[0.03] dark:border-white/[0.03]">
-                <Skeleton className="h-10 w-full rounded-xl" />
+            <div className="pt-4 border-t border-black/3 dark:border-white/3">
+              <Skeleton className="h-10 w-full rounded-xl" />
             </div>
           </Card>
         ))}
@@ -68,7 +71,7 @@ export const ListSkeleton = ({ count = 3 }: { count?: number }) => (
 
 export const ScheduleSkeleton = () => (
   <SkeletonWrapper>
-    <Card className="border-none shadow-xl bg-card/50 backdrop-blur-2xl rounded-[2rem] overflow-hidden text-start">
+    <Card className="border-none shadow-xl bg-card/50 backdrop-blur-2xl rounded-4xl overflow-hidden text-start">
       <CardHeader className="p-8 pb-4">
         <Skeleton className="h-6 w-40" />
       </CardHeader>
@@ -89,7 +92,7 @@ export const ScheduleSkeleton = () => (
 
 export const StatsSkeleton = () => (
   <SkeletonWrapper>
-    <Card className="border-none shadow-xl bg-card/50 backdrop-blur-2xl rounded-[2rem] overflow-hidden text-start">
+    <Card className="border-none shadow-xl bg-card/50 backdrop-blur-2xl rounded-4xl overflow-hidden text-start">
       <CardHeader className="p-8 pb-4">
         <Skeleton className="h-6 w-32" />
       </CardHeader>

@@ -30,15 +30,12 @@ interface AtRiskStudentsProps {
 
 export const AtRiskStudents = ({ students }: AtRiskStudentsProps) => {
   const { t, i18n } = useTranslation();
-  const isArabic = i18n.language === 'ar';
+  const isArabic = i18n.language === "ar";
 
   if (students.length === 0) {
     return (
-      <motion.div
-        initial={{ opacity: 0, scale: 0.98 }}
-        animate={{ opacity: 1, scale: 1 }}
-      >
-        <Card className="border-none shadow-2xl bg-success/[0.02] backdrop-blur-xl rounded-[2rem] overflow-hidden group">
+      <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }}>
+        <Card className="border-none shadow-2xl bg-success/2 backdrop-blur-xl rounded-4xl overflow-hidden group">
           <div className="h-1.5 bg-success/20 w-full" />
           <CardHeader className="p-8">
             <div className="flex items-center gap-4">
@@ -46,11 +43,13 @@ export const AtRiskStudents = ({ students }: AtRiskStudentsProps) => {
                 <ShieldCheck className="h-6 w-6" />
               </div>
               <div className="space-y-1">
-                <CardTitle className={cn(
+                <CardTitle
+                  className={cn(
                     "text-xl text-success",
                     isArabic ? "font-bold" : "font-black tracking-tight"
-                )}>
-                    {t("dashboard.staff.atRiskStudents.allClear")}
+                  )}
+                >
+                  {t("dashboard.staff.atRiskStudents.allClear")}
                 </CardTitle>
                 <CardDescription className="font-medium text-success/60">
                   {t("dashboard.staff.atRiskStudents.allClearDescription")}
@@ -64,11 +63,8 @@ export const AtRiskStudents = ({ students }: AtRiskStudentsProps) => {
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-    >
-      <Card className="border-none shadow-2xl bg-destructive/[0.02] backdrop-blur-xl rounded-[2rem] overflow-hidden group">
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+      <Card className="border-none shadow-2xl bg-destructive/2 backdrop-blur-xl rounded-4xl overflow-hidden group">
         <div className="h-1.5 bg-destructive/20 w-full animate-pulse" />
         <CardHeader className="p-8 pb-4">
           <div className="flex items-center justify-between">
@@ -77,20 +73,28 @@ export const AtRiskStudents = ({ students }: AtRiskStudentsProps) => {
                 <AlertTriangle className="h-6 w-6" />
               </div>
               <div className="space-y-1">
-                <CardTitle className={cn(
+                <CardTitle
+                  className={cn(
                     "text-xl text-destructive",
                     isArabic ? "font-bold" : "font-black tracking-tight"
-                )}>
-                    {t("dashboard.staff.atRiskStudents.title")}
+                  )}
+                >
+                  {t("dashboard.staff.atRiskStudents.title")}
                 </CardTitle>
                 <div className="flex items-center gap-2">
                   <Sparkles className="h-3 w-3 text-ai-primary opacity-40" />
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">{t("dashboard.staff.atRiskStudents.aiDetected")}</span>
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
+                    {t("dashboard.staff.atRiskStudents.aiDetected")}
+                  </span>
                 </div>
               </div>
             </div>
-            <Badge variant="destructive" className="rounded-full px-3 py-1 font-black text-[10px] uppercase tracking-widest animate-pulse border-none shadow-lg shadow-destructive/20">
-              {new Intl.NumberFormat(isArabic ? 'ar-EG' : 'en-US').format(students.length)} {isArabic ? "حالات" : "Critical"}
+            <Badge
+              variant="destructive"
+              className="rounded-full px-3 py-1 font-black text-[10px] uppercase tracking-widest animate-pulse border-none shadow-lg shadow-destructive/20"
+            >
+              {new Intl.NumberFormat(isArabic ? "ar-EG" : "en-US").format(students.length)}{" "}
+              {isArabic ? "حالات" : "Critical"}
             </Badge>
           </div>
         </CardHeader>
@@ -109,8 +113,8 @@ export const AtRiskStudents = ({ students }: AtRiskStudentsProps) => {
               ))}
             </AnimatePresence>
           </div>
-          
-          <div className="pt-4 border-t border-black/[0.03] dark:border-white/[0.03] flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">
+
+          <div className="pt-4 border-t border-black/3 dark:border-white/3 flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">
             <Info className="h-3 w-3" />
             <span>{t("dashboard.staff.atRiskStudents.interventionRecommended")}</span>
           </div>

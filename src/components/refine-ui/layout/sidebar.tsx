@@ -31,49 +31,46 @@ export function Sidebar() {
         })}
       >
         {isSidebarLoading ? (
-            <div className="flex flex-col gap-4 items-center justify-center py-10 opacity-40">
-                <Loader2 className="h-5 w-5 animate-spin" />
-            </div>
+          <div className="flex flex-col gap-4 items-center justify-center py-10 opacity-40">
+            <Loader2 className="h-5 w-5 animate-spin" />
+          </div>
         ) : (
-            <>
-                {/* Render default (ungrouped) items first */}
-                <div className="flex flex-col gap-1.5">
-                    {groupedItems.default.map((item: TreeMenuItem) => (
-                        <SidebarItem
-                            key={item.key || item.name}
-                            item={item}
-                            selectedKey={selectedKey}
-                        />
-                    ))}
-                </div>
+          <>
+            {/* Render default (ungrouped) items first */}
+            <div className="flex flex-col gap-1.5">
+              {groupedItems.default.map((item: TreeMenuItem) => (
+                <SidebarItem key={item.key || item.name} item={item} selectedKey={selectedKey} />
+              ))}
+            </div>
 
-                {/* Render grouped items with headers */}
-                {Object.entries(groupedItems).map(([groupName, items]) => {
-                if (groupName === "default" || items.length === 0) return null;
-                
-                return (
-                    <div key={groupName} className="mt-8 mb-2">
-                    <div
-                        className={cn(
-                        "ml-4 mb-4 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40 transition-all duration-300",
-                        !open && "opacity-0 -translate-x-4 pointer-events-none h-0 mb-0 overflow-hidden"
-                        )}
-                    >
-                        {t(groupName as any)}
-                    </div>
-                    <div className="flex flex-col gap-1.5">
-                        {items.map((item: TreeMenuItem) => (
-                        <SidebarItem
-                            key={item.key || item.name}
-                            item={item}
-                            selectedKey={selectedKey}
-                        />
-                        ))}
-                    </div>
-                    </div>
-                );
-                })}
-            </>
+            {/* Render grouped items with headers */}
+            {Object.entries(groupedItems).map(([groupName, items]) => {
+              if (groupName === "default" || items.length === 0) return null;
+
+              return (
+                <div key={groupName} className="mt-8 mb-2">
+                  <div
+                    className={cn(
+                      "ms-4 mb-4 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40 transition-all duration-300",
+                      !open &&
+                        "opacity-0 -translate-x-4 pointer-events-none h-0 mb-0 overflow-hidden"
+                    )}
+                  >
+                    {t(groupName as any)}
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    {items.map((item: TreeMenuItem) => (
+                      <SidebarItem
+                        key={item.key || item.name}
+                        item={item}
+                        selectedKey={selectedKey}
+                      />
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </>
         )}
       </ShadcnSidebarContent>
     </ShadcnSidebar>

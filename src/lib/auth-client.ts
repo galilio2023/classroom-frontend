@@ -3,8 +3,8 @@ import { BETTER_AUTH_ROOT } from "@/config";
 
 /**
  * Better Auth Client Configuration
- * 
- * To avoid any path resolution errors, we provide the FULL 
+ *
+ * To avoid any path resolution errors, we provide the FULL
  * path to the auth root (e.g., https://backend.com/api/auth)
  * as the baseURL, and set basePath to an empty string.
  */
@@ -21,7 +21,7 @@ export const authClient = createAuthClient({
       status: { type: "string" },
       verificationStatus: { type: "string" },
       xp: { type: "number" },
-      level: { type: "number" }
-    }
-  }
+      level: { type: "number" },
+    },
+  },
 });

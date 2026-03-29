@@ -54,9 +54,7 @@ export const AnnouncementReadsModal = ({
             <Eye className="h-5 w-5 text-primary" />
             {t("classes.announcements.reads.title")}
           </DialogTitle>
-          <DialogDescription>
-            {t("classes.announcements.reads.description")}
-          </DialogDescription>
+          <DialogDescription>{t("classes.announcements.reads.description")}</DialogDescription>
         </DialogHeader>
 
         <div className="py-4">
@@ -69,27 +67,18 @@ export const AnnouncementReadsModal = ({
               {t("classes.announcements.reads.empty")}
             </div>
           ) : (
-            <ScrollArea className="h-[300px] pr-4">
+            <ScrollArea className="h-[300px] pe-4">
               <div className="space-y-4">
                 {reads.map((read: ReadReceipt) => (
-                  <div
-                    key={read.id}
-                    className="flex items-center justify-between gap-3"
-                  >
+                  <div key={read.id} className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
                       <Avatar className="h-8 w-8">
                         <AvatarImage src={read.student.image ?? ""} />
-                        <AvatarFallback>
-                          {read.student.name[0]}
-                        </AvatarFallback>
+                        <AvatarFallback>{read.student.name[0]}</AvatarFallback>
                       </Avatar>
                       <div className="flex flex-col">
-                        <span className="text-sm font-medium">
-                          {read.student.name}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          {t("roles.student")}
-                        </span>
+                        <span className="text-sm font-medium">{read.student.name}</span>
+                        <span className="text-xs text-muted-foreground">{t("roles.student")}</span>
                       </div>
                     </div>
                     <span className="text-xs text-muted-foreground">

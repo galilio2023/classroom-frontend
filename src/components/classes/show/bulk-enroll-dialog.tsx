@@ -36,15 +36,11 @@ interface BulkResults {
   errors: { row: number; email: string; error: string }[];
 }
 
-export const BulkEnrollDialog = ({
-  open,
-  onOpenChange,
-  classId,
-}: BulkEnrollDialogProps) => {
+export const BulkEnrollDialog = ({ open, onOpenChange, classId }: BulkEnrollDialogProps) => {
   const { t } = useTranslation();
   const apiUrl = useApiUrl();
   const invalidate = useInvalidate();
-  
+
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<BulkResults | null>(null);
@@ -72,16 +68,12 @@ export const BulkEnrollDialog = ({
     formData.append("file", file);
 
     try {
-      const response = await axios.post(
-        `${apiUrl}/classes/${classId}/bulk-enroll`,
-        formData,
-        {
-          withCredentials: true,
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      const response = await axios.post(`${apiUrl}/classes/${classId}/bulk-enroll`, formData, {
+        withCredentials: true,
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
       setResults(response.data.data);
       toast.success(t("classes.show.students.bulk.success" as any));
@@ -104,11 +96,14 @@ export const BulkEnrollDialog = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={(val) => {
+    <Dialog
+      open={open}
+      onOpenChange={(val) => {
         onOpenChange(val);
         if (!val) reset();
-    }}>
-      <DialogContent className="sm:max-w-[500px] rounded-[2rem] border-none shadow-2xl p-0 overflow-hidden bg-card/95 backdrop-blur-2xl">
+      }}
+    >
+      <DialogContent className="sm:max-w-[500px] rounded-4xl border-none shadow-2xl p-0 overflow-hidden bg-card/95 backdrop-blur-2xl">
         <div className="p-8 space-y-6">
           <DialogHeader className="space-y-3 text-start">
             <div className="flex items-center gap-4">
@@ -120,7 +115,10 @@ export const BulkEnrollDialog = ({
                   {t("classes.show.students.bulk.title", "Bulk Enrollment")}
                 </DialogTitle>
                 <DialogDescription className="font-bold text-muted-foreground/80">
-                  {t("classes.show.students.bulk.description", "Upload a CSV file to enroll multiple students at once.")}
+                  {t(
+                    "classes.show.students.bulk.description",
+                    "Upload a CSV file to enroll multiple students at once."
+                  )}
                 </DialogDescription>
               </div>
             </div>
@@ -132,9 +130,9 @@ export const BulkEnrollDialog = ({
               <div
                 onClick={() => fileInputRef.current?.click()}
                 className={cn(
-                  "relative group cursor-pointer overflow-hidden rounded-[2rem] border-2 border-dashed transition-all duration-500",
-                  file 
-                    ? "border-primary bg-primary/5" 
+                  "relative group cursor-pointer overflow-hidden rounded-4xl border-2 border-dashed transition-all duration-500",
+                  file
+                    ? "border-primary bg-primary/5"
                     : "border-muted-foreground/20 hover:border-primary/50 hover:bg-primary/5"
                 )}
               >
@@ -145,22 +143,28 @@ export const BulkEnrollDialog = ({
                   accept=".csv"
                   className="hidden"
                 />
-                
+
                 <div className="p-10 flex flex-col items-center justify-center text-center space-y-4">
-                  <div className={cn(
-                    "p-4 rounded-2xl transition-all duration-500",
-                    file ? "bg-primary text-white scale-110 shadow-xl" : "bg-muted text-muted-foreground group-hover:scale-110"
-                  )}>
+                  <div
+                    className={cn(
+                      "p-4 rounded-2xl transition-all duration-500",
+                      file
+                        ? "bg-primary text-white scale-110 shadow-xl"
+                        : "bg-muted text-muted-foreground group-hover:scale-110"
+                    )}
+                  >
                     {file ? <FileText className="h-8 w-8" /> : <Upload className="h-8 w-8" />}
                   </div>
-                  
+
                   <div className="space-y-1">
                     <p className="font-black text-sm uppercase tracking-widest">
-                      {file ? file.name : t("classes.show.students.bulk.dropzoneTitle", "Click to upload CSV")}
+                      {file
+                        ? file.name
+                        : t("classes.show.students.bulk.dropzoneTitle", "Click to upload CSV")}
                     </p>
                     <p className="text-xs font-bold text-muted-foreground">
-                      {file 
-                        ? `${(file.size / 1024).toFixed(1)} KB` 
+                      {file
+                        ? `${(file.size / 1024).toFixed(1)} KB`
                         : t("classes.show.students.bulk.dropzoneLimit", "Max file size: 5MB")}
                     </p>
                   </div>
@@ -174,7 +178,10 @@ export const BulkEnrollDialog = ({
                   {t("classes.show.students.bulk.requirementsTitle", "CSV Requirements")}
                 </AlertTitle>
                 <AlertDescription className="text-xs font-bold text-primary/80 mt-1">
-                  {t("classes.show.students.bulk.requirementsText", "Your CSV must include 'name' and 'email' columns. An optional 'password' column can also be provided.")}
+                  {t(
+                    "classes.show.students.bulk.requirementsText",
+                    "Your CSV must include 'name' and 'email' columns. An optional 'password' column can also be provided."
+                  )}
                 </AlertDescription>
               </Alert>
 
@@ -192,9 +199,9 @@ export const BulkEnrollDialog = ({
                   className="flex-1 h-12 rounded-xl font-black uppercase tracking-widest text-[10px] shadow-xl shadow-primary/20"
                 >
                   {loading ? (
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    <Loader2 className="h-4 w-4 animate-spin me-2" />
                   ) : (
-                    <Upload className="h-4 w-4 mr-2" />
+                    <Upload className="h-4 w-4 me-2" />
                   )}
                   {t("buttons.uploadAndEnroll", "Upload & Enroll")}
                 </Button>
@@ -206,11 +213,15 @@ export const BulkEnrollDialog = ({
               <div className="grid grid-cols-2 gap-4">
                 <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 text-center space-y-1">
                   <p className="text-2xl font-black tracking-tight">{results.enrolled}</p>
-                  <p className="text-[10px] font-black uppercase tracking-widest">{t("classes.show.students.bulk.statsEnrolled", "Enrolled")}</p>
+                  <p className="text-[10px] font-black uppercase tracking-widest">
+                    {t("classes.show.students.bulk.statsEnrolled", "Enrolled")}
+                  </p>
                 </div>
                 <div className="p-4 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-600 text-center space-y-1">
                   <p className="text-2xl font-black tracking-tight">{results.created}</p>
-                  <p className="text-[10px] font-black uppercase tracking-widest">{t("classes.show.students.bulk.statsCreated", "New Users")}</p>
+                  <p className="text-[10px] font-black uppercase tracking-widest">
+                    {t("classes.show.students.bulk.statsCreated", "New Users")}
+                  </p>
                 </div>
               </div>
 
@@ -219,7 +230,8 @@ export const BulkEnrollDialog = ({
                 <div className="space-y-3">
                   <p className="text-[10px] font-black uppercase tracking-widest text-destructive flex items-center gap-2 px-1">
                     <AlertCircle className="h-3 w-3" />
-                    {t("classes.show.students.bulk.errorsTitle", "Issues Found")} ({results.errors.length})
+                    {t("classes.show.students.bulk.errorsTitle", "Issues Found")} (
+                    {results.errors.length})
                   </p>
                   <ScrollArea className="h-40 rounded-2xl border border-destructive/10 bg-destructive/5 p-4">
                     <div className="space-y-3">
@@ -241,7 +253,7 @@ export const BulkEnrollDialog = ({
                 onClick={() => onOpenChange(false)}
                 className="w-full h-14 rounded-2xl font-black uppercase tracking-widest text-[10px] bg-emerald-600 hover:bg-emerald-700 shadow-xl shadow-emerald-500/20"
               >
-                <CheckCircle2 className="h-4 w-4 mr-2" />
+                <CheckCircle2 className="h-4 w-4 me-2" />
                 {t("buttons.done" as any)}
               </Button>
             </div>

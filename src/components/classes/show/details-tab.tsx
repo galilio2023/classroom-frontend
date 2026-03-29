@@ -115,8 +115,7 @@ export const DetailsTab = ({
                     <Building2 className="h-4 w-4 md:h-5 md:w-5" />
                   </div>
                   <span className="font-black text-sm md:text-base text-foreground">
-                    {aClass.subject?.department?.name ||
-                      t("classes.show.banner.academic")}
+                    {aClass.subject?.department?.name || t("classes.show.banner.academic")}
                   </span>
                 </div>
               </div>
@@ -142,19 +141,19 @@ export const DetailsTab = ({
               </div>
               {t("classes.show.details.accessControl")}
             </CardTitle>
-            
+
             <CanAccess resource="classes" action="edit" id={aClass.id}>
-                {isOwner && (
+              {isOwner && (
                 <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full sm:w-auto h-10 md:h-12 rounded-xl md:rounded-2xl font-black uppercase tracking-widest text-[10px] border-primary/20 text-primary hover:bg-primary/5 px-6 shadow-sm"
-                    onClick={onInviteClick}
+                  variant="outline"
+                  size="sm"
+                  className="w-full sm:w-auto h-10 md:h-12 rounded-xl md:rounded-2xl font-black uppercase tracking-widest text-[10px] border-primary/20 text-primary hover:bg-primary/5 px-6 shadow-sm"
+                  onClick={onInviteClick}
                 >
-                    <UserPlus className={cn("h-4 w-4", isAr ? "ml-2" : "mr-2")} />
-                    {t("buttons.invite")}
+                  <UserPlus className={cn("h-4 w-4", "me-2")} />
+                  {t("buttons.invite")}
                 </Button>
-                )}
+              )}
             </CanAccess>
           </CardHeader>
           <CardContent className="p-6 md:p-10 space-y-8 md:space-y-10">
@@ -173,7 +172,7 @@ export const DetailsTab = ({
                   >
                     {t("classes.show.details.inviteCode")}
                   </p>
-                  <p className="text-4xl md:text-5xl font-black font-mono tracking-[0.3em] ml-[0.3em]">
+                  <p className="text-4xl md:text-5xl font-black font-mono tracking-[0.3em] ms-[0.3em]">
                     {aClass.inviteCode}
                   </p>
                 </div>

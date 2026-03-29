@@ -27,10 +27,11 @@ export const DashboardHeader = ({ identity, isStudent, analyticsData }: Props) =
       <div className="absolute top-0 end-0 hidden lg:flex items-center gap-4">
         <Badge className="rounded-full px-5 py-2 font-black text-[10px] uppercase tracking-[0.2em] bg-background/60 backdrop-blur-3xl border-border/40 text-muted-foreground shadow-sm group-hover:shadow-md transition-all duration-300">
           <Clock className="h-3.5 w-3.5 me-2 text-primary" />
-          {new Date().toLocaleDateString(
-            i18n.language === "ar" ? "ar-EG" : "en-US",
-            { weekday: "long", month: "short", day: "numeric" },
-          )}
+          {new Date().toLocaleDateString(i18n.language === "ar" ? "ar-EG" : "en-US", {
+            weekday: "long",
+            month: "short",
+            day: "numeric",
+          })}
         </Badge>
         <Button
           variant="outline"

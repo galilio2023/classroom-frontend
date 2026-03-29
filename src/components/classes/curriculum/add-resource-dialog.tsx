@@ -58,36 +58,22 @@ export const AddResourceDialog = ({
               <Input
                 placeholder={t("classes.resource.addDialog.titlePlaceholder")}
                 value={resource.title}
-                onChange={(e) =>
-                  setResource({ ...resource, title: e.target.value })
-                }
+                onChange={(e) => setResource({ ...resource, title: e.target.value })}
               />
             </div>
             <div className="space-y-2">
               <Label>{t("classes.resource.addDialog.fieldType")}</Label>
               <Select
                 value={resource.type}
-                onValueChange={(v: ResourceState["type"]) =>
-                  setResource({ ...resource, type: v })
-                }
+                onValueChange={(v: ResourceState["type"]) => setResource({ ...resource, type: v })}
               >
                 <SelectTrigger>
-                  <SelectValue
-                    placeholder={t(
-                      "classes.resource.addDialog.typePlaceholder",
-                    )}
-                  />
+                  <SelectValue placeholder={t("classes.resource.addDialog.typePlaceholder")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="note">
-                    {t("classes.resource.addDialog.types.note")}
-                  </SelectItem>
-                  <SelectItem value="file">
-                    {t("classes.resource.addDialog.types.file")}
-                  </SelectItem>
-                  <SelectItem value="link">
-                    {t("classes.resource.addDialog.types.link")}
-                  </SelectItem>
+                  <SelectItem value="note">{t("classes.resource.addDialog.types.note")}</SelectItem>
+                  <SelectItem value="file">{t("classes.resource.addDialog.types.file")}</SelectItem>
+                  <SelectItem value="link">{t("classes.resource.addDialog.types.link")}</SelectItem>
                   <SelectItem value="video">
                     {t("classes.resource.addDialog.types.video")}
                   </SelectItem>
@@ -99,17 +85,13 @@ export const AddResourceDialog = ({
             </div>
           </div>
 
-          {(resource.type === "link" ||
-            resource.type === "video" ||
-            resource.type === "other") && (
+          {(resource.type === "link" || resource.type === "video" || resource.type === "other") && (
             <div className="space-y-2">
               <Label>{t("classes.resource.addDialog.fieldUrl")}</Label>
               <Input
                 placeholder={t("classes.resource.addDialog.urlPlaceholder")}
                 value={resource.url}
-                onChange={(e) =>
-                  setResource({ ...resource, url: e.target.value })
-                }
+                onChange={(e) => setResource({ ...resource, url: e.target.value })}
               />
             </div>
           )}
@@ -121,9 +103,7 @@ export const AddResourceDialog = ({
                 className="min-h-50"
                 placeholder={t("classes.resource.addDialog.contentPlaceholder")}
                 value={resource.content}
-                onChange={(e) =>
-                  setResource({ ...resource, content: e.target.value })
-                }
+                onChange={(e) => setResource({ ...resource, content: e.target.value })}
               />
             </div>
           )}
@@ -136,9 +116,7 @@ export const AddResourceDialog = ({
                 })}
               </Label>
               <FileUpload
-                onUploadSuccess={(url, pubId) =>
-                  setResource({ ...resource, url, cldPubId: pubId })
-                }
+                onUploadSuccess={(url, pubId) => setResource({ ...resource, url, cldPubId: pubId })}
               />
             </div>
           )}

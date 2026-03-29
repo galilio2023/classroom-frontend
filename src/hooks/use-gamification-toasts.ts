@@ -17,7 +17,12 @@ export const useGamificationToasts = (userId: string | undefined) => {
     if (!userId || !socket || !isConnected) return;
 
     // 1. Listen for XP Gained
-    const handleXPGained = (data: { amount: number; reason: string; totalXP: number; level: number }) => {
+    const handleXPGained = (data: {
+      amount: number;
+      reason: string;
+      totalXP: number;
+      level: number;
+    }) => {
       toast.success(`+${data.amount} XP`, {
         description: data.reason,
         style: {
@@ -26,7 +31,7 @@ export const useGamificationToasts = (userId: string | undefined) => {
           border: "none",
         },
       });
-      
+
       // Sync UI data
       invalidate({
         resource: "users",
@@ -51,7 +56,7 @@ export const useGamificationToasts = (userId: string | undefined) => {
     };
 
     // 3. Listen for Badge Earned
-    const handleBadgeEarned = (data: { badge: any; message: string }) => {
+    const handleBadgeEarned = (data: { badge: unknown; message: string }) => {
       toast("🏆 " + t("gamification.newBadge", "New Badge Unlocked!"), {
         description: data.message,
         duration: 8000,
@@ -61,7 +66,7 @@ export const useGamificationToasts = (userId: string | undefined) => {
           border: "none",
         },
       });
-      
+
       invalidate({
         resource: "badges",
         invalidates: ["list"],

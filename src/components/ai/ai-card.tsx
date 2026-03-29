@@ -1,5 +1,12 @@
 import React from "react";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Sparkles, LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -13,14 +20,14 @@ interface AICardProps {
   headerAction?: React.ReactNode;
 }
 
-export const AICard: React.FC<AICardProps> = ({ 
-  title, 
-  description, 
-  icon: Icon = Sparkles, 
-  children, 
-  footer, 
+export const AICard: React.FC<AICardProps> = ({
+  title,
+  description,
+  icon: Icon = Sparkles,
+  children,
+  footer,
   className,
-  headerAction
+  headerAction,
 }) => {
   return (
     <Card className={cn("flex flex-col", className)}>
@@ -34,9 +41,7 @@ export const AICard: React.FC<AICardProps> = ({
         </div>
         {headerAction}
       </CardHeader>
-      <CardContent className="flex-1">
-        {children}
-      </CardContent>
+      <CardContent className="flex-1">{children}</CardContent>
       {footer && <CardFooter>{footer}</CardFooter>}
     </Card>
   );

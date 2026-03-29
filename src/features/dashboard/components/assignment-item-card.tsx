@@ -29,18 +29,20 @@ export const AssignmentItemCard: React.FC<AssignmentItemCardProps> = ({ assignme
     >
       <Card
         className={cn(
-          "group relative overflow-hidden transition-all duration-500 border-none shadow-xl bg-card/50 backdrop-blur-xl rounded-[2rem] cursor-pointer",
-          isUrgent 
-            ? "bg-destructive/[0.03] border border-destructive/20 shadow-destructive/5" 
+          "group relative overflow-hidden transition-all duration-500 border-none shadow-xl bg-card/50 backdrop-blur-xl rounded-4xl cursor-pointer",
+          isUrgent
+            ? "bg-destructive/3 border border-destructive/20 shadow-destructive/5"
             : "hover:shadow-2xl hover:bg-card/80 border border-transparent hover:border-primary/20"
         )}
         onClick={() => onOpen(assignment.id.toString())}
       >
         {/* Top Accent Bar */}
-        <div className={cn(
-          "absolute top-0 left-0 w-full h-1.5 transition-all duration-500",
-          isUrgent ? "bg-destructive animate-pulse" : "bg-primary/20 group-hover:bg-primary"
-        )} />
+        <div
+          className={cn(
+            "absolute top-0 start-0 w-full h-1.5 transition-all duration-500",
+            isUrgent ? "bg-destructive animate-pulse" : "bg-primary/20 group-hover:bg-primary"
+          )}
+        />
 
         <div className="p-6 space-y-6">
           <div className="flex items-start justify-between">
@@ -54,12 +56,18 @@ export const AssignmentItemCard: React.FC<AssignmentItemCardProps> = ({ assignme
             </div>
             <div className="flex flex-col items-end gap-2">
               {isUrgent && (
-                <Badge variant="destructive" className="h-5 px-2 rounded-full font-black text-[9px] uppercase tracking-widest animate-pulse border-none shadow-lg shadow-destructive/20">
-                  <AlertCircle className="h-2.5 w-2.5 mr-1" />
+                <Badge
+                  variant="destructive"
+                  className="h-5 px-2 rounded-full font-black text-[9px] uppercase tracking-widest animate-pulse border-none shadow-lg shadow-destructive/20"
+                >
+                  <AlertCircle className="h-2.5 w-2.5 me-1" />
                   Urgent
                 </Badge>
               )}
-              <Badge variant="secondary" className="h-5 px-3 rounded-full font-black text-[9px] uppercase tracking-widest bg-muted/50 border-none">
+              <Badge
+                variant="secondary"
+                className="h-5 px-3 rounded-full font-black text-[9px] uppercase tracking-widest bg-muted/50 border-none"
+              >
                 {assignment.class?.name}
               </Badge>
             </div>
@@ -75,17 +83,19 @@ export const AssignmentItemCard: React.FC<AssignmentItemCardProps> = ({ assignme
                 <span>Due {dueDate.toLocaleDateString()}</span>
               </div>
               <div className="w-1 h-1 rounded-full bg-muted-foreground/20" />
-              <div className={cn(
-                "flex items-center gap-1.5",
-                isUrgent ? "text-destructive font-black" : "text-primary/60"
-              )}>
+              <div
+                className={cn(
+                  "flex items-center gap-1.5",
+                  isUrgent ? "text-destructive font-black" : "text-primary/60"
+                )}
+              >
                 <Clock className="h-3 w-3 opacity-40" />
                 <span>{formatDistanceToNow(dueDate, { addSuffix: true })}</span>
               </div>
             </div>
           </div>
 
-          <div className="flex items-center justify-between pt-4 border-t border-black/[0.03] dark:border-white/[0.03]">
+          <div className="flex items-center justify-between pt-4 border-t border-black/3 dark:border-white/3">
             <div className="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-muted-foreground/40">
               <Sparkles className="h-3 w-3" />
               <span>Ready to submit</span>

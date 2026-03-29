@@ -8,9 +8,9 @@ import { useTranslation } from "react-i18next";
 
 export const useAssignment = (id?: string) => {
   const { i18n } = useTranslation();
-  const isAr = i18n.language === 'ar';
+  const isAr = i18n.language === "ar";
   const { data: identity, isLoading: isIdentityLoading } = useGetIdentity<User>();
-  
+
   const [isResubmitting, setIsResubmitting] = useState(false);
   const [isMonitoring, setIsMonitoring] = useState(false);
 
@@ -21,7 +21,7 @@ export const useAssignment = (id?: string) => {
     isLoading: isDataLoading,
     isError,
     refetchSubmissions,
-    refetchAssignedReviews
+    refetchAssignedReviews,
   } = useAssignmentData(id, identity?.id, identity?.role);
 
   const onAlert = useCallback(() => {
@@ -52,6 +52,9 @@ export const useAssignment = (id?: string) => {
     isLoading: isIdentityLoading || isDataLoading,
     isError,
     state: { isResubmitting, setIsResubmitting, isMonitoring, setIsMonitoring },
-    refetch: { submissions: refetchSubmissions, assignedReviews: refetchAssignedReviews }
+    refetch: {
+      submissions: refetchSubmissions,
+      assignedReviews: refetchAssignedReviews,
+    },
   };
 };

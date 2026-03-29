@@ -46,7 +46,7 @@ export const useQuiz = ({ assignmentId, classId, description, onComplete }: UseQ
 
     const handleActiveStudent = (data: { studentName: string; quizId: number }) => {
       if (data.quizId === assignmentId) {
-        toast(t("classes.quiz.startedToast" as any, { name: data.studentName }), {
+        toast((t as any)("classes.quiz.startedToast", { name: data.studentName }), {
           icon: "✍️",
           duration: 3000,
         });
@@ -54,13 +54,15 @@ export const useQuiz = ({ assignmentId, classId, description, onComplete }: UseQ
     };
 
     const handleNudge = (data: { teacherName: string; message: string; quizId: number }) => {
-        if (data.quizId === assignmentId) {
-            toast(data.message, {
-                description: t("classes.quiz.nudgeFrom" as any, { name: data.teacherName }),
-                icon: "👋",
-                duration: 5000,
-            });
-        }
+      if (data.quizId === assignmentId) {
+        toast(data.message, {
+          description: (t as any)("classes.quiz.nudgeFrom", {
+            name: data.teacherName,
+          }),
+          icon: "👋",
+          duration: 5000,
+        });
+      }
     };
 
     socket.on("quiz:room_count", handleRoomCount);
@@ -84,37 +86,42 @@ export const useQuiz = ({ assignmentId, classId, description, onComplete }: UseQ
     if (!selectedOption || !currentQuestion) return;
     setIsAnswered(true);
     if (selectedOption === currentQuestion.correctAnswer) {
-      setScore(prev => prev + 1);
+      setScore((prev) => prev + 1);
     }
   };
 
   const handleNext = () => {
     if (currentStep < questions.length - 1) {
-      setCurrentStep(prev => prev + 1);
+      setCurrentStep((prev) => prev + 1);
       setSelectedOption(null);
       setIsAnswered(false);
     } else {
       setIsFinished(true);
       const finalScore = Math.round((score / questions.length) * 100);
-      
-      submitScore({
-        resource: "submissions",
-        values: {
-          assignmentId,
-          content: `Completed AI Quiz. Final Score: ${finalScore}%`,
-          grade: finalScore,
-          feedback: `Automated grade from interactive quiz. Correct answers: ${score}/${questions.length}`,
+
+      submitScore(
+        {
+          resource: "submissions",
+          values: {
+            assignmentId,
+            content: `Completed AI Quiz. Final Score: ${finalScore}%`,
+            grade: finalScore,
+            feedback: `Automated grade from interactive quiz. Correct answers: ${score}/${questions.length}`,
+          },
+        },
+        {
+          onSuccess: () => {
+            open?.({
+              type: "success",
+              message: t("classes.quiz.submittedTitle", "Quiz Submitted!"),
+              description: (t as any)("classes.quiz.submittedDesc", {
+                score: finalScore,
+              }),
+            });
+            onComplete?.(finalScore);
+          },
         }
-      }, {
-        onSuccess: () => {
-          open?.({
-            type: "success",
-            message: t("classes.quiz.submittedTitle", "Quiz Submitted!"),
-            description: t("classes.quiz.submittedDesc" as any, { score: finalScore }),
-          });
-          onComplete?.(finalScore);
-        }
-      });
+      );
     }
   };
 

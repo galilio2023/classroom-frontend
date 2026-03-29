@@ -27,16 +27,12 @@ export const QuizResult: React.FC<QuizResultProps> = ({
           </div>
         </div>
         <div className="space-y-2">
-          <h2 className="text-2xl md:text-3xl font-black">
-            {t("classes.quiz.quizComplete")}
-          </h2>
+          <h2 className="text-2xl md:text-3xl font-black">{t("classes.quiz.quizComplete")}</h2>
           <p className="text-sm md:text-base text-muted-foreground font-medium px-4">
             {t("classes.quiz.finishedAssessment")}
           </p>
         </div>
-        <div className="text-5xl md:text-6xl font-black text-primary">
-          {finalPercentage}%
-        </div>
+        <div className="text-5xl md:text-6xl font-black text-primary">{finalPercentage}%</div>
         <p className="text-xs md:text-sm font-bold uppercase tracking-widest text-primary/60">
           {t("classes.quiz.scoreSummary", { score, total: totalQuestions })}
         </p>
@@ -47,7 +43,7 @@ export const QuizResult: React.FC<QuizResultProps> = ({
           variant="outline"
           className="rounded-xl font-bold w-full max-w-50"
         >
-          <RefreshCw className="mr-2 h-4 w-4 rtl:mr-0 rtl:ml-2" />
+          <RefreshCw className="me-2 h-4 w-4 rtl:me-0 rtl:ms-2" />
           {t("buttons.goBack")}
         </Button>
       </CardFooter>

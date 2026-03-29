@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  ChevronLeft,
-  ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 import { useMemo } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -61,23 +56,13 @@ export function DataTablePagination({
         "gap-2"
       )}
     >
-      <div
-        className={cn(
-          "flex-1",
-          "text-sm",
-          "text-muted-foreground",
-          "whitespace-nowrap"
-        )}
-      >
+      <div className={cn("flex-1", "text-sm", "text-muted-foreground", "whitespace-nowrap")}>
         {typeof total === "number" ? t("common.table.rows", { count: total }) : null}
       </div>
       <div className={cn("flex", "items-center", "flex-wrap", "gap-2")}>
         <div className={cn("flex", "items-center", "gap-2")}>
           <span className={cn("text-sm", "font-medium")}>{t("common.table.rowsPerPage")}</span>
-          <Select
-            value={`${pageSize}`}
-            onValueChange={(v) => setPageSize(Number(v))}
-          >
+          <Select value={`${pageSize}`} onValueChange={(v) => setPageSize(Number(v))}>
             <SelectTrigger className={cn("h-8", "w-[70px]")}>
               <SelectValue placeholder={pageSize} />
             </SelectTrigger>
@@ -91,16 +76,11 @@ export function DataTablePagination({
           </Select>
         </div>
         <div className={cn("flex", "items-center", "flex-wrap", "gap-2")}>
-          <div
-            className={cn(
-              "flex",
-              "items-center",
-              "justify-center",
-              "text-sm",
-              "font-medium"
-            )}
-          >
-            {t("common.table.pageOf", { current: currentPage, total: pageCount })}
+          <div className={cn("flex", "items-center", "justify-center", "text-sm", "font-medium")}>
+            {t("common.table.pageOf", {
+              current: currentPage,
+              total: pageCount,
+            })}
           </div>
           <div className={cn("flex", "items-center", "gap-2")}>
             <Button

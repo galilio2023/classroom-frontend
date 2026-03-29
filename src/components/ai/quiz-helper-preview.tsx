@@ -1,11 +1,5 @@
 import React from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "../ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
 import { Send } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -15,10 +9,7 @@ interface QuizHelperPreviewProps {
   onUseAll?: () => void;
 }
 
-export const QuizHelperPreview: React.FC<QuizHelperPreviewProps> = ({
-  questions,
-  onUseAll,
-}) => {
+export const QuizHelperPreview: React.FC<QuizHelperPreviewProps> = ({ questions, onUseAll }) => {
   const { t } = useTranslation();
   return (
     <Card className="flex flex-col">
@@ -28,12 +19,7 @@ export const QuizHelperPreview: React.FC<QuizHelperPreviewProps> = ({
           <CardDescription>{t("aiHub.assistant.quizGen.desc")}</CardDescription>
         </div>
         {questions.length > 0 && onUseAll && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onUseAll}
-            className="gap-2"
-          >
+          <Button variant="outline" size="sm" onClick={onUseAll} className="gap-2">
             <Send className="h-4 w-4" />
             {t("buttons.addSelected")}
           </Button>
@@ -43,10 +29,7 @@ export const QuizHelperPreview: React.FC<QuizHelperPreviewProps> = ({
         <div className="space-y-4 max-h-100">
           {questions.length > 0 ? (
             questions.map((q, idx) => (
-              <div
-                key={idx}
-                className="p-3 border rounded-md bg-muted/30 space-y-2 text-start"
-              >
+              <div key={idx} className="p-3 border rounded-md bg-muted/30 space-y-2 text-start">
                 <p className="font-medium text-sm">
                   {idx + 1}. {q.question}
                 </p>
@@ -54,11 +37,7 @@ export const QuizHelperPreview: React.FC<QuizHelperPreviewProps> = ({
                   {q.options.map((opt: string, oIdx: number) => (
                     <div
                       key={oIdx}
-                      className={
-                        opt === q.correctAnswer
-                          ? "text-green-600 font-bold"
-                          : ""
-                      }
+                      className={opt === q.correctAnswer ? "text-green-600 font-bold" : ""}
                     >
                       • {opt}
                     </div>

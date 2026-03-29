@@ -1,19 +1,21 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { useCustom, useNotification, usePermissions, useCustomMutation } from "@refinedev/core";
+import {
+  useCustom,
+  useNotification,
+  usePermissions,
+  useCustomMutation,
+  useGetIdentity,
+} from "@refinedev/core";
 import { useTranslation } from "react-i18next";
 import { BACKEND_URL } from "@/config";
-import { BasePermissions, UserRole } from "@/types";
-
-export interface Message {
-  id?: string;
-  role: "user" | "model";
-  parts: { text: string }[];
-  sources?: any[];
-}
+import { BasePermissions, UserRole, User } from "@/types";
+import { ChatSource, Message } from "@/types/ai";
+import { offlineDB } from "@/lib/offline-db";
+import { useAiAccess } from "./use-ai-access";
 
 interface UseAIChatProps {
   url: string;
-  context?: Record<string, any>;
+  context?: Record<string, unknown>;
   classId?: string | number | null;
 }
 
@@ -28,81 +30,118 @@ interface ChatHistoryResponse {
   data: ChatHistoryItem[];
 }
 
-interface AuthPermissions extends BasePermissions {}
+interface StreamData {
+  text?: string;
+  sources?: ChatSource[];
+  done?: boolean;
+  metadata?: {
+    isDryRun?: boolean;
+  };
+}
 
 const MAX_INPUT_LENGTH = 4000;
 
 /**
  * useAIChat Hook (Final Production Grade)
- * 
+ *
  * Optimized for Tablawy OS AI Streaming.
  * Handles SSE Buffering, History Syncing, and Multi-Class Navigation.
  */
 export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
   const { t } = useTranslation();
+  const { data: identity } = useGetIdentity<User>();
+  const { isAiEnabled, isAllowed } = useAiAccess();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
-  
+
+  const effectiveClassId = String(classId || "global");
+
+  // 🛡️ ADAPTIVE CACHE: Load from local IndexedDB first (Dexie)
+  useEffect(() => {
+    if (!identity?.id || !isAiEnabled || !isAllowed) return;
+
+    const loadLocalCache = async () => {
+      try {
+        const cached = await offlineDB.ai_history.get({
+          userId: identity.id,
+          classId: effectiveClassId,
+        });
+        // Only use cache if we haven't loaded from server yet
+        if (cached && hasLoadedHistoryFor.current !== effectiveClassId) {
+          setMessages(cached.messages);
+          hasLoadedHistoryFor.current = effectiveClassId;
+        }
+      } catch (err) {
+        console.warn("Failed to load AI cache:", err);
+      }
+    };
+
+    void loadLocalCache();
+  }, [identity?.id, effectiveClassId]);
+
   // 🛡️ AUTO-DRAFT: AI Assistant Persistence
   useEffect(() => {
-      const draftKey = `draft:ai-assistant:${classId || 'global'}`;
-      if (input) {
-          localStorage.setItem(draftKey, input);
-      } else {
-          localStorage.removeItem(draftKey);
-      }
+    const draftKey = `draft:ai-assistant:${classId || "global"}`;
+    if (input) {
+      localStorage.setItem(draftKey, input);
+    } else {
+      localStorage.removeItem(draftKey);
+    }
   }, [input, classId]);
 
   // 🚀 DRAFT RECOVERY
   useEffect(() => {
-      const draftKey = `draft:ai-assistant:${classId || 'global'}`;
-      const saved = localStorage.getItem(draftKey);
-      if (saved && !input) {
-          setInput(saved);
-      }
+    const draftKey = `draft:ai-assistant:${classId || "global"}`;
+    const saved = localStorage.getItem(draftKey);
+    if (saved) {
+      setInput((prev) => prev || saved);
+    }
   }, [classId]);
+
   const [isLoading, setIsLoading] = useState(false);
   const [streamingMessage, setStreamingMessage] = useState("");
-  const [streamingSources, setStreamingSources] = useState<any[] | null>(null);
+  const [streamingSources, setStreamingSources] = useState<ChatSource[] | null>(null);
   const [isDryRun, setIsDryRun] = useState(false);
 
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const accumulatorRef = useRef("");
-  const lineBufferRef = useRef(""); 
+  const lineBufferRef = useRef("");
   const animationFrameRef = useRef<number | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
-  const hasLoadedHistoryFor = useRef<string | number | null>(null); 
-  
+  const hasLoadedHistoryFor = useRef<string | number | null>(null);
+
   const { open } = useNotification();
-  const { data: permissions, isLoading: isPermissionsLoading, isError: isPermissionsError } = usePermissions<AuthPermissions>({});
+  const {
+    data: permissions,
+    isLoading: isPermissionsLoading,
+    isError: isPermissionsError,
+  } = usePermissions<BasePermissions>({});
 
   // 1. 📜 HISTORY: Standard Refine v5 GET
-  // Task: Context Safety - Fallback to "global" history if no classId provided
-  const effectiveClassId = classId || 'global';
   const { result: historyResult, query: historyQuery } = useCustom<ChatHistoryResponse>({
     url: `${BACKEND_URL}/ai/chat-history/${effectiveClassId}`,
     method: "get",
     queryOptions: {
-      enabled: hasLoadedHistoryFor.current !== effectiveClassId,
+      enabled: !!identity?.id && hasLoadedHistoryFor.current !== effectiveClassId,
     },
   });
 
-  // 1b. 🦾 NON-STREAMING FALLBACK (Refine v5 Pattern Adherence)
+  // 1b. 🦾 NON-STREAMING FALLBACK
   const { mutate: sendSimpleChat } = useCustomMutation();
 
   // Handle Navigation & State Resets
   useEffect(() => {
     if (effectiveClassId !== hasLoadedHistoryFor.current) {
-        setMessages([]);
-        accumulatorRef.current = "";
-        lineBufferRef.current = "";
+      setMessages([]);
+      accumulatorRef.current = "";
+      lineBufferRef.current = "";
     }
   }, [effectiveClassId]);
 
-  // Sync history safely
+  // Sync history safely and update local cache
   useEffect(() => {
     const historyData = historyResult?.data?.data;
-    if (historyData && hasLoadedHistoryFor.current !== effectiveClassId) {
+    if (historyData && identity?.id && hasLoadedHistoryFor.current !== effectiveClassId) {
       const history = historyData.map((m: ChatHistoryItem) => ({
         id: String(m.id),
         role: m.role,
@@ -110,8 +149,18 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
       }));
       setMessages(history);
       hasLoadedHistoryFor.current = effectiveClassId;
+
+      // Update Dexie Cache
+      if (!abortControllerRef.current?.signal.aborted) {
+        void offlineDB.ai_history.put({
+          userId: identity.id,
+          classId: effectiveClassId,
+          messages: history,
+          timestamp: Date.now(),
+        });
+      }
     }
-  }, [historyResult, effectiveClassId]);
+  }, [historyResult, effectiveClassId, identity?.id]);
 
   // 2. 🧹 CLEANUP
   useEffect(() => {
@@ -123,7 +172,9 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
 
   const scrollToBottom = useCallback(() => {
     if (scrollAreaRef.current) {
-      const scrollContainer = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
+      const scrollContainer = scrollAreaRef.current.querySelector(
+        "[data-radix-scroll-area-viewport]"
+      );
       if (scrollContainer) {
         scrollContainer.scrollTop = scrollContainer.scrollHeight;
       }
@@ -136,7 +187,7 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
 
   const updateStreamingUI = useCallback(() => {
     if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
-    
+
     animationFrameRef.current = requestAnimationFrame(() => {
       setStreamingMessage(accumulatorRef.current);
       animationFrameRef.current = null;
@@ -148,21 +199,43 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
     const cleanInput = input.trim();
     if (!cleanInput || isLoading || isPermissionsLoading) return;
 
+    // 🛡️ Global Master Switch & RBAC
+    if (!isAiEnabled || !isAllowed) {
+      open?.({
+        type: "error",
+        message: t("common.accessDenied"),
+        description: t("aiHub.errors.serviceUnavailable"),
+      });
+      return;
+    }
+
     // RBAC & Safety Checks
     if (isPermissionsError) {
-        open?.({ type: "error", message: t("common.error"), description: t("auth.errors.permissions" as any) });
-        return;
+      open?.({
+        type: "error",
+        message: t("common.error"),
+        description: t("auth.errors.permissions"),
+      });
+      return;
     }
 
     if (cleanInput.length > MAX_INPUT_LENGTH) {
-        open?.({ type: "error", message: t("common.error"), description: t("aiHub.errors.inputTooLong" as any) });
-        return;
+      open?.({
+        type: "error",
+        message: t("common.error"),
+        description: t("aiHub.errors.inputTooLong"),
+      });
+      return;
     }
 
     const role = permissions?.role;
     if (effectiveClassId && role === UserRole.PARENT) {
-        open?.({ type: "error", message: t("common.accessDenied" as any), description: t("aiHub.errors.parentRestricted" as any) });
-        return;
+      open?.({
+        type: "error",
+        message: t("common.accessDenied"),
+        description: t("aiHub.errors.parentRestricted"),
+      });
+      return;
     }
 
     // Initialize Request Lifecycle
@@ -170,17 +243,21 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
     const controller = new AbortController();
     abortControllerRef.current = controller;
 
-    const userMessage: Message = { role: "user", parts: [{ text: cleanInput }] };
-    setMessages((prev) => [...prev, userMessage]);
-    
+    const userMessage: Message = {
+      role: "user",
+      parts: [{ text: cleanInput }],
+    };
+    const messagesBeforeModel = [...messages, userMessage];
+    setMessages(messagesBeforeModel);
+
     setInput("");
     setIsLoading(true);
     setStreamingMessage("");
     setStreamingSources(null);
     accumulatorRef.current = "";
-    lineBufferRef.current = ""; 
+    lineBufferRef.current = "";
 
-    const finalUrl = effectiveClassId ? "/ai/study-buddy" : url;
+    const finalUrl = effectiveClassId && effectiveClassId !== "global" ? "/ai/study-buddy" : url;
     const apiUrl = `${BACKEND_URL}${finalUrl}`;
 
     try {
@@ -188,36 +265,62 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
       const correlationId = crypto.randomUUID();
 
       // General Chat (Non-Streaming) - Use Refine's useCustomMutation
-      if (!effectiveClassId || effectiveClassId === 'global') {
-        sendSimpleChat({
+      if (!effectiveClassId || effectiveClassId === "global") {
+        sendSimpleChat(
+          {
             url: apiUrl,
             method: "post",
             values: {
-                message: cleanInput,
-                history: messages.map(m => ({ role: m.role, parts: m.parts })),
-                context,
-                correlationId
-            }
-        }, {
-            onSuccess: (result: any) => {
-                if (result.data?.data?.response) {
-                    setMessages((prev) => [...prev, { role: "model", parts: [{ text: result.data.data.response }] }]);
+              message: cleanInput,
+              history: messages.map((m) => ({ role: m.role, parts: m.parts })),
+              context,
+              correlationId,
+            },
+          },
+          {
+            onSuccess: (result) => {
+              const responseData = result.data as {
+                data?: { response?: string };
+                metadata?: { isDryRun?: boolean };
+              };
+              if (responseData.data?.response) {
+                const modelMessage: Message = {
+                  role: "model",
+                  parts: [{ text: responseData.data?.response || "" }],
+                };
+                const updatedMessages = [...messagesBeforeModel, modelMessage];
+                setMessages(updatedMessages);
+
+                // Update Cache
+                if (identity?.id && !abortControllerRef.current?.signal.aborted) {
+                  void offlineDB.ai_history.put({
+                    userId: identity.id,
+                    classId: effectiveClassId,
+                    messages: updatedMessages,
+                    timestamp: Date.now(),
+                  });
                 }
-                if (result.data?.metadata?.isDryRun) setIsDryRun(true);
-                setIsLoading(false);
+              }
+              if (responseData.metadata?.isDryRun) setIsDryRun(true);
+              setIsLoading(false);
             },
             onError: (err) => {
-                console.error("Simple Chat Error:", err);
-                setIsLoading(false);
-                open?.({ type: "error", message: t("common.error"), description: t("aiHub.errors.serviceUnavailable" as any) });
-            }
-        });
+              console.error("Simple Chat Error:", err);
+              setIsLoading(false);
+              open?.({
+                type: "error",
+                message: t("common.error"),
+                description: t("aiHub.errors.serviceUnavailable"),
+              });
+            },
+          }
+        );
         return;
       }
 
-      const headers: Record<string, string> = { 
-          "Content-Type": "application/json",
-          "X-Correlation-ID": correlationId
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+        "X-Correlation-ID": correlationId,
       };
       if (token) headers["Authorization"] = `Bearer ${token}`;
 
@@ -228,10 +331,10 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
         headers,
         body: JSON.stringify({
           message: cleanInput,
-          history: messages.map(m => ({ role: m.role, parts: m.parts })),
+          history: messages.map((m) => ({ role: m.role, parts: m.parts })),
           context,
           classId: effectiveClassId,
-          correlationId, // Also pass in body for non-header compliant middle-layers
+          correlationId,
         }),
       });
 
@@ -244,28 +347,25 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
       const decoder = new TextDecoder();
       if (!reader) throw new Error("STREAM_READER_UNAVAILABLE");
 
-      let buffer = "";
+      let streamBuffer = "";
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
 
         const chunk = decoder.decode(value, { stream: true });
-        buffer += chunk;
-        
-        // 🛡️ JSON LINE BUFFERING: Split by double newlines (SSE standard)
-        const lines = buffer.split("\n\n");
+        streamBuffer += chunk;
 
-        // Keep the last partial line in the buffer
-        buffer = lines.pop() || "";
+        const lines = streamBuffer.split("\n\n");
+        streamBuffer = lines.pop() || "";
 
         for (const line of lines) {
           if (line.startsWith("data: ")) {
             try {
               const rawData = line.replace("data: ", "").trim();
               if (!rawData) continue;
-              
-              const data = JSON.parse(rawData);
+
+              const data = JSON.parse(rawData) as StreamData;
               if (data.text) {
                 accumulatorRef.current += data.text;
                 updateStreamingUI();
@@ -279,45 +379,56 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
         }
       }
 
-      // Final State Push (Guard against empty bubbles)
       if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
       const finalResponseText = accumulatorRef.current.trim();
-      
+
       if (finalResponseText.length > 0) {
-        setMessages((prev) => [
-          ...prev,
-          {
-            role: "model",
-            parts: [{ text: finalResponseText }],
-            sources: streamingSources || undefined
-          }
-        ]);
+        const modelMessage: Message = {
+          role: "model",
+          parts: [{ text: finalResponseText }],
+          sources: streamingSources || undefined,
+        };
+        const updatedMessages = [...messagesBeforeModel, modelMessage];
+        setMessages(updatedMessages);
+
+        // Persistent Cache update
+        if (identity?.id && !abortControllerRef.current?.signal.aborted) {
+          void offlineDB.ai_history.put({
+            userId: identity.id,
+            classId: effectiveClassId,
+            messages: updatedMessages,
+            timestamp: Date.now(),
+          });
+        }
       } else {
         throw new Error("EMPTY_RESPONSE");
       }
 
       setStreamingMessage("");
       setStreamingSources(null);
+    } catch (err: unknown) {
+      const error = err as Error;
+      if (error.name === "AbortError") return;
 
-    } catch (error: any) {
-      if (error.name === 'AbortError') return;
-      
       console.error("Tablawy AI Error:", error);
-      
-      let description = t("aiHub.errors.serviceUnavailable" as any);
-      if (error.message === "RATE_LIMIT_EXCEEDED") description = t("aiHub.errors.rateLimit" as any);
-      if (error.message === "AI_SERVICE_OFFLINE") description = t("aiHub.errors.maintenance" as any);
 
-      open?.({ 
-        type: "error", 
-        message: t("common.error"), 
-        description 
+      let description: string = t("aiHub.errors.serviceUnavailable");
+      if (error.message === "RATE_LIMIT_EXCEEDED") description = t("aiHub.errors.rateLimit");
+      if (error.message === "AI_SERVICE_OFFLINE") description = t("aiHub.errors.maintenance");
+
+      open?.({
+        type: "error",
+        message: t("common.error"),
+        description,
       });
-      
-      setMessages((prev) => [...prev, { 
-        role: "model", 
-        parts: [{ text: t("aiHub.errors.friendlyFallback" as any) }] 
-      }]);
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "model",
+          parts: [{ text: t("aiHub.errors.friendlyFallback") }],
+        },
+      ]);
     } finally {
       if (abortControllerRef.current === controller) {
         setIsLoading(false);

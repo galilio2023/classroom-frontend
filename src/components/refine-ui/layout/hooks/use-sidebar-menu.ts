@@ -28,7 +28,7 @@ export const useSidebarMenu = () => {
 
     menuItems.forEach((item) => {
       const groupName = item.meta?.group as string | undefined;
-      
+
       // 1. RBAC Group Check
       if (groupName && userRole) {
         const allowedRoles = ROLE_GROUP_PERMISSIONS[groupName];
@@ -38,16 +38,42 @@ export const useSidebarMenu = () => {
       // 2. Explicit Exclusions
       if (userRole === UserRole.STUDENT) {
         if (["ai-assistant", "teacher-channel", "teacher-applications"].includes(item.name)) return;
-        if (["departments", "profile-requests", "academic-terms", "activity-log", "users", "settings"].includes(item.name)) return;
+        if (
+          [
+            "departments",
+            "profile-requests",
+            "academic-terms",
+            "activity-log",
+            "users",
+            "settings",
+          ].includes(item.name)
+        )
+          return;
       }
 
       if (userRole === UserRole.TEACHER) {
-        if (["departments", "profile-requests", "activity-log", "users", "settings"].includes(item.name)) return;
-        if (["ai-study-lab", "study-planner", "report-card", "portfolio"].includes(item.name)) return;
+        if (
+          ["departments", "profile-requests", "activity-log", "users", "settings"].includes(
+            item.name
+          )
+        )
+          return;
+        if (["ai-study-lab", "study-planner", "report-card", "portfolio"].includes(item.name))
+          return;
       }
-      
+
       if (userRole === UserRole.ADMIN) {
-        if (!["dashboard", "users", "departments", "settings", "activity-log", "profile-requests"].includes(item.name)) return;
+        if (
+          ![
+            "dashboard",
+            "users",
+            "departments",
+            "settings",
+            "activity-log",
+            "profile-requests",
+          ].includes(item.name)
+        )
+          return;
       }
 
       // 3. Meta Role Check

@@ -60,7 +60,7 @@ export const ResourceItem = ({
         "group flex flex-col p-3 md:p-4 rounded-xl md:rounded-2xl border transition-all duration-300",
         completed
           ? "bg-success/5 border-success/20 shadow-sm"
-          : "bg-card/50 border-black/3 dark:border-white/3 hover:border-primary/20 hover:bg-card hover:shadow-md",
+          : "bg-card/50 border-black/3 dark:border-white/3 hover:border-primary/20 hover:bg-card hover:shadow-md"
       )}
     >
       <div className="flex items-center justify-between gap-3 md:gap-4">
@@ -98,7 +98,7 @@ export const ResourceItem = ({
             <div
               className={cn(
                 "p-1.5 md:p-2 rounded-lg md:rounded-xl shrink-0 transition-transform group-hover:scale-110",
-                bg,
+                bg
               )}
             >
               <Icon className={cn("h-3.5 w-3.5 md:h-4 md:w-4", color)} />
@@ -110,7 +110,7 @@ export const ResourceItem = ({
                   "text-xs md:text-sm font-black tracking-tight truncate transition-all",
                   completed
                     ? "text-success/60 line-through decoration-success/30"
-                    : "text-foreground group-hover:text-primary",
+                    : "text-foreground group-hover:text-primary"
                 )}
               >
                 {resource.title}
@@ -133,9 +133,7 @@ export const ResourceItem = ({
             >
               <Link to={`/classes/${classId}/lessons/${resource.id}`}>
                 <Eye className="h-3 w-3 md:h-3.5 md:w-3.5" />
-                <span className="hidden xs:inline">
-                  {t("buttons.openLesson")}
-                </span>
+                <span className="hidden xs:inline">{t("buttons.openLesson")}</span>
                 <ArrowRight className="hidden md:block h-3 w-3 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all rtl:rotate-180" />
               </Link>
             </Button>
@@ -156,7 +154,7 @@ export const ResourceItem = ({
       </div>
 
       {resource.type === "note" && resource.content && (
-        <div className="mt-2 md:mt-3 pl-10 md:pl-12 rtl:pl-0 rtl:pr-10 md:rtl:pr-12 text-[10px] md:text-[11px] text-muted-foreground/60 line-clamp-1 italic font-medium text-start">
+        <div className="mt-2 md:mt-3 ps-10 md:ps-12 rtl:ps-0 rtl:pe-10 md:rtl:pe-12 text-[10px] md:text-[11px] text-muted-foreground/60 line-clamp-1 italic font-medium text-start">
           <div className="prose prose-xs dark:prose-invert max-w-none pointer-events-none">
             <ReactMarkdown>{resource.content}</ReactMarkdown>
           </div>

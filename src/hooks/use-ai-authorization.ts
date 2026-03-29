@@ -1,19 +1,11 @@
 import { usePermissions } from "@refinedev/core";
 import { BasePermissions, UserRole } from "@/types";
 
-interface AuthPermissions extends BasePermissions {}
-
-/**
- * 🛡️ useAIAuthorization Hook
- * 
- * Centralizes RBAC logic for AI features.
- * Consistent with Tablawy OS security patterns.
- */
 export const useAIAuthorization = () => {
-  const { data: permissions, isLoading } = usePermissions<AuthPermissions>({});
+  const { data: permissions, isLoading } = usePermissions<BasePermissions>({});
 
   const role = permissions?.role;
-  
+
   const isStudent = role === UserRole.STUDENT;
   const isTeacher = role === UserRole.TEACHER;
   const isAdmin = role === UserRole.ADMIN;
@@ -35,6 +27,6 @@ export const useAIAuthorization = () => {
     isParent,
     isStaff,
     canInteract,
-    isLoading
+    isLoading,
   };
 };

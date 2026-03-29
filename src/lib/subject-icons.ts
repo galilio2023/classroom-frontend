@@ -1,5 +1,5 @@
-import { 
-  BookOpen, 
+import {
+  BookOpen,
   Calculator,
   FlaskConical,
   Languages,
@@ -8,7 +8,7 @@ import {
   Dumbbell,
   Code,
   Landmark,
-  FileText
+  FileText,
 } from "lucide-react";
 
 /**
@@ -17,7 +17,7 @@ import {
  */
 export const getSubjectIcon = (subjectName?: string | null) => {
   const name = (subjectName || "").toLowerCase();
-  
+
   if (/(tech|code|computer|web|software|ai)/.test(name)) return Code;
   if (/(science|bio|chem|phys|lab)/.test(name)) return FlaskConical;
   if (/(math|calc|algebra)/.test(name)) return Calculator;
@@ -27,6 +27,6 @@ export const getSubjectIcon = (subjectName?: string | null) => {
   if (/(sport|gym|physical|health|athletic)/.test(name)) return Dumbbell;
   if (/(hist|geog|social|civics|politi)/.test(name)) return Landmark;
   if (/(writ|lit|journalism)/.test(name)) return FileText;
-  
+
   return BookOpen;
 };

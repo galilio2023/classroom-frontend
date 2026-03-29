@@ -24,7 +24,9 @@ export const ClassLoadingView = () => {
         <h2 className="text-sm font-black uppercase tracking-[0.3em] text-primary/60 animate-pulse">
           {t("classes.show.assembling")}
         </h2>
-        <p className="text-xs font-medium text-muted-foreground/60 italic">Preparing your immersive classroom...</p>
+        <p className="text-xs font-medium text-muted-foreground/60 italic">
+          Preparing your immersive classroom...
+        </p>
       </div>
     </div>
   );
@@ -38,9 +40,7 @@ export const ClassErrorView = () => {
         <XCircle className="h-20 w-20" />
       </div>
       <div className="space-y-3">
-        <h2 className="text-4xl font-black tracking-tight">
-          {t("classes.show.notFound")}
-        </h2>
+        <h2 className="text-4xl font-black tracking-tight">{t("classes.show.notFound")}</h2>
         <p className="text-muted-foreground font-medium max-w-md mx-auto text-lg">
           {t("classes.show.notFoundDescription")}
         </p>

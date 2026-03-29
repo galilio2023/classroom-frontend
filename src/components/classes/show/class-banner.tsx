@@ -1,6 +1,16 @@
 import { Class } from "@/types";
 import { Badge } from "@/components/ui/badge";
-import { Clock, Globe, Timer, Users, Video, Zap, ZapOff } from "lucide-react";
+import {
+  Clock,
+  Globe,
+  Timer,
+  Users,
+  Video,
+  Zap,
+  ZapOff,
+  CircleDollarSign,
+  Loader2,
+} from "lucide-react";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { Fragment, useMemo } from "react";
@@ -15,6 +25,9 @@ interface ClassBannerProps {
   isLiveIndicator: boolean;
   isStaff?: boolean;
   onToggleLive?: () => void;
+  isEnrolled?: boolean;
+  onCheckout?: () => void;
+  isCheckingOut?: boolean;
 }
 
 export const ClassBanner = ({
@@ -24,15 +37,21 @@ export const ClassBanner = ({
   isLiveIndicator,
   isStaff,
   onToggleLive,
+  isEnrolled,
+  onCheckout,
+  isCheckingOut,
 }: ClassBannerProps) => {
   const { t, i18n } = useTranslation();
   const classColor = aClass.color || "#3b82f6";
   const isFull = aClass.capacity && approvedCount >= aClass.capacity;
 
-  const SubjectIcon = useMemo(
-    () => getSubjectIcon(aClass.subject?.name),
-    [aClass.subject?.name],
-  );
+  const SubjectIcon = useMemo(() => getSubjectIcon(aClass.subject?.name), [aClass.subject?.name]);
+
+  const showEnrollButton = !isStaff && !isEnrolled;
+  const isPaid = aClass.isPaid && aClass.priceAmount > 0;
+  const formattedPrice = isPaid
+    ? `${(aClass.priceAmount / 100).toFixed(2)} ${aClass.currency?.toUpperCase()}`
+    : "";
 
   return (
     <motion.div
@@ -56,8 +75,7 @@ export const ClassBanner = ({
               variant="secondary"
               className="bg-white/20 text-white border border-white/10 backdrop-blur-md font-black text-[10px] md:text-xs uppercase tracking-widest px-4 py-1.5 md:py-2 rounded-xl shadow-sm"
             >
-              {aClass.subject?.department?.name ||
-                t("classes.show.banner.academic")}
+              {aClass.subject?.department?.name || t("classes.show.banner.academic")}
             </Badge>
             {isFull && (
               <Badge className="bg-orange-500 text-white border-none font-black text-[10px] md:text-xs uppercase tracking-widest px-4 py-1.5 md:py-2 rounded-xl shadow-lg">
@@ -103,8 +121,7 @@ export const ClassBanner = ({
               >
                 <Clock className="h-4 w-4 text-white/70" />
                 <span>
-                  {t(`days.${schedule.day.substring(0, 3)}` as any)} •{" "}
-                  {schedule.startTime}
+                  {t(`days.${schedule.day.substring(0, 3)}` as any)} • {schedule.startTime}
                 </span>
               </div>
             ))}
@@ -112,43 +129,74 @@ export const ClassBanner = ({
         </div>
 
         <div className="flex flex-col gap-3 self-start md:self-end shrink-0">
-            {isStaff && onToggleLive && (
-                <Button
-                    size="lg"
-                    onClick={onToggleLive}
-                    className={cn(
-                        "rounded-2xl h-14 px-8 font-black uppercase tracking-widest text-[10px] shadow-2xl transition-all active:scale-95 border-2",
-                        isLiveIndicator 
-                            ? "bg-white text-red-600 border-white hover:bg-white/90 shadow-red-500/20" 
-                            : "bg-red-600 text-white border-red-600 hover:bg-red-700 shadow-red-600/40"
-                    )}
-                >
-                    {isLiveIndicator ? (
-                        <>
-                            <ZapOff className="h-4 w-4 mr-2" />
-                            {t("buttons.stopLive", "End Live Session")}
-                        </>
-                    ) : (
-                        <>
-                            <Zap className="h-4 w-4 mr-2 animate-pulse" />
-                            {t("buttons.goLive", "Go Live Now")}
-                        </>
-                    )}
-                </Button>
-            )}
+          {isStaff && onToggleLive && (
+            <Button
+              size="lg"
+              onClick={onToggleLive}
+              className={cn(
+                "rounded-2xl h-14 px-8 font-black uppercase tracking-widest text-[10px] shadow-2xl transition-all active:scale-95 border-2",
+                isLiveIndicator
+                  ? "bg-white text-red-600 border-white hover:bg-white/90 shadow-red-500/20"
+                  : "bg-red-600 text-white border-red-600 hover:bg-red-700 shadow-red-600/40"
+              )}
+            >
+              {isLiveIndicator ? (
+                <>
+                  <ZapOff className="h-4 w-4 me-2" />
+                  {t("buttons.stopLive", "End Live Session")}
+                </>
+              ) : (
+                <>
+                  <Zap className="h-4 w-4 me-2 animate-pulse" />
+                  {t("buttons.goLive", "Go Live Now")}
+                </>
+              )}
+            </Button>
+          )}
 
-            {isLiveIndicator && !isStaff && (
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="flex items-center gap-3 bg-red-500 text-white px-6 md:px-8 py-3 md:py-4 rounded-2xl md:rounded-4xl shadow-2xl shadow-red-500/40 animate-pulse border-2 border-white/20"
-                >
-                    <Video className="h-5 w-5 md:h-6 md:w-6" />
-                    <span className="font-black uppercase tracking-widest text-[10px] md:text-sm whitespace-nowrap">
-                    {t("classes.show.banner.liveActive")}
-                    </span>
-                </motion.div>
-            )}
+          {isLiveIndicator && !isStaff && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="flex items-center gap-3 bg-red-500 text-white px-6 md:px-8 py-3 md:py-4 rounded-2xl md:rounded-4xl shadow-2xl shadow-red-500/40 animate-pulse border-2 border-white/20"
+            >
+              <Video className="h-5 w-5 md:h-6 md:w-6" />
+              <span className="font-black uppercase tracking-widest text-[10px] md:text-sm whitespace-nowrap">
+                {t("classes.show.banner.liveActive")}
+              </span>
+            </motion.div>
+          )}
+
+          {showEnrollButton && (
+            <Button
+              size="lg"
+              disabled={isCheckingOut || !!isFull}
+              onClick={isPaid ? onCheckout : undefined} // For now, only handle paid, free enrollment usually goes through a dialog
+              className={cn(
+                "rounded-2xl h-14 md:h-16 px-8 md:px-10 font-black uppercase tracking-[0.2em] text-[10px] md:text-xs shadow-2xl transition-all active:scale-95 border-2",
+                isPaid
+                  ? "bg-amber-500 text-white border-amber-400 hover:bg-amber-600 shadow-amber-500/30"
+                  : "bg-white text-primary border-white hover:bg-white/90 shadow-white/20"
+              )}
+            >
+              {isCheckingOut ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : isPaid ? (
+                <>
+                  <CircleDollarSign className="h-5 w-5 me-2" />
+                  {t("buttons.payToEnroll", { defaultValue: "Enroll for {{price}}" }).replace(
+                    "{{price}}",
+                    formattedPrice
+                  )}
+                </>
+              ) : (
+                <>
+                  <Users className="h-5 w-5 me-2" />
+                  {t("buttons.joinForFree", { defaultValue: "Join for Free" })}
+                </>
+              )}
+            </Button>
+          )}
         </div>
       </div>
     </motion.div>

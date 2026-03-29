@@ -13,7 +13,20 @@ export interface LoadingButtonProps extends ButtonProps {
 }
 
 const LoadingButton = React.forwardRef<HTMLButtonElement, LoadingButtonProps>(
-  ({ isLoading, isSuccess, loadingText, successText, icon, children, className, disabled, ...props }, ref) => {
+  (
+    {
+      isLoading,
+      isSuccess,
+      loadingText,
+      successText,
+      icon,
+      children,
+      className,
+      disabled,
+      ...props
+    },
+    ref
+  ) => {
     return (
       <Button
         className={cn("gap-2 relative overflow-hidden transition-all duration-300", className)}

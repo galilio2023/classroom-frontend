@@ -1,7 +1,11 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Link as RouterLink } from "react-router-dom";
 import { useRefineOptions } from "@refinedev/core";
-import { SidebarHeader as ShadcnSidebarHeader, SidebarTrigger as ShadcnSidebarTrigger, useSidebar as useShadcnSidebar } from "@/components/ui/sidebar";
+import {
+  SidebarHeader as ShadcnSidebarHeader,
+  SidebarTrigger as ShadcnSidebarTrigger,
+  useSidebar as useShadcnSidebar,
+} from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 
 export function SidebarHeader() {
@@ -12,7 +16,7 @@ export function SidebarHeader() {
     <ShadcnSidebarHeader
       className={cn(
         "p-0 h-20 border-b border-border/40 flex items-center overflow-hidden bg-transparent transition-all duration-300",
-        !open && !isMobile ? "justify-center" : "flex-row justify-between px-6",
+        !open && !isMobile ? "justify-center" : "flex-row justify-between px-6"
       )}
     >
       <AnimatePresence mode="wait">
@@ -30,10 +34,10 @@ export function SidebarHeader() {
               </div>
               <div className="flex flex-col">
                 <h2 className="text-sm font-black tracking-tight text-foreground leading-none mb-0.5">
-                    {title.text}
+                  {title.text}
                 </h2>
                 <span className="text-[10px] text-muted-foreground/60 font-medium tracking-wide">
-                    {open ? "Learning Management" : ""}
+                  {open ? "Learning Management" : ""}
                 </span>
               </div>
             </RouterLink>
@@ -43,7 +47,7 @@ export function SidebarHeader() {
       <ShadcnSidebarTrigger
         className={cn(
           "text-muted-foreground/60 hover:text-primary transition-all duration-300 shrink-0 opacity-100 pointer-events-auto",
-          { "mr-0": !open && !isMobile },
+          { "me-0": !open && !isMobile }
         )}
       />
     </ShadcnSidebarHeader>

@@ -1,13 +1,6 @@
 import { ListView } from "@/components/refine-ui/views/list-view";
 import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
-import {
-  GraduationCap,
-  Loader2,
-  MessageSquare,
-  Eye,
-  Layers,
-  UserCheck,
-} from "lucide-react";
+import { GraduationCap, Loader2, MessageSquare, Eye, Layers, UserCheck } from "lucide-react";
 import { useMemo } from "react";
 import { useList, useGetIdentity, useNavigation } from "@refinedev/core";
 import { User, UserRole } from "@/types";
@@ -27,7 +20,7 @@ interface TeacherSubscription {
     id: number;
     name: string;
     teachers: {
-        teacher: User;
+      teacher: User;
     }[];
   };
   studentId: string;
@@ -64,15 +57,15 @@ const MyTeachersList = () => {
   const teachers = useMemo(() => {
     const enrollments = subscriptionsData?.data || [];
     const teacherMap = new Map<string, User>();
-    
-    enrollments.forEach(enrollment => {
-        enrollment.class?.teachers?.forEach(ct => {
-            if (ct.teacher) {
-                teacherMap.set(ct.teacher.id, ct.teacher);
-            }
-        });
+
+    enrollments.forEach((enrollment) => {
+      enrollment.class?.teachers?.forEach((ct) => {
+        if (ct.teacher) {
+          teacherMap.set(ct.teacher.id, ct.teacher);
+        }
+      });
     });
-    
+
     return Array.from(teacherMap.values());
   }, [subscriptionsData]);
 
@@ -132,71 +125,60 @@ const MyTeachersList = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-              {teachers.map(
-                (teacher: User, index: number) => (
-                  <motion.div
-                    key={teacher.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                    className="group relative flex flex-col p-6 rounded-[2rem] bg-card/50 backdrop-blur-sm border border-border/40 hover:border-primary/30 hover:bg-card/80 transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-primary/5"
-                  >
-                    <div className="flex items-center gap-4 mb-6">
-                      <Avatar className="h-16 w-16 rounded-full border-4 border-background shadow-lg group-hover:scale-105 transition-transform duration-500">
-                        <AvatarImage
-                          src={teacher.image ?? undefined}
-                          alt={teacher.name}
-                        />
-                        <AvatarFallback className="bg-primary/10 text-primary font-black text-xl">
-                          {teacher.name
-                            .substring(0, 2)
-                            .toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="text-xl font-black tracking-tight truncate group-hover:text-primary transition-colors leading-tight">
-                          {teacher.name}
-                        </h3>
-                        <p className="text-sm text-muted-foreground truncate">
-                          {teacher.email}
-                        </p>
-                      </div>
+              {teachers.map((teacher: User, index: number) => (
+                <motion.div
+                  key={teacher.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                  className="group relative flex flex-col p-6 rounded-4xl bg-card/50 backdrop-blur-sm border border-border/40 hover:border-primary/30 hover:bg-card/80 transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-primary/5"
+                >
+                  <div className="flex items-center gap-4 mb-6">
+                    <Avatar className="h-16 w-16 rounded-full border-4 border-background shadow-lg group-hover:scale-105 transition-transform duration-500">
+                      <AvatarImage src={teacher.image ?? undefined} alt={teacher.name} />
+                      <AvatarFallback className="bg-primary/10 text-primary font-black text-xl">
+                        {teacher.name.substring(0, 2).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-xl font-black tracking-tight truncate group-hover:text-primary transition-colors leading-tight">
+                        {teacher.name}
+                      </h3>
+                      <p className="text-sm text-muted-foreground truncate">{teacher.email}</p>
                     </div>
+                  </div>
 
-                    <div className="flex items-center gap-3 pt-4 border-t border-border/40 w-full mt-auto">
-                      <Button
-                        asChild
-                        size="lg"
-                        variant="outline"
-                        className="flex-1 rounded-2xl h-12 font-black uppercase tracking-widest text-[10px] transition-all border-primary/20 hover:bg-primary/5 text-primary"
+                  <div className="flex items-center gap-3 pt-4 border-t border-border/40 w-full mt-auto">
+                    <Button
+                      asChild
+                      size="lg"
+                      variant="outline"
+                      className="flex-1 rounded-2xl h-12 font-black uppercase tracking-widest text-[10px] transition-all border-primary/20 hover:bg-primary/5 text-primary"
+                    >
+                      <a href={`mailto:${teacher.email}`}>
+                        <MessageSquare className="h-4 w-4 me-2" />
+                        {t("buttons.sendMessage")}
+                      </a>
+                    </Button>
+                    <Button
+                      asChild
+                      size="lg"
+                      className="flex-1 rounded-2xl h-12 font-black uppercase tracking-widest text-[10px] shadow-xl shadow-primary/20"
+                    >
+                      <a
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          show("users", teacher.id);
+                        }}
                       >
-                        <a href={`mailto:${teacher.email}`}>
-                          <MessageSquare className="h-4 w-4 me-2" />
-                          {t("buttons.sendMessage")}
-                        </a>
-                      </Button>
-                      <Button
-                        asChild
-                        size="lg"
-                        className="flex-1 rounded-2xl h-12 font-black uppercase tracking-widest text-[10px] shadow-xl shadow-primary/20"
-                      >
-                        <a
-                          href="#"
-                          onClick={(e) => {
-                            e.preventDefault(); 
-                            show("users", teacher.id);
-                          }}
-                        >
-                          {t("buttons.viewProfile")}
-                          <Eye
-                            className={cn("h-4 w-4 ms-2", isAr && "me-2 ms-0")}
-                          />
-                        </a>
-                      </Button>
-                    </div>
-                  </motion.div>
-                ),
-              )}
+                        {t("buttons.viewProfile")}
+                        <Eye className={cn("h-4 w-4 ms-2", isAr && "me-2 ms-0")} />
+                      </a>
+                    </Button>
+                  </div>
+                </motion.div>
+              ))}
             </div>
           )}
         </div>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { toast } from "sonner"; 
+import { toast } from "sonner";
 import { useSocket } from "@/contexts/socket-context";
 import { useNavigate } from "react-router-dom";
 
@@ -29,14 +29,16 @@ export const useLiveNotifications = (userId: string | undefined) => {
     // 1. Listen for Real-time Toast Alerts
     const handleNotification = (notification: Notification) => {
       setLatestNotification(notification);
-      
+
       // Trigger Global Toast
       toast(notification.title, {
         description: notification.message,
-        action: notification.link ? {
-          label: "View",
-          onClick: () => navigate(notification.link!)
-        } : undefined,
+        action: notification.link
+          ? {
+              label: "View",
+              onClick: () => navigate(notification.link!),
+            }
+          : undefined,
       });
     };
 

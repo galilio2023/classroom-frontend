@@ -3,10 +3,6 @@
     "attendance": "Attendance",
     "label": "Attendance"
   },
-  "enrollments": {
-    "enrollments": "Enrollments",
-    "label": "Enrollments"
-  },
   "project-groups": {
     "project-groups": "Project Groups",
     "label": "Project Groups"
@@ -64,6 +60,10 @@
     "ai-activity-logs": "Study History",
     "label": "Study History"
   },
+  "ai-metrics": {
+    "ai-metrics": "AI Observability",
+    "label": "AI Observability"
+  },
   "app": {
     "title": "Classroom AI"
   },
@@ -95,7 +95,8 @@
     },
     "subjects": {
       "list": "Subjects",
-      "subjects": "Subjects"
+      "subjects": "Subjects",
+      "general": "Subjects"
     },
     "departments": {
       "list": "Departments",
@@ -104,7 +105,8 @@
     "classes": {
       "list": "Classes",
       "show": "Classroom Hub",
-      "edit": "Edit Class"
+      "edit": "Edit Class",
+      "general": "Classroom Hub"
     },
     "assignments": {
       "list": "Assignments",
@@ -114,7 +116,8 @@
     "quizzes": {
       "list": "Quizzes",
       "show": "Quiz Results",
-      "create": "Create Quiz"
+      "create": "Create Quiz",
+      "general": "Quizzes"
     },
     "modules": {
       "list": "Modules"
@@ -219,6 +222,8 @@
     "copyInsight": "Copy Insight",
     "insightCopied": "Insight copied to clipboard",
     "sendToStudent": "Send to Student",
+    "copied": "Copied",
+    "sent": "Sent",
     "strengths": "Strengths",
     "weaknesses": "Areas for Improvement",
     "improvementPlan": "Personalized Action Plan",
@@ -306,6 +311,14 @@
         "label": "Enable AI Features",
         "description": "Enable Gemini-powered features across the platform (Magic Builder, Study Lab, etc.)."
       },
+      "dailyTokenQuota": {
+        "label": "Daily AI Token Quota",
+        "description": "Total AI tokens allowed per user per day before reset (midnight)."
+      },
+      "maxAiTokenLimit": {
+        "label": "Max Tokens per Request",
+        "description": "Maximum tokens the AI is allowed to use in a single interaction."
+      },
       "defaultRegistrationRole": {
         "label": "Default Registration Role",
         "description": "The default role assigned to new users when they sign up.",
@@ -339,6 +352,8 @@
     "createAccount": "Create Account",
     "back": "Back",
     "continue": "Continue",
+    "addAssignment": "Add Assignment",
+    "createQuiz": "Create Quiz",
     "completeJoin": "Complete Join",
     "aiAssist": "AI Assist",
     "change": "Change",
@@ -399,7 +414,14 @@
     "deleteAssignment": "Delete Assignment",
     "confirmDelete": "Confirm Delete",
     "editTask": "Edit Task",
+    "stopMonitoring": "Stop Monitoring",
+    "liveMonitor": "Live Monitor",
     "assignPeerReviews": "Assign Peer Reviews",
+    "featureOnTv": "Feature on TV",
+    "watchNow": "Watch Now",
+    "addResource": "Add Resource",
+    "editResource": "Edit Resource",
+    "deleteResource": "Delete Resource",
     "resubmitAssignment": "Resubmit Assignment",
     "viewReport": "View Detailed Report",
     "saveAsDraft": "Save as Draft",
@@ -705,12 +727,22 @@
       }
     },
     "errors": {
+      "rateLimitTitle": "Gemini is Resting",
+      "geminiIsResting": "Hourly AI limit reached. Please take a short break and try again later.",
       "inputTooLong": "Message is too long. Please shorten it.",
       "parentRestricted": "Only students and teachers can interact with the Study Buddy.",
       "serviceUnavailable": "Gemini AI is currently unavailable. Please try again later.",
       "rateLimit": "Hourly AI limit reached. Please take a short break and try again later.",
       "maintenance": "AI features are temporarily offline for system maintenance.",
-      "friendlyFallback": "I'm having trouble connecting to the AI brain right now. I'll be back soon!"
+      "friendlyFallback": "I'm having trouble connecting to the AI brain right now. I'll be back soon!",
+      "speechNotSupported": "Speech recognition is not supported in this browser.",
+      "noTranscript": "No transcript available for analysis.",
+      "noAnalysis": "Failed to generate AI analysis.",
+      "sessionExpired": "Your session has expired. Please rejoin.",
+      "failedToJoin": "Failed to join live session.",
+      "chromeRequired": "Chrome browser is required for voice interaction.",
+      "listeningTimeout": "Listening timeout. Please try again.",
+      "tryAgain": "Please try again."
     }
   },
   "studyPlanner": {
@@ -857,7 +889,8 @@
       "deleted": "Term deleted successfully",
       "created": "Term created successfully",
       "error": "An error occurred"
-    }
+    },
+    "noTermsFound": "No terms found"
   },
   "profile": {
     "title": "User Profile",
@@ -1204,29 +1237,6 @@
     "defaultNote": "Your performance this term has been exceptional. Keep focusing on your core subjects to maintain this high GPA.",
     "noNote": "No instructor notes available for this term yet."
   },
-  "library": {
-    "title": "Global Library",
-    "description": "Manage your personal collection of teaching resources.",
-    "searchPlaceholder": "Search files...",
-    "addResource": "Add Resource",
-    "addToLibrary": "Add to Library",
-    "uploadDesc": "Upload files to your personal library for reuse across classes.",
-    "resourceTitle": "Resource Title",
-    "optionalDesc": "Optional description",
-    "noDescription": "No description",
-    "emptyTitle": "Library is Empty",
-    "emptyDesc": "Upload files here to access them from any class.",
-    "deleteConfirm": "Are you sure you want to delete this resource?",
-    "toasts": {
-      "fillRequired": "Please provide a title and upload a file.",
-      "added": "Resource added to library!",
-      "deleted": "Resource deleted.",
-      "error": "Failed to add resource."
-    },
-    "accessDenied": "Access Denied",
-    "accessDeniedDesc": "Sorry, you do not have permission to access this page.",
-    "teacherOnly": "Only teachers can manage the Global Library."
-  },
   "messages": {
     "messages": "Messages",
     "title": "Messages",
@@ -1240,6 +1250,8 @@
     "noMessages": "No messages"
   },
   "enrollments": {
+    "enrollments": "Enrollments",
+    "label": "Enrollments",
     "title": "Admissions & Enrollments",
     "description": "Manage student applications, class placements, and enrollment status.",
     "enrollStudent": "Enroll Student",
@@ -1327,7 +1339,7 @@
   },
   "teacherSubscriptions": {
     "title": "Teacher Subscriptions",
-    "description": "Manage your active subscriptions and billing information.",
+    "description": "Review and manage your active subscriptions and billing information.",
     "empty": {
       "title": "No Subscriptions Found",
       "description": "You don't have any active teacher subscriptions yet."

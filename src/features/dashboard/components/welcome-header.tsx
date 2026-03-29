@@ -27,12 +27,7 @@ interface WelcomeHeaderProps {
   data?: DashboardData;
 }
 
-export const WelcomeHeader = ({
-  name,
-  isStudent,
-  user,
-  data,
-}: WelcomeHeaderProps) => {
+export const WelcomeHeader = ({ name, isStudent, user, data }: WelcomeHeaderProps) => {
   const { t } = useTranslation();
   const [isUploading, setIsUploading] = useState(false);
   const { mutate: requestChange, mutation } = useCustomMutation();
@@ -45,14 +40,12 @@ export const WelcomeHeader = ({
   const getSummaryText = () => {
     // 🛡️ Global Master Switch: Use platform welcome message if set by admin
     if (data?.globalConfig?.welcomeMessage) {
-        return data.globalConfig.welcomeMessage;
+      return data.globalConfig.welcomeMessage;
     }
 
     if (isStudent) {
       const count = data?.upcomingAssignments?.length || 0;
-      const next =
-        data?.upcomingAssignments?.[0]?.title ||
-        t("dashboard.student.allCaughtUp");
+      const next = data?.upcomingAssignments?.[0]?.title || t("dashboard.student.allCaughtUp");
       return t("dashboard.summary.student", { count, next });
     }
     if (isTeacher) {
@@ -67,9 +60,7 @@ export const WelcomeHeader = ({
       const count = data?.stats?.pendingVerifications || 0;
       return t("dashboard.summary.admin", { count });
     }
-    return isStudent
-      ? t("dashboard.readyToContinue")
-      : t("dashboard.managementOverview");
+    return isStudent ? t("dashboard.readyToContinue") : t("dashboard.managementOverview");
   };
 
   const getSummaryIcon = () => {
@@ -98,7 +89,7 @@ export const WelcomeHeader = ({
       try {
         const res = await fetch(
           `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/auto/upload`,
-          { method: "POST", body: formData },
+          { method: "POST", body: formData }
         );
         const data = await res.json();
 
@@ -115,7 +106,7 @@ export const WelcomeHeader = ({
               onSuccess: () => {
                 toast.success(t("dashboard.verification.success"));
               },
-            },
+            }
           );
         }
       } catch (err) {
@@ -153,7 +144,7 @@ export const WelcomeHeader = ({
       {isUnverifiedTeacher && (
         <Alert className="border-amber-500/20 bg-amber-500/5 animate-in slide-in-from-top-4 duration-500 p-4 md:p-8 rounded-[1.5rem] md:rounded-[2.5rem]">
           <ShieldAlert className="h-6 w-6 text-amber-600 shrink-0 mt-1" />
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 w-full ml-3">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 w-full ms-3">
             <div className="space-y-1.5">
               <AlertTitle className="text-amber-800 font-black uppercase tracking-[0.15em] text-[10px] md:text-xs">
                 {t("dashboard.verification.required")}
@@ -179,13 +170,12 @@ export const WelcomeHeader = ({
         </Alert>
       )}
 
-      {user?.role === UserRole.TEACHER &&
-        user?.verificationStatus === "verified" && (
-          <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 text-[10px] font-black uppercase tracking-widest shadow-sm">
-            <CheckCircle2 className="h-3.5 w-3.5" />
-            {t("dashboard.verification.verifiedEducator")}
-          </div>
-        )}
+      {user?.role === UserRole.TEACHER && user?.verificationStatus === "verified" && (
+        <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 text-[10px] font-black uppercase tracking-widest shadow-sm">
+          <CheckCircle2 className="h-3.5 w-3.5" />
+          {t("dashboard.verification.verifiedEducator")}
+        </div>
+      )}
     </div>
   );
 };

@@ -32,27 +32,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import {
-  BookOpen,
-  Code2,
-  Building2,
-  FileText,
-  Lightbulb,
-  Info,
-  GraduationCap
-} from "lucide-react";
+import { BookOpen, Code2, Building2, FileText, Lightbulb, Info, GraduationCap } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 // Define the validation schema using z.coerce for automatic type conversion
 const formSchema = z.object({
-  code: z
-    .string()
-    .min(1, "Code is required")
-    .max(50, "Code must be less than 50 characters"),
-  name: z
-    .string()
-    .min(1, "Name is required")
-    .max(255, "Name must be less than 255 characters"),
+  code: z.string().min(1, "Code is required").max(50, "Code must be less than 50 characters"),
+  name: z.string().min(1, "Name is required").max(255, "Name must be less than 255 characters"),
   description: z
     .string()
     .max(255, "Description must be less than 255 characters")
@@ -74,7 +60,7 @@ const SubjectsCreate = () => {
     },
     defaultValues: {
       credits: 0,
-    }
+    },
   });
 
   const { options: departmentOptions } = useSelect<Department>({
@@ -98,9 +84,7 @@ const SubjectsCreate = () => {
                     <BookOpen className="h-5 w-5 text-primary" />
                     Subject Details
                   </CardTitle>
-                  <CardDescription>
-                    Enter the core information for the new subject.
-                  </CardDescription>
+                  <CardDescription>Enter the core information for the new subject.</CardDescription>
                 </CardHeader>
 
                 <Separator />
@@ -118,11 +102,7 @@ const SubjectsCreate = () => {
                             Subject Code
                           </FormLabel>
                           <FormControl>
-                            <Input
-                              placeholder="e.g. CS101"
-                              {...field}
-                              className="font-mono"
-                            />
+                            <Input placeholder="e.g. CS101" {...field} className="font-mono" />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -140,10 +120,7 @@ const SubjectsCreate = () => {
                             Subject Name
                           </FormLabel>
                           <FormControl>
-                            <Input
-                              placeholder="e.g. Intro to Programming"
-                              {...field}
-                            />
+                            <Input placeholder="e.g. Intro to Programming" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -162,10 +139,7 @@ const SubjectsCreate = () => {
                             <Building2 className="h-4 w-4 text-muted-foreground" />
                             Department
                           </FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            defaultValue={String(field.value)}
-                          >
+                          <Select onValueChange={field.onChange} defaultValue={String(field.value)}>
                             <FormControl>
                               <SelectTrigger>
                                 <SelectValue placeholder="Select a department" />
@@ -173,10 +147,7 @@ const SubjectsCreate = () => {
                             </FormControl>
                             <SelectContent className="bg-white dark:bg-[#09090b] opacity-100 backdrop-blur-none border border-border/50 shadow-2xl">
                               {departmentOptions.map((option) => (
-                                <SelectItem
-                                  key={option.value}
-                                  value={String(option.value)}
-                                >
+                                <SelectItem key={option.value} value={String(option.value)}>
                                   {option.label}
                                 </SelectItem>
                               ))}
@@ -198,11 +169,7 @@ const SubjectsCreate = () => {
                             Credits
                           </FormLabel>
                           <FormControl>
-                            <Input
-                              type="number"
-                              placeholder="e.g. 3"
-                              {...field}
-                            />
+                            <Input type="number" placeholder="e.g. 3" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -234,12 +201,7 @@ const SubjectsCreate = () => {
                 <Separator />
 
                 <CardFooter className="flex justify-end pt-6 pb-6 bg-muted/5">
-                  <Button
-                    type="submit"
-                    size="lg"
-                    disabled={formLoading}
-                    className="min-w-[150px]"
-                  >
+                  <Button type="submit" size="lg" disabled={formLoading} className="min-w-[150px]">
                     {formLoading ? "Saving..." : "Create Subject"}
                   </Button>
                 </CardFooter>
@@ -263,8 +225,8 @@ const SubjectsCreate = () => {
                   <span className="text-xs font-bold text-primary">1</span>
                 </div>
                 <p>
-                  <strong>Consistent Codes:</strong> Use a standard format like
-                  "DEPT-101" to make searching easier.
+                  <strong>Consistent Codes:</strong> Use a standard format like "DEPT-101" to make
+                  searching easier.
                 </p>
               </div>
               <div className="flex gap-3">
@@ -272,7 +234,8 @@ const SubjectsCreate = () => {
                   <span className="text-xs font-bold text-primary">2</span>
                 </div>
                 <p>
-                  <strong>Credits:</strong> Assign credits based on the workload and importance of the subject.
+                  <strong>Credits:</strong> Assign credits based on the workload and importance of
+                  the subject.
                 </p>
               </div>
             </CardContent>
@@ -282,8 +245,8 @@ const SubjectsCreate = () => {
             <Info className="h-4 w-4" />
             <AlertTitle>Did you know?</AlertTitle>
             <AlertDescription className="text-xs text-muted-foreground mt-1">
-              Subjects created here will be immediately available for class
-              scheduling and teacher assignment.
+              Subjects created here will be immediately available for class scheduling and teacher
+              assignment.
             </AlertDescription>
           </Alert>
         </div>

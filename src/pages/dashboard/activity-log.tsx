@@ -27,12 +27,16 @@ const actionVariants: Record<string, string> = {
 const ActivityLogPage = () => {
   const { t, i18n } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
-  const isArabic = i18n.language === 'ar';
+  const isArabic = i18n.language === "ar";
 
   const filters = useMemo(() => {
     const f = [];
     if (searchQuery) {
-      f.push({ field: "action", operator: "contains" as const, value: searchQuery });
+      f.push({
+        field: "action",
+        operator: "contains" as const,
+        value: searchQuery,
+      });
     }
     return f;
   }, [searchQuery]);
@@ -52,8 +56,8 @@ const ActivityLogPage = () => {
                   <AvatarFallback>{user?.name?.[0] || "U"}</AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col">
-                    <span className="text-xs font-bold">{user?.name || "System"}</span>
-                    <span className="text-[10px] text-muted-foreground">{user?.email}</span>
+                  <span className="text-xs font-bold">{user?.name || "System"}</span>
+                  <span className="text-[10px] text-muted-foreground">{user?.email}</span>
                 </div>
               </div>
             );
@@ -65,7 +69,13 @@ const ActivityLogPage = () => {
           cell: ({ getValue }) => {
             const action = getValue<string>();
             return (
-              <Badge variant="outline" className={cn("text-[10px] font-black uppercase tracking-wider border-none", actionVariants[action])}>
+              <Badge
+                variant="outline"
+                className={cn(
+                  "text-[10px] font-black uppercase tracking-wider border-none",
+                  actionVariants[action]
+                )}
+              >
                 {t(`activity.actions.${action}`, action.replace("_", " "))}
               </Badge>
             );
@@ -80,22 +90,22 @@ const ActivityLogPage = () => {
               <span className="capitalize">{row.original.entityType || "N/A"}</span>
               <span className="opacity-40">ID: {row.original.entityId || "-"}</span>
             </div>
-          )
+          ),
         },
         {
           id: "network",
           header: () => <p className="column-title">{t("dashboard.activity.network" as any)}</p>,
           cell: ({ row }) => (
             <div className="flex flex-col gap-0.5">
-                <div className="flex items-center gap-1.5 text-[9px] font-bold text-muted-foreground">
-                    <Globe className="h-2.5 w-2.5" />
-                    {row.original.ipAddress || "Local"}
-                </div>
-                <div className="text-[8px] text-muted-foreground/60 truncate max-w-[150px]">
-                    {row.original.userAgent}
-                </div>
+              <div className="flex items-center gap-1.5 text-[9px] font-bold text-muted-foreground">
+                <Globe className="h-2.5 w-2.5" />
+                {row.original.ipAddress || "Local"}
+              </div>
+              <div className="text-[8px] text-muted-foreground/60 truncate max-w-[150px]">
+                {row.original.userAgent}
+              </div>
             </div>
-          )
+          ),
         },
         {
           accessorKey: "createdAt",
@@ -103,15 +113,17 @@ const ActivityLogPage = () => {
           cell: ({ getValue }) => (
             <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
               <Clock className="h-3.5 w-3.5" />
-              <span>{formatDistanceToNow(new Date(getValue<string>()), { 
-                addSuffix: true,
-                locale: isArabic ? ar : enUS
-              })}</span>
+              <span>
+                {formatDistanceToNow(new Date(getValue<string>()), {
+                  addSuffix: true,
+                  locale: isArabic ? ar : enUS,
+                })}
+              </span>
             </div>
           ),
         },
       ],
-      [t, isArabic],
+      [t, isArabic]
     ),
     refineCoreProps: {
       resource: "activity-log",
@@ -119,8 +131,8 @@ const ActivityLogPage = () => {
       filters: { permanent: filters },
       sorters: { initial: [{ field: "createdAt", order: "desc" }] },
       meta: {
-        populate: ["user"]
-      }
+        populate: ["user"],
+      },
     },
   });
 
@@ -143,7 +155,7 @@ const ActivityLogPage = () => {
           <Input
             type="text"
             placeholder={t("common.search")}
-            className="pl-10 w-full h-11 rounded-xl bg-background"
+            className="ps-10 w-full h-11 rounded-xl bg-background"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />

@@ -21,7 +21,7 @@ import { socket, connectSocket } from "@/lib/socket";
 
 export const QRAttendance = ({ classId, className }: QRAttendanceProps) => {
   const { t, i18n } = useTranslation();
-  const isArabic = i18n.language === 'ar';
+  const isArabic = i18n.language === "ar";
   const [isActive, setIsActive] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
   const [scannedCount, setScannedCount] = useState(0);
@@ -37,12 +37,12 @@ export const QRAttendance = ({ classId, className }: QRAttendanceProps) => {
     if (!isActive) return;
 
     void connectSocket().then(() => {
-        socket.emit("join_class", { classId });
+      socket.emit("join_class", { classId });
 
-        socket.on("attendance_scanned", (data: { studentName: string }) => {
-            setScannedCount((prev) => prev + 1);
-            toast.success(`${data.studentName} checked in!`);
-        });
+      socket.on("attendance_scanned", (data: { studentName: string }) => {
+        setScannedCount((prev) => prev + 1);
+        toast.success(`${data.studentName} checked in!`);
+      });
     });
 
     return () => {
@@ -53,26 +53,31 @@ export const QRAttendance = ({ classId, className }: QRAttendanceProps) => {
 
   const startSession = () => {
     // Call backend to generate a secure, time-limited token
-    generateQR({
+    generateQR(
+      {
         url: "/attendance/qr",
         method: "post",
-        values: { classId }
-    }, {
+        values: { classId },
+      },
+      {
         onSuccess: (data: any) => {
-            const token = data.data.token;
-            setQrValue(`${window.location.origin}/attendance/scan?token=${token}`);
-            setIsActive(true);
-            setTimeLeft(DURATION);
-            setScannedCount(0);
-            toast.success(t("classes.attendance.toast.savedDescription", { 
+          const token = data.data.token;
+          setQrValue(`${window.location.origin}/attendance/scan?token=${token}`);
+          setIsActive(true);
+          setTimeLeft(DURATION);
+          setScannedCount(0);
+          toast.success(
+            t("classes.attendance.toast.savedDescription", {
               date: new Date().toLocaleDateString(),
-              defaultValue: `Attendance session started for ${new Date().toLocaleDateString()}`
-            } as any) as string);
+              defaultValue: `Attendance session started for ${new Date().toLocaleDateString()}`,
+            } as any) as string
+          );
         },
         onError: () => {
-            toast.error(t("common.upload.error") as string);
-        }
-    });
+          toast.error(t("common.upload.error") as string);
+        },
+      }
+    );
   };
 
   const stopSession = () => {
@@ -84,8 +89,10 @@ export const QRAttendance = ({ classId, className }: QRAttendanceProps) => {
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    const formattedMins = new Intl.NumberFormat(isArabic ? 'ar-EG' : 'en-US').format(mins);
-    const formattedSecs = new Intl.NumberFormat(isArabic ? 'ar-EG' : 'en-US').format(secs).padStart(2, isArabic ? "٠" : "0");
+    const formattedMins = new Intl.NumberFormat(isArabic ? "ar-EG" : "en-US").format(mins);
+    const formattedSecs = new Intl.NumberFormat(isArabic ? "ar-EG" : "en-US")
+      .format(secs)
+      .padStart(2, isArabic ? "٠" : "0");
     return `${formattedMins}:${formattedSecs}`;
   };
 
@@ -99,13 +106,14 @@ export const QRAttendance = ({ classId, className }: QRAttendanceProps) => {
             <QrCode className="h-5 w-5 text-primary" />
             <CardTitle className="text-lg">{t("classes.attendance.qr.title")}</CardTitle>
           </div>
-          <Badge variant={isActive ? "default" : "secondary"} className={cn(isActive && "bg-green-500 animate-pulse")}>
+          <Badge
+            variant={isActive ? "default" : "secondary"}
+            className={cn(isActive && "bg-green-500 animate-pulse")}
+          >
             {isActive ? t("classes.attendance.qr.active") : t("classes.attendance.qr.inactive")}
           </Badge>
         </div>
-        <CardDescription>
-          {t("classes.attendance.qr.description")}
-        </CardDescription>
+        <CardDescription>{t("classes.attendance.qr.description")}</CardDescription>
       </CardHeader>
       <CardContent className="p-6 flex flex-col items-center gap-6">
         {isActive ? (
@@ -113,22 +121,32 @@ export const QRAttendance = ({ classId, className }: QRAttendanceProps) => {
             <div className="p-4 bg-white rounded-2xl shadow-inner border-4 border-primary/10">
               <QRCodeSVG value={qrValue} size={200} level="H" marginSize={4} />
             </div>
-            
+
             <div className="w-full space-y-4">
               <div className="flex justify-between text-sm font-medium">
                 <div className="flex items-center gap-1.5 text-muted-foreground">
                   <Clock className="h-4 w-4" />
-                  {t("classes.attendance.qr.timeRemaining")}: <span className="text-foreground font-bold font-mono">{formatTime(timeLeft)}</span>
+                  {t("classes.attendance.qr.timeRemaining")}:{" "}
+                  <span className="text-foreground font-bold font-mono">
+                    {formatTime(timeLeft)}
+                  </span>
                 </div>
                 <div className="flex items-center gap-1.5 text-muted-foreground">
                   <Users className="h-4 w-4" />
-                  {t("classes.attendance.qr.checkedIn")}: <span className="text-primary font-bold">{new Intl.NumberFormat(isArabic ? 'ar-EG' : 'en-US').format(scannedCount)}</span>
+                  {t("classes.attendance.qr.checkedIn")}:{" "}
+                  <span className="text-primary font-bold">
+                    {new Intl.NumberFormat(isArabic ? "ar-EG" : "en-US").format(scannedCount)}
+                  </span>
                 </div>
               </div>
               <Progress value={progress} className="h-2" />
             </div>
 
-            <Button variant="destructive" className="w-full gap-2 h-11 rounded-xl" onClick={stopSession}>
+            <Button
+              variant="destructive"
+              className="w-full gap-2 h-11 rounded-xl"
+              onClick={stopSession}
+            >
               <StopCircle className="h-4 w-4" />
               {t("buttons.stopSession")}
             </Button>

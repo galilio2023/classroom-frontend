@@ -24,7 +24,7 @@ export async function subscribeToPush() {
 
   try {
     const registration = await navigator.serviceWorker.ready;
-    
+
     // Check if already subscribed
     const existingSubscription = await registration.pushManager.getSubscription();
     if (existingSubscription) {
@@ -60,7 +60,7 @@ async function sendSubscriptionToBackend(subscription: PushSubscription) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify(subscription),
   });

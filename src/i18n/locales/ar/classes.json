@@ -82,7 +82,12 @@
         "archived": "مؤرشف"
       },
       "createNewSubject": "إنشاء مادة جديدة",
-      "newSubjectName": "اسم المادة الجديدة"
+      "newSubjectName": "اسم المادة الجديدة",
+      "monetization": "تحقيق الدخل",
+      "paidClass": "فصل مدفوع",
+      "paidClassDescription": "قم بتفعيل هذا الخيار لفرض رسوم على الطلاب للانضمام لهذا الفصل.",
+      "price": "سعر الاشتراك",
+      "currency": "العملة"
     },
     "list": {
       "title": "الفصول الدراسية",
@@ -437,8 +442,12 @@
       "quizComplete": "اكتمل الاختبار!",
       "finishedAssessment": "لقد انتهيت من التقييم التفاعلي.",
       "scoreSummary": "{{score}} من {{total}} صحيحة",
-      "explanation": "الشرح"
-    },
+      "explanation": "شرح",
+      "startedToast": "{{name}} بدأ الاختبار!",
+      "nudgeFrom": "تنبيه من {{name}}",
+      "submittedTitle": "تم تقديم الاختبار!",
+      "submittedDesc": "درجتك النهائية هي {{score}}%"
+      },
     "dialogs": {
       "applyTeacher": {
         "title": "طلب تدريس",

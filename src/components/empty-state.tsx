@@ -26,7 +26,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   const isAr = i18n.language === "ar";
 
   return (
-    <div 
+    <div
       dir={isAr ? "rtl" : "ltr"}
       className={cn(
         "flex flex-col items-center justify-center w-full h-full min-h-[400px] p-8 text-center border-2 border-dashed rounded-[2.5rem] bg-muted/5 border-primary/10 text-muted-foreground animate-in fade-in zoom-in duration-500",
@@ -39,8 +39,8 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
       <h3 className="text-2xl font-black tracking-tight text-foreground mb-2">{title}</h3>
       <p className="text-sm font-medium max-w-sm px-4 leading-relaxed">{description}</p>
       {action && (
-        <Button 
-          onClick={action.onClick} 
+        <Button
+          onClick={action.onClick}
           className="mt-8 h-12 px-8 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-xl shadow-primary/20 transition-all hover:scale-105 active:scale-95"
         >
           {action.label}

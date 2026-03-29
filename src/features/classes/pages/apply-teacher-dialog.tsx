@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useCustomMutation } from "@refinedev/core";
+import { useCustomMutation, HttpError } from "@refinedev/core";
 import {
   Dialog,
   DialogContent,
@@ -53,14 +53,17 @@ export const ApplyTeacherDialog = ({
           setMessage("");
           onSuccess?.();
         },
-        onError: (error: any) => {
-          toast.error(error?.data?.message || t("classes.dialogs.applyTeacher.toast.error"));
+        onError: (err) => {
+          const error = err as HttpError;
+          toast.error(
+            (error?.response?.data as any)?.message || t("classes.dialogs.applyTeacher.toast.error")
+          );
         },
       }
     );
   };
 
-  const isAr = i18n.language === 'ar';
+  const isAr = i18n.language === "ar";
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -75,16 +78,22 @@ export const ApplyTeacherDialog = ({
             </DialogTitle>
             <DialogDescription className="font-medium text-base">
               {isAr ? (
-                <>أنت تطلب إدارة وتدريس فصل <strong>{className}</strong>. سيقوم المسؤول بمراجعة طلبك.</>
+                <>
+                  أنت تطلب إدارة وتدريس فصل <strong>{className}</strong>. سيقوم المسؤول بمراجعة
+                  طلبك.
+                </>
               ) : (
-                <>You are requesting to manage and teach <strong>{className}</strong>. The administrator will review your request.</>
+                <>
+                  You are requesting to manage and teach <strong>{className}</strong>. The
+                  administrator will review your request.
+                </>
               )}
             </DialogDescription>
           </div>
         </DialogHeader>
         <div className="space-y-6 py-6">
           <div className="space-y-3">
-            <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+            <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ms-1">
               {t("classes.dialogs.applyTeacher.fieldLabel")}
             </Label>
             <div className="relative group">
@@ -92,9 +101,14 @@ export const ApplyTeacherDialog = ({
                 placeholder={t("classes.dialogs.applyTeacher.fieldPlaceholder")}
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                className="min-h-[150px] rounded-[2rem] bg-muted/30 border-none focus-visible:ring-primary p-6 text-base leading-relaxed font-medium resize-none shadow-inner"
+                className="min-h-[150px] rounded-4xl bg-muted/30 border-none focus-visible:ring-primary p-6 text-base leading-relaxed font-medium resize-none shadow-inner"
               />
-              <div className={cn("absolute bottom-4 opacity-10 group-focus-within:opacity-30 transition-opacity", isAr ? "left-4" : "right-4")}>
+              <div
+                className={cn(
+                  "absolute bottom-4 opacity-10 group-focus-within:opacity-30 transition-opacity",
+                  "end-4"
+                )}
+              >
                 <Sparkles className="h-6 w-6" />
               </div>
             </div>
@@ -114,9 +128,9 @@ export const ApplyTeacherDialog = ({
             disabled={isLoading}
           >
             {isLoading ? (
-              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              <Loader2 className="h-4 w-4 animate-spin me-2" />
             ) : (
-              <Send className={cn("h-4 w-4 mr-2", isAr && "rotate-180")} />
+              <Send className={cn("h-4 w-4 me-2", isAr && "rotate-180")} />
             )}
             {t("buttons.submitApplication")}
           </Button>

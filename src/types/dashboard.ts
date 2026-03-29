@@ -170,6 +170,30 @@ export interface SystemHealth {
   reportDate: string;
 }
 
+export interface RLHFDataPoint {
+  date: string;
+  avgAdjustmentGap: number;
+  acceptanceRate: number;
+  totalAudits: number;
+}
+
+export interface MarketplaceEarnings {
+  totalRevenue: number;
+  platformFees: number;
+  netEarnings: number;
+  totalSales: number;
+}
+
+export interface TransactionItem {
+  id: number;
+  amount: number;
+  currency: string;
+  studentName: string;
+  studentImage?: string;
+  className: string;
+  date: string;
+}
+
 export interface DashboardData {
   todaySchedule: ScheduleItem[];
   stats?: DashboardStats;
@@ -188,4 +212,7 @@ export interface DashboardData {
   channelStats?: ChannelStats;
   systemHealth?: SystemHealth;
   globalConfig?: GlobalConfig;
+  rlhf?: RLHFDataPoint[];
+  marketplaceEarnings?: MarketplaceEarnings;
+  recentTransactions?: TransactionItem[];
 }

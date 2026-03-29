@@ -26,45 +26,43 @@ export const defaultNS = "translation";
 export const resources = {
   en: {
     translation: {
+      ...enCommon,
       ...enAuth,
       ...enClasses,
-      ...enCommon,
       ...enDashboard,
       ...enLanding,
     },
-    zod: zodEn, 
+    zod: zodEn,
   },
   ar: {
     translation: {
+      ...arCommon,
       ...arAuth,
       ...arClasses,
-      ...arCommon,
       ...arDashboard,
       ...arLanding,
     },
-    zod: zodAr, 
+    zod: zodAr,
   },
 } as const;
 
 const STORAGE_KEY = "i18nextLng";
 const savedLng = localStorage.getItem(STORAGE_KEY);
 
-i18n
-  .use(initReactI18next)
-  .init({
-    resources,
-    lng: savedLng || "en", 
-    fallbackLng: "en",
-    interpolation: {
-      escapeValue: false,
-    },
-    returnObjects: true,
-    debug: false,
-    defaultNS,
-  });
+i18n.use(initReactI18next).init({
+  resources,
+  lng: savedLng || "en",
+  fallbackLng: "en",
+  interpolation: {
+    escapeValue: false,
+  },
+  returnObjects: true,
+  debug: false,
+  defaultNS,
+});
 
-i18n.on('languageChanged', (lng) => {
-  localStorage.setItem(STORAGE_KEY, lng); 
+i18n.on("languageChanged", (lng) => {
+  localStorage.setItem(STORAGE_KEY, lng);
 });
 
 // 3. THE MAGIC TRICK: Tell Zod to route all errors through i18next
@@ -75,6 +73,6 @@ export default i18n;
 declare module "i18next" {
   interface CustomTypeOptions {
     defaultNS: typeof defaultNS;
-    resources: typeof resources["en"];
+    resources: (typeof resources)["en"];
   }
 }

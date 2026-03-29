@@ -9,14 +9,7 @@ import {
   useNavigation,
 } from "@refinedev/core";
 import { useTable } from "@refinedev/react-table";
-import { 
-  User, 
-  UserRole, 
-  ClassListItem, 
-  TeacherApplication, 
-  Subject, 
-  Department 
-} from "@/types";
+import { User, UserRole, ClassListItem, TeacherApplication, Subject, Department } from "@/types";
 import { toast } from "sonner";
 import { socket } from "@/lib/socket";
 import { useTerm } from "@/contexts/term-context";
@@ -36,12 +29,15 @@ export const useClassList = () => {
   const isStudent = identity?.role === UserRole.STUDENT;
   const isTeacher = identity?.role === UserRole.TEACHER;
   const isAdmin = identity?.role === UserRole.ADMIN;
-  const isAr = i18n.language === 'ar';
+  const isAr = i18n.language === "ar";
 
   const [inviteCode, setInviteCode] = useState("");
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
-  const [applyTarget, setApplyTarget] = useState<{ id: number; name: string } | null>(null);
+  const [applyTarget, setApplyTarget] = useState<{
+    id: number;
+    name: string;
+  } | null>(null);
   const [view, setView] = useState<"discovery" | "my">(isStudent ? "discovery" : "my");
 
   const { mutate: joinClass, mutation: joinMutation } = useCustomMutation();
@@ -51,7 +47,7 @@ export const useClassList = () => {
   // --- SOCKET UPDATES ---
   useEffect(() => {
     if (!socket.connected) socket.connect();
-    
+
     const handleLiveUpdate = () => invalidate({ resource: "classes", invalidates: ["list"] });
     const handleEnrollmentApproval = () => {
       toast.success(t("classes.list.toast.enrollmentApproved"));
@@ -73,7 +69,7 @@ export const useClassList = () => {
   const columns = useMemo<ColumnDef<ClassListItem>[]>(() => [{ id: "id", accessorKey: "id" }], []);
 
   const {
-    refineCore: { tableQuery: tableQueryResult, filters, setFilters }
+    refineCore: { tableQuery: tableQueryResult, filters, setFilters },
   } = useTable<ClassListItem>({
     columns,
     refineCoreProps: {
@@ -81,65 +77,123 @@ export const useClassList = () => {
       pagination: { mode: "server", pageSize: DEFAULT_PAGE_SIZE },
       sorters: { initial: [{ field: "id", order: "desc" }] },
       meta: {
-        populate: ["subject", "subject.department", "teachers", "teachers.teacher", "_count", "schedules"],
+        populate: [
+          "subject",
+          "subject.department",
+          "teachers",
+          "teachers.teacher",
+          "_count",
+          "schedules",
+        ],
       },
       syncWithLocation: true,
       filters: {
         permanent: [
-          ...(selectedTerm ? [{ field: "termId", operator: "eq", value: selectedTerm.id }] : []),
-          ...(isTeacher && identity?.id ? [{ field: "teacherUid", operator: "eq", value: identity.id }] : []),
-          ...(isStudent && view === "my" ? [{ field: "my", operator: "eq", value: "true" }] : []),
-        ] as any[],
+          ...(selectedTerm
+            ? [
+                {
+                  field: "termId",
+                  operator: "eq" as const,
+                  value: selectedTerm.id,
+                },
+              ]
+            : []),
+          ...(isTeacher && identity?.id
+            ? [
+                {
+                  field: "teacherUid",
+                  operator: "eq" as const,
+                  value: identity.id,
+                },
+              ]
+            : []),
+          ...(isStudent && view === "my"
+            ? [{ field: "my", operator: "eq" as const, value: "true" }]
+            : []),
+        ],
       },
-    }
+    },
   });
 
-  const { query: subjectsQuery } = useList<Subject, HttpError>({ resource: "subjects", pagination: { pageSize: 1000 } });
-  const { query: departmentsQuery } = useList<Department, HttpError>({ resource: "departments", pagination: { pageSize: 100 } });
-  const { query: applicationsQuery } = useList<TeacherApplication>({ resource: "teacher-applications", queryOptions: { enabled: isTeacher } });
+  const { query: subjectsQuery } = useList<Subject, HttpError>({
+    resource: "subjects",
+    pagination: { pageSize: 1000 },
+  });
+  const { query: departmentsQuery } = useList<Department, HttpError>({
+    resource: "departments",
+    pagination: { pageSize: 100 },
+  });
+  const { query: applicationsQuery } = useList<TeacherApplication>({
+    resource: "teacher-applications",
+    queryOptions: { enabled: isTeacher },
+  });
 
   // --- ACTIONS ---
   const handleJoinByCode = () => {
     if (!inviteCode.trim()) return;
-    joinClass({ url: "/classes/join", method: "post", values: { inviteCode } }, {
-      onSuccess: (data: any) => {
-        toast.success(data.data.message || t("classes.list.toast.joinRequestSent"));
-        setIsJoinModalOpen(false);
-        setInviteCode("");
-        // SMART FIX: Force refresh of the class lists
-        void invalidate({ resource: "classes", invalidates: ["list"] });
-      },
-      onError: (err: any) => toast.error(err?.data?.message || t("classes.list.toast.invalidInviteCode"))
-    });
+    joinClass(
+      { url: "/classes/join", method: "post", values: { inviteCode } },
+      {
+        onSuccess: (data) => {
+          const responseData = data.data as { message?: string };
+          toast.success(responseData.message || t("classes.list.toast.joinRequestSent"));
+          setIsJoinModalOpen(false);
+          setInviteCode("");
+          // SMART FIX: Force refresh of the class lists
+          void invalidate({ resource: "classes", invalidates: ["list"] });
+        },
+        onError: (err) => {
+          const error = err as HttpError;
+          toast.error(
+            (error?.response?.data as any)?.message || t("classes.list.toast.invalidInviteCode")
+          );
+        },
+      }
+    );
   };
 
   const handleEnrollRequest = (id: number) => {
-    enrollRequest({ url: `/classes/${id}/enroll`, method: "post", values: {} }, {
-      onSuccess: (data: any) => {
-        toast.success(data.data.message);
-        invalidate({ resource: "classes", invalidates: ["list"] });
-      },
-      onError: (err: any) => toast.error(err?.data?.message || "Failed to send enrollment request.")
-    });
+    enrollRequest(
+      { url: `/classes/${id}/enroll`, method: "post", values: {} },
+      {
+        onSuccess: (data) => {
+          const responseData = data.data as { message?: string };
+          toast.success(responseData.message);
+          invalidate({ resource: "classes", invalidates: ["list"] });
+        },
+        onError: (err) => {
+          const error = err as HttpError;
+          toast.error(
+            (error?.response?.data as any)?.message || "Failed to send enrollment request."
+          );
+        },
+      }
+    );
   };
 
   const handleClone = (id: number) => {
-    cloneClass({ url: `/classes/${id}/clone`, method: "post", values: {} }, {
-      onSuccess: () => {
-        toast.success(t("classes.list.toast.cloned"));
-        invalidate({ resource: "classes", invalidates: ["list"] });
+    cloneClass(
+      { url: `/classes/${id}/clone`, method: "post", values: {} },
+      {
+        onSuccess: () => {
+          toast.success(t("classes.list.toast.cloned"));
+          invalidate({ resource: "classes", invalidates: ["list"] });
+        },
       }
-    });
+    );
   };
 
   const handleConfirmDelete = () => {
     if (deleteTarget) {
-      deleteClass({ resource: "classes", id: deleteTarget }, {
-        onSuccess: () => {
-          toast.success(t("classes.list.toast.deleted"));
-          setDeleteTarget(null);
+      deleteClass(
+        { resource: "classes", id: deleteTarget },
+        {
+          onSuccess: () => {
+            toast.success(t("classes.list.toast.deleted"));
+            setDeleteTarget(null);
+          },
         }
-      });
+      );
     }
   };
 
@@ -151,7 +205,7 @@ export const useClassList = () => {
       departments: departmentsQuery.data?.data || [],
       applications: applicationsQuery.data?.data || [],
       identity,
-      selectedTerm
+      selectedTerm,
     },
     status: {
       isLoading: tableQueryResult?.isPending,
@@ -161,31 +215,59 @@ export const useClassList = () => {
       isAr,
       isStudent,
       isTeacher,
-      isAdmin
+      isAdmin,
     },
     filters: {
       view,
       setView,
       search: (filters.find((f) => "field" in f && f.field === "name") as any)?.value || "",
       subject: (filters.find((f) => "field" in f && f.field === "subject") as any)?.value || "all",
-      department: (filters.find((f) => "field" in f && f.field === "departmentId") as any)?.value || "all",
-      setSearch: (val: string) => setFilters([{ field: "name", operator: "contains", value: val || undefined }], "merge"),
-      setSubject: (val: string) => setFilters([{ field: "subject", operator: "eq", value: val === "all" ? undefined : val }], "merge"),
-      setDepartment: (val: string) => setFilters([{ field: "departmentId", operator: "eq", value: val === "all" ? undefined : Number(val) }], "merge")
+      department:
+        (filters.find((f) => "field" in f && f.field === "departmentId") as any)?.value || "all",
+      setSearch: (val: string) =>
+        setFilters([{ field: "name", operator: "contains", value: val || undefined }], "merge"),
+      setSubject: (val: string) =>
+        setFilters(
+          [
+            {
+              field: "subject",
+              operator: "eq",
+              value: val === "all" ? undefined : val,
+            },
+          ],
+          "merge"
+        ),
+      setDepartment: (val: string) =>
+        setFilters(
+          [
+            {
+              field: "departmentId",
+              operator: "eq",
+              value: val === "all" ? undefined : Number(val),
+            },
+          ],
+          "merge"
+        ),
     },
     state: {
-      inviteCode, setInviteCode,
-      isJoinModalOpen, setIsJoinModalOpen,
-      deleteTarget, setDeleteTarget,
-      applyTarget, setApplyTarget
+      inviteCode,
+      setInviteCode,
+      isJoinModalOpen,
+      setIsJoinModalOpen,
+      deleteTarget,
+      setDeleteTarget,
+      applyTarget,
+      setApplyTarget,
     },
     actions: {
       handleJoinByCode,
       handleEnrollRequest,
       handleClone,
       handleConfirmDelete,
-      create, show, edit,
-      invalidate
-    }
+      create,
+      show,
+      edit,
+      invalidate,
+    },
   };
 };

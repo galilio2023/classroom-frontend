@@ -1,12 +1,12 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { 
-  useShow, 
-  useOne, 
-  useUpdate, 
-  useList, 
-  useDelete, 
+import {
+  useShow,
+  useOne,
+  useUpdate,
+  useList,
+  useDelete,
   useCreate,
-  useInvalidate
+  useCustomMutation,
 } from "@refinedev/core";
 import { Class, Announcement, Enrollment } from "@/types";
 import { toast } from "sonner";
@@ -19,7 +19,6 @@ export const useClassDetails = (classId: string) => {
   const { t } = useTranslation();
   const { identity, isAdmin, isTeacher, isStaff } = useUserRole();
   const queryClient = useQueryClient();
-  const invalidate = useInvalidate();
 
   // --- Data Fetching ---
   const { query } = useShow<Class>({
@@ -29,18 +28,20 @@ export const useClassDetails = (classId: string) => {
   });
 
   const aClass = query?.data?.data;
-  
+
   const isModerator = useMemo(() => {
     if (isAdmin) return false; // Admins are Registrars, not Instructors
-    return !!aClass?.teachers?.some((t: any) => t.teacher.id === identity?.id);
+    return !!aClass?.teachers?.some((t) => t.teacher.id === identity?.id);
   }, [identity, aClass, isAdmin]);
 
   const isOwner = useMemo(() => {
-    return isAdmin || aClass?.teachers?.find((t: any) => t.teacher.id === identity?.id)?.isPrimary;
+    return isAdmin || aClass?.teachers?.find((t) => t.teacher.id === identity?.id)?.isPrimary;
   }, [identity, aClass, isAdmin]);
 
   // --- Announcements Logic ---
-  const { query: { data: announcementsResult } } = useList<Announcement>({
+  const {
+    query: { data: announcementsResult },
+  } = useList<Announcement>({
     resource: "announcements",
     filters: [{ field: "classId", operator: "eq", value: classId }],
     sorters: [{ field: "isPinned", order: "desc" }],
@@ -64,7 +65,7 @@ export const useClassDetails = (classId: string) => {
 
   // --- Teacher Notes Logic ---
   const [teacherNotes, setTeacherNotes] = useState("");
-  const { query: notesQuery } = useOne({
+  const { query: notesQuery } = useOne<{ content: string }>({
     resource: `classes/${classId}/notes`,
     id: "current",
     queryOptions: { enabled: !!classId && isStaff },
@@ -72,8 +73,8 @@ export const useClassDetails = (classId: string) => {
   const { mutate: updateNote } = useUpdate();
 
   useEffect(() => {
-    if ((notesQuery?.data as any)?.content !== undefined) {
-      setTeacherNotes((notesQuery?.data as any).content);
+    if (notesQuery?.data?.data?.content !== undefined) {
+      setTeacherNotes(notesQuery.data.data.content);
     }
   }, [notesQuery?.data]);
 
@@ -85,7 +86,7 @@ export const useClassDetails = (classId: string) => {
         values: { content },
       });
     }, 1000),
-    [classId, updateNote],
+    [classId, updateNote]
   );
 
   const handleNoteChange = (val: string) => {
@@ -106,79 +107,117 @@ export const useClassDetails = (classId: string) => {
     const previousClass = queryClient.getQueryData(queryKey);
 
     if (previousClass) {
-        queryClient.setQueryData(queryKey, (old: any) => {
-            if (!old?.data) return old;
-            return {
-                ...old,
-                data: {
-                    ...old.data,
-                    enrollments: old.data.enrollments.map((e: Enrollment) => 
-                        e.id === id ? { ...e, status } : e
-                    )
-                }
-            };
-        });
+      queryClient.setQueryData(queryKey, (old: { data?: Class } | undefined) => {
+        if (!old?.data) return old;
+        return {
+          ...old,
+          data: {
+            ...old.data,
+            enrollments: old.data.enrollments.map((e: Enrollment) =>
+              e.id === id ? { ...e, status } : e
+            ),
+          },
+        };
+      });
     }
 
-    updateEnrollment({
-      resource: "enrollments",
-      id: `${id}/status`,
-      values: { status },
-    }, {
-      onSuccess: () => {
-        toast.success(t("classes.show.toast.enrollmentStatus", {
-          status: status === "approved" ? t("profileRequests.toasts.approved") : t("profileRequests.toasts.rejected"),
-        }));
+    updateEnrollment(
+      {
+        resource: "enrollments",
+        id: `${id}/status`,
+        values: { status },
       },
-      onError: () => {
+      {
+        onSuccess: () => {
+          toast.success(
+            t("classes.show.toast.enrollmentStatus", {
+              status:
+                status === "approved"
+                  ? t("profileRequests.toasts.approved")
+                  : t("profileRequests.toasts.rejected"),
+            })
+          );
+        },
+        onError: () => {
           // Rollback if error
           if (previousClass) queryClient.setQueryData(queryKey, previousClass);
           toast.error(t("classes.show.toast.enrollmentError"));
-      },
-      onSettled: () => {
+        },
+        onSettled: () => {
           void query?.refetch();
+        },
       }
-    });
+    );
   };
 
   const handleToggleLive = async () => {
-      if (!aClass) return;
-      const newLiveStatus = !aClass.isLive;
+    if (!aClass) return;
+    const newLiveStatus = !aClass.isLive;
 
-      // Optimistic Update
-      const queryKey = ["classes", "show", classId];
-      await queryClient.cancelQueries({ queryKey });
-      const previousClass = queryClient.getQueryData(queryKey);
+    // Optimistic Update
+    const queryKey = ["classes", "show", classId];
+    await queryClient.cancelQueries({ queryKey });
+    const previousClass = queryClient.getQueryData(queryKey);
 
-      queryClient.setQueryData(queryKey, (old: any) => {
-          if (!old?.data) return old;
-          return { ...old, data: { ...old.data, isLive: newLiveStatus } };
-      });
+    queryClient.setQueryData(queryKey, (old: { data?: Class } | undefined) => {
+      if (!old?.data) return old;
+      return { ...old, data: { ...old.data, isLive: newLiveStatus } };
+    });
 
-      updateClass({
-          resource: "classes",
-          id: classId,
-          values: { isLive: newLiveStatus },
-      }, {
-          onError: () => {
-              if (previousClass) queryClient.setQueryData(queryKey, previousClass);
-              toast.error(t("classes.show.toast.liveToggleError", "Failed to update live status"));
-          },
-          onSettled: () => {
-              void query?.refetch();
-          }
-      });
+    updateClass(
+      {
+        resource: "classes",
+        id: classId,
+        values: { isLive: newLiveStatus },
+      },
+      {
+        onError: () => {
+          if (previousClass) queryClient.setQueryData(queryKey, previousClass);
+          toast.error(t("classes.show.toast.liveToggleError", "Failed to update live status"));
+        },
+        onSettled: () => {
+          void query?.refetch();
+        },
+      }
+    );
   };
 
   const handleConfirmUnenroll = (unenrollTarget: number | null, callback: () => void) => {
     if (unenrollTarget) {
-      deleteMutation({ resource: "enrollments", id: unenrollTarget }, {
-        onSuccess: () => {
-          callback();
-          void query?.refetch();
+      deleteMutation(
+        { resource: "enrollments", id: unenrollTarget },
+        {
+          onSuccess: () => {
+            callback();
+            void query?.refetch();
+          },
         }
-      });
+      );
     }
+  };
+
+  const { mutate: checkoutMutation, isLoading: isCheckingOut } = useCustomMutation() as any;
+
+  const handleCheckout = () => {
+    checkoutMutation(
+      {
+        url: `marketplace/${classId}/checkout`,
+        method: "post",
+        values: {},
+      },
+      {
+        onSuccess: (data: any) => {
+          if (data?.data?.url) {
+            window.location.href = data.data.url;
+          }
+        },
+        onError: (err: any) => {
+          toast.error(
+            err?.message || "Checkout failed. Please ensure the teacher has connected Stripe."
+          );
+        },
+      }
+    );
   };
 
   return {
@@ -200,9 +239,11 @@ export const useClassDetails = (classId: string) => {
     handleEnrollmentAction,
     handleToggleLive,
     handleConfirmUnenroll,
+    handleCheckout,
+    isCheckingOut,
     isDeleting: deleteMutationObj.isPending,
     createMutation,
     isMessaging: createMutationObj.isPending,
-    refetch: query?.refetch
+    refetch: query?.refetch,
   };
 };

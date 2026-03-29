@@ -13,18 +13,13 @@ interface ChatInputProps {
   isLoading: boolean;
 }
 
-export const ChatInput: React.FC<ChatInputProps> = ({
-  input,
-  setInput,
-  handleSend,
-  isLoading,
-}) => {
+export const ChatInput: React.FC<ChatInputProps> = ({ input, setInput, handleSend, isLoading }) => {
   const { t, i18n } = useTranslation();
-  const isAr = i18n.language === 'ar';
-  
+  const isAr = i18n.language === "ar";
+
   return (
     <CardFooter className="p-4 md:p-6 border-t border-border/40 bg-card/60 backdrop-blur-xl">
-      <form 
+      <form
         className="flex w-full items-center gap-3"
         onSubmit={(e) => {
           e.preventDefault();
@@ -38,9 +33,9 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           disabled={isLoading}
           className="flex-1 bg-muted/40 border-none shadow-inner h-12 md:h-14 rounded-2xl md:rounded-[1.25rem] px-4 md:px-6 font-medium placeholder:text-muted-foreground/50 focus-visible:ring-primary/20 text-sm md:text-base"
         />
-        <Button 
-          type="submit" 
-          size="icon" 
+        <Button
+          type="submit"
+          size="icon"
           disabled={isLoading || !input.trim()}
           className="h-12 w-12 md:h-14 md:w-14 rounded-2xl md:rounded-[1.25rem] shadow-lg shadow-ai-primary/20 transition-all active:scale-95 shrink-0 bg-ai-primary hover:bg-ai-primary/90 text-white"
         >

@@ -9,16 +9,18 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/80 shadow-[0_4px_14px_0_rgba(var(--primary),0.39)] hover:shadow-[0_6px_20px_rgba(var(--primary),0.23)]",
+        default:
+          "bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/80 shadow-[0_4px_14px_0_rgba(var(--primary),0.39)] hover:shadow-[0_6px_20px_rgba(var(--primary),0.23)]",
         destructive:
           "bg-destructive text-destructive-foreground hover:bg-destructive/90 active:bg-destructive/80 shadow-[0_4px_14px_0_rgba(var(--destructive),0.39)] hover:shadow-[0_6px_20px_rgba(var(--destructive),0.23)]",
         outline:
           "border border-input/80 bg-background/50 backdrop-blur-sm hover:bg-accent hover:text-accent-foreground active:bg-accent/80 shadow-sm hover:border-accent",
         secondary:
           "bg-secondary/80 backdrop-blur-sm text-secondary-foreground hover:bg-secondary active:bg-secondary/90 shadow-sm",
-        ghost: "hover:bg-accent/50 hover:text-accent-foreground active:bg-accent/80 backdrop-blur-sm",
+        ghost:
+          "hover:bg-accent/50 hover:text-accent-foreground active:bg-accent/80 backdrop-blur-sm",
         link: "text-primary underline-offset-4 hover:underline active:opacity-70",
-        ai: "bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 text-white hover:opacity-90 active:scale-95 shadow-lg shadow-purple-500/25",
+        ai: "bg-linear-to-br from-indigo-600 via-purple-600 to-pink-600 text-white hover:opacity-90 active:scale-95 shadow-lg shadow-purple-500/25",
       },
       size: {
         default: "h-11 px-6 py-2",
@@ -35,8 +37,7 @@ const buttonVariants = cva(
 );
 
 export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
   asChild?: boolean;
 }
 

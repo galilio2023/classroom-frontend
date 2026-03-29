@@ -76,8 +76,7 @@ const DepartmentsEdit = () => {
                     Edit Department
                   </CardTitle>
                   <CardDescription>
-                    Update the details for the department "
-                    {query?.data?.data.name}".
+                    Update the details for the department "{query?.data?.data.name}".
                   </CardDescription>
                 </CardHeader>
 
@@ -96,11 +95,7 @@ const DepartmentsEdit = () => {
                             Department Code
                           </FormLabel>
                           <FormControl>
-                            <Input
-                              placeholder="e.g. CS"
-                              {...field}
-                              className="font-mono"
-                            />
+                            <Input placeholder="e.g. CS" {...field} className="font-mono" />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -118,10 +113,7 @@ const DepartmentsEdit = () => {
                             Department Name
                           </FormLabel>
                           <FormControl>
-                            <Input
-                              placeholder="e.g. Computer Science"
-                              {...field}
-                            />
+                            <Input placeholder="e.g. Computer Science" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -182,12 +174,7 @@ const DepartmentsEdit = () => {
                 <Separator />
 
                 <CardFooter className="flex justify-end pt-6 pb-6 bg-muted/5">
-                  <Button
-                    type="submit"
-                    size="lg"
-                    disabled={formLoading}
-                    className="min-w-[150px]"
-                  >
+                  <Button type="submit" size="lg" disabled={formLoading} className="min-w-[150px]">
                     {formLoading ? "Saving..." : "Save Changes"}
                   </Button>
                 </CardFooter>
@@ -211,8 +198,8 @@ const DepartmentsEdit = () => {
                   <span className="text-xs font-bold text-primary">1</span>
                 </div>
                 <p>
-                  <strong>Short Codes:</strong> Use short, uppercase codes like
-                  "CS", "MATH", or "ENG" for easy reference.
+                  <strong>Short Codes:</strong> Use short, uppercase codes like "CS", "MATH", or
+                  "ENG" for easy reference.
                 </p>
               </div>
               <div className="flex gap-3">
@@ -220,8 +207,7 @@ const DepartmentsEdit = () => {
                   <span className="text-xs font-bold text-primary">2</span>
                 </div>
                 <p>
-                  <strong>Clear Names:</strong> Use the full official name of
-                  the department.
+                  <strong>Clear Names:</strong> Use the full official name of the department.
                 </p>
               </div>
             </CardContent>

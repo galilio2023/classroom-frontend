@@ -16,12 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
-import {
-  useLink,
-  useNotification,
-  useRefineOptions,
-  useRegister,
-} from "@refinedev/core";
+import { useLink, useNotification, useRefineOptions, useRegister } from "@refinedev/core";
 import { useTranslation } from "react-i18next";
 
 export const SignUpForm = () => {
@@ -83,29 +78,18 @@ export const SignUpForm = () => {
     >
       <div className={cn("flex", "items-center", "justify-center", "gap-2")}>
         {title.icon && (
-          <div
-            className={cn("text-foreground", "[&>svg]:w-12", "[&>svg]:h-12")}
-          >
-            {title.icon}
-          </div>
+          <div className={cn("text-foreground", "[&>svg]:w-12", "[&>svg]:h-12")}>{title.icon}</div>
         )}
       </div>
 
       <Card className={cn("sm:w-[456px]", "p-12", "mt-6")}>
         <CardHeader className={cn("px-0")}>
           <CardTitle
-            className={cn(
-              "text-green-600",
-              "dark:text-green-400",
-              "text-3xl",
-              "font-semibold"
-            )}
+            className={cn("text-green-600", "dark:text-green-400", "text-3xl", "font-semibold")}
           >
             {t("auth.login.signUp")}
           </CardTitle>
-          <CardDescription
-            className={cn("text-muted-foreground", "font-medium")}
-          >
+          <CardDescription className={cn("text-muted-foreground", "font-medium")}>
             {t("auth.register.welcomeTo")}
           </CardDescription>
         </CardHeader>
@@ -126,9 +110,7 @@ export const SignUpForm = () => {
               />
             </div>
 
-            <div
-              className={cn("relative", "flex", "flex-col", "gap-2", "mt-6")}
-            >
+            <div className={cn("relative", "flex", "flex-col", "gap-2", "mt-6")}>
               <Label htmlFor="password">{t("auth.register.passwordLabel")}</Label>
               <InputPassword
                 id="password"
@@ -138,9 +120,7 @@ export const SignUpForm = () => {
               />
             </div>
 
-            <div
-              className={cn("relative", "flex", "flex-col", "gap-2", "mt-6")}
-            >
+            <div className={cn("relative", "flex", "flex-col", "gap-2", "mt-6")}>
               <Label htmlFor="confirmPassword">{t("auth.register.confirmPassword")}</Label>
               <InputPassword
                 id="confirmPassword"
@@ -153,13 +133,7 @@ export const SignUpForm = () => {
             <Button
               type="submit"
               size="lg"
-              className={cn(
-                "w-full",
-                "mt-6",
-                "bg-green-600",
-                "hover:bg-green-700",
-                "text-white"
-              )}
+              className={cn("w-full", "mt-6", "bg-green-600", "hover:bg-green-700", "text-white")}
             >
               {t("auth.login.signUp")}
             </Button>
@@ -229,12 +203,7 @@ export const SignUpForm = () => {
             </span>
             <Link
               to="/login"
-              className={cn(
-                "text-blue-600",
-                "dark:text-blue-400",
-                "font-semibold",
-                "underline"
-              )}
+              className={cn("text-blue-600", "dark:text-blue-400", "font-semibold", "underline")}
             >
               {t("auth.login.signIn")}
             </Link>

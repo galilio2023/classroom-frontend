@@ -1,10 +1,5 @@
 import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useResourceParams, useTranslate } from "@refinedev/core";
 import { ChevronLeft, InfoIcon, Home, RefreshCw } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -17,16 +12,7 @@ export function ErrorComponent() {
   const [errorMessage, setErrorMessage] = useState<string>();
   const translate = useTranslate();
   const navigate = useNavigate();
-  
-  // Safely handle resource params
-  let resourceParams: any = {};
-  try {
-    resourceParams = useResourceParams();
-  } catch (e) {
-    console.error("Error getting resource params", e);
-  }
-  
-  const { resource, action } = resourceParams;
+  const { resource, action } = useResourceParams();
 
   useEffect(() => {
     if (resource && action) {
@@ -45,17 +31,17 @@ export function ErrorComponent() {
 
   const handleBackToDashboard = () => {
     try {
-        navigate("/");
-    } catch (e) {
-        window.location.href = "/";
+      navigate("/");
+    } catch {
+      window.location.href = "/";
     }
   };
 
   const handleGoBack = () => {
     try {
-        navigate(-1);
-    } catch (e) {
-        window.history.back();
+      navigate(-1);
+    } catch {
+      window.history.back();
     }
   };
 
@@ -90,8 +76,8 @@ export function ErrorComponent() {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <div className="flex items-center gap-1 text-[10px] text-primary cursor-help mt-2 font-bold uppercase tracking-widest">
-                        <InfoIcon className="h-3 w-3" />
-                        Technical Details
+                      <InfoIcon className="h-3 w-3" />
+                      Technical Details
                     </div>
                   </TooltipTrigger>
                   <TooltipContent side="bottom" className="max-w-xs">
@@ -104,36 +90,36 @@ export function ErrorComponent() {
         </div>
 
         <div className="flex flex-col gap-3">
-            <Button 
-                size="lg" 
-                className="gap-2 rounded-xl px-8 shadow-xl shadow-primary/20 font-bold"
-                onClick={handleBackToDashboard}
-            >
-                <Home className="h-4 w-4" />
-                {translate("pages.error.backHome", "Return to Dashboard")}
-            </Button>
-            
-            <div className="flex gap-2 justify-center">
-                <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="text-muted-foreground hover:text-foreground"
-                    onClick={handleGoBack}
-                >
-                    <ChevronLeft className="h-4 w-4 mr-1" />
-                    Go Back
-                </Button>
+          <Button
+            size="lg"
+            className="gap-2 rounded-xl px-8 shadow-xl shadow-primary/20 font-bold"
+            onClick={handleBackToDashboard}
+          >
+            <Home className="h-4 w-4" />
+            {translate("pages.error.backHome", "Return to Dashboard")}
+          </Button>
 
-                <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="text-muted-foreground hover:text-foreground"
-                    onClick={handleHardRefresh}
-                >
-                    <RefreshCw className="h-4 w-4 mr-1" />
-                    Refresh Page
-                </Button>
-            </div>
+          <div className="flex gap-2 justify-center">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-muted-foreground hover:text-foreground"
+              onClick={handleGoBack}
+            >
+              <ChevronLeft className="h-4 w-4 me-1" />
+              Go Back
+            </Button>
+
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-muted-foreground hover:text-foreground"
+              onClick={handleHardRefresh}
+            >
+              <RefreshCw className="h-4 w-4 me-1" />
+              Refresh Page
+            </Button>
+          </div>
         </div>
       </div>
     </div>

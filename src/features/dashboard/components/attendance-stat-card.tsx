@@ -19,9 +19,19 @@ export const AttendanceStatCard: React.FC<AttendanceStatCardProps> = ({
   hoverBorderClass,
 }) => {
   return (
-    <Card className={cn("bg-card/50 backdrop-blur-sm border-border/50 transition-colors group", hoverBorderClass)}>
+    <Card
+      className={cn(
+        "bg-card/50 backdrop-blur-sm border-border/50 transition-colors group",
+        hoverBorderClass
+      )}
+    >
       <CardContent className="p-4 flex flex-col items-center justify-center text-center">
-        <div className={cn("p-2 rounded-full mb-2 group-hover:scale-110 transition-transform", colorClass)}>
+        <div
+          className={cn(
+            "p-2 rounded-full mb-2 group-hover:scale-110 transition-transform",
+            colorClass
+          )}
+        >
           <Icon className="h-5 w-5" />
         </div>
         <span className="text-2xl font-black text-foreground">{value}</span>

@@ -20,7 +20,10 @@ export const parseQuizDescription = (description: string): ParsedQuestion[] => {
           ? correctAnswerLine.replace("- ", "").replace(" (Correct)", "").trim()
           : "";
         const explanation =
-          lines.find((l) => l.includes("**Explanation:**"))?.replace("**Explanation:**", "").trim() || "";
+          lines
+            .find((l) => l.includes("**Explanation:**"))
+            ?.replace("**Explanation:**", "")
+            .trim() || "";
 
         return { question, options, correctAnswer, explanation };
       })

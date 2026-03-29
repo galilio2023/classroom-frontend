@@ -5,11 +5,25 @@ import { useTranslation } from "react-i18next";
 import usePageTitle from "@/hooks/use-page-title";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -21,8 +35,15 @@ import { UserRole } from "@/types"; // Assuming UserRole enum is accessible
 // Define the schema for global settings
 const settingsSchema = z.object({
   enableAiFeatures: z.boolean(),
+  isDryRun: z.boolean(),
+  dailyTokenQuota: z.coerce.number().min(0).max(1000000),
+  maxAiTokenLimit: z.coerce.number().min(0).max(32000),
   defaultRegistrationRole: z.nativeEnum(UserRole),
-  welcomeMessage: z.string().min(1, "Welcome message cannot be empty").max(500, "Welcome message too long").optional(),
+  welcomeMessage: z
+    .string()
+    .min(1, "Welcome message cannot be empty")
+    .max(500, "Welcome message too long")
+    .optional(),
 });
 
 type SettingsFormValues = z.infer<typeof settingsSchema>;
@@ -48,6 +69,9 @@ const SettingsEditPage = () => {
     resolver: zodResolver(settingsSchema),
     defaultValues: {
       enableAiFeatures: true,
+      isDryRun: false,
+      dailyTokenQuota: 50000,
+      maxAiTokenLimit: 8000,
       defaultRegistrationRole: UserRole.STUDENT,
       welcomeMessage: undefined, // Explicitly set to undefined for optional field
     },
@@ -72,7 +96,11 @@ const SettingsEditPage = () => {
           toast.success(t("settings.toasts.success"));
         },
         onError: (error) => {
-          toast.error(t("settings.toasts.error", { message: error?.message || "Unknown error" }));
+          toast.error(
+            t("settings.toasts.error", {
+              message: error?.message || "Unknown error",
+            })
+          );
         },
       }
     );
@@ -119,28 +147,81 @@ const SettingsEditPage = () => {
             ) : (
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                  <FormField
-                    control={form.control}
-                    name="enableAiFeatures"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                        <div className="space-y-0.5">
-                          <FormLabel className="text-base">
-                            {t("settings.form.enableAiFeatures.label")}
-                          </FormLabel>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <FormField
+                      control={form.control}
+                      name="enableAiFeatures"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                          <div className="space-y-0.5">
+                            <FormLabel className="text-base">
+                              {t("settings.form.enableAiFeatures.label")}
+                            </FormLabel>
+                            <FormDescription>
+                              {t("settings.form.enableAiFeatures.description")}
+                            </FormDescription>
+                          </div>
+                          <FormControl>
+                            <Switch checked={field.value} onCheckedChange={field.onChange} />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="isDryRun"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border border-orange-500/20 bg-orange-500/5 p-4">
+                          <div className="space-y-0.5">
+                            <FormLabel className="text-base text-orange-600">
+                              {t("aiHub.assistant.mockMode")}
+                            </FormLabel>
+                            <FormDescription>{t("aiHub.assistant.mockModeDesc")}</FormDescription>
+                          </div>
+                          <FormControl>
+                            <Switch checked={field.value} onCheckedChange={field.onChange} />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <FormField
+                      control={form.control}
+                      name="dailyTokenQuota"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t("settings.form.dailyTokenQuota.label")}</FormLabel>
+                          <FormControl>
+                            <Input type="number" {...field} />
+                          </FormControl>
                           <FormDescription>
-                            {t("settings.form.enableAiFeatures.description")}
+                            {t("settings.form.dailyTokenQuota.description")}
                           </FormDescription>
-                        </div>
-                        <FormControl>
-                          <Switch
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="maxAiTokenLimit"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{t("settings.form.maxAiTokenLimit.label")}</FormLabel>
+                          <FormControl>
+                            <Input type="number" {...field} />
+                          </FormControl>
+                          <FormDescription>
+                            {t("settings.form.maxAiTokenLimit.description")}
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
 
                   <FormField
                     control={form.control}
@@ -151,7 +232,9 @@ const SettingsEditPage = () => {
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder={t("settings.form.defaultRegistrationRole.placeholder")} />
+                              <SelectValue
+                                placeholder={t("settings.form.defaultRegistrationRole.placeholder")}
+                              />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent className="bg-white dark:bg-[#09090b] opacity-100 backdrop-blur-none border border-border/50 shadow-2xl">
@@ -175,7 +258,10 @@ const SettingsEditPage = () => {
                       <FormItem>
                         <FormLabel>{t("settings.form.welcomeMessage.label")}</FormLabel>
                         <FormControl>
-                          <Input placeholder={t("settings.form.welcomeMessage.placeholder")} {...field} />
+                          <Input
+                            placeholder={t("settings.form.welcomeMessage.placeholder")}
+                            {...field}
+                          />
                         </FormControl>
                         <FormDescription>
                           {t("settings.form.welcomeMessage.description")}
@@ -187,9 +273,9 @@ const SettingsEditPage = () => {
 
                   <Button type="submit" className="w-full" disabled={isUpdatingSettings}>
                     {isUpdatingSettings ? (
-                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                      <Loader2 className="h-4 w-4 animate-spin me-2" />
                     ) : (
-                      <SettingsIcon className="h-4 w-4 mr-2" />
+                      <SettingsIcon className="h-4 w-4 me-2" />
                     )}
                     {t("buttons.saveSettings")}
                   </Button>

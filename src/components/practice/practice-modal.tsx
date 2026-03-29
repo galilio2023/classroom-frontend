@@ -1,5 +1,11 @@
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { Loader2, Trophy } from "lucide-react";
 import { useCustomMutation } from "@refinedev/core";
 import Confetti from "react-confetti";
@@ -37,36 +43,42 @@ export const PracticeModal = ({ topic, subjectId, onClose }: PracticeModalProps)
 
   // Start Session Mutation
   const { mutate: startSession } = useCustomMutation<Session>();
-  
+
   // Submit Session Mutation
   const { mutate: submitSession, mutation: submitMutation } = useCustomMutation<any>();
   const isSubmitting = (submitMutation as any).isPending || (submitMutation as any).isLoading;
 
   useEffect(() => {
-    startSession({
-      url: "/ai/practice/start",
-      method: "post",
-      values: { topic, subjectId },
-      successNotification: false,
-      errorNotification: { message: t("aiHub.studyLab.toasts.error"), type: "error" },
-    }, {
-      onSuccess: (data) => {
-        setSession(data.data);
-        setStep("quiz");
+    startSession(
+      {
+        url: "/ai/practice/start",
+        method: "post",
+        values: { topic, subjectId },
+        successNotification: false,
+        errorNotification: {
+          message: t("aiHub.studyLab.toasts.error"),
+          type: "error",
+        },
       },
-      onError: () => {
-        onClose();
+      {
+        onSuccess: (data) => {
+          setSession(data.data);
+          setStep("quiz");
+        },
+        onError: () => {
+          onClose();
+        },
       }
-    });
+    );
   }, [topic, subjectId]);
 
   const handleOptionSelect = (option: string) => {
-    setAnswers(prev => ({ ...prev, [currentQuestionIndex]: option }));
+    setAnswers((prev) => ({ ...prev, [currentQuestionIndex]: option }));
   };
 
   const handleNext = () => {
     if (session && currentQuestionIndex < session.questions.length - 1) {
-      setCurrentQuestionIndex(prev => prev + 1);
+      setCurrentQuestionIndex((prev) => prev + 1);
     } else {
       handleSubmit();
     }
@@ -74,18 +86,21 @@ export const PracticeModal = ({ topic, subjectId, onClose }: PracticeModalProps)
 
   const handleSubmit = () => {
     if (!session) return;
-    
-    submitSession({
-      url: "/ai/practice/submit",
-      method: "post",
-      values: { sessionId: session.id, answers },
-      successNotification: false,
-    }, {
-      onSuccess: (data: any) => {
-        setResult(data.data);
-        setStep("result");
+
+    submitSession(
+      {
+        url: "/ai/practice/submit",
+        method: "post",
+        values: { sessionId: session.id, answers },
+        successNotification: false,
+      },
+      {
+        onSuccess: (data: any) => {
+          setResult(data.data);
+          setStep("result");
+        },
       }
-    });
+    );
   };
 
   const currentQuestion = session?.questions[currentQuestionIndex];
@@ -94,8 +109,10 @@ export const PracticeModal = ({ topic, subjectId, onClose }: PracticeModalProps)
   return (
     <Dialog open={true} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-2xl">
-        {step === "result" && result?.passed && <Confetti width={width} height={height} recycle={false} numberOfPieces={500} />}
-        
+        {step === "result" && result?.passed && (
+          <Confetti width={width} height={height} recycle={false} numberOfPieces={500} />
+        )}
+
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Trophy className="h-5 w-5 text-yellow-500" />
@@ -103,7 +120,11 @@ export const PracticeModal = ({ topic, subjectId, onClose }: PracticeModalProps)
           </DialogTitle>
           <DialogDescription>
             {step === "loading" && t("common.analyzingData")}
-            {step === "quiz" && t("aiHub.studyLab.flashcards.cardOf", { current: currentQuestionIndex + 1, total: session?.questions.length })}
+            {step === "quiz" &&
+              t("aiHub.studyLab.flashcards.cardOf", {
+                current: currentQuestionIndex + 1,
+                total: session?.questions.length,
+              })}
             {step === "result" && t("aiHub.studyLab.flashcards.sessionComplete")}
           </DialogDescription>
         </DialogHeader>
@@ -129,9 +150,7 @@ export const PracticeModal = ({ topic, subjectId, onClose }: PracticeModalProps)
             />
           )}
 
-          {step === "result" && result && (
-            <PracticeResultStep result={result} onClose={onClose} />
-          )}
+          {step === "result" && result && <PracticeResultStep result={result} onClose={onClose} />}
         </div>
       </DialogContent>
     </Dialog>

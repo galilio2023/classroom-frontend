@@ -27,6 +27,10 @@ This document serves as the **Single Source of Truth** for frontend developers. 
 | `POST` | `/feedback` | `useCustomMutation` | 60/hr | - |
 | `GET` | `/health-report` | `useTable` | 1/hr | `SystemHealthReport` |
 
+### 🛠️ Specialized AI Hooks
+*   **`useAiStream`**: The foundational hook for all AI streaming (SSE) interactions. Implements line-buffering, Zod validation, and backend proxy auth. Use this when building new agentic features.
+*   **`useAIChat`**: Production-grade wrapper for Study Buddy and General Chat. Includes Dexie-backed persistence and adaptive UI states.
+
 ### 📡 Hardened SSE Pattern
 All streaming endpoints (`/study-buddy`, `/interact`) MUST follow the **JSON Line Buffering** protocol:
 1.  **Transport:** Server-Sent Events (SSE).

@@ -1,4 +1,4 @@
-import type { AuthProvider } from "@refinedev/core";
+import type { AuthProvider, HttpError } from "@refinedev/core";
 import { User, SignUpPayload } from "@/types";
 import { authClient } from "@/lib/auth-client";
 
@@ -6,7 +6,7 @@ import { authClient } from "@/lib/auth-client";
  * Sanitizes the payload by converting empty strings to null.
  * This prevents PostgreSQL "invalid input syntax for type date" errors.
  */
-const sanitizePayload = (params: any) => {
+const sanitizePayload = (params: Record<string, unknown>) => {
   const sanitized = { ...params };
   Object.keys(sanitized).forEach((key) => {
     if (sanitized[key] === "") {
@@ -17,15 +17,13 @@ const sanitizePayload = (params: any) => {
 };
 
 export const authProvider: AuthProvider = {
-  register: async (params: any) => {
+  register: async (params: Record<string, unknown>) => {
     try {
       const sanitizedParams = sanitizePayload(params);
       console.log("Attempting registration for:", sanitizedParams.email);
-      
-      const { data, error } = await authClient.signUp.email(
-        sanitizedParams as SignUpPayload,
-      );
-      
+
+      const { error } = await authClient.signUp.email(sanitizedParams as unknown as SignUpPayload);
+
       if (error) {
         console.error("Registration error from Better Auth:", error);
         return {
@@ -36,26 +34,27 @@ export const authProvider: AuthProvider = {
           },
         };
       }
-      
+
       console.log("Registration successful for:", sanitizedParams.email);
       return { success: true, redirectTo: "/login" };
-    } catch (err: any) {
-      console.error("Unexpected registration error:", err);
+    } catch (err: unknown) {
+      const error = err as Error;
+      console.error("Unexpected registration error:", error);
       return {
         success: false,
         error: {
           name: "Registration Error",
-          message: err.message || "Network error. Please check your connection.",
+          message: error.message || "Network error. Please check your connection.",
         },
       };
     }
   },
 
-  login: async (params: any) => {
+  login: async (params: Record<string, unknown>) => {
     try {
       const { data, error } = await authClient.signIn.email({
-        email: params.email,
-        password: params.password,
+        email: params.email as string,
+        password: params.password as string,
       });
       if (error) {
         return {
@@ -66,24 +65,28 @@ export const authProvider: AuthProvider = {
           },
         };
       }
-      
+
       if (data?.user) {
-        const user = data.user as any;
+        const user = data.user as unknown as User;
         const userWithVerified = {
-            ...user,
-            isVerified: user.verificationStatus === "verified" || user.role === "admin" || user.role === "student"
+          ...user,
+          isVerified:
+            user.verificationStatus === "verified" ||
+            user.role === "admin" ||
+            user.role === "student",
         };
         localStorage.setItem("user", JSON.stringify(userWithVerified));
       }
-      
+
       // Fixed: Redirect to dashboard instead of landing page
       return { success: true, redirectTo: "/dashboard" };
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const error = err as Error;
       return {
         success: false,
         error: {
           name: "Login Error",
-          message: err.message || "Network error. Please check your connection.",
+          message: error.message || "Network error. Please check your connection.",
         },
       };
     }
@@ -95,7 +98,7 @@ export const authProvider: AuthProvider = {
       localStorage.removeItem("user");
       localStorage.removeItem("tablawy-live-session");
       return { success: true, redirectTo: "/login" };
-    } catch (error) {
+    } catch {
       localStorage.removeItem("user");
       localStorage.removeItem("tablawy-live-session");
       return { success: true, redirectTo: "/login" };
@@ -105,38 +108,40 @@ export const authProvider: AuthProvider = {
   check: async () => {
     try {
       const { data: session, error } = await authClient.getSession();
-      
+
       if (error || !session?.user) {
         if (import.meta.env.DEV) {
           console.warn("Better-Auth session missing or failed:", error);
         }
-        
+
         // TEMPORARY DEV FALLBACK: Only trust local storage in development mode (npm run dev)
         // In production, this block is ignored to prevent UI-level spoofing.
         if (import.meta.env.DEV) {
           const localUser = localStorage.getItem("user");
           if (localUser) {
-             return { authenticated: true };
+            return { authenticated: true };
           }
         }
       }
-      
+
       if (session?.user) {
-        const user = session.user as any;
+        const user = session.user as unknown as User;
         const userWithVerified = {
-            ...user,
-            isVerified: user.verificationStatus === "verified" || user.role === "admin" || user.role === "student"
+          ...user,
+          isVerified:
+            user.verificationStatus === "verified" ||
+            user.role === "admin" ||
+            user.role === "student",
         };
         localStorage.setItem("user", JSON.stringify(userWithVerified));
         return { authenticated: true };
       }
-      
+
       localStorage.removeItem("user");
       return {
         authenticated: false,
       };
-    } catch (error) {
-      console.error("Session check error:", error);
+    } catch {
       localStorage.removeItem("user");
       return {
         authenticated: false,
@@ -144,8 +149,8 @@ export const authProvider: AuthProvider = {
     }
   },
 
-  onError: async (error: any) => {
-    if (error?.response?.status === 401 || error?.status === 401) {
+  onError: async (error: HttpError | null) => {
+    if (error?.status === 401) {
       localStorage.removeItem("user");
       return {
         logout: true,
@@ -158,7 +163,9 @@ export const authProvider: AuthProvider = {
   getPermissions: async () => {
     // 🛡️ SECURITY: Prefer session over localStorage if possible
     const { data: session } = await authClient.getSession();
-    const role = (session?.user as any)?.role || JSON.parse(localStorage.getItem("user") || "{}")?.role;
+    const role =
+      (session?.user as unknown as User)?.role ||
+      JSON.parse(localStorage.getItem("user") || "{}")?.role;
     return { role };
   },
 
@@ -166,14 +173,14 @@ export const authProvider: AuthProvider = {
     // 🛡️ SECURITY: Fetch fresh session to prevent local spoofing
     const { data: session } = await authClient.getSession();
     if (session?.user) {
-        return session.user;
+      return session.user as unknown as User;
     }
-    
+
     const user = localStorage.getItem("user");
     if (!user) return null;
     try {
-      return JSON.parse(user);
-    } catch (e) {
+      return JSON.parse(user) as User;
+    } catch {
       return null;
     }
   },

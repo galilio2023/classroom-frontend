@@ -69,29 +69,18 @@ export const SignInForm = () => {
     >
       <div className={cn("flex", "items-center", "justify-center")}>
         {title.icon && (
-          <div
-            className={cn("text-foreground", "[&>svg]:w-12", "[&>svg]:h-12")}
-          >
-            {title.icon}
-          </div>
+          <div className={cn("text-foreground", "[&>svg]:w-12", "[&>svg]:h-12")}>{title.icon}</div>
         )}
       </div>
 
       <Card className={cn("sm:w-[456px]", "p-12", "mt-6")}>
         <CardHeader className={cn("px-0")}>
           <CardTitle
-            className={cn(
-              "text-blue-600",
-              "dark:text-blue-400",
-              "text-3xl",
-              "font-semibold"
-            )}
+            className={cn("text-blue-600", "dark:text-blue-400", "text-3xl", "font-semibold")}
           >
             {t("auth.login.signIn")}
           </CardTitle>
-          <CardDescription
-            className={cn("text-muted-foreground", "font-medium")}
-          >
+          <CardDescription className={cn("text-muted-foreground", "font-medium")}>
             {t("auth.login.welcomeBack")}
           </CardDescription>
         </CardHeader>
@@ -111,9 +100,7 @@ export const SignInForm = () => {
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
-            <div
-              className={cn("relative", "flex", "flex-col", "gap-2", "mt-6")}
-            >
+            <div className={cn("relative", "flex", "flex-col", "gap-2", "mt-6")}>
               <Label htmlFor="password">{t("auth.login.passwordLabel")}</Label>
               <InputPassword
                 value={password}
@@ -122,14 +109,7 @@ export const SignInForm = () => {
               />
             </div>
 
-            <div
-              className={cn(
-                "flex items-center justify-between",
-                "flex-wrap",
-                "gap-2",
-                "mt-4"
-              )}
-            >
+            <div className={cn("flex items-center justify-between", "flex-wrap", "gap-2", "mt-4")}>
               <div className={cn("flex items-center", "space-x-2")}>
                 <Checkbox
                   id="remember"
@@ -227,12 +207,7 @@ export const SignInForm = () => {
             </span>
             <Link
               to="/register"
-              className={cn(
-                "text-green-600",
-                "dark:text-green-400",
-                "font-semibold",
-                "underline"
-              )}
+              className={cn("text-green-600", "dark:text-green-400", "font-semibold", "underline")}
             >
               {t("auth.login.signUp")}
             </Link>

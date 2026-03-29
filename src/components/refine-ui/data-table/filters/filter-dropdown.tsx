@@ -5,11 +5,7 @@ import type { Column } from "@tanstack/react-table";
 import { ListFilter, X } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
 export type DataTableFilterDropdownProps<TData> = {
@@ -50,10 +46,7 @@ export function DataTableFilterDropdown<TData>({
           <ListFilter className="!h-3 !w-3" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent
-        align="start"
-        className={cn("w-full shadow-sm", contentClassName)}
-      >
+      <PopoverContent align="start" className={cn("w-full shadow-sm", contentClassName)}>
         {children({ isOpen, setIsOpen })}
       </PopoverContent>
     </Popover>

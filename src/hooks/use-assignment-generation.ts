@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import { useCustomMutation, useNotification } from "@refinedev/core";
+import { useCustomMutation, useNotification, HttpError } from "@refinedev/core";
 
-interface AIResponse {
-  content: string;
+interface AIJobResponse {
+  jobId: string;
 }
 
 export const useAssignmentGeneration = () => {
@@ -11,21 +11,29 @@ export const useAssignmentGeneration = () => {
   const [difficulty, setDifficulty] = useState("intermediate");
   const [tone, setTone] = useState("academic");
   const [objectives, setObjectives] = useState("");
+  const [isProcessing, setIsProcessing] = useState(false);
   const [generatedContent, setGeneratedContent] = useState(() => {
     // 🧠 BRAVE PERSISTENCE: Restore from session if exists
     return sessionStorage.getItem("pending_ai_assignment") || "";
   });
 
   const { open } = useNotification();
-  const { mutate, mutation } = useCustomMutation<AIResponse>();
-  const isLoading = mutation.isPending;
+  const { mutate, mutation } = useCustomMutation<AIJobResponse>();
+  const isLoading = mutation.isPending || isProcessing;
 
-  // Save to session whenever content changes
+  // Listen for background job completion
   useEffect(() => {
-    if (generatedContent) {
-      sessionStorage.setItem("pending_ai_assignment", generatedContent);
-    }
-  }, [generatedContent]);
+    const handleReady = (event: Event) => {
+      const customEvent = event as CustomEvent<{ content: string }>;
+      const content = customEvent.detail.content;
+      setGeneratedContent(content);
+      setIsProcessing(false);
+      sessionStorage.setItem("pending_ai_assignment", content);
+    };
+
+    window.addEventListener("AI_ASSIGNMENT_READY", handleReady);
+    return () => window.removeEventListener("AI_ASSIGNMENT_READY", handleReady);
+  }, []);
 
   const handleGenerate = () => {
     if (!subject || !topic) {
@@ -44,18 +52,22 @@ export const useAssignmentGeneration = () => {
         values: { subject, topic, difficulty, tone, objectives },
       },
       {
-        onSuccess: (data) => {
-          setGeneratedContent(data.data.content);
+        onSuccess: () => {
+          setIsProcessing(true);
           open?.({
             type: "success",
-            message: "Assignment Generated!",
-            description: "Gemini has created a draft for you.",
+            message: "Generation Started",
+            description:
+              "Gemini is building your assignment. You will be notified when it's ready!",
           });
         },
-        onError: (error: any) => {
+        onError: (error: HttpError) => {
+          setIsProcessing(false);
           let description = "There was an error connecting to the AI service.";
-          if (error.status === 429) description = "AI generation limit reached for this period. Please try again later.";
-          if (error.status === 503) description = "AI services are currently offline for maintenance.";
+          if (error.status === 429)
+            description = "AI generation limit reached for this period. Please try again later.";
+          if (error.status === 503)
+            description = "AI services are currently offline for maintenance.";
 
           open?.({
             type: "error",

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { BaseRecord } from "@refinedev/core";
 import { classFormSchema, scheduleSchema } from "@/schemas/class";
 import { signUpFormSchema } from "@/schemas/auth";
 import { Quiz } from "./quiz";
@@ -18,18 +19,16 @@ export interface AIMetadata {
   latencyMs?: number;
   promptVersion?: string;
   isCached?: boolean;
-  [key: string]: any;
 }
 
 export interface AIResponse<T> {
   data: T;
   metadata?: AIMetadata;
-  usage?: AIMetadata['usage'];
+  usage?: AIMetadata["usage"];
   latencyMs?: number;
 }
 
 export type SignUpPayload = z.infer<typeof signUpFormSchema>;
-
 
 export enum UserRole {
   ADMIN = "admin",
@@ -55,7 +54,6 @@ export enum VerificationStatus {
 export interface BasePermissions {
   role?: UserRole;
   canAccessAi?: boolean;
-  [key: string]: any;
 }
 
 export interface User {
@@ -85,6 +83,8 @@ export interface User {
   currentStreak: number;
   longestStreak: number;
   lastActiveAt: string | null;
+  aiTokensUsed?: number;
+  aiMonthlyLimit?: number;
   enrollments?: Enrollment[];
   teacherChannel?: TeacherChannel;
   persona?: {
@@ -92,6 +92,8 @@ export interface User {
     preferredTone: string;
     lastSummarizedAt: string;
   };
+  stripeAccountId?: string | null;
+  stripeOnboardingComplete?: boolean;
 }
 
 export interface Department {
@@ -158,6 +160,8 @@ export interface Submission {
   studentId: string;
   groupId?: number | null;
   aiApprovalStatus?: "pending" | "approved" | "rejected";
+  aiStatus: "idle" | "processing" | "completed" | "failed";
+  aiError?: string | null;
   createdAt: string;
   updatedAt: string;
   student?: User;
@@ -195,6 +199,15 @@ export interface Assignment {
   hasPeerReview: boolean;
   peerReviewWeight: number;
   rubric: RubricItem[];
+}
+
+export interface ProjectGroup {
+  id: number;
+  classId: number;
+  name: string;
+  description: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface PeerReview {
@@ -317,6 +330,23 @@ export type Class = z.infer<typeof classFormSchema> & {
   gradeCategories?: GradeCategory[];
   isLive?: boolean;
   isBreakoutActive?: boolean;
+  isAiDelegated?: boolean;
+  aiDelegationPhoto?: string | null;
+  aiDelegationContext?: {
+    script?: string;
+    visualCue?: string;
+  };
+  liveLessonRoadmap?: {
+    sessionTitle?: string;
+    icebreaker?: string;
+    keyConcepts?: string[];
+    outline?: {
+      time: string;
+      topic: string;
+      goal: string;
+    }[];
+    studentWatchouts?: string;
+  };
   termId?: number;
   term?: AcademicTerm;
 };
@@ -435,7 +465,7 @@ export interface AIFeedbackResponse {
   summary: string;
 }
 
-export interface ListResponse<T = any> {
+export interface ListResponse<T = BaseRecord> {
   data: T[];
   pagination: {
     total: number;
@@ -445,11 +475,11 @@ export interface ListResponse<T = any> {
   };
 }
 
-export interface CreateResponse<T = any> {
+export interface CreateResponse<T = BaseRecord> {
   data: T;
 }
 
-export interface GetOneResponse<T = any> {
+export interface GetOneResponse<T = BaseRecord> {
   data: T;
 }
 
@@ -463,12 +493,12 @@ export interface AiLog {
   latencyMs: number;
   model: string;
   metadata: {
-      classId?: number;
-      conversationId?: number;
-      isAborted?: boolean;
-      errorName?: string;
-      errorCode?: string;
-      [key: string]: any;
+    classId?: number;
+    conversationId?: number;
+    isAborted?: boolean;
+    errorName?: string;
+    errorCode?: string;
+    [key: string]: any;
   };
   createdAt: string;
   user?: User;

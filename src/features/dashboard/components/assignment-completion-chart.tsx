@@ -1,5 +1,13 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 import { TrendingUp } from "lucide-react";
 import { AssignmentCompletionTrend } from "@/types/dashboard";
 import { NoChartData } from "./no-chart-data";
@@ -27,36 +35,36 @@ export const AssignmentCompletionChart = ({ data }: AssignmentCompletionChartPro
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={data} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
               <CartesianGrid strokeDasharray="3 3" className="stroke-border/50" vertical={false} />
-              <XAxis 
-                dataKey="assignmentTitle" 
-                tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} 
+              <XAxis
+                dataKey="assignmentTitle"
+                tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
                 tickLine={false}
                 axisLine={false}
                 interval="preserveStartEnd"
               />
-              <YAxis 
-                domain={[0, 100]} 
-                tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} 
+              <YAxis
+                domain={[0, 100]}
+                tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
                 tickLine={false}
                 axisLine={false}
                 unit="%"
               />
-              <Tooltip 
-                contentStyle={{ 
-                  backgroundColor: 'hsl(var(--card))', 
-                  borderColor: 'hsl(var(--border))', 
-                  borderRadius: '8px',
-                  fontSize: '12px'
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: "hsl(var(--card))",
+                  borderColor: "hsl(var(--border))",
+                  borderRadius: "8px",
+                  fontSize: "12px",
                 }}
-                itemStyle={{ color: 'hsl(var(--foreground))' }}
-                formatter={(value: number) => [`${value}%`, 'Completion Rate']}
+                itemStyle={{ color: "hsl(var(--foreground))" }}
+                formatter={(value: number) => [`${value}%`, "Completion Rate"]}
               />
-              <Line 
-                type="monotone" 
-                dataKey="completionRate" 
+              <Line
+                type="monotone"
+                dataKey="completionRate"
                 stroke="#6366f1" // Indigo-500
                 strokeWidth={3}
-                dot={{ r: 4, fill: '#6366f1', strokeWidth: 2, stroke: 'white' }}
+                dot={{ r: 4, fill: "#6366f1", strokeWidth: 2, stroke: "white" }}
                 activeDot={{ r: 6, strokeWidth: 0 }}
               />
             </LineChart>

@@ -90,9 +90,7 @@ export function DataTableRowActions({
             </DropdownMenuItem>
           )}
 
-          {(showCan?.can || editCan?.can) && deleteCan?.can && (
-            <DropdownMenuSeparator />
-          )}
+          {(showCan?.can || editCan?.can) && deleteCan?.can && <DropdownMenuSeparator />}
 
           {deleteCan?.can && onDelete && (
             <DropdownMenuItem

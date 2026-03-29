@@ -48,14 +48,10 @@ export function UndoableNotification({
       )}
     >
       <div className={cn("flex", "items-center", "justify-between")}>
-        <div className={cn("flex-1", "mr-4")}>
-          <div className={cn("font-medium", "text-foreground", "text-sm")}>
-            {message}
-          </div>
+        <div className={cn("flex-1", "me-4")}>
+          <div className={cn("font-medium", "text-foreground", "text-sm")}>{message}</div>
           {description && (
-            <div className={cn("text-muted-foreground", "text-sm", "mt-1")}>
-              {description}
-            </div>
+            <div className={cn("text-muted-foreground", "text-sm", "mt-1")}>{description}</div>
           )}
         </div>
         <Button

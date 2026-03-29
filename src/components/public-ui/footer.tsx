@@ -1,13 +1,5 @@
 import { Link } from "react-router-dom";
-import {
-  ArrowRight,
-  BookOpen,
-  Globe,
-  Heart,
-  Mail,
-  ShieldCheck,
-  Zap,
-} from "lucide-react";
+import { ArrowRight, BookOpen, Globe, Heart, Mail, ShieldCheck, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useTranslation } from "react-i18next";
@@ -155,14 +147,14 @@ export const Footer = () => {
   return (
     <footer className="relative bg-background pt-32 pb-12 overflow-hidden border-t border-primary/5">
       {/* Decorative background with bg-linear-to-r update */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-linear-to-r from-transparent via-primary/50 to-transparent" />
-      <div className="absolute top-0 left-0 w-64 h-64 bg-primary/5 blur-[100px] rounded-full pointer-events-none" />
+      <div className="absolute top-0 start-1/2 -translate-x-1/2 w-full h-px bg-linear-to-r from-transparent via-primary/50 to-transparent" />
+      <div className="absolute top-0 start-0 w-64 h-64 bg-primary/5 blur-[100px] rounded-full pointer-events-none" />
 
       <div className="container-center">
         {/* Newsletter / CTA Section */}
         <div className="bg-muted/30 rounded-[3rem] p-12 md:p-16 mb-24 border border-primary/5 backdrop-blur-sm relative overflow-hidden flex flex-col lg:flex-row items-center justify-between gap-12 group">
           {/* RTL Positioning Fix */}
-          <div className="absolute -top-10 -right-10 rtl:-left-10 rtl:right-auto w-40 h-40 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-colors" />
+          <div className="absolute -top-10 -end-10 rtl:-start-10 rtl:end-auto w-40 h-40 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-colors" />
 
           <div className="max-w-md space-y-4 text-center lg:text-start">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest">
@@ -179,7 +171,7 @@ export const Footer = () => {
             <p className="text-muted-foreground font-medium">
               {t(
                 "footer.subscribeDesc",
-                "Subscribe to our weekly insights on AI in modern education.",
+                "Subscribe to our weekly insights on AI in modern education."
               )}
             </p>
           </div>
@@ -198,7 +190,7 @@ export const Footer = () => {
                 <ArrowRight
                   className={cn(
                     "h-6 w-6 group-hover/btn:translate-x-1 transition-transform",
-                    isAr && "rotate-180 group-hover/btn:-translate-x-1",
+                    isAr && "rotate-180 group-hover/btn:-translate-x-1"
                   )}
                 />
               </Button>
@@ -222,7 +214,7 @@ export const Footer = () => {
             <p className="text-muted-foreground text-lg font-medium leading-relaxed max-w-sm">
               {t(
                 "footer.brandDesc",
-                "The next generation of education. AI-powered tools, collaborative environments, and enterprise-grade classroom management.",
+                "The next generation of education. AI-powered tools, collaborative environments, and enterprise-grade classroom management."
               )}
             </p>
             <div className="flex items-center gap-4">
@@ -274,8 +266,7 @@ export const Footer = () => {
         <div className="pt-12 border-t border-primary/5 flex flex-col md:flex-row justify-between items-center gap-8">
           <div className="flex flex-col items-center md:items-start gap-2">
             <p className="text-[10px] text-muted-foreground font-black uppercase tracking-[0.2em]">
-              &copy; {currentYear}{" "}
-              {t("footer.rightsReserved", "Tablawy OS. All rights reserved.")}
+              &copy; {currentYear} {t("footer.rightsReserved", "Tablawy OS. All rights reserved.")}
             </p>
             <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
               {t("footer.builtWith", "Built with")}{" "}

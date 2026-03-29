@@ -15,21 +15,21 @@ interface QuizQuestionItemProps {
   showExplanation?: boolean;
 }
 
-export const QuizQuestionItem: React.FC<QuizQuestionItemProps> = ({ 
-  question, 
+export const QuizQuestionItem: React.FC<QuizQuestionItemProps> = ({
+  question,
   index: _index,
-  showExplanation = true 
+  showExplanation = true,
 }) => {
   const { t } = useTranslation();
   return (
     <div className="space-y-4 pt-2">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
         {question.options.map((option, i) => (
-          <div 
-            key={i} 
+          <div
+            key={i}
             className={`p-2 rounded-md border text-sm flex items-center gap-2 ${
-              option === question.correctAnswer 
-                ? "bg-green-50 border-green-200 text-green-700 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800" 
+              option === question.correctAnswer
+                ? "bg-green-50 border-green-200 text-green-700 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800"
                 : "bg-muted/50 border-transparent"
             }`}
           >

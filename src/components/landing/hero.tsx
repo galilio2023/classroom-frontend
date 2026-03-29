@@ -17,7 +17,7 @@ export const LandingHero = ({ isAr: _isAr }: Props) => {
       {/* Designer Background: Noise + Aurora - SEND TO BACK */}
       <div className="absolute inset-0 z-0 pointer-events-none">
         <div className="noise-overlay" />
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-300 h-125 bg-primary/10 rounded-full blur-[120px] opacity-40" />
+        <div className="absolute top-0 start-1/2 -translate-x-1/2 w-full max-w-300 h-125 bg-primary/10 rounded-full blur-[120px] opacity-40" />
       </div>
 
       <div className="container-center relative z-20 text-center">

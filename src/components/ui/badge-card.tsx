@@ -21,27 +21,33 @@ interface BadgeCardProps {
 
 export function BadgeCard({ badge, className }: BadgeCardProps) {
   const { t, i18n } = useTranslation();
-  const isArabic = i18n.language === 'ar';
+  const isArabic = i18n.language === "ar";
   const Icon = badge.icon;
 
   const formatNumber = (num: number) => {
-    return new Intl.NumberFormat(isArabic ? 'ar-EG' : 'en-US').format(num);
+    return new Intl.NumberFormat(isArabic ? "ar-EG" : "en-US").format(num);
   };
 
   return (
-    <Card className={cn(
-      "relative overflow-hidden transition-all duration-300 group",
-      badge.unlocked ? "border-primary/20 bg-primary/5" : "border-muted bg-muted/20 grayscale opacity-60",
-      className
-    )}>
+    <Card
+      className={cn(
+        "relative overflow-hidden transition-all duration-300 group",
+        badge.unlocked
+          ? "border-primary/20 bg-primary/5"
+          : "border-muted bg-muted/20 grayscale opacity-60",
+        className
+      )}
+    >
       <CardContent className="p-4 flex flex-col items-center text-center gap-2">
-        <div className={cn(
-          "p-3 rounded-2xl transition-transform duration-500 group-hover:scale-110",
-          badge.unlocked ? badge.color : "bg-muted text-muted-foreground"
-        )}>
+        <div
+          className={cn(
+            "p-3 rounded-2xl transition-transform duration-500 group-hover:scale-110",
+            badge.unlocked ? badge.color : "bg-muted text-muted-foreground"
+          )}
+        >
           <Icon className="h-6 w-6" />
         </div>
-        
+
         <div className="space-y-1">
           <h4 className="text-xs font-black uppercase tracking-tight leading-none">
             {t(`badges.${badge.id}.name`, { defaultValue: badge.name })}
@@ -55,19 +61,23 @@ export function BadgeCard({ badge, className }: BadgeCardProps) {
           <div className="w-full mt-2 space-y-1">
             <div className="flex justify-between text-[8px] font-bold uppercase tracking-widest text-muted-foreground">
               <span>{t("common.progress")}</span>
-              <span>{formatNumber(badge.progress)} / {formatNumber(badge.threshold)}</span>
+              <span>
+                {formatNumber(badge.progress)} / {formatNumber(badge.threshold)}
+              </span>
             </div>
             <div className="h-1 w-full bg-muted rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-primary transition-all duration-500" 
-                style={{ width: `${(badge.progress / badge.threshold) * 100}%` }}
+              <div
+                className="h-full bg-primary transition-all duration-500"
+                style={{
+                  width: `${(badge.progress / badge.threshold) * 100}%`,
+                }}
               />
             </div>
           </div>
         )}
-        
+
         {badge.unlocked && (
-          <div className="absolute top-1 right-1">
+          <div className="absolute top-1 end-1">
             <Trophy className="h-3 w-3 text-gold-primary fill-gold-primary animate-pulse" />
           </div>
         )}
@@ -118,5 +128,5 @@ export const MOCK_BADGES: BadgeData[] = [
     icon: Zap,
     color: "bg-badge-yellow text-black",
     unlocked: false,
-  }
+  },
 ];

@@ -16,14 +16,8 @@ type EditButtonProps = {
   hideText?: boolean; // Add this prop
 } & React.ComponentProps<typeof Button>;
 
-export const EditButton = React.forwardRef<
-  React.ComponentRef<typeof Button>,
-  EditButtonProps
->(
-  (
-    { resource, recordItemId, accessControl, meta, hideText, children, onClick, ...rest },
-    ref
-  ) => {
+export const EditButton = React.forwardRef<React.ComponentRef<typeof Button>, EditButtonProps>(
+  ({ resource, recordItemId, accessControl, meta, hideText, children, onClick, ...rest }, ref) => {
     const { hidden, disabled, LinkComponent, to, label } = useEditButton({
       resource,
       id: recordItemId,

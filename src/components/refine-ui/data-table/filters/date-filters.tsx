@@ -2,7 +2,7 @@
 
 import { type CrudOperators } from "@refinedev/core";
 import type { Column } from "@tanstack/react-table";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { DateRange } from "react-day-picker";
 import { Calendar } from "@/components/ui/calendar";
 import { Separator } from "@/components/ui/separator";
@@ -22,12 +22,12 @@ export function DataTableFilterDropdownDateSinglePicker<TData>({
 }: DataTableFilterDropdownDateSinglePickerProps<TData>) {
   const columnFilterValue = column.getFilterValue() as string;
 
-  const parseDate = (value: string | undefined): Date | undefined => {
+  const parseDate = useCallback((value: string | undefined): Date | undefined => {
     if (!value) return undefined;
     const date = new Date(value);
     if (Number.isNaN(date.getTime())) return undefined;
     return date;
-  };
+  }, []);
 
   const [filterValue, setFilterValue] = useState<Date | undefined>(() =>
     parseDate(columnFilterValue)
@@ -42,7 +42,7 @@ export function DataTableFilterDropdownDateSinglePicker<TData>({
 
   useEffect(() => {
     setFilterValue(parseDate(columnFilterValue));
-  }, [columnFilterValue]);
+  }, [columnFilterValue, parseDate]);
 
   const hasDate = !!filterValue;
 
@@ -53,10 +53,7 @@ export function DataTableFilterDropdownDateSinglePicker<TData>({
   };
 
   return (
-    <DataTableFilterDropdown
-      column={column}
-      contentClassName={cn("w-fit", "p-0")}
-    >
+    <DataTableFilterDropdown column={column} contentClassName={cn("w-fit", "p-0")}>
       {({ setIsOpen }) => (
         <div
           className="flex flex-col items-center"
@@ -68,11 +65,7 @@ export function DataTableFilterDropdownDateSinglePicker<TData>({
             }
           }}
         >
-          <Calendar
-            mode="single"
-            selected={filterValue}
-            onSelect={setFilterValue}
-          />
+          <Calendar mode="single" selected={filterValue} onSelect={setFilterValue} />
           <div className="w-full">
             <Separator />
           </div>
@@ -108,13 +101,14 @@ export function DataTableFilterDropdownDateRangePicker<TData>({
 }: DataTableFilterDropdownDateRangePickerProps<TData>) {
   const columnFilterValue = column.getFilterValue() as string[];
 
-  const parseDateRange = (value: string[] | undefined): DateRange | undefined => {
+  const parseDateRange = useCallback((value: string[] | undefined): DateRange | undefined => {
     if (!value || !Array.isArray(value) || value.length !== 2) return undefined;
     const from = value[0] ? new Date(value[0]) : undefined;
     const to = value[1] ? new Date(value[1]) : undefined;
-    if (!from || !to || Number.isNaN(from.getTime()) || Number.isNaN(to.getTime())) return undefined;
+    if (!from || !to || Number.isNaN(from.getTime()) || Number.isNaN(to.getTime()))
+      return undefined;
     return { from, to };
-  };
+  }, []);
 
   const [filterValue, setFilterValue] = useState<DateRange | undefined>(() =>
     parseDateRange(columnFilterValue)
@@ -127,9 +121,11 @@ export function DataTableFilterDropdownDateRangePicker<TData>({
     };
   }, [defaultOperator, column]);
 
+  const filterValueKey = columnFilterValue?.join(",");
+
   useEffect(() => {
     setFilterValue(parseDateRange(columnFilterValue));
-  }, [JSON.stringify(columnFilterValue)]);
+  }, [filterValueKey, parseDateRange, columnFilterValue]);
 
   const hasDateRange = filterValue?.from && filterValue?.to;
 
@@ -143,10 +139,7 @@ export function DataTableFilterDropdownDateRangePicker<TData>({
   };
 
   return (
-    <DataTableFilterDropdown
-      column={column}
-      contentClassName={cn("w-fit", "p-0")}
-    >
+    <DataTableFilterDropdown column={column} contentClassName={cn("w-fit", "p-0")}>
       {({ setIsOpen }) => (
         <div
           className="flex flex-col items-center"

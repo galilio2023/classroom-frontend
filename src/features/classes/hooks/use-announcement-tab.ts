@@ -1,11 +1,5 @@
 import { useState } from "react";
-import {
-  useList,
-  useCreate,
-  useUpdate,
-  useDelete,
-  useCustomMutation,
-} from "@refinedev/core";
+import { useList, useCreate, useUpdate, useDelete, useCustomMutation } from "@refinedev/core";
 import { Announcement } from "@/types";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
@@ -28,7 +22,10 @@ export const useAnnouncementTab = (classId: string) => {
   const { query } = useList<Announcement>({
     resource: "announcements",
     filters: [{ field: "classId", operator: "eq", value: classId }],
-    sorters: [{ field: "isPinned", order: "desc" }, { field: "createdAt", order: "desc" }],
+    sorters: [
+      { field: "isPinned", order: "desc" },
+      { field: "createdAt", order: "desc" },
+    ],
   });
 
   const { mutate: createAnnouncement, mutation: createMutation } = useCreate();
@@ -37,9 +34,12 @@ export const useAnnouncementTab = (classId: string) => {
   const { mutate: markAsRead } = useCustomMutation();
 
   const handleMarkAsRead = (id: number) => {
-    markAsRead({ url: `announcements/${id}/read`, method: "post", values: {} }, {
-      onSuccess: () => query.refetch(),
-    });
+    markAsRead(
+      { url: `announcements/${id}/read`, method: "post", values: {} },
+      {
+        onSuccess: () => query.refetch(),
+      }
+    );
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -47,9 +47,14 @@ export const useAnnouncementTab = (classId: string) => {
     if (!file) return;
     setIsUploading(true);
     try {
-      const sigRes = await fetch(`${import.meta.env.VITE_API_URL}/upload/signature?folder=announcements`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("refine-auth")}` },
-      });
+      const sigRes = await fetch(
+        `${import.meta.env.VITE_API_URL}/upload/signature?folder=announcements`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("refine-auth")}`,
+          },
+        }
+      );
       const { data: sigData } = await sigRes.json();
       const formData = new FormData();
       formData.append("file", file);
@@ -58,38 +63,64 @@ export const useAnnouncementTab = (classId: string) => {
       formData.append("signature", sigData.signature);
       formData.append("folder", sigData.folder);
 
-      const cloudRes = await fetch(`https://api.cloudinary.com/v1_1/${sigData.cloudName}/auto/upload`, {
-        method: "POST",
-        body: formData,
-      });
+      const cloudRes = await fetch(
+        `https://api.cloudinary.com/v1_1/${sigData.cloudName}/auto/upload`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
       const result = await cloudRes.json();
       if (result.secure_url) {
-        setNewAnnouncement(prev => ({ ...prev, fileUrl: result.secure_url, fileCldPubId: result.public_id }));
+        setNewAnnouncement((prev) => ({
+          ...prev,
+          fileUrl: result.secure_url,
+          fileCldPubId: result.public_id,
+        }));
         toast.success(t("common.upload.success"));
       }
-    } catch (err) {
+    } catch {
       toast.error(t("common.upload.error"));
-    } finally { setIsUploading(false); }
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const handleCreate = () => {
-    createAnnouncement({
-      resource: "announcements",
-      values: { ...newAnnouncement, classId: Number(classId), authorId: identity?.id },
-    }, {
-      onSuccess: () => {
-        setIsCreateOpen(false);
-        setNewAnnouncement({ title: "", content: "", isPinned: false, fileUrl: null, fileCldPubId: null });
-        query.refetch();
+    createAnnouncement(
+      {
+        resource: "announcements",
+        values: {
+          ...newAnnouncement,
+          classId: Number(classId),
+          authorId: identity?.id,
+        },
       },
-    });
+      {
+        onSuccess: () => {
+          setIsCreateOpen(false);
+          setNewAnnouncement({
+            title: "",
+            content: "",
+            isPinned: false,
+            fileUrl: null,
+            fileCldPubId: null,
+          });
+          query.refetch();
+        },
+      }
+    );
   };
 
   const togglePin = (announcement: Announcement) => {
-    updateAnnouncement({
-      resource: "announcements", id: announcement.id,
-      values: { isPinned: !announcement.isPinned },
-    }, { onSuccess: () => query.refetch() });
+    updateAnnouncement(
+      {
+        resource: "announcements",
+        id: announcement.id,
+        values: { isPinned: !announcement.isPinned },
+      },
+      { onSuccess: () => query.refetch() }
+    );
   };
 
   const handleDelete = (id: number) => {
@@ -103,7 +134,18 @@ export const useAnnouncementTab = (classId: string) => {
     isUploading,
     isStaff,
     identity,
-    state: { isCreateOpen, setIsCreateOpen, newAnnouncement, setNewAnnouncement },
-    actions: { handleMarkAsRead, handleFileUpload, handleCreate, togglePin, handleDelete }
+    state: {
+      isCreateOpen,
+      setIsCreateOpen,
+      newAnnouncement,
+      setNewAnnouncement,
+    },
+    actions: {
+      handleMarkAsRead,
+      handleFileUpload,
+      handleCreate,
+      togglePin,
+      handleDelete,
+    },
   };
 };

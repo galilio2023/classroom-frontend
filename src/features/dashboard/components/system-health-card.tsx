@@ -44,21 +44,28 @@ export const SystemHealthCard: React.FC<SystemHealthCardProps> = ({ report, isLo
                 {t("aiHub.governance.title")}
               </CardTitle>
             </div>
-            <Badge className={cn(
+            <Badge
+              className={cn(
                 "border-none shadow-sm gap-1.5",
-                !hasData ? "bg-muted text-muted-foreground" :
-                happinessScore > 80 ? "bg-green-500/10 text-green-600" : "bg-orange-500/10 text-orange-600"
-            )}>
-                <Heart className={cn("h-3 w-3", hasData && happinessScore > 80 && "fill-green-600")} />
-                {hasData ? `${happinessScore}% ${t("common.happy")}` : "---"}
+                !hasData
+                  ? "bg-muted text-muted-foreground"
+                  : happinessScore > 80
+                    ? "bg-green-500/10 text-green-600"
+                    : "bg-orange-500/10 text-orange-600"
+              )}
+            >
+              <Heart
+                className={cn("h-3 w-3", hasData && happinessScore > 80 && "fill-green-600")}
+              />
+              {hasData ? `${happinessScore}% ${t("common.happy")}` : "---"}
             </Badge>
           </div>
         </CardHeader>
         <CardContent className="p-6 pt-4 space-y-6 relative z-10 text-start">
           <div className="space-y-2">
             <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
-                <Activity className="h-3 w-3" />
-                {t("aiHub.governance.aiDiagnosis")}
+              <Activity className="h-3 w-3" />
+              {t("aiHub.governance.aiDiagnosis")}
             </Label>
             <p className="text-sm font-bold leading-relaxed tracking-tight line-clamp-3">
               {report.diagnosis}
@@ -67,12 +74,15 @@ export const SystemHealthCard: React.FC<SystemHealthCardProps> = ({ report, isLo
 
           <div className="space-y-3">
             <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
-                <Sparkles className="h-3 w-3" />
-                {t("aiHub.governance.suggestedFixes")}
+              <Sparkles className="h-3 w-3" />
+              {t("aiHub.governance.suggestedFixes")}
             </Label>
             <div className="grid gap-2">
               {report.suggestedFixes?.slice(0, 2).map((fix: string, i: number) => (
-                <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-ai-primary/[0.03] border border-ai-primary/5 group-hover:bg-ai-primary/[0.06] transition-colors">
+                <div
+                  key={i}
+                  className="flex items-center gap-3 p-3 rounded-xl bg-ai-primary/3 border border-ai-primary/5 group-hover:bg-ai-primary/6 transition-colors"
+                >
                   <div className="h-1.5 w-1.5 rounded-full bg-ai-primary shrink-0" />
                   <span className="text-xs font-medium truncate">{fix}</span>
                 </div>
@@ -86,13 +96,16 @@ export const SystemHealthCard: React.FC<SystemHealthCardProps> = ({ report, isLo
 };
 
 const Badge = ({ children, className }: { children: React.ReactNode; className?: string }) => (
-    <div className={cn("px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border flex items-center", className)}>
-        {children}
-    </div>
+  <div
+    className={cn(
+      "px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border flex items-center",
+      className
+    )}
+  >
+    {children}
+  </div>
 );
 
 const Label = ({ children, className }: { children: React.ReactNode; className?: string }) => (
-    <span className={cn("block", className)}>
-        {children}
-    </span>
+  <span className={cn("block", className)}>{children}</span>
 );

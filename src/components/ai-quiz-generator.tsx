@@ -3,12 +3,16 @@ import { useNotification, useCreate } from "@refinedev/core";
 import { useQuizGeneration } from "@/hooks/use-quiz-generation";
 import { QuizGeneratorForm } from "./ai/quiz-generator-form";
 import { QuizPreview } from "./ai/quiz-preview";
+import { AIFeatureDisabled } from "./ai/ai-feature-disabled";
+import { useAiAccess } from "@/hooks/use-ai-access";
+import { addDays, format } from "date-fns";
 
 interface AIQuizGeneratorProps {
   classId?: string;
 }
 
 export const AIQuizGenerator: React.FC<AIQuizGeneratorProps> = ({ classId }) => {
+  const { isAiEnabled, isAllowed } = useAiAccess();
   const {
     topic,
     setTopic,
@@ -27,14 +31,28 @@ export const AIQuizGenerator: React.FC<AIQuizGeneratorProps> = ({ classId }) => 
   const { mutate: createAssignment, mutation: createMutation } = useCreate();
   const isSaving = createMutation.isPending;
 
+  // 🛡️ PARENT GATING: AI interactive features are disabled for Parents
+  if (!isAllowed) return null;
+
+  // 🛡️ Global Master Switch: Graceful Degradation
+  if (!isAiEnabled) {
+    return <AIFeatureDisabled title="AI Quiz Generator Offline" />;
+  }
+
   const handleSaveAsAssignment = () => {
     if (!classId || quiz.length === 0) return;
 
-    const description = quiz.map((q, i) => {
-      return `### Q${i+1}: ${q.question}\n\n` + 
-             q.options.map((opt) => `- ${opt}${opt === q.correctAnswer ? " (Correct)" : ""}`).join("\n") +
-             `\n\n**Explanation:** ${q.explanation}\n\n---`;
-    }).join("\n\n");
+    const description = quiz
+      .map((q, i) => {
+        return (
+          `### Q${i + 1}: ${q.question}\n\n` +
+          q.options
+            .map((opt) => `- ${opt}${opt === q.correctAnswer ? " (Correct)" : ""}`)
+            .join("\n") +
+          `\n\n**Explanation:** ${q.explanation}\n\n---`
+        );
+      })
+      .join("\n\n");
 
     createAssignment(
       {
@@ -43,7 +61,7 @@ export const AIQuizGenerator: React.FC<AIQuizGeneratorProps> = ({ classId }) => 
           title: `Quiz: ${topic}`,
           description,
           classId: Number(classId),
-          dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          dueDate: format(addDays(new Date(), 7), "yyyy-MM-dd"),
         },
       },
       {

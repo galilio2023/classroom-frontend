@@ -4,6 +4,7 @@ import {
   useDelete,
   useGetIdentity,
   useCustomMutation,
+  HttpError,
 } from "@refinedev/core";
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
@@ -15,10 +16,10 @@ import {
   X,
   MessageCircle,
   LayoutDashboard,
-  Info,
   ArrowRight,
-  Reply,
   Trophy,
+  Info,
+  Reply,
 } from "lucide-react";
 import { toast } from "sonner";
 import { ChatBubble } from "@/components/classes/chat-bubble";
@@ -37,29 +38,29 @@ interface DiscussionTabProps {
 }
 
 export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { data: identity } = useGetIdentity<User>();
   const { isStaff } = useUserRole();
   const [newPost, setNewPost] = useState("");
   const [replyTo, setReplyTo] = useState<number | null>(null);
-  
+
   // 🛡️ AUTO-DRAFT: Discussion Persistence
   useEffect(() => {
-      const draftKey = `draft:discussion:${classId}${replyTo ? `:${replyTo}` : ''}`;
-      if (newPost && newPost !== "<p></p>") {
-          localStorage.setItem(draftKey, newPost);
-      } else {
-          localStorage.removeItem(draftKey);
-      }
+    const draftKey = `draft:discussion:${classId}${replyTo ? `:${replyTo}` : ""}`;
+    if (newPost && newPost !== "<p></p>") {
+      localStorage.setItem(draftKey, newPost);
+    } else {
+      localStorage.removeItem(draftKey);
+    }
   }, [newPost, classId, replyTo]);
 
   // 🚀 DRAFT RECOVERY
   useEffect(() => {
-      const draftKey = `draft:discussion:${classId}${replyTo ? `:${replyTo}` : ''}`;
-      const saved = localStorage.getItem(draftKey);
-      if (saved && !newPost) {
-          setNewPost(saved);
-      }
+    const draftKey = `draft:discussion:${classId}${replyTo ? `:${replyTo}` : ""}`;
+    const saved = localStorage.getItem(draftKey);
+    if (saved && !newPost) {
+      setNewPost(saved);
+    }
   }, [classId, replyTo]);
 
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -81,16 +82,18 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
   const isLoading = query.isLoading;
   const refetch = query.refetch;
 
-  const { mutate: createPost, mutation } = useCreate<Discussion, any, any>();
+  const { mutate: createPost, mutation } = useCreate<
+    Discussion,
+    HttpError,
+    { content: string; classId: number; parentId: number | null }
+  >();
   const { mutate: deletePost } = useDelete();
   const { mutate: solvePost } = useCustomMutation();
   const { mutate: generateSummary } = useCustomMutation();
 
   useEffect(() => {
     if (scrollRef.current) {
-      const viewport = scrollRef.current.querySelector(
-        "[data-radix-scroll-area-viewport]",
-      );
+      const viewport = scrollRef.current.querySelector("[data-radix-scroll-area-viewport]");
       if (viewport) viewport.scrollTop = viewport.scrollHeight;
     }
   }, [discussions]);
@@ -108,12 +111,12 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
       void refetch();
     };
 
-    const handleDiscussionSolved = (payload: any) => {
-        toast.success(payload.message || "A question has been solved!", {
-            icon: <Trophy className="w-4 h-4 text-yellow-500" />,
-            duration: 5000,
-        });
-        void refetch();
+    const handleDiscussionSolved = (payload: { message?: string }) => {
+      toast.success(payload.message || "A question has been solved!", {
+        icon: <Trophy className="w-4 h-4 text-yellow-500" />,
+        duration: 5000,
+      });
+      void refetch();
     };
 
     socket.on("new_discussion", handleNewDiscussion);
@@ -145,23 +148,26 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
           toast.success(
             replyTo
               ? t("classes.discussion.toast.replySent")
-              : t("classes.discussion.toast.messagePosted"),
+              : t("classes.discussion.toast.messagePosted")
           );
         },
-      },
+      }
     );
   };
 
   const handleSolve = (postId: number, solverId: string) => {
-      solvePost({
-          url: `/discussions/${postId}/solve`,
-          method: "patch",
-          values: { solvedById: solverId }
-      }, {
-          onSuccess: () => {
-              void refetch();
-          }
-      });
+    solvePost(
+      {
+        url: `/discussions/${postId}/solve`,
+        method: "patch",
+        values: { solvedById: solverId },
+      },
+      {
+        onSuccess: () => {
+          void refetch();
+        },
+      }
+    );
   };
 
   const handleGenerateSummary = () => {
@@ -174,15 +180,16 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
         values: { classId: Number(classId) },
       },
       {
-        onSuccess: (data: any) => {
-          setSummary(data.data.summary);
+        onSuccess: (data) => {
+          const responseData = data.data as { summary: string };
+          setSummary(responseData.summary);
           setIsSummarizing(false);
         },
         onError: () => {
           toast.error(t("classes.discussion.toast.summaryError"));
           setIsSummarizing(false);
         },
-      },
+      }
     );
   };
 
@@ -203,7 +210,7 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
           <h2 className="text-xl font-bold tracking-tight">
             {t("classes.discussion.classStream")}
           </h2>
-          <Badge variant="outline" className="ml-2 font-mono">
+          <Badge variant="outline" className="ms-2 font-mono">
             {discussions.length}
           </Badge>
         </div>
@@ -275,9 +282,7 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
               <div className="p-4 bg-muted rounded-full">
                 <MessageCircle className="w-8 h-8 opacity-20" />
               </div>
-              <p className="text-sm font-medium">
-                {t("classes.discussion.noMessages")}
-              </p>
+              <p className="text-sm font-medium">{t("classes.discussion.noMessages")}</p>
             </div>
           ) : (
             discussions.map((discussion) => (
@@ -330,10 +335,8 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
         <div
           className={cn(
             "bg-background rounded-2xl border-2 transition-all duration-200 shadow-lg",
-            mutation.isPending
-              ? "opacity-70 pointer-events-none"
-              : "hover:border-primary/30",
-            replyTo ? "rounded-t-none border-t-0" : "",
+            mutation.isPending ? "opacity-70 pointer-events-none" : "hover:border-primary/30",
+            replyTo ? "rounded-t-none border-t-0" : ""
           )}
         >
           <RichTextEditor
@@ -355,16 +358,14 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
             </div>
             <Button
               onClick={handlePost}
-              disabled={
-                mutation.isPending || !newPost.trim() || newPost === "<p></p>"
-              }
+              disabled={mutation.isPending || !newPost.trim() || newPost === "<p></p>"}
               size="sm"
               className="px-6 rounded-xl shadow-md transition-all hover:translate-y-[-1px] active:translate-y-[0px]"
             >
               {mutation.isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                <Loader2 className="h-4 w-4 animate-spin me-2" />
               ) : (
-                <Send className="h-4 w-4 mr-2" />
+                <Send className="h-4 w-4 me-2" />
               )}
               {replyTo ? t("buttons.reply") : t("buttons.post")}
             </Button>

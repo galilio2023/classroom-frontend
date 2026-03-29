@@ -1,13 +1,7 @@
 import React from "react";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { Textarea } from "../ui/textarea";
 import { AICard } from "./ai-card";
 import { AIActionButton } from "./ai-action-button";
@@ -29,9 +23,7 @@ interface AssignmentGeneratorFormProps {
   isLoading: boolean;
 }
 
-export const AssignmentGeneratorForm: React.FC<
-  AssignmentGeneratorFormProps
-> = ({
+export const AssignmentGeneratorForm: React.FC<AssignmentGeneratorFormProps> = ({
   subject,
   setSubject,
   topic,
@@ -67,7 +59,7 @@ export const AssignmentGeneratorForm: React.FC<
           <div className="space-y-2 min-w-0">
             <Label
               htmlFor="subject"
-              className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1"
+              className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ms-1"
             >
               {t("aiHub.assistant.helper.subject")}
             </Label>
@@ -82,7 +74,7 @@ export const AssignmentGeneratorForm: React.FC<
           <div className="space-y-2 min-w-0">
             <Label
               htmlFor="difficulty"
-              className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1"
+              className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ms-1"
             >
               {t("aiHub.assistant.helper.level")}
             </Label>
@@ -94,9 +86,7 @@ export const AssignmentGeneratorForm: React.FC<
                 <div className="flex items-center gap-2 truncate min-w-0">
                   <GraduationCap className="h-4 w-4 text-primary shrink-0" />
                   <span className="truncate block">
-                    <SelectValue
-                      placeholder={t("aiHub.assistant.helper.level")}
-                    />
+                    <SelectValue placeholder={t("aiHub.assistant.helper.level")} />
                   </span>
                 </div>
               </SelectTrigger>
@@ -118,7 +108,7 @@ export const AssignmentGeneratorForm: React.FC<
         <div className="space-y-2">
           <Label
             htmlFor="topic"
-            className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1"
+            className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ms-1"
           >
             {t("aiHub.assistant.helper.topic")}
           </Label>
@@ -134,7 +124,7 @@ export const AssignmentGeneratorForm: React.FC<
         <div className="space-y-2 min-w-0">
           <Label
             htmlFor="tone"
-            className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1"
+            className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ms-1"
           >
             {t("aiHub.assistant.helper.tone")}
           </Label>
@@ -170,7 +160,7 @@ export const AssignmentGeneratorForm: React.FC<
         <div className="space-y-2">
           <Label
             htmlFor="objectives"
-            className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2 ml-1"
+            className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2 ms-1"
           >
             <Target className="h-3.5 w-3.5 text-primary shrink-0" />
             {t("aiHub.assistant.helper.objectives")}

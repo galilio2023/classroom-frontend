@@ -12,11 +12,11 @@ interface XPGain {
 
 export function XPGainPopup() {
   const { t, i18n } = useTranslation();
-  const isArabic = i18n.language === 'ar';
+  const isArabic = i18n.language === "ar";
   const [gains, setGains] = useState<XPGain[]>([]);
 
   const formatNumber = (num: number) => {
-    return new Intl.NumberFormat(isArabic ? 'ar-EG' : 'en-US').format(num);
+    return new Intl.NumberFormat(isArabic ? "ar-EG" : "en-US").format(num);
   };
 
   useEffect(() => {
@@ -25,7 +25,7 @@ export function XPGainPopup() {
     const handleXPGained = (data: { amount: number; reason?: string }) => {
       const id = Date.now();
       setGains((prev) => [...prev, { id, amount: data.amount, reason: data.reason }]);
-      
+
       // Remove after animation (3 seconds)
       setTimeout(() => {
         setGains((prev) => prev.filter((g) => g.id !== id));
@@ -47,10 +47,7 @@ export function XPGainPopup() {
   }, []);
 
   return (
-    <div className={cn(
-        "fixed bottom-8 z-[100] flex flex-col gap-2 pointer-events-none",
-        isArabic ? "left-8" : "right-8"
-    )}>
+    <div className={cn("fixed bottom-8 z-[100] flex flex-col gap-2 pointer-events-none", "end-8")}>
       {gains.map((gain) => (
         <div
           key={gain.id}
@@ -60,12 +57,18 @@ export function XPGainPopup() {
           )}
         >
           <Zap className={cn("h-4 w-4 fill-white", isArabic && "order-last")} />
-          <span className="font-black text-sm">+{formatNumber(gain.amount)} {t("common.xp")}</span>
+          <span className="font-black text-sm">
+            +{formatNumber(gain.amount)} {t("common.xp")}
+          </span>
           {gain.reason && (
-            <span className={cn(
+            <span
+              className={cn(
                 "text-[10px] font-bold uppercase opacity-80",
-                isArabic ? "border-r border-white/20 pr-2 order-first" : "border-l border-white/20 pl-2"
-            )}>
+                isArabic
+                  ? "border-r border-white/20 pe-2 order-first"
+                  : "border-l border-white/20 ps-2"
+              )}
+            >
               {gain.reason}
             </span>
           )}

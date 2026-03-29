@@ -21,11 +21,17 @@ interface Props {
   setSelectedStatus: (v: string) => void;
   verificationFilter: string;
   setVerificationFilter: (v: string) => void;
-  isAr: boolean;
 }
 
 export const UserFilters = ({
-  searchQuery, setSearchQuery, selectedRole, setSelectedRole, selectedStatus, setSelectedStatus, verificationFilter, setVerificationFilter, isAr
+  searchQuery,
+  setSearchQuery,
+  selectedRole,
+  setSelectedRole,
+  selectedStatus,
+  setSelectedStatus,
+  verificationFilter,
+  setVerificationFilter,
 }: Props) => {
   const { t } = useTranslation();
 
@@ -33,11 +39,19 @@ export const UserFilters = ({
     <Card className="p-2 border-border/40 bg-muted/20 rounded-[1.75rem] md:rounded-3xl backdrop-blur-md sticky top-20 z-30 shadow-sm">
       <div className="flex flex-col lg:flex-row gap-2">
         <div className="relative flex-1 group">
-          <Search className={cn("absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60 group-focus-within:text-primary transition-colors", isAr ? "right-4" : "left-4")} />
+          <Search
+            className={cn(
+              "absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60 group-focus-within:text-primary transition-colors",
+              "start-4"
+            )}
+          />
           <Input
             type="text"
             placeholder={t("users.governance.filters.searchPlaceholder")}
-            className={cn("h-12 rounded-2xl border-none bg-background/50 shadow-none font-medium", isAr ? "pr-11 pl-4" : "pl-11 pr-4")}
+            className={cn(
+              "h-12 rounded-2xl border-none bg-background/50 shadow-none font-medium",
+              "ps-11 pe-4"
+            )}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -49,8 +63,12 @@ export const UserFilters = ({
               <SelectValue placeholder={t("users.governance.filters.verification")} />
             </SelectTrigger>
             <SelectContent className="rounded-2xl bg-white dark:bg-[#09090b] opacity-100 backdrop-blur-none border border-border/50 shadow-2xl">
-              <SelectItem value="all" className="font-bold">{t("users.governance.filters.allVerification")}</SelectItem>
-              <SelectItem value="pending" className="font-bold">{t("users.governance.filters.pendingTeachers")}</SelectItem>
+              <SelectItem value="all" className="font-bold">
+                {t("users.governance.filters.allVerification")}
+              </SelectItem>
+              <SelectItem value="pending" className="font-bold">
+                {t("users.governance.filters.pendingTeachers")}
+              </SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -60,11 +78,21 @@ export const UserFilters = ({
             <SelectValue placeholder={t("users.governance.filters.role")} />
           </SelectTrigger>
           <SelectContent className="rounded-2xl bg-white dark:bg-[#09090b] opacity-100 backdrop-blur-none border border-border/50 shadow-2xl">
-            <SelectItem value="all" className="font-bold">{t("users.governance.filters.allRoles")}</SelectItem>
-            <SelectItem value={UserRole.ADMIN} className="font-bold">{t("roles.admin")}</SelectItem>
-            <SelectItem value={UserRole.TEACHER} className="font-bold">{t("roles.teacher")}</SelectItem>
-            <SelectItem value={UserRole.STUDENT} className="font-bold">{t("roles.student")}</SelectItem>
-            <SelectItem value={UserRole.PARENT} className="font-bold">{t("roles.parent")}</SelectItem>
+            <SelectItem value="all" className="font-bold">
+              {t("users.governance.filters.allRoles")}
+            </SelectItem>
+            <SelectItem value={UserRole.ADMIN} className="font-bold">
+              {t("roles.admin")}
+            </SelectItem>
+            <SelectItem value={UserRole.TEACHER} className="font-bold">
+              {t("roles.teacher")}
+            </SelectItem>
+            <SelectItem value={UserRole.STUDENT} className="font-bold">
+              {t("roles.student")}
+            </SelectItem>
+            <SelectItem value={UserRole.PARENT} className="font-bold">
+              {t("roles.parent")}
+            </SelectItem>
           </SelectContent>
         </Select>
 
@@ -73,10 +101,18 @@ export const UserFilters = ({
             <SelectValue placeholder={t("users.governance.filters.status")} />
           </SelectTrigger>
           <SelectContent className="rounded-2xl bg-white dark:bg-[#09090b] opacity-100 backdrop-blur-none border border-border/50 shadow-2xl">
-            <SelectItem value="all" className="font-bold">{t("users.governance.filters.allStatus")}</SelectItem>
-            <SelectItem value={UserStatus.ACTIVE} className="font-bold">{t("status.active")}</SelectItem>
-            <SelectItem value={UserStatus.SUSPENDED} className="font-bold">{t("status.suspended")}</SelectItem>
-            <SelectItem value={UserStatus.INACTIVE} className="font-bold">{t("status.inactive")}</SelectItem>
+            <SelectItem value="all" className="font-bold">
+              {t("users.governance.filters.allStatus")}
+            </SelectItem>
+            <SelectItem value={UserStatus.ACTIVE} className="font-bold">
+              {t("status.active")}
+            </SelectItem>
+            <SelectItem value={UserStatus.SUSPENDED} className="font-bold">
+              {t("status.suspended")}
+            </SelectItem>
+            <SelectItem value={UserStatus.INACTIVE} className="font-bold">
+              {t("status.inactive")}
+            </SelectItem>
           </SelectContent>
         </Select>
       </div>

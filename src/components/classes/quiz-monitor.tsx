@@ -46,22 +46,22 @@ export const QuizMonitor: React.FC<QuizMonitorProps> = ({ quizId, assignmentTitl
 
   const handleNudge = (studentId: string, studentName: string) => {
     if (!socket) return;
-    
+
     socket.emit("quiz:nudge", {
       studentId,
       quizId,
-      message: t("classes.monitor.nudgeMessage", "Need any help with this one?")
+      message: t("classes.monitor.nudgeMessage", "Need any help with this one?"),
     });
 
     toast.success(t("classes.monitor.nudgeSentTo" as any, { name: studentName }));
   };
 
-  const filteredStudents = activeStudents.filter(s => 
+  const filteredStudents = activeStudents.filter((s) =>
     s.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
-    <Card className="border-none shadow-2xl bg-card/50 backdrop-blur-3xl rounded-[2rem] overflow-hidden text-start">
+    <Card className="border-none shadow-2xl bg-card/50 backdrop-blur-3xl rounded-4xl overflow-hidden text-start">
       <CardHeader className="bg-primary/5 border-b border-primary/10 p-6 md:p-8 space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1">
@@ -69,7 +69,9 @@ export const QuizMonitor: React.FC<QuizMonitorProps> = ({ quizId, assignmentTitl
               <div className="p-2 rounded-xl bg-primary/10 text-primary">
                 <Activity className="h-5 w-5 animate-pulse" />
               </div>
-              <CardTitle className="text-xl font-black tracking-tight">{t("classes.monitor.title", "Live Quiz Monitor")}</CardTitle>
+              <CardTitle className="text-xl font-black tracking-tight">
+                {t("classes.monitor.title", "Live Quiz Monitor")}
+              </CardTitle>
             </div>
             <CardDescription className="font-bold text-muted-foreground/80">
               {assignmentTitle}
@@ -85,27 +87,29 @@ export const QuizMonitor: React.FC<QuizMonitorProps> = ({ quizId, assignmentTitl
         </div>
 
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input 
-            placeholder={t("classes.monitor.search", "Filter students...")} 
-            className="pl-10 h-11 rounded-xl bg-background/50 border-none shadow-inner"
+          <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder={t("classes.monitor.search", "Filter students...")}
+            className="ps-10 h-11 rounded-xl bg-background/50 border-none shadow-inner"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
       </CardHeader>
-      
+
       <CardContent className="p-6 md:p-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <AnimatePresence mode="popLayout">
             {filteredStudents.length === 0 ? (
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 className="col-span-full py-12 text-center space-y-3 opacity-40"
               >
                 <Users className="h-12 w-12 mx-auto text-muted-foreground" />
-                <p className="text-xs font-black uppercase tracking-widest">{t("classes.monitor.noStudents", "No students currently active")}</p>
+                <p className="text-xs font-black uppercase tracking-widest">
+                  {t("classes.monitor.noStudents", "No students currently active")}
+                </p>
               </motion.div>
             ) : (
               filteredStudents.map((student) => (
@@ -115,22 +119,26 @@ export const QuizMonitor: React.FC<QuizMonitorProps> = ({ quizId, assignmentTitl
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.9 }}
-                  className="flex items-center justify-between gap-4 p-4 rounded-2xl bg-background/50 border border-black/[0.03] dark:border-white/[0.03] shadow-sm group hover:border-primary/20 transition-all"
+                  className="flex items-center justify-between gap-4 p-4 rounded-2xl bg-background/50 border border-black/3 dark:border-white/3 shadow-sm group hover:border-primary/20 transition-all"
                 >
                   <div className="flex items-center gap-4 min-w-0">
                     <Avatar className="h-10 w-10 border-2 border-background shadow-sm rounded-xl">
                       <AvatarImage src={student.image} className="object-cover" />
-                      <AvatarFallback className="bg-primary/5 text-primary font-black text-xs">{student.name[0]}</AvatarFallback>
+                      <AvatarFallback className="bg-primary/5 text-primary font-black text-xs">
+                        {student.name[0]}
+                      </AvatarFallback>
                     </Avatar>
                     <div className="flex flex-col min-w-0">
-                      <span className="text-sm font-black tracking-tight truncate">{student.name}</span>
+                      <span className="text-sm font-black tracking-tight truncate">
+                        {student.name}
+                      </span>
                       <span className="text-[9px] font-bold uppercase tracking-widest text-emerald-600 flex items-center gap-1">
                         <ShieldCheck className="h-3 w-3" />
                         {t("classes.monitor.active", "Actively Testing")}
                       </span>
                     </div>
                   </div>
-                  
+
                   <Button
                     size="icon"
                     variant="ghost"

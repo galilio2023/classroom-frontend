@@ -8,14 +8,7 @@ import { toast } from "sonner";
  */
 export function useNotificationProvider(): NotificationProvider {
   return {
-    open: ({
-      key,
-      type,
-      message,
-      description,
-      undoableTimeout,
-      cancelMutation,
-    }) => {
+    open: ({ key, type, message, description, undoableTimeout, cancelMutation }) => {
       const toastId = key || Date.now().toString();
 
       switch (type) {

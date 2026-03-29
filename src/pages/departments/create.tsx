@@ -35,9 +35,9 @@ import { departmentFormSchema } from "@/schemas/department";
 import { User, UserRole } from "@/types";
 
 const DepartmentsCreate = () => {
-  const { 
-    refineCore: { onFinish, formLoading }, 
-    ...form 
+  const {
+    refineCore: { onFinish, formLoading },
+    ...form
   } = useForm({
     resolver: zodResolver(departmentFormSchema),
     refineCoreProps: {
@@ -62,7 +62,7 @@ const DepartmentsCreate = () => {
   return (
     <div className="container mx-auto py-6 max-w-6xl">
       <CreateViewHeader />
-      
+
       <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left Column: The Main Form */}
         <div className="lg:col-span-2">
@@ -78,9 +78,9 @@ const DepartmentsCreate = () => {
                     Enter the core information for the new department.
                   </CardDescription>
                 </CardHeader>
-                
+
                 <Separator />
-                
+
                 <CardContent className="space-y-6 pt-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Code Field */}
@@ -157,10 +157,10 @@ const DepartmentsCreate = () => {
                       <FormItem>
                         <FormLabel>Description</FormLabel>
                         <FormControl>
-                          <Textarea 
-                            placeholder="Brief description of the department..." 
-                            className="resize-none min-h-[120px]" 
-                            {...field} 
+                          <Textarea
+                            placeholder="Brief description of the department..."
+                            className="resize-none min-h-[120px]"
+                            {...field}
                             value={field.value || ""}
                           />
                         </FormControl>
@@ -169,16 +169,11 @@ const DepartmentsCreate = () => {
                     )}
                   />
                 </CardContent>
-                
+
                 <Separator />
-                
+
                 <CardFooter className="flex justify-end pt-6 pb-6 bg-muted/5">
-                  <Button 
-                    type="submit" 
-                    size="lg"
-                    disabled={formLoading}
-                    className="min-w-[150px]"
-                  >
+                  <Button type="submit" size="lg" disabled={formLoading} className="min-w-[150px]">
                     {formLoading ? "Saving..." : "Create Department"}
                   </Button>
                 </CardFooter>
@@ -202,7 +197,8 @@ const DepartmentsCreate = () => {
                   <span className="text-xs font-bold text-primary">1</span>
                 </div>
                 <p>
-                  <strong>Short Codes:</strong> Use short, uppercase codes like "CS", "MATH", or "ENG" for easy reference.
+                  <strong>Short Codes:</strong> Use short, uppercase codes like "CS", "MATH", or
+                  "ENG" for easy reference.
                 </p>
               </div>
               <div className="flex gap-3">
@@ -220,7 +216,8 @@ const DepartmentsCreate = () => {
             <Info className="h-4 w-4" />
             <AlertTitle>Did you know?</AlertTitle>
             <AlertDescription className="text-xs text-muted-foreground mt-1">
-              Departments are the top-level organization. You will assign subjects and teachers to them later.
+              Departments are the top-level organization. You will assign subjects and teachers to
+              them later.
             </AlertDescription>
           </Alert>
         </div>

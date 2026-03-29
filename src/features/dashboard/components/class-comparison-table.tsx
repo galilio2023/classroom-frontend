@@ -1,5 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { ClassComparison } from "@/types/dashboard";
 import { Users, TrendingUp, CheckCircle } from "lucide-react";
 
@@ -22,20 +29,22 @@ export const ClassComparisonTable = ({ data }: ClassComparisonTableProps) => {
           <TableHeader>
             <TableRow>
               <TableHead>Class Name</TableHead>
-              <TableHead className="text-right">Avg Grade</TableHead>
-              <TableHead className="text-right">Attendance</TableHead>
-              <TableHead className="text-right">Completion</TableHead>
-              <TableHead className="text-right">Students</TableHead>
+              <TableHead className="text-end">Avg Grade</TableHead>
+              <TableHead className="text-end">Attendance</TableHead>
+              <TableHead className="text-end">Completion</TableHead>
+              <TableHead className="text-end">Students</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {data.map((cls) => (
               <TableRow key={cls.classId}>
                 <TableCell className="font-medium">{cls.className}</TableCell>
-                <TableCell className="text-right font-bold text-primary">{cls.averageGrade}%</TableCell>
-                <TableCell className="text-right">{cls.attendanceRate}%</TableCell>
-                <TableCell className="text-right">{cls.completionRate}%</TableCell>
-                <TableCell className="text-right">{cls.studentCount}</TableCell>
+                <TableCell className="text-end font-bold text-primary">
+                  {cls.averageGrade}%
+                </TableCell>
+                <TableCell className="text-end">{cls.attendanceRate}%</TableCell>
+                <TableCell className="text-end">{cls.completionRate}%</TableCell>
+                <TableCell className="text-end">{cls.studentCount}</TableCell>
               </TableRow>
             ))}
           </TableBody>

@@ -35,9 +35,7 @@ export const EnrollStudentDialog = ({
   enrolledStudentIds,
 }: EnrollStudentDialogProps) => {
   const { t } = useTranslation();
-  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(
-    null,
-  );
+  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
 
   // Correctly destructure mutation from useCreate
@@ -78,12 +76,12 @@ export const EnrollStudentDialog = ({
         onError: (error) => {
           toast.error(error.message || t("classes.dialogs.enrollStudent.toast.error"));
         },
-      },
+      }
     );
   };
 
   const availableStudents = studentOptions.filter(
-    (option) => !enrolledStudentIds.includes(String(option.value)),
+    (option) => !enrolledStudentIds.includes(String(option.value))
   );
 
   return (
@@ -91,22 +89,21 @@ export const EnrollStudentDialog = ({
       <DialogContent className="text-start">
         <DialogHeader>
           <DialogTitle>{t("classes.dialogs.enrollStudent.title")}</DialogTitle>
-          <DialogDescription>
-            {t("classes.dialogs.enrollStudent.description")}
-          </DialogDescription>
+          <DialogDescription>{t("classes.dialogs.enrollStudent.description")}</DialogDescription>
         </DialogHeader>
         <div className="py-4">
-          <Select
-            onValueChange={setSelectedStudentId}
-            value={selectedStudentId ?? undefined}
-          >
+          <Select onValueChange={setSelectedStudentId} value={selectedStudentId ?? undefined}>
             <SelectTrigger>
               <SelectValue placeholder={t("classes.dialogs.enrollStudent.fieldPlaceholder")} />
             </SelectTrigger>
             <SelectContent>
               {availableStudents.length > 0 ? (
                 availableStudents.map((option) => (
-                  <SelectItem key={option.value} value={String(option.value)} className="text-start">
+                  <SelectItem
+                    key={option.value}
+                    value={String(option.value)}
+                    className="text-start"
+                  >
                     {option.label}
                   </SelectItem>
                 ))

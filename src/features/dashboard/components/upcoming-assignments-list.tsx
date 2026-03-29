@@ -14,7 +14,11 @@ interface UpcomingAssignmentsListProps {
   show: (resource: string, id: string) => void;
 }
 
-export const UpcomingAssignmentsList = ({ assignments, list, show }: UpcomingAssignmentsListProps) => {
+export const UpcomingAssignmentsList = ({
+  assignments,
+  list,
+  show,
+}: UpcomingAssignmentsListProps) => {
   const { t, i18n } = useTranslation();
 
   return (
@@ -25,22 +29,34 @@ export const UpcomingAssignmentsList = ({ assignments, list, show }: UpcomingAss
             <ClipboardCheck className="h-5 w-5" />
           </div>
           <div>
-            <h3 className="text-xl font-black tracking-tight">{t("dashboard.student.upcomingTasks")}</h3>
-            <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">{t("dashboard.student.dontMissDeadlines")}</p>
+            <h3 className="text-xl font-black tracking-tight">
+              {t("dashboard.student.upcomingTasks")}
+            </h3>
+            <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">
+              {t("dashboard.student.dontMissDeadlines")}
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <Badge variant="secondary" className="hidden sm:flex rounded-full px-3 py-1 font-black text-[10px] uppercase tracking-widest bg-muted/50 border-none">
+          <Badge
+            variant="secondary"
+            className="hidden sm:flex rounded-full px-3 py-1 font-black text-[10px] uppercase tracking-widest bg-muted/50 border-none"
+          >
             {t("dashboard.student.pendingCount", { count: assignments.length })}
           </Badge>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={() => list("assignments")} 
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => list("assignments")}
             className="h-8 rounded-xl px-4 text-[10px] font-black uppercase tracking-widest text-primary hover:bg-primary/5 gap-2 group transition-all"
           >
             {t("buttons.viewAll")}
-            <ArrowRight className={cn("h-3 w-3 group-hover:translate-x-1 transition-transform", i18n.language === 'ar' && "rotate-180 group-hover:-translate-x-1")} />
+            <ArrowRight
+              className={cn(
+                "h-3 w-3 group-hover:translate-x-1 transition-transform",
+                i18n.language === "ar" && "rotate-180 group-hover:-translate-x-1"
+              )}
+            />
           </Button>
         </div>
       </div>
@@ -56,9 +72,9 @@ export const UpcomingAssignmentsList = ({ assignments, list, show }: UpcomingAss
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ delay: idx * 0.05 }}
               >
-                <AssignmentItemCard 
-                  assignment={assignment} 
-                  onOpen={(id) => show("assignments", id)} 
+                <AssignmentItemCard
+                  assignment={assignment}
+                  onOpen={(id) => show("assignments", id)}
                 />
               </motion.div>
             ))
@@ -66,9 +82,9 @@ export const UpcomingAssignmentsList = ({ assignments, list, show }: UpcomingAss
             <motion.div
               initial={{ opacity: 0, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="col-span-full text-center py-16 border-none shadow-2xl bg-card/50 backdrop-blur-xl rounded-[2rem] flex flex-col items-center gap-4 group overflow-hidden relative"
+              className="col-span-full text-center py-16 border-none shadow-2xl bg-card/50 backdrop-blur-xl rounded-4xl flex flex-col items-center gap-4 group overflow-hidden relative"
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
+              <div className="absolute inset-0 bg-linear-to-br from-primary/5 to-transparent pointer-events-none" />
               <div className="relative">
                 <div className="absolute inset-0 bg-primary/20 rounded-full blur-2xl animate-pulse" />
                 <div className="relative p-5 rounded-full bg-primary/10 text-primary group-hover:scale-110 transition-transform duration-500">
@@ -76,8 +92,12 @@ export const UpcomingAssignmentsList = ({ assignments, list, show }: UpcomingAss
                 </div>
               </div>
               <div className="space-y-1 relative z-10">
-                <p className="text-xl font-black tracking-tight text-foreground">{t("dashboard.student.allCaughtUp")}</p>
-                <p className="text-sm font-medium text-muted-foreground/60">{t("dashboard.student.noUpcoming")}</p>
+                <p className="text-xl font-black tracking-tight text-foreground">
+                  {t("dashboard.student.allCaughtUp")}
+                </p>
+                <p className="text-sm font-medium text-muted-foreground/60">
+                  {t("dashboard.student.noUpcoming")}
+                </p>
               </div>
               <div className="mt-2 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary/60 relative z-10">
                 <Sparkles className="h-3 w-3" />
@@ -87,7 +107,7 @@ export const UpcomingAssignmentsList = ({ assignments, list, show }: UpcomingAss
           )}
         </AnimatePresence>
       </div>
-      
+
       {assignments.length > 0 && (
         <div className="pt-4 flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">
           <Info className="h-3 w-3" />

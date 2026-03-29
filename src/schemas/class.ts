@@ -19,6 +19,9 @@ export const classFormSchema = z.object({
   status: z.nativeEnum(ClassStatus),
   schedules: z.array(scheduleSchema),
   color: z.string().regex(hexColorRegex).optional().default("#3b82f6"), // Default to a blue color
+  isPaid: z.boolean().default(false),
+  priceAmount: z.coerce.number().min(0).default(0),
+  currency: z.string().min(3).max(3).default("USD"),
 });
 
 // This is the schema for the creation form.
@@ -32,8 +35,10 @@ export const classCreateFormSchema = classFormSchema
     (data) => {
       // Ensure either subjectId is provided OR newSubjectName is provided, but not both.
       // And if newSubjectName is provided, subjectId must be undefined.
-      const hasSubjectId = data.subjectId !== undefined && data.subjectId !== null && data.subjectId !== 0;
-      const hasNewSubjectName = data.newSubjectName !== undefined && data.newSubjectName.trim() !== "";
+      const hasSubjectId =
+        data.subjectId !== undefined && data.subjectId !== null && data.subjectId !== 0;
+      const hasNewSubjectName =
+        data.newSubjectName !== undefined && data.newSubjectName.trim() !== "";
 
       if (hasSubjectId && hasNewSubjectName) {
         return false; // Cannot have both
