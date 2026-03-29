@@ -24,7 +24,9 @@ To transform the educational experience through:
 - **Zero-Direct-Call Enforcement:** ESLint strictly forbids importing `@google/generative-ai` on the frontend.
 - **Hook Isolation:** All AI-related hooks reside in `src/hooks/ai/` and must follow strict type-safety rules (no `any`).
 - **Feature Gating:** Every AI component MUST be wrapped in the `<AiFeatureGuard />` component to enforce the "Master Switch" and RBAC rules.
-- **Hardened Streaming:** The `useAiStream` hook provides a secure, typed wrapper for SSE interactions, implementing **Line Buffering** to ensure robust parsing of LLM JSON chunks.
+- **Hardened Streaming:**
+    - **`useAiStream`**: The foundational base hook for all AI streaming (SSE) interactions. Implements **Line Buffering** to ensure robust parsing of LLM JSON chunks.
+    - **`useAIChat`**: A production-grade specialization of the streaming pattern for Study Buddy and General Chat, including **Dexie-backed Persistence** and adaptive UI states.
 - **Client-Side Persistence:** `Dexie.js` is utilized for secure, local caching of AI chat history (Study Buddy) to reduce redundant API calls and enable offline review.
 
 ## 3. UI/UX Best Practices
