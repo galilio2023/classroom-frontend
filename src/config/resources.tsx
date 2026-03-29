@@ -311,7 +311,7 @@ export const resources: ResourceProps[] = [
     },
   },
   {
-    name: "teacher-subscriptions",
+    name: "enrollments",
     list: "/followed-teachers",
     meta: {
       group: "groups.student-hub",

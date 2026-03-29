@@ -459,7 +459,7 @@ export const AppRouter = () => (
           <Route
             path="/followed-teachers"
             element={
-              <AuthorizedRoute resource="teacher-subscriptions" action="list">
+              <AuthorizedRoute resource="enrollments" action="list">
                 <TeacherSubscriptionsList />
               </AuthorizedRoute>
             }
