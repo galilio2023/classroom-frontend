@@ -25,7 +25,7 @@ export const useDashboard = () => {
     url: `/dashboard`,
     method: "get",
     queryOptions: {
-      enabled: !!identity && !!selectedTerm && !isParent,
+      enabled: !!identity && !isParent,
       staleTime: 30000, // 30 seconds cache
     },
     config: {
