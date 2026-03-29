@@ -95,6 +95,13 @@ export default tseslint.config(
     },
   },
   {
+    // 🛡️ LOGIC HARDENING: Pure AI logic (.ts hooks/libs) must have explicit return types.
+    files: AI_RELATED_FILES.filter((f) => f.includes(".ts") && !f.includes(".tsx")),
+    rules: {
+      "@typescript-eslint/explicit-function-return-type": "error",
+    },
+  },
+  {
     // 🎚️ EXCEPTION: Streaming hooks require native fetch for SSE/ReadableStream support
     // which Refine's useCustom (built on standard fetch but with different return types)
     // might abstract away too much for the raw reader.

@@ -37,7 +37,7 @@ export class OfflineDB extends Dexie {
   /**
    * Adds a mutation to the outbox for background synchronization.
    */
-  async queue(mutation: Omit<OfflineMutation, "id" | "timestamp">) {
+  async queue(mutation: Omit<OfflineMutation, "id" | "timestamp">): Promise<number> {
     return await this.outbox.add({
       ...mutation,
       timestamp: Date.now(),
@@ -47,14 +47,14 @@ export class OfflineDB extends Dexie {
   /**
    * Retrieves all pending mutations ordered by timestamp.
    */
-  async getPending() {
+  async getPending(): Promise<OfflineMutation[]> {
     return await this.outbox.orderBy("timestamp").toArray();
   }
 
   /**
    * Removes a processed mutation from the outbox.
    */
-  async resolve(id: number) {
+  async resolve(id: number): Promise<void> {
     return await this.outbox.delete(id);
   }
 }

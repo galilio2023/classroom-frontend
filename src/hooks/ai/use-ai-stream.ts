@@ -16,7 +16,14 @@ interface UseAiStreamOptions<T> {
   onError?: (error: Error) => void;
 }
 
-export function useAiStream<T = unknown>(endpoint: string, options: UseAiStreamOptions<T> = {}) {
+export function useAiStream<T = unknown>(
+  endpoint: string,
+  options: UseAiStreamOptions<T> = {}
+): {
+  stream: (body: unknown) => Promise<T | void>;
+  isLoading: boolean;
+  error: Error | null;
+} {
   const { isAiEnabled, isAllowed } = useAiAccess();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
