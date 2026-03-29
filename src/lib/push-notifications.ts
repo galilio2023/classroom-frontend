@@ -49,7 +49,7 @@ export async function subscribeToPush() {
 async function sendSubscriptionToBackend(subscription: PushSubscription) {
   // Use the authClient singleton to get the session reliably
   const { data: sessionData } = await getFreshSession();
-  const token = sessionData?.session?.token;
+  const token = sessionData?.session?.token || localStorage.getItem("tablawy_auth_token");
 
   if (!token) {
     console.warn("Attempted to subscribe to push notifications without an active session.");

@@ -34,9 +34,13 @@ export const VerificationUpload = ({ url, onUpload, onClear }: VerificationUploa
     formData.append("folder", "verification");
 
     try {
+      const token = localStorage.getItem("tablawy_auth_token");
       const response = await fetch(`${BACKEND_URL}/upload`, {
         method: "POST",
         body: formData,
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
       });
 
       if (!response.ok) {

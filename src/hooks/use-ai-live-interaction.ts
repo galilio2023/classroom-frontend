@@ -198,7 +198,7 @@ export const useAILiveInteraction = ({
       const apiUrl = `${BACKEND_URL}${AI_API.INTERACT(classId)}`;
 
       try {
-        const token = localStorage.getItem("token");
+        const token = localStorage.getItem("tablawy_auth_token");
         const correlationId = crypto.randomUUID();
         const headers: Record<string, string> = {
           "Content-Type": "application/json",

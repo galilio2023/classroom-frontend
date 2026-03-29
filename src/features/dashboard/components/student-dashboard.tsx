@@ -7,7 +7,7 @@ import { StatsSkeleton } from "./dashboard-skeletons";
 import { useGetIdentity } from "@refinedev/core";
 import { User } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
-import { Trophy, Star, Zap, Sparkles, History, TrendingUp, Flame } from "lucide-react";
+import { Trophy, Star, Zap, Sparkles, History, TrendingUp, Flame, Download } from "lucide-react";
 import { XPProgressBar } from "@/components/xp-progress-bar";
 import { getLevelProgress } from "@/lib/xp";
 import { StudentOnboarding } from "./student-onboarding";
@@ -16,6 +16,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
+import { usePWAInstall } from "@/hooks/use-pwa-install";
 
 interface StudentDashboardProps {
   data: DashboardData;
@@ -27,6 +28,7 @@ interface StudentDashboardProps {
 export const StudentDashboard = ({ data, isLoading, list, show }: StudentDashboardProps) => {
   const { t } = useTranslation();
   const { data: identity } = useGetIdentity<User>();
+  const { isInstallable, isStandalone, handleInstallClick } = usePWAInstall();
 
   const currentXP = identity?.xp || 0;
   const { currentLevel, xpRequiredForNextLevel, xpInCurrentLevel } = getLevelProgress(currentXP);
@@ -37,6 +39,18 @@ export const StudentDashboard = ({ data, isLoading, list, show }: StudentDashboa
 
   // Generate Action Items dynamically based on data
   const actions: ActionItem[] = [];
+
+  // PWA Install Prompt - Higher priority if not installed
+  if (isInstallable && !isStandalone) {
+    actions.push({
+      id: "pwa-install",
+      title: t("common.installAppTitle", "Tablawy OS on Mobile"),
+      description: t("common.installAppDesc", "Install Tablawy on your home screen for a better experience and offline access."),
+      priority: "high",
+      actionText: t("common.installApp", "Install Now"),
+      onClick: handleInstallClick,
+    });
+  }
 
   if (data.upcomingAssignments && data.upcomingAssignments.length > 0) {
     const nextAssignment = data.upcomingAssignments[0];

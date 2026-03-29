@@ -261,7 +261,7 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
     const apiUrl = `${BACKEND_URL}${finalUrl}`;
 
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("tablawy_auth_token");
       const correlationId = crypto.randomUUID();
 
       // General Chat (Non-Streaming) - Use Refine's useCustomMutation

@@ -63,7 +63,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     formData.append("folder", folder);
 
     try {
-      const token = localStorage.getItem("token"); // Get token for authorization
+      const token = localStorage.getItem("tablawy_auth_token"); // Get token for authorization
       const response = await fetch(`${BACKEND_URL}/upload`, {
         method: "POST",
         body: formData,

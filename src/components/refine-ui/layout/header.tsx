@@ -17,6 +17,7 @@ import {
   CalendarClock,
   Languages,
   MoreVertical,
+  Download,
 } from "lucide-react";
 import { toast } from "sonner";
 import { User, UserRole } from "@/types";
@@ -38,6 +39,7 @@ import {
 } from "@/components/ui/select";
 import { useTranslation } from "react-i18next";
 import { UserAvatar } from "./user-avatar";
+import { usePWAInstall } from "@/hooks/use-pwa-install";
 
 export function Header() {
   const { mutate: logout } = useLogout();
@@ -45,6 +47,7 @@ export function Header() {
   const { show, edit } = useNavigation();
   const { selectedTerm, setSelectedTerm, terms } = useTerm();
   const { t, i18n } = useTranslation();
+  const { isInstallable, isStandalone, handleInstallClick } = usePWAInstall();
 
   const handleLogout = () => {
     logout(undefined, {
@@ -225,6 +228,14 @@ export function Header() {
               <LifeBuoy className="h-4 w-4" />
               <span>{t("buttons.contactSupport")}</span>
             </DropdownMenuItem>
+
+            {isInstallable && !isStandalone && (
+              <DropdownMenuItem className="gap-2 cursor-pointer font-bold text-primary" onClick={handleInstallClick}>
+                <Download className="h-4 w-4" />
+                <span>{t("common.installApp", "Install App")}</span>
+              </DropdownMenuItem>
+            )}
+
             <DropdownMenuSeparator className="bg-border/50" />
             <DropdownMenuItem
               onClick={handleLogout}

@@ -45,13 +45,20 @@ export function useAiStream<T = unknown>(
       setError(null);
 
       try {
+        const token = localStorage.getItem("tablawy_auth_token");
+        const headers: Record<string, string> = {
+          "Content-Type": "application/json",
+          "X-Tablawy-Client": "Tablawy-Frontend",
+        };
+
+        if (token) {
+          headers["Authorization"] = `Bearer ${token}`;
+        }
+
         const response = await fetch(`${BACKEND_URL}${endpoint}`, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            // 🛡️ SECURITY: Credentials include for Better Auth sessions
-            "X-Tablawy-Client": "Tablawy-Frontend",
-          },
+          headers,
+          credentials: "include",
           body: JSON.stringify(body),
         });
 

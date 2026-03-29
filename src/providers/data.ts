@@ -80,7 +80,8 @@ const fetcher = async (url: string, options?: RequestInit) => {
   }
 
   // 🛡️ DUAL AUTH: Better Auth (Cookies) + Bearer Token (Authorization Header)
-  const token = localStorage.getItem("token");
+  // Fix: use 'tablawy_auth_token' to match src/providers/auth.ts
+  const token = localStorage.getItem("tablawy_auth_token");
   if (token && !headers["Authorization"]) {
     headers["Authorization"] = `Bearer ${token}`;
   }

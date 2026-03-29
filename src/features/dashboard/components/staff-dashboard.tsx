@@ -18,10 +18,12 @@ import {
   Tv,
   Eye,
   TrendingUp,
+  Download,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useNavigation } from "@refinedev/core";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { usePWAInstall } from "@/hooks/use-pwa-install";
 
 interface StaffDashboardProps {
   data: DashboardData;
@@ -33,9 +35,22 @@ interface StaffDashboardProps {
 export const StaffDashboard = ({ data, isLoading, onRefresh, show }: StaffDashboardProps) => {
   const { t } = useTranslation();
   const { create, list } = useNavigation();
+  const { isInstallable, isStandalone, handleInstallClick } = usePWAInstall();
 
   // Generate Action Items dynamically based on data
   const actions: ActionItem[] = [];
+
+  // PWA Install Prompt - Higher priority if not installed
+  if (isInstallable && !isStandalone) {
+    actions.push({
+      id: "pwa-install",
+      title: t("common.installAppTitle", "Tablawy OS on Mobile"),
+      description: t("common.installAppDesc", "Install Tablawy on your home screen for a better experience and offline access."),
+      priority: "high",
+      actionText: t("common.installApp", "Install Now"),
+      onClick: handleInstallClick,
+    });
+  }
 
   if (data.atRiskStudents && data.atRiskStudents.length > 0) {
     actions.push({
