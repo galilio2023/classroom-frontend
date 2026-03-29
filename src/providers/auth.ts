@@ -20,13 +20,13 @@ let cachedSessionData: any = null;
 let lastFetchTime = 0;
 const CACHE_TTL = 30000; // 30 seconds
 
-// 🛡️ MOBILE STABILITY: Helper to ensure authClient uses the stored token
+// 🛡️ MOBILE STABILITY: Helper to ensure authClient has the token
 const syncToken = (token?: string | null) => {
   const finalToken = token || localStorage.getItem("tablawy_auth_token");
   if (finalToken) {
-    authClient.setHeaders({
-      Authorization: `Bearer ${finalToken}`,
-    });
+    localStorage.setItem("tablawy_auth_token", finalToken);
+    // Note: Better Auth bearer plugin will use this if we use the authClient's fetch
+    // or we can manually attach it if needed in a custom fetcher.
   }
 };
 
@@ -36,18 +36,15 @@ export const getFreshSession = async () => {
     return { data: cachedSessionData, error: null };
   }
 
-  // Ensure token is attached before fetching
-  syncToken();
-
   const result = await authClient.getSession();
   if (result.data) {
     cachedSessionData = result.data;
     lastFetchTime = now;
     
     // Refresh token in storage if present
-    const sessionToken = result.data.session?.token;
+    // getSession typically returns { session, user }
+    const sessionToken = (result.data as any).session?.token;
     if (sessionToken) {
-      localStorage.setItem("tablawy_auth_token", sessionToken);
       syncToken(sessionToken);
     }
   } else {
@@ -111,10 +108,10 @@ export const authProvider: AuthProvider = {
         cachedSessionData = data;
         lastFetchTime = Date.now();
         
-        // 🛡️ MOBILE STABILITY: Explicitly store and sync token
-        const sessionToken = data.session?.token;
+        // 🛡️ MOBILE STABILITY: Explicitly store token
+        // In signIn result, token is at the top level
+        const sessionToken = (data as any).token;
         if (sessionToken) {
-          localStorage.setItem("tablawy_auth_token", sessionToken);
           syncToken(sessionToken);
         }
 

@@ -1,5 +1,6 @@
 import { createAuthClient } from "better-auth/react";
 import { BETTER_AUTH_ROOT } from "@/config";
+import { bearer } from "better-auth/plugins";
 
 /**
  * Better Auth Client Configuration
@@ -15,6 +16,7 @@ export const authClient = createAuthClient({
   fetchOptions: {
     credentials: "include",
   },
+  plugins: [bearer()],
   user: {
     additionalFields: {
       role: { type: "string" },
