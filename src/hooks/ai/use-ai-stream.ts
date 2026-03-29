@@ -55,6 +55,7 @@ export function useAiStream<T = unknown>(endpoint: string, options: UseAiStreamO
         const reader = response.body?.getReader();
         const decoder = new TextDecoder();
         let fullContent = "";
+        let buffer = ""; // 🛡️ SSE LINE BUFFERING
 
         if (!reader) throw new Error("Response body is null");
 
@@ -63,8 +64,24 @@ export function useAiStream<T = unknown>(endpoint: string, options: UseAiStreamO
           if (done) break;
 
           const chunk = decoder.decode(value, { stream: true });
-          fullContent += chunk;
-          options.onChunk?.(chunk);
+          buffer += chunk;
+
+          // 🛡️ Split by newline to ensure we process complete SSE lines
+          const lines = buffer.split("\n");
+          // Keep the last partial line in the buffer
+          buffer = lines.pop() || "";
+
+          for (const line of lines) {
+            if (!line.trim()) continue;
+            fullContent += line;
+            options.onChunk?.(line);
+          }
+        }
+
+        // Process any remaining content in the buffer
+        if (buffer.trim()) {
+          fullContent += buffer;
+          options.onChunk?.(buffer);
         }
 
         // 🛡️ Validation: Ensure the final output matches our expected schema

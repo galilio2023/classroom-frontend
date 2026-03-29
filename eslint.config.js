@@ -8,11 +8,11 @@ import prettier from "eslint-plugin-prettier";
 
 const AI_RELATED_FILES = [
   "src/hooks/ai/**/*.{ts,tsx}",
-  "src/hooks/**/use*[aA][iI]*",
-  "src/hooks/**/use*[gG]emini*",
-  "src/hooks/**/use*[aA][iI][gG]eneration*",
-  "src/hooks/**/use*[mM]agic*",
-  "src/hooks/**/use*[cC]o[tT]eacher*",
+  "src/hooks/**/use*Ai*.ts",
+  "src/hooks/**/use*Gemini*.ts",
+  "src/hooks/**/use*AiGeneration*.ts",
+  "src/hooks/**/use*Magic*.ts",
+  "src/hooks/**/use*CoTeacher*.ts",
   "src/features/ai/**/*.{ts,tsx}",
   "src/lib/**/*[aA][iI]*",
 ];
