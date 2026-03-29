@@ -69,7 +69,7 @@ const MessagesPage = () => {
 
   // Fetch Conversations
   const {
-    result: conversationsResult,
+    data: conversationsResult,
     query: { refetch: refetchConversations, isLoading: isLoadingConversations },
   } = useCustom<{ data: Conversation[] }>({
     url: "/messages",
@@ -80,7 +80,7 @@ const MessagesPage = () => {
     },
   });
 
-  const conversations = conversationsResult?.data?.data || [];
+  const conversations = conversationsResult?.data || [];
 
   // Auto-select user from searchParams (Notification deep-link)
   useEffect(() => {
@@ -93,7 +93,7 @@ const MessagesPage = () => {
   }, [targetUserId, conversations]);
 
   // Fetch Target User if not in conversations (Start new chat)
-  const { result: targetUserResult } = useCustom<{
+  const { data: targetUserResult } = useCustom<{
     data: Conversation["user"];
   }>({
     url: `/messages/user/${targetUserId}`,
@@ -104,14 +104,14 @@ const MessagesPage = () => {
   });
 
   useEffect(() => {
-    if (targetUserResult?.data?.data) {
-      setSelectedUser(targetUserResult.data.data);
+    if (targetUserResult?.data) {
+      setSelectedUser(targetUserResult.data);
     }
   }, [targetUserResult]);
 
   // Fetch Messages for Selected User
   const {
-    result: messagesResult,
+    data: messagesResult,
     query: { refetch: refetchMessages, isLoading: isLoadingMessages },
   } = useCustom<{ data: Message[] }>({
     url: `/messages/${selectedUser?.id}`,

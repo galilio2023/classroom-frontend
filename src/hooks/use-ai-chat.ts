@@ -118,7 +118,7 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
   } = usePermissions<BasePermissions>({});
 
   // 1. 📜 HISTORY: Standard Refine v5 GET
-  const { result: historyResult, query: historyQuery } = useCustom<ChatHistoryResponse>({
+  const { data: historyResult, query: historyQuery } = useCustom<ChatHistoryResponse>({
     url: `${BACKEND_URL}/ai/chat-history/${effectiveClassId}`,
     method: "get",
     queryOptions: {

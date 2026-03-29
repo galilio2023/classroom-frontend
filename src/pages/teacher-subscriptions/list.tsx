@@ -1,6 +1,14 @@
 import { ListView } from "@/components/refine-ui/views/list-view";
 import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
-import { UserPlus, Loader2, Users as UsersIcon, MessageSquare, Eye, Layers } from "lucide-react";
+import {
+  UserPlus,
+  Loader2,
+  Users as UsersIcon,
+  MessageSquare,
+  Eye,
+  Layers,
+  Bookmark,
+} from "lucide-react";
 import { useMemo } from "react";
 import { useList, useGetIdentity, useNavigation } from "@refinedev/core";
 import { User, UserRole } from "@/types";
@@ -34,13 +42,15 @@ const TeacherSubscriptionsList = () => {
 
   const { query } = useList<any>({
     resource: resource,
-    filters: isStudent ? [
-      {
-        field: "studentId",
-        operator: "eq",
-        value: identity?.id,
-      },
-    ] : [],
+    filters: isStudent
+      ? [
+          {
+            field: "studentId",
+            operator: "eq",
+            value: identity?.id,
+          },
+        ]
+      : [],
     queryOptions: {
       enabled: !!identity?.id,
     },
@@ -55,7 +65,7 @@ const TeacherSubscriptionsList = () => {
   // For Students: list of teachers of classes they are enrolled in
   const items = useMemo(() => {
     const rawData = query.data?.data || [];
-    
+
     if (isStudent) {
       const teacherMap = new Map<string, User>();
       rawData.forEach((enrollment: any) => {
@@ -99,7 +109,9 @@ const TeacherSubscriptionsList = () => {
                     <UserPlus className="h-6 w-6 md:h-8 md:w-8" />
                   )}
                 </div>
-                {isStudent ? t("resources.followed-teachers.label") : t("teacherSubscriptions.title")}
+                {isStudent
+                  ? t("resources.followed-teachers.label")
+                  : t("teacherSubscriptions.title")}
               </h1>
               <p className="text-muted-foreground font-medium max-w-2xl text-balance">
                 {isStudent ? t("myTeachers.description") : t("teacherSubscriptions.description")}
@@ -129,8 +141,14 @@ const TeacherSubscriptionsList = () => {
             <div className="flex items-center justify-center p-16 bg-card/20 rounded-[2.5rem] border border-dashed border-border/40">
               <EmptyState
                 icon={Layers}
-                title={isStudent ? t("myTeachers.empty.title") : t("teacherSubscriptions.empty.title")}
-                description={isStudent ? t("myTeachers.empty.description") : t("teacherSubscriptions.empty.description")}
+                title={
+                  isStudent ? t("myTeachers.empty.title") : t("teacherSubscriptions.empty.title")
+                }
+                description={
+                  isStudent
+                    ? t("myTeachers.empty.description")
+                    : t("teacherSubscriptions.empty.description")
+                }
                 className="border-none bg-transparent min-h-0"
               />
             </div>
@@ -176,10 +194,13 @@ const TeacherSubscriptionsList = () => {
                       size="lg"
                       className="flex-1 rounded-2xl h-12 font-black uppercase tracking-widest text-[10px] shadow-xl shadow-primary/20"
                     >
-                      <a href="#" onClick={(e) => {
-                        e.preventDefault();
-                        show("users", person.id);
-                      }}>
+                      <a
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          show("users", person.id);
+                        }}
+                      >
                         {t("buttons.viewProfile")}
                         <Eye className={cn("h-4 w-4 ms-2", isAr && "me-2 ms-0")} />
                       </a>

@@ -91,7 +91,7 @@ export function CommandMenu() {
   };
 
   // --- UNIFIED GLOBAL SEARCH ---
-  const { result: searchResult, query: searchQuery } = useCustom<SearchResult[]>({
+  const { data: searchResult, query: searchQuery } = useCustom<SearchResult[]>({
     url: "/search",
     method: "get",
     config: {

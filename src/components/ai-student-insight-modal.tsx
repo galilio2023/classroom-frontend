@@ -45,7 +45,7 @@ export const AIStudentInsightModal = ({
   const { mutate: sendNotification, mutation: sendMutation } = useCustomMutation();
   const isSending = sendMutation.isPending;
 
-  const { result, query } = useCustom<AIInsight>({
+  const { data: result, query } = useCustom<AIInsight>({
     url: `/ai/student-insight/${studentId}/${classId}`,
     method: "get",
     queryOptions: {

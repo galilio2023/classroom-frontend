@@ -54,7 +54,7 @@ export default function ReportCard() {
   const { data: identity } = useGetIdentity<User>();
   const { selectedTerm } = useTerm();
 
-  const { result, query } = useCustom<ReportCardData>({
+  const { data: result, query } = useCustom<ReportCardData>({
     url: `/submissions/report-card`,
     method: "get",
     config: {

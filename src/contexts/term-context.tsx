@@ -15,8 +15,8 @@ const TermContext = createContext<TermContextType | undefined>(undefined);
 export const TermProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [selectedTerm, setSelectedTerm] = useState<AcademicTerm | null>(null);
 
-  // Refine useList implementation returns { result, query }
-  const { result, query } = useList<AcademicTerm>({
+  // Refine useList implementation returns { data, query }
+  const { data: result, query } = useList<AcademicTerm>({
     resource: "academic-terms",
     sorters: [
       {

@@ -66,7 +66,7 @@ export const AnalyticsTab = ({ classId }: AnalyticsTabProps) => {
 
   const isAiEnabled = coreData?.globalConfig?.enableAiFeatures !== false;
 
-  const { result, query } = useCustom<ClassAnalytics>({
+  const { data: result, query } = useCustom<ClassAnalytics>({
     url: `/classes/${classId}/analytics`,
     method: "get",
     config: {

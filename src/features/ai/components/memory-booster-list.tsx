@@ -26,12 +26,12 @@ export const MemoryBoosterList: React.FC<MemoryBoosterListProps> = ({ onSelectTo
   const { t, i18n } = useTranslation();
   const isAr = i18n.language === "ar";
 
-  const { result, query } = useCustom<SpacedRepetition[]>({
+  const { data: response, query } = useCustom<SpacedRepetition[]>({
     url: "/ai/memory-boosters",
     method: "get",
   });
 
-  const boosters = result?.data || [];
+  const boosters = Array.isArray(response?.data) ? response.data : [];
   const isLoading = query.isLoading;
   const dueItems = boosters.filter((b: SpacedRepetition) =>
     dayjs(b.nextReviewAt).isBefore(dayjs().add(1, "hour"))
