@@ -21,10 +21,10 @@ To transform the educational experience through:
 - **Refine v5 Hooks:** Standard AI metadata (history, permissions) is fetched using Refine's `useCustom` and `usePermissions` to benefit from centralized caching and standardized state.
 
 ### Security & Access Control
-- **RBAC (Role-Based Access Control):** AI features are restricted using Refine's `accessControlProvider` and the `usePermissions` hook.
-- **Teacher-Only Tools:** Magic Builder and Grading Agent are restricted to **Teachers** and **Admins**.
-- **Student-Only Tools:** Study Lab and Study Buddy are primarily for **Students**.
-- **Parent Gating:** AI interactive features are explicitly disabled for the **Parent** role to ensure pedagogical integrity.
+- **Zero-Direct-Call Enforcement:** ESLint strictly forbids importing `@google/generative-ai` on the frontend.
+- **Hook Isolation:** All AI-related hooks reside in `src/hooks/ai/` and must follow strict type-safety rules (no `any`).
+- **Feature Gating:** Every AI component MUST be wrapped in the `<AiFeatureGuard />` component to enforce the "Master Switch" and RBAC rules.
+- **Hardened Streaming:** The `useAiStream` hook provides a secure, typed wrapper for SSE interactions, ensuring auth headers and Zod validation are applied to LLM outputs.
 
 ## 3. UI/UX Best Practices
 - **Visual Identity:** AI components use the `ai-primary` color, `Sparkles` icon, and `ai-gradient-border`.

@@ -4,6 +4,7 @@ import reactRefresh from "eslint-plugin-react-refresh";
 import globals from "globals";
 import tseslint from "typescript-eslint";
 import eslintConfigPrettier from "eslint-config-prettier";
+import prettier from "eslint-plugin-prettier";
 
 export default tseslint.config(
   { ignores: ["dist"] },
@@ -17,9 +18,11 @@ export default tseslint.config(
     plugins: {
       "react-hooks": reactHooks,
       "react-refresh": reactRefresh,
+      prettier,
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
+      "prettier/prettier": "error",
       "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
       "@typescript-eslint/no-explicit-any": "warn",
       "@typescript-eslint/no-unused-vars": [
@@ -46,6 +49,7 @@ export default tseslint.config(
   },
   {
     files: [
+      "src/hooks/ai/**/*.{ts,tsx}",
       "src/hooks/**/use*[aA][iI]*",
       "src/hooks/**/use*[gG]emini*",
       "src/hooks/**/use*[aA][iI][gG]eneration*",
@@ -92,7 +96,11 @@ export default tseslint.config(
     // 🎚️ EXCEPTION: Streaming hooks require native fetch for SSE/ReadableStream support
     // which Refine's useCustom (built on standard fetch but with different return types)
     // might abstract away too much for the raw reader.
-    files: ["src/hooks/**/use-ai-chat.ts", "src/hooks/**/use-ai-live-interaction.ts"],
+    files: [
+      "src/hooks/ai/use-ai-stream.ts",
+      "src/hooks/**/use-ai-chat.ts",
+      "src/hooks/**/use-ai-live-interaction.ts",
+    ],
     rules: {
       "no-restricted-globals": "off",
     },
