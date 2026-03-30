@@ -25,9 +25,11 @@ export function PWAInstaller() {
 
     // If it's iOS and not installed, we can show instructions
     if (isIOSDevice && !isStandaloneMode) {
-      // Check if we've already shown it or if user dismissed it recently
       const dismissed = localStorage.getItem("pwa-prompt-dismissed");
-      if (!dismissed) {
+      const oneDay = 24 * 60 * 60 * 1000;
+      
+      // If never dismissed OR dismissed more than 24 hours ago
+      if (!dismissed || (Date.now() - parseInt(dismissed) > oneDay)) {
         setIsVisible(true);
       }
     }
@@ -35,7 +37,15 @@ export function PWAInstaller() {
     const handler = (e: any) => {
       e.preventDefault();
       setInstallPrompt(e);
-      setIsVisible(true);
+      
+      // On Android/Desktop, always show the banner when the prompt is available
+      // unless the user dismissed it very recently (last 24h)
+      const dismissed = localStorage.getItem("pwa-prompt-dismissed");
+      const oneDay = 24 * 60 * 60 * 1000;
+      
+      if (!dismissed || (Date.now() - parseInt(dismissed) > oneDay)) {
+        setIsVisible(true);
+      }
     };
 
     window.addEventListener("beforeinstallprompt", handler);
