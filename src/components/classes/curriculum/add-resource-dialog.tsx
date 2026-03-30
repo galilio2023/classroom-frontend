@@ -15,9 +15,19 @@ import { FileUpload } from "@/components/file-upload";
 import { useTranslation } from "react-i18next";
 import { useForm } from "@refinedev/react-hook-form";
 import { Controller, SubmitHandler } from "react-hook-form";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Resource } from "@/types";
 import { HttpError } from "@refinedev/core";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface AddResourceDialogProps {
   isOpen: boolean;
@@ -45,6 +55,7 @@ export const AddResourceDialog = ({
   moduleId,
 }: AddResourceDialogProps) => {
   const { t } = useTranslation();
+  const [showConfirmClose, setShowConfirmClose] = useState(false);
 
   const {
     refineCore: { onFinish, formLoading },
@@ -80,8 +91,9 @@ export const AddResourceDialog = ({
 
   const resourceType = watch("type");
 
+  // 🛡️ COMPLIANCE: Standardized reset on open to ensure fresh state
   useEffect(() => {
-    if (!isOpen) {
+    if (isOpen) {
       reset({
         title: "",
         description: "",
@@ -108,188 +120,220 @@ export const AddResourceDialog = ({
     onFinish(finalPayload);
   };
 
+  const handleCloseAttempt = (open: boolean) => {
+    if (!open && isDirty) {
+      setShowConfirmClose(true);
+    } else {
+      onOpenChange(open);
+    }
+  };
+
   return (
-    <Dialog
-      open={isOpen}
-      onOpenChange={(open) => {
-        if (!open && isDirty) {
-          if (confirm(t("common.unsavedChanges", "You have unsaved changes. Close anyway?"))) {
-            onOpenChange(false);
-          }
-        } else {
-          onOpenChange(open);
-        }
-      }}
-    >
-      <DialogContent
-        onPointerDownOutside={(e) => {
-          if (isDirty) e.preventDefault();
-        }}
-        className="sm:max-w-[600px] rounded-3xl border-none shadow-2xl p-0 overflow-hidden bg-card/95 backdrop-blur-2xl"
-      >
-        <form onSubmit={handleSubmit(handleFormSubmit)} className="p-8 space-y-6">
-          <DialogHeader className="space-y-3 text-start">
-            <DialogTitle className="text-2xl font-black tracking-tight">
-              {t("classes.resource.addDialog.title")}
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-5">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">
-                  {t("classes.resource.addDialog.fieldTitle")}
-                </Label>
-                <Input
-                  placeholder={t("classes.resource.addDialog.titlePlaceholder")}
-                  {...register("title", { required: true })}
-                  className="h-12 rounded-xl border-muted-foreground/20 focus:border-primary transition-all font-bold"
-                />
-                {errors.title && (
-                  <span className="text-[10px] text-destructive font-bold px-1 uppercase tracking-tighter">
-                    {t("common.required", "Required")}
-                  </span>
-                )}
+    <>
+      <Dialog open={isOpen} onOpenChange={handleCloseAttempt}>
+        <DialogContent
+          onPointerDownOutside={(e) => {
+            if (isDirty) e.preventDefault();
+          }}
+          className="sm:max-w-[600px] rounded-3xl border-none shadow-2xl p-0 overflow-hidden bg-card/95 backdrop-blur-2xl"
+        >
+          <form onSubmit={handleSubmit(handleFormSubmit)} className="p-8 space-y-6">
+            <DialogHeader className="space-y-3 text-start">
+              <DialogTitle className="text-2xl font-black tracking-tight">
+                {t("classes.resource.addDialog.title")}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-5">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">
+                    {t("classes.resource.addDialog.fieldTitle")}
+                  </Label>
+                  <Input
+                    placeholder={t("classes.resource.addDialog.titlePlaceholder")}
+                    {...register("title", { required: true })}
+                    className="h-12 rounded-xl border-muted-foreground/20 focus:border-primary transition-all font-bold"
+                  />
+                  {errors.title && (
+                    <span className="text-[10px] text-destructive font-bold px-1 uppercase tracking-tighter">
+                      {t("common.required", "Required")}
+                    </span>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">
+                    {t("classes.resource.addDialog.fieldType")}
+                  </Label>
+                  <Controller
+                    name="type"
+                    control={control}
+                    render={({ field }) => (
+                      <Select value={field.value} onValueChange={field.onChange}>
+                        <SelectTrigger className="h-12 rounded-xl border-muted-foreground/20 focus:border-primary transition-all font-bold">
+                          <SelectValue
+                            placeholder={t("classes.resource.addDialog.typePlaceholder")}
+                          />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-xl border-muted-foreground/20">
+                          <SelectItem value="note">
+                            {t("classes.resource.addDialog.types.note")}
+                          </SelectItem>
+                          <SelectItem value="file">
+                            {t("classes.resource.addDialog.types.file")}
+                          </SelectItem>
+                          <SelectItem value="link">
+                            {t("classes.resource.addDialog.types.link")}
+                          </SelectItem>
+                          <SelectItem value="video">
+                            {t("classes.resource.addDialog.types.video")}
+                          </SelectItem>
+                          <SelectItem value="other">
+                            {t("classes.resource.addDialog.types.other")}
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">
-                  {t("classes.resource.addDialog.fieldType")}
-                </Label>
+
+              {(resourceType === "link" ||
+                resourceType === "video" ||
+                resourceType === "other") && (
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">
+                    {t("classes.resource.addDialog.fieldUrl")}
+                  </Label>
+                  <Input
+                    placeholder={t("classes.resource.addDialog.urlPlaceholder")}
+                    {...register("url", { required: true })}
+                    className="h-12 rounded-xl border-muted-foreground/20 focus:border-primary transition-all font-bold"
+                  />
+                  {errors.url && (
+                    <span className="text-[10px] text-destructive font-bold px-1 uppercase tracking-tighter">
+                      {t("common.required", "Required")}
+                    </span>
+                  )}
+                </div>
+              )}
+
+              {resourceType === "note" && (
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">
+                    {t("classes.resource.addDialog.fieldContent")}
+                  </Label>
+                  <Textarea
+                    className="min-h-50 rounded-xl border-muted-foreground/20 focus:border-primary transition-all font-medium leading-relaxed"
+                    placeholder={t("classes.resource.addDialog.contentPlaceholder")}
+                    {...register("content", { required: true })}
+                  />
+                  {errors.content && (
+                    <span className="text-[10px] text-destructive font-bold px-1 uppercase tracking-tighter">
+                      {t("common.required", "Required")}
+                    </span>
+                  )}
+                </div>
+              )}
+
+              {resourceType === "file" && (
+                <div className="space-y-2">
+                  <input type="hidden" {...register("url", { required: true })} />
+                  <input type="hidden" {...register("cldPubId", { required: true })} />
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">
+                    {t("classes.resource.addDialog.fieldUpload", {
+                      type: t("classes.resource.addDialog.types.file"),
+                    })}
+                  </Label>
+                  <FileUpload
+                    onUploadSuccess={(url, pubId) => {
+                      setValue("url", url, { shouldDirty: true, shouldValidate: true });
+                      setValue("cldPubId", pubId, { shouldDirty: true, shouldValidate: true });
+                    }}
+                    onClear={() => {
+                      setValue("url", "", { shouldDirty: true, shouldValidate: true });
+                      setValue("cldPubId", "", { shouldDirty: true, shouldValidate: true });
+                    }}
+                  />
+                  {(errors.url || errors.cldPubId) && (
+                    <span className="text-[10px] text-destructive font-bold px-1 uppercase tracking-tighter">
+                      {t("classes.resource.addDialog.uploadRequired", "Please upload a file")}
+                    </span>
+                  )}
+                </div>
+              )}
+
+              <div className="flex items-center justify-between p-4 rounded-2xl bg-primary/5 border border-primary/10">
+                <div className="space-y-0.5">
+                  <Label className="text-sm font-black tracking-tight">
+                    {t("common.curriculum.publishImmediately")}
+                  </Label>
+                  <p className="text-[10px] font-black text-muted-foreground">
+                    {t("common.curriculum.resourcePublishHelp")}
+                  </p>
+                </div>
                 <Controller
-                  name="type"
+                  name="status"
                   control={control}
                   render={({ field }) => (
-                    <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger className="h-12 rounded-xl border-muted-foreground/20 focus:border-primary transition-all font-bold">
-                        <SelectValue
-                          placeholder={t("classes.resource.addDialog.typePlaceholder")}
-                        />
-                      </SelectTrigger>
-                      <SelectContent className="rounded-xl border-muted-foreground/20">
-                        <SelectItem value="note">
-                          {t("classes.resource.addDialog.types.note")}
-                        </SelectItem>
-                        <SelectItem value="file">
-                          {t("classes.resource.addDialog.types.file")}
-                        </SelectItem>
-                        <SelectItem value="link">
-                          {t("classes.resource.addDialog.types.link")}
-                        </SelectItem>
-                        <SelectItem value="video">
-                          {t("classes.resource.addDialog.types.video")}
-                        </SelectItem>
-                        <SelectItem value="other">
-                          {t("classes.resource.addDialog.types.other")}
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <Switch
+                      checked={field.value === "active"}
+                      onCheckedChange={(val) => field.onChange(val ? "active" : "draft")}
+                    />
                   )}
                 />
               </div>
             </div>
 
-            {(resourceType === "link" || resourceType === "video" || resourceType === "other") && (
-              <div className="space-y-2">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">
-                  {t("classes.resource.addDialog.fieldUrl")}
-                </Label>
-                <Input
-                  placeholder={t("classes.resource.addDialog.urlPlaceholder")}
-                  {...register("url", { required: true })}
-                  className="h-12 rounded-xl border-muted-foreground/20 focus:border-primary transition-all font-bold"
-                />
-                {errors.url && (
-                  <span className="text-[10px] text-destructive font-bold px-1 uppercase tracking-tighter">
-                    {t("common.required", "Required")}
-                  </span>
-                )}
-              </div>
-            )}
-
-            {resourceType === "note" && (
-              <div className="space-y-2">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">
-                  {t("classes.resource.addDialog.fieldContent")}
-                </Label>
-                <Textarea
-                  className="min-h-50 rounded-xl border-muted-foreground/20 focus:border-primary transition-all font-medium leading-relaxed"
-                  placeholder={t("classes.resource.addDialog.contentPlaceholder")}
-                  {...register("content", { required: true })}
-                />
-                {errors.content && (
-                  <span className="text-[10px] text-destructive font-bold px-1 uppercase tracking-tighter">
-                    {t("common.required", "Required")}
-                  </span>
-                )}
-              </div>
-            )}
-
-            {resourceType === "file" && (
-              <div className="space-y-2">
-                <input type="hidden" {...register("url", { required: true })} />
-                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">
-                  {t("classes.resource.addDialog.fieldUpload", {
-                    type: t("classes.resource.addDialog.types.file"),
-                  })}
-                </Label>
-                <FileUpload
-                  onUploadSuccess={(url, pubId) => {
-                    setValue("url", url, { shouldDirty: true, shouldValidate: true });
-                    setValue("cldPubId", pubId, { shouldDirty: true });
-                  }}
-                  onClear={() => {
-                    setValue("url", "", { shouldDirty: true, shouldValidate: true });
-                    setValue("cldPubId", "", { shouldDirty: true });
-                  }}
-                />
-                {errors.url && (
-                  <span className="text-[10px] text-destructive font-bold px-1 uppercase tracking-tighter">
-                    {t("classes.resource.addDialog.uploadRequired", "Please upload a file")}
-                  </span>
-                )}
-              </div>
-            )}
-
-            <div className="flex items-center justify-between p-4 rounded-2xl bg-primary/5 border border-primary/10">
-              <div className="space-y-0.5">
-                <Label className="text-sm font-black tracking-tight">
-                  {t("common.curriculum.publishImmediately")}
-                </Label>
-                <p className="text-[10px] font-black text-muted-foreground">
-                  {t("common.curriculum.resourcePublishHelp")}
-                </p>
-              </div>
-              <Controller
-                name="status"
-                control={control}
-                render={({ field }) => (
-                  <Switch
-                    checked={field.value === "active"}
-                    onCheckedChange={(val) => field.onChange(val ? "active" : "draft")}
-                  />
-                )}
-              />
+            <div className="flex gap-3 pt-2">
+              <Button
+                variant="outline"
+                type="button"
+                onClick={() => handleCloseAttempt(false)}
+                className="flex-1 h-12 rounded-xl font-black uppercase tracking-widest text-[10px] border-muted-foreground/20"
+              >
+                {t("buttons.cancel")}
+              </Button>
+              <Button
+                type="submit"
+                disabled={formLoading}
+                className="flex-1 h-12 rounded-xl font-black uppercase tracking-widest text-[10px] shadow-xl shadow-primary/20"
+              >
+                {formLoading ? t("common.loading", "Loading...") : t("buttons.save")}
+              </Button>
             </div>
-          </div>
+          </form>
+        </DialogContent>
+      </Dialog>
 
-          <div className="flex gap-3 pt-2">
-            <Button
-              variant="outline"
-              type="button"
-              onClick={() => onOpenChange(false)}
-              className="flex-1 h-12 rounded-xl font-black uppercase tracking-widest text-[10px] border-muted-foreground/20"
-            >
+      <AlertDialog open={showConfirmClose} onOpenChange={setShowConfirmClose}>
+        <AlertDialogContent className="rounded-3xl border-none shadow-2xl bg-card/95 backdrop-blur-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-xl font-black">
+              {t("common.unsavedChanges", "Unsaved Changes")}
+            </AlertDialogTitle>
+            <AlertDialogDescription className="font-bold">
+              {t(
+                "common.unsavedChangesDescription",
+                "You have unsaved changes. Are you sure you want to close? Your progress will be lost."
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-3">
+            <AlertDialogCancel className="rounded-xl font-black uppercase tracking-widest text-[10px] border-muted-foreground/20">
               {t("buttons.cancel")}
-            </Button>
-            <Button
-              type="submit"
-              disabled={formLoading}
-              className="flex-1 h-12 rounded-xl font-black uppercase tracking-widest text-[10px] shadow-xl shadow-primary/20"
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                setShowConfirmClose(false);
+                onOpenChange(false);
+              }}
+              className="rounded-xl font-black uppercase tracking-widest text-[10px] bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {formLoading ? t("common.loading", "Loading...") : t("buttons.save")}
-            </Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
+              {t("buttons.closeAnyway", "Close Anyway")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 };
