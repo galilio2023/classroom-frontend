@@ -11,6 +11,9 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: "autoUpdate",
+      devOptions: {
+        enabled: true,
+      },
       includeAssets: ["logo.svg", "apple-icon-180.png"],
       manifest: {
         name: "Tablawy OS",

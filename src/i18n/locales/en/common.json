@@ -210,7 +210,10 @@
       "title": "Install Classroom App",
       "description": "Access your classes faster",
       "install": "Install",
-      "success": "App installed successfully!"
+      "success": "App installed successfully!",
+      "ios": {
+        "instruction": "To install: tap the share button (square with arrow up) and select \"Add to Home Screen\"."
+      }
     },
     "progress": "Progress",
     "xp": "XP",
