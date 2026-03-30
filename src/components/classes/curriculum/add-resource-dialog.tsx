@@ -55,7 +55,7 @@ export const AddResourceDialog = ({
     watch,
     setValue,
     trigger,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = useForm<Resource, HttpError, IResourceForm>({
     refineCoreProps: {
       resource: "resources",
@@ -109,8 +109,24 @@ export const AddResourceDialog = ({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px] rounded-3xl border-none shadow-2xl p-0 overflow-hidden bg-card/95 backdrop-blur-2xl">
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open && isDirty) {
+          if (confirm(t("common.unsavedChanges", "You have unsaved changes. Close anyway?"))) {
+            onOpenChange(false);
+          }
+        } else {
+          onOpenChange(open);
+        }
+      }}
+    >
+      <DialogContent
+        onPointerDownOutside={(e) => {
+          if (isDirty) e.preventDefault();
+        }}
+        className="sm:max-w-[600px] rounded-3xl border-none shadow-2xl p-0 overflow-hidden bg-card/95 backdrop-blur-2xl"
+      >
         <form onSubmit={handleSubmit(handleFormSubmit)} className="p-8 space-y-6">
           <DialogHeader className="space-y-3 text-start">
             <DialogTitle className="text-2xl font-black tracking-tight">
@@ -217,9 +233,12 @@ export const AddResourceDialog = ({
                 </Label>
                 <FileUpload
                   onUploadSuccess={(url, pubId) => {
-                    setValue("url", url);
-                    setValue("cldPubId", pubId);
-                    trigger("url");
+                    setValue("url", url, { shouldDirty: true, shouldValidate: true });
+                    setValue("cldPubId", pubId, { shouldDirty: true });
+                  }}
+                  onClear={() => {
+                    setValue("url", "", { shouldDirty: true, shouldValidate: true });
+                    setValue("cldPubId", "", { shouldDirty: true });
                   }}
                 />
                 {errors.url && (

@@ -29,6 +29,7 @@ import { CanAccess } from "@/components/auth/can-access";
 import { useDashboard } from "@/features/dashboard/hooks/use-dashboard";
 import { useJobs } from "@/contexts/job-context";
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
+import { AiFeatureGuard } from "@/components/ai/AiFeatureGuard";
 
 interface CurriculumTabProps {
   classId: string;
@@ -444,15 +445,17 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
       )}
 
       {isTeacher && (
-        <MagicBuilderDialog
-          isOpen={isMagicModalOpen}
-          onOpenChange={setIsMagicModalOpen}
-          config={magicConfig}
-          setConfig={setMagicConfig}
-          onGenerate={handleMagicCreate}
-          isGenerating={isMagicCreating}
-          classId={Number(classId)}
-        />
+        <AiFeatureGuard silent>
+          <MagicBuilderDialog
+            isOpen={isMagicModalOpen}
+            onOpenChange={setIsMagicModalOpen}
+            config={magicConfig}
+            setConfig={setMagicConfig}
+            onGenerate={handleMagicCreate}
+            isGenerating={isMagicCreating}
+            classId={Number(classId)}
+          />
+        </AiFeatureGuard>
       )}
 
       {isTeacher && (
