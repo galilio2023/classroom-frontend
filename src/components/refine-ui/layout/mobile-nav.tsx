@@ -30,7 +30,7 @@ export const MobileNav = () => {
       initial={{ y: 100 }}
       animate={{ y: 0 }}
       transition={{ type: "spring", stiffness: 260, damping: 20 }}
-      className="md:hidden fixed bottom-0 start-0 end-0 z-60 bg-background/80 backdrop-blur-xl border-t border-border/40 px-6 py-2 pb-safe-area flex justify-between items-center shadow-[0_-8px_32px_rgba(0,0,0,0.1)] rounded-t-3xl"
+      className="md:hidden fixed bottom-0 start-0 end-0 z-60 bg-background/95 backdrop-blur-xl border-t border-border/40 px-6 py-2 pb-safe-area flex justify-between items-center shadow-[0_-8px_32px_rgba(0,0,0,0.1)] rounded-t-3xl"
     >
       {navItems.map((item) => {
         const isActive =

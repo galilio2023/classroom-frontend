@@ -178,7 +178,7 @@ function Sidebar({
           data-slot="sidebar"
           data-mobile="true"
           className={cn(
-            "bg-card/60 backdrop-blur-3xl text-sidebar-foreground w-[var(--sidebar-width)] p-0 [&>button]:hidden shadow-2xl",
+            "bg-card/95 backdrop-blur-xl text-sidebar-foreground w-[var(--sidebar-width)] p-0 [&>button]:hidden shadow-2xl",
             isAr ? "border-l border-border/40" : "border-r border-border/40"
           )}
           style={
