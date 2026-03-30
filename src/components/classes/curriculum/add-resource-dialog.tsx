@@ -14,7 +14,7 @@ import {
 import { FileUpload } from "@/components/file-upload";
 import { useTranslation } from "react-i18next";
 import { useForm } from "@refinedev/react-hook-form";
-import { Controller } from "react-hook-form";
+import { Controller, SubmitHandler } from "react-hook-form";
 import { useEffect } from "react";
 
 interface AddResourceDialogProps {
@@ -86,11 +86,11 @@ export const AddResourceDialog = ({
     }
   }, [isOpen, reset]);
 
-  const handleFormSubmit = (data: IResourceForm) => {
+  const handleFormSubmit: SubmitHandler<IResourceForm> = (data) => {
     // 🧹 CLEANUP: Use destructuring to construct the payload instead of 'delete'
     const { url, content, cldPubId, ...baseData } = data;
 
-    let finalPayload: TResourcePayload = { ...baseData };
+    const finalPayload: TResourcePayload = { ...baseData };
 
     if (data.type === "note") {
       finalPayload.content = content;
@@ -101,14 +101,13 @@ export const AddResourceDialog = ({
       finalPayload.url = url;
     }
 
-    // @ts-expect-error - Refine core expects the full form type but partial is safe for create
-    onFinish(finalPayload);
+    onFinish(finalPayload as IResourceForm);
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px] rounded-3xl border-none shadow-2xl p-0 overflow-hidden bg-card/95 backdrop-blur-2xl">
-        <form onSubmit={handleSubmit(handleFormSubmit)} className="p-8 space-y-6">
+        <form onSubmit={handleSubmit(handleFormSubmit as any)} className="p-8 space-y-6">
           <DialogHeader className="space-y-3 text-start">
             <DialogTitle className="text-2xl font-black tracking-tight">
               {t("classes.resource.addDialog.title")}
