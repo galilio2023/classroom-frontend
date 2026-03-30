@@ -43,9 +43,7 @@ export function Layout({ children }: PropsWithChildren) {
   return (
     <ThemeProvider>
       <SidebarProvider>
-        <div className="hidden md:block">
-          <Sidebar />
-        </div>
+        <Sidebar />
         <SidebarInset className="flex flex-col min-h-screen bg-background/50 relative overflow-hidden">
           {/* Global Live Signal */}
           {isStudent && <GlobalLiveIndicator />}
