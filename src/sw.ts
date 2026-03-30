@@ -1,4 +1,10 @@
+/// <reference lib="webworker" />
+
 import { precacheAndRoute } from "workbox-precaching";
+
+declare const self: ServiceWorkerGlobalScope & {
+  __WB_MANIFEST: any;
+};
 
 // This will be replaced by the actual manifest during build
 precacheAndRoute(self.__WB_MANIFEST || []);
@@ -16,7 +22,7 @@ const STATIC_ASSETS = [
   "/favicon.ico"
 ];
 
-self.addEventListener("install", (event: any) => {
+self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(STATIC_ASSETS);
@@ -25,7 +31,7 @@ self.addEventListener("install", (event: any) => {
   self.skipWaiting();
 });
 
-self.addEventListener("activate", (event: any) => {
+self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
       return Promise.all(
@@ -33,11 +39,11 @@ self.addEventListener("activate", (event: any) => {
       );
     })
   );
-  (self as any).clients.claim();
+  self.clients.claim();
 });
 
 // --- SMART FETCH STRATEGY ---
-self.addEventListener("fetch", (event: any) => {
+self.addEventListener("fetch", (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
@@ -64,7 +70,7 @@ self.addEventListener("fetch", (event: any) => {
 });
 
 // --- PUSH NOTIFICATIONS ---
-self.addEventListener("push", (event: any) => {
+self.addEventListener("push", (event) => {
   if (!event.data) return;
 
   try {
@@ -81,26 +87,26 @@ self.addEventListener("push", (event: any) => {
       vibrate: [100, 50, 100],
     };
 
-    event.waitUntil((self as any).registration.showNotification(title, options));
+    event.waitUntil(self.registration.showNotification(title, options));
   } catch (error) {
     console.error("Error showing push notification", error);
   }
 });
 
-self.addEventListener("notificationclick", (event: any) => {
+self.addEventListener("notificationclick", (event) => {
   event.notification.close();
   const urlToOpen = event.notification.data.url;
 
   event.waitUntil(
-    (self as any).clients.matchAll({ type: "window", includeUncontrolled: true }).then((windowClients: any) => {
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((windowClients) => {
       for (let i = 0; i < windowClients.length; i++) {
         const client = windowClients[i];
         if (client.url === urlToOpen && "focus" in client) {
           return client.focus();
         }
       }
-      if ((self as any).clients.openWindow) {
-        return (self as any).clients.openWindow(urlToOpen);
+      if (self.clients.openWindow) {
+        return self.clients.openWindow(urlToOpen);
       }
     })
   );
