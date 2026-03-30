@@ -80,7 +80,7 @@ const AIStudyLab = () => {
   });
 
   // Defensive extraction for Refine useList
-  const classesRaw = (classesResult as any)?.data || classesResult;
+  const classesRaw = (classesResult as unknown as { data?: Class[] })?.data || classesResult;
   const classesData = Array.isArray(classesRaw) ? classesRaw : [];
   const [selectedClassId, setSelectedClassId] = useState<string>("");
 

@@ -16,6 +16,8 @@ import ReactMarkdown from "react-markdown";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
+import { AiFeatureGuard } from "@/components/ai/AiFeatureGuard";
+import { Badge } from "@/components/ui/badge";
 
 interface ResourceItemProps {
   resource: Resource;
@@ -105,19 +107,25 @@ export const ResourceItem = ({
             </div>
 
             <div className="flex flex-col min-w-0 text-start">
-              <span
-                className={cn(
-                  "text-xs md:text-sm font-black tracking-tight truncate transition-all",
-                  completed
-                    ? "text-success/60 line-through decoration-success/30"
-                    : "text-foreground group-hover:text-primary"
-                )}
-              >
-                {resource.title}
-              </span>
+              <div className="flex items-center gap-2">
+                <span
+                  className={cn(
+                    "text-xs md:text-sm font-black tracking-tight truncate transition-all",
+                    completed
+                      ? "text-success/60 line-through decoration-success/30"
+                      : "text-foreground group-hover:text-primary"
+                  )}
+                >
+                  {resource.title}
+                </span>
+              </div>
               <span className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-muted-foreground/40 truncate">
                 {t(`classes.resource.addDialog.types.${resource.type}`)}{" "}
-                {resource.type === "note" && `• ${t("common.aiAnalyzed")}`}
+                {resource.type === "note" && (
+                  <AiFeatureGuard>
+                    <span>• {t("common.aiAnalyzed")}</span>
+                  </AiFeatureGuard>
+                )}
               </span>
             </div>
           </div>
@@ -125,18 +133,20 @@ export const ResourceItem = ({
 
         <div className="flex items-center gap-2 shrink-0">
           {resource.type === "note" ? (
-            <Button
-              variant="ghost"
-              size="sm"
-              asChild
-              className="h-8 md:h-9 rounded-lg md:rounded-xl px-3 md:px-4 text-[8px] md:text-[10px] font-black uppercase tracking-widest gap-1.5 md:gap-2 text-primary hover:bg-primary/5 transition-all"
-            >
-              <Link to={`/classes/${classId}/lessons/${resource.id}`}>
-                <Eye className="h-3 w-3 md:h-3.5 md:w-3.5" />
-                <span className="hidden xs:inline">{t("buttons.openLesson")}</span>
-                <ArrowRight className="hidden md:block h-3 w-3 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all rtl:rotate-180" />
-              </Link>
-            </Button>
+            <AiFeatureGuard>
+              <Button
+                variant="ghost"
+                size="sm"
+                asChild
+                className="h-8 md:h-9 rounded-lg md:rounded-xl px-3 md:px-4 text-[8px] md:text-[10px] font-black uppercase tracking-widest gap-1.5 md:gap-2 text-primary hover:bg-primary/5 transition-all"
+              >
+                <Link to={`/classes/${classId}/lessons/${resource.id}`}>
+                  <Eye className="h-3 w-3 md:h-3.5 md:w-3.5" />
+                  <span className="hidden xs:inline">{t("buttons.openLesson")}</span>
+                  <ArrowRight className="hidden md:block h-3 w-3 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all rtl:rotate-180" />
+                </Link>
+              </Button>
+            </AiFeatureGuard>
           ) : (
             <Button
               variant="ghost"

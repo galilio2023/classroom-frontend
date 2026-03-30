@@ -215,6 +215,11 @@
         "instruction": "To install: tap the share button (square with arrow up) and select \"Add to Home Screen\"."
       }
     },
+    "curriculum": {
+      "publishImmediately": "Publish Immediately",
+      "publishHelp": "Visible to students once created.",
+      "resourcePublishHelp": "Visible to students once saved."
+    },
     "progress": "Progress",
     "xp": "XP",
     "aiInsightTitle": "AI Student Insight: {{name}}",
@@ -341,8 +346,8 @@
     "delete": "Delete",
     "create": "Create",
     "show": "Show",
-    "tryAgain": "Try Again",
-    "search": "Search history...",
+    "copy": "Copy",
+    "tryAgain": "Try Again",    "search": "Search history...",
     "uploadCredentials": "Upload Credentials",
     "dismiss": "Dismiss",
     "getStarted": "Get Started",

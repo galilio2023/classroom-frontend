@@ -29,6 +29,7 @@ export const accessControlProvider: AccessControlProvider = {
         "ai-assistant",
         "ai-activity-logs",
         "ai-health-reports",
+        "ai_features",
       ];
       const academicResources = [
         "classes",
@@ -134,6 +135,7 @@ export const accessControlProvider: AccessControlProvider = {
         "teacher-subscriptions",
         "academic-terms", // Added academic-terms
         "ai-activity-logs",
+        "ai_features",
       ];
 
       if (allowedResources.includes(resourceName)) {

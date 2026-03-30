@@ -205,6 +205,11 @@
       "install": "تثبيت",
       "success": "تم تثبيت التطبيق بنجاح!"
     },
+    "curriculum": {
+      "publishImmediately": "النشر فوراً",
+      "publishHelp": "سيظهر للطلاب بمجرد إنشائه.",
+      "resourcePublishHelp": "سيظهر للطلاب بمجرد حفظه."
+    },
     "progress": "التقدم",
     "xp": "نقطة خبرة",
     "aiInsightTitle": "رؤية ذكية للطالب: {{name}}",

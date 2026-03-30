@@ -96,6 +96,7 @@ export const LiveClassroom = ({
   const isMounted = useRef(true);
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("video");
+  const [studentCount, setStudentCount] = useState(0);
 
   // Breakout Room State
   const [isBreakoutActive, setIsBreakoutActive] = useState(false);
@@ -456,12 +457,19 @@ export const LiveClassroom = ({
       }
     };
 
+    const handlePulseUpdate = (data: { classId: number; count: number }) => {
+      if (data.classId === numericClassId) {
+        setStudentCount(data.count);
+      }
+    };
+
     socket.on("live_session_started", handleSessionStarted);
     socket.on("live_session_ended", handleSessionEnded);
     socket.on("breakout_session_started", handleBreakoutStarted);
     socket.on("breakout_session_ended", handleBreakoutEnded);
     socket.on("teacher_delegated", handleTeacherDelegated);
     socket.on("teacher_resumed", handleTeacherResumed);
+    socket.on("live_pulse_update", handlePulseUpdate);
 
     return () => {
       // 🛡️ HARD CLEANUP: Dispose Jitsi instance on unmount
@@ -475,6 +483,7 @@ export const LiveClassroom = ({
       socket.off("breakout_session_ended", handleBreakoutEnded);
       socket.off("teacher_delegated", handleTeacherDelegated);
       socket.off("teacher_resumed", handleTeacherResumed);
+      socket.off("live_pulse_update", handlePulseUpdate);
     };
   }, [
     numericClassId,
@@ -717,15 +726,27 @@ export const LiveClassroom = ({
     >
       {!isMiniMode && (
         <div className="flex items-center justify-between mb-6">
-          <div>
-            <h3 className="text-lg font-semibold flex items-center gap-2 text-start">
-              <Video className="h-5 w-5 text-live-primary" />
-              {t("classes.live.title")}{" "}
-              {currentGroupId ? t("classes.live.breakoutRoom") : t("classes.live.mainHall")}
-            </h3>
-            <p className="text-sm text-muted-foreground text-start">
-              {isBreakoutActive ? t("classes.live.breakoutActive") : t("classes.live.mainActive")}
-            </p>
+          <div className="flex items-center gap-4">
+            <div>
+              <h3 className="text-lg font-semibold flex items-center gap-2 text-start">
+                <Video className="h-5 w-5 text-live-primary" />
+                {t("classes.live.title")}{" "}
+                {currentGroupId ? t("classes.live.breakoutRoom") : t("classes.live.mainHall")}
+              </h3>
+              <p className="text-sm text-muted-foreground text-start">
+                {isBreakoutActive ? t("classes.live.breakoutActive") : t("classes.live.mainActive")}
+              </p>
+            </div>
+            {isTeacher && isJoined && (
+              <Badge
+                variant="outline"
+                className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 px-3 py-1.5 rounded-full font-black gap-2 animate-in fade-in zoom-in duration-500"
+              >
+                <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                <Users className="h-3.5 w-3.5" />
+                {studentCount} {t("classes.live.studentsPresent", "Live Now")}
+              </Badge>
+            )}
           </div>
 
           {isTeacher && isJoined && (

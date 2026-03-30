@@ -13,10 +13,11 @@ export function PWAInstaller() {
 
   useEffect(() => {
     // Detect if the app is already running in standalone mode (installed)
-    const isStandaloneMode = window.matchMedia("(display-mode: standalone)").matches 
-      || (window.navigator as any).standalone 
-      || document.referrer.includes("android-app://");
-    
+    const isStandaloneMode =
+      window.matchMedia("(display-mode: standalone)").matches ||
+      (window.navigator as any).standalone ||
+      document.referrer.includes("android-app://");
+
     setIsStandalone(isStandaloneMode);
 
     // Detect iOS
@@ -27,9 +28,9 @@ export function PWAInstaller() {
     if (isIOSDevice && !isStandaloneMode) {
       const dismissed = localStorage.getItem("pwa-prompt-dismissed");
       const oneDay = 24 * 60 * 60 * 1000;
-      
+
       // If never dismissed OR dismissed more than 24 hours ago
-      if (!dismissed || (Date.now() - parseInt(dismissed) > oneDay)) {
+      if (!dismissed || Date.now() - parseInt(dismissed) > oneDay) {
         setIsVisible(true);
       }
     }
@@ -37,13 +38,13 @@ export function PWAInstaller() {
     const handler = (e: any) => {
       e.preventDefault();
       setInstallPrompt(e);
-      
+
       // On Android/Desktop, always show the banner when the prompt is available
       // unless the user dismissed it very recently (last 24h)
       const dismissed = localStorage.getItem("pwa-prompt-dismissed");
       const oneDay = 24 * 60 * 60 * 1000;
-      
-      if (!dismissed || (Date.now() - parseInt(dismissed) > oneDay)) {
+
+      if (!dismissed || Date.now() - parseInt(dismissed) > oneDay) {
         setIsVisible(true);
       }
     };
@@ -90,12 +91,7 @@ export function PWAInstaller() {
               <p className="text-xs text-muted-foreground">{t("common.pwa.description")}</p>
             </div>
           </div>
-          <Button
-            size="icon"
-            variant="ghost"
-            className="h-8 w-8"
-            onClick={handleDismiss}
-          >
+          <Button size="icon" variant="ghost" className="h-8 w-8" onClick={handleDismiss}>
             <X className="h-4 w-4" />
           </Button>
         </div>
@@ -103,9 +99,7 @@ export function PWAInstaller() {
         {isIOS ? (
           <div className="bg-muted/50 rounded-md p-3 text-xs flex items-start gap-3">
             <Share className="h-4 w-4 mt-0.5 text-primary shrink-0" />
-            <p className="leading-relaxed">
-              {t("common.pwa.ios.instruction")}
-            </p>
+            <p className="leading-relaxed">{t("common.pwa.ios.instruction")}</p>
           </div>
         ) : (
           <div className="flex justify-end">

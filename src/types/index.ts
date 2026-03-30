@@ -264,6 +264,7 @@ export interface Module {
   assignments?: Assignment[];
   resources?: Resource[];
   quizzes?: Quiz[];
+  version: number;
   createdAt: string;
   updatedAt: string;
 }

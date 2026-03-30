@@ -43,7 +43,9 @@ export function Layout({ children }: PropsWithChildren) {
   return (
     <ThemeProvider>
       <SidebarProvider>
-        <Sidebar />
+        <div className="hidden md:block">
+          <Sidebar />
+        </div>
         <SidebarInset className="flex flex-col min-h-screen bg-background/50 relative overflow-hidden">
           {/* Global Live Signal */}
           {isStudent && <GlobalLiveIndicator />}
@@ -96,7 +98,7 @@ export function Layout({ children }: PropsWithChildren) {
             !isJoined && <AIStudyBuddy classId={classIdFromUrl} />}
 
           {isStudent && <XPGainPopup />}
-          {isStudent && <MobileNav />}
+          {identity && <MobileNav />}
           <PWAInstaller />
           <JobTracker />
         </SidebarInset>

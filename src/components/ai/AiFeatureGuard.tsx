@@ -3,6 +3,7 @@ import { useAiAccess } from "@/hooks/use-ai-access";
 import { Lock } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useCan } from "@refinedev/core";
 
 interface AiFeatureGuardProps {
   children: React.ReactNode;
@@ -10,13 +11,15 @@ interface AiFeatureGuardProps {
   fallback?: React.ReactNode;
   /** Whether to show a detailed 'Disabled' UI or just hide the feature */
   silent?: boolean;
+  /** Custom CSS for the loading skeleton to avoid layout shift */
+  skeletonClassName?: string;
 }
 
 /**
  * 🛡️ ARCHITECTURAL COMPONENT: AiFeatureGuard
  * Wraps AI-powered features to ensure they only mount when:
  * 1. Global Master Switch (enableAiFeatures) is ON.
- * 2. User role (RBAC) allows AI interactions.
+ * 2. User role (RBAC) allows AI interactions via useCan.
  *
  * Prevents "if (isAiEnabled)" sprawl across the codebase.
  */
@@ -24,12 +27,21 @@ export const AiFeatureGuard: React.FC<AiFeatureGuardProps> = ({
   children,
   fallback,
   silent = false,
+  skeletonClassName = "w-full h-32 rounded-lg",
 }) => {
-  const { isAiEnabled, isAllowed, isQuotaExceeded, isLoading } = useAiAccess();
+  const { isAiEnabled, isQuotaExceeded, isLoading: isAiLoading } = useAiAccess();
+  const { data: canAccess, isLoading: isCanLoading } = useCan({
+    resource: "ai_features",
+    action: "access",
+  });
+
+  const isLoading = isAiLoading || isCanLoading;
 
   if (isLoading) {
-    return <Skeleton className="w-full h-32 rounded-lg" />;
+    return <Skeleton className={skeletonClassName} />;
   }
+
+  const isAllowed = canAccess?.can ?? false;
 
   // 🛡️ Guard logic
   if (!isAiEnabled || !isAllowed || isQuotaExceeded) {

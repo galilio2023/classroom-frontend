@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Users, CheckCircle2, QrCode, ScanLine, History } from "lucide-react";
+import { Users, CheckCircle2, QrCode, ScanLine, History, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { format } from "date-fns";
@@ -10,6 +10,8 @@ import { QRScannerModal } from "../components/qr-scanner-modal";
 import { EmptyState } from "@/components/empty-state";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
+import Confetti from "react-confetti";
+import { useWindowSize } from "react-use";
 
 // Logic & Components
 import { useAttendanceDetails } from "../hooks/use-attendance-details";
@@ -26,9 +28,11 @@ interface AttendanceTabProps {
 
 export const AttendanceTab = ({ classId, enrollments }: AttendanceTabProps) => {
   const { t, i18n } = useTranslation();
+  const { width, height } = useWindowSize();
   const isAr = i18n.language === "ar";
   const [viewMode, setViewMode] = useState<"mark" | "history">("mark");
   const [selectedDate] = useState<Date>(new Date());
+  const [showConfetti, setShowConfetti] = useState(false);
 
   const {
     attendanceData,
@@ -39,6 +43,7 @@ export const AttendanceTab = ({ classId, enrollments }: AttendanceTabProps) => {
     handleMarkAttendance,
     handleValueChange,
     handleBulkMark,
+    handleSave,
     historyData,
     isQRModalOpen,
     setIsQRModalOpen,
@@ -50,6 +55,12 @@ export const AttendanceTab = ({ classId, enrollments }: AttendanceTabProps) => {
     () => enrollments.filter((e) => e.status === "approved"),
     [enrollments]
   );
+
+  const onSaveWithCelebration = async () => {
+    await handleSave();
+    setShowConfetti(true);
+    setTimeout(() => setShowConfetti(false), 5000);
+  };
 
   if (isLoading)
     return (
@@ -63,6 +74,17 @@ export const AttendanceTab = ({ classId, enrollments }: AttendanceTabProps) => {
 
   return (
     <div className="space-y-8 pb-20">
+      {showConfetti && (
+        <Confetti
+          width={width}
+          height={height}
+          recycle={false}
+          numberOfPieces={300}
+          gravity={0.3}
+          colors={["#4f46e5", "#22c55e", "#eab308", "#db2777"]}
+        />
+      )}
+
       {/* Header Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 text-start">
         <div className="space-y-1.5">
@@ -150,12 +172,49 @@ export const AttendanceTab = ({ classId, enrollments }: AttendanceTabProps) => {
               {viewMode === "mark" && isStaff && (
                 <div className="flex items-center gap-2">
                   <Button
-                    variant="ghost"
+                    variant="outline"
                     size="sm"
-                    onClick={() => handleBulkMark(AttendanceStatus.PRESENT)}
-                    className="h-8 rounded-lg text-[9px] font-black uppercase tracking-widest text-emerald-600 hover:bg-emerald-500/10"
+                    disabled={isUpdating}
+                    onClick={() => {
+                      // Calculate the new state for all active enrollments
+                      const newData = { ...attendanceData };
+                      activeEnrollments.forEach((e) => {
+                        newData[e.studentId] = {
+                          ...newData[e.studentId],
+                          status: AttendanceStatus.PRESENT,
+                        };
+                      });
+
+                      const records = Object.entries(newData).map(([studentId, data]) => ({
+                        studentId,
+                        ...data,
+                      }));
+
+                      // Update local state and save directly
+                      handleBulkMark(AttendanceStatus.PRESENT);
+                      handleSave(records);
+
+                      // Celebration
+                      setShowConfetti(true);
+                      setTimeout(() => setShowConfetti(false), 5000);
+                    }}
+                    className="h-9 rounded-xl px-4 text-[10px] font-black uppercase tracking-widest text-emerald-600 border-emerald-500/20 hover:bg-emerald-500/10 gap-2"
                   >
+                    {isUpdating ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <CheckCircle2 className="h-3.5 w-3.5" />
+                    )}
                     {(t as any)("classes.attendance.markAllPresent")}
+                  </Button>
+                  <Button
+                    size="sm"
+                    disabled={isUpdating}
+                    onClick={onSaveWithCelebration}
+                    className="h-9 rounded-xl px-6 text-[10px] font-black uppercase tracking-widest shadow-lg shadow-primary/20"
+                  >
+                    {isUpdating && <Loader2 className="h-3.5 w-3.5 animate-spin me-2" />}
+                    {(t as any)("buttons.save")}
                   </Button>
                 </div>
               )}

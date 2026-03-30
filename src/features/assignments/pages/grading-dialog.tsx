@@ -23,8 +23,8 @@ import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { useCustomMutation, useNotification, useUpdate, HttpError } from "@refinedev/core";
 import { useQueryClient } from "@tanstack/react-query";
-import { Submission, Assignment, AIFeedbackResponse, GetOneResponse } from "@/types";
-import { useEffect, useState } from "react";
+import { Submission, Assignment, AIFeedbackResponse, GetOneResponse, User } from "@/types";
+import { useEffect, useState, useMemo } from "react";
 import {
   Sparkles,
   Loader2,
@@ -39,6 +39,9 @@ import {
   PartyPopper,
   RotateCcw,
   Lock,
+  ChevronLeft,
+  ChevronRight,
+  Maximize2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LoadingButton } from "@/components/ui/loading-button";
@@ -53,6 +56,8 @@ import { useTranslation } from "react-i18next";
 import { TFunction } from "i18next";
 import { toast } from "sonner";
 import { useUserRole } from "@/hooks/use-user-role";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const gradingSchema = (t: TFunction) =>
   z.object({
@@ -72,6 +77,8 @@ interface GradingDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   submission: (Submission & { assignment?: Assignment }) | null;
+  submissions?: Submission[]; // For navigation
+  onNavigate?: (submission: Submission) => void;
   readOnly?: boolean;
 }
 
@@ -79,6 +86,8 @@ export const GradingDialog = ({
   isOpen,
   onOpenChange,
   submission,
+  submissions = [],
+  onNavigate,
   readOnly = false,
 }: GradingDialogProps) => {
   const { t, i18n } = useTranslation();
@@ -114,7 +123,23 @@ export const GradingDialog = ({
     },
   });
 
-  const { handleSubmit, control, setValue, watch } = form;
+  const { handleSubmit, control, setValue, watch, reset } = form;
+
+  // Navigation Logic
+  const currentIndex = useMemo(
+    () => submissions.findIndex((s) => s.id === submission?.id),
+    [submissions, submission]
+  );
+  const hasNext = currentIndex < submissions.length - 1;
+  const hasPrev = currentIndex > 0;
+
+  const handleNext = () => {
+    if (hasNext && onNavigate) onNavigate(submissions[currentIndex + 1]);
+  };
+
+  const handlePrev = () => {
+    if (hasPrev && onNavigate) onNavigate(submissions[currentIndex - 1]);
+  };
 
   const currentGrade = watch("grade");
   const isDraft = submission?.isDraft;
@@ -130,8 +155,16 @@ export const GradingDialog = ({
       setShowConfetti(false);
       setAiStatus(submission?.aiStatus || "idle");
       setAiError(submission?.aiError || null);
+
+      // Reset form values for new submission
+      reset({
+        grade: submission?.grade ?? 0,
+        feedback: submission?.feedback ?? "",
+        requiresResubmission: submission?.requiresResubmission ?? false,
+        teacherPrivateNotes: submission?.teacherPrivateNotes ?? "",
+      });
     }
-  }, [isOpen, submission?.id, submission?.aiStatus, submission?.aiError]);
+  }, [isOpen, submission?.id, submission?.aiStatus, submission?.aiError, reset]);
 
   useEffect(() => {
     if (isOpen && submission?.id && socket) {
@@ -148,11 +181,7 @@ export const GradingDialog = ({
           t("assignments.grading.toasts.aiComplete", { defaultValue: "AI analysis complete!" })
         );
 
-        // 🚀 REAL-TIME SYNC: Force Refine to refresh the underlying data
         queryClient.invalidateQueries({ queryKey: ["submissions"] });
-        queryClient.invalidateQueries({
-          queryKey: ["default", "submissions", "getOne", String(submission.id)],
-        });
       };
 
       const handleAiFailed = (data: { error: string }) => {
@@ -161,7 +190,6 @@ export const GradingDialog = ({
         toast.error(
           t("assignments.grading.toasts.aiFailed", { defaultValue: "AI analysis failed." })
         );
-        queryClient.invalidateQueries({ queryKey: ["submissions"] });
       };
 
       socket.on("submission:ai-grade:completed", handleAiComplete);
@@ -176,44 +204,24 @@ export const GradingDialog = ({
   }, [isOpen, submission?.id, socket, setValue, t, queryClient]);
 
   useEffect(() => {
-    if (submission) {
-      setValue("grade", submission.grade ?? submission.suggestedGrade ?? 0);
-      setValue("feedback", submission.feedback ?? submission.suggestedFeedback ?? "");
-      setValue("requiresResubmission", submission.requiresResubmission ?? false);
-      setValue("teacherPrivateNotes", submission.teacherPrivateNotes ?? "");
-
-      if (
-        isStaff &&
-        isOpen &&
-        !submission.grade &&
-        !submission.suggestedGrade &&
-        !hasAutoAnalyzed &&
-        !isAILoading &&
-        !isDraft &&
-        aiStatus === "idle"
-      ) {
-        handleAIGrade();
-        setHasAutoAnalyzed(true);
-      }
+    if (
+      submission &&
+      isStaff &&
+      isOpen &&
+      !submission.grade &&
+      !submission.suggestedGrade &&
+      !hasAutoAnalyzed &&
+      !isAILoading &&
+      !isDraft &&
+      aiStatus === "idle"
+    ) {
+      handleAIGrade();
+      setHasAutoAnalyzed(true);
     }
-  }, [submission, setValue, isOpen, isStaff, hasAutoAnalyzed, isAILoading, isDraft, aiStatus]);
+  }, [submission, isOpen, isStaff, hasAutoAnalyzed, isAILoading, isDraft, aiStatus]);
 
   const onSubmit: SubmitHandler<GradingFormValues> = async (values) => {
     if (!isStaff || !submission?.id || isDraft) return;
-
-    // Optimistic Update Setup
-    const queryKey = ["submissions", submission.id.toString()];
-    await queryClient.cancelQueries({ queryKey });
-    const previousData = queryClient.getQueryData(queryKey);
-
-    // Update Cache Immediately
-    queryClient.setQueryData(queryKey, (old: GetOneResponse<Submission> | undefined) => {
-      if (!old || !old.data) return old;
-      return {
-        ...old,
-        data: { ...old.data, ...values, updatedAt: new Date().toISOString() },
-      };
-    });
 
     updateSubmission(
       {
@@ -227,18 +235,18 @@ export const GradingDialog = ({
       {
         onSuccess: () => {
           setIsSuccess(true);
-          if (values.grade >= 90) {
-            setShowConfetti(true);
-          }
+          if (values.grade >= 90) setShowConfetti(true);
+
+          toast.success(t("assignments.grading.gradeSaved"));
+
           setTimeout(() => {
             setIsSuccess(false);
-            onOpenChange(false);
-          }, 1500);
-        },
-        onError: () => {
-          // Rollback on error
-          queryClient.setQueryData(queryKey, previousData);
-          toast.error("Failed to save grade.");
+            if (hasNext) {
+              handleNext();
+            } else {
+              onOpenChange(false);
+            }
+          }, 1000);
         },
       }
     );
@@ -246,7 +254,6 @@ export const GradingDialog = ({
 
   const handleAIGrade = () => {
     if (!submission || !isStaff || isDraft) return;
-
     setAiStatus("processing");
     getAIFeedback(
       {
@@ -256,41 +263,12 @@ export const GradingDialog = ({
       },
       {
         onSuccess: (response: any) => {
-          // If response is 202, it means we wait for socket
-          if (response.status === "accepted") {
-            toast.info(
-              t("assignments.grading.toasts.aiProcessing", {
-                defaultValue: "AI analysis started...",
-              })
-            );
-            return;
-          }
-          // Fallback for old/sync behavior
+          if (response.status === "accepted") return;
           const { suggestedGrade, feedback } = response.data;
           setValue("grade", Number(suggestedGrade));
           setValue("feedback", feedback);
           setIsAISuggested(true);
           setAiStatus("completed");
-          setAiError(null);
-          open?.({
-            type: "success",
-            message: t("assignments.grading.toasts.aiComplete", {
-              defaultValue: "AI analysis complete!",
-            }),
-            description: t("assignments.grading.toasts.aiApplied", {
-              defaultValue: "AI suggestions have been applied to the form.",
-            }),
-          });
-        },
-        onError: (err: any) => {
-          setAiStatus("failed");
-          setAiError(
-            err?.message ||
-              t("assignments.grading.toasts.aiFailed", { defaultValue: "AI analysis failed." })
-          );
-          toast.error(
-            t("assignments.grading.toasts.aiFailed", { defaultValue: "AI analysis failed." })
-          );
         },
       }
     );
@@ -303,456 +281,275 @@ export const GradingDialog = ({
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const wordCount = submission?.content?.trim().split(/\s+/).filter(Boolean).length ?? 0;
-
   if (!submission) return null;
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent
-        className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto border-none shadow-2xl p-0 overflow-hidden text-start bg-background/95 backdrop-blur-xl"
+        className="max-w-[95vw] w-[1400px] h-[90vh] overflow-hidden border-none shadow-2xl p-0 text-start bg-background/95 backdrop-blur-xl flex flex-col"
         style={{ direction: isAr ? "rtl" : "ltr" }}
       >
         {showConfetti && (
-          <Confetti
-            width={width}
-            height={height}
-            recycle={false}
-            numberOfPieces={200}
-            gravity={0.2}
-            colors={["#4f46e5", "#9333ea", "#db2777", "#22c55e"]}
-          />
+          <Confetti width={width} height={height} recycle={false} numberOfPieces={200} />
         )}
 
-        <div className="h-1.5 bg-linear-to-r from-primary via-ai-primary to-primary w-full" />
+        {/* --- TOP BAR: SPEED GRADER CONTROLS --- */}
+        <div className="h-16 border-b bg-card/50 flex items-center justify-between px-6 shrink-0">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
+              <Avatar className="h-9 w-9 border-2 border-primary/10">
+                <AvatarImage src={submission.student?.image || undefined} />
+                <AvatarFallback className="font-black text-xs">
+                  {submission.student?.name?.[0]}
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <p className="text-sm font-black tracking-tight leading-none">
+                  {submission.student?.name}
+                </p>
+                <p className="text-[10px] font-bold text-muted-foreground uppercase mt-1">
+                  {t("assignments.grading.attempt", { count: submission.attemptNumber })}
+                </p>
+              </div>
+            </div>
+          </div>
 
-        <div className="p-0 space-y-0 relative">
-          {/* Success Overlay */}
-          <AnimatePresence>
-            {isSuccess && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="absolute inset-0 z-50 bg-background/80 backdrop-blur-sm flex flex-col items-center justify-center gap-4"
-              >
-                <motion.div
-                  initial={{ scale: 0.5, rotate: -10 }}
-                  animate={{ scale: 1, rotate: 0 }}
-                  className="p-4 rounded-full bg-success/10 text-success"
-                >
-                  <Check className="h-12 w-12 stroke-[3]" />
-                </motion.div>
-                <h3 className="text-2xl font-black tracking-tight">
-                  {t("assignments.grading.gradeSaved")}
-                </h3>
-                {currentGrade >= 90 && (
-                  <motion.div
-                    initial={{ y: 10, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ delay: 0.2 }}
-                    className="flex items-center gap-2 text-primary font-bold"
-                  >
-                    <PartyPopper className="h-5 w-5" />
-                    <span>{t("assignments.grading.excellentWork")}</span>
-                  </motion.div>
-                )}
-              </motion.div>
+          <div className="flex items-center gap-2 bg-muted/30 p-1 rounded-xl border">
+            <Button
+              variant="ghost"
+              size="icon"
+              disabled={!hasPrev}
+              onClick={handlePrev}
+              className="h-9 w-9 rounded-lg hover:bg-background shadow-sm"
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </Button>
+            <div className="px-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+              {currentIndex + 1} / {submissions.length}
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              disabled={!hasNext}
+              onClick={handleNext}
+              className="h-9 w-9 rounded-lg hover:bg-background shadow-sm"
+            >
+              <ChevronRight className="h-5 w-5" />
+            </Button>
+          </div>
+
+          <div className="flex items-center gap-3">
+            {isAISuggested && (
+              <Badge className="bg-ai-primary/10 text-ai-primary border-none font-black text-[10px] uppercase tracking-widest px-3 py-1 rounded-lg animate-pulse">
+                <Sparkles className="h-3 w-3 me-1.5" />
+                {t("assignments.grading.aiSuggested")}
+              </Badge>
             )}
-          </AnimatePresence>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => onOpenChange(false)}
+              className="rounded-xl h-10 w-10"
+            >
+              <Maximize2 className="h-4 w-4 rotate-45" />
+            </Button>
+          </div>
+        </div>
 
-          <DialogHeader className="p-6 pb-2 text-start">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="space-y-1">
-                <div className="flex items-center gap-3">
-                  <DialogTitle className="text-2xl font-black tracking-tight flex items-center gap-2">
-                    <div className="p-2 rounded-lg bg-primary/10 text-primary">
-                      <FileText className="h-5 w-5" />
-                    </div>
-                    {isStaff
-                      ? t("assignments.grading.gradeSubmission")
-                      : t("assignments.grading.submissionDetails")}
-                  </DialogTitle>
-                  <Badge
-                    variant="outline"
-                    className="bg-primary/5 text-primary border-primary/10 font-black text-[10px] uppercase tracking-widest px-3 py-1 rounded-lg"
-                  >
-                    {t("assignments.grading.attempt", {
-                      count: submission.attemptNumber,
-                    })}
-                  </Badge>
-                  {isDraft && (
-                    <Badge className="bg-amber-500/10 text-amber-600 border-none font-black text-[10px] uppercase tracking-widest px-3 py-1 rounded-lg">
-                      {t("assignments.grading.draft")}
-                    </Badge>
-                  )}
-                </div>
-                <DialogDescription className="font-medium flex items-center gap-2 mt-1">
-                  <UserIcon className="h-3.5 w-3.5 text-muted-foreground" />
-                  <span className="text-muted-foreground text-xs uppercase tracking-wider font-bold">
-                    {t("assignments.grading.studentLabel")}
-                  </span>
-                  <span className="text-foreground font-bold bg-primary/5 px-2 py-0.5 rounded-md border border-primary/10">
-                    {submission.student?.name}
-                  </span>
-                </DialogDescription>
-              </div>
-              {isStaff && !isDraft && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className={cn(
-                    "gap-2 rounded-xl transition-all relative overflow-hidden group h-10 px-4",
-                    isAILoading
-                      ? "border-ai-primary bg-ai-primary/5"
-                      : "border-ai-primary/20 text-ai-primary hover:border-ai-primary/40 hover:bg-ai-primary/5"
-                  )}
-                  onClick={handleAIGrade}
-                  disabled={isAILoading}
-                >
-                  <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shine_1.5s_ease-in-out] pointer-events-none" />
-                  {isAILoading ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Sparkles className="h-4 w-4" />
-                  )}
-                  <span className="font-bold tracking-tight">
-                    {isAILoading ? t("buttons.aiAnalyzing") : t("buttons.aiReanalyze")}
-                  </span>
-                </Button>
-              )}
-            </div>
-          </DialogHeader>
+        {/* --- MAIN CONTENT: 70/30 SPLIT --- */}
+        <div className="flex-1 flex overflow-hidden">
+          {/* LEFT: STUDENT WORK (70%) */}
+          <div className="flex-[7] bg-muted/10 overflow-hidden flex flex-col border-e">
+            <ScrollArea className="flex-1 p-8 md:p-12">
+              <div className="max-w-4xl mx-auto space-y-8 pb-20">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+                      {t("assignments.grading.studentWork")}
+                    </h3>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={copyToClipboard}
+                      className="h-8 rounded-lg text-[9px] font-black uppercase tracking-widest gap-2"
+                    >
+                      {copied ? (
+                        <Check className="h-3 w-3 text-success" />
+                      ) : (
+                        <Copy className="h-3 w-3" />
+                      )}
+                      {t("buttons.copy")}
+                    </Button>
+                  </div>
 
-          <div className="p-6 pt-2 grid grid-cols-1 md:grid-cols-2 gap-8 text-start">
-            {/* Left Column: Student Work */}
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-                    <span className="w-1 h-1 rounded-full bg-primary" />
-                    {t("assignments.grading.studentWork")}
-                  </Label>
-                  {submission.content && (
-                    <div className="flex items-center gap-3">
-                      <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-tighter">
-                        {t("assignments.form.wordsCount", { count: wordCount })}
-                      </span>
-                      <button
-                        onClick={copyToClipboard}
-                        className="text-muted-foreground hover:text-primary transition-colors p-1 rounded-md hover:bg-primary/5"
-                        title="Copy to clipboard"
-                      >
-                        {copied ? (
-                          <Check className="h-3.5 w-3.5 text-success" />
-                        ) : (
-                          <Copy className="h-3.5 w-3.5" />
-                        )}
-                      </button>
-                    </div>
-                  )}
+                  <div className="bg-card p-10 rounded-4xl shadow-sm border leading-relaxed text-lg font-medium italic min-h-[400px] relative">
+                    <MessageSquareQuote className="absolute top-6 start-6 h-12 w-12 text-primary/5 -scale-x-100" />
+                    <div className="relative z-10 whitespace-pre-wrap">{submission.content}</div>
+                  </div>
                 </div>
-                <div className="relative group">
-                  <div className="p-5 rounded-2xl bg-muted/30 text-sm whitespace-pre-wrap min-h-[250px] max-h-[450px] overflow-y-auto border border-dashed border-muted-foreground/20 leading-relaxed italic shadow-inner scrollbar-thin scrollbar-thumb-primary/10">
-                    {submission.content || (
-                      <div className="h-full flex flex-col items-center justify-center text-muted-foreground/40 py-20 gap-2">
-                        <FileText className="h-8 w-8 opacity-20" />
-                        <span className="font-medium italic">
-                          {t("assignments.grading.noContent")}
-                        </span>
+
+                {submission.fileUrl && (
+                  <div className="p-6 border-2 border-dashed rounded-4xl bg-primary/5 border-primary/10 flex items-center justify-between group hover:bg-primary/10 transition-all">
+                    <div className="flex items-center gap-4">
+                      <div className="p-4 rounded-2xl bg-white shadow-sm group-hover:scale-110 transition-transform">
+                        <FileText className="h-8 w-8 text-primary" />
                       </div>
-                    )}
-                  </div>
-                </div>
-
-                {aiStatus === "failed" && aiError && (
-                  <div className="p-4 rounded-xl bg-destructive/5 border border-destructive/20 text-destructive text-xs font-medium animate-in fade-in slide-in-from-top-1 duration-300">
-                    <p className="flex items-center gap-2">
-                      <span className="h-2 w-2 rounded-full bg-destructive animate-pulse" />
-                      {t("assignments.grading.aiError", { defaultValue: "AI Error" })}: {aiError}
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              {submission.fileUrl && (
-                <div className="flex items-center justify-between p-4 border rounded-2xl bg-primary/5 border-primary/10 group hover:bg-primary/10 transition-all hover:shadow-md hover:-translate-y-0.5">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2.5 rounded-xl bg-white dark:bg-muted/10 shadow-sm group-hover:scale-110 transition-transform">
-                      <FileText className="h-5 w-5 text-primary" />
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-xs font-bold group-hover:text-primary transition-colors">
-                        {t("assignments.grading.attachedDoc")}
-                      </span>
-                      <span className="text-[10px] text-muted-foreground uppercase font-medium flex items-center gap-1">
-                        {t("assignments.grading.viewOrDownload")}{" "}
-                        <ExternalLink className="h-2 w-2" />
-                      </span>
-                    </div>
-                  </div>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    className="h-9 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-sm gap-2"
-                    asChild
-                  >
-                    <a href={submission.fileUrl} target="_blank" rel="noopener noreferrer">
-                      <Download className="h-3 w-3" />
-                      {t("buttons.open")}
-                    </a>
-                  </Button>
-                </div>
-              )}
-            </div>
-
-            {/* Right Column: Grading Form / Display */}
-            <div className="space-y-4">
-              {isStaff ? (
-                <>
-                  {isDraft ? (
-                    <div className="h-full flex flex-col items-center justify-center p-10 rounded-3xl bg-amber-500/5 border-2 border-dashed border-amber-500/20 text-center space-y-4">
-                      <div className="p-4 rounded-full bg-amber-500/10 text-amber-600">
-                        <Lock className="h-10 w-10" />
-                      </div>
-                      <div className="space-y-2">
-                        <h4 className="text-xl font-black tracking-tight text-amber-700">
-                          {t("assignments.grading.gradingLocked")}
-                        </h4>
-                        <p className="text-sm text-amber-600/80 font-medium leading-relaxed">
-                          {t("assignments.grading.draftNotice")}
+                      <div>
+                        <p className="font-black text-sm uppercase tracking-tight">
+                          {t("assignments.grading.attachedDoc")}
+                        </p>
+                        <p className="text-xs text-muted-foreground font-medium">
+                          {t("assignments.grading.viewOrDownload")}
                         </p>
                       </div>
-                      <Button
-                        variant="outline"
-                        className="rounded-xl border-amber-500/20 text-amber-700 hover:bg-amber-500/10 font-bold"
-                        onClick={() => onOpenChange(false)}
-                      >
-                        {t("buttons.closePreview")}
-                      </Button>
                     </div>
-                  ) : (
-                    <Form {...form}>
-                      <form onSubmit={handleSubmit(onSubmit as any)} className="space-y-6">
+                    <Button
+                      className="h-12 px-8 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-xl shadow-primary/20"
+                      asChild
+                    >
+                      <a href={submission.fileUrl} target="_blank" rel="noreferrer">
+                        <Download className="h-4 w-4 me-2" />
+                        {t("buttons.open")}
+                      </a>
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </ScrollArea>
+          </div>
+
+          {/* RIGHT: GRADING PANEL (30%) */}
+          <div className="flex-[3] bg-card overflow-hidden flex flex-col min-w-[380px]">
+            <ScrollArea className="flex-1">
+              <div className="p-8 space-y-10">
+                {isStaff && !isDraft ? (
+                  <Form {...form}>
+                    <form onSubmit={handleSubmit(onSubmit as any)} className="space-y-10">
+                      <FormField
+                        control={control}
+                        name="grade"
+                        render={({ field }) => (
+                          <FormItem className="space-y-6">
+                            <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+                              <span className="w-1 h-1 rounded-full bg-primary" />
+                              {t("assignments.grading.finalScore")}
+                            </FormLabel>
+                            <FormControl>
+                              <div className="space-y-8">
+                                <div className="relative group">
+                                  <Input
+                                    type="number"
+                                    {...field}
+                                    onChange={(e) => field.onChange(Number(e.target.value))}
+                                    className="h-24 text-6xl font-black text-center rounded-3xl bg-muted/20 border-none focus-visible:ring-primary focus-visible:ring-offset-0 transition-all"
+                                  />
+                                  <span className="absolute end-8 top-1/2 -translate-y-1/2 text-3xl font-black opacity-20">
+                                    %
+                                  </span>
+                                </div>
+                                <Slider
+                                  value={[field.value ?? 0]}
+                                  max={100}
+                                  onValueChange={(vals) => field.onChange(vals[0])}
+                                />
+                              </div>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={control}
+                        name="feedback"
+                        render={({ field }) => (
+                          <FormItem className="space-y-4">
+                            <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                              {t("assignments.grading.feedbackToStudent")}
+                            </FormLabel>
+                            <FormControl>
+                              <Textarea
+                                placeholder={t("assignments.grading.feedbackPlaceholder")}
+                                className="min-h-[200px] rounded-3xl bg-muted/10 border-none p-6 text-sm leading-relaxed"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <div className="space-y-4">
                         <FormField
                           control={control}
-                          name="grade"
+                          name="requiresResubmission"
                           render={({ field }) => (
-                            <FormItem className="space-y-4">
-                              <div className="flex items-center justify-between">
-                                <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-                                  <span className="w-1 h-1 rounded-full bg-primary" />
-                                  {t("assignments.grading.finalScore")}
+                            <FormItem className="flex items-center justify-between p-5 rounded-3xl bg-orange-500/5 border border-orange-500/10">
+                              <div className="space-y-0.5">
+                                <FormLabel className="text-[10px] font-black uppercase tracking-widest text-orange-700">
+                                  {t("assignments.grading.requiresResubmission")}
                                 </FormLabel>
-                                <AnimatePresence>
-                                  {isAISuggested && (
-                                    <motion.span
-                                      initial={{ opacity: 0, x: 10 }}
-                                      animate={{ opacity: 1, x: 0 }}
-                                      className="text-[9px] font-black uppercase tracking-tighter text-ai-primary bg-ai-primary/10 px-2 py-0.5 rounded-full flex items-center gap-1"
-                                    >
-                                      <Sparkles className="h-2.5 w-2.5" />{" "}
-                                      {t("assignments.grading.aiSuggested")}
-                                    </motion.span>
-                                  )}
-                                </AnimatePresence>
+                                <p className="text-[9px] text-orange-600/60 font-bold">
+                                  {t("assignments.grading.resubmissionNote")}
+                                </p>
                               </div>
                               <FormControl>
-                                <div className="space-y-6">
-                                  <div className="relative group">
-                                    <Input
-                                      type="number"
-                                      step="0.01"
-                                      {...field}
-                                      onChange={(e) => field.onChange(Number(e.target.value))}
-                                      value={field.value ?? 0}
-                                      className="h-20 text-4xl font-black text-center rounded-2xl bg-muted/20 border-2 border-transparent focus-visible:ring-primary focus-visible:border-primary/20 transition-all"
-                                    />
-                                    <span className="absolute end-6 top-1/2 -translate-y-1/2 text-2xl font-black opacity-20 group-focus-within:opacity-40 transition-opacity">
-                                      %
-                                    </span>
-                                  </div>
-                                  <div className="px-2">
-                                    <Slider
-                                      value={[field.value ?? 0]}
-                                      min={0}
-                                      max={100}
-                                      step={0.01}
-                                      onValueChange={(vals) => field.onChange(vals[0])}
-                                      className="cursor-pointer"
-                                    />
-                                  </div>
-                                </div>
+                                <Switch checked={field.value} onCheckedChange={field.onChange} />
                               </FormControl>
-                              <FormMessage />
                             </FormItem>
                           )}
                         />
-                        <FormField
-                          control={control}
-                          name="feedback"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-                                <span className="w-1 h-1 rounded-full bg-primary" />
-                                {t("assignments.grading.feedbackToStudent")}
-                              </FormLabel>
-                              <FormControl>
-                                <div className="relative">
-                                  <Textarea
-                                    placeholder={t("assignments.grading.feedbackPlaceholder")}
-                                    className={cn(
-                                      "min-h-[120px] rounded-2xl resize-none bg-muted/10 border-2 border-transparent focus-visible:ring-primary p-5 text-sm leading-relaxed shadow-inner transition-all",
-                                      isAISuggested && "border-ai-primary/10 bg-ai-primary/2"
-                                    )}
-                                    {...field}
-                                  />
-                                  {isAISuggested && (
-                                    <motion.div
-                                      initial={{ opacity: 0, scale: 0.5 }}
-                                      animate={{ opacity: 0.2, scale: 1 }}
-                                      className="absolute bottom-3 end-3"
-                                    >
-                                      <Sparkles className="h-5 w-5 text-ai-primary" />
-                                    </motion.div>
-                                  )}
-                                </div>
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        <div className="grid grid-cols-1 gap-4">
-                          <FormField
-                            control={control}
-                            name="requiresResubmission"
-                            render={({ field }) => (
-                              <FormItem className="flex flex-row items-start space-x-3 space-y-0 p-4 rounded-2xl bg-orange-500/5 border border-orange-500/10">
-                                <FormControl>
-                                  <Checkbox
-                                    checked={field.value}
-                                    onCheckedChange={field.onChange}
-                                  />
-                                </FormControl>
-                                <div className="space-y-1 leading-none">
-                                  <FormLabel className="text-xs font-black uppercase tracking-widest text-orange-700 flex items-center gap-2">
-                                    <RotateCcw className="h-3 w-3" />
-                                    {t("assignments.grading.requiresResubmission")}
-                                  </FormLabel>
-                                  <p className="text-[10px] text-orange-600/60 font-medium">
-                                    {t("assignments.grading.resubmissionNote")}
-                                  </p>
-                                </div>
-                              </FormItem>
-                            )}
-                          />
-
-                          <FormField
-                            control={control}
-                            name="teacherPrivateNotes"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-                                  <Lock className="h-3 w-3" />
-                                  {t("assignments.grading.privateNotes")}
-                                </FormLabel>
-                                <FormControl>
-                                  <Textarea
-                                    placeholder={t("assignments.grading.privatePlaceholder")}
-                                    className="min-h-[80px] rounded-2xl resize-none bg-muted/5 border-none focus-visible:ring-primary p-4 text-xs leading-relaxed italic"
-                                    {...field}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-
-                        <div className="flex gap-3 pt-2">
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            className="flex-1 rounded-xl font-bold h-12"
-                            onClick={() => onOpenChange(false)}
-                          >
-                            {t("buttons.cancel")}
-                          </Button>
-                          <LoadingButton
-                            type="submit"
-                            isLoading={isUpdating}
-                            isSuccess={isSuccess}
-                            disabled={isAILoading}
-                            className="flex-[2] rounded-xl font-black uppercase tracking-widest shadow-lg shadow-primary/20 h-12"
-                          >
-                            {t("buttons.saveGrade")}
-                          </LoadingButton>
-                        </div>
-                      </form>
-                    </Form>
-                  )}
-                </>
-              ) : (
-                <div className="space-y-6">
-                  <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-                      <span className="w-1 h-1 rounded-full bg-primary" />
-                      {t("assignments.grading.yourScore")}
-                    </Label>
-                    <motion.div
-                      initial={{ scale: 0.95, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      className="h-40 flex flex-col items-center justify-center rounded-3xl bg-primary/5 border-2 border-primary/10 shadow-inner relative overflow-hidden group"
-                    >
-                      <div className="absolute inset-0 bg-linear-to-br from-primary/10 to-transparent pointer-events-none" />
-                      <div className="absolute -end-4 -top-4 opacity-5 group-hover:opacity-10 transition-opacity rotate-12">
-                        <Trophy className="h-32 w-32 text-primary" />
                       </div>
-                      <div className="flex items-baseline relative z-10">
-                        <span className="text-7xl font-black text-primary tracking-tighter">
-                          {submission.grade ?? "--"}
-                        </span>
-                        <span className="text-2xl font-black text-primary/40 ms-1">%</span>
+
+                      <div className="flex gap-3 sticky bottom-0 bg-card pt-4 pb-2 mt-10">
+                        <LoadingButton
+                          type="submit"
+                          isLoading={isUpdating}
+                          isSuccess={isSuccess}
+                          className="w-full h-16 rounded-2xl font-black uppercase tracking-widest text-xs shadow-2xl shadow-primary/20"
+                        >
+                          <Check className="h-5 w-5 me-2" />
+                          {t("buttons.saveGrade")}
+                        </LoadingButton>
                       </div>
-                      <div className="mt-2 px-3 py-1 rounded-full bg-primary/10 text-[10px] font-black uppercase tracking-widest text-primary relative z-10">
-                        {submission.requiresResubmission
-                          ? t("assignments.grading.status.requested")
-                          : Number(submission.grade) >= 90
-                            ? t("assignments.grading.status.excellent")
-                            : Number(submission.grade) >= 70
-                              ? t("assignments.grading.status.good")
-                              : t("assignments.grading.status.improving")}
-                      </div>
-                    </motion.div>
+                    </form>
+                  </Form>
+                ) : (
+                  <div className="h-full flex items-center justify-center text-muted-foreground italic text-sm">
+                    {isDraft ? t("assignments.grading.draftNotice") : "View Mode Only"}
                   </div>
-                  <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-                      <span className="w-1 h-1 rounded-full bg-primary" />
-                      {t("assignments.grading.teacherFeedback")}
-                    </Label>
-                    <motion.div
-                      initial={{ y: 10, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      transition={{ delay: 0.1 }}
-                      className="p-6 rounded-2xl bg-muted/20 border border-muted-foreground/10 min-h-[180px] text-sm leading-relaxed italic shadow-sm relative"
-                    >
-                      <MessageSquareQuote className="absolute top-4 end-4 h-5 w-5 text-muted-foreground/10" />
-                      {submission.feedback || t("assignments.grading.noFeedback")}
-                    </motion.div>
-                  </div>
-                  <Button
-                    className="w-full rounded-xl font-bold h-12 mt-4"
-                    onClick={() => onOpenChange(false)}
-                  >
-                    {t("buttons.close")}
-                  </Button>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+            </ScrollArea>
           </div>
         </div>
       </DialogContent>
     </Dialog>
   );
 };
+
+// Helper components missing from original imports but needed for the UI
+const Switch = ({
+  checked,
+  onCheckedChange,
+}: {
+  checked: boolean;
+  onCheckedChange: (v: boolean) => void;
+}) => (
+  <button
+    type="button"
+    onClick={() => onCheckedChange(!checked)}
+    className={cn(
+      "h-6 w-11 rounded-full transition-colors relative",
+      checked ? "bg-primary" : "bg-muted"
+    )}
+  >
+    <div
+      className={cn(
+        "absolute top-1 start-1 h-4 w-4 rounded-full bg-white transition-transform",
+        checked ? "translate-x-5" : "translate-x-0"
+      )}
+    />
+  </button>
+);
