@@ -11,6 +11,8 @@ interface AiFeatureGuardProps {
   fallback?: React.ReactNode;
   /** Whether to show a detailed 'Disabled' UI or just hide the feature */
   silent?: boolean;
+  /** Custom CSS for the loading skeleton to avoid layout shift */
+  skeletonClassName?: string;
 }
 
 /**
@@ -25,6 +27,7 @@ export const AiFeatureGuard: React.FC<AiFeatureGuardProps> = ({
   children,
   fallback,
   silent = false,
+  skeletonClassName = "w-full h-32 rounded-lg",
 }) => {
   const { isAiEnabled, isQuotaExceeded, isLoading: isAiLoading } = useAiAccess();
   const { data: canAccess, isLoading: isCanLoading } = useCan({
@@ -35,7 +38,7 @@ export const AiFeatureGuard: React.FC<AiFeatureGuardProps> = ({
   const isLoading = isAiLoading || isCanLoading;
 
   if (isLoading) {
-    return <Skeleton className="w-full h-32 rounded-lg" />;
+    return <Skeleton className={skeletonClassName} />;
   }
 
   const isAllowed = canAccess?.can ?? false;

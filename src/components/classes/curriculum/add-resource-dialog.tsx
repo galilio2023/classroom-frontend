@@ -16,6 +16,8 @@ import { useTranslation } from "react-i18next";
 import { useForm } from "@refinedev/react-hook-form";
 import { Controller, SubmitHandler } from "react-hook-form";
 import { useEffect } from "react";
+import { Resource } from "@/types";
+import { HttpError } from "@refinedev/core";
 
 interface AddResourceDialogProps {
   isOpen: boolean;
@@ -36,8 +38,6 @@ interface IResourceForm {
   moduleId: number;
 }
 
-type TResourcePayload = Partial<IResourceForm>;
-
 export const AddResourceDialog = ({
   isOpen,
   onOpenChange,
@@ -56,7 +56,7 @@ export const AddResourceDialog = ({
     setValue,
     trigger,
     formState: { errors },
-  } = useForm<any, any, IResourceForm>({
+  } = useForm<Resource, HttpError, IResourceForm>({
     refineCoreProps: {
       resource: "resources",
       action: "create",
@@ -97,26 +97,15 @@ export const AddResourceDialog = ({
   }, [isOpen, reset, classId, moduleId]);
 
   const handleFormSubmit: SubmitHandler<IResourceForm> = (data) => {
-    // 🧹 CLEANUP: Use destructuring to construct the payload instead of 'delete'
-    const { url, content, cldPubId, ...baseData } = data;
+    // 🧹 CLEANUP: Ensure strict type alignment for the API payload
+    const finalPayload: IResourceForm = {
+      ...data,
+      content: data.type === "note" ? data.content : null,
+      url: data.type === "note" ? null : data.url,
+      cldPubId: data.type === "file" ? data.cldPubId : null,
+    };
 
-    const finalPayload: TResourcePayload = { ...baseData };
-
-    if (data.type === "note") {
-      finalPayload.content = content || "";
-      finalPayload.url = null;
-      finalPayload.cldPubId = null;
-    } else if (data.type === "file") {
-      finalPayload.url = url || "";
-      finalPayload.cldPubId = cldPubId || "";
-      finalPayload.content = null;
-    } else {
-      finalPayload.url = url || "";
-      finalPayload.content = null;
-      finalPayload.cldPubId = null;
-    }
-
-    onFinish(finalPayload as IResourceForm);
+    onFinish(finalPayload);
   };
 
   return (
