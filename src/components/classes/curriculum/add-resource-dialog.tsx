@@ -48,9 +48,9 @@ export const AddResourceDialog = ({
       action: "create",
       onMutationSuccess: () => {
         onOpenChange(false);
-        reset();
       },
     },
+    shouldUnregister: true,
     defaultValues: {
       title: "",
       description: "",
@@ -65,6 +65,12 @@ export const AddResourceDialog = ({
   });
 
   const resourceType = watch("type");
+
+  useEffect(() => {
+    if (!isOpen) {
+      reset();
+    }
+  }, [isOpen, reset]);
 
   useEffect(() => {
     if (isOpen) {
