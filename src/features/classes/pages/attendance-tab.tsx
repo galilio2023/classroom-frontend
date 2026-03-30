@@ -150,12 +150,26 @@ export const AttendanceTab = ({ classId, enrollments }: AttendanceTabProps) => {
               {viewMode === "mark" && isStaff && (
                 <div className="flex items-center gap-2">
                   <Button
-                    variant="ghost"
+                    variant="outline"
                     size="sm"
-                    onClick={() => handleBulkMark(AttendanceStatus.PRESENT)}
-                    className="h-8 rounded-lg text-[9px] font-black uppercase tracking-widest text-emerald-600 hover:bg-emerald-500/10"
+                    disabled={isUpdating}
+                    onClick={() => {
+                      handleBulkMark(AttendanceStatus.PRESENT);
+                      // SetTimeout ensures the state update has finished before saving
+                      setTimeout(() => handleSave(), 100);
+                    }}
+                    className="h-9 rounded-xl px-4 text-[10px] font-black uppercase tracking-widest text-emerald-600 border-emerald-500/20 hover:bg-emerald-500/10 gap-2"
                   >
+                    <CheckCircle2 className="h-3.5 w-3.5" />
                     {(t as any)("classes.attendance.markAllPresent")}
+                  </Button>
+                  <Button
+                    size="sm"
+                    loading={isUpdating}
+                    onClick={handleSave}
+                    className="h-9 rounded-xl px-6 text-[10px] font-black uppercase tracking-widest shadow-lg shadow-primary/20"
+                  >
+                    {(t as any)("buttons.save")}
                   </Button>
                 </div>
               )}

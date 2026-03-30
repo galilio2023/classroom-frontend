@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Dialog,
@@ -17,12 +17,15 @@ import {
   X,
   FileText,
 } from "lucide-react";
-import { useApiUrl, useInvalidate } from "@refinedev/core";
+import { useApiUrl, useInvalidate, useGetIdentity } from "@refinedev/core";
 import { toast } from "sonner";
 import axios from "axios";
 import { cn } from "@/lib/utils";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Progress } from "@/components/ui/progress";
+import { socket, connectSocket } from "@/lib/socket";
+import { User } from "@/types";
 
 interface BulkEnrollDialogProps {
   open: boolean;
@@ -40,11 +43,49 @@ export const BulkEnrollDialog = ({ open, onOpenChange, classId }: BulkEnrollDial
   const { t } = useTranslation();
   const apiUrl = useApiUrl();
   const invalidate = useInvalidate();
+  const { data: identity } = useGetIdentity<User>();
 
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
+  const [jobId, setJobId] = useState<string | null>(null);
+  const [progress, setProgress] = useState(0);
   const [results, setResults] = useState<BulkResults | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // --- REAL-TIME UPDATES ---
+  useEffect(() => {
+    if (!open || !identity?.id) return;
+
+    // Ensure socket is connected and authenticated
+    void connectSocket();
+
+    const handleProgress = (data: { jobId: string; progress: number }) => {
+      if (data.jobId === jobId) {
+        setProgress(data.progress);
+      }
+    };
+
+    const handleCompleted = (data: { jobId: string; results: BulkResults }) => {
+      if (data.jobId === jobId) {
+        setResults(data.results);
+        setLoading(false);
+        setJobId(null);
+        toast.success(t("classes.show.students.bulk.success" as any));
+        invalidate({
+          resource: "enrollments",
+          invalidates: ["list"],
+        });
+      }
+    };
+
+    socket.on("bulk-enroll:progress", handleProgress);
+    socket.on("bulk-enroll:completed", handleCompleted);
+
+    return () => {
+      socket.off("bulk-enroll:progress", handleProgress);
+      socket.off("bulk-enroll:completed", handleCompleted);
+    };
+  }, [open, jobId, identity?.id, t, invalidate]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -57,6 +98,8 @@ export const BulkEnrollDialog = ({ open, onOpenChange, classId }: BulkEnrollDial
       }
       setFile(selectedFile);
       setResults(null);
+      setProgress(0);
+      setJobId(null);
     }
   };
 
@@ -64,6 +107,7 @@ export const BulkEnrollDialog = ({ open, onOpenChange, classId }: BulkEnrollDial
     if (!file) return;
 
     setLoading(true);
+    setProgress(0);
     const formData = new FormData();
     formData.append("file", file);
 
@@ -75,16 +119,23 @@ export const BulkEnrollDialog = ({ open, onOpenChange, classId }: BulkEnrollDial
         },
       });
 
-      setResults(response.data.data);
-      toast.success(t("classes.show.students.bulk.success" as any));
-      invalidate({
-        resource: "enrollments",
-        invalidates: ["list"],
-      });
+      // The backend returns 202 Accepted with a jobId
+      if (response.data.data?.jobId) {
+        setJobId(response.data.data.jobId);
+        // Loading continues until socket 'completed' event
+      } else {
+        // Fallback for immediate response (legacy)
+        setResults(response.data.data);
+        setLoading(false);
+        toast.success(t("classes.show.students.bulk.success" as any));
+        invalidate({
+          resource: "enrollments",
+          invalidates: ["list"],
+        });
+      }
     } catch (error: any) {
       const message = error.response?.data?.message || t("common.errors.uploadFailed" as any);
       toast.error(message);
-    } finally {
       setLoading(false);
     }
   };
@@ -93,6 +144,8 @@ export const BulkEnrollDialog = ({ open, onOpenChange, classId }: BulkEnrollDial
     setFile(null);
     setResults(null);
     setLoading(false);
+    setJobId(null);
+    setProgress(0);
   };
 
   return (
@@ -124,7 +177,28 @@ export const BulkEnrollDialog = ({ open, onOpenChange, classId }: BulkEnrollDial
             </div>
           </DialogHeader>
 
-          {!results ? (
+          {loading && !results ? (
+            <div className="py-10 flex flex-col items-center justify-center space-y-6 animate-in fade-in duration-500">
+              <div className="relative">
+                <Loader2 className="h-16 w-16 text-primary animate-spin opacity-20" />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <FileSpreadsheet className="h-8 w-8 text-primary animate-pulse" />
+                </div>
+              </div>
+              <div className="w-full space-y-3">
+                <div className="flex justify-between items-center px-1">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-primary">
+                    {t("common.processing", "Processing Students...")}
+                  </p>
+                  <p className="text-[10px] font-black text-primary">{progress}%</p>
+                </div>
+                <Progress value={progress} className="h-2 rounded-full" />
+                <p className="text-[9px] font-bold text-muted-foreground text-center">
+                  {t("classes.show.students.bulk.waitMessage", "Please stay on this page until complete.")}
+                </p>
+              </div>
+            </div>
+          ) : !results ? (
             <div className="space-y-6">
               {/* Dropzone */}
               <div
@@ -198,11 +272,7 @@ export const BulkEnrollDialog = ({ open, onOpenChange, classId }: BulkEnrollDial
                   onClick={handleUpload}
                   className="flex-1 h-12 rounded-xl font-black uppercase tracking-widest text-[10px] shadow-xl shadow-primary/20"
                 >
-                  {loading ? (
-                    <Loader2 className="h-4 w-4 animate-spin me-2" />
-                  ) : (
-                    <Upload className="h-4 w-4 me-2" />
-                  )}
+                  <Upload className="h-4 w-4 me-2" />
                   {t("buttons.uploadAndEnroll", "Upload & Enroll")}
                 </Button>
               </div>
