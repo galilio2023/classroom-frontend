@@ -24,6 +24,18 @@ interface AddResourceDialogProps {
   moduleId: number;
 }
 
+interface IResourceForm {
+  title: string;
+  description: string;
+  type: "file" | "link" | "video" | "note" | "other";
+  url?: string;
+  content?: string;
+  cldPubId?: string;
+  status: "draft" | "active";
+  classId: number;
+  moduleId: number;
+}
+
 export const AddResourceDialog = ({
   isOpen,
   onOpenChange,
@@ -42,7 +54,7 @@ export const AddResourceDialog = ({
     setValue,
     trigger,
     formState: { errors },
-  } = useForm({
+  } = useForm<IResourceForm>({
     refineCoreProps: {
       resource: "resources",
       action: "create",
@@ -74,11 +86,13 @@ export const AddResourceDialog = ({
 
   const handleFormSubmit = (data: any) => {
     // 🧹 CLEANUP: Only send relevant data based on type to keep DB clean
-    const payload = { ...data };
-    if (data.type === "note") {
+    const payload: any = { ...data };
+    const resourceData = data as IResourceForm;
+
+    if (resourceData.type === "note") {
       delete payload.url;
       delete payload.cldPubId;
-    } else if (data.type === "file") {
+    } else if (resourceData.type === "file") {
       delete payload.content;
     } else {
       delete payload.content;
@@ -187,6 +201,7 @@ export const AddResourceDialog = ({
                   onUploadSuccess={(url, pubId) => {
                     setValue("url", url);
                     setValue("cldPubId", pubId);
+                    trigger("url");
                   }}
                 />
               </div>

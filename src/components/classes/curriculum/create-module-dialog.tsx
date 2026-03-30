@@ -7,10 +7,19 @@ import { Switch } from "@/components/ui/switch";
 import { useTranslation } from "react-i18next";
 import { useForm } from "@refinedev/react-hook-form";
 import { Controller } from "react-hook-form";
+import { useEffect } from "react";
 
 interface CreateModuleDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
+  classId: number;
+  order: number;
+}
+
+interface IModuleForm {
+  name: string;
+  description: string;
+  isPublished: boolean;
   classId: number;
   order: number;
 }
@@ -30,13 +39,12 @@ export const CreateModuleDialog = ({
     control,
     reset,
     formState: { errors },
-  } = useForm({
+  } = useForm<IModuleForm>({
     refineCoreProps: {
       resource: "modules",
       action: "create",
       onMutationSuccess: () => {
         onOpenChange(false);
-        reset();
       },
     },
     defaultValues: {
@@ -47,6 +55,19 @@ export const CreateModuleDialog = ({
       order,
     },
   });
+
+  // 🧹 CLEANUP: Handle reset on open/close to prevent double-reset flickering
+  useEffect(() => {
+    if (isOpen) {
+      reset({
+        name: "",
+        description: "",
+        isPublished: false,
+        classId,
+        order,
+      });
+    }
+  }, [isOpen, reset, classId, order]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
