@@ -10,11 +10,14 @@ export default defineConfig({
     react(),
     tailwindcss(),
     VitePWA({
+      strategies: "injectManifest",
+      srcDir: "public",
+      filename: "sw.js",
       registerType: "autoUpdate",
       devOptions: {
         enabled: true,
+        type: "module",
       },
-      includeAssets: ["logo.svg", "apple-icon-180.png"],
       manifest: {
         name: "Tablawy OS",
         short_name: "Tablawy",

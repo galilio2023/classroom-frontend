@@ -18,39 +18,64 @@ const sanitizePayload = (params: Record<string, unknown>) => {
 
 let cachedSessionData: any = null;
 let lastFetchTime = 0;
-const CACHE_TTL = 30000; // 30 seconds
+let lastFailedFetchTime = 0;
+let pendingPromise: Promise<any> | null = null;
+
+const CACHE_TTL = 30000; // 30 seconds for success
+const FAILED_TTL = 5000;  // 5 seconds for failures
 
 // 🛡️ MOBILE STABILITY: Helper to ensure authClient has the token
 const syncToken = (token?: string | null) => {
   const finalToken = token || localStorage.getItem("tablawy_auth_token");
   if (finalToken) {
     localStorage.setItem("tablawy_auth_token", finalToken);
-    // Note: Better Auth bearer plugin will use this if we use the authClient's fetch
-    // or we can manually attach it if needed in a custom fetcher.
   }
 };
 
 export const getFreshSession = async () => {
   const now = Date.now();
+  
+  // 1. Return success cache
   if (cachedSessionData && now - lastFetchTime < CACHE_TTL) {
     return { data: cachedSessionData, error: null };
   }
 
-  const result = await authClient.getSession();
-  if (result.data) {
-    cachedSessionData = result.data;
-    lastFetchTime = now;
-    
-    // Refresh token in storage if present
-    // getSession typically returns { session, user }
-    const sessionToken = (result.data as any).session?.token;
-    if (sessionToken) {
-      syncToken(sessionToken);
-    }
-  } else {
-    cachedSessionData = null;
+  // 2. Throttle repeat attempts after a failure
+  if (!cachedSessionData && now - lastFailedFetchTime < FAILED_TTL) {
+    return { data: null, error: { message: "Throttled" } };
   }
-  return result;
+
+  // 3. Deduplicate concurrent requests
+  if (pendingPromise) {
+    return pendingPromise;
+  }
+
+  pendingPromise = (async () => {
+    try {
+      const result = await authClient.getSession();
+      if (result.data) {
+        cachedSessionData = result.data;
+        lastFetchTime = Date.now();
+        lastFailedFetchTime = 0;
+        
+        const sessionToken = (result.data as any).session?.token;
+        if (sessionToken) {
+          syncToken(sessionToken);
+        }
+      } else {
+        cachedSessionData = null;
+        lastFailedFetchTime = Date.now();
+      }
+      return result;
+    } catch (err) {
+      lastFailedFetchTime = Date.now();
+      return { data: null, error: err };
+    } finally {
+      pendingPromise = null;
+    }
+  })();
+
+  return pendingPromise;
 };
 
 export const authProvider: AuthProvider = {
