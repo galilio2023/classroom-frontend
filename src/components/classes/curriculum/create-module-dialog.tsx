@@ -47,6 +47,7 @@ export const CreateModuleDialog = ({
         onOpenChange(false);
       },
     },
+    shouldUnregister: true,
     defaultValues: {
       name: "",
       description: "",

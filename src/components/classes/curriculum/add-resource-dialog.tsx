@@ -84,21 +84,22 @@ export const AddResourceDialog = ({
     }
   }, [isOpen, reset]);
 
-  const handleFormSubmit = (data: any) => {
-    // 🧹 CLEANUP: Only send relevant data based on type to keep DB clean
-    const payload: any = { ...data };
-    const resourceData = data as IResourceForm;
+  const handleFormSubmit = (data: IResourceForm) => {
+    // 🧹 CLEANUP: Use destructuring to construct the payload instead of 'delete'
+    const { url, content, cldPubId, ...baseData } = data;
 
-    if (resourceData.type === "note") {
-      delete payload.url;
-      delete payload.cldPubId;
-    } else if (resourceData.type === "file") {
-      delete payload.content;
+    let finalPayload: Partial<IResourceForm> = { ...baseData };
+
+    if (data.type === "note") {
+      finalPayload.content = content;
+    } else if (data.type === "file") {
+      finalPayload.url = url;
+      finalPayload.cldPubId = cldPubId;
     } else {
-      delete payload.content;
-      delete payload.cldPubId;
+      finalPayload.url = url;
     }
-    onFinish(payload);
+
+    onFinish(finalPayload as any);
   };
 
   return (
@@ -174,6 +175,11 @@ export const AddResourceDialog = ({
                   {...register("url", { required: true })}
                   className="h-12 rounded-xl border-muted-foreground/20 focus:border-primary transition-all font-bold"
                 />
+                {errors.url && (
+                  <span className="text-[10px] text-destructive font-bold px-1 uppercase tracking-tighter">
+                    {t("common.required", "Required")}
+                  </span>
+                )}
               </div>
             )}
 
@@ -187,6 +193,11 @@ export const AddResourceDialog = ({
                   placeholder={t("classes.resource.addDialog.contentPlaceholder")}
                   {...register("content", { required: true })}
                 />
+                {errors.content && (
+                  <span className="text-[10px] text-destructive font-bold px-1 uppercase tracking-tighter">
+                    {t("common.required", "Required")}
+                  </span>
+                )}
               </div>
             )}
 
@@ -204,6 +215,11 @@ export const AddResourceDialog = ({
                     trigger("url");
                   }}
                 />
+                {errors.url && (
+                  <span className="text-[10px] text-destructive font-bold px-1 uppercase tracking-tighter">
+                    {t("classes.resource.addDialog.uploadRequired", "Please upload a file")}
+                  </span>
+                )}
               </div>
             )}
 
