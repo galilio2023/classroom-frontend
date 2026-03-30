@@ -66,29 +66,31 @@ export const AddResourceDialog = ({
 
   const resourceType = watch("type");
 
-  // 🛠️ CLEANUP: Clear stale data when switching resource types
-  useEffect(() => {
-    if (resourceType === "note") {
-      setValue("url", "");
-      setValue("cldPubId", "");
-    } else if (resourceType === "file") {
-      setValue("content", "");
-    } else {
-      setValue("content", "");
-      setValue("cldPubId", "");
-    }
-  }, [resourceType, setValue]);
-
   useEffect(() => {
     if (!isOpen) {
       reset();
     }
   }, [isOpen, reset]);
 
+  const handleFormSubmit = (data: any) => {
+    // 🧹 CLEANUP: Only send relevant data based on type to keep DB clean
+    const payload = { ...data };
+    if (data.type === "note") {
+      delete payload.url;
+      delete payload.cldPubId;
+    } else if (data.type === "file") {
+      delete payload.content;
+    } else {
+      delete payload.content;
+      delete payload.cldPubId;
+    }
+    onFinish(payload);
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px] rounded-3xl border-none shadow-2xl p-0 overflow-hidden bg-card/95 backdrop-blur-2xl">
-        <form onSubmit={handleSubmit(onFinish)} className="p-8 space-y-6">
+        <form onSubmit={handleSubmit(handleFormSubmit)} className="p-8 space-y-6">
           <DialogHeader className="space-y-3 text-start">
             <DialogTitle className="text-2xl font-black tracking-tight">
               {t("classes.resource.addDialog.title")}

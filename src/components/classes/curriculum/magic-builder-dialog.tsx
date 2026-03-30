@@ -136,7 +136,7 @@ export const MagicBuilderDialog = ({
                     </div>
                     <Progress value={progress} className="h-2 bg-ai-primary/10" />
                     <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-tight italic">
-                      Gemini is architecting your curriculum...
+                      Gemini is thinking...
                     </p>
                   </div>
                 </motion.div>

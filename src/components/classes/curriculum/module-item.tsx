@@ -91,10 +91,12 @@ export const ModuleItem = ({
         {isTeacher && (
           <div
             {...dragHandleProps}
-            aria-label="Drag to reorder"
             className="p-2 cursor-grab active:cursor-grabbing text-muted-foreground/30 hover:text-primary transition-colors"
           >
-            <GripVertical className="h-5 w-5" />
+            <GripVertical
+              className="h-5 w-5"
+              aria-label={t("common.dragToReorder", "Drag to reorder")}
+            />
           </div>
         )}
         <AccordionTrigger className="hover:no-underline py-4 md:py-6 flex-1 group/trigger text-start rtl:text-end">
