@@ -76,7 +76,7 @@ export function Header() {
 
   return (
     <header className="flex h-16 md:h-20 items-center gap-3 md:gap-4 border-b border-border/80 dark:border-white/5 bg-background/60 backdrop-blur-xl px-4 md:px-6 sticky top-0 z-50">
-      <SidebarTrigger className="md:hidden shrink-0" />
+      <SidebarTrigger className="hidden md:flex shrink-0" />
 
       <div className="flex-1 flex items-center gap-2 md:gap-6 min-w-0">
         <div className="hidden sm:block flex-1 max-w-md">

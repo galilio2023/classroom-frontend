@@ -96,7 +96,7 @@ export function Layout({ children }: PropsWithChildren) {
             !isJoined && <AIStudyBuddy classId={classIdFromUrl} />}
 
           {isStudent && <XPGainPopup />}
-          {isStudent && <MobileNav />}
+          {identity && <MobileNav />}
           <PWAInstaller />
           <JobTracker />
         </SidebarInset>

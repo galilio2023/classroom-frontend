@@ -1,36 +1,51 @@
-import React from "react";
-import { Home, LayoutGrid, BrainCircuit, Bell } from "lucide-react";
+import React, { useMemo } from "react";
+import { Home, LayoutGrid, BrainCircuit, Bell, ClipboardList, Library } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
-
 import { useTranslation } from "react-i18next";
-
-const navItems = [
-  { label: "resources.dashboard.label", icon: Home, path: "/dashboard" },
-  { label: "resources.classes.label", icon: LayoutGrid, path: "/classes" },
-  {
-    label: "resources.ai-study-lab.label",
-    icon: BrainCircuit,
-    path: "/ai-study-lab",
-  },
-  {
-    label: "resources.notifications.label",
-    icon: Bell,
-    path: "/notifications",
-  },
-];
+import { useGetIdentity } from "@refinedev/core";
+import { User, UserRole } from "@/types";
 
 export const MobileNav = () => {
   const location = useLocation();
   const { t } = useTranslation();
+  const { data: identity } = useGetIdentity<User>();
+
+  const isStudent = identity?.role === UserRole.STUDENT;
+  const isTeacher = identity?.role === UserRole.TEACHER || identity?.role === UserRole.ADMIN;
+
+  const navItems = useMemo(() => {
+    const base = [
+      { label: "resources.dashboard.label", icon: Home, path: "/dashboard" },
+      { label: "resources.classes.label", icon: LayoutGrid, path: "/classes" },
+    ];
+
+    if (isStudent) {
+      return [
+        ...base,
+        { label: "resources.ai-study-lab.label", icon: BrainCircuit, path: "/ai-study-lab" },
+        { label: "resources.notifications.label", icon: Bell, path: "/notifications" },
+      ];
+    }
+
+    if (isTeacher) {
+      return [
+        ...base,
+        { label: "resources.assignments.label", icon: ClipboardList, path: "/assignments" },
+        { label: "resources.subjects.label", icon: Library, path: "/subjects" },
+      ];
+    }
+
+    return base;
+  }, [isStudent, isTeacher]);
 
   return (
     <motion.div
       initial={{ y: 100 }}
       animate={{ y: 0 }}
       transition={{ type: "spring", stiffness: 260, damping: 20 }}
-      className="md:hidden fixed bottom-0 start-0 end-0 z-60 bg-background/95 backdrop-blur-xl border-t border-border/40 px-6 py-2 pb-safe-area flex justify-between items-center shadow-[0_-8px_32px_rgba(0,0,0,0.1)] rounded-t-3xl"
+      className="md:hidden fixed bottom-0 start-0 end-0 z-60 bg-background/95 backdrop-blur-xl border-t border-border/40 px-4 py-2 pb-safe-area flex justify-between items-center shadow-[0_-8px_32px_rgba(0,0,0,0.1)] rounded-t-3xl"
     >
       {navItems.map((item) => {
         const isActive =
@@ -56,14 +71,14 @@ export const MobileNav = () => {
               {isActive && (
                 <motion.div
                   layoutId="mobile-nav-indicator"
-                  className="absolute -top-1 -end-1 w-2 h-2 bg-primary rounded-full border-2 border-background shadow-sm"
+                  className="absolute -top-1 -end-1 w-1.5 h-1.5 bg-primary rounded-full border-2 border-background shadow-sm"
                   transition={{ type: "spring", stiffness: 300, damping: 30 }}
                 />
               )}
             </motion.div>
             <span
               className={cn(
-                "text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-opacity",
+                "text-[8px] font-black uppercase tracking-tight transition-opacity",
                 isActive ? "opacity-100" : "opacity-60"
               )}
             >

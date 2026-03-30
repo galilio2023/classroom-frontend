@@ -11,6 +11,8 @@ import { QuizExplanation } from "./ai/quiz-explanation";
 import { useTranslation } from "react-i18next";
 import { Badge } from "./ui/badge";
 import { motion, AnimatePresence } from "framer-motion";
+import Confetti from "react-confetti";
+import { useWindowSize } from "react-use";
 
 interface InteractiveQuizProps {
   assignmentId: number;
@@ -26,6 +28,7 @@ export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({
   onComplete,
 }) => {
   const { t } = useTranslation();
+  const { width, height } = useWindowSize();
   const go = useGo();
   const {
     questions,
@@ -46,11 +49,21 @@ export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({
 
   if (isFinished) {
     return (
-      <QuizResult
-        score={score}
-        totalQuestions={questions.length}
-        onBackToDashboard={() => go({ to: "/dashboard" })}
-      />
+      <>
+        <Confetti
+          width={width}
+          height={height}
+          recycle={false}
+          numberOfPieces={500}
+          gravity={0.2}
+          colors={["#4f46e5", "#9333ea", "#db2777", "#22c55e", "#eab308"]}
+        />
+        <QuizResult
+          score={score}
+          totalQuestions={questions.length}
+          onBackToDashboard={() => go({ to: "/dashboard" })}
+        />
+      </>
     );
   }
 
