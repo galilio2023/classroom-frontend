@@ -28,9 +28,9 @@ interface IResourceForm {
   title: string;
   description: string;
   type: "file" | "link" | "video" | "note" | "other";
-  url?: string;
-  content?: string;
-  cldPubId?: string;
+  url?: string | null;
+  content?: string | null;
+  cldPubId?: string | null;
   status: "draft" | "active";
   classId: number;
   moduleId: number;
@@ -56,7 +56,7 @@ export const AddResourceDialog = ({
     setValue,
     trigger,
     formState: { errors },
-  } = useForm<IResourceForm>({
+  } = useForm<any, any, IResourceForm>({
     refineCoreProps: {
       resource: "resources",
       action: "create",
@@ -82,9 +82,19 @@ export const AddResourceDialog = ({
 
   useEffect(() => {
     if (!isOpen) {
-      reset();
+      reset({
+        title: "",
+        description: "",
+        type: "file",
+        url: "",
+        content: "",
+        cldPubId: "",
+        status: "draft",
+        classId,
+        moduleId,
+      });
     }
-  }, [isOpen, reset]);
+  }, [isOpen, reset, classId, moduleId]);
 
   const handleFormSubmit: SubmitHandler<IResourceForm> = (data) => {
     // 🧹 CLEANUP: Use destructuring to construct the payload instead of 'delete'
@@ -93,12 +103,17 @@ export const AddResourceDialog = ({
     const finalPayload: TResourcePayload = { ...baseData };
 
     if (data.type === "note") {
-      finalPayload.content = content;
+      finalPayload.content = content || "";
+      finalPayload.url = null;
+      finalPayload.cldPubId = null;
     } else if (data.type === "file") {
-      finalPayload.url = url;
-      finalPayload.cldPubId = cldPubId;
+      finalPayload.url = url || "";
+      finalPayload.cldPubId = cldPubId || "";
+      finalPayload.content = null;
     } else {
-      finalPayload.url = url;
+      finalPayload.url = url || "";
+      finalPayload.content = null;
+      finalPayload.cldPubId = null;
     }
 
     onFinish(finalPayload as IResourceForm);
@@ -107,7 +122,7 @@ export const AddResourceDialog = ({
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px] rounded-3xl border-none shadow-2xl p-0 overflow-hidden bg-card/95 backdrop-blur-2xl">
-        <form onSubmit={handleSubmit(handleFormSubmit as any)} className="p-8 space-y-6">
+        <form onSubmit={handleSubmit(handleFormSubmit)} className="p-8 space-y-6">
           <DialogHeader className="space-y-3 text-start">
             <DialogTitle className="text-2xl font-black tracking-tight">
               {t("classes.resource.addDialog.title")}
@@ -205,6 +220,7 @@ export const AddResourceDialog = ({
 
             {resourceType === "file" && (
               <div className="space-y-2">
+                <input type="hidden" {...register("url", { required: true })} />
                 <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">
                   {t("classes.resource.addDialog.fieldUpload", {
                     type: t("classes.resource.addDialog.types.file"),
