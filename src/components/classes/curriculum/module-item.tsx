@@ -76,6 +76,7 @@ export const ModuleItem = ({
       values: {
         isPublished: !module.isPublished,
       },
+      mutationMode: "optimistic",
     });
   };
 

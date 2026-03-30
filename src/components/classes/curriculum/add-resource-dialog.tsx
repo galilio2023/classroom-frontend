@@ -15,6 +15,7 @@ import { FileUpload } from "@/components/file-upload";
 import { useTranslation } from "react-i18next";
 import { useForm } from "@refinedev/react-hook-form";
 import { Controller } from "react-hook-form";
+import { useEffect } from "react";
 
 interface AddResourceDialogProps {
   isOpen: boolean;
@@ -39,6 +40,7 @@ export const AddResourceDialog = ({
     reset,
     watch,
     setValue,
+    trigger,
     formState: { errors },
   } = useForm({
     refineCoreProps: {
@@ -63,6 +65,12 @@ export const AddResourceDialog = ({
   });
 
   const resourceType = watch("type");
+
+  useEffect(() => {
+    if (isOpen) {
+      void trigger(["url", "content"]);
+    }
+  }, [resourceType, trigger, isOpen]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>

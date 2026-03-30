@@ -133,18 +133,20 @@ export const ResourceItem = ({
 
         <div className="flex items-center gap-2 shrink-0">
           {resource.type === "note" ? (
-            <Button
-              variant="ghost"
-              size="sm"
-              asChild
-              className="h-8 md:h-9 rounded-lg md:rounded-xl px-3 md:px-4 text-[8px] md:text-[10px] font-black uppercase tracking-widest gap-1.5 md:gap-2 text-primary hover:bg-primary/5 transition-all"
-            >
-              <Link to={`/classes/${classId}/lessons/${resource.id}`}>
-                <Eye className="h-3 w-3 md:h-3.5 md:w-3.5" />
-                <span className="hidden xs:inline">{t("buttons.openLesson")}</span>
-                <ArrowRight className="hidden md:block h-3 w-3 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all rtl:rotate-180" />
-              </Link>
-            </Button>
+            <AiFeatureGuard>
+              <Button
+                variant="ghost"
+                size="sm"
+                asChild
+                className="h-8 md:h-9 rounded-lg md:rounded-xl px-3 md:px-4 text-[8px] md:text-[10px] font-black uppercase tracking-widest gap-1.5 md:gap-2 text-primary hover:bg-primary/5 transition-all"
+              >
+                <Link to={`/classes/${classId}/lessons/${resource.id}`}>
+                  <Eye className="h-3 w-3 md:h-3.5 md:w-3.5" />
+                  <span className="hidden xs:inline">{t("buttons.openLesson")}</span>
+                  <ArrowRight className="hidden md:block h-3 w-3 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all rtl:rotate-180" />
+                </Link>
+              </Button>
+            </AiFeatureGuard>
           ) : (
             <Button
               variant="ghost"
