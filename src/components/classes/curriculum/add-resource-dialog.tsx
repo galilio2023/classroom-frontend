@@ -36,6 +36,8 @@ interface IResourceForm {
   moduleId: number;
 }
 
+type TResourcePayload = Partial<IResourceForm>;
+
 export const AddResourceDialog = ({
   isOpen,
   onOpenChange,
@@ -88,7 +90,7 @@ export const AddResourceDialog = ({
     // 🧹 CLEANUP: Use destructuring to construct the payload instead of 'delete'
     const { url, content, cldPubId, ...baseData } = data;
 
-    let finalPayload: Partial<IResourceForm> = { ...baseData };
+    let finalPayload: TResourcePayload = { ...baseData };
 
     if (data.type === "note") {
       finalPayload.content = content;
@@ -99,7 +101,8 @@ export const AddResourceDialog = ({
       finalPayload.url = url;
     }
 
-    onFinish(finalPayload as any);
+    // @ts-expect-error - Refine core expects the full form type but partial is safe for create
+    onFinish(finalPayload);
   };
 
   return (
