@@ -334,6 +334,8 @@ export const SubmissionList = ({ submissions = [], assignmentId }: SubmissionLis
         isOpen={isGradingOpen}
         onOpenChange={setIsGradingOpen}
         submission={selectedSubmission}
+        submissions={submissions}
+        onNavigate={(sub) => setSelectedSubmission(sub)}
       />
     </div>
   );

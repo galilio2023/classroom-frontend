@@ -19,6 +19,7 @@ import { useTranslation } from "react-i18next";
 
 interface ResourceItemProps {
   resource: Resource;
+  isTeacher: boolean;
   isStudent: boolean;
   completed: boolean;
   classId: string;
@@ -27,6 +28,7 @@ interface ResourceItemProps {
 
 export const ResourceItem = ({
   resource,
+  isTeacher,
   isStudent,
   completed,
   classId,
@@ -60,7 +62,8 @@ export const ResourceItem = ({
         "group flex flex-col p-3 md:p-4 rounded-xl md:rounded-2xl border transition-all duration-300",
         completed
           ? "bg-success/5 border-success/20 shadow-sm"
-          : "bg-card/50 border-black/3 dark:border-white/3 hover:border-primary/20 hover:bg-card hover:shadow-md"
+          : "bg-card/50 border-black/3 dark:border-white/3 hover:border-primary/20 hover:bg-card hover:shadow-md",
+        isTeacher && resource.status !== "active" && "opacity-75 grayscale-[0.5]"
       )}
     >
       <div className="flex items-center justify-between gap-3 md:gap-4">
@@ -105,16 +108,26 @@ export const ResourceItem = ({
             </div>
 
             <div className="flex flex-col min-w-0 text-start">
-              <span
-                className={cn(
-                  "text-xs md:text-sm font-black tracking-tight truncate transition-all",
-                  completed
-                    ? "text-success/60 line-through decoration-success/30"
-                    : "text-foreground group-hover:text-primary"
+              <div className="flex items-center gap-2">
+                <span
+                  className={cn(
+                    "text-xs md:text-sm font-black tracking-tight truncate transition-all",
+                    completed
+                      ? "text-success/60 line-through decoration-success/30"
+                      : "text-foreground group-hover:text-primary"
+                  )}
+                >
+                  {resource.title}
+                </span>
+                {isTeacher && resource.status !== "active" && (
+                  <Badge
+                    variant="outline"
+                    className="bg-muted text-muted-foreground border-none text-[7px] font-black uppercase tracking-tighter px-1.5 py-0 h-3.5"
+                  >
+                    {t("common.draft", "Draft")}
+                  </Badge>
                 )}
-              >
-                {resource.title}
-              </span>
+              </div>
               <span className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-muted-foreground/40 truncate">
                 {t(`classes.resource.addDialog.types.${resource.type}`)}{" "}
                 {resource.type === "note" && `• ${t("common.aiAnalyzed")}`}

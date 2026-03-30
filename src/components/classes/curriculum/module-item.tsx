@@ -12,6 +12,9 @@ import {
   Library,
   ClipboardCheck,
   MoreVertical,
+  Eye,
+  EyeOff,
+  GripVertical,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -25,12 +28,14 @@ import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { useTranslation } from "react-i18next";
 import { CanAccess } from "@/components/auth/can-access";
+import { useUpdate } from "@refinedev/core";
 
 interface ModuleItemProps {
   module: Module;
   isTeacher: boolean;
   isStudent: boolean;
   classId: string;
+  dragHandleProps?: any;
   isItemCompleted: (type: "resource" | "assignment" | "quiz", id: number) => boolean;
   onToggleProgress: (
     type: "resource" | "assignment" | "quiz",
@@ -48,6 +53,7 @@ export const ModuleItem = ({
   isTeacher,
   isStudent,
   classId,
+  dragHandleProps,
   isItemCompleted,
   onToggleProgress,
   onDeleteModule,
@@ -56,11 +62,23 @@ export const ModuleItem = ({
   onAddTask,
 }: ModuleItemProps) => {
   const { t, i18n } = useTranslation();
+  const { mutate: updateModule } = useUpdate();
   const isArabic = i18n.language === "ar";
   const totalItems =
     (module.resources?.length || 0) +
     (module.assignments?.length || 0) +
     (module.quizzes?.length || 0);
+
+  const handleTogglePublish = () => {
+    updateModule({
+      resource: "modules",
+      id: module.id,
+      values: {
+        isPublished: !module.isPublished,
+        version: module.version, // Ensure version is passed for optimistic locking
+      },
+    });
+  };
 
   return (
     <AccordionItem
@@ -68,14 +86,32 @@ export const ModuleItem = ({
       className="border-none shadow-xl bg-card/50 backdrop-blur-xl rounded-3xl md:rounded-4xl overflow-hidden group transition-all hover:shadow-2xl hover:bg-card/80"
     >
       <div className="flex items-center justify-between w-full px-4 md:px-6">
+        {isTeacher && (
+          <div
+            {...dragHandleProps}
+            className="p-2 cursor-grab active:cursor-grabbing text-muted-foreground/30 hover:text-primary transition-colors"
+          >
+            <GripVertical className="h-5 w-5" />
+          </div>
+        )}
         <AccordionTrigger className="hover:no-underline py-4 md:py-6 flex-1 group/trigger text-start rtl:text-end">
           <div className="flex items-center gap-3 md:gap-4 min-w-0">
             <div className="p-2 md:p-3 rounded-lg md:rounded-2xl bg-primary/10 text-primary group-hover/trigger:scale-110 transition-transform shrink-0">
               <BookOpen className="h-5 w-5 md:h-6 md:w-6" />
             </div>
             <div className="space-y-0.5 md:space-y-1 min-w-0 text-start">
-              <div className="font-black text-base md:text-lg tracking-tight group-hover/trigger:text-primary transition-colors truncate">
-                {module.name}
+              <div className="flex items-center gap-2">
+                <div className="font-black text-base md:text-lg tracking-tight group-hover/trigger:text-primary transition-colors truncate">
+                  {module.name}
+                </div>
+                {isTeacher && !module.isPublished && (
+                  <Badge
+                    variant="outline"
+                    className="bg-muted text-muted-foreground border-none text-[7px] md:text-[8px] font-black uppercase tracking-tighter px-1.5 py-0 h-3.5 md:h-4 shrink-0"
+                  >
+                    {t("common.draft", "Draft")}
+                  </Badge>
+                )}
               </div>
               <div className="flex flex-wrap items-center gap-2 md:gap-3">
                 {module.description && (
@@ -113,6 +149,22 @@ export const ModuleItem = ({
                   className="rounded-xl border-none shadow-2xl p-1.5 min-w-40"
                 >
                   <DropdownMenuItem
+                    className="font-bold rounded-lg cursor-pointer py-2.5"
+                    onClick={handleTogglePublish}
+                  >
+                    {module.isPublished ? (
+                      <>
+                        <EyeOff className="h-4 w-4 me-2 rtl:me-0 rtl:ms-2" />
+                        {t("buttons.unpublish", "Revert to Draft")}
+                      </>
+                    ) : (
+                      <>
+                        <Eye className="h-4 w-4 me-2 rtl:me-0 rtl:ms-2" />
+                        {t("buttons.publish", "Publish to Students")}
+                      </>
+                    )}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
                     className="text-destructive focus:text-destructive font-bold rounded-lg cursor-pointer py-2.5"
                     onClick={() => onDeleteModule(module.id)}
                   >
@@ -145,11 +197,19 @@ export const ModuleItem = ({
               </Badge>
             </div>
             <div className="grid gap-2.5 md:gap-3">
-              {module.resources && module.resources.length > 0 ? (
-                module.resources.map((res) => (
+              {module.resources &&
+              (isTeacher
+                ? module.resources
+                : module.resources.filter((r) => r.status === "active")
+              ).length > 0 ? (
+                (isTeacher
+                  ? module.resources
+                  : module.resources.filter((r) => r.status === "active")
+                ).map((res) => (
                   <ResourceItem
                     key={res.id}
                     resource={res}
+                    isTeacher={isTeacher}
                     isStudent={isStudent}
                     classId={classId}
                     completed={isItemCompleted("resource", res.id)}

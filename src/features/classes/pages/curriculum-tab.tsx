@@ -28,6 +28,7 @@ import { useTranslation } from "react-i18next";
 import { CanAccess } from "@/components/auth/can-access";
 import { useDashboard } from "@/features/dashboard/hooks/use-dashboard";
 import { useJobs } from "@/contexts/job-context";
+import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
 
 interface CurriculumTabProps {
   classId: string;
@@ -45,6 +46,7 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [newModuleName, setNewModuleName] = useState("");
   const [newModuleDesc, setNewModuleDesc] = useState("");
+  const [isNewModulePublished, setIsNewModulePublished] = useState(false);
 
   const [isMagicModalOpen, setIsMagicModalOpen] = useState(false);
   const [isMagicCreating, setIsMagicCreating] = useState(false);
@@ -66,6 +68,7 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
     url: "",
     content: "",
     cldPubId: "",
+    status: "draft" as "draft" | "active",
   });
 
   const { query: modulesQuery } = useList<Module>({
@@ -89,6 +92,45 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
   const { mutate: deleteModule } = useDelete();
   const { mutate: customMutation } = useCustomMutation();
   const queryClient = useQueryClient();
+
+  const handleOnDragEnd = (result: DropResult) => {
+    if (!result.destination || !isTeacher) return;
+
+    const items = Array.from(modules).sort((a, b) => (a.order || 0) - (b.order || 0));
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+
+    // Optimistic update
+    const newOrders = items.map((item, index) => ({
+      id: item.id,
+      order: index,
+    }));
+
+    const queryKey = [
+      "modules",
+      {
+        filters: [{ field: "classId", operator: "eq" as const, value: Number(classId) }],
+      },
+    ];
+
+    queryClient.setQueryData(queryKey, (old: any) => {
+      if (!old) return old;
+      return {
+        ...old,
+        data: items.map((item, index) => ({ ...item, order: index })),
+      };
+    });
+
+    // Backend sync
+    customMutation({
+      url: "modules/reorder",
+      method: "post",
+      values: {
+        classId: Number(classId),
+        orders: newOrders,
+      },
+    });
+  };
 
   const isItemCompleted = (type: "resource" | "assignment" | "quiz", id: number) => {
     return userProgress.some(
@@ -196,6 +238,7 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
           description: newModuleDesc,
           classId: Number(classId),
           order: modules.length,
+          isPublished: isNewModulePublished,
         },
       },
       {
@@ -203,6 +246,7 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
           setIsCreateModalOpen(false);
           setNewModuleName("");
           setNewModuleDesc("");
+          setIsNewModulePublished(false);
           void modulesQuery.refetch();
         },
       }
@@ -273,6 +317,7 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
             url: "",
             content: "",
             cldPubId: "",
+            status: "draft",
           });
           void modulesQuery.refetch();
         },
@@ -352,6 +397,7 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
                 onClick={() => {
                   setNewModuleName("");
                   setNewModuleDesc("");
+                  setIsNewModulePublished(false);
                   setIsCreateModalOpen(true);
                 }}
                 className="flex-1 md:flex-none rounded-xl h-10 md:h-12 px-4 md:px-8 font-black uppercase tracking-widest text-[9px] md:text-[10px] gap-2 shadow-lg shadow-primary/20 transition-all active:scale-95"
@@ -392,60 +438,87 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
           </div>
 
           <Accordion type="multiple" className="w-full space-y-4 md:space-y-6">
-            <AnimatePresence mode="popLayout">
-              {modules.map((module, idx) => (
-                <motion.div
-                  key={module.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: idx * 0.05 }}
-                >
-                  <ModuleItem
-                    module={module}
-                    isTeacher={isTeacher}
-                    isStudent={isStudent}
-                    classId={classId}
-                    isItemCompleted={isItemCompleted}
-                    onToggleProgress={handleToggleProgress}
-                    onDeleteModule={(id) =>
-                      deleteModule(
-                        { resource: "modules", id },
-                        {
-                          onSuccess: () => {
-                            void modulesQuery.refetch();
-                          },
-                        }
-                      )
-                    }
-                    onMagicAction={(moduleId, type) => {
-                      setMagicConfig({
-                        ...magicConfig,
-                        moduleId,
-                        type: type as "package" | "note" | "quiz" | "assignment",
-                      });
-                      setIsMagicModalOpen(true);
-                    }}
-                    onAddMaterial={(moduleId) => {
-                      setActiveModuleId(moduleId);
-                      setNewResource({
-                        title: "",
-                        description: "",
-                        type: "file",
-                        url: "",
-                        content: "",
-                        cldPubId: "",
-                      });
-                      setIsAddResourceOpen(true);
-                    }}
-                    onAddTask={(moduleId) =>
-                      go({
-                        to: `/assignments/create?classId=${classId}&moduleId=${moduleId}`,
-                      })
-                    }
-                  />
-                </motion.div>
-              ))}
-            </AnimatePresence>
+            <DragDropContext onDragEnd={handleOnDragEnd}>
+              <Droppable droppableId="modules">
+                {(provided) => (
+                  <div {...provided.droppableProps} ref={provided.innerRef}>
+                    <AnimatePresence mode="popLayout">
+                      {modules
+                        .sort((a, b) => (a.order || 0) - (b.order || 0))
+                        .map((module, idx) => (
+                          <Draggable
+                            key={module.id}
+                            draggableId={module.id.toString()}
+                            index={idx}
+                            isDragDisabled={!isTeacher}
+                          >
+                            {(draggableProvided) => (
+                              <div
+                                ref={draggableProvided.innerRef}
+                                {...draggableProvided.draggableProps}
+                                className="mb-4 md:mb-6"
+                              >
+                                <motion.div
+                                  initial={{ opacity: 0, y: 20 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  transition={{ delay: idx * 0.05 }}
+                                >
+                                  <ModuleItem
+                                    module={module}
+                                    isTeacher={isTeacher}
+                                    isStudent={isStudent}
+                                    classId={classId}
+                                    dragHandleProps={draggableProvided.dragHandleProps}
+                                    isItemCompleted={isItemCompleted}
+                                    onToggleProgress={handleToggleProgress}
+                                    onDeleteModule={(id) =>
+                                      deleteModule(
+                                        { resource: "modules", id },
+                                        {
+                                          onSuccess: () => {
+                                            void modulesQuery.refetch();
+                                          },
+                                        }
+                                      )
+                                    }
+                                    onMagicAction={(moduleId, type) => {
+                                      setMagicConfig({
+                                        ...magicConfig,
+                                        moduleId,
+                                        type: type as "package" | "note" | "quiz" | "assignment",
+                                      });
+                                      setIsMagicModalOpen(true);
+                                    }}
+                                    onAddMaterial={(moduleId) => {
+                                      setActiveModuleId(moduleId);
+                                      setNewResource({
+                                        title: "",
+                                        description: "",
+                                        type: "file",
+                                        url: "",
+                                        content: "",
+                                        cldPubId: "",
+                                        status: "draft",
+                                      });
+                                      setIsAddResourceOpen(true);
+                                    }}
+                                    onAddTask={(moduleId) =>
+                                      go({
+                                        to: `/assignments/create?classId=${classId}&moduleId=${moduleId}`,
+                                      })
+                                    }
+                                  />
+                                </motion.div>
+                              </div>
+                            )}
+                          </Draggable>
+                        ))}
+                    </AnimatePresence>
+                    {provided.placeholder}
+                  </div>
+                )}
+              </Droppable>
+            </DragDropContext>
           </Accordion>
         </div>
       )}
@@ -477,6 +550,8 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
         setName={setNewModuleName}
         description={newModuleDesc}
         setDescription={setNewModuleDesc}
+        isPublished={isNewModulePublished}
+        setIsPublished={setIsNewModulePublished}
         onCreate={handleCreateModule}
       />
     </div>
