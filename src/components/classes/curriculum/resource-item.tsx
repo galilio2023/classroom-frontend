@@ -16,10 +16,11 @@ import ReactMarkdown from "react-markdown";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
+import { AiFeatureGuard } from "@/components/ai/AiFeatureGuard";
+import { Badge } from "@/components/ui/badge";
 
 interface ResourceItemProps {
   resource: Resource;
-  isTeacher: boolean;
   isStudent: boolean;
   completed: boolean;
   classId: string;
@@ -28,7 +29,6 @@ interface ResourceItemProps {
 
 export const ResourceItem = ({
   resource,
-  isTeacher,
   isStudent,
   completed,
   classId,
@@ -62,8 +62,7 @@ export const ResourceItem = ({
         "group flex flex-col p-3 md:p-4 rounded-xl md:rounded-2xl border transition-all duration-300",
         completed
           ? "bg-success/5 border-success/20 shadow-sm"
-          : "bg-card/50 border-black/3 dark:border-white/3 hover:border-primary/20 hover:bg-card hover:shadow-md",
-        isTeacher && resource.status !== "active" && "opacity-75 grayscale-[0.5]"
+          : "bg-card/50 border-black/3 dark:border-white/3 hover:border-primary/20 hover:bg-card hover:shadow-md"
       )}
     >
       <div className="flex items-center justify-between gap-3 md:gap-4">
@@ -119,18 +118,14 @@ export const ResourceItem = ({
                 >
                   {resource.title}
                 </span>
-                {isTeacher && resource.status !== "active" && (
-                  <Badge
-                    variant="outline"
-                    className="bg-muted text-muted-foreground border-none text-[7px] font-black uppercase tracking-tighter px-1.5 py-0 h-3.5"
-                  >
-                    {t("common.draft", "Draft")}
-                  </Badge>
-                )}
               </div>
               <span className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-muted-foreground/40 truncate">
                 {t(`classes.resource.addDialog.types.${resource.type}`)}{" "}
-                {resource.type === "note" && `• ${t("common.aiAnalyzed")}`}
+                {resource.type === "note" && (
+                  <AiFeatureGuard>
+                    <span>• {t("common.aiAnalyzed")}</span>
+                  </AiFeatureGuard>
+                )}
               </span>
             </div>
           </div>

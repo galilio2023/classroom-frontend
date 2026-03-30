@@ -230,7 +230,10 @@ export function Header() {
             </DropdownMenuItem>
 
             {isInstallable && !isStandalone && (
-              <DropdownMenuItem className="gap-2 cursor-pointer font-bold text-primary" onClick={handleInstallClick}>
+              <DropdownMenuItem
+                className="gap-2 cursor-pointer font-bold text-primary"
+                onClick={handleInstallClick}
+              >
                 <Download className="h-4 w-4" />
                 <span>{t("common.installApp", "Install App")}</span>
               </DropdownMenuItem>

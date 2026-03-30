@@ -19,7 +19,7 @@ const STATIC_ASSETS = [
   "/manifest.webmanifest",
   "/offline.html",
   "/logo.svg",
-  "/favicon.ico"
+  "/favicon.ico",
 ];
 
 self.addEventListener("install", (event) => {
@@ -34,9 +34,7 @@ self.addEventListener("install", (event) => {
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
-      return Promise.all(
-        keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
-      );
+      return Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key)));
     })
   );
   self.clients.claim();
@@ -56,12 +54,16 @@ self.addEventListener("fetch", (event) => {
   event.respondWith(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.match(request).then((cachedResponse) => {
-        const fetchPromise = fetch(request).then((networkResponse) => {
-          cache.put(request, networkResponse.clone());
-          return networkResponse;
-        }).catch(() => {
-            return cachedResponse || (request.mode === 'navigate' ? cache.match(OFFLINE_URL) : undefined);
-        });
+        const fetchPromise = fetch(request)
+          .then((networkResponse) => {
+            cache.put(request, networkResponse.clone());
+            return networkResponse;
+          })
+          .catch(() => {
+            return (
+              cachedResponse || (request.mode === "navigate" ? cache.match(OFFLINE_URL) : undefined)
+            );
+          });
 
         return cachedResponse || fetchPromise;
       });

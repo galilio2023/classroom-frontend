@@ -738,7 +738,10 @@ export const LiveClassroom = ({
               </p>
             </div>
             {isTeacher && isJoined && (
-              <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 px-3 py-1.5 rounded-full font-black gap-2 animate-in fade-in zoom-in duration-500">
+              <Badge
+                variant="outline"
+                className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 px-3 py-1.5 rounded-full font-black gap-2 animate-in fade-in zoom-in duration-500"
+              >
                 <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
                 <Users className="h-3.5 w-3.5" />
                 {studentCount} {t("classes.live.studentsPresent", "Live Now")}

@@ -137,11 +137,13 @@ export const useAttendanceDetails = (classId: string, enrollments: Enrollment[],
     setAttendanceData(newData);
   };
 
-  const handleSave = () => {
-    const records = Object.entries(attendanceData).map(([studentId, data]) => ({
-      studentId,
-      ...data,
-    }));
+  const handleSave = (customRecords?: any[]) => {
+    const records =
+      customRecords ||
+      Object.entries(attendanceData).map(([studentId, data]) => ({
+        studentId,
+        ...data,
+      }));
 
     saveAttendance(
       {

@@ -1,10 +1,4 @@
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,38 +13,61 @@ import {
 } from "@/components/ui/select";
 import { FileUpload } from "@/components/file-upload";
 import { useTranslation } from "react-i18next";
-
-interface ResourceState {
-  title: string;
-  description: string;
-  type: "file" | "link" | "video" | "note" | "other";
-  url: string;
-  content: string;
-  cldPubId: string;
-  status: "draft" | "active";
-}
+import { useForm } from "@refinedev/react-hook-form";
+import { Controller } from "react-hook-form";
 
 interface AddResourceDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  resource: ResourceState;
-  setResource: (res: ResourceState) => void;
-  onSave: () => void;
+  classId: number;
+  moduleId: number;
 }
 
 export const AddResourceDialog = ({
   isOpen,
   onOpenChange,
-  resource,
-  setResource,
-  onSave,
+  classId,
+  moduleId,
 }: AddResourceDialogProps) => {
   const { t } = useTranslation();
+
+  const {
+    refineCore: { onFinish, formLoading },
+    register,
+    handleSubmit,
+    control,
+    reset,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm({
+    refineCoreProps: {
+      resource: "resources",
+      action: "create",
+      onMutationSuccess: () => {
+        onOpenChange(false);
+        reset();
+      },
+    },
+    defaultValues: {
+      title: "",
+      description: "",
+      type: "file",
+      url: "",
+      content: "",
+      cldPubId: "",
+      status: "draft",
+      classId,
+      moduleId,
+    },
+  });
+
+  const resourceType = watch("type");
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-150 rounded-3xl border-none shadow-2xl p-0 overflow-hidden bg-card/95 backdrop-blur-2xl">
-        <div className="p-8 space-y-6">
+        <form onSubmit={handleSubmit(onFinish)} className="p-8 space-y-6">
           <DialogHeader className="space-y-3 text-start">
             <DialogTitle className="text-2xl font-black tracking-tight">
               {t("classes.resource.addDialog.title")}
@@ -64,52 +81,66 @@ export const AddResourceDialog = ({
                 </Label>
                 <Input
                   placeholder={t("classes.resource.addDialog.titlePlaceholder")}
-                  value={resource.title}
-                  onChange={(e) => setResource({ ...resource, title: e.target.value })}
+                  {...register("title", { required: true })}
                   className="h-12 rounded-xl border-muted-foreground/20 focus:border-primary transition-all font-bold"
                 />
+                {errors.title && (
+                  <span className="text-[10px] text-destructive font-bold px-1 uppercase tracking-tighter">
+                    {t("common.required", "Required")}
+                  </span>
+                )}
               </div>
               <div className="space-y-2">
                 <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">
                   {t("classes.resource.addDialog.fieldType")}
                 </Label>
-                <Select
-                  value={resource.type}
-                  onValueChange={(v: ResourceState["type"]) => setResource({ ...resource, type: v })}
-                >
-                  <SelectTrigger className="h-12 rounded-xl border-muted-foreground/20 focus:border-primary transition-all font-bold">
-                    <SelectValue placeholder={t("classes.resource.addDialog.typePlaceholder")} />
-                  </SelectTrigger>
-                  <SelectContent className="rounded-xl border-muted-foreground/20">
-                    <SelectItem value="note">{t("classes.resource.addDialog.types.note")}</SelectItem>
-                    <SelectItem value="file">{t("classes.resource.addDialog.types.file")}</SelectItem>
-                    <SelectItem value="link">{t("classes.resource.addDialog.types.link")}</SelectItem>
-                    <SelectItem value="video">
-                      {t("classes.resource.addDialog.types.video")}
-                    </SelectItem>
-                    <SelectItem value="other">
-                      {t("classes.resource.addDialog.types.other")}
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
+                <Controller
+                  name="type"
+                  control={control}
+                  render={({ field }) => (
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger className="h-12 rounded-xl border-muted-foreground/20 focus:border-primary transition-all font-bold">
+                        <SelectValue
+                          placeholder={t("classes.resource.addDialog.typePlaceholder")}
+                        />
+                      </SelectTrigger>
+                      <SelectContent className="rounded-xl border-muted-foreground/20">
+                        <SelectItem value="note">
+                          {t("classes.resource.addDialog.types.note")}
+                        </SelectItem>
+                        <SelectItem value="file">
+                          {t("classes.resource.addDialog.types.file")}
+                        </SelectItem>
+                        <SelectItem value="link">
+                          {t("classes.resource.addDialog.types.link")}
+                        </SelectItem>
+                        <SelectItem value="video">
+                          {t("classes.resource.addDialog.types.video")}
+                        </SelectItem>
+                        <SelectItem value="other">
+                          {t("classes.resource.addDialog.types.other")}
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
               </div>
             </div>
 
-            {(resource.type === "link" || resource.type === "video" || resource.type === "other") && (
+            {(resourceType === "link" || resourceType === "video" || resourceType === "other") && (
               <div className="space-y-2">
                 <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">
                   {t("classes.resource.addDialog.fieldUrl")}
                 </Label>
                 <Input
                   placeholder={t("classes.resource.addDialog.urlPlaceholder")}
-                  value={resource.url}
-                  onChange={(e) => setResource({ ...resource, url: e.target.value })}
+                  {...register("url", { required: true })}
                   className="h-12 rounded-xl border-muted-foreground/20 focus:border-primary transition-all font-bold"
                 />
               </div>
             )}
 
-            {resource.type === "note" && (
+            {resourceType === "note" && (
               <div className="space-y-2">
                 <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">
                   {t("classes.resource.addDialog.fieldContent")}
@@ -117,13 +148,12 @@ export const AddResourceDialog = ({
                 <Textarea
                   className="min-h-50 rounded-xl border-muted-foreground/20 focus:border-primary transition-all font-medium leading-relaxed"
                   placeholder={t("classes.resource.addDialog.contentPlaceholder")}
-                  value={resource.content}
-                  onChange={(e) => setResource({ ...resource, content: e.target.value })}
+                  {...register("content", { required: true })}
                 />
               </div>
             )}
 
-            {resource.type === "file" && (
+            {resourceType === "file" && (
               <div className="space-y-2">
                 <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">
                   {t("classes.resource.addDialog.fieldUpload", {
@@ -131,9 +161,10 @@ export const AddResourceDialog = ({
                   })}
                 </Label>
                 <FileUpload
-                  onUploadSuccess={(url, pubId) =>
-                    setResource({ ...resource, url, cldPubId: pubId })
-                  }
+                  onUploadSuccess={(url, pubId) => {
+                    setValue("url", url);
+                    setValue("cldPubId", pubId);
+                  }}
                 />
               </div>
             )}
@@ -141,17 +172,21 @@ export const AddResourceDialog = ({
             <div className="flex items-center justify-between p-4 rounded-2xl bg-primary/5 border border-primary/10">
               <div className="space-y-0.5">
                 <Label className="text-sm font-black tracking-tight">
-                  {t("classes.curriculum.publishImmediately", "Publish Immediately")}
+                  {t("common.curriculum.publishImmediately")}
                 </Label>
-                <p className="text-[10px] font-bold text-muted-foreground">
-                  {t("classes.curriculum.resourcePublishHelp", "Visible to students once saved.")}
+                <p className="text-[10px] font-black text-muted-foreground">
+                  {t("common.curriculum.resourcePublishHelp")}
                 </p>
               </div>
-              <Switch
-                checked={resource.status === "active"}
-                onCheckedChange={(val) =>
-                  setResource({ ...resource, status: val ? "active" : "draft" })
-                }
+              <Controller
+                name="status"
+                control={control}
+                render={({ field }) => (
+                  <Switch
+                    checked={field.value === "active"}
+                    onCheckedChange={(val) => field.onChange(val ? "active" : "draft")}
+                  />
+                )}
               />
             </div>
           </div>
@@ -159,20 +194,21 @@ export const AddResourceDialog = ({
           <div className="flex gap-3 pt-2">
             <Button
               variant="outline"
+              type="button"
               onClick={() => onOpenChange(false)}
               className="flex-1 h-12 rounded-xl font-black uppercase tracking-widest text-[10px] border-muted-foreground/20"
             >
               {t("buttons.cancel")}
             </Button>
             <Button
-              onClick={onSave}
-              disabled={!resource.title.trim()}
+              type="submit"
+              disabled={formLoading}
               className="flex-1 h-12 rounded-xl font-black uppercase tracking-widest text-[10px] shadow-xl shadow-primary/20"
             >
-              {t("buttons.save")}
+              {formLoading ? t("common.loading", "Loading...") : t("buttons.save")}
             </Button>
           </div>
-        </div>
+        </form>
       </DialogContent>
     </Dialog>
   );

@@ -33,9 +33,12 @@ export const MemoryBoosterList: React.FC<MemoryBoosterListProps> = ({ onSelectTo
 
   // Extremely defensive extraction to prevent "filter is not a function"
   // result might be the payload, or it might have a data property which is the payload
-  const payload = (result as any)?.data || result;
+  const resultData = result as unknown as { data?: SpacedRepetition[] };
+  const payload = resultData?.data || result;
   // payload might be the array, or it might be { success, data: [...] }
-  const boostersData = Array.isArray(payload) ? payload : (payload as any)?.data;
+  const boostersData = Array.isArray(payload)
+    ? payload
+    : (payload as unknown as { data?: SpacedRepetition[] })?.data;
   const boosters = Array.isArray(boostersData) ? boostersData : [];
 
   const isLoading = query.isLoading;

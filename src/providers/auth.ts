@@ -22,7 +22,7 @@ let lastFailedFetchTime = 0;
 let pendingPromise: Promise<any> | null = null;
 
 const CACHE_TTL = 30000; // 30 seconds for success
-const FAILED_TTL = 5000;  // 5 seconds for failures
+const FAILED_TTL = 5000; // 5 seconds for failures
 
 // 🛡️ MOBILE STABILITY: Helper to ensure authClient has the token
 const syncToken = (token?: string | null) => {
@@ -34,7 +34,7 @@ const syncToken = (token?: string | null) => {
 
 export const getFreshSession = async () => {
   const now = Date.now();
-  
+
   // 1. Return success cache
   if (cachedSessionData && now - lastFetchTime < CACHE_TTL) {
     return { data: cachedSessionData, error: null };
@@ -57,7 +57,7 @@ export const getFreshSession = async () => {
         cachedSessionData = result.data;
         lastFetchTime = Date.now();
         lastFailedFetchTime = 0;
-        
+
         const sessionToken = (result.data as any).session?.token;
         if (sessionToken) {
           syncToken(sessionToken);
@@ -132,7 +132,7 @@ export const authProvider: AuthProvider = {
         const user = data.user as unknown as User;
         cachedSessionData = data;
         lastFetchTime = Date.now();
-        
+
         // 🛡️ MOBILE STABILITY: Explicitly store token
         // In signIn result, token is at the top level
         const sessionToken = (data as any).token;
@@ -193,7 +193,7 @@ export const authProvider: AuthProvider = {
           const localUser = localStorage.getItem("user");
           if (localUser) return { authenticated: true };
         }
-        
+
         // In production, if session check failed, try to clear potential stale token
         localStorage.removeItem("tablawy_auth_token");
       }

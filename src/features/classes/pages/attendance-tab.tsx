@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Users, CheckCircle2, QrCode, ScanLine, History } from "lucide-react";
+import { Users, CheckCircle2, QrCode, ScanLine, History, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { format } from "date-fns";
@@ -176,21 +176,44 @@ export const AttendanceTab = ({ classId, enrollments }: AttendanceTabProps) => {
                     size="sm"
                     disabled={isUpdating}
                     onClick={() => {
+                      // Calculate the new state for all active enrollments
+                      const newData = { ...attendanceData };
+                      activeEnrollments.forEach((e) => {
+                        newData[e.studentId] = {
+                          ...newData[e.studentId],
+                          status: AttendanceStatus.PRESENT,
+                        };
+                      });
+
+                      const records = Object.entries(newData).map(([studentId, data]) => ({
+                        studentId,
+                        ...data,
+                      }));
+
+                      // Update local state and save directly
                       handleBulkMark(AttendanceStatus.PRESENT);
-                      // SetTimeout ensures the state update has finished before saving
-                      setTimeout(() => onSaveWithCelebration(), 100);
+                      handleSave(records);
+
+                      // Celebration
+                      setShowConfetti(true);
+                      setTimeout(() => setShowConfetti(false), 5000);
                     }}
                     className="h-9 rounded-xl px-4 text-[10px] font-black uppercase tracking-widest text-emerald-600 border-emerald-500/20 hover:bg-emerald-500/10 gap-2"
                   >
-                    <CheckCircle2 className="h-3.5 w-3.5" />
+                    {isUpdating ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <CheckCircle2 className="h-3.5 w-3.5" />
+                    )}
                     {(t as any)("classes.attendance.markAllPresent")}
                   </Button>
                   <Button
                     size="sm"
-                    loading={isUpdating}
+                    disabled={isUpdating}
                     onClick={onSaveWithCelebration}
                     className="h-9 rounded-xl px-6 text-[10px] font-black uppercase tracking-widest shadow-lg shadow-primary/20"
                   >
+                    {isUpdating && <Loader2 className="h-3.5 w-3.5 animate-spin me-2" />}
                     {(t as any)("buttons.save")}
                   </Button>
                 </div>

@@ -75,7 +75,6 @@ export const ModuleItem = ({
       id: module.id,
       values: {
         isPublished: !module.isPublished,
-        version: module.version, // Ensure version is passed for optimistic locking
       },
     });
   };
@@ -89,6 +88,7 @@ export const ModuleItem = ({
         {isTeacher && (
           <div
             {...dragHandleProps}
+            aria-label="Drag to reorder"
             className="p-2 cursor-grab active:cursor-grabbing text-muted-foreground/30 hover:text-primary transition-colors"
           >
             <GripVertical className="h-5 w-5" />
@@ -197,19 +197,11 @@ export const ModuleItem = ({
               </Badge>
             </div>
             <div className="grid gap-2.5 md:gap-3">
-              {module.resources &&
-              (isTeacher
-                ? module.resources
-                : module.resources.filter((r) => r.status === "active")
-              ).length > 0 ? (
-                (isTeacher
-                  ? module.resources
-                  : module.resources.filter((r) => r.status === "active")
-                ).map((res) => (
+              {(module.resources ?? []).length > 0 ? (
+                (module.resources ?? []).map((res) => (
                   <ResourceItem
                     key={res.id}
                     resource={res}
-                    isTeacher={isTeacher}
                     isStudent={isStudent}
                     classId={classId}
                     completed={isItemCompleted("resource", res.id)}

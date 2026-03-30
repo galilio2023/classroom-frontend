@@ -155,7 +155,7 @@ export const GradingDialog = ({
       setShowConfetti(false);
       setAiStatus(submission?.aiStatus || "idle");
       setAiError(submission?.aiError || null);
-      
+
       // Reset form values for new submission
       reset({
         grade: submission?.grade ?? 0,
@@ -204,7 +204,17 @@ export const GradingDialog = ({
   }, [isOpen, submission?.id, socket, setValue, t, queryClient]);
 
   useEffect(() => {
-    if (submission && isStaff && isOpen && !submission.grade && !submission.suggestedGrade && !hasAutoAnalyzed && !isAILoading && !isDraft && aiStatus === "idle") {
+    if (
+      submission &&
+      isStaff &&
+      isOpen &&
+      !submission.grade &&
+      !submission.suggestedGrade &&
+      !hasAutoAnalyzed &&
+      !isAILoading &&
+      !isDraft &&
+      aiStatus === "idle"
+    ) {
       handleAIGrade();
       setHasAutoAnalyzed(true);
     }
@@ -226,9 +236,9 @@ export const GradingDialog = ({
         onSuccess: () => {
           setIsSuccess(true);
           if (values.grade >= 90) setShowConfetti(true);
-          
+
           toast.success(t("assignments.grading.gradeSaved"));
-          
+
           setTimeout(() => {
             setIsSuccess(false);
             if (hasNext) {
@@ -245,20 +255,23 @@ export const GradingDialog = ({
   const handleAIGrade = () => {
     if (!submission || !isStaff || isDraft) return;
     setAiStatus("processing");
-    getAIFeedback({
-      url: `/submissions/${submission.id}/ai-grade`,
-      method: "post",
-      values: {},
-    }, {
-      onSuccess: (response: any) => {
-        if (response.status === "accepted") return;
-        const { suggestedGrade, feedback } = response.data;
-        setValue("grade", Number(suggestedGrade));
-        setValue("feedback", feedback);
-        setIsAISuggested(true);
-        setAiStatus("completed");
+    getAIFeedback(
+      {
+        url: `/submissions/${submission.id}/ai-grade`,
+        method: "post",
+        values: {},
+      },
+      {
+        onSuccess: (response: any) => {
+          if (response.status === "accepted") return;
+          const { suggestedGrade, feedback } = response.data;
+          setValue("grade", Number(suggestedGrade));
+          setValue("feedback", feedback);
+          setIsAISuggested(true);
+          setAiStatus("completed");
+        },
       }
-    });
+    );
   };
 
   const copyToClipboard = () => {
@@ -276,18 +289,24 @@ export const GradingDialog = ({
         className="max-w-[95vw] w-[1400px] h-[90vh] overflow-hidden border-none shadow-2xl p-0 text-start bg-background/95 backdrop-blur-xl flex flex-col"
         style={{ direction: isAr ? "rtl" : "ltr" }}
       >
-        {showConfetti && <Confetti width={width} height={height} recycle={false} numberOfPieces={200} />}
+        {showConfetti && (
+          <Confetti width={width} height={height} recycle={false} numberOfPieces={200} />
+        )}
 
         {/* --- TOP BAR: SPEED GRADER CONTROLS --- */}
         <div className="h-16 border-b bg-card/50 flex items-center justify-between px-6 shrink-0">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-3">
               <Avatar className="h-9 w-9 border-2 border-primary/10">
-                <AvatarImage src={submission.student?.image} />
-                <AvatarFallback className="font-black text-xs">{submission.student?.name?.[0]}</AvatarFallback>
+                <AvatarImage src={submission.student?.image || undefined} />
+                <AvatarFallback className="font-black text-xs">
+                  {submission.student?.name?.[0]}
+                </AvatarFallback>
               </Avatar>
               <div>
-                <p className="text-sm font-black tracking-tight leading-none">{submission.student?.name}</p>
+                <p className="text-sm font-black tracking-tight leading-none">
+                  {submission.student?.name}
+                </p>
                 <p className="text-[10px] font-bold text-muted-foreground uppercase mt-1">
                   {t("assignments.grading.attempt", { count: submission.attemptNumber })}
                 </p>
@@ -320,21 +339,25 @@ export const GradingDialog = ({
           </div>
 
           <div className="flex items-center gap-3">
-             {isAISuggested && (
-                <Badge className="bg-ai-primary/10 text-ai-primary border-none font-black text-[10px] uppercase tracking-widest px-3 py-1 rounded-lg animate-pulse">
-                  <Sparkles className="h-3 w-3 me-1.5" />
-                  {t("assignments.grading.aiSuggested")}
-                </Badge>
-              )}
-              <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)} className="rounded-xl h-10 w-10">
-                <Maximize2 className="h-4 w-4 rotate-45" />
-              </Button>
+            {isAISuggested && (
+              <Badge className="bg-ai-primary/10 text-ai-primary border-none font-black text-[10px] uppercase tracking-widest px-3 py-1 rounded-lg animate-pulse">
+                <Sparkles className="h-3 w-3 me-1.5" />
+                {t("assignments.grading.aiSuggested")}
+              </Badge>
+            )}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => onOpenChange(false)}
+              className="rounded-xl h-10 w-10"
+            >
+              <Maximize2 className="h-4 w-4 rotate-45" />
+            </Button>
           </div>
         </div>
 
         {/* --- MAIN CONTENT: 70/30 SPLIT --- */}
         <div className="flex-1 flex overflow-hidden">
-          
           {/* LEFT: STUDENT WORK (70%) */}
           <div className="flex-[7] bg-muted/10 overflow-hidden flex flex-col border-e">
             <ScrollArea className="flex-1 p-8 md:p-12">
@@ -345,12 +368,21 @@ export const GradingDialog = ({
                       <span className="w-1.5 h-1.5 rounded-full bg-primary" />
                       {t("assignments.grading.studentWork")}
                     </h3>
-                    <Button variant="ghost" size="sm" onClick={copyToClipboard} className="h-8 rounded-lg text-[9px] font-black uppercase tracking-widest gap-2">
-                      {copied ? <Check className="h-3 w-3 text-success" /> : <Copy className="h-3 w-3" />}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={copyToClipboard}
+                      className="h-8 rounded-lg text-[9px] font-black uppercase tracking-widest gap-2"
+                    >
+                      {copied ? (
+                        <Check className="h-3 w-3 text-success" />
+                      ) : (
+                        <Copy className="h-3 w-3" />
+                      )}
                       {t("buttons.copy")}
                     </Button>
                   </div>
-                  
+
                   <div className="bg-card p-10 rounded-4xl shadow-sm border leading-relaxed text-lg font-medium italic min-h-[400px] relative">
                     <MessageSquareQuote className="absolute top-6 start-6 h-12 w-12 text-primary/5 -scale-x-100" />
                     <div className="relative z-10 whitespace-pre-wrap">{submission.content}</div>
@@ -364,11 +396,18 @@ export const GradingDialog = ({
                         <FileText className="h-8 w-8 text-primary" />
                       </div>
                       <div>
-                        <p className="font-black text-sm uppercase tracking-tight">{t("assignments.grading.attachedDoc")}</p>
-                        <p className="text-xs text-muted-foreground font-medium">{t("assignments.grading.viewOrDownload")}</p>
+                        <p className="font-black text-sm uppercase tracking-tight">
+                          {t("assignments.grading.attachedDoc")}
+                        </p>
+                        <p className="text-xs text-muted-foreground font-medium">
+                          {t("assignments.grading.viewOrDownload")}
+                        </p>
                       </div>
                     </div>
-                    <Button className="h-12 px-8 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-xl shadow-primary/20" asChild>
+                    <Button
+                      className="h-12 px-8 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-xl shadow-primary/20"
+                      asChild
+                    >
                       <a href={submission.fileUrl} target="_blank" rel="noreferrer">
                         <Download className="h-4 w-4 me-2" />
                         {t("buttons.open")}
@@ -405,7 +444,9 @@ export const GradingDialog = ({
                                     onChange={(e) => field.onChange(Number(e.target.value))}
                                     className="h-24 text-6xl font-black text-center rounded-3xl bg-muted/20 border-none focus-visible:ring-primary focus-visible:ring-offset-0 transition-all"
                                   />
-                                  <span className="absolute end-8 top-1/2 -translate-y-1/2 text-3xl font-black opacity-20">%</span>
+                                  <span className="absolute end-8 top-1/2 -translate-y-1/2 text-3xl font-black opacity-20">
+                                    %
+                                  </span>
                                 </div>
                                 <Slider
                                   value={[field.value ?? 0]}
@@ -449,7 +490,9 @@ export const GradingDialog = ({
                                 <FormLabel className="text-[10px] font-black uppercase tracking-widest text-orange-700">
                                   {t("assignments.grading.requiresResubmission")}
                                 </FormLabel>
-                                <p className="text-[9px] text-orange-600/60 font-bold">{t("assignments.grading.resubmissionNote")}</p>
+                                <p className="text-[9px] text-orange-600/60 font-bold">
+                                  {t("assignments.grading.resubmissionNote")}
+                                </p>
                               </div>
                               <FormControl>
                                 <Switch checked={field.value} onCheckedChange={field.onChange} />
@@ -487,7 +530,13 @@ export const GradingDialog = ({
 };
 
 // Helper components missing from original imports but needed for the UI
-const Switch = ({ checked, onCheckedChange }: { checked: boolean; onCheckedChange: (v: boolean) => void }) => (
+const Switch = ({
+  checked,
+  onCheckedChange,
+}: {
+  checked: boolean;
+  onCheckedChange: (v: boolean) => void;
+}) => (
   <button
     type="button"
     onClick={() => onCheckedChange(!checked)}
@@ -496,9 +545,11 @@ const Switch = ({ checked, onCheckedChange }: { checked: boolean; onCheckedChang
       checked ? "bg-primary" : "bg-muted"
     )}
   >
-    <div className={cn(
-      "absolute top-1 start-1 h-4 w-4 rounded-full bg-white transition-transform",
-      checked ? "translate-x-5" : "translate-x-0"
-    )} />
+    <div
+      className={cn(
+        "absolute top-1 start-1 h-4 w-4 rounded-full bg-white transition-transform",
+        checked ? "translate-x-5" : "translate-x-0"
+      )}
+    />
   </button>
 );

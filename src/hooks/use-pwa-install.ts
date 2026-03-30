@@ -43,7 +43,7 @@ export const usePWAInstall = () => {
 
     // Wait for the user to respond to the prompt
     const { outcome } = await installPrompt.userChoice;
-    
+
     if (outcome === "accepted") {
       setIsInstallable(false);
       setInstallPrompt(null);

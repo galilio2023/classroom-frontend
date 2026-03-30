@@ -16,6 +16,7 @@ import {
   Loader2,
   X,
   FileText,
+  Sparkles,
 } from "lucide-react";
 import { useApiUrl, useInvalidate, useGetIdentity } from "@refinedev/core";
 import { toast } from "sonner";
@@ -180,21 +181,29 @@ export const BulkEnrollDialog = ({ open, onOpenChange, classId }: BulkEnrollDial
           {loading && !results ? (
             <div className="py-10 flex flex-col items-center justify-center space-y-6 animate-in fade-in duration-500">
               <div className="relative">
-                <Loader2 className="h-16 w-16 text-primary animate-spin opacity-20" />
+                <div className="absolute inset-0 bg-ai-primary/20 blur-3xl rounded-full animate-pulse" />
+                <Loader2 className="h-16 w-16 text-ai-primary animate-spin opacity-20" />
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <FileSpreadsheet className="h-8 w-8 text-primary animate-pulse" />
+                  <Sparkles className="h-8 w-8 text-ai-primary animate-pulse" />
                 </div>
               </div>
               <div className="w-full space-y-3">
                 <div className="flex justify-between items-center px-1">
-                  <p className="text-[10px] font-black uppercase tracking-widest text-primary">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-ai-primary">
                     {t("common.processing", "Processing Students...")}
                   </p>
-                  <p className="text-[10px] font-black text-primary">{progress}%</p>
+                  <p className="text-[10px] font-black text-ai-primary">{progress}%</p>
                 </div>
-                <Progress value={progress} className="h-2 rounded-full" />
+                <Progress
+                  value={progress}
+                  className="h-2 rounded-full bg-ai-primary/10"
+                  indicatorClassName="bg-ai-primary"
+                />
                 <p className="text-[9px] font-bold text-muted-foreground text-center">
-                  {t("classes.show.students.bulk.waitMessage", "Please stay on this page until complete.")}
+                  {t(
+                    "classes.show.students.bulk.waitMessage",
+                    "Please stay on this page until complete."
+                  )}
                 </p>
               </div>
             </div>

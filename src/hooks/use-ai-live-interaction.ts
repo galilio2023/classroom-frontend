@@ -286,7 +286,6 @@ export const useAILiveInteraction = ({
 
   // 2. 👂 SPEECH RECOGNITION ENGINE
   const startListening = useCallback(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const SpeechRecognitionClass =
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (window as any).SpeechRecognition ||

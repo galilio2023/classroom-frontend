@@ -45,7 +45,10 @@ export const StudentDashboard = ({ data, isLoading, list, show }: StudentDashboa
     actions.push({
       id: "pwa-install",
       title: t("common.installAppTitle", "Tablawy OS on Mobile"),
-      description: t("common.installAppDesc", "Install Tablawy on your home screen for a better experience and offline access."),
+      description: t(
+        "common.installAppDesc",
+        "Install Tablawy on your home screen for a better experience and offline access."
+      ),
       priority: "urgent",
       actionText: t("common.installApp", "Install Now"),
       onClick: handleInstallClick,

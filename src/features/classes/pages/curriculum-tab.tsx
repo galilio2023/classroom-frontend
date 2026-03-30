@@ -44,9 +44,6 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
   const go = useGo();
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [newModuleName, setNewModuleName] = useState("");
-  const [newModuleDesc, setNewModuleDesc] = useState("");
-  const [isNewModulePublished, setIsNewModulePublished] = useState(false);
 
   const [isMagicModalOpen, setIsMagicModalOpen] = useState(false);
   const [isMagicCreating, setIsMagicCreating] = useState(false);
@@ -61,15 +58,6 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
 
   const [isAddResourceOpen, setIsAddResourceOpen] = useState(false);
   const [activeModuleId, setActiveModuleId] = useState<number | null>(null);
-  const [newResource, setNewResource] = useState({
-    title: "",
-    description: "",
-    type: "file" as "file" | "link" | "video" | "note" | "other",
-    url: "",
-    content: "",
-    cldPubId: "",
-    status: "draft" as "draft" | "active",
-  });
 
   const { query: modulesQuery } = useList<Module>({
     resource: "modules",
@@ -87,8 +75,6 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
   const userProgress = progressQuery.data?.data || [];
   const isLoading = modulesQuery.isLoading;
 
-  const { mutate: createModule } = useCreate();
-  const { mutate: createResource } = useCreate<Resource>();
   const { mutate: deleteModule } = useDelete();
   const { mutate: customMutation } = useCustomMutation();
   const queryClient = useQueryClient();
@@ -228,31 +214,6 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
     );
   };
 
-  const handleCreateModule = () => {
-    if (!newModuleName.trim()) return;
-    createModule(
-      {
-        resource: "modules",
-        values: {
-          name: newModuleName,
-          description: newModuleDesc,
-          classId: Number(classId),
-          order: modules.length,
-          isPublished: isNewModulePublished,
-        },
-      },
-      {
-        onSuccess: () => {
-          setIsCreateModalOpen(false);
-          setNewModuleName("");
-          setNewModuleDesc("");
-          setIsNewModulePublished(false);
-          void modulesQuery.refetch();
-        },
-      }
-    );
-  };
-
   const { addJob } = useJobs();
 
   const handleMagicCreate = () => {
@@ -292,35 +253,6 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
           }
         },
         onError: () => setIsMagicCreating(false),
-      }
-    );
-  };
-
-  const handleAddResource = () => {
-    if (!newResource.title || !activeModuleId) return;
-    createResource(
-      {
-        resource: "resources",
-        values: {
-          ...newResource,
-          classId: Number(classId),
-          moduleId: activeModuleId,
-        },
-      },
-      {
-        onSuccess: () => {
-          setIsAddResourceOpen(false);
-          setNewResource({
-            title: "",
-            description: "",
-            type: "file",
-            url: "",
-            content: "",
-            cldPubId: "",
-            status: "draft",
-          });
-          void modulesQuery.refetch();
-        },
       }
     );
   };
@@ -395,9 +327,6 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
               <Button
                 id="guide-add-module"
                 onClick={() => {
-                  setNewModuleName("");
-                  setNewModuleDesc("");
-                  setIsNewModulePublished(false);
                   setIsCreateModalOpen(true);
                 }}
                 className="flex-1 md:flex-none rounded-xl h-10 md:h-12 px-4 md:px-8 font-black uppercase tracking-widest text-[9px] md:text-[10px] gap-2 shadow-lg shadow-primary/20 transition-all active:scale-95"
@@ -491,15 +420,6 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
                                     }}
                                     onAddMaterial={(moduleId) => {
                                       setActiveModuleId(moduleId);
-                                      setNewResource({
-                                        title: "",
-                                        description: "",
-                                        type: "file",
-                                        url: "",
-                                        content: "",
-                                        cldPubId: "",
-                                        status: "draft",
-                                      });
                                       setIsAddResourceOpen(true);
                                     }}
                                     onAddTask={(moduleId) =>
@@ -535,25 +455,23 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
         />
       )}
 
-      <AddResourceDialog
-        isOpen={isAddResourceOpen}
-        onOpenChange={setIsAddResourceOpen}
-        resource={newResource}
-        setResource={setNewResource}
-        onSave={handleAddResource}
-      />
+      {isTeacher && (
+        <>
+          <AddResourceDialog
+            isOpen={isAddResourceOpen}
+            onOpenChange={setIsAddResourceOpen}
+            classId={Number(classId)}
+            moduleId={activeModuleId || 0}
+          />
 
-      <CreateModuleDialog
-        isOpen={isCreateModalOpen}
-        onOpenChange={setIsCreateModalOpen}
-        name={newModuleName}
-        setName={setNewModuleName}
-        description={newModuleDesc}
-        setDescription={setNewModuleDesc}
-        isPublished={isNewModulePublished}
-        setIsPublished={setIsNewModulePublished}
-        onCreate={handleCreateModule}
-      />
+          <CreateModuleDialog
+            isOpen={isCreateModalOpen}
+            onOpenChange={setIsCreateModalOpen}
+            classId={Number(classId)}
+            order={modules.length}
+          />
+        </>
+      )}
     </div>
   );
 };

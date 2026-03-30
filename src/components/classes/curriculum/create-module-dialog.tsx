@@ -1,46 +1,57 @@
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { useTranslation } from "react-i18next";
+import { useForm } from "@refinedev/react-hook-form";
+import { Controller } from "react-hook-form";
 
 interface CreateModuleDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  name: string;
-  setName: (name: string) => void;
-  description: string;
-  setDescription: (desc: string) => void;
-  isPublished: boolean;
-  setIsPublished: (val: boolean) => void;
-  onCreate: () => void;
+  classId: number;
+  order: number;
 }
 
 export const CreateModuleDialog = ({
   isOpen,
   onOpenChange,
-  name,
-  setName,
-  description,
-  setDescription,
-  isPublished,
-  setIsPublished,
-  onCreate,
+  classId,
+  order,
 }: CreateModuleDialogProps) => {
   const { t } = useTranslation();
+
+  const {
+    refineCore: { onFinish, formLoading },
+    register,
+    handleSubmit,
+    control,
+    reset,
+    formState: { errors },
+  } = useForm({
+    refineCoreProps: {
+      resource: "modules",
+      action: "create",
+      onMutationSuccess: () => {
+        onOpenChange(false);
+        reset();
+      },
+    },
+    defaultValues: {
+      name: "",
+      description: "",
+      isPublished: false,
+      classId,
+      order,
+    },
+  });
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px] rounded-3xl border-none shadow-2xl p-0 overflow-hidden bg-card/95 backdrop-blur-2xl">
-        <div className="p-8 space-y-6">
+        <form onSubmit={handleSubmit(onFinish)} className="p-8 space-y-6">
           <DialogHeader className="space-y-3 text-start">
             <DialogTitle className="text-2xl font-black tracking-tight">
               {t("buttons.createModule")}
@@ -53,10 +64,14 @@ export const CreateModuleDialog = ({
               </Label>
               <Input
                 placeholder={t("classes.curriculum.moduleNamePlaceholder")}
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                {...register("name", { required: true })}
                 className="h-12 rounded-xl border-muted-foreground/20 focus:border-primary transition-all font-bold"
               />
+              {errors.name && (
+                <span className="text-[10px] text-destructive font-bold px-1 uppercase tracking-tighter">
+                  {t("common.required", "Required")}
+                </span>
+              )}
             </div>
             <div className="grid gap-2">
               <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">
@@ -64,8 +79,7 @@ export const CreateModuleDialog = ({
               </Label>
               <Textarea
                 placeholder={t("classes.curriculum.descriptionPlaceholder")}
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                {...register("description")}
                 className="min-h-[100px] rounded-xl border-muted-foreground/20 focus:border-primary transition-all font-medium leading-relaxed"
               />
             </div>
@@ -73,32 +87,39 @@ export const CreateModuleDialog = ({
             <div className="flex items-center justify-between p-4 rounded-2xl bg-primary/5 border border-primary/10">
               <div className="space-y-0.5">
                 <Label className="text-sm font-black tracking-tight">
-                  {t("classes.curriculum.publishImmediately", "Publish Immediately")}
+                  {t("common.curriculum.publishImmediately")}
                 </Label>
                 <p className="text-[10px] font-bold text-muted-foreground">
-                  {t("classes.curriculum.publishHelp", "Visible to students once created.")}
+                  {t("common.curriculum.publishHelp")}
                 </p>
               </div>
-              <Switch checked={isPublished} onCheckedChange={setIsPublished} />
+              <Controller
+                name="isPublished"
+                control={control}
+                render={({ field }) => (
+                  <Switch checked={field.value} onCheckedChange={field.onChange} />
+                )}
+              />
             </div>
           </div>
           <div className="flex gap-3 pt-2">
             <Button
               variant="outline"
+              type="button"
               onClick={() => onOpenChange(false)}
               className="flex-1 h-12 rounded-xl font-black uppercase tracking-widest text-[10px] border-muted-foreground/20"
             >
               {t("buttons.cancel")}
             </Button>
             <Button
-              onClick={onCreate}
-              disabled={!name.trim()}
+              type="submit"
+              disabled={formLoading}
               className="flex-1 h-12 rounded-xl font-black uppercase tracking-widest text-[10px] shadow-xl shadow-primary/20"
             >
-              {t("buttons.create")}
+              {formLoading ? t("common.loading", "Loading...") : t("buttons.create")}
             </Button>
           </div>
-        </div>
+        </form>
       </DialogContent>
     </Dialog>
   );
