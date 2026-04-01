@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useParams, useLocation } from "react-router-dom";
+import { useParsed } from "@refinedev/core";
 import { socket } from "@/lib/socket";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -13,17 +13,16 @@ import { PresenceUser } from "@/types";
  * Hooks into the 'presence:update' socket event and sends heartbeats.
  */
 export const PresenceAvatars = () => {
-  const { id } = useParams();
-  const { pathname } = useLocation();
+  const { resource, id: resourceId } = useParsed();
   const [users, setUsers] = useState<PresenceUser[]>([]);
   const [count, setCount] = useState(0);
   const activeClassIdRef = useRef<string | number | undefined>(undefined);
 
-  // Extract classId from URL (only show presence in class-specific views)
-  const classId = pathname.includes("/classes/show/") ? id : undefined;
+  // 🛡️ DURABLE ID EXTRACTION: Only show presence for "classes" resource
+  const classId = resource?.name === "classes" ? resourceId : undefined;
 
   useEffect(() => {
-    // 🛡️ CLEANUP PREVIOUS: If we are switching classes, leave the old one immediately
+    // 🛡️ CLEANUP PREVIOUS: If we are switching rooms, leave the old one immediately
     if (activeClassIdRef.current && activeClassIdRef.current !== classId) {
       socket.emit("presence:leave", { classId: activeClassIdRef.current });
     }

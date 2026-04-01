@@ -19,7 +19,7 @@ export const SidebarBadge = ({ resource, className }: SidebarBadgeProps) => {
     method: "get",
     queryOptions: {
       refetchInterval: 60000, // Sync every minute
-      staleTime: 30000, // Cache for 30s to prevent rapid re-renders
+      staleTime: 30000, // 🛡️ DEDUPLICATION: Allow all badges to share the same cached result
     },
   });
 

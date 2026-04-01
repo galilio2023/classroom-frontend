@@ -7,6 +7,8 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Loader2, Lock, Save, Trash2, Unlock } from "lucide-react";
 import { toast } from "sonner";
+import { ConflictDialog } from "@/components/conflict-dialog";
+import { ErrorCode } from "@/constants/error-codes";
 
 // Lazy load Excalidraw to avoid SSR/Vite bundling issues
 const Excalidraw = lazy(async () => {
@@ -27,6 +29,7 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
   const [excalidrawAPI, setExcalidrawAPI] = useState<any>(null);
   const [isLocked, setIsLocked] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [showConflict, setShowConflict] = useState(false);
   const lastUpdateRef = useRef<number>(0);
   const versionRef = useRef<number>(1); // 🛡️ OPTIMISTIC LOCKING VERSION
   const isTeacher = identity?.role === "teacher" || identity?.role === "admin";
@@ -113,8 +116,8 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
       const elements = excalidrawAPI.getSceneElements();
       const appState = excalidrawAPI.getAppState();
 
-      // 🛡️ OPTIMISTIC VERSIONING: Record baseline before emitting
-      const baselineVersion = versionRef.current;
+      // 🛡️ ANCESTRY CHECK: Send current version to backend
+      const currentVersion = versionRef.current;
 
       socket.emit(
         "whiteboard:save",
@@ -122,23 +125,26 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
           classId: activeRoomId,
           elements,
           appState,
-          version: baselineVersion,
+          version: currentVersion,
         },
         (res: { success: boolean; version?: number; error?: string }) => {
           if (res.success && res.version) {
-            // Server accepted our edit and incremented the version
             versionRef.current = res.version;
-          } else if (res.error === "CONFLICT" && res.version) {
-            // 🚨 ROLLBACK & SYNC: Someone else beat us to it
-            versionRef.current = res.version;
-            toast.error("Sync Conflict: Whiteboard was updated elsewhere. Re-syncing...");
-            socket.emit("whiteboard:join", activeRoomId); // Re-fetch latest state
+          } else if (res.error === "CONFLICT" || res.error === ErrorCode.STALE_VERSION_CONFLICT) {
+            setShowConflict(true);
+            if (res.version) versionRef.current = res.version;
           }
         }
       );
       hasChangesRef.current = false;
     }
   }, [excalidrawAPI, activeRoomId, isTeacher]);
+
+  const handleRefresh = () => {
+    if (!activeRoomId) return;
+    setShowConflict(false);
+    socket.emit("whiteboard:join", activeRoomId); // Re-fetch latest state
+  };
 
   // 🚀 AUTO-SAVE HEARTBEAT: Save to Postgres every 10 seconds if changes exist
   useEffect(() => {
@@ -246,7 +252,7 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
                   url: fileUrl,
                   classId: Number(classId),
                   description: `Snapshot from ${roomId ? "Group" : "Class"} Whiteboard`,
-                  version: 1, // 🛡️ Initial version for new resource
+                  version: versionRef.current, // 🛡️ CAPTURE ACCURATE VERSION
                 },
               },
               {
@@ -345,6 +351,16 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
           />
         </Suspense>
       </div>
+
+      <ConflictDialog
+        isOpen={showConflict}
+        onRefresh={handleRefresh}
+        onOverwrite={() => {
+          setShowConflict(false);
+          hasChangesRef.current = true;
+          triggerSave(); // Force overwrite with our version
+        }}
+      />
     </div>
   );
 };

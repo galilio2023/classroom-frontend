@@ -93,6 +93,16 @@ const handleError = async (response: Response): Promise<HttpError> => {
     };
   }
 
+  if (response.status === 429) {
+    const retryAfter = response.headers.get("Retry-After");
+    return {
+      message: (json.message as string) || "Too many requests. Please slow down.",
+      statusCode: 429,
+      // @ts-ignore - Custom property for rate limit feedback
+      retryAfter: retryAfter ? parseInt(retryAfter, 10) : undefined,
+    };
+  }
+
   return {
     message:
       (json.error as string) ||
