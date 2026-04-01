@@ -112,7 +112,7 @@ export const ModuleItem = ({
                 </div>
                 {module.isUpdated && isStudent && (
                   <AiFeatureGuard>
-                    <Badge className="bg-ai-primary text-white border-none text-[7px] md:text-[8px] font-black uppercase tracking-tighter px-1.5 py-0 h-3.5 md:h-4 shrink-0 animate-pulse">
+                    <Badge className="bg-ai-primary text-white border-none text-[10px] md:text-[11px] font-black uppercase tracking-tighter px-1.5 py-0 h-3.5 md:h-4 shrink-0 animate-pulse">
                       <Sparkles className="h-2.5 w-2.5 me-1" />
                       {t("common.new", "NEW")}
                     </Badge>
@@ -121,7 +121,7 @@ export const ModuleItem = ({
                 {isTeacher && !module.isPublished && (
                   <Badge
                     variant="outline"
-                    className="bg-muted text-muted-foreground border-none text-[7px] md:text-[8px] font-black uppercase tracking-tighter px-1.5 py-0 h-3.5 md:h-4 shrink-0"
+                    className="bg-muted text-muted-foreground border-none text-[10px] md:text-[11px] font-black uppercase tracking-tighter px-1.5 py-0 h-3.5 md:h-4 shrink-0"
                   >
                     {t("common.draft", "Draft")}
                   </Badge>
