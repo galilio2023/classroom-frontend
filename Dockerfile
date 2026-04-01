@@ -21,6 +21,7 @@ RUN apk add --no-cache gettext
 
 # Copy the custom Nginx configuration template and entrypoint
 COPY nginx.conf.template /etc/nginx/nginx.conf.template
+COPY security-headers.conf /etc/nginx/conf.d/security-headers.conf
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 

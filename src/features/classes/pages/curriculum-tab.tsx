@@ -464,14 +464,14 @@ export const CurriculumTab = ({ classId, aClass }: CurriculumTabProps) => {
       ) : (
         <div className="space-y-6">
           <div className="flex items-center justify-between px-2">
-            <div className="flex items-center gap-2 text-[9px] md:text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
+            <div className="flex items-center gap-2 text-[10px] md:text-[11px] font-black uppercase tracking-widest text-muted-foreground/60">
               <LayoutDashboard className="h-3 w-3" />
               {t("classes.curriculum.modulesPublished", {
                 count: modules.length,
               })}
             </div>
             {isStudent && (
-              <div className="flex items-center gap-1.5 md:gap-2 text-[9px] md:text-[10px] font-black uppercase tracking-widest text-primary">
+              <div className="flex items-center gap-1.5 md:gap-2 text-[10px] md:text-[11px] font-black uppercase tracking-widest text-primary">
                 <Zap className="h-3 w-3 md:h-3.5 md:w-3.5" />
                 <span>
                   {t("classes.curriculum.itemsCompleted", {
