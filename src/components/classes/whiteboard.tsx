@@ -14,7 +14,7 @@ import { User } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Loader2, Lock, Save, Trash2, Unlock, AlertCircle } from "lucide-react";
+import { Loader2, Lock, Save, Trash2, Unlock, AlertCircle, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { ConflictDialog } from "@/components/conflict-dialog";
 import { ErrorCode } from "@/constants/error-codes";
@@ -99,6 +99,7 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
   const [excalidrawAPI, setExcalidrawAPI] = useState<ExcalidrawAPI | null>(null);
   const [isLocked, setIsLocked] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isRemotePending, setIsRemotePending] = useState(false); // 🛡️ UI: Indicator for blocked updates
   const [showConflict, setShowConflict] = useState(false);
   const [isDirty, setIsDirty] = useState(false); // 🛡️ SEMANTIC STATE: Replaces forceUpdate
   const lastUpdateRef = useRef<number>(0);
@@ -169,9 +170,11 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
 
         if (isInteracting) {
           console.log("[Whiteboard] Remote update skipped: User is interacting with canvas.");
+          setIsRemotePending(true); // 🛡️ Alert user that remote changes are waiting
           return;
         }
 
+        setIsRemotePending(false); // Clear alert on successful sync
         excalidrawAPI.updateScene({
           elements: data.elements,
           appState: { ...(data.appState as any), collaborators: [] },
@@ -430,6 +433,12 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
               <div className="flex items-center gap-1 text-xs text-destructive font-medium">
                 <Lock className="h-3 w-3" />
                 Drawing is currently disabled by teacher
+              </div>
+            )}
+            {isRemotePending && (
+              <div className="flex items-center gap-1 text-xs text-amber-500 font-bold animate-pulse">
+                <RefreshCw className="h-3 w-3 animate-spin" />
+                Remote updates waiting... (Release drawing to sync)
               </div>
             )}
           </div>
