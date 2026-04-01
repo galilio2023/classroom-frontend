@@ -205,7 +205,7 @@ export const ModuleItem = ({
               </h4>
               <Badge
                 variant="secondary"
-                className="rounded-full px-2 py-0 h-4 md:h-5 text-[8px] md:text-[9px] font-black bg-primary/5 text-primary border-none"
+                className="rounded-full px-2 py-0 h-4 md:h-5 text-[10px] md:text-[11px] font-black bg-primary/5 text-primary border-none"
               >
                 {new Intl.NumberFormat(isArabic ? "ar-EG" : "en-US").format(
                   module.resources?.length || 0
@@ -244,7 +244,7 @@ export const ModuleItem = ({
               </h4>
               <Badge
                 variant="secondary"
-                className="rounded-full px-2 py-0 h-4 md:h-5 text-[8px] md:text-[9px] font-black bg-primary/5 text-primary border-none"
+                className="rounded-full px-2 py-0 h-4 md:h-5 text-[10px] md:text-[11px] font-black bg-primary/5 text-primary border-none"
               >
                 {new Intl.NumberFormat(isArabic ? "ar-EG" : "en-US").format(
                   (module.assignments?.length || 0) + (module.quizzes?.length || 0)

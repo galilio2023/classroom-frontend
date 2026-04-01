@@ -42,11 +42,19 @@
       "joinNow": "Join Class Now",
       "joinGroup": "Join {{name}} Room",
       "videoSession": "Video Session",
-      "whiteboard": "Whiteboard",
+      "whiteboard": {
+        "title": "Whiteboard",
+        "locked": "Teacher has locked the board",
+        "unlocked": "Teacher has unlocked the board",
+        "cleared": "The teacher has cleared the whiteboard",
+        "clearConfirm": "Are you sure you want to clear the whiteboard?"
+      },
       "whiteboardErrors": {
         "failed": "Whiteboard failed to load",
         "refreshDesc": "Please refresh the page to try again.",
-        "refreshBtn": "Refresh Now"
+        "refreshBtn": "Refresh Now",
+        "connectionLost": "Cloud sync paused: Connection lost. Reconnecting...",
+        "saveTimeout": "Cloud sync timeout: No response from server. Will retry later."
       },
       "startLiveSession": "Start Live Session",
       "sessionNotStarted": "Live session has not started yet.",

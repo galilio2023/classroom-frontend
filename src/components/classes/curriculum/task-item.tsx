@@ -152,7 +152,7 @@ export const TaskItem = ({ item, type, isStudent, completed, onToggleProgress }:
         <Badge
           variant="secondary"
           className={cn(
-            "text-[8px] md:text-[9px] font-black uppercase tracking-widest px-1.5 md:px-2 py-0.5 rounded-full border-none",
+            "text-[10px] md:text-[11px] font-black uppercase tracking-widest px-1.5 md:px-2 py-0.5 rounded-full border-none",
             completed
               ? "bg-success/10 text-success"
               : isQuiz

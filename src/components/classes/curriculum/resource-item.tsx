@@ -119,7 +119,7 @@ export const ResourceItem = ({
                   {resource.title}
                 </span>
               </div>
-              <span className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-muted-foreground/40 truncate">
+              <span className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-muted-foreground/40 truncate">
                 {t(`classes.resource.addDialog.types.${resource.type}`)}{" "}
                 {resource.type === "note" && (
                   <AiFeatureGuard>

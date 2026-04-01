@@ -1,30 +1,29 @@
 import {
   Component,
+  ErrorInfo,
   lazy,
   ReactNode,
   Suspense,
-  useCallback,
   useEffect,
-  useRef,
   useState,
 } from "react";
-import { socket } from "@/lib/socket";
-import { useCustomMutation, useGetIdentity, usePermissions } from "@refinedev/core";
-import { User } from "@/types";
+import { useCustomMutation } from "@refinedev/core";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { AlertCircle, Loader2, Lock, RefreshCw, Save, Trash2, Unlock } from "lucide-react";
 import { toast } from "sonner";
 import { ConflictDialog } from "@/components/conflict-dialog";
-import { ErrorCode } from "@/constants/error-codes";
 import { cn } from "@/lib/utils";
+import { type TFunction } from "i18next";
 import { useTranslation } from "react-i18next";
 import { AiFeatureGuard } from "@/components/ai/AiFeatureGuard";
+import { useWhiteboardSocket } from "@/hooks/use-whiteboard-socket";
+import { useUserRole } from "@/hooks/use-user-role";
 
 // 🛡️ STRICT TYPE SAFETY: Import specific Excalidraw types
 import type { ExcalidrawElement } from "@excalidraw/excalidraw/element/types";
-import type { AppState, Collaborator, SocketId } from "@excalidraw/excalidraw/types";
+import type { AppState, BinaryFiles, Collaborator, SocketId } from "@excalidraw/excalidraw/types";
 
 // Lazy load Excalidraw to avoid SSR/Vite bundling issues
 const Excalidraw = lazy(async () => {
@@ -36,7 +35,7 @@ const Excalidraw = lazy(async () => {
 type ExportToBlobFn = (opts: {
   elements: readonly ExcalidrawElement[];
   appState?: Partial<AppState>;
-  files: any; // BinaryFiles type is complex, using any/unknown for now if needed, but let's try unknown
+  files: BinaryFiles; // 🛡️ TYPE SAFETY: Strictly typed from library
   mimeType?: string;
   quality?: number;
 }) => Promise<Blob>;
@@ -55,13 +54,7 @@ interface ExcalidrawAPI {
   }) => void;
   getSceneElements: () => readonly ExcalidrawElement[];
   getAppState: () => AppState;
-  getFiles: () => unknown;
-}
-
-interface WhiteboardSaveResponse {
-  success: boolean;
-  version?: number;
-  error?: string;
+  getFiles: () => BinaryFiles;
 }
 
 interface WhiteboardProps {
@@ -73,10 +66,10 @@ interface WhiteboardProps {
  * 🛡️ RESILIENCE: Local Error Boundary for heavy Excalidraw component
  */
 class WhiteboardErrorBoundary extends Component<
-  { children: ReactNode; t: any },
+  { children: ReactNode; t: TFunction },
   { hasError: boolean }
 > {
-  constructor(props: { children: ReactNode; t: any }) {
+  constructor(props: { children: ReactNode; t: TFunction }) {
     super(props);
     this.state = { hasError: false };
   }
@@ -85,7 +78,7 @@ class WhiteboardErrorBoundary extends Component<
     return { hasError: true };
   }
 
-  componentDidCatch(error: Error, errorInfo: any) {
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     // 🛡️ PRODUCTION LOGGING: Monitor Excalidraw-specific crashes
     console.error("⚪ Whiteboard Component Crash:", error, errorInfo);
     // Future: Integration with Sentry/LogRocket here
@@ -121,31 +114,41 @@ class WhiteboardErrorBoundary extends Component<
 
 export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
   const { t } = useTranslation();
-  const { data: identity } = useGetIdentity<User>();
-  const { data: permissions } = usePermissions({});
+  const { isStaff: isTeacher, isLoading: isPermissionsLoading } = useUserRole();
   const [excalidrawAPI, setExcalidrawAPI] = useState<ExcalidrawAPI | null>(null);
-  const [isLocked, setIsLocked] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [isRemotePending, setIsRemotePending] = useState(false); // 🛡️ UI: Indicator for blocked updates
-  const [showConflict, setShowConflict] = useState(false);
-  const [isDirty, setIsDirty] = useState(false); // 🛡️ SEMANTIC STATE: Replaces forceUpdate
-  const lastUpdateRef = useRef<number>(0);
-  const versionRef = useRef<number>(1); // 🛡️ OPTIMISTIC LOCKING VERSION
-  const isSavingRef = useRef<boolean>(false); // 🛡️ IN-FLIGHT SAVE TRACKER
-  
-  // 🛡️ PERMISSIONS: Derive from usePermissions hook for security compliance
-  const isTeacher = permissions === "teacher" || permissions === "admin" || identity?.role === "teacher" || identity?.role === "admin";
-  
-  const hasChangesRef = useRef<boolean>(false);
-  const isMounted = useRef<boolean>(true); // 🛡️ MOUNT CHECK
 
   // If roomId is not provided, fallback to classId (backward compatibility)
   const activeRoomId = roomId || classId;
 
+  const {
+    isLocked,
+    isRemotePending,
+    showConflict,
+    setShowConflict,
+    isDirty,
+    setIsDirty,
+    versionRef,
+    triggerSave,
+    handleRefresh,
+    onChange,
+    toggleLock,
+    clearWhiteboard,
+    savedTriggerSave,
+    hasChangesRef,
+  } = useWhiteboardSocket({
+    activeRoomId,
+    excalidrawAPI,
+    isTeacher,
+    isPermissionsLoading,
+    t,
+  });
+
   const { mutate: uploadFile } = useCustomMutation();
 
   useEffect(() => {
-    isMounted.current = true;
+    if (isPermissionsLoading) return;
+    const isMounted = { current: true };
 
     // 🛡️ DATA INTEGRITY: Final flush save on page leave
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -153,27 +156,17 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
         savedTriggerSave.current();
         // Standard browsers require a non-empty string for the confirmation dialog
         e.preventDefault();
-        (e as any).returnValue = "";
+        e.returnValue = "";
       }
     };
 
     window.addEventListener("beforeunload", handleBeforeUnload);
 
-    // 🛡️ SOCKET SAFETY: Reset saving state on disconnect to prevent UI locks
-    const handleDisconnect = () => {
-      if (isSavingRef.current) {
-        console.warn("[Whiteboard] Socket disconnected during save. Resetting lock.");
-        isSavingRef.current = false;
-      }
-    };
-    socket.on("disconnect", handleDisconnect);
-
     return () => {
       isMounted.current = false;
       window.removeEventListener("beforeunload", handleBeforeUnload);
-      socket.off("disconnect", handleDisconnect);
     };
-  }, [isTeacher]);
+  }, [isTeacher, isPermissionsLoading, hasChangesRef, savedTriggerSave]);
 
   useEffect(() => {
     // Load helper functions dynamically
@@ -188,236 +181,13 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
     void loadHelpers();
   }, []);
 
-  useEffect(() => {
-    if (!activeRoomId) return;
-    if (!socket.connected) socket.connect();
-
-    console.log(`[Whiteboard] Joining room: ${activeRoomId}`);
-    socket.emit("whiteboard:join", activeRoomId);
-
-    const handleInit = (data: {
-      elements: ExcalidrawElement[];
-      appState: Partial<AppState>;
-      isLocked: boolean;
-      version?: number;
-    }) => {
-      if (excalidrawAPI && data.elements) {
-        excalidrawAPI.updateScene({
-          elements: data.elements,
-          appState: { ...(data.appState as Partial<AppState>), collaborators: new Map() },
-        });
-        setIsLocked(data.isLocked);
-
-        // 🛡️ SYNC VERSION
-        if (data.version) {
-          versionRef.current = data.version;
-          console.log(`[Whiteboard] Initialized at version: ${data.version}`);
-        }
-      }
-    };
-
-    const handleUpdate = (data: {
-      elements: ExcalidrawElement[];
-      appState: Partial<AppState>;
-      version?: number;
-    }) => {
-      if (excalidrawAPI) {
-        // 🛡️ INTERACTION GUARD: Don't overwrite if user is currently drawing/editing
-        const currentAppState = excalidrawAPI.getAppState();
-        const isInteracting =
-          currentAppState.isResizing ||
-          currentAppState.isRotating ||
-          currentAppState.selectedElementsAreBeingDragged ||
-          currentAppState.editingTextElement !== null ||
-          currentAppState.newElement !== null ||
-          currentAppState.multiElement !== null ||
-          currentAppState.editingLinearElement !== null;
-
-        if (isInteracting) {
-          console.log("[Whiteboard] Remote update skipped: User is interacting with canvas.");
-          setIsRemotePending(true); // 🛡️ Alert user that remote changes are waiting
-          return;
-        }
-
-        setIsRemotePending(false); // Clear alert on successful sync
-        excalidrawAPI.updateScene({
-          elements: data.elements,
-          appState: { ...(data.appState as Partial<AppState>), collaborators: new Map() },
-        });
-
-        // 🛡️ SYNC VERSION ON UPDATE
-        if (data.version) {
-          versionRef.current = data.version;
-        }
-      }
-    };
-
-    const handleLockStatus = (data: { isLocked: boolean }) => {
-      setIsLocked(data.isLocked);
-      if (!isTeacher) {
-        toast.info(
-          data.isLocked ? "Teacher has locked the board" : "Teacher has unlocked the board"
-        );
-      }
-    };
-
-    const handleClear = () => {
-      if (excalidrawAPI) {
-        excalidrawAPI.updateScene({ elements: [] });
-        if (!isTeacher) toast.warning("The teacher has cleared the whiteboard");
-      }
-    };
-
-    socket.on("whiteboard:init", handleInit);
-    socket.on("whiteboard:update", handleUpdate);
-    socket.on("whiteboard:lock-status", handleLockStatus);
-    socket.on("whiteboard:clear", handleClear);
-
-    return () => {
-      socket.off("whiteboard:init", handleInit);
-      socket.off("whiteboard:update", handleUpdate);
-      socket.off("whiteboard:lock-status", handleLockStatus);
-      socket.off("whiteboard:clear", handleClear);
-    };
-  }, [activeRoomId, excalidrawAPI, isTeacher]);
-
-  // 🚀 MANUAL SAVE FUNCTION
-  const triggerSave = useCallback(() => {
-    // 🛡️ RESILIENCE: Ensure socket is connected and state is dirty before emitting
-    const canSave =
-      hasChangesRef.current && !isSavingRef.current && excalidrawAPI && activeRoomId && isTeacher;
-
-    if (canSave) {
-      if (!socket.connected) {
-        toast.error("Cloud sync paused: Connection lost. Reconnecting...");
-        return;
-      }
-
-      if (!isMounted.current) return;
-
-      isSavingRef.current = true;
-
-      // 🛡️ TIMEOUT FALLBACK: Prevent UI from getting stuck if server doesn't respond
-      const saveTimeout = setTimeout(() => {
-        if (isSavingRef.current) {
-          isSavingRef.current = false;
-          if (isMounted.current) {
-            toast.error("Cloud sync timeout: No response from server. Will retry later.");
-          }
-        }
-      }, 8000); // 8 seconds
-
-      const elements = excalidrawAPI.getSceneElements();
-      const appState = excalidrawAPI.getAppState();
-
-      // 🛡️ ANCESTRY CHECK: Send current version to backend
-      const currentVersion = versionRef.current;
-
-      socket.emit(
-        "whiteboard:save",
-        {
-          classId: activeRoomId,
-          elements,
-          appState,
-          version: currentVersion,
-        },
-        (res: WhiteboardSaveResponse) => {
-          clearTimeout(saveTimeout);
-          isSavingRef.current = false; // 🛡️ CRITICAL: Always reset ref even if unmounted
-
-          if (!isMounted.current) return; // 🛡️ PREVENT MEMORY LEAK for setState
-
-          if (res.success && res.version) {
-            versionRef.current = res.version;
-            hasChangesRef.current = false; // 🛡️ RESET ONLY ON CONFIRMED SUCCESS
-            setIsDirty(false);
-          } else if (res.error === "CONFLICT" || res.error === ErrorCode.STALE_VERSION_CONFLICT) {
-            setShowConflict(true);
-            if (res.version) versionRef.current = res.version;
-            // Note: hasChanges stays true to prevent data loss until refresh
-          }
-        }
-      );
-    }
-  }, [excalidrawAPI, activeRoomId, isTeacher]);
-
-  const handleRefresh = () => {
-    if (!activeRoomId) return;
-    setShowConflict(false);
-    isSavingRef.current = false; // 🛡️ RESET: Ensure saving lock is cleared on refresh
-    socket.emit("whiteboard:join", activeRoomId); // Re-fetch latest state
-    hasChangesRef.current = false;
-    setIsDirty(false);
-  };
-
-  // 🚀 STABLE HEARTBEAT: Decouple callback from dependency array
-  const savedTriggerSave = useRef(triggerSave);
-  useEffect(() => {
-    savedTriggerSave.current = triggerSave;
-  }, [triggerSave]);
-
-  // 🚀 AUTO-SAVE HEARTBEAT: Save to Postgres every 10 seconds if changes exist
-  useEffect(() => {
-    if (!activeRoomId || !isTeacher) return;
-
-    const interval = setInterval(() => {
-      if (hasChangesRef.current) {
-        savedTriggerSave.current();
-      }
-    }, 10000);
-
-    return () => {
-      clearInterval(interval);
-      // 🛡️ UNMOUNT SAFETY: Flush only if dirty, socket is active, and still mounted
-      if (hasChangesRef.current && socket.connected && isMounted.current) {
-        savedTriggerSave.current();
-      }
-    };
-  }, [activeRoomId, isTeacher]); // 🛡️ Removed triggerSave to prevent stutter
-
-  const onChange = useCallback(
-    (elements: readonly ExcalidrawElement[], appState: AppState) => {
-      if (!excalidrawAPI || !activeRoomId) return;
-
-      // Only broadcast if not locked or if user is teacher
-      if (isLocked && !isTeacher) return;
-
-      if (!hasChangesRef.current) {
-        hasChangesRef.current = true; // Mark for autosave
-        setIsDirty(true); // Show pending status
-      }
-
-      const now = Date.now();
-      if (now - lastUpdateRef.current > 150) {
-        // 🚀 THROTTLE: Increased to 150ms for performance stability
-        socket.emit("whiteboard:update", {
-          classId: activeRoomId, // Backend expects "classId" property for room ID
-          elements,
-          appState,
-          version: versionRef.current, // 🔗 Attach current version to broadcast
-        });
-        lastUpdateRef.current = now;
-      }
-    },
-    [activeRoomId, excalidrawAPI, isLocked, isTeacher]
-  );
-
-  const toggleLock = () => {
-    if (!activeRoomId) return;
-    const newLockedState = !isLocked;
-    setIsLocked(newLockedState);
-    socket.emit("whiteboard:toggle-lock", {
-      classId: activeRoomId,
-      isLocked: newLockedState,
-    });
-  };
-
-  const clearWhiteboard = () => {
-    if (!activeRoomId) return;
-    if (window.confirm("Are you sure you want to clear the whiteboard?")) {
-      socket.emit("whiteboard:clear", activeRoomId);
-    }
-  };
+  if (isPermissionsLoading) {
+    return (
+      <div className="flex items-center justify-center h-125 border rounded-xl bg-muted/10">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
 
   const saveSnapshot = async () => {
     if (!excalidrawAPI || !exportToBlob || !classId) {
@@ -459,7 +229,7 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
           },
         },
         {
-          onSuccess: (data: any) => {
+          onSuccess: (data: { data: { url: string } }) => {
             const fileUrl = data.data.url;
             // Now create a resource entry
             uploadFile(
@@ -591,7 +361,6 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
             onRefresh={handleRefresh}
             onOverwrite={() => {
               setShowConflict(false);
-              hasChangesRef.current = true;
               setIsDirty(true);
               triggerSave(); // Force overwrite with our version
             }}
