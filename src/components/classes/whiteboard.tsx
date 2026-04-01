@@ -9,7 +9,7 @@ import {
   useState,
 } from "react";
 import { socket } from "@/lib/socket";
-import { useCustomMutation, useGetIdentity } from "@refinedev/core";
+import { useCustomMutation, useGetIdentity, usePermissions } from "@refinedev/core";
 import { User } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -85,6 +85,12 @@ class WhiteboardErrorBoundary extends Component<
     return { hasError: true };
   }
 
+  componentDidCatch(error: Error, errorInfo: any) {
+    // 🛡️ PRODUCTION LOGGING: Monitor Excalidraw-specific crashes
+    console.error("⚪ Whiteboard Component Crash:", error, errorInfo);
+    // Future: Integration with Sentry/LogRocket here
+  }
+
   render() {
     const { t } = this.props;
     if (this.state.hasError) {
@@ -116,6 +122,7 @@ class WhiteboardErrorBoundary extends Component<
 export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
   const { t } = useTranslation();
   const { data: identity } = useGetIdentity<User>();
+  const { data: permissions } = usePermissions({});
   const [excalidrawAPI, setExcalidrawAPI] = useState<ExcalidrawAPI | null>(null);
   const [isLocked, setIsLocked] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -125,7 +132,10 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
   const lastUpdateRef = useRef<number>(0);
   const versionRef = useRef<number>(1); // 🛡️ OPTIMISTIC LOCKING VERSION
   const isSavingRef = useRef<boolean>(false); // 🛡️ IN-FLIGHT SAVE TRACKER
-  const isTeacher = identity?.role === "teacher" || identity?.role === "admin";
+  
+  // 🛡️ PERMISSIONS: Derive from usePermissions hook for security compliance
+  const isTeacher = permissions === "teacher" || permissions === "admin" || identity?.role === "teacher" || identity?.role === "admin";
+  
   const hasChangesRef = useRef<boolean>(false);
   const isMounted = useRef<boolean>(true); // 🛡️ MOUNT CHECK
 
@@ -149,9 +159,19 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
 
     window.addEventListener("beforeunload", handleBeforeUnload);
 
+    // 🛡️ SOCKET SAFETY: Reset saving state on disconnect to prevent UI locks
+    const handleDisconnect = () => {
+      if (isSavingRef.current) {
+        console.warn("[Whiteboard] Socket disconnected during save. Resetting lock.");
+        isSavingRef.current = false;
+      }
+    };
+    socket.on("disconnect", handleDisconnect);
+
     return () => {
       isMounted.current = false;
       window.removeEventListener("beforeunload", handleBeforeUnload);
+      socket.off("disconnect", handleDisconnect);
     };
   }, [isTeacher]);
 
