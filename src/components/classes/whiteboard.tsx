@@ -19,6 +19,16 @@ const Excalidraw = lazy(async () => {
 // Helper for exporting (needs to be imported dynamically too)
 let exportToBlob: any;
 
+/**
+ * 🛡️ TYPE SAFETY: Minimal interface for Excalidraw API
+ */
+interface ExcalidrawAPI {
+  updateScene: (data: any) => void;
+  getSceneElements: () => readonly any[];
+  getAppState: () => any;
+  getFiles: () => any;
+}
+
 interface WhiteboardProps {
   classId?: string; // Optional: context for saving resources
   roomId?: string; // Explicit socket room ID. If not provided, defaults to classId.
@@ -26,7 +36,7 @@ interface WhiteboardProps {
 
 export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
   const { data: identity } = useGetIdentity<User>();
-  const [excalidrawAPI, setExcalidrawAPI] = useState<any>(null);
+  const [excalidrawAPI, setExcalidrawAPI] = useState<ExcalidrawAPI | null>(null);
   const [isLocked, setIsLocked] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [showConflict, setShowConflict] = useState(false);
@@ -112,7 +122,8 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
 
   // 🚀 MANUAL SAVE FUNCTION
   const triggerSave = useCallback(() => {
-    if (hasChangesRef.current && excalidrawAPI && activeRoomId && isTeacher) {
+    // 🛡️ RESILIENCE: Ensure socket is connected and state is dirty before emitting
+    if (hasChangesRef.current && excalidrawAPI && activeRoomId && isTeacher && socket.connected) {
       const elements = excalidrawAPI.getSceneElements();
       const appState = excalidrawAPI.getAppState();
 
@@ -150,11 +161,18 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
   useEffect(() => {
     if (!activeRoomId || !isTeacher) return;
 
-    const interval = setInterval(triggerSave, 10000);
+    const interval = setInterval(() => {
+      if (hasChangesRef.current) {
+        triggerSave();
+      }
+    }, 10000);
 
     return () => {
       clearInterval(interval);
-      triggerSave(); // 🛡️ FLUSH ON UNMOUNT: Ensure final state is recorded
+      // 🛡️ UNMOUNT SAFETY: Flush only if dirty and socket is still active
+      if (hasChangesRef.current) {
+        triggerSave();
+      }
     };
   }, [activeRoomId, isTeacher, triggerSave]);
 
@@ -337,7 +355,7 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
           }
         >
           <Excalidraw
-            excalidrawAPI={(api) => setExcalidrawAPI(api)}
+            excalidrawAPI={(api) => setExcalidrawAPI(api as ExcalidrawAPI)}
             onChange={onChange}
             viewModeEnabled={isLocked && !isTeacher}
             theme="light"
