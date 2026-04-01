@@ -219,17 +219,20 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
   // 🚀 MANUAL SAVE FUNCTION
   const triggerSave = useCallback(() => {
     // 🛡️ RESILIENCE: Ensure socket is connected and state is dirty before emitting
-    if (
-      hasChangesRef.current &&
-      !isSavingRef.current && // 🛡️ PREVENT CONCURRENT SAVES
-      excalidrawAPI &&
-      activeRoomId &&
-      isTeacher &&
-      socket.connected && // 🛡️ UNMOUNT/CONNECTIVITY SAFETY
-      isMounted.current
-    ) {
+    const canSave =
+      hasChangesRef.current && !isSavingRef.current && excalidrawAPI && activeRoomId && isTeacher;
+
+    if (canSave) {
+      if (!socket.connected) {
+        toast.error("Cloud sync paused: Connection lost. Reconnecting...");
+        return;
+      }
+
+      if (!isMounted.current) return;
+
       isSavingRef.current = true;
       const elements = excalidrawAPI.getSceneElements();
+
       const appState = excalidrawAPI.getAppState();
 
       // 🛡️ ANCESTRY CHECK: Send current version to backend
@@ -281,8 +284,8 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
 
     return () => {
       clearInterval(interval);
-      // 🛡️ UNMOUNT SAFETY: Flush only if dirty and socket is still active
-      if (hasChangesRef.current) {
+      // 🛡️ UNMOUNT SAFETY: Flush only if dirty, socket is active, and still mounted
+      if (hasChangesRef.current && socket.connected && isMounted.current) {
         triggerSave();
       }
     };
