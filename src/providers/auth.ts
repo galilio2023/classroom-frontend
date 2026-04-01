@@ -179,6 +179,7 @@ export const authProvider: AuthProvider = {
       localStorage.removeItem("user");
       localStorage.removeItem("tablawy_auth_token");
       localStorage.removeItem("tablawy-live-session");
+      localStorage.removeItem("tablawy_telemetry_id"); // 🛡️ SECURITY: Clear telemetry on logout
       return { success: true, redirectTo: "/login" };
     } catch {
       cachedSessionData = null;
@@ -186,6 +187,7 @@ export const authProvider: AuthProvider = {
       localStorage.removeItem("user");
       localStorage.removeItem("tablawy_auth_token");
       localStorage.removeItem("tablawy-live-session");
+      localStorage.removeItem("tablawy_telemetry_id");
       return { success: true, redirectTo: "/login" };
     }
   },
