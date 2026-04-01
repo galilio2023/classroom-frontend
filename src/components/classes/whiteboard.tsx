@@ -35,14 +35,14 @@ let exportToBlob: any;
  */
 interface ExcalidrawAPI {
   updateScene: (data: {
-    elements?: readonly unknown[];
-    appState?: unknown;
-    collaborators?: Map<string, unknown>;
+    elements?: readonly any[];
+    appState?: any;
+    collaborators?: Map<string, any>;
     commitToHistory?: boolean;
   }) => void;
-  getSceneElements: () => readonly unknown[];
-  getAppState: () => unknown;
-  getFiles: () => unknown;
+  getSceneElements: () => readonly any[];
+  getAppState: () => any;
+  getFiles: () => any;
 }
 
 interface WhiteboardSaveResponse {
@@ -103,6 +103,7 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
   const [isDirty, setIsDirty] = useState(false); // 🛡️ SEMANTIC STATE: Replaces forceUpdate
   const lastUpdateRef = useRef<number>(0);
   const versionRef = useRef<number>(1); // 🛡️ OPTIMISTIC LOCKING VERSION
+  const isSavingRef = useRef<boolean>(false); // 🛡️ IN-FLIGHT SAVE TRACKER
   const isTeacher = identity?.role === "teacher" || identity?.role === "admin";
   const hasChangesRef = useRef<boolean>(false);
   const isMounted = useRef<boolean>(true); // 🛡️ MOUNT CHECK
@@ -157,6 +158,20 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
 
     const handleUpdate = (data: any) => {
       if (excalidrawAPI) {
+        // 🛡️ INTERACTION GUARD: Don't overwrite if user is currently drawing/editing
+        const currentAppState = excalidrawAPI.getAppState();
+        const isInteracting =
+          currentAppState.isResizing ||
+          currentAppState.isRotating ||
+          currentAppState.draggingElement ||
+          currentAppState.editingElement ||
+          currentAppState.multiElement;
+
+        if (isInteracting) {
+          console.log("[Whiteboard] Remote update skipped: User is interacting with canvas.");
+          return;
+        }
+
         excalidrawAPI.updateScene({
           elements: data.elements,
           appState: { ...(data.appState as any), collaborators: [] },
@@ -201,7 +216,15 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
   // 🚀 MANUAL SAVE FUNCTION
   const triggerSave = useCallback(() => {
     // 🛡️ RESILIENCE: Ensure socket is connected and state is dirty before emitting
-    if (hasChangesRef.current && excalidrawAPI && activeRoomId && isTeacher && socket.connected) {
+    if (
+      hasChangesRef.current &&
+      !isSavingRef.current && // 🛡️ PREVENT CONCURRENT SAVES
+      excalidrawAPI &&
+      activeRoomId &&
+      isTeacher &&
+      socket.connected
+    ) {
+      isSavingRef.current = true;
       const elements = excalidrawAPI.getSceneElements();
       const appState = excalidrawAPI.getAppState();
 
@@ -217,6 +240,7 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
           version: currentVersion,
         },
         (res: WhiteboardSaveResponse) => {
+          isSavingRef.current = false;
           if (!isMounted.current) return; // 🛡️ PREVENT MEMORY LEAK
 
           if (res.success && res.version) {
@@ -424,7 +448,9 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
                 disabled={isSaving}
                 className={cn(
                   "h-8 transition-all",
-                  isDirty ? "bg-amber-500 hover:bg-amber-600" : "bg-live-primary hover:bg-live-primary/90"
+                  isDirty
+                    ? "bg-amber-500 hover:bg-amber-600"
+                    : "bg-live-primary hover:bg-live-primary/90"
                 )}
               >
                 {isSaving ? (
@@ -462,16 +488,16 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
             />
           </Suspense>
         </div>
-<ConflictDialog
-  isOpen={showConflict}
-  onRefresh={handleRefresh}
-  onOverwrite={() => {
-    setShowConflict(false);
-    hasChangesRef.current = true;
-    setIsDirty(true);
-    triggerSave(); // Force overwrite with our version
-  }}
-/>
+        <ConflictDialog
+          isOpen={showConflict}
+          onRefresh={handleRefresh}
+          onOverwrite={() => {
+            setShowConflict(false);
+            hasChangesRef.current = true;
+            setIsDirty(true);
+            triggerSave(); // Force overwrite with our version
+          }}
+        />
       </div>
     </WhiteboardErrorBoundary>
   );
