@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useLocation } from "react-router-dom";
 import { socket } from "@/lib/socket";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -17,11 +17,18 @@ export const PresenceAvatars = () => {
   const { pathname } = useLocation();
   const [users, setUsers] = useState<PresenceUser[]>([]);
   const [count, setCount] = useState(0);
+  const activeClassIdRef = useRef<string | number | undefined>(undefined);
 
   // Extract classId from URL (only show presence in class-specific views)
   const classId = pathname.includes("/classes/show/") ? id : undefined;
 
   useEffect(() => {
+    // 🛡️ CLEANUP PREVIOUS: If we are switching classes, leave the old one immediately
+    if (activeClassIdRef.current && activeClassIdRef.current !== classId) {
+      socket.emit("presence:leave", { classId: activeClassIdRef.current });
+    }
+    activeClassIdRef.current = classId;
+
     if (!socket || !classId) {
       setUsers([]);
       setCount(0);
@@ -55,7 +62,10 @@ export const PresenceAvatars = () => {
     return () => {
       socket.off("presence:update", onPresenceUpdate);
       clearInterval(interval);
-      socket.emit("presence:leave", { classId }); // 🛡️ EXPLICIT LEAVE: Clean up presence immediately
+      // 🛡️ EXPLICIT LEAVE: Clean up current presence on unmount or id change
+      if (activeClassIdRef.current) {
+        socket.emit("presence:leave", { classId: activeClassIdRef.current });
+      }
     };
   }, [classId]);
 

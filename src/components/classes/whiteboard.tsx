@@ -113,17 +113,26 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
       const elements = excalidrawAPI.getSceneElements();
       const appState = excalidrawAPI.getAppState();
 
+      // 🛡️ OPTIMISTIC VERSIONING: Record baseline before emitting
+      const baselineVersion = versionRef.current;
+
       socket.emit(
         "whiteboard:save",
         {
           classId: activeRoomId,
           elements,
           appState,
-          version: versionRef.current,
+          version: baselineVersion,
         },
         (res: { success: boolean; version?: number; error?: string }) => {
           if (res.success && res.version) {
+            // Server accepted our edit and incremented the version
             versionRef.current = res.version;
+          } else if (res.error === "CONFLICT" && res.version) {
+            // 🚨 ROLLBACK & SYNC: Someone else beat us to it
+            versionRef.current = res.version;
+            toast.error("Sync Conflict: Whiteboard was updated elsewhere. Re-syncing...");
+            socket.emit("whiteboard:join", activeRoomId); // Re-fetch latest state
           }
         }
       );

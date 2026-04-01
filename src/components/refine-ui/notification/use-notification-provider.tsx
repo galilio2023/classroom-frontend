@@ -24,19 +24,21 @@ export function useNotificationProvider(): NotificationProvider {
       };
 
       // 🚀 ACTIONABLE REDIRECTS: If there's a link, add a button
-      const meta = description as unknown as NotificationMetadata;
-      if (meta?.link) {
-        config.action = {
-          label: (
-            <div className="flex items-center gap-1">
-              Go <MoveRight className="h-3 w-3" />
-            </div>
-          ),
-          onClick: () => {
-            go({ to: meta.link! });
-          },
-        };
-        config.description = meta.message || description;
+      if (typeof description === "object" && description !== null) {
+        const meta = description as unknown as NotificationMetadata;
+        if (meta.link) {
+          config.action = {
+            label: (
+              <div className="flex items-center gap-1">
+                Go <MoveRight className="h-3 w-3" />
+              </div>
+            ),
+            onClick: () => {
+              go({ to: meta.link! });
+            },
+          };
+          config.description = meta.message || undefined;
+        }
       }
 
       switch (type) {
