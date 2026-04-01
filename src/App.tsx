@@ -38,6 +38,7 @@ const PulseManager = () => {
 
 function App() {
   const { t, i18n } = useTranslation();
+  const notificationProvider = useNotificationProvider();
 
   // Enforce RTL direction globally
   useEffect(() => {
