@@ -28,6 +28,9 @@ RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 # Copy the built React assets to Nginx html directory
 COPY --from=builder /app/dist /usr/share/nginx/html
 
+# 🛡️ SECURITY: Grant ownership to nginx user for dynamic config updates
+RUN chown -R nginx:nginx /etc/nginx /usr/share/nginx/html /var/cache/nginx /var/log/nginx
+
 # Switch back to unprivileged user
 USER nginx
 

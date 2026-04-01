@@ -57,6 +57,8 @@ interface WhiteboardProps {
   roomId?: string; // Explicit socket room ID. If not provided, defaults to classId.
 }
 
+import { AiFeatureGuard } from "@/components/ai/AiFeatureGuard";
+
 /**
  * 🛡️ RESILIENCE: Local Error Boundary for heavy Excalidraw component
  */
@@ -451,101 +453,103 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
   };
 
   return (
-    <WhiteboardErrorBoundary t={t}>
-      <div className="flex flex-col h-full border rounded-xl overflow-hidden bg-background">
-        <div className="flex items-center justify-between p-2 border-b bg-muted/30">
-          <div className="flex items-center gap-4">
-            <h4 className="text-sm font-semibold px-2">
-              {roomId ? "Group Whiteboard" : "Class Whiteboard"}
-            </h4>
-            {isTeacher && (
-              <div className="flex items-center space-x-2">
-                <Switch id="lock-mode" checked={isLocked} onCheckedChange={toggleLock} />
-                <Label htmlFor="lock-mode" className="text-xs flex items-center gap-1">
-                  {isLocked ? <Lock className="h-3 w-3" /> : <Unlock className="h-3 w-3" />}
-                  {isLocked ? "Students Locked" : "Students Can Draw"}
-                </Label>
-              </div>
-            )}
-            {!isTeacher && isLocked && (
-              <div className="flex items-center gap-1 text-xs text-destructive font-medium">
-                <Lock className="h-3 w-3" />
-                Drawing is currently disabled by teacher
-              </div>
-            )}
-            {isRemotePending && (
-              <div className="flex items-center gap-1 text-xs text-amber-500 font-bold animate-pulse">
-                <RefreshCw className="h-3 w-3 animate-spin" />
-                Remote updates waiting... (Release drawing to sync)
-              </div>
-            )}
+    <AiFeatureGuard>
+      <WhiteboardErrorBoundary t={t}>
+        <div className="flex flex-col h-full border rounded-xl overflow-hidden bg-background">
+          <div className="flex items-center justify-between p-2 border-b bg-muted/30">
+            <div className="flex items-center gap-4">
+              <h4 className="text-sm font-semibold px-2">
+                {roomId ? "Group Whiteboard" : "Class Whiteboard"}
+              </h4>
+              {isTeacher && (
+                <div className="flex items-center space-x-2">
+                  <Switch id="lock-mode" checked={isLocked} onCheckedChange={toggleLock} />
+                  <Label htmlFor="lock-mode" className="text-xs flex items-center gap-1">
+                    {isLocked ? <Lock className="h-3 w-3" /> : <Unlock className="h-3 w-3" />}
+                    {isLocked ? "Students Locked" : "Students Can Draw"}
+                  </Label>
+                </div>
+              )}
+              {!isTeacher && isLocked && (
+                <div className="flex items-center gap-1 text-xs text-destructive font-medium">
+                  <Lock className="h-3 w-3" />
+                  Drawing is currently disabled by teacher
+                </div>
+              )}
+              {isRemotePending && (
+                <div className="flex items-center gap-1 text-xs text-amber-500 font-bold animate-pulse">
+                  <RefreshCw className="h-3 w-3 animate-spin" />
+                  Remote updates waiting... (Release drawing to sync)
+                </div>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              {isTeacher && (
+                <Button variant="outline" size="sm" onClick={clearWhiteboard} className="h-8">
+                  <Trash2 className="h-4 w-4 me-1" />
+                  Clear
+                </Button>
+              )}
+              {classId && (
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={saveSnapshot}
+                  disabled={isSaving}
+                  className={cn(
+                    "h-8 transition-all",
+                    isDirty
+                      ? "bg-amber-500 hover:bg-amber-600"
+                      : "bg-live-primary hover:bg-live-primary/90"
+                  )}
+                >
+                  {isSaving ? (
+                    <Loader2 className="h-4 w-4 animate-spin me-1" />
+                  ) : isDirty ? (
+                    <AlertCircle className="h-4 w-4 me-1 animate-pulse" />
+                  ) : (
+                    <Save className="h-4 w-4 me-1" />
+                  )}
+                  {isDirty ? "Save Pending..." : "Save Snapshot"}
+                </Button>
+              )}
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            {isTeacher && (
-              <Button variant="outline" size="sm" onClick={clearWhiteboard} className="h-8">
-                <Trash2 className="h-4 w-4 me-1" />
-                Clear
-              </Button>
-            )}
-            {classId && (
-              <Button
-                variant="default"
-                size="sm"
-                onClick={saveSnapshot}
-                disabled={isSaving}
-                className={cn(
-                  "h-8 transition-all",
-                  isDirty
-                    ? "bg-amber-500 hover:bg-amber-600"
-                    : "bg-live-primary hover:bg-live-primary/90"
-                )}
-              >
-                {isSaving ? (
-                  <Loader2 className="h-4 w-4 animate-spin me-1" />
-                ) : isDirty ? (
-                  <AlertCircle className="h-4 w-4 me-1 animate-pulse" />
-                ) : (
-                  <Save className="h-4 w-4 me-1" />
-                )}
-                {isDirty ? "Save Pending..." : "Save Snapshot"}
-              </Button>
-            )}
+          <div className="flex-1 relative min-h-125">
+            <Suspense
+              fallback={
+                <div className="flex items-center justify-center h-full">
+                  <Loader2 className="h-8 w-8 animate-spin" />
+                </div>
+              }
+            >
+              <Excalidraw
+                excalidrawAPI={(api) => setExcalidrawAPI(api as any as ExcalidrawAPI)}
+                onChange={onChange}
+                viewModeEnabled={isLocked && !isTeacher}
+                theme="light"
+                UIOptions={{
+                  canvasActions: {
+                    loadScene: false,
+                    saveAsImage: true,
+                    export: false,
+                  },
+                }}
+              />
+            </Suspense>
           </div>
+          <ConflictDialog
+            isOpen={showConflict}
+            onRefresh={handleRefresh}
+            onOverwrite={() => {
+              setShowConflict(false);
+              hasChangesRef.current = true;
+              setIsDirty(true);
+              triggerSave(); // Force overwrite with our version
+            }}
+          />
         </div>
-        <div className="flex-1 relative min-h-125">
-          <Suspense
-            fallback={
-              <div className="flex items-center justify-center h-full">
-                <Loader2 className="h-8 w-8 animate-spin" />
-              </div>
-            }
-          >
-            <Excalidraw
-              excalidrawAPI={(api) => setExcalidrawAPI(api as any as ExcalidrawAPI)}
-              onChange={onChange}
-              viewModeEnabled={isLocked && !isTeacher}
-              theme="light"
-              UIOptions={{
-                canvasActions: {
-                  loadScene: false,
-                  saveAsImage: true,
-                  export: false,
-                },
-              }}
-            />
-          </Suspense>
-        </div>
-        <ConflictDialog
-          isOpen={showConflict}
-          onRefresh={handleRefresh}
-          onOverwrite={() => {
-            setShowConflict(false);
-            hasChangesRef.current = true;
-            setIsDirty(true);
-            triggerSave(); // Force overwrite with our version
-          }}
-        />
-      </div>
-    </WhiteboardErrorBoundary>
+      </WhiteboardErrorBoundary>
+    </AiFeatureGuard>
   );
 };

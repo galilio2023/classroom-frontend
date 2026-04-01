@@ -38,6 +38,7 @@ http {
         location /assets {
             expires 1y;
             add_header Cache-Control "public, no-transform";
+            # 🛡️ SECURITY: Inherit global security headers
             include /etc/nginx/conf.d/security-headers.conf;
         }
 
