@@ -28,6 +28,7 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
   const [isLocked, setIsLocked] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const lastUpdateRef = useRef<number>(0);
+  const versionRef = useRef<number>(1); // 🛡️ OPTIMISTIC LOCKING VERSION
   const isTeacher = identity?.role === "teacher" || identity?.role === "admin";
   const hasChangesRef = useRef<boolean>(false);
 
@@ -59,6 +60,12 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
           appState: { ...data.appState, collaborators: [] },
         });
         setIsLocked(data.isLocked);
+
+        // 🛡️ SYNC VERSION
+        if (data.version) {
+          versionRef.current = data.version;
+          console.log(`[Whiteboard] Initialized at version: ${data.version}`);
+        }
       }
     });
 
@@ -68,6 +75,11 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
           elements: data.elements,
           appState: { ...data.appState, collaborators: [] },
         });
+
+        // 🛡️ SYNC VERSION ON UPDATE
+        if (data.version) {
+          versionRef.current = data.version;
+        }
       }
     });
 
@@ -104,13 +116,27 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
         const elements = excalidrawAPI.getSceneElements();
         const appState = excalidrawAPI.getAppState();
 
-        socket.emit("whiteboard:save", {
-          classId: activeRoomId,
-          elements,
-          appState,
-        });
+        // 🛡️ TRANSACTIONAL SAVE: Send current version and handle acknowledgment
+        socket.emit(
+          "whiteboard:save",
+          {
+            classId: activeRoomId,
+            elements,
+            appState,
+            version: versionRef.current, // 🚀 PROVE ANCESTRY
+          },
+          (res: { success: boolean; version?: number; error?: string }) => {
+            if (res.success && res.version) {
+              versionRef.current = res.version;
+              console.log(`[Whiteboard] Cloud sync success. New version: ${res.version}`);
+            } else if (res.error === "CONFLICT") {
+              toast.error("Sync Conflict: This board was updated elsewhere. Refreshing...");
+              socket.emit("whiteboard:join", activeRoomId); // Re-trigger init to get latest
+            }
+          }
+        );
+
         hasChangesRef.current = false;
-        console.log("[Whiteboard] Auto-saved to Postgres");
       }
     }, 10000);
 
@@ -133,6 +159,7 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
           classId: activeRoomId, // Backend expects "classId" property for room ID
           elements,
           appState,
+          version: versionRef.current, // 🔗 Attach current version to broadcast
         });
         lastUpdateRef.current = now;
       }
@@ -210,6 +237,7 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
                   url: fileUrl,
                   classId: Number(classId),
                   description: `Snapshot from ${roomId ? "Group" : "Class"} Whiteboard`,
+                  version: 1, // 🛡️ Initial version for new resource
                 },
               },
               {

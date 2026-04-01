@@ -205,6 +205,7 @@ export interface DashboardData {
   gradeTrends?: GradeTrend[];
   subjectMastery?: SubjectMastery[];
   attendanceSummary?: AttendanceSummary;
+  resubmissions?: any[];
   assignmentCompletionTrend?: AssignmentCompletionTrend[];
   submissionTiming?: SubmissionTiming[];
   studentTrajectories?: StudentTrajectory[];

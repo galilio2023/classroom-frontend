@@ -83,7 +83,7 @@ const SubmissionsListPage = () => {
 
   const { query } = useList<Submission>({
     resource: "submissions",
-    pagination: { pageSize: 1000, mode: "server" },
+    pagination: { pageSize: 50, mode: "server" },
     filters,
     sorters: [{ field: "updatedAt", order: "desc" }],
     meta: {

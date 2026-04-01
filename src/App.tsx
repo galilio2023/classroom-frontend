@@ -15,13 +15,26 @@ import { authProvider } from "./providers/auth";
 import { accessControlProvider } from "./providers/access-control";
 import { resources } from "./config/resources";
 import { dataProvider } from "./providers/data";
+import { liveProvider } from "./providers/live";
+import { socket } from "./lib/socket";
 import { Toaster } from "./components/ui/sonner";
 import { ErrorBoundary } from "./components/error-boundary";
 import { AppRouter } from "./routes";
+import { usePulseNotifications } from "./hooks/use-pulse-notifications";
+import { GlobalLiveOverlay } from "./features/classes/components/global-live-overlay";
 
 import "./App.css";
 import "@excalidraw/excalidraw/index.css";
 import "./i18n/i18n";
+
+/**
+ * 🚀 REAL-TIME BRIDGE: PulseManager
+ * Injected inside Refine to handle global socket-to-toast orchestration.
+ */
+const PulseManager = () => {
+  usePulseNotifications();
+  return null;
+};
 
 function App() {
   const { t, i18n } = useTranslation();
@@ -74,6 +87,7 @@ function App() {
               notificationProvider={useNotificationProvider}
               i18nProvider={i18nProvider}
               resources={resources}
+              liveProvider={liveProvider(socket)}
               options={{
                 syncWithLocation: true,
                 warnWhenUnsavedChanges: true,
@@ -84,6 +98,8 @@ function App() {
                 },
               }}
             >
+              <PulseManager />
+              <GlobalLiveOverlay />
               <AppRouter />
               <Toaster />
               <UnsavedChangesNotifier />

@@ -25,6 +25,7 @@ import {
   Save,
   Wand2,
   Sparkles,
+  Lock,
 } from "lucide-react";
 import { Submission, User as UserType, Assignment } from "@/types";
 import { toast } from "sonner";
@@ -34,6 +35,7 @@ import { cn } from "@/lib/utils";
 import dayjs from "dayjs";
 import { useDashboard } from "@/features/dashboard/hooks/use-dashboard";
 import { getSocket, connectSocket } from "@/lib/socket";
+import { Switch } from "@/components/ui/switch";
 
 const SubmissionShow = () => {
   const { t, i18n } = useTranslation();
@@ -45,6 +47,8 @@ const SubmissionShow = () => {
 
   const [grade, setGrade] = useState<number>(0);
   const [feedback, setFeedback] = useState("");
+  const [teacherPrivateNotes, setTeacherPrivateNotes] = useState("");
+  const [requiresResubmission, setRequiresResubmission] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   const { query: submissionQuery } = useShow<Submission & { assignment?: Assignment }>({
@@ -100,6 +104,8 @@ const SubmissionShow = () => {
       if (!isAnalyzing) {
         setGrade(submission.grade ?? submission.suggestedGrade ?? 0);
         setFeedback(submission.feedback ?? submission.suggestedFeedback ?? "");
+        setTeacherPrivateNotes(submission.teacherPrivateNotes ?? "");
+        setRequiresResubmission(submission.requiresResubmission ?? false);
       }
     }
   }, [submission, isAnalyzing]);
@@ -112,6 +118,8 @@ const SubmissionShow = () => {
         values: {
           grade,
           feedback,
+          teacherPrivateNotes,
+          requiresResubmission,
         },
       },
       {
@@ -158,6 +166,9 @@ const SubmissionShow = () => {
 
   if (!submission)
     return <div className="p-20 text-center font-bold">{t("assignments.show.notFound")}</div>;
+
+  const isTeacher =
+    identity?.role === "teacher" || identity?.role === "ta" || identity?.role === "admin";
 
   return (
     <ShowView>
@@ -232,14 +243,21 @@ const SubmissionShow = () => {
             </Card>
           </div>
 
-          {/* Right: Grading Panel */}
+          {/* Right: Grading/Feedback Panel */}
           <div className="space-y-6">
-            <Card className="border-primary/10 shadow-2xl sticky top-24 overflow-hidden">
-              <div className="h-1.5 bg-primary w-full" />
+            <Card
+              className={cn(
+                "border-primary/10 shadow-2xl sticky top-24 overflow-hidden",
+                !isTeacher && "border-success/20 shadow-success/10"
+              )}
+            >
+              <div className={cn("h-1.5 w-full", isTeacher ? "bg-primary" : "bg-success")} />
               <CardHeader>
                 <CardTitle className="text-sm font-black uppercase tracking-widest flex items-center justify-between">
-                  {t("assignments.grading.gradeSubmission")}
-                  {coreData?.globalConfig?.enableAiFeatures !== false && (
+                  {isTeacher
+                    ? t("assignments.grading.gradeSubmission")
+                    : t("assignments.show.instructorFeedback")}
+                  {isTeacher && coreData?.globalConfig?.enableAiFeatures !== false && (
                     <Button
                       variant="outline"
                       size="sm"
@@ -260,26 +278,32 @@ const SubmissionShow = () => {
               <CardContent className="space-y-6">
                 <div className="space-y-2">
                   <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-                    {t("assignments.grading.finalScore")}
+                    {isTeacher
+                      ? t("assignments.grading.finalScore")
+                      : t("assignments.show.yourGrade")}
                   </Label>
                   <div className="relative">
-                    <Input
-                      type="number"
-                      step="0.01"
-                      value={grade}
-                      onChange={(e) => setGrade(Number(e.target.value))}
-                      className="h-14 text-3xl font-black text-center rounded-xl bg-muted/20 border-none"
-                      min={0}
-                      max={100}
-                    />
-                    <div
-                      className={cn(
-                        "absolute top-1/2 -translate-y-1/2 text-xl font-black text-muted-foreground/30",
-                        "end-4"
-                      )}
-                    >
-                      %
-                    </div>
+                    {isTeacher ? (
+                      <Input
+                        type="number"
+                        step="0.01"
+                        value={grade}
+                        onChange={(e) => setGrade(Number(e.target.value))}
+                        className="h-14 text-3xl font-black text-center rounded-xl bg-muted/20 border-none"
+                        min={0}
+                        max={100}
+                      />
+                    ) : (
+                      <div className="h-14 flex items-center justify-center text-4xl font-black rounded-xl bg-success/5 text-success">
+                        {submission.grade !== null ? `${submission.grade}` : "--"}
+                        <span className="text-xl ms-1 opacity-50">%</span>
+                      </div>
+                    )}
+                    {isTeacher && (
+                      <div className="absolute top-1/2 -translate-y-1/2 text-xl font-black text-muted-foreground/30 end-4">
+                        %
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -287,15 +311,82 @@ const SubmissionShow = () => {
                   <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                     {t("assignments.grading.feedbackToStudent")}
                   </Label>
-                  <Textarea
-                    value={feedback}
-                    onChange={(e) => setFeedback(e.target.value)}
-                    placeholder={t("assignments.grading.feedbackPlaceholder")}
-                    className="min-h-[200px] rounded-xl resize-none bg-muted/10 border-none p-4 text-sm leading-relaxed"
-                  />
+                  {isTeacher ? (
+                    <Textarea
+                      value={feedback}
+                      onChange={(e) => setFeedback(e.target.value)}
+                      placeholder={t("assignments.grading.feedbackPlaceholder")}
+                      className="min-h-[120px] rounded-xl resize-none bg-muted/10 border-none p-4 text-sm leading-relaxed"
+                    />
+                  ) : (
+                    <div className="min-h-[100px] p-4 rounded-xl bg-muted/10 text-sm leading-relaxed italic font-medium">
+                      {submission.feedback || t("assignments.show.noFeedbackYet")}
+                    </div>
+                  )}
                 </div>
 
-                {submission.suggestedGrade !== undefined &&
+                {isTeacher && (
+                  <>
+                    <div className="space-y-2">
+                      <Label className="text-[10px] font-black uppercase tracking-widest text-destructive flex items-center gap-1">
+                        <Lock className="h-3 w-3" />
+                        {t("assignments.grading.teacherPrivateNotes", {
+                          defaultValue: "Private Notes (Staff Only)",
+                        })}
+                      </Label>
+                      <Textarea
+                        value={teacherPrivateNotes}
+                        onChange={(e) => setTeacherPrivateNotes(e.target.value)}
+                        placeholder="Internal notes, rubrics, or context..."
+                        className="min-h-[80px] rounded-xl resize-none bg-destructive/5 border-dashed border-destructive/20 p-4 text-sm leading-relaxed"
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between p-4 bg-muted/20 rounded-xl border border-dashed">
+                      <div className="space-y-0.5">
+                        <Label className="text-xs font-black uppercase tracking-tight">
+                          {t("assignments.grading.requiresResubmission", {
+                            defaultValue: "Request Resubmission",
+                          })}
+                        </Label>
+                        <p className="text-[10px] text-muted-foreground leading-none font-bold">
+                          {t("assignments.grading.resubmissionHint", {
+                            defaultValue: "Allow student to submit a new version.",
+                          })}
+                        </p>
+                      </div>
+                      <Switch
+                        checked={requiresResubmission}
+                        onCheckedChange={setRequiresResubmission}
+                      />
+                    </div>
+                  </>
+                )}
+
+                {!isTeacher && submission.requiresResubmission && (
+                  <div className="p-4 rounded-xl bg-destructive/10 border border-destructive/20 flex flex-col gap-3">
+                    <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-destructive">
+                      <AlertCircle className="h-3 w-3" />
+                      {t("notifications.resubmissionRequested.title")}
+                    </div>
+                    <p className="text-[10px] font-bold text-destructive/80">
+                      {t("assignments.grading.resubmissionHint")}
+                    </p>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      className="h-8 rounded-lg font-black uppercase tracking-widest text-[9px]"
+                      onClick={() =>
+                        navigate(`/classes/show/${submission.assignment?.classId}?tab=assessments`)
+                      }
+                    >
+                      {t("buttons.resubmit")}
+                    </Button>
+                  </div>
+                )}
+
+                {isTeacher &&
+                  submission.suggestedGrade !== undefined &&
                   submission.suggestedGrade !== null &&
                   !submission.grade && (
                     <div className="p-5 bg-ai-primary/5 rounded-2xl border-2 border-ai-primary/20 space-y-4 animate-in fade-in zoom-in duration-500">
@@ -326,20 +417,22 @@ const SubmissionShow = () => {
                     </div>
                   )}
               </CardContent>
-              <CardFooter className="border-t bg-muted/5 pt-6">
-                <Button
-                  onClick={handleSaveGrade}
-                  disabled={updateMutationObj.isPending}
-                  className="w-full h-12 rounded-xl font-black uppercase tracking-widest shadow-lg shadow-primary/20"
-                >
-                  {updateMutationObj.isPending ? (
-                    <Loader2 className="me-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <Save className="me-2 h-4 w-4" />
-                  )}
-                  {t("buttons.saveGrade")}
-                </Button>
-              </CardFooter>
+              {isTeacher && (
+                <CardFooter className="border-t bg-muted/5 pt-6">
+                  <Button
+                    onClick={handleSaveGrade}
+                    disabled={updateMutationObj.isPending}
+                    className="w-full h-12 rounded-xl font-black uppercase tracking-widest shadow-lg shadow-primary/20"
+                  >
+                    {updateMutationObj.isPending ? (
+                      <Loader2 className="me-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <Save className="me-2 h-4 w-4" />
+                    )}
+                    {t("buttons.saveGrade")}
+                  </Button>
+                </CardFooter>
+              )}
             </Card>
           </div>
         </div>

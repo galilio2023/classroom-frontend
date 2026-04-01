@@ -22,6 +22,7 @@ export const classFormSchema = z.object({
   isPaid: z.boolean().default(false),
   priceAmount: z.coerce.number().min(0).default(0),
   currency: z.string().min(3).max(3).default("USD"),
+  version: z.number().optional(),
 });
 
 // This is the schema for the creation form.

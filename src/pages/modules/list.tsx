@@ -21,6 +21,7 @@ import { Input } from "@/components/ui/input.tsx";
 import { useMemo, useState, useRef } from "react";
 import { useList, useNavigation, useDelete } from "@refinedev/core";
 import { Module } from "@/types";
+import { SyncStatusBadge } from "@/components/sync-status-badge";
 import { useUserRole } from "@/hooks/use-user-role";
 import { Badge } from "@/components/ui/badge.tsx";
 import { Button } from "@/components/ui/button.tsx";
@@ -328,6 +329,7 @@ const ModulesListPage = () => {
                             >
                               {isPublished ? t("status.published") : t("status.draft")}
                             </Badge>
+                            <SyncStatusBadge resource="modules" id={module.id} />
                             <Badge
                               variant="ai"
                               className="text-[9px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full shadow-sm"

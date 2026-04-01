@@ -58,7 +58,7 @@ export const QRAttendanceModal = ({ isOpen, onClose, classId }: QRAttendanceModa
     },
   });
 
-  const { data: tokenData, refetch, isLoading } = query;
+  const { data: tokenData, refetch, isLoading, isError: isTokenError } = query;
 
   useEffect(() => {
     if (tokenData?.data?.token) {
@@ -67,17 +67,47 @@ export const QRAttendanceModal = ({ isOpen, onClose, classId }: QRAttendanceModa
     }
   }, [tokenData]);
 
-  // Session countdown
+  // 🚀 TRUTH IN FAILURE: Clear token on error to prevent students from scanning stale codes
+  useEffect(() => {
+    if (isTokenError) {
+      setToken(null);
+    }
+  }, [isTokenError]);
+
+  useEffect(() => {
+    if (!isOpen || isExpired) return;
+
+    const interval = setInterval(() => {
+      setTokenTimeLeft((prev) => {
+        if (prev <= 1) {
+          void refetch();
+          return 10;
+        }
+        return prev - 1;
+      });
+
+      setSessionTimeLeft((prev) => {
+        if (prev <= 1) {
+          setIsExpired(true);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [isOpen, isExpired, refetch]);
+
+  // Real-time Check-in Feed
   useEffect(() => {
     if (!isOpen || !identity) return;
 
     void connectSocket().then(() => {
-      // For QR attendance, we might need to be in the class room
-      socket.emit("join_class", { classId });
+      socket.emit("join_class", classId);
 
       socket.on("attendance_marked", (newRecord: Attendance) => {
         setScannedStudents((prev) => {
-          if (prev.find((r) => r.studentId === newRecord.studentId)) return prev;
+          if (prev.find((r) => r.id === newRecord.id)) return prev;
           return [newRecord, ...prev];
         });
       });
@@ -85,7 +115,7 @@ export const QRAttendanceModal = ({ isOpen, onClose, classId }: QRAttendanceModa
 
     return () => {
       socket.off("attendance_marked");
-      socket.emit("leave_class", { classId });
+      socket.emit("leave_class", classId);
     };
   }, [isOpen, identity, classId]);
 
@@ -154,6 +184,22 @@ export const QRAttendanceModal = ({ isOpen, onClose, classId }: QRAttendanceModa
                 >
                   <RotateCcw className="h-3 w-3" />
                   New Session
+                </Button>
+              </div>
+            ) : isTokenError ? (
+              <div className="w-[200px] h-[200px] flex flex-col items-center justify-center bg-destructive/5 rounded-lg border-2 border-dashed border-destructive/20 gap-2 p-4 text-center">
+                <AlertCircle className="h-8 w-8 text-destructive opacity-50" />
+                <p className="text-[10px] font-black uppercase tracking-tighter text-destructive">
+                  Connection Error
+                </p>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 text-[9px] font-black uppercase tracking-widest hover:bg-destructive/10"
+                  onClick={() => void refetch()}
+                >
+                  <RotateCcw className="h-3 w-3 me-1" />
+                  Retry Sync
                 </Button>
               </div>
             ) : isLoading && !token ? (

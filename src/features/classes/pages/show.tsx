@@ -15,6 +15,7 @@ import { EngagementTabWrapper } from "../components/engagement-tab-wrapper";
 import { RosterTabWrapper } from "../components/roster-tab-wrapper";
 import { ProgressTabWrapper } from "../components/progress-tab-wrapper";
 import { InfoTabWrapper } from "../components/info-tab-wrapper";
+import { AutomationsTabWrapper } from "../components/automations-tab-wrapper";
 import { StaffActions } from "../components/staff-actions";
 import { ClassErrorView } from "../components/class-state-views";
 import { ClassTabNavigation } from "../components/class-tab-navigation";
@@ -135,6 +136,7 @@ const ClassesShow = () => {
                   {activePrimaryTab === "content" && (
                     <ContentTabWrapper
                       classId={classId}
+                      aClass={aClass}
                       activeSubTab={activeSubTab}
                       setSearchParams={setSearchParams}
                     />
@@ -193,6 +195,14 @@ const ClassesShow = () => {
                         activeSubTab={activeSubTab}
                         setSearchParams={setSearchParams}
                       />
+                    )}
+                  </TabsContent>
+                )}
+
+                {isStaff && (
+                  <TabsContent value="automations" className="mt-0 focus-visible:outline-none">
+                    {activePrimaryTab === "automations" && (
+                      <AutomationsTabWrapper classId={classId} aClass={aClass} />
                     )}
                   </TabsContent>
                 )}

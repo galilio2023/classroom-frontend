@@ -357,5 +357,13 @@
       "linkError": "Failed to link student. Please check the email.",
       "enterEmailError": "Please enter a student email address."
     }
+  },
+  "guardian": {
+    "risk": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High",
+      "critical": "Critical"
+    }
   }
 }

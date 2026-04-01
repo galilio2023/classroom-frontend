@@ -24,16 +24,22 @@ export const useAssignment = (id?: string) => {
     refetchAssignedReviews,
   } = useAssignmentData(id, identity?.id, identity?.role);
 
-  const onAlert = useCallback(() => {
-    void refetchSubmissions();
-  }, [refetchSubmissions]);
-
-  useAssignmentSocket(identity?.id, identity?.role, assignment?.classId, onAlert);
-
   const { mySubmission, isQuiz, isPhysicsLab, blendedGrade } = useAssignmentLogic(
     assignment,
     submissions,
     identity?.id
+  );
+
+  const onAlert = useCallback(() => {
+    void refetchSubmissions();
+  }, [refetchSubmissions]);
+
+  useAssignmentSocket(
+    identity?.id,
+    identity?.role,
+    assignment?.classId,
+    mySubmission?.id, // 🚀 NEW: Watch the specific submission
+    onAlert
   );
 
   const isStaff = identity?.role === UserRole.ADMIN || identity?.role === UserRole.TEACHER;

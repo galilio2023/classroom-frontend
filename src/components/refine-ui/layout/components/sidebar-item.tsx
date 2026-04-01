@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { useSidebar as useShadcnSidebar } from "@/components/ui/sidebar";
+import { SidebarBadge } from "@/components/sidebar-badge";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 
@@ -126,7 +127,10 @@ function SidebarButton({ item, isSelected, rightIcon, className, onClick }: any)
 
   const content = (
     <>
-      <ItemIcon icon={item.meta?.icon ?? item.icon} isSelected={isSelected} />
+      <div className="relative">
+        <ItemIcon icon={item.meta?.icon ?? item.icon} isSelected={isSelected} />
+        {!open && <SidebarBadge resource={item.name} />}
+      </div>
       <span
         className={cn(
           "tracking-tight transition-all duration-200",
@@ -136,6 +140,7 @@ function SidebarButton({ item, isSelected, rightIcon, className, onClick }: any)
       >
         {getDisplayName(item, t)}
       </span>
+      {open && <SidebarBadge resource={item.name} />}
       {rightIcon && open && rightIcon}
     </>
   );

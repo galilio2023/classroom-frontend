@@ -87,6 +87,17 @@ const MonetizationSettings = React.lazy(() => import("@/pages/settings/monetizat
 const TeacherSubscriptionsList = React.lazy(() => import("@/pages/teacher-subscriptions/list"));
 const MyTeachersList = React.lazy(() => import("@/pages/my-teachers/list"));
 const DiscoveryPage = React.lazy(() => import("@/pages/discovery/index"));
+const PublicClassesPage = React.lazy(() => import("@/pages/discovery/classes-list"));
+const PublicClassPreview = React.lazy(() =>
+  import("@/pages/discovery/class-preview").then((m) => ({ default: m.PublicClassPreview }))
+);
+
+const ParentDashboard = React.lazy(() =>
+  import("@/features/parents/pages/dashboard").then((m) => ({ default: m.ParentDashboard }))
+);
+const ChildRiskReport = React.lazy(() =>
+  import("@/features/parents/pages/child-risk-report").then((m) => ({ default: m.ChildRiskReport }))
+);
 
 const LandingPage = React.lazy(() => import("@/pages/landing"));
 const PricingPage = React.lazy(() => import("@/pages/pricing"));
@@ -121,7 +132,15 @@ export const AppRouter = () => (
       {/* PUBLIC ROUTES */}
       <Route element={<PublicLayout />}>
         <Route path="/" element={<LandingPage />} />
+        <Route path="/landing" element={<LandingPage />} />
         <Route path="/pricing" element={<PricingPage />} />
+        <Route path="/discovery">
+          <Route index element={<DiscoveryPage />} />
+          <Route path="classes">
+            <Route index element={<PublicClassesPage />} />
+            <Route path=":id" element={<PublicClassPreview />} />
+          </Route>
+        </Route>
       </Route>
 
       {/* AUTH PAGES */}
@@ -464,14 +483,6 @@ export const AppRouter = () => (
               </AuthorizedRoute>
             }
           />
-          <Route
-            path="/discovery"
-            element={
-              <AuthorizedRoute resource="teacher-channels" action="list">
-                <DiscoveryPage />
-              </AuthorizedRoute>
-            }
-          />
 
           {/* ADMIN */}
           <Route path="/users">
@@ -622,6 +633,23 @@ export const AppRouter = () => (
             element={
               <AuthorizedRoute resource="progress" action="list">
                 <StudentProgress />
+              </AuthorizedRoute>
+            }
+          />
+
+          <Route
+            path="/parent/dashboard"
+            element={
+              <AuthorizedRoute resource="guardian-portal" action="list">
+                <ParentDashboard />
+              </AuthorizedRoute>
+            }
+          />
+          <Route
+            path="/parent/child/:id"
+            element={
+              <AuthorizedRoute resource="guardian-portal" action="show">
+                <ChildRiskReport />
               </AuthorizedRoute>
             }
           />

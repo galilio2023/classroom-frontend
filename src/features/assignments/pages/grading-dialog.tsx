@@ -69,6 +69,7 @@ const gradingSchema = (t: TFunction) =>
     requiresResubmission: z.boolean().default(false),
     teacherPrivateNotes: z.string().optional(),
     aiApprovalStatus: z.string().optional(),
+    version: z.number(), // 🛡️ ENFORCED: Support optimistic locking
   });
 
 type GradingFormValues = z.infer<ReturnType<typeof gradingSchema>>;
@@ -120,6 +121,7 @@ export const GradingDialog = ({
       feedback: submission?.feedback ?? "",
       requiresResubmission: submission?.requiresResubmission ?? false,
       teacherPrivateNotes: submission?.teacherPrivateNotes ?? "",
+      version: submission?.version,
     },
   });
 
@@ -162,9 +164,17 @@ export const GradingDialog = ({
         feedback: submission?.feedback ?? "",
         requiresResubmission: submission?.requiresResubmission ?? false,
         teacherPrivateNotes: submission?.teacherPrivateNotes ?? "",
+        version: submission?.version,
       });
     }
-  }, [isOpen, submission?.id, submission?.aiStatus, submission?.aiError, reset]);
+  }, [
+    isOpen,
+    submission?.id,
+    submission?.aiStatus,
+    submission?.aiError,
+    reset,
+    submission?.version,
+  ]);
 
   useEffect(() => {
     if (isOpen && submission?.id && socket) {
@@ -230,6 +240,7 @@ export const GradingDialog = ({
         values: {
           ...values,
           aiApprovalStatus: "approved",
+          version: submission.version, // 🛡️ ENFORCE LOCKING
         },
       },
       {
@@ -247,6 +258,27 @@ export const GradingDialog = ({
               onOpenChange(false);
             }
           }, 1000);
+        },
+        onError: (error: HttpError) => {
+          if (error.statusCode === 409) {
+            toast.error(
+              t("assignments.grading.toasts.conflictError", {
+                defaultValue:
+                  "Conflict Detected: Another teacher has just updated this grade. Please refresh to see their changes.",
+              }),
+              {
+                duration: 5000,
+                action: {
+                  label: t("buttons.refresh", { defaultValue: "Refresh Now" }),
+                  onClick: () => window.location.reload(),
+                },
+              }
+            );
+          } else {
+            toast.error(
+              t("assignments.grading.toasts.saveError", { defaultValue: "Failed to save grade." })
+            );
+          }
         },
       }
     );

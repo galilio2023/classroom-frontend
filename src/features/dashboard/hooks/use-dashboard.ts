@@ -32,7 +32,7 @@ export const useDashboard = () => {
       query: {
         sections: isStaff
           ? `schedule,stats,attendanceTrend,gradeDistribution,pendingSubmissions,atRiskStudents,rlhf${isTeacher ? ",channelStats" : ""}`
-          : "schedule,upcomingAssignments,gradeTrends,subjectMastery,attendanceSummary",
+          : "schedule,upcomingAssignments,gradeTrends,subjectMastery,attendanceSummary,resubmissions",
         termId: selectedTerm?.id,
         ...(isTeacher ? { teacherId: identity?.id } : {}),
       },

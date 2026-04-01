@@ -25,9 +25,9 @@ import {
   X,
   Reply,
 } from "lucide-react";
-import { useGo, useInvalidate, useList, HttpError, BaseRecord } from "@refinedev/core";
+import { useGo, useInvalidate, useList, HttpError } from "@refinedev/core";
 import { LoadingButton } from "@/components/ui/loading-button";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { Label } from "@/components/ui/label";
@@ -42,6 +42,7 @@ import {
 } from "@/components/ui/select";
 import { useTranslation } from "react-i18next";
 import { TFunction } from "i18next";
+import { toast } from "sonner";
 
 const submissionSchema = (t: TFunction) =>
   z.object({
@@ -51,6 +52,7 @@ const submissionSchema = (t: TFunction) =>
     isDraft: z.boolean().default(false),
     groupId: z.coerce.number().optional().nullable(),
     assignmentId: z.number().optional(),
+    version: z.number().optional(), // 🚀 NEW: Support optimistic locking
   });
 
 type SubmissionFormValues = z.infer<ReturnType<typeof submissionSchema>>;
@@ -77,6 +79,8 @@ export const SubmissionForm = ({
   const [isSuccess, setIsSuccess] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
 
+  const draftKey = `submission:draft:${assignmentId}`;
+
   // Fetch groups for the class if it's a group assignment
   const { query: groupsQuery } = useList<ProjectGroup>({
     resource: "project-groups",
@@ -96,17 +100,22 @@ export const SubmissionForm = ({
       fileCldPubId: existingSubmission?.fileCldPubId ?? "",
       isDraft: false,
       groupId: existingSubmission?.groupId ?? null,
+      version: existingSubmission?.version,
     },
     refineCoreProps: {
       resource: "submissions",
-      action: "create",
+      action: existingSubmission ? "edit" : "create",
+      id: existingSubmission?.id,
       redirect: false,
       onMutationSuccess: (data) => {
         const isDraft = (data.data as any)?.isDraft;
+        localStorage.removeItem(draftKey); // 🚀 CLEAR DRAFT ON SUCCESS
         setIsSuccess(true);
-        setSuccessMessage(
-          isDraft ? t("assignments.form.toast.draftSaved") : t("assignments.form.toast.submitted")
-        );
+        const msg = isDraft
+          ? t("assignments.form.toast.draftSaved")
+          : t("assignments.form.toast.submitted");
+        setSuccessMessage(msg);
+        toast.success(msg);
 
         void invalidate({
           resource: "submissions",
@@ -125,6 +134,13 @@ export const SubmissionForm = ({
           }
         }, 1500);
       },
+      onMutationError: (error: HttpError) => {
+        if (error.statusCode === 409) {
+          toast.error(
+            t("assignments.form.toast.conflictError") || "Conflict detected. Please refresh."
+          );
+        }
+      },
     },
   });
 
@@ -136,8 +152,32 @@ export const SubmissionForm = ({
     refineCore: { onFinish, formLoading },
   } = form;
 
+  // 🚀 DRAFT RECOVERY
+  useEffect(() => {
+    const saved = localStorage.getItem(draftKey);
+    if (saved && !existingSubmission?.content) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (parsed.content) setValue("content", parsed.content);
+        if (parsed.fileUrl) setValue("fileUrl", parsed.fileUrl);
+        if (parsed.fileCldPubId) setValue("fileCldPubId", parsed.fileCldPubId);
+        toast.info(t("assignments.form.toast.draftRestored"));
+      } catch (e) {
+        console.error("Failed to restore draft", e);
+      }
+    }
+  }, [assignmentId, existingSubmission, setValue, t]);
+
   const content = watch("content");
   const fileUrl = watch("fileUrl");
+  const fileCldPubId = watch("fileCldPubId");
+
+  // 🚀 DRAFT PERSISTENCE
+  useEffect(() => {
+    if (content || fileUrl) {
+      localStorage.setItem(draftKey, JSON.stringify({ content, fileUrl, fileCldPubId }));
+    }
+  }, [content, fileUrl, fileCldPubId, draftKey]);
 
   const wordCount = useMemo(() => {
     return content?.trim().split(/\s+/).filter(Boolean).length ?? 0;
@@ -147,6 +187,7 @@ export const SubmissionForm = ({
     void onFinish({
       ...values,
       assignmentId,
+      version: existingSubmission?.version, // 🛡️ ENFORCE LOCKING
     });
   };
 
@@ -156,6 +197,7 @@ export const SubmissionForm = ({
       ...values,
       assignmentId,
       isDraft: true,
+      version: existingSubmission?.version,
     });
   };
 
@@ -369,7 +411,7 @@ export const SubmissionForm = ({
                 {t("assignments.form.submissionTips")}
               </h4>
               <ul className="space-y-3">
-                {tipsList.map((tip: string, i: number) => (
+                {tipsList.map((tip: any, i: number) => (
                   <li
                     key={i}
                     className="flex items-start gap-2 text-xs font-medium text-muted-foreground"

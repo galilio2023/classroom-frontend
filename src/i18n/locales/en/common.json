@@ -281,6 +281,9 @@
     "noNotificationsDesc": "You don't have any notifications at the moment. Check back later for updates.",
     "liveSessionStarted": "Live Session Started!",
     "liveSessionDescription": "{{name}} has started a live session. Join now!",
+    "resubmissionRequested": {
+      "title": "Resubmission Requested"
+    },
     "view": "View",
     "joinNow": "Join Now",
     "viewClass": "View Class",
@@ -431,6 +434,7 @@
     "editResource": "Edit Resource",
     "deleteResource": "Delete Resource",
     "resubmitAssignment": "Resubmit Assignment",
+    "resubmit": "Resubmit",
     "viewReport": "View Detailed Report",
     "saveAsDraft": "Save as Draft",
     "resubmitWork": "Resubmit Work",

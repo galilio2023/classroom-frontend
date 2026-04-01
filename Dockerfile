@@ -1,37 +1,41 @@
-# This Dockerfile uses `serve` npm package to serve the static files with node process.
-# You can find the Dockerfile for nginx in the following link:
-# https://github.com/refinedev/dockerfiles/blob/main/vite/Dockerfile.nginx
-FROM refinedev/node:18 AS base
+# --- STAGE 1: BUILD ---
+FROM node:20-alpine AS builder
 
-FROM base as deps
+WORKDIR /app
 
-COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* .npmrc* ./
+# Install build dependencies
+COPY package*.json ./
+RUN npm ci
 
-RUN \
-  if [ -f yarn.lock ]; then yarn --frozen-lockfile; \
-  elif [ -f package-lock.json ]; then npm ci; \
-  elif [ -f pnpm-lock.yaml ]; then yarn global add pnpm && pnpm i --frozen-lockfile; \
-  else echo "Lockfile not found." && exit 1; \
-  fi
-
-FROM base as builder
-
-ENV NODE_ENV production
-
-COPY --from=deps /app/refine/node_modules ./node_modules
-
+# Copy source and build (React -> Dist)
 COPY . .
-
 RUN npm run build
 
-FROM base as runner
+# --- STAGE 2: RUNNER (NGINX) ---
+# Nginx is significantly more performant and secure for static Vite builds
+FROM nginx:stable-alpine AS runner
 
-ENV NODE_ENV production
+# 🛡️ SECURITY: Run as non-root (if supported by environment) or use standard alpine hardening
+# Copy the built React assets to Nginx html directory
+COPY --from=builder /app/dist /usr/share/nginx/html
 
-RUN npm install -g serve
+# 🚀 PERFORMANCE: Custom Nginx config for Single Page App (SPA) routing
+# This handles the client-side routing fallback so "Refresh" doesn't 404
+RUN echo 'server { \
+    listen 80; \
+    server_name localhost; \
+    location / { \
+        root /usr/share/nginx/html; \
+        index index.html index.htm; \
+        try_files $uri $uri/ /index.html; \
+    } \
+    # 🛡️ RESILIENCE: Healthcheck for the static server \
+    location /health { \
+        access_log off; \
+        return 200 "healthy\n"; \
+    } \
+}' > /etc/nginx/conf.d/default.conf
 
-COPY --from=builder /app/refine/dist ./
+EXPOSE 80
 
-USER refine
-
-CMD ["serve"]
+CMD ["nginx", "-g", "daemon off;"]

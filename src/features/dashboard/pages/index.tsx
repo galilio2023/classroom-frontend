@@ -35,6 +35,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { useDashboard } from "../hooks/use-dashboard";
 import { useLocation } from "react-router-dom";
+import { useOne } from "@refinedev/core";
+import { MissionControlHero, MissionAction } from "../components/mission-control-hero";
+import { socket } from "@/lib/socket";
 
 const Dashboard = () => {
   const { t } = useTranslation();
@@ -51,6 +54,34 @@ const Dashboard = () => {
     roles,
     navigation,
   } = useDashboard();
+
+  // 🚀 MISSION CONTROL: Fetch next action for students
+  const { query: missionQuery } = useOne<MissionAction>({
+    resource: "dashboard/mission",
+    id: "current",
+    queryOptions: {
+      enabled: roles.isStudent,
+      refetchOnWindowFocus: true,
+    },
+  });
+
+  const {
+    data: missionData,
+    isLoading: isMissionLoading,
+    refetch: missionDataRefetch,
+  } = missionQuery;
+  const mission = missionData?.data || null;
+
+  useEffect(() => {
+    const handleMissionReconcile = () => {
+      void missionDataRefetch();
+    };
+
+    socket.on("lifecycle:pulse:reconcile", handleMissionReconcile);
+    return () => {
+      socket.off("lifecycle:pulse:reconcile", handleMissionReconcile);
+    };
+  }, [missionDataRefetch]);
 
   useEffect(() => {
     if (hash === "#atRisk" && !isCoreLoading) {
@@ -231,6 +262,12 @@ const Dashboard = () => {
             isStudent={roles.isStudent}
             analyticsData={analyticsData}
           />
+
+          {roles.isStudent && (
+            <div className="mb-12 md:mb-16">
+              <MissionControlHero mission={mission} isLoading={isMissionLoading} />
+            </div>
+          )}
 
           <div className="space-y-16 md:space-y-24">
             {roles.isAdmin && (

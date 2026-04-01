@@ -36,12 +36,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTerm } from "@/contexts/term-context";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
 import { useTranslation } from "react-i18next";
+import { useOptimisticVersion } from "@/hooks/use-optimistic-version";
+import { ConflictDialog } from "@/components/conflict-dialog";
 
 const ClassesEdit = () => {
   const { t, i18n } = useTranslation();
@@ -50,6 +52,8 @@ const ClassesEdit = () => {
   const [isImportOpen, setIsImportOpen] = useState(false);
   const [selectedSourceTerm, setSelectedSourceTerm] = useState<string>("");
   const [selectedSourceClass, setSelectedSourceClass] = useState<string>("");
+  const [showConflict, setShowConflict] = useState(false);
+  const [pendingServerVersion, setPendingServerVersion] = useState<number | null>(null);
 
   const isAr = i18n.language === "ar";
 
@@ -61,10 +65,7 @@ const ClassesEdit = () => {
   const { mutate: importContent, mutation } = useCustomMutation();
   const isImporting = mutation.isPending;
 
-  const {
-    refineCore: { onFinish, formLoading },
-    ...form
-  } = useForm({
+  const formReturn = useForm({
     resolver: zodResolver(classFormSchema),
     defaultValues: {
       name: "",
@@ -72,14 +73,53 @@ const ClassesEdit = () => {
       capacity: 0,
       status: ClassStatus.ACTIVE,
       schedules: [],
+      version: 1,
     },
     refineCoreProps: {
       resource: "classes",
       action: "edit",
       id,
       redirect: "list",
+      onMutationSuccess: (data) => {
+        // Update version after successful save if server returns it
+        const newVersion = (data as any)?.data?.version;
+        if (newVersion) {
+          formReturn.setValue("version", newVersion);
+        }
+      },
     },
   });
+
+  const {
+    refineCore: { onFinish, formLoading },
+    ...form
+  } = formReturn;
+
+  // 🛡️ Deep Sync: Update version in real-time from server
+  useOptimisticVersion("classes", id, formReturn, (serverVersion) => {
+    setPendingServerVersion(serverVersion);
+    setShowConflict(true);
+  });
+
+  const handleRefresh = async () => {
+    if (pendingServerVersion) {
+      form.setValue("version", pendingServerVersion);
+      // Optional: Re-fetch the whole record to merge non-dirty fields
+      await classQuery.refetch();
+      setShowConflict(false);
+    }
+  };
+
+  const handleOverwrite = () => {
+    setShowConflict(false); // Just close and let them save with their current stale version, dataProvider will handle 409
+  };
+
+  // Sync version from initial load
+  useEffect(() => {
+    if (classQuery?.data?.data?.version) {
+      form.setValue("version", classQuery.data.data.version);
+    }
+  }, [classQuery?.data?.data?.version, form]);
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
@@ -350,6 +390,12 @@ const ClassesEdit = () => {
             </Card>
           </motion.div>
         </div>
+
+        <ConflictDialog
+          isOpen={showConflict}
+          onRefresh={handleRefresh}
+          onOverwrite={handleOverwrite}
+        />
       </div>
     </div>
   );

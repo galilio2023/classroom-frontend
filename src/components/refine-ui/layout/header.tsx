@@ -40,6 +40,7 @@ import {
 import { useTranslation } from "react-i18next";
 import { UserAvatar } from "./user-avatar";
 import { usePWAInstall } from "@/hooks/use-pwa-install";
+import { PresenceAvatars } from "@/components/presence-avatars";
 
 export function Header() {
   const { mutate: logout } = useLogout();
@@ -114,6 +115,8 @@ export function Header() {
             <XPProgressBar xp={identity?.xp || 0} className="w-full" />
           </div>
         )}
+
+        <PresenceAvatars />
       </div>
 
       <div className="flex items-center gap-2 md:gap-4 shrink-0">
