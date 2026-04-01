@@ -316,8 +316,8 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
       }
 
       const now = Date.now();
-      if (now - lastUpdateRef.current > 100) {
-        // Throttle updates
+      if (now - lastUpdateRef.current > 150) {
+        // 🚀 THROTTLE: Increased to 150ms for performance stability
         socket.emit("whiteboard:update", {
           classId: activeRoomId, // Backend expects "classId" property for room ID
           elements,

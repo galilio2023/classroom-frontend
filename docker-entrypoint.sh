@@ -15,5 +15,11 @@ else
   envsubst '${API_DOMAIN} ${SOCKET_DOMAIN}' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf
 fi
 
+if [ -f /etc/nginx/conf.d/security-headers.conf ]; then
+  echo "🔧 Injecting into security-headers.conf..."
+  envsubst '${API_DOMAIN} ${SOCKET_DOMAIN}' < /etc/nginx/conf.d/security-headers.conf > /etc/nginx/conf.d/security-headers.conf.tmp
+  mv /etc/nginx/conf.d/security-headers.conf.tmp /etc/nginx/conf.d/security-headers.conf
+fi
+
 echo "🚀 Starting Nginx..."
 exec "$@"
