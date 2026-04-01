@@ -18,6 +18,7 @@ import { Loader2, Lock, Save, Trash2, Unlock, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { ConflictDialog } from "@/components/conflict-dialog";
 import { ErrorCode } from "@/constants/error-codes";
+import { cn } from "@/lib/utils";
 
 // Lazy load Excalidraw to avoid SSR/Vite bundling issues
 const Excalidraw = lazy(async () => {
@@ -29,13 +30,19 @@ const Excalidraw = lazy(async () => {
 let exportToBlob: any;
 
 /**
- * 🛡️ TYPE SAFETY: Whiteboard interfaces
+ * 🛡️ TYPE SAFETY: Minimal interface for Excalidraw API
+ * Replacing 'any' with 'unknown' where specific library types aren't critical
  */
 interface ExcalidrawAPI {
-  updateScene: (data: any) => void;
-  getSceneElements: () => readonly any[];
-  getAppState: () => any;
-  getFiles: () => any;
+  updateScene: (data: {
+    elements?: readonly unknown[];
+    appState?: unknown;
+    collaborators?: Map<string, unknown>;
+    commitToHistory?: boolean;
+  }) => void;
+  getSceneElements: () => readonly unknown[];
+  getAppState: () => unknown;
+  getFiles: () => unknown;
 }
 
 interface WhiteboardSaveResponse {
@@ -98,6 +105,9 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
   const isTeacher = identity?.role === "teacher" || identity?.role === "admin";
   const hasChangesRef = useRef<boolean>(false);
 
+  // Force re-render for local-only state visibility
+  const [, forceUpdate] = useState({});
+
   // If roomId is not provided, fallback to classId (backward compatibility)
   const activeRoomId = roomId || classId;
 
@@ -127,7 +137,7 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
       if (excalidrawAPI && data.elements) {
         excalidrawAPI.updateScene({
           elements: data.elements,
-          appState: { ...data.appState, collaborators: [] },
+          appState: { ...(data.appState as any), collaborators: [] },
         });
         setIsLocked(data.isLocked);
 
@@ -143,7 +153,7 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
       if (excalidrawAPI) {
         excalidrawAPI.updateScene({
           elements: data.elements,
-          appState: { ...data.appState, collaborators: [] },
+          appState: { ...(data.appState as any), collaborators: [] },
         });
 
         // 🛡️ SYNC VERSION ON UPDATE
@@ -204,10 +214,11 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
           if (res.success && res.version) {
             versionRef.current = res.version;
             hasChangesRef.current = false; // 🛡️ RESET ONLY ON CONFIRMED SUCCESS
+            forceUpdate({});
           } else if (res.error === "CONFLICT" || res.error === ErrorCode.STALE_VERSION_CONFLICT) {
             setShowConflict(true);
             if (res.version) versionRef.current = res.version;
-            hasChangesRef.current = false; // Reset on conflict as well since we need to refresh
+            // Note: hasChanges stays true to prevent data loss until refresh
           }
         }
       );
@@ -218,6 +229,8 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
     if (!activeRoomId) return;
     setShowConflict(false);
     socket.emit("whiteboard:join", activeRoomId); // Re-fetch latest state
+    hasChangesRef.current = false;
+    forceUpdate({});
   };
 
   // 🚀 AUTO-SAVE HEARTBEAT: Save to Postgres every 10 seconds if changes exist
@@ -246,7 +259,10 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
       // Only broadcast if not locked or if user is teacher
       if (isLocked && !isTeacher) return;
 
-      hasChangesRef.current = true; // Mark for autosave
+      if (!hasChangesRef.current) {
+        hasChangesRef.current = true; // Mark for autosave
+        forceUpdate({}); // Show pending status
+      }
 
       const now = Date.now();
       if (now - lastUpdateRef.current > 100) {
@@ -398,14 +414,21 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
                 size="sm"
                 onClick={saveSnapshot}
                 disabled={isSaving}
-                className="h-8 bg-live-primary hover:bg-live-primary/90"
+                className={cn(
+                  "h-8 transition-all",
+                  hasChangesRef.current
+                    ? "bg-amber-500 hover:bg-amber-600"
+                    : "bg-live-primary hover:bg-live-primary/90"
+                )}
               >
                 {isSaving ? (
                   <Loader2 className="h-4 w-4 animate-spin me-1" />
+                ) : hasChangesRef.current ? (
+                  <AlertCircle className="h-4 w-4 me-1 animate-pulse" />
                 ) : (
                   <Save className="h-4 w-4 me-1" />
                 )}
-                Save Snapshot
+                {hasChangesRef.current ? "Save Pending..." : "Save Snapshot"}
               </Button>
             )}
           </div>
@@ -419,7 +442,7 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
             }
           >
             <Excalidraw
-              excalidrawAPI={(api) => setExcalidrawAPI(api as ExcalidrawAPI)}
+              excalidrawAPI={(api) => setExcalidrawAPI(api as any as ExcalidrawAPI)}
               onChange={onChange}
               viewModeEnabled={isLocked && !isTeacher}
               theme="light"
