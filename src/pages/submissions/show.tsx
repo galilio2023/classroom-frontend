@@ -1,4 +1,10 @@
-import { useShow, useUpdate, useGetIdentity, useCustomMutation } from "@refinedev/core";
+import {
+  useShow,
+  useUpdate,
+  useGetIdentity,
+  useCustomMutation,
+  useSubscription,
+} from "@refinedev/core";
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { ShowView } from "@/components/refine-ui/views/show-view";
@@ -30,6 +36,7 @@ import {
 import { Submission, User as UserType, Assignment } from "@/types";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
+import { ErrorBoundary } from "@/components/error-boundary";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import dayjs from "dayjs";
@@ -59,6 +66,44 @@ const SubmissionShow = () => {
   const submission = submissionQuery.data?.data;
   const { refetch } = submissionQuery;
 
+  // 🛡️ REAL-TIME CONCURRENCY: Listen for updates from other teachers
+  useSubscription({
+    channel: `submissions/${id}`,
+    types: ["*"],
+    onLiveEvent: (event) => {
+      if (event.type === "updated" || event.type === "patch") {
+        const serverVersion = event.payload?.data?.version || event.payload?.version;
+        if (serverVersion !== undefined && submission && serverVersion > submission.version) {
+          // Check if the current teacher has unsaved changes
+          const isDirty =
+            Number(grade) !== (Number(submission.grade) || submission.suggestedGrade || 0) ||
+            feedback !== (submission.feedback || submission.suggestedFeedback || "") ||
+            teacherPrivateNotes !== (submission.teacherPrivateNotes || "");
+
+          if (isDirty) {
+            toast.warning(
+              t("common.concurrencyConflict", {
+                defaultValue:
+                  "This submission was updated by another user. Please refresh to see changes.",
+              }),
+              {
+                duration: 10000,
+                action: {
+                  label: t("buttons.refresh"),
+                  onClick: () => refetch(),
+                },
+              }
+            );
+          } else {
+            // Auto-sync if no local changes
+            refetch();
+          }
+        }
+      }
+    },
+    enabled: !!id && !!submission,
+  });
+
   const { mutate: updateSubmission, mutation: updateMutationObj } = useUpdate();
   const { mutate: aiGrade } = useCustomMutation();
 
@@ -70,11 +115,6 @@ const SubmissionShow = () => {
         const socket = getSocket();
 
         if (socket && id) {
-          // Join the specific submission room (backend emits to submission:${id})
-          // Although backend doesn't have a listener for 'join_submission',
-          // we can assume the room is established or we rely on user room.
-          // For now, let's just listen globally as the event is specific.
-
           const handleAiComplete = (data: any) => {
             if (Number(data.submissionId) === Number(id)) {
               setIsAnalyzing(false);
@@ -83,10 +123,23 @@ const SubmissionShow = () => {
             }
           };
 
+          const handleReconnect = () => {
+            // 🛡️ RESILIENCE: If we were waiting for AI and the connection dropped,
+            // refetch on reconnect to see if it finished while we were offline.
+            if (isAnalyzing) {
+              refetch().then(() => {
+                // If the status is no longer 'processing', we can stop the spinner
+                // but usually the next query result will handle this via useEffect
+              });
+            }
+          };
+
           socket.on("submission:ai-grade:completed", handleAiComplete);
+          socket.on("connect", handleReconnect);
 
           return () => {
             socket.off("submission:ai-grade:completed", handleAiComplete);
+            socket.off("connect", handleReconnect);
           };
         }
       } catch (err) {
@@ -95,22 +148,23 @@ const SubmissionShow = () => {
     };
 
     setupSocket();
-  }, [id, refetch, t]);
+  }, [id, refetch, t, isAnalyzing]); // Added isAnalyzing to dependency array for handleReconnect context
 
-  // Sync local state with fetched data
+  // Sync local state with fetched data (only when ID changes or manual refetch)
   useEffect(() => {
     if (submission) {
-      // Only sync if not currently analyzing to prevent UI flicker
       if (!isAnalyzing) {
-        setGrade(submission.grade ?? submission.suggestedGrade ?? 0);
-        setFeedback(submission.feedback ?? submission.suggestedFeedback ?? "");
-        setTeacherPrivateNotes(submission.teacherPrivateNotes ?? "");
-        setRequiresResubmission(submission.requiresResubmission ?? false);
+        setGrade(Number(submission.grade) || submission.suggestedGrade || 0);
+        setFeedback(submission.feedback || submission.suggestedFeedback || "");
+        setTeacherPrivateNotes(submission.teacherPrivateNotes || "");
+        setRequiresResubmission(submission.requiresResubmission || false);
       }
     }
-  }, [submission, isAnalyzing]);
+  }, [submission?.id, submission?.version]);
 
   const handleSaveGrade = () => {
+    if (!submission) return;
+
     updateSubmission(
       {
         resource: "submissions",
@@ -120,6 +174,7 @@ const SubmissionShow = () => {
           feedback,
           teacherPrivateNotes,
           requiresResubmission,
+          version: submission.version, // 🛡️ ENFORCED: Satisfy backend optimistic locking
         },
       },
       {
@@ -222,9 +277,11 @@ const SubmissionShow = () => {
               </CardHeader>
               <CardContent className="pt-8">
                 <div className="prose prose-sm dark:prose-invert max-w-none bg-muted/10 p-6 rounded-2xl border border-dashed">
-                  <ReactMarkdown>
-                    {submission.content || t("assignments.grading.noContent")}
-                  </ReactMarkdown>
+                  <ErrorBoundary>
+                    <ReactMarkdown>
+                      {submission.content || t("assignments.grading.noContent")}
+                    </ReactMarkdown>
+                  </ErrorBoundary>
                 </div>
               </CardContent>
               <CardFooter className="bg-muted/10 border-t py-4 flex justify-between text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
