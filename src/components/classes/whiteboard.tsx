@@ -220,13 +220,15 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
   const triggerSave = useCallback(() => {
     // 🛡️ RESILIENCE: Ensure socket is connected and state is dirty before emitting
     if (
-      hasChangesRef.current &&
+      hasChangesRef.current && 
       !isSavingRef.current && // 🛡️ PREVENT CONCURRENT SAVES
-      excalidrawAPI &&
-      activeRoomId &&
-      isTeacher &&
-      socket.connected
+      excalidrawAPI && 
+      activeRoomId && 
+      isTeacher && 
+      socket.connected && // 🛡️ UNMOUNT/CONNECTIVITY SAFETY
+      isMounted.current
     ) {
+
       isSavingRef.current = true;
       const elements = excalidrawAPI.getSceneElements();
       const appState = excalidrawAPI.getAppState();
