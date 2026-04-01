@@ -203,13 +203,14 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
         (res: WhiteboardSaveResponse) => {
           if (res.success && res.version) {
             versionRef.current = res.version;
+            hasChangesRef.current = false; // 🛡️ RESET ONLY ON CONFIRMED SUCCESS
           } else if (res.error === "CONFLICT" || res.error === ErrorCode.STALE_VERSION_CONFLICT) {
             setShowConflict(true);
             if (res.version) versionRef.current = res.version;
+            hasChangesRef.current = false; // Reset on conflict as well since we need to refresh
           }
         }
       );
-      hasChangesRef.current = false;
     }
   }, [excalidrawAPI, activeRoomId, isTeacher]);
 
