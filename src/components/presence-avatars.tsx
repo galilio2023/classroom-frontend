@@ -7,6 +7,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { PresenceUser } from "@/types";
 
+interface PresenceUpdatePayload {
+  classId: string | number;
+  users: PresenceUser[];
+  count: number;
+}
+
 /**
  * 👥 PresenceAvatars
  * Displays real-time active users in the current classroom.
@@ -35,7 +41,7 @@ export const PresenceAvatars = () => {
     }
 
     // 1. Listen for updates
-    const onPresenceUpdate = (data: { classId: string; users: PresenceUser[]; count: number }) => {
+    const onPresenceUpdate = (data: PresenceUpdatePayload) => {
       if (String(data.classId) === String(classId)) {
         // Sort: Teachers first, then alphabetical
         const sorted = [...data.users].sort((a, b) => {

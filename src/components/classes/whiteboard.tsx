@@ -1,11 +1,20 @@
-import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
+import {
+  lazy,
+  Suspense,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  Component,
+  ReactNode,
+} from "react";
 import { socket } from "@/lib/socket";
 import { useCustomMutation, useGetIdentity } from "@refinedev/core";
 import { User } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Loader2, Lock, Save, Trash2, Unlock } from "lucide-react";
+import { Loader2, Lock, Save, Trash2, Unlock, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { ConflictDialog } from "@/components/conflict-dialog";
 import { ErrorCode } from "@/constants/error-codes";
@@ -20,7 +29,7 @@ const Excalidraw = lazy(async () => {
 let exportToBlob: any;
 
 /**
- * 🛡️ TYPE SAFETY: Minimal interface for Excalidraw API
+ * 🛡️ TYPE SAFETY: Whiteboard interfaces
  */
 interface ExcalidrawAPI {
   updateScene: (data: any) => void;
@@ -29,9 +38,53 @@ interface ExcalidrawAPI {
   getFiles: () => any;
 }
 
+interface WhiteboardSaveResponse {
+  success: boolean;
+  version?: number;
+  error?: string;
+}
+
 interface WhiteboardProps {
   classId?: string; // Optional: context for saving resources
   roomId?: string; // Explicit socket room ID. If not provided, defaults to classId.
+}
+
+/**
+ * 🛡️ RESILIENCE: Local Error Boundary for heavy Excalidraw component
+ */
+class WhiteboardErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
+  constructor(props: { children: ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="flex flex-col items-center justify-center h-125 border rounded-xl bg-muted/10 gap-4">
+          <AlertCircle className="h-12 w-12 text-destructive opacity-50" />
+          <div className="text-center">
+            <h3 className="font-black tracking-tight">Whiteboard failed to load</h3>
+            <p className="text-sm text-muted-foreground font-medium">
+              Please refresh the page to try again.
+            </p>
+          </div>
+          <Button
+            onClick={() => window.location.reload()}
+            variant="outline"
+            className="rounded-xl font-bold uppercase tracking-widest"
+          >
+            Refresh Now
+          </Button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
 }
 
 export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
@@ -53,8 +106,12 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
   useEffect(() => {
     // Load helper functions dynamically
     const loadHelpers = async () => {
-      const module = await import("@excalidraw/excalidraw");
-      exportToBlob = module.exportToBlob;
+      try {
+        const module = await import("@excalidraw/excalidraw");
+        exportToBlob = module.exportToBlob;
+      } catch (err) {
+        console.error("Failed to load Excalidraw helpers", err);
+      }
     };
     void loadHelpers();
   }, []);
@@ -66,7 +123,7 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
     console.log(`[Whiteboard] Joining room: ${activeRoomId}`);
     socket.emit("whiteboard:join", activeRoomId);
 
-    socket.on("whiteboard:init", (data) => {
+    const handleInit = (data: any) => {
       if (excalidrawAPI && data.elements) {
         excalidrawAPI.updateScene({
           elements: data.elements,
@@ -80,9 +137,9 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
           console.log(`[Whiteboard] Initialized at version: ${data.version}`);
         }
       }
-    });
+    };
 
-    socket.on("whiteboard:update", (data) => {
+    const handleUpdate = (data: any) => {
       if (excalidrawAPI) {
         excalidrawAPI.updateScene({
           elements: data.elements,
@@ -94,31 +151,36 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
           versionRef.current = data.version;
         }
       }
-    });
+    };
 
-    socket.on("whiteboard:lock-status", (data) => {
+    const handleLockStatus = (data: { isLocked: boolean }) => {
       setIsLocked(data.isLocked);
       if (!isTeacher) {
         toast.info(
           data.isLocked ? "Teacher has locked the board" : "Teacher has unlocked the board"
         );
       }
-    });
+    };
 
-    socket.on("whiteboard:clear", () => {
+    const handleClear = () => {
       if (excalidrawAPI) {
         excalidrawAPI.updateScene({ elements: [] });
         if (!isTeacher) toast.warning("The teacher has cleared the whiteboard");
       }
-    });
+    };
+
+    socket.on("whiteboard:init", handleInit);
+    socket.on("whiteboard:update", handleUpdate);
+    socket.on("whiteboard:lock-status", handleLockStatus);
+    socket.on("whiteboard:clear", handleClear);
 
     return () => {
-      socket.off("whiteboard:init");
-      socket.off("whiteboard:update");
-      socket.off("whiteboard:lock-status");
-      socket.off("whiteboard:clear");
+      socket.off("whiteboard:init", handleInit);
+      socket.off("whiteboard:update", handleUpdate);
+      socket.off("whiteboard:lock-status", handleLockStatus);
+      socket.off("whiteboard:clear", handleClear);
     };
-  }, [activeRoomId, excalidrawAPI]);
+  }, [activeRoomId, excalidrawAPI, isTeacher]);
 
   // 🚀 MANUAL SAVE FUNCTION
   const triggerSave = useCallback(() => {
@@ -138,7 +200,7 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
           appState,
           version: currentVersion,
         },
-        (res: { success: boolean; version?: number; error?: string }) => {
+        (res: WhiteboardSaveResponse) => {
           if (res.success && res.version) {
             versionRef.current = res.version;
           } else if (res.error === "CONFLICT" || res.error === ErrorCode.STALE_VERSION_CONFLICT) {
@@ -299,86 +361,88 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
   };
 
   return (
-    <div className="flex flex-col h-full border rounded-xl overflow-hidden bg-background">
-      <div className="flex items-center justify-between p-2 border-b bg-muted/30">
-        <div className="flex items-center gap-4">
-          <h4 className="text-sm font-semibold px-2">
-            {roomId ? "Group Whiteboard" : "Class Whiteboard"}
-          </h4>
-          {isTeacher && (
-            <div className="flex items-center space-x-2">
-              <Switch id="lock-mode" checked={isLocked} onCheckedChange={toggleLock} />
-              <Label htmlFor="lock-mode" className="text-xs flex items-center gap-1">
-                {isLocked ? <Lock className="h-3 w-3" /> : <Unlock className="h-3 w-3" />}
-                {isLocked ? "Students Locked" : "Students Can Draw"}
-              </Label>
-            </div>
-          )}
-          {!isTeacher && isLocked && (
-            <div className="flex items-center gap-1 text-xs text-destructive font-medium">
-              <Lock className="h-3 w-3" />
-              Drawing is currently disabled by teacher
-            </div>
-          )}
+    <WhiteboardErrorBoundary>
+      <div className="flex flex-col h-full border rounded-xl overflow-hidden bg-background">
+        <div className="flex items-center justify-between p-2 border-b bg-muted/30">
+          <div className="flex items-center gap-4">
+            <h4 className="text-sm font-semibold px-2">
+              {roomId ? "Group Whiteboard" : "Class Whiteboard"}
+            </h4>
+            {isTeacher && (
+              <div className="flex items-center space-x-2">
+                <Switch id="lock-mode" checked={isLocked} onCheckedChange={toggleLock} />
+                <Label htmlFor="lock-mode" className="text-xs flex items-center gap-1">
+                  {isLocked ? <Lock className="h-3 w-3" /> : <Unlock className="h-3 w-3" />}
+                  {isLocked ? "Students Locked" : "Students Can Draw"}
+                </Label>
+              </div>
+            )}
+            {!isTeacher && isLocked && (
+              <div className="flex items-center gap-1 text-xs text-destructive font-medium">
+                <Lock className="h-3 w-3" />
+                Drawing is currently disabled by teacher
+              </div>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            {isTeacher && (
+              <Button variant="outline" size="sm" onClick={clearWhiteboard} className="h-8">
+                <Trash2 className="h-4 w-4 me-1" />
+                Clear
+              </Button>
+            )}
+            {classId && (
+              <Button
+                variant="default"
+                size="sm"
+                onClick={saveSnapshot}
+                disabled={isSaving}
+                className="h-8 bg-live-primary hover:bg-live-primary/90"
+              >
+                {isSaving ? (
+                  <Loader2 className="h-4 w-4 animate-spin me-1" />
+                ) : (
+                  <Save className="h-4 w-4 me-1" />
+                )}
+                Save Snapshot
+              </Button>
+            )}
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          {isTeacher && (
-            <Button variant="outline" size="sm" onClick={clearWhiteboard} className="h-8">
-              <Trash2 className="h-4 w-4 me-1" />
-              Clear
-            </Button>
-          )}
-          {classId && (
-            <Button
-              variant="default"
-              size="sm"
-              onClick={saveSnapshot}
-              disabled={isSaving}
-              className="h-8 bg-live-primary hover:bg-live-primary/90"
-            >
-              {isSaving ? (
-                <Loader2 className="h-4 w-4 animate-spin me-1" />
-              ) : (
-                <Save className="h-4 w-4 me-1" />
-              )}
-              Save Snapshot
-            </Button>
-          )}
+        <div className="flex-1 relative min-h-125">
+          <Suspense
+            fallback={
+              <div className="flex items-center justify-center h-full">
+                <Loader2 className="h-8 w-8 animate-spin" />
+              </div>
+            }
+          >
+            <Excalidraw
+              excalidrawAPI={(api) => setExcalidrawAPI(api as ExcalidrawAPI)}
+              onChange={onChange}
+              viewModeEnabled={isLocked && !isTeacher}
+              theme="light"
+              UIOptions={{
+                canvasActions: {
+                  loadScene: false,
+                  saveAsImage: true,
+                  export: false,
+                },
+              }}
+            />
+          </Suspense>
         </div>
-      </div>
-      <div className="flex-1 relative min-h-125">
-        <Suspense
-          fallback={
-            <div className="flex items-center justify-center h-full">
-              <Loader2 className="h-8 w-8 animate-spin" />
-            </div>
-          }
-        >
-          <Excalidraw
-            excalidrawAPI={(api) => setExcalidrawAPI(api as ExcalidrawAPI)}
-            onChange={onChange}
-            viewModeEnabled={isLocked && !isTeacher}
-            theme="light"
-            UIOptions={{
-              canvasActions: {
-                loadScene: false,
-                saveAsImage: true,
-                export: false,
-              },
-            }}
-          />
-        </Suspense>
-      </div>
 
-      <ConflictDialog
-        isOpen={showConflict}
-        onRefresh={handleRefresh}
-        onOverwrite={() => {
-          setShowConflict(false);
-          hasChangesRef.current = true;
-          triggerSave(); // Force overwrite with our version
-        }}
-      />
-    </div>
+        <ConflictDialog
+          isOpen={showConflict}
+          onRefresh={handleRefresh}
+          onOverwrite={() => {
+            setShowConflict(false);
+            hasChangesRef.current = true;
+            triggerSave(); // Force overwrite with our version
+          }}
+        />
+      </div>
+    </WhiteboardErrorBoundary>
   );
 };

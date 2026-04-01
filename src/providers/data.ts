@@ -98,9 +98,8 @@ const handleError = async (response: Response): Promise<HttpError> => {
     return {
       message: (json.message as string) || "Too many requests. Please slow down.",
       statusCode: 429,
-      // @ts-expect-error - Custom property for rate limit feedback
       retryAfter: retryAfter ? parseInt(retryAfter, 10) : undefined,
-    };
+    } as HttpError;
   }
 
   return {
