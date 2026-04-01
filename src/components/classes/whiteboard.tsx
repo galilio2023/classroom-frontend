@@ -100,18 +100,24 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
   const [isLocked, setIsLocked] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [showConflict, setShowConflict] = useState(false);
+  const [isDirty, setIsDirty] = useState(false); // 🛡️ SEMANTIC STATE: Replaces forceUpdate
   const lastUpdateRef = useRef<number>(0);
   const versionRef = useRef<number>(1); // 🛡️ OPTIMISTIC LOCKING VERSION
   const isTeacher = identity?.role === "teacher" || identity?.role === "admin";
   const hasChangesRef = useRef<boolean>(false);
-
-  // Force re-render for local-only state visibility
-  const [, forceUpdate] = useState({});
+  const isMounted = useRef<boolean>(true); // 🛡️ MOUNT CHECK
 
   // If roomId is not provided, fallback to classId (backward compatibility)
   const activeRoomId = roomId || classId;
 
   const { mutate: uploadFile } = useCustomMutation();
+
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   useEffect(() => {
     // Load helper functions dynamically
@@ -211,10 +217,12 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
           version: currentVersion,
         },
         (res: WhiteboardSaveResponse) => {
+          if (!isMounted.current) return; // 🛡️ PREVENT MEMORY LEAK
+
           if (res.success && res.version) {
             versionRef.current = res.version;
             hasChangesRef.current = false; // 🛡️ RESET ONLY ON CONFIRMED SUCCESS
-            forceUpdate({});
+            setIsDirty(false);
           } else if (res.error === "CONFLICT" || res.error === ErrorCode.STALE_VERSION_CONFLICT) {
             setShowConflict(true);
             if (res.version) versionRef.current = res.version;
@@ -230,7 +238,7 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
     setShowConflict(false);
     socket.emit("whiteboard:join", activeRoomId); // Re-fetch latest state
     hasChangesRef.current = false;
-    forceUpdate({});
+    setIsDirty(false);
   };
 
   // 🚀 AUTO-SAVE HEARTBEAT: Save to Postgres every 10 seconds if changes exist
@@ -261,7 +269,7 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
 
       if (!hasChangesRef.current) {
         hasChangesRef.current = true; // Mark for autosave
-        forceUpdate({}); // Show pending status
+        setIsDirty(true); // Show pending status
       }
 
       const now = Date.now();
@@ -416,19 +424,17 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
                 disabled={isSaving}
                 className={cn(
                   "h-8 transition-all",
-                  hasChangesRef.current
-                    ? "bg-amber-500 hover:bg-amber-600"
-                    : "bg-live-primary hover:bg-live-primary/90"
+                  isDirty ? "bg-amber-500 hover:bg-amber-600" : "bg-live-primary hover:bg-live-primary/90"
                 )}
               >
                 {isSaving ? (
                   <Loader2 className="h-4 w-4 animate-spin me-1" />
-                ) : hasChangesRef.current ? (
+                ) : isDirty ? (
                   <AlertCircle className="h-4 w-4 me-1 animate-pulse" />
                 ) : (
                   <Save className="h-4 w-4 me-1" />
                 )}
-                {hasChangesRef.current ? "Save Pending..." : "Save Snapshot"}
+                {isDirty ? "Save Pending..." : "Save Snapshot"}
               </Button>
             )}
           </div>
@@ -456,16 +462,16 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
             />
           </Suspense>
         </div>
-
-        <ConflictDialog
-          isOpen={showConflict}
-          onRefresh={handleRefresh}
-          onOverwrite={() => {
-            setShowConflict(false);
-            hasChangesRef.current = true;
-            triggerSave(); // Force overwrite with our version
-          }}
-        />
+<ConflictDialog
+  isOpen={showConflict}
+  onRefresh={handleRefresh}
+  onOverwrite={() => {
+    setShowConflict(false);
+    hasChangesRef.current = true;
+    setIsDirty(true);
+    triggerSave(); // Force overwrite with our version
+  }}
+/>
       </div>
     </WhiteboardErrorBoundary>
   );
