@@ -324,6 +324,7 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
   const handleRefresh = () => {
     if (!activeRoomId) return;
     setShowConflict(false);
+    isSavingRef.current = false; // 🛡️ RESET: Ensure saving lock is cleared on refresh
     socket.emit("whiteboard:join", activeRoomId); // Re-fetch latest state
     hasChangesRef.current = false;
     setIsDirty(false);
@@ -504,9 +505,9 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
                 </div>
               )}
               {isRemotePending && (
-                <div className="flex items-center gap-1 text-xs text-amber-500 font-bold animate-pulse">
+                <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-amber-500/10 text-amber-600 text-xs font-bold animate-pulse border border-amber-500/20">
                   <RefreshCw className="h-3 w-3 animate-spin" />
-                  Remote updates waiting... (Release drawing to sync)
+                  <span>Sync paused while you draw...</span>
                 </div>
               )}
             </div>
