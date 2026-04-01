@@ -107,41 +107,41 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
     };
   }, [activeRoomId, excalidrawAPI]);
 
+  // 🚀 MANUAL SAVE FUNCTION
+  const triggerSave = useCallback(() => {
+    if (hasChangesRef.current && excalidrawAPI && activeRoomId && isTeacher) {
+      const elements = excalidrawAPI.getSceneElements();
+      const appState = excalidrawAPI.getAppState();
+
+      socket.emit(
+        "whiteboard:save",
+        {
+          classId: activeRoomId,
+          elements,
+          appState,
+          version: versionRef.current,
+        },
+        (res: { success: boolean; version?: number; error?: string }) => {
+          if (res.success && res.version) {
+            versionRef.current = res.version;
+          }
+        }
+      );
+      hasChangesRef.current = false;
+    }
+  }, [excalidrawAPI, activeRoomId, isTeacher]);
+
   // 🚀 AUTO-SAVE HEARTBEAT: Save to Postgres every 10 seconds if changes exist
   useEffect(() => {
     if (!activeRoomId || !isTeacher) return;
 
-    const interval = setInterval(() => {
-      if (hasChangesRef.current && excalidrawAPI) {
-        const elements = excalidrawAPI.getSceneElements();
-        const appState = excalidrawAPI.getAppState();
+    const interval = setInterval(triggerSave, 10000);
 
-        // 🛡️ TRANSACTIONAL SAVE: Send current version and handle acknowledgment
-        socket.emit(
-          "whiteboard:save",
-          {
-            classId: activeRoomId,
-            elements,
-            appState,
-            version: versionRef.current, // 🚀 PROVE ANCESTRY
-          },
-          (res: { success: boolean; version?: number; error?: string }) => {
-            if (res.success && res.version) {
-              versionRef.current = res.version;
-              console.log(`[Whiteboard] Cloud sync success. New version: ${res.version}`);
-            } else if (res.error === "CONFLICT") {
-              toast.error("Sync Conflict: This board was updated elsewhere. Refreshing...");
-              socket.emit("whiteboard:join", activeRoomId); // Re-trigger init to get latest
-            }
-          }
-        );
-
-        hasChangesRef.current = false;
-      }
-    }, 10000);
-
-    return () => clearInterval(interval);
-  }, [activeRoomId, isTeacher, excalidrawAPI]);
+    return () => {
+      clearInterval(interval);
+      triggerSave(); // 🛡️ FLUSH ON UNMOUNT: Ensure final state is recorded
+    };
+  }, [activeRoomId, isTeacher, triggerSave]);
 
   const onChange = useCallback(
     (elements: readonly any[], appState: any) => {

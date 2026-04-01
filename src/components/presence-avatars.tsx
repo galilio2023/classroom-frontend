@@ -5,6 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { PresenceUser } from "@/types";
 
 /**
  * 👥 PresenceAvatars
@@ -14,7 +15,7 @@ import { cn } from "@/lib/utils";
 export const PresenceAvatars = () => {
   const { id } = useParams();
   const { pathname } = useLocation();
-  const [users, setUsers] = useState<any[]>([]);
+  const [users, setUsers] = useState<PresenceUser[]>([]);
   const [count, setCount] = useState(0);
 
   // Extract classId from URL (only show presence in class-specific views)
@@ -28,7 +29,7 @@ export const PresenceAvatars = () => {
     }
 
     // 1. Listen for updates
-    const onPresenceUpdate = (data: any) => {
+    const onPresenceUpdate = (data: { classId: string; users: PresenceUser[]; count: number }) => {
       if (String(data.classId) === String(classId)) {
         // Sort: Teachers first, then alphabetical
         const sorted = [...data.users].sort((a, b) => {
@@ -54,6 +55,7 @@ export const PresenceAvatars = () => {
     return () => {
       socket.off("presence:update", onPresenceUpdate);
       clearInterval(interval);
+      socket.emit("presence:leave", { classId }); // 🛡️ EXPLICIT LEAVE: Clean up presence immediately
     };
   }, [classId]);
 

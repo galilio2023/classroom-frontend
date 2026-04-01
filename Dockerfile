@@ -11,18 +11,17 @@ RUN npm ci
 COPY . .
 RUN npm run build
 
-# --- STAGE 2: RUNNER (NGINX) ---
-# Nginx is significantly more performant and secure for static Vite builds
-FROM nginx:stable-alpine AS runner
+# --- STAGE 2: RUNNER (UNPRIVILEGED NGINX) ---
+# 🛡️ SECURITY: Use unprivileged Nginx image to avoid running as root
+FROM nginxinc/nginx-unprivileged:stable-alpine AS runner
 
-# 🛡️ SECURITY: Run as non-root (if supported by environment) or use standard alpine hardening
 # Copy the built React assets to Nginx html directory
 COPY --from=builder /app/dist /usr/share/nginx/html
 
 # 🚀 PERFORMANCE: Custom Nginx config for Single Page App (SPA) routing
-# This handles the client-side routing fallback so "Refresh" doesn't 404
+# Configured for unprivileged user (listening on 8080)
 RUN echo 'server { \
-    listen 80; \
+    listen 8080; \
     server_name localhost; \
     location / { \
         root /usr/share/nginx/html; \
@@ -36,6 +35,7 @@ RUN echo 'server { \
     } \
 }' > /etc/nginx/conf.d/default.conf
 
-EXPOSE 80
+# Port 8080 is standard for unprivileged nginx images
+EXPOSE 8080
 
 CMD ["nginx", "-g", "daemon off;"]

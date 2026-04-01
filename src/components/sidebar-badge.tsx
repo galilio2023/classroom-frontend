@@ -1,5 +1,5 @@
-import React from "react";
-import { useList, type CrudFilter } from "@refinedev/core";
+import React, { useMemo } from "react";
+import { useCustom } from "@refinedev/core";
 import { cn } from "@/lib/utils";
 
 interface SidebarBadgeProps {
@@ -9,37 +9,27 @@ interface SidebarBadgeProps {
 
 /**
  * 🏷️ SidebarBadge
- * Displays a small count or indicator next to sidebar items
- * for pending actions (e.g., ungraded submissions, new notifications).
+ * Optimized: Uses a single batched endpoint (/stats/sidebar-counts)
+ * to prevent overfetching when multiple sidebar items are rendered.
  */
 export const SidebarBadge = ({ resource, className }: SidebarBadgeProps) => {
-  // Logic to determine what "pending" means for each resource
-  const getFilters = (): CrudFilter[] | null => {
-    switch (resource) {
-      case "submissions":
-        return [{ field: "grade", operator: "null", value: null }];
-      case "notifications":
-        return [{ field: "isRead", operator: "eq", value: false }];
-      case "users":
-        return [{ field: "verificationStatus", operator: "eq", value: "pending" }];
-      default:
-        return null;
-    }
-  };
-
-  const filters = getFilters();
-
-  const { query } = useList({
-    resource,
-    filters: filters || [],
+  // 🚀 BATCHED FETCH: Fetch all counts at once
+  const { result: customResult } = useCustom<Record<string, number>>({
+    url: "/stats/sidebar-counts",
+    method: "get",
     queryOptions: {
-      enabled: !!filters,
       refetchInterval: 60000, // Sync every minute
+      staleTime: 30000, // Cache for 30s to prevent rapid re-renders
     },
-    pagination: { pageSize: 1, mode: "server" },
   });
 
-  const count = query.data?.total || 0;
+  const counts = customResult?.data;
+
+  // Memoize the count extraction to prevent unnecessary logic on every render
+  const count = useMemo(() => {
+    if (!counts) return 0;
+    return counts[resource] || 0;
+  }, [counts, resource]);
 
   if (!count || count === 0) return null;
 

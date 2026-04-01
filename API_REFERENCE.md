@@ -107,6 +107,7 @@ Catch these specific status codes in your Refine notification providers:
 *   **429 (Too Many Requests):** Show localized "Hourly Limit Reached."
 *   **503 (Service Unavailable):** Show localized "AI Maintenance Mode."
 *   **403 (Forbidden):** Standard "Access Denied."
+*   **409 (Conflict):** Optimistic Locking Failure. Show `ConflictDialog` or "Refresh Required" toast.
 
 ---
 

@@ -68,3 +68,11 @@ Maintain a strict hierarchy between Refine hooks and local state.
 *   **Permissions**: Always use `usePermissions` to gate AI actions. Handle `isLoading` and `isError` states to prevent unauthorized "Flash of Content."
 *   **Navigation**: Reset AI state trackers (`hasLoadedHistoryFor`) when the resource ID (e.g., `classId`) changes to ensure context purity.
 
+---
+
+## 7. Operational Resilience
+To maintain 99.9% availability during deployments:
+*   **Unprivileged Docker**: Production Nginx images MUST run as a non-root user (port 8080) to mitigate container breakout risks.
+*   **Zero-Downtime Migration**: Database changes are applied via a "Pre-Flight" migration container before traffic is shifted to the new build.
+*   **Healthchecks**: All services implement `/health` probes to ensure they are fully ready before receiving live student traffic.
+

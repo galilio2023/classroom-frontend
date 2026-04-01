@@ -97,6 +97,20 @@ export interface User {
   stripeOnboardingComplete?: boolean;
 }
 
+export interface PresenceUser {
+  id: string;
+  name: string;
+  role: UserRole;
+  image?: string;
+  lastSeen: number;
+}
+
+export interface NotificationMetadata {
+  link?: string;
+  message?: string;
+  [key: string]: any;
+}
+
 export interface Department {
   id: number;
   name: string;
@@ -294,6 +308,7 @@ export interface Module {
   version: number;
   createdAt: string;
   updatedAt: string;
+  isUpdated?: boolean;
 }
 
 export enum AnnouncementPriority {
