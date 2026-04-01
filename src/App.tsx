@@ -84,7 +84,7 @@ function App() {
               authProvider={authProvider}
               accessControlProvider={accessControlProvider}
               routerProvider={routerBindings}
-              notificationProvider={useNotificationProvider}
+              notificationProvider={notificationProvider}
               i18nProvider={i18nProvider}
               resources={resources}
               liveProvider={liveProvider(socket)}
