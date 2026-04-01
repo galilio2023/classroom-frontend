@@ -43,6 +43,11 @@
       "joinGroup": "Join {{name}} Room",
       "videoSession": "Video Session",
       "whiteboard": "Whiteboard",
+      "whiteboardErrors": {
+        "failed": "Whiteboard failed to load",
+        "refreshDesc": "Please refresh the page to try again.",
+        "refreshBtn": "Refresh Now"
+      },
       "startLiveSession": "Start Live Session",
       "sessionNotStarted": "Live session has not started yet.",
       "toasts": {

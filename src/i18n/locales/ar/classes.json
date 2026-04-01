@@ -40,8 +40,14 @@
       "joinNow": "انضم للفصل الآن",
       "joinGroup": "انضم لغرفة {{name}}",
       "videoSession": "جلسة فيديو",
-      "whiteboard": "لوحة بيضاء",
+      "whiteboard": "السبورة",
+      "whiteboardErrors": {
+        "failed": "فشل تحميل السبورة",
+        "refreshDesc": "يرجى تحديث الصفحة للمحاولة مرة أخرى.",
+        "refreshBtn": "تحديث الآن"
+      },
       "startLiveSession": "بدء جلسة مباشرة",
+
       "sessionNotStarted": "الجلسة المباشرة لم تبدأ بعد.",
       "toasts": {
         "sessionStarted": "بدأ {{name}} جلسة مباشرة!",

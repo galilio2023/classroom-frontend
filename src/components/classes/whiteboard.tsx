@@ -19,6 +19,7 @@ import { toast } from "sonner";
 import { ConflictDialog } from "@/components/conflict-dialog";
 import { ErrorCode } from "@/constants/error-codes";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 // Lazy load Excalidraw to avoid SSR/Vite bundling issues
 const Excalidraw = lazy(async () => {
@@ -59,8 +60,11 @@ interface WhiteboardProps {
 /**
  * 🛡️ RESILIENCE: Local Error Boundary for heavy Excalidraw component
  */
-class WhiteboardErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
-  constructor(props: { children: ReactNode }) {
+class WhiteboardErrorBoundary extends Component<
+  { children: ReactNode; t: any },
+  { hasError: boolean }
+> {
+  constructor(props: { children: ReactNode; t: any }) {
     super(props);
     this.state = { hasError: false };
   }
@@ -70,14 +74,17 @@ class WhiteboardErrorBoundary extends Component<{ children: ReactNode }, { hasEr
   }
 
   render() {
+    const { t } = this.props;
     if (this.state.hasError) {
       return (
         <div className="flex flex-col items-center justify-center h-125 border rounded-xl bg-muted/10 gap-4">
           <AlertCircle className="h-12 w-12 text-destructive opacity-50" />
           <div className="text-center">
-            <h3 className="font-black tracking-tight">Whiteboard failed to load</h3>
+            <h3 className="font-black tracking-tight">
+              {t("classes.live.whiteboardErrors.failed")}
+            </h3>
             <p className="text-sm text-muted-foreground font-medium">
-              Please refresh the page to try again.
+              {t("classes.live.whiteboardErrors.refreshDesc")}
             </p>
           </div>
           <Button
@@ -85,7 +92,7 @@ class WhiteboardErrorBoundary extends Component<{ children: ReactNode }, { hasEr
             variant="outline"
             className="rounded-xl font-bold uppercase tracking-widest"
           >
-            Refresh Now
+            {t("classes.live.whiteboardErrors.refreshBtn")}
           </Button>
         </div>
       );
@@ -95,6 +102,7 @@ class WhiteboardErrorBoundary extends Component<{ children: ReactNode }, { hasEr
 }
 
 export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
+  const { t } = useTranslation();
   const { data: identity } = useGetIdentity<User>();
   const [excalidrawAPI, setExcalidrawAPI] = useState<ExcalidrawAPI | null>(null);
   const [isLocked, setIsLocked] = useState(false);
@@ -116,10 +124,24 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
 
   useEffect(() => {
     isMounted.current = true;
+
+    // 🛡️ DATA INTEGRITY: Final flush save on page leave
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasChangesRef.current && isTeacher) {
+        triggerSave();
+        // Standard browsers require a non-empty string for the confirmation dialog
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
     return () => {
       isMounted.current = false;
+      window.removeEventListener("beforeunload", handleBeforeUnload);
     };
-  }, []);
+  }, [isTeacher]);
 
   useEffect(() => {
     // Load helper functions dynamically
@@ -429,7 +451,7 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
   };
 
   return (
-    <WhiteboardErrorBoundary>
+    <WhiteboardErrorBoundary t={t}>
       <div className="flex flex-col h-full border rounded-xl overflow-hidden bg-background">
         <div className="flex items-center justify-between p-2 border-b bg-muted/30">
           <div className="flex items-center gap-4">
