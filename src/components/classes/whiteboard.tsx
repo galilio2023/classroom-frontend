@@ -1,12 +1,12 @@
 import {
+  Component,
   lazy,
+  ReactNode,
   Suspense,
   useCallback,
   useEffect,
   useRef,
   useState,
-  Component,
-  ReactNode,
 } from "react";
 import { socket } from "@/lib/socket";
 import { useCustomMutation, useGetIdentity } from "@refinedev/core";
@@ -14,12 +14,17 @@ import { User } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Loader2, Lock, Save, Trash2, Unlock, AlertCircle, RefreshCw } from "lucide-react";
+import { AlertCircle, Loader2, Lock, RefreshCw, Save, Trash2, Unlock } from "lucide-react";
 import { toast } from "sonner";
 import { ConflictDialog } from "@/components/conflict-dialog";
 import { ErrorCode } from "@/constants/error-codes";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
+import { AiFeatureGuard } from "@/components/ai/AiFeatureGuard";
+
+// 🛡️ STRICT TYPE SAFETY: Import specific Excalidraw types
+import type { ExcalidrawElement } from "@excalidraw/excalidraw/element/types";
+import type { AppState, Collaborator, SocketId } from "@excalidraw/excalidraw/types";
 
 // Lazy load Excalidraw to avoid SSR/Vite bundling issues
 const Excalidraw = lazy(async () => {
@@ -28,22 +33,29 @@ const Excalidraw = lazy(async () => {
 });
 
 // Helper for exporting (needs to be imported dynamically too)
-let exportToBlob: any;
+type ExportToBlobFn = (opts: {
+  elements: readonly ExcalidrawElement[];
+  appState?: Partial<AppState>;
+  files: any; // BinaryFiles type is complex, using any/unknown for now if needed, but let's try unknown
+  mimeType?: string;
+  quality?: number;
+}) => Promise<Blob>;
+
+let exportToBlob: ExportToBlobFn;
 
 /**
- * 🛡️ TYPE SAFETY: Minimal interface for Excalidraw API
- * Replacing 'any' with 'unknown' where specific library types aren't critical
+ * 🛡️ TYPE SAFETY: Strictly typed interface to satisfy Rule #2
  */
 interface ExcalidrawAPI {
   updateScene: (data: {
-    elements?: readonly any[];
-    appState?: any;
-    collaborators?: Map<string, any>;
+    elements?: readonly ExcalidrawElement[];
+    appState?: Partial<AppState>;
+    collaborators?: Map<SocketId, Collaborator>;
     commitToHistory?: boolean;
   }) => void;
-  getSceneElements: () => readonly any[];
-  getAppState: () => any;
-  getFiles: () => any;
+  getSceneElements: () => readonly ExcalidrawElement[];
+  getAppState: () => AppState;
+  getFiles: () => unknown;
 }
 
 interface WhiteboardSaveResponse {
@@ -56,8 +68,6 @@ interface WhiteboardProps {
   classId?: string; // Optional: context for saving resources
   roomId?: string; // Explicit socket room ID. If not provided, defaults to classId.
 }
-
-import { AiFeatureGuard } from "@/components/ai/AiFeatureGuard";
 
 /**
  * 🛡️ RESILIENCE: Local Error Boundary for heavy Excalidraw component
@@ -133,7 +143,7 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
         triggerSave();
         // Standard browsers require a non-empty string for the confirmation dialog
         e.preventDefault();
-        e.returnValue = "";
+        (e as any).returnValue = "";
       }
     };
 
@@ -165,11 +175,16 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
     console.log(`[Whiteboard] Joining room: ${activeRoomId}`);
     socket.emit("whiteboard:join", activeRoomId);
 
-    const handleInit = (data: any) => {
+    const handleInit = (data: {
+      elements: ExcalidrawElement[];
+      appState: Partial<AppState>;
+      isLocked: boolean;
+      version?: number;
+    }) => {
       if (excalidrawAPI && data.elements) {
         excalidrawAPI.updateScene({
           elements: data.elements,
-          appState: { ...(data.appState as any), collaborators: [] },
+          appState: { ...(data.appState as Partial<AppState>), collaborators: new Map() },
         });
         setIsLocked(data.isLocked);
 
@@ -181,16 +196,22 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
       }
     };
 
-    const handleUpdate = (data: any) => {
+    const handleUpdate = (data: {
+      elements: ExcalidrawElement[];
+      appState: Partial<AppState>;
+      version?: number;
+    }) => {
       if (excalidrawAPI) {
         // 🛡️ INTERACTION GUARD: Don't overwrite if user is currently drawing/editing
         const currentAppState = excalidrawAPI.getAppState();
         const isInteracting =
           currentAppState.isResizing ||
           currentAppState.isRotating ||
-          currentAppState.draggingElement ||
-          currentAppState.editingElement ||
-          currentAppState.multiElement;
+          currentAppState.selectedElementsAreBeingDragged ||
+          currentAppState.editingTextElement !== null ||
+          currentAppState.newElement !== null ||
+          currentAppState.multiElement !== null ||
+          currentAppState.editingLinearElement !== null;
 
         if (isInteracting) {
           console.log("[Whiteboard] Remote update skipped: User is interacting with canvas.");
@@ -201,7 +222,7 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
         setIsRemotePending(false); // Clear alert on successful sync
         excalidrawAPI.updateScene({
           elements: data.elements,
-          appState: { ...(data.appState as any), collaborators: [] },
+          appState: { ...(data.appState as Partial<AppState>), collaborators: new Map() },
         });
 
         // 🛡️ SYNC VERSION ON UPDATE
@@ -308,13 +329,19 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
     setIsDirty(false);
   };
 
+  // 🚀 STABLE HEARTBEAT: Decouple callback from dependency array
+  const savedTriggerSave = useRef(triggerSave);
+  useEffect(() => {
+    savedTriggerSave.current = triggerSave;
+  }, [triggerSave]);
+
   // 🚀 AUTO-SAVE HEARTBEAT: Save to Postgres every 10 seconds if changes exist
   useEffect(() => {
     if (!activeRoomId || !isTeacher) return;
 
     const interval = setInterval(() => {
       if (hasChangesRef.current) {
-        triggerSave();
+        savedTriggerSave.current();
       }
     }, 10000);
 
@@ -322,13 +349,13 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
       clearInterval(interval);
       // 🛡️ UNMOUNT SAFETY: Flush only if dirty, socket is active, and still mounted
       if (hasChangesRef.current && socket.connected && isMounted.current) {
-        triggerSave();
+        savedTriggerSave.current();
       }
     };
-  }, [activeRoomId, isTeacher, triggerSave]);
+  }, [activeRoomId, isTeacher]); // 🛡️ Removed triggerSave to prevent stutter
 
   const onChange = useCallback(
-    (elements: readonly any[], appState: any) => {
+    (elements: readonly ExcalidrawElement[], appState: AppState) => {
       if (!excalidrawAPI || !activeRoomId) return;
 
       // Only broadcast if not locked or if user is teacher
@@ -524,7 +551,7 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
               }
             >
               <Excalidraw
-                excalidrawAPI={(api) => setExcalidrawAPI(api as any as ExcalidrawAPI)}
+                excalidrawAPI={(api) => setExcalidrawAPI(api as ExcalidrawAPI)}
                 onChange={onChange}
                 viewModeEnabled={isLocked && !isTeacher}
                 theme="light"

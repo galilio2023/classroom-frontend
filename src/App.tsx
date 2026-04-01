@@ -28,12 +28,13 @@ import "@excalidraw/excalidraw/index.css";
 import "./i18n/i18n";
 
 /**
- * 🚀 REAL-TIME BRIDGE: PulseManager
+ * 🚀 REAL-TIME BRIDGE: PulseProvider
  * Injected inside Refine to handle global socket-to-toast orchestration.
+ * Headless provider pattern ensures clean separation of concerns.
  */
-const PulseManager = () => {
+const PulseProvider = ({ children }: { children: React.ReactNode }) => {
   usePulseNotifications();
-  return null;
+  return <>{children}</>;
 };
 
 function App() {
@@ -99,13 +100,14 @@ function App() {
                 },
               }}
             >
-              <PulseManager />
-              <GlobalLiveOverlay />
-              <AppRouter />
-              <Toaster />
-              <UnsavedChangesNotifier />
-              <DocumentTitleHandler />
-              <RefineKbar />
+              <PulseProvider>
+                <GlobalLiveOverlay />
+                <AppRouter />
+                <Toaster />
+                <UnsavedChangesNotifier />
+                <DocumentTitleHandler />
+                <RefineKbar />
+              </PulseProvider>
             </Refine>
           </ErrorBoundary>
         </DevtoolsProvider>
