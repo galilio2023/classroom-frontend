@@ -3,10 +3,10 @@
 # Dynamically injects environment variables into Nginx configuration
 
 # Default values if not provided
-export API_DOMAIN=${VITE_API_URL:-"http://localhost:8000"}
-export SOCKET_DOMAIN=${VITE_SOCKET_URL:-"http://localhost:8000"}
-export BACKEND_URL=${VITE_API_URL:-"http://localhost:8000"}
-export SOCKET_URL=${VITE_SOCKET_URL:-"http://localhost:8000"}
+export API_DOMAIN=$(echo ${VITE_API_URL:-"http://localhost:8000"} | sed 's:/*$::')
+export SOCKET_DOMAIN=$(echo ${VITE_SOCKET_URL:-"http://localhost:8000"} | sed 's:/*$::')
+export BACKEND_URL=$(echo ${VITE_API_URL:-"http://localhost:8000"} | sed 's:/*$::')
+export SOCKET_URL=$(echo ${VITE_SOCKET_URL:-"http://localhost:8000"} | sed 's:/*$::')
 
 echo "🔧 Injecting API_DOMAIN=$API_DOMAIN and SOCKET_DOMAIN=$SOCKET_DOMAIN into CSP..."
 echo "🔧 Injecting BACKEND_URL=$BACKEND_URL and SOCKET_URL=$SOCKET_URL into Proxy..."

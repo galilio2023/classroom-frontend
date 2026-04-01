@@ -140,7 +140,7 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
     // 🛡️ DATA INTEGRITY: Final flush save on page leave
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (hasChangesRef.current && isTeacher) {
-        triggerSave();
+        savedTriggerSave.current();
         // Standard browsers require a non-empty string for the confirmation dialog
         e.preventDefault();
         (e as any).returnValue = "";
