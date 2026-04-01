@@ -15,13 +15,23 @@ RUN npm run build
 # 🛡️ SECURITY: Use unprivileged Nginx image to avoid running as root
 FROM nginxinc/nginx-unprivileged:stable-alpine AS runner
 
-# Copy the custom Nginx configuration
-COPY nginx.conf /etc/nginx/nginx.conf
+USER root
+# Install envsubst (comes with gettext)
+RUN apk add --no-cache gettext
+
+# Copy the custom Nginx configuration template and entrypoint
+COPY nginx.conf.template /etc/nginx/nginx.conf.template
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 # Copy the built React assets to Nginx html directory
 COPY --from=builder /app/dist /usr/share/nginx/html
 
+# Switch back to unprivileged user
+USER nginx
+
 # Port 8080 is standard for unprivileged nginx images
 EXPOSE 8080
 
+ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["nginx", "-g", "daemon off;"]
