@@ -401,7 +401,7 @@ const GlobalLibraryPage = () => {
                         <div className="pt-6 border-t border-border/40 flex items-center justify-between">
                           <div className="flex items-center gap-2">
                             <CalendarIcon className="h-3.5 w-3.5 text-primary/60" />
-                            <span className="text-[10px] font-black uppercase tracking-wider text-muted-foreground/60">
+                            <span className="text-[10px] md:text-[11px] font-black uppercase tracking-wider text-muted-foreground/60">
                               {dayjs(resource.createdAt)
                                 .locale(i18n.language)
                                 .format("MMM D, YYYY")}
@@ -410,7 +410,7 @@ const GlobalLibraryPage = () => {
                           <Button
                             variant="outline"
                             size="sm"
-                            className="rounded-xl font-black uppercase tracking-widest text-[9px] h-9 px-4 gap-2 border-primary/10 text-primary hover:bg-primary hover:text-primary-foreground transition-all shadow-sm"
+                            className="rounded-xl font-black uppercase tracking-widest text-[10px] md:text-[11px] h-9 px-4 gap-2 border-primary/10 text-primary hover:bg-primary hover:text-primary-foreground transition-all shadow-sm"
                             asChild
                           >
                             <a href={resource.url} target="_blank" rel="noreferrer">

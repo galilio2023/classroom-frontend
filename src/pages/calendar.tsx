@@ -346,7 +346,7 @@ export const CalendarPage = () => {
                 month_grid: "w-full border-collapse space-y-4",
                 weekdays: "flex w-full mb-6",
                 weekday:
-                  "text-muted-foreground/50 w-full font-black uppercase tracking-[0.2em] text-[9px] md:text-[10px]",
+                  "text-muted-foreground/50 w-full font-black uppercase tracking-[0.2em] text-[10px] md:text-[11px]",
                 week: "flex w-full mt-2 gap-2 md:gap-4",
                 day: "text-center text-sm p-0 relative w-full h-12 xs:h-16 md:h-20 focus-within:relative focus-within:z-20",
                 day_button: cn(
@@ -522,7 +522,7 @@ export const CalendarPage = () => {
                           )}
 
                           {event.classId && (
-                            <div className="mt-5 flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-primary opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0">
+                            <div className="mt-5 flex items-center gap-2 text-[10px] md:text-[11px] font-black uppercase tracking-widest text-primary opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0">
                               {t("notifications.viewClass")}
                               <ChevronRight className="h-3 w-3" />
                             </div>

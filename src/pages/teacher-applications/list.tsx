@@ -251,7 +251,7 @@ const TeacherApplicationsList = () => {
                                     : "destructive"
                               }
                               className={cn(
-                                "text-[9px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full shadow-sm",
+                                "text-[10px] md:text-[11px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full shadow-sm",
                                 app.status === "pending" &&
                                   "bg-amber-500/10 text-amber-600 border border-amber-500/20"
                               )}
@@ -260,7 +260,7 @@ const TeacherApplicationsList = () => {
                             </Badge>
                             <Badge
                               variant="ai"
-                              className="text-[9px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full shadow-sm"
+                              className="text-[10px] md:text-[11px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full shadow-sm"
                             >
                               {t("teacherApps.labels.applyingFor", {
                                 name: app.class?.name,
@@ -275,7 +275,7 @@ const TeacherApplicationsList = () => {
                               <Mail className="h-3.5 w-3.5 text-primary" />
                             </div>
                             <div className="flex flex-col">
-                              <span className="text-[9px] uppercase font-bold text-muted-foreground/60 tracking-wider">
+                              <span className="text-[10px] md:text-[11px] uppercase font-bold text-muted-foreground/60 tracking-wider">
                                 Email
                               </span>
                               <span className="text-[11px] font-black text-foreground truncate max-w-[150px]">
@@ -289,7 +289,7 @@ const TeacherApplicationsList = () => {
                               <Clock className="h-3.5 w-3.5 text-primary" />
                             </div>
                             <div className="flex flex-col">
-                              <span className="text-[9px] uppercase font-bold text-muted-foreground/60 tracking-wider">
+                              <span className="text-[10px] md:text-[11px] uppercase font-bold text-muted-foreground/60 tracking-wider">
                                 Applied
                               </span>
                               <span className="text-[11px] font-black text-foreground uppercase tracking-tight">
@@ -303,7 +303,7 @@ const TeacherApplicationsList = () => {
                                 <MessageSquare className="h-3.5 w-3.5 text-primary" />
                               </div>
                               <div className="flex flex-col">
-                                <span className="text-[9px] uppercase font-bold text-muted-foreground/60 tracking-wider">
+                                <span className="text-[10px] md:text-[11px] uppercase font-bold text-muted-foreground/60 tracking-wider">
                                   Message
                                 </span>
                                 <span className="text-[11px] font-black text-foreground truncate max-w-[150px]">

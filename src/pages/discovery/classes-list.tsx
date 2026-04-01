@@ -47,11 +47,11 @@ const PublicClassCard = ({ aClass }: { aClass: Class }) => {
           <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent opacity-60" />
 
           <div className="absolute top-6 left-6 flex gap-2">
-            <Badge className="bg-white/90 text-primary backdrop-blur-md border-none rounded-full px-4 py-1 font-black uppercase tracking-widest text-[8px]">
+            <Badge className="bg-white/90 text-primary backdrop-blur-md border-none rounded-full px-4 py-1 font-black uppercase tracking-widest text-[10px] md:text-[11px]">
               {aClass.subject?.name}
             </Badge>
             {aClass.isPaid && (
-              <Badge className="bg-primary text-white border-none rounded-full px-4 py-1 font-black uppercase tracking-widest text-[8px]">
+              <Badge className="bg-primary text-white border-none rounded-full px-4 py-1 font-black uppercase tracking-widest text-[10px] md:text-[11px]">
                 Premium
               </Badge>
             )}

@@ -331,7 +331,7 @@ const SubmissionsListPage = () => {
                             <Badge
                               variant={isGraded ? "default" : "secondary"}
                               className={cn(
-                                "text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-lg border-none",
+                                "text-[10px] md:text-[11px] font-black uppercase tracking-widest px-3 py-1 rounded-lg border-none",
                                 isGraded
                                   ? "bg-green-500/10 text-green-600"
                                   : "bg-amber-500/10 text-amber-600"
@@ -344,7 +344,7 @@ const SubmissionsListPage = () => {
                             {submission.isLate && (
                               <Badge
                                 variant="destructive"
-                                className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md"
+                                className="text-[10px] md:text-[11px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md"
                               >
                                 {t("assignments.list.table.late")}
                               </Badge>

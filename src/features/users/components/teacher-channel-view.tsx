@@ -131,7 +131,7 @@ export const TeacherChannelView = ({ user, teacherClasses }: Props) => {
                   alt={classItem.name}
                 />
                 <div className="absolute inset-0 bg-black/20" />
-                <Badge className="absolute top-4 end-4 bg-white/90 text-black border-none font-black text-[9px] uppercase tracking-widest shadow-sm">
+                <Badge className="absolute top-4 end-4 bg-white/90 text-black border-none font-black text-[10px] md:text-[11px] uppercase tracking-widest shadow-sm">
                   {(classItem as any).subject?.name}
                 </Badge>
               </div>

@@ -176,7 +176,7 @@ export const MarketplaceFunnel = ({ data }: Props) => {
 const Badge = ({ children, variant, className }: any) => (
   <div
     className={cn(
-      "px-2 py-0.5 rounded text-[8px] font-black uppercase",
+      "px-2 py-0.5 rounded text-[10px] md:text-[11px] font-black uppercase",
       variant === "outline" ? "border" : "bg-primary text-white",
       className
     )}

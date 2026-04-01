@@ -442,7 +442,7 @@ export default function TermsList() {
                                     ? "secondary"
                                     : "outline"
                               }
-                              className="text-[9px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full border-none shadow-sm"
+                              className="text-[10px] md:text-[11px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full border-none shadow-sm"
                             >
                               {t(`status.${term.status.toLowerCase()}` as any)}
                             </Badge>
@@ -455,7 +455,7 @@ export default function TermsList() {
                               <Calendar className="h-3.5 w-3.5 text-primary" />
                             </div>
                             <div className="flex flex-col text-start">
-                              <span className="text-[9px] uppercase font-bold text-muted-foreground/60 tracking-wider">
+                              <span className="text-[10px] md:text-[11px] uppercase font-bold text-muted-foreground/60 tracking-wider">
                                 Duration
                               </span>
                               <span className="text-[11px] font-black text-foreground">
@@ -470,7 +470,7 @@ export default function TermsList() {
                               <Clock className="h-3.5 w-3.5 text-primary" />
                             </div>
                             <div className="flex flex-col text-start">
-                              <span className="text-[9px] uppercase font-bold text-muted-foreground/60 tracking-wider">
+                              <span className="text-[10px] md:text-[11px] uppercase font-bold text-muted-foreground/60 tracking-wider">
                                 Timeline
                               </span>
                               <span className="text-[11px] font-black uppercase tracking-tight">

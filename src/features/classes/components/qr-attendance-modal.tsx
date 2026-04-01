@@ -277,7 +277,7 @@ export const QRAttendanceModal = ({ isOpen, onClose, classId }: QRAttendanceModa
                           <span className="text-sm font-bold leading-tight">
                             {record.student?.name}
                           </span>
-                          <span className="text-[9px] font-black uppercase tracking-tighter text-muted-foreground">
+                          <span className="text-[10px] md:text-[11px] font-black uppercase tracking-tighter text-muted-foreground">
                             {new Date().toLocaleTimeString([], {
                               hour: "2-digit",
                               minute: "2-digit",

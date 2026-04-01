@@ -119,7 +119,7 @@ export const ProfileCard = ({ user, isStudent, isTeacher }: Props) => {
                 <span className="text-xl md:text-2xl font-black text-orange-600">
                   {formatter.format(user.currentStreak || 0)}
                 </span>
-                <span className="text-[8px] uppercase font-black text-orange-600/60 tracking-widest">
+                <span className="text-[10px] md:text-[11px] uppercase font-black text-orange-600/60 tracking-widest">
                   {t("profile.labels.currentStreak" as any)}
                 </span>
               </div>
@@ -128,7 +128,7 @@ export const ProfileCard = ({ user, isStudent, isTeacher }: Props) => {
                 <span className="text-xl md:text-2xl font-black text-primary">
                   {formatter.format(user.longestStreak || 0)}
                 </span>
-                <span className="text-[8px] uppercase font-black text-primary/60 tracking-widest">
+                <span className="text-[10px] md:text-[11px] uppercase font-black text-primary/60 tracking-widest">
                   {t("profile.labels.longestStreak" as any)}
                 </span>
               </div>

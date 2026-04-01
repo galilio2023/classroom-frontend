@@ -357,11 +357,11 @@ const SubjectsList = () => {
                           <div className="flex items-center justify-center md:justify-start gap-2">
                             <Badge
                               variant="outline"
-                              className="text-[9px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full border-primary/10 shadow-sm"
+                              className="text-[10px] md:text-[11px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full border-primary/10 shadow-sm"
                             >
                               {subject.code}
                             </Badge>
-                            <Badge className="bg-primary/10 text-primary border-none font-black px-3 py-0.5 rounded-full text-[9px] tracking-widest uppercase shadow-sm">
+                            <Badge className="bg-primary/10 text-primary border-none font-black px-3 py-0.5 rounded-full text-[10px] md:text-[11px] tracking-widest uppercase shadow-sm">
                               {new Intl.NumberFormat(i18n.language).format(subject.credits || 0)}{" "}
                               {t("classes.form.studentsUnit")}
                             </Badge>
@@ -374,7 +374,7 @@ const SubjectsList = () => {
                               <Building2 className="h-3.5 w-3.5 text-primary" />
                             </div>
                             <div className="flex flex-col">
-                              <span className="text-[9px] uppercase font-bold text-muted-foreground/60 tracking-wider">
+                              <span className="text-[10px] md:text-[11px] uppercase font-bold text-muted-foreground/60 tracking-wider">
                                 Department
                               </span>
                               <span className="text-[11px] font-black text-foreground truncate max-w-[150px]">
@@ -389,7 +389,7 @@ const SubjectsList = () => {
                               <GraduationCap className="h-3.5 w-3.5 text-primary" />
                             </div>
                             <div className="flex flex-col">
-                              <span className="text-[9px] uppercase font-bold text-muted-foreground/60 tracking-wider">
+                              <span className="text-[10px] md:text-[11px] uppercase font-bold text-muted-foreground/60 tracking-wider">
                                 Category
                               </span>
                               <span className="text-[11px] font-black text-foreground uppercase tracking-tight">

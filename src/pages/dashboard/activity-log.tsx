@@ -97,11 +97,11 @@ const ActivityLogPage = () => {
           header: () => <p className="column-title">{t("dashboard.activity.network" as any)}</p>,
           cell: ({ row }) => (
             <div className="flex flex-col gap-0.5">
-              <div className="flex items-center gap-1.5 text-[9px] font-bold text-muted-foreground">
+              <div className="flex items-center gap-1.5 text-[10px] md:text-[11px] font-bold text-muted-foreground">
                 <Globe className="h-2.5 w-2.5" />
                 {row.original.ipAddress || "Local"}
               </div>
-              <div className="text-[8px] text-muted-foreground/60 truncate max-w-[150px]">
+              <div className="text-[10px] md:text-[11px] text-muted-foreground/60 truncate max-w-[150px]">
                 {row.original.userAgent}
               </div>
             </div>

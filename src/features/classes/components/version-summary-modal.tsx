@@ -56,7 +56,7 @@ export const VersionSummaryModal = ({ isOpen, onClose, updatedModules }: Props) 
                   </h4>
                   <Badge
                     variant="outline"
-                    className="text-[8px] font-black uppercase tracking-tighter bg-background"
+                    className="text-[10px] md:text-[11px] font-black uppercase tracking-tighter bg-background"
                   >
                     v{module.version}
                   </Badge>
@@ -66,7 +66,7 @@ export const VersionSummaryModal = ({ isOpen, onClose, updatedModules }: Props) 
                     {module.description}
                   </p>
                 )}
-                <div className="mt-3 flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-primary/60">
+                <div className="mt-3 flex items-center gap-2 text-[10px] md:text-[11px] font-black uppercase tracking-widest text-primary/60">
                   <ArrowRight className="h-3 w-3" />
                   {t("common.viewNewContent", { defaultValue: "View Content" })}
                 </div>

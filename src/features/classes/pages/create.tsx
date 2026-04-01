@@ -458,7 +458,7 @@ const ClassesCreate = () => {
                     </Button>
                     <div className="mt-4 flex items-center justify-center gap-2 text-muted-foreground/40">
                       <Info className="h-3.5 w-3.5" />
-                      <span className="text-[9px] font-black uppercase tracking-widest">
+                      <span className="text-[10px] md:text-[11px] font-black uppercase tracking-widest">
                         {t("classes.create.inviteNote")}
                       </span>
                     </div>

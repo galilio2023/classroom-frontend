@@ -357,7 +357,7 @@ const ProfileRequestsList = () => {
                                       : "destructive"
                                 }
                                 className={cn(
-                                  "text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md border-none",
+                                  "text-[10px] md:text-[11px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md border-none",
                                   request.status === "pending" && "bg-amber-500/10 text-amber-600"
                                 )}
                               >
@@ -365,7 +365,7 @@ const ProfileRequestsList = () => {
                               </Badge>
                               <Badge
                                 variant="outline"
-                                className="text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md border-primary/10"
+                                className="text-[10px] md:text-[11px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md border-primary/10"
                               >
                                 {t("profileRequests.labels.changes", {
                                   count: changedKeys.length,
@@ -399,21 +399,21 @@ const ProfileRequestsList = () => {
                                   key={key}
                                   className="flex items-center gap-1.5 bg-muted/30 px-2 py-1 rounded-lg border border-primary/5"
                                 >
-                                  <span className="text-[7px] font-black uppercase tracking-widest text-muted-foreground/60">
+                                  <span className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-muted-foreground/60">
                                     {key.replace("Url", "").replace(/([A-Z])/g, " $1")}
                                   </span>
                                   {isDoc ? (
                                     <Button
                                       variant="link"
                                       size="sm"
-                                      className="h-auto p-0 text-[9px] font-black gap-1 text-primary"
+                                      className="h-auto p-0 text-[10px] md:text-[11px] font-black gap-1 text-primary"
                                       onClick={() => setPreviewUrl(String(newData[key]))}
                                     >
                                       <FileText className="h-2.5 w-2.5" />
                                       {t("profileRequests.labels.viewProof")}
                                     </Button>
                                   ) : (
-                                    <div className="flex items-center gap-1 text-[9px] font-bold">
+                                    <div className="flex items-center gap-1 text-[10px] md:text-[11px] font-bold">
                                       <span className="text-muted-foreground/40 line-through truncate max-w-15">
                                         {String(oldData[key] || t("profileRequests.labels.empty"))}
                                       </span>
@@ -436,7 +436,7 @@ const ProfileRequestsList = () => {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                className="h-9 rounded-lg font-black uppercase tracking-widest text-[9px] border-green-500/20 text-green-600 bg-green-500/5 hover:bg-green-500/10 px-3"
+                                className="h-9 rounded-lg font-black uppercase tracking-widest text-[10px] md:text-[11px] border-green-500/20 text-green-600 bg-green-500/5 hover:bg-green-500/10 px-3"
                                 onClick={() => handleApprove(request.id)}
                                 disabled={isApproving}
                               >
@@ -450,7 +450,7 @@ const ProfileRequestsList = () => {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                className="h-9 rounded-lg font-black uppercase tracking-widest text-[9px] border-destructive/20 text-destructive bg-destructive/5 hover:bg-destructive/10 px-3"
+                                className="h-9 rounded-lg font-black uppercase tracking-widest text-[10px] md:text-[11px] border-destructive/20 text-destructive bg-destructive/5 hover:bg-destructive/10 px-3"
                                 onClick={() => setRejectTarget(request.id)}
                                 disabled={isRejecting}
                               >
@@ -470,7 +470,7 @@ const ProfileRequestsList = () => {
                               align="end"
                               className="w-48 rounded-xl p-1 bg-white dark:bg-[#09090b] opacity-100 backdrop-blur-none border border-border/50 shadow-2xl"
                             >
-                              <DropdownMenuLabel className="text-[9px] font-black uppercase tracking-widest text-muted-foreground px-2 py-1.5">
+                              <DropdownMenuLabel className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-muted-foreground px-2 py-1.5">
                                 {t("assignments.list.labels.options")}
                               </DropdownMenuLabel>
                               <DropdownMenuItem

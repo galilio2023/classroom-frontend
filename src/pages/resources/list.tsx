@@ -370,11 +370,11 @@ const ResourcesListPage = () => {
                           <div className="flex items-center justify-center md:justify-start gap-2">
                             <Badge
                               variant="outline"
-                              className="text-[9px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full border-primary/10 shadow-sm"
+                              className="text-[10px] md:text-[11px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full border-primary/10 shadow-sm"
                             >
                               {resource.type}
                             </Badge>
-                            <Badge className="bg-primary/5 text-primary border-none font-black px-3 py-0.5 rounded-full text-[9px] tracking-widest uppercase shadow-sm">
+                            <Badge className="bg-primary/5 text-primary border-none font-black px-3 py-0.5 rounded-full text-[10px] md:text-[11px] tracking-widest uppercase shadow-sm">
                               {(resource as any).class?.name || "Global"}
                             </Badge>
                           </div>
@@ -386,7 +386,7 @@ const ResourcesListPage = () => {
                               <Calendar className="h-3.5 w-3.5 text-primary" />
                             </div>
                             <div className="flex flex-col text-start">
-                              <span className="text-[9px] uppercase font-bold text-muted-foreground/60 tracking-wider">
+                              <span className="text-[10px] md:text-[11px] uppercase font-bold text-muted-foreground/60 tracking-wider">
                                 Uploaded
                               </span>
                               <span className="text-[11px] font-black text-foreground">
@@ -400,7 +400,7 @@ const ResourcesListPage = () => {
                               <Clock className="h-3.5 w-3.5 text-primary" />
                             </div>
                             <div className="flex flex-col text-start">
-                              <span className="text-[9px] uppercase font-bold text-muted-foreground/60 tracking-wider">
+                              <span className="text-[10px] md:text-[11px] uppercase font-bold text-muted-foreground/60 tracking-wider">
                                 Timeline
                               </span>
                               <span className="text-[11px] font-black uppercase tracking-tight">

@@ -138,7 +138,7 @@ export const ResourceItem = ({
                 variant="ghost"
                 size="sm"
                 asChild
-                className="h-8 md:h-9 rounded-lg md:rounded-xl px-3 md:px-4 text-[8px] md:text-[10px] font-black uppercase tracking-widest gap-1.5 md:gap-2 text-primary hover:bg-primary/5 transition-all"
+                className="h-8 md:h-9 rounded-lg md:rounded-xl px-3 md:px-4 text-[10px] md:text-[11px] font-black uppercase tracking-widest gap-1.5 md:gap-2 text-primary hover:bg-primary/5 transition-all"
               >
                 <Link to={`/classes/${classId}/lessons/${resource.id}`}>
                   <Eye className="h-3 w-3 md:h-3.5 md:w-3.5" />
@@ -152,7 +152,7 @@ export const ResourceItem = ({
               variant="ghost"
               size="sm"
               asChild
-              className="h-8 md:h-9 rounded-lg md:rounded-xl px-3 md:px-4 text-[8px] md:text-[10px] font-black uppercase tracking-widest gap-1.5 md:gap-2 hover:bg-muted transition-all"
+              className="h-8 md:h-9 rounded-lg md:rounded-xl px-3 md:px-4 text-[10px] md:text-[11px] font-black uppercase tracking-widest gap-1.5 md:gap-2 hover:bg-muted transition-all"
             >
               <a href={resource.url} target="_blank" rel="noreferrer">
                 <ExternalLink className="h-3 w-3 md:h-3.5 md:w-3.5" />

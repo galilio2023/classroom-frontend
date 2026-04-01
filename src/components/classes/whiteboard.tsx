@@ -231,8 +231,18 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
       if (!isMounted.current) return;
 
       isSavingRef.current = true;
-      const elements = excalidrawAPI.getSceneElements();
 
+      // 🛡️ TIMEOUT FALLBACK: Prevent UI from getting stuck if server doesn't respond
+      const saveTimeout = setTimeout(() => {
+        if (isSavingRef.current) {
+          isSavingRef.current = false;
+          if (isMounted.current) {
+            toast.error("Cloud sync timeout: No response from server. Will retry later.");
+          }
+        }
+      }, 8000); // 8 seconds
+
+      const elements = excalidrawAPI.getSceneElements();
       const appState = excalidrawAPI.getAppState();
 
       // 🛡️ ANCESTRY CHECK: Send current version to backend
@@ -247,8 +257,10 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
           version: currentVersion,
         },
         (res: WhiteboardSaveResponse) => {
-          isSavingRef.current = false;
-          if (!isMounted.current) return; // 🛡️ PREVENT MEMORY LEAK
+          clearTimeout(saveTimeout);
+          isSavingRef.current = false; // 🛡️ CRITICAL: Always reset ref even if unmounted
+
+          if (!isMounted.current) return; // 🛡️ PREVENT MEMORY LEAK for setState
 
           if (res.success && res.version) {
             versionRef.current = res.version;

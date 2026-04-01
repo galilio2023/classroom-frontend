@@ -432,11 +432,12 @@ const SubmissionShow = () => {
                     <Button
                       size="sm"
                       variant="destructive"
-                      className="h-8 rounded-lg font-black uppercase tracking-widest text-[9px]"
+                      className="h-8 rounded-lg font-black uppercase tracking-widest text-[10px] md:text-[11px]"
                       onClick={() =>
                         navigate(`/classes/show/${submission.assignment?.classId}?tab=assessments`)
                       }
                     >
+                      {" "}
                       {t("buttons.resubmit")}
                     </Button>
                   </div>

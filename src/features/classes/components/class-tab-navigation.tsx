@@ -104,7 +104,7 @@ export const ClassTabNavigation: React.FC<ClassTabNavigationProps> = ({
                   )}
                   {tab.badge && (
                     <Badge
-                      className="h-4 md:h-5 min-w-[1rem] md:min-w-[1.25rem] p-0 flex items-center justify-center text-[8px] md:text-[9px] rounded-full border-none bg-white text-primary font-black ms-1 shrink-0"
+                      className="h-4 md:h-5 min-w-[1rem] md:min-w-[1.25rem] p-0 flex items-center justify-center text-[10px] md:text-[11px] rounded-full border-none bg-white text-primary font-black ms-1 shrink-0"
                       style={{ color: isActive ? classColor : "inherit" }}
                     >
                       {tab.badge}

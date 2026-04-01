@@ -216,13 +216,13 @@ const ShowProjectGroup = () => {
             <TabsList className="grid w-full grid-cols-2 h-12 md:h-14 bg-muted/20 gap-1 rounded-[1.25rem]">
               <TabsTrigger
                 value="members"
-                className="rounded-xl font-black uppercase tracking-widest text-[9px] md:text-[10px] gap-2 md:gap-3 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-xl transition-all duration-300"
+                className="rounded-xl font-black uppercase tracking-widest text-[10px] md:text-[11px] gap-2 md:gap-3 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-xl transition-all duration-300"
               >
                 <Users className="h-4 w-4 md:h-5 md:w-5" /> {t("projectGroups.members")}
               </TabsTrigger>
               <TabsTrigger
                 value="whiteboard"
-                className="rounded-xl font-black uppercase tracking-widest text-[9px] md:text-[10px] gap-2 md:gap-3 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-xl transition-all duration-300"
+                className="rounded-xl font-black uppercase tracking-widest text-[10px] md:text-[11px] gap-2 md:gap-3 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-xl transition-all duration-300"
               >
                 <Presentation className="h-4 w-4 md:h-5 md:w-5" />{" "}
                 {t("projectGroups.show.whiteboard")}
