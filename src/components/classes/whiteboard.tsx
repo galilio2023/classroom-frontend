@@ -63,7 +63,6 @@ class WhiteboardErrorBoundary extends Component<
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     // 🛡️ PRODUCTION LOGGING: Monitor Excalidraw-specific crashes
     console.error("⚪ Whiteboard Component Crash:", error, errorInfo);
-    // Future: Integration with Sentry/LogRocket here
   }
 
   handleReset = () => {
@@ -110,12 +109,20 @@ class WhiteboardErrorBoundary extends Component<
   }
 }
 
+interface UploadResponse {
+  url: string;
+}
+
+interface ResourceResponse {
+  id: number;
+}
+
 export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
   const { t } = useTranslation();
   const { isStaff: isTeacher, isLoading: isPermissionsLoading } = useUserRole();
   const [excalidrawAPI, setExcalidrawAPI] = useState<ExcalidrawAPI | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-  const [isHelpersLoading, setIsHelpersLoading] = useState(false);
+  const [isHelpersLoading] = useState(false);
 
   // If roomId is not provided, fallback to classId (backward compatibility)
   const activeRoomId = roomId || classId;
@@ -143,26 +150,29 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
     t,
   });
 
-  const { mutate: uploadFile } = useCustomMutation<any>();
+  const { mutate: uploadFile } = useCustomMutation<UploadResponse>();
+  const { mutate: createResource } = useCustomMutation<ResourceResponse>();
 
   useEffect(() => {
     if (isPermissionsLoading) return;
-    const isMounted = { current: true };
 
     // 🛡️ DATA INTEGRITY: Final flush save on page leave
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (hasChangesRef.current && isTeacher) {
+        // Trigger save via socket (best effort)
         savedTriggerSave.current();
-        // Standard browsers require a non-empty string for the confirmation dialog
+
+        // NOTE: Standard browsers require a non-empty string for the confirmation dialog
+        // This gives the socket a tiny bit more time to flush before the process is killed.
         e.preventDefault();
         e.returnValue = "";
+        return "";
       }
     };
 
     window.addEventListener("beforeunload", handleBeforeUnload);
 
     return () => {
-      isMounted.current = false;
       window.removeEventListener("beforeunload", handleBeforeUnload);
     };
   }, [isTeacher, isPermissionsLoading, hasChangesRef, savedTriggerSave]);
@@ -216,10 +226,10 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
           },
         },
         {
-          onSuccess: (data: { data: { url: string } }) => {
-            const fileUrl = data.data.url;
+          onSuccess: (response) => {
+            const fileUrl = response.data.url;
             // Now create a resource entry
-            uploadFile(
+            createResource(
               {
                 url: "/resources",
                 method: "post",

@@ -1,7 +1,7 @@
 import { UndoableNotification } from "@/components/refine-ui/notification/undoable-notification";
 import type { NotificationProvider } from "@refinedev/core";
 import { useNavigate } from "react-router-dom";
-import { toast } from "sonner";
+import { toast, type ExternalToast } from "sonner";
 import { MoveRight } from "lucide-react";
 import { NotificationMetadata } from "@/types";
 
@@ -16,7 +16,7 @@ export function useNotificationProvider(): NotificationProvider {
     open: ({ key, type, message, description, undoableTimeout, cancelMutation }) => {
       const toastId = key || Date.now().toString();
 
-      const config: any = {
+      const config: ExternalToast = {
         id: toastId,
         description,
         richColors: true,
