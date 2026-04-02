@@ -1,9 +1,7 @@
-import { AlertTriangle, RefreshCcw, History, ArrowRight } from "lucide-react";
+import { AlertTriangle, RefreshCcw, History } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
@@ -11,6 +9,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 
 interface ConflictDialogProps {
   isOpen: boolean;
@@ -24,6 +23,8 @@ interface ConflictDialogProps {
  * or the dataProvider catches a 409 conflict during a live edit.
  */
 export const ConflictDialog = ({ isOpen, onRefresh, onOverwrite }: ConflictDialogProps) => {
+  const { t } = useTranslation();
+
   return (
     <AlertDialog open={isOpen}>
       <AlertDialogContent className="rounded-[2.5rem] border-none shadow-3xl bg-card/95 backdrop-blur-xl">
@@ -37,11 +38,10 @@ export const ConflictDialog = ({ isOpen, onRefresh, onOverwrite }: ConflictDialo
           </motion.div>
           <div className="space-y-2 text-center">
             <AlertDialogTitle className="text-3xl font-black tracking-tight">
-              Collision Detected
+              {t("conflict.title")}
             </AlertDialogTitle>
             <AlertDialogDescription className="text-base font-medium px-4 leading-relaxed">
-              Another teacher has just updated this class. If you save now, you might overwrite
-              their changes.
+              {t("conflict.description")}
             </AlertDialogDescription>
           </div>
         </AlertDialogHeader>
@@ -52,9 +52,9 @@ export const ConflictDialog = ({ isOpen, onRefresh, onOverwrite }: ConflictDialo
               <RefreshCcw className="h-5 w-5" />
             </div>
             <div className="text-start">
-              <p className="text-sm font-bold">Refresh & Merge</p>
+              <p className="text-sm font-bold">{t("conflict.refreshLabel")}</p>
               <p className="text-[10px] text-muted-foreground font-medium">
-                Get the latest server version and keep your edits.
+                {t("conflict.refreshDesc")}
               </p>
             </div>
           </div>
@@ -64,9 +64,9 @@ export const ConflictDialog = ({ isOpen, onRefresh, onOverwrite }: ConflictDialo
               <History className="h-5 w-5" />
             </div>
             <div className="text-start">
-              <p className="text-sm font-bold text-destructive">Force Overwrite</p>
+              <p className="text-sm font-bold text-destructive">{t("conflict.overwriteLabel")}</p>
               <p className="text-[10px] text-destructive/60 font-medium">
-                Ignore the other update and push your version anyway.
+                {t("conflict.overwriteDesc")}
               </p>
             </div>
           </div>
@@ -78,14 +78,14 @@ export const ConflictDialog = ({ isOpen, onRefresh, onOverwrite }: ConflictDialo
             onClick={onOverwrite}
             className="rounded-2xl px-8 h-12 font-black uppercase tracking-widest text-[10px] text-destructive hover:bg-destructive/10"
           >
-            Overwrite
+            {t("conflict.overwriteBtn")}
           </Button>
           <Button
             onClick={onRefresh}
             className="rounded-2xl px-10 h-14 font-black uppercase tracking-widest text-[10px] bg-primary text-primary-foreground shadow-xl shadow-primary/20"
           >
             <RefreshCcw className="h-4 w-4 me-2" />
-            Refresh Now
+            {t("conflict.refreshBtn")}
           </Button>
         </AlertDialogFooter>
       </AlertDialogContent>

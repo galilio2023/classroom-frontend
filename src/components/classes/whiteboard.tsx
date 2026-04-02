@@ -1,12 +1,4 @@
-import {
-  Component,
-  ErrorInfo,
-  lazy,
-  ReactNode,
-  Suspense,
-  useEffect,
-  useState,
-} from "react";
+import { Component, ErrorInfo, lazy, ReactNode, Suspense, useEffect, useState } from "react";
 import { useCustomMutation } from "@refinedev/core";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -117,6 +109,7 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
   const { isStaff: isTeacher, isLoading: isPermissionsLoading } = useUserRole();
   const [excalidrawAPI, setExcalidrawAPI] = useState<ExcalidrawAPI | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [isHelpersLoading, setIsHelpersLoading] = useState(true);
 
   // If roomId is not provided, fallback to classId (backward compatibility)
   const activeRoomId = roomId || classId;
@@ -144,7 +137,7 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
     t,
   });
 
-  const { mutate: uploadFile } = useCustomMutation();
+  const { mutate: uploadFile } = useCustomMutation<any>();
 
   useEffect(() => {
     if (isPermissionsLoading) return;
@@ -174,8 +167,10 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
       try {
         const module = await import("@excalidraw/excalidraw");
         exportToBlob = module.exportToBlob;
+        setIsHelpersLoading(false);
       } catch (err) {
         console.error("Failed to load Excalidraw helpers", err);
+        setIsHelpersLoading(false);
       }
     };
     void loadHelpers();
@@ -313,7 +308,7 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
                   variant="default"
                   size="sm"
                   onClick={saveSnapshot}
-                  disabled={isSaving}
+                  disabled={isSaving || isHelpersLoading}
                   className={cn(
                     "h-8 transition-all",
                     isDirty
@@ -321,14 +316,20 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
                       : "bg-live-primary hover:bg-live-primary/90"
                   )}
                 >
-                  {isSaving ? (
+                  {isSaving || isHelpersLoading ? (
                     <Loader2 className="h-4 w-4 animate-spin me-1" />
                   ) : isDirty ? (
                     <AlertCircle className="h-4 w-4 me-1 animate-pulse" />
                   ) : (
                     <Save className="h-4 w-4 me-1" />
                   )}
-                  {isDirty ? "Save Pending..." : "Save Snapshot"}
+                  {isHelpersLoading
+                    ? "Loading..."
+                    : isSaving
+                      ? "Saving..."
+                      : isDirty
+                        ? "Save Pending..."
+                        : "Save Snapshot"}
                 </Button>
               )}
             </div>

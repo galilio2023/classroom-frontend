@@ -28,7 +28,7 @@ interface UseWhiteboardSocketProps {
   excalidrawAPI: ExcalidrawAPI | null;
   isTeacher: boolean;
   isPermissionsLoading: boolean;
-  t: (key: string) => string;
+  t: any;
 }
 
 export const useWhiteboardSocket = ({
@@ -42,7 +42,7 @@ export const useWhiteboardSocket = ({
   const [isRemotePending, setIsRemotePending] = useState(false);
   const [showConflict, setShowConflict] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
-  
+
   const lastUpdateRef = useRef<number>(0);
   const versionRef = useRef<number>(1);
   const isSavingRef = useRef<boolean>(false);
@@ -135,7 +135,9 @@ export const useWhiteboardSocket = ({
       setIsLocked(data.isLocked);
       if (!isTeacher) {
         toast.info(
-          data.isLocked ? t("classes.live.whiteboard.locked") : t("classes.live.whiteboard.unlocked")
+          data.isLocked
+            ? t("classes.live.whiteboard.locked")
+            : t("classes.live.whiteboard.unlocked")
         );
       }
     };

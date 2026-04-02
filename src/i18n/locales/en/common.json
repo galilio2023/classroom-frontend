@@ -1,4 +1,14 @@
 {
+  "conflict": {
+    "title": "Collision Detected",
+    "description": "Another teacher has just updated this class. If you save now, you might overwrite their changes.",
+    "refreshLabel": "Refresh & Merge",
+    "refreshDesc": "Get the latest server version and keep your edits.",
+    "overwriteLabel": "Force Overwrite",
+    "overwriteDesc": "Ignore the other update and push your version anyway.",
+    "refreshBtn": "Refresh Now",
+    "overwriteBtn": "Overwrite"
+  },
   "attendance": {
     "attendance": "Attendance",
     "label": "Attendance"
