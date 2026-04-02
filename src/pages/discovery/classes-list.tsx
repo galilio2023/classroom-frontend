@@ -22,6 +22,7 @@ import { Class, User } from "@/types";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
+import Big from "big.js";
 
 const PublicClassCard = ({ aClass }: { aClass: Class }) => {
   const { t } = useTranslation();
@@ -75,7 +76,7 @@ const PublicClassCard = ({ aClass }: { aClass: Class }) => {
               <div className="flex items-center gap-1 text-primary">
                 <CircleDollarSign className="h-4 w-4" />
                 <span className="text-sm font-black">
-                  {(aClass.priceAmount / 100).toLocaleString()} {aClass.currency.toUpperCase()}
+                  {new Big(aClass.priceAmount || 0).toFixed(2)} {aClass.currency.toUpperCase()}
                 </span>
               </div>
             )}

@@ -48,11 +48,16 @@ export const useWhiteboardSocket = ({
   const isSavingRef = useRef<boolean>(false);
   const hasChangesRef = useRef<boolean>(false);
   const isMounted = useRef<boolean>(true);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     isMounted.current = true;
+    abortControllerRef.current = new AbortController();
     return () => {
       isMounted.current = false;
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
     };
   }, []);
 
@@ -132,6 +137,9 @@ export const useWhiteboardSocket = ({
     };
 
     const handleLockStatus = (data: { isLocked: boolean }) => {
+      // 🛡️ LIFECYCLE SAFETY: Ignore if hook is aborted
+      if (abortControllerRef.current?.signal.aborted) return;
+
       setIsLocked(data.isLocked);
       if (!isTeacher) {
         toast.info(
@@ -143,6 +151,9 @@ export const useWhiteboardSocket = ({
     };
 
     const handleClear = () => {
+      // 🛡️ LIFECYCLE SAFETY: Ignore if hook is aborted
+      if (abortControllerRef.current?.signal.aborted) return;
+
       if (excalidrawAPI) {
         excalidrawAPI.updateScene({ elements: [] });
         if (!isTeacher) toast.warning(t("classes.live.whiteboard.cleared"));
@@ -201,7 +212,8 @@ export const useWhiteboardSocket = ({
           clearTimeout(saveTimeout);
           isSavingRef.current = false;
 
-          if (!isMounted.current) return;
+          // 🛡️ LIFECYCLE SAFETY: Ignore response if hook is aborted or unmounted
+          if (abortControllerRef.current?.signal.aborted || !isMounted.current) return;
 
           if (res.success && res.version) {
             versionRef.current = res.version;
@@ -289,6 +301,12 @@ export const useWhiteboardSocket = ({
     }
   };
 
+  const abort = useCallback(() => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+  }, []);
+
   return {
     isLocked,
     isRemotePending,
@@ -305,5 +323,6 @@ export const useWhiteboardSocket = ({
     toggleLock,
     clearWhiteboard,
     savedTriggerSave,
+    abort,
   };
 };

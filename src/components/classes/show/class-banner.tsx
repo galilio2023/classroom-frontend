@@ -1,5 +1,6 @@
 import { Class } from "@/types";
 import { Badge } from "@/components/ui/badge";
+import Big from "big.js";
 import {
   Clock,
   Globe,
@@ -48,9 +49,9 @@ export const ClassBanner = ({
   const SubjectIcon = useMemo(() => getSubjectIcon(aClass.subject?.name), [aClass.subject?.name]);
 
   const showEnrollButton = !isStaff && !isEnrolled;
-  const isPaid = aClass.isPaid && aClass.priceAmount > 0;
+  const isPaid = aClass.isPaid && Number(aClass.priceAmount) > 0;
   const formattedPrice = isPaid
-    ? `${(aClass.priceAmount / 100).toFixed(2)} ${aClass.currency?.toUpperCase()}`
+    ? `${new Big(aClass.priceAmount || 0).toFixed(2)} ${aClass.currency?.toUpperCase()}`
     : "";
 
   return (

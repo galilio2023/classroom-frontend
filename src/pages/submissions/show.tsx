@@ -44,6 +44,8 @@ import { useDashboard } from "@/features/dashboard/hooks/use-dashboard";
 import { getSocket, connectSocket } from "@/lib/socket";
 import { Switch } from "@/components/ui/switch";
 
+import Big from "big.js";
+
 const SubmissionShow = () => {
   const { t, i18n } = useTranslation();
   const { coreData } = useDashboard();
@@ -52,7 +54,7 @@ const SubmissionShow = () => {
   const navigate = useNavigate();
   const { data: identity } = useGetIdentity<UserType>();
 
-  const [grade, setGrade] = useState<number>(0);
+  const [grade, setGrade] = useState<string>("0");
   const [feedback, setFeedback] = useState("");
   const [teacherPrivateNotes, setTeacherPrivateNotes] = useState("");
   const [requiresResubmission, setRequiresResubmission] = useState(false);
@@ -75,10 +77,21 @@ const SubmissionShow = () => {
         const serverVersion = event.payload?.data?.version || event.payload?.version;
         if (serverVersion !== undefined && submission && serverVersion > submission.version) {
           // Check if the current teacher has unsaved changes
-          const isDirty =
-            Number(grade) !== (Number(submission.grade) || submission.suggestedGrade || 0) ||
-            feedback !== (submission.feedback || submission.suggestedFeedback || "") ||
-            teacherPrivateNotes !== (submission.teacherPrivateNotes || "");
+          // 🛡️ PRECISION: Use big.js for robust grade comparison
+          let isDirty = false;
+          try {
+            const currentGrade = new Big(grade || "0");
+            const serverGrade = new Big(submission.grade || submission.suggestedGrade || "0");
+            isDirty = !currentGrade.eq(serverGrade);
+          } catch (e) {
+            isDirty = true;
+          }
+
+          if (!isDirty) {
+            isDirty =
+              feedback !== (submission.feedback || submission.suggestedFeedback || "") ||
+              teacherPrivateNotes !== (submission.teacherPrivateNotes || "");
+          }
 
           if (isDirty) {
             toast.warning(
@@ -154,7 +167,7 @@ const SubmissionShow = () => {
   useEffect(() => {
     if (submission) {
       if (!isAnalyzing) {
-        setGrade(Number(submission.grade) || submission.suggestedGrade || 0);
+        setGrade((submission.grade || submission.suggestedGrade || "0").toString());
         setFeedback(submission.feedback || submission.suggestedFeedback || "");
         setTeacherPrivateNotes(submission.teacherPrivateNotes || "");
         setRequiresResubmission(submission.requiresResubmission || false);
@@ -345,7 +358,7 @@ const SubmissionShow = () => {
                         type="number"
                         step="0.01"
                         value={grade}
-                        onChange={(e) => setGrade(Number(e.target.value))}
+                        onChange={(e) => setGrade(e.target.value)}
                         className="h-14 text-3xl font-black text-center rounded-xl bg-muted/20 border-none"
                         min={0}
                         max={100}
@@ -465,7 +478,7 @@ const SubmissionShow = () => {
                         variant="outline"
                         className="w-full h-9 text-[10px] font-black uppercase tracking-widest gap-2 border-ai-primary/20 text-ai-primary hover:bg-ai-primary hover:text-white transition-all rounded-lg"
                         onClick={() => {
-                          setGrade(submission.suggestedGrade!);
+                          setGrade((submission.suggestedGrade || "0").toString());
                           setFeedback(submission.suggestedFeedback || "");
                         }}
                       >

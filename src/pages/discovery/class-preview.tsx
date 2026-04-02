@@ -24,6 +24,7 @@ import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { useTelemetry } from "@/hooks/use-telemetry";
 import { useEffect } from "react";
+import Big from "big.js";
 
 export const PublicClassPreview = () => {
   const { id } = useParams();
@@ -184,7 +185,7 @@ export const PublicClassPreview = () => {
                 <div className="flex items-center justify-center gap-2">
                   <CircleDollarSign className="h-8 w-8 text-primary" />
                   <span className="text-5xl font-black tracking-tighter">
-                    {aClass.isPaid ? `${(aClass.priceAmount / 100).toLocaleString()}` : "FREE"}
+                    {aClass.isPaid ? new Big(aClass.priceAmount || 0).toFixed(2) : "FREE"}
                   </span>
                   {aClass.isPaid && (
                     <span className="text-xl font-black opacity-40 uppercase">
