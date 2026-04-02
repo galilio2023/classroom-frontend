@@ -122,7 +122,7 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
   const { isStaff: isTeacher, isLoading: isPermissionsLoading } = useUserRole();
   const [excalidrawAPI, setExcalidrawAPI] = useState<ExcalidrawAPI | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-  const [isHelpersLoading] = useState(false);
+  const [isHelpersLoading, setIsHelpersLoading] = useState(false);
 
   // If roomId is not provided, fallback to classId (backward compatibility)
   const activeRoomId = roomId || classId;
@@ -162,11 +162,9 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
         // Trigger save via socket (best effort)
         savedTriggerSave.current();
 
-        // NOTE: Standard browsers require a non-empty string for the confirmation dialog
-        // This gives the socket a tiny bit more time to flush before the process is killed.
+        // Standard way to show confirmation dialog and prevent immediate exit
         e.preventDefault();
-        e.returnValue = "";
-        return "";
+        return (e.returnValue = "");
       }
     };
 
@@ -190,10 +188,12 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
       if (!classId) toast.error("Cannot save snapshot: Class context missing.");
       return;
     }
+    setIsHelpersLoading(true);
     setIsSaving(true);
 
     try {
       const exportToBlob = await getExportToBlob();
+      setIsHelpersLoading(false);
       const elements = excalidrawAPI.getSceneElements();
       if (!elements || elements.length === 0) {
         toast.error("Whiteboard is empty");
@@ -263,6 +263,7 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
     } catch (error) {
       console.error("Save snapshot error:", error);
       toast.error("Failed to save snapshot");
+      setIsHelpersLoading(false);
       setIsSaving(false);
     }
   };

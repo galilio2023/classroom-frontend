@@ -30,9 +30,9 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 
 # 🛡️ SECURITY: Grant ownership to nginx user for dynamic config updates and runtime files
 # We only chown what's strictly necessary for envsubst and nginx operation.
+# Static assets in /usr/share/nginx/html remain owned by root for integrity.
 RUN chown nginx:nginx /etc/nginx/nginx.conf.template \
     /etc/nginx/conf.d/security-headers.conf \
-    /usr/share/nginx/html \
     /var/cache/nginx \
     /var/log/nginx
 
