@@ -149,8 +149,11 @@ export const usePulseNotifications = () => {
       });
 
       return () => {
-        socket.off("lifecycle:pulse", handlePulse);
+        socket.off("lifecycle:pulse");
+        socket.off("class:live:started");
+        socket.off("submission:graded");
         socket.off("notification");
+        socket.off("agent_alert");
       };
     };
 
