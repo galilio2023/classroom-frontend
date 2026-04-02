@@ -110,10 +110,18 @@ export const ModuleItem = ({
                 <div className="font-black text-base md:text-lg tracking-tight group-hover/trigger:text-primary transition-colors truncate">
                   {module.name}
                 </div>
+                {module.isUpdated && isStudent && (
+                  <AiFeatureGuard>
+                    <Badge className="bg-ai-primary text-white border-none text-[10px] md:text-[11px] font-black uppercase tracking-tighter px-1.5 py-0 h-3.5 md:h-4 shrink-0 animate-pulse">
+                      <Sparkles className="h-2.5 w-2.5 me-1" />
+                      {t("common.new", "NEW")}
+                    </Badge>
+                  </AiFeatureGuard>
+                )}
                 {isTeacher && !module.isPublished && (
                   <Badge
                     variant="outline"
-                    className="bg-muted text-muted-foreground border-none text-[7px] md:text-[8px] font-black uppercase tracking-tighter px-1.5 py-0 h-3.5 md:h-4 shrink-0"
+                    className="bg-muted text-muted-foreground border-none text-[10px] md:text-[11px] font-black uppercase tracking-tighter px-1.5 py-0 h-3.5 md:h-4 shrink-0"
                   >
                     {t("common.draft", "Draft")}
                   </Badge>
@@ -197,7 +205,7 @@ export const ModuleItem = ({
               </h4>
               <Badge
                 variant="secondary"
-                className="rounded-full px-2 py-0 h-4 md:h-5 text-[8px] md:text-[9px] font-black bg-primary/5 text-primary border-none"
+                className="rounded-full px-2 py-0 h-4 md:h-5 text-[10px] md:text-[11px] font-black bg-primary/5 text-primary border-none"
               >
                 {new Intl.NumberFormat(isArabic ? "ar-EG" : "en-US").format(
                   module.resources?.length || 0
@@ -236,7 +244,7 @@ export const ModuleItem = ({
               </h4>
               <Badge
                 variant="secondary"
-                className="rounded-full px-2 py-0 h-4 md:h-5 text-[8px] md:text-[9px] font-black bg-primary/5 text-primary border-none"
+                className="rounded-full px-2 py-0 h-4 md:h-5 text-[10px] md:text-[11px] font-black bg-primary/5 text-primary border-none"
               >
                 {new Intl.NumberFormat(isArabic ? "ar-EG" : "en-US").format(
                   (module.assignments?.length || 0) + (module.quizzes?.length || 0)

@@ -311,7 +311,7 @@ export const ResourceTab = ({ classId }: ResourceTabProps) => {
                                       {t("buttons.featureOnTv")}
                                     </DropdownMenuItem>
                                     <DropdownMenuItem
-                                      className="rounded-lg font-black uppercase tracking-widest text-[9px] gap-2 py-3 cursor-pointer text-destructive hover:bg-destructive/10 transition-all"
+                                      className="rounded-lg font-black uppercase tracking-widest text-[10px] md:text-[11px] gap-2 py-3 cursor-pointer text-destructive hover:bg-destructive/10 transition-all"
                                       onClick={() => handleDeleteResource(res.id)}
                                     >
                                       <Trash2 className="h-3.5 w-3.5" />

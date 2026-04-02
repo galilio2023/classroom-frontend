@@ -310,7 +310,7 @@ const DiscussionsListPage = () => {
                               {(discussion as any).class?.name || "General"}
                             </Badge>
                             {discussion.replies && discussion.replies.length > 5 && (
-                              <Badge className="bg-orange-500/10 text-orange-600 border border-orange-500/20 font-black px-2.5 py-0.5 rounded-full text-[9px] tracking-widest uppercase shadow-sm">
+                              <Badge className="bg-orange-500/10 text-orange-600 border border-orange-500/20 font-black px-2.5 py-0.5 rounded-full text-[10px] md:text-[11px] tracking-widest uppercase shadow-sm">
                                 {t("discussions.labels.trending")}
                               </Badge>
                             )}
@@ -323,7 +323,7 @@ const DiscussionsListPage = () => {
                               <User className="h-3.5 w-3.5 text-primary" />
                             </div>
                             <div className="flex flex-col text-start">
-                              <span className="text-[9px] uppercase font-bold text-muted-foreground/60 tracking-wider">
+                              <span className="text-[10px] md:text-[11px] uppercase font-bold text-muted-foreground/60 tracking-wider">
                                 {discussion.user.role}
                               </span>
                               <span className="text-[11px] font-black text-foreground">
@@ -337,7 +337,7 @@ const DiscussionsListPage = () => {
                               <MessageCircle className="h-3.5 w-3.5 text-primary" />
                             </div>
                             <div className="flex flex-col text-start">
-                              <span className="text-[9px] uppercase font-bold text-muted-foreground/60 tracking-wider">
+                              <span className="text-[10px] md:text-[11px] uppercase font-bold text-muted-foreground/60 tracking-wider">
                                 {t("discussions.labels.replies")}
                               </span>
                               <span className="text-[11px] font-black text-foreground">
@@ -351,7 +351,7 @@ const DiscussionsListPage = () => {
                               <Clock className="h-3.5 w-3.5 text-primary" />
                             </div>
                             <div className="flex flex-col text-start">
-                              <span className="text-[9px] uppercase font-bold text-muted-foreground/60 tracking-wider">
+                              <span className="text-[10px] md:text-[11px] uppercase font-bold text-muted-foreground/60 tracking-wider">
                                 Activity
                               </span>
                               <span className="text-[11px] font-black uppercase tracking-tight">

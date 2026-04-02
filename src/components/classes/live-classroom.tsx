@@ -946,7 +946,7 @@ export const LiveClassroom = ({
                   className="flex items-center gap-2 rounded-full font-bold"
                 >
                   <Presentation className="h-4 w-4" />
-                  {t("classes.live.whiteboard")}
+                  {t("classes.live.whiteboard.title")}
                 </TabsTrigger>
                 <TabsTrigger
                   value="roadmap"

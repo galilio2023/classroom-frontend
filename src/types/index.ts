@@ -78,6 +78,7 @@ export interface User {
   verificationDocumentCldPubId: string | null;
   createdAt: string;
   updatedAt: string;
+  version: number;
   level?: number;
   xp?: number;
   currentStreak: number;
@@ -96,6 +97,20 @@ export interface User {
   stripeOnboardingComplete?: boolean;
 }
 
+export interface PresenceUser {
+  id: string;
+  name: string;
+  role: UserRole;
+  image?: string;
+  lastSeen: number;
+}
+
+export interface NotificationMetadata {
+  link?: string;
+  message?: string;
+  [key: string]: any;
+}
+
 export interface Department {
   id: number;
   name: string;
@@ -103,6 +118,7 @@ export interface Department {
   description: string | null;
   headOfDepartmentId: string | null;
   headOfDepartment?: User;
+  version: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -117,6 +133,7 @@ export interface Subject {
   department: Department;
   prerequisiteSubjectId: number | null;
   prerequisite?: Subject;
+  version: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -131,6 +148,26 @@ export enum GradingStatus {
   OPEN = "open",
   LOCKED = "locked",
   FINALIZED = "finalized",
+}
+
+export interface AutomationRule {
+  id: string;
+  name: string;
+  trigger: {
+    type: "completion_threshold" | "date_reached" | "student_at_risk";
+    threshold?: number;
+    moduleId?: number;
+    date?: string;
+  };
+  action: {
+    type: "publish_module" | "send_announcement" | "award_badge";
+    targetModuleId?: number;
+    announcementTitle?: string;
+    announcementMessage?: string;
+    badgeId?: number;
+  };
+  isActive: boolean;
+  lastTriggeredAt?: string | null;
 }
 
 export type Schedule = z.infer<typeof scheduleSchema>;
@@ -162,6 +199,7 @@ export interface Submission {
   aiApprovalStatus?: "pending" | "approved" | "rejected";
   aiStatus: "idle" | "processing" | "completed" | "failed";
   aiError?: string | null;
+  version: number;
   createdAt: string;
   updatedAt: string;
   student?: User;
@@ -193,6 +231,7 @@ export interface Assignment {
   allowLateSubmissions: boolean;
   latePenaltyPercentage: number;
   isGroupAssignment: boolean;
+  version: number;
   createdAt: string;
   updatedAt: string;
   submissions?: Submission[];
@@ -206,6 +245,7 @@ export interface ProjectGroup {
   classId: number;
   name: string;
   description: string | null;
+  version: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -238,6 +278,7 @@ export type Enrollment = {
   };
   approvedBy?: User;
   lastAccessedAt?: string | null;
+  lastSyncedManifest: number;
   riskAssessment?: {
     riskLevel: "low" | "medium" | "high" | "critical";
     aiAnalysis?: {
@@ -267,6 +308,7 @@ export interface Module {
   version: number;
   createdAt: string;
   updatedAt: string;
+  isUpdated?: boolean;
 }
 
 export enum AnnouncementPriority {
@@ -290,6 +332,7 @@ export interface Announcement {
   fileUrl?: string | null;
   fileCldPubId?: string | null;
   author?: User;
+  version: number;
   createdAt: string;
   updatedAt: string;
   isRead?: boolean;
@@ -305,6 +348,8 @@ export interface Progress {
   quizId: number | null;
   isCompleted: boolean;
   completedAt: string | null;
+  lastViewedVersion: number;
+  lastViewedAt: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -323,6 +368,7 @@ export type Class = z.infer<typeof classFormSchema> & {
     isPrimary: boolean;
   }[];
   subject: Subject;
+  version: number;
   createdAt: string;
   updatedAt: string;
   enrollments: Enrollment[];
@@ -337,6 +383,8 @@ export type Class = z.infer<typeof classFormSchema> & {
     script?: string;
     visualCue?: string;
   };
+  manifestVersion: number;
+  automationRules?: AutomationRule[];
   liveLessonRoadmap?: {
     sessionTitle?: string;
     icebreaker?: string;
@@ -427,6 +475,7 @@ export interface Discussion {
   solvedBy?: Pick<User, "id" | "name" | "image">;
   user: Pick<User, "id" | "name" | "image" | "role">;
   replies?: Discussion[];
+  version: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -444,6 +493,17 @@ export interface Resource {
   ownerId: string | null;
   isInternal: boolean;
   isRequired: boolean;
+  version: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ClassNote {
+  id: number;
+  classId: number;
+  userId: string;
+  content: string;
+  version: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -524,6 +584,7 @@ export interface AcademicTerm {
   startDate: string;
   endDate: string;
   status: "active" | "upcoming" | "archived";
+  version: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -552,6 +613,7 @@ export interface TeacherChannel {
   totalViews: number;
   conversionRate: number;
   teacher?: User;
+  version: number;
   createdAt: string;
   updatedAt: string;
 }

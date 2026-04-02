@@ -12,6 +12,24 @@ const BACKEND_BASE_URL = BACKEND_URL;
 const isOffline = () => !navigator.onLine;
 
 /**
+ * 🗺️ RESOURCE TO PATH MAPPING
+ * Centralized mapping of Refine resource names to Backend API paths.
+ */
+const resourceToPath: Record<string, string> = {
+  "teacher-channels": "channels",
+  "teacher-subscriptions": "enrollments",
+  portfolio: "users",
+  "ai-activity-logs": "ai/logs",
+  "ai-health-reports": "ai/health-reports",
+  "academic-terms": "terms",
+  "guardian-portal": "parent/dashboard",
+  "child-risk-reports": "parent/child",
+  "public-classes": "public/classes",
+};
+
+const getResourcePath = (resource: string) => resourceToPath[resource] || resource;
+
+/**
  * Helper to handle API errors and return Refine-compatible HttpError
  */
 const handleError = async (response: Response): Promise<HttpError> => {
@@ -40,11 +58,29 @@ const handleError = async (response: Response): Promise<HttpError> => {
     };
   }
 
-  // 🛡️ SECURITY & UX: Catch database 'restrict' violations (ON DELETE restrict)
+  // 🛡️ SECURITY & UX: Catch database 'restrict' violations or Optimistic Locking conflicts
+  if (response.status === 400) {
+    const isMissingVersion =
+      json.message?.toString().toLowerCase().includes("version") ||
+      json.error?.toString().toLowerCase().includes("version");
+
+    if (isMissingVersion) {
+      return {
+        message: "Update failed: Technical metadata (version) is missing. Please refresh the page.",
+        statusCode: 400,
+      };
+    }
+  }
+
   if (response.status === 409) {
+    const isConflict =
+      json.message?.toString().toLowerCase().includes("conflict") ||
+      json.error?.toString().toLowerCase().includes("conflict");
+
     return {
-      message:
-        "Cannot delete: This item has active sub-records. Please reassign or delete them first.",
+      message: isConflict
+        ? "Update conflict: This item has been modified by another user. Please refresh and try again."
+        : "Cannot delete: This item has active sub-records. Please reassign or delete them first.",
       statusCode: 409,
     };
   }
@@ -55,6 +91,15 @@ const handleError = async (response: Response): Promise<HttpError> => {
       statusCode: response.status,
       errors: json.details as Record<string, string>,
     };
+  }
+
+  if (response.status === 429) {
+    const retryAfter = response.headers.get("Retry-After");
+    return {
+      message: (json.message as string) || "Too many requests. Please slow down.",
+      statusCode: 429,
+      retryAfter: retryAfter ? parseInt(retryAfter, 10) : undefined,
+    } as HttpError;
   }
 
   return {
@@ -114,12 +159,42 @@ export const flushOutbox = async () => {
           variables: mutation.variables,
         });
       } else if (mutation.action === "update") {
-        const vars = mutation.variables as { id: string | number };
-        response = await dataProvider.update({
-          resource: mutation.resource,
-          id: vars.id,
-          variables: mutation.variables as any,
-        });
+        const vars = mutation.variables as { id: string | number; version?: number };
+
+        try {
+          response = await dataProvider.update({
+            resource: mutation.resource,
+            id: vars.id,
+            variables: mutation.variables as any,
+          });
+        } catch (err: any) {
+          // 🛡️ CONFLICT RESOLUTION: If sync fails with 409, try to get latest version and replay
+          if (err.statusCode === 409) {
+            console.warn(
+              `[Sync Conflict] Mutation ${mutation.id} version mismatch. Attempting recovery...`
+            );
+
+            const { data: latestRecord } = await dataProvider.getOne({
+              resource: mutation.resource,
+              id: vars.id,
+            });
+
+            if (latestRecord && (latestRecord as any).version !== undefined) {
+              response = await dataProvider.update({
+                resource: mutation.resource,
+                id: vars.id,
+                variables: {
+                  ...(mutation.variables as any),
+                  version: (latestRecord as any).version,
+                } as any,
+              });
+            } else {
+              throw err;
+            }
+          } else {
+            throw err;
+          }
+        }
       } else if (mutation.action === "delete") {
         const vars = mutation.variables as { id: string | number };
         response = await dataProvider.deleteOne({
@@ -161,10 +236,7 @@ export const resourceFilterMappings: Record<string, any> = {
 
 export const dataProvider: DataProvider = {
   getList: async ({ resource, pagination, filters, sorters, meta }) => {
-    let urlPath = resource;
-    if (resource === "teacher-channels") urlPath = "channels";
-    if (resource === "teacher-subscriptions") urlPath = "enrollments";
-
+    const urlPath = getResourcePath(resource);
     const url = new URL(`${BACKEND_BASE_URL}/${urlPath}`);
 
     // Relations: Support meta.with or meta.populate for dynamic embedding
@@ -255,10 +327,7 @@ export const dataProvider: DataProvider = {
   },
 
   getOne: async ({ resource, id, meta }) => {
-    let urlPath = resource;
-    if (resource === "teacher-channels") urlPath = "channels";
-    if (resource === "teacher-subscriptions") urlPath = "enrollments";
-
+    const urlPath = getResourcePath(resource);
     const url = new URL(`${BACKEND_BASE_URL}/${urlPath}/${id}`);
 
     // Relations: Support meta.with or meta.populate for dynamic embedding
@@ -292,10 +361,7 @@ export const dataProvider: DataProvider = {
       return { data: { ...variables, id: `offline-${Date.now()}` } as any };
     }
 
-    let urlPath = resource;
-    if (resource === "teacher-channels") urlPath = "channels";
-    if (resource === "teacher-subscriptions") urlPath = "enrollments";
-
+    const urlPath = getResourcePath(resource);
     const url = `${BACKEND_BASE_URL}/${urlPath}`;
     try {
       const response = await fetcher(url, {
@@ -324,15 +390,19 @@ export const dataProvider: DataProvider = {
       return { data: { ...variables, id } as any };
     }
 
-    let urlPath = resource;
-    if (resource === "teacher-channels") urlPath = "channels";
-    if (resource === "teacher-subscriptions") urlPath = "enrollments";
-
+    const urlPath = getResourcePath(resource);
     const url = `${BACKEND_BASE_URL}/${urlPath}/${id}`;
+
+    // 🛡️ SECURITY: Auto-Inject 'version' if it's missing from variables but present in meta
+    const finalVariables: any = { ...variables };
+    if (finalVariables.version === undefined && meta?.version !== undefined) {
+      finalVariables.version = meta.version;
+    }
+
     try {
       const response = await fetcher(url, {
         method: "PATCH",
-        body: JSON.stringify(variables),
+        body: JSON.stringify(finalVariables),
       });
 
       if (!response.ok) throw await handleError(response);
@@ -361,10 +431,7 @@ export const dataProvider: DataProvider = {
       return { data: { id } as any };
     }
 
-    let urlPath = resource;
-    if (resource === "teacher-channels") urlPath = "channels";
-    if (resource === "teacher-subscriptions") urlPath = "enrollments";
-
+    const urlPath = getResourcePath(resource);
     const url = `${BACKEND_BASE_URL}/${urlPath}/${id}`;
     try {
       const response = await fetcher(url, {
@@ -388,10 +455,7 @@ export const dataProvider: DataProvider = {
   getApiUrl: () => BACKEND_BASE_URL,
 
   getMany: async ({ resource, ids }) => {
-    let urlPath = resource;
-    if (resource === "teacher-channels") urlPath = "channels";
-    if (resource === "teacher-subscriptions") urlPath = "enrollments";
-
+    const urlPath = getResourcePath(resource);
     const url = new URL(`${BACKEND_BASE_URL}/${urlPath}`);
     ids.forEach((id) => {
       url.searchParams.append("id", String(id));

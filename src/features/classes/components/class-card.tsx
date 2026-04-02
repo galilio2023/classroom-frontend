@@ -27,6 +27,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import { SyncStatusBadge } from "@/components/sync-status-badge";
 import { useTranslation } from "react-i18next";
 import { ClassListItem, TeacherApplication, User } from "@/types";
 
@@ -132,6 +133,7 @@ export const ClassCard = ({
             <Badge variant="ai" className="h-6 text-[9px] md:text-[10px]">
               {classItem.subject?.name || t("classes.list.general")}
             </Badge>
+            <SyncStatusBadge resource="classes" id={classItem.id as number} />
             <Badge
               variant="secondary"
               className="h-6 text-[9px] md:text-[10px] bg-muted/50 border-none font-bold"

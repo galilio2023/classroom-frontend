@@ -1,10 +1,9 @@
 import React, { useState } from "react";
-import { useShow, useList, useCustomMutation, useGetIdentity } from "@refinedev/core";
-import { useParams, Link } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { useCustomMutation, useGetIdentity, useList, useShow } from "@refinedev/core";
+import { Link, useParams } from "react-router-dom";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { User, UserRole } from "@/types";
 import {
@@ -24,24 +23,20 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import {
-  Plus,
-  Trash2,
-  Users,
-  Loader2,
-  ChevronsUpDown,
   Check,
-  UserPlus,
+  ChevronsUpDown,
+  Loader2,
   Presentation,
-  Sparkles,
-  LayoutGrid,
-  ArrowRight,
+  Trash2,
+  UserPlus,
+  Users,
 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Whiteboard } from "@/components/classes/whiteboard";
 import { useTranslation } from "react-i18next";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
 import { Label } from "@/components/ui/label";
 
@@ -133,8 +128,8 @@ const ShowProjectGroup = () => {
           animate={{ scale: 1, opacity: 1 }}
           className="relative"
         >
-          <div className="absolute inset-[-20px] rounded-full bg-primary/5 animate-ping duration-[3000ms]" />
-          <Loader2 className="h-20 w-20 animate-spin text-primary/10 stroke-[1]" />
+          <div className="absolute -inset-5 rounded-full bg-primary/5 animate-ping duration-3000" />
+          <Loader2 className="h-20 w-20 animate-spin text-primary/10 stroke-1" />
           <div className="absolute inset-0 flex items-center justify-center">
             <Users className="h-8 w-8 text-primary/30" />
           </div>
@@ -216,13 +211,13 @@ const ShowProjectGroup = () => {
             <TabsList className="grid w-full grid-cols-2 h-12 md:h-14 bg-muted/20 gap-1 rounded-[1.25rem]">
               <TabsTrigger
                 value="members"
-                className="rounded-xl font-black uppercase tracking-widest text-[9px] md:text-[10px] gap-2 md:gap-3 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-xl transition-all duration-300"
+                className="rounded-xl font-black uppercase tracking-widest text-[10px] md:text-[11px] gap-2 md:gap-3 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-xl transition-all duration-300"
               >
                 <Users className="h-4 w-4 md:h-5 md:w-5" /> {t("projectGroups.members")}
               </TabsTrigger>
               <TabsTrigger
                 value="whiteboard"
-                className="rounded-xl font-black uppercase tracking-widest text-[9px] md:text-[10px] gap-2 md:gap-3 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-xl transition-all duration-300"
+                className="rounded-xl font-black uppercase tracking-widest text-[10px] md:text-[11px] gap-2 md:gap-3 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-xl transition-all duration-300"
               >
                 <Presentation className="h-4 w-4 md:h-5 md:w-5" />{" "}
                 {t("projectGroups.show.whiteboard")}
@@ -241,7 +236,7 @@ const ShowProjectGroup = () => {
                 <Button
                   onClick={() => setAddMemberOpen(true)}
                   size="lg"
-                  className="rounded-2xl h-12 md:h-14 px-8 font-bold uppercase tracking-widest text-[10px] gap-2 shadow-lg shadow-primary/25 hover:translate-y-[-2px] transition-all"
+                  className="rounded-2xl h-12 md:h-14 px-8 font-bold uppercase tracking-widest text-[10px] gap-2 shadow-lg shadow-primary/25 hover:-translate-y-0.5 transition-all"
                 >
                   <UserPlus className="h-5 w-5" /> {t("projectGroups.show.addMembers")}
                 </Button>
@@ -302,7 +297,7 @@ const ShowProjectGroup = () => {
         <TabsContent value="whiteboard" className="mt-0 px-2">
           <Card className="border-border/40 shadow-2xl bg-card/50 backdrop-blur-xl rounded-[2.5rem] md:rounded-[3rem] overflow-hidden">
             <CardContent className="p-0">
-              <div className="h-[500px] md:h-[700px]">
+              <div className="h-125 md:h-175">
                 <Whiteboard classId={String(group.class.id)} roomId={`group-${group.id}`} />
               </div>
             </CardContent>

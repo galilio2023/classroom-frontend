@@ -21,6 +21,7 @@ import { PromotionMiniPlayer } from "@/components/promotion-mini-player";
 import { VideoMiniPlayer } from "@/components/video-mini-player";
 import { usePersistentLive } from "@/hooks/use-persistent-live";
 import { useGamificationToasts } from "@/hooks/use-gamification-toasts";
+import { useLifecyclePulse } from "@/hooks/use-lifecycle-pulse";
 import { JobTracker } from "@/components/job-tracker";
 
 export function Layout({ children }: PropsWithChildren) {
@@ -32,6 +33,9 @@ export function Layout({ children }: PropsWithChildren) {
 
   // 🚀 GAMIFICATION: Activate listeners for XP, Levels, and Badges
   useGamificationToasts(identity?.id);
+
+  // 🚀 LIFECYCLE: Activate real-time pulse listeners
+  useLifecyclePulse();
 
   // Extract classId from URL if present (supports /classes/show/:id or /assignments/show/:id)
   const classIdFromUrl = pathname.includes("/classes/show/") ? id : undefined;

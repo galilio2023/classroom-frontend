@@ -82,6 +82,13 @@ export const authProvider: AuthProvider = {
   register: async (params: Record<string, unknown>) => {
     try {
       const sanitizedParams = sanitizePayload(params);
+
+      // 🚀 SESSION STITCHING: Include telemetry ID if available
+      const telemetryId = localStorage.getItem("tablawy_telemetry_id");
+      if (telemetryId) {
+        (sanitizedParams as any).telemetrySessionId = telemetryId;
+      }
+
       console.log("Attempting registration for:", sanitizedParams.email);
 
       const { error } = await authClient.signUp.email(sanitizedParams as unknown as SignUpPayload);
@@ -172,6 +179,7 @@ export const authProvider: AuthProvider = {
       localStorage.removeItem("user");
       localStorage.removeItem("tablawy_auth_token");
       localStorage.removeItem("tablawy-live-session");
+      localStorage.removeItem("tablawy_telemetry_id"); // 🛡️ SECURITY: Clear telemetry on logout
       return { success: true, redirectTo: "/login" };
     } catch {
       cachedSessionData = null;
@@ -179,6 +187,7 @@ export const authProvider: AuthProvider = {
       localStorage.removeItem("user");
       localStorage.removeItem("tablawy_auth_token");
       localStorage.removeItem("tablawy-live-session");
+      localStorage.removeItem("tablawy_telemetry_id");
       return { success: true, redirectTo: "/login" };
     }
   },

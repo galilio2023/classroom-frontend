@@ -278,7 +278,7 @@ export function LeaderboardTab({ classId }: LeaderboardTabProps) {
                             <span className="text-sm font-black text-gold-primary tracking-tight">
                               {student.xp || 0}
                             </span>
-                            <span className="text-[8px] font-black text-gold-primary/60 uppercase tracking-tighter -mt-1">
+                            <span className="text-[10px] md:text-[11px] font-black text-gold-primary/60 uppercase tracking-tighter -mt-1">
                               {t("classes.leaderboard.points")}
                             </span>
                           </div>

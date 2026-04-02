@@ -395,7 +395,7 @@ const DepartmentsList = () => {
 
                           <Button
                             variant="outline"
-                            className="rounded-xl px-6 h-10 text-[9px] font-black uppercase tracking-widest transition-all shadow-sm border-primary/10 text-primary hover:bg-primary hover:text-primary-foreground"
+                            className="rounded-xl px-6 h-10 text-[10px] md:text-[11px] font-black uppercase tracking-widest transition-all shadow-sm border-primary/10 text-primary hover:bg-primary hover:text-primary-foreground"
                             onClick={() => edit("departments", department.id)}
                           >
                             {t("buttons.manage")}
@@ -418,7 +418,7 @@ const DepartmentsList = () => {
                               align="end"
                               className="w-48 rounded-xl p-1 bg-white dark:bg-[#09090b] opacity-100 backdrop-blur-none border border-border/50 shadow-2xl"
                             >
-                              <DropdownMenuLabel className="text-[9px] font-black uppercase tracking-widest text-muted-foreground px-2 py-1.5">
+                              <DropdownMenuLabel className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-muted-foreground px-2 py-1.5">
                                 {t("assignments.list.labels.options")}
                               </DropdownMenuLabel>
                               <DropdownMenuItem

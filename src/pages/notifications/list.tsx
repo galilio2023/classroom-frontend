@@ -348,7 +348,7 @@ const NotificationsListPage = () => {
                           <div className="flex items-center justify-center md:justify-start gap-2">
                             <Badge
                               variant={notification.type === "agent_alert" ? "ai" : "outline"}
-                              className="text-[9px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full"
+                              className="text-[10px] md:text-[11px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full"
                             >
                               {notification.type}
                             </Badge>
@@ -367,14 +367,14 @@ const NotificationsListPage = () => {
                         <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
                           <div className="flex items-center gap-2 bg-background/40 px-3 py-1 rounded-full border border-border/20">
                             <Calendar className="h-3.5 w-3.5 text-primary/60" />
-                            <span className="text-[10px] font-black uppercase tracking-wider text-muted-foreground/60">
+                            <span className="text-[10px] md:text-[11px] font-black uppercase tracking-wider text-muted-foreground/60">
                               {createdAt.locale(i18n.language).format("MMM D, YYYY")}
                             </span>
                           </div>
 
                           <div className="flex items-center gap-2 bg-background/40 px-3 py-1 rounded-full border border-border/20">
                             <Clock className="h-3.5 w-3.5 text-primary/60" />
-                            <span className="text-[10px] font-black uppercase tracking-wider text-muted-foreground/60">
+                            <span className="text-[10px] md:text-[11px] font-black uppercase tracking-wider text-muted-foreground/60">
                               {createdAt.locale(i18n.language).fromNow()}
                             </span>
                           </div>

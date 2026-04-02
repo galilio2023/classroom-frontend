@@ -281,7 +281,7 @@ export const LessonReader = () => {
                         <ReactMarkdown>{msg.parts[0].text}</ReactMarkdown>
                       </div>
                     </div>
-                    <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground/40 px-1">
+                    <span className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-muted-foreground/40 px-1">
                       {msg.role === "user" ? identity?.name : "AI Tutor"}
                     </span>
                   </div>

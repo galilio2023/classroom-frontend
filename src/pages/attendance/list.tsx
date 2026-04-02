@@ -339,11 +339,11 @@ const AttendanceListPage = () => {
                             <div className="flex items-center justify-center md:justify-start gap-2">
                               <Badge
                                 variant="outline"
-                                className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md border-primary/10"
+                                className="text-[10px] md:text-[11px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md border-primary/10"
                               >
                                 {sessionDate.format("MMM D, YYYY")}
                               </Badge>
-                              <Badge className="bg-primary/5 text-primary border-none font-black px-2 py-0.5 rounded-md text-[9px] tracking-widest uppercase">
+                              <Badge className="bg-primary/5 text-primary border-none font-black px-2 py-0.5 rounded-md text-[10px] md:text-[11px] tracking-widest uppercase">
                                 {sessionDate.fromNow()}
                               </Badge>
                             </div>

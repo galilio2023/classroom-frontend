@@ -1,0 +1,81 @@
+worker_processes auto;
+pid /tmp/nginx.pid;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    include /etc/nginx/mime.types;
+    default_type application/octet-stream;
+
+    # 🚀 PERFORMANCE: Gzip compression
+    gzip on;
+    gzip_vary on;
+    gzip_min_length 10240;
+    gzip_proxied any;
+    gzip_types text/plain text/css text/xml text/javascript application/x-javascript application/xml;
+    gzip_disable "MSIE [1-6]\.";
+
+    # 🛡️ SECURITY: Remove version header
+    server_tokens off;
+
+    include /etc/nginx/conf.d/security-headers.conf;
+
+    server {
+        listen 8080;
+        server_name localhost;
+
+        root /usr/share/nginx/html;
+        index index.html;
+
+        # 🚀 SPA ROUTING: Redirect all 404s to index.html
+        location / {
+            try_files $uri $uri/ /index.html;
+        }
+
+        # 🚀 REVERSE PROXY: API
+        location /api/ {
+            proxy_pass ${BACKEND_URL};
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection 'upgrade';
+            proxy_set_header Host $host;
+            proxy_cache_bypass $http_upgrade;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        }
+
+        # 🚀 REVERSE PROXY: Sockets
+        location /socket.io/ {
+            proxy_pass ${SOCKET_URL}/socket.io/;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection "Upgrade";
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        }
+
+        # 📦 STATIC CACHING: Cache hashed assets for 1 year
+
+        location /assets {
+            expires 1y;
+            add_header Cache-Control "public, no-transform";
+            # 🛡️ SECURITY: Inherit global security headers
+            include /etc/nginx/conf.d/security-headers.conf;
+        }
+
+        # 🛡️ RESILIENCE: Healthcheck for load balancers
+        location /health {
+            access_log off;
+            return 200 "healthy\n";
+        }
+
+        # Error handling
+        error_page 500 502 503 504 /50x.html;
+        location = /50x.html {
+            root /usr/share/nginx/html;
+        }
+    }
+}

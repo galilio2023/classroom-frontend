@@ -1,6 +1,7 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 import { registerSW } from "virtual:pwa-register";
 import { ThemeProvider } from "./components/refine-ui/theme/theme-provider";
@@ -41,9 +42,11 @@ registerSW({
 root.render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="system" storageKey="refine-ui-theme">
-        <App />
-      </ThemeProvider>
+      <BrowserRouter>
+        <ThemeProvider defaultTheme="system" storageKey="refine-ui-theme">
+          <App />
+        </ThemeProvider>
+      </BrowserRouter>
     </QueryClientProvider>
   </React.StrictMode>
 );

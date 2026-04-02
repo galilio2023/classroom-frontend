@@ -42,7 +42,21 @@
       "joinNow": "Join Class Now",
       "joinGroup": "Join {{name}} Room",
       "videoSession": "Video Session",
-      "whiteboard": "Whiteboard",
+      "whiteboard": {
+        "title": "Whiteboard",
+        "locked": "Teacher has locked the board",
+        "unlocked": "Teacher has unlocked the board",
+        "cleared": "The teacher has cleared the whiteboard",
+        "clearConfirm": "Are you sure you want to clear the whiteboard?"
+      },
+      "whiteboardErrors": {
+        "failed": "Whiteboard failed to load",
+        "refreshDesc": "Please refresh the page to try again.",
+        "refreshBtn": "Refresh Now",
+        "resetBtn": "Reset State",
+        "connectionLost": "Cloud sync paused: Connection lost. Reconnecting...",
+        "saveTimeout": "Cloud sync timeout: No response from server. Will retry later."
+      },
       "startLiveSession": "Start Live Session",
       "sessionNotStarted": "Live session has not started yet.",
       "toasts": {
@@ -577,7 +591,10 @@
       "integrityDescription": "All work must be original. AI-assisted work should be cited if permitted.",
       "studentSubmissions": "Student Submissions",
       "submissionsDescription": "Manage grading and feedback for all students.",
-      "submissionsCount": "{{count}} Submissions"
+      "submissionsCount": "{{count}} Submissions",
+      "aiProcessing": "AI Processing...",
+      "yourGrade": "Your Grade",
+      "noFeedbackYet": "No feedback provided yet."
     },
     "form": {
       "successRedirecting": "Redirecting to assignment details...",
@@ -610,7 +627,53 @@
         "contentRequired": "Submission content cannot be empty.",
         "draftSaved": "Draft Saved Successfully!",
         "submitted": "Assignment Submitted!",
-        "fillRequired": "Please fill in all required fields"
+        "fillRequired": "Please fill in all required fields",
+        "conflictError": "Conflict detected. Please refresh.",
+        "draftRestored": "Your previous draft has been restored."
+      }
+    },
+    "grading": {
+      "gradeSubmission": "Grade Submission",
+      "submissionDetails": "Submission Details",
+      "attempt": "Attempt #{{count}}",
+      "draft": "Draft",
+      "studentLabel": "Student:",
+      "studentWork": "Student Work",
+      "noContent": "No text content provided.",
+      "attachedDoc": "Attached Document",
+      "viewOrDownload": "View or Download",
+      "gradingLocked": "Grading Locked",
+      "draftNotice": "This submission is currently a Draft. You can review the student's work, but grading is disabled until they officially turn it in.",
+      "finalScore": "Final Score (%)",
+      "aiSuggested": "AI Suggested",
+      "aiSuggestion": "AI Grading Suggestion",
+      "proposedAI": "Proposed by AI",
+      "applyAI": "Apply AI Suggestions",
+      "feedbackToStudent": "Feedback to Student",
+      "feedbackPlaceholder": "Provide constructive feedback...",
+      "requiresResubmission": "Requires Resubmission",
+      "resubmissionNote": "Student will be notified to submit a new attempt.",
+      "resubmissionHint": "Requesting a resubmission allows the student to submit a new version while keeping their current grade as a baseline.",
+      "privateNotes": "Private Teacher Notes",
+      "privatePlaceholder": "Internal notes (not visible to student)...",
+      "gradeSaved": "Grade Saved!",
+      "excellentWork": "Excellent work by the student!",
+      "yourScore": "Your Score",
+      "teacherFeedback": "Teacher Feedback",
+      "noFeedback": "No feedback provided yet.",
+      "status": {
+        "requested": "Resubmission Requested",
+        "excellent": "Excellent Work!",
+        "good": "Good Job!",
+        "improving": "Keep Improving!"
+      },
+      "toasts": {
+        "aiComplete": "AI Analysis Complete",
+        "aiApplied": "Suggested grade and feedback applied."
+      },
+      "validation": {
+        "min": "Grade must be at least 0",
+        "max": "Grade cannot exceed 100"
       }
     },
     "create": {
@@ -657,49 +720,6 @@
       "toasts": {
         "aiDraftApplied": "AI draft applied from Assistant.",
         "aiContentApplied": "AI content applied!"
-      }
-    },
-    "grading": {
-      "gradeSubmission": "Grade Submission",
-      "submissionDetails": "Submission Details",
-      "attempt": "Attempt #{{count}}",
-      "draft": "Draft",
-      "studentLabel": "Student:",
-      "studentWork": "Student Work",
-      "noContent": "No text content provided.",
-      "attachedDoc": "Attached Document",
-      "viewOrDownload": "View or Download",
-      "gradingLocked": "Grading Locked",
-      "draftNotice": "This submission is currently a Draft. You can review the student's work, but grading is disabled until they officially turn it in.",
-      "finalScore": "Final Score (%)",
-      "aiSuggested": "AI Suggested",
-      "aiSuggestion": "AI Grading Suggestion",
-      "proposedAI": "Proposed by AI",
-      "applyAI": "Apply AI Suggestions",
-      "feedbackToStudent": "Feedback to Student",
-      "feedbackPlaceholder": "Provide constructive feedback...",
-      "requiresResubmission": "Requires Resubmission",
-      "resubmissionNote": "Student will be notified to submit a new attempt.",
-      "privateNotes": "Private Teacher Notes",
-      "privatePlaceholder": "Internal notes (not visible to student)...",
-      "gradeSaved": "Grade Saved!",
-      "excellentWork": "Excellent work by the student!",
-      "yourScore": "Your Score",
-      "teacherFeedback": "Teacher Feedback",
-      "noFeedback": "No feedback provided yet.",
-      "status": {
-        "requested": "Resubmission Requested",
-        "excellent": "Excellent Work!",
-        "good": "Good Job!",
-        "improving": "Keep Improving!"
-      },
-      "toasts": {
-        "aiComplete": "AI Analysis Complete",
-        "aiApplied": "Suggested grade and feedback applied."
-      },
-      "validation": {
-        "min": "Grade must be at least 0",
-        "max": "Grade cannot exceed 100"
       }
     }
   },

@@ -17,6 +17,8 @@ export const useClassTabs = () => {
       attendance: { primary: "roster", sub: "attendance" },
       analytics: { primary: "progress", sub: "analytics" },
       leaderboard: { primary: "progress", sub: "leaderboard" },
+      automations: { primary: "automations", sub: "rules" },
+      "market-analytics": { primary: "automations", sub: "analytics" },
       details: { primary: "info", sub: "details" },
     }),
     []
@@ -53,6 +55,8 @@ export const useClassTabs = () => {
         return "students";
       case "progress":
         return "analytics";
+      case "automations":
+        return "rules";
       case "info":
         return "details";
       default:
@@ -101,6 +105,9 @@ export const useClassTabs = () => {
               break;
             case "progress":
               newParams.set("subtab", "analytics");
+              break;
+            case "automations":
+              newParams.set("subtab", "rules");
               break;
             case "info":
               newParams.set("subtab", "details");

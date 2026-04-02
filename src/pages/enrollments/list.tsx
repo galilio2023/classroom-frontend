@@ -437,13 +437,13 @@ const EnrollmentsList = () => {
                                       ? "secondary"
                                       : "destructive"
                                 }
-                                className="text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-lg border-none"
+                                className="text-[10px] md:text-[11px] font-black uppercase tracking-widest px-3 py-1 rounded-lg border-none"
                               >
                                 {enrollment.status}
                               </Badge>
                               <Badge
                                 variant="outline"
-                                className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md border-primary/10"
+                                className="text-[10px] md:text-[11px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md border-primary/10"
                               >
                                 {enrollment.class?.name}
                               </Badge>

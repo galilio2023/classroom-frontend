@@ -10,8 +10,10 @@ export const socket: Socket = io(SOCKET_URL, {
   withCredentials: true,
   autoConnect: false,
   reconnection: true,
-  reconnectionAttempts: 10,
-  reconnectionDelay: 2000,
+  reconnectionAttempts: Infinity, // 🛡️ ENDLESS RETRY: For long-running student sessions
+  reconnectionDelay: 1000,
+  reconnectionDelayMax: 10000, // 🛡️ CAP: Max 10s wait between retries
+  randomizationFactor: 0.5, // 🚀 JITTER: Randomize delay by +/- 50% to prevent "Thundering Herd"
   transports: ["websocket", "polling"], // Allow WebSocket with polling fallback
   upgrade: true,
 });

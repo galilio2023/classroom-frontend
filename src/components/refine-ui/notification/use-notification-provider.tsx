@@ -1,34 +1,56 @@
 import { UndoableNotification } from "@/components/refine-ui/notification/undoable-notification";
 import type { NotificationProvider } from "@refinedev/core";
-import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
+import { toast, type ExternalToast } from "sonner";
+import { MoveRight } from "lucide-react";
+import { NotificationMetadata } from "@/types";
 
 /**
  * Refine Notification Provider using Sonner.
  * Optimized for the new Service Layer backend.
  */
 export function useNotificationProvider(): NotificationProvider {
+  const navigate = useNavigate();
+
   return {
     open: ({ key, type, message, description, undoableTimeout, cancelMutation }) => {
       const toastId = key || Date.now().toString();
 
+      const config: ExternalToast = {
+        id: toastId,
+        description,
+        richColors: true,
+        duration: type === "error" ? 6000 : 4000,
+      };
+
+      // 🚀 ACTIONABLE REDIRECTS: If there's a link, add a button
+      if (typeof description === "object" && description !== null) {
+        const meta = description as unknown as NotificationMetadata;
+        if (meta.link) {
+          config.action = {
+            label: (
+              <div className="flex items-center gap-1">
+                Go <MoveRight className="h-3 w-3" />
+              </div>
+            ),
+            onClick: () => {
+              navigate(meta.link!);
+            },
+          };
+          config.description = meta.message || undefined;
+        }
+      }
+
       switch (type) {
         case "success":
-          toast.success(message, {
-            id: toastId,
-            description,
-            richColors: true,
-            duration: 4000,
-          });
+          toast.success(message, config);
           return;
 
         case "error":
-          // Fixed: Changed syntax error '|' to '??' for fallback description
           toast.error(message, {
-            id: toastId,
-            description: description ?? "An unexpected error occurred. Please try again.",
-            richColors: true,
-            duration: 6000, // Errors stay longer
-            action: {
+            ...config,
+            description: config.description ?? "An unexpected error occurred. Please try again.",
+            action: config.action || {
               label: "Dismiss",
               onClick: () => toast.dismiss(toastId),
             },
@@ -56,11 +78,7 @@ export function useNotificationProvider(): NotificationProvider {
         }
 
         default:
-          toast(message, {
-            id: toastId,
-            description,
-            richColors: true,
-          });
+          toast(message, config);
           return;
       }
     },

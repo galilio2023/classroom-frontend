@@ -1,4 +1,14 @@
 {
+  "conflict": {
+    "title": "Collision Detected",
+    "description": "Another teacher has just updated this class. If you save now, you might overwrite their changes.",
+    "refreshLabel": "Refresh & Merge",
+    "refreshDesc": "Get the latest server version and keep your edits.",
+    "overwriteLabel": "Force Overwrite",
+    "overwriteDesc": "Ignore the other update and push your version anyway.",
+    "refreshBtn": "Refresh Now",
+    "overwriteBtn": "Overwrite"
+  },
   "attendance": {
     "attendance": "Attendance",
     "label": "Attendance"
@@ -281,6 +291,9 @@
     "noNotificationsDesc": "You don't have any notifications at the moment. Check back later for updates.",
     "liveSessionStarted": "Live Session Started!",
     "liveSessionDescription": "{{name}} has started a live session. Join now!",
+    "resubmissionRequested": {
+      "title": "Resubmission Requested"
+    },
     "view": "View",
     "joinNow": "Join Now",
     "viewClass": "View Class",
@@ -431,6 +444,7 @@
     "editResource": "Edit Resource",
     "deleteResource": "Delete Resource",
     "resubmitAssignment": "Resubmit Assignment",
+    "resubmit": "Resubmit",
     "viewReport": "View Detailed Report",
     "saveAsDraft": "Save as Draft",
     "resubmitWork": "Resubmit Work",

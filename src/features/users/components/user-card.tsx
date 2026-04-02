@@ -111,13 +111,13 @@ export const UserCard = ({
           <div className="flex items-center justify-center md:justify-start gap-2">
             <Badge
               variant={roleVariants[user.role] || "outline"}
-              className="capitalize text-[9px] font-black tracking-widest px-2.5 py-0.5 rounded-full"
+              className="capitalize text-[10px] md:text-[11px] font-black tracking-widest px-2.5 py-0.5 rounded-full"
             >
               {t(`roles.${user.role.toLowerCase()}` as any)}
             </Badge>
             <Badge
               variant={statusVariants[user.status]}
-              className="capitalize text-[9px] font-black tracking-widest px-2.5 py-0.5 rounded-full"
+              className="capitalize text-[10px] md:text-[11px] font-black tracking-widest px-2.5 py-0.5 rounded-full"
             >
               {t(`status.${user.status.toLowerCase()}` as any)}
             </Badge>

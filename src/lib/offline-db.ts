@@ -52,6 +52,20 @@ export class OfflineDB extends Dexie {
   }
 
   /**
+   * Checks if a specific ID for a resource has a pending mutation.
+   */
+  async getPendingById(
+    resource: string,
+    id: string | number
+  ): Promise<OfflineMutation | undefined> {
+    const allPending = await this.getPending();
+    return allPending.find((m) => {
+      const vars = m.variables as { id?: string | number };
+      return m.resource === resource && String(vars.id) === String(id);
+    });
+  }
+
+  /**
    * Removes a processed mutation from the outbox.
    */
   async resolve(id: number): Promise<void> {

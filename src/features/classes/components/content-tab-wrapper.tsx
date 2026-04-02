@@ -5,9 +5,11 @@ import { CurriculumTab } from "../pages/curriculum-tab";
 import { ResourceTab } from "../pages/resource-tab";
 import { LayoutGrid, Library } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Class } from "@/types";
 
 interface ContentTabWrapperProps {
   classId: string;
+  aClass?: Class;
   activeSubTab: string;
   setSearchParams: (
     setter: (prev: URLSearchParams) => URLSearchParams,
@@ -17,6 +19,7 @@ interface ContentTabWrapperProps {
 
 export const ContentTabWrapper: React.FC<ContentTabWrapperProps> = ({
   classId,
+  aClass,
   activeSubTab,
   setSearchParams,
 }) => {
@@ -74,7 +77,7 @@ export const ContentTabWrapper: React.FC<ContentTabWrapperProps> = ({
         </div>
 
         <TabsContent value="curriculum" className="mt-8">
-          {activeSubTab === "curriculum" && <CurriculumTab classId={classId} />}
+          {activeSubTab === "curriculum" && <CurriculumTab classId={classId} aClass={aClass} />}
         </TabsContent>
 
         <TabsContent value="resources" className="mt-8">

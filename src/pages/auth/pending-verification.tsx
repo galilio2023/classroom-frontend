@@ -202,7 +202,7 @@ const PendingVerificationPage = () => {
           <div className="flex items-center gap-3 px-4 py-2 bg-background rounded-2xl border shadow-sm w-full sm:w-auto justify-center sm:justify-start">
             <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
             <div className="flex flex-col">
-              <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground leading-none mb-0.5">
+              <span className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-muted-foreground leading-none mb-0.5">
                 {t("auth.pending.loggedInAs")}
               </span>
               <span className="text-[10px] font-bold truncate max-w-[150px]">

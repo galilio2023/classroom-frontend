@@ -19,6 +19,7 @@ To transform the educational experience through:
     - **Lifecycle Safety**: Uses `AbortController` and `requestAnimationFrame` to prevent memory leaks and race conditions.
     - **Dual Auth**: Maintains both `credentials: "include"` and `Authorization` headers for maximum backend compatibility.
 - **Refine v5 Hooks:** Standard AI metadata (history, permissions) is fetched using Refine's `useCustom` and `usePermissions` to benefit from centralized caching and standardized state.
+- **Batched Sidebar Counts:** Multiple resource badges (e.g., ungraded submissions, new notifications) are fetched in a single optimized network request via the `/stats/sidebar-counts` endpoint to prevent overfetching.
 
 ### Security & Access Control
 - **Zero-Direct-Call Enforcement:** ESLint strictly forbids importing `@google/generative-ai` on the frontend.

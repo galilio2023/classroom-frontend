@@ -9,7 +9,7 @@ import {
 } from "@refinedev/core";
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Module, Progress, Resource, User, UserRole, ListResponse } from "@/types";
+import { Class, Module, Progress, Resource, User, UserRole, ListResponse } from "@/types";
 import { CurriculumEmptyState } from "../components/class-empty-states";
 import { Accordion } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
@@ -30,12 +30,15 @@ import { useDashboard } from "@/features/dashboard/hooks/use-dashboard";
 import { useJobs } from "@/contexts/job-context";
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
 import { AiFeatureGuard } from "@/components/ai/AiFeatureGuard";
+import { VersionSummaryModal } from "../components/version-summary-modal";
+import { useEffect } from "react";
 
 interface CurriculumTabProps {
   classId: string;
+  aClass?: Class;
 }
 
-export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
+export const CurriculumTab = ({ classId, aClass }: CurriculumTabProps) => {
   const { t, i18n } = useTranslation();
   const { coreData } = useDashboard();
   const isAr = i18n.language === "ar";
@@ -45,6 +48,8 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
   const go = useGo();
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [hasShownVersionModal, setHasShownVersionModal] = useState(false);
+  const [isVersionModalOpen, setIsVersionModalOpen] = useState(false);
 
   const [isMagicModalOpen, setIsMagicModalOpen] = useState(false);
   const [isMagicCreating, setIsMagicCreating] = useState(false);
@@ -72,33 +77,102 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
     queryOptions: { enabled: !!classId && isStudent },
   });
 
-  const modules = modulesQuery.data?.data || [];
+  const modulesRaw = modulesQuery.data?.data || [];
   const userProgress = progressQuery.data?.data || [];
-  const isLoading = modulesQuery.isLoading;
+
+  // 🚀 VERSION DRIFT: Map modules with isUpdated flag
+  const modules = modulesRaw.map((m) => {
+    const prog = userProgress.find((p: Progress) => p.moduleId === m.id);
+    return {
+      ...m,
+      isUpdated: m.version > (prog?.lastViewedVersion || 0),
+    };
+  });
+
+  const updatedModules = modules.filter((m) => m.isUpdated);
+
+  // 🚀 UNIFIED MANIFEST SYNC: Check if class manifest has changed since last sync
+  const myEnrollment = identity?.enrollments?.find((e) => e.classId === Number(classId));
+  const isManifestUpdated =
+    isStudent && (aClass?.manifestVersion || 0) > (myEnrollment?.lastSyncedManifest || 0);
+
+  useEffect(() => {
+    // We show the modal if either specific modules are updated OR the global manifest has bumped
+    if (isStudent && (updatedModules.length > 0 || isManifestUpdated) && !hasShownVersionModal) {
+      setIsVersionModalOpen(true);
+      setHasShownVersionModal(true);
+    }
+  }, [isStudent, updatedModules.length, isManifestUpdated, hasShownVersionModal]);
 
   const { mutate: deleteModule } = useDelete();
   const { mutate: customMutation } = useCustomMutation();
   const queryClient = useQueryClient();
 
-  const handleOnDragEnd = (result: DropResult) => {
+  const isLoading = modulesQuery.isLoading;
+
+  // 🚀 VERSION SYNC: Mark all as read (Individual & Manifest)
+  const { mutate: bulkSync } = useCustomMutation();
+  const { mutate: syncManifest } = useCustomMutation();
+
+  const handleVersionModalClose = () => {
+    setIsVersionModalOpen(false);
+
+    // 1. Sync Individual Modules (Detailed indicators)
+    if (updatedModules.length > 0) {
+      bulkSync({
+        url: "/progress/bulk-sync",
+        method: "post",
+        values: {
+          classId: Number(classId),
+          modules: updatedModules.map((m) => ({ id: m.id, version: m.version })),
+        },
+      });
+    }
+
+    // 2. Sync Manifest (Global indicator)
+    if (isManifestUpdated) {
+      syncManifest(
+        {
+          url: `/classes/${classId}/sync-manifest`,
+          method: "post",
+          values: {},
+        },
+        {
+          onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["progress"] });
+            // Also invalidate identity to get updated enrollment data
+            queryClient.invalidateQueries({ queryKey: ["getUserIdentity"] });
+            toast.success(
+              t("classes.curriculum.allCaughtUp", { defaultValue: "Great! You're all caught up." })
+            );
+          },
+        }
+      );
+    }
+  };
+
+  const handleOnDragEnd = async (result: DropResult) => {
     if (!result.destination || !isTeacher) return;
 
     const items = Array.from(modules).sort((a, b) => (a.order || 0) - (b.order || 0));
     const [reorderedItem] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reorderedItem);
 
-    // Optimistic update
-    const newOrders = items.map((item, index) => ({
-      id: item.id,
-      order: index,
-    }));
-
+    // 🚀 ROLLBACK MACHINE: Capture previous state
     const queryKey = [
       "modules",
       {
         filters: [{ field: "classId", operator: "eq" as const, value: Number(classId) }],
       },
     ];
+    await queryClient.cancelQueries({ queryKey });
+    const previousModules = queryClient.getQueryData(queryKey);
+
+    // Optimistic update
+    const newOrders = items.map((item, index) => ({
+      id: item.id,
+      order: index,
+    }));
 
     queryClient.setQueryData(queryKey, (old: any) => {
       if (!old) return old;
@@ -109,14 +183,29 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
     });
 
     // Backend sync
-    customMutation({
-      url: "modules/reorder",
-      method: "post",
-      values: {
-        classId: Number(classId),
-        orders: newOrders,
+    customMutation(
+      {
+        url: "modules/reorder",
+        method: "post",
+        values: {
+          classId: Number(classId),
+          orders: newOrders,
+        },
       },
-    });
+      {
+        onError: () => {
+          // Revert on failure
+          if (previousModules) {
+            queryClient.setQueryData(queryKey, previousModules);
+          }
+          toast.error(
+            t("classes.curriculum.reorderError", {
+              defaultValue: "Failed to save new order. Please try again.",
+            })
+          );
+        },
+      }
+    );
   };
 
   const isItemCompleted = (type: "resource" | "assignment" | "quiz", id: number) => {
@@ -210,6 +299,32 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
           // Rollback on error
           queryClient.setQueryData(queryKey, previousProgress);
           toast.error("Failed to update progress.");
+        },
+      }
+    );
+  };
+
+  const handleMarkAsViewed = (moduleId: number, version: number) => {
+    if (!isStudent) return;
+
+    // Check if it actually needs an update to avoid redundant calls
+    const prog = userProgress.find((p: Progress) => p.moduleId === moduleId);
+    if (prog && prog.lastViewedVersion >= version) return;
+
+    customMutation(
+      {
+        url: "progress/view",
+        method: "post",
+        values: {
+          classId: Number(classId),
+          moduleId,
+          version,
+        },
+      },
+      {
+        onSuccess: () => {
+          // Silently refresh progress to clear the NEW badge
+          void progressQuery.refetch();
         },
       }
     );
@@ -349,14 +464,14 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
       ) : (
         <div className="space-y-6">
           <div className="flex items-center justify-between px-2">
-            <div className="flex items-center gap-2 text-[9px] md:text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
+            <div className="flex items-center gap-2 text-[10px] md:text-[11px] font-black uppercase tracking-widest text-muted-foreground/60">
               <LayoutDashboard className="h-3 w-3" />
               {t("classes.curriculum.modulesPublished", {
                 count: modules.length,
               })}
             </div>
             {isStudent && (
-              <div className="flex items-center gap-1.5 md:gap-2 text-[9px] md:text-[10px] font-black uppercase tracking-widest text-primary">
+              <div className="flex items-center gap-1.5 md:gap-2 text-[10px] md:text-[11px] font-black uppercase tracking-widest text-primary">
                 <Zap className="h-3 w-3 md:h-3.5 md:w-3.5" />
                 <span>
                   {t("classes.curriculum.itemsCompleted", {
@@ -400,7 +515,10 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
                                     classId={classId}
                                     dragHandleProps={draggableProvided.dragHandleProps}
                                     isItemCompleted={isItemCompleted}
-                                    onToggleProgress={handleToggleProgress}
+                                    onToggleProgress={(type, id, mid) => {
+                                      handleMarkAsViewed(mid, (module as any).version);
+                                      handleToggleProgress(type, id, mid);
+                                    }}
                                     onDeleteModule={(id) =>
                                       deleteModule(
                                         { resource: "modules", id },
@@ -474,6 +592,14 @@ export const CurriculumTab = ({ classId }: CurriculumTabProps) => {
             order={modules.length}
           />
         </>
+      )}
+
+      {isVersionModalOpen && (
+        <VersionSummaryModal
+          isOpen={isVersionModalOpen}
+          onClose={handleVersionModalClose}
+          updatedModules={updatedModules}
+        />
       )}
     </div>
   );

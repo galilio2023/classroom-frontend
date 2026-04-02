@@ -264,7 +264,7 @@ const StudentPortfolio = () => {
                 <span className="text-3xl md:text-4xl font-black tracking-tighter">
                   {stat.value}
                 </span>
-                <span className="text-[9px] md:text-[10px] uppercase font-black text-muted-foreground/60 tracking-[0.2em] mt-2">
+                <span className="text-[10px] md:text-[11px] uppercase font-black text-muted-foreground/60 tracking-[0.2em] mt-2">
                   {stat.label}
                 </span>
               </Card>

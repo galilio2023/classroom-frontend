@@ -84,7 +84,7 @@ export const AnnouncementItem = ({
                   {announcement.isPinned && (
                     <Badge
                       variant="secondary"
-                      className="h-6 gap-1.5 px-3 rounded-full font-black text-[9px] uppercase tracking-widest bg-primary/10 text-primary border-none"
+                      className="h-6 gap-1.5 px-3 rounded-full font-black text-[10px] md:text-[11px] uppercase tracking-widest bg-primary/10 text-primary border-none"
                     >
                       <Pin className="h-3 w-3" />
                       {t("classes.announcements.pinnedLabel")}
@@ -93,7 +93,7 @@ export const AnnouncementItem = ({
                   {isRead === false && !isStaff && (
                     <Badge
                       variant="default"
-                      className="h-6 px-3 rounded-full bg-primary text-[9px] uppercase font-black tracking-widest animate-pulse"
+                      className="h-6 px-3 rounded-full bg-primary text-[10px] md:text-[11px] uppercase font-black tracking-widest animate-pulse"
                     >
                       {t("classes.announcements.newUpdate")}
                     </Badge>

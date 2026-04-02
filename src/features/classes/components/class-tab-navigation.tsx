@@ -4,7 +4,7 @@ import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { Info, BookText, GraduationCap, Sparkles, UserRound, Activity } from "lucide-react";
+import { Info, BookText, GraduationCap, Sparkles, UserRound, Activity, Zap } from "lucide-react";
 
 interface ClassTabNavigationProps {
   activePrimaryTab: string;
@@ -54,6 +54,12 @@ export const ClassTabNavigation: React.FC<ClassTabNavigationProps> = ({
           icon: Activity,
           staffOnly: true,
         },
+        {
+          id: "automations",
+          label: t("classes.show.tabs.automations", { defaultValue: "Automations" }),
+          icon: Zap,
+          staffOnly: true,
+        },
         { id: "info", label: t("classes.show.tabs.info"), icon: Info },
       ].filter((t) => !t.staffOnly || isStaff),
     [isLiveIndicator, isStaff, pendingCount, t]
@@ -98,7 +104,7 @@ export const ClassTabNavigation: React.FC<ClassTabNavigationProps> = ({
                   )}
                   {tab.badge && (
                     <Badge
-                      className="h-4 md:h-5 min-w-[1rem] md:min-w-[1.25rem] p-0 flex items-center justify-center text-[8px] md:text-[9px] rounded-full border-none bg-white text-primary font-black ms-1 shrink-0"
+                      className="h-4 md:h-5 min-w-[1rem] md:min-w-[1.25rem] p-0 flex items-center justify-center text-[10px] md:text-[11px] rounded-full border-none bg-white text-primary font-black ms-1 shrink-0"
                       style={{ color: isActive ? classColor : "inherit" }}
                     >
                       {tab.badge}

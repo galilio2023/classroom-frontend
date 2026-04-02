@@ -78,13 +78,13 @@ const TeacherCard = ({
       <div className="absolute inset-x-0 bottom-0 p-8 md:p-10 space-y-6 z-10">
         <div className="space-y-3">
           <div className="flex items-center gap-2">
-            <Badge className="bg-primary/20 backdrop-blur-md text-white border-primary/20 rounded-full px-4 py-1 font-black uppercase tracking-widest text-[8px]">
+            <Badge className="bg-primary/20 backdrop-blur-md text-white border-primary/20 rounded-full px-4 py-1 font-black uppercase tracking-widest text-[10px] md:text-[11px]">
               Top Rated
             </Badge>
             {channel.totalViews > 1000 && (
               <Badge
                 variant="secondary"
-                className="bg-white/10 text-white border-none backdrop-blur-md rounded-full px-4 py-1 font-black uppercase tracking-widest text-[8px]"
+                className="bg-white/10 text-white border-none backdrop-blur-md rounded-full px-4 py-1 font-black uppercase tracking-widest text-[10px] md:text-[11px]"
               >
                 Trending
               </Badge>
@@ -104,7 +104,7 @@ const TeacherCard = ({
           </Avatar>
           <div className="text-start">
             <p className="text-sm font-black text-white">{channel.teacher.name}</p>
-            <p className="text-[9px] font-black uppercase tracking-widest text-white/40">
+            <p className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-white/40">
               {channel.totalViews.toLocaleString()} Views
             </p>
           </div>

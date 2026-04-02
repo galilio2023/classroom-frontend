@@ -21,6 +21,7 @@ import { Input } from "@/components/ui/input.tsx";
 import { useMemo, useState, useRef } from "react";
 import { useList, useNavigation, useDelete } from "@refinedev/core";
 import { Module } from "@/types";
+import { SyncStatusBadge } from "@/components/sync-status-badge";
 import { useUserRole } from "@/hooks/use-user-role";
 import { Badge } from "@/components/ui/badge.tsx";
 import { Button } from "@/components/ui/button.tsx";
@@ -320,7 +321,7 @@ const ModulesListPage = () => {
                             <Badge
                               variant={isPublished ? "default" : "secondary"}
                               className={cn(
-                                "text-[9px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full shadow-sm border-none",
+                                "text-[10px] md:text-[11px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full shadow-sm border-none",
                                 isPublished
                                   ? "bg-green-500/10 text-green-600"
                                   : "bg-amber-500/10 text-amber-600 border border-amber-500/20"
@@ -328,9 +329,10 @@ const ModulesListPage = () => {
                             >
                               {isPublished ? t("status.published") : t("status.draft")}
                             </Badge>
+                            <SyncStatusBadge resource="modules" id={module.id} />
                             <Badge
                               variant="ai"
-                              className="text-[9px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full shadow-sm"
+                              className="text-[10px] md:text-[11px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full shadow-sm"
                             >
                               {module.class?.name || "General"}
                             </Badge>
@@ -343,7 +345,7 @@ const ModulesListPage = () => {
                               <BookOpen className="h-3.5 w-3.5 text-primary" />
                             </div>
                             <div className="flex flex-col text-start">
-                              <span className="text-[9px] uppercase font-bold text-muted-foreground/60 tracking-wider">
+                              <span className="text-[10px] md:text-[11px] uppercase font-bold text-muted-foreground/60 tracking-wider">
                                 {t("modulesPage.labels.resources")}
                               </span>
                               <span className="text-[11px] font-black text-foreground">
@@ -357,7 +359,7 @@ const ModulesListPage = () => {
                               <LayoutGrid className="h-3.5 w-3.5 text-primary" />
                             </div>
                             <div className="flex flex-col text-start">
-                              <span className="text-[9px] uppercase font-bold text-muted-foreground/60 tracking-wider">
+                              <span className="text-[10px] md:text-[11px] uppercase font-bold text-muted-foreground/60 tracking-wider">
                                 {t("modulesPage.labels.tasks")}
                               </span>
                               <span className="text-[11px] font-black text-foreground">

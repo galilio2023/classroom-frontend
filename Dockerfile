@@ -1,37 +1,46 @@
-# This Dockerfile uses `serve` npm package to serve the static files with node process.
-# You can find the Dockerfile for nginx in the following link:
-# https://github.com/refinedev/dockerfiles/blob/main/vite/Dockerfile.nginx
-FROM refinedev/node:18 AS base
+# --- STAGE 1: BUILD ---
+FROM node:20-alpine AS builder
 
-FROM base as deps
+WORKDIR /app
 
-COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* .npmrc* ./
+# Install build dependencies
+COPY package*.json ./
+RUN npm ci
 
-RUN \
-  if [ -f yarn.lock ]; then yarn --frozen-lockfile; \
-  elif [ -f package-lock.json ]; then npm ci; \
-  elif [ -f pnpm-lock.yaml ]; then yarn global add pnpm && pnpm i --frozen-lockfile; \
-  else echo "Lockfile not found." && exit 1; \
-  fi
-
-FROM base as builder
-
-ENV NODE_ENV production
-
-COPY --from=deps /app/refine/node_modules ./node_modules
-
+# Copy source and build (React -> Dist)
 COPY . .
-
 RUN npm run build
 
-FROM base as runner
+# --- STAGE 2: RUNNER (UNPRIVILEGED NGINX) ---
+# 🛡️ SECURITY: Use unprivileged Nginx image to avoid running as root
+FROM nginxinc/nginx-unprivileged:stable-alpine AS runner
 
-ENV NODE_ENV production
+USER root
+# Install envsubst (comes with gettext)
+RUN apk add --no-cache gettext
 
-RUN npm install -g serve
+# Copy the custom Nginx configuration template and entrypoint
+COPY nginx.conf.template /etc/nginx/nginx.conf.template
+COPY security-headers.conf /etc/nginx/conf.d/security-headers.conf
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
-COPY --from=builder /app/refine/dist ./
+# Copy the built React assets to Nginx html directory
+COPY --from=builder /app/dist /usr/share/nginx/html
 
-USER refine
+# 🛡️ SECURITY: Grant ownership to nginx user for dynamic config updates and runtime files
+# We only chown what's strictly necessary for envsubst and nginx operation.
+# Static assets in /usr/share/nginx/html remain owned by root for integrity.
+RUN chown nginx:nginx /etc/nginx/nginx.conf.template \
+    /etc/nginx/conf.d/security-headers.conf \
+    /var/cache/nginx \
+    /var/log/nginx
 
-CMD ["serve"]
+# Switch back to unprivileged user
+USER nginx
+
+# Port 8080 is standard for unprivileged nginx images
+EXPOSE 8080
+
+ENTRYPOINT ["docker-entrypoint.sh"]
+CMD ["nginx", "-g", "daemon off;"]

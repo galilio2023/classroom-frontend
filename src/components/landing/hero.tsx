@@ -77,6 +77,17 @@ export const LandingHero = ({ isAr: _isAr }: Props) => {
           <Button
             size="lg"
             variant="ghost"
+            className="h-14 md:h-20 w-full sm:w-auto px-12 rounded-full text-lg font-black uppercase tracking-widest hover:bg-muted/50 border border-border/40 transition-all duration-500"
+            asChild
+          >
+            <Link to="/discovery/classes">
+              {t("buttons.browseClasses", { defaultValue: "Browse Classes" })}
+            </Link>
+          </Button>
+
+          <Button
+            size="lg"
+            variant="ghost"
             className="h-14 md:h-20 w-full sm:w-auto px-12 rounded-full text-lg font-black uppercase tracking-widest hover:bg-muted/50 transition-all duration-500"
             asChild
           >

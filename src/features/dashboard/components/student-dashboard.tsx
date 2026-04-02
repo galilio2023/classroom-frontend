@@ -63,9 +63,28 @@ export const StudentDashboard = ({ data, isLoading, list, show }: StudentDashboa
       description: t("dashboard.student.actions.upcoming.description", {
         title: nextAssignment.title,
       }),
-      priority: "urgent",
+      priority: "normal",
       actionText: t("dashboard.student.actions.upcoming.action"),
       onClick: () => show("assignments", nextAssignment.id),
+    });
+  }
+
+  // 🚀 ACTION REQUIRED: Resubmissions
+  if (data.resubmissions && data.resubmissions.length > 0) {
+    data.resubmissions.forEach((sub: any) => {
+      actions.push({
+        id: `resubmit-${sub.id}`,
+        title: t("dashboard.student.actions.resubmit.title", { defaultValue: "Action Required" }),
+        description: t("dashboard.student.actions.resubmit.description", {
+          defaultValue: "Resubmission requested for: {{title}}",
+          title: sub.assignment?.title || "Assignment",
+        }),
+        priority: "urgent",
+        actionText: t("dashboard.student.actions.resubmit.action", {
+          defaultValue: "Edit Submission",
+        }),
+        onClick: () => show("submissions", sub.id),
+      });
     });
   }
 

@@ -156,7 +156,7 @@ export const QuizTab = ({ classId }: QuizTabProps) => {
                                 query: { action: "results" },
                               })
                             }
-                            className="h-10 rounded-xl font-black uppercase tracking-widest text-[9px] gap-2 border-primary/20 text-primary hover:bg-primary/5"
+                            className="h-10 rounded-xl font-black uppercase tracking-widest text-[10px] md:text-[11px] gap-2 border-primary/20 text-primary hover:bg-primary/5"
                           >
                             <Trophy className="h-3.5 w-3.5" />
                             {t("buttons.results")}
