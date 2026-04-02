@@ -58,10 +58,10 @@ interface WhiteboardProps {
  * 🛡️ RESILIENCE: Local Error Boundary for heavy Excalidraw component
  */
 class WhiteboardErrorBoundary extends Component<
-  { children: ReactNode; t: TFunction },
+  { children: ReactNode; t: TFunction; onReset?: () => void },
   { hasError: boolean }
 > {
-  constructor(props: { children: ReactNode; t: TFunction }) {
+  constructor(props: { children: ReactNode; t: TFunction; onReset?: () => void }) {
     super(props);
     this.state = { hasError: false };
   }
@@ -76,27 +76,43 @@ class WhiteboardErrorBoundary extends Component<
     // Future: Integration with Sentry/LogRocket here
   }
 
+  handleReset = () => {
+    this.setState({ hasError: false });
+    if (this.props.onReset) this.props.onReset();
+  };
+
   render() {
     const { t } = this.props;
     if (this.state.hasError) {
       return (
-        <div className="flex flex-col items-center justify-center h-125 border rounded-xl bg-muted/10 gap-4">
-          <AlertCircle className="h-12 w-12 text-destructive opacity-50" />
-          <div className="text-center">
-            <h3 className="font-black tracking-tight">
+        <div className="flex flex-col items-center justify-center h-125 border rounded-xl bg-muted/10 gap-6 p-8">
+          <div className="p-4 rounded-full bg-destructive/5 text-destructive animate-pulse">
+            <AlertCircle className="h-12 w-12 opacity-50" />
+          </div>
+          <div className="text-center space-y-2">
+            <h3 className="font-black tracking-tight text-xl">
               {t("classes.live.whiteboardErrors.failed")}
             </h3>
-            <p className="text-sm text-muted-foreground font-medium">
+            <p className="text-sm text-muted-foreground font-medium max-w-xs mx-auto">
               {t("classes.live.whiteboardErrors.refreshDesc")}
             </p>
           </div>
-          <Button
-            onClick={() => window.location.reload()}
-            variant="outline"
-            className="rounded-xl font-bold uppercase tracking-widest"
-          >
-            {t("classes.live.whiteboardErrors.refreshBtn")}
-          </Button>
+          <div className="flex flex-wrap gap-3 justify-center w-full">
+            <Button
+              onClick={this.handleReset}
+              variant="default"
+              className="rounded-xl font-bold uppercase tracking-widest px-8 shadow-lg shadow-primary/20"
+            >
+              {t("classes.live.whiteboardErrors.resetBtn", "Reset State")}
+            </Button>
+            <Button
+              onClick={() => window.location.reload()}
+              variant="outline"
+              className="rounded-xl font-bold uppercase tracking-widest px-8 border-primary/20 text-primary"
+            >
+              {t("classes.live.whiteboardErrors.refreshBtn")}
+            </Button>
+          </div>
         </div>
       );
     }

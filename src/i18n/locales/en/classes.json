@@ -53,6 +53,7 @@
         "failed": "Whiteboard failed to load",
         "refreshDesc": "Please refresh the page to try again.",
         "refreshBtn": "Refresh Now",
+        "resetBtn": "Reset State",
         "connectionLost": "Cloud sync paused: Connection lost. Reconnecting...",
         "saveTimeout": "Cloud sync timeout: No response from server. Will retry later."
       },
