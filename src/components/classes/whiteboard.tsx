@@ -12,6 +12,7 @@ import { useTranslation } from "react-i18next";
 import { AiFeatureGuard } from "@/components/ai/AiFeatureGuard";
 import { useWhiteboardSocket } from "@/hooks/use-whiteboard-socket";
 import { useUserRole } from "@/hooks/use-user-role";
+import { getExportToBlob } from "@/lib/excalidraw-helpers";
 
 // 🛡️ STRICT TYPE SAFETY: Import specific Excalidraw types
 import type { ExcalidrawElement } from "@excalidraw/excalidraw/element/types";
@@ -22,17 +23,6 @@ const Excalidraw = lazy(async () => {
   const module = await import("@excalidraw/excalidraw");
   return { default: module.Excalidraw };
 });
-
-// Helper for exporting (needs to be imported dynamically too)
-type ExportToBlobFn = (opts: {
-  elements: readonly ExcalidrawElement[];
-  appState?: Partial<AppState>;
-  files: BinaryFiles; // 🛡️ TYPE SAFETY: Strictly typed from library
-  mimeType?: string;
-  quality?: number;
-}) => Promise<Blob>;
-
-let exportToBlob: ExportToBlobFn;
 
 /**
  * 🛡️ TYPE SAFETY: Strictly typed interface to satisfy Rule #2
@@ -125,7 +115,7 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
   const { isStaff: isTeacher, isLoading: isPermissionsLoading } = useUserRole();
   const [excalidrawAPI, setExcalidrawAPI] = useState<ExcalidrawAPI | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-  const [isHelpersLoading, setIsHelpersLoading] = useState(true);
+  const [isHelpersLoading, setIsHelpersLoading] = useState(false);
 
   // If roomId is not provided, fallback to classId (backward compatibility)
   const activeRoomId = roomId || classId;
@@ -177,21 +167,6 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
     };
   }, [isTeacher, isPermissionsLoading, hasChangesRef, savedTriggerSave]);
 
-  useEffect(() => {
-    // Load helper functions dynamically
-    const loadHelpers = async () => {
-      try {
-        const module = await import("@excalidraw/excalidraw");
-        exportToBlob = module.exportToBlob;
-        setIsHelpersLoading(false);
-      } catch (err) {
-        console.error("Failed to load Excalidraw helpers", err);
-        setIsHelpersLoading(false);
-      }
-    };
-    void loadHelpers();
-  }, []);
-
   if (isPermissionsLoading) {
     return (
       <div className="flex items-center justify-center h-125 border rounded-xl bg-muted/10">
@@ -201,13 +176,14 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
   }
 
   const saveSnapshot = async () => {
-    if (!excalidrawAPI || !exportToBlob || !classId) {
+    if (!excalidrawAPI || !classId) {
       if (!classId) toast.error("Cannot save snapshot: Class context missing.");
       return;
     }
     setIsSaving(true);
 
     try {
+      const exportToBlob = await getExportToBlob();
       const elements = excalidrawAPI.getSceneElements();
       if (!elements || elements.length === 0) {
         toast.error("Whiteboard is empty");

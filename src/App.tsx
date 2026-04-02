@@ -2,7 +2,6 @@ import { useEffect } from "react";
 import { Refine } from "@refinedev/core";
 import { RefineKbar, RefineKbarProvider } from "@refinedev/kbar";
 import { DevtoolsProvider } from "@refinedev/devtools";
-import { BrowserRouter } from "react-router-dom";
 import routerBindings, {
   DocumentTitleHandler,
   UnsavedChangesNotifier,
@@ -77,42 +76,40 @@ function App() {
   };
 
   return (
-    <BrowserRouter>
-      <RefineKbarProvider>
-        <DevtoolsProvider>
-          <ErrorBoundary>
-            <Refine
-              dataProvider={dataProvider}
-              authProvider={authProvider}
-              accessControlProvider={accessControlProvider}
-              routerProvider={routerBindings}
-              notificationProvider={notificationProvider}
-              i18nProvider={i18nProvider}
-              resources={resources}
-              liveProvider={liveProvider(socket)}
-              options={{
-                syncWithLocation: true,
-                warnWhenUnsavedChanges: true,
-                projectId: "classroom-refine",
-                title: {
-                  icon: <GraduationCap className="w-8 h-8 text-primary" />,
-                  text: t("app.title", { defaultValue: "Classroom AI" }),
-                },
-              }}
-            >
-              <PulseProvider>
-                <GlobalLiveOverlay />
-                <AppRouter />
-                <Toaster />
-                <UnsavedChangesNotifier />
-                <DocumentTitleHandler />
-                <RefineKbar />
-              </PulseProvider>
-            </Refine>
-          </ErrorBoundary>
-        </DevtoolsProvider>
-      </RefineKbarProvider>
-    </BrowserRouter>
+    <RefineKbarProvider>
+      <DevtoolsProvider>
+        <ErrorBoundary>
+          <Refine
+            dataProvider={dataProvider}
+            authProvider={authProvider}
+            accessControlProvider={accessControlProvider}
+            routerProvider={routerBindings}
+            notificationProvider={notificationProvider}
+            i18nProvider={i18nProvider}
+            resources={resources}
+            liveProvider={liveProvider(socket)}
+            options={{
+              syncWithLocation: true,
+              warnWhenUnsavedChanges: true,
+              projectId: "classroom-refine",
+              title: {
+                icon: <GraduationCap className="w-8 h-8 text-primary" />,
+                text: t("app.title", { defaultValue: "Classroom AI" }),
+              },
+            }}
+          >
+            <PulseProvider>
+              <GlobalLiveOverlay />
+              <AppRouter />
+              <Toaster />
+              <UnsavedChangesNotifier />
+              <DocumentTitleHandler />
+              <RefineKbar />
+            </PulseProvider>
+          </Refine>
+        </ErrorBoundary>
+      </DevtoolsProvider>
+    </RefineKbarProvider>
   );
 }
 

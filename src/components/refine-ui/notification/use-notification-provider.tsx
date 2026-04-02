@@ -1,6 +1,6 @@
 import { UndoableNotification } from "@/components/refine-ui/notification/undoable-notification";
 import type { NotificationProvider } from "@refinedev/core";
-import { useGo } from "@refinedev/core";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { MoveRight } from "lucide-react";
 import { NotificationMetadata } from "@/types";
@@ -10,7 +10,7 @@ import { NotificationMetadata } from "@/types";
  * Optimized for the new Service Layer backend.
  */
 export function useNotificationProvider(): NotificationProvider {
-  const go = useGo();
+  const navigate = useNavigate();
 
   return {
     open: ({ key, type, message, description, undoableTimeout, cancelMutation }) => {
@@ -34,7 +34,7 @@ export function useNotificationProvider(): NotificationProvider {
               </div>
             ),
             onClick: () => {
-              go({ to: meta.link! });
+              navigate(meta.link!);
             },
           };
           config.description = meta.message || undefined;
