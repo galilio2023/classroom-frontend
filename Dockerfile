@@ -1,9 +1,6 @@
 # --- STAGE 1: BUILD ---
 FROM node:20-alpine AS builder
 
-# 🛡️ SECURITY: Run build in production mode
-ENV NODE_ENV=production
-
 WORKDIR /app
 
 # Install build dependencies
