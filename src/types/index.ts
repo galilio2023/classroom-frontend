@@ -413,6 +413,7 @@ export type ClassListItem = Pick<
   | "isBreakoutActive"
   | "color"
   | "enrollments"
+  | "version"
 > & {
   isEnrolled?: boolean;
   isTeacherAssigned?: boolean;
@@ -493,6 +494,7 @@ export interface Resource {
   ownerId: string | null;
   isInternal: boolean;
   isRequired: boolean;
+  isAiPinned: boolean;
   version: number;
   createdAt: string;
   updatedAt: string;

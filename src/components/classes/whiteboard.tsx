@@ -1,4 +1,4 @@
-import { Component, ErrorInfo, lazy, ReactNode, Suspense, useEffect, useState } from "react";
+import { Component, ErrorInfo, lazy, memo, ReactNode, Suspense, useEffect, useState } from "react";
 import { useCustomMutation } from "@refinedev/core";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -19,10 +19,52 @@ import type { ExcalidrawElement } from "@excalidraw/excalidraw/element/types";
 import type { AppState, BinaryFiles, Collaborator, SocketId } from "@excalidraw/excalidraw/types";
 
 // Lazy load Excalidraw to avoid SSR/Vite bundling issues
-const Excalidraw = lazy(async () => {
+const ExcalidrawLib = lazy(async () => {
   const module = await import("@excalidraw/excalidraw");
   return { default: module.Excalidraw };
 });
+
+/**
+ * 🚀 PERFORMANCE: Memoized Excalidraw wrapper to prevent heavy re-renders
+ * when unrelated parent states (isSaving, isDirty, etc.) change.
+ */
+const MemoizedExcalidraw = memo(
+  ({
+    onApi,
+    onChange,
+    viewModeEnabled,
+  }: {
+    onApi: (api: any) => void;
+    onChange: (elements: readonly any[], appState: any) => void;
+    viewModeEnabled: boolean;
+  }) => (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center h-full">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+      }
+    >
+      <ExcalidrawLib
+        excalidrawAPI={onApi}
+        onChange={onChange}
+        viewModeEnabled={viewModeEnabled}
+        theme="light"
+        UIOptions={{
+          canvasActions: {
+            loadScene: false,
+            saveAsImage: true,
+            export: false,
+          },
+        }}
+      />
+    </Suspense>
+  ),
+  (prev, next) =>
+    prev.viewModeEnabled === next.viewModeEnabled &&
+    prev.onChange === next.onChange &&
+    prev.onApi === next.onApi
+);
 
 /**
  * 🛡️ TYPE SAFETY: Strictly typed interface to satisfy Rule #2
@@ -338,27 +380,11 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
             </div>
           </div>
           <div className="flex-1 relative min-h-125">
-            <Suspense
-              fallback={
-                <div className="flex items-center justify-center h-full">
-                  <Loader2 className="h-8 w-8 animate-spin" />
-                </div>
-              }
-            >
-              <Excalidraw
-                excalidrawAPI={(api) => setExcalidrawAPI(api as ExcalidrawAPI)}
-                onChange={onChange}
-                viewModeEnabled={isLocked && !isTeacher}
-                theme="light"
-                UIOptions={{
-                  canvasActions: {
-                    loadScene: false,
-                    saveAsImage: true,
-                    export: false,
-                  },
-                }}
-              />
-            </Suspense>
+            <MemoizedExcalidraw
+              onApi={(api) => setExcalidrawAPI(api as ExcalidrawAPI)}
+              onChange={onChange}
+              viewModeEnabled={isLocked && !isTeacher}
+            />
           </div>
           <ConflictDialog
             isOpen={showConflict}

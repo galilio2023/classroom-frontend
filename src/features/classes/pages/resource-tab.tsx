@@ -25,6 +25,8 @@ import {
   Sparkles,
   Save,
   Play,
+  Pin,
+  PinOff,
 } from "lucide-react";
 import {
   Dialog,
@@ -79,6 +81,7 @@ export const ResourceTab = ({ classId }: ResourceTabProps) => {
     url: "",
     content: "",
     cldPubId: "",
+    isAiPinned: false, // 🆕 AI Context Pinning
   });
 
   const { query } = useList<Module>({
@@ -94,7 +97,27 @@ export const ResourceTab = ({ classId }: ResourceTabProps) => {
   const isCreatingResource = createMutation.isPending;
 
   const { mutate: deleteResource } = useDelete();
+  const { mutate: updateResource } = useCustomMutation();
   const { mutate: featureResource } = useCustomMutation();
+
+  const toggleAiPin = (res: Resource) => {
+    updateResource(
+      {
+        url: `resources/${res.id}`,
+        method: "patch",
+        values: {
+          isAiPinned: !res.isAiPinned,
+          version: res.version,
+        },
+      },
+      {
+        onSuccess: () => {
+          toast.success(!res.isAiPinned ? "Pinned to AI!" : "Unpinned from AI");
+          query.refetch();
+        },
+      }
+    );
+  };
 
   const { setActiveVideo } = usePersistentLive();
 
@@ -123,6 +146,7 @@ export const ResourceTab = ({ classId }: ResourceTabProps) => {
             url: "",
             content: "",
             cldPubId: "",
+            isAiPinned: false,
           });
           setActiveModuleId(null);
           query.refetch();
@@ -265,9 +289,14 @@ export const ResourceTab = ({ classId }: ResourceTabProps) => {
                                 )}
                               </div>
                               <div className="flex flex-col overflow-hidden">
-                                <span className="text-sm font-black tracking-tight group-hover/item:text-primary transition-colors truncate">
-                                  {res.title}
-                                </span>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-sm font-black tracking-tight group-hover/item:text-primary transition-colors truncate">
+                                    {res.title}
+                                  </span>
+                                  {res.isAiPinned && (
+                                    <Pin className="h-3 w-3 text-ai-primary fill-ai-primary" />
+                                  )}
+                                </div>
                                 {res.description && (
                                   <span className="text-[10px] text-muted-foreground/60 font-medium uppercase tracking-widest truncate">
                                     {res.description}
@@ -276,7 +305,7 @@ export const ResourceTab = ({ classId }: ResourceTabProps) => {
                               </div>
                             </div>
                             <div className="flex items-center gap-2">
-                              {isTeacher && res.type === "video" && (
+                              {isTeacher && (
                                 <DropdownMenu>
                                   <DropdownMenuTrigger asChild>
                                     <Button
@@ -292,24 +321,47 @@ export const ResourceTab = ({ classId }: ResourceTabProps) => {
                                     className="rounded-xl border-none shadow-2xl p-2 min-w-[180px] bg-card/95 backdrop-blur-xl"
                                   >
                                     <DropdownMenuItem
-                                      className="rounded-lg font-black uppercase tracking-widest text-[9px] gap-2 py-3 cursor-pointer text-ai-primary hover:bg-ai-primary/10 transition-all"
-                                      onClick={() => {
-                                        featureResource({
-                                          url: "/channels/feature-resource",
-                                          method: "post",
-                                          values: { resourceId: res.id },
-                                          successNotification: () => ({
-                                            type: "success",
-                                            message: "Highlighted!",
-                                            description:
-                                              "This lesson is now featured on your public Teacher TV channel.",
-                                          }),
-                                        });
-                                      }}
+                                      className={cn(
+                                        "rounded-lg font-black uppercase tracking-widest text-[9px] gap-2 py-3 cursor-pointer transition-all",
+                                        res.isAiPinned
+                                          ? "text-muted-foreground hover:bg-muted"
+                                          : "text-ai-primary hover:bg-ai-primary/10"
+                                      )}
+                                      onClick={() => toggleAiPin(res)}
                                     >
-                                      <Sparkles className="h-3.5 w-3.5" />
-                                      {t("buttons.featureOnTv")}
+                                      {res.isAiPinned ? (
+                                        <>
+                                          <PinOff className="h-3.5 w-3.5" />
+                                          Unpin from AI
+                                        </>
+                                      ) : (
+                                        <>
+                                          <Pin className="h-3.5 w-3.5" />
+                                          Pin to AI Context
+                                        </>
+                                      )}
                                     </DropdownMenuItem>
+                                    {res.type === "video" && (
+                                      <DropdownMenuItem
+                                        className="rounded-lg font-black uppercase tracking-widest text-[9px] gap-2 py-3 cursor-pointer text-ai-primary hover:bg-ai-primary/10 transition-all"
+                                        onClick={() => {
+                                          featureResource({
+                                            url: "/channels/feature-resource",
+                                            method: "post",
+                                            values: { resourceId: res.id },
+                                            successNotification: () => ({
+                                              type: "success",
+                                              message: "Highlighted!",
+                                              description:
+                                                "This lesson is now featured on your public Teacher TV channel.",
+                                            }),
+                                          });
+                                        }}
+                                      >
+                                        <Sparkles className="h-3.5 w-3.5" />
+                                        {t("buttons.featureOnTv")}
+                                      </DropdownMenuItem>
+                                    )}
                                     <DropdownMenuItem
                                       className="rounded-lg font-black uppercase tracking-widest text-[10px] md:text-[11px] gap-2 py-3 cursor-pointer text-destructive hover:bg-destructive/10 transition-all"
                                       onClick={() => handleDeleteResource(res.id)}

@@ -32,6 +32,7 @@ http {
         # 🚀 SPA ROUTING: Redirect all 404s to index.html
         location / {
             try_files $uri $uri/ /index.html;
+            add_header Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0";
         }
 
         # 🚀 REVERSE PROXY: API
@@ -58,10 +59,9 @@ http {
         }
 
         # 📦 STATIC CACHING: Cache hashed assets for 1 year
-
         location /assets {
             expires 1y;
-            add_header Cache-Control "public, no-transform";
+            add_header Cache-Control "public, max-age=31536000, immutable";
             # 🛡️ SECURITY: Inherit global security headers
             include /etc/nginx/conf.d/security-headers.conf;
         }

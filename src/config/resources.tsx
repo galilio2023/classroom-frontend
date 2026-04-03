@@ -33,6 +33,7 @@ import {
   Settings,
   CircleDollarSign,
   HeartPulse,
+  CalendarCheck,
 } from "lucide-react";
 import { ResourceProps } from "@refinedev/core";
 import { UserRole } from "@/types"; // Assuming UserRole enum is defined here or imported
@@ -45,12 +46,13 @@ export const resources: ResourceProps[] = [
     meta: {
       label: "resources.dashboard.label",
       icon: <Home />,
-      roles: [UserRole.ADMIN, UserRole.TEACHER, UserRole.STUDENT, UserRole.PARENT],
+      roles: [UserRole.ADMIN, UserRole.TEACHER, UserRole.STUDENT],
     },
   },
   {
     name: "guardian-portal",
     list: "/parent/dashboard",
+    show: "/parent/child/:id",
     meta: {
       label: "resources.guardian-portal.label",
       icon: <HeartPulse />,
@@ -82,6 +84,15 @@ export const resources: ResourceProps[] = [
       label: "resources.messages.label",
       icon: <MessageCircle />,
       roles: [UserRole.ADMIN, UserRole.TEACHER, UserRole.STUDENT],
+    },
+  },
+  {
+    name: "meetings",
+    list: "/meetings",
+    meta: {
+      label: "resources.meetings.label",
+      icon: <CalendarCheck />,
+      roles: [UserRole.ADMIN, UserRole.TEACHER, UserRole.PARENT],
     },
   },
 

@@ -105,6 +105,22 @@ export const authProvider: AuthProvider = {
       }
 
       console.log("Registration successful for:", sanitizedParams.email);
+
+      // 🚀 AUTO-LOGIN: remove friction by logging the user in immediately
+      const { data: loginData, error: loginError } = await authClient.signIn.email({
+        email: sanitizedParams.email as string,
+        password: sanitizedParams.password as string,
+      });
+
+      if (!loginError && loginData?.user) {
+        cachedSessionData = loginData;
+        lastFetchTime = Date.now();
+        const sessionToken = (loginData as any).token;
+        if (sessionToken) syncToken(sessionToken);
+        
+        return { success: true, redirectTo: "/dashboard" };
+      }
+
       return { success: true, redirectTo: "/login" };
     } catch (err: unknown) {
       const error = err as Error;

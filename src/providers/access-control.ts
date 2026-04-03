@@ -218,6 +218,7 @@ export const accessControlProvider: AccessControlProvider = {
     if (role === UserRole.PARENT) {
       const parentAllowed = [
         "dashboard",
+        "guardian-portal",
         "classes",
         "attendance",
         "submissions",

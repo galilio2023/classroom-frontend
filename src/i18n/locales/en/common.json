@@ -1055,6 +1055,21 @@
     "dashboard": {
       "label": "Dashboard"
     },
+    "guardian-portal": {
+      "label": "Family Portal"
+    },
+    "guardian": {
+      "dashboard": {
+        "title": "Family Portal",
+        "subtitle": "Monitor your children's academic performance, attendance, and well-being in real-time."
+      },
+      "risk": {
+        "low": "Stable",
+        "medium": "Attention",
+        "high": "High Risk",
+        "critical": "Critical"
+      }
+    },
     "calendar": {
       "label": "Calendar"
     },

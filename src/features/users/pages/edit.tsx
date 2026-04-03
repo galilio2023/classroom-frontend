@@ -1,6 +1,8 @@
+import React from "react";
 import { useForm } from "@refinedev/react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useGetIdentity, useSelect } from "@refinedev/core";
+import { toast } from "sonner";
 import {
   Form,
   FormControl,
@@ -43,6 +45,10 @@ import {
   Save,
   ArrowRight,
   UserCheck,
+  Copy,
+  Check,
+  Users as UsersIcon,
+  Sparkles,
 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { userFormSchema } from "@/schemas/user";
@@ -56,11 +62,13 @@ import { cn } from "@/lib/utils";
 
 const UsersEdit = () => {
   const { t, i18n } = useTranslation();
+  const [copied, setCopied] = React.useState(false);
   const isAr = i18n.language === "ar";
 
   usePageTitle(t("profile.editTitle"));
   const { data: identity } = useGetIdentity<User>();
   const isAdmin = identity?.role === "admin";
+  const isStudent = identity?.role === "student";
 
   const {
     refineCore: { onFinish, formLoading, query },
@@ -81,6 +89,15 @@ const UsersEdit = () => {
   });
 
   const user = query?.data?.data;
+
+  const handleCopyCode = () => {
+    if (user?.inviteCode) {
+      navigator.clipboard.writeText(user.inviteCode);
+      setCopied(true);
+      toast.success(t("profile.toasts.linkCopied", { defaultValue: "Invite code copied!" }));
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
 
   return (
     <div className="container mx-auto py-10 max-w-6xl space-y-10 text-start">
@@ -510,6 +527,47 @@ const UsersEdit = () => {
               </div>
             </CardContent>
           </Card>
+
+          {isStudent && (
+            <Card className="border-primary/10 shadow-lg rounded-4xl overflow-hidden bg-primary/5 backdrop-blur-sm relative group">
+              <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
+                <Sparkles className="h-24 w-24 text-primary" />
+              </div>
+              <CardHeader className="pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-xl bg-primary/10 text-primary">
+                    <UsersIcon className="h-5 w-5" />
+                  </div>
+                  <CardTitle className="text-lg font-black tracking-tight uppercase">
+                    Family Connection
+                  </CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-sm text-muted-foreground font-medium leading-relaxed">
+                  Share this unique code with your parents so they can link their accounts to your
+                  academic profile.
+                </p>
+                <div className="relative group/code">
+                  <div className="absolute -inset-1 bg-linear-to-r from-primary/20 to-primary/0 rounded-2xl blur-xs opacity-0 group-hover/code:opacity-100 transition duration-500" />
+                  <div className="relative flex items-center gap-2 p-1 bg-white dark:bg-[#09090b] rounded-2xl border-2 border-primary/10">
+                    <div className="flex-1 font-mono font-black text-center text-primary text-sm tracking-widest py-3 px-4 uppercase select-all">
+                      {user?.inviteCode || "STU-XXXX-XXXX"}
+                    </div>
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="ghost"
+                      onClick={handleCopyCode}
+                      className="h-10 w-10 rounded-xl hover:bg-primary/10 text-primary transition-all shrink-0 me-1"
+                    >
+                      {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           <Alert className="rounded-4xl border-primary/10 bg-primary/5 p-6">
             <Info className="h-5 w-5 text-primary" />
