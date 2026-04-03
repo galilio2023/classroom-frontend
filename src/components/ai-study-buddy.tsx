@@ -24,7 +24,6 @@ interface AIStudyBuddyProps {
 
 const AIStudyBuddyContent = ({ subject, topic, assignment, classId }: AIStudyBuddyProps) => {
   const { t } = useTranslation();
-  const { isAllowed } = useAiAccess();
   const [isOpen, setIsOpen] = useState(false);
 
   const {
@@ -41,11 +40,6 @@ const AIStudyBuddyContent = ({ subject, topic, assignment, classId }: AIStudyBud
     classId,
     context: { subject, topic, assignment },
   });
-
-  // 🛡️ PARENT GATING: AI interactive features are disabled for Parents
-  if (!isAllowed) {
-    return null;
-  }
 
   return (
     <div
@@ -80,7 +74,7 @@ const AIStudyBuddyContent = ({ subject, topic, assignment, classId }: AIStudyBud
                     message={{
                       role: "model",
                       parts: [{ text: streamingMessage }],
-                      sources: (streamingSources as ChatSource[]) || undefined,
+                      sources: streamingSources || undefined,
                     }}
                   />
                 )}
@@ -128,7 +122,10 @@ export const AIStudyBuddy = (props: AIStudyBuddyProps) => {
   if (!props.classId) return null;
 
   return (
-    <AiFeatureGuard silent skeletonClassName="fixed bottom-6 end-6 h-16 w-16 rounded-full">
+    <AiFeatureGuard
+      silent
+      skeletonClassName="fixed bottom-[5rem] md:bottom-6 end-4 md:end-6 h-14 w-14 md:h-16 md:w-16 rounded-3xl md:rounded-4xl"
+    >
       <AIStudyBuddyContent {...props} />
     </AiFeatureGuard>
   );
