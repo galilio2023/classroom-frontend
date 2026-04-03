@@ -16,28 +16,13 @@ import { getExportToBlob } from "@/lib/excalidraw-helpers";
 
 // 🛡️ STRICT TYPE SAFETY: Import specific Excalidraw types
 import type { ExcalidrawElement } from "@excalidraw/excalidraw/element/types";
-import type { AppState, BinaryFiles, Collaborator, SocketId } from "@excalidraw/excalidraw/types";
+import type { AppState, BinaryFiles, ExcalidrawImperativeAPI } from "@excalidraw/excalidraw/types";
 
 // Lazy load Excalidraw to avoid SSR/Vite bundling issues
 const ExcalidrawLib = lazy(async () => {
   const module = await import("@excalidraw/excalidraw");
   return { default: module.Excalidraw };
 });
-
-/**
- * 🛡️ TYPE SAFETY: Strictly typed interface to satisfy Rule #2
- */
-interface ExcalidrawAPI {
-  updateScene: (data: {
-    elements?: readonly ExcalidrawElement[];
-    appState?: Partial<AppState>;
-    collaborators?: Map<SocketId, Collaborator>;
-    commitToHistory?: boolean;
-  }) => void;
-  getSceneElements: () => readonly ExcalidrawElement[];
-  getAppState: () => AppState;
-  getFiles: () => BinaryFiles;
-}
 
 /**
  * 🚀 PERFORMANCE: Memoized Excalidraw wrapper to prevent heavy re-renders
@@ -49,7 +34,7 @@ const MemoizedExcalidraw = memo(
     onChange,
     viewModeEnabled,
   }: {
-    onApi: (api: ExcalidrawAPI) => void;
+    onApi: (api: ExcalidrawImperativeAPI) => void;
     onChange: (elements: readonly ExcalidrawElement[], appState: AppState) => void;
     viewModeEnabled: boolean;
   }) => (
@@ -61,7 +46,7 @@ const MemoizedExcalidraw = memo(
       }
     >
       <ExcalidrawLib
-        excalidrawAPI={onApi as any} // Cast to any only at the boundary if library types slightly mismatch
+        excalidrawAPI={onApi}
         onChange={onChange}
         viewModeEnabled={viewModeEnabled}
         theme="light"
@@ -162,7 +147,7 @@ interface ResourceResponse {
 export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
   const { t } = useTranslation();
   const { isStaff: isTeacher, isLoading: isPermissionsLoading } = useUserRole();
-  const [excalidrawAPI, setExcalidrawAPI] = useState<ExcalidrawAPI | null>(null);
+  const [excalidrawAPI, setExcalidrawAPI] = useState<ExcalidrawImperativeAPI | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isHelpersLoading, setIsHelpersLoading] = useState(false);
 
@@ -381,7 +366,7 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
           </div>
           <div className="flex-1 relative min-h-125">
             <MemoizedExcalidraw
-              onApi={(api) => setExcalidrawAPI(api as ExcalidrawAPI)}
+              onApi={(api) => setExcalidrawAPI(api)}
               onChange={onChange}
               viewModeEnabled={isLocked && !isTeacher}
             />

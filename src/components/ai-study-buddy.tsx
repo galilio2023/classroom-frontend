@@ -13,6 +13,7 @@ import { AI_API } from "@/constants/api";
 import { useTranslation } from "react-i18next";
 import { useAiAccess } from "@/hooks/use-ai-access";
 import { AiFeatureGuard } from "./ai/AiFeatureGuard";
+import { ChatSource } from "@/types/ai";
 
 interface AIStudyBuddyProps {
   subject?: string;
@@ -79,7 +80,7 @@ const AIStudyBuddyContent = ({ subject, topic, assignment, classId }: AIStudyBud
                     message={{
                       role: "model",
                       parts: [{ text: streamingMessage }],
-                      sources: (streamingSources as any) || undefined,
+                      sources: (streamingSources as ChatSource[]) || undefined,
                     }}
                   />
                 )}
