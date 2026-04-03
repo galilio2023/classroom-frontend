@@ -1148,6 +1148,9 @@
     "teacher-applications": {
       "label": "Teacher Apps"
     },
+    "meetings": {
+      "label": "Meetings"
+    },
     "resources": {
       "label": "Lessons"
     },
