@@ -25,6 +25,21 @@ const ExcalidrawLib = lazy(async () => {
 });
 
 /**
+ * 🛡️ TYPE SAFETY: Strictly typed interface to satisfy Rule #2
+ */
+interface ExcalidrawAPI {
+  updateScene: (data: {
+    elements?: readonly ExcalidrawElement[];
+    appState?: Partial<AppState>;
+    collaborators?: Map<SocketId, Collaborator>;
+    commitToHistory?: boolean;
+  }) => void;
+  getSceneElements: () => readonly ExcalidrawElement[];
+  getAppState: () => AppState;
+  getFiles: () => BinaryFiles;
+}
+
+/**
  * 🚀 PERFORMANCE: Memoized Excalidraw wrapper to prevent heavy re-renders
  * when unrelated parent states (isSaving, isDirty, etc.) change.
  */
@@ -34,8 +49,8 @@ const MemoizedExcalidraw = memo(
     onChange,
     viewModeEnabled,
   }: {
-    onApi: (api: any) => void;
-    onChange: (elements: readonly any[], appState: any) => void;
+    onApi: (api: ExcalidrawAPI) => void;
+    onChange: (elements: readonly ExcalidrawElement[], appState: AppState) => void;
     viewModeEnabled: boolean;
   }) => (
     <Suspense
@@ -46,7 +61,7 @@ const MemoizedExcalidraw = memo(
       }
     >
       <ExcalidrawLib
-        excalidrawAPI={onApi}
+        excalidrawAPI={onApi as any} // Cast to any only at the boundary if library types slightly mismatch
         onChange={onChange}
         viewModeEnabled={viewModeEnabled}
         theme="light"
@@ -65,21 +80,6 @@ const MemoizedExcalidraw = memo(
     prev.onChange === next.onChange &&
     prev.onApi === next.onApi
 );
-
-/**
- * 🛡️ TYPE SAFETY: Strictly typed interface to satisfy Rule #2
- */
-interface ExcalidrawAPI {
-  updateScene: (data: {
-    elements?: readonly ExcalidrawElement[];
-    appState?: Partial<AppState>;
-    collaborators?: Map<SocketId, Collaborator>;
-    commitToHistory?: boolean;
-  }) => void;
-  getSceneElements: () => readonly ExcalidrawElement[];
-  getAppState: () => AppState;
-  getFiles: () => BinaryFiles;
-}
 
 interface WhiteboardProps {
   classId?: string; // Optional: context for saving resources

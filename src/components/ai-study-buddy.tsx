@@ -10,10 +10,9 @@ import { ChatEmptyState } from "./ai/chat-empty-state";
 import { ChatInput } from "./ai/chat-input";
 import { cn } from "@/lib/utils";
 import { AI_API } from "@/constants/api";
-import { useCan } from "@refinedev/core";
 import { useTranslation } from "react-i18next";
-import { AIFeatureDisabled } from "./ai/ai-feature-disabled";
 import { useAiAccess } from "@/hooks/use-ai-access";
+import { AiFeatureGuard } from "./ai/AiFeatureGuard";
 
 interface AIStudyBuddyProps {
   subject?: string;
@@ -22,20 +21,10 @@ interface AIStudyBuddyProps {
   classId?: string | number;
 }
 
-export const AIStudyBuddy = ({ subject, topic, assignment, classId }: AIStudyBuddyProps) => {
+const AIStudyBuddyContent = ({ subject, topic, assignment, classId }: AIStudyBuddyProps) => {
   const { t } = useTranslation();
-  const { isAiEnabled, isAllowed, isLoading: isAccessLoading } = useAiAccess();
+  const { isAllowed } = useAiAccess();
   const [isOpen, setIsOpen] = useState(false);
-
-  // 🛡️ RBAC: Centralized access control via Refine patterns (Extra layer)
-  const { data: canAccessAI, isLoading: isCanLoading } = useCan({
-    resource: "ai_features",
-    action: "interact",
-    params: { classId },
-    queryOptions: {
-      enabled: !!classId && isAllowed,
-    },
-  });
 
   const {
     messages,
@@ -52,67 +41,9 @@ export const AIStudyBuddy = ({ subject, topic, assignment, classId }: AIStudyBud
     context: { subject, topic, assignment },
   });
 
-  // 🛡️ Global Master Switch: Graceful Degradation
-  // 🛡️ CONTEXT GUARD: Hide if no classId is provided
   // 🛡️ PARENT GATING: AI interactive features are disabled for Parents
-  if (!classId || !isAllowed) {
+  if (!isAllowed) {
     return null;
-  }
-
-  // 🛡️ LOADING STATE: Show disabled button to prevent layout flicker
-  if (isAccessLoading || isCanLoading) {
-    return (
-      <div className="fixed bottom-[5rem] md:bottom-6 end-4 md:end-6 z-50">
-        <Button
-          size="lg"
-          disabled
-          className="rounded-[1.5rem] md:rounded-4xl h-14 w-14 md:h-16 md:w-16 opacity-20 grayscale bg-ai-primary border-none text-white p-0"
-        >
-          <Loader2 className="h-6 w-6 md:h-7 md:w-7 animate-spin" />
-        </Button>
-      </div>
-    );
-  }
-
-  if (canAccessAI?.can === false) {
-    return null;
-  }
-
-  if (!isAiEnabled) {
-    if (!isOpen)
-      return (
-        <div className="fixed bottom-[5rem] md:bottom-6 end-4 md:end-6 z-50">
-          <Button
-            size="lg"
-            disabled
-            className="rounded-[1.5rem] md:rounded-4xl h-14 w-14 md:h-16 md:w-16 opacity-50 grayscale transition-all duration-500 bg-ai-primary border-none text-white p-0"
-          >
-            <MessageCircle className="h-6 w-6 md:h-7 md:w-7" />
-          </Button>
-        </div>
-      );
-
-    return (
-      <div className="fixed inset-0 md:inset-auto md:bottom-6 md:end-6 md:w-[400px] z-50 animate-[zoom-in_0.3s_ease-out]">
-        <Card className="shadow-2xl flex flex-col ai-gradient-border overflow-hidden rounded-none md:rounded-2xl bg-card/90 backdrop-blur-3xl p-0">
-          <div className="p-8">
-            <AIFeatureDisabled
-              title="AI Buddy Maintenance"
-              description="Our AI Study Buddy is currently undergoing scheduled maintenance. Please try again later."
-            />
-            <div className="mt-6 flex justify-center">
-              <Button
-                variant="outline"
-                onClick={() => setIsOpen(false)}
-                className="rounded-xl font-bold"
-              >
-                {t("buttons.close")}
-              </Button>
-            </div>
-          </div>
-        </Card>
-      </div>
-    );
   }
 
   return (
@@ -148,7 +79,7 @@ export const AIStudyBuddy = ({ subject, topic, assignment, classId }: AIStudyBud
                     message={{
                       role: "model",
                       parts: [{ text: streamingMessage }],
-                      sources: streamingSources || undefined,
+                      sources: (streamingSources as any) || undefined,
                     }}
                   />
                 )}
@@ -189,5 +120,15 @@ export const AIStudyBuddy = ({ subject, topic, assignment, classId }: AIStudyBud
         </Button>
       )}
     </div>
+  );
+};
+
+export const AIStudyBuddy = (props: AIStudyBuddyProps) => {
+  if (!props.classId) return null;
+
+  return (
+    <AiFeatureGuard silent skeletonClassName="fixed bottom-6 end-6 h-16 w-16 rounded-full">
+      <AIStudyBuddyContent {...props} />
+    </AiFeatureGuard>
   );
 };

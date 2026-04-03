@@ -1,4 +1,5 @@
 export interface ChatSource {
+  id?: number;
   title: string;
   url: string;
   type: string;

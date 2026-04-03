@@ -19,6 +19,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { format } from "date-fns";
 import { MeetingRequestWizard } from "../components/meeting-request-wizard";
+import { MarkdownRenderer } from "@/components/ui/markdown-renderer";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -181,9 +182,10 @@ const MeetingListPage = () => {
                                 </Badge>
                               )}
                             </div>
-                            <p className="text-sm font-medium leading-relaxed whitespace-pre-line">
-                              {meeting.agenda || meeting.aiSuggestedAgenda}
-                            </p>
+                            <MarkdownRenderer
+                              content={meeting.agenda || meeting.aiSuggestedAgenda}
+                              className="text-sm font-medium leading-relaxed"
+                            />
                           </div>
                         )}
 

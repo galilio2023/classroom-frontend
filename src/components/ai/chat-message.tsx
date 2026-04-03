@@ -14,16 +14,11 @@ import { MarkdownRenderer } from "@/components/ui/markdown-renderer";
 import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useCustomMutation } from "@refinedev/core";
+import { useNavigation, useCustomMutation } from "@refinedev/core";
 import { motion, AnimatePresence } from "framer-motion";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-
-interface Message {
-  role: "user" | "model";
-  parts: { text: string }[];
-  sources?: any[];
-}
+import { type Message, type ChatSource } from "@/types/ai";
 
 interface ChatMessageProps {
   message: Message;
@@ -33,12 +28,22 @@ interface ChatMessageProps {
 export const ChatMessage = React.memo(
   ({ message, isLast: _isLast }: ChatMessageProps) => {
     const { t, i18n } = useTranslation();
+    const { showUrl } = useNavigation();
     const isAr = i18n.language === "ar";
     const isModel = message.role === "model";
     const fullText = message.parts[0].text;
     const [feedbackSent, setFeedbackSent] = useState<"pos" | "neg" | null>(null);
 
     const { mutate: sendFeedback } = useCustomMutation();
+
+    // 🚀 PERFORMANCE: Memoize source deduplication to avoid expensive recalculations on every stream update
+    const uniqueSources = React.useMemo(() => {
+      if (!message.sources || message.sources.length === 0) return [];
+      // Use url or id as key for deduplication
+      return Array.from(
+        new Map(message.sources.map((s) => [s.id || s.url || s.title, s])).values()
+      );
+    }, [message.sources]);
 
     const handleFeedback = (isPositive: boolean) => {
       setFeedbackSent(isPositive ? "pos" : "neg");
@@ -153,42 +158,40 @@ export const ChatMessage = React.memo(
             )}
 
             {/* Citation Chips */}
-            {message.sources && message.sources.length > 0 && (
+            {uniqueSources.length > 0 && (
               <div className="mt-4 pt-4 border-t border-border/40 flex flex-wrap gap-2">
                 <span className="text-[9px] md:text-[10px] uppercase font-black tracking-widest text-muted-foreground w-full mb-1">
                   {t("aiHub.studyLab.studyBuddy.sources")}:
                 </span>
-                {Array.from(new Map(message.sources.map((s) => [s.id, s])).values()).map(
-                  (source: any, idx) => (
-                    <div key={source.id || idx} className="flex items-center gap-1">
-                      <Badge
-                        variant="secondary"
-                        className="text-[9px] md:text-[10px] h-7 px-3 gap-2 bg-primary/5 hover:bg-primary/10 border border-primary/10 text-primary font-bold transition-all"
-                      >
-                        <FileText className="h-3 w-3 shrink-0" />
-                        <span className="truncate max-w-[120px]">
-                          {source.title || `Source #${idx + 1}`}
-                        </span>
-                        {source.id && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            asChild
-                            className="h-4 w-4 p-0 hover:bg-transparent hover:text-primary/70"
+                {uniqueSources.map((source: ChatSource, idx) => (
+                  <div key={source.id || idx} className="flex items-center gap-1">
+                    <Badge
+                      variant="secondary"
+                      className="text-[9px] md:text-[10px] h-7 px-3 gap-2 bg-primary/5 hover:bg-primary/10 border border-primary/10 text-primary font-bold transition-all"
+                    >
+                      <FileText className="h-3 w-3 shrink-0" />
+                      <span className="truncate max-w-[120px]">
+                        {source.title || `Source #${idx + 1}`}
+                      </span>
+                      {source.id && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          asChild
+                          className="h-4 w-4 p-0 hover:bg-transparent hover:text-primary/70"
+                        >
+                          <a
+                            href={showUrl("resources", source.id)}
+                            target="_blank"
+                            rel="noopener noreferrer"
                           >
-                            <a
-                              href={`/resources/show/${source.id}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              <ExternalLink className="h-2.5 w-2.5" />
-                            </a>
-                          </Button>
-                        )}
-                      </Badge>
-                    </div>
-                  )
-                )}
+                            <ExternalLink className="h-2.5 w-2.5" />
+                          </a>
+                        </Button>
+                      )}
+                    </Badge>
+                  </div>
+                ))}
               </div>
             )}
           </div>

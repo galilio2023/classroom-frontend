@@ -26,7 +26,15 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
-import { ArrowLeft, ArrowRight, BookOpen, CheckCircle2, Loader2, Sparkles, Zap } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  BookOpen,
+  CheckCircle2,
+  Loader2,
+  Sparkles,
+  Zap,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import axios from "axios";
 import { RoleSelector } from "@/components/auth/role-selector";
@@ -574,7 +582,7 @@ const RegisterPage = () => {
                             <ArrowRight
                               className={cn(
                                 "h-4 w-4 ms-2 group-hover:translate-x-1 transition-transform",
-                                isAr && "me-2 ms-0 rotate-180 group-hover:-translate-x-1",
+                                isAr && "me-2 ms-0 rotate-180 group-hover:-translate-x-1"
                               )}
                             />
                           </Button>
@@ -597,7 +605,7 @@ const RegisterPage = () => {
                                 <Zap
                                   className={cn(
                                     "h-5 w-5 fill-current group-hover:scale-125 transition-transform",
-                                    isAr && "rotate-180",
+                                    isAr && "rotate-180"
                                   )}
                                 />
                               </div>

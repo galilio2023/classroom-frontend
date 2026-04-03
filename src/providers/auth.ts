@@ -117,7 +117,7 @@ export const authProvider: AuthProvider = {
         lastFetchTime = Date.now();
         const sessionToken = (loginData as any).token;
         if (sessionToken) syncToken(sessionToken);
-        
+
         return { success: true, redirectTo: "/dashboard" };
       }
 
