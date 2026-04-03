@@ -15,6 +15,7 @@ import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useNavigation, useCustomMutation } from "@refinedev/core";
+import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
@@ -180,16 +181,11 @@ export const ChatMessage = React.memo(
                           asChild
                           className="h-4 w-4 p-0 hover:bg-transparent hover:text-primary/70"
                         >
-                          <a
-                            href={showUrl("resources", source.id)}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
+                          <Link to={showUrl("resources", source.id)}>
                             <ExternalLink className="h-2.5 w-2.5" />
-                          </a>
+                          </Link>
                         </Button>
-                      )}
-                    </Badge>
+                      )}                    </Badge>
                   </div>
                 ))}
               </div>
@@ -204,7 +200,8 @@ export const ChatMessage = React.memo(
   },
   (prev, next) => {
     // 🚀 PERFORMANCE: Avoid re-rendering old messages during active streaming.
-    // We only re-render if the content of this specific message changes.
+    // 💡 ASSUMPTION: LLM sources/metadata are static once received for a specific message role/text.
+    // Checking .length is sufficient since sources aren't updated dynamically after generation.
     return (
       prev.message.role === next.message.role &&
       prev.message.parts[0].text === next.message.parts[0].text &&
