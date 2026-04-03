@@ -78,6 +78,8 @@ export const ClassCard = React.memo(
     );
     const firstSchedule = classItem.schedules?.[0];
 
+    const { prefetchClass } = usePrefetch();
+
     return (
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -86,6 +88,7 @@ export const ClassCard = React.memo(
         transition={{ delay: index * 0.05 }}
         className="group relative flex flex-col h-full p-6 md:p-8 rounded-[2.5rem] bg-card/50 backdrop-blur-3xl border border-border/40 hover:border-primary/30 hover:bg-card/80 transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-primary/5 cursor-pointer"
         onClick={() => onShow(classItem.id as number)}
+        onMouseEnter={() => prefetchClass(classItem.id as number)}
       >
         <div
           className="absolute start-0 top-1/2 -translate-y-1/2 w-1.5 h-16 rounded-e-full transition-all group-hover:h-24"

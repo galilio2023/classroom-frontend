@@ -181,11 +181,18 @@ export const ChatMessage = React.memo(
                           asChild
                           className="h-4 w-4 p-0 hover:bg-transparent hover:text-primary/70"
                         >
-                          <Link to={showUrl("resources", source.id)}>
-                            <ExternalLink className="h-2.5 w-2.5" />
-                          </Link>
+                          {source.url?.startsWith("http") ? (
+                            <a href={source.url} target="_blank" rel="noopener noreferrer">
+                              <ExternalLink className="h-2.5 w-2.5" />
+                            </a>
+                          ) : (
+                            <Link to={showUrl("resources", source.id)}>
+                              <ExternalLink className="h-2.5 w-2.5" />
+                            </Link>
+                          )}
                         </Button>
-                      )}                    </Badge>
+                      )}{" "}
+                    </Badge>
                   </div>
                 ))}
               </div>
