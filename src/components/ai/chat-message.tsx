@@ -74,7 +74,7 @@ export const ChatMessage = React.memo(
         if (["http:", "https:"].includes(parsed.protocol)) {
           return parsed.toString();
         }
-      } catch (e) {
+      } catch (_e) {
         // Fallback for relative or malformed URLs
         if (url.startsWith("/") && !url.startsWith("//")) return url;
       }
@@ -211,9 +211,23 @@ export const ChatMessage = React.memo(
                                         <ExternalLink className="h-2.5 w-2.5" />
                                       </a>
                                     ) : (
-                                      <span className="cursor-not-allowed opacity-50">
-                                        <ExternalLink className="h-2.5 w-2.5" />
-                                      </span>
+                                      <TooltipProvider>
+                                        <Tooltip>
+                                          <TooltipTrigger asChild>
+                                            <span className="cursor-not-allowed opacity-50">
+                                              <ExternalLink className="h-2.5 w-2.5" />
+                                            </span>
+                                          </TooltipTrigger>
+                                          <TooltipContent
+                                            side="top"
+                                            className="text-[10px] font-bold bg-destructive text-destructive-foreground"
+                                          >
+                                            {t("aiHub.studyLab.studyBuddy.unsafeLink", {
+                                              defaultValue: "Unsafe or malformed link",
+                                            })}
+                                          </TooltipContent>
+                                        </Tooltip>
+                                      </TooltipProvider>
                                     );
                                   })()
                                 ) : (

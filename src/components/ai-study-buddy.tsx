@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Sparkles, MessageCircle, Loader2 } from "lucide-react";
+import { Sparkles, MessageCircle } from "lucide-react";
 import { ChatMessage } from "./ai/chat-message";
 import { useAIChat } from "@/hooks/use-ai-chat";
 import { ChatHeader } from "./ai/chat-header";
@@ -10,10 +10,7 @@ import { ChatEmptyState } from "./ai/chat-empty-state";
 import { ChatInput } from "./ai/chat-input";
 import { cn } from "@/lib/utils";
 import { AI_API } from "@/constants/api";
-import { useTranslation } from "react-i18next";
-import { useAiAccess } from "@/hooks/use-ai-access";
 import { AiFeatureGuard } from "./ai/AiFeatureGuard";
-import { ChatSource } from "@/types/ai";
 import { ErrorBoundary } from "./error-boundary";
 
 interface AIStudyBuddyProps {
@@ -24,7 +21,6 @@ interface AIStudyBuddyProps {
 }
 
 const AIStudyBuddyContent = ({ subject, topic, assignment, classId }: AIStudyBuddyProps) => {
-  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
 
   const {
@@ -120,6 +116,8 @@ const AIStudyBuddyContent = ({ subject, topic, assignment, classId }: AIStudyBud
 };
 
 export const AIStudyBuddy = (props: AIStudyBuddyProps) => {
+  if (!props.classId) return null;
+
   return (
     <AiFeatureGuard
       silent
@@ -127,11 +125,9 @@ export const AIStudyBuddy = (props: AIStudyBuddyProps) => {
     >
       {/* 🛡️ SECURITY: Only mount the chat interface if classId is provided. 
           The guard handles global AI availability and RBAC. */}
-      {props.classId ? (
-        <ErrorBoundary>
-          <AIStudyBuddyContent {...props} />
-        </ErrorBoundary>
-      ) : null}
+      <ErrorBoundary>
+        <AIStudyBuddyContent {...props} />
+      </ErrorBoundary>
     </AiFeatureGuard>
   );
 };
