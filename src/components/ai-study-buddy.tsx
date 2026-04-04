@@ -14,6 +14,7 @@ import { useTranslation } from "react-i18next";
 import { useAiAccess } from "@/hooks/use-ai-access";
 import { AiFeatureGuard } from "./ai/AiFeatureGuard";
 import { ChatSource } from "@/types/ai";
+import { ErrorBoundary } from "./error-boundary";
 
 interface AIStudyBuddyProps {
   subject?: string;
@@ -122,11 +123,15 @@ export const AIStudyBuddy = (props: AIStudyBuddyProps) => {
   return (
     <AiFeatureGuard
       silent
-      skeletonClassName="fixed bottom-[5rem] md:bottom-6 end-4 md:end-6 h-14 w-14 md:h-16 md:w-16 rounded-3xl md:rounded-4xl"
+      skeletonClassName="fixed bottom-[10rem] md:bottom-28 end-4 md:end-6 h-14 w-14 md:h-16 md:w-16 rounded-3xl md:rounded-4xl"
     >
       {/* 🛡️ SECURITY: Only mount the chat interface if classId is provided. 
           The guard handles global AI availability and RBAC. */}
-      {props.classId ? <AIStudyBuddyContent {...props} /> : null}
+      {props.classId ? (
+        <ErrorBoundary>
+          <AIStudyBuddyContent {...props} />
+        </ErrorBoundary>
+      ) : null}
     </AiFeatureGuard>
   );
 };
