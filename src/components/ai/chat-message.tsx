@@ -250,11 +250,11 @@ export const ChatMessage = React.memo(
   },
   (prev, next) => {
     // 🚀 PERFORMANCE: Avoid re-rendering old messages during active streaming.
-    // 💡 ASSUMPTION: LLM sources/metadata are static once received for a specific message role/text.
-    // Checking .length is sufficient since sources aren't updated dynamically after generation.
+    // 🛡️ ROBUSTNESS: Compare all message parts to handle potential multi-part evolution.
     return (
       prev.message.role === next.message.role &&
-      prev.message.parts[0].text === next.message.parts[0].text &&
+      prev.message.parts.length === next.message.parts.length &&
+      prev.message.parts.every((p, i) => p.text === next.message.parts[i].text) &&
       prev.message.sources?.length === next.message.sources?.length &&
       prev.isLast === next.isLast
     );

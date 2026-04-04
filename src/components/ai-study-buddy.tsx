@@ -48,7 +48,7 @@ const AIStudyBuddyContent = ({ subject, topic, assignment, classId }: AIStudyBud
         "fixed z-50 transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)]",
         isOpen
           ? "inset-0 md:inset-auto md:bottom-6 md:end-6 md:w-auto"
-          : "bottom-[5rem] md:bottom-6 end-4 md:end-6"
+          : "bottom-28 md:bottom-32 end-4 md:end-6"
       )}
     >
       {isOpen ? (
@@ -123,7 +123,7 @@ export const AIStudyBuddy = (props: AIStudyBuddyProps) => {
   return (
     <AiFeatureGuard
       silent
-      skeletonClassName="fixed bottom-[10rem] md:bottom-28 end-4 md:end-6 h-14 w-14 md:h-16 md:w-16 rounded-3xl md:rounded-4xl"
+      skeletonClassName="fixed bottom-28 md:bottom-32 end-4 md:end-6 h-14 w-14 md:h-16 md:w-16 rounded-3xl md:rounded-4xl"
     >
       {/* 🛡️ SECURITY: Only mount the chat interface if classId is provided. 
           The guard handles global AI availability and RBAC. */}
