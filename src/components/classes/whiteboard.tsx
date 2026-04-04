@@ -169,6 +169,13 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
     setExcalidrawAPI(api);
   }, []);
 
+  // 🛡️ LIFECYCLE: Clear API reference on unmount to prevent stale imperative calls
+  useEffect(() => {
+    return () => {
+      setExcalidrawAPI(null);
+    };
+  }, []);
+
   const {
     isLocked,
     isRemotePending,

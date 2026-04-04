@@ -14,7 +14,7 @@ import { MarkdownRenderer } from "@/components/ui/markdown-renderer";
 import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useNavigation, useCustomMutation } from "@refinedev/core";
+import { useNavigation, useCustomMutation, CanAccess } from "@refinedev/core";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -65,6 +65,20 @@ export const ChatMessage = React.memo(
           },
         },
       });
+    };
+
+    // 🛡️ SECURITY: Stricter URL sanitization for external links
+    const getSafeUrl = (url: string) => {
+      try {
+        const parsed = new URL(url.startsWith("//") ? `https:${url}` : url);
+        if (["http:", "https:"].includes(parsed.protocol)) {
+          return parsed.toString();
+        }
+      } catch (e) {
+        // Fallback for relative or malformed URLs
+        if (url.startsWith("/") && !url.startsWith("//")) return url;
+      }
+      return null;
     };
 
     return (
@@ -190,13 +204,28 @@ export const ChatMessage = React.memo(
                               >
                                 {source.url &&
                                 (source.url.startsWith("http") || source.url.startsWith("//")) ? (
-                                  <a href={source.url} target="_blank" rel="noopener noreferrer">
-                                    <ExternalLink className="h-2.5 w-2.5" />
-                                  </a>
+                                  (() => {
+                                    const safeUrl = getSafeUrl(source.url);
+                                    return safeUrl ? (
+                                      <a href={safeUrl} target="_blank" rel="noopener noreferrer">
+                                        <ExternalLink className="h-2.5 w-2.5" />
+                                      </a>
+                                    ) : (
+                                      <span className="cursor-not-allowed opacity-50">
+                                        <ExternalLink className="h-2.5 w-2.5" />
+                                      </span>
+                                    );
+                                  })()
                                 ) : (
-                                  <Link to={showUrl("resources", source.id)}>
-                                    <ExternalLink className="h-2.5 w-2.5" />
-                                  </Link>
+                                  <CanAccess
+                                    resource="resources"
+                                    action="show"
+                                    params={{ id: source.id }}
+                                  >
+                                    <Link to={showUrl("resources", source.id)}>
+                                      <ExternalLink className="h-2.5 w-2.5" />
+                                    </Link>
+                                  </CanAccess>
                                 )}
                               </Button>
                             )}
