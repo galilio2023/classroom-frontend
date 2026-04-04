@@ -1,4 +1,14 @@
-import { Component, ErrorInfo, lazy, memo, ReactNode, Suspense, useEffect, useState } from "react";
+import {
+  Component,
+  ErrorInfo,
+  lazy,
+  memo,
+  ReactNode,
+  Suspense,
+  useEffect,
+  useState,
+  useCallback,
+} from "react";
 import { useCustomMutation } from "@refinedev/core";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -153,6 +163,11 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
 
   // If roomId is not provided, fallback to classId (backward compatibility)
   const activeRoomId = roomId || classId;
+
+  // 🚀 PERFORMANCE: Wrap API setter in useCallback to maintain stable reference for MemoizedExcalidraw
+  const handleApi = useCallback((api: ExcalidrawImperativeAPI) => {
+    setExcalidrawAPI(api);
+  }, []);
 
   const {
     isLocked,
@@ -366,7 +381,7 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
           </div>
           <div className="flex-1 relative min-h-125">
             <MemoizedExcalidraw
-              onApi={(api) => setExcalidrawAPI(api)}
+              onApi={handleApi}
               onChange={onChange}
               viewModeEnabled={isLocked && !isTeacher}
             />

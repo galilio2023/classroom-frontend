@@ -1013,6 +1013,9 @@
     "messages": {
       "label": "الرسائل"
     },
+    "meetings": {
+      "label": "الاجتماعات"
+    },
     "ai-assistant": {
       "label": "مساعد الذكاء الاصطناعي"
     },
@@ -1078,9 +1081,6 @@
     },
     "teacher-applications": {
       "label": "طلبات التدريس"
-    },
-    "meetings": {
-      "label": "الاجتماعات"
     },
     "resources": {
       "label": "المصادر"
