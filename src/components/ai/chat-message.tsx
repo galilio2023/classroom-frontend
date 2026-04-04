@@ -40,10 +40,14 @@ export const ChatMessage = React.memo(
     // 🚀 PERFORMANCE: Memoize source deduplication to avoid expensive recalculations on every stream update
     const uniqueSources = React.useMemo(() => {
       if (!message.sources || message.sources.length === 0) return [];
-      // Use url or id as key for deduplication
-      return Array.from(
-        new Map(message.sources.map((s) => [s.id || s.url || s.title, s])).values()
-      );
+      const seen = new Set<string>();
+      return message.sources.filter((s) => {
+        // 🛡️ SECURITY: Use a composite key to ensure different sources with same title aren't lost
+        const key = s.id ? `id-${s.id}` : s.url ? `url-${s.url}` : `title-${s.title}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
     }, [message.sources]);
 
     const handleFeedback = (isPositive: boolean) => {

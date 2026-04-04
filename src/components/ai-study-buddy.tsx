@@ -119,14 +119,14 @@ const AIStudyBuddyContent = ({ subject, topic, assignment, classId }: AIStudyBud
 };
 
 export const AIStudyBuddy = (props: AIStudyBuddyProps) => {
-  if (!props.classId) return null;
-
   return (
     <AiFeatureGuard
       silent
       skeletonClassName="fixed bottom-[5rem] md:bottom-6 end-4 md:end-6 h-14 w-14 md:h-16 md:w-16 rounded-3xl md:rounded-4xl"
     >
-      <AIStudyBuddyContent {...props} />
+      {/* 🛡️ SECURITY: Only mount the chat interface if classId is provided. 
+          The guard handles global AI availability and RBAC. */}
+      {props.classId ? <AIStudyBuddyContent {...props} /> : null}
     </AiFeatureGuard>
   );
 };

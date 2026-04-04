@@ -46,7 +46,7 @@ export const resources: ResourceProps[] = [
     meta: {
       label: "resources.dashboard.label",
       icon: <Home />,
-      roles: [UserRole.ADMIN, UserRole.TEACHER, UserRole.STUDENT],
+      roles: [UserRole.ADMIN, UserRole.TEACHER, UserRole.STUDENT, UserRole.PARENT],
     },
   },
   {

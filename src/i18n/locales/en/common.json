@@ -75,7 +75,10 @@
     "label": "AI Observability"
   },
   "app": {
-    "title": "Classroom AI"
+    "title": "Classroom AI",
+    "ai": "AI",
+    "studyBuddy": "Study Buddy",
+    "generating": "Generating..."
   },
   "Show": "Show",
   "warnWhenUnsavedChanges": "You have unsaved changes. Are you sure you want to leave?",
