@@ -188,7 +188,8 @@ export const ChatMessage = React.memo(
                                 asChild
                                 className="h-4 w-4 p-0 hover:bg-transparent hover:text-primary/70"
                               >
-                                {source.url && (source.url.startsWith("http") || source.url.startsWith("//")) ? (
+                                {source.url &&
+                                (source.url.startsWith("http") || source.url.startsWith("//")) ? (
                                   <a href={source.url} target="_blank" rel="noopener noreferrer">
                                     <ExternalLink className="h-2.5 w-2.5" />
                                   </a>
