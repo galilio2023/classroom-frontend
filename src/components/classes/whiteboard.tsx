@@ -312,8 +312,7 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
 
   return (
     <AiFeatureGuard>
-      <WhiteboardErrorBoundary t={t}>
-        <div className="flex flex-col h-full border rounded-xl overflow-hidden bg-background">
+      <div className="flex flex-col h-full border rounded-xl overflow-hidden bg-background">
           <div className="flex items-center justify-between p-2 border-b bg-muted/30">
             <div className="flex items-center gap-4">
               <h4 className="text-sm font-semibold px-2">
@@ -380,11 +379,13 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
             </div>
           </div>
           <div className="flex-1 relative min-h-125">
-            <MemoizedExcalidraw
-              onApi={handleApi}
-              onChange={onChange}
-              viewModeEnabled={isLocked && !isTeacher}
-            />
+            <WhiteboardErrorBoundary t={t}>
+              <MemoizedExcalidraw
+                onApi={handleApi}
+                onChange={onChange}
+                viewModeEnabled={isLocked && !isTeacher}
+              />
+            </WhiteboardErrorBoundary>
           </div>
           <ConflictDialog
             isOpen={showConflict}
@@ -396,7 +397,6 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
             }}
           />
         </div>
-      </WhiteboardErrorBoundary>
     </AiFeatureGuard>
   );
 };

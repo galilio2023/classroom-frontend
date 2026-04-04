@@ -170,33 +170,42 @@ export const ChatMessage = React.memo(
                 </span>
                 {uniqueSources.map((source: ChatSource, idx) => (
                   <div key={source.id || idx} className="flex items-center gap-1">
-                    <Badge
-                      variant="secondary"
-                      className="text-[9px] md:text-[10px] h-7 px-3 gap-2 bg-primary/5 hover:bg-primary/10 border border-primary/10 text-primary font-bold transition-all"
-                    >
-                      <FileText className="h-3 w-3 shrink-0" />
-                      <span className="truncate max-w-[120px]">
-                        {source.title || `Source #${idx + 1}`}
-                      </span>
-                      {source.id && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          asChild
-                          className="h-4 w-4 p-0 hover:bg-transparent hover:text-primary/70"
-                        >
-                          {source.url?.startsWith("http") ? (
-                            <a href={source.url} target="_blank" rel="noopener noreferrer">
-                              <ExternalLink className="h-2.5 w-2.5" />
-                            </a>
-                          ) : (
-                            <Link to={showUrl("resources", source.id)}>
-                              <ExternalLink className="h-2.5 w-2.5" />
-                            </Link>
-                          )}
-                        </Button>
-                      )}{" "}
-                    </Badge>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Badge
+                            variant="secondary"
+                            className="text-[9px] md:text-[10px] h-7 px-3 gap-2 bg-primary/5 hover:bg-primary/10 border border-primary/10 text-primary font-bold transition-all cursor-default"
+                          >
+                            <FileText className="h-3 w-3 shrink-0" />
+                            <span className="truncate max-w-[120px]">
+                              {source.title || `Source #${idx + 1}`}
+                            </span>
+                            {source.id && (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                asChild
+                                className="h-4 w-4 p-0 hover:bg-transparent hover:text-primary/70"
+                              >
+                                {source.url && (source.url.startsWith("http") || source.url.startsWith("//")) ? (
+                                  <a href={source.url} target="_blank" rel="noopener noreferrer">
+                                    <ExternalLink className="h-2.5 w-2.5" />
+                                  </a>
+                                ) : (
+                                  <Link to={showUrl("resources", source.id)}>
+                                    <ExternalLink className="h-2.5 w-2.5" />
+                                  </Link>
+                                )}
+                              </Button>
+                            )}
+                          </Badge>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" className="text-[10px] font-bold">
+                          {source.title || `Source #${idx + 1}`}
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   </div>
                 ))}
               </div>
