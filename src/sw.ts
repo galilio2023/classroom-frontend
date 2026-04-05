@@ -45,8 +45,13 @@ self.addEventListener("fetch", (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // 1. Skip non-GET requests and API calls
-  if (request.method !== "GET" || url.pathname.startsWith("/api")) {
+  // 1. Skip non-GET requests, API calls, and non-http/https schemes (e.g., chrome-extension://)
+  // Fixes: TypeError: Failed to execute 'put' on 'Cache': Request scheme 'chrome-extension' is unsupported
+  if (
+    request.method !== "GET" ||
+    url.pathname.startsWith("/api") ||
+    !["http:", "https:"].includes(url.protocol)
+  ) {
     return;
   }
 

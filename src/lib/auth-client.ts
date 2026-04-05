@@ -10,8 +10,10 @@ import { bearer } from "better-auth/plugins";
  * as the baseURL, and set basePath to an empty string.
  */
 export const authClient = createAuthClient({
+  // Better Auth expects the API root for its internal routing
   baseURL: BETTER_AUTH_ROOT,
-  // We provide the full path in baseURL, so we clear the default /api/auth path
+  // Since we provide the exact path (e.g., .../api/auth) in baseURL, 
+  // we must clear basePath to prevent it from appending '/api/auth' again.
   basePath: "",
   fetchOptions: {
     credentials: "include",
