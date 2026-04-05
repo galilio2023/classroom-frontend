@@ -27,13 +27,15 @@ import {
 export default function AnnouncementCreate() {
   const t = useTranslate();
   const { list } = useNavigation();
-  const { mutate: create, isLoading } = useCreate();
+  const { mutate: create, mutation } = useCreate();
+  const isLoading = mutation.isPending;
 
   // Fetch classes for the dropdown
-  const { data: classesData, isLoading: isClassesLoading } = useList({
+  const { query: classesQuery } = useList({
     resource: "classes",
   });
-  const classes = classesData?.data || [];
+  const classes = classesQuery.data?.data || [];
+  const isClassesLoading = classesQuery.isLoading;
 
   const form = useForm({
     defaultValues: {

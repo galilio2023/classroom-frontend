@@ -13,11 +13,12 @@ export default function BadgesList() {
   const { create } = useNavigation();
   const { isStaff: isTeacher, isAdmin } = useUserRole();
 
-  const { data, isLoading } = useList({
+  const { query } = useList({
     resource: "badges",
     sorters: [{ field: "createdAt", order: "desc" }],
   });
 
+  const { data, isLoading } = query;
   const badges = data?.data || [];
 
   if (isLoading) {

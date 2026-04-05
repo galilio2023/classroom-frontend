@@ -8,7 +8,7 @@ import { User, UserRole } from "@/types";
  */
 export const accessControlProvider: AccessControlProvider = {
   can: async ({ resource, action, params }) => {
-    const user = await authProvider.getIdentity?.<User>();
+    const user = (await authProvider.getIdentity?.()) as User | null;
     if (!user) return { can: false };
 
     const role = user.role;

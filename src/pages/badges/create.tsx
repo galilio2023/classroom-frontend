@@ -26,7 +26,8 @@ import {
 export default function BadgeCreate() {
   const t = useTranslate();
   const { list } = useNavigation();
-  const { mutate: create, isLoading } = useCreate();
+  const { mutate: create, mutation } = useCreate();
+  const isLoading = mutation.isPending;
 
   const form = useForm({
     defaultValues: {

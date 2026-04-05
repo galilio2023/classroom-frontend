@@ -13,7 +13,7 @@ export default function AnnouncementsList() {
   const { mutate: deleteAnnouncement } = useDelete();
   const { isStaff: isTeacher } = useUserRole();
 
-  const { data, isLoading } = useList({
+  const { query } = useList({
     resource: "announcements",
     sorters: [
       { field: "isPinned", order: "desc" },
@@ -21,6 +21,7 @@ export default function AnnouncementsList() {
     ],
   });
 
+  const { data, isLoading } = query;
   const announcements = data?.data || [];
 
   if (isLoading) {

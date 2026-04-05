@@ -66,7 +66,12 @@ export const ChatSourceBadge = ({ source, index }: ChatSourceBadgeProps) => {
                       );
                     })()
                   ) : (
-                    <CanAccess resource="resources" action="show" params={{ id: source.id }}>
+                    <CanAccess
+                      resource="resources"
+                      action="show"
+                      params={{ id: source.id }}
+                      fallback={null}
+                    >
                       <Link to={showUrl("resources", source.id)}>
                         <ExternalLink className="h-2.5 w-2.5" />
                       </Link>
