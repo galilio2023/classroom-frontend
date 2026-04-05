@@ -21,107 +21,112 @@ import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { usePersistentLive } from "@/hooks/use-persistent-live";
 
-const TeacherCard = ({
-  channel,
-  onShow,
-}: {
-  channel: TeacherChannel & { teacher: User };
-  onShow: (id: string) => void;
-}) => {
-  const [isHovered, setIsHovered] = useState(false);
-  const { t } = useTranslation();
+const TeacherCard = React.memo(
+  ({
+    channel,
+    onShow,
+  }: {
+    channel: TeacherChannel & { teacher: User };
+    onShow: (id: string) => void;
+  }) => {
+    const [isHovered, setIsHovered] = useState(false);
+    const { t } = useTranslation();
 
-  return (
-    <motion.div
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -8 }}
-      className="group relative aspect-[4/5.5] rounded-[2.5rem] md:rounded-[3.5rem] overflow-hidden border border-border/40 bg-black shadow-2xl transition-all duration-500"
-    >
-      <AnimatePresence mode="wait">
-        {isHovered && channel.trailerVideoUrl ? (
-          <motion.video
-            key="video"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            src={channel.trailerVideoUrl}
-            autoPlay
-            muted
-            loop
-            playsInline
-            className="absolute inset-0 w-full h-full object-cover scale-105"
-          />
-        ) : (
-          <motion.img
-            key="image"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            src={
-              channel.thumbnailUrl ||
-              channel.teacher.image ||
-              "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&q=80&w=1000"
-            }
-            className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 opacity-60 group-hover:opacity-100"
-            alt={channel.teacher.name}
-          />
-        )}
-      </AnimatePresence>
+    return (
+      <motion.div
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        whileHover={{ y: -8 }}
+        className="group relative aspect-[4/5.5] rounded-[2.5rem] md:rounded-[3.5rem] overflow-hidden border border-border/40 bg-black shadow-2xl transition-all duration-500"
+      >
+        <AnimatePresence mode="wait">
+          {isHovered && channel.trailerVideoUrl ? (
+            <motion.video
+              key="video"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              src={channel.trailerVideoUrl}
+              autoPlay
+              muted
+              loop
+              playsInline
+              className="absolute inset-0 w-full h-full object-cover scale-105"
+            />
+          ) : (
+            <motion.img
+              key="image"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              src={
+                channel.thumbnailUrl ||
+                channel.teacher.image ||
+                "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&q=80&w=1000"
+              }
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 opacity-60 group-hover:opacity-100"
+              alt={channel.teacher.name}
+              loading="lazy"
+            />
+          )}
+        </AnimatePresence>
 
-      {/* Modern Overlay */}
-      <div className="absolute inset-0 bg-linear-to-t from-black via-black/20 to-transparent opacity-90 transition-opacity duration-500" />
+        {/* Modern Overlay */}
+        <div className="absolute inset-0 bg-linear-to-t from-black via-black/20 to-transparent opacity-90 transition-opacity duration-500" />
 
-      {/* Content */}
-      <div className="absolute inset-x-0 bottom-0 p-8 md:p-10 space-y-6 z-10">
-        <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <Badge className="bg-primary/20 backdrop-blur-md text-white border-primary/20 rounded-full px-4 py-1 font-black uppercase tracking-widest text-[10px] md:text-[11px]">
-              Top Rated
-            </Badge>
-            {channel.totalViews > 1000 && (
-              <Badge
-                variant="secondary"
-                className="bg-white/10 text-white border-none backdrop-blur-md rounded-full px-4 py-1 font-black uppercase tracking-widest text-[10px] md:text-[11px]"
-              >
-                Trending
+        {/* Content */}
+        <div className="absolute inset-x-0 bottom-0 p-8 md:p-10 space-y-6 z-10">
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <Badge className="bg-primary/20 backdrop-blur-md text-white border-primary/20 rounded-full px-4 py-1 font-black uppercase tracking-widest text-[10px] md:text-[11px]">
+                Top Rated
               </Badge>
-            )}
+              {channel.totalViews > 1000 && (
+                <Badge
+                  variant="secondary"
+                  className="bg-white/10 text-white border-none backdrop-blur-md rounded-full px-4 py-1 font-black uppercase tracking-widest text-[10px] md:text-[11px]"
+                >
+                  Trending
+                </Badge>
+              )}
+            </div>
+            <h3 className="text-2xl md:text-3xl font-black text-white tracking-tighter leading-[0.9] uppercase text-start">
+              {channel.headline || channel.teacher.name}
+            </h3>
           </div>
-          <h3 className="text-2xl md:text-3xl font-black text-white tracking-tighter leading-[0.9] uppercase text-start">
-            {channel.headline || channel.teacher.name}
-          </h3>
-        </div>
 
-        <div className="flex items-center gap-4">
-          <Avatar className="h-10 w-10 border-2 border-white/20">
-            <AvatarImage src={channel.teacher.image || undefined} />
-            <AvatarFallback className="bg-primary/20 text-white font-black text-xs">
-              {channel.teacher.name.substring(0, 2).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
-          <div className="text-start">
-            <p className="text-sm font-black text-white">{channel.teacher.name}</p>
-            <p className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-white/40">
-              {channel.totalViews.toLocaleString()} Views
-            </p>
+          <div className="flex items-center gap-4">
+            <Avatar className="h-10 w-10 border-2 border-white/20">
+              <AvatarImage src={channel.teacher.image || undefined} />
+              <AvatarFallback className="bg-primary/20 text-white font-black text-xs">
+                {channel.teacher.name.substring(0, 2).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <div className="text-start">
+              <p className="text-sm font-black text-white">{channel.teacher.name}</p>
+              <p className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-white/40">
+                {channel.totalViews.toLocaleString()} Views
+              </p>
+            </div>
           </div>
-        </div>
 
-        <Button
-          onClick={() => onShow(channel.teacher.id)}
-          className="w-full h-14 rounded-2xl bg-white text-black hover:bg-primary hover:text-white font-black uppercase tracking-widest text-[10px] gap-3 transition-all duration-500 shadow-2xl"
-        >
-          <Video className="h-4 w-4" />
-          Watch Channel
-          <ArrowRight className="h-4 w-4 rtl:rotate-180" />
-        </Button>
-      </div>
-    </motion.div>
-  );
-};
+          <Button
+            onClick={() => onShow(channel.teacher.id)}
+            className="w-full h-14 rounded-2xl bg-white text-black hover:bg-primary hover:text-white font-black uppercase tracking-widest text-[10px] gap-3 transition-all duration-500 shadow-2xl"
+          >
+            <Video className="h-4 w-4" />
+            Watch Channel
+            <ArrowRight className="h-4 w-4 rtl:rotate-180" />
+          </Button>
+        </div>
+      </motion.div>
+    );
+  }
+);
+
+TeacherCard.displayName = "TeacherCard";
 
 const DiscoveryPage = () => {
   const { t } = useTranslation();
@@ -131,7 +136,7 @@ const DiscoveryPage = () => {
 
   const { query: channelsQuery } = useList<TeacherChannel & { teacher: User }>({
     resource: "teacher-channels",
-    pagination: { pageSize: 20 },
+    pagination: { pageSize: 12 }, // 🚀 Snappier load
     filters: search ? [{ field: "headline", operator: "contains", value: search }] : [],
     meta: { populate: ["teacher"] },
   });

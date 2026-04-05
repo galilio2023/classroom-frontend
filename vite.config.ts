@@ -75,6 +75,21 @@ export default defineConfig({
               },
             },
           },
+          {
+            // Cache static assets with CacheFirst strategy
+            urlPattern: /\.(?:js|css|woff2?|png|jpg|jpeg|svg|gif|ico)$/,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "static-assets",
+              expiration: {
+                maxEntries: 200,
+                maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+              },
+              cacheableResponse: {
+                statuses: [0, 200],
+              },
+            },
+          },
         ],
       },
     }),
@@ -86,7 +101,18 @@ export default defineConfig({
     dedupe: ["react", "react-dom"],
   },
   build: {
-    chunkSizeWarningLimit: 5000,
+    chunkSizeWarningLimit: 2000,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          "vendor-react": ["react", "react-dom", "react-router-dom"],
+          "vendor-refine": ["@refinedev/core", "@refinedev/react-router", "@refinedev/simple-rest"],
+          "vendor-ui": ["framer-motion", "lucide-react", "clsx", "tailwind-merge"],
+          "vendor-charts": ["recharts"],
+          "vendor-utils": ["date-fns", "dayjs", "zod", "i18next"],
+        },
+      },
+    },
   },
   define: {
     "process.env": {},

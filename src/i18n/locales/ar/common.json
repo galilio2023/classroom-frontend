@@ -1001,6 +1001,9 @@
     "teacher-subscriptions": {
       "label": "المعلمون المتابعون"
     },
+    "student-subscriptions": {
+      "label": "المعلمون المتابعون"
+    },
     "dashboard": {
       "label": "لوحة التحكم"
     },
@@ -1012,6 +1015,9 @@
     },
     "messages": {
       "label": "الرسائل"
+    },
+    "meetings": {
+      "label": "الاجتماعات"
     },
     "ai-assistant": {
       "label": "مساعد الذكاء الاصطناعي"
@@ -1073,13 +1079,19 @@
     "academic-terms": {
       "label": "الفصول الدراسية"
     },
+    "my-classes": {
+      "label": "فصولي الدراسية"
+    },
     "profile-requests": {
       "label": "طلبات الملفات"
     },
     "teacher-applications": {
       "label": "طلبات التدريس"
     },
-    "resources": {
+    "badges": {
+      "label": "الأوسمة"
+    },
+    "meetings": {
       "label": "المصادر"
     },
     "activity-log": {
@@ -1111,6 +1123,9 @@
     },
     "setting": {
       "label": "الإعدادات"
+    },
+    "announcements": {
+      "label": "الإعلانات"
     }
   },
   "groups": {
@@ -1240,7 +1255,7 @@
     "description": "وصف الرسائل",
     "noMessages": "لا توجد رسائل"
   },
-  "enrollments": {
+  "my-classes": {
     "title": "القبول والتسجيل",
     "description": "إدارة طلبات الطلاب، وتنسيق الفصول، وحالة التسجيل.",
     "enrollStudent": "تسجيل طالب",

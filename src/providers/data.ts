@@ -18,6 +18,8 @@ const isOffline = () => !navigator.onLine;
 const resourceToPath: Record<string, string> = {
   "teacher-channels": "channels",
   "teacher-subscriptions": "enrollments",
+  "student-subscriptions": "enrollments",
+  "my-classes": "enrollments",
   portfolio: "users",
   "ai-activity-logs": "ai/logs",
   "ai-health-reports": "ai/health-reports",
@@ -113,6 +115,7 @@ const handleError = async (response: Response): Promise<HttpError> => {
 
 /**
  * Smart Fetcher: Only adds Content-Type for methods with a body.
+ * 🛡️ SECURITY: Skips Content-Type if body is FormData to let the browser set the boundary.
  */
 const fetcher = async (url: string, options?: RequestInit) => {
   const method = options?.method?.toUpperCase() || "GET";
@@ -120,12 +123,15 @@ const fetcher = async (url: string, options?: RequestInit) => {
     ...(options?.headers as Record<string, string>),
   };
 
-  if (["POST", "PUT", "PATCH", "DELETE"].includes(method)) {
-    headers["Content-Type"] = "application/json";
+  const isFormData = options?.body instanceof FormData;
+
+  if (["POST", "PUT", "PATCH", "DELETE"].includes(method) && !isFormData) {
+    if (!headers["Content-Type"]) {
+      headers["Content-Type"] = "application/json";
+    }
   }
 
   // 🛡️ DUAL AUTH: Better Auth (Cookies) + Bearer Token (Authorization Header)
-  // Fix: use 'tablawy_auth_token' to match src/providers/auth.ts
   const token = localStorage.getItem("tablawy_auth_token");
   if (token && !headers["Authorization"]) {
     headers["Authorization"] = `Bearer ${token}`;
@@ -504,7 +510,7 @@ export const dataProvider: DataProvider = {
 
     const response = await fetcher(requestUrl, {
       method: method ? method.toUpperCase() : "GET",
-      body: payload ? JSON.stringify(payload) : undefined,
+      body: payload instanceof FormData ? payload : payload ? JSON.stringify(payload) : undefined,
       headers: headers as Record<string, string>,
       signal: meta?.signal,
     });

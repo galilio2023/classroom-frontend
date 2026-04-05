@@ -3,19 +3,13 @@ import { socket } from "@/lib/socket";
 import { toast } from "sonner";
 import { ErrorCode } from "@/constants/error-codes";
 import type { ExcalidrawElement } from "@excalidraw/excalidraw/element/types";
-import type { AppState, BinaryFiles, Collaborator, SocketId } from "@excalidraw/excalidraw/types";
-
-interface ExcalidrawAPI {
-  updateScene: (data: {
-    elements?: readonly ExcalidrawElement[];
-    appState?: Partial<AppState>;
-    collaborators?: Map<SocketId, Collaborator>;
-    commitToHistory?: boolean;
-  }) => void;
-  getSceneElements: () => readonly ExcalidrawElement[];
-  getAppState: () => AppState;
-  getFiles: () => BinaryFiles;
-}
+import type {
+  AppState,
+  BinaryFiles,
+  Collaborator,
+  SocketId,
+  ExcalidrawImperativeAPI,
+} from "@excalidraw/excalidraw/types";
 
 interface WhiteboardSaveResponse {
   success: boolean;
@@ -25,7 +19,7 @@ interface WhiteboardSaveResponse {
 
 interface UseWhiteboardSocketProps {
   activeRoomId: string | undefined;
-  excalidrawAPI: ExcalidrawAPI | null;
+  excalidrawAPI: ExcalidrawImperativeAPI | null;
   isTeacher: boolean;
   isPermissionsLoading: boolean;
   t: any;
@@ -91,7 +85,10 @@ export const useWhiteboardSocket = ({
       if (excalidrawAPI && data.elements) {
         excalidrawAPI.updateScene({
           elements: data.elements,
-          appState: { ...(data.appState as Partial<AppState>), collaborators: new Map() },
+          appState: {
+            ...(data.appState as Partial<AppState>),
+            collaborators: new Map(),
+          } as any,
         });
         setIsLocked(data.isLocked);
 
@@ -127,7 +124,10 @@ export const useWhiteboardSocket = ({
         setIsRemotePending(false);
         excalidrawAPI.updateScene({
           elements: data.elements,
-          appState: { ...(data.appState as Partial<AppState>), collaborators: new Map() },
+          appState: {
+            ...(data.appState as Partial<AppState>),
+            collaborators: new Map(),
+          } as any,
         });
 
         if (data.version) {

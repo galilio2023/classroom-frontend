@@ -17,10 +17,10 @@ import {
   X,
   FileText,
   Sparkles,
+  Download,
 } from "lucide-react";
-import { useApiUrl, useInvalidate, useGetIdentity } from "@refinedev/core";
+import { useApiUrl, useInvalidate, useGetIdentity, useCustomMutation } from "@refinedev/core";
 import { toast } from "sonner";
-import axios from "axios";
 import { cn } from "@/lib/utils";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -104,6 +104,8 @@ export const BulkEnrollDialog = ({ open, onOpenChange, classId }: BulkEnrollDial
     }
   };
 
+  const { mutate: uploadFile } = useCustomMutation();
+
   const handleUpload = async () => {
     if (!file) return;
 
@@ -112,33 +114,41 @@ export const BulkEnrollDialog = ({ open, onOpenChange, classId }: BulkEnrollDial
     const formData = new FormData();
     formData.append("file", file);
 
-    try {
-      const response = await axios.post(`${apiUrl}/classes/${classId}/bulk-enroll`, formData, {
-        withCredentials: true,
-        headers: {
-          "Content-Type": "multipart/form-data",
+    uploadFile(
+      {
+        url: `${apiUrl}/bulk-enroll/${classId}`,
+        method: "post",
+        values: formData,
+        meta: {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
         },
-      });
-
-      // The backend returns 202 Accepted with a jobId
-      if (response.data.data?.jobId) {
-        setJobId(response.data.data.jobId);
-        // Loading continues until socket 'completed' event
-      } else {
-        // Fallback for immediate response (legacy)
-        setResults(response.data.data);
-        setLoading(false);
-        toast.success(t("classes.show.students.bulk.success" as any));
-        invalidate({
-          resource: "enrollments",
-          invalidates: ["list"],
-        });
+      },
+      {
+        onSuccess: (response: any) => {
+          // The backend returns 202 Accepted with a jobId
+          if (response.data?.data?.jobId) {
+            setJobId(response.data.data.jobId);
+            // Loading continues until socket 'completed' event
+          } else {
+            // Fallback for immediate response (legacy)
+            setResults(response.data?.data);
+            setLoading(false);
+            toast.success(t("classes.show.students.bulk.success" as any));
+            invalidate({
+              resource: "enrollments",
+              invalidates: ["list"],
+            });
+          }
+        },
+        onError: (error: any) => {
+          const message = error.response?.data?.message || t("common.errors.uploadFailed" as any);
+          toast.error(message);
+          setLoading(false);
+        },
       }
-    } catch (error: any) {
-      const message = error.response?.data?.message || t("common.errors.uploadFailed" as any);
-      toast.error(message);
-      setLoading(false);
-    }
+    );
   };
 
   const reset = () => {
@@ -166,11 +176,11 @@ export const BulkEnrollDialog = ({ open, onOpenChange, classId }: BulkEnrollDial
               </div>
               <div>
                 <DialogTitle className="text-2xl font-black tracking-tight">
-                  {t("classes.show.students.bulk.title", "Bulk Enrollment")}
+                  {t("classes.show.students.bulk.title" as any, "Bulk Enrollment")}
                 </DialogTitle>
                 <DialogDescription className="font-bold text-muted-foreground/80">
                   {t(
-                    "classes.show.students.bulk.description",
+                    "classes.show.students.bulk.description" as any,
                     "Upload a CSV file to enroll multiple students at once."
                   )}
                 </DialogDescription>
@@ -190,7 +200,7 @@ export const BulkEnrollDialog = ({ open, onOpenChange, classId }: BulkEnrollDial
               <div className="w-full space-y-3">
                 <div className="flex justify-between items-center px-1">
                   <p className="text-[10px] font-black uppercase tracking-widest text-ai-primary">
-                    {t("common.processing", "Processing Students...")}
+                    {t("common.processing" as any, "Processing Students...")}
                   </p>
                   <p className="text-[10px] font-black text-ai-primary">{progress}%</p>
                 </div>
@@ -201,7 +211,7 @@ export const BulkEnrollDialog = ({ open, onOpenChange, classId }: BulkEnrollDial
                 />
                 <p className="text-[9px] font-bold text-muted-foreground text-center">
                   {t(
-                    "classes.show.students.bulk.waitMessage",
+                    "classes.show.students.bulk.waitMessage" as any,
                     "Please stay on this page until complete."
                   )}
                 </p>
@@ -243,12 +253,18 @@ export const BulkEnrollDialog = ({ open, onOpenChange, classId }: BulkEnrollDial
                     <p className="font-black text-sm uppercase tracking-widest">
                       {file
                         ? file.name
-                        : t("classes.show.students.bulk.dropzoneTitle", "Click to upload CSV")}
+                        : t(
+                            "classes.show.students.bulk.dropzoneTitle" as any,
+                            "Click to upload CSV"
+                          )}
                     </p>
                     <p className="text-xs font-bold text-muted-foreground">
                       {file
                         ? `${(file.size / 1024).toFixed(1)} KB`
-                        : t("classes.show.students.bulk.dropzoneLimit", "Max file size: 5MB")}
+                        : t(
+                            "classes.show.students.bulk.dropzoneLimit" as any,
+                            "Max file size: 5MB"
+                          )}
                     </p>
                   </div>
                 </div>
@@ -258,11 +274,11 @@ export const BulkEnrollDialog = ({ open, onOpenChange, classId }: BulkEnrollDial
               <Alert className="rounded-2xl border-primary/10 bg-primary/5">
                 <AlertCircle className="h-4 w-4 text-primary" />
                 <AlertTitle className="text-xs font-black uppercase tracking-widest text-primary">
-                  {t("classes.show.students.bulk.requirementsTitle", "CSV Requirements")}
+                  {t("classes.show.students.bulk.requirementsTitle" as any, "CSV Requirements")}
                 </AlertTitle>
                 <AlertDescription className="text-xs font-bold text-primary/80 mt-1">
                   {t(
-                    "classes.show.students.bulk.requirementsText",
+                    "classes.show.students.bulk.requirementsText" as any,
                     "Your CSV must include 'name' and 'email' columns. An optional 'password' column can also be provided."
                   )}
                 </AlertDescription>
@@ -274,7 +290,7 @@ export const BulkEnrollDialog = ({ open, onOpenChange, classId }: BulkEnrollDial
                   onClick={() => onOpenChange(false)}
                   className="flex-1 h-12 rounded-xl font-black uppercase tracking-widest text-[10px] border-muted-foreground/20"
                 >
-                  {t("buttons.cancel")}
+                  {t("buttons.cancel" as any)}
                 </Button>
                 <Button
                   disabled={!file || loading}
@@ -282,7 +298,7 @@ export const BulkEnrollDialog = ({ open, onOpenChange, classId }: BulkEnrollDial
                   className="flex-1 h-12 rounded-xl font-black uppercase tracking-widest text-[10px] shadow-xl shadow-primary/20"
                 >
                   <Upload className="h-4 w-4 me-2" />
-                  {t("buttons.uploadAndEnroll", "Upload & Enroll")}
+                  {t("buttons.uploadAndEnroll" as any, "Upload & Enroll")}
                 </Button>
               </div>
             </div>
@@ -293,13 +309,13 @@ export const BulkEnrollDialog = ({ open, onOpenChange, classId }: BulkEnrollDial
                 <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 text-center space-y-1">
                   <p className="text-2xl font-black tracking-tight">{results.enrolled}</p>
                   <p className="text-[10px] font-black uppercase tracking-widest">
-                    {t("classes.show.students.bulk.statsEnrolled", "Enrolled")}
+                    {t("classes.show.students.bulk.statsEnrolled" as any, "Enrolled")}
                   </p>
                 </div>
                 <div className="p-4 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-600 text-center space-y-1">
                   <p className="text-2xl font-black tracking-tight">{results.created}</p>
                   <p className="text-[10px] font-black uppercase tracking-widest">
-                    {t("classes.show.students.bulk.statsCreated", "New Users")}
+                    {t("classes.show.students.bulk.statsCreated" as any, "New Users")}
                   </p>
                 </div>
               </div>
@@ -309,7 +325,7 @@ export const BulkEnrollDialog = ({ open, onOpenChange, classId }: BulkEnrollDial
                 <div className="space-y-3">
                   <p className="text-[10px] font-black uppercase tracking-widest text-destructive flex items-center gap-2 px-1">
                     <AlertCircle className="h-3 w-3" />
-                    {t("classes.show.students.bulk.errorsTitle", "Issues Found")} (
+                    {t("classes.show.students.bulk.errorsTitle" as any, "Issues Found")} (
                     {results.errors.length})
                   </p>
                   <ScrollArea className="h-40 rounded-2xl border border-destructive/10 bg-destructive/5 p-4">

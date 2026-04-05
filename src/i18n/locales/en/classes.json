@@ -225,7 +225,24 @@
           "dropzoneTitle": "Click to upload CSV",
           "dropzoneLimit": "Max file size: 5MB",
           "requirementsTitle": "CSV Requirements",
-          "requirementsText": "Your CSV must include 'name' and 'email' columns. An optional 'password' column can also be provided."
+          "requirementsText": "Your CSV must include 'name' and 'email' columns. An optional 'password' column can also be provided.",
+          "success": "Bulk enrollment completed successfully!",
+          "csvError": "Invalid file type. Please upload a CSV.",
+          "drop": "Drop CSV file here",
+          "csvOnly": "CSV files only",
+          "downloadTemplate": "Download Template",
+          "upload": "Upload & Process",
+          "processing": "Processing Students...",
+          "processingDesc": "We are creating accounts and enrolling students in the background.",
+          "complete": "Complete",
+          "resultTitle": "Enrollment Results",
+          "newCount": "New Accounts Created",
+          "existingCount": "Existing Students Enrolled",
+          "failedRows": "Issues Found",
+          "waitMessage": "Please stay on this page until complete.",
+          "statsEnrolled": "Enrolled",
+          "statsCreated": "New Users",
+          "errorsTitle": "Issues Found"
         }
       },
       "details": {

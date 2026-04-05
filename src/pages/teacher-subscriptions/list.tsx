@@ -38,7 +38,7 @@ const TeacherSubscriptionsList = () => {
   const isStudent = identity?.role === UserRole.STUDENT;
 
   // Resource name depends on the context it's used in (based on route/config)
-  const resource = isStudent ? "enrollments" : "teacher-subscriptions";
+  const resource = isStudent ? "my-classes" : "teacher-subscriptions";
 
   const { query } = useList<any>({
     resource: resource,

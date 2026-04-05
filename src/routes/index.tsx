@@ -44,6 +44,8 @@ const SubmissionShow = React.lazy(() => import("@/pages/submissions/show"));
 const AttendanceList = React.lazy(() => import("@/pages/attendance/list"));
 const EnrollmentList = React.lazy(() => import("@/pages/enrollments/list"));
 const DiscussionsList = React.lazy(() => import("@/pages/discussions/list"));
+const AnnouncementsList = React.lazy(() => import("@/pages/announcements/list"));
+const CreateAnnouncement = React.lazy(() => import("@/pages/announcements/create"));
 
 const QuizzesList = React.lazy(() => import("@/features/quizzes/pages/list"));
 const CreateQuiz = React.lazy(() => import("@/features/quizzes/pages/create"));
@@ -74,6 +76,8 @@ const TermsList = React.lazy(() => import("@/pages/terms/list"));
 const ProfileRequestsList = React.lazy(() => import("@/pages/profile-requests/list"));
 const StudyPlanner = React.lazy(() => import("@/features/ai/pages/study-planner"));
 const TeacherApplicationsList = React.lazy(() => import("@/pages/teacher-applications/list"));
+const BadgesList = React.lazy(() => import("@/pages/badges/list"));
+const CreateBadge = React.lazy(() => import("@/pages/badges/create"));
 const ActivityLogPage = React.lazy(() => import("@/pages/dashboard/activity-log"));
 const AIGovernanceList = React.lazy(() => import("@/features/ai/pages/ai-governance-list"));
 const AiMetricsPage = React.lazy(() => import("@/features/ai/pages/ai-metrics"));
@@ -418,7 +422,7 @@ export const AppRouter = () => (
           <Route
             path="/enrollments"
             element={
-              <AuthorizedRoute resource="enrollments" action="list">
+              <AuthorizedRoute resource="my-classes" action="list">
                 <EnrollmentList />
               </AuthorizedRoute>
             }
@@ -431,6 +435,24 @@ export const AppRouter = () => (
               </AuthorizedRoute>
             }
           />
+          <Route path="/announcements">
+            <Route
+              index
+              element={
+                <AuthorizedRoute resource="announcements" action="list">
+                  <AnnouncementsList />
+                </AuthorizedRoute>
+              }
+            />
+            <Route
+              path="create"
+              element={
+                <AuthorizedRoute resource="announcements" action="create">
+                  <CreateAnnouncement />
+                </AuthorizedRoute>
+              }
+            />
+          </Route>
           <Route
             path="/modules"
             element={
@@ -478,7 +500,7 @@ export const AppRouter = () => (
           <Route
             path="/followed-teachers"
             element={
-              <AuthorizedRoute resource="enrollments" action="list">
+              <AuthorizedRoute resource="my-classes" action="list">
                 <TeacherSubscriptionsList />
               </AuthorizedRoute>
             }
@@ -596,6 +618,24 @@ export const AppRouter = () => (
               </AuthorizedRoute>
             }
           />
+          <Route path="/badges">
+            <Route
+              index
+              element={
+                <AuthorizedRoute resource="badges" action="list">
+                  <BadgesList />
+                </AuthorizedRoute>
+              }
+            />
+            <Route
+              path="create"
+              element={
+                <AuthorizedRoute resource="badges" action="create">
+                  <CreateBadge />
+                </AuthorizedRoute>
+              }
+            />
+          </Route>
           <Route
             path="/activity-log"
             element={

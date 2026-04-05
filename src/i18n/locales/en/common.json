@@ -75,7 +75,10 @@
     "label": "AI Observability"
   },
   "app": {
-    "title": "Classroom AI"
+    "title": "Classroom AI",
+    "ai": "AI",
+    "studyBuddy": "Study Buddy",
+    "generating": "Generating..."
   },
   "Show": "Show",
   "warnWhenUnsavedChanges": "You have unsaved changes. Are you sure you want to leave?",
@@ -1055,6 +1058,21 @@
     "dashboard": {
       "label": "Dashboard"
     },
+    "guardian-portal": {
+      "label": "Family Portal"
+    },
+    "guardian": {
+      "dashboard": {
+        "title": "Family Portal",
+        "subtitle": "Monitor your children's academic performance, attendance, and well-being in real-time."
+      },
+      "risk": {
+        "low": "Stable",
+        "medium": "Attention",
+        "high": "High Risk",
+        "critical": "Critical"
+      }
+    },
     "calendar": {
       "label": "Calendar"
     },
@@ -1063,6 +1081,9 @@
     },
     "messages": {
       "label": "Messages"
+    },
+    "meetings": {
+      "label": "Meetings"
     },
     "ai-assistant": {
       "label": "AI Assistant"
@@ -1084,6 +1105,15 @@
     },
     "enrollments": {
       "label": "Enrollments"
+    },
+    "my-classes": {
+      "label": "My Classes"
+    },
+    "announcements": {
+      "label": "Announcements"
+    },
+    "student-subscriptions": {
+      "label": "Followed Teachers"
     },
     "attendance": {
       "label": "Attendance"
@@ -1132,6 +1162,12 @@
     },
     "teacher-applications": {
       "label": "Teacher Apps"
+    },
+    "badges": {
+      "label": "Badges"
+    },
+    "meetings": {
+      "label": "Meetings"
     },
     "resources": {
       "label": "Lessons"
@@ -1271,7 +1307,7 @@
     "description": "Messages description",
     "noMessages": "No messages"
   },
-  "enrollments": {
+  "my-classes": {
     "enrollments": "Enrollments",
     "label": "Enrollments",
     "title": "Admissions & Enrollments",

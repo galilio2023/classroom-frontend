@@ -33,6 +33,7 @@ import {
   Settings,
   CircleDollarSign,
   HeartPulse,
+  CalendarCheck,
 } from "lucide-react";
 import { ResourceProps } from "@refinedev/core";
 import { UserRole } from "@/types"; // Assuming UserRole enum is defined here or imported
@@ -51,6 +52,7 @@ export const resources: ResourceProps[] = [
   {
     name: "guardian-portal",
     list: "/parent/dashboard",
+    show: "/parent/child/:id",
     meta: {
       label: "resources.guardian-portal.label",
       icon: <HeartPulse />,
@@ -82,6 +84,15 @@ export const resources: ResourceProps[] = [
       label: "resources.messages.label",
       icon: <MessageCircle />,
       roles: [UserRole.ADMIN, UserRole.TEACHER, UserRole.STUDENT],
+    },
+  },
+  {
+    name: "meetings",
+    list: "/meetings",
+    meta: {
+      label: "resources.meetings.label",
+      icon: <CalendarCheck />,
+      roles: [UserRole.ADMIN, UserRole.TEACHER, UserRole.PARENT],
     },
   },
 
@@ -165,11 +176,11 @@ export const resources: ResourceProps[] = [
     },
   },
   {
-    name: "enrollments",
+    name: "my-classes",
     list: "/enrollments",
     meta: {
       group: "groups.academic",
-      label: "resources.enrollments.label",
+      label: "resources.my-classes.label",
       icon: <Bookmark />,
       hide: false,
       roles: [UserRole.ADMIN, UserRole.TEACHER, UserRole.STUDENT],
@@ -265,6 +276,17 @@ export const resources: ResourceProps[] = [
     },
   },
   {
+    name: "announcements",
+    list: "/announcements",
+    create: "/announcements/create",
+    meta: {
+      group: "groups.curriculum",
+      label: "resources.announcements.label",
+      icon: <Send />,
+      roles: [UserRole.ADMIN, UserRole.TEACHER, UserRole.STUDENT],
+    },
+  },
+  {
     name: "discussions",
     list: "/discussions",
     meta: {
@@ -321,7 +343,7 @@ export const resources: ResourceProps[] = [
     },
   },
   {
-    name: "enrollments",
+    name: "student-subscriptions",
     list: "/followed-teachers",
     meta: {
       group: "groups.student-hub",
@@ -437,6 +459,17 @@ export const resources: ResourceProps[] = [
       label: "resources.ai-metrics.label",
       icon: <Activity />,
       roles: [UserRole.ADMIN],
+    },
+  },
+  {
+    name: "badges",
+    list: "/badges",
+    create: "/badges/create",
+    meta: {
+      group: "groups.admin",
+      label: "resources.badges.label",
+      icon: <CheckSquare />,
+      roles: [UserRole.ADMIN, UserRole.TEACHER],
     },
   },
   {

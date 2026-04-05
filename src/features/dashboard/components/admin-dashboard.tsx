@@ -1,6 +1,7 @@
 import { EngagementChart } from "./engagement-chart";
 import { PlatformOverview } from "./platform-overview";
 import { SystemHealthCard } from "./system-health-card";
+import { SystemVitalsCard } from "./system-vitals-card";
 import { RecentActivity } from "./recent-activity";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { DashboardData } from "@/types/dashboard";
@@ -149,6 +150,7 @@ export const AdminDashboard = ({ data, isLoading, onRefresh }: AdminDashboardPro
                 </div>
               </div>
               <SystemHealthCard report={data.systemHealth} isLoading={isLoading} />
+              <SystemVitalsCard />
             </div>
           </ErrorBoundary>
 

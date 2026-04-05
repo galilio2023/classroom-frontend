@@ -242,11 +242,11 @@ const ProfileRequestsList = () => {
                 <Filter className="h-4 w-4 text-muted-foreground" />
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
                   <SelectTrigger className="w-40 border-none h-10 focus:ring-0 shadow-none font-black text-[10px] uppercase tracking-widest">
-                    <SelectValue placeholder={t("enrollments.allStatus")} />
+                    <SelectValue placeholder={t("my-classes.allStatus")} />
                   </SelectTrigger>
                   <SelectContent className="rounded-2xl shadow-2xl bg-white dark:bg-[#09090b] opacity-100 backdrop-blur-none border border-border/50">
                     <SelectItem value="all" className="rounded-xl font-bold">
-                      {t("enrollments.allStatus")}
+                      {t("my-classes.allStatus")}
                     </SelectItem>
                     <SelectItem value="pending" className="rounded-xl font-bold">
                       {t("status.upcoming")}

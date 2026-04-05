@@ -1,5 +1,6 @@
 import { useList } from "@refinedev/core";
 import { ChildOverviewCard } from "../components/child-overview-card";
+import { LinkChildDialog } from "../components/link-child-dialog";
 import { ShieldCheck, HeartPulse, LayoutDashboard, Loader2, Info } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
@@ -57,6 +58,7 @@ export const ParentDashboard = () => {
             <LayoutDashboard className="h-4 w-4" />
             Active Students ({children.length})
           </h2>
+          <LinkChildDialog />
         </div>
 
         {children.length > 0 ? (

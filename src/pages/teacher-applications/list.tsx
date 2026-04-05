@@ -138,11 +138,11 @@ const TeacherApplicationsList = () => {
             <Filter className="h-3.5 w-3.5 text-muted-foreground/60" />
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-[160px] border-none h-10 focus:ring-0 shadow-none font-bold text-[10px] uppercase tracking-wider bg-transparent">
-                <SelectValue placeholder={t("enrollments.allStatus")} />
+                <SelectValue placeholder={t("my-classes.allStatus")} />
               </SelectTrigger>
               <SelectContent className="rounded-2xl bg-white dark:bg-[#09090b] opacity-100 backdrop-blur-none border border-border/50 shadow-2xl">
                 <SelectItem value="all" className="font-bold">
-                  {t("enrollments.allStatus")}
+                  {t("my-classes.allStatus")}
                 </SelectItem>
                 <SelectItem value="pending" className="font-bold">
                   {t("status.upcoming")}
