@@ -18,6 +18,7 @@ const isOffline = () => !navigator.onLine;
 const resourceToPath: Record<string, string> = {
   "teacher-channels": "channels",
   "teacher-subscriptions": "enrollments",
+  "student-subscriptions": "enrollments",
   portfolio: "users",
   "ai-activity-logs": "ai/logs",
   "ai-health-reports": "ai/health-reports",

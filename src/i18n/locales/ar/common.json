@@ -1001,6 +1001,9 @@
     "teacher-subscriptions": {
       "label": "المعلمون المتابعون"
     },
+    "student-subscriptions": {
+      "label": "المعلمون المتابعون"
+    },
     "dashboard": {
       "label": "لوحة التحكم"
     },
@@ -1082,7 +1085,10 @@
     "teacher-applications": {
       "label": "طلبات التدريس"
     },
-    "resources": {
+    "badges": {
+      "label": "الأوسمة"
+    },
+    "meetings": {
       "label": "المصادر"
     },
     "activity-log": {
@@ -1114,6 +1120,9 @@
     },
     "setting": {
       "label": "الإعدادات"
+    },
+    "announcements": {
+      "label": "الإعلانات"
     }
   },
   "groups": {

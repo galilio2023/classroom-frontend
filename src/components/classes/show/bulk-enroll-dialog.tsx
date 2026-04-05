@@ -113,7 +113,7 @@ export const BulkEnrollDialog = ({ open, onOpenChange, classId }: BulkEnrollDial
     formData.append("file", file);
 
     try {
-      const response = await axios.post(`${apiUrl}/classes/${classId}/bulk-enroll`, formData, {
+      const response = await axios.post(`${apiUrl}/bulk-enroll/${classId}`, formData, {
         withCredentials: true,
         headers: {
           "Content-Type": "multipart/form-data",

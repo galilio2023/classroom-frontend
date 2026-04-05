@@ -276,6 +276,17 @@ export const resources: ResourceProps[] = [
     },
   },
   {
+    name: "announcements",
+    list: "/announcements",
+    create: "/announcements/create",
+    meta: {
+      group: "groups.curriculum",
+      label: "resources.announcements.label",
+      icon: <Send />,
+      roles: [UserRole.ADMIN, UserRole.TEACHER, UserRole.STUDENT],
+    },
+  },
+  {
     name: "discussions",
     list: "/discussions",
     meta: {
@@ -332,7 +343,7 @@ export const resources: ResourceProps[] = [
     },
   },
   {
-    name: "enrollments",
+    name: "student-subscriptions",
     list: "/followed-teachers",
     meta: {
       group: "groups.student-hub",
@@ -448,6 +459,17 @@ export const resources: ResourceProps[] = [
       label: "resources.ai-metrics.label",
       icon: <Activity />,
       roles: [UserRole.ADMIN],
+    },
+  },
+  {
+    name: "badges",
+    list: "/badges",
+    create: "/badges/create",
+    meta: {
+      group: "groups.admin",
+      label: "resources.badges.label",
+      icon: <CheckSquare />,
+      roles: [UserRole.ADMIN, UserRole.TEACHER],
     },
   },
   {

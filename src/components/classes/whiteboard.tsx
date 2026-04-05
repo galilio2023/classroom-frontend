@@ -13,7 +13,19 @@ import { useCustomMutation } from "@refinedev/core";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { AlertCircle, Loader2, Lock, RefreshCw, Save, Trash2, Unlock } from "lucide-react";
+import {
+  AlertCircle,
+  Loader2,
+  Lock,
+  RefreshCw,
+  Save,
+  Trash2,
+  Unlock,
+  Sparkles,
+  ChevronRight,
+  Lightbulb,
+  MessageSquare,
+} from "lucide-react";
 import { toast } from "sonner";
 import { ConflictDialog } from "@/components/conflict-dialog";
 import { cn } from "@/lib/utils";
@@ -23,6 +35,14 @@ import { AiFeatureGuard } from "@/components/ai/AiFeatureGuard";
 import { useWhiteboardSocket } from "@/hooks/use-whiteboard-socket";
 import { useUserRole } from "@/hooks/use-user-role";
 import { getExportToBlob } from "@/lib/excalidraw-helpers";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 // 🛡️ STRICT TYPE SAFETY: Import specific Excalidraw types
 import type { ExcalidrawElement } from "@excalidraw/excalidraw/element/types";
@@ -154,12 +174,19 @@ interface ResourceResponse {
   id: number;
 }
 
+interface AnalysisResponse {
+  analysis: string;
+  followUpQuestions: string[];
+}
+
 export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
   const { t } = useTranslation();
   const { isStaff: isTeacher, isLoading: isPermissionsLoading } = useUserRole();
   const [excalidrawAPI, setExcalidrawAPI] = useState<ExcalidrawImperativeAPI | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isHelpersLoading, setIsHelpersLoading] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState<AnalysisResponse | null>(null);
 
   // If roomId is not provided, fallback to classId (backward compatibility)
   const activeRoomId = roomId || classId;
@@ -201,6 +228,7 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
 
   const { mutate: uploadFile } = useCustomMutation<UploadResponse>();
   const { mutate: createResource } = useCustomMutation<ResourceResponse>();
+  const { mutate: analyzeRequest } = useCustomMutation<AnalysisResponse>();
 
   useEffect(() => {
     if (isPermissionsLoading) return;
@@ -231,6 +259,63 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
       </div>
     );
   }
+
+  const analyzeWithAI = async () => {
+    if (!excalidrawAPI) return;
+
+    setIsHelpersLoading(true);
+    setIsAnalyzing(true);
+
+    try {
+      const exportToBlob = await getExportToBlob();
+      setIsHelpersLoading(false);
+      const elements = excalidrawAPI.getSceneElements();
+
+      if (!elements || elements.length === 0) {
+        toast.error("Whiteboard is empty. Draw something to analyze!");
+        setIsAnalyzing(false);
+        return;
+      }
+
+      const blob = await exportToBlob({
+        elements,
+        mimeType: "image/png",
+        appState: excalidrawAPI.getAppState(),
+        files: excalidrawAPI.getFiles(),
+      });
+
+      // Convert Blob to Base64
+      const reader = new FileReader();
+      reader.readAsDataURL(blob);
+      reader.onloadend = () => {
+        const base64data = (reader.result as string).split(",")[1];
+
+        analyzeRequest(
+          {
+            url: "/ai/whiteboard-analyze",
+            method: "post",
+            values: { image: base64data },
+          },
+          {
+            onSuccess: (response) => {
+              setAnalysisResult(response.data);
+              setIsAnalyzing(false);
+            },
+            onError: (err) => {
+              console.error("AI Analysis Error:", err);
+              toast.error("AI was unable to analyze this drawing.");
+              setIsAnalyzing(false);
+            },
+          }
+        );
+      };
+    } catch (error) {
+      console.error("Analysis preparation error:", error);
+      toast.error("Failed to prepare image for analysis.");
+      setIsHelpersLoading(false);
+      setIsAnalyzing(false);
+    }
+  };
 
   const saveSnapshot = async () => {
     if (!excalidrawAPI || !classId) {
@@ -349,10 +434,26 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
           </div>
           <div className="flex items-center gap-2">
             {isTeacher && (
-              <Button variant="outline" size="sm" onClick={clearWhiteboard} className="h-8">
-                <Trash2 className="h-4 w-4 me-1" />
-                Clear
-              </Button>
+              <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={analyzeWithAI}
+                  disabled={isAnalyzing || isHelpersLoading}
+                  className="h-8 border-ai-primary/30 hover:bg-ai-primary/5 text-ai-primary font-bold group transition-all"
+                >
+                  {isAnalyzing ? (
+                    <Loader2 className="h-4 w-4 animate-spin me-1" />
+                  ) : (
+                    <Sparkles className="h-4 w-4 me-1 group-hover:rotate-12 transition-transform" />
+                  )}
+                  Analyze with AI
+                </Button>
+                <Button variant="outline" size="sm" onClick={clearWhiteboard} className="h-8">
+                  <Trash2 className="h-4 w-4 me-1" />
+                  Clear
+                </Button>
+              </>
             )}
             {classId && (
               <Button
@@ -403,6 +504,74 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
             triggerSave(); // Force overwrite with our version
           }}
         />
+
+        {/* AI ANALYSIS DIALOG */}
+        <Dialog open={!!analysisResult} onOpenChange={(open) => !open && setAnalysisResult(null)}>
+          <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col gap-0 p-0 overflow-hidden rounded-2xl ai-gradient-border border-2">
+            <div className="p-6 bg-ai-primary/5 border-b flex items-center gap-3">
+              <div className="bg-ai-primary p-2 rounded-xl">
+                <Sparkles className="h-5 w-5 text-white" />
+              </div>
+              <DialogHeader className="p-0">
+                <DialogTitle className="text-xl font-black tracking-tight">
+                  AI Drawing Analysis
+                </DialogTitle>
+                <DialogDescription className="text-xs font-medium text-ai-primary/70">
+                  Insights powered by Gemini 1.5 Flash Vision
+                </DialogDescription>
+              </DialogHeader>
+            </div>
+
+            <ScrollArea className="flex-1 p-6">
+              <div className="space-y-8">
+                {/* Main Analysis Section */}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 text-sm font-black uppercase tracking-widest text-muted-foreground">
+                    <Lightbulb className="h-4 w-4 text-amber-500" />
+                    Key Concepts & Explanation
+                  </div>
+                  <div className="bg-card border p-5 rounded-2xl text-base leading-relaxed font-medium shadow-sm">
+                    {analysisResult?.analysis}
+                  </div>
+                </div>
+
+                {/* Follow up Questions */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 text-sm font-black uppercase tracking-widest text-muted-foreground">
+                    <MessageSquare className="h-4 w-4 text-blue-500" />
+                    Pedagogical Follow-up Questions
+                  </div>
+                  <div className="grid gap-3">
+                    {analysisResult?.followUpQuestions.map((q, i) => (
+                      <div
+                        key={i}
+                        className="flex gap-3 p-4 rounded-xl bg-muted/30 border border-border/50 group hover:bg-muted/50 transition-colors"
+                      >
+                        <div className="h-6 w-6 rounded-full bg-background border flex items-center justify-center text-xs font-bold shrink-0">
+                          {i + 1}
+                        </div>
+                        <p className="text-sm font-bold text-foreground/80 leading-tight pt-0.5">
+                          {q}
+                        </p>
+                        <ChevronRight className="h-4 w-4 ms-auto text-muted-foreground/30 group-hover:text-primary transition-colors" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </ScrollArea>
+
+            <div className="p-4 bg-muted/20 border-t flex justify-end">
+              <Button
+                onClick={() => setAnalysisResult(null)}
+                variant="outline"
+                className="rounded-xl font-bold px-6"
+              >
+                Close
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </AiFeatureGuard>
   );

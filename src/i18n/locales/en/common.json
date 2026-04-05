@@ -1106,6 +1106,12 @@
     "enrollments": {
       "label": "Enrollments"
     },
+    "announcements": {
+      "label": "Announcements"
+    },
+    "student-subscriptions": {
+      "label": "Followed Teachers"
+    },
     "attendance": {
       "label": "Attendance"
     },
@@ -1153,6 +1159,9 @@
     },
     "teacher-applications": {
       "label": "Teacher Apps"
+    },
+    "badges": {
+      "label": "Badges"
     },
     "meetings": {
       "label": "Meetings"
