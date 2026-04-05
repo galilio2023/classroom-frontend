@@ -162,7 +162,7 @@ const AssignmentShow = () => {
                       </div>
                       <Button
                         variant="outline"
-                        className="rounded-2xl"
+                        className="rounded-2xl h-12 font-black uppercase tracking-widest text-[10px]"
                         onClick={() => state.setIsResubmitting(true)}
                       >
                         {t("buttons.resubmitAssignment")}
@@ -172,35 +172,65 @@ const AssignmentShow = () => {
                 </CardContent>
               </Card>
 
-              {assignedReviews.length > 0 && (
-                <Card className="rounded-[2.5rem] md:rounded-[3rem] overflow-hidden border-none shadow-2xl">
+              {assignment.hasPeerReview && (
+                <Card className="rounded-[2.5rem] md:rounded-[3rem] overflow-hidden border-none shadow-2xl bg-amber-500/[0.02]">
                   <CardHeader className="bg-amber-500/5 p-8 md:p-10 border-b border-amber-500/10">
                     <CardTitle className="text-amber-600 flex items-center gap-4 font-black uppercase tracking-widest text-xl">
                       <Users className="h-8 w-8" /> {t("assignments.show.peersAssigned")}
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="p-8 md:p-10 space-y-10">
-                    {assignedReviews.map((review: PeerReview) => (
-                      <div
-                        key={review.id}
-                        className="p-8 rounded-4xl border-2 border-dashed border-amber-500/20 space-y-6"
-                      >
-                        <div className="flex items-center gap-4">
-                          <Avatar className="h-12 w-12">
-                            <AvatarFallback>{review.submission?.student?.name?.[0]}</AvatarFallback>
-                          </Avatar>
-                          <h4 className="font-black text-lg">{review.submission?.student?.name}</h4>
-                        </div>
-                        <div className="p-6 bg-muted/20 rounded-2xl italic">
-                          {review.submission?.content}
-                        </div>
-                        <PeerReviewForm
-                          review={review}
-                          assignment={assignment}
-                          onSuccess={() => refetch.assignedReviews()}
-                        />
+                  <CardContent className="p-8 md:p-10">
+                    {assignedReviews.length > 0 ? (
+                      <div className="space-y-10">
+                        {assignedReviews.map((review: PeerReview) => (
+                          <div
+                            key={review.id}
+                            className="p-8 rounded-4xl border-2 border-dashed border-amber-500/20 space-y-6 bg-card"
+                          >
+                            <div className="flex items-center gap-4">
+                              <Avatar className="h-12 w-12 border-2 border-amber-500/20">
+                                <AvatarFallback className="bg-amber-500/10 text-amber-600 font-bold">
+                                  {review.submission?.student?.name?.[0]}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <h4 className="font-black text-lg">
+                                  {t("assignments.show.peerReviewerAnonymous", "Peer Reviewer")}
+                                </h4>
+                                <p className="text-[10px] font-black uppercase tracking-widest text-amber-600/60">
+                                  {review.status === "completed" ? t("status.completed") : t("status.pending")}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="p-6 bg-muted/20 rounded-2xl italic border border-border/20 font-medium">
+                              {review.submission?.content}
+                            </div>
+                            <PeerReviewForm
+                              review={review}
+                              assignment={assignment}
+                              onSuccess={() => refetch.assignedReviews()}
+                            />
+                          </div>
+                        ))}
                       </div>
-                    ))}
+                    ) : (
+                      <div className="py-12 flex flex-col items-center justify-center text-center space-y-6 opacity-60">
+                        <div className="p-6 rounded-full bg-amber-500/10 text-amber-600">
+                          <Users className="h-12 w-12" />
+                        </div>
+                        <div className="space-y-2">
+                          <h3 className="text-xl font-black uppercase tracking-tight">
+                            {t("assignments.show.noReviewsYet", "No Reviews Assigned Yet")}
+                          </h3>
+                          <p className="max-w-md mx-auto font-medium text-muted-foreground">
+                            {t(
+                              "assignments.show.noReviewsDesc",
+                              "Once the teacher closes the submission window and assigns peer reviews, you will see your classmates' work here for evaluation."
+                            )}
+                          </p>
+                        </div>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               )}

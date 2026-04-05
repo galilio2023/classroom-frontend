@@ -34,9 +34,11 @@ import {
   CircleDollarSign,
   HeartPulse,
   CalendarCheck,
+  Award,
+  Megaphone,
 } from "lucide-react";
 import { ResourceProps } from "@refinedev/core";
-import { UserRole } from "@/types"; // Assuming UserRole enum is defined here or imported
+import { UserRole } from "@/types";
 
 export const resources: ResourceProps[] = [
   // --- MAIN ---
@@ -116,7 +118,7 @@ export const resources: ResourceProps[] = [
       icon: <BrainCircuit />,
       roles: [UserRole.ADMIN, UserRole.STUDENT],
     },
-  }, // Student-specific AI
+  },
   {
     name: "ai-activity-logs",
     list: "/ai-history",
@@ -137,7 +139,7 @@ export const resources: ResourceProps[] = [
       icon: <CalendarDays />,
       roles: [UserRole.ADMIN, UserRole.STUDENT],
     },
-  }, // Student-specific
+  },
 
   // --- ACADEMIC ---
   {
@@ -147,9 +149,9 @@ export const resources: ResourceProps[] = [
       group: "groups.academic",
       label: "resources.academic-terms.label",
       icon: <Calendar />,
-      roles: [UserRole.TEACHER],
+      roles: [UserRole.ADMIN, UserRole.TEACHER],
     },
-  }, // MOVED TO TEACHER
+  },
   {
     name: "classes",
     list: "/classes",
@@ -160,7 +162,7 @@ export const resources: ResourceProps[] = [
       group: "groups.academic",
       label: "resources.classes.label",
       icon: <LayoutGrid />,
-      roles: [UserRole.TEACHER, UserRole.STUDENT],
+      roles: [UserRole.ADMIN, UserRole.TEACHER, UserRole.STUDENT],
     },
   },
   {
@@ -172,7 +174,7 @@ export const resources: ResourceProps[] = [
       group: "groups.academic",
       label: "resources.subjects.label",
       icon: <BookOpen />,
-      roles: [UserRole.TEACHER, UserRole.STUDENT],
+      roles: [UserRole.ADMIN, UserRole.TEACHER, UserRole.STUDENT],
     },
   },
   {
@@ -182,7 +184,6 @@ export const resources: ResourceProps[] = [
       group: "groups.academic",
       label: "resources.my-classes.label",
       icon: <Bookmark />,
-      hide: false,
       roles: [UserRole.ADMIN, UserRole.TEACHER, UserRole.STUDENT],
     },
   },
@@ -193,6 +194,16 @@ export const resources: ResourceProps[] = [
       group: "groups.academic",
       label: "resources.attendance.label",
       icon: <CheckSquare />,
+      roles: [UserRole.ADMIN, UserRole.TEACHER, UserRole.STUDENT, UserRole.PARENT],
+    },
+  },
+  {
+    name: "peer-reviews",
+    list: "/peer-reviews",
+    meta: {
+      group: "groups.academic",
+      label: "resources.peer-reviews.label",
+      icon: <Users />,
       roles: [UserRole.ADMIN, UserRole.TEACHER, UserRole.STUDENT],
     },
   },
@@ -282,8 +293,8 @@ export const resources: ResourceProps[] = [
     meta: {
       group: "groups.curriculum",
       label: "resources.announcements.label",
-      icon: <Send />,
-      roles: [UserRole.ADMIN, UserRole.TEACHER, UserRole.STUDENT],
+      icon: <Megaphone />,
+      roles: [UserRole.ADMIN, UserRole.TEACHER, UserRole.STUDENT, UserRole.PARENT],
     },
   },
   {
@@ -317,9 +328,9 @@ export const resources: ResourceProps[] = [
       group: "groups.progress",
       label: "resources.report-card.label",
       icon: <FileText />,
-      roles: [UserRole.ADMIN, UserRole.STUDENT],
+      roles: [UserRole.ADMIN, UserRole.TEACHER, UserRole.STUDENT, UserRole.PARENT],
     },
-  }, // Student-specific
+  },
   {
     name: "progress",
     list: "/progress",
@@ -327,6 +338,19 @@ export const resources: ResourceProps[] = [
       group: "groups.progress",
       label: "resources.progress.label",
       icon: <TrendingUp />,
+      roles: [UserRole.ADMIN, UserRole.TEACHER, UserRole.STUDENT, UserRole.PARENT],
+    },
+  },
+
+  // --- GAMIFICATION ---
+  {
+    name: "badges",
+    list: "/badges",
+    create: "/badges/create",
+    meta: {
+      group: "groups.gamification",
+      label: "resources.badges.label",
+      icon: <Award />,
       roles: [UserRole.ADMIN, UserRole.TEACHER, UserRole.STUDENT],
     },
   },
@@ -363,6 +387,7 @@ export const resources: ResourceProps[] = [
       resource: "channels",
     },
   },
+
   // --- TEACHER HUB ---
   {
     name: "teacher-channel",
@@ -442,45 +467,30 @@ export const resources: ResourceProps[] = [
     },
   },
   {
-    name: "ai-health-reports",
+    name: "ai-governance",
     list: "/ai-governance",
     meta: {
       group: "groups.admin",
-      label: "resources.ai-health-reports.label",
-      icon: <BrainCircuit />,
+      label: "resources.ai-governance.label",
+      icon: <ShieldCheck />,
       roles: [UserRole.ADMIN],
-    },
-  },
-  {
-    name: "ai-metrics",
-    list: "/ai-metrics",
-    meta: {
-      group: "groups.admin",
-      label: "resources.ai-metrics.label",
-      icon: <Activity />,
-      roles: [UserRole.ADMIN],
-    },
-  },
-  {
-    name: "badges",
-    list: "/badges",
-    create: "/badges/create",
-    meta: {
-      group: "groups.admin",
-      label: "resources.badges.label",
-      icon: <CheckSquare />,
-      roles: [UserRole.ADMIN, UserRole.TEACHER],
     },
   },
   {
     name: "settings",
-    list: "/settings",
     edit: "/settings/edit",
     meta: {
       group: "groups.admin",
       label: "resources.settings.label",
       icon: <Settings />,
       roles: [UserRole.ADMIN],
+    },
+  },
+  {
+    name: "ai_features",
+    meta: {
+      hide: true,
+      roles: [UserRole.ADMIN, UserRole.TEACHER, UserRole.STUDENT],
     },
   },
 ];

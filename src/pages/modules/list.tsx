@@ -25,6 +25,7 @@ import { SyncStatusBadge } from "@/components/sync-status-badge";
 import { useUserRole } from "@/hooks/use-user-role";
 import { Badge } from "@/components/ui/badge.tsx";
 import { Button } from "@/components/ui/button.tsx";
+import { MagicBuilderDialog } from "@/components/classes/show/magic-builder-dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -46,6 +47,7 @@ import {
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion, AnimatePresence } from "framer-motion";
+import { Sparkles } from "lucide-react";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import usePageTitle from "@/hooks/use-page-title";
@@ -63,6 +65,7 @@ const ModulesListPage = () => {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
+  const [isMagicBuilderOpen, setIsMagicBuilderOpen] = useState(false);
 
   const { edit, show, create } = useNavigation();
   const { mutate: deleteMutation, mutation } = useDelete();
@@ -151,19 +154,36 @@ const ModulesListPage = () => {
               </p>
             </div>
           </div>
-          <div className="w-full md:w-auto">
+          <div className="w-full md:w-auto flex flex-col md:flex-row gap-3">
             {isStaff && (
-              <Button
-                onClick={() => create("modules")}
-                size="lg"
-                className="w-full md:w-auto rounded-2xl h-12 md:h-14 px-10 font-bold uppercase tracking-widest text-[10px] gap-2 shadow-lg shadow-primary/25 hover:translate-y-[-2px] transition-all"
-              >
-                <PlusCircle className="h-5 w-5" />
-                {t("modulesPage.create")}
-              </Button>
+              <>
+                <Button
+                  onClick={() => setIsMagicBuilderOpen(true)}
+                  size="lg"
+                  variant="outline"
+                  className="w-full md:w-auto rounded-2xl h-12 md:h-14 px-8 font-black uppercase tracking-widest text-[10px] gap-2 border-ai-primary/20 text-ai-primary hover:bg-ai-primary/5 transition-all hover:scale-105 active:scale-95 shadow-xl shadow-ai-primary/5"
+                >
+                  <Sparkles className="h-5 w-5" />
+                  {t("classes.show.students.actions.magicBuilder", "AI Magic")}
+                </Button>
+                <Button
+                  onClick={() => create("modules")}
+                  size="lg"
+                  className="w-full md:w-auto rounded-2xl h-12 md:h-14 px-10 font-bold uppercase tracking-widest text-[10px] gap-2 shadow-lg shadow-primary/25 hover:translate-y-[-2px] transition-all"
+                >
+                  <PlusCircle className="h-5 w-5" />
+                  {t("modulesPage.create")}
+                </Button>
+              </>
             )}
           </div>
         </motion.div>
+
+        {/* AI Magic Builder Dialog */}
+        <MagicBuilderDialog
+          open={isMagicBuilderOpen}
+          onOpenChange={setIsMagicBuilderOpen}
+        />
 
         {/* Stats Row - Adaptive */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">

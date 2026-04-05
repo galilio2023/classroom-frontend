@@ -26,6 +26,8 @@ import "./App.css";
 import "@excalidraw/excalidraw/index.css";
 import "./i18n/i18n";
 
+import { XPCelebration } from "./components/xp-celebration";
+
 /**
  * 🚀 REAL-TIME BRIDGE: PulseProvider
  * Injected inside Refine to handle global socket-to-toast orchestration.
@@ -33,7 +35,14 @@ import "./i18n/i18n";
  */
 const PulseProvider = ({ children }: { children: React.ReactNode }) => {
   usePulseNotifications();
-  return <>{children}</>;
+  return (
+    <>
+      <XPCelebration />
+      <GlobalLiveOverlay />
+      <Toaster />
+      {children}
+    </>
+  );
 };
 
 function App() {
