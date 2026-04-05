@@ -116,7 +116,7 @@ const AIStudyBuddyContent = ({ subject, topic, assignment, classId }: AIStudyBud
 };
 
 export const AIStudyBuddy = (props: AIStudyBuddyProps) => {
-  if (!props.classId) return null;
+  if (props.classId === undefined || props.classId === null) return null;
 
   return (
     <AiFeatureGuard

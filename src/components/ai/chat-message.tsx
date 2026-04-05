@@ -47,6 +47,7 @@ export const ChatMessage = React.memo(
           actionType: "chat",
           isPositive,
           metadata: {
+            messageId: message.id || null, // 🛡️ Gap B Senior Fix: Use actual ID for accurate tracking
             messageLength: fullText.length,
             role: message.role,
             contentFingerprint: fullText.substring(0, 100), // Unique snippet for grouping
