@@ -176,11 +176,11 @@ export const resources: ResourceProps[] = [
     },
   },
   {
-    name: "enrollments",
+    name: "my-classes",
     list: "/enrollments",
     meta: {
       group: "groups.academic",
-      label: "resources.enrollments.label",
+      label: "resources.my-classes.label",
       icon: <Bookmark />,
       hide: false,
       roles: [UserRole.ADMIN, UserRole.TEACHER, UserRole.STUDENT],

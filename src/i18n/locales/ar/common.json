@@ -1079,6 +1079,9 @@
     "academic-terms": {
       "label": "الفصول الدراسية"
     },
+    "my-classes": {
+      "label": "فصولي الدراسية"
+    },
     "profile-requests": {
       "label": "طلبات الملفات"
     },
@@ -1252,7 +1255,7 @@
     "description": "وصف الرسائل",
     "noMessages": "لا توجد رسائل"
   },
-  "enrollments": {
+  "my-classes": {
     "title": "القبول والتسجيل",
     "description": "إدارة طلبات الطلاب، وتنسيق الفصول، وحالة التسجيل.",
     "enrollStudent": "تسجيل طالب",

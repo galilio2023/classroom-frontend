@@ -422,7 +422,7 @@ export const AppRouter = () => (
           <Route
             path="/enrollments"
             element={
-              <AuthorizedRoute resource="enrollments" action="list">
+              <AuthorizedRoute resource="my-classes" action="list">
                 <EnrollmentList />
               </AuthorizedRoute>
             }
@@ -500,7 +500,7 @@ export const AppRouter = () => (
           <Route
             path="/followed-teachers"
             element={
-              <AuthorizedRoute resource="enrollments" action="list">
+              <AuthorizedRoute resource="my-classes" action="list">
                 <TeacherSubscriptionsList />
               </AuthorizedRoute>
             }

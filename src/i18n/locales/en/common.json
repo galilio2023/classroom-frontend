@@ -1106,6 +1106,9 @@
     "enrollments": {
       "label": "Enrollments"
     },
+    "my-classes": {
+      "label": "My Classes"
+    },
     "announcements": {
       "label": "Announcements"
     },
@@ -1304,7 +1307,7 @@
     "description": "Messages description",
     "noMessages": "No messages"
   },
-  "enrollments": {
+  "my-classes": {
     "enrollments": "Enrollments",
     "label": "Enrollments",
     "title": "Admissions & Enrollments",

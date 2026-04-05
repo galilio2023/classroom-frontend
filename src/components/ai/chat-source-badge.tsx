@@ -49,7 +49,7 @@ export const ChatSourceBadge = ({ source, index }: ChatSourceBadgeProps) => {
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <span className="cursor-not-allowed opacity-50">
+                              <span className="cursor-not-allowed opacity-50" aria-disabled="true">
                                 <ExternalLink className="h-2.5 w-2.5" />
                               </span>
                             </TooltipTrigger>
