@@ -20,7 +20,6 @@ import {
 } from "lucide-react";
 import { useApiUrl, useInvalidate, useGetIdentity } from "@refinedev/core";
 import { toast } from "sonner";
-import axios from "axios";
 import { cn } from "@/lib/utils";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -104,6 +103,8 @@ export const BulkEnrollDialog = ({ open, onOpenChange, classId }: BulkEnrollDial
     }
   };
 
+  const { mutate: uploadFile } = useCustomMutation();
+
   const handleUpload = async () => {
     if (!file) return;
 
@@ -112,33 +113,41 @@ export const BulkEnrollDialog = ({ open, onOpenChange, classId }: BulkEnrollDial
     const formData = new FormData();
     formData.append("file", file);
 
-    try {
-      const response = await axios.post(`${apiUrl}/bulk-enroll/${classId}`, formData, {
-        withCredentials: true,
-        headers: {
-          "Content-Type": "multipart/form-data",
+    uploadFile(
+      {
+        url: `${apiUrl}/bulk-enroll/${classId}`,
+        method: "post",
+        values: formData,
+        meta: {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
         },
-      });
-
-      // The backend returns 202 Accepted with a jobId
-      if (response.data.data?.jobId) {
-        setJobId(response.data.data.jobId);
-        // Loading continues until socket 'completed' event
-      } else {
-        // Fallback for immediate response (legacy)
-        setResults(response.data.data);
-        setLoading(false);
-        toast.success(t("classes.show.students.bulk.success" as any));
-        invalidate({
-          resource: "enrollments",
-          invalidates: ["list"],
-        });
+      },
+      {
+        onSuccess: (response: any) => {
+          // The backend returns 202 Accepted with a jobId
+          if (response.data?.data?.jobId) {
+            setJobId(response.data.data.jobId);
+            // Loading continues until socket 'completed' event
+          } else {
+            // Fallback for immediate response (legacy)
+            setResults(response.data?.data);
+            setLoading(false);
+            toast.success(t("classes.show.students.bulk.success" as any));
+            invalidate({
+              resource: "enrollments",
+              invalidates: ["list"],
+            });
+          }
+        },
+        onError: (error: any) => {
+          const message = error.response?.data?.message || t("common.errors.uploadFailed" as any);
+          toast.error(message);
+          setLoading(false);
+        },
       }
-    } catch (error: any) {
-      const message = error.response?.data?.message || t("common.errors.uploadFailed" as any);
-      toast.error(message);
-      setLoading(false);
-    }
+    );
   };
 
   const reset = () => {

@@ -172,10 +172,13 @@ export const ChatMessage = React.memo(
   (prev, next) => {
     // 🚀 PERFORMANCE: Avoid re-rendering old messages during active streaming.
     // 🛡️ ROBUSTNESS: Compare all message parts to handle potential multi-part evolution.
+    const partsMatch = 
+      prev.message.parts.length === next.message.parts.length &&
+      prev.message.parts.every((p, i) => p.text === next.message.parts[i].text);
+
     return (
       prev.message.role === next.message.role &&
-      prev.message.parts.length === next.message.parts.length &&
-      prev.message.parts.every((p, i) => p.text === next.message.parts[i].text) &&
+      partsMatch &&
       prev.message.sources?.length === next.message.sources?.length &&
       prev.isLast === next.isLast
     );
