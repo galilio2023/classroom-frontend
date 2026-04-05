@@ -46,23 +46,13 @@ export const ChatSourceBadge = ({ source, index }: ChatSourceBadgeProps) => {
                           <ExternalLink className="h-2.5 w-2.5" />
                         </a>
                       ) : (
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <span className="cursor-not-allowed opacity-50" aria-disabled="true">
-                                <ExternalLink className="h-2.5 w-2.5" />
-                              </span>
-                            </TooltipTrigger>
-                            <TooltipContent
-                              side="top"
-                              className="text-[10px] font-bold bg-destructive text-destructive-foreground"
-                            >
-                              {t("aiHub.studyLab.studyBuddy.unsafeLink", {
-                                defaultValue: "Unsafe or malformed link",
-                              })}
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
+                        <span
+                          className="cursor-not-allowed opacity-40"
+                          aria-disabled="true"
+                          title="Unsafe link blocked"
+                        >
+                          <ExternalLink className="h-2.5 w-2.5" />
+                        </span>
                       );
                     })()
                   ) : (
