@@ -73,7 +73,7 @@ export const BulkEnrollDialog = ({ open, onOpenChange, classId }: BulkEnrollDial
         setJobId(null);
         toast.success(t("classes.show.students.bulk.success" as any));
         invalidate({
-          resource: "my-classes",
+          resource: "enrollments",
           invalidates: ["list"],
         });
       }
@@ -137,7 +137,7 @@ export const BulkEnrollDialog = ({ open, onOpenChange, classId }: BulkEnrollDial
             setLoading(false);
             toast.success(t("classes.show.students.bulk.success" as any));
             invalidate({
-              resource: "my-classes",
+              resource: "enrollments",
               invalidates: ["list"],
             });
           }
