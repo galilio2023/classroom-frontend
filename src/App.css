@@ -21,6 +21,7 @@
   --primary: hsl(var(--primary-hsl));
   --primary-foreground: hsl(0 0% 100%);
 
+  /* 🤖 AI BRAND IDENTITY: Ensure HSL and RGB stay synchronized if updated */
   --ai-primary-hsl: 270 90% 60%;
   --ai-primary-rgb: 153 61 245;
   --ai-primary: hsl(var(--ai-primary-hsl));

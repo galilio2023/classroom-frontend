@@ -74,7 +74,7 @@ export const AIRiskBadge = memo(({ riskLevel, className, showText = false }: AIR
             <Badge
               variant="outline"
               className={cn(
-                "px-2 py-0.5 rounded-lg font-black uppercase tracking-tighter text-[10px] flex items-center gap-1.5 transition-all hover:scale-105 border-transparent",
+                "px-2 py-0.5 rounded-lg font-black uppercase tracking-normal text-xs flex items-center gap-1.5 transition-all hover:scale-105 border-transparent",
                 config.color,
                 className
               )}
