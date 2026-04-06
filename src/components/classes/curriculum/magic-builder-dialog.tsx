@@ -66,6 +66,301 @@ interface MagicBuilderDialogProps {
   isGenerating?: boolean;
 }
 
+/**
+ * 🛠️ SUB-COMPONENT: Progress View
+ */
+const MagicBuilderProgress = ({
+  isCompleted,
+  step,
+  progress,
+  t,
+}: {
+  isCompleted: boolean;
+  step: string;
+  progress: number;
+  t: any;
+}) => (
+  <motion.div
+    key="generating"
+    initial={{ opacity: 0, y: 10 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: -10 }}
+    className="py-10 flex flex-col items-center justify-center space-y-8"
+  >
+    <div className="relative">
+      <div
+        className={cn(
+          "absolute inset-0 blur-3xl rounded-full animate-pulse transition-colors duration-1000",
+          isCompleted ? "bg-emerald-500/20" : "bg-ai-primary/20"
+        )}
+      />
+      <div className="relative bg-background rounded-3xl p-6 shadow-2xl border border-border/50">
+        {isCompleted ? (
+          <CheckCircle2 className="h-16 w-16 text-emerald-500 animate-in zoom-in duration-500" />
+        ) : (
+          <div className="relative">
+            <Loader2 className="h-16 w-16 text-ai-primary animate-spin opacity-20" />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <BrainCircuit className="h-8 w-8 text-ai-primary animate-pulse" />
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+    <div className="w-full space-y-4">
+      <div className="flex justify-between items-end px-1">
+        <div className="space-y-1">
+          <p
+            className={cn(
+              "text-[10px] font-black uppercase tracking-widest transition-colors",
+              isCompleted ? "text-emerald-500" : "text-ai-primary"
+            )}
+          >
+            {isCompleted ? (t("common.completed") as string) : step}
+          </p>
+          {!isCompleted && (
+            <p className="text-[9px] font-bold text-muted-foreground animate-pulse">
+              {t("classes.magicBuilder.wait")}
+            </p>
+          )}
+        </div>
+        <p className="text-sm font-black text-foreground">{progress}%</p>
+      </div>
+      <Progress
+        value={progress}
+        className="h-3 rounded-full bg-muted shadow-inner"
+        indicatorClassName={cn(
+          "transition-all duration-500",
+          isCompleted
+            ? "bg-emerald-500"
+            : "bg-ai-primary shadow-[0_0_15px_hsla(var(--ai-primary-hsl),0.5)]"
+        )}
+      />
+    </div>
+  </motion.div>
+);
+
+/**
+ * 🛠️ SUB-COMPONENT: Ready/Completed View
+ */
+const MagicBuilderReady = ({ onReview, t }: { onReview: () => void; t: any }) => (
+  <motion.div
+    key="completed"
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    className="py-10 flex flex-col items-center text-center space-y-6"
+  >
+    <div className="p-4 rounded-full bg-emerald-500/10 text-emerald-500">
+      <CheckCircle2 className="h-12 w-12" />
+    </div>
+    <div className="space-y-2">
+      <h4 className="text-xl font-black">{t("classes.magicBuilder.readyTitle")}</h4>
+      <p className="text-sm text-muted-foreground font-medium">
+        {t("classes.magicBuilder.readyDesc")}
+      </p>
+    </div>
+    <Button
+      onClick={onReview}
+      className="w-full h-14 rounded-2xl font-black uppercase tracking-widest text-[10px] bg-emerald-600 hover:bg-emerald-700 shadow-xl shadow-emerald-500/20"
+    >
+      <BookOpen className="h-4 w-4 me-2" />
+      {t("buttons.exploreCurriculum", "Review Suggestions")}
+    </Button>
+  </motion.div>
+);
+
+/**
+ * 🛠️ SUB-COMPONENT: Configuration Form View
+ */
+const MagicBuilderForm = ({
+  config,
+  setConfig,
+  classId,
+  setClassId,
+  classOptions,
+  classQuery,
+  initialClassId,
+  isGenerating,
+  handleStart,
+  onCancel,
+  t,
+}: {
+  config: MagicBuilderConfig;
+  setConfig: (c: MagicBuilderConfig) => void;
+  classId: string;
+  setClassId: (id: string) => void;
+  classOptions: any[];
+  classQuery: any;
+  initialClassId?: string;
+  isGenerating: boolean;
+  handleStart: () => void;
+  onCancel: () => void;
+  t: any;
+}) => (
+  <motion.div key="form" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
+    {!initialClassId && (
+      <div className="space-y-2">
+        <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">
+          {t("classes.magicBuilder.targetClass")}
+        </Label>
+        <Select value={classId} onValueChange={setClassId}>
+          <SelectTrigger className="h-14 rounded-2xl border-none bg-muted/50 shadow-inner font-bold">
+            <SelectValue
+              placeholder={
+                classQuery.isLoading
+                  ? (t("common.loading") as string)
+                  : (t("classes.magicBuilder.selectPlaceholder") as string)
+              }
+            />
+          </SelectTrigger>
+          <SelectContent className="rounded-2xl border-none shadow-2xl">
+            {classOptions.map((opt) => (
+              <SelectItem
+                key={opt.value}
+                value={opt.value.toString()}
+                className="rounded-xl py-3 font-bold"
+              >
+                {opt.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    )}
+
+    <div className="grid grid-cols-2 gap-4">
+      <div className="space-y-2">
+        <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">
+          {t("classes.magicBuilder.subjectArea")}
+        </Label>
+        <div className="relative group">
+          <LayoutGrid className="absolute start-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-ai-primary transition-colors" />
+          <Input
+            placeholder={t("classes.magicBuilder.subjectPlaceholder") as string}
+            value={config.subject}
+            onChange={(e) => setConfig({ ...config, subject: e.target.value })}
+            className="ps-11 h-14 rounded-2xl border-none bg-muted/50 shadow-inner font-bold"
+          />
+        </div>
+      </div>
+      <div className="space-y-2">
+        <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">
+          {t("aiHub.assistant.helper.level")}
+        </Label>
+        <Select
+          value={config.level}
+          onValueChange={(v: MagicBuilderLevel) => setConfig({ ...config, level: v })}
+        >
+          <SelectTrigger className="h-14 rounded-2xl border-none bg-muted/50 shadow-inner font-bold">
+            <div className="flex items-center gap-2">
+              <GraduationCap className="h-4 w-4 text-primary" />
+              <SelectValue />
+            </div>
+          </SelectTrigger>
+          <SelectContent className="rounded-2xl border-none shadow-xl">
+            <SelectItem value="primary">{t("aiHub.assistant.helper.levels.beginner")}</SelectItem>
+            <SelectItem value="high_school">
+              {t("aiHub.assistant.helper.levels.intermediate")}
+            </SelectItem>
+            <SelectItem value="university">
+              {t("aiHub.assistant.helper.levels.advanced")}
+            </SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+    </div>
+
+    <div className="space-y-2">
+      <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">
+        {t("classes.magicBuilder.topicLabel")}
+      </Label>
+      <div className="relative group">
+        <Sparkles className="absolute start-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-ai-primary transition-colors" />
+        <Input
+          placeholder={t("classes.magicBuilder.topicPlaceholder") as string}
+          value={config.topic}
+          onChange={(e) => setConfig({ ...config, topic: e.target.value })}
+          className="ps-11 h-14 rounded-2xl border-none bg-muted/50 shadow-inner font-bold"
+        />
+      </div>
+    </div>
+
+    <div className="grid grid-cols-2 gap-4">
+      <div className="space-y-2">
+        <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">
+          {t("classes.resource.addDialog.fieldType")}
+        </Label>
+        <Select
+          value={config.type}
+          onValueChange={(v: MagicBuilderConfig["type"]) => setConfig({ ...config, type: v })}
+        >
+          <SelectTrigger className="h-14 rounded-2xl border-none bg-muted/50 shadow-inner font-bold">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent className="rounded-2xl border-none shadow-xl">
+            <SelectItem value="package">{t("aiHub.assistant.architect")}</SelectItem>
+            <SelectItem value="note">{t("classes.resource.addDialog.types.note")}</SelectItem>
+            <SelectItem value="quiz">{t("classes.show.tabs.quizzes")}</SelectItem>
+            <SelectItem value="assignment">{t("classes.show.tabs.assignments")}</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="space-y-2">
+        <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">
+          {t("aiHub.assistant.helper.tone")}
+        </Label>
+        <Select
+          value={config.tone}
+          onValueChange={(v: MagicBuilderTone) => setConfig({ ...config, tone: v })}
+        >
+          <SelectTrigger className="h-14 rounded-2xl border-none bg-muted/50 shadow-inner font-bold">
+            <div className="flex items-center gap-2">
+              <MessageSquare className="h-4 w-4 text-primary" />
+              <SelectValue />
+            </div>
+          </SelectTrigger>
+          <SelectContent className="rounded-2xl border-none shadow-xl">
+            <SelectItem value="academic">{t("aiHub.assistant.helper.tones.academic")}</SelectItem>
+            <SelectItem value="creative">{t("aiHub.assistant.helper.tones.creative")}</SelectItem>
+            <SelectItem value="practical">{t("aiHub.assistant.helper.tones.practical")}</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+    </div>
+
+    <div className="space-y-2">
+      <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1 flex items-center gap-2">
+        <Target className="h-3.5 w-3.5 text-primary" />
+        {t("aiHub.assistant.helper.objectives")}
+      </Label>
+      <Textarea
+        placeholder={t("aiHub.assistant.helper.placeholders.objectives")}
+        value={config.objectives}
+        onChange={(e) => setConfig({ ...config, objectives: e.target.value })}
+        className="resize-none h-20 rounded-2xl border-none bg-muted/50 shadow-inner font-bold text-xs"
+      />
+    </div>
+
+    <div className="pt-4 space-y-3">
+      <Button
+        disabled={!config.topic || !classId || isGenerating}
+        onClick={handleStart}
+        className="w-full h-14 rounded-2xl font-black uppercase tracking-widest text-[10px] gap-3 bg-ai-primary hover:bg-ai-primary/90 shadow-xl shadow-ai-primary/20 transition-all hover:scale-105 active:scale-95 group"
+      >
+        <Zap className="h-5 w-5 animate-pulse group-hover:rotate-12 transition-transform" />
+        {t("buttons.generateWithGemini", "Generate with Gemini")}
+      </Button>
+      <Button
+        variant="ghost"
+        onClick={onCancel}
+        className="w-full h-12 rounded-xl font-black uppercase tracking-widest text-[10px] text-muted-foreground"
+      >
+        {t("buttons.cancel")}
+      </Button>
+    </div>
+  </motion.div>
+);
+
 export const MagicBuilderDialog = ({
   open,
   onOpenChange,
@@ -109,20 +404,20 @@ export const MagicBuilderDialog = ({
     queryOptions: { enabled: !initialClassId && open && isAiEnabled },
   });
 
+  // 🛡️ JOB ID: Unique to class + type to prevent collisions
+  const jobId = useMemo(() => `magic-builder-${config.type}-${classId}`, [config.type, classId]);
+
   const activeJob = useMemo(() => {
     return jobs.find(
-      (j) =>
-        j.type === "magic-builder" &&
-        j.metadata?.classId === Number(classId) &&
-        (j.status === "processing" || j.status === "completed")
+      (j) => j.id === jobId && (j.status === "processing" || j.status === "completed")
     );
-  }, [jobs, classId]);
+  }, [jobs, jobId]);
 
   const progress = activeJob?.metadata?.progress || 0;
   const step = activeJob?.metadata?.step || "";
   const isCompleted = activeJob?.status === "completed";
 
-  // 🛡️ LOADING STATE: Derive isGenerating strictly from job status or external prop
+  // 🛡️ LOADING STATE: Derive isGenerating strictly from job status, internal state, or external prop
   const isGenerating = useMemo(() => {
     if (externalIsGenerating) return true;
     return activeJob?.status === "processing" || internalIsGenerating;
@@ -138,10 +433,8 @@ export const MagicBuilderDialog = ({
     }
 
     const initialStep = t("common.starting");
-    const jobId = `magic-builder-${classId}`;
 
     // 🛡️ JOB SYNC: Ensure addJob is called for both internal and external flows
-    // so the UI can track progress correctly via the global Job Context.
     addJob({
       id: jobId,
       type: "magic-builder",
@@ -184,16 +477,51 @@ export const MagicBuilderDialog = ({
     }
   };
 
+  /**
+   * 🛡️ UX POLISH: Determine the current view based on job status and loading state
+   */
+  const renderContent = () => {
+    if (isGenerating) {
+      return (
+        <MagicBuilderProgress isCompleted={isCompleted} step={step} progress={progress} t={t} />
+      );
+    }
+
+    if (isCompleted) {
+      return (
+        <MagicBuilderReady
+          onReview={() => {
+            onOpenChange(false);
+            removeJob(jobId);
+          }}
+          t={t}
+        />
+      );
+    }
+
+    return (
+      <MagicBuilderForm
+        config={config}
+        setConfig={setConfig}
+        classId={classId}
+        setClassId={setClassId}
+        classOptions={classOptions}
+        classQuery={classQuery}
+        initialClassId={initialClassId}
+        isGenerating={isGenerating}
+        handleStart={handleStart}
+        onCancel={() => onOpenChange(false)}
+        t={t}
+      />
+    );
+  };
+
   return (
     <Dialog
       open={open}
       onOpenChange={(val) => {
         onOpenChange(val);
-        if (!val) {
-          // 🛡️ UX POLISH: Do not auto-remove job on close to prevent data loss if closed accidentally.
-          // Job is only removed when explicitly clicking "Review Suggestions" in the completed state.
-          reset();
-        }
+        if (!val) reset();
       }}
     >
       <DialogContent className="sm:max-w-125 border-none shadow-2xl bg-background/95 backdrop-blur-xl p-0 overflow-hidden">
@@ -232,277 +560,7 @@ export const MagicBuilderDialog = ({
               </div>
             </DialogHeader>
 
-            <AnimatePresence mode="wait">
-              {isGenerating ? (
-                <motion.div
-                  key="generating"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className="py-10 flex flex-col items-center justify-center space-y-8"
-                >
-                  <div className="relative">
-                    <div
-                      className={cn(
-                        "absolute inset-0 blur-3xl rounded-full animate-pulse transition-colors duration-1000",
-                        isCompleted ? "bg-emerald-500/20" : "bg-ai-primary/20"
-                      )}
-                    />
-                    <div className="relative bg-background rounded-3xl p-6 shadow-2xl border border-border/50">
-                      {isCompleted ? (
-                        <CheckCircle2 className="h-16 w-16 text-emerald-500 animate-in zoom-in duration-500" />
-                      ) : (
-                        <div className="relative">
-                          <Loader2 className="h-16 w-16 text-ai-primary animate-spin opacity-20" />
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <BrainCircuit className="h-8 w-8 text-ai-primary animate-pulse" />
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  <div className="w-full space-y-4">
-                    <div className="flex justify-between items-end px-1">
-                      <div className="space-y-1">
-                        <p
-                          className={cn(
-                            "text-[10px] font-black uppercase tracking-widest transition-colors",
-                            isCompleted ? "text-emerald-500" : "text-ai-primary"
-                          )}
-                        >
-                          {isCompleted ? (t("common.completed") as string) : step}
-                        </p>
-                        {!isCompleted && (
-                          <p className="text-[9px] font-bold text-muted-foreground animate-pulse">
-                            {t("classes.magicBuilder.wait")}
-                          </p>
-                        )}
-                      </div>
-                      <p className="text-sm font-black text-foreground">{progress}%</p>
-                    </div>
-                    <Progress
-                      value={progress}
-                      className="h-3 rounded-full bg-muted shadow-inner"
-                      indicatorClassName={cn(
-                        "transition-all duration-500",
-                        isCompleted
-                          ? "bg-emerald-500"
-                          : "bg-ai-primary shadow-[0_0_15px_hsla(var(--ai-primary-hsl),0.5)]"
-                      )}
-                    />
-                  </div>
-                </motion.div>
-              ) : isCompleted ? (
-                <motion.div
-                  key="completed"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="py-10 flex flex-col items-center text-center space-y-6"
-                >
-                  <div className="p-4 rounded-full bg-emerald-500/10 text-emerald-500">
-                    <CheckCircle2 className="h-12 w-12" />
-                  </div>
-                  <div className="space-y-2">
-                    <h4 className="text-xl font-black">{t("classes.magicBuilder.readyTitle")}</h4>
-                    <p className="text-sm text-muted-foreground font-medium">
-                      {t("classes.magicBuilder.readyDesc")}
-                    </p>
-                  </div>
-                  <Button
-                    onClick={() => {
-                      onOpenChange(false);
-                      removeJob(`magic-builder-${classId}`);
-                    }}
-                    className="w-full h-14 rounded-2xl font-black uppercase tracking-widest text-[10px] bg-emerald-600 hover:bg-emerald-700 shadow-xl shadow-emerald-500/20"
-                  >
-                    <BookOpen className="h-4 w-4 me-2" />
-                    {t("buttons.exploreCurriculum", "Review Suggestions")}
-                  </Button>
-                </motion.div>
-              ) : (
-                <motion.div
-                  key="form"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="space-y-5"
-                >
-                  {!initialClassId && (
-                    <div className="space-y-2">
-                      <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">
-                        {t("classes.magicBuilder.targetClass")}
-                      </Label>
-                      <Select value={classId} onValueChange={setClassId}>
-                        <SelectTrigger className="h-14 rounded-2xl border-none bg-muted/50 shadow-inner font-bold">
-                          <SelectValue
-                            placeholder={
-                              classQuery.isLoading
-                                ? (t("common.loading") as string)
-                                : (t("classes.magicBuilder.selectPlaceholder") as string)
-                            }
-                          />
-                        </SelectTrigger>
-                        <SelectContent className="rounded-2xl border-none shadow-2xl">
-                          {classOptions.map((opt) => (
-                            <SelectItem
-                              key={opt.value}
-                              value={opt.value.toString()}
-                              className="rounded-xl py-3 font-bold"
-                            >
-                              {opt.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  )}
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">
-                        {t("classes.magicBuilder.subjectArea")}
-                      </Label>
-                      <div className="relative group">
-                        <LayoutGrid className="absolute start-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-ai-primary transition-colors" />
-                        <Input
-                          placeholder={t("classes.magicBuilder.subjectPlaceholder") as string}
-                          value={config.subject}
-                          onChange={(e) => setConfig({ ...config, subject: e.target.value })}
-                          className="ps-11 h-14 rounded-2xl border-none bg-muted/50 shadow-inner font-bold"
-                        />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">
-                        {t("aiHub.assistant.helper.level")}
-                      </Label>
-                      <Select
-                        value={config.level}
-                        onValueChange={(v: MagicBuilderLevel) => setConfig({ ...config, level: v })}
-                      >
-                        <SelectTrigger className="h-14 rounded-2xl border-none bg-muted/50 shadow-inner font-bold">
-                          <div className="flex items-center gap-2">
-                            <GraduationCap className="h-4 w-4 text-primary" />
-                            <SelectValue />
-                          </div>
-                        </SelectTrigger>
-                        <SelectContent className="rounded-2xl border-none shadow-xl">
-                          <SelectItem value="primary">
-                            {t("aiHub.assistant.helper.levels.beginner")}
-                          </SelectItem>
-                          <SelectItem value="high_school">
-                            {t("aiHub.assistant.helper.levels.intermediate")}
-                          </SelectItem>
-                          <SelectItem value="university">
-                            {t("aiHub.assistant.helper.levels.advanced")}
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">
-                      {t("classes.magicBuilder.topicLabel")}
-                    </Label>
-                    <div className="relative group">
-                      <Sparkles className="absolute start-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-ai-primary transition-colors" />
-                      <Input
-                        placeholder={t("classes.magicBuilder.topicPlaceholder") as string}
-                        value={config.topic}
-                        onChange={(e) => setConfig({ ...config, topic: e.target.value })}
-                        className="ps-11 h-14 rounded-2xl border-none bg-muted/50 shadow-inner font-bold"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">
-                        {t("classes.resource.addDialog.fieldType")}
-                      </Label>
-                      <Select
-                        value={config.type}
-                        onValueChange={(v: MagicBuilderConfig["type"]) =>
-                          setConfig({ ...config, type: v })
-                        }
-                      >
-                        <SelectTrigger className="h-14 rounded-2xl border-none bg-muted/50 shadow-inner font-bold">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="rounded-2xl border-none shadow-xl">
-                          <SelectItem value="package">{t("aiHub.assistant.architect")}</SelectItem>
-                          <SelectItem value="note">
-                            {t("classes.resource.addDialog.types.note")}
-                          </SelectItem>
-                          <SelectItem value="quiz">{t("classes.show.tabs.quizzes")}</SelectItem>
-                          <SelectItem value="assignment">
-                            {t("classes.show.tabs.assignments")}
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">
-                        {t("aiHub.assistant.helper.tone")}
-                      </Label>
-                      <Select
-                        value={config.tone}
-                        onValueChange={(v: MagicBuilderTone) => setConfig({ ...config, tone: v })}
-                      >
-                        <SelectTrigger className="h-14 rounded-2xl border-none bg-muted/50 shadow-inner font-bold">
-                          <div className="flex items-center gap-2">
-                            <MessageSquare className="h-4 w-4 text-primary" />
-                            <SelectValue />
-                          </div>
-                        </SelectTrigger>
-                        <SelectContent className="rounded-2xl border-none shadow-xl">
-                          <SelectItem value="academic">
-                            {t("aiHub.assistant.helper.tones.academic")}
-                          </SelectItem>
-                          <SelectItem value="creative">
-                            {t("aiHub.assistant.helper.tones.creative")}
-                          </SelectItem>
-                          <SelectItem value="practical">
-                            {t("aiHub.assistant.helper.tones.practical")}
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1 flex items-center gap-2">
-                      <Target className="h-3.5 w-3.5 text-primary" />
-                      {t("aiHub.assistant.helper.objectives")}
-                    </Label>
-                    <Textarea
-                      placeholder={t("aiHub.assistant.helper.placeholders.objectives")}
-                      value={config.objectives}
-                      onChange={(e) => setConfig({ ...config, objectives: e.target.value })}
-                      className="resize-none h-20 rounded-2xl border-none bg-muted/50 shadow-inner font-bold text-xs"
-                    />
-                  </div>
-
-                  <div className="pt-4 space-y-3">
-                    <Button
-                      disabled={!config.topic || !classId || isGenerating}
-                      onClick={handleStart}
-                      className="w-full h-14 rounded-2xl font-black uppercase tracking-widest text-[10px] gap-3 bg-ai-primary hover:bg-ai-primary/90 shadow-xl shadow-ai-primary/20 transition-all hover:scale-105 active:scale-95 group"
-                    >
-                      <Zap className="h-5 w-5 animate-pulse group-hover:rotate-12 transition-transform" />
-                      {t("buttons.generateWithGemini", "Generate with Gemini")}
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      onClick={() => onOpenChange(false)}
-                      className="w-full h-12 rounded-xl font-black uppercase tracking-widest text-[10px] text-muted-foreground"
-                    >
-                      {t("buttons.cancel")}
-                    </Button>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            <AnimatePresence mode="wait">{renderContent()}</AnimatePresence>
           </div>
         )}
       </DialogContent>
