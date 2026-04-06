@@ -71,6 +71,9 @@ export const useSidebarMenu = () => {
             "settings",
             "activity-log",
             "profile-requests",
+            "teacher-applications",
+            "ai-governance",
+            "monetization",
           ].includes(item.name)
         )
           return;

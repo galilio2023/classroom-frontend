@@ -478,7 +478,7 @@ export const resources: ResourceProps[] = [
   },
   {
     name: "settings",
-    edit: "/settings/edit",
+    list: "/settings",
     meta: {
       group: "groups.admin",
       label: "resources.settings.label",
