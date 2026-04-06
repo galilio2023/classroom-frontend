@@ -36,9 +36,14 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        // Clean up very old jobs (> 24h)
+        // 🛡️ AUTO-CLEANUP: Remove very old jobs (> 24h) or completed/failed jobs (> 1h)
         const dayAgo = Date.now() - 24 * 60 * 60 * 1000;
-        const valid = parsed.filter((j: BackgroundJob) => j.createdAt > dayAgo);
+        const hourAgo = Date.now() - 60 * 60 * 1000;
+
+        const valid = parsed.filter((j: BackgroundJob) => {
+          if (j.status === "processing") return j.createdAt > dayAgo;
+          return j.createdAt > hourAgo;
+        });
         setJobs(valid);
       } catch (e) {
         console.error("Failed to load jobs from storage", e);

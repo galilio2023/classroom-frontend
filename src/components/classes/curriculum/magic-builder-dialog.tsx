@@ -164,6 +164,9 @@ export const MagicBuilderDialog = ({
           },
         },
         {
+          onSuccess: () => {
+            setInternalIsGenerating(false);
+          },
           onError: (error) => {
             console.error("AI Magic Builder failed:", error);
             toast.error(t("common.errors.aiFailed"));

@@ -2,8 +2,9 @@ import React, { Component, ErrorInfo, ReactNode } from "react";
 import { AlertCircle, RefreshCcw, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { withTranslation, WithTranslation } from "react-i18next";
 
-interface Props {
+interface Props extends WithTranslation {
   children: ReactNode;
   fallback?: ReactNode;
   name?: string;
@@ -14,7 +15,7 @@ interface State {
   error: Error | null;
 }
 
-export class AIErrorBoundary extends Component<Props, State> {
+class AIErrorBoundaryBase extends Component<Props, State> {
   public state: State = {
     hasError: false,
     error: null,
@@ -33,6 +34,8 @@ export class AIErrorBoundary extends Component<Props, State> {
   };
 
   public render() {
+    const { t } = this.props;
+
     if (this.state.hasError) {
       if (this.props.fallback) return this.props.fallback;
 
@@ -45,9 +48,14 @@ export class AIErrorBoundary extends Component<Props, State> {
             </div>
           </div>
           <div className="space-y-1">
-            <h3 className="text-lg font-black tracking-tight">AI Assistant Offline</h3>
+            <h3 className="text-lg font-black tracking-tight">
+              {t("ai.errorBoundary.title", "AI Assistant Offline")}
+            </h3>
             <p className="text-xs font-medium text-muted-foreground max-w-[240px]">
-              Something went wrong while communicating with Gemini. This is usually temporary.
+              {t(
+                "ai.errorBoundary.description",
+                "Something went wrong while communicating with Gemini. This is usually temporary."
+              )}
             </p>
           </div>
           <Button
@@ -57,7 +65,7 @@ export class AIErrorBoundary extends Component<Props, State> {
             className="rounded-xl h-10 px-6 font-black uppercase tracking-widest text-[10px] gap-2 border-ai-primary/20 text-ai-primary hover:bg-ai-primary/5"
           >
             <RefreshCcw className="h-3 w-3" />
-            Try Again
+            {t("ai.errorBoundary.tryAgain", "Try Again")}
           </Button>
         </Card>
       );
@@ -66,3 +74,5 @@ export class AIErrorBoundary extends Component<Props, State> {
     return this.props.children;
   }
 }
+
+export const AIErrorBoundary = withTranslation()(AIErrorBoundaryBase);

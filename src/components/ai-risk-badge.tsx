@@ -29,13 +29,15 @@ const getRiskConfig = (t: TFunction) => ({
     desc: t("classes.risk.mediumDesc", "Slight dip in performance or attendance detected."),
   },
   high: {
-    color: "bg-orange-500/10 text-orange-600 border-orange-500/20",
+    color:
+      "bg-orange-500/10 text-orange-600 border-orange-500/20 ai-gradient-border shadow-[0_0_10px_rgba(var(--ai-primary-rgb),0.1)]",
     icon: AlertTriangle,
     label: t("classes.risk.high", "High Risk"),
     desc: t("classes.risk.highDesc", "Significant struggle detected. Intervention recommended."),
   },
   critical: {
-    color: "bg-destructive/10 text-destructive border-destructive/20",
+    color:
+      "bg-destructive/10 text-destructive border-destructive/20 ai-gradient-border shadow-[0_0_15px_rgba(var(--ai-primary-rgb),0.15)]",
     icon: ShieldAlert,
     label: t("classes.risk.critical", "Critical Risk"),
     desc: t("classes.risk.criticalDesc", "Urgent: Student is at risk of failing this class."),

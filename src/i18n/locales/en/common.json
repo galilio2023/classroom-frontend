@@ -423,6 +423,13 @@
     "copied": "Copied!",
     "confirmUnenroll": "Confirm Unenroll",
     "processing": "Processing...",
+    "ai": {
+      "errorBoundary": {
+        "title": "AI Assistant Offline",
+        "description": "Something went wrong while communicating with Gemini. This is usually temporary.",
+        "tryAgain": "Try Again"
+      }
+    },
     "magicBuilder": "Magic Builder",
     "addModule": "Add Module",
     "aiMagicBuilder": "AI Magic Builder",
