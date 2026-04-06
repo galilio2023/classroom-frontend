@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ScanLine, ArrowRight, Camera } from "lucide-react";
+import { ScanLine, Camera } from "lucide-react";
 import { QRScannerModal } from "./qr-scanner-modal";
 import { Class } from "@/types";
 import { useTerm } from "@/contexts/term-context";
@@ -33,7 +33,7 @@ export const QRScannerSelectorDialog = ({ open, onOpenChange }: QRScannerSelecto
   const [showScanner, setShowScanner] = useState(false);
 
   // Fetch classes for the current student in the selected term
-  const { data: classesData, isLoading } = useList<Class>({
+  const { query } = useList<Class>({
     resource: "my-classes",
     filters: selectedTerm
       ? [
@@ -50,7 +50,8 @@ export const QRScannerSelectorDialog = ({ open, onOpenChange }: QRScannerSelecto
     }
   });
 
-  const classes = (classesData?.data as any) || [];
+  const classes = (query.data?.data as any) || [];
+  const isLoading = query.isLoading;
 
   const handleNext = () => {
     if (selectedClassId) {
@@ -89,10 +90,10 @@ export const QRScannerSelectorDialog = ({ open, onOpenChange }: QRScannerSelecto
               </div>
               <div>
                 <DialogTitle className="text-2xl font-black tracking-tight">
-                  {t("classes.attendance.scanQR", "Scan QR Attendance")}
+                  {t("classes.attendance.scanQR" as any, "Scan QR Attendance")}
                 </DialogTitle>
                 <DialogDescription className="font-bold text-muted-foreground/80">
-                  {t("classes.attendance.selectClassToScan", "Select the class you are attending to open the scanner.")}
+                  {t("classes.attendance.selectClassToScan" as any, "Select the class you are attending to open the scanner.")}
                 </DialogDescription>
               </div>
             </div>
@@ -101,11 +102,11 @@ export const QRScannerSelectorDialog = ({ open, onOpenChange }: QRScannerSelecto
           <div className="space-y-4">
             <div className="space-y-2">
               <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">
-                {t("classes.attendance.targetClass", "Target Class")}
+                {t("classes.attendance.targetClass" as any, "Target Class")}
               </label>
               <Select value={selectedClassId} onValueChange={setSelectedClassId}>
                 <SelectTrigger className="h-14 rounded-2xl border-none bg-muted/50 shadow-inner font-bold focus:ring-2 focus:ring-primary/20">
-                  <SelectValue placeholder={isLoading ? t("common.loading") : t("classes.attendance.selectPlaceholder", "Select a class...")} />
+                  <SelectValue placeholder={isLoading ? (t("common.loading" as any) as string) : (t("classes.attendance.selectPlaceholder" as any, "Select a class...") as string)} />
                 </SelectTrigger>
                 <SelectContent className="rounded-2xl border-none shadow-2xl">
                   {classes.map((item: any) => {
@@ -118,7 +119,7 @@ export const QRScannerSelectorDialog = ({ open, onOpenChange }: QRScannerSelecto
                   })}
                   {classes.length === 0 && !isLoading && (
                     <div className="p-4 text-center text-xs font-bold text-muted-foreground">
-                      {t("classes.attendance.noClassesFound", "No classes found for this term.")}
+                      {t("classes.attendance.noClassesFound" as any, "No classes found for this term.")}
                     </div>
                   )}
                 </SelectContent>
@@ -130,7 +131,7 @@ export const QRScannerSelectorDialog = ({ open, onOpenChange }: QRScannerSelecto
               onClick={handleNext}
               className="w-full h-14 rounded-2xl font-black uppercase tracking-widest text-[10px] gap-2 shadow-xl shadow-primary/20 transition-all hover:scale-105 active:scale-95 mt-2"
             >
-              {t("buttons.openScanner", "Open Scanner")}
+              {t("buttons.openScanner" as any, "Open Scanner")}
               <Camera className="h-4 w-4" />
             </Button>
           </div>

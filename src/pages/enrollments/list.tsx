@@ -245,10 +245,7 @@ const EnrollmentsList = () => {
           </motion.div>
 
           {/* Bulk Enroll Dialog */}
-          <BulkEnrollSelectorDialog
-            open={isBulkEnrollOpen}
-            onOpenChange={setIsBulkEnrollOpen}
-          />
+          <BulkEnrollSelectorDialog open={isBulkEnrollOpen} onOpenChange={setIsBulkEnrollOpen} />
 
           {/* Stats Row */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

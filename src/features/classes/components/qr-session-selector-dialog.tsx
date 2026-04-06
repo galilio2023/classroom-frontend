@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { QrCode, ArrowRight, Play } from "lucide-react";
+import { QrCode, Play } from "lucide-react";
 import { QRAttendanceModal } from "./qr-attendance-modal";
 import { Class } from "@/types";
 import { useTerm } from "@/contexts/term-context";
@@ -33,7 +33,7 @@ export const QRSessionSelectorDialog = ({ open, onOpenChange }: QRSessionSelecto
   const [showQR, setShowQR] = useState(false);
 
   // Fetch classes for the current teacher in the selected term
-  const { data: classesData, isLoading } = useList<Class>({
+  const { query } = useList<Class>({
     resource: "classes",
     filters: selectedTerm
       ? [
@@ -50,7 +50,8 @@ export const QRSessionSelectorDialog = ({ open, onOpenChange }: QRSessionSelecto
     }
   });
 
-  const classes = classesData?.data || [];
+  const classes = query.data?.data || [];
+  const isLoading = query.isLoading;
 
   const handleStart = () => {
     if (selectedClassId) {
@@ -89,10 +90,10 @@ export const QRSessionSelectorDialog = ({ open, onOpenChange }: QRSessionSelecto
               </div>
               <div>
                 <DialogTitle className="text-2xl font-black tracking-tight">
-                  {t("classes.attendance.startQrSession", "Start QR Session")}
+                  {t("classes.attendance.startQrSession" as any, "Start QR Session")}
                 </DialogTitle>
                 <DialogDescription className="font-bold text-muted-foreground/80">
-                  {t("classes.attendance.selectClassToStart", "Choose a class to display the live attendance QR code.")}
+                  {t("classes.attendance.selectClassToStart" as any, "Choose a class to display the live attendance QR code.")}
                 </DialogDescription>
               </div>
             </div>
@@ -101,21 +102,21 @@ export const QRSessionSelectorDialog = ({ open, onOpenChange }: QRSessionSelecto
           <div className="space-y-4">
             <div className="space-y-2">
               <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">
-                {t("classes.attendance.targetClass", "Target Class")}
+                {t("classes.attendance.targetClass" as any, "Target Class")}
               </label>
               <Select value={selectedClassId} onValueChange={setSelectedClassId}>
                 <SelectTrigger className="h-14 rounded-2xl border-none bg-muted/50 shadow-inner font-bold focus:ring-2 focus:ring-primary/20">
-                  <SelectValue placeholder={isLoading ? t("common.loading") : t("classes.attendance.selectPlaceholder", "Select a class...")} />
+                  <SelectValue placeholder={isLoading ? (t("common.loading" as any) as string) : (t("classes.attendance.selectPlaceholder" as any, "Select a class...") as string)} />
                 </SelectTrigger>
                 <SelectContent className="rounded-2xl border-none shadow-2xl">
-                  {classes.map((c) => (
+                  {classes.map((c: Class) => (
                     <SelectItem key={c.id} value={c.id.toString()} className="rounded-xl py-3 font-bold">
                       {c.name}
                     </SelectItem>
                   ))}
                   {classes.length === 0 && !isLoading && (
                     <div className="p-4 text-center text-xs font-bold text-muted-foreground">
-                      {t("classes.attendance.noClassesFound", "No classes found for this term.")}
+                      {t("classes.attendance.noClassesFound" as any, "No classes found for this term.")}
                     </div>
                   )}
                 </SelectContent>
@@ -127,7 +128,7 @@ export const QRSessionSelectorDialog = ({ open, onOpenChange }: QRSessionSelecto
               onClick={handleStart}
               className="w-full h-14 rounded-2xl font-black uppercase tracking-widest text-[10px] gap-2 shadow-xl shadow-primary/20 transition-all hover:scale-105 active:scale-95 mt-2"
             >
-              {t("buttons.startSession", "Start Session")}
+              {t("buttons.startSession" as any, "Start Session")}
               <Play className="h-4 w-4" />
             </Button>
           </div>

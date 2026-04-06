@@ -117,7 +117,10 @@ export const XPCelebration = () => {
                   {activeXP.reason || t("gamification.xpGained", "XP Gained!")}
                 </p>
                 <p className="text-lg font-black tracking-tight">
-                  {t("gamification.currentXP", { count: activeXP.totalXP, defaultValue: "{{count}} Total XP" })}
+                  {t("gamification.currentXP", {
+                    count: activeXP.totalXP,
+                    defaultValue: "{{count}} Total XP",
+                  })}
                 </p>
               </div>
             </motion.div>
@@ -162,9 +165,7 @@ export const XPCelebration = () => {
                 <h3 className="text-[10px] font-black uppercase tracking-widest text-amber-600">
                   New Badge Unlocked
                 </h3>
-                <h2 className="text-2xl font-black tracking-tight">
-                  {activeBadge.badge.name}
-                </h2>
+                <h2 className="text-2xl font-black tracking-tight">{activeBadge.badge.name}</h2>
                 <p className="text-xs font-medium text-muted-foreground italic">
                   "{activeBadge.badge.description}"
                 </p>

@@ -13,7 +13,7 @@ const rawApiUrl = getEnvVar("VITE_API_URL", "http://localhost:8000/api");
 
 // 🚀 RUNTIME CONFIG: Better Auth REQUIRES absolute URLs.
 // We prioritize VITE_API_URL if it's absolute, otherwise fallback to runtime origin.
-export const BACKEND_URL = rawApiUrl.startsWith("http") 
+export const BACKEND_URL = rawApiUrl.startsWith("http")
   ? rawApiUrl.replace(/\/+$/, "")
   : `${window.location.origin}/api`;
 

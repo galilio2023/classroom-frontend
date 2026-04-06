@@ -53,7 +53,7 @@ export class AIErrorBoundary extends Component<Props, State> {
           <Button
             variant="outline"
             size="sm"
-            onClick={handleReset}
+            onClick={this.handleReset}
             className="rounded-xl h-10 px-6 font-black uppercase tracking-widest text-[10px] gap-2 border-ai-primary/20 text-ai-primary hover:bg-ai-primary/5"
           >
             <RefreshCcw className="h-3 w-3" />
@@ -63,6 +63,6 @@ export class AIErrorBoundary extends Component<Props, State> {
       );
     }
 
-    return this.children;
+    return this.props.children;
   }
 }

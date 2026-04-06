@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Enrollment, User } from "@/types";
-import { HttpError, useInvalidate } from "@refinedev/core";
+import { HttpError } from "@refinedev/core";
 import { ColumnDef } from "@tanstack/react-table";
 import { useTable } from "@refinedev/react-table";
 import { DataTable } from "@/components/refine-ui/data-table/data-table";
@@ -9,7 +9,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import {
-  Calendar,
   Sparkles,
   Trash2,
   UserPlus,
@@ -18,11 +17,9 @@ import {
   CheckCircle2,
   XCircle,
   FileSpreadsheet,
-  ShieldAlert,
   TrendingDown,
   BrainCircuit,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { motion, AnimatePresence } from "framer-motion";
@@ -30,6 +27,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { BulkEnrollDialog } from "./bulk-enroll-dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { AIRiskBadge } from "@/components/ai-risk-badge";
+import { AiFeatureGuard } from "../../ai/AiFeatureGuard";
 import dayjs from "dayjs";
 
 interface StudentsTabProps {
@@ -89,7 +87,7 @@ export const StudentsTab = ({
         id: "student",
         header: () => (
           <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-            {t("classes.show.students.table.student")}
+            {t("classes.show.students.table.student" as any)}
           </p>
         ),
         accessorKey: "student",
@@ -116,7 +114,9 @@ export const StudentsTab = ({
                   </span>
 
                   {isStaff && riskAssessment && (
-                    <AIRiskBadge riskLevel={riskAssessment.riskLevel} />
+                    <AiFeatureGuard silent>
+                      <AIRiskBadge riskLevel={riskAssessment.riskLevel as any} />
+                    </AiFeatureGuard>
                   )}
 
                   {/* 🧠 LEARNING DNA TOOLTIP (Staff Only) */}
@@ -159,7 +159,7 @@ export const StudentsTab = ({
                       variant="outline"
                       className="bg-orange-500/10 text-orange-600 border-none text-[7px] md:text-[8px] font-black uppercase tracking-tighter px-1.5 md:px-2 py-0 h-3.5 md:h-4 shrink-0"
                     >
-                      {t("classes.show.students.table.waitlist", {
+                      {t("classes.show.students.table.waitlist" as any, {
                         pos: row.original.waitlistPosition,
                       })}
                     </Badge>
@@ -169,7 +169,7 @@ export const StudentsTab = ({
                       variant="outline"
                       className="bg-blue-500/10 text-blue-600 border-none text-[7px] md:text-[8px] font-black uppercase tracking-tighter px-1.5 md:px-2 py-0 h-3.5 md:h-4 shrink-0"
                     >
-                      {t("classes.show.students.pending.title")}
+                      {t("classes.show.students.pending.title" as any)}
                     </Badge>
                   )}
                 </div>
@@ -190,248 +190,190 @@ export const StudentsTab = ({
         },
       },
       {
-        accessorKey: "createdAt",
+        id: "actions",
         header: () => (
-          <p className="hidden sm:block text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-            {t("classes.show.students.table.enrolledOn")}
+          <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground text-center">
+            {t("classes.show.students.table.actions" as any)}
           </p>
         ),
-        cell: ({ getValue }) => (
-          <div className="hidden sm:flex items-center gap-2 text-[10px] md:text-xs font-bold text-muted-foreground">
-            <Calendar className="h-3 md:h-3.5 w-3 md:w-3.5 opacity-40" />
-            <span className="whitespace-nowrap">
-              {new Date(getValue<string>()).toLocaleDateString(isAr ? "ar-EG" : "en-US", {
-                month: "short",
-                day: "numeric",
-                year: "numeric",
-              })}
-            </span>
-          </div>
-        ),
-      },
-      {
-        id: "actions",
-        header: "",
         cell: ({ row }) => (
-          <div className={cn("flex items-center gap-1.5 md:gap-2 justify-end")}>
-            {isStaff && row.original.status === "approved" && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-8 md:h-9 rounded-lg md:rounded-xl font-black text-[9px] md:text-[10px] uppercase tracking-widest gap-1.5 md:gap-2 border-ai-primary/20 hover:bg-ai-primary/5 text-ai-primary transition-all shadow-sm px-2 md:px-3"
-                onClick={() =>
-                  onInsight({
-                    id: row.original.student.id,
-                    name: row.original.student.name,
-                  })
-                }
-              >
-                <Sparkles className="h-3 w-3 md:h-3.5 md:w-3.5" />
-                <span className="hidden xs:inline">{t("buttons.aiInsight")}</span>
-              </Button>
-            )}
-            {isStaff && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 md:h-9 md:w-9 rounded-lg md:rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/5"
-                onClick={() => onUnenroll(row.original.id)}
-              >
-                <Trash2 className="h-3.5 w-3.5 md:h-4 md:w-4" />
-              </Button>
-            )}
+          <div className="flex justify-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0 rounded-lg text-muted-foreground hover:text-primary transition-colors"
+              onClick={() => onInsight({ id: row.original.studentId, name: row.original.student?.name || "" })}
+            >
+              <Sparkles className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0 rounded-lg text-muted-foreground hover:text-destructive transition-colors"
+              onClick={() => onUnenroll(row.original.id)}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
           </div>
         ),
       },
     ],
-    [isStaff, t, isAr, onInsight, onUnenroll]
+    [t, isStaff, onInsight, onUnenroll]
   );
 
-  const enrollmentsTable = useTable<Enrollment, HttpError>({
-    columns,
+  const table = useTable<Enrollment, HttpError, Enrollment>({
     refineCoreProps: {
       resource: "enrollments",
       filters: {
-        initial: [
-          {
-            field: "classId",
-            operator: "eq",
-            value: classId,
-          },
-          {
-            field: "status",
-            operator: "in",
-            value: ["approved", "waitlisted"],
-          },
-        ],
+        initial: [{ field: "classId", operator: "eq", value: classId }],
       },
-      pagination: {
-        pageSize: 50,
-      },
-      syncWithLocation: false,
     },
+    columns,
   });
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 md:gap-10 items-start">
-      <div className="lg:col-span-3 space-y-6 md:space-y-8">
-        <Card className="rounded-4xl md:rounded-[2.5rem] border-none shadow-2xl shadow-black/5 overflow-hidden bg-card/50 backdrop-blur-3xl">
-          <CardHeader className="p-6 md:p-10 pb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 border-b border-black/3 dark:border-white/3 bg-muted/30">
-            <div className="space-y-1.5 md:space-y-2 text-start">
-              <div className="flex items-center gap-3">
-                <div className="p-2 md:p-3 rounded-xl md:rounded-2xl bg-primary/10 text-primary border border-primary/5 shadow-sm">
-                  <Users className="h-5 w-5 md:h-6 md:w-6" />
-                </div>
-                <CardTitle className="text-xl md:text-2xl font-black tracking-tight text-foreground">
-                  {t("classes.show.students.table.title")}
-                </CardTitle>
-              </div>
-              <CardDescription className="text-xs md:text-sm text-muted-foreground font-medium px-1">
-                {t("classes.show.students.table.description", {
-                  count: approvedCount,
-                })}
-              </CardDescription>
+    <div className="space-y-10">
+      {/* --- STATS & ACTIONS --- */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card className="rounded-4xl border-none shadow-xl shadow-primary/5 bg-primary/5 border border-primary/10 overflow-hidden">
+          <CardContent className="p-8 flex items-center gap-6">
+            <div className="p-4 rounded-3xl bg-primary/10 text-primary">
+              <Users className="h-8 w-8" />
             </div>
-            {isStaff && (
-              <div className="flex flex-wrap items-center gap-2 md:gap-3 w-full sm:w-auto">
-                <Button
-                  variant="outline"
-                  size="lg"
-                  onClick={onMessageAllClick}
-                  className="flex-1 sm:flex-none rounded-xl md:rounded-2xl h-12 md:h-14 px-6 md:px-8 font-black uppercase tracking-widest text-[9px] md:text-[10px] gap-2 border-primary/20 hover:bg-primary/10 transition-all text-primary shadow-sm"
-                >
-                  <MessageSquare className="h-4 w-4 md:h-5 md:w-5" />
-                  <span className="hidden xs:inline">
-                    {t("classes.show.students.actions.messageAll")}
-                  </span>
-                  <span className="xs:hidden">{t("classes.show.students.actions.message")}</span>
-                </Button>
-                <Button
-                  variant="outline"
-                  size="lg"
-                  onClick={() => setBulkDialogOpen(true)}
-                  className="flex-1 sm:flex-none rounded-xl md:rounded-2xl h-12 md:h-14 px-6 md:px-8 font-black uppercase tracking-widest text-[9px] md:text-[10px] gap-2 border-emerald-500/20 hover:bg-emerald-500/10 transition-all text-emerald-600 shadow-sm"
-                >
-                  <FileSpreadsheet className="h-4 w-4 md:h-5 md:w-5" />
-                  <span className="hidden xs:inline">
-                    {t("classes.show.students.actions.bulkEnroll", "Bulk Enroll")}
-                  </span>
-                  <span className="xs:hidden">{t("classes.show.students.actions.csv")}</span>
-                </Button>
-                <Button
-                  size="lg"
-                  onClick={onEnrollClick}
-                  className="flex-1 sm:flex-none rounded-xl md:rounded-2xl h-12 md:h-14 px-6 md:px-8 font-black uppercase tracking-widest text-[9px] md:text-[10px] gap-2 shadow-xl shadow-primary/20 transition-all text-white bg-primary hover:bg-primary/90"
-                >
-                  <UserPlus className="h-4 w-4 md:h-5 md:w-5" />
-                  <span className="hidden xs:inline">
-                    {t("classes.show.students.actions.enrollStudent")}
-                  </span>
-                  <span className="xs:hidden">{t("classes.show.students.actions.enroll")}</span>
-                </Button>
-              </div>
-            )}
-          </CardHeader>
-          <CardContent className="p-0 overflow-x-auto relative min-h-100">
-            <DataTable table={enrollmentsTable} />
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-widest text-primary/60">
+                {t("classes.show.students.stats.totalStudents" as any)}
+              </p>
+              <h3 className="text-3xl font-black tracking-tight">{approvedCount}</h3>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="md:col-span-2 rounded-4xl border-none shadow-xl shadow-primary/5 bg-card/50 backdrop-blur-sm overflow-hidden">
+          <CardContent className="p-8 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="space-y-1 text-center md:text-start">
+              <h4 className="font-black text-lg tracking-tight">
+                {t("classes.show.students.actions.title" as any)}
+              </h4>
+              <p className="text-xs font-medium text-muted-foreground">
+                {t("classes.show.students.actions.description" as any)}
+              </p>
+            </div>
+            <div className="flex items-center gap-3 w-full md:w-auto">
+              <Button
+                variant="outline"
+                className="flex-1 md:flex-none rounded-2xl h-12 px-6 font-black uppercase tracking-widest text-[10px] gap-2 border-primary/20 text-primary hover:bg-primary/5 transition-all"
+                onClick={() => setBulkDialogOpen(true)}
+              >
+                <FileSpreadsheet className="h-4 w-4" />
+                {t("classes.show.students.actions.bulkEnroll" as any)}
+              </Button>
+              <Button
+                className="flex-1 md:flex-none rounded-2xl h-12 px-8 font-black uppercase tracking-widest text-[10px] gap-2 shadow-xl shadow-primary/20 transition-all hover:scale-105 active:scale-95"
+                onClick={onEnrollClick}
+              >
+                <UserPlus className="h-4 w-4" />
+                {t("classes.show.students.actions.enroll" as any)}
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Sidebar - Pending Requests */}
-      {isStaff && (
-        <div className="space-y-6 md:space-y-8 lg:sticky lg:top-40">
-          <Card className="rounded-4xl md:rounded-[2.5rem] border-none shadow-2xl shadow-black/5 overflow-hidden bg-card/50 backdrop-blur-3xl">
-            <CardHeader className="p-6 md:p-8 pb-4 bg-orange-500/5 border-b border-orange-500/10">
-              <div className="flex items-center justify-between">
-                <div className="space-y-1.5 text-start">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-xl bg-orange-500/10 text-orange-600 shadow-sm border border-orange-500/20">
-                      <UserPlus className="h-4 w-4" />
-                    </div>
-                    <CardTitle className="text-lg md:text-xl font-black tracking-tight text-foreground">
-                      {t("classes.show.students.pending.title")}
-                    </CardTitle>
-                  </div>
-                  <CardDescription className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-orange-600/80 px-1">
-                    {t("classes.show.students.pending.count", {
-                      count: pendingEnrollments.length,
-                    })}
-                  </CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="p-0">
-              <ScrollArea className="max-h-125">
-                <div className="p-4 md:p-6 space-y-3 md:space-y-4">
-                  {pendingEnrollments.length === 0 ? (
-                    <div className="text-center py-10 md:py-16 space-y-3 opacity-40">
-                      <UserPlus className="h-8 w-8 md:h-12 md:w-12 mx-auto text-muted-foreground" />
-                      <p className="text-[10px] md:text-xs font-black uppercase tracking-widest text-muted-foreground">
-                        {t("classes.show.students.pending.empty")}
-                      </p>
-                    </div>
-                  ) : (
-                    <AnimatePresence mode="popLayout">
-                      {pendingEnrollments.map((enrollment: Enrollment, index: number) => (
-                        <motion.div
-                          key={enrollment.id}
-                          initial={{ opacity: 0, scale: 0.95 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.95 }}
-                          transition={{ delay: index * 0.05 }}
-                          className="flex items-center justify-between p-4 md:p-5 rounded-2xl md:rounded-3xl bg-orange-500/3 border border-orange-500/10 transition-all hover:bg-orange-500/10 hover:border-orange-500/20 group shadow-sm"
+      {/* --- PENDING REQUESTS --- */}
+      {pendingEnrollments.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="space-y-6"
+        >
+          <div className="flex items-center gap-3 px-2">
+            <div className="h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
+            <h3 className="font-black uppercase tracking-widest text-[10px] text-muted-foreground">
+              {t("classes.show.students.pending.title" as any)} ({pendingEnrollments.length})
+            </h3>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <AnimatePresence mode="popLayout">
+              {pendingEnrollments.map((enrollment) => (
+                <motion.div
+                  key={enrollment.id}
+                  layout
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                >
+                  <Card className="rounded-3xl border-none shadow-lg bg-card/80 backdrop-blur-md overflow-hidden group hover:shadow-xl transition-all">
+                    <CardContent className="p-5 flex items-center justify-between gap-4">
+                      <div className="flex items-center gap-3 overflow-hidden">
+                        <Avatar className="h-10 w-10 rounded-2xl border-2 border-background shadow-sm">
+                          <AvatarFallback className="bg-blue-500/10 text-blue-600 font-black text-xs">
+                            {enrollment.student?.name?.[0]}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="overflow-hidden">
+                          <p className="font-black text-sm truncate">{enrollment.student?.name}</p>
+                          <p className="text-[10px] font-bold text-muted-foreground truncate uppercase tracking-tighter">
+                            {dayjs(enrollment.createdAt).fromNow()}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-9 w-9 p-0 rounded-xl text-emerald-600 hover:bg-emerald-500/10"
+                          onClick={() => handleOptimisticEnrollment(enrollment.id, "approved")}
                         >
-                          <div className="flex items-center gap-3 md:gap-4 min-w-0">
-                            <Avatar className="h-10 w-10 md:h-12 md:w-12 border-2 border-background shadow-sm rounded-xl md:rounded-2xl group-hover:scale-105 transition-transform duration-500">
-                              {enrollment.student.image && (
-                                <AvatarImage
-                                  src={enrollment.student.image}
-                                  alt={enrollment.student.name}
-                                  className="object-cover"
-                                />
-                              )}
-                              <AvatarFallback className="bg-orange-500/10 text-orange-600 font-black text-xs md:text-sm">
-                                {enrollment.student.name?.[0]}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div className="flex flex-col text-start min-w-0">
-                              <span className="text-sm md:text-base font-black tracking-tight truncate text-foreground group-hover:text-orange-700 transition-colors">
-                                {enrollment.student.name}
-                              </span>
-                              <span className="text-[9px] md:text-[10px] text-muted-foreground/80 font-bold uppercase tracking-widest truncate mt-0.5">
-                                {t("classes.show.students.pending.requested")}
-                              </span>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-1 md:gap-2 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              className="h-9 w-9 md:h-10 md:w-10 rounded-xl text-emerald-600 border-emerald-500/20 bg-emerald-500/5 hover:bg-emerald-500 hover:text-white transition-all shadow-sm"
-                              onClick={() => handleOptimisticEnrollment(enrollment.id, "approved")}
-                            >
-                              <CheckCircle2 className="h-4 w-4 md:h-5 md:w-5" />
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              className="h-9 w-9 md:h-10 md:w-10 rounded-xl text-destructive border-destructive/20 bg-destructive/5 hover:bg-destructive hover:text-white transition-all shadow-sm"
-                              onClick={() => handleOptimisticEnrollment(enrollment.id, "rejected")}
-                            >
-                              <XCircle className="h-4 w-4 md:h-5 md:w-5" />
-                            </Button>
-                          </div>
-                        </motion.div>
-                      ))}
-                    </AnimatePresence>
-                  )}
-                </div>
-              </ScrollArea>
-            </CardContent>
-          </Card>
-        </div>
+                          <CheckCircle2 className="h-5 w-5" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-9 w-9 p-0 rounded-xl text-destructive hover:bg-destructive/10"
+                          onClick={() => handleOptimisticEnrollment(enrollment.id, "rejected")}
+                        >
+                          <XCircle className="h-5 w-5" />
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
+        </motion.div>
       )}
+
+      {/* --- ROSTER TABLE --- */}
+      <Card className="rounded-[2.5rem] md:rounded-[3rem] border-none shadow-2xl shadow-primary/5 bg-card/30 backdrop-blur-xl overflow-hidden">
+        <CardHeader className="p-8 md:p-10 border-b border-border/40 flex flex-row items-center justify-between">
+          <div className="space-y-1">
+            <CardTitle className="text-2xl font-black tracking-tight">
+              {t("classes.show.students.table.title" as any)}
+            </CardTitle>
+            <CardDescription className="font-bold text-muted-foreground/80">
+              {t("classes.show.students.table.description" as any)}
+            </CardDescription>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="rounded-xl h-10 px-4 font-black uppercase tracking-widest text-[10px] gap-2"
+            onClick={onMessageAllClick}
+          >
+            <MessageSquare className="h-4 w-4" />
+            {t("classes.show.students.actions.messageAll" as any)}
+          </Button>
+        </CardHeader>
+        <CardContent className="p-0">
+          <ScrollArea className="h-[500px]">
+            <div className="p-4 md:p-6">
+              <DataTable table={table} />
+            </div>
+          </ScrollArea>
+        </CardContent>
+      </Card>
 
       <BulkEnrollDialog open={bulkDialogOpen} onOpenChange={setBulkDialogOpen} classId={classId} />
     </div>

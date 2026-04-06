@@ -180,10 +180,7 @@ const ModulesListPage = () => {
         </motion.div>
 
         {/* AI Magic Builder Dialog */}
-        <MagicBuilderDialog
-          open={isMagicBuilderOpen}
-          onOpenChange={setIsMagicBuilderOpen}
-        />
+        <MagicBuilderDialog open={isMagicBuilderOpen} onOpenChange={setIsMagicBuilderOpen} />
 
         {/* Stats Row - Adaptive */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">

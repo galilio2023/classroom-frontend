@@ -197,10 +197,7 @@ const AttendanceListPage = () => {
           </motion.div>
 
           {/* QR Action Dialogs */}
-          <QRScannerSelectorDialog
-            open={isScannerOpen}
-            onOpenChange={setIsScannerOpen}
-          />
+          <QRScannerSelectorDialog open={isScannerOpen} onOpenChange={setIsScannerOpen} />
           <QRSessionSelectorDialog
             open={isSessionSelectorOpen}
             onOpenChange={setIsSessionSelectorOpen}
