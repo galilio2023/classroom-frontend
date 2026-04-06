@@ -200,12 +200,24 @@ const MagicBuilderForm = ({
     <motion.div key="form" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
       {!initialClassId && (
         <div className="space-y-2">
-          <Label
-            htmlFor="target-class"
-            className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1"
-          >
-            {t("classes.magicBuilder.targetClass")}
-          </Label>
+          <div className="flex justify-between items-center px-1">
+            <Label
+              htmlFor="target-class"
+              className="text-[10px] font-black uppercase tracking-widest text-muted-foreground"
+            >
+              {t("classes.magicBuilder.targetClass")}
+            </Label>
+            {classQuery.isError && (
+              <Button
+                variant="link"
+                size="sm"
+                onClick={() => void classQuery.refetch()}
+                className="h-auto p-0 text-[10px] font-black uppercase text-destructive hover:text-destructive/80"
+              >
+                {t("buttons.tryAgain", "Retry")}
+              </Button>
+            )}
+          </div>
           <Select value={classId?.toString() || ""} onValueChange={setClassId}>
             <SelectTrigger
               id="target-class"
@@ -240,18 +252,6 @@ const MagicBuilderForm = ({
                   {opt.label}
                 </SelectItem>
               ))}
-              {classQuery.isError && (
-                <div className="p-4 text-center">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => void classQuery.refetch()}
-                    className="text-[10px] font-black uppercase"
-                  >
-                    {t("buttons.tryAgain", "Retry")}
-                  </Button>
-                </div>
-              )}
             </SelectContent>
           </Select>
         </div>

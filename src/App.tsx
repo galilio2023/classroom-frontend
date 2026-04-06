@@ -21,6 +21,7 @@ import { ErrorBoundary } from "./components/error-boundary";
 import { AppRouter } from "./routes";
 import { usePulseNotifications } from "./hooks/use-pulse-notifications";
 import { GlobalLiveOverlay } from "./features/classes/components/global-live-overlay";
+import { TooltipProvider } from "./components/ui/tooltip";
 
 import "./App.css";
 import "@excalidraw/excalidraw/index.css";
@@ -36,12 +37,12 @@ import { XPCelebration } from "./components/xp-celebration";
 const PulseProvider = ({ children }: { children: React.ReactNode }) => {
   usePulseNotifications();
   return (
-    <>
+    <TooltipProvider>
       <XPCelebration />
       <GlobalLiveOverlay />
       <Toaster />
       {children}
-    </>
+    </TooltipProvider>
   );
 };
 
