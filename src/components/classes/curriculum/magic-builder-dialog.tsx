@@ -98,7 +98,7 @@ const MagicBuilderProgress = ({
     </div>
     <div className="w-full space-y-4">
       <div className="flex justify-between items-end px-1">
-        <div className="space-y-1">
+        <div className="space-y-1" aria-live="polite">
           <p
             className={cn(
               "text-[10px] font-black uppercase tracking-widest transition-colors",
@@ -201,7 +201,10 @@ const MagicBuilderForm = ({
           <SelectTrigger
             id="target-class"
             disabled={classQuery.isLoading}
-            className="h-14 rounded-2xl border-none bg-muted/50 shadow-inner font-bold"
+            className={cn(
+              "h-14 rounded-2xl border-none bg-muted/50 shadow-inner font-bold",
+              classQuery.isError && "ring-2 ring-destructive/20"
+            )}
           >
             <div className="flex items-center gap-2">
               {classQuery.isLoading && <Loader2 className="h-3 w-3 animate-spin text-ai-primary" />}
@@ -209,11 +212,13 @@ const MagicBuilderForm = ({
                 placeholder={
                   classQuery.isLoading
                     ? (t("common.loading") as string)
-                    : (t("classes.magicBuilder.selectPlaceholder") as string)
+                    : classQuery.isError
+                      ? (t("common.errors.loadingFailed", "Failed to load classes") as string)
+                      : (t("classes.magicBuilder.selectPlaceholder") as string)
                 }
               />
             </div>
-          </SelectTrigger>{" "}
+          </SelectTrigger>
           <SelectContent className="rounded-2xl border-none shadow-2xl">
             {classOptions.map((opt) => (
               <SelectItem
@@ -224,6 +229,18 @@ const MagicBuilderForm = ({
                 {opt.label}
               </SelectItem>
             ))}
+            {classQuery.isError && (
+              <div className="p-4 text-center">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => void classQuery.refetch()}
+                  className="text-[10px] font-black uppercase"
+                >
+                  {t("buttons.tryAgain", "Retry")}
+                </Button>
+              </div>
+            )}
           </SelectContent>
         </Select>
       </div>
