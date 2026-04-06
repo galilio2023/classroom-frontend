@@ -59,12 +59,19 @@ const RISK_CONFIG = {
 export const AIRiskBadge = memo(({ riskLevel, className, showText = false }: AIRiskBadgeProps) => {
   const { t } = useTranslation();
 
-  if (!riskLevel) return null;
+  const config = useMemo(() => {
+    if (!riskLevel) return null;
+    const active = RISK_CONFIG[riskLevel];
+    return {
+      ...active,
+      label: t(active.labelKey, active.defaultLabel),
+      desc: t(active.descKey, active.defaultDesc),
+    };
+  }, [riskLevel, t]);
 
-  const active = RISK_CONFIG[riskLevel];
-  const Icon = active.icon;
-  const label = t(active.labelKey, active.defaultLabel);
-  const desc = t(active.descKey, active.defaultDesc);
+  if (!config) return null;
+
+  const Icon = config.icon;
 
   return (
     <AiFeatureGuard silent>
@@ -75,21 +82,21 @@ export const AIRiskBadge = memo(({ riskLevel, className, showText = false }: AIR
               variant="outline"
               className={cn(
                 "px-2 py-0.5 rounded-lg font-black uppercase tracking-tighter text-[10px] flex items-center gap-1.5 transition-all hover:scale-105 border-transparent",
-                active.color,
+                config.color,
                 className
               )}
             >
               <Icon className="h-3 w-3" />
-              {(showText || active.alwaysShowLabel) && label}
+              {(showText || config.alwaysShowLabel) && config.label}
             </Badge>
           </TooltipTrigger>
           <TooltipContent className="rounded-xl p-3 max-w-[200px] border-none shadow-2xl bg-card/95 backdrop-blur-xl">
             <div className="space-y-1">
               <p className="font-black text-xs uppercase tracking-widest flex items-center gap-2">
                 <Icon className="h-3 w-3" />
-                {label}
+                {config.label}
               </p>
-              <p className="text-[10px] font-medium leading-relaxed opacity-70">{desc}</p>
+              <p className="text-[10px] font-medium leading-relaxed opacity-70">{config.desc}</p>
             </div>
           </TooltipContent>
         </Tooltip>

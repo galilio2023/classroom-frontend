@@ -159,6 +159,14 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         socket.off("disconnect", onDisconnect);
         socket.off("bulk-enroll:completed");
         socket.off("AI_SUMMARY_COMPLETED");
+        socket.off("magic_builder_progress");
+        socket.off("AI_ASSIGNMENT_COMPLETED");
+        socket.off("AI_QUIZ_COMPLETED");
+        socket.off("AI_MAGIC_BUILDER_COMPLETED");
+        socket.off("AI_ASSIGNMENT_FAILED");
+        socket.off("AI_QUIZ_FAILED");
+        socket.off("AI_MAGIC_BUILDER_FAILED");
+        socket.off("AI_SUMMARY_FAILED");
         socket.off("submission:ai-grade:completed");
         socket.disconnect();
       };

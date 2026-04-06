@@ -31,6 +31,7 @@ import {
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { TFunction } from "i18next";
+import { GetListResponse, HttpError } from "@refinedev/core";
 import { UseQueryResult } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import { AIFeatureDisabled } from "../../ai/ai-feature-disabled";
@@ -138,6 +139,7 @@ const MagicBuilderReady = ({ onReview, t }: { onReview: () => void; t: TFunction
     initial={{ opacity: 0 }}
     animate={{ opacity: 1 }}
     className="py-10 flex flex-col items-center text-center space-y-6"
+    aria-live="polite"
   >
     <div className="p-4 rounded-full bg-emerald-500/10 text-emerald-500">
       <CheckCircle2 className="h-12 w-12" />
@@ -179,7 +181,7 @@ const MagicBuilderForm = ({
   classId: string;
   setClassId: (id: string) => void;
   classOptions: { label: string; value: string }[];
-  classQuery: UseQueryResult<any, any>;
+  classQuery: UseQueryResult<GetListResponse<Class>, HttpError>;
   initialClassId?: string;
   isGenerating: boolean;
   handleStart: () => void;
@@ -201,13 +203,16 @@ const MagicBuilderForm = ({
             disabled={classQuery.isLoading}
             className="h-14 rounded-2xl border-none bg-muted/50 shadow-inner font-bold"
           >
-            <SelectValue
-              placeholder={
-                classQuery.isLoading
-                  ? (t("common.loading") as string)
-                  : (t("classes.magicBuilder.selectPlaceholder") as string)
-              }
-            />
+            <div className="flex items-center gap-2">
+              {classQuery.isLoading && <Loader2 className="h-3 w-3 animate-spin text-ai-primary" />}
+              <SelectValue
+                placeholder={
+                  classQuery.isLoading
+                    ? (t("common.loading") as string)
+                    : (t("classes.magicBuilder.selectPlaceholder") as string)
+                }
+              />
+            </div>
           </SelectTrigger>{" "}
           <SelectContent className="rounded-2xl border-none shadow-2xl">
             {classOptions.map((opt) => (

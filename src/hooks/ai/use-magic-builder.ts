@@ -64,7 +64,7 @@ export const useMagicBuilder = ({
   const [classId, setClassId] = useState(initialClassId || "");
   const [internalIsGenerating, setInternalIsGenerating] = useState(false);
 
-  const jobId = useMemo(() => `magic-builder-${config.type}-${classId}`, [config.type, classId]);
+  const jobId = useMemo(() => `magic-builder-${classId}`, [classId]);
 
   // 🛡️ MEMORY SAFETY: AbortController for long-running AI tasks
   useEffect(() => {

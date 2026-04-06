@@ -427,6 +427,7 @@
       "errorBoundary": {
         "title": "AI Assistant Offline",
         "description": "Something went wrong while communicating with Gemini. This is usually temporary.",
+        "disabled": "This AI feature has been disabled by the administrator.",
         "tryAgain": "Try Again"
       }
     },
