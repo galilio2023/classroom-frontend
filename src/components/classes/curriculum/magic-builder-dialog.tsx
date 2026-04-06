@@ -41,6 +41,9 @@ import { Class } from "@/types";
 import { useTerm } from "@/contexts/term-context";
 import { cn } from "@/lib/utils";
 
+// 🛡️ BATCHING OPTIMIZATION: Consistent page size for AI-related list fetching
+const AI_LIST_PAGE_SIZE = 50;
+
 export type MagicBuilderLevel = "primary" | "high_school" | "university";
 export type MagicBuilderTone = "academic" | "creative" | "practical";
 
@@ -93,11 +96,16 @@ export const MagicBuilderDialog = ({
   const [classId, setClassId] = useState(initialClassId || "");
   const [internalIsGenerating, setInternalIsGenerating] = useState(false);
 
+  // 🛡️ STATE SYNC: Prevent "Stale State Trap" when initialClassId changes from parent
+  useEffect(() => {
+    if (initialClassId) setClassId(initialClassId);
+  }, [initialClassId]);
+
   // 🛡️ BATCHING OPTIMIZATION: Use Refine's useSelect for scalable class selection
   const { options: classOptions, query: classQuery } = useSelect<Class>({
     resource: "classes",
     filters: selectedTerm ? [{ field: "termId", operator: "eq", value: selectedTerm.id }] : [],
-    pagination: { mode: "client", pageSize: 50 },
+    pagination: { mode: "client", pageSize: AI_LIST_PAGE_SIZE },
     queryOptions: { enabled: !initialClassId && open && isAiEnabled },
   });
 
@@ -180,10 +188,8 @@ export const MagicBuilderDialog = ({
       onOpenChange={(val) => {
         onOpenChange(val);
         if (!val) {
-          // 🛡️ JOB CLEANUP: Auto-remove completed jobs when closing dialog to prevent bloat
-          if (isCompleted) {
-            removeJob(`magic-builder-${classId}`);
-          }
+          // 🛡️ UX POLISH: Do not auto-remove job on close to prevent data loss if closed accidentally.
+          // Job is only removed when explicitly clicking "Review Suggestions" in the completed state.
           reset();
         }
       }}
@@ -414,7 +420,9 @@ export const MagicBuilderDialog = ({
                       </Label>
                       <Select
                         value={config.type}
-                        onValueChange={(v: any) => setConfig({ ...config, type: v })}
+                        onValueChange={(v: MagicBuilderConfig["type"]) =>
+                          setConfig({ ...config, type: v })
+                        }
                       >
                         <SelectTrigger className="h-14 rounded-2xl border-none bg-muted/50 shadow-inner font-bold">
                           <SelectValue />

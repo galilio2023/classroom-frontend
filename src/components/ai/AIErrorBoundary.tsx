@@ -37,7 +37,7 @@ export class AIErrorBoundary extends Component<Props, State> {
       if (this.props.fallback) return this.props.fallback;
 
       return (
-        <Card className="p-8 border-2 border-dashed border-ai-primary/20 bg-ai-primary/5 rounded-[2rem] flex flex-col items-center text-center space-y-4 animate-in fade-in zoom-in duration-300">
+        <Card className="p-8 border-2 border-dashed border-ai-primary/20 bg-ai-primary/5 rounded-[2rem] flex flex-col items-center text-center space-y-4 animate-in fade-in zoom-in duration-300 ai-gradient-border">
           <div className="relative">
             <div className="p-4 rounded-2xl bg-background shadow-xl border border-ai-primary/10">
               <Sparkles className="h-8 w-8 text-ai-primary/40" />
