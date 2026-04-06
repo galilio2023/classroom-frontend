@@ -15,48 +15,56 @@ interface AIRiskBadgeProps {
   showText?: boolean;
 }
 
-const getRiskConfig = (t: TFunction) => ({
+const RISK_CONFIG = {
   low: {
     color: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
     icon: ShieldCheck,
-    label: t("classes.risk.low", "Low Risk"),
-    desc: t("classes.risk.lowDesc", "Student is performing well and meeting expectations."),
+    labelKey: "classes.risk.low",
+    defaultLabel: "Low Risk",
+    descKey: "classes.risk.lowDesc",
+    defaultDesc: "Student is performing well and meeting expectations.",
     alwaysShowLabel: false,
   },
   medium: {
     color: "bg-amber-500/10 text-amber-600 border-amber-500/20",
     icon: ShieldQuestion,
-    label: t("classes.risk.medium", "Medium Risk"),
-    desc: t("classes.risk.mediumDesc", "Slight dip in performance or attendance detected."),
+    labelKey: "classes.risk.medium",
+    defaultLabel: "Medium Risk",
+    descKey: "classes.risk.mediumDesc",
+    defaultDesc: "Slight dip in performance or attendance detected.",
     alwaysShowLabel: false,
   },
   high: {
     color:
       "bg-orange-500/10 text-orange-600 border-orange-500/20 ai-gradient-border shadow-[0_0_10px_rgba(var(--ai-primary-rgb),0.1)]",
     icon: AlertTriangle,
-    label: t("classes.risk.high", "High Risk"),
-    desc: t("classes.risk.highDesc", "Significant struggle detected. Intervention recommended."),
+    labelKey: "classes.risk.high",
+    defaultLabel: "High Risk",
+    descKey: "classes.risk.highDesc",
+    defaultDesc: "Significant struggle detected. Intervention recommended.",
     alwaysShowLabel: true,
   },
   critical: {
     color:
       "bg-destructive/10 text-destructive border-destructive/20 ai-gradient-border shadow-[0_0_15px_rgba(var(--ai-primary-rgb),0.15)]",
     icon: ShieldAlert,
-    label: t("classes.risk.critical", "Critical Risk"),
-    desc: t("classes.risk.criticalDesc", "Urgent: Student is at risk of failing this class."),
+    labelKey: "classes.risk.critical",
+    defaultLabel: "Critical Risk",
+    descKey: "classes.risk.criticalDesc",
+    defaultDesc: "Urgent: Student is at risk of failing this class.",
     alwaysShowLabel: true,
   },
-});
+};
 
 export const AIRiskBadge = memo(({ riskLevel, className, showText = false }: AIRiskBadgeProps) => {
   const { t } = useTranslation();
 
-  const config = useMemo(() => getRiskConfig(t), [t]);
-
   if (!riskLevel) return null;
 
-  const active = config[riskLevel];
+  const active = RISK_CONFIG[riskLevel];
   const Icon = active.icon;
+  const label = t(active.labelKey, active.defaultLabel);
+  const desc = t(active.descKey, active.defaultDesc);
 
   return (
     <AiFeatureGuard silent>
@@ -72,16 +80,16 @@ export const AIRiskBadge = memo(({ riskLevel, className, showText = false }: AIR
               )}
             >
               <Icon className="h-3 w-3" />
-              {(showText || active.alwaysShowLabel) && active.label}
+              {(showText || active.alwaysShowLabel) && label}
             </Badge>
           </TooltipTrigger>
           <TooltipContent className="rounded-xl p-3 max-w-[200px] border-none shadow-2xl bg-card/95 backdrop-blur-xl">
             <div className="space-y-1">
               <p className="font-black text-xs uppercase tracking-widest flex items-center gap-2">
                 <Icon className="h-3 w-3" />
-                {active.label}
+                {label}
               </p>
-              <p className="text-[10px] font-medium leading-relaxed opacity-70">{active.desc}</p>
+              <p className="text-[10px] font-medium leading-relaxed opacity-70">{desc}</p>
             </div>
           </TooltipContent>
         </Tooltip>

@@ -34,15 +34,8 @@ class AIErrorBoundaryBase extends Component<Props, State> {
   }
 
   private handleReset = () => {
-    // 🛡️ UX: If AI was disabled while the user was on the page, the parent guard
-    // should ideally handle this, but we force a state reset here.
-    if (this.props.isAiEnabled === false) {
-      // If AI is disabled, we don't even attempt to reset into a broken state
-      return;
-    }
     this.setState({ hasError: false, error: null });
   };
-
   public render() {
     const { t, isAiEnabled } = this.props;
 
