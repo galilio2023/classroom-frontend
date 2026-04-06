@@ -59,19 +59,12 @@ const RISK_CONFIG = {
 export const AIRiskBadge = memo(({ riskLevel, className, showText = false }: AIRiskBadgeProps) => {
   const { t } = useTranslation();
 
-  const config = useMemo(() => {
-    if (!riskLevel) return null;
-    const active = RISK_CONFIG[riskLevel];
-    return {
-      ...active,
-      label: t(active.labelKey, active.defaultLabel),
-      desc: t(active.descKey, active.defaultDesc),
-    };
-  }, [riskLevel, t]);
+  if (!riskLevel) return null;
 
-  if (!config) return null;
-
+  const config = RISK_CONFIG[riskLevel];
   const Icon = config.icon;
+  const label = t(config.labelKey, config.defaultLabel);
+  const desc = t(config.descKey, config.defaultDesc);
 
   return (
     <AiFeatureGuard silent>
@@ -87,16 +80,16 @@ export const AIRiskBadge = memo(({ riskLevel, className, showText = false }: AIR
               )}
             >
               <Icon className="h-3 w-3" />
-              {(showText || config.alwaysShowLabel) && config.label}
+              {(showText || config.alwaysShowLabel) && label}
             </Badge>
           </TooltipTrigger>
           <TooltipContent className="rounded-xl p-3 max-w-[200px] border-none shadow-2xl bg-card/95 backdrop-blur-xl">
             <div className="space-y-1">
               <p className="font-black text-xs uppercase tracking-widest flex items-center gap-2">
                 <Icon className="h-3 w-3" />
-                {config.label}
+                {label}
               </p>
-              <p className="text-[10px] font-medium leading-relaxed opacity-70">{config.desc}</p>
+              <p className="text-[10px] font-medium leading-relaxed opacity-70">{desc}</p>
             </div>
           </TooltipContent>
         </Tooltip>

@@ -33,6 +33,7 @@ import { useTranslation } from "react-i18next";
 import { TFunction } from "i18next";
 import { GetListResponse, HttpError } from "@refinedev/core";
 import { UseQueryResult } from "@tanstack/react-query";
+import { Class } from "@/types";
 import { AnimatePresence, motion } from "framer-motion";
 import { AIFeatureDisabled } from "../../ai/ai-feature-disabled";
 import { AiFeatureGuard } from "@/components/ai/AiFeatureGuard";

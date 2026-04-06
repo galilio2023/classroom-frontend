@@ -108,9 +108,7 @@ function App() {
             }}
           >
             <PulseProvider>
-              <GlobalLiveOverlay />
               <AppRouter />
-              <Toaster />
               <UnsavedChangesNotifier />
               <DocumentTitleHandler />
               <RefineKbar />
