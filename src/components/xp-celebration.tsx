@@ -88,11 +88,11 @@ export const XPCelebration = () => {
           numberOfPieces={200}
           gravity={0.2}
           colors={["#4f46e5", "#8b5cf6", "#ec4899", "#f59e0b", "#10b981"]}
-          style={{ zIndex: 100 }}
+          style={{ zIndex: 20000 }}
         />
       )}
 
-      <div className="fixed bottom-8 right-8 z-50 pointer-events-none flex flex-col gap-4 items-end">
+      <div className="fixed bottom-8 right-8 z-[10000] pointer-events-none flex flex-col gap-4 items-end">
         <AnimatePresence>
           {/* XP Gained Toast */}
           {activeXP && (
@@ -125,14 +125,18 @@ export const XPCelebration = () => {
               </div>
             </motion.div>
           )}
+        </AnimatePresence>
+      </div>
 
+      <div className="fixed inset-0 pointer-events-none z-[10001] flex flex-col items-center justify-center">
+        <AnimatePresence>
           {/* Level Up Banner */}
           {activeLevelUp && (
             <motion.div
               initial={{ opacity: 0, y: 100, scale: 0.5 }}
-              animate={{ opacity: 1, y: -200, scale: 1.2 }}
+              animate={{ opacity: 1, y: 0, scale: 1.2 }}
               exit={{ opacity: 0, scale: 2, filter: "blur(10px)" }}
-              className="fixed inset-0 m-auto w-fit h-fit bg-linear-to-br from-indigo-600 to-violet-600 p-8 rounded-[3rem] shadow-[0_0_50px_rgba(79,70,229,0.4)] text-white text-center space-y-4 border-4 border-white/20"
+              className="bg-linear-to-br from-indigo-600 to-violet-600 p-8 rounded-[3rem] shadow-[0_0_50px_rgba(79,70,229,0.4)] text-white text-center space-y-4 border-4 border-white/20"
             >
               <div className="relative">
                 <Trophy className="h-20 w-20 mx-auto drop-shadow-2xl animate-bounce" />
@@ -149,14 +153,18 @@ export const XPCelebration = () => {
               </p>
             </motion.div>
           )}
+        </AnimatePresence>
+      </div>
 
+      <div className="fixed top-20 inset-x-0 pointer-events-none z-[10001] flex justify-center">
+        <AnimatePresence>
           {/* Badge Earned Card */}
           {activeBadge && (
             <motion.div
               initial={{ opacity: 0, scale: 0.8, rotate: -5 }}
               animate={{ opacity: 1, scale: 1, rotate: 0 }}
               exit={{ opacity: 0, y: 50 }}
-              className="fixed inset-x-8 top-20 mx-auto max-w-sm bg-card/95 backdrop-blur-3xl border-2 border-amber-500/20 p-6 rounded-[2.5rem] shadow-2xl flex flex-col items-center text-center space-y-4"
+              className="max-w-sm bg-card/95 backdrop-blur-3xl border-2 border-amber-500/20 p-6 rounded-[2.5rem] shadow-2xl flex flex-col items-center text-center space-y-4"
             >
               <div className="p-5 rounded-full bg-amber-500/10 text-amber-600 border border-amber-500/10 shadow-inner group">
                 <Award className="h-16 w-16 group-hover:scale-110 transition-transform duration-500" />
