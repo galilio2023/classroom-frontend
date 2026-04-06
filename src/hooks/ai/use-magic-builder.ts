@@ -64,6 +64,8 @@ export const useMagicBuilder = ({
   const [classId, setClassId] = useState(initialClassId || "");
   const [internalIsGenerating, setInternalIsGenerating] = useState(false);
 
+  const jobId = useMemo(() => `magic-builder-${config.type}-${classId}`, [config.type, classId]);
+
   // 🛡️ MEMORY SAFETY: AbortController for long-running AI tasks
   useEffect(() => {
     const controller = new AbortController();
@@ -80,8 +82,6 @@ export const useMagicBuilder = ({
     pagination: { mode: "client", pageSize: AI_LIST_PAGE_SIZE },
     queryOptions: { enabled: !initialClassId && open && isAiEnabled },
   });
-
-  const jobId = useMemo(() => `magic-builder-${config.type}-${classId}`, [config.type, classId]);
 
   const activeJob = useMemo(() => {
     return jobs.find(

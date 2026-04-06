@@ -34,6 +34,7 @@ import { TFunction } from "i18next";
 import { UseQueryResult } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import { AIFeatureDisabled } from "../../ai/ai-feature-disabled";
+import { AiFeatureGuard } from "@/components/ai/AiFeatureGuard";
 import { useAiAccess } from "@/hooks/use-ai-access";
 import { useJobs } from "@/contexts/job-context";
 import { cn } from "@/lib/utils";
@@ -177,7 +178,7 @@ const MagicBuilderForm = ({
   classId: string;
   setClassId: (id: string) => void;
   classOptions: { label: string; value: string }[];
-  classQuery: UseQueryResult;
+  classQuery: UseQueryResult<any, any>;
   initialClassId?: string;
   isGenerating: boolean;
   handleStart: () => void;
@@ -357,7 +358,7 @@ export const MagicBuilderDialog = ({
   isGenerating: externalIsGenerating,
 }: MagicBuilderDialogProps) => {
   const { t } = useTranslation();
-  const { isAiEnabled, isAllowed } = useAiAccess();
+  const { isAiEnabled } = useAiAccess();
   const { removeJob } = useJobs();
 
   const {
@@ -381,8 +382,6 @@ export const MagicBuilderDialog = ({
     onGenerate,
     externalIsGenerating,
   });
-
-  if (!isAllowed) return null;
 
   /**
    * 🛡️ UX POLISH: Determine the current view based on job status and loading state
@@ -424,53 +423,55 @@ export const MagicBuilderDialog = ({
   };
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(val) => {
-        onOpenChange(val);
-        if (!val) reset();
-      }}
-    >
-      <DialogContent className="sm:max-w-125 min-h-[500px] border-none shadow-2xl bg-background/95 backdrop-blur-xl p-0 overflow-hidden">
-        {!isAiEnabled ? (
-          <div className="p-8 flex flex-col items-center">
-            <AIFeatureDisabled
-              title="Magic Builder Offline"
-              description="Curriculum generation is currently disabled. Please contact your administrator."
-            />
-            <Button
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              className="mt-6 rounded-xl font-bold"
-            >
-              {t("buttons.close")}
-            </Button>
-          </div>
-        ) : (
-          <div className="p-8 space-y-6">
-            <DialogHeader className="space-y-3 text-start">
-              <div className="flex items-center gap-4">
-                <div className="p-3 rounded-2xl bg-ai-primary/10 text-ai-primary shadow-sm border border-ai-primary/5">
-                  <Zap className="h-6 w-6 fill-ai-primary/10" />
+    <AiFeatureGuard>
+      <Dialog
+        open={open}
+        onOpenChange={(val) => {
+          onOpenChange(val);
+          if (!val) reset();
+        }}
+      >
+        <DialogContent className="sm:max-w-125 min-h-[500px] border-none shadow-2xl bg-background/95 backdrop-blur-xl p-0 overflow-hidden">
+          {!isAiEnabled ? (
+            <div className="p-8 flex flex-col items-center">
+              <AIFeatureDisabled
+                title="Magic Builder Offline"
+                description="Curriculum generation is currently disabled. Please contact your administrator."
+              />
+              <Button
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+                className="mt-6 rounded-xl font-bold"
+              >
+                {t("buttons.close")}
+              </Button>
+            </div>
+          ) : (
+            <div className="p-8 space-y-6">
+              <DialogHeader className="space-y-3 text-start">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 rounded-2xl bg-ai-primary/10 text-ai-primary shadow-sm border border-ai-primary/5">
+                    <Zap className="h-6 w-6 fill-ai-primary/10" />
+                  </div>
+                  <div>
+                    <DialogTitle className="text-2xl font-black tracking-tight flex items-center gap-2">
+                      {t("classes.magicBuilder.title")}
+                      <span className="px-2 py-0.5 rounded-full bg-ai-primary/20 text-ai-primary border-none text-[10px] font-black tracking-tighter uppercase">
+                        {t("classes.magicBuilder.version")}
+                      </span>
+                    </DialogTitle>
+                    <DialogDescription className="font-bold text-muted-foreground/80">
+                      {t("classes.magicBuilder.description")}
+                    </DialogDescription>
+                  </div>
                 </div>
-                <div>
-                  <DialogTitle className="text-2xl font-black tracking-tight flex items-center gap-2">
-                    {t("classes.magicBuilder.title")}
-                    <span className="px-2 py-0.5 rounded-full bg-ai-primary/20 text-ai-primary border-none text-[10px] font-black tracking-tighter uppercase">
-                      {t("classes.magicBuilder.version")}
-                    </span>
-                  </DialogTitle>
-                  <DialogDescription className="font-bold text-muted-foreground/80">
-                    {t("classes.magicBuilder.description")}
-                  </DialogDescription>
-                </div>
-              </div>
-            </DialogHeader>
+              </DialogHeader>
 
-            <AnimatePresence mode="wait">{renderContent()}</AnimatePresence>
-          </div>
-        )}
-      </DialogContent>
-    </Dialog>
+              <AnimatePresence mode="wait">{renderContent()}</AnimatePresence>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+    </AiFeatureGuard>
   );
 };
