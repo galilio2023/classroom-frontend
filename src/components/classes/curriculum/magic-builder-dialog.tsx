@@ -1,4 +1,3 @@
-import { useEffect, useMemo, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -31,31 +30,19 @@ import {
   Zap,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { TFunction } from "i18next";
+import { UseQueryResult } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import { AIFeatureDisabled } from "../../ai/ai-feature-disabled";
 import { useAiAccess } from "@/hooks/use-ai-access";
 import { useJobs } from "@/contexts/job-context";
-import { toast } from "sonner";
-import { useApiUrl, useCustomMutation, useSelect } from "@refinedev/core";
-import { Class } from "@/types";
-import { useTerm } from "@/contexts/term-context";
 import { cn } from "@/lib/utils";
-
-// 🛡️ BATCHING OPTIMIZATION: Consistent page size for AI-related list fetching
-const AI_LIST_PAGE_SIZE = 50;
-
-export type MagicBuilderLevel = "primary" | "high_school" | "university";
-export type MagicBuilderTone = "academic" | "creative" | "practical";
-
-export interface MagicBuilderConfig {
-  topic: string;
-  subject?: string;
-  type: "package" | "note" | "quiz" | "assignment";
-  level: MagicBuilderLevel;
-  tone: MagicBuilderTone;
-  objectives: string;
-  moduleId: number | null;
-}
+import {
+  useMagicBuilder,
+  MagicBuilderConfig,
+  MagicBuilderLevel,
+  MagicBuilderTone,
+} from "@/hooks/ai/use-magic-builder";
 
 interface MagicBuilderDialogProps {
   open: boolean;
@@ -78,7 +65,7 @@ const MagicBuilderProgress = ({
   isCompleted: boolean;
   step: string;
   progress: number;
-  t: any;
+  t: TFunction;
 }) => (
   <motion.div
     key="generating"
@@ -143,7 +130,7 @@ const MagicBuilderProgress = ({
 /**
  * 🛠️ SUB-COMPONENT: Ready/Completed View
  */
-const MagicBuilderReady = ({ onReview, t }: { onReview: () => void; t: any }) => (
+const MagicBuilderReady = ({ onReview, t }: { onReview: () => void; t: TFunction }) => (
   <motion.div
     key="completed"
     initial={{ opacity: 0 }}
@@ -189,13 +176,13 @@ const MagicBuilderForm = ({
   setConfig: (c: MagicBuilderConfig) => void;
   classId: string;
   setClassId: (id: string) => void;
-  classOptions: any[];
-  classQuery: any;
+  classOptions: { label: string; value: string }[];
+  classQuery: UseQueryResult;
   initialClassId?: string;
   isGenerating: boolean;
   handleStart: () => void;
   onCancel: () => void;
-  t: any;
+  t: TFunction;
 }) => (
   <motion.div key="form" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
     {!initialClassId && (
@@ -371,111 +358,31 @@ export const MagicBuilderDialog = ({
 }: MagicBuilderDialogProps) => {
   const { t } = useTranslation();
   const { isAiEnabled, isAllowed } = useAiAccess();
-  const { jobs, addJob, updateJob, removeJob } = useJobs();
-  const apiUrl = useApiUrl();
-  const { selectedTerm } = useTerm();
+  const { removeJob } = useJobs();
 
-  const { mutate } = useCustomMutation();
-
-  const [config, setConfig] = useState<MagicBuilderConfig>({
-    topic: "",
-    subject: "",
-    type: "package",
-    level: "high_school",
-    tone: "academic",
-    objectives: "",
-    moduleId: null,
-    ...initialConfig,
+  const {
+    config,
+    setConfig,
+    classId,
+    setClassId,
+    classOptions,
+    classQuery,
+    isGenerating,
+    isCompleted,
+    progress,
+    step,
+    jobId,
+    handleStart,
+    reset,
+  } = useMagicBuilder({
+    open,
+    initialConfig,
+    initialClassId,
+    onGenerate,
+    externalIsGenerating,
   });
-
-  const [classId, setClassId] = useState(initialClassId || "");
-  const [internalIsGenerating, setInternalIsGenerating] = useState(false);
-
-  // 🛡️ STATE SYNC: Prevent "Stale State Trap" when initialClassId changes from parent
-  useEffect(() => {
-    if (initialClassId) setClassId(initialClassId);
-  }, [initialClassId]);
-
-  // 🛡️ BATCHING OPTIMIZATION: Use Refine's useSelect for scalable class selection
-  const { options: classOptions, query: classQuery } = useSelect<Class>({
-    resource: "classes",
-    filters: selectedTerm ? [{ field: "termId", operator: "eq", value: selectedTerm.id }] : [],
-    pagination: { mode: "client", pageSize: AI_LIST_PAGE_SIZE },
-    queryOptions: { enabled: !initialClassId && open && isAiEnabled },
-  });
-
-  // 🛡️ JOB ID: Unique to class + type to prevent collisions
-  const jobId = useMemo(() => `magic-builder-${config.type}-${classId}`, [config.type, classId]);
-
-  const activeJob = useMemo(() => {
-    return jobs.find(
-      (j) => j.id === jobId && (j.status === "processing" || j.status === "completed")
-    );
-  }, [jobs, jobId]);
-
-  const progress = activeJob?.metadata?.progress || 0;
-  const step = activeJob?.metadata?.step || "";
-  const isCompleted = activeJob?.status === "completed";
-
-  // 🛡️ LOADING STATE: Derive isGenerating strictly from job status, internal state, or external prop
-  const isGenerating = useMemo(() => {
-    if (externalIsGenerating) return true;
-    return activeJob?.status === "processing" || internalIsGenerating;
-  }, [externalIsGenerating, activeJob?.status, internalIsGenerating]);
 
   if (!isAllowed) return null;
-
-  const handleStart = async () => {
-    const cleanTopic = config.topic.trim();
-    if (!cleanTopic || !classId) {
-      toast.error(t("common.errors.fillRequired"));
-      return;
-    }
-
-    const initialStep = t("common.starting");
-
-    // 🛡️ JOB SYNC: Ensure addJob is called for both internal and external flows
-    addJob({
-      id: jobId,
-      type: "magic-builder",
-      title: `${config.subject || "Curriculum"}: ${cleanTopic}`,
-      metadata: { classId: Number(classId), progress: 0, step: initialStep },
-    });
-
-    if (onGenerate) {
-      onGenerate(config, classId);
-    } else {
-      setInternalIsGenerating(true);
-
-      mutate(
-        {
-          url: `${apiUrl}/ai/magic-builder`,
-          method: "post",
-          values: {
-            classId: Number(classId),
-            ...config,
-          },
-        },
-        {
-          onSuccess: () => {
-            setInternalIsGenerating(false);
-          },
-          onError: (error) => {
-            console.error("AI Magic Builder failed:", error);
-            toast.error(t("common.errors.aiFailed"));
-            setInternalIsGenerating(false);
-            updateJob(jobId, { status: "failed" });
-          },
-        }
-      );
-    }
-  };
-
-  const reset = () => {
-    if (!activeJob || activeJob.status !== "processing") {
-      setInternalIsGenerating(false);
-    }
-  };
 
   /**
    * 🛡️ UX POLISH: Determine the current view based on job status and loading state
@@ -567,3 +474,4 @@ export const MagicBuilderDialog = ({
     </Dialog>
   );
 };
+
