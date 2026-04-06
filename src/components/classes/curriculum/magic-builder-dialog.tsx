@@ -116,6 +116,7 @@ const MagicBuilderProgress = ({
       </div>
       <Progress
         value={progress}
+        aria-label={t("classes.magicBuilder.progress", "Generation Progress") as string}
         className="h-3 rounded-full bg-muted shadow-inner"
         indicatorClassName={cn(
           "transition-all duration-500",
