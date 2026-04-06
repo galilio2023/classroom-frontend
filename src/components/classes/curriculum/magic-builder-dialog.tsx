@@ -256,7 +256,7 @@ const MagicBuilderForm = ({
           {t("classes.magicBuilder.subjectArea")}
         </Label>
         <div className="relative group">
-          <LayoutGrid className="absolute start-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-ai-primary transition-colors" />
+          <BookOpen className="absolute start-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-ai-primary transition-colors" />
           <Input
             id="subject-area"
             placeholder={t("classes.magicBuilder.subjectPlaceholder") as string}

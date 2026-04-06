@@ -288,7 +288,8 @@
     "loading": "Loading...",
     "errors": {
       "fillRequired": "Please fill in all required fields.",
-      "aiFailed": "AI Generation failed. Please try again."
+      "aiFailed": "AI Generation failed. Please try again.",
+      "loadingFailed": "Failed to load classes"
     }
   },
   "notifications": {
