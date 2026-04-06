@@ -21,12 +21,14 @@ const getRiskConfig = (t: TFunction) => ({
     icon: ShieldCheck,
     label: t("classes.risk.low", "Low Risk"),
     desc: t("classes.risk.lowDesc", "Student is performing well and meeting expectations."),
+    alwaysShowLabel: false,
   },
   medium: {
     color: "bg-amber-500/10 text-amber-600 border-amber-500/20",
     icon: ShieldQuestion,
     label: t("classes.risk.medium", "Medium Risk"),
     desc: t("classes.risk.mediumDesc", "Slight dip in performance or attendance detected."),
+    alwaysShowLabel: false,
   },
   high: {
     color:
@@ -34,6 +36,7 @@ const getRiskConfig = (t: TFunction) => ({
     icon: AlertTriangle,
     label: t("classes.risk.high", "High Risk"),
     desc: t("classes.risk.highDesc", "Significant struggle detected. Intervention recommended."),
+    alwaysShowLabel: true,
   },
   critical: {
     color:
@@ -41,6 +44,7 @@ const getRiskConfig = (t: TFunction) => ({
     icon: ShieldAlert,
     label: t("classes.risk.critical", "Critical Risk"),
     desc: t("classes.risk.criticalDesc", "Urgent: Student is at risk of failing this class."),
+    alwaysShowLabel: true,
   },
 });
 
@@ -68,7 +72,7 @@ export const AIRiskBadge = memo(({ riskLevel, className, showText = false }: AIR
               )}
             >
               <Icon className="h-3 w-3" />
-              {(showText || riskLevel === "critical" || riskLevel === "high") && active.label}
+              {(showText || active.alwaysShowLabel) && active.label}
             </Badge>
           </TooltipTrigger>
           <TooltipContent className="rounded-xl p-3 max-w-[200px] border-none shadow-2xl bg-card/95 backdrop-blur-xl">

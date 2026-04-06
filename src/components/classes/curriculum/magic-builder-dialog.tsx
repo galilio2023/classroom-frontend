@@ -428,7 +428,7 @@ export const MagicBuilderDialog = ({
         open={open}
         onOpenChange={(val) => {
           onOpenChange(val);
-          if (!val) reset();
+          if (!val && !isGenerating) reset();
         }}
       >
         <DialogContent className="sm:max-w-125 min-h-[500px] border-none shadow-2xl bg-background/95 backdrop-blur-xl p-0 overflow-hidden">
