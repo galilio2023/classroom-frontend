@@ -5,10 +5,13 @@ import { Card } from "@/components/ui/card";
 import { withTranslation, WithTranslation } from "react-i18next";
 import { useAiAccess } from "@/hooks/use-ai-access";
 
-interface Props extends WithTranslation {
+interface AIErrorBoundaryProps {
   children: ReactNode;
   fallback?: ReactNode;
   name?: string;
+}
+
+interface InternalProps extends AIErrorBoundaryProps, WithTranslation {
   isAiEnabled?: boolean;
 }
 
@@ -17,7 +20,7 @@ interface State {
   error: Error | null;
 }
 
-class AIErrorBoundaryBase extends Component<Props, State> {
+class AIErrorBoundaryBase extends Component<InternalProps, State> {
   public state: State = {
     hasError: false,
     error: null,
@@ -36,11 +39,12 @@ class AIErrorBoundaryBase extends Component<Props, State> {
   private handleReset = () => {
     this.setState({ hasError: false, error: null });
   };
+
   public render() {
-    const { t, isAiEnabled } = this.props;
+    const { t, isAiEnabled, children, fallback } = this.props;
 
     if (this.state.hasError) {
-      if (this.props.fallback) return this.props.fallback;
+      if (fallback) return fallback;
 
       return (
         <Card className="p-8 border-2 border-dashed border-ai-primary/20 bg-ai-primary/5 rounded-[2rem] flex flex-col items-center text-center space-y-4 animate-in fade-in zoom-in duration-300 ai-gradient-border">
@@ -80,13 +84,13 @@ class AIErrorBoundaryBase extends Component<Props, State> {
       );
     }
 
-    return this.props.children;
+    return children;
   }
 }
 
 const TranslatedErrorBoundary = withTranslation()(AIErrorBoundaryBase);
 
-export const AIErrorBoundary = (props: Omit<Props, keyof WithTranslation | "isAiEnabled">) => {
+export const AIErrorBoundary = (props: AIErrorBoundaryProps) => {
   const { isAiEnabled } = useAiAccess();
   return <TranslatedErrorBoundary {...props} isAiEnabled={isAiEnabled} />;
 };

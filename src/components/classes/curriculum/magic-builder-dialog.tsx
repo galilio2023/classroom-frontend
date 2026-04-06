@@ -493,44 +493,28 @@ export const MagicBuilderDialog = ({
         }}
       >
         <DialogContent className="sm:max-w-125 min-h-[500px] border-none shadow-2xl bg-background/95 backdrop-blur-xl p-0 overflow-hidden">
-          {!isAiEnabled ? (
-            <div className="p-8 flex flex-col items-center">
-              <AIFeatureDisabled
-                title="Magic Builder Offline"
-                description="Curriculum generation is currently disabled. Please contact your administrator."
-              />
-              <Button
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-                className="mt-6 rounded-xl font-bold"
-              >
-                {t("buttons.close")}
-              </Button>
-            </div>
-          ) : (
-            <div className="p-8 space-y-6">
-              <DialogHeader className="space-y-3 text-start">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 rounded-2xl bg-ai-primary/10 text-ai-primary shadow-sm border border-ai-primary/5">
-                    <Zap className="h-6 w-6 fill-ai-primary/10" />
-                  </div>
-                  <div>
-                    <DialogTitle className="text-2xl font-black tracking-tight flex items-center gap-2">
-                      {t("classes.magicBuilder.title")}
-                      <span className="px-2 py-0.5 rounded-full bg-ai-primary/20 text-ai-primary border-none text-[10px] font-black tracking-tighter uppercase">
-                        {t("classes.magicBuilder.version")}
-                      </span>
-                    </DialogTitle>
-                    <DialogDescription className="font-bold text-muted-foreground/80">
-                      {t("classes.magicBuilder.description")}
-                    </DialogDescription>
-                  </div>
+          <div className="p-8 space-y-6">
+            <DialogHeader className="space-y-3 text-start">
+              <div className="flex items-center gap-4">
+                <div className="p-3 rounded-2xl bg-ai-primary/10 text-ai-primary shadow-sm border border-ai-primary/5">
+                  <Zap className="h-6 w-6 fill-ai-primary/10" />
                 </div>
-              </DialogHeader>
+                <div>
+                  <DialogTitle className="text-2xl font-black tracking-tight flex items-center gap-2">
+                    {t("classes.magicBuilder.title")}
+                    <span className="px-2 py-0.5 rounded-full bg-ai-primary/20 text-ai-primary border-none text-[10px] font-black tracking-tighter uppercase">
+                      {t("classes.magicBuilder.version")}
+                    </span>
+                  </DialogTitle>
+                  <DialogDescription className="font-bold text-muted-foreground/80">
+                    {t("classes.magicBuilder.description")}
+                  </DialogDescription>
+                </div>
+              </div>
+            </DialogHeader>
 
-              <AnimatePresence mode="wait">{renderContent()}</AnimatePresence>
-            </div>
-          )}
+            <AnimatePresence mode="wait">{renderContent()}</AnimatePresence>
+          </div>
         </DialogContent>
       </Dialog>
     </AiFeatureGuard>
