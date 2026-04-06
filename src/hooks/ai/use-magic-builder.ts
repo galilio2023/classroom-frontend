@@ -64,6 +64,12 @@ export const useMagicBuilder = ({
   const [classId, setClassId] = useState(initialClassId || "");
   const [internalIsGenerating, setInternalIsGenerating] = useState(false);
 
+  // 🛡️ MEMORY SAFETY: AbortController for long-running AI tasks
+  useEffect(() => {
+    const controller = new AbortController();
+    return () => controller.abort();
+  }, [jobId]);
+
   useEffect(() => {
     if (initialClassId) setClassId(initialClassId);
   }, [initialClassId]);
@@ -97,7 +103,7 @@ export const useMagicBuilder = ({
     // 🛡️ SECURITY: Sanitize and truncate inputs
     const cleanTopic = config.topic.trim().substring(0, 500);
     const cleanObjectives = config.objectives.trim().substring(0, 1000);
-    
+
     if (!cleanTopic || !classId) {
       toast.error(t("common.errors.fillRequired"));
       return;
@@ -112,10 +118,10 @@ export const useMagicBuilder = ({
       metadata: { classId: Number(classId), progress: 0, step: initialStep },
     });
 
-    const finalConfig = { 
-      ...config, 
+    const finalConfig = {
+      ...config,
       topic: cleanTopic,
-      objectives: cleanObjectives 
+      objectives: cleanObjectives,
     };
 
     if (onGenerate) {

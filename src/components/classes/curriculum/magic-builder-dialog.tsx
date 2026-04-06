@@ -190,7 +190,7 @@ const MagicBuilderForm = ({
         <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">
           {t("classes.magicBuilder.targetClass")}
         </Label>
-        <Select value={classId} onValueChange={setClassId}>
+        <Select value={classId?.toString()} onValueChange={setClassId}>
           <SelectTrigger className="h-14 rounded-2xl border-none bg-muted/50 shadow-inner font-bold">
             <SelectValue
               placeholder={
@@ -431,7 +431,7 @@ export const MagicBuilderDialog = ({
         if (!val) reset();
       }}
     >
-      <DialogContent className="sm:max-w-125 border-none shadow-2xl bg-background/95 backdrop-blur-xl p-0 overflow-hidden">
+      <DialogContent className="sm:max-w-125 min-h-[500px] border-none shadow-2xl bg-background/95 backdrop-blur-xl p-0 overflow-hidden">
         {!isAiEnabled ? (
           <div className="p-8 flex flex-col items-center">
             <AIFeatureDisabled
@@ -474,4 +474,3 @@ export const MagicBuilderDialog = ({
     </Dialog>
   );
 };
-
