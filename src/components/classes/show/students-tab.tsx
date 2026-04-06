@@ -194,7 +194,6 @@ export const StudentsTab = ({
           <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground text-center">
             {t("classes.show.students.table.actions" as any)}
           </p>
-
         ),
         cell: ({ row }) => (
           <div className="flex justify-center gap-2">
@@ -387,8 +386,5 @@ export const StudentsTab = ({
         />
       </div>
     </TooltipProvider>
-  );
-};
-der>
   );
 };

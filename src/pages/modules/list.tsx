@@ -25,7 +25,7 @@ import { SyncStatusBadge } from "@/components/sync-status-badge";
 import { useUserRole } from "@/hooks/use-user-role";
 import { Badge } from "@/components/ui/badge.tsx";
 import { Button } from "@/components/ui/button.tsx";
-import { MagicBuilderDialog } from "@/components/classes/show/magic-builder-dialog";
+import { MagicBuilderDialog } from "@/components/classes/curriculum/magic-builder-dialog";
 import {
   AlertDialog,
   AlertDialogAction,
