@@ -68,6 +68,8 @@ const MagicBuilderProgress = ({
   progress: number;
 }) => {
   const { t } = useTranslation();
+  const safeProgress = Number.isNaN(progress) ? 0 : Math.max(0, Math.min(100, progress));
+
   return (
     <motion.div
       key="generating"
@@ -113,11 +115,14 @@ const MagicBuilderProgress = ({
               </p>
             )}
           </div>
-          <p className="text-sm font-black text-foreground">{Math.round(progress ?? 0)}%</p>
+          <p className="text-sm font-black text-foreground">{Math.round(safeProgress)}%</p>
         </div>
         <Progress
-          value={progress}
+          value={safeProgress}
           aria-label={t("classes.magicBuilder.progress", "Generation Progress") as string}
+          aria-valuenow={safeProgress}
+          aria-valuemin={0}
+          aria-valuemax={100}
           className="h-3 rounded-full bg-muted shadow-inner"
           indicatorClassName={cn(
             "transition-all duration-500",
@@ -496,7 +501,10 @@ export const MagicBuilderDialog = ({
           if (!val && !isGenerating) reset();
         }}
       >
-        <DialogContent className="sm:max-w-125 min-h-[500px] border-none shadow-2xl bg-background/95 backdrop-blur-xl p-0 overflow-hidden">
+        <DialogContent
+          aria-busy={isGenerating}
+          className="sm:max-w-125 min-h-[500px] border-none shadow-2xl bg-background/95 backdrop-blur-xl p-0 overflow-hidden"
+        >
           <div className="p-8 space-y-6">
             <DialogHeader className="space-y-3 text-start">
               <div className="flex items-center gap-4">
