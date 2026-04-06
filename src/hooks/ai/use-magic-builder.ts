@@ -95,8 +95,8 @@ export const useMagicBuilder = ({
   const isCompleted = activeJob?.status === "completed";
 
   const isGenerating = useMemo(() => {
-    if (externalIsGenerating) return true;
-    return activeJob?.status === "processing" || internalIsGenerating;
+    // 🛡️ CONSOLIDATED STATE: Check background jobs, internal state, and external overrides
+    return externalIsGenerating || activeJob?.status === "processing" || internalIsGenerating;
   }, [externalIsGenerating, activeJob?.status, internalIsGenerating]);
 
   const handleStart = async () => {
