@@ -67,18 +67,12 @@ export const BulkEnrollSelectorDialog = ({ open, onOpenChange }: BulkEnrollSelec
   };
 
   if (showUpload && selectedClassId) {
-    return (
-      <BulkEnrollDialog
-        open={open}
-        onOpenChange={handleClose}
-        classId={selectedClassId}
-      />
-    );
+    return <BulkEnrollDialog open={open} onOpenChange={handleClose} classId={selectedClassId} />;
   }
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[450px] rounded-4xl border-none shadow-2xl p-0 overflow-hidden bg-card/95 backdrop-blur-2xl">
+      <DialogContent className="sm:max-w-112.5 rounded-4xl border-none shadow-2xl p-0 overflow-hidden bg-card/95 backdrop-blur-2xl">
         <div className="p-8 space-y-6">
           <DialogHeader className="space-y-3 text-start">
             <div className="flex items-center gap-4">
@@ -87,10 +81,10 @@ export const BulkEnrollSelectorDialog = ({ open, onOpenChange }: BulkEnrollSelec
               </div>
               <div>
                 <DialogTitle className="text-2xl font-black tracking-tight">
-                  {t("classes.show.students.bulk.title" as any, "Bulk Enrollment")}
+                  {t("classes.show.students.bulk.title" as any)}
                 </DialogTitle>
                 <DialogDescription className="font-bold text-muted-foreground/80">
-                  {t("classes.show.students.bulk.selectClassDesc" as any, "First, select the class you want to enroll students into.")}
+                  {t("classes.show.students.bulk.selectClassDesc" as any)}
                 </DialogDescription>
               </div>
             </div>
@@ -99,21 +93,31 @@ export const BulkEnrollSelectorDialog = ({ open, onOpenChange }: BulkEnrollSelec
           <div className="space-y-4">
             <div className="space-y-2">
               <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">
-                {t("classes.show.students.bulk.selectClassLabel" as any, "Target Class")}
+                {t("classes.show.students.bulk.selectClassLabel" as any)}
               </label>
               <Select value={selectedClassId} onValueChange={setSelectedClassId}>
                 <SelectTrigger className="h-14 rounded-2xl border-none bg-muted/50 shadow-inner font-bold focus:ring-2 focus:ring-primary/20">
-                  <SelectValue placeholder={isLoading ? (t("common.loading" as any) as string) : (t("classes.show.students.bulk.selectPlaceholder" as any, "Select a class...") as string)} />
+                  <SelectValue
+                    placeholder={
+                      isLoading
+                        ? (t("common.loading" as any) as string)
+                        : (t("classes.show.students.bulk.selectPlaceholder" as any) as string)
+                    }
+                  />
                 </SelectTrigger>
                 <SelectContent className="rounded-2xl border-none shadow-2xl">
                   {classes.map((c: Class) => (
-                    <SelectItem key={c.id} value={c.id.toString()} className="rounded-xl py-3 font-bold">
+                    <SelectItem
+                      key={c.id}
+                      value={c.id.toString()}
+                      className="rounded-xl py-3 font-bold"
+                    >
                       {c.name}
                     </SelectItem>
                   ))}
                   {classes.length === 0 && !isLoading && (
                     <div className="p-4 text-center text-xs font-bold text-muted-foreground">
-                      {t("classes.show.students.bulk.noClasses" as any, "No classes found for this term.")}
+                      {t("classes.show.students.bulk.noClasses" as any) as string}
                     </div>
                   )}
                 </SelectContent>
@@ -125,7 +129,7 @@ export const BulkEnrollSelectorDialog = ({ open, onOpenChange }: BulkEnrollSelec
               onClick={handleNext}
               className="w-full h-14 rounded-2xl font-black uppercase tracking-widest text-[10px] gap-2 shadow-xl shadow-primary/20 transition-all hover:scale-105 active:scale-95 mt-2"
             >
-              {t("common.next" as any, "Next")}
+              {t("common.next" as any) as string}
               <ArrowRight className="h-4 w-4" />
             </Button>
           </div>

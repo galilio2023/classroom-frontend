@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Dialog,
   DialogContent,
@@ -25,6 +25,8 @@ import { socket, connectSocket } from "@/lib/socket";
 import { motion, AnimatePresence } from "framer-motion";
 import { AIFeatureDisabled } from "../../ai/ai-feature-disabled";
 import { useAiAccess } from "@/hooks/use-ai-access";
+import { useJobs } from "@/contexts/job-context";
+import { toast } from "sonner";
 
 export type MagicBuilderLevel = "primary" | "high_school" | "university";
 export type MagicBuilderTone = "academic" | "creative" | "practical";
@@ -59,17 +61,48 @@ export const MagicBuilderDialog = ({
 }: MagicBuilderDialogProps) => {
   const { t } = useTranslation();
   const { isAiEnabled, isAllowed } = useAiAccess();
+  const { jobs, updateJob } = useJobs();
   const [progress, setProgress] = useState(0);
   const [step, setStep] = useState("");
 
+  // --- JOB PERSISTENCE ---
+  const activeJob = useMemo(() => {
+    return jobs.find(
+      (j) =>
+        j.type === "magic-builder" && j.metadata?.classId === classId && j.status === "processing"
+    );
+  }, [jobs, classId]);
+
   useEffect(() => {
-    if (isGenerating && isOpen && isAiEnabled) {
+    if (activeJob && isOpen) {
+      setProgress(activeJob.metadata?.progress || 0);
+      setStep(activeJob.metadata?.step || "");
+    }
+  }, [activeJob, isOpen]);
+
+  useEffect(() => {
+    if ((isGenerating || activeJob) && isOpen && isAiEnabled) {
       void connectSocket();
 
       const handleProgress = (data: { step: string; progress: number; classId: number }) => {
         if (data.classId === classId) {
           setStep(data.step);
           setProgress(data.progress);
+
+          // Update global job state
+          const jobId = `magic-builder-${data.classId}`;
+          updateJob(jobId, {
+            metadata: {
+              ...activeJob?.metadata,
+              progress: data.progress,
+              step: data.step,
+              classId: data.classId,
+            },
+          });
+
+          if (data.progress === 100) {
+            updateJob(jobId, { status: "completed" });
+          }
         }
       };
 
@@ -77,14 +110,24 @@ export const MagicBuilderDialog = ({
       return () => {
         socket.off("magic_builder_progress", handleProgress);
       };
-    } else {
-      setProgress(0);
-      setStep("");
     }
-  }, [isGenerating, isOpen, classId, isAiEnabled]);
+    // We don't reset progress/step here to allow persistence
+  }, [isGenerating, isOpen, classId, isAiEnabled, updateJob, activeJob]);
 
   // 🛡️ PARENT GATING: AI interactive features are disabled for Parents
   if (!isAllowed) return null;
+
+  const handleStart = () => {
+    if (!config.topic.trim()) {
+      toast.error(t("common.errors.fillRequired" as any));
+      return;
+    }
+    if (config.topic.trim().length < 3) {
+      toast.error(t("classes.magicBuilder.errors.topicTooShort" as any, "Topic too short"));
+      return;
+    }
+    onGenerate();
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -116,7 +159,7 @@ export const MagicBuilderDialog = ({
             </DialogHeader>
 
             <AnimatePresence mode="wait">
-              {isGenerating ? (
+              {isGenerating || activeJob ? (
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -248,7 +291,7 @@ export const MagicBuilderDialog = ({
                   </div>
 
                   <div className="space-y-2">
-                    <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2 block text-start">
+                    <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2  text-start">
                       <Target className="h-3.5 w-3.5 text-primary" />
                       {t("aiHub.assistant.helper.objectives")}
                     </Label>
@@ -263,7 +306,7 @@ export const MagicBuilderDialog = ({
               )}
             </AnimatePresence>
 
-            {!isGenerating && (
+            {!isGenerating && !activeJob && (
               <DialogFooter>
                 <Button
                   variant="ghost"
@@ -273,12 +316,26 @@ export const MagicBuilderDialog = ({
                   {t("buttons.cancel")}
                 </Button>
                 <Button
-                  onClick={onGenerate}
+                  onClick={handleStart}
                   disabled={isGenerating || !config.topic}
                   className="bg-ai-primary hover:bg-ai-primary/90 text-ai-primary-foreground rounded-xl px-8 font-black uppercase tracking-widest text-[10px] shadow-lg shadow-ai-primary/20"
                 >
                   <Zap className="h-4 w-4 me-2" />
                   {t("buttons.create")}
+                </Button>
+              </DialogFooter>
+            )}
+
+            {activeJob?.status === "completed" && (
+              <DialogFooter>
+                <Button
+                  onClick={() => {
+                    onOpenChange(false);
+                    // Cleanup job if needed
+                  }}
+                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl"
+                >
+                  {t("common.completed" as any)}
                 </Button>
               </DialogFooter>
             )}

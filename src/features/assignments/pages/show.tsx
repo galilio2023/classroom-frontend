@@ -1,11 +1,6 @@
 import { motion } from "framer-motion";
 import { useParams } from "react-router-dom";
-import {
-  CheckCircle2,
-  Loader2,
-  Users,
-  FileText,
-} from "lucide-react";
+import { CheckCircle2, Loader2, Users, FileText } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useList, useGetIdentity, useCustom } from "@refinedev/core";
 import { Assignment, Submission, User, PeerReview } from "@/types";
@@ -61,11 +56,7 @@ const AssignmentShow = () => {
 
   // --- Real-time & Logic ---
   useAssignmentSocket(id || "");
-  const { mySubmission } = useAssignmentLogic(
-    assignment,
-    submissions,
-    identity?.id
-  );
+  const { mySubmission } = useAssignmentLogic(assignment, submissions, identity?.id);
 
   usePageTitle(assignment?.title || (t("assignments.list.title" as any) as string));
 
@@ -81,15 +72,12 @@ const AssignmentShow = () => {
 
   return (
     <div className="max-w-7xl mx-auto space-y-10 pb-20">
-      <AssignmentHeader
-        assignment={assignment}
-        isStaff={isStaff}
-      />
+      <AssignmentHeader assignment={assignment} isStaff={isStaff} />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-10">
-          <AssignmentBanner 
+          <AssignmentBanner
             assignment={assignment}
             submissions={submissions}
             isStaff={isStaff}
@@ -172,7 +160,9 @@ const AssignmentShow = () => {
                               {t("assignments.show.peerReviewerAnonymous" as any, "Peer Reviewer")}
                             </h4>
                             <p className="text-[10px] font-black uppercase tracking-widest text-amber-600/60">
-                              {(review as any).status === "completed" ? t("status.completed" as any) : t("status.pending" as any)}
+                              {(review as any).status === "completed"
+                                ? t("status.completed" as any)
+                                : t("status.pending" as any)}
                             </p>
                           </div>
                         </div>
@@ -221,13 +211,19 @@ const AssignmentShow = () => {
             </CardHeader>
             <CardContent className="p-8 space-y-6">
               <div className="flex items-center justify-between">
-                <span className="font-bold text-muted-foreground">{t("assignments.show.dueDate" as any)}</span>
+                <span className="font-bold text-muted-foreground">
+                  {t("assignments.show.dueDate" as any)}
+                </span>
                 <span className="font-black text-sm">
-                  {assignment.dueDate ? new Date(assignment.dueDate).toLocaleDateString() : t("common.noDueDate" as any)}
+                  {assignment.dueDate
+                    ? new Date(assignment.dueDate).toLocaleDateString()
+                    : t("common.noDueDate" as any)}
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="font-bold text-muted-foreground">{t("assignments.show.points" as any)}</span>
+                <span className="font-bold text-muted-foreground">
+                  {t("assignments.show.points" as any)}
+                </span>
                 <Badge className="bg-primary/10 text-primary border-none font-black px-3">
                   {assignment.id} {t("common.xp" as any)}
                 </Badge>

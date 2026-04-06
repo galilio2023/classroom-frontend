@@ -47,7 +47,7 @@ export const QRScannerSelectorDialog = ({ open, onOpenChange }: QRScannerSelecto
     pagination: { mode: "off" },
     queryOptions: {
       enabled: open && !showScanner,
-    }
+    },
   });
 
   const classes = (query.data?.data as any) || [];
@@ -71,11 +71,7 @@ export const QRScannerSelectorDialog = ({ open, onOpenChange }: QRScannerSelecto
 
   if (showScanner && selectedClassId) {
     return (
-      <QRScannerModal
-        isOpen={open}
-        onClose={() => handleClose(false)}
-        classId={selectedClassId}
-      />
+      <QRScannerModal isOpen={open} onClose={() => handleClose(false)} classId={selectedClassId} />
     );
   }
 
@@ -93,7 +89,10 @@ export const QRScannerSelectorDialog = ({ open, onOpenChange }: QRScannerSelecto
                   {t("classes.attendance.scanQR" as any, "Scan QR Attendance")}
                 </DialogTitle>
                 <DialogDescription className="font-bold text-muted-foreground/80">
-                  {t("classes.attendance.selectClassToScan" as any, "Select the class you are attending to open the scanner.")}
+                  {t(
+                    "classes.attendance.selectClassToScan" as any,
+                    "Select the class you are attending to open the scanner."
+                  )}
                 </DialogDescription>
               </div>
             </div>
@@ -106,20 +105,36 @@ export const QRScannerSelectorDialog = ({ open, onOpenChange }: QRScannerSelecto
               </label>
               <Select value={selectedClassId} onValueChange={setSelectedClassId}>
                 <SelectTrigger className="h-14 rounded-2xl border-none bg-muted/50 shadow-inner font-bold focus:ring-2 focus:ring-primary/20">
-                  <SelectValue placeholder={isLoading ? (t("common.loading" as any) as string) : (t("classes.attendance.selectPlaceholder" as any, "Select a class...") as string)} />
+                  <SelectValue
+                    placeholder={
+                      isLoading
+                        ? (t("common.loading" as any) as string)
+                        : (t(
+                            "classes.attendance.selectPlaceholder" as any,
+                            "Select a class..."
+                          ) as string)
+                    }
+                  />
                 </SelectTrigger>
                 <SelectContent className="rounded-2xl border-none shadow-2xl">
                   {classes.map((item: any) => {
                     const c = item.class || item;
                     return (
-                      <SelectItem key={c.id} value={c.id.toString()} className="rounded-xl py-3 font-bold">
+                      <SelectItem
+                        key={c.id}
+                        value={c.id.toString()}
+                        className="rounded-xl py-3 font-bold"
+                      >
                         {c.name}
                       </SelectItem>
                     );
                   })}
                   {classes.length === 0 && !isLoading && (
                     <div className="p-4 text-center text-xs font-bold text-muted-foreground">
-                      {t("classes.attendance.noClassesFound" as any, "No classes found for this term.")}
+                      {t(
+                        "classes.attendance.noClassesFound" as any,
+                        "No classes found for this term."
+                      )}
                     </div>
                   )}
                 </SelectContent>

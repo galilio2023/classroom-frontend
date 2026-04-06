@@ -47,7 +47,7 @@ export const QRSessionSelectorDialog = ({ open, onOpenChange }: QRSessionSelecto
     pagination: { mode: "off" },
     queryOptions: {
       enabled: open && !showQR,
-    }
+    },
   });
 
   const classes = query.data?.data || [];
@@ -93,7 +93,10 @@ export const QRSessionSelectorDialog = ({ open, onOpenChange }: QRSessionSelecto
                   {t("classes.attendance.startQrSession" as any, "Start QR Session")}
                 </DialogTitle>
                 <DialogDescription className="font-bold text-muted-foreground/80">
-                  {t("classes.attendance.selectClassToStart" as any, "Choose a class to display the live attendance QR code.")}
+                  {t(
+                    "classes.attendance.selectClassToStart" as any,
+                    "Choose a class to display the live attendance QR code."
+                  )}
                 </DialogDescription>
               </div>
             </div>
@@ -106,17 +109,33 @@ export const QRSessionSelectorDialog = ({ open, onOpenChange }: QRSessionSelecto
               </label>
               <Select value={selectedClassId} onValueChange={setSelectedClassId}>
                 <SelectTrigger className="h-14 rounded-2xl border-none bg-muted/50 shadow-inner font-bold focus:ring-2 focus:ring-primary/20">
-                  <SelectValue placeholder={isLoading ? (t("common.loading" as any) as string) : (t("classes.attendance.selectPlaceholder" as any, "Select a class...") as string)} />
+                  <SelectValue
+                    placeholder={
+                      isLoading
+                        ? (t("common.loading" as any) as string)
+                        : (t(
+                            "classes.attendance.selectPlaceholder" as any,
+                            "Select a class..."
+                          ) as string)
+                    }
+                  />
                 </SelectTrigger>
                 <SelectContent className="rounded-2xl border-none shadow-2xl">
                   {classes.map((c: Class) => (
-                    <SelectItem key={c.id} value={c.id.toString()} className="rounded-xl py-3 font-bold">
+                    <SelectItem
+                      key={c.id}
+                      value={c.id.toString()}
+                      className="rounded-xl py-3 font-bold"
+                    >
                       {c.name}
                     </SelectItem>
                   ))}
                   {classes.length === 0 && !isLoading && (
                     <div className="p-4 text-center text-xs font-bold text-muted-foreground">
-                      {t("classes.attendance.noClassesFound" as any, "No classes found for this term.")}
+                      {t(
+                        "classes.attendance.noClassesFound" as any,
+                        "No classes found for this term."
+                      )}
                     </div>
                   )}
                 </SelectContent>
