@@ -70,6 +70,26 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         });
       });
 
+      socket.on(
+        "magic_builder_progress",
+        (data: { step: string; progress: number; classId: number }) => {
+          const jobId = `magic-builder-${data.classId}`;
+          updateJob(jobId, {
+            metadata: {
+              progress: data.progress,
+              step: data.step,
+              classId: data.classId,
+            },
+          });
+
+          if (data.progress === 100) {
+            updateJob(jobId, { status: "completed" });
+            void invalidate({ resource: "modules", invalidates: ["list"] });
+            void invalidate({ resource: "classes", id: data.classId, invalidates: ["detail"] });
+          }
+        }
+      );
+
       socket.on("AI_ASSIGNMENT_COMPLETED", ({ content }) => {
         open?.({
           type: "success",

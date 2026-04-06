@@ -31,20 +31,13 @@ import {
   Zap,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { connectSocket, socket } from "@/lib/socket";
 import { AnimatePresence, motion } from "framer-motion";
 import { AIFeatureDisabled } from "../../ai/ai-feature-disabled";
 import { useAiAccess } from "@/hooks/use-ai-access";
 import { useJobs } from "@/contexts/job-context";
 import { toast } from "sonner";
-import {
-  useApiUrl,
-  useCustomMutation,
-  useGetIdentity,
-  useInvalidate,
-  useList,
-} from "@refinedev/core";
-import { Class, User } from "@/types";
+import { useApiUrl, useCustomMutation, useSelect } from "@refinedev/core";
+import { Class } from "@/types";
 import { useTerm } from "@/contexts/term-context";
 import { cn } from "@/lib/utils";
 
@@ -66,7 +59,6 @@ interface MagicBuilderDialogProps {
   onOpenChange: (open: boolean) => void;
   initialConfig?: Partial<MagicBuilderConfig>;
   initialClassId?: string;
-  // If onGenerate is NOT provided, the dialog will handle its own mutation
   onGenerate?: (config: MagicBuilderConfig, classId: string) => void;
   isGenerating?: boolean;
 }
@@ -83,7 +75,6 @@ export const MagicBuilderDialog = ({
   const { isAiEnabled, isAllowed } = useAiAccess();
   const { jobs, addJob, updateJob, removeJob } = useJobs();
   const apiUrl = useApiUrl();
-  const invalidate = useInvalidate();
   const { selectedTerm } = useTerm();
 
   const { mutate } = useCustomMutation();
@@ -101,84 +92,38 @@ export const MagicBuilderDialog = ({
 
   const [classId, setClassId] = useState(initialClassId || "");
   const [internalIsGenerating, setInternalIsGenerating] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [step, setStep] = useState("");
-  const [isCompleted, setIsCompleted] = useState(false);
+
+  // 🛡️ BATCHING OPTIMIZATION: Use Refine's useSelect for scalable class selection
+  const { options: classOptions, query: classQuery } = useSelect<Class>({
+    resource: "classes",
+    filters: selectedTerm ? [{ field: "termId", operator: "eq", value: selectedTerm.id }] : [],
+    pagination: { mode: "client", pageSize: 50 },
+    queryOptions: { enabled: !initialClassId && open && isAiEnabled },
+  });
 
   const isGenerating = externalIsGenerating ?? internalIsGenerating;
 
-  // --- JOB PERSISTENCE ---
   const activeJob = useMemo(() => {
     return jobs.find(
       (j) =>
         j.type === "magic-builder" &&
         j.metadata?.classId === Number(classId) &&
-        j.status === "processing"
+        (j.status === "processing" || j.status === "completed")
     );
   }, [jobs, classId]);
 
+  const progress = activeJob?.metadata?.progress || 0;
+  const step = activeJob?.metadata?.step || "";
+  const isCompleted = activeJob?.status === "completed";
+
   useEffect(() => {
-    if (activeJob && open) {
+    if (activeJob?.status === "processing" && open) {
       setInternalIsGenerating(true);
-      setProgress(activeJob.metadata?.progress || 0);
-      setStep(activeJob.metadata?.step || "");
+    } else if (activeJob?.status === "completed") {
+      setInternalIsGenerating(false);
     }
-  }, [activeJob, open]);
+  }, [activeJob?.status, open]);
 
-  // Fetch classes if no initialClassId is provided
-  // 🛡️ FEATURE GATING: Only fetch if AI is enabled and dialog is open
-  const { query } = useList<Class>({
-    resource: "classes",
-    filters: selectedTerm ? [{ field: "termId", operator: "eq", value: selectedTerm.id }] : [],
-    pagination: { mode: "off" },
-    queryOptions: { enabled: !initialClassId && open && isAiEnabled },
-  });
-
-  const classes = query.data?.data || [];
-  const isLoadingClasses = query.isLoading;
-
-  useEffect(() => {
-    if ((isGenerating || activeJob) && open && isAiEnabled) {
-      void connectSocket();
-
-      const handleProgress = (data: { step: string; progress: number; classId: number }) => {
-        if (data.classId === Number(classId)) {
-          setStep(data.step);
-          setProgress(data.progress);
-
-          // Update global job state
-          const jobId = `magic-builder-${data.classId}`;
-          updateJob(jobId, {
-            metadata: {
-              ...activeJob?.metadata,
-              progress: data.progress,
-              step: data.step,
-              classId: data.classId,
-            },
-          });
-
-          if (data.progress === 100) {
-            setInternalIsGenerating(false);
-            setIsCompleted(true);
-            updateJob(jobId, { status: "completed" });
-
-            // 🛠️ REFINE METADATA: Invalidate list AND specific class detail
-            void invalidate({ resource: "modules", invalidates: ["list"] });
-            void invalidate({ resource: "classes", id: data.classId, invalidates: ["detail"] });
-
-            toast.success(t("classes.magicBuilder.success"));
-          }
-        }
-      };
-
-      socket.on("magic_builder_progress", handleProgress);
-      return () => {
-        socket.off("magic_builder_progress", handleProgress);
-      };
-    }
-  }, [isGenerating, open, classId, isAiEnabled, updateJob, activeJob, invalidate, t]);
-
-  // 🛡️ PARENT GATING: AI interactive features are disabled for Parents
   if (!isAllowed) return null;
 
   const handleStart = async () => {
@@ -187,22 +132,14 @@ export const MagicBuilderDialog = ({
       toast.error(t("common.errors.fillRequired"));
       return;
     }
-    if (cleanTopic.length < 3) {
-      toast.error(t("classes.magicBuilder.errors.topicTooShort"));
-      return;
-    }
 
     if (onGenerate) {
       onGenerate(config, classId);
     } else {
-      // Internal mutation flow (Show Page usage)
       setInternalIsGenerating(true);
-      setProgress(0);
       const initialStep = t("common.starting");
-      setStep(initialStep);
-      setIsCompleted(false);
-
       const jobId = `magic-builder-${classId}`;
+
       addJob({
         id: jobId,
         type: "magic-builder",
@@ -210,7 +147,6 @@ export const MagicBuilderDialog = ({
         metadata: { classId: Number(classId), progress: 0, step: initialStep },
       });
 
-      // Refactored to use useCustomMutation
       mutate(
         {
           url: `${apiUrl}/ai/magic-builder`,
@@ -233,10 +169,7 @@ export const MagicBuilderDialog = ({
   };
 
   const reset = () => {
-    if (!activeJob) {
-      setProgress(0);
-      setStep("");
-      setIsCompleted(false);
+    if (!activeJob || activeJob.status !== "processing") {
       setInternalIsGenerating(false);
     }
   };
@@ -246,7 +179,13 @@ export const MagicBuilderDialog = ({
       open={open}
       onOpenChange={(val) => {
         onOpenChange(val);
-        if (!val) reset();
+        if (!val) {
+          // 🛡️ JOB CLEANUP: Auto-remove completed jobs when closing dialog to prevent bloat
+          if (isCompleted) {
+            removeJob(`magic-builder-${classId}`);
+          }
+          reset();
+        }
       }}
     >
       <DialogContent className="sm:max-w-125 border-none shadow-2xl bg-background/95 backdrop-blur-xl p-0 overflow-hidden">
@@ -286,7 +225,7 @@ export const MagicBuilderDialog = ({
             </DialogHeader>
 
             <AnimatePresence mode="wait">
-              {isGenerating || activeJob ? (
+              {isGenerating ? (
                 <motion.div
                   key="generating"
                   initial={{ opacity: 0, y: 10 }}
@@ -361,7 +300,6 @@ export const MagicBuilderDialog = ({
                       {t("classes.magicBuilder.readyDesc")}
                     </p>
                   </div>
-                  {/* 👤 HUMAN-IN-THE-LOOP: This satisfies the requirement to review suggestions */}
                   <Button
                     onClick={() => {
                       onOpenChange(false);
@@ -389,20 +327,20 @@ export const MagicBuilderDialog = ({
                         <SelectTrigger className="h-14 rounded-2xl border-none bg-muted/50 shadow-inner font-bold">
                           <SelectValue
                             placeholder={
-                              isLoadingClasses
+                              classQuery.isLoading
                                 ? (t("common.loading") as string)
                                 : (t("classes.magicBuilder.selectPlaceholder") as string)
                             }
                           />
                         </SelectTrigger>
                         <SelectContent className="rounded-2xl border-none shadow-2xl">
-                          {classes.map((c: Class) => (
+                          {classOptions.map((opt) => (
                             <SelectItem
-                              key={c.id}
-                              value={c.id.toString()}
+                              key={opt.value}
+                              value={opt.value.toString()}
                               className="rounded-xl py-3 font-bold"
                             >
-                              {c.name}
+                              {opt.label}
                             </SelectItem>
                           ))}
                         </SelectContent>
