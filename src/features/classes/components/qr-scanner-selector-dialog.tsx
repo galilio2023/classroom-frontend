@@ -101,18 +101,15 @@ export const QRScannerSelectorDialog = ({ open, onOpenChange }: QRScannerSelecto
           <div className="space-y-4">
             <div className="space-y-2">
               <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">
-                {t("classes.attendance.targetClass" as any, "Target Class")}
+                {t("classes.attendance.targetClass")}
               </label>
               <Select value={selectedClassId} onValueChange={setSelectedClassId}>
                 <SelectTrigger className="h-14 rounded-2xl border-none bg-muted/50 shadow-inner font-bold focus:ring-2 focus:ring-primary/20">
                   <SelectValue
                     placeholder={
                       isLoading
-                        ? (t("common.loading" as any) as string)
-                        : (t(
-                            "classes.attendance.selectPlaceholder" as any,
-                            "Select a class..."
-                          ) as string)
+                        ? (t("common.loading") as string)
+                        : (t("classes.attendance.selectPlaceholder") as string)
                     }
                   />
                 </SelectTrigger>

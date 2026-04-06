@@ -93,15 +93,15 @@ export const BulkEnrollSelectorDialog = ({ open, onOpenChange }: BulkEnrollSelec
           <div className="space-y-4">
             <div className="space-y-2">
               <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">
-                {t("classes.show.students.bulk.selectClassLabel" as any)}
+                {t("classes.show.students.bulk.selectClassLabel")}
               </label>
               <Select value={selectedClassId} onValueChange={setSelectedClassId}>
                 <SelectTrigger className="h-14 rounded-2xl border-none bg-muted/50 shadow-inner font-bold focus:ring-2 focus:ring-primary/20">
                   <SelectValue
                     placeholder={
                       isLoading
-                        ? (t("common.loading" as any) as string)
-                        : (t("classes.show.students.bulk.selectPlaceholder" as any) as string)
+                        ? (t("common.loading") as string)
+                        : (t("classes.show.students.bulk.selectPlaceholder") as string)
                     }
                   />
                 </SelectTrigger>

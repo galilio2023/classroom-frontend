@@ -37,7 +37,13 @@ import { AIFeatureDisabled } from "../../ai/ai-feature-disabled";
 import { useAiAccess } from "@/hooks/use-ai-access";
 import { useJobs } from "@/contexts/job-context";
 import { toast } from "sonner";
-import { useApiUrl, useGetIdentity, useInvalidate, useList } from "@refinedev/core";
+import {
+  useApiUrl,
+  useCustomMutation,
+  useGetIdentity,
+  useInvalidate,
+  useList,
+} from "@refinedev/core";
 import { Class, User } from "@/types";
 import { useTerm } from "@/contexts/term-context";
 import { cn } from "@/lib/utils";
@@ -78,8 +84,9 @@ export const MagicBuilderDialog = ({
   const { jobs, addJob, updateJob, removeJob } = useJobs();
   const apiUrl = useApiUrl();
   const invalidate = useInvalidate();
-  const { data: identity } = useGetIdentity<User>();
   const { selectedTerm } = useTerm();
+
+  const { mutate } = useCustomMutation();
 
   const [config, setConfig] = useState<MagicBuilderConfig>({
     topic: "",
@@ -159,9 +166,7 @@ export const MagicBuilderDialog = ({
             void invalidate({ resource: "modules", invalidates: ["list"] });
             void invalidate({ resource: "classes", id: data.classId, invalidates: ["detail"] });
 
-            toast.success(
-              t("classes.magicBuilder.success" as any, "Curriculum generated successfully!")
-            );
+            toast.success(t("classes.magicBuilder.success"));
           }
         }
       };
@@ -179,11 +184,11 @@ export const MagicBuilderDialog = ({
   const handleStart = async () => {
     const cleanTopic = config.topic.trim();
     if (!cleanTopic || !classId) {
-      toast.error(t("common.errors.fillRequired" as any));
+      toast.error(t("common.errors.fillRequired"));
       return;
     }
     if (cleanTopic.length < 3) {
-      toast.error(t("classes.magicBuilder.errors.topicTooShort" as any, "Topic too short"));
+      toast.error(t("classes.magicBuilder.errors.topicTooShort"));
       return;
     }
 
@@ -193,7 +198,7 @@ export const MagicBuilderDialog = ({
       // Internal mutation flow (Show Page usage)
       setInternalIsGenerating(true);
       setProgress(0);
-      const initialStep = t("common.starting" as any, "Starting AI engine...");
+      const initialStep = t("common.starting");
       setStep(initialStep);
       setIsCompleted(false);
 
@@ -205,22 +210,25 @@ export const MagicBuilderDialog = ({
         metadata: { classId: Number(classId), progress: 0, step: initialStep },
       });
 
-      // Simple fetch for the internal flow
-      try {
-        const response = await fetch(`${apiUrl}/ai/magic-builder`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
+      // Refactored to use useCustomMutation
+      mutate(
+        {
+          url: `${apiUrl}/ai/magic-builder`,
+          method: "post",
+          values: {
             classId: Number(classId),
             ...config,
-          }),
-        });
-        if (!response.ok) throw new Error("Failed to start AI");
-      } catch (error) {
-        toast.error(t("common.errors.aiFailed" as any, "AI Generation failed."));
-        setInternalIsGenerating(false);
-        updateJob(jobId, { status: "failed" });
-      }
+          },
+        },
+        {
+          onError: (error) => {
+            console.error("AI Magic Builder failed:", error);
+            toast.error(t("common.errors.aiFailed"));
+            setInternalIsGenerating(false);
+            updateJob(jobId, { status: "failed" });
+          },
+        }
+      );
     }
   };
 
@@ -253,7 +261,7 @@ export const MagicBuilderDialog = ({
               onClick={() => onOpenChange(false)}
               className="mt-6 rounded-xl font-bold"
             >
-              {t("buttons.close" as any)}
+              {t("buttons.close")}
             </Button>
           </div>
         ) : (
@@ -265,16 +273,13 @@ export const MagicBuilderDialog = ({
                 </div>
                 <div>
                   <DialogTitle className="text-2xl font-black tracking-tight flex items-center gap-2">
-                    {t("classes.magicBuilder.title" as any, "AI Magic Builder")}
+                    {t("classes.magicBuilder.title")}
                     <span className="px-2 py-0.5 rounded-full bg-ai-primary/20 text-ai-primary border-none text-[10px] font-black tracking-tighter uppercase">
                       Flash 3.0
                     </span>
                   </DialogTitle>
                   <DialogDescription className="font-bold text-muted-foreground/80">
-                    {t(
-                      "classes.magicBuilder.description" as any,
-                      "Let Gemini build your entire curriculum structure from a single topic."
-                    )}
+                    {t("classes.magicBuilder.description")}
                   </DialogDescription>
                 </div>
               </div>
@@ -318,14 +323,11 @@ export const MagicBuilderDialog = ({
                             isCompleted ? "text-emerald-500" : "text-ai-primary"
                           )}
                         >
-                          {isCompleted ? (t("common.completed" as any) as string) : step}
+                          {isCompleted ? (t("common.completed") as string) : step}
                         </p>
                         {!isCompleted && (
                           <p className="text-[9px] font-bold text-muted-foreground animate-pulse">
-                            {t(
-                              "classes.magicBuilder.wait" as any,
-                              " Gemini is thinking and structuring..."
-                            )}
+                            {t("classes.magicBuilder.wait")}
                           </p>
                         )}
                       </div>
@@ -338,7 +340,7 @@ export const MagicBuilderDialog = ({
                         "transition-all duration-500",
                         isCompleted
                           ? "bg-emerald-500"
-                          : "bg-ai-primary shadow-[0_0_15px_rgba(var(--ai-primary),0.5)]"
+                          : "bg-ai-primary shadow-[0_0_15px_hsla(var(--ai-primary-hsl),0.5)]"
                       )}
                     />
                   </div>
@@ -354,14 +356,9 @@ export const MagicBuilderDialog = ({
                     <CheckCircle2 className="h-12 w-12" />
                   </div>
                   <div className="space-y-2">
-                    <h4 className="text-xl font-black">
-                      {t("classes.magicBuilder.readyTitle" as any, "Curriculum Ready!")}
-                    </h4>
+                    <h4 className="text-xl font-black">{t("classes.magicBuilder.readyTitle")}</h4>
                     <p className="text-sm text-muted-foreground font-medium">
-                      {t(
-                        "classes.magicBuilder.readyDesc" as any,
-                        "Gemini has generated your curriculum as suggestions. Please review and publish them."
-                      )}
+                      {t("classes.magicBuilder.readyDesc")}
                     </p>
                   </div>
                   {/* 👤 HUMAN-IN-THE-LOOP: This satisfies the requirement to review suggestions */}
@@ -373,7 +370,7 @@ export const MagicBuilderDialog = ({
                     className="w-full h-14 rounded-2xl font-black uppercase tracking-widest text-[10px] bg-emerald-600 hover:bg-emerald-700 shadow-xl shadow-emerald-500/20"
                   >
                     <BookOpen className="h-4 w-4 me-2" />
-                    {t("buttons.exploreCurriculum" as any, "Review Suggestions")}
+                    {t("buttons.exploreCurriculum", "Review Suggestions")}
                   </Button>
                 </motion.div>
               ) : (
@@ -386,18 +383,15 @@ export const MagicBuilderDialog = ({
                   {!initialClassId && (
                     <div className="space-y-2">
                       <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">
-                        {t("classes.magicBuilder.targetClass" as any, "Target Class")}
+                        {t("classes.magicBuilder.targetClass")}
                       </Label>
                       <Select value={classId} onValueChange={setClassId}>
                         <SelectTrigger className="h-14 rounded-2xl border-none bg-muted/50 shadow-inner font-bold">
                           <SelectValue
                             placeholder={
                               isLoadingClasses
-                                ? (t("common.loading" as any) as string)
-                                : (t(
-                                    "classes.magicBuilder.selectPlaceholder" as any,
-                                    "Select a class..."
-                                  ) as string)
+                                ? (t("common.loading") as string)
+                                : (t("classes.magicBuilder.selectPlaceholder") as string)
                             }
                           />
                         </SelectTrigger>
@@ -419,17 +413,12 @@ export const MagicBuilderDialog = ({
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">
-                        {t("classes.magicBuilder.subjectArea" as any, "Subject Area")}
+                        {t("classes.magicBuilder.subjectArea")}
                       </Label>
                       <div className="relative group">
                         <LayoutGrid className="absolute start-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-ai-primary transition-colors" />
                         <Input
-                          placeholder={
-                            t(
-                              "classes.magicBuilder.subjectPlaceholder" as any,
-                              "e.g. Physics"
-                            ) as string
-                          }
+                          placeholder={t("classes.magicBuilder.subjectPlaceholder") as string}
                           value={config.subject}
                           onChange={(e) => setConfig({ ...config, subject: e.target.value })}
                           className="ps-11 h-14 rounded-2xl border-none bg-muted/50 shadow-inner font-bold"
@@ -438,7 +427,7 @@ export const MagicBuilderDialog = ({
                     </div>
                     <div className="space-y-2">
                       <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">
-                        {t("aiHub.assistant.helper.level" as any, "Level")}
+                        {t("aiHub.assistant.helper.level")}
                       </Label>
                       <Select
                         value={config.level}
@@ -452,13 +441,13 @@ export const MagicBuilderDialog = ({
                         </SelectTrigger>
                         <SelectContent className="rounded-2xl border-none shadow-xl">
                           <SelectItem value="primary">
-                            {t("aiHub.assistant.helper.levels.beginner" as any)}
+                            {t("aiHub.assistant.helper.levels.beginner")}
                           </SelectItem>
                           <SelectItem value="high_school">
-                            {t("aiHub.assistant.helper.levels.intermediate" as any)}
+                            {t("aiHub.assistant.helper.levels.intermediate")}
                           </SelectItem>
                           <SelectItem value="university">
-                            {t("aiHub.assistant.helper.levels.advanced" as any)}
+                            {t("aiHub.assistant.helper.levels.advanced")}
                           </SelectItem>
                         </SelectContent>
                       </Select>
@@ -467,17 +456,12 @@ export const MagicBuilderDialog = ({
 
                   <div className="space-y-2">
                     <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">
-                      {t("classes.magicBuilder.topicLabel" as any, "Core Topic")}
+                      {t("classes.magicBuilder.topicLabel")}
                     </Label>
                     <div className="relative group">
                       <Sparkles className="absolute start-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-ai-primary transition-colors" />
                       <Input
-                        placeholder={
-                          t(
-                            "classes.magicBuilder.topicPlaceholder" as any,
-                            "e.g. Quantum Mechanics"
-                          ) as string
-                        }
+                        placeholder={t("classes.magicBuilder.topicPlaceholder") as string}
                         value={config.topic}
                         onChange={(e) => setConfig({ ...config, topic: e.target.value })}
                         className="ps-11 h-14 rounded-2xl border-none bg-muted/50 shadow-inner font-bold"
@@ -488,7 +472,7 @@ export const MagicBuilderDialog = ({
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">
-                        {t("classes.resource.addDialog.fieldType" as any)}
+                        {t("classes.resource.addDialog.fieldType")}
                       </Label>
                       <Select
                         value={config.type}
@@ -498,24 +482,20 @@ export const MagicBuilderDialog = ({
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent className="rounded-2xl border-none shadow-xl">
-                          <SelectItem value="package">
-                            {t("aiHub.assistant.architect" as any)}
-                          </SelectItem>
+                          <SelectItem value="package">{t("aiHub.assistant.architect")}</SelectItem>
                           <SelectItem value="note">
-                            {t("classes.resource.addDialog.types.note" as any)}
+                            {t("classes.resource.addDialog.types.note")}
                           </SelectItem>
-                          <SelectItem value="quiz">
-                            {t("classes.show.tabs.quizzes" as any)}
-                          </SelectItem>
+                          <SelectItem value="quiz">{t("classes.show.tabs.quizzes")}</SelectItem>
                           <SelectItem value="assignment">
-                            {t("classes.show.tabs.assignments" as any)}
+                            {t("classes.show.tabs.assignments")}
                           </SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                     <div className="space-y-2">
                       <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">
-                        {t("aiHub.assistant.helper.tone" as any)}
+                        {t("aiHub.assistant.helper.tone")}
                       </Label>
                       <Select
                         value={config.tone}
@@ -529,13 +509,13 @@ export const MagicBuilderDialog = ({
                         </SelectTrigger>
                         <SelectContent className="rounded-2xl border-none shadow-xl">
                           <SelectItem value="academic">
-                            {t("aiHub.assistant.helper.tones.academic" as any)}
+                            {t("aiHub.assistant.helper.tones.academic")}
                           </SelectItem>
                           <SelectItem value="creative">
-                            {t("aiHub.assistant.helper.tones.creative" as any)}
+                            {t("aiHub.assistant.helper.tones.creative")}
                           </SelectItem>
                           <SelectItem value="practical">
-                            {t("aiHub.assistant.helper.tones.practical" as any)}
+                            {t("aiHub.assistant.helper.tones.practical")}
                           </SelectItem>
                         </SelectContent>
                       </Select>
@@ -545,10 +525,10 @@ export const MagicBuilderDialog = ({
                   <div className="space-y-2">
                     <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1 flex items-center gap-2">
                       <Target className="h-3.5 w-3.5 text-primary" />
-                      {t("aiHub.assistant.helper.objectives" as any)}
+                      {t("aiHub.assistant.helper.objectives")}
                     </Label>
                     <Textarea
-                      placeholder={t("aiHub.assistant.helper.placeholders.objectives" as any)}
+                      placeholder={t("aiHub.assistant.helper.placeholders.objectives")}
                       value={config.objectives}
                       onChange={(e) => setConfig({ ...config, objectives: e.target.value })}
                       className="resize-none h-20 rounded-2xl border-none bg-muted/50 shadow-inner font-bold text-xs"
@@ -562,14 +542,14 @@ export const MagicBuilderDialog = ({
                       className="w-full h-14 rounded-2xl font-black uppercase tracking-widest text-[10px] gap-3 bg-ai-primary hover:bg-ai-primary/90 shadow-xl shadow-ai-primary/20 transition-all hover:scale-105 active:scale-95 group"
                     >
                       <Zap className="h-5 w-5 animate-pulse group-hover:rotate-12 transition-transform" />
-                      {t("buttons.generateWithGemini" as any, "Generate with Gemini")}
+                      {t("buttons.generateWithGemini", "Generate with Gemini")}
                     </Button>
                     <Button
                       variant="ghost"
                       onClick={() => onOpenChange(false)}
                       className="w-full h-12 rounded-xl font-black uppercase tracking-widest text-[10px] text-muted-foreground"
                     >
-                      {t("buttons.cancel" as any)}
+                      {t("buttons.cancel")}
                     </Button>
                   </div>
                 </motion.div>

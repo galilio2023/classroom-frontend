@@ -4,6 +4,7 @@ import { AlertTriangle, ShieldAlert, ShieldCheck, ShieldQuestion } from "lucide-
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 import { TFunction } from "i18next";
+import { AiFeatureGuard } from "@/components/ai/AiFeatureGuard";
 
 export type AIRiskLevel = "low" | "medium" | "high" | "critical";
 
@@ -50,29 +51,31 @@ export const AIRiskBadge = ({ riskLevel, className, showText = false }: AIRiskBa
   const Icon = active.icon;
 
   return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Badge
-          variant="outline"
-          className={cn(
-            "px-2 py-0.5 rounded-lg font-black uppercase tracking-tighter text-[10px] flex items-center gap-1.5 transition-all hover:scale-105 border-none",
-            active.color,
-            className
-          )}
-        >
-          <Icon className="h-3 w-3" />
-          {(showText || riskLevel === "critical" || riskLevel === "high") && active.label}
-        </Badge>
-      </TooltipTrigger>
-      <TooltipContent className="rounded-xl p-3 max-w-[200px] border-none shadow-2xl bg-card/95 backdrop-blur-xl">
-        <div className="space-y-1">
-          <p className="font-black text-xs uppercase tracking-widest flex items-center gap-2">
+    <AiFeatureGuard silent>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Badge
+            variant="outline"
+            className={cn(
+              "px-2 py-0.5 rounded-lg font-black uppercase tracking-tighter text-[10px] flex items-center gap-1.5 transition-all hover:scale-105 border-none",
+              active.color,
+              className
+            )}
+          >
             <Icon className="h-3 w-3" />
-            {active.label}
-          </p>
-          <p className="text-[10px] font-medium leading-relaxed opacity-70">{active.desc}</p>
-        </div>
-      </TooltipContent>
-    </Tooltip>
+            {(showText || riskLevel === "critical" || riskLevel === "high") && active.label}
+          </Badge>
+        </TooltipTrigger>
+        <TooltipContent className="rounded-xl p-3 max-w-[200px] border-none shadow-2xl bg-card/95 backdrop-blur-xl">
+          <div className="space-y-1">
+            <p className="font-black text-xs uppercase tracking-widest flex items-center gap-2">
+              <Icon className="h-3 w-3" />
+              {active.label}
+            </p>
+            <p className="text-[10px] font-medium leading-relaxed opacity-70">{active.desc}</p>
+          </div>
+        </TooltipContent>
+      </Tooltip>
+    </AiFeatureGuard>
   );
 };
