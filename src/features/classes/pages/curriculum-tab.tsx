@@ -15,9 +15,7 @@ import { Button } from "@/components/ui/button";
 import { BookOpen, LayoutDashboard, Loader2, PlusCircle, Sparkles, Wand2, Zap } from "lucide-react";
 import { toast } from "sonner";
 import { ModuleItem } from "@/components/classes/curriculum/module-item";
-import {
-  MagicBuilderDialog,
-} from "@/components/classes/curriculum/magic-builder-dialog";
+import { MagicBuilderDialog } from "@/components/classes/curriculum/magic-builder-dialog";
 import { MagicBuilderConfig } from "@/hooks/ai/use-magic-builder";
 import { CreateModuleDialog } from "@/components/classes/curriculum/create-module-dialog";
 import { AddResourceDialog } from "@/components/classes/curriculum/add-resource-dialog";

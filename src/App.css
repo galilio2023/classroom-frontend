@@ -22,6 +22,7 @@
   --primary-foreground: hsl(0 0% 100%);
 
   --ai-primary-hsl: 270 90% 60%;
+  --ai-primary-rgb: 153 61 245;
   --ai-primary: hsl(var(--ai-primary-hsl));
   --ai-secondary: hsl(270 90% 98%);
 

@@ -28,6 +28,7 @@ import { BulkEnrollDialog } from "./bulk-enroll-dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { AIRiskBadge, AIRiskLevel } from "@/components/ai-risk-badge";
 import { AiFeatureGuard } from "../../ai/AiFeatureGuard";
+import { useAiAccess } from "@/hooks/use-ai-access";
 import dayjs from "dayjs";
 
 interface StudentsTabProps {
@@ -179,7 +180,7 @@ export const StudentsTab = ({
                     riskAssessment.riskLevel !== "low" && (
                       <span className="text-[9px] font-black text-destructive flex items-center gap-0.5">
                         <TrendingDown className="h-2.5 w-2.5" />
-                        AI: {riskAssessment.predictedGrade}%
+                        AI: {Math.round(riskAssessment.predictedGrade)}%
                       </span>
                     )}
                 </div>
@@ -222,11 +223,16 @@ export const StudentsTab = ({
     [t, isStaff, onInsight, onUnenroll]
   );
 
+  const { isAiEnabled } = useAiAccess();
+
   const table = useTable<Enrollment, HttpError, Enrollment>({
     refineCoreProps: {
       resource: "enrollments",
       filters: {
         initial: [{ field: "classId", operator: "eq", value: classId }],
+      },
+      meta: {
+        includeAi: isAiEnabled,
       },
     },
     columns,

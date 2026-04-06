@@ -3,11 +3,13 @@ import { AlertCircle, RefreshCcw, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { withTranslation, WithTranslation } from "react-i18next";
+import { useAiAccess } from "@/hooks/use-ai-access";
 
 interface Props extends WithTranslation {
   children: ReactNode;
   fallback?: ReactNode;
   name?: string;
+  isAiEnabled?: boolean;
 }
 
 interface State {
@@ -26,15 +28,23 @@ class AIErrorBoundaryBase extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error(`[AIErrorBoundary:${this.props.name || "Unknown"}]`, error, errorInfo);
+    // 🛡️ SECURITY: Sanitize name to strictly alphanumeric to prevent log injection
+    const safeName = (this.props.name || "Unknown").replace(/[^a-z0-9]/gi, "");
+    console.error(`[AIErrorBoundary:${safeName}]`, error, errorInfo);
   }
 
   private handleReset = () => {
+    // 🛡️ UX: If AI was disabled while the user was on the page, the parent guard
+    // should ideally handle this, but we force a state reset here.
+    if (this.props.isAiEnabled === false) {
+      // If AI is disabled, we don't even attempt to reset into a broken state
+      return;
+    }
     this.setState({ hasError: false, error: null });
   };
 
   public render() {
-    const { t } = this.props;
+    const { t, isAiEnabled } = this.props;
 
     if (this.state.hasError) {
       if (this.props.fallback) return this.props.fallback;
@@ -52,15 +62,18 @@ class AIErrorBoundaryBase extends Component<Props, State> {
               {t("ai.errorBoundary.title", "AI Assistant Offline")}
             </h3>
             <p className="text-xs font-medium text-muted-foreground max-w-[240px]">
-              {t(
-                "ai.errorBoundary.description",
-                "Something went wrong while communicating with Gemini. This is usually temporary."
-              )}
+              {isAiEnabled === false
+                ? "This AI feature has been disabled by the administrator."
+                : t(
+                    "ai.errorBoundary.description",
+                    "Something went wrong while communicating with Gemini. This is usually temporary."
+                  )}
             </p>
           </div>
           <Button
             variant="outline"
             size="sm"
+            disabled={isAiEnabled === false}
             onClick={this.handleReset}
             className="rounded-xl h-10 px-6 font-black uppercase tracking-widest text-[10px] gap-2 border-ai-primary/20 text-ai-primary hover:bg-ai-primary/5"
           >
@@ -75,4 +88,9 @@ class AIErrorBoundaryBase extends Component<Props, State> {
   }
 }
 
-export const AIErrorBoundary = withTranslation()(AIErrorBoundaryBase);
+const TranslatedErrorBoundary = withTranslation()(AIErrorBoundaryBase);
+
+export const AIErrorBoundary = (props: Omit<Props, keyof WithTranslation | "isAiEnabled">) => {
+  const { isAiEnabled } = useAiAccess();
+  return <TranslatedErrorBoundary {...props} isAiEnabled={isAiEnabled} />;
+};

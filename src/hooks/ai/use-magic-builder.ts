@@ -45,7 +45,7 @@ export const useMagicBuilder = ({
 }: UseMagicBuilderProps) => {
   const { t } = useTranslation();
   const { isAiEnabled } = useAiAccess();
-  const { jobs, addJob, updateJob } = useJobs();
+  const { jobs, addJob, updateJob, removeJob } = useJobs();
   const apiUrl = useApiUrl();
   const { selectedTerm } = useTerm();
   const { mutate } = useCustomMutation();
@@ -154,8 +154,10 @@ export const useMagicBuilder = ({
   };
 
   const reset = () => {
-    if (!activeJob || activeJob.status !== "processing") {
-      setInternalIsGenerating(false);
+    setInternalIsGenerating(false);
+    // 🛡️ Prune stale or completed jobs when the modal closes
+    if (isCompleted || activeJob?.status === "failed") {
+      removeJob(jobId);
     }
   };
 

@@ -112,7 +112,7 @@ const MagicBuilderProgress = ({
             </p>
           )}
         </div>
-        <p className="text-sm font-black text-foreground">{progress}%</p>
+        <p className="text-sm font-black text-foreground">{Math.round(progress)}%</p>
       </div>
       <Progress
         value={progress}
@@ -191,7 +191,7 @@ const MagicBuilderForm = ({
         <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">
           {t("classes.magicBuilder.targetClass")}
         </Label>
-        <Select value={classId?.toString()} onValueChange={setClassId}>
+        <Select value={classId?.toString() || ""} onValueChange={setClassId}>
           <SelectTrigger className="h-14 rounded-2xl border-none bg-muted/50 shadow-inner font-bold">
             <SelectValue
               placeholder={
@@ -200,7 +200,7 @@ const MagicBuilderForm = ({
                   : (t("classes.magicBuilder.selectPlaceholder") as string)
               }
             />
-          </SelectTrigger>
+          </SelectTrigger>{" "}
           <SelectContent className="rounded-2xl border-none shadow-2xl">
             {classOptions.map((opt) => (
               <SelectItem
