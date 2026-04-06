@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 import { TFunction } from "i18next";
 import { AiFeatureGuard } from "@/components/ai/AiFeatureGuard";
-import { useMemo, memo } from "react";
+import { memo } from "react";
 
 export type AIRiskLevel = "low" | "medium" | "high" | "critical";
 

@@ -211,7 +211,9 @@ const MagicBuilderForm = ({
               )}
             >
               <div className="flex items-center gap-2">
-                {classQuery.isLoading && <Loader2 className="h-3 w-3 animate-spin text-ai-primary" />}
+                {classQuery.isLoading && (
+                  <Loader2 className="h-3 w-3 animate-spin text-ai-primary" />
+                )}
                 <SelectValue
                   placeholder={
                     classQuery.isLoading
@@ -370,7 +372,9 @@ const MagicBuilderForm = ({
             <SelectContent className="rounded-2xl border-none shadow-xl">
               <SelectItem value="academic">{t("aiHub.assistant.helper.tones.academic")}</SelectItem>
               <SelectItem value="creative">{t("aiHub.assistant.helper.tones.creative")}</SelectItem>
-              <SelectItem value="practical">{t("aiHub.assistant.helper.tones.practical")}</SelectItem>
+              <SelectItem value="practical">
+                {t("aiHub.assistant.helper.tones.practical")}
+              </SelectItem>
             </SelectContent>
           </Select>
         </div>

@@ -532,6 +532,7 @@
       "wait": "Gemini is thinking and structuring...",
       "readyTitle": "Curriculum Ready!",
       "readyDesc": "Gemini has generated your curriculum as suggestions. Please review and publish them.",
+      "progress": "Generation Progress",
       "success": "Curriculum generated successfully!",
       "errors": {
         "topicTooShort": "Topic too short (min 3 chars)"
