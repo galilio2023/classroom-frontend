@@ -63,7 +63,10 @@ class AIErrorBoundaryBase extends Component<Props, State> {
             </h3>
             <p className="text-xs font-medium text-muted-foreground max-w-[240px]">
               {isAiEnabled === false
-                ? t("ai.errorBoundary.disabled", "This AI feature has been disabled by the administrator.")
+                ? t(
+                    "ai.errorBoundary.disabled",
+                    "This AI feature has been disabled by the administrator."
+                  )
                 : t(
                     "ai.errorBoundary.description",
                     "Something went wrong while communicating with Gemini. This is usually temporary."

@@ -104,7 +104,7 @@ const MagicBuilderProgress = ({
               isCompleted ? "text-emerald-500" : "text-ai-primary"
             )}
           >
-            {isCompleted ? (t("common.completed") as string) : step}
+            {isCompleted ? t("common.completed") : step}
           </p>
           {!isCompleted && (
             <p className="text-[9px] font-bold text-muted-foreground animate-pulse">
@@ -188,11 +188,18 @@ const MagicBuilderForm = ({
   <motion.div key="form" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
     {!initialClassId && (
       <div className="space-y-2">
-        <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">
+        <Label
+          htmlFor="target-class"
+          className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1"
+        >
           {t("classes.magicBuilder.targetClass")}
         </Label>
         <Select value={classId?.toString() || ""} onValueChange={setClassId}>
-          <SelectTrigger className="h-14 rounded-2xl border-none bg-muted/50 shadow-inner font-bold">
+          <SelectTrigger
+            id="target-class"
+            disabled={classQuery.isLoading}
+            className="h-14 rounded-2xl border-none bg-muted/50 shadow-inner font-bold"
+          >
             <SelectValue
               placeholder={
                 classQuery.isLoading
@@ -218,12 +225,16 @@ const MagicBuilderForm = ({
 
     <div className="grid grid-cols-2 gap-4">
       <div className="space-y-2">
-        <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">
+        <Label
+          htmlFor="subject-area"
+          className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1"
+        >
           {t("classes.magicBuilder.subjectArea")}
         </Label>
         <div className="relative group">
           <LayoutGrid className="absolute start-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-ai-primary transition-colors" />
           <Input
+            id="subject-area"
             placeholder={t("classes.magicBuilder.subjectPlaceholder") as string}
             value={config.subject}
             onChange={(e) => setConfig({ ...config, subject: e.target.value })}
@@ -232,14 +243,20 @@ const MagicBuilderForm = ({
         </div>
       </div>
       <div className="space-y-2">
-        <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">
+        <Label
+          htmlFor="target-level"
+          className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1"
+        >
           {t("aiHub.assistant.helper.level")}
         </Label>
         <Select
           value={config.level}
           onValueChange={(v: MagicBuilderLevel) => setConfig({ ...config, level: v })}
         >
-          <SelectTrigger className="h-14 rounded-2xl border-none bg-muted/50 shadow-inner font-bold">
+          <SelectTrigger
+            id="target-level"
+            className="h-14 rounded-2xl border-none bg-muted/50 shadow-inner font-bold"
+          >
             <div className="flex items-center gap-2">
               <GraduationCap className="h-4 w-4 text-primary" />
               <SelectValue />
@@ -259,12 +276,16 @@ const MagicBuilderForm = ({
     </div>
 
     <div className="space-y-2">
-      <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">
+      <Label
+        htmlFor="core-topic"
+        className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1"
+      >
         {t("classes.magicBuilder.topicLabel")}
       </Label>
       <div className="relative group">
         <Sparkles className="absolute start-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-ai-primary transition-colors" />
         <Input
+          id="core-topic"
           placeholder={t("classes.magicBuilder.topicPlaceholder") as string}
           value={config.topic}
           onChange={(e) => setConfig({ ...config, topic: e.target.value })}
@@ -275,14 +296,20 @@ const MagicBuilderForm = ({
 
     <div className="grid grid-cols-2 gap-4">
       <div className="space-y-2">
-        <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">
+        <Label
+          htmlFor="resource-type"
+          className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1"
+        >
           {t("classes.resource.addDialog.fieldType")}
         </Label>
         <Select
           value={config.type}
           onValueChange={(v: MagicBuilderConfig["type"]) => setConfig({ ...config, type: v })}
         >
-          <SelectTrigger className="h-14 rounded-2xl border-none bg-muted/50 shadow-inner font-bold">
+          <SelectTrigger
+            id="resource-type"
+            className="h-14 rounded-2xl border-none bg-muted/50 shadow-inner font-bold"
+          >
             <SelectValue />
           </SelectTrigger>
           <SelectContent className="rounded-2xl border-none shadow-xl">
@@ -294,14 +321,20 @@ const MagicBuilderForm = ({
         </Select>
       </div>
       <div className="space-y-2">
-        <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1">
+        <Label
+          htmlFor="assistant-tone"
+          className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1"
+        >
           {t("aiHub.assistant.helper.tone")}
         </Label>
         <Select
           value={config.tone}
           onValueChange={(v: MagicBuilderTone) => setConfig({ ...config, tone: v })}
         >
-          <SelectTrigger className="h-14 rounded-2xl border-none bg-muted/50 shadow-inner font-bold">
+          <SelectTrigger
+            id="assistant-tone"
+            className="h-14 rounded-2xl border-none bg-muted/50 shadow-inner font-bold"
+          >
             <div className="flex items-center gap-2">
               <MessageSquare className="h-4 w-4 text-primary" />
               <SelectValue />
@@ -317,11 +350,15 @@ const MagicBuilderForm = ({
     </div>
 
     <div className="space-y-2">
-      <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1 flex items-center gap-2">
+      <Label
+        htmlFor="objectives"
+        className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-1 flex items-center gap-2"
+      >
         <Target className="h-3.5 w-3.5 text-primary" />
         {t("aiHub.assistant.helper.objectives")}
       </Label>
       <Textarea
+        id="objectives"
         placeholder={t("aiHub.assistant.helper.placeholders.objectives")}
         value={config.objectives}
         onChange={(e) => setConfig({ ...config, objectives: e.target.value })}
