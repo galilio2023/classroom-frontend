@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 import { TFunction } from "i18next";
 import { AiFeatureGuard } from "@/components/ai/AiFeatureGuard";
-import { useMemo } from "react";
+import { useMemo, memo } from "react";
 
 export type AIRiskLevel = "low" | "medium" | "high" | "critical";
 
@@ -42,7 +42,7 @@ const getRiskConfig = (t: TFunction) => ({
   },
 });
 
-export const AIRiskBadge = ({ riskLevel, className, showText = false }: AIRiskBadgeProps) => {
+export const AIRiskBadge = memo(({ riskLevel, className, showText = false }: AIRiskBadgeProps) => {
   const { t } = useTranslation();
 
   const config = useMemo(() => getRiskConfig(t), [t]);
@@ -80,4 +80,6 @@ export const AIRiskBadge = ({ riskLevel, className, showText = false }: AIRiskBa
       </Tooltip>
     </AiFeatureGuard>
   );
-};
+});
+
+AIRiskBadge.displayName = "AIRiskBadge";

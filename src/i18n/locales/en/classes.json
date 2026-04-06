@@ -528,6 +528,7 @@
       "subjectPlaceholder": "e.g. Physics",
       "topicLabel": "Core Topic",
       "topicPlaceholder": "e.g. Quantum Mechanics",
+      "version": "Flash 3.0",
       "wait": "Gemini is thinking and structuring...",
       "readyTitle": "Curriculum Ready!",
       "readyDesc": "Gemini has generated your curriculum as suggestions. Please review and publish them.",

@@ -109,8 +109,6 @@ export const MagicBuilderDialog = ({
     queryOptions: { enabled: !initialClassId && open && isAiEnabled },
   });
 
-  const isGenerating = externalIsGenerating ?? internalIsGenerating;
-
   const activeJob = useMemo(() => {
     return jobs.find(
       (j) =>
@@ -124,13 +122,11 @@ export const MagicBuilderDialog = ({
   const step = activeJob?.metadata?.step || "";
   const isCompleted = activeJob?.status === "completed";
 
-  useEffect(() => {
-    if (activeJob?.status === "processing" && open) {
-      setInternalIsGenerating(true);
-    } else if (activeJob?.status === "completed") {
-      setInternalIsGenerating(false);
-    }
-  }, [activeJob?.status, open]);
+  // 🛡️ LOADING STATE: Derive isGenerating strictly from job status or external prop
+  const isGenerating = useMemo(() => {
+    if (externalIsGenerating) return true;
+    return activeJob?.status === "processing" || internalIsGenerating;
+  }, [externalIsGenerating, activeJob?.status, internalIsGenerating]);
 
   if (!isAllowed) return null;
 
@@ -141,19 +137,22 @@ export const MagicBuilderDialog = ({
       return;
     }
 
+    const initialStep = t("common.starting");
+    const jobId = `magic-builder-${classId}`;
+
+    // 🛡️ JOB SYNC: Ensure addJob is called for both internal and external flows
+    // so the UI can track progress correctly via the global Job Context.
+    addJob({
+      id: jobId,
+      type: "magic-builder",
+      title: `${config.subject || "Curriculum"}: ${cleanTopic}`,
+      metadata: { classId: Number(classId), progress: 0, step: initialStep },
+    });
+
     if (onGenerate) {
       onGenerate(config, classId);
     } else {
       setInternalIsGenerating(true);
-      const initialStep = t("common.starting");
-      const jobId = `magic-builder-${classId}`;
-
-      addJob({
-        id: jobId,
-        type: "magic-builder",
-        title: `${config.subject || "Curriculum"}: ${cleanTopic}`,
-        metadata: { classId: Number(classId), progress: 0, step: initialStep },
-      });
 
       mutate(
         {
@@ -220,7 +219,7 @@ export const MagicBuilderDialog = ({
                   <DialogTitle className="text-2xl font-black tracking-tight flex items-center gap-2">
                     {t("classes.magicBuilder.title")}
                     <span className="px-2 py-0.5 rounded-full bg-ai-primary/20 text-ai-primary border-none text-[10px] font-black tracking-tighter uppercase">
-                      Flash 3.0
+                      {t("classes.magicBuilder.version")}
                     </span>
                   </DialogTitle>
                   <DialogDescription className="font-bold text-muted-foreground/80">
