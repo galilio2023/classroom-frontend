@@ -21,7 +21,9 @@
   --primary: hsl(var(--primary-hsl));
   --primary-foreground: hsl(0 0% 100%);
 
+  /* 🤖 AI BRAND IDENTITY: Ensure HSL and RGB stay synchronized if updated */
   --ai-primary-hsl: 270 90% 60%;
+  --ai-primary-rgb: 153 61 245;
   --ai-primary: hsl(var(--ai-primary-hsl));
   --ai-secondary: hsl(270 90% 98%);
 
@@ -204,11 +206,11 @@
   @apply relative overflow-hidden border-none bg-card/60 backdrop-blur-2xl;
   box-shadow:
     0 20px 40px -15px rgba(0, 0, 0, 0.1),
-    0 0 0 1px hsla(var(--ai-primary-hsl), 0.1);
+    0 0 0 1px rgba(var(--ai-primary-rgb), 0.1);
 }
 
 .dark .ai-card-premium {
-  background: linear-gradient(to bottom right, hsla(var(--ai-primary-hsl), 0.05), transparent);
+  background: linear-gradient(to bottom right, rgba(var(--ai-primary-rgb), 0.05), transparent);
   box-shadow:
     0 30px 60px -20px rgba(0, 0, 0, 0.6),
     inset 0 0 0 1px rgba(255, 255, 255, 0.03);

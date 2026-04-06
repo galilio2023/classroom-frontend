@@ -1,25 +1,22 @@
 import {
-  useCreate,
+  CrudFilter,
   useCustomMutation,
   useDelete,
   useGetIdentity,
   useGo,
   useList,
-  CrudFilter,
 } from "@refinedev/core";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Class, Module, Progress, Resource, User, UserRole, ListResponse } from "@/types";
+import { Class, ListResponse, Module, Progress, User, UserRole } from "@/types";
 import { CurriculumEmptyState } from "../components/class-empty-states";
 import { Accordion } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { BookOpen, LayoutDashboard, Loader2, PlusCircle, Sparkles, Wand2, Zap } from "lucide-react";
 import { toast } from "sonner";
 import { ModuleItem } from "@/components/classes/curriculum/module-item";
-import {
-  MagicBuilderConfig,
-  MagicBuilderDialog,
-} from "@/components/classes/curriculum/magic-builder-dialog";
+import { MagicBuilderDialog } from "@/components/classes/curriculum/magic-builder-dialog";
+import { MagicBuilderConfig } from "@/hooks/ai/use-magic-builder";
 import { CreateModuleDialog } from "@/components/classes/curriculum/create-module-dialog";
 import { AddResourceDialog } from "@/components/classes/curriculum/add-resource-dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -28,10 +25,9 @@ import { useTranslation } from "react-i18next";
 import { CanAccess } from "@/components/auth/can-access";
 import { useDashboard } from "@/features/dashboard/hooks/use-dashboard";
 import { useJobs } from "@/contexts/job-context";
-import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
+import { DragDropContext, Draggable, Droppable, DropResult } from "@hello-pangea/dnd";
 import { AiFeatureGuard } from "@/components/ai/AiFeatureGuard";
 import { VersionSummaryModal } from "../components/version-summary-modal";
-import { useEffect } from "react";
 
 interface CurriculumTabProps {
   classId: string;
@@ -139,9 +135,9 @@ export const CurriculumTab = ({ classId, aClass }: CurriculumTabProps) => {
         },
         {
           onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["progress"] });
+            void queryClient.invalidateQueries({ queryKey: ["progress"] });
             // Also invalidate identity to get updated enrollment data
-            queryClient.invalidateQueries({ queryKey: ["getUserIdentity"] });
+            void queryClient.invalidateQueries({ queryKey: ["getUserIdentity"] });
             toast.success(
               t("classes.curriculum.allCaughtUp", { defaultValue: "Great! You're all caught up." })
             );
@@ -517,7 +513,7 @@ export const CurriculumTab = ({ classId, aClass }: CurriculumTabProps) => {
                                     isItemCompleted={isItemCompleted}
                                     onToggleProgress={(type, id, mid) => {
                                       handleMarkAsViewed(mid, (module as any).version);
-                                      handleToggleProgress(type, id, mid);
+                                      void handleToggleProgress(type, id, mid);
                                     }}
                                     onDeleteModule={(id) =>
                                       deleteModule(
@@ -565,17 +561,18 @@ export const CurriculumTab = ({ classId, aClass }: CurriculumTabProps) => {
       {isTeacher && (
         <AiFeatureGuard silent>
           <MagicBuilderDialog
-            isOpen={isMagicModalOpen}
+            open={isMagicModalOpen}
             onOpenChange={setIsMagicModalOpen}
-            config={magicConfig}
-            setConfig={setMagicConfig}
-            onGenerate={handleMagicCreate}
+            initialConfig={magicConfig}
+            onGenerate={(config) => {
+              setMagicConfig(config);
+              handleMagicCreate();
+            }}
             isGenerating={isMagicCreating}
-            classId={Number(classId)}
+            initialClassId={classId}
           />
         </AiFeatureGuard>
       )}
-
       {isTeacher && (
         <>
           <AddResourceDialog

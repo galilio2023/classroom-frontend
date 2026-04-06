@@ -19,6 +19,7 @@ import {
   UserCheck,
   UserMinus,
   Clock,
+  FileSpreadsheet,
 } from "lucide-react";
 import { Input } from "@/components/ui/input.tsx";
 import { useMemo, useState, useRef } from "react";
@@ -33,6 +34,7 @@ import { Enrollment } from "@/types";
 import { useUserRole } from "@/hooks/use-user-role";
 import { Badge } from "@/components/ui/badge.tsx";
 import { Button } from "@/components/ui/button.tsx";
+import { BulkEnrollSelectorDialog } from "@/components/classes/show/bulk-enroll-selector-dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -91,6 +93,7 @@ const EnrollmentsList = () => {
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
+  const [isBulkEnrollOpen, setIsBulkEnrollOpen] = useState(false);
 
   const filters = useMemo(() => {
     const f = [];
@@ -219,17 +222,30 @@ const EnrollmentsList = () => {
               </div>
               <div className="flex items-center gap-3 w-full md:w-auto">
                 {isStaff && (
-                  <Button
-                    onClick={() => create("classes")}
-                    className="flex-1 md:flex-none rounded-2xl h-14 px-10 font-black uppercase tracking-widest text-[10px] gap-2 shadow-xl shadow-primary/20 transition-all hover:scale-105 active:scale-95"
-                  >
-                    <UserPlus className="h-5 w-5" />
-                    {t("my-classes.enrollStudent")}
-                  </Button>
+                  <>
+                    <Button
+                      onClick={() => setIsBulkEnrollOpen(true)}
+                      variant="outline"
+                      className="flex-1 md:flex-none rounded-2xl h-14 px-8 font-black uppercase tracking-widest text-[10px] gap-2 border-primary/20 text-primary hover:bg-primary/5 transition-all hover:scale-105 active:scale-95"
+                    >
+                      <FileSpreadsheet className="h-5 w-5" />
+                      {t("classes.show.students.actions.bulkEnroll", "Bulk Enroll")}
+                    </Button>
+                    <Button
+                      onClick={() => create("classes")}
+                      className="flex-1 md:flex-none rounded-2xl h-14 px-10 font-black uppercase tracking-widest text-[10px] gap-2 shadow-xl shadow-primary/20 transition-all hover:scale-105 active:scale-95"
+                    >
+                      <UserPlus className="h-5 w-5" />
+                      {t("my-classes.enrollStudent")}
+                    </Button>
+                  </>
                 )}
               </div>
             </div>
           </motion.div>
+
+          {/* Bulk Enroll Dialog */}
+          <BulkEnrollSelectorDialog open={isBulkEnrollOpen} onOpenChange={setIsBulkEnrollOpen} />
 
           {/* Stats Row */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

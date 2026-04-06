@@ -13,7 +13,7 @@ const rawApiUrl = getEnvVar("VITE_API_URL", "http://localhost:8000/api");
 
 // 🚀 RUNTIME CONFIG: Better Auth REQUIRES absolute URLs.
 // We prioritize VITE_API_URL if it's absolute, otherwise fallback to runtime origin.
-export const BACKEND_URL = rawApiUrl.startsWith("http") 
+export const BACKEND_URL = rawApiUrl.startsWith("http")
   ? rawApiUrl.replace(/\/+$/, "")
   : `${window.location.origin}/api`;
 
@@ -23,5 +23,5 @@ export const BASE_URL = BACKEND_URL.replace(/\/api\/?$/, "");
 // Better Auth specific root (Points exactly to the /api/auth endpoint)
 export const BETTER_AUTH_ROOT = `${BACKEND_URL}/auth`;
 
-// Sockets connect to root domain
-export const SOCKET_URL = import.meta.env.PROD ? window.location.origin : BASE_URL;
+// Sockets connect to root domain (Railway backend)
+export const SOCKET_URL = BASE_URL;

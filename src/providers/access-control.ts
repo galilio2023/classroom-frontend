@@ -1,10 +1,12 @@
 import { AccessControlProvider } from "@refinedev/core";
 import { authProvider } from "./auth";
 import { User, UserRole } from "@/types";
+import { resources } from "../config/resources";
 
 /**
  * Access Control Provider
- * Handles client-side visibility of resources and actions based on user roles and department isolation.
+ * Dynamically handles client-side visibility of resources based on UserRole configurations in resources.tsx.
+ * Provides logical isolation for multi-tenancy.
  */
 export const accessControlProvider: AccessControlProvider = {
   can: async ({ resource, action, params }) => {
@@ -14,124 +16,39 @@ export const accessControlProvider: AccessControlProvider = {
     const role = user.role;
     const resourceName = resource || "";
 
-    // 🛡️ ADMIN: Superuser access
-    if (role === UserRole.ADMIN) {
-      const adminAllowedResources = [
-        "dashboard",
-        "users",
-        "departments",
-        "academic-terms",
-        "subjects",
-        "attendance",
-        "submissions",
-        "my-classes",
-        "student-subscriptions",
-        "announcements",
-        "teacher-applications",
-        "discussions",
-        "calendar",
-        "notifications",
-        "profile-requests",
-        "activity-log",
-        "ai-health-reports",
-        "ai-metrics",
-        "badges",
-        "settings",
-        "monetization",
-        "portfolio",
-        "messages",
-        "my-teachers",
-        "channels",
-      ];
+    // 1. Find the resource definition from the master config
+    const resourceDef = resources.find((r) => r.name === resourceName);
 
-      if (adminAllowedResources.includes(resourceName)) {
-        // Admins can do anything on their allowed resources
-        return { can: true };
-      }
+    // 2. Check Role-based access (Dynamic)
+    // If resource is defined, check if user role is in its allowed roles array.
+    const allowedRoles = resourceDef?.meta?.roles as UserRole[] | undefined;
+    const hasRoleAccess = allowedRoles?.includes(role);
+
+    if (!hasRoleAccess) {
+      // Resource is not defined or user role is not allowed
+      return {
+        can: false,
+        reason: `Unauthorized: Role "${role}" cannot access resource "${resourceName}".`,
+      };
     }
 
-    // 🛡️ TEACHER: Content and Class Management
-    if (role === UserRole.TEACHER) {
-      const teacherAllowed = [
-        "dashboard",
-        "calendar",
-        "notifications",
-        "messages",
-        "meetings",
-        "classes",
-        "subjects",
-        "academic-terms",
-        "modules",
-        "resources",
-        "assignments",
-        "quizzes",
-        "submissions",
-        "my-classes",
-        "attendance",
-        "announcements",
-        "project-groups",
-        "discussions",
-        "library",
-        "badges",
-        "monetization",
-        "teacher-channel",
-        "ai-activity-logs",
-        "ai_features",
-      ];
-
-      if (!teacherAllowed.includes(resourceName)) return { can: false };
-      return { can: true };
-    }
-
-    // 🛡️ STUDENT: Learning Hub
+    // 3. Action-based restrictions for STUDENT
+    // Students can view but usually not create/edit/delete academic structures.
     if (role === UserRole.STUDENT) {
-      const studentAllowed = [
-        "dashboard",
-        "calendar",
-        "notifications",
-        "messages",
-        "classes",
-        "my-classes",
-        "attendance",
-        "announcements",
-        "project-groups",
-        "library",
-        "student-subscriptions",
-        "ai-activity-logs",
-        "badges",
-        "ai_features",
-      ];
-
-      if (!studentAllowed.includes(resourceName)) return { can: false };
-
-      // Students can't create or edit academic structures
       if (["create", "edit", "delete"].includes(action)) {
-        // Exception: discussions and submissions
-        if (["discussions", "submissions"].includes(resourceName)) {
-          return { can: true };
+        // Exception: discussions and submissions (Students need to participate)
+        const studentActionExceptions = ["discussions", "submissions"];
+        if (!studentActionExceptions.includes(resourceName)) {
+          return {
+            can: false,
+            reason: "Students are restricted from performing mutations on this resource.",
+          };
         }
-        return { can: false, reason: "Students cannot perform this action." };
       }
-
-      return { can: true };
     }
 
-    // 🛡️ PARENT: Monitoring Portal
-    if (role === UserRole.PARENT) {
-      const parentAllowed = [
-        "dashboard",
-        "guardian-portal",
-        "meetings",
-        "messages",
-        "notifications",
-        "badges",
-      ];
-      if (!parentAllowed.includes(resourceName)) return { can: false };
-      return { can: true };
-    }
-
-    // 🛡️ DATA ISOLATION (Multi-Tenancy)
-    // If a specific record is provided, check department_id alignment
+    // 4. DATA ISOLATION (Multi-Tenancy)
+    // If a specific record is provided, check department_id alignment to prevent cross-tenant access.
     if (params?.record && "departmentId" in params.record) {
       const record = params.record as { departmentId: number };
       if (record.departmentId !== user.departmentId && role !== UserRole.ADMIN) {
@@ -142,7 +59,7 @@ export const accessControlProvider: AccessControlProvider = {
       }
     }
 
-    return { can: false, reason: "Unauthorized." };
+    return { can: true };
   },
   options: {
     buttons: {

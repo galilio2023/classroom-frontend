@@ -242,7 +242,9 @@
           "waitMessage": "Please stay on this page until complete.",
           "statsEnrolled": "Enrolled",
           "statsCreated": "New Users",
-          "errorsTitle": "Issues Found"
+          "errorsTitle": "Issues Found",
+          "selectClassLabel": "Select a Class",
+          "selectPlaceholder": "Choose a classroom..."
         }
       },
       "details": {
@@ -334,6 +336,8 @@
       "dailySummaryTeacher": "View daily attendance summaries for the entire class.",
       "personalRecordStudent": "Your personal attendance record for this class.",
       "noRemarks": "No remarks",
+      "targetClass": "Target Class",
+      "selectPlaceholder": "Select a class...",
       "toast": {
         "saved": "Attendance Saved",
         "savedDescription": "Attendance for {{date}} has been updated successfully."
@@ -514,6 +518,35 @@
           "error": "Failed to enroll student."
         }
       }
+    },
+    "magicBuilder": {
+      "title": "AI Magic Builder",
+      "description": "Let Gemini build your entire curriculum structure from a single topic.",
+      "targetClass": "Target Class",
+      "selectPlaceholder": "Select a class...",
+      "subjectArea": "Subject Area",
+      "subjectPlaceholder": "e.g. Physics",
+      "topicLabel": "Core Topic",
+      "topicPlaceholder": "e.g. Quantum Mechanics",
+      "version": "Flash 3.0",
+      "wait": "Gemini is thinking and structuring...",
+      "readyTitle": "Curriculum Ready!",
+      "readyDesc": "Gemini has generated your curriculum as suggestions. Please review and publish them.",
+      "progress": "Generation Progress",
+      "success": "Curriculum generated successfully!",
+      "errors": {
+        "topicTooShort": "Topic too short (min 3 chars)"
+      }
+    },
+    "risk": {
+      "low": "Low Risk",
+      "lowDesc": "Student is performing well and meeting expectations.",
+      "medium": "Medium Risk",
+      "mediumDesc": "Slight dip in performance or attendance detected.",
+      "high": "High Risk",
+      "highDesc": "Significant struggle detected. Intervention recommended.",
+      "critical": "Critical Risk",
+      "criticalDesc": "Urgent: Student is at risk of failing this class."
     }
   },
   "assignments": {

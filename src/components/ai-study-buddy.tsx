@@ -11,7 +11,7 @@ import { ChatInput } from "./ai/chat-input";
 import { cn } from "@/lib/utils";
 import { AI_API } from "@/constants/api";
 import { AiFeatureGuard } from "./ai/AiFeatureGuard";
-import { ErrorBoundary } from "./error-boundary";
+import { AIErrorBoundary } from "./ai/AIErrorBoundary";
 
 interface AIStudyBuddyProps {
   subject?: string;
@@ -125,9 +125,9 @@ export const AIStudyBuddy = (props: AIStudyBuddyProps) => {
     >
       {/* 🛡️ SECURITY: Only mount the chat interface if classId is provided. 
           The guard handles global AI availability and RBAC. */}
-      <ErrorBoundary>
+      <AIErrorBoundary name="StudyBuddy">
         <AIStudyBuddyContent {...props} />
-      </ErrorBoundary>
+      </AIErrorBoundary>
     </AiFeatureGuard>
   );
 };

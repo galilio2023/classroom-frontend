@@ -224,7 +224,9 @@
           "dropzoneTitle": "انقر لرفع ملف CSV",
           "dropzoneLimit": "أقصى حجم للملف: 5 ميجابايت",
           "requirementsTitle": "متطلبات ملف CSV",
-          "requirementsText": "يجب أن يتضمن ملف CSV أعمدة 'name' و 'email'. يمكن أيضاً توفير عمود 'password' اختياري."
+          "requirementsText": "يجب أن يتضمن ملف CSV أعمدة 'name' و 'email'. يمكن أيضاً توفير عمود 'password' اختياري.",
+          "selectClassLabel": "اختر فصلاً",
+          "selectPlaceholder": "اختر فصلاً دراسياً..."
         }
       },
       "details": {
@@ -316,6 +318,8 @@
       "dailySummaryTeacher": "عرض ملخصات الحضور اليومية للفصل بأكمله.",
       "personalRecordStudent": "سجل حضورك الشخصي لهذا الفصل.",
       "noRemarks": "لا توجد ملاحظات",
+      "targetClass": "الفصل المستهدف",
+      "selectPlaceholder": "اختر فصلاً...",
       "toast": {
         "saved": "تم حفظ الحضور",
         "savedDescription": "تم تحديث حضور يوم {{date}} بنجاح."
@@ -462,7 +466,7 @@
       "nudgeFrom": "تنبيه من {{name}}",
       "submittedTitle": "تم تقديم الاختبار!",
       "submittedDesc": "درجتك النهائية هي {{score}}%"
-      },
+    },
     "dialogs": {
       "applyTeacher": {
         "title": "طلب تدريس",
@@ -496,6 +500,35 @@
           "error": "فشل تسجيل الطالب."
         }
       }
+    },
+    "magicBuilder": {
+      "title": "البناء السحري بالذكاء الاصطناعي",
+      "description": "دع Gemini يقوم ببناء هيكل منهجك بالكامل من موضوع واحد.",
+      "targetClass": "الفصل المستهدف",
+      "selectPlaceholder": "اختر فصلاً...",
+      "subjectArea": "مجال المادة",
+      "subjectPlaceholder": "مثال: الفيزياء",
+      "topicLabel": "الموضوع الأساسي",
+      "topicPlaceholder": "مثال: ميكانيكا الكم",
+      "version": "فلاش 3.0",
+      "wait": "Gemini يفكر ويقوم بالهيكلة...",
+      "readyTitle": "المنهج جاهز!",
+      "readyDesc": "قام Gemini بإنشاء منهجك كاقتراحات. يرجى مراجعتها ونشرها.",
+      "progress": "تقدم عملية الإنشاء",
+      "success": "تم إنشاء المنهج بنجاح!",
+      "errors": {
+        "topicTooShort": "الموضوع قصير جداً (على الأقل 3 أحرف)"
+      }
+    },
+    "risk": {
+      "low": "خطر منخفض",
+      "lowDesc": "أداء الطالب جيد ويلبي التوقعات.",
+      "medium": "خطر متوسط",
+      "mediumDesc": "تم رصد انخفاض طفيف في الأداء أو الحضور.",
+      "high": "خطر مرتفع",
+      "highDesc": "تم رصد تعثر ملحوظ. يوصى بالتدخل.",
+      "critical": "خطر حرج",
+      "criticalDesc": "عاجل: الطالب معرض لخطر الرسوب في هذا الفصل."
     }
   },
   "assignments": {

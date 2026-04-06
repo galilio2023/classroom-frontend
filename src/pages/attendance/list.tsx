@@ -14,6 +14,8 @@ import {
   UserCheck,
   UserMinus,
   XCircle,
+  ScanLine,
+  Play,
 } from "lucide-react";
 import { Input } from "@/components/ui/input.tsx";
 import { useCallback, useMemo, useRef, useState } from "react";
@@ -22,6 +24,8 @@ import { useUserRole } from "@/hooks/use-user-role";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { QRAttendanceModal } from "@/features/classes/components/qr-attendance-modal";
+import { QRScannerSelectorDialog } from "@/features/classes/components/qr-scanner-selector-dialog";
+import { QRSessionSelectorDialog } from "@/features/classes/components/qr-session-selector-dialog";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { AnimatePresence, motion } from "framer-motion";
@@ -67,6 +71,9 @@ const AttendanceListPage = () => {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [qrTargetClassId, setQrTargetClassId] = useState<string | null>(null);
+  const [isScannerOpen, setIsScannerOpen] = useState(false);
+  const [isSessionSelectorOpen, setIsSessionSelectorOpen] = useState(false);
+
   const { show } = useNavigation();
 
   const filters = useMemo(() => {
@@ -167,8 +174,34 @@ const AttendanceListPage = () => {
                     : t("classes.attendance.governance.descriptionStudent")}
                 </p>
               </div>
+              <div className="flex items-center gap-3 w-full md:w-auto">
+                {isStaff ? (
+                  <Button
+                    onClick={() => setIsSessionSelectorOpen(true)}
+                    className="flex-1 md:flex-none rounded-2xl h-14 px-8 font-black uppercase tracking-widest text-[10px] gap-2 shadow-xl shadow-primary/20 transition-all hover:scale-105 active:scale-95"
+                  >
+                    <QrCode className="h-5 w-5" />
+                    {t("classes.attendance.governance.startQrSession", "Live QR Session")}
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={() => setIsScannerOpen(true)}
+                    className="flex-1 md:flex-none rounded-2xl h-14 px-10 font-black uppercase tracking-widest text-[10px] gap-2 shadow-xl shadow-primary/20 transition-all hover:scale-105 active:scale-95"
+                  >
+                    <ScanLine className="h-5 w-5" />
+                    {t("classes.attendance.scanQR", "Scan to Check-in")}
+                  </Button>
+                )}
+              </div>
             </div>
           </motion.div>
+
+          {/* QR Action Dialogs */}
+          <QRScannerSelectorDialog open={isScannerOpen} onOpenChange={setIsScannerOpen} />
+          <QRSessionSelectorDialog
+            open={isSessionSelectorOpen}
+            onOpenChange={setIsSessionSelectorOpen}
+          />
 
           {/* Stats Row */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

@@ -21,10 +21,13 @@ import { ErrorBoundary } from "./components/error-boundary";
 import { AppRouter } from "./routes";
 import { usePulseNotifications } from "./hooks/use-pulse-notifications";
 import { GlobalLiveOverlay } from "./features/classes/components/global-live-overlay";
+import { TooltipProvider } from "./components/ui/tooltip";
 
 import "./App.css";
 import "@excalidraw/excalidraw/index.css";
 import "./i18n/i18n";
+
+import { XPCelebration } from "./components/xp-celebration";
 
 /**
  * 🚀 REAL-TIME BRIDGE: PulseProvider
@@ -33,7 +36,14 @@ import "./i18n/i18n";
  */
 const PulseProvider = ({ children }: { children: React.ReactNode }) => {
   usePulseNotifications();
-  return <>{children}</>;
+  return (
+    <TooltipProvider>
+      <XPCelebration />
+      <GlobalLiveOverlay />
+      <Toaster />
+      {children}
+    </TooltipProvider>
+  );
 };
 
 function App() {
@@ -99,9 +109,7 @@ function App() {
             }}
           >
             <PulseProvider>
-              <GlobalLiveOverlay />
               <AppRouter />
-              <Toaster />
               <UnsavedChangesNotifier />
               <DocumentTitleHandler />
               <RefineKbar />
