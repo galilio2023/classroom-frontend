@@ -62,6 +62,10 @@
     "ai-study-lab": "AI Study Lab",
     "label": "AI Study Lab"
   },
+  "memory-lab": {
+    "memory-lab": "Memory Lab",
+    "label": "Memory Lab"
+  },
   "study-planner": {
     "study-planner": "AI Study Planner",
     "label": "AI Study Planner"
@@ -332,6 +336,16 @@
   "settings": {
     "title": "System Settings",
     "description": "Configure global platform behavior and defaults.",
+    "monetization": {
+      "title": "Sales Dashboard",
+      "subtitle": "Monitor your classroom performance and revenue growth.",
+      "earnings": "Earnings & Payouts",
+      "payoutStatus": "Payout Status",
+      "connected": "Active",
+      "notTeacherTitle": "Not Available",
+      "notTeacherDesc": "Only teachers can set up monetization for their classes.",
+      "error": "Failed to start Stripe onboarding."
+    },
     "toasts": {
       "success": "Settings updated successfully!",
       "error": "Failed to update settings: {{message}}"
@@ -589,11 +603,14 @@
       "description": "Leverage Gemini AI to architect high-quality educational content in seconds.",
       "architect": "Assignment Architect",
       "generator": "Quiz Generator",
+      "vision": "Snapshot & Solve",
       "capabilities": "AI Capabilities",
       "rubrics": "Smart Rubrics",
       "rubricsDesc": "Generate detailed grading criteria and learning objectives automatically.",
       "quizzes": "Adaptive Quizzes",
       "quizzesDesc": "Create multiple-choice questions with varying difficulty levels based on your topic.",
+      "vision": "Snapshot & Solve",
+      "visionDesc": "Upload a photo of a whiteboard or textbook for instant AI explanation and reasoning.",
       "drafts": "Instant Drafts",
       "draftsDesc": "Get a complete assignment draft including description and instructions in seconds.",
       "proTip": "Pro Tip",

@@ -66,6 +66,7 @@ const CalendarPage = React.lazy(() => import("@/pages/calendar"));
 const NotificationsPage = React.lazy(() => import("@/pages/notifications/list"));
 const AiAssistantPage = React.lazy(() => import("@/features/ai/pages/ai-assistant"));
 const AiStudyLabPage = React.lazy(() => import("@/features/ai/pages/ai-study-lab"));
+const MemoryLabPage = React.lazy(() => import("@/features/ai/pages/memory-lab"));
 const AiHistoryList = React.lazy(() => import("@/features/ai/pages/history-list"));
 const AiHistoryShow = React.lazy(() => import("@/features/ai/pages/history-show"));
 const MessagesPage = React.lazy(() => import("@/pages/messages/index"));
@@ -260,6 +261,14 @@ export const AppRouter = () => (
             element={
               <AuthorizedRoute resource="ai-study-lab" action="list">
                 <AiStudyLabPage />
+              </AuthorizedRoute>
+            }
+          />
+          <Route
+            path="/memory-lab"
+            element={
+              <AuthorizedRoute resource="memory-lab" action="list">
+                <MemoryLabPage />
               </AuthorizedRoute>
             }
           />

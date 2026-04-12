@@ -1,14 +1,25 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { LucideIcon, Award, Star, Zap, Target, Flame, Trophy } from "lucide-react";
+import {
+  LucideIcon,
+  Award,
+  Star,
+  Zap,
+  Target,
+  Flame,
+  Trophy,
+  GraduationCap,
+  Medal,
+} from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 export interface BadgeData {
-  id: string;
+  id: string | number;
   name: string;
   description: string;
-  icon: LucideIcon;
-  color: string;
+  icon?: LucideIcon | any;
+  iconUrl?: string;
+  color?: string;
   unlocked: boolean;
   progress?: number;
   threshold?: number;
@@ -19,10 +30,28 @@ interface BadgeCardProps {
   className?: string;
 }
 
+const ICON_MAP: Record<string, LucideIcon> = {
+  Target,
+  Star,
+  Flame,
+  Award,
+  Zap,
+  GraduationCap,
+  Medal,
+  Trophy,
+};
+
 export function BadgeCard({ badge, className }: BadgeCardProps) {
   const { t, i18n } = useTranslation();
   const isArabic = i18n.language === "ar";
-  const Icon = badge.icon;
+
+  // Resolve Icon: Priority 1: Lucide Component, Priority 2: Mapped Name, Priority 3: Default
+  let Icon = badge.icon;
+  if (typeof Icon === "string" && ICON_MAP[Icon]) {
+    Icon = ICON_MAP[Icon];
+  } else if (!Icon) {
+    Icon = Medal;
+  }
 
   const formatNumber = (num: number) => {
     return new Intl.NumberFormat(isArabic ? "ar-EG" : "en-US").format(num);
@@ -31,28 +60,34 @@ export function BadgeCard({ badge, className }: BadgeCardProps) {
   return (
     <Card
       className={cn(
-        "relative overflow-hidden transition-all duration-300 group",
+        "relative overflow-hidden transition-all duration-300 group h-full",
         badge.unlocked
           ? "border-primary/20 bg-primary/5"
           : "border-muted bg-muted/20 grayscale opacity-60",
         className
       )}
     >
-      <CardContent className="p-4 flex flex-col items-center text-center gap-2">
+      <CardContent className="p-4 flex flex-col items-center text-center gap-2 h-full">
         <div
           className={cn(
-            "p-3 rounded-2xl transition-transform duration-500 group-hover:scale-110",
-            badge.unlocked ? badge.color : "bg-muted text-muted-foreground"
+            "p-3 rounded-2xl transition-transform duration-500 group-hover:scale-110 shrink-0",
+            badge.unlocked
+              ? badge.color || "bg-primary text-white"
+              : "bg-muted text-muted-foreground"
           )}
         >
-          <Icon className="h-6 w-6" />
+          {badge.iconUrl && badge.unlocked ? (
+            <img src={badge.iconUrl} alt={badge.name} className="h-6 w-6 object-contain" />
+          ) : (
+            <Icon className="h-6 w-6" />
+          )}
         </div>
 
-        <div className="space-y-1">
-          <h4 className="text-xs font-black uppercase tracking-tight leading-none">
+        <div className="space-y-1 flex-1 flex flex-col justify-center">
+          <h4 className="text-[11px] font-black uppercase tracking-tight leading-tight">
             {t(`badges.${badge.id}.name`, { defaultValue: badge.name })}
           </h4>
-          <p className="text-[10px] text-muted-foreground font-medium leading-tight">
+          <p className="text-[9px] text-muted-foreground font-medium leading-tight line-clamp-2">
             {t(`badges.${badge.id}.desc`, { defaultValue: badge.description })}
           </p>
         </div>

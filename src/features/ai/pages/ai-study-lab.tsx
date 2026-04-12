@@ -15,10 +15,6 @@ import {
   Zap,
   Save,
   CheckCircle2,
-  ThumbsUp,
-  ThumbsDown,
-  Heart,
-  Check,
 } from "lucide-react";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
@@ -33,6 +29,7 @@ import { useTranslation } from "react-i18next";
 import { useCreate, useList, useNavigation, useCustomMutation } from "@refinedev/core";
 import { MemoryBoosterList } from "../components/memory-booster-list";
 import { SparkleLoader } from "@/components/ai/sparkle-loader";
+import { AIFeedback } from "@/components/ai/ai-feedback";
 import { Class } from "@/types";
 import { useAiAccess } from "@/hooks/use-ai-access";
 import UnauthorizedPage from "@/pages/unauthorized";
@@ -64,7 +61,6 @@ const AIStudyLab = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [hasSaved, setHasSaved] = useState(false);
-  const [feedbackSent, setFeedbackSent] = useState<"pos" | "neg" | null>(null);
   const isAr = i18n.language === "ar";
 
   const [practiceTopic, setPracticeTopic] = useState<string | null>(null);
@@ -124,7 +120,6 @@ const AIStudyLab = () => {
     setResult("");
     setFlashcards(null);
     setHasSaved(false);
-    setFeedbackSent(null);
 
     try {
       if (activeTool === "flashcards") {
@@ -168,23 +163,6 @@ const AIStudyLab = () => {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleFeedback = (isPositive: boolean) => {
-    setFeedbackSent(isPositive ? "pos" : "neg");
-    mutateCustom({
-      url: "/ai/feedback",
-      method: "post",
-      values: {
-        actionType: `studylab_${activeTool}`,
-        isPositive,
-        metadata: {
-          tool: activeTool,
-          topic: input,
-          classId: selectedClassId,
-        },
-      },
-    });
   };
 
   const handleSaveToHistory = () => {
@@ -511,55 +489,14 @@ const AIStudyLab = () => {
                   </CardContent>
                   <div className="p-8 bg-ai-primary/2 border-t border-ai-primary/10 flex flex-col md:flex-row items-center justify-between gap-6">
                     {/* 🔄 AI FEEDBACK LOOP */}
-                    <div className="flex items-center gap-3">
-                      <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-                        {t("aiHub.studyLab.wasHelpful")}
-                      </span>
-                      <AnimatePresence mode="wait">
-                        {!feedbackSent ? (
-                          <motion.div
-                            key="buttons"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            className="flex items-center gap-2"
-                          >
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="rounded-xl h-9 w-9 p-0 hover:bg-green-500/10 hover:text-green-600 border-border/40"
-                              onClick={() => handleFeedback(true)}
-                            >
-                              <ThumbsUp className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="rounded-xl h-9 w-9 p-0 hover:bg-destructive/10 hover:text-destructive border-border/40"
-                              onClick={() => handleFeedback(false)}
-                            >
-                              <ThumbsDown className="h-4 w-4" />
-                            </Button>
-                          </motion.div>
-                        ) : (
-                          <motion.div
-                            key="thanks"
-                            initial={{ scale: 0.5, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            className="flex items-center gap-2 px-4 py-2 bg-primary/5 rounded-2xl border border-primary/10"
-                          >
-                            {feedbackSent === "pos" ? (
-                              <Heart className="h-4 w-4 text-pink-500 fill-pink-500" />
-                            ) : (
-                              <Check className="h-4 w-4 text-primary" />
-                            )}
-                            <span className="text-[10px] font-black uppercase tracking-widest text-primary">
-                              {t("notifications.thankYou")}
-                            </span>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
+                    <AIFeedback
+                      actionType={`studylab_${activeTool}`}
+                      metadata={{
+                        tool: activeTool,
+                        topic: input,
+                        classId: selectedClassId,
+                      }}
+                    />
 
                     <Button
                       size="lg"

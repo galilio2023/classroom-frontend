@@ -19,6 +19,8 @@ jobs:
       - run: npm ci
       - name: Format Check
         run: npm run format:check
+      - name: Verify .env.example coverage
+        run: node scripts/validate-env.mjs
       - name: Lint Check
         run: npm run lint -- --quiet
       - name: Build and Type Check

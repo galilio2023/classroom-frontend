@@ -20,6 +20,7 @@ import { TeacherChannel, User } from "@/types";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { usePersistentLive } from "@/hooks/use-persistent-live";
+import { Helmet } from "react-helmet-async";
 
 const TeacherCard = React.memo(
   ({
@@ -155,6 +156,20 @@ const DiscoveryPage = () => {
 
   return (
     <div className="container-center section-wrapper !pt-10">
+      <Helmet>
+        <title>Teacher TV | Discover the Best Educators</title>
+        <meta
+          name="description"
+          content="Explore high-definition teacher channels, watch trailers, and discover your next interactive classroom on Tablawy OS."
+        />
+        <meta property="og:title" content="Teacher TV | Discovery" />
+        <meta
+          property="og:description"
+          content="Discover top educators through immersive video channels."
+        />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+      </Helmet>
       <div className="noise-overlay" />
 
       {/* Cinematic Header */}

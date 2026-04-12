@@ -4,6 +4,7 @@ import {
   Building2,
   Calendar,
   Sparkles,
+  Flame,
   UserPlus,
   ClipboardCheck,
   FileQuestion,
@@ -120,7 +121,17 @@ export const resources: ResourceProps[] = [
     },
   },
   {
-    name: "ai-activity-logs",
+    name: "memory-lab",
+    list: "/memory-lab",
+    meta: {
+      group: "groups.ai-lab",
+      label: "resources.memory-lab.label",
+      icon: <Flame />,
+      roles: [UserRole.ADMIN, UserRole.STUDENT],
+    },
+  },
+  {
+    name: "study-planner",
     list: "/ai-history",
     show: "/ai-history/show/:id",
     meta: {
