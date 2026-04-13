@@ -16,10 +16,20 @@ interface AIFeedbackProps {
 export const AIFeedback: React.FC<AIFeedbackProps> = ({ actionType, metadata, className }) => {
   const { t } = useTranslation();
   const [feedbackSent, setFeedbackSent] = useState<"pos" | "neg" | null>(null);
-  const { mutate: sendFeedback, isLoading } = useCustomMutation() as any;
+  const { mutate: sendFeedback, mutation } = useCustomMutation<
+    any,
+    any,
+    {
+      actionType: string;
+      isPositive: boolean;
+      metadata?: Record<string, any>;
+    }
+  >();
+
+  const isPending = mutation.isPending;
 
   const handleFeedback = (isPositive: boolean) => {
-    if (isLoading || feedbackSent) return;
+    if (isPending || feedbackSent) return;
 
     setFeedbackSent(isPositive ? "pos" : "neg");
     sendFeedback(
@@ -34,7 +44,7 @@ export const AIFeedback: React.FC<AIFeedbackProps> = ({ actionType, metadata, cl
       },
       {
         onSuccess: () => {
-          toast.success(t("notifications.thankYou" as any));
+          toast.success(t("notifications.thankYou") as string);
         },
         onError: () => {
           setFeedbackSent(null);
@@ -61,7 +71,7 @@ export const AIFeedback: React.FC<AIFeedbackProps> = ({ actionType, metadata, cl
             <Button
               size="sm"
               variant="ghost"
-              disabled={isLoading}
+              disabled={isPending}
               className="h-8 w-8 p-0 rounded-full hover:bg-green-500/10 hover:text-green-600 transition-colors"
               onClick={() => handleFeedback(true)}
             >
@@ -70,7 +80,7 @@ export const AIFeedback: React.FC<AIFeedbackProps> = ({ actionType, metadata, cl
             <Button
               size="sm"
               variant="ghost"
-              disabled={isLoading}
+              disabled={isPending}
               className="h-8 w-8 p-0 rounded-full hover:bg-destructive/10 hover:text-destructive transition-colors"
               onClick={() => handleFeedback(false)}
             >

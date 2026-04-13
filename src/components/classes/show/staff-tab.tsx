@@ -54,7 +54,15 @@ export const StaffTab = ({ classId, isOwner }: StaffTabProps) => {
   const isLoading = query?.isLoading;
   const refetch = query?.refetch;
 
-  const { mutate: updatePermissions, isLoading: isUpdating } = useCustomMutation() as any;
+  const { mutate: updatePermissions, mutation: updateMutation } = useCustomMutation<
+    any,
+    any,
+    {
+      permissions: ClassTeacher["permissions"];
+    }
+  >();
+
+  const isUpdating = updateMutation.isPending;
 
   const teachers = result?.data || [];
 
