@@ -229,7 +229,8 @@ export const useAILiveInteraction = ({
         const decoder = new TextDecoder();
         if (!reader) throw new Error("STREAM_READER_UNAVAILABLE");
 
-        while (true) {
+        let isStreamDone = false;
+        while (!isStreamDone) {
           const { done, value } = await reader.read();
           if (done) break;
 
@@ -260,7 +261,10 @@ export const useAILiveInteraction = ({
                   );
                 }
 
-                if (data.done) break;
+                if (data.done) {
+                  isStreamDone = true;
+                  break;
+                }
               } catch {
                 // Wait for buffer
               }

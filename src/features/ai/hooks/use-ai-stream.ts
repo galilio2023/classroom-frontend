@@ -94,33 +94,58 @@ export function useAiStream<T = unknown>(
         const reader = response.body?.getReader();
         const decoder = new TextDecoder();
         let fullContent = "";
-        let buffer = ""; // ðŸ›¡ï¸ SSE LINE BUFFERING
+        let lineBuffer = ""; // 🛡️ HARDENED SSE LINE BUFFERING
+        let isStreamDone = false;
 
         if (!reader) throw new Error("Response body is null");
 
-        while (true) {
+        while (!isStreamDone) {
           const { done, value } = await reader.read();
           if (done) break;
 
           const chunk = decoder.decode(value, { stream: true });
-          buffer += chunk;
+          lineBuffer += chunk;
 
-          // ðŸ›¡ï¸ Split by newline to ensure we process complete SSE lines
-          const lines = buffer.split("\n");
-          // Keep the last partial line in the buffer
-          buffer = lines.pop() || "";
+          // 🛡️ Split by \n\n as per Tablawy OS SSE mandate
+          const lines = lineBuffer.split("\n\n");
+          // Keep the last partial packet in the buffer
+          lineBuffer = lines.pop() || "";
 
           for (const line of lines) {
-            if (!line.trim()) continue;
-            fullContent += line;
-            options.onChunk?.(line);
+            if (line.startsWith("data: ")) {
+              const rawData = line.replace("data: ", "").trim();
+              if (!rawData) continue;
+
+              try {
+                // If it's a JSON stream, we might want to parse and extract text
+                const data = JSON.parse(rawData);
+                const chunkText = data.text || (typeof data === "string" ? data : "");
+
+                if (chunkText) {
+                  fullContent += chunkText;
+                  options.onChunk?.(chunkText);
+                }
+
+                if (data.done) {
+                  isStreamDone = true;
+                  break;
+                }
+              } catch (e) {
+                // Partial JSON or unexpected format - wait for next chunk
+                console.warn("Partial SSE JSON buffered:", e);
+              }
+            } else if (line.trim()) {
+              // Fallback for non-standard SSE lines
+              fullContent += line;
+              options.onChunk?.(line);
+            }
           }
         }
 
         // Process any remaining content in the buffer
-        if (buffer.trim()) {
-          fullContent += buffer;
-          options.onChunk?.(buffer);
+        if (lineBuffer.trim()) {
+          fullContent += lineBuffer;
+          options.onChunk?.(lineBuffer);
         }
 
         // ðŸ›¡ï¸ Validation: Ensure the final output matches our expected schema

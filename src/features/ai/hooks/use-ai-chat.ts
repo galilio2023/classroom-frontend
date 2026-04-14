@@ -352,8 +352,9 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
       if (!reader) throw new Error("STREAM_READER_UNAVAILABLE");
 
       let streamBuffer = "";
+      let isStreamDone = false;
 
-      while (true) {
+      while (!isStreamDone) {
         const { done, value } = await reader.read();
         if (done) break;
 
@@ -375,7 +376,10 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
                 updateStreamingUI();
               }
               if (data.sources) setStreamingSources(data.sources);
-              if (data.done) break;
+              if (data.done) {
+                isStreamDone = true;
+                break;
+              }
             } catch (e) {
               console.error("Partial SSE JSON buffered or malformed:", e);
             }
