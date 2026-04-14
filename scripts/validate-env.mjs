@@ -31,8 +31,8 @@ function getUsedEnvKeys(dir) {
       }
     } else if (file.endsWith('.ts') || file.endsWith('.tsx') || file.endsWith('.css')) {
       const content = fs.readFileSync(fullPath, 'utf8');
-      // 🛡️ REGEX: Support whitespace or varied formatting while maintaining static target
-      const matches = content.matchAll(/import\.meta\.env\s*\.\s*(VITE_[A-Z0-9_]+)/g);
+      // 🛡️ REGEX: Support whitespace or varied formatting (including multi-line) while maintaining static target
+      const matches = content.matchAll(/import\s*\.\s*meta\s*\.\s*env\s*\.\s*(VITE_[A-Z0-9_]+)/g);
       for (const match of matches) {
         keys.add(match[1]);
       }
