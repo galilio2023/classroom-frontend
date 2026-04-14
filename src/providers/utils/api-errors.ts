@@ -73,6 +73,13 @@ export const handleError = async (response: Response): Promise<HttpError> => {
     } as HttpError;
   }
 
+  if (response.status === 503) {
+    return {
+      message: "AI service is currently under maintenance or cooling off. Please try again later.",
+      statusCode: 503,
+    };
+  }
+
   return {
     message:
       (json.error as string) ||
