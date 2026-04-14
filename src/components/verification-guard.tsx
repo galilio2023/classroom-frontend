@@ -1,8 +1,8 @@
 import React from "react";
-import { useGetIdentity } from "@refinedev/core";
 import { Navigate } from "react-router-dom";
-import { User, UserRole, VerificationStatus } from "@/types";
+import { VerificationStatus } from "@/types";
 import { Loader2 } from "lucide-react";
+import { useCapabilities } from "@/hooks/use-capabilities";
 
 const Loading = () => (
   <div className="flex h-dvh w-full items-center justify-center bg-background/50 backdrop-blur-sm">
@@ -21,7 +21,7 @@ const Loading = () => (
  * Reverted localStorage fallback to prevent security bypass risks as per security review.
  */
 export const VerificationGuard = ({ children }: { children: React.ReactNode }) => {
-  const { data: user, isLoading } = useGetIdentity<User>();
+  const { identity: user, isTeacher, isLoading } = useCapabilities();
 
   // Security: We MUST wait for the authoritative server-fetched identity.
   // Using localStorage here would allow a client-side bypass of the verification check.
@@ -32,7 +32,7 @@ export const VerificationGuard = ({ children }: { children: React.ReactNode }) =
   if (!user) return <>{children}</>;
 
   const isVerified = user.verificationStatus === VerificationStatus.VERIFIED;
-  const isUnverifiedTeacher = user.role === UserRole.TEACHER && !isVerified;
+  const isUnverifiedTeacher = isTeacher && !isVerified;
 
   if (isUnverifiedTeacher) {
     return <Navigate to="/pending-verification" replace />;

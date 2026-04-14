@@ -29,7 +29,7 @@ function getUsedEnvKeys(dir) {
         const subKeys = getUsedEnvKeys(fullPath);
         subKeys.forEach(k => keys.add(k));
       }
-    } else if (file.endsWith('.ts') || file.endsWith('.tsx')) {
+    } else if (file.endsWith('.ts') || file.endsWith('.tsx') || file.endsWith('.css')) {
       const content = fs.readFileSync(fullPath, 'utf8');
       // 🛡️ REGEX: Support whitespace or varied formatting while maintaining static target
       const matches = content.matchAll(/import\.meta\.env\s*\.\s*(VITE_[A-Z0-9_]+)/g);
