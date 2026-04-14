@@ -12,6 +12,7 @@ import { BasePermissions, UserRole, User } from "@/types";
 import { ChatSource, Message } from "@/types/ai";
 import { offlineDB } from "@/lib/offline-db";
 import { useAiAccess } from "./use-ai-access";
+import { handleError } from "@/providers/utils/api-errors";
 
 interface UseAIChatProps {
   url: string;
@@ -339,9 +340,9 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
         }),
       });
 
-      if (response.status === 429) throw new Error("RATE_LIMIT_EXCEEDED");
-      if (response.status === 503) throw new Error("AI_SERVICE_OFFLINE");
-      if (!response.ok) throw new Error("AI_SERVICE_UNAVAILABLE");
+      if (!response.ok) {
+        throw await handleError(response);
+      }
 
       // Study Buddy (Streaming)
       const reader = response.body?.getReader();

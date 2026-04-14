@@ -2,6 +2,7 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import { BACKEND_URL } from "@/config";
 import { useAiAccess } from "@/features/ai/hooks/use-ai-access";
 import { z } from "zod";
+import { handleError } from "@/providers/utils/api-errors";
 
 /**
  * ðŸ›¡ï¸ ARCHITECTURAL PATTERN: useAiStream
@@ -87,8 +88,7 @@ export function useAiStream<T = unknown>(
         });
 
         if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          throw new Error(errorData.message || "Failed to connect to AI service");
+          throw await handleError(response);
         }
 
         const reader = response.body?.getReader();
