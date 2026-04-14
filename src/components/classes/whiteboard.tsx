@@ -159,11 +159,13 @@ export const Whiteboard = memo(({ classId, roomId }: WhiteboardProps) => {
 
   const {
     isAnalyzing,
+    isTidying,
     isHelpersLoading,
     setIsHelpersLoading,
     analysisResult,
     setAnalysisResult,
     analyzeWithAI,
+    tidyWithAI,
   } = useWhiteboardAI(excalidrawAPI);
 
   const { isSaving, saveSnapshot } = useWhiteboardPersistence(
@@ -205,8 +207,10 @@ export const Whiteboard = memo(({ classId, roomId }: WhiteboardProps) => {
           onToggleLock={toggleLock}
           isRemotePending={isRemotePending}
           isAnalyzing={isAnalyzing}
+          isTidying={isTidying}
           isHelpersLoading={isHelpersLoading}
           onAnalyze={analyzeWithAI}
+          onTidy={tidyWithAI}
           onClear={clearWhiteboard}
           isSaving={isSaving}
           isDirty={isDirty}

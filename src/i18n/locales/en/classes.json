@@ -610,6 +610,10 @@
         "physicsLab": "Physics Lab Mode",
         "groupAssignment": "Group Assignment",
         "due": "Due {{date}}",
+        "overdue": "Overdue",
+        "dueDate": "Due Date",
+        "maxPoints": "Max Points",
+        "timeEstimate": "Time Estimate",
         "submissionsReceived": "{{count}} Submissions Received"
       },
       "interactiveQuiz": "Interactive Quiz Player",

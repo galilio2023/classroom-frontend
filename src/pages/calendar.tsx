@@ -26,6 +26,7 @@ import {
   FileQuestion,
   Wand2,
   Sparkles,
+  AlertTriangle,
 } from "lucide-react";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
@@ -65,6 +66,10 @@ interface CalendarEvent extends BaseRecord {
   classId?: number;
   className?: string;
   color?: string;
+  risk?: {
+    high: number;
+    critical: number;
+  } | null;
 }
 
 export const CalendarPage = () => {
@@ -373,6 +378,10 @@ export const CalendarPage = () => {
                   const isSelected = modifiers.selected;
                   const isToday = modifiers.today;
 
+                  const hasCriticalRisk = dayEvents.some(
+                    (e) => e.risk && (e.risk.high > 0 || e.risk.critical > 0)
+                  );
+
                   return (
                     <button
                       {...props}
@@ -383,6 +392,9 @@ export const CalendarPage = () => {
                         !isSelected && isToday && "text-primary"
                       )}
                     >
+                      {hasCriticalRisk && !isSelected && (
+                        <div className="absolute top-2 end-2 h-2 w-2 bg-red-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
+                      )}
                       <span className="text-sm md:text-lg lg:text-xl font-black">
                         {date.getDate()}
                       </span>
@@ -499,15 +511,27 @@ export const CalendarPage = () => {
                               {getEventIcon(event.type)}
                               {t(`calendar.eventTypes.classes`)}
                             </Badge>
-                            {event.startTime && (
-                              <div className="flex items-center gap-2 text-[10px] font-black text-muted-foreground/60 bg-background/60 px-3 py-1.5 rounded-full backdrop-blur-md border border-border/40">
-                                <Clock className="h-3.5 w-3.5" />
-                                <span>
-                                  {dayjs(event.startTime).format("HH:mm")}
-                                  {event.endTime && ` - ${dayjs(event.endTime).format("HH:mm")}`}
-                                </span>
-                              </div>
-                            )}
+                            <div className="flex items-center gap-2">
+                              {event.risk && (event.risk.high > 0 || event.risk.critical > 0) && (
+                                <Badge
+                                  variant="destructive"
+                                  className="h-6 px-2 text-[8px] font-black animate-pulse flex items-center gap-1"
+                                >
+                                  <AlertTriangle className="h-3 w-3" />
+                                  {event.risk.high + event.risk.critical}{" "}
+                                  {t("ai.riskLevel.high", { defaultValue: "At Risk" })}
+                                </Badge>
+                              )}
+                              {event.startTime && (
+                                <div className="flex items-center gap-2 text-[10px] font-black text-muted-foreground/60 bg-background/60 px-3 py-1.5 rounded-full backdrop-blur-md border border-border/40">
+                                  <Clock className="h-3.5 w-3.5" />
+                                  <span>
+                                    {dayjs(event.startTime).format("HH:mm")}
+                                    {event.endTime && ` - ${dayjs(event.endTime).format("HH:mm")}`}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
                           </div>
                           <h4 className="font-black text-lg md:text-xl tracking-tight mb-2 group-hover:text-primary transition-colors text-start leading-tight">
                             {event.title}

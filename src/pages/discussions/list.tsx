@@ -14,16 +14,20 @@ import {
   Sparkles,
   Clock,
   Layers,
+  Wand2,
+  BrainCircuit,
+  Loader2,
+  X,
 } from "lucide-react";
 import { Input } from "@/components/ui/input.tsx";
-import { useMemo, useState } from "react";
-import { useList, useNavigation, useGetIdentity } from "@refinedev/core";
+import { useMemo, useState, useCallback } from "react";
+import { useList, useNavigation, useGetIdentity, useCustom } from "@refinedev/core";
 import { Discussion, User as UserType, UserRole } from "@/types";
 import { Badge } from "@/components/ui/badge.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { EmptyState } from "@/components/empty-state";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { motion, AnimatePresence } from "framer-motion";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -37,10 +41,18 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-  // //   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { useTranslation } from "react-i18next";
+import ReactMarkdown from "react-markdown";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 dayjs.extend(relativeTime);
 
@@ -54,7 +66,36 @@ const DiscussionsListPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const { show, create } = useNavigation();
 
+  // 🤖 AI Summary State
+  const [isAiModalOpen, setIsAiModalOpen] = useState(false);
+  const [activeClassId, setActiveClassId] = useState<number | null>(null);
+
+  const isStaff = identity?.role === UserRole.TEACHER || identity?.role === UserRole.ADMIN;
+
   dayjs.locale(isAr ? "ar" : "en");
+
+  // 🤖 AI Summary Fetch
+  const { query: aiSummaryQuery } = useCustom({
+    url: `/ai/discussion-summary/${activeClassId || "global"}`,
+    method: "get",
+    queryOptions: {
+      enabled: false,
+      retry: false,
+    },
+  });
+
+  const fetchSummary = aiSummaryQuery.refetch;
+  const isAiLoading = aiSummaryQuery.isFetching;
+  const aiSummaryData = aiSummaryQuery.data;
+
+  const handleAiSummary = useCallback(
+    (classId?: number) => {
+      setActiveClassId(classId || null);
+      setIsAiModalOpen(true);
+      setTimeout(() => fetchSummary(), 0);
+    },
+    [fetchSummary]
+  );
 
   const filters = useMemo(() => {
     const f = [];
@@ -88,7 +129,7 @@ const DiscussionsListPage = () => {
     },
   });
 
-  const discussions = discussionsData?.data || [];
+  const discussions = useMemo(() => discussionsData?.data || [], [discussionsData]);
   const hasData = discussions.length > 0;
 
   const stats = useMemo(() => {
@@ -104,6 +145,38 @@ const DiscussionsListPage = () => {
       ),
     };
   }, [discussions]);
+
+  if (isLoading) {
+    return (
+      <ListView>
+        <div className="space-y-8 md:space-y-12">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+            <div className="space-y-4 flex-1">
+              <Skeleton className="h-4 w-32 rounded-full px-2" />
+              <div className="space-y-3 text-start px-2">
+                <Skeleton className="h-10 w-64 rounded-xl" />
+                <Skeleton className="h-4 w-full max-w-2xl rounded-lg" />
+              </div>
+            </div>
+            <div className="flex gap-3 w-full md:w-auto">
+              <Skeleton className="h-12 md:h-14 flex-1 md:w-40 rounded-2xl" />
+              <Skeleton className="h-12 md:h-14 flex-1 md:w-40 rounded-2xl" />
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Skeleton className="h-32 rounded-[2rem]" />
+            <Skeleton className="h-32 rounded-[2rem]" />
+            <Skeleton className="h-32 rounded-[2rem]" />
+          </div>
+          <div className="space-y-6">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <Skeleton key={i} className="h-40 w-full rounded-[2.5rem]" />
+            ))}
+          </div>
+        </div>
+      </ListView>
+    );
+  }
 
   return (
     <ListView>
@@ -128,11 +201,22 @@ const DiscussionsListPage = () => {
               </p>
             </div>
           </div>
-          <div className="w-full md:w-auto">
+          <div className="w-full md:w-auto flex flex-wrap gap-3">
+            {isStaff && hasData && (
+              <Button
+                onClick={() => handleAiSummary()}
+                variant="outline"
+                size="lg"
+                className="flex-1 md:flex-none rounded-2xl h-12 md:h-14 px-8 font-black uppercase tracking-widest text-[10px] gap-2 border-ai-primary/20 text-ai-primary hover:bg-ai-primary/5 shadow-lg shadow-ai-primary/5"
+              >
+                <BrainCircuit className="h-5 w-5" />
+                {t("ai.summarizeGaps", { defaultValue: "Summarize Gaps" })}
+              </Button>
+            )}
             <Button
               onClick={() => create("discussions")}
               size="lg"
-              className="w-full md:w-auto rounded-2xl h-12 md:h-14 px-10 font-bold uppercase tracking-widest text-[10px] gap-2 shadow-lg shadow-primary/25 hover:translate-y-[-2px] transition-all"
+              className="flex-1 md:flex-none rounded-2xl h-12 md:h-14 px-10 font-bold uppercase tracking-widest text-[10px] gap-2 shadow-lg shadow-primary/25 hover:translate-y-[-2px] transition-all"
             >
               <PlusCircle className="h-5 w-5" />
               {t("discussions.start")}
@@ -140,7 +224,85 @@ const DiscussionsListPage = () => {
           </div>
         </motion.div>
 
-        {/* Stats Row - Adaptive */}
+        {/* AI Insight Modal */}
+        <Dialog open={isAiModalOpen} onOpenChange={setIsAiModalOpen}>
+          <DialogContent className="rounded-[2.5rem] border-none shadow-2xl bg-card/95 backdrop-blur-3xl max-w-2xl p-0 overflow-hidden">
+            <div className="p-8 md:p-12 space-y-8">
+              <DialogHeader className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="p-5 rounded-2xl bg-ai-primary/10 text-ai-primary w-fit">
+                    <Wand2 className="h-10 w-10" />
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="rounded-full h-10 w-10"
+                    onClick={() => setIsAiModalOpen(false)}
+                  >
+                    <X className="h-5 w-5" />
+                  </Button>
+                </div>
+                <div className="space-y-2 text-start">
+                  <DialogTitle className="text-3xl font-black tracking-tight flex items-center gap-3">
+                    {t("ai.discussionAnalysis", { defaultValue: "Discussion Analysis" })}
+                    <Badge variant="ai" className="h-6 px-3 text-[9px] uppercase tracking-widest">
+                      Experimental
+                    </Badge>
+                  </DialogTitle>
+                  <DialogDescription className="font-medium text-base text-muted-foreground">
+                    {t("ai.discussionAnalysisDesc", {
+                      defaultValue:
+                        "AI analysis of unresolved discussions to identify learning gaps.",
+                    })}
+                  </DialogDescription>
+                </div>
+              </DialogHeader>
+
+              <div className="relative min-h-[300px] rounded-3xl bg-muted/20 border border-border/40 overflow-hidden">
+                {isAiLoading ? (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 p-12 text-center">
+                    <div className="relative">
+                      <Loader2 className="h-16 w-16 animate-spin text-ai-primary/20" />
+                      <BrainCircuit className="h-6 w-6 text-ai-primary absolute inset-0 m-auto" />
+                    </div>
+                    <div className="space-y-2">
+                      <p className="font-black uppercase tracking-[0.3em] text-xs text-ai-primary animate-pulse">
+                        {t("ai.analyzing", { defaultValue: "Analyzing Discussions..." })}
+                      </p>
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                        Reconciling unresolved student gaps
+                      </p>
+                    </div>
+                  </div>
+                ) : aiSummaryData?.data ? (
+                  <ScrollArea className="h-[400px] w-full p-8 md:p-10">
+                    <div className="prose prose-sm dark:prose-invert max-w-none prose-headings:font-black prose-headings:tracking-tight prose-p:font-medium prose-p:text-muted-foreground prose-li:font-medium prose-li:text-muted-foreground">
+                      <ReactMarkdown>{aiSummaryData.data.summary}</ReactMarkdown>
+                    </div>
+                  </ScrollArea>
+                ) : (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 p-12 text-center opacity-40">
+                    <BrainCircuit className="h-12 w-12" />
+                    <p className="font-black uppercase tracking-widest text-[10px]">
+                      {t("common.noData", { defaultValue: "No insights available" })}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-3 pt-4">
+                <Button
+                  className="flex-1 rounded-2xl font-black uppercase tracking-widest text-[10px] h-14 bg-ai-primary hover:bg-ai-primary/90 text-white shadow-xl shadow-ai-primary/20"
+                  onClick={() => setIsAiModalOpen(false)}
+                >
+                  {t("buttons.gotIt", { defaultValue: "Got it, thanks!" })}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Stats Row */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
           <Card className="p-6 md:p-8 bg-card/40 backdrop-blur-3xl border-border/40 rounded-4xl md:rounded-[2.5rem] flex items-center gap-5 shadow-sm">
             <div className="p-3.5 rounded-2xl bg-primary/10 text-primary">
@@ -150,7 +312,7 @@ const DiscussionsListPage = () => {
               <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 mb-1">
                 {t("discussions.stats.total")}
               </p>
-              <p className="text-2xl md:text-3xl font-black">{isLoading ? "..." : stats.total}</p>
+              <p className="text-2xl md:text-3xl font-black">{stats.total}</p>
             </div>
           </Card>
           <Card className="p-6 md:p-8 bg-card/40 backdrop-blur-3xl border-border/40 rounded-4xl md:rounded-[2.5rem] flex items-center gap-5 shadow-sm">
@@ -161,9 +323,7 @@ const DiscussionsListPage = () => {
               <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 mb-1">
                 {t("discussions.stats.active")}
               </p>
-              <p className="text-2xl md:text-3xl font-black text-indigo-600">
-                {isLoading ? "..." : stats.activeToday}
-              </p>
+              <p className="text-2xl md:text-3xl font-black text-indigo-600">{stats.activeToday}</p>
             </div>
           </Card>
           <Card className="p-6 md:p-8 bg-card/40 backdrop-blur-3xl border-border/40 rounded-4xl md:rounded-[2.5rem] flex items-center gap-5 shadow-sm">
@@ -174,14 +334,12 @@ const DiscussionsListPage = () => {
               <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 mb-1">
                 {t("discussions.stats.replies")}
               </p>
-              <p className="text-2xl md:text-3xl font-black text-green-600">
-                {isLoading ? "..." : stats.totalReplies}
-              </p>
+              <p className="text-2xl md:text-3xl font-black text-green-600">{stats.totalReplies}</p>
             </div>
           </Card>
         </div>
 
-        {/* Search & Filters Card - Sticky */}
+        {/* Search & Filters */}
         <Card className="p-2 border-border/40 bg-muted/20 rounded-[1.75rem] md:rounded-3xl backdrop-blur-md sticky top-20 z-30 shadow-sm">
           <div className="flex flex-col lg:flex-row gap-2">
             <div className="relative flex-1 group">
@@ -209,28 +367,9 @@ const DiscussionsListPage = () => {
           </div>
         </Card>
 
-        {/* Discussions List - Global Scroll */}
+        {/* Discussions List */}
         <div className="relative min-h-[400px]">
-          {isLoading ? (
-            <div className="space-y-4">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Card
-                  key={i}
-                  className="p-6 flex flex-col md:flex-row items-center gap-6 border-border/20 bg-background/50"
-                >
-                  <Skeleton className="h-20 w-20 rounded-full shrink-0" />
-                  <div className="flex-1 space-y-4 w-full">
-                    <Skeleton className="h-8 w-[350px] max-w-full" />
-                    <div className="flex gap-4">
-                      <Skeleton className="h-4 w-24" />
-                      <Skeleton className="h-4 w-24" />
-                    </div>
-                  </div>
-                  <Skeleton className="h-12 w-36 rounded-2xl" />
-                </Card>
-              ))}
-            </div>
-          ) : !hasData ? (
+          {!hasData ? (
             <div className="flex items-center justify-center p-16 bg-card/20 rounded-[2.5rem] border border-dashed border-border/40">
               <EmptyState
                 icon={Layers}
@@ -262,13 +401,11 @@ const DiscussionsListPage = () => {
                       )}
                       onClick={() => show("discussions", discussion.id)}
                     >
-                      {/* Class Color Accent */}
                       <div
                         className="absolute start-0 top-1/2 -translate-y-1/2 w-1.5 h-12 bg-primary rounded-e-full transition-all group-hover:h-20"
                         style={{ backgroundColor: discussionColor }}
                       />
 
-                      {/* Author Avatar */}
                       <div className="relative shrink-0 mb-4 md:mb-0">
                         <Avatar className="h-20 w-20 rounded-[1.5rem] border-4 border-background shadow-lg group-hover:scale-105 transition-transform duration-500">
                           <AvatarImage
@@ -297,7 +434,6 @@ const DiscussionsListPage = () => {
                         </div>
                       </div>
 
-                      {/* Info Area */}
                       <div
                         className={cn("flex-1 min-w-0 w-full text-center md:text-start", "md:ms-8")}
                       >
@@ -362,7 +498,6 @@ const DiscussionsListPage = () => {
                         </div>
                       </div>
 
-                      {/* Action Area */}
                       <div className="flex items-center gap-3 mt-6 md:mt-0 shrink-0">
                         <Button
                           variant="outline"

@@ -1,5 +1,5 @@
 import { useList, useGetIdentity } from "@refinedev/core";
-import { User, Class } from "@/types";
+import { User, Class, UserRole } from "@/types";
 import { AnimatePresence, motion } from "framer-motion";
 import { Radio, ArrowRight, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -88,8 +88,15 @@ export const GlobalLiveOverlay = () => {
 
             <div className="space-y-3">
               {liveClasses.slice(0, 2).map((c) => (
-                <div key={c.id} className="p-3 bg-white/10 rounded-2xl border border-white/10">
-                  <p className="font-black text-xs truncate mb-2">{c.name}</p>
+                <div
+                  key={c.id}
+                  className="p-3 bg-white/10 rounded-2xl border border-white/10 space-y-3"
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="font-black text-xs truncate">{c.name}</p>
+                    {/* FIXME: SentimentPulse is missing - re-enable once component is created */}
+                    {/* {identity?.role !== UserRole.STUDENT && <SentimentPulse classId={c.id} />} */}
+                  </div>
                   <Button
                     asChild
                     size="sm"

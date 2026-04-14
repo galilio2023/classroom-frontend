@@ -140,7 +140,10 @@ export const StaffDashboard = ({ data, isLoading, onRefresh, show }: StaffDashbo
 
       {/* Teacher TV Stats Row */}
       {data.channelStats && (
-        <TeacherTvStats stats={data.channelStats} onManageClick={() => show("channels", "me")} />
+        <TeacherTvStats
+          stats={data.channelStats}
+          onManageClick={() => show("teacher-channel", "me")}
+        />
       )}
 
       <div className="grid gap-12 lg:grid-cols-12 items-start">

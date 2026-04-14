@@ -32,6 +32,7 @@ import { TFunction } from "i18next";
 import { toast } from "sonner";
 import { useUserRole } from "@/hooks/use-user-role";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { formatGrade } from "@/lib/numeric";
 
 // --- NEW IMPORTS ---
 import { useGradingAutomation } from "../hooks/use-grading-automation";
@@ -354,7 +355,10 @@ export const GradingDialog = ({
                                   <div className="pt-4 border-t border-primary/10 flex items-center justify-between text-[9px] font-bold text-muted-foreground/60 uppercase">
                                     <span>
                                       Confidence:{" "}
-                                      {Math.round((audit.metadata?.aiConfidenceScore || 0) * 100)}%
+                                      {formatGrade(
+                                        (audit.metadata?.aiConfidenceScore || 0) * 100,
+                                        0
+                                      )}
                                     </span>
                                     <span>v{audit.promptVersion || 1}</span>
                                   </div>

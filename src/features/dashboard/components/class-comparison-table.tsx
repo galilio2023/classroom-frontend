@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/table";
 import { ClassComparison } from "@/types/dashboard";
 import { Users } from "lucide-react";
+import { formatGrade } from "@/lib/numeric";
 
 interface ClassComparisonTableProps {
   data: ClassComparison[];
@@ -40,10 +41,10 @@ export const ClassComparisonTable = ({ data }: ClassComparisonTableProps) => {
               <TableRow key={cls.classId}>
                 <TableCell className="font-medium">{cls.className}</TableCell>
                 <TableCell className="text-end font-bold text-primary">
-                  {cls.averageGrade}%
+                  {formatGrade(cls.averageGrade)}
                 </TableCell>
-                <TableCell className="text-end">{cls.attendanceRate}%</TableCell>
-                <TableCell className="text-end">{cls.completionRate}%</TableCell>
+                <TableCell className="text-end">{formatGrade(cls.attendanceRate)}</TableCell>
+                <TableCell className="text-end">{formatGrade(cls.completionRate)}</TableCell>
                 <TableCell className="text-end">{cls.studentCount}</TableCell>
               </TableRow>
             ))}

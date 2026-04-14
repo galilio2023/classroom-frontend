@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import { AI_API } from "@/constants/api";
 import { AiFeatureGuard } from "./AiFeatureGuard";
 import { AIErrorBoundary } from "./AIErrorBoundary";
+import { eventBus, UI_EVENTS } from "@/lib/event-bus";
 
 interface AIStudyBuddyProps {
   subject?: string;
@@ -22,6 +23,18 @@ interface AIStudyBuddyProps {
 
 const AIStudyBuddyContent = ({ subject, topic, assignment, classId }: AIStudyBuddyProps) => {
   const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    const handleOpen = (data?: { classId?: string | number }) => {
+      // If a specific classId is provided in the event, and it doesn't match this buddy, ignore.
+      // But usually there's only one buddy instance per page.
+      if (data?.classId && classId && Number(data.classId) !== Number(classId)) return;
+      setIsOpen(true);
+    };
+
+    eventBus.on(UI_EVENTS.OPEN_STUDY_BUDDY, handleOpen);
+    return () => eventBus.off(UI_EVENTS.OPEN_STUDY_BUDDY, handleOpen);
+  }, [classId]);
 
   const {
     messages,

@@ -129,7 +129,7 @@ const Dashboard = () => {
             icon: Heart,
             heading: t("dashboard.cards.myChildren"),
             description: t("dashboard.cards.monitorProgress"),
-            resource: "users",
+            resource: "guardian-portal",
           },
           {
             title: t("dashboard.cards.calendar"),
@@ -143,7 +143,7 @@ const Dashboard = () => {
             icon: Bell,
             heading: t("dashboard.cards.notifications"),
             description: t("dashboard.cards.teacherUpdates"),
-            resource: "notifications",
+            resource: "messages",
           },
         ]
       : roles.isAdmin
@@ -288,6 +288,7 @@ const Dashboard = () => {
             )}
             {roles.isStudent && (
               <StudentDashboard
+                identity={identity}
                 data={analyticsData}
                 isLoading={isAnalyticsLoading}
                 list={navigation.list}

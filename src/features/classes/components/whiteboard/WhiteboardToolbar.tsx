@@ -10,6 +10,7 @@ import {
   Trash2,
   AlertCircle,
   Save,
+  Wand2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -20,8 +21,10 @@ interface WhiteboardToolbarProps {
   onToggleLock: (checked: boolean) => void;
   isRemotePending: boolean;
   isAnalyzing: boolean;
+  isTidying: boolean;
   isHelpersLoading: boolean;
   onAnalyze: () => void;
+  onTidy: () => void;
   onClear: () => void;
   isSaving: boolean;
   isDirty: boolean;
@@ -36,8 +39,10 @@ export const WhiteboardToolbar = ({
   onToggleLock,
   isRemotePending,
   isAnalyzing,
+  isTidying,
   isHelpersLoading,
   onAnalyze,
+  onTidy,
   onClear,
   isSaving,
   isDirty,
@@ -75,6 +80,20 @@ export const WhiteboardToolbar = ({
       <div className="flex items-center gap-2">
         {isTeacher && (
           <>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onTidy}
+              disabled={isTidying || isHelpersLoading}
+              className="h-8 border-ai-secondary/30 hover:bg-ai-secondary/5 text-ai-secondary font-bold group transition-all"
+            >
+              {isTidying ? (
+                <Loader2 className="h-4 w-4 animate-spin me-1" />
+              ) : (
+                <Wand2 className="h-4 w-4 me-1 group-hover:scale-110 transition-transform" />
+              )}
+              AI Tidy
+            </Button>
             <Button
               variant="outline"
               size="sm"

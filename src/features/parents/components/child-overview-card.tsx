@@ -11,10 +11,16 @@ import {
   ArrowRight,
   Flame,
   Award,
+  Sparkles,
+  BrainCircuit,
+  Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useCustom } from "@refinedev/core";
+import { ChildCardSkeleton } from "./parent-skeletons";
+import { formatGrade } from "@/lib/numeric";
 
 interface Props {
   child: {
@@ -34,8 +40,20 @@ interface Props {
 export const ChildOverviewCard = ({ child }: Props) => {
   const { t } = useTranslation();
 
+  // 🤖 AI GROWTH NARRATIVE: Fetch weekly highlight
+  const { query: narrativeQuery } = useCustom<{
+    narrative: string;
+    highlightType: string;
+  }>({
+    url: `/parent/child/${child.id}/growth-narrative`,
+    method: "get",
+  });
+
+  const isNarrativeLoading = narrativeQuery.isLoading;
+  const narrativeData = narrativeQuery.data;
+
   const riskColors = {
-    low: "bg-success/10 text-success border-success/20",
+    low: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
     medium: "bg-amber-500/10 text-amber-600 border-amber-500/20",
     high: "bg-destructive/10 text-destructive border-destructive/20",
     critical: "bg-destructive text-white border-none animate-pulse",
@@ -95,22 +113,46 @@ export const ChildOverviewCard = ({ child }: Props) => {
         </CardHeader>
 
         <CardContent className="pt-8 space-y-6">
+          {/* AI Weekly Highlight */}
+          <div className="relative p-5 rounded-3xl bg-ai-primary/5 border border-ai-primary/10 overflow-hidden group/ai">
+            <div className="absolute top-0 end-0 p-3 opacity-10 group-hover/ai:opacity-20 transition-opacity">
+              <BrainCircuit className="h-12 w-12 text-ai-primary" />
+            </div>
+            <div className="flex items-center gap-2 mb-3">
+              <div className="p-1.5 rounded-lg bg-ai-primary/10 text-ai-primary">
+                <Sparkles className="h-3.5 w-3.5" />
+              </div>
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-ai-primary">
+                {t("ai.weeklyHighlight", { defaultValue: "Weekly Highlight" })}
+              </span>
+            </div>
+
+            {isNarrativeLoading ? (
+              <div className="flex items-center gap-3 py-2">
+                <Loader2 className="h-4 w-4 animate-spin text-ai-primary/40" />
+                <div className="h-2 w-32 bg-ai-primary/10 rounded-full animate-pulse" />
+              </div>
+            ) : (
+              <p className="text-[11px] font-bold text-foreground/80 leading-relaxed italic relative z-10">
+                "{narrativeData?.data.narrative}"
+              </p>
+            )}
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div className="p-4 rounded-2xl bg-primary/5 border border-primary/10">
               <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary/60 mb-1">
                 <Users className="h-3 w-3" />
                 Attendance
               </div>
-              <p className="text-2xl font-black">{child.attendanceRate}%</p>
+              <p className="text-2xl font-black">{formatGrade(child.attendanceRate)}</p>
             </div>
             <div className="p-4 rounded-2xl bg-success/5 border border-success/10">
               <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-success/60 mb-1">
                 <TrendingUp className="h-3 w-3" />
                 Avg. Grade
               </div>
-              <p className="text-2xl font-black">
-                {child.averageGrade !== null ? `${child.averageGrade}%` : "--"}
-              </p>
+              <p className="text-2xl font-black">{formatGrade(child.averageGrade)}</p>
             </div>
           </div>
 

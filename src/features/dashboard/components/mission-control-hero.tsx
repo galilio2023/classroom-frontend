@@ -16,6 +16,7 @@ import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 import { useCustomMutation, useInvalidate } from "@refinedev/core";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export interface MissionAction {
   type: "assignment" | "lesson" | "quiz" | "study_block" | "live_session";
@@ -39,9 +40,7 @@ export const MissionControlHero = ({ mission, isLoading }: Props) => {
   const invalidate = useInvalidate();
 
   if (isLoading) {
-    return (
-      <div className="w-full h-48 rounded-[2.5rem] bg-muted/20 animate-pulse border-2 border-dashed border-border/50" />
-    );
+    return <Skeleton className="w-full h-48 rounded-[2.5rem]" />;
   }
 
   if (!mission) {
@@ -204,3 +203,5 @@ export const MissionControlHero = ({ mission, isLoading }: Props) => {
     </motion.div>
   );
 };
+
+export default MissionControlHero;

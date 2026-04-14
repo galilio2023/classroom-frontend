@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Trophy, Star, Zap, Sparkles, Flame } from "lucide-react";
+import { Trophy, Star, Zap, Sparkles, Flame, BrainCircuit } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { XPProgressBar } from "@/components/xp-progress-bar";
@@ -13,6 +13,7 @@ interface MissionControlHeroProps {
   xpRequiredForNextLevel: number;
   xpNeeded: number;
   currentStreak: number;
+  readinessScore?: number; // 🚀 New: Proactive success indicator
 }
 
 export const MissionControlHero = ({
@@ -23,6 +24,7 @@ export const MissionControlHero = ({
   xpRequiredForNextLevel,
   xpNeeded,
   currentStreak,
+  readinessScore = 75,
 }: MissionControlHeroProps) => {
   const { t } = useTranslation();
 
@@ -41,10 +43,40 @@ export const MissionControlHero = ({
         <CardContent className="p-8 md:p-12 lg:p-16 xl:p-20 relative z-10">
           <div className="flex flex-col lg:flex-row items-center gap-8 md:gap-12 lg:gap-16">
             <div className="relative shrink-0">
-              <div className="absolute inset-0 bg-white/20 rounded-full blur-2xl animate-pulse" />
-              <div className="w-24 h-24 md:w-32 md:h-32 lg:w-40 lg:h-40 rounded-full bg-white/10 flex items-center justify-center backdrop-blur-xl border-2 border-white/30 shadow-2xl relative z-10 group-hover:scale-110 transition-transform duration-500">
-                <Trophy className="h-10 w-10 md:h-16 md:w-16 lg:h-20 lg:w-20 text-gold-primary drop-shadow-[0_0_15px_rgba(234,179,8,0.5)]" />
+              {/* Readiness Circular Progress */}
+              <svg className="w-32 h-32 md:w-44 md:h-44 lg:w-56 lg:h-56 transform -rotate-90">
+                <circle
+                  cx="50%"
+                  cy="50%"
+                  r="45%"
+                  className="stroke-white/10 fill-none"
+                  strokeWidth="8"
+                />
+                <motion.circle
+                  cx="50%"
+                  cy="50%"
+                  r="45%"
+                  className="stroke-gold-primary fill-none drop-shadow-[0_0_8px_rgba(234,179,8,0.5)]"
+                  strokeWidth="8"
+                  strokeDasharray="283%"
+                  initial={{ strokeDashoffset: "283%" }}
+                  animate={{ strokeDashoffset: `${283 - (283 * readinessScore) / 100}%` }}
+                  transition={{ duration: 1.5, delay: 0.5, ease: "easeOut" }}
+                  strokeLinecap="round"
+                />
+              </svg>
+
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-20 h-20 md:w-28 md:h-28 lg:w-36 lg:h-36 rounded-full bg-white/10 flex flex-col items-center justify-center backdrop-blur-xl border-2 border-white/30 shadow-2xl relative z-10 group-hover:scale-110 transition-transform duration-500">
+                  <span className="text-2xl md:text-4xl lg:text-5xl font-black tracking-tighter text-white leading-none">
+                    {readinessScore}%
+                  </span>
+                  <span className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-white/60 mt-1">
+                    Ready
+                  </span>
+                </div>
               </div>
+
               <motion.div
                 initial={{ scale: 0, rotate: -45 }}
                 animate={{ scale: 1, rotate: 0 }}
@@ -62,35 +94,39 @@ export const MissionControlHero = ({
                     variant="secondary"
                     className="bg-white/20 text-white border-none backdrop-blur-md font-black text-[10px] lg:text-xs uppercase tracking-widest px-3 md:px-4 py-1 md:py-1.5 shadow-sm"
                   >
-                    {t("dashboard.student.academicJourney")}
+                    {t("dashboard.student.missionControl", { defaultValue: "Mission Control" })}
                   </Badge>
-                  {currentStreak >= 3 && (
-                    <div className="flex items-center gap-1.5 text-orange-400 animate-bounce">
-                      <Flame className="h-3.5 w-3.5 lg:h-4 lg:w-4 fill-orange-400" />
+                  {readinessScore >= 90 && (
+                    <div className="flex items-center gap-1.5 text-success animate-pulse">
+                      <Sparkles className="h-3.5 w-3.5 lg:h-4 lg:w-4 fill-success" />
                       <span className="text-[10px] lg:text-xs font-black uppercase tracking-widest">
-                        {t("dashboard.student.onFire")}
+                        {t("dashboard.student.battleReady", { defaultValue: "Exam Ready" })}
                       </span>
                     </div>
                   )}
-                  <div className="flex items-center gap-1.5 text-gold-primary animate-pulse">
-                    <Sparkles className="h-3.5 w-3.5 lg:h-4 lg:w-4 fill-gold-primary" />
-                    <span className="text-[10px] lg:text-xs font-black uppercase tracking-widest">
-                      {t("dashboard.student.eliteStudent")}
-                    </span>
-                  </div>
                 </div>
                 <h2 className="text-3xl md:text-5xl lg:text-6xl xl:text-7xl font-black tracking-tighter leading-none text-balance">
                   {t("dashboard.student.keepItUp", {
                     name: name.split(" ")[0] || "Student",
                   })}
                 </h2>
-                <p className="text-white/70 text-sm md:text-lg lg:text-xl font-medium flex items-center justify-center lg:justify-start gap-2 text-balance">
-                  <Zap className="h-5 w-5 lg:h-6 lg:w-6 text-gold-primary fill-gold-primary" />
-                  {t("dashboard.student.xpToNextLevel", {
-                    xp: Math.round(xpNeeded),
-                    level: currentLevel + 1,
-                  })}
-                </p>
+                <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-8">
+                  <p className="text-white/70 text-sm md:text-lg lg:text-xl font-medium flex items-center justify-center lg:justify-start gap-2 text-balance">
+                    <Zap className="h-5 w-5 lg:h-6 lg:w-6 text-gold-primary fill-gold-primary" />
+                    {t("dashboard.student.xpToNextLevel", {
+                      xp: Math.round(xpNeeded),
+                      level: currentLevel + 1,
+                    })}
+                  </p>
+                  <div className="h-4 w-px bg-white/10 hidden md:block" />
+                  <p className="text-white/90 text-sm md:text-lg font-bold flex items-center justify-center lg:justify-start gap-2 italic">
+                    <BrainCircuit className="h-5 w-5 text-ai-secondary" />
+                    AI:{" "}
+                    {readinessScore < 80
+                      ? "Complete 'Module 2' to boost score"
+                      : "You're ahead of the curve!"}
+                  </p>
+                </div>
               </div>
 
               <div className="space-y-3 lg:space-y-4 max-w-2xl mx-auto lg:mx-0">

@@ -9,12 +9,57 @@ interface AnalysisResponse {
   followUpQuestions: string[];
 }
 
+interface TidyResponse {
+  tidiedElements: any[];
+}
+
 export const useWhiteboardAI = (excalidrawAPI: ExcalidrawImperativeAPI | null) => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isTidying, setIsTidying] = useState(false);
   const [isHelpersLoading, setIsHelpersLoading] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<AnalysisResponse | null>(null);
 
   const { mutate: analyzeRequest } = useCustomMutation<AnalysisResponse>();
+  const { mutate: tidyRequest } = useCustomMutation<TidyResponse>();
+
+  const tidyWithAI = async () => {
+    if (!excalidrawAPI) return;
+
+    const elements = excalidrawAPI.getSceneElements();
+    if (!elements || elements.length === 0) {
+      toast.error("Whiteboard is empty.");
+      return;
+    }
+
+    setIsTidying(true);
+    setIsHelpersLoading(true);
+
+    tidyRequest(
+      {
+        url: "/ai/whiteboard-tidy",
+        method: "post",
+        values: { elements },
+      },
+      {
+        onSuccess: (response) => {
+          if (response.data?.tidiedElements) {
+            excalidrawAPI.updateScene({
+              elements: response.data.tidiedElements,
+            });
+            toast.success("Whiteboard tidied by AI!");
+          }
+          setIsTidying(false);
+          setIsHelpersLoading(false);
+        },
+        onError: (err) => {
+          console.error("AI Tidy Error:", err);
+          toast.error("AI was unable to tidy this whiteboard.");
+          setIsTidying(false);
+          setIsHelpersLoading(false);
+        },
+      }
+    );
+  };
 
   const analyzeWithAI = async () => {
     if (!excalidrawAPI) return;
@@ -74,10 +119,12 @@ export const useWhiteboardAI = (excalidrawAPI: ExcalidrawImperativeAPI | null) =
 
   return {
     isAnalyzing,
+    isTidying,
     isHelpersLoading,
     setIsHelpersLoading,
     analysisResult,
     setAnalysisResult,
     analyzeWithAI,
+    tidyWithAI,
   };
 };

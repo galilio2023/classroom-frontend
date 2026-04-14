@@ -46,6 +46,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useTranslation } from "react-i18next";
+import { formatGrade } from "@/lib/numeric";
 
 dayjs.extend(relativeTime);
 
@@ -399,9 +400,7 @@ const SubmissionsListPage = () => {
                               isGraded ? "text-primary" : "text-muted-foreground/20"
                             )}
                           >
-                            {isGraded
-                              ? `${new Intl.NumberFormat(i18n.language).format(submission.grade!)}%`
-                              : "--"}
+                            {formatGrade(submission.grade)}
                           </p>
                         </div>
 

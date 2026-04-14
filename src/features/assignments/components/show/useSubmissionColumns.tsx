@@ -22,6 +22,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { TFunction } from "i18next";
+import { formatGrade } from "@/lib/numeric";
 
 export const useSubmissionColumns = (
   t: TFunction,
@@ -136,7 +137,7 @@ export const useSubmissionColumns = (
                   {t("assignments.list.table.reviews", { completed, total })}
                 </span>
                 <span className="text-muted-foreground/40 text-start">
-                  {Math.round((completed / total) * 100)}%
+                  {formatGrade((completed / total) * 100, 0)}
                 </span>
               </div>
               <div className="h-2 w-full bg-muted rounded-full overflow-hidden border border-black/3 dark:border-white/10 shadow-inner">
@@ -183,7 +184,7 @@ export const useSubmissionColumns = (
                       : "bg-muted/50 text-foreground border-border/40"
                 )}
               >
-                {grade}%
+                {formatGrade(grade)}
               </div>
               {isHigh && <Trophy className="h-4 w-4 text-gold-primary animate-bounce" />}
             </div>
