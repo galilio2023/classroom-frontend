@@ -155,6 +155,11 @@ export const useAILiveInteraction = ({
       recognitionRef.current.abort();
       recognitionRef.current = null;
     }
+    // 🛡️ PRIVACY: Abort any active SSE streams to stop background processing
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
     setIsListening(false);
     setVisualState("talking");
     if (timeoutRef.current) clearTimeout(timeoutRef.current);

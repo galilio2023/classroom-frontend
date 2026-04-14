@@ -46,10 +46,10 @@ export const AILiveCompanion = ({
   onFinished,
 }: AILiveCompanionProps) => {
   const { coreData, isIdentityLoading: isAuthLoading } = useDashboard();
-  const { isParent, isStaff, canAccessAi, isLoading: isAccessLoading } = useCapabilities();
+  const { isParent, isStaff, canAccessAi: canAccessAI, isLoading: isAccessLoading } = useCapabilities();
 
   // 🛡️ RBAC: Centralized access control via Refine patterns
-  const canAccessAI = canAccessAi;
+  // canAccessAI is already destructured from useCapabilities
 
   const {
     isJoined,
