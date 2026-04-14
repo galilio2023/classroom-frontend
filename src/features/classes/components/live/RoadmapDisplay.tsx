@@ -1,3 +1,4 @@
+import React from "react";
 import { Badge } from "@/components/ui/badge";
 import { Sparkles, Presentation, ListChecks, Users, BrainCircuit } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -6,7 +7,7 @@ interface RoadmapDisplayProps {
   roadmap: any;
 }
 
-export const RoadmapDisplay = ({ roadmap }: RoadmapDisplayProps) => {
+export const RoadmapDisplay = React.memo(({ roadmap }: RoadmapDisplayProps) => {
   const { t } = useTranslation();
 
   if (!roadmap?.sessionTitle) {
@@ -116,4 +117,4 @@ export const RoadmapDisplay = ({ roadmap }: RoadmapDisplayProps) => {
       </div>
     </div>
   );
-};
+});

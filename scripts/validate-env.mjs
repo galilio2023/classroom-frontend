@@ -35,8 +35,13 @@ function getUsedEnvKeys(dir) {
       for (const match of matches) {
         keys.add(match[1]);
       }
-      // Also check for dynamic access: import.meta.env[key] where key might be VITE_
-      // Hard to audit perfectly without a schema, but we can check config.ts patterns
+      
+      // 🛡️ SECURITY & BUNDLING WARNING: 
+      // Audit for dynamic access: import.meta.env[key]. 
+      // Vite cannot statically replace dynamic access, which can lead to undefined values in production.
+      if (content.includes("import.meta.env[")) {
+        console.warn(`⚠️  Warning in ${fullPath}: Dynamic access to 'import.meta.env' detected. Vite requires static property access (e.g., import.meta.env.VITE_KEY) for reliable bundling.`);
+      }
     }
   }
   return keys;

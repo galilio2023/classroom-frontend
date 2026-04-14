@@ -127,7 +127,7 @@ class WhiteboardErrorBoundary extends Component<
   }
 }
 
-export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
+export const Whiteboard = memo(({ classId, roomId }: WhiteboardProps) => {
   const { t } = useTranslation();
   const { isStaff: isTeacher, isLoading: isPermissionsLoading } = useUserRole();
   const activeRoomId = roomId || classId;
@@ -238,4 +238,4 @@ export const Whiteboard = ({ classId, roomId }: WhiteboardProps) => {
       </div>
     </AiFeatureGuard>
   );
-};
+});
