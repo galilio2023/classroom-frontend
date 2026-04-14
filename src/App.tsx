@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Refine } from "@refinedev/core";
 import { Helmet } from "react-helmet-async";
 import { RefineKbar, RefineKbarProvider } from "@refinedev/kbar";
