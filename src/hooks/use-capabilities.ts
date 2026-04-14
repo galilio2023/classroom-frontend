@@ -35,6 +35,7 @@ export const useCapabilities = () => {
 
     // --- FEATURE CAPABILITIES ---
     canAccessAi: isAiEnabled,
+    canInteractWithAiCompanion: isAiEnabled && !isParent,
     canManageClasses: isStaff,
     canManageLiveSession: isStaff,
     canManageCurriculum: isStaff,

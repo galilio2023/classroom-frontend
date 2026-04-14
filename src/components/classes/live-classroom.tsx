@@ -12,7 +12,7 @@ import { Whiteboard } from "./whiteboard";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
-import { AILiveCompanion } from "./ai-live-companion";
+import { AILiveCompanion } from "@/features/ai/components/AiLiveCompanion";
 
 // Hooks
 import { useLiveSession } from "@/features/classes/hooks/useLiveSession";
@@ -129,6 +129,12 @@ export const LiveClassroom = ({
       );
     }
   );
+
+  const handleCompanionFinished = useCallback(() => {
+    if (isTeacher) {
+      toast.info(t("classes.live.ai.segmentFinished", "AI Co-teacher has finished the segment."));
+    }
+  }, [isTeacher, t]);
 
   useLiveClassroomSocket(Number(classIdString), {
     onSessionStarted: (data) => {
@@ -472,9 +478,7 @@ export const LiveClassroom = ({
                     script={classData?.aiDelegationContext?.script ?? null}
                     visualCue={(classData?.aiDelegationContext?.visualCue as any) || "talking"}
                     language={i18n.language === "ar" ? "Arabic" : "English"}
-                    onFinished={() =>
-                      isTeacher && toast.info("AI Co-teacher has finished the segment.")
-                    }
+                    onFinished={handleCompanionFinished}
                   />
                 </div>
               )}

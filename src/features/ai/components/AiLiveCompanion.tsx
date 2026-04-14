@@ -1,16 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  Mic,
-  User as UserIcon,
-  Hand,
-  Loader2,
-  BrainCircuit,
-  Sparkles,
-  AlertCircle,
-} from "lucide-react";
+import { Mic, Hand, Loader2, BrainCircuit } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useNotification } from "@refinedev/core";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -18,6 +9,11 @@ import { useAILiveInteraction } from "@/features/ai/hooks/use-ai-live-interactio
 import { useDashboard } from "@/features/dashboard/hooks/use-dashboard";
 import { useCapabilities } from "@/hooks/use-capabilities";
 import { AIVisualState } from "@/features/ai/types/ai";
+
+// Atomic Widgets
+import { AiCompanionErrorState } from "./companion-widgets/AiCompanionErrorState";
+import { AiCompanionOverlay } from "./companion-widgets/AiCompanionOverlay";
+import { AiCompanionAvatar } from "./companion-widgets/AiCompanionAvatar";
 
 interface AILiveCompanionProps {
   classId: string;
@@ -29,13 +25,13 @@ interface AILiveCompanionProps {
 }
 
 /**
- * AILiveCompanion Component (Refactored)
+ * 🤖 AI LIVE COMPANION (Deconstructed)
  *
- * Uses the specialized useAILiveInteraction hook for:
- * - Hardened SSE Streaming
- * - Lifecycle-safe SpeechSynthesis
- * - Global session persistence (Zustand)
- * - Refine v5 Permissions gating
+ * Orchestrates atomic widgets and manages live AI interaction state.
+ * Adheres to:
+ * - Rule 1: Capability-Based UI (canInteractWithAiCompanion)
+ * - Rule 3: Component Deconstruction (Atomic Widgets)
+ * - Rule 5: RTL Support (Logical CSS)
  */
 export const AILiveCompanion = React.memo(
   ({
@@ -47,15 +43,7 @@ export const AILiveCompanion = React.memo(
     onFinished,
   }: AILiveCompanionProps) => {
     const { coreData, isIdentityLoading: isAuthLoading } = useDashboard();
-    const {
-      isParent,
-      isStaff,
-      canAccessAi: canAccessAI,
-      isLoading: isAccessLoading,
-    } = useCapabilities();
-
-    // 🛡️ RBAC: Centralized access control via Refine patterns
-    // canAccessAI is already destructured from useCapabilities
+    const { isStaff, canInteractWithAiCompanion, isLoading: isAccessLoading } = useCapabilities();
 
     const {
       isJoined,
@@ -80,6 +68,9 @@ export const AILiveCompanion = React.memo(
     const [isHydrated, setIsHydrated] = useState(false);
     const [isPermissionDenied, setIsPermissionDenied] = useState(false);
     const { open } = useNotification();
+
+    // 🛡️ MASTER SWITCH: Global AI Kill-switch enforcement
+    const isAiEnabled = coreData?.globalConfig?.enableAiFeatures !== false;
 
     // 🛡️ NOTIFICATION: Trigger persistent toast on permission denial
     useEffect(() => {
@@ -112,13 +103,10 @@ export const AILiveCompanion = React.memo(
       return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
     }, [isJoined, isListening, stopListening]);
 
-    // 🛡️ MASTER SWITCH: Global AI Kill-switch enforcement
-    const isAiEnabled = coreData?.globalConfig?.enableAiFeatures !== false;
-
     // 🛡️ SSR SAFETY: Initialize browser-only features after mount
     useEffect(() => {
-      const SpeechRecognition =
-        (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      const win = window as unknown as Record<string, unknown>;
+      const SpeechRecognition = win.SpeechRecognition || win.webkitSpeechRecognition;
       setIsBrowserSupported(!!SpeechRecognition);
       setIsHydrated(true);
     }, []);
@@ -148,22 +136,12 @@ export const AILiveCompanion = React.memo(
       };
     }, []);
 
-    if (!isHydrated || isParent || isAccessLoading || !canAccessAI) return null;
+    // 🛡️ RULE 1: Use capability flag instead of direct role check
+    if (!isHydrated || isAccessLoading || !canInteractWithAiCompanion) return null;
 
-    // 🛡️ Global Master Switch: Graceful Degradation
+    // 🛡️ MASTER SWITCH: Global Kill-switch UI
     if (!isAiEnabled) {
-      return (
-        <div className="w-full h-full min-h-[400px] flex flex-col items-center justify-center bg-black/60 border-white/10 rounded-3xl p-8 text-center border-4">
-          <div className="bg-destructive/10 p-6 rounded-full mb-6">
-            <BrainCircuit className="w-12 h-12 text-destructive grayscale" />
-          </div>
-          <h3 className="text-2xl font-bold text-white mb-4">AI Co-Teacher Offline</h3>
-          <p className="text-muted-foreground max-w-xs mx-auto">
-            The AI Co-teacher features are currently undergoing maintenance to improve your
-            experience.
-          </p>
-        </div>
-      );
+      return <AiCompanionErrorState />;
     }
 
     if (isAuthLoading) {
@@ -190,50 +168,12 @@ export const AILiveCompanion = React.memo(
         )}
       >
         {!isJoined && (
-          <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/40 backdrop-blur-md text-center p-8">
-            {isPermissionDenied ? (
-              <div className="bg-destructive/10 border border-destructive/20 p-6 rounded-2xl max-w-xs animate-in fade-in zoom-in duration-300">
-                <Mic className="w-10 h-10 text-destructive mx-auto mb-3" />
-                <h4 className="text-white font-bold mb-2">Microphone Access Denied</h4>
-                <p className="text-xs text-muted-foreground mb-4">
-                  Please enable microphone permissions in your browser settings to interact with the
-                  AI Co-Teacher.
-                </p>
-                <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
-                  Try Again
-                </Button>
-              </div>
-            ) : !isBrowserSupported && isHydrated ? (
-              <div className="bg-destructive/10 border border-destructive/20 p-6 rounded-2xl max-w-xs animate-in fade-in zoom-in duration-300">
-                <AlertCircle className="w-10 h-10 text-destructive mx-auto mb-3" />
-                <h4 className="text-white font-bold mb-2">Browser Not Supported</h4>
-                <p className="text-xs text-muted-foreground mb-4">
-                  Speech interaction requires a modern browser like Chrome or Edge.
-                </p>
-                <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
-                  Retry Connection
-                </Button>
-              </div>
-            ) : (
-              <>
-                <Sparkles className="w-12 h-12 text-ai-primary mb-4 animate-pulse" />
-                <h3 className="text-2xl font-black text-white uppercase tracking-tighter mb-4">
-                  Start Interactive AI Session
-                </h3>
-                <p className="text-muted-foreground text-sm mb-8 max-w-xs">
-                  Click the button below to allow your AI Co-Teacher to speak and listen for your
-                  questions.
-                </p>
-                <Button
-                  size="lg"
-                  onClick={() => setIsJoined(true)}
-                  className="rounded-full bg-ai-primary hover:bg-ai-primary/80 text-white font-bold px-12"
-                >
-                  Join AI Session
-                </Button>
-              </>
-            )}
-          </div>
+          <AiCompanionOverlay
+            isPermissionDenied={isPermissionDenied}
+            isBrowserSupported={isBrowserSupported}
+            isHydrated={isHydrated}
+            onJoin={() => setIsJoined(true)}
+          />
         )}
 
         <AnimatePresence>
@@ -258,71 +198,12 @@ export const AILiveCompanion = React.memo(
         </AnimatePresence>
 
         <div className="relative z-10 flex flex-col items-center gap-8 max-w-2xl px-6 text-center">
-          <div className="relative">
-            <motion.div
-              animate={
-                isSpeaking
-                  ? {
-                      scale: [1, 1.05, 1],
-                      boxShadow: [
-                        "0 0 0px rgba(99, 102, 241, 0)",
-                        "0 0 40px rgba(99, 102, 241, 0.4)",
-                        "0 0 0px rgba(99, 102, 241, 0)",
-                      ],
-                    }
-                  : isListening
-                    ? {
-                        scale: [1, 0.98, 1],
-                        borderColor: [
-                          "rgba(249, 115, 22, 0.2)",
-                          "rgba(249, 115, 22, 0.8)",
-                          "rgba(249, 115, 22, 0.2)",
-                        ],
-                      }
-                    : {}
-              }
-              transition={{ repeat: Infinity, duration: 1.5 }}
-              className={cn(
-                "w-40 h-40 md:w-56 md:h-56 rounded-full border-4 overflow-hidden shadow-2xl bg-muted relative z-10 transition-colors duration-500",
-                visualState === "talking"
-                  ? "border-white/20"
-                  : visualState === "listening"
-                    ? "border-orange-500/50"
-                    : "border-green-500/50"
-              )}
-            >
-              {photo ? (
-                <img
-                  src={photo}
-                  alt="Teacher"
-                  className="w-full h-full object-cover grayscale-[20%]"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center bg-ai-primary/10">
-                  <UserIcon className="w-20 h-20 text-ai-primary/40" />
-                </div>
-              )}
-            </motion.div>
-
-            <div className="absolute -bottom-2 start-1/2 -translate-x-1/2 z-20 w-max">
-              <Badge
-                className={cn(
-                  "px-4 py-1.5 rounded-full font-black uppercase tracking-widest text-[10px] shadow-xl border-none",
-                  visualState === "talking"
-                    ? "bg-ai-primary text-white animate-pulse"
-                    : visualState === "listening"
-                      ? "bg-orange-500 text-white"
-                      : "bg-green-500 text-white"
-                )}
-              >
-                {visualState === "talking"
-                  ? "AI Co-Teacher Speaking"
-                  : visualState === "listening"
-                    ? "AI is Listening..."
-                    : "AI is Thinking..."}
-              </Badge>
-            </div>
-          </div>
+          <AiCompanionAvatar
+            photo={photo}
+            visualState={visualState}
+            isSpeaking={isSpeaking}
+            isListening={isListening}
+          />
 
           <div className="space-y-4">
             <div className="flex items-center justify-center gap-2 text-ai-primary">
