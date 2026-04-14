@@ -26,9 +26,11 @@ const AIStudyBuddyContent = ({ subject, topic, assignment, classId }: AIStudyBud
 
   useEffect(() => {
     const handleOpen = (data?: { classId?: string | number }) => {
-      // If a specific classId is provided in the event, and it doesn't match this buddy, ignore.
-      // But usually there's only one buddy instance per page.
-      if (data?.classId && classId && Number(data.classId) !== Number(classId)) return;
+      // 🛡️ SECURITY & UX: If a specific classId is provided in the event, and it doesn't match this buddy, ignore.
+      // If data.classId is missing, it's a general open request that should be honored by the active buddy.
+      if (data?.classId && classId) {
+        if (Number(data.classId) !== Number(classId)) return;
+      }
       setIsOpen(true);
     };
 

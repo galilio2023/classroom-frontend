@@ -237,6 +237,8 @@ export interface Assignment {
   submissions?: Submission[];
   hasPeerReview: boolean;
   peerReviewWeight: number;
+  maxPoints?: number;
+  timeEstimate?: string;
   rubric: RubricItem[];
 }
 

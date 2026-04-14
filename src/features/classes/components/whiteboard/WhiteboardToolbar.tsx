@@ -10,7 +10,7 @@ import {
   Trash2,
   AlertCircle,
   Save,
-  Wand2,
+  Undo2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -30,6 +30,8 @@ interface WhiteboardToolbarProps {
   isDirty: boolean;
   onSave: () => void;
   classId?: string;
+  canDiscardTidy?: boolean;
+  onDiscardTidy?: () => void;
 }
 
 export const WhiteboardToolbar = ({
@@ -48,6 +50,8 @@ export const WhiteboardToolbar = ({
   isDirty,
   onSave,
   classId,
+  canDiscardTidy,
+  onDiscardTidy,
 }: WhiteboardToolbarProps) => {
   return (
     <div className="flex items-center justify-between p-2 border-b bg-muted/30">
@@ -80,6 +84,17 @@ export const WhiteboardToolbar = ({
       <div className="flex items-center gap-2">
         {isTeacher && (
           <>
+            {canDiscardTidy && onDiscardTidy && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onDiscardTidy}
+                className="h-8 border-destructive/30 hover:bg-destructive/5 text-destructive font-bold group transition-all"
+              >
+                <Undo2 className="h-4 w-4 me-1 group-hover:-translate-x-0.5 transition-transform" />
+                Undo Tidy
+              </Button>
+            )}
             <Button
               variant="outline"
               size="sm"
@@ -90,7 +105,7 @@ export const WhiteboardToolbar = ({
               {isTidying ? (
                 <Loader2 className="h-4 w-4 animate-spin me-1" />
               ) : (
-                <Wand2 className="h-4 w-4 me-1 group-hover:scale-110 transition-transform" />
+                <Sparkles className="h-4 w-4 me-1 group-hover:scale-110 transition-transform" />
               )}
               AI Tidy
             </Button>

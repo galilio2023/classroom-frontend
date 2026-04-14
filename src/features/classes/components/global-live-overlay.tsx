@@ -94,9 +94,8 @@ export const GlobalLiveOverlay = () => {
                 >
                   <div className="flex items-center justify-between gap-3">
                     <p className="font-black text-xs truncate">{c.name}</p>
-                    {/* FIXME: SentimentPulse is missing - re-enable once component is created */}
-                    {/* {identity?.role !== UserRole.STUDENT && <SentimentPulse classId={c.id} />} */}
                   </div>
+
                   <Button
                     asChild
                     size="sm"

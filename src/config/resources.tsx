@@ -442,7 +442,7 @@ export const resources: ResourceProps[] = [
       group: "groups.admin",
       label: "resources.users.label",
       icon: <ShieldCheck />,
-      roles: [UserRole.ADMIN, UserRole.PARENT],
+      roles: [UserRole.ADMIN],
     },
   },
   {

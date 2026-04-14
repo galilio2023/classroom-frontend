@@ -598,23 +598,24 @@
       "notFoundDescription": "The assignment you are looking for does not exist or has been removed.",
       "assignmentDetails": "Assignment Details",
       "description": "Review instructions, submit work, and track feedback.",
+      "banner": {
+        "peerReviewActive": "Peer Review Active",
+        "aiQuizMode": "AI Quiz Mode",
+        "physicsLab": "Physics Lab",
+        "overdue": "Overdue",
+        "dueDate": "Due Date",
+        "maxPoints": "Max Points",
+        "timeEstimate": "Time Estimate",
+        "submissionsReceived": "Submissions Received",
+        "instructions": "Instructions",
+        "groupAssignment": "Group Assignment",
+        "due": "Due {{date}}"
+      },
       "toast": {
         "linkCopied": "Assignment link copied!",
         "peersSuccess": "Peers assigned successfully!",
         "peersError": "Failed to assign peers (need min 3 submissions)",
         "peersLoading": "Assigning peers..."
-      },
-      "banner": {
-        "peerReviewActive": "Peer Review Active",
-        "aiQuizMode": "AI Quiz Mode",
-        "physicsLab": "Physics Lab Mode",
-        "groupAssignment": "Group Assignment",
-        "due": "Due {{date}}",
-        "overdue": "Overdue",
-        "dueDate": "Due Date",
-        "maxPoints": "Max Points",
-        "timeEstimate": "Time Estimate",
-        "submissionsReceived": "{{count}} Submissions Received"
       },
       "interactiveQuiz": "Interactive Quiz Player",
       "quizContentActive": "Interactive AI quiz content is active below.",
