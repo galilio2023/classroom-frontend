@@ -7,6 +7,7 @@ import { usePersistentLive } from "@/hooks/use-persistent-live";
 import { AI_API } from "@/constants/api";
 import { AIVisualState } from "@/features/ai/types/ai";
 import { useAiAccess } from "./use-ai-access";
+import { handleError } from "@/providers/utils/api-errors";
 
 interface UseAILiveInteractionProps {
   classId: string;
@@ -220,9 +221,9 @@ export const useAILiveInteraction = ({
           body: JSON.stringify({ question, language, correlationId }),
         });
 
-        if (response.status === 429) throw new Error("RATE_LIMIT_EXCEEDED");
-        if (response.status === 503) throw new Error("AI_SERVICE_OFFLINE");
-        if (!response.ok) throw new Error("AI_SERVICE_UNAVAILABLE");
+        if (!response.ok) {
+          throw await handleError(response);
+        }
 
         const reader = response.body?.getReader();
         const decoder = new TextDecoder();
@@ -272,14 +273,19 @@ export const useAILiveInteraction = ({
           speakText(accumulatorRef.current);
         }
       } catch (err: unknown) {
-        const error = err as Error;
-        if (error.name === "AbortError") return;
+        if (err instanceof Error && err.name === "AbortError") return;
 
-        console.error("Co-Teacher Error:", error);
-        let description: string = t("aiHub.errors.serviceUnavailable");
-        if (error.message === "RATE_LIMIT_EXCEEDED") description = t("aiHub.errors.rateLimit");
+        console.error("Co-Teacher Error:", err);
 
-        open?.({ type: "error", message: t("common.error"), description });
+        const message = t("common.error");
+        let description = t("aiHub.errors.serviceUnavailable");
+
+        // Handle Refine HttpError
+        if (err && typeof err === "object" && "message" in err) {
+          description = (err as { message: string }).message;
+        }
+
+        open?.({ type: "error", message, description });
         setVisualState("talking");
       } finally {
         if (abortControllerRef.current === controller) {
@@ -292,11 +298,7 @@ export const useAILiveInteraction = ({
 
   // 2. 👂 SPEECH RECOGNITION ENGINE
   const startListening = useCallback(() => {
-    const SpeechRecognitionClass =
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (window as any).SpeechRecognition ||
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (window as any).webkitSpeechRecognition;
+    const SpeechRecognitionClass = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognitionClass) {
       open?.({
         type: "error",

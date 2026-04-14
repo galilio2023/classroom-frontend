@@ -1,31 +1,30 @@
-# 🤖 Tablawy OS - Frontend Architectural Mandates
+# 🤖 Gemini CLI - Frontend Implementation Mandates
 
-This document defines the foundational patterns and UI protocols for the Tablawy OS frontend (React/Refine v5). Adherence to these mandates ensures a consistent, high-performance, and maintainable user experience.
+This document serves as the primary foundational mandate for the Gemini CLI agent when working on the Tablawy OS frontend.
 
-## 1. Capability-Based UI
-We have moved away from raw role checks (`user.role === 'teacher'`).
-- **Mandate**: Use the `useCapabilities` hook for all feature gating.
-- **Why**: This makes the UI resilient to role re-configurations or the addition of new permission tiers.
-- **Example**: `const { canManageCurriculum } = useCapabilities();`
+## 📜 Architectural Source of Truth
+The engineering standards and UI protocols for this project are defined in:
+👉 **[DEVELOPMENT_PATTERNS.md](./DEVELOPMENT_PATTERNS.md)**
 
-## 2. Feature-Scoped AI Domain
-All AI-related assets are consolidated within `src/features/ai/`.
-- **Hooks**: General-purpose AI hooks (streaming, vision, chat) reside in `src/features/ai/hooks/`.
-- **Components**: AI-specific UI (Study Buddy, Vision Assistant) reside in `src/features/ai/components/`.
-- **Security**: The `<AiFeatureGuard />` component must be used to enforce global platform switches and RBAC rules.
+All changes MUST align with the patterns documented there, including **Capability-Based UI**, **Component Deconstruction**, and **Environment Safety**.
 
-## 3. Component Deconstruction
-Monolithic components (God Files) are strictly forbidden.
-- **Atomic Tabs**: Large tab components (Curriculum, Resource) must be broken down into atomic widgets in a `components/` sub-folder.
-- **Memoization**: Heavy UI sections should be extracted into memoized functional components to prevent unnecessary re-renders.
-- **Form Orchestration**: Complex forms (e.g., `ClassForm`) must act purely as orchestrators, delegating sections to specialized sub-components.
+## 🦾 AI-Specific Implementation Rules
 
-## 4. State & Data Fetching
-- **Zero-Direct-Call Policy**: Never call the Google AI SDK directly from the frontend. All AI interactions must go through the backend proxy.
-- **Standardized Error Handling**: Use the modularized `handleError` utility in `src/providers/utils/api-errors.ts` for consistent Refine-compatible error reporting.
-- **Hardened SSE Streaming**: The `useAIChat` hook implements line-buffering and lifecycle cleanup to ensure robust, real-time typing effects without memory leaks.
+### 1. Hardened SSE Streaming (SSE)
+When implementing or modifying AI streaming hooks (e.g., `useAIChat`, `useAILiveInteraction`):
+- **Line Buffering**: Always implement a buffer for incoming chunks. Split by `\n\n` before parsing to ensure partial JSON packets don't crash the UI.
+- **Cleanup**: Every streaming request MUST be bound to an `AbortController`. Ensure `.abort()` is called on component unmount.
+- **Feedback**: Provide immediate visual feedback (e.g., updating a `currentScript` state) during the stream to ensure the UI feels responsive.
 
-## 5. UI/UX Standards
-- **Visual Identity**: AI components must use the `ai-primary` color, `Sparkles` icon, and `ai-gradient-border`.
-- **Responsive Resilience**: Components must support both LTR and RTL (Arabic) layouts using `i18n` and logical CSS properties where possible.
-- **Human-in-the-Loop**: Teacher-facing AI outputs must be presented as editable suggestions, never as final deployments.
+### 2. Standardized Error Handling
+- **Mandate**: NEVER use generic `Error` strings for API failures.
+- **Action**: Always import and use the `handleError` utility from `@/providers/utils/api-errors`.
+- **Why**: This ensures that 429 (Rate Limit) and 503 (Circuit Breaker) states are correctly reported to the user via Refine's notification system.
+
+### 3. Hardware Privacy & Safety
+- **Mandate**: Components using microphone or camera MUST implement "Tab Visibility Safety".
+- **Action**: Use a `visibilitychange` event listener to stop active speech synthesis or microphone recording if the user leaves the tab.
+
+## 🎨 Visual Identifiers
+- AI features must use the `ai-primary` color gradient.
+- Use the `Sparkles` icon for generative features and `BrainCircuit` for analysis features.
