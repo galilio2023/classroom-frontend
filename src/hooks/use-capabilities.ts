@@ -23,6 +23,7 @@ export const useCapabilities = () => {
   const isStaff = isTeacher || isAdmin;
 
   return {
+    identity,
     isLoading: isIdentityLoading || isConfigLoading,
 
     // --- IDENTITY CAPABILITIES ---
@@ -35,6 +36,7 @@ export const useCapabilities = () => {
     // --- FEATURE CAPABILITIES ---
     canAccessAi: isAiEnabled,
     canManageClasses: isStaff,
+    canManageLiveSession: isStaff,
     canManageCurriculum: isStaff,
     canGradeSubmissions: isStaff,
     canViewAnalytics: isStaff || isAdmin,

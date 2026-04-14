@@ -11,6 +11,7 @@ import { User, UserRole, Class } from "@/types";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { usePersistentLive } from "@/hooks/use-persistent-live";
+import { useCapabilities } from "@/hooks/use-capabilities";
 import { handleError } from "@/providers/utils/api-errors";
 
 interface UseLiveSessionReturn {
@@ -41,7 +42,7 @@ interface UseLiveSessionReturn {
 
 export const useLiveSession = (classIdString: string): UseLiveSessionReturn => {
   const { t, i18n } = useTranslation();
-  const { data: identity } = useGetIdentity<User>();
+  const { identity, isStaff: isTeacher } = useCapabilities();
   const { isJoined, setIsJoined, setActiveClassId } = usePersistentLive();
   const [isLoading, setIsLoading] = useState(false);
   const [studentCount, setStudentCount] = useState(0);
@@ -51,7 +52,6 @@ export const useLiveSession = (classIdString: string): UseLiveSessionReturn => {
   const [generateRoadmap, setGenerateRoadmap] = useState(true);
 
   const numericClassId = Number(classIdString);
-  const isTeacher = identity?.role === UserRole.TEACHER || identity?.role === UserRole.ADMIN;
 
   const { mutate: markLiveAttendance } = useCustomMutation<BaseRecord, HttpError>();
   const { mutate: endLiveSession } = useCustomMutation<BaseRecord, HttpError>();
@@ -137,8 +137,9 @@ export const useLiveSession = (classIdString: string): UseLiveSessionReturn => {
           );
           setIsBreakoutActive(!isBreakoutActive);
         },
-        onError: (error: HttpError) => {
-          toast.error(error.message);
+        onError: async (error: HttpError) => {
+          const refinedError = await handleError(error as any);
+          toast.error(refinedError.message);
         },
       }
     );
