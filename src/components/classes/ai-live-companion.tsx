@@ -12,11 +12,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { useNotification, useCan } from "@refinedev/core";
+import { useNotification } from "@refinedev/core";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAILiveInteraction } from "@/features/ai/hooks/use-ai-live-interaction";
 import { useDashboard } from "@/features/dashboard/hooks/use-dashboard";
-import { useAIAuthorization } from "@/features/ai/hooks/use-ai-authorization";
+import { useCapabilities } from "@/hooks/use-capabilities";
 import { AIVisualState } from "@/features/ai/types/ai";
 
 interface AILiveCompanionProps {
@@ -46,14 +46,11 @@ export const AILiveCompanion = ({
   onFinished,
 }: AILiveCompanionProps) => {
   const { coreData } = useDashboard();
-  const { isParent, isStaff, isLoading: isAuthLoading } = useAIAuthorization();
+  const { isParent, isStaff, canAccessAi, isLoading: isAuthLoading } = useCapabilities();
 
-  // ðŸ›¡ï¸ RBAC: Centralized access control via Refine patterns
-  const { data: canAccessAI, isLoading: isAccessLoading } = useCan({
-    resource: "ai_features",
-    action: "interact",
-    params: { classId },
-  });
+  // 🛡️ RBAC: Centralized access control via Refine patterns
+  const canAccessAI = canAccessAi;
+  const isAccessLoading = false;
 
   const {
     isJoined,
@@ -79,7 +76,7 @@ export const AILiveCompanion = ({
   const [isPermissionDenied, setIsPermissionDenied] = useState(false);
   const { open } = useNotification();
 
-  // ðŸ›¡ï¸ NOTIFICATION: Trigger persistent toast on permission denial
+  // 🛡️ NOTIFICATION: Trigger persistent toast on permission denial
   useEffect(() => {
     if (isPermissionDenied) {
       open?.({
@@ -91,17 +88,17 @@ export const AILiveCompanion = ({
     }
   }, [isPermissionDenied, open]);
 
-  // ðŸ›¡ï¸ TAB VISIBILITY SAFETY: Stop mic/speech if user leaves tab
+  // 🛡️ TAB VISIBILITY SAFETY: Stop mic/speech if user leaves tab
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === "hidden" && isJoined) {
         if (typeof window !== "undefined" && window.speechSynthesis) {
           window.speechSynthesis.cancel();
         }
-        // ðŸ›¡ï¸ PRIVACY GUARD: Stop hardware microphone if tab is hidden
+        // 🛡️ PRIVACY GUARD: Stop hardware microphone if tab is hidden
         if (isListening) {
           stopListening();
-          console.warn("ðŸ”’ Tab hidden: Microphone and Speech paused for privacy.");
+          console.warn("🔐 Tab hidden: Microphone and Speech paused for privacy.");
         }
       }
     };
@@ -109,10 +106,10 @@ export const AILiveCompanion = ({
     return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
   }, [isJoined, isListening, stopListening]);
 
-  // ðŸ›¡ï¸ MASTER SWITCH: Global AI Kill-switch enforcement
+  // 🛡️ MASTER SWITCH: Global AI Kill-switch enforcement
   const isAiEnabled = coreData?.globalConfig?.enableAiFeatures !== false;
 
-  // ðŸ›¡ï¸ SSR SAFETY: Initialize browser-only features after mount
+  // 🛡️ SSR SAFETY: Initialize browser-only features after mount
   useEffect(() => {
     const SpeechRecognition =
       (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -120,7 +117,7 @@ export const AILiveCompanion = ({
     setIsHydrated(true);
   }, []);
 
-  // ðŸ›¡ï¸ AUTO-LEAVE: If AI is disabled mid-session, kick student out
+  // 🛡️ AUTO-LEAVE: If AI is disabled mid-session, kick student out
   useEffect(() => {
     if (!isAiEnabled && isJoined) {
       setIsJoined(false);
@@ -136,7 +133,7 @@ export const AILiveCompanion = ({
     }
   }, [script, isJoined, speakText, currentScript, setCurrentScript]);
 
-  // ðŸ§¹ CLEANUP: Stop speaking on unmount
+  // 🧹 CLEANUP: Stop speaking on unmount
   useEffect(() => {
     return () => {
       if (typeof window !== "undefined" && window.speechSynthesis) {
@@ -145,9 +142,9 @@ export const AILiveCompanion = ({
     };
   }, []);
 
-  if (!isHydrated || isParent || isAccessLoading || canAccessAI?.can === false) return null;
+  if (!isHydrated || isParent || isAccessLoading || !canAccessAI) return null;
 
-  // ðŸ›¡ï¸ Global Master Switch: Graceful Degradation
+  // 🛡️ Global Master Switch: Graceful Degradation
   if (!isAiEnabled) {
     return (
       <div className="w-full h-full min-h-[400px] flex flex-col items-center justify-center bg-black/60 border-white/10 rounded-3xl p-8 text-center border-4">

@@ -34,7 +34,6 @@ import { GetListResponse, HttpError } from "@refinedev/core";
 import { UseQueryResult } from "@tanstack/react-query";
 import { Class } from "@/types";
 import { AnimatePresence, motion } from "framer-motion";
-import {} from "@/features/ai/components/ai-feature-disabled";
 import { AiFeatureGuard } from "@/features/ai/components/AiFeatureGuard";
 import { useAiAccess } from "@/features/ai/hooks/use-ai-access";
 import { useJobs } from "@/contexts/job-context";

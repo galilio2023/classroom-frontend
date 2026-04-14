@@ -77,7 +77,7 @@ export const ModuleItem = ({
       id: module.id,
       values: {
         isPublished: !module.isPublished,
-        version: module.version, // ðŸ›¡ï¸ COMPLIANCE: Backend requires version for all updates
+        version: module.version, // 🛡️ COMPLIANCE: Backend requires version for all updates
       },
       mutationMode: "optimistic",
     });

@@ -17,7 +17,6 @@ import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { AiFeatureGuard } from "@/features/ai/components/AiFeatureGuard";
-import {} from "@/components/ui/badge";
 
 interface ResourceItemProps {
   resource: Resource;
@@ -123,7 +122,7 @@ export const ResourceItem = ({
                 {t(`classes.resource.addDialog.types.${resource.type}`)}{" "}
                 {resource.type === "note" && (
                   <AiFeatureGuard>
-                    <span>â€¢ {t("common.aiAnalyzed")}</span>
+                    <span>• {t("common.aiAnalyzed")}</span>
                   </AiFeatureGuard>
                 )}
               </span>

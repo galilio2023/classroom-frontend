@@ -22,6 +22,7 @@ import { AppRouter } from "./routes";
 import { usePulseNotifications } from "./hooks/use-pulse-notifications";
 import { GlobalLiveOverlay } from "./features/classes/components/global-live-overlay";
 import { TooltipProvider } from "./components/ui/tooltip";
+import { HelmetProvider } from "react-helmet-async";
 
 import "./App.css";
 import "@excalidraw/excalidraw/index.css";
@@ -86,38 +87,40 @@ function App() {
   };
 
   return (
-    <RefineKbarProvider>
-      <DevtoolsProvider>
-        <ErrorBoundary>
-          <Refine
-            dataProvider={dataProvider}
-            authProvider={authProvider}
-            accessControlProvider={accessControlProvider}
-            routerProvider={routerBindings}
-            notificationProvider={notificationProvider}
-            i18nProvider={i18nProvider}
-            resources={resources}
-            liveProvider={liveProvider(socket)}
-            options={{
-              syncWithLocation: true,
-              warnWhenUnsavedChanges: true,
-              projectId: "classroom-refine",
-              title: {
-                icon: <GraduationCap className="w-8 h-8 text-primary" />,
-                text: t("app.title", { defaultValue: "Classroom AI" }),
-              },
-            }}
-          >
-            <PulseProvider>
-              <AppRouter />
-              <UnsavedChangesNotifier />
-              <DocumentTitleHandler />
-              <RefineKbar />
-            </PulseProvider>
-          </Refine>
-        </ErrorBoundary>
-      </DevtoolsProvider>
-    </RefineKbarProvider>
+    <HelmetProvider>
+      <RefineKbarProvider>
+        <DevtoolsProvider>
+          <ErrorBoundary>
+            <Refine
+              dataProvider={dataProvider}
+              authProvider={authProvider}
+              accessControlProvider={accessControlProvider}
+              routerProvider={routerBindings}
+              notificationProvider={notificationProvider}
+              i18nProvider={i18nProvider}
+              resources={resources}
+              liveProvider={liveProvider(socket)}
+              options={{
+                syncWithLocation: true,
+                warnWhenUnsavedChanges: true,
+                projectId: "classroom-refine",
+                title: {
+                  icon: <GraduationCap className="w-8 h-8 text-primary" />,
+                  text: t("app.title", { defaultValue: "Classroom AI" }),
+                },
+              }}
+            >
+              <PulseProvider>
+                <AppRouter />
+                <UnsavedChangesNotifier />
+                <DocumentTitleHandler />
+                <RefineKbar />
+              </PulseProvider>
+            </Refine>
+          </ErrorBoundary>
+        </DevtoolsProvider>
+      </RefineKbarProvider>
+    </HelmetProvider>
   );
 }
 
