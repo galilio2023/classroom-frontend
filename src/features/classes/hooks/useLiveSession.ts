@@ -1,11 +1,45 @@
 import { useState, useCallback, useEffect } from "react";
-import { useCustomMutation, useOne, useList, useGetIdentity } from "@refinedev/core";
+import {
+  useCustomMutation,
+  useOne,
+  useList,
+  useGetIdentity,
+  BaseRecord,
+  HttpError,
+} from "@refinedev/core";
 import { User, UserRole, Class } from "@/types";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { usePersistentLive } from "@/hooks/use-persistent-live";
+import { handleError } from "@/providers/utils/api-errors";
 
-export const useLiveSession = (classIdString: string) => {
+interface UseLiveSessionReturn {
+  identity: User | undefined;
+  isTeacher: boolean;
+  classData: Class | undefined;
+  isLoading: boolean;
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  studentCount: number;
+  setStudentCount: React.Dispatch<React.SetStateAction<number>>;
+  isBreakoutActive: boolean;
+  setIsBreakoutActive: React.Dispatch<React.SetStateAction<boolean>>;
+  currentGroupId: number | null;
+  setCurrentGroupId: React.Dispatch<React.SetStateAction<number | null>>;
+  myGroup: any;
+  groups: any[];
+  generateRoadmap: boolean;
+  setGenerateRoadmap: React.Dispatch<React.SetStateAction<boolean>>;
+  handleStartLiveSession: () => void;
+  handleToggleBreakout: () => void;
+  handleEndSession: () => Promise<void>;
+  markLiveAttendance: any;
+  refetchClass: () => void;
+  isJoined: boolean;
+  setIsJoined: (joined: boolean) => void;
+  setActiveClassId: (id: string | null) => void;
+}
+
+export const useLiveSession = (classIdString: string): UseLiveSessionReturn => {
   const { t, i18n } = useTranslation();
   const { data: identity } = useGetIdentity<User>();
   const { isJoined, setIsJoined, setActiveClassId } = usePersistentLive();
@@ -19,10 +53,10 @@ export const useLiveSession = (classIdString: string) => {
   const numericClassId = Number(classIdString);
   const isTeacher = identity?.role === UserRole.TEACHER || identity?.role === UserRole.ADMIN;
 
-  const { mutate: markLiveAttendance } = useCustomMutation();
-  const { mutate: endLiveSession } = useCustomMutation();
-  const { mutate: manageBreakout } = useCustomMutation();
-  const { mutate: startLiveSession } = useCustomMutation();
+  const { mutate: markLiveAttendance } = useCustomMutation<BaseRecord, HttpError>();
+  const { mutate: endLiveSession } = useCustomMutation<BaseRecord, HttpError>();
+  const { mutate: manageBreakout } = useCustomMutation<BaseRecord, HttpError>();
+  const { mutate: startLiveSession } = useCustomMutation<BaseRecord, HttpError>();
 
   const { query: classQuery } = useOne<Class>({
     resource: "classes",
@@ -70,9 +104,9 @@ export const useLiveSession = (classIdString: string) => {
           setActiveClassId(classIdString);
           setIsJoined(true);
         },
-        onError: (error: any) => {
+        onError: (error: HttpError) => {
           setIsLoading(false);
-          toast.error(error?.data?.message || t("classes.live.toasts.startFailed"));
+          toast.error(error.message);
         },
       }
     );
@@ -103,6 +137,9 @@ export const useLiveSession = (classIdString: string) => {
           );
           setIsBreakoutActive(!isBreakoutActive);
         },
+        onError: (error: HttpError) => {
+          toast.error(error.message);
+        },
       }
     );
   }, [isBreakoutActive, manageBreakout, numericClassId, t]);
@@ -125,9 +162,9 @@ export const useLiveSession = (classIdString: string) => {
           setIsLoading(false);
           toast.success("Session terminated.");
         },
-        onError: () => {
+        onError: (error: HttpError) => {
           setIsLoading(false);
-          toast.error("Failed to end session.");
+          toast.error(error.message);
         },
       }
     );

@@ -45,12 +45,11 @@ export const AILiveCompanion = ({
   language = "English",
   onFinished,
 }: AILiveCompanionProps) => {
-  const { coreData } = useDashboard();
-  const { isParent, isStaff, canAccessAi, isLoading: isAuthLoading } = useCapabilities();
+  const { coreData, isIdentityLoading: isAuthLoading } = useDashboard();
+  const { isParent, isStaff, canAccessAi, isLoading: isAccessLoading } = useCapabilities();
 
   // 🛡️ RBAC: Centralized access control via Refine patterns
   const canAccessAI = canAccessAi;
-  const isAccessLoading = false;
 
   const {
     isJoined,
@@ -357,7 +356,7 @@ export const AILiveCompanion = ({
           </AnimatePresence>
         </div>
 
-        {/* ðŸ›¡ï¸ RBAC: Only Students (non-staff) can raise hands to interact */}
+        {/* 🛡️ RBAC: Only Students (non-staff) can raise hands to interact */}
         {!isStaff && (
           <div className="flex items-center gap-4 pt-6">
             <Button
