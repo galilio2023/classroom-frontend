@@ -4,7 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   BookOpen,
-  CheckCircle2,
+  // //   CheckCircle2,
   FileText,
   Sparkles,
   Users,
@@ -15,15 +15,16 @@ import {
   Lock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { motion } from "framer-motion";
+import {} from "framer-motion";
 import { Class } from "@/types";
 import { useTranslation } from "react-i18next";
-import { cn } from "@/lib/utils";
+import {} from "@/lib/utils";
 import { useTelemetry } from "@/hooks/use-telemetry";
 import { useEffect } from "react";
+import { Helmet } from "react-helmet-async";
 import Big from "big.js";
 
 export const PublicClassPreview = () => {
@@ -71,6 +72,23 @@ export const PublicClassPreview = () => {
 
   return (
     <div className="max-w-7xl mx-auto pb-20 text-start">
+      <Helmet>
+        <title>
+          {aClass.name} | {aClass.subject?.name || "Class"} Preview
+        </title>
+        <meta
+          name="description"
+          content={aClass.description || `Explore ${aClass.name} on Tablawy OS.`}
+        />
+        <meta property="og:title" content={`${aClass.name} - Public Preview`} />
+        <meta
+          property="og:description"
+          content={aClass.description || `Join this classroom led by expert educators.`}
+        />
+        <meta property="og:image" content={aClass.bannerUrl || ""} />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+      </Helmet>
       {/* Banner & Hero */}
       <div className="relative h-[40vh] md:h-[50vh] w-full overflow-hidden rounded-b-[4rem] md:rounded-b-[6rem] shadow-2xl">
         <img

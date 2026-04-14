@@ -1,6 +1,6 @@
 import { ListView } from "@/components/refine-ui/views/list-view";
 import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
-import { GraduationCap, Loader2, MessageSquare, Eye, Layers, UserCheck } from "lucide-react";
+import { GraduationCap, MessageSquare, Eye, Layers } from "lucide-react";
 import { useMemo } from "react";
 import { useList, useGetIdentity, useNavigation } from "@refinedev/core";
 import { User, UserRole } from "@/types";

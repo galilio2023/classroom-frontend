@@ -173,7 +173,7 @@ const SubmissionShow = () => {
         setRequiresResubmission(submission.requiresResubmission || false);
       }
     }
-  }, [submission?.id, submission?.version]);
+  }, [submission, isAnalyzing]);
 
   const handleSaveGrade = () => {
     if (!submission) return;

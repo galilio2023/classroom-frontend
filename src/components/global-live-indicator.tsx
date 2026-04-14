@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import axios from "axios";
 import { BACKEND_URL } from "@/config";
-import { cn } from "@/lib/utils";
+import {} from "@/lib/utils";
 
 interface LiveClass {
   id: number;
@@ -19,7 +19,7 @@ export const GlobalLiveIndicator = () => {
   const { t, i18n } = useTranslation();
   const { show } = useNavigation();
   const [liveClasses, setLiveClasses] = useState<LiveClass[]>([]);
-  const isAr = i18n.language === "ar";
+  const isArr = i18n.language === "ar";
 
   useEffect(() => {
     // 1. Initial Load: Fetch already live classes

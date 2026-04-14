@@ -8,26 +8,22 @@ import {
 } from "@refinedev/core";
 import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Class, ListResponse, Module, Progress, User, UserRole } from "@/types";
+import { Class, ListResponse, Module, Progress, User } from "@/types";
 import { CurriculumEmptyState } from "../components/class-empty-states";
-import { Accordion } from "@/components/ui/accordion";
-import { Button } from "@/components/ui/button";
-import { BookOpen, LayoutDashboard, Loader2, PlusCircle, Sparkles, Wand2, Zap } from "lucide-react";
+import { LayoutDashboard, Loader2, Zap } from "lucide-react";
 import { toast } from "sonner";
-import { ModuleItem } from "@/components/classes/curriculum/module-item";
-import { MagicBuilderDialog } from "@/components/classes/curriculum/magic-builder-dialog";
-import { MagicBuilderConfig } from "@/hooks/ai/use-magic-builder";
-import { CreateModuleDialog } from "@/components/classes/curriculum/create-module-dialog";
-import { AddResourceDialog } from "@/components/classes/curriculum/add-resource-dialog";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { AnimatePresence, motion } from "framer-motion";
+import { MagicBuilderConfig } from "@/features/ai/hooks/use-magic-builder";
 import { useTranslation } from "react-i18next";
-import { CanAccess } from "@/components/auth/can-access";
 import { useDashboard } from "@/features/dashboard/hooks/use-dashboard";
 import { useJobs } from "@/contexts/job-context";
-import { DragDropContext, Draggable, Droppable, DropResult } from "@hello-pangea/dnd";
-import { AiFeatureGuard } from "@/components/ai/AiFeatureGuard";
+import { DropResult } from "@hello-pangea/dnd";
 import { VersionSummaryModal } from "../components/version-summary-modal";
+import { useCapabilities } from "@/hooks/use-capabilities";
+
+// New sub-components
+import { CurriculumHeader } from "../components/curriculum/CurriculumHeader";
+import { ModuleList } from "../components/curriculum/ModuleList";
+import { TeacherActions } from "../components/curriculum/TeacherActions";
 
 interface CurriculumTabProps {
   classId: string;
@@ -35,12 +31,10 @@ interface CurriculumTabProps {
 }
 
 export const CurriculumTab = ({ classId, aClass }: CurriculumTabProps) => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { coreData } = useDashboard();
-  const isAr = i18n.language === "ar";
   const { data: identity } = useGetIdentity<User>();
-  const isTeacher = identity?.role === UserRole.TEACHER || identity?.role === UserRole.ADMIN;
-  const isStudent = identity?.role === UserRole.STUDENT;
+  const { isStudent, canManageCurriculum: isTeacher } = useCapabilities();
   const go = useGo();
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -76,7 +70,6 @@ export const CurriculumTab = ({ classId, aClass }: CurriculumTabProps) => {
   const modulesRaw = modulesQuery.data?.data || [];
   const userProgress = progressQuery.data?.data || [];
 
-  // 🚀 VERSION DRIFT: Map modules with isUpdated flag
   const modules = modulesRaw.map((m) => {
     const prog = userProgress.find((p: Progress) => p.moduleId === m.id);
     return {
@@ -86,14 +79,11 @@ export const CurriculumTab = ({ classId, aClass }: CurriculumTabProps) => {
   });
 
   const updatedModules = modules.filter((m) => m.isUpdated);
-
-  // 🚀 UNIFIED MANIFEST SYNC: Check if class manifest has changed since last sync
   const myEnrollment = identity?.enrollments?.find((e) => e.classId === Number(classId));
   const isManifestUpdated =
     isStudent && (aClass?.manifestVersion || 0) > (myEnrollment?.lastSyncedManifest || 0);
 
   useEffect(() => {
-    // We show the modal if either specific modules are updated OR the global manifest has bumped
     if (isStudent && (updatedModules.length > 0 || isManifestUpdated) && !hasShownVersionModal) {
       setIsVersionModalOpen(true);
       setHasShownVersionModal(true);
@@ -106,14 +96,11 @@ export const CurriculumTab = ({ classId, aClass }: CurriculumTabProps) => {
 
   const isLoading = modulesQuery.isLoading;
 
-  // 🚀 VERSION SYNC: Mark all as read (Individual & Manifest)
   const { mutate: bulkSync } = useCustomMutation();
   const { mutate: syncManifest } = useCustomMutation();
 
   const handleVersionModalClose = () => {
     setIsVersionModalOpen(false);
-
-    // 1. Sync Individual Modules (Detailed indicators)
     if (updatedModules.length > 0) {
       bulkSync({
         url: "/progress/bulk-sync",
@@ -125,7 +112,6 @@ export const CurriculumTab = ({ classId, aClass }: CurriculumTabProps) => {
       });
     }
 
-    // 2. Sync Manifest (Global indicator)
     if (isManifestUpdated) {
       syncManifest(
         {
@@ -136,7 +122,6 @@ export const CurriculumTab = ({ classId, aClass }: CurriculumTabProps) => {
         {
           onSuccess: () => {
             void queryClient.invalidateQueries({ queryKey: ["progress"] });
-            // Also invalidate identity to get updated enrollment data
             void queryClient.invalidateQueries({ queryKey: ["getUserIdentity"] });
             toast.success(
               t("classes.curriculum.allCaughtUp", { defaultValue: "Great! You're all caught up." })
@@ -154,46 +139,29 @@ export const CurriculumTab = ({ classId, aClass }: CurriculumTabProps) => {
     const [reorderedItem] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reorderedItem);
 
-    // 🚀 ROLLBACK MACHINE: Capture previous state
     const queryKey = [
       "modules",
-      {
-        filters: [{ field: "classId", operator: "eq" as const, value: Number(classId) }],
-      },
+      { filters: [{ field: "classId", operator: "eq" as const, value: Number(classId) }] },
     ];
     await queryClient.cancelQueries({ queryKey });
     const previousModules = queryClient.getQueryData(queryKey);
 
-    // Optimistic update
-    const newOrders = items.map((item, index) => ({
-      id: item.id,
-      order: index,
-    }));
+    const newOrders = items.map((item, index) => ({ id: item.id, order: index }));
 
     queryClient.setQueryData(queryKey, (old: any) => {
       if (!old) return old;
-      return {
-        ...old,
-        data: items.map((item, index) => ({ ...item, order: index })),
-      };
+      return { ...old, data: items.map((item, index) => ({ ...item, order: index })) };
     });
 
-    // Backend sync
     customMutation(
       {
         url: "modules/reorder",
         method: "post",
-        values: {
-          classId: Number(classId),
-          orders: newOrders,
-        },
+        values: { classId: Number(classId), orders: newOrders },
       },
       {
         onError: () => {
-          // Revert on failure
-          if (previousModules) {
-            queryClient.setQueryData(queryKey, previousModules);
-          }
+          if (previousModules) queryClient.setQueryData(queryKey, previousModules);
           toast.error(
             t("classes.curriculum.reorderError", {
               defaultValue: "Failed to save new order. Please try again.",
@@ -222,26 +190,18 @@ export const CurriculumTab = ({ classId, aClass }: CurriculumTabProps) => {
     const currentStatus = isItemCompleted(type, id);
     const queryKey: [string, { filters: CrudFilter[] }] = [
       "progress",
-      {
-        filters: [{ field: "classId", operator: "eq" as const, value: Number(classId) }],
-      },
+      { filters: [{ field: "classId", operator: "eq" as const, value: Number(classId) }] },
     ];
 
-    // 1. Cancel any outgoing refetches (so they don't overwrite our optimistic update)
     await queryClient.cancelQueries({ queryKey });
-
-    // 2. Snapshot the previous value
     const previousProgress = queryClient.getQueryData<ListResponse<Progress>>(queryKey);
 
-    // 3. Optimistically update to the new value
     queryClient.setQueryData(queryKey, (old: ListResponse<Progress> | undefined) => {
       if (!old || !old.data) return old;
-
       let newData = [...old.data];
       if (!currentStatus) {
-        // Add a temporary progress record
         newData.push({
-          id: Math.random(), // Temp ID
+          id: Math.random(),
           classId: Number(classId),
           moduleId,
           resourceId: type === "resource" ? id : null,
@@ -254,7 +214,6 @@ export const CurriculumTab = ({ classId, aClass }: CurriculumTabProps) => {
           updatedAt: new Date().toISOString(),
         } as Progress);
       } else {
-        // Remove the record
         newData = newData.filter(
           (p: Progress) =>
             !(
@@ -267,7 +226,6 @@ export const CurriculumTab = ({ classId, aClass }: CurriculumTabProps) => {
       return { ...old, data: newData };
     });
 
-    // 4. Perform the actual mutation
     customMutation(
       {
         url: "progress/toggle",
@@ -283,7 +241,6 @@ export const CurriculumTab = ({ classId, aClass }: CurriculumTabProps) => {
       },
       {
         onSuccess: () => {
-          // Optional: Refetch to ensure we have the correct server-generated ID
           void progressQuery.refetch();
           toast.success(
             !currentStatus
@@ -292,7 +249,6 @@ export const CurriculumTab = ({ classId, aClass }: CurriculumTabProps) => {
           );
         },
         onError: () => {
-          // Rollback on error
           queryClient.setQueryData(queryKey, previousProgress);
           toast.error("Failed to update progress.");
         },
@@ -302,8 +258,6 @@ export const CurriculumTab = ({ classId, aClass }: CurriculumTabProps) => {
 
   const handleMarkAsViewed = (moduleId: number, version: number) => {
     if (!isStudent) return;
-
-    // Check if it actually needs an update to avoid redundant calls
     const prog = userProgress.find((p: Progress) => p.moduleId === moduleId);
     if (prog && prog.lastViewedVersion >= version) return;
 
@@ -311,15 +265,10 @@ export const CurriculumTab = ({ classId, aClass }: CurriculumTabProps) => {
       {
         url: "progress/view",
         method: "post",
-        values: {
-          classId: Number(classId),
-          moduleId,
-          version,
-        },
+        values: { classId: Number(classId), moduleId, version },
       },
       {
         onSuccess: () => {
-          // Silently refresh progress to clear the NEW badge
           void progressQuery.refetch();
         },
       }
@@ -336,15 +285,12 @@ export const CurriculumTab = ({ classId, aClass }: CurriculumTabProps) => {
         url: "modules/magic-create",
         method: "post",
         values: { classId: Number(classId), ...magicConfig },
-        meta: {
-          invalidates: ["modules"],
-        },
+        meta: { invalidates: ["modules"] },
       },
       {
         onSuccess: (data: any) => {
           setIsMagicCreating(false);
           setIsMagicModalOpen(false);
-
           if (data?.data?.jobId) {
             addJob({
               id: `magic-builder-${classId}`,
@@ -381,75 +327,16 @@ export const CurriculumTab = ({ classId, aClass }: CurriculumTabProps) => {
 
   return (
     <div className="space-y-6 md:space-y-10">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 text-start">
-        <div className="space-y-1 md:space-y-2">
-          <div className="flex items-center gap-2">
-            <div className="p-2 rounded-lg bg-primary/10 text-primary">
-              <BookOpen className="h-4 w-4 md:h-5 md:w-5" />
-            </div>
-            <h3 className="text-xl md:text-2xl font-black tracking-tight">
-              {t("classes.curriculum.courseCurriculum")}
-            </h3>
-          </div>
-          <p className="text-sm md:text-base text-muted-foreground font-medium max-w-2xl">
-            {t("classes.curriculum.curriculumDescription")}
-          </p>
-        </div>
-
-        {isTeacher && (
-          <div className="flex items-center gap-2 md:gap-3 w-full md:w-auto">
-            {coreData?.globalConfig?.enableAiFeatures !== false && (
-              <CanAccess resource="modules" action="create" params={{ classId }}>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        id="guide-magic-builder"
-                        variant="outline"
-                        className="flex-1 md:flex-none rounded-xl h-10 md:h-12 px-4 md:px-8 border-ai-primary/20 text-ai-primary hover:bg-ai-primary/5 font-black uppercase tracking-widest text-[9px] md:text-[10px] gap-2 relative overflow-hidden group shadow-sm"
-                        onClick={() => {
-                          setMagicConfig({
-                            ...magicConfig,
-                            moduleId: null,
-                            type: "package",
-                          });
-                          setIsMagicModalOpen(true);
-                        }}
-                      >
-                        <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-[shine_1.5s_ease-in-out] pointer-events-none" />
-                        <Wand2 className="h-3.5 w-3.5 md:h-4 md:w-4" />
-                        <span className="truncate">{t("buttons.magicBuilder")}</span>
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent className="max-w-xs text-center border-ai-primary/20 bg-background/95 backdrop-blur-xl p-3 shadow-2xl rounded-xl">
-                      <div className="flex items-center justify-center mb-1">
-                        <Sparkles className="h-4 w-4 text-ai-primary animate-pulse me-2" />
-                        <span className="font-bold">{t("tooltips.magicBuilder.title")}</span>
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        {t("tooltips.magicBuilder.description")}
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </CanAccess>
-            )}
-
-            <CanAccess resource="modules" action="create" params={{ classId }}>
-              <Button
-                id="guide-add-module"
-                onClick={() => {
-                  setIsCreateModalOpen(true);
-                }}
-                className="flex-1 md:flex-none rounded-xl h-10 md:h-12 px-4 md:px-8 font-black uppercase tracking-widest text-[9px] md:text-[10px] gap-2 shadow-lg shadow-primary/20 transition-all active:scale-95"
-              >
-                <PlusCircle className="h-3.5 w-3.5 md:h-4 md:w-4" />
-                <span className="truncate">{t("buttons.addModule")}</span>
-              </Button>
-            </CanAccess>
-          </div>
-        )}
-      </div>
+      <CurriculumHeader
+        classId={classId}
+        isTeacher={isTeacher}
+        enableAiFeatures={coreData?.globalConfig?.enableAiFeatures !== false}
+        onMagicClick={() => {
+          setMagicConfig({ ...magicConfig, moduleId: null, type: "package" });
+          setIsMagicModalOpen(true);
+        }}
+        onAddModuleClick={() => setIsCreateModalOpen(true)}
+      />
 
       {modules.length === 0 ? (
         <CurriculumEmptyState
@@ -462,9 +349,7 @@ export const CurriculumTab = ({ classId, aClass }: CurriculumTabProps) => {
           <div className="flex items-center justify-between px-2">
             <div className="flex items-center gap-2 text-[10px] md:text-[11px] font-black uppercase tracking-widest text-muted-foreground/60">
               <LayoutDashboard className="h-3 w-3" />
-              {t("classes.curriculum.modulesPublished", {
-                count: modules.length,
-              })}
+              {t("classes.curriculum.modulesPublished", { count: modules.length })}
             </div>
             {isStudent && (
               <div className="flex items-center gap-1.5 md:gap-2 text-[10px] md:text-[11px] font-black uppercase tracking-widest text-primary">
@@ -478,117 +363,56 @@ export const CurriculumTab = ({ classId, aClass }: CurriculumTabProps) => {
             )}
           </div>
 
-          <Accordion type="multiple" className="w-full space-y-4 md:space-y-6">
-            <DragDropContext onDragEnd={handleOnDragEnd}>
-              <Droppable droppableId="modules">
-                {(provided) => (
-                  <div {...provided.droppableProps} ref={provided.innerRef}>
-                    <AnimatePresence mode="popLayout">
-                      {modules
-                        .sort((a, b) => (a.order || 0) - (b.order || 0))
-                        .map((module, idx) => (
-                          <Draggable
-                            key={module.id}
-                            draggableId={module.id.toString()}
-                            index={idx}
-                            isDragDisabled={!isTeacher}
-                          >
-                            {(draggableProvided) => (
-                              <div
-                                ref={draggableProvided.innerRef}
-                                {...draggableProvided.draggableProps}
-                                className="mb-4 md:mb-6"
-                              >
-                                <motion.div
-                                  initial={{ opacity: 0, y: 20 }}
-                                  animate={{ opacity: 1, y: 0 }}
-                                  transition={{ delay: idx * 0.05 }}
-                                >
-                                  <ModuleItem
-                                    module={module}
-                                    isTeacher={isTeacher}
-                                    isStudent={isStudent}
-                                    classId={classId}
-                                    dragHandleProps={draggableProvided.dragHandleProps}
-                                    isItemCompleted={isItemCompleted}
-                                    onToggleProgress={(type, id, mid) => {
-                                      handleMarkAsViewed(mid, (module as any).version);
-                                      void handleToggleProgress(type, id, mid);
-                                    }}
-                                    onDeleteModule={(id) =>
-                                      deleteModule(
-                                        { resource: "modules", id },
-                                        {
-                                          onSuccess: () => {
-                                            void modulesQuery.refetch();
-                                          },
-                                        }
-                                      )
-                                    }
-                                    onMagicAction={(moduleId, type) => {
-                                      setMagicConfig({
-                                        ...magicConfig,
-                                        moduleId,
-                                        type: type as "package" | "note" | "quiz" | "assignment",
-                                      });
-                                      setIsMagicModalOpen(true);
-                                    }}
-                                    onAddMaterial={(moduleId) => {
-                                      setActiveModuleId(moduleId);
-                                      setIsAddResourceOpen(true);
-                                    }}
-                                    onAddTask={(moduleId) =>
-                                      go({
-                                        to: `/assignments/create?classId=${classId}&moduleId=${moduleId}`,
-                                      })
-                                    }
-                                  />
-                                </motion.div>
-                              </div>
-                            )}
-                          </Draggable>
-                        ))}
-                    </AnimatePresence>
-                    {provided.placeholder}
-                  </div>
-                )}
-              </Droppable>
-            </DragDropContext>
-          </Accordion>
+          <ModuleList
+            modules={modules}
+            isTeacher={isTeacher}
+            isStudent={isStudent}
+            classId={classId}
+            onDragEnd={handleOnDragEnd}
+            isItemCompleted={isItemCompleted}
+            onToggleProgress={(type, id, mid) => {
+              const m = modules.find((mod) => mod.id === mid);
+              handleMarkAsViewed(mid, (m as any).version);
+              void handleToggleProgress(type, id, mid);
+            }}
+            onDeleteModule={(id) =>
+              deleteModule({ resource: "modules", id }, { onSuccess: () => modulesQuery.refetch() })
+            }
+            onMagicAction={(moduleId, type) => {
+              setMagicConfig({
+                ...magicConfig,
+                moduleId,
+                type: type as any,
+              });
+              setIsMagicModalOpen(true);
+            }}
+            onAddMaterial={(moduleId) => {
+              setActiveModuleId(moduleId);
+              setIsAddResourceOpen(true);
+            }}
+            onAddTask={(moduleId) =>
+              go({ to: `/assignments/create?classId=${classId}&moduleId=${moduleId}` })
+            }
+          />
         </div>
       )}
 
       {isTeacher && (
-        <AiFeatureGuard silent>
-          <MagicBuilderDialog
-            open={isMagicModalOpen}
-            onOpenChange={setIsMagicModalOpen}
-            initialConfig={magicConfig}
-            onGenerate={(config) => {
-              setMagicConfig(config);
-              handleMagicCreate();
-            }}
-            isGenerating={isMagicCreating}
-            initialClassId={classId}
-          />
-        </AiFeatureGuard>
-      )}
-      {isTeacher && (
-        <>
-          <AddResourceDialog
-            isOpen={isAddResourceOpen}
-            onOpenChange={setIsAddResourceOpen}
-            classId={Number(classId)}
-            moduleId={activeModuleId || 0}
-          />
-
-          <CreateModuleDialog
-            isOpen={isCreateModalOpen}
-            onOpenChange={setIsCreateModalOpen}
-            classId={Number(classId)}
-            order={modules.length}
-          />
-        </>
+        <TeacherActions
+          classId={classId}
+          isMagicModalOpen={isMagicModalOpen}
+          setIsMagicModalOpen={setIsMagicModalOpen}
+          magicConfig={magicConfig}
+          setMagicConfig={setMagicConfig}
+          isMagicCreating={isMagicCreating}
+          onMagicCreate={handleMagicCreate}
+          isAddResourceOpen={isAddResourceOpen}
+          setIsAddResourceOpen={setIsAddResourceOpen}
+          activeModuleId={activeModuleId}
+          isCreateModalOpen={isCreateModalOpen}
+          setIsCreateModalOpen={setIsCreateModalOpen}
+          moduleCount={modules.length}
+        />
       )}
 
       {isVersionModalOpen && (

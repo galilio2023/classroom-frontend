@@ -1,8 +1,9 @@
-import { useCustom, useGetIdentity } from "@refinedev/core";
-import { useParams } from "react-router-dom";
+import { useCustom, useGetIdentity, useList } from "@refinedev/core";
+import { useNavigate, useParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
   Activity,
@@ -16,11 +17,12 @@ import {
   Target,
   TrendingUp,
   Trophy,
+  BrainCircuit,
 } from "lucide-react";
 import { User as UserType } from "@/types";
 import { XPProgressBar } from "@/components/xp-progress-bar";
 import { getLevelProgress } from "@/lib/xp";
-import { BadgeCard, MOCK_BADGES } from "@/components/badge-card";
+import { BadgeCard } from "@/components/ui/badge-card";
 import { StudentAcademicJourney } from "@/features/dashboard/components/student-academic-journey";
 import { SubmissionHeatmap } from "@/features/dashboard/components/submission-heatmap";
 import { motion } from "framer-motion";
@@ -28,14 +30,17 @@ import usePageTitle from "@/hooks/use-page-title";
 import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
+import { useMemo } from "react";
 
 const StudentPortfolio = () => {
   const { id } = useParams();
   const { data: identity } = useGetIdentity<UserType>();
+  const navigate = useNavigate();
   const { t, i18n } = useTranslation();
-  const isAr = i18n.language === "ar";
+  const isArr = i18n.language === "ar";
 
   const studentId = id || identity?.id;
+  const isSelf = studentId === identity?.id;
 
   const { query: userQuery } = useCustom<UserType>({
     url: `/users/${studentId}`,
@@ -54,8 +59,30 @@ const StudentPortfolio = () => {
 
   const { data: analyticsData, isLoading: isAnalyticsLoading } = analyticsQuery;
 
+  // Fetch All Available Badges
+  const { result: allBadgesResult, query: badgesQuery } = useList<any>({
+    resource: "badges",
+    pagination: { mode: "off" },
+  });
+
+  const isBadgesLoading = badgesQuery.isLoading;
+
   const user = userData?.data;
   const analytics = analyticsData?.data;
+  const allBadges = allBadgesResult?.data || [];
+
+  const combinedBadges = useMemo(() => {
+    if (!allBadges.length) return [];
+    const earnedIds = new Set(analytics?.badges?.map((b: any) => b.id) || []);
+
+    return allBadges.map((b: any) => ({
+      id: b.id,
+      name: b.name,
+      description: b.description,
+      iconUrl: b.iconUrl,
+      unlocked: earnedIds.has(b.id),
+    }));
+  }, [allBadges, analytics?.badges]);
 
   usePageTitle(
     user?.name
@@ -63,7 +90,7 @@ const StudentPortfolio = () => {
       : t("portfolioPage.fallbackPageTitle")
   );
 
-  if (isUserLoading || isAnalyticsLoading) {
+  if (isUserLoading || isAnalyticsLoading || isBadgesLoading) {
     return (
       <div className="flex flex-col items-center justify-center h-[85vh] gap-8">
         <motion.div
@@ -181,6 +208,16 @@ const StudentPortfolio = () => {
               <Separator className="my-10 opacity-50" />
 
               <div className="w-full space-y-4 text-start">
+                {isSelf && (
+                  <Button
+                    variant="outline"
+                    className="w-full h-14 rounded-2xl font-black uppercase tracking-widest text-[10px] border-ai-primary/20 text-ai-primary hover:bg-ai-primary/5 gap-2 group mb-4 shadow-sm"
+                    onClick={() => navigate("/ai-personalization")}
+                  >
+                    <BrainCircuit className="h-4 w-4 group-hover:rotate-12 transition-transform" />
+                    AI Personalization
+                  </Button>
+                )}
                 <div className="flex items-center gap-4 p-4 rounded-2xl bg-background/50 border border-border/40 shadow-sm">
                   <div className="p-2.5 bg-primary/10 rounded-xl text-primary">
                     <Mail className="h-5 w-5" />
@@ -345,14 +382,14 @@ const StudentPortfolio = () => {
             className="w-fit rounded-full border-primary/20 font-black text-[10px] uppercase tracking-[0.2em] px-6 py-2 shadow-sm bg-background/40 backdrop-blur-xl"
           >
             {t("portfolioPage.badgesEarned", {
-              earned: MOCK_BADGES.filter((b) => b.unlocked).length,
-              total: MOCK_BADGES.length,
+              earned: analytics?.totalBadges || 0,
+              total: allBadges.length,
             })}
           </Badge>
         </div>
         <Card className="p-8 md:p-12 lg:p-16 border-border/40 shadow-2xl rounded-[3rem] bg-card/50 backdrop-blur-3xl">
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6 md:gap-10">
-            {MOCK_BADGES.map((badge) => (
+            {combinedBadges.map((badge: any) => (
               <BadgeCard key={badge.id} badge={badge} />
             ))}
           </div>

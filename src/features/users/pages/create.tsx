@@ -1,4 +1,4 @@
-import { CreateViewHeader } from "@/components/refine-ui/views/create-view";
+import {} from "@/components/refine-ui/views/create-view";
 import { useForm } from "@refinedev/react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSelect } from "@refinedev/core";
@@ -27,7 +27,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+import {} from "@/components/ui/separator";
 import {
   User,
   Mail,

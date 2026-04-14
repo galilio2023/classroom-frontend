@@ -1,6 +1,6 @@
 import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
 import { Button } from "@/components/ui/button";
-import { Copy, Pencil, Share2, Check, LayoutDashboard, Brain, Loader2 } from "lucide-react";
+import { Pencil, Share2, Check, LayoutDashboard, Brain, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useState } from "react";

@@ -31,7 +31,6 @@ export const liveProvider = (socketInstance: typeof socket): LiveProvider => ({
     }
   },
   publish: (event) => {
-    const listenerName = `live-event:${event.channel}`;
     socketInstance.emit("publish-live-event", event);
   },
 });

@@ -16,7 +16,7 @@ import {
   Layers,
 } from "lucide-react";
 import { Input } from "@/components/ui/input.tsx";
-import { useMemo, useState, useRef } from "react";
+import { useMemo, useState } from "react";
 import { useList, useNavigation, useGetIdentity } from "@refinedev/core";
 import { Discussion, User as UserType, UserRole } from "@/types";
 import { Badge } from "@/components/ui/badge.tsx";
@@ -37,7 +37,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
+  // //   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useTranslation } from "react-i18next";

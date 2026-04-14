@@ -18,7 +18,7 @@ import {
   Layers,
 } from "lucide-react";
 import { Input } from "@/components/ui/input.tsx";
-import { useMemo, useState, useRef } from "react";
+import { useMemo, useState } from "react";
 import { useList, useNavigation, useDelete } from "@refinedev/core";
 import { Module } from "@/types";
 import { SyncStatusBadge } from "@/components/sync-status-badge";
@@ -59,7 +59,7 @@ dayjs.extend(relativeTime);
 
 const ModulesListPage = () => {
   const { t, i18n } = useTranslation();
-  const isAr = i18n.language === "ar";
+  const isArr = i18n.language === "ar";
   usePageTitle(t("modulesPage.title"));
   const { identity, isStaff } = useUserRole();
 

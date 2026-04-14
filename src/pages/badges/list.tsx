@@ -2,7 +2,7 @@ import React from "react";
 import { useList, useNavigation, useTranslate } from "@refinedev/core";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Award, Plus, Search, Users, Trophy, ShieldCheck } from "lucide-react";
+import { Award, Plus, Users, Trophy, ShieldCheck } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useUserRole } from "@/hooks/use-user-role";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";

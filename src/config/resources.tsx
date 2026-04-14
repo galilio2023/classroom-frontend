@@ -4,6 +4,7 @@ import {
   Building2,
   Calendar,
   Sparkles,
+  Flame,
   UserPlus,
   ClipboardCheck,
   FileQuestion,
@@ -120,7 +121,17 @@ export const resources: ResourceProps[] = [
     },
   },
   {
-    name: "ai-activity-logs",
+    name: "memory-lab",
+    list: "/memory-lab",
+    meta: {
+      group: "groups.ai-lab",
+      label: "resources.memory-lab.label",
+      icon: <Flame />,
+      roles: [UserRole.ADMIN, UserRole.STUDENT],
+    },
+  },
+  {
+    name: "study-planner",
     list: "/ai-history",
     show: "/ai-history/show/:id",
     meta: {
@@ -185,6 +196,16 @@ export const resources: ResourceProps[] = [
       label: "resources.my-classes.label",
       icon: <Bookmark />,
       roles: [UserRole.ADMIN, UserRole.TEACHER, UserRole.STUDENT],
+    },
+  },
+  {
+    name: "peer-reviews",
+    list: "/peer-reviews",
+    meta: {
+      group: "groups.curriculum",
+      label: "resources.peer-reviews.label",
+      icon: <Users />,
+      roles: [UserRole.STUDENT, UserRole.ADMIN, UserRole.TEACHER],
     },
   },
   {

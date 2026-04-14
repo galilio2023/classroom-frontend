@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useNavigation } from "@refinedev/core";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import { cn } from "@/lib/utils";
+import {} from "@/lib/utils";
 
 export const StudentOnboarding = () => {
   const { t } = useTranslation();

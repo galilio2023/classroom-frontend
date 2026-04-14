@@ -3,7 +3,7 @@ import { ChildOverviewCard } from "../components/child-overview-card";
 import { LinkChildDialog } from "../components/link-child-dialog";
 import { ShieldCheck, HeartPulse, LayoutDashboard, Loader2, Info } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { motion } from "framer-motion";
+import {} from "framer-motion";
 
 export const ParentDashboard = () => {
   const { t } = useTranslation();

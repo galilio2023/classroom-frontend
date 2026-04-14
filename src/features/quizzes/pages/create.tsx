@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { CreateView } from "@/components/refine-ui/views/create-view";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { AIQuizHelper } from "@/components/ai-quiz-helper";
+import { AIQuizHelper } from "@/features/ai/components/ai-quiz-helper";
 import {
   Sheet,
   SheetContent,
@@ -30,7 +30,7 @@ import {
 import { Sparkles, Loader2, LayoutGrid, Info } from "lucide-react";
 import { Module } from "@/types";
 import { useTranslation } from "react-i18next";
-import { useQuizCreate, QuizFormValues } from "../hooks/use-quiz-create";
+import { useQuizCreate } from "../hooks/use-quiz-create";
 import { QuizQuestionsForm } from "../components/quiz-questions-form";
 
 const QuizCreate = () => {

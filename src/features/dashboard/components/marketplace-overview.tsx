@@ -5,7 +5,7 @@ import {
   TrendingUp,
   ShoppingBag,
   ArrowUpRight,
-  User,
+  // //   User,
   Calendar,
   Wallet,
 } from "lucide-react";

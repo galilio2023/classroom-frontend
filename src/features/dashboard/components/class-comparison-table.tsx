@@ -8,7 +8,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ClassComparison } from "@/types/dashboard";
-import { Users, TrendingUp, CheckCircle } from "lucide-react";
+import { Users } from "lucide-react";
 
 interface ClassComparisonTableProps {
   data: ClassComparison[];

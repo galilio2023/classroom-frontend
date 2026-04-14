@@ -14,7 +14,7 @@ import {
   Briefcase,
   Layers,
 } from "lucide-react";
-import { useMemo, useState, useRef } from "react";
+import { useMemo, useState } from "react";
 import {
   useList,
   useNavigation,
@@ -30,7 +30,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
+  // //   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";

@@ -44,7 +44,7 @@ export const DetailsTab = ({
   onInviteClick,
 }: DetailsTabProps) => {
   const { t, i18n } = useTranslation();
-  const isAr = i18n.language === "ar";
+  const isArr = i18n.language === "ar";
   const classColor = aClass.color || "#3b82f6";
 
   return (

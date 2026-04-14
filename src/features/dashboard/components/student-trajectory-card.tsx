@@ -11,7 +11,7 @@ export const StudentTrajectoryCard = ({ student }: StudentTrajectoryCardProps) =
   const { studentName, currentGrade, predictedGrade, trend } = student;
   const isImproving = predictedGrade > currentGrade;
   const isDeclining = predictedGrade < currentGrade;
-  const isStable = predictedGrade === currentGrade;
+  const _isStablee = predictedGrade === currentGrade;
 
   const trendIcon = isImproving ? (
     <TrendingUp className="text-green-500" />

@@ -12,27 +12,12 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Submission, Assignment, ProjectGroup } from "@/types";
 import { FileUpload } from "@/components/file-upload";
-import {
-  Paperclip,
-  FileText,
-  CheckCircle2,
-  Info,
-  Sparkles,
-  Send,
-  Save,
-  History,
-  Users,
-  X,
-  Reply,
-} from "lucide-react";
+import { Paperclip, FileText, History, Users } from "lucide-react";
 import { useGo, useInvalidate, useList, HttpError } from "@refinedev/core";
-import { LoadingButton } from "@/components/ui/loading-button";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -43,6 +28,12 @@ import {
 import { useTranslation } from "react-i18next";
 import { TFunction } from "i18next";
 import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
+
+// Hooks & Components
+import { useSubmissionDraft } from "../hooks/useSubmissionDraft";
+import { SubmissionSuccessOverlay } from "../components/show/SubmissionSuccessOverlay";
+import { SubmissionSidebar } from "../components/show/SubmissionSidebar";
 
 const submissionSchema = (t: TFunction) =>
   z.object({
@@ -52,7 +43,7 @@ const submissionSchema = (t: TFunction) =>
     isDraft: z.boolean().default(false),
     groupId: z.coerce.number().optional().nullable(),
     assignmentId: z.number().optional(),
-    version: z.number().optional(), // 🚀 NEW: Support optimistic locking
+    version: z.number().optional(),
   });
 
 type SubmissionFormValues = z.infer<ReturnType<typeof submissionSchema>>;
@@ -73,24 +64,10 @@ export const SubmissionForm = ({
   onCancel,
 }: SubmissionFormProps) => {
   const { t, i18n } = useTranslation();
-
   const go = useGo();
   const invalidate = useInvalidate();
   const [isSuccess, setIsSuccess] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
-
-  const draftKey = `submission:draft:${assignmentId}`;
-
-  // Fetch groups for the class if it's a group assignment
-  const { query: groupsQuery } = useList<ProjectGroup>({
-    resource: "project-groups",
-    filters: [{ field: "classId", operator: "eq", value: assignment?.classId }],
-    queryOptions: {
-      enabled: !!assignment?.isGroupAssignment && !!assignment?.classId,
-    },
-  });
-
-  const groups = groupsQuery?.data?.data || [];
 
   const form = useForm<SubmissionFormValues>({
     resolver: zodResolver(submissionSchema(t)) as any,
@@ -109,7 +86,7 @@ export const SubmissionForm = ({
       redirect: false,
       onMutationSuccess: (data) => {
         const isDraft = (data.data as any)?.isDraft;
-        localStorage.removeItem(draftKey); // 🚀 CLEAR DRAFT ON SUCCESS
+        clearDraft();
         setIsSuccess(true);
         const msg = isDraft
           ? t("assignments.form.toast.draftSaved")
@@ -124,21 +101,13 @@ export const SubmissionForm = ({
 
         setTimeout(() => {
           setIsSuccess(false);
-          if (onCancel) {
-            onCancel();
-          } else {
-            go({
-              to: `/assignments/show/${assignmentId}`,
-              type: "replace",
-            });
-          }
+          if (onCancel) onCancel();
+          else go({ to: `/assignments/show/${assignmentId}`, type: "replace" });
         }, 1500);
       },
       onMutationError: (error: HttpError) => {
         if (error.statusCode === 409) {
-          toast.error(
-            t("assignments.form.toast.conflictError") || "Conflict detected. Please refresh."
-          );
+          toast.error(t("assignments.form.toast.conflictError") || "Conflict detected.");
         }
       },
     },
@@ -152,54 +121,22 @@ export const SubmissionForm = ({
     refineCore: { onFinish, formLoading },
   } = form;
 
-  // 🚀 DRAFT RECOVERY
-  useEffect(() => {
-    const saved = localStorage.getItem(draftKey);
-    if (saved && !existingSubmission?.content) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (parsed.content) setValue("content", parsed.content);
-        if (parsed.fileUrl) setValue("fileUrl", parsed.fileUrl);
-        if (parsed.fileCldPubId) setValue("fileCldPubId", parsed.fileCldPubId);
-        toast.info(t("assignments.form.toast.draftRestored"));
-      } catch (e) {
-        console.error("Failed to restore draft", e);
-      }
-    }
-  }, [assignmentId, existingSubmission, setValue, t]);
+  const { clearDraft } = useSubmissionDraft(assignmentId, form, !!existingSubmission?.content);
 
   const content = watch("content");
   const fileUrl = watch("fileUrl");
-  const fileCldPubId = watch("fileCldPubId");
-
-  // 🚀 DRAFT PERSISTENCE
-  useEffect(() => {
-    if (content || fileUrl) {
-      localStorage.setItem(draftKey, JSON.stringify({ content, fileUrl, fileCldPubId }));
-    }
-  }, [content, fileUrl, fileCldPubId, draftKey]);
 
   const wordCount = useMemo(() => {
     return content?.trim().split(/\s+/).filter(Boolean).length ?? 0;
   }, [content]);
 
-  const onSubmit = (values: SubmissionFormValues) => {
-    void onFinish({
-      ...values,
-      assignmentId,
-      version: existingSubmission?.version, // 🛡️ ENFORCE LOCKING
-    });
-  };
+  const { query: groupsQuery } = useList<ProjectGroup>({
+    resource: "project-groups",
+    filters: [{ field: "classId", operator: "eq", value: assignment?.classId }],
+    queryOptions: { enabled: !!assignment?.isGroupAssignment && !!assignment?.classId },
+  });
 
-  const handleSaveDraft = () => {
-    const values = form.getValues();
-    void onFinish({
-      ...values,
-      assignmentId,
-      isDraft: true,
-      version: existingSubmission?.version,
-    });
-  };
+  const groups = groupsQuery?.data?.data || [];
 
   const handleFileUpload = (url: string, publicId: string) => {
     setValue("fileUrl", url);
@@ -211,39 +148,20 @@ export const SubmissionForm = ({
     setValue("fileCldPubId", "");
   };
 
+  const isAr = i18n.language === "ar";
   const currentAttempt = existingSubmission?.isDraft
     ? latestAttemptNumber
     : latestAttemptNumber + 1;
-  const isAr = i18n.language === "ar";
-
-  const tips = t("assignments.form.tips", { returnObjects: true });
-  const tipsList = Array.isArray(tips) ? tips : [];
 
   return (
     <Form {...form}>
-      <form onSubmit={handleSubmit(onSubmit as any)} className="space-y-8 relative text-start">
-        <AnimatePresence>
-          {isSuccess && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 z-50 bg-background/80 backdrop-blur-sm flex flex-col items-center justify-center gap-4 rounded-2xl"
-            >
-              <motion.div
-                initial={{ scale: 0.5, rotate: -10 }}
-                animate={{ scale: 1, rotate: 0 }}
-                className="p-4 rounded-full bg-success/10 text-success"
-              >
-                <CheckCircle2 className="h-12 w-12 stroke-3" />
-              </motion.div>
-              <h3 className="text-2xl font-black tracking-tight">{successMessage}</h3>
-              <p className="text-muted-foreground font-medium">
-                {t("assignments.form.successRedirecting")}
-              </p>
-            </motion.div>
-          )}
-        </AnimatePresence>
+      <form
+        onSubmit={handleSubmit((v) =>
+          onFinish({ ...v, assignmentId, version: existingSubmission?.version })
+        )}
+        className="space-y-8 relative text-start"
+      >
+        <SubmissionSuccessOverlay isVisible={isSuccess} message={successMessage} />
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           <div className="lg:col-span-3 space-y-6">
@@ -259,9 +177,7 @@ export const SubmissionForm = ({
                   <p className="text-sm font-black tracking-tight">
                     {existingSubmission?.isDraft
                       ? t("assignments.form.editingDraft")
-                      : t("assignments.form.submittingAttempt", {
-                          count: currentAttempt,
-                        })}
+                      : t("assignments.form.submittingAttempt", { count: currentAttempt })}
                   </p>
                 </div>
               </div>
@@ -272,9 +188,8 @@ export const SubmissionForm = ({
               )}
             </div>
 
-            {/* Group Selection for Group Assignments */}
             {assignment?.isGroupAssignment && (
-              <div className="p-6 bg-card rounded-3xl border border-border shadow-sm">
+              <div className="p-6 bg-card rounded-3xl border border-border shadow-sm text-start">
                 <FormField
                   control={control}
                   name="groupId"
@@ -287,7 +202,7 @@ export const SubmissionForm = ({
                       <Select
                         onValueChange={(val) => field.onChange(Number(val))}
                         value={field.value?.toString()}
-                        disabled={!!existingSubmission} // Cannot change group after first save/submit for consistency
+                        disabled={!!existingSubmission}
                       >
                         <FormControl>
                           <SelectTrigger className="h-12 rounded-xl bg-muted/20 border-none focus:ring-primary text-start">
@@ -308,9 +223,6 @@ export const SubmissionForm = ({
                           ))}
                         </SelectContent>
                       </Select>
-                      <p className="text-[10px] text-muted-foreground">
-                        {t("assignments.form.groupNote")}
-                      </p>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -328,27 +240,18 @@ export const SubmissionForm = ({
                       <span className="w-1 h-1 rounded-full bg-primary" />
                       {t("assignments.form.yourSubmission")}
                     </FormLabel>
-                    <div className="flex items-center gap-3">
-                      <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-tighter">
-                        {t("assignments.form.wordsCount", { count: wordCount })}
-                      </span>
-                    </div>
+                    <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-tighter">
+                      {t("assignments.form.wordsCount", { count: wordCount })}
+                    </span>
                   </div>
                   <FormControl>
                     <div className="relative group">
                       <Textarea
                         placeholder={t("assignments.form.contentPlaceholder")}
-                        className="min-h-75 rounded-3xl resize-none bg-muted/20 border-2 border-transparent focus-visible:ring-primary focus-visible:border-primary/20 p-6 text-sm leading-relaxed shadow-inner transition-all scrollbar-thin scrollbar-thumb-primary/10"
+                        className="min-h-75 rounded-3xl resize-none bg-muted/20 border-2 border-transparent focus-visible:ring-primary p-6 text-sm leading-relaxed shadow-inner transition-all"
                         {...field}
                       />
-                      <div
-                        className={cn(
-                          "absolute bottom-4 opacity-10 group-focus-within:opacity-30 transition-opacity",
-                          "end-4"
-                        )}
-                      >
-                        <FileText className="h-8 w-8" />
-                      </div>
+                      <FileText className="absolute bottom-4 end-4 h-8 w-8 opacity-10 group-focus-within:opacity-30 transition-opacity" />
                     </div>
                   </FormControl>
                   <FormMessage />
@@ -402,76 +305,22 @@ export const SubmissionForm = ({
             </div>
           </div>
 
-          <div className="lg:col-span-1 space-y-6 text-start">
-            <div className="p-6 rounded-3xl bg-primary/5 border border-primary/10 space-y-4">
-              <h4 className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
-                <div className="p-1.5 rounded-lg bg-primary/10">
-                  <Info className="h-3.5 w-3.5" />
-                </div>
-                {t("assignments.form.submissionTips")}
-              </h4>
-              <ul className="space-y-3">
-                {tipsList.map((tip: any, i: number) => (
-                  <li
-                    key={i}
-                    className="flex items-start gap-2 text-xs font-medium text-muted-foreground"
-                  >
-                    <div className="mt-1 size-1 rounded-full bg-primary/40" />
-                    {tip}
-                  </li>
-                ))}
-              </ul>
-              <div className="pt-4 border-t border-primary/10">
-                <div className="flex items-center gap-2 text-primary">
-                  <Sparkles className="h-3.5 w-3.5" />
-                  <span className="text-[10px] font-black uppercase tracking-widest">
-                    {t("assignments.form.aiReady")}
-                  </span>
-                </div>
-                <p className="text-[10px] text-muted-foreground mt-1 leading-relaxed">
-                  {t("assignments.form.aiDescription")}
-                </p>
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleSaveDraft}
-                disabled={formLoading}
-                className="w-full h-14 rounded-2xl font-black uppercase tracking-widest border-primary/10 bg-card/50 backdrop-blur-sm hover:bg-primary/5 text-primary gap-2"
-              >
-                <Save className="h-4 w-4" />
-                {t("buttons.saveAsDraft")}
-              </Button>
-
-              <LoadingButton
-                type="submit"
-                isLoading={formLoading}
-                isSuccess={isSuccess}
-                className="w-full h-14 rounded-2xl font-black uppercase tracking-widest shadow-xl shadow-primary/20 gap-2"
-              >
-                <Send className={cn("h-4 w-4", isAr && "rotate-180")} />
-                {existingSubmission && !existingSubmission.isDraft
-                  ? t("buttons.resubmitWork")
-                  : t("buttons.turnInNow")}
-              </LoadingButton>
-
-              {onCancel && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onClick={onCancel}
-                  disabled={formLoading}
-                  className="w-full h-14 rounded-2xl font-black uppercase tracking-widest text-muted-foreground hover:bg-destructive/5 hover:text-destructive gap-2"
-                >
-                  <X className="h-4 w-4" />
-                  {t("buttons.cancel")}
-                </Button>
-              )}
-            </div>
-          </div>
+          <SubmissionSidebar
+            formLoading={formLoading}
+            isSuccess={isSuccess}
+            onSaveDraft={() =>
+              onFinish({
+                ...form.getValues(),
+                assignmentId,
+                isDraft: true,
+                version: existingSubmission?.version,
+              })
+            }
+            onCancel={onCancel}
+            isAr={isAr}
+            hasExistingSubmission={!!existingSubmission}
+            isDraft={existingSubmission?.isDraft ?? false}
+          />
         </div>
       </form>
     </Form>

@@ -1,6 +1,6 @@
 import { useList, useCreate, useDelete, useGetIdentity, useCustomMutation } from "@refinedev/core";
 import { useState } from "react";
-import { Module, User, UserRole, Resource } from "@/types";
+import { Module, User, Resource } from "@/types";
 import {
   Accordion,
   AccordionContent,
@@ -8,81 +8,29 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import {
-  PlusCircle,
-  BookOpen,
-  Link as LinkIcon,
-  Video,
-  File,
-  Loader2,
-  Trash2,
-  MoreVertical,
-  ExternalLink,
-  PenLine,
-  Image as ImageIcon,
-  Library,
-  ArrowRight,
-  Sparkles,
-  Save,
-  Play,
-  Pin,
-  PinOff,
-} from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogDescription,
-} from "@/components/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { PlusCircle, BookOpen, Loader2, Library } from "lucide-react";
 import { toast } from "sonner";
-import { FileUpload } from "@/components/file-upload";
-import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
+import { useCapabilities } from "@/hooks/use-capabilities";
 
 import { ResourcesEmptyState } from "../components/class-empty-states";
-
-import { usePersistentLive } from "@/hooks/use-persistent-live";
+import { ResourceHeader } from "../components/resources/ResourceHeader";
+import { ResourceItem } from "../components/resources/ResourceItem";
+import { AddResourceDialog } from "../components/resources/AddResourceDialog";
 
 interface ResourceTabProps {
   classId: string;
 }
 
 export const ResourceTab = ({ classId }: ResourceTabProps) => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { data: identity } = useGetIdentity<User>();
-  const isTeacher = identity?.role === UserRole.TEACHER || identity?.role === UserRole.ADMIN;
+  const { canManageCurriculum: isTeacher } = useCapabilities();
 
   const [isAddResourceOpen, setIsAddResourceOpen] = useState(false);
   const [activeModuleId, setActiveModuleId] = useState<number | null>(null);
-  const [newResource, setNewResource] = useState({
-    title: "",
-    description: "",
-    type: "file" as "file" | "link" | "video" | "note" | "image" | "other",
-    url: "",
-    content: "",
-    cldPubId: "",
-    isAiPinned: false, // 🆕 AI Context Pinning
-  });
 
   const { query } = useList<Module>({
     resource: "modules",
@@ -94,8 +42,6 @@ export const ResourceTab = ({ classId }: ResourceTabProps) => {
   const isLoading = query.isPending;
 
   const { mutate: createResource, mutation: createMutation } = useCreate<Resource>();
-  const isCreatingResource = createMutation.isPending;
-
   const { mutate: deleteResource } = useDelete();
   const { mutate: updateResource } = useCustomMutation();
   const { mutate: featureResource } = useCustomMutation();
@@ -105,10 +51,7 @@ export const ResourceTab = ({ classId }: ResourceTabProps) => {
       {
         url: `resources/${res.id}`,
         method: "patch",
-        values: {
-          isAiPinned: !res.isAiPinned,
-          version: res.version,
-        },
+        values: { isAiPinned: !res.isAiPinned, version: res.version },
       },
       {
         onSuccess: () => {
@@ -119,10 +62,8 @@ export const ResourceTab = ({ classId }: ResourceTabProps) => {
     );
   };
 
-  const { setActiveVideo } = usePersistentLive();
-
-  const handleAddResource = () => {
-    if (!newResource.title || !activeModuleId) {
+  const handleAddResource = (resourceData: any) => {
+    if (!resourceData.title || !activeModuleId) {
       toast.error(t("classes.resource.toast.fillRequired"));
       return;
     }
@@ -130,24 +71,11 @@ export const ResourceTab = ({ classId }: ResourceTabProps) => {
     createResource(
       {
         resource: "resources",
-        values: {
-          ...newResource,
-          classId: Number(classId),
-          moduleId: activeModuleId,
-        },
+        values: { ...resourceData, classId: Number(classId), moduleId: activeModuleId },
       },
       {
         onSuccess: () => {
           setIsAddResourceOpen(false);
-          setNewResource({
-            title: "",
-            description: "",
-            type: "file",
-            url: "",
-            content: "",
-            cldPubId: "",
-            isAiPinned: false,
-          });
           setActiveModuleId(null);
           query.refetch();
           toast.success(t("classes.resource.toast.added"));
@@ -168,7 +96,18 @@ export const ResourceTab = ({ classId }: ResourceTabProps) => {
     );
   };
 
-  const isAr = i18n.language === "ar";
+  const handleFeatureResource = (id: number) => {
+    featureResource({
+      url: "/channels/feature-resource",
+      method: "post",
+      values: { resourceId: id },
+      successNotification: () => ({
+        type: "success",
+        message: "Highlighted!",
+        description: "This lesson is now featured on your public Teacher TV channel.",
+      }),
+    });
+  };
 
   if (isLoading) {
     return (
@@ -183,21 +122,7 @@ export const ResourceTab = ({ classId }: ResourceTabProps) => {
 
   return (
     <div className="space-y-8 pb-20">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 text-start">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <div className="p-1.5 rounded-lg bg-primary/10 text-primary">
-              <Library className="h-4 w-4" />
-            </div>
-            <h3 className="text-xl font-black tracking-tight">
-              {t("classes.resource.learningMaterials")}
-            </h3>
-          </div>
-          <p className="text-sm text-muted-foreground font-medium">
-            {t("classes.resource.description")}
-          </p>
-        </div>
-      </div>
+      <ResourceHeader />
 
       {modules.length === 0 ? (
         <ResourcesEmptyState isTeacher={isTeacher} />
@@ -257,182 +182,15 @@ export const ResourceTab = ({ classId }: ResourceTabProps) => {
                     <div className="grid grid-cols-1 gap-3 text-start">
                       {module.resources && module.resources.length > 0 ? (
                         module.resources.map((res) => (
-                          <div
+                          <ResourceItem
                             key={res.id}
-                            className="flex items-center justify-between p-4 rounded-2xl border border-black/3 dark:border-white/3 bg-muted/20 hover:bg-primary/5 transition-all cursor-pointer group/item"
-                          >
-                            <div className="flex items-center gap-4 overflow-hidden">
-                              <div
-                                className={cn(
-                                  "p-2.5 rounded-xl shrink-0 transition-transform group-hover/item:scale-110",
-                                  res.type === "video"
-                                    ? "bg-blue-500/10 text-blue-500"
-                                    : res.type === "link"
-                                      ? "bg-success/10 text-success"
-                                      : res.type === "note"
-                                        ? "bg-purple-500/10 text-purple-500"
-                                        : res.type === "image"
-                                          ? "bg-pink-500/10 text-pink-500"
-                                          : "bg-orange-500/10 text-orange-500"
-                                )}
-                              >
-                                {res.type === "video" ? (
-                                  <Video className="h-4 w-4" />
-                                ) : res.type === "link" ? (
-                                  <LinkIcon className="h-4 w-4" />
-                                ) : res.type === "note" ? (
-                                  <PenLine className="h-4 w-4" />
-                                ) : res.type === "image" ? (
-                                  <ImageIcon className="h-4 w-4" />
-                                ) : (
-                                  <File className="h-4 w-4" />
-                                )}
-                              </div>
-                              <div className="flex flex-col overflow-hidden">
-                                <div className="flex items-center gap-2">
-                                  <span className="text-sm font-black tracking-tight group-hover/item:text-primary transition-colors truncate">
-                                    {res.title}
-                                  </span>
-                                  {res.isAiPinned && (
-                                    <Pin className="h-3 w-3 text-ai-primary fill-ai-primary" />
-                                  )}
-                                </div>
-                                {res.description && (
-                                  <span className="text-[10px] text-muted-foreground/60 font-medium uppercase tracking-widest truncate">
-                                    {res.description}
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              {isTeacher && (
-                                <DropdownMenu>
-                                  <DropdownMenuTrigger asChild>
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      className="h-9 w-9 rounded-xl text-muted-foreground hover:bg-primary/5 hover:text-primary transition-all"
-                                    >
-                                      <MoreVertical className="h-4 w-4" />
-                                    </Button>
-                                  </DropdownMenuTrigger>
-                                  <DropdownMenuContent
-                                    align="end"
-                                    className="rounded-xl border-none shadow-2xl p-2 min-w-[180px] bg-card/95 backdrop-blur-xl"
-                                  >
-                                    <DropdownMenuItem
-                                      className={cn(
-                                        "rounded-lg font-black uppercase tracking-widest text-[9px] gap-2 py-3 cursor-pointer transition-all",
-                                        res.isAiPinned
-                                          ? "text-muted-foreground hover:bg-muted"
-                                          : "text-ai-primary hover:bg-ai-primary/10"
-                                      )}
-                                      onClick={() => toggleAiPin(res)}
-                                    >
-                                      {res.isAiPinned ? (
-                                        <>
-                                          <PinOff className="h-3.5 w-3.5" />
-                                          Unpin from AI
-                                        </>
-                                      ) : (
-                                        <>
-                                          <Pin className="h-3.5 w-3.5" />
-                                          Pin to AI Context
-                                        </>
-                                      )}
-                                    </DropdownMenuItem>
-                                    {res.type === "video" && (
-                                      <DropdownMenuItem
-                                        className="rounded-lg font-black uppercase tracking-widest text-[9px] gap-2 py-3 cursor-pointer text-ai-primary hover:bg-ai-primary/10 transition-all"
-                                        onClick={() => {
-                                          featureResource({
-                                            url: "/channels/feature-resource",
-                                            method: "post",
-                                            values: { resourceId: res.id },
-                                            successNotification: () => ({
-                                              type: "success",
-                                              message: "Highlighted!",
-                                              description:
-                                                "This lesson is now featured on your public Teacher TV channel.",
-                                            }),
-                                          });
-                                        }}
-                                      >
-                                        <Sparkles className="h-3.5 w-3.5" />
-                                        {t("buttons.featureOnTv")}
-                                      </DropdownMenuItem>
-                                    )}
-                                    <DropdownMenuItem
-                                      className="rounded-lg font-black uppercase tracking-widest text-[10px] md:text-[11px] gap-2 py-3 cursor-pointer text-destructive hover:bg-destructive/10 transition-all"
-                                      onClick={() => handleDeleteResource(res.id)}
-                                    >
-                                      <Trash2 className="h-3.5 w-3.5" />
-                                      {t("buttons.delete")}
-                                    </DropdownMenuItem>
-                                  </DropdownMenuContent>
-                                </DropdownMenu>
-                              )}
-
-                              {res.type === "note" ? (
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  asChild
-                                  className="h-9 rounded-xl px-4 text-[10px] font-black uppercase tracking-widest gap-2 text-primary hover:bg-primary/10 transition-all"
-                                >
-                                  <Link to={`/classes/${classId}/lessons/${res.id}`}>
-                                    <ExternalLink className="h-3.5 w-3.5" />
-                                    {t("buttons.openLesson")}
-                                    <ArrowRight
-                                      className={cn(
-                                        "h-3 w-3 opacity-0 group-hover/item:opacity-100 transition-all",
-                                        isAr
-                                          ? "translate-x-2 group-hover:translate-x-0 rotate-180"
-                                          : "-translate-x-2 group-hover:translate-x-0"
-                                      )}
-                                    />
-                                  </Link>
-                                </Button>
-                              ) : res.type === "video" ? (
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="h-9 rounded-xl px-4 text-[10px] font-black uppercase tracking-widest gap-2 text-blue-500 hover:bg-blue-500/10 transition-all"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    if (res.url) {
-                                      setActiveVideo(res.url, res.title);
-                                    }
-                                  }}
-                                >
-                                  <Play className="h-3.5 w-3.5 fill-blue-500" />
-                                  {t("buttons.watchNow")}
-                                </Button>
-                              ) : (
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  asChild
-                                  className="h-9 rounded-xl px-4 text-[10px] font-black uppercase tracking-widest gap-2 hover:bg-muted transition-all"
-                                >
-                                  <a href={res.url} target="_blank" rel="noreferrer">
-                                    <ExternalLink className="h-3.5 w-3.5" />
-                                    {t("buttons.view")}
-                                  </a>
-                                </Button>
-                              )}
-                              {isTeacher && (
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-9 w-9 rounded-xl text-destructive opacity-0 group-hover/item:opacity-100 transition-opacity hover:bg-destructive/5"
-                                  onClick={() => handleDeleteResource(res.id)}
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              )}
-                            </div>
-                          </div>
+                            res={res}
+                            classId={classId}
+                            isTeacher={isTeacher}
+                            onDelete={handleDeleteResource}
+                            onToggleAiPin={toggleAiPin}
+                            onFeature={handleFeatureResource}
+                          />
                         ))
                       ) : (
                         <div className="p-10 rounded-2xl border-2 border-dashed border-muted-foreground/10 flex flex-col items-center justify-center gap-3 text-muted-foreground/40">
@@ -451,179 +209,12 @@ export const ResourceTab = ({ classId }: ResourceTabProps) => {
         </Accordion>
       )}
 
-      {/* Add Resource Dialog */}
-      <Dialog open={isAddResourceOpen} onOpenChange={setIsAddResourceOpen}>
-        <DialogContent className="sm:max-w-[650px] rounded-4xl border-none shadow-2xl bg-card/95 backdrop-blur-xl text-start">
-          <DialogHeader className="space-y-3">
-            <div className="p-3 rounded-2xl bg-primary/10 text-primary w-fit">
-              <PlusCircle className="h-6 w-6" />
-            </div>
-            <DialogTitle className="text-2xl font-black tracking-tight">
-              {t("classes.resource.addDialog.title")}
-            </DialogTitle>
-            <DialogDescription className="font-medium">
-              {t("classes.resource.addDialog.description")}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-6 py-6">
-            <div className="grid grid-cols-2 gap-6">
-              <div className="space-y-2.5">
-                <Label
-                  htmlFor="title"
-                  className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ms-1"
-                >
-                  {t("classes.resource.addDialog.fieldTitle")}
-                </Label>
-                <Input
-                  id="title"
-                  placeholder={t("classes.resource.addDialog.titlePlaceholder")}
-                  value={newResource.title}
-                  onChange={(e) => setNewResource({ ...newResource, title: e.target.value })}
-                  className="h-12 rounded-xl bg-muted/20 border-none focus-visible:ring-primary font-bold"
-                />
-              </div>
-              <div className="space-y-2.5">
-                <Label
-                  htmlFor="type"
-                  className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ms-1"
-                >
-                  {t("classes.resource.addDialog.fieldType")}
-                </Label>
-                <Select
-                  value={newResource.type}
-                  onValueChange={(v: any) => setNewResource({ ...newResource, type: v })}
-                >
-                  <SelectTrigger className="h-12 rounded-xl bg-muted/20 border-none focus:ring-primary transition-all font-bold">
-                    <SelectValue placeholder={t("classes.resource.addDialog.typePlaceholder")} />
-                  </SelectTrigger>
-                  <SelectContent className="rounded-xl border-none shadow-2xl">
-                    <SelectItem value="note" className="rounded-lg font-bold text-start">
-                      {t("classes.resource.addDialog.types.note")}
-                    </SelectItem>
-                    <SelectItem value="file" className="rounded-lg font-bold text-start">
-                      {t("classes.resource.addDialog.types.file")}
-                    </SelectItem>
-                    <SelectItem value="image" className="rounded-lg font-bold text-start">
-                      {t("classes.resource.addDialog.types.image")}
-                    </SelectItem>
-                    <SelectItem value="link" className="rounded-lg font-bold text-start">
-                      {t("classes.resource.addDialog.types.link")}
-                    </SelectItem>
-                    <SelectItem value="video" className="rounded-lg font-bold text-start">
-                      {t("classes.resource.addDialog.types.video")}
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            {newResource.type === "note" && (
-              <div className="space-y-2.5">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ms-1">
-                  {t("classes.resource.addDialog.fieldContent")}
-                </Label>
-                <Textarea
-                  placeholder={t("classes.resource.addDialog.contentPlaceholder")}
-                  value={newResource.content}
-                  onChange={(e) => setNewResource({ ...newResource, content: e.target.value })}
-                  className="min-h-[250px] rounded-2xl bg-muted/20 border-none focus-visible:ring-primary p-5 text-sm leading-relaxed font-mono shadow-inner"
-                />
-              </div>
-            )}
-
-            {(newResource.type === "file" || newResource.type === "image") && (
-              <div className="space-y-2.5">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ms-1">
-                  {t("classes.resource.addDialog.fieldUpload", {
-                    type:
-                      newResource.type === "image"
-                        ? t("classes.resource.addDialog.types.image")
-                        : t("classes.resource.addDialog.types.file"),
-                  })}
-                </Label>
-                <div className="p-6 rounded-2xl border-2 border-dashed border-muted-foreground/10 bg-muted/10">
-                  <FileUpload
-                    onUploadSuccess={(url, pubId) =>
-                      setNewResource({ ...newResource, url, cldPubId: pubId })
-                    }
-                  />
-                </div>
-              </div>
-            )}
-
-            {(newResource.type === "link" || newResource.type === "video") && (
-              <div className="space-y-2.5">
-                <Label
-                  htmlFor="url"
-                  className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ms-1"
-                >
-                  {t("classes.resource.addDialog.fieldUrl")}
-                </Label>
-                <div className="relative group">
-                  <Input
-                    id="url"
-                    placeholder={t("classes.resource.addDialog.urlPlaceholder")}
-                    value={newResource.url}
-                    onChange={(e) => setNewResource({ ...newResource, url: e.target.value })}
-                    className={cn(
-                      "h-12 rounded-xl bg-muted/20 border-none focus-visible:ring-primary font-bold",
-                      isAr ? "pe-10" : "ps-10"
-                    )}
-                  />
-                  <LinkIcon
-                    className={cn(
-                      "absolute top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors",
-                      "start-3.5"
-                    )}
-                  />
-                </div>
-              </div>
-            )}
-
-            <div className="space-y-2.5">
-              <Label
-                htmlFor="desc"
-                className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ms-1"
-              >
-                {t("classes.resource.addDialog.fieldDescription")}
-              </Label>
-              <Input
-                id="desc"
-                placeholder={t("classes.resource.addDialog.descPlaceholder")}
-                value={newResource.description}
-                onChange={(e) =>
-                  setNewResource({
-                    ...newResource,
-                    description: e.target.value,
-                  })
-                }
-                className="h-12 rounded-xl bg-muted/20 border-none focus-visible:ring-primary font-bold"
-              />
-            </div>
-          </div>
-          <DialogFooter className="gap-3">
-            <Button
-              variant="ghost"
-              className="rounded-xl font-bold h-12"
-              onClick={() => setIsAddResourceOpen(false)}
-            >
-              {t("buttons.cancel")}
-            </Button>
-            <Button
-              onClick={handleAddResource}
-              disabled={isCreatingResource}
-              className="rounded-xl font-black uppercase tracking-widest h-12 px-8 shadow-lg shadow-primary/20"
-            >
-              {isCreatingResource ? (
-                <Loader2 className="h-4 w-4 me-2 animate-spin" />
-              ) : (
-                <Save className="h-4 w-4 me-2" />
-              )}
-              {t("buttons.saveMaterial")}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <AddResourceDialog
+        isOpen={isAddResourceOpen}
+        onOpenChange={setIsAddResourceOpen}
+        onAdd={handleAddResource}
+        isLoading={createMutation.isPending}
+      />
     </div>
   );
 };

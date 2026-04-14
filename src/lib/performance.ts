@@ -28,7 +28,7 @@ export const perf = {
    * Track React render cycles (Development only or sampled in production)
    */
   trackRender: (componentName: string) => {
-    if (process.env.NODE_ENV === "development") {
+    if (import.meta.env.DEV) {
       console.debug(`[Render] ${componentName} rendered at ${performance.now().toFixed(2)}ms`);
     }
   },

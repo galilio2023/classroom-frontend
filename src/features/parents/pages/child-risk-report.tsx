@@ -1,17 +1,20 @@
-import { useList, useOne } from "@refinedev/core";
+import { useList } from "@refinedev/core";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   AlertTriangle,
   BrainCircuit,
   CheckCircle2,
-  History,
+  // //   History,
   Info,
   ExternalLink,
   Loader2,
+  Dna,
+  Workflow,
+  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
@@ -95,10 +98,40 @@ export const ChildRiskReport = () => {
                       <BrainCircuit className="h-4 w-4" />
                       AI Diagnosis
                     </div>
-                    <p className="text-lg font-medium leading-relaxed italic text-foreground/80">
-                      "{report.aiAnalysis?.summary || "No automated summary available."}"
+                    <p className="text-xl font-black leading-tight text-foreground/90">
+                      {report.aiAnalysis?.summary || "No automated summary available."}
                     </p>
                   </div>
+
+                  {/* 🧬 LOGIC CHAIN (Deep Dive) */}
+                  {report.aiAnalysis?.logicChain && report.aiAnalysis.logicChain.length > 0 && (
+                    <div className="space-y-6 p-8 rounded-[2rem] bg-muted/20 border-2 border-dashed border-border/40 relative overflow-hidden">
+                      <div className="absolute top-0 right-0 p-6 opacity-5">
+                        <Workflow className="h-24 w-24 rotate-12" />
+                      </div>
+                      <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground relative z-10">
+                        <Dna className="h-4 w-4 text-primary" />
+                        AI Reasoning Chain
+                      </div>
+                      <div className="space-y-4 relative z-10">
+                        {report.aiAnalysis.logicChain.map((step: string, i: number) => (
+                          <div key={i} className="flex gap-4 group">
+                            <div className="flex flex-col items-center">
+                              <div className="h-6 w-6 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-[10px] font-black text-primary shrink-0">
+                                {i + 1}
+                              </div>
+                              {i < report.aiAnalysis.logicChain.length - 1 && (
+                                <div className="w-0.5 h-full bg-border/40 my-1" />
+                              )}
+                            </div>
+                            <p className="text-sm font-bold text-muted-foreground pt-0.5 leading-relaxed group-hover:text-foreground transition-colors text-start">
+                              {step}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     {/* Factors */}

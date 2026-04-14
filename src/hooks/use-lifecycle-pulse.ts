@@ -1,7 +1,7 @@
 import { useEffect } from "react";
-import { useInvalidate, useNotification, useGetIdentity } from "@refinedev/core";
+import { useInvalidate, useNotification } from "@refinedev/core";
 import { socket } from "@/lib/socket";
-import { User, UserRole } from "@/types";
+import { useCapabilities } from "@/hooks/use-capabilities";
 import { toast } from "sonner"; // For high-fidelity Lifecycle Pulse notifications
 
 /**
@@ -13,7 +13,7 @@ import { toast } from "sonner"; // For high-fidelity Lifecycle Pulse notificatio
  * 3. Updating presence/badge states
  */
 export const useLifecyclePulse = () => {
-  const { data: user } = useGetIdentity<User>();
+  const { identity: user, isStudent } = useCapabilities();
   const invalidate = useInvalidate();
   const { open } = useNotification();
 
@@ -34,7 +34,7 @@ export const useLifecyclePulse = () => {
       }
 
       // --- SPECIALIZED NOTIFICATIONS ---
-      if (event === "content:published" && user.role === UserRole.STUDENT) {
+      if (event === "content:published" && isStudent) {
         toast.success("New Content Available", {
           description: `Teacher just published a new ${entityType}.`,
           duration: 10000,
@@ -53,7 +53,7 @@ export const useLifecyclePulse = () => {
 
     // 2. STAFF-ONLY PULSE (Audience: Teachers & Admins)
     socket.on("lifecycle:staff_pulse", (payload: any) => {
-      const { event, entityType, data } = payload;
+      const { event, _entityType: _dataityType, data: _data } = payload;
 
       if (event === "submission:received") {
         toast.info("New Submission", {
@@ -72,5 +72,5 @@ export const useLifecyclePulse = () => {
       socket.off("lifecycle:pulse");
       socket.off("lifecycle:staff_pulse");
     };
-  }, [user, invalidate, open]);
+  }, [user, invalidate, open, isStudent]);
 };

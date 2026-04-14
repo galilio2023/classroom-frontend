@@ -14,7 +14,7 @@ import { MobileNav } from "./mobile-nav";
 import { motion, AnimatePresence } from "framer-motion";
 import { OfflineBanner } from "@/components/offline-banner";
 import { PWAInstaller } from "@/components/pwa-installer";
-import { AIStudyBuddy } from "@/components/ai-study-buddy";
+import { AIStudyBuddy } from "@/features/ai/components/ai-study-buddy";
 import { GlobalLiveIndicator } from "@/components/global-live-indicator";
 import { LiveClassroom } from "@/components/classes/live-classroom";
 import { PromotionMiniPlayer } from "@/components/promotion-mini-player";
@@ -31,10 +31,10 @@ export function Layout({ children }: PropsWithChildren) {
   const isStudent = identity?.role === UserRole.STUDENT;
   const { activeClassId, isJoined } = usePersistentLive();
 
-  // 🚀 GAMIFICATION: Activate listeners for XP, Levels, and Badges
+  // ðŸš€ GAMIFICATION: Activate listeners for XP, Levels, and Badges
   useGamificationToasts(identity?.id);
 
-  // 🚀 LIFECYCLE: Activate real-time pulse listeners
+  // ðŸš€ LIFECYCLE: Activate real-time pulse listeners
   useLifecyclePulse();
 
   // Extract classId from URL if present (supports /classes/show/:id or /assignments/show/:id)
@@ -52,13 +52,13 @@ export function Layout({ children }: PropsWithChildren) {
           {/* Global Live Signal */}
           {isStudent && <GlobalLiveIndicator />}
 
-          {/* 📣 GLOBAL PROMOTION TRAILER (PiP) */}
+          {/* ðŸ“£ GLOBAL PROMOTION TRAILER (PiP) */}
           {isStudent && <PromotionMiniPlayer />}
 
-          {/* 🎞️ GLOBAL RECORDED LESSON (PiP) */}
+          {/* ðŸŽžï¸ GLOBAL RECORDED LESSON (PiP) */}
           {isStudent && <VideoMiniPlayer />}
 
-          {/* 🚀 GLOBAL PERSISTENT LIVE SESSION (PiP) */}
+          {/* ðŸš€ GLOBAL PERSISTENT LIVE SESSION (PiP) */}
           {activeClassId && isJoined && (
             <LiveClassroom classId={activeClassId} isMiniMode={!isOnLiveTab} />
           )}

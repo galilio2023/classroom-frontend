@@ -1,8 +1,9 @@
 import React from "react";
-import { AIAssignmentHelper } from "@/components/ai-assignment-helper";
-import { AIQuizGenerator } from "@/components/ai-quiz-generator";
+import { AIAssignmentHelper } from "@/features/ai/components/ai-assignment-helper";
+import { AIQuizGenerator } from "@/features/ai/components/ai-quiz-generator";
+import { AIVisionAssistant } from "@/features/ai/components/ai-vision-assistant";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Sparkles, FileText, BrainCircuit, LayoutDashboard, Info } from "lucide-react";
+import { Sparkles, FileText, BrainCircuit, LayoutDashboard, Info, Camera } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
 import usePageTitle from "@/hooks/use-page-title";
@@ -11,6 +12,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { useDashboard } from "@/features/dashboard/hooks/use-dashboard";
+import { AiFeatureGuard } from "@/features/ai/components/AiFeatureGuard";
 
 export const AIAssistantPage: React.FC = () => {
   const { t } = useTranslation();
@@ -65,7 +67,7 @@ export const AIAssistantPage: React.FC = () => {
           <Tabs defaultValue="assignment" className="w-full space-y-8 md:space-y-12">
             <div className="sticky top-20 z-40">
               <div className="rounded-3xl border border-border/40 bg-background/40 backdrop-blur-3xl p-1.5 shadow-2xl shadow-black/5">
-                <TabsList className="grid w-full grid-cols-2 h-12 md:h-14 bg-muted/20 gap-1 rounded-[1.25rem]">
+                <TabsList className="grid w-full grid-cols-3 h-12 md:h-14 bg-muted/20 gap-1 rounded-[1.25rem]">
                   <TabsTrigger
                     value="assignment"
                     className="rounded-xl font-black uppercase tracking-widest text-[9px] md:text-[10px] gap-2 md:gap-3 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-xl transition-all duration-300"
@@ -80,6 +82,13 @@ export const AIAssistantPage: React.FC = () => {
                     <BrainCircuit className="h-4 w-4 md:h-5 md:w-5" />
                     {t("aiHub.assistant.generator")}
                   </TabsTrigger>
+                  <TabsTrigger
+                    value="vision"
+                    className="rounded-xl font-black uppercase tracking-widest text-[9px] md:text-[10px] gap-2 md:gap-3 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-xl transition-all duration-300"
+                  >
+                    <Camera className="h-4 w-4 md:h-5 md:w-5" />
+                    {t("aiHub.assistant.vision")}
+                  </TabsTrigger>
                 </TabsList>
               </div>
             </div>
@@ -92,11 +101,19 @@ export const AIAssistantPage: React.FC = () => {
                 transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
               >
                 <TabsContent value="assignment" className="mt-0 focus-visible:outline-none">
-                  <AIAssignmentHelper />
+                  <AiFeatureGuard>
+                    <AIAssignmentHelper />
+                  </AiFeatureGuard>
                 </TabsContent>
 
                 <TabsContent value="quiz" className="mt-0 focus-visible:outline-none">
-                  <AIQuizGenerator />
+                  <AiFeatureGuard>
+                    <AIQuizGenerator />
+                  </AiFeatureGuard>
+                </TabsContent>
+
+                <TabsContent value="vision" className="mt-0 focus-visible:outline-none">
+                  <AIVisionAssistant />
                 </TabsContent>
               </motion.div>
             </AnimatePresence>
@@ -147,6 +164,20 @@ export const AIAssistantPage: React.FC = () => {
                     </p>
                     <p className="text-sm md:text-base text-muted-foreground/80 font-medium leading-relaxed">
                       {t("aiHub.assistant.quizzesDesc")}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex gap-5 group">
+                  <div className="h-12 w-12 rounded-[1.25rem] bg-orange-500/10 border border-orange-500/20 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-500 shadow-sm">
+                    <Camera className="h-6 w-6 text-orange-600" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <p className="font-black text-[10px] uppercase tracking-[0.2em] text-orange-600/70">
+                      {t("aiHub.assistant.vision")}
+                    </p>
+                    <p className="text-sm md:text-base text-muted-foreground/80 font-medium leading-relaxed">
+                      {t("aiHub.assistant.visionDesc")}
                     </p>
                   </div>
                 </div>

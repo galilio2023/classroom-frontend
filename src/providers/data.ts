@@ -1,8 +1,10 @@
-import { DataProvider, HttpError, LogicalFilter } from "@refinedev/core";
+import { DataProvider, LogicalFilter } from "@refinedev/core";
 import { BACKEND_URL } from "@/config";
 import { resourceFilterMappings as generatedMappings } from "../generated/resource-metadata";
 import { offlineDB } from "../lib/offline-db";
 import { toast } from "sonner";
+import { getResourcePath } from "./utils/resource-paths";
+import { handleError } from "./utils/api-errors";
 
 const BACKEND_BASE_URL = BACKEND_URL;
 
@@ -12,110 +14,7 @@ const BACKEND_BASE_URL = BACKEND_URL;
 const isOffline = () => !navigator.onLine;
 
 /**
- * 🗺️ RESOURCE TO PATH MAPPING
- * Centralized mapping of Refine resource names to Backend API paths.
- */
-const resourceToPath: Record<string, string> = {
-  "teacher-channels": "channels",
-  "teacher-subscriptions": "enrollments",
-  "student-subscriptions": "enrollments",
-  "my-classes": "enrollments",
-  portfolio: "users",
-  "ai-activity-logs": "ai/logs",
-  "ai-health-reports": "ai/health-reports",
-  "academic-terms": "terms",
-  "guardian-portal": "parent/dashboard",
-  "child-risk-reports": "parent/child",
-  "public-classes": "public/classes",
-};
-
-const getResourcePath = (resource: string) => resourceToPath[resource] || resource;
-
-/**
- * Helper to handle API errors and return Refine-compatible HttpError
- */
-const handleError = async (response: Response): Promise<HttpError> => {
-  let json: Record<string, unknown> = {};
-  try {
-    const text = await response.text();
-    if (text) {
-      json = JSON.parse(text);
-    }
-  } catch {
-    // Not JSON or empty
-  }
-
-  // 🛡️ SECURITY & UX: Provide meaningful messages for common errors
-  if (response.status === 401) {
-    return {
-      message: "Session expired or unauthorized. Please log in.",
-      statusCode: 401,
-    };
-  }
-
-  if (response.status === 404) {
-    return {
-      message: "The requested resource was not found.",
-      statusCode: 404,
-    };
-  }
-
-  // 🛡️ SECURITY & UX: Catch database 'restrict' violations or Optimistic Locking conflicts
-  if (response.status === 400) {
-    const isMissingVersion =
-      json.message?.toString().toLowerCase().includes("version") ||
-      json.error?.toString().toLowerCase().includes("version");
-
-    if (isMissingVersion) {
-      return {
-        message: "Update failed: Technical metadata (version) is missing. Please refresh the page.",
-        statusCode: 400,
-      };
-    }
-  }
-
-  if (response.status === 409) {
-    const isConflict =
-      json.message?.toString().toLowerCase().includes("conflict") ||
-      json.error?.toString().toLowerCase().includes("conflict");
-
-    return {
-      message: isConflict
-        ? "Update conflict: This item has been modified by another user. Please refresh and try again."
-        : "Cannot delete: This item has active sub-records. Please reassign or delete them first.",
-      statusCode: 409,
-    };
-  }
-
-  if (json.details) {
-    return {
-      message: (json.error as string) || "Validation failed",
-      statusCode: response.status,
-      errors: json.details as Record<string, string>,
-    };
-  }
-
-  if (response.status === 429) {
-    const retryAfter = response.headers.get("Retry-After");
-    return {
-      message: (json.message as string) || "Too many requests. Please slow down.",
-      statusCode: 429,
-      retryAfter: retryAfter ? parseInt(retryAfter, 10) : undefined,
-    } as HttpError;
-  }
-
-  return {
-    message:
-      (json.error as string) ||
-      (json.message as string) ||
-      `HTTP error! status: ${response.status}`,
-    statusCode: response.status,
-  };
-};
-
-/**
  * Smart Fetcher: Only adds Content-Type for methods with a body.
- * 🛡️ SECURITY: Skips Content-Type if body is FormData to let the browser set the boundary.
  */
 const fetcher = async (url: string, options?: RequestInit) => {
   const method = options?.method?.toUpperCase() || "GET";

@@ -1,10 +1,9 @@
 import React, { useState } from "react";
-import { useList, useNavigation } from "@refinedev/core";
+import { useList } from "@refinedev/core";
 import {
-  LayoutGrid,
   Search,
-  BookOpen,
-  Users,
+  // //   BookOpen,
+  // //   Users,
   ArrowRight,
   TrendingUp,
   Loader2,
@@ -18,9 +17,9 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { motion } from "framer-motion";
-import { Class, User } from "@/types";
+import { Class } from "@/types";
 import { useTranslation } from "react-i18next";
-import { cn } from "@/lib/utils";
+import {} from "@/lib/utils";
 import { Link } from "react-router-dom";
 import Big from "big.js";
 

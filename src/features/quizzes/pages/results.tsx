@@ -1,14 +1,14 @@
 import { useCustom, useNavigation } from "@refinedev/core";
 import { useParams } from "react-router-dom";
 import { QuizAttempt, Quiz } from "@/types/quiz";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   Loader2,
   ArrowLeft,
   User,
   Calendar,
-  Trophy,
+  // //   Trophy,
   Search,
   LayoutDashboard,
   ListChecks,

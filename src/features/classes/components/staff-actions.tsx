@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { EnrollStudentDialog } from "../pages/enroll-student-dialog";
 import { InviteTeacherDialog } from "../pages/invite-teacher-dialog";
-import { AIStudentInsightModal } from "@/components/ai-student-insight-modal";
+import { AIStudentInsightModal } from "@/features/ai/components/ai-student-insight-modal";
 import {
   Dialog,
   DialogContent,

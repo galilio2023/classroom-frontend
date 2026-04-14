@@ -1,9 +1,6 @@
 import { EditViewHeader } from "@/components/refine-ui/views/edit-view";
-import { useForm } from "@refinedev/react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useSelect, useOne, useCustomMutation } from "@refinedev/core";
 import { useParams } from "react-router-dom";
-import { useFieldArray } from "react-hook-form";
 import { Form } from "@/components/ui/form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -16,8 +13,7 @@ import {
   History,
   BookOpen,
 } from "lucide-react";
-import { classFormSchema } from "@/schemas/class";
-import { Subject, ClassStatus, Class } from "@/types";
+import { Class } from "@/types";
 import { ClassForm } from "./form";
 import { Button } from "@/components/ui/button";
 import {
@@ -39,11 +35,13 @@ import {
 import { useState, useEffect } from "react";
 import { useTerm } from "@/contexts/term-context";
 import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
+import {} from "@/lib/utils";
 import { Label } from "@/components/ui/label";
 import { useTranslation } from "react-i18next";
 import { useOptimisticVersion } from "@/hooks/use-optimistic-version";
 import { ConflictDialog } from "@/components/conflict-dialog";
+import { useClassForm } from "../hooks/useClassForm";
+import {} from "sonner";
 
 const ClassesEdit = () => {
   const { t, i18n } = useTranslation();
@@ -62,90 +60,43 @@ const ClassesEdit = () => {
     id,
   });
 
-  const { mutate: importContent, mutation } = useCustomMutation();
-  const isImporting = mutation.isPending;
+  const { form, onSubmit, subjectOptions, fields, append, remove, formLoading, setValue } =
+    useClassForm("edit", id);
 
-  const formReturn = useForm({
-    resolver: zodResolver(classFormSchema),
-    defaultValues: {
-      name: "",
-      subjectId: undefined,
-      capacity: 0,
-      status: ClassStatus.ACTIVE,
-      schedules: [],
-      version: 1,
-    },
-    refineCoreProps: {
-      resource: "classes",
-      action: "edit",
-      id,
-      redirect: "list",
-      onMutationSuccess: (data) => {
-        // Update version after successful save if server returns it
-        const newVersion = (data as any)?.data?.version;
-        if (newVersion) {
-          formReturn.setValue("version", newVersion);
-        }
-      },
-    },
-  });
-
-  const {
-    refineCore: { onFinish, formLoading },
-    ...form
-  } = formReturn;
+  const { mutate: importContent, mutation: importMutation } = useCustomMutation();
+  const isImporting = importMutation.isPending;
 
   // 🛡️ Deep Sync: Update version in real-time from server
-  useOptimisticVersion("classes", id, formReturn, (serverVersion) => {
+  useOptimisticVersion("classes", id, form, (serverVersion) => {
     setPendingServerVersion(serverVersion);
     setShowConflict(true);
   });
 
   const handleRefresh = async () => {
     if (pendingServerVersion) {
-      form.setValue("version", pendingServerVersion);
-      // Optional: Re-fetch the whole record to merge non-dirty fields
+      setValue("version", pendingServerVersion);
       await classQuery.refetch();
       setShowConflict(false);
     }
   };
 
   const handleOverwrite = () => {
-    setShowConflict(false); // Just close and let them save with their current stale version, dataProvider will handle 409
+    setShowConflict(false);
   };
 
   // Sync version from initial load
   useEffect(() => {
     if (classQuery?.data?.data?.version) {
-      form.setValue("version", classQuery.data.data.version);
+      setValue("version", classQuery.data.data.version);
     }
-  }, [classQuery?.data?.data?.version, form]);
-
-  const { fields, append, remove } = useFieldArray({
-    control: form.control,
-    name: "schedules",
-  });
-
-  const { options: subjectOptions } = useSelect<Subject>({
-    resource: "subjects",
-    optionLabel: "name",
-    optionValue: "id",
-  });
+  }, [classQuery?.data?.data?.version, setValue]);
 
   const { options: sourceClassOptions } = useSelect<Class>({
     resource: "classes",
     optionLabel: "name",
     optionValue: "id",
-    filters: [
-      {
-        field: "termId",
-        operator: "eq",
-        value: selectedSourceTerm,
-      },
-    ],
-    queryOptions: {
-      enabled: !!selectedSourceTerm,
-    },
+    filters: [{ field: "termId", operator: "eq", value: selectedSourceTerm }],
+    queryOptions: { enabled: !!selectedSourceTerm },
   });
 
   const handleImport = () => {
@@ -159,18 +110,8 @@ const ClassesEdit = () => {
           sourceClassId: Number(selectedSourceClass),
           targetClassId: Number(id),
         },
-        successNotification: () => {
-          return {
-            message: t("classes.list.toast.cloned"),
-            type: "success",
-          };
-        },
-        errorNotification: () => {
-          return {
-            message: t("common.error"),
-            type: "error",
-          };
-        },
+        successNotification: () => ({ message: t("classes.list.toast.cloned"), type: "success" }),
+        errorNotification: () => ({ message: t("common.error"), type: "error" }),
       },
       {
         onSuccess: () => {
@@ -188,7 +129,7 @@ const ClassesEdit = () => {
       dir={isAr ? "rtl" : "ltr"}
     >
       <div className="flex flex-col gap-8">
-        <div className="space-y-1">
+        <div className="space-y-1 text-start">
           <EditViewHeader />
           <p className="text-muted-foreground font-medium">{t("classes.edit.subtitle")}</p>
         </div>
@@ -200,7 +141,7 @@ const ClassesEdit = () => {
             animate={{ opacity: 1, x: 0 }}
             className="lg:col-span-8"
           >
-            <Card className="border-none shadow-2xl bg-card/50 backdrop-blur-xl rounded-4xl overflow-hidden">
+            <Card className="border-none shadow-2xl bg-card/50 backdrop-blur-xl rounded-4xl overflow-hidden text-start">
               <div className="h-1.5 bg-linear-to-r from-primary via-ai-primary to-primary w-full" />
               <CardHeader className="p-8 pb-4">
                 <CardTitle className="text-sm font-black uppercase tracking-widest flex items-center gap-2 opacity-60">
@@ -210,7 +151,7 @@ const ClassesEdit = () => {
               </CardHeader>
               <CardContent className="p-8 pt-4">
                 <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onFinish)}>
+                  <form onSubmit={onSubmit}>
                     <ClassForm
                       form={form}
                       subjectOptions={subjectOptions}
@@ -233,8 +174,7 @@ const ClassesEdit = () => {
             transition={{ delay: 0.1 }}
             className="lg:col-span-4 space-y-10"
           >
-            {/* Editing Mode Info */}
-            <Card className="border-none shadow-xl bg-primary/5 rounded-4xl overflow-hidden">
+            <Card className="border-none shadow-xl bg-primary/5 rounded-4xl overflow-hidden text-start">
               <CardHeader className="p-6 pb-2">
                 <CardTitle className="text-xs font-black uppercase tracking-widest flex items-center gap-2 text-primary">
                   <Info className="h-4 w-4" />
@@ -248,8 +188,7 @@ const ClassesEdit = () => {
               </CardContent>
             </Card>
 
-            {/* Invite Code Card */}
-            <Card className="border-none shadow-xl bg-card/50 backdrop-blur-xl rounded-4xl overflow-hidden">
+            <Card className="border-none shadow-xl bg-card/50 backdrop-blur-xl rounded-4xl overflow-hidden text-start">
               <CardHeader className="p-6 pb-2">
                 <CardTitle className="text-xs font-black uppercase tracking-widest flex items-center gap-2 opacity-60">
                   <Key className="h-4 w-4" />
@@ -271,8 +210,7 @@ const ClassesEdit = () => {
               </CardContent>
             </Card>
 
-            {/* Content Actions Card */}
-            <Card className="border-none shadow-2xl bg-ai-primary/2 backdrop-blur-xl rounded-4xl overflow-hidden border border-ai-primary/10">
+            <Card className="border-none shadow-2xl bg-ai-primary/2 backdrop-blur-xl rounded-4xl overflow-hidden border border-ai-primary/10 text-start">
               <CardHeader className="p-6 pb-2">
                 <CardTitle className="text-xs font-black uppercase tracking-widest flex items-center gap-2 text-ai-primary">
                   <Sparkles className="h-4 w-4" />
@@ -291,7 +229,7 @@ const ClassesEdit = () => {
                       {t("classes.edit.importContent")}
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="sm:max-w-[550px] rounded-4xl border-none shadow-2xl bg-card/95 backdrop-blur-xl">
+                  <DialogContent className="sm:max-w-[550px] rounded-4xl border-none shadow-2xl bg-card/95 backdrop-blur-xl text-start">
                     <DialogHeader className="space-y-3">
                       <div className="p-3 rounded-2xl bg-ai-primary/10 text-ai-primary w-fit">
                         <Import className="h-6 w-6" />

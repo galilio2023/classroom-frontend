@@ -18,7 +18,7 @@ import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { DashboardData } from "@/types/dashboard";
 import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
+import {} from "@/lib/utils";
 
 interface WelcomeHeaderProps {
   name: string;

@@ -30,7 +30,7 @@ import { useTranslation } from "react-i18next";
 import { CanAccess } from "@/components/auth/can-access";
 import { useUpdate } from "@refinedev/core";
 import { DraggableProvidedDragHandleProps } from "@hello-pangea/dnd";
-import { AiFeatureGuard } from "@/components/ai/AiFeatureGuard";
+import { AiFeatureGuard } from "@/features/ai/components/AiFeatureGuard";
 
 interface ModuleItemProps {
   module: Module;

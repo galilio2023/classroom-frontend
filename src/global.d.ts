@@ -3,6 +3,18 @@ interface Window {
   webkitSpeechRecognition: typeof SpeechRecognition;
 }
 
+declare module "uuid";
+
+type TOptionsBase = {
+  defaultValue?: string;
+  count?: number;
+  [key: string]: any;
+};
+
+type $Dictionary = {
+  [key: string]: any;
+};
+
 declare let SpeechRecognition: {
   prototype: SpeechRecognition;
   new (): SpeechRecognition;

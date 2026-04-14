@@ -66,6 +66,7 @@ const CalendarPage = React.lazy(() => import("@/pages/calendar"));
 const NotificationsPage = React.lazy(() => import("@/pages/notifications/list"));
 const AiAssistantPage = React.lazy(() => import("@/features/ai/pages/ai-assistant"));
 const AiStudyLabPage = React.lazy(() => import("@/features/ai/pages/ai-study-lab"));
+const MemoryLabPage = React.lazy(() => import("@/features/ai/pages/memory-lab"));
 const AiHistoryList = React.lazy(() => import("@/features/ai/pages/history-list"));
 const AiHistoryShow = React.lazy(() => import("@/features/ai/pages/history-show"));
 const MessagesPage = React.lazy(() => import("@/pages/messages/index"));
@@ -75,6 +76,8 @@ const GlobalLibraryPage = React.lazy(() => import("@/pages/library/index"));
 const TermsList = React.lazy(() => import("@/pages/terms/list"));
 const ProfileRequestsList = React.lazy(() => import("@/pages/profile-requests/list"));
 const StudyPlanner = React.lazy(() => import("@/features/ai/pages/study-planner"));
+const StudentPersonaSettings = React.lazy(() => import("@/pages/student/persona-settings"));
+const PeerReviewBoard = React.lazy(() => import("@/features/assignments/pages/peer-review-board"));
 const TeacherApplicationsList = React.lazy(() => import("@/pages/teacher-applications/list"));
 const BadgesList = React.lazy(() => import("@/pages/badges/list"));
 const CreateBadge = React.lazy(() => import("@/pages/badges/create"));
@@ -263,6 +266,14 @@ export const AppRouter = () => (
               </AuthorizedRoute>
             }
           />
+          <Route
+            path="/memory-lab"
+            element={
+              <AuthorizedRoute resource="memory-lab" action="list">
+                <MemoryLabPage />
+              </AuthorizedRoute>
+            }
+          />
           <Route path="/ai-history">
             <Route
               index
@@ -286,6 +297,22 @@ export const AppRouter = () => (
             element={
               <AuthorizedRoute resource="study-planner" action="list">
                 <StudyPlanner />
+              </AuthorizedRoute>
+            }
+          />
+          <Route
+            path="/ai-personalization"
+            element={
+              <AuthorizedRoute resource="portfolio" action="edit">
+                <StudentPersonaSettings />
+              </AuthorizedRoute>
+            }
+          />
+          <Route
+            path="/peer-reviews"
+            element={
+              <AuthorizedRoute resource="peer-reviews" action="list">
+                <PeerReviewBoard />
               </AuthorizedRoute>
             }
           />
