@@ -5,6 +5,7 @@ import {
   usePermissions,
   useCustomMutation,
   useGetIdentity,
+  type HttpError,
 } from "@refinedev/core";
 import { useTranslation } from "react-i18next";
 import { BACKEND_URL } from "@/config";
@@ -308,10 +309,11 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
             onError: (err) => {
               console.error("Simple Chat Error:", err);
               setIsLoading(false);
+              const error = err as HttpError;
               open?.({
                 type: "error",
                 message: t("common.error"),
-                description: t("aiHub.errors.serviceUnavailable"),
+                description: error.message || t("aiHub.errors.serviceUnavailable"),
               });
             },
           }
@@ -409,19 +411,15 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
       setStreamingMessage("");
       setStreamingSources(null);
     } catch (err: unknown) {
-      const error = err as Error;
-      if (error.name === "AbortError") return;
+      if (err instanceof Error && err.name === "AbortError") return;
 
-      console.error("Tablawy AI Error:", error);
-
-      let description: string = t("aiHub.errors.serviceUnavailable");
-      if (error.message === "RATE_LIMIT_EXCEEDED") description = t("aiHub.errors.rateLimit");
-      if (error.message === "AI_SERVICE_OFFLINE") description = t("aiHub.errors.maintenance");
+      console.error("Tablawy AI Error:", err);
+      const error = err as HttpError;
 
       open?.({
         type: "error",
         message: t("common.error"),
-        description,
+        description: error.message || t("aiHub.errors.serviceUnavailable"),
       });
 
       setMessages((prev) => [

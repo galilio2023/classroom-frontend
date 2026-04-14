@@ -9,6 +9,7 @@ import { useAILiveInteraction } from "@/features/ai/hooks/use-ai-live-interactio
 import { useDashboard } from "@/features/dashboard/hooks/use-dashboard";
 import { useCapabilities } from "@/hooks/use-capabilities";
 import { AIVisualState } from "@/features/ai/types/ai";
+import { useHardwareSafety } from "@/hooks/use-hardware-safety";
 
 // Atomic Widgets
 import { AiCompanionErrorState } from "./companion-widgets/AiCompanionErrorState";
@@ -86,22 +87,14 @@ export const AILiveCompanion = React.memo(
     }, [isPermissionDenied, open]);
 
     // 🛡️ TAB VISIBILITY SAFETY: Stop mic/speech if user leaves tab
-    useEffect(() => {
-      const handleVisibilityChange = () => {
-        if (document.visibilityState === "hidden" && isJoined) {
-          if (typeof window !== "undefined" && window.speechSynthesis) {
-            window.speechSynthesis.cancel();
-          }
-          // 🛡️ PRIVACY GUARD: Stop hardware microphone if tab is hidden
-          if (isListening) {
-            stopListening();
-            console.warn("🔐 Tab hidden: Microphone and Speech paused for privacy.");
-          }
+    useHardwareSafety({
+      onHidden: () => {
+        if (isJoined && isListening) {
+          stopListening();
         }
-      };
-      document.addEventListener("visibilitychange", handleVisibilityChange);
-      return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
-    }, [isJoined, isListening, stopListening]);
+      },
+      shouldStopSpeech: true,
+    });
 
     // 🛡️ SSR SAFETY: Initialize browser-only features after mount
     useEffect(() => {
