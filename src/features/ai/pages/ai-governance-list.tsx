@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { DataTable } from "@/components/refine-ui/data-table/data-table";
-import { SparkleLoader } from "@/components/ai/sparkle-loader";
+import { SparkleLoader } from "@/features/ai/components/sparkle-loader";
 import { Badge } from "@/components/ui/badge";
 import {
   Sparkles,

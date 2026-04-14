@@ -1,13 +1,13 @@
-import React, { useMemo } from "react";
+import React from "react";
 import { useCustom, useCustomMutation } from "@refinedev/core";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import {} from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import {
   ShieldCheck,
-  ShieldAlert,
+  // //   ShieldAlert,
   Loader2,
   Users,
   GraduationCap,
@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { motion } from "framer-motion";
+import {} from "framer-motion";
 
 interface ClassTeacher {
   classId: number;
@@ -113,10 +113,10 @@ export const StaffTab = ({ classId, isOwner }: StaffTabProps) => {
         <div className="text-start space-y-1">
           <h2 className="text-2xl font-black uppercase tracking-tight flex items-center gap-3">
             <Users className="h-6 w-6 text-primary" />
-            Class Staff
+            {t("resources.classes.staff.title")}
           </h2>
           <p className="text-muted-foreground font-medium text-sm">
-            Manage your teaching assistants and delegate class responsibilities.
+            {t("resources.classes.staff.subtitle")}
           </p>
         </div>
       </div>
@@ -145,14 +145,14 @@ export const StaffTab = ({ classId, isOwner }: StaffTabProps) => {
                 </div>
                 {teacherAssignment.isPrimary ? (
                   <Badge className="bg-primary text-white border-none px-4 py-1 rounded-full font-black uppercase text-[9px] tracking-widest">
-                    Primary Teacher
+                    {t("resources.classes.staff.primaryTeacher")}
                   </Badge>
                 ) : (
                   <Badge
                     variant="outline"
                     className="px-4 py-1 rounded-full font-black uppercase text-[9px] tracking-widest border-primary/20 text-primary"
                   >
-                    Junior Teacher (TA)
+                    {t("resources.classes.staff.juniorTeacher")}
                   </Badge>
                 )}
               </div>
@@ -161,12 +161,12 @@ export const StaffTab = ({ classId, isOwner }: StaffTabProps) => {
               <div className="lg:col-span-8 p-8 space-y-6">
                 <div className="flex items-center justify-between border-b border-border/40 pb-4">
                   <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
-                    Role Delegation Grid
+                    {t("resources.classes.staff.roleDelegation")}
                   </span>
                   {teacherAssignment.isPrimary && (
                     <span className="text-[9px] font-bold text-primary flex items-center gap-1 uppercase">
                       <ShieldCheck className="h-3 w-3" />
-                      Full Access (Implicit)
+                      {t("resources.classes.staff.fullAccess")}
                     </span>
                   )}
                 </div>
@@ -179,9 +179,11 @@ export const StaffTab = ({ classId, isOwner }: StaffTabProps) => {
                         <GraduationCap className="h-5 w-5" />
                       </div>
                       <div className="text-start">
-                        <p className="font-black text-sm">Grading & Feedback</p>
+                        <p className="font-black text-sm">
+                          {t("resources.classes.staff.perms.grading.title")}
+                        </p>
                         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight">
-                          Correct assignments & give grades
+                          {t("resources.classes.staff.perms.grading.desc")}
                         </p>
                       </div>
                     </div>
@@ -207,9 +209,11 @@ export const StaffTab = ({ classId, isOwner }: StaffTabProps) => {
                         <BookOpen className="h-5 w-5" />
                       </div>
                       <div className="text-start">
-                        <p className="font-black text-sm">Curriculum Management</p>
+                        <p className="font-black text-sm">
+                          {t("resources.classes.staff.perms.curriculum.title")}
+                        </p>
                         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight">
-                          Manage modules, notes & resources
+                          {t("resources.classes.staff.perms.curriculum.desc")}
                         </p>
                       </div>
                     </div>
@@ -236,9 +240,11 @@ export const StaffTab = ({ classId, isOwner }: StaffTabProps) => {
                         <Users className="h-5 w-5" />
                       </div>
                       <div className="text-start">
-                        <p className="font-black text-sm">Roster Control</p>
+                        <p className="font-black text-sm">
+                          {t("resources.classes.staff.perms.roster.title")}
+                        </p>
                         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight">
-                          Approve students & manage groups
+                          {t("resources.classes.staff.perms.roster.desc")}
                         </p>
                       </div>
                     </div>
@@ -265,9 +271,11 @@ export const StaffTab = ({ classId, isOwner }: StaffTabProps) => {
                         <MonitorPlay className="h-5 w-5" />
                       </div>
                       <div className="text-start">
-                        <p className="font-black text-sm">Live Orchestration</p>
+                        <p className="font-black text-sm">
+                          {t("resources.classes.staff.perms.live.title")}
+                        </p>
                         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight">
-                          Start broadcasts & manage sessions
+                          {t("resources.classes.staff.perms.live.desc")}
                         </p>
                       </div>
                     </div>

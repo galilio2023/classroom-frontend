@@ -1,11 +1,11 @@
-import { useList, useOne } from "@refinedev/core";
+import { useList } from "@refinedev/core";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   AlertTriangle,
   BrainCircuit,
   CheckCircle2,
-  History,
+  // //   History,
   Info,
   ExternalLink,
   Loader2,
@@ -14,7 +14,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";

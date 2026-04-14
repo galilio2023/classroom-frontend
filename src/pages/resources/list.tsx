@@ -23,7 +23,7 @@ import {
   Layers,
 } from "lucide-react";
 import { Input } from "@/components/ui/input.tsx";
-import { useMemo, useState, useRef } from "react";
+import { useMemo, useState } from "react";
 import { useList, useNavigation, useDelete } from "@refinedev/core";
 import { Resource } from "@/types";
 import { useUserRole } from "@/hooks/use-user-role";

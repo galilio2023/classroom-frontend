@@ -19,7 +19,6 @@ const UserShow = () => {
     user,
     teacherClasses,
     displayBadges,
-    isAr,
     isLoading,
     isError,
     isSelf,

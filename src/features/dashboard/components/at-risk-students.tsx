@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { AlertTriangle, Activity, Sparkles, ShieldCheck, Info, ArrowRight } from "lucide-react";
+import { AlertTriangle, Sparkles, ShieldCheck, Info } from "lucide-react";
 import { AtRiskStudentItem } from "./at-risk-student-item";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";

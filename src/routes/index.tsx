@@ -76,6 +76,8 @@ const GlobalLibraryPage = React.lazy(() => import("@/pages/library/index"));
 const TermsList = React.lazy(() => import("@/pages/terms/list"));
 const ProfileRequestsList = React.lazy(() => import("@/pages/profile-requests/list"));
 const StudyPlanner = React.lazy(() => import("@/features/ai/pages/study-planner"));
+const StudentPersonaSettings = React.lazy(() => import("@/pages/student/persona-settings"));
+const PeerReviewBoard = React.lazy(() => import("@/features/assignments/pages/peer-review-board"));
 const TeacherApplicationsList = React.lazy(() => import("@/pages/teacher-applications/list"));
 const BadgesList = React.lazy(() => import("@/pages/badges/list"));
 const CreateBadge = React.lazy(() => import("@/pages/badges/create"));
@@ -295,6 +297,22 @@ export const AppRouter = () => (
             element={
               <AuthorizedRoute resource="study-planner" action="list">
                 <StudyPlanner />
+              </AuthorizedRoute>
+            }
+          />
+          <Route
+            path="/ai-personalization"
+            element={
+              <AuthorizedRoute resource="portfolio" action="edit">
+                <StudentPersonaSettings />
+              </AuthorizedRoute>
+            }
+          />
+          <Route
+            path="/peer-reviews"
+            element={
+              <AuthorizedRoute resource="peer-reviews" action="list">
+                <PeerReviewBoard />
               </AuthorizedRoute>
             }
           />

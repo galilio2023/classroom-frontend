@@ -16,9 +16,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PeerReview, Assignment } from "@/types";
 import { useUpdate } from "@refinedev/core";
 import { Loader2, CheckCircle2, Star, MessageSquare, Info, Sparkles, Send } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { motion, AnimatePresence } from "framer-motion";
-import { Label } from "@/components/ui/label";
+import {} from "@/lib/utils";
+import { motion } from "framer-motion";
+import {} from "@/components/ui/label";
 import { useTranslation } from "react-i18next";
 
 const peerReviewSchema = z.object({
@@ -192,14 +192,14 @@ export const PeerReviewForm = ({ review, assignment, onSuccess }: PeerReviewForm
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full h-12 rounded-xl font-black uppercase tracking-widest shadow-lg shadow-primary/20 gap-2 transition-all hover:scale-[1.02] active:scale-[0.98]"
+              className="w-full h-16 rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl shadow-primary/20 bg-primary hover:bg-primary/90 text-white gap-2 transition-all hover:scale-[1.02] active:scale-[0.98]"
             >
               {isLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 className="h-5 w-5 animate-spin" />
               ) : (
-                <Send className="h-4 w-4" />
+                <Send className="h-5 w-5" />
               )}
-              {t("assignments.show.interactiveQuiz")}
+              {t("buttons.submitEvaluation", { defaultValue: "Submit Evaluation" })}
             </Button>
           </form>
         </Form>

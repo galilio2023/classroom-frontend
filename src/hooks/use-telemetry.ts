@@ -1,7 +1,6 @@
-import { useEffect } from "react";
-import { useLocation, useParams } from "react-router-dom";
+import {} from "react";
+import { useLocation } from "react-router-dom";
 import { useCustomMutation } from "@refinedev/core";
-// @ts-expect-error - uuid types may be missing
 import { v4 as uuidv4 } from "uuid";
 
 const TELEMETRY_SESSION_KEY = "tablawy_telemetry_id";
@@ -13,7 +12,7 @@ const TELEMETRY_SESSION_KEY = "tablawy_telemetry_id";
  */
 export const useTelemetry = () => {
   const { mutate } = useCustomMutation();
-  const location = useLocation();
+  const _locationn = useLocation();
 
   // Get or Generate Telemetry Session ID
   const getSessionId = () => {

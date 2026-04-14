@@ -7,7 +7,7 @@ import {
   Wand2,
   CheckCircle2,
   AlertCircle,
-  ArrowRight,
+  // //   ArrowRight,
   Loader2,
   Trophy,
   Landmark,
@@ -23,13 +23,13 @@ import {
   BarChart3,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { motion, AnimatePresence } from "framer-motion";
+import {} from "framer-motion";
 import { toast } from "sonner";
-import { useEffect, useMemo } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useMemo } from "react";
+import {} from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { format } from "date-fns";
-import { Badge } from "@/components/ui/badge";
+import {} from "@/components/ui/badge";
 import {
   AreaChart,
   Area,
@@ -80,7 +80,7 @@ export default function MonetizationSettings() {
 
   const stripeBalance = balanceData?.data?.balance;
   const availableBalance = stripeBalance?.available?.[0]?.amount || 0;
-  const pendingBalance = stripeBalance?.pending?.[0]?.amount || 0;
+  const _pendingBalancee = stripeBalance?.pending?.[0]?.amount || 0;
   const currency = stripeBalance?.available?.[0]?.currency || "USD";
 
   const trendData = useMemo(() => marketplaceStats?.data?.trend || [], [marketplaceStats]);

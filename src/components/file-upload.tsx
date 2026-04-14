@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import { Button } from "./ui/button";
-import { Input } from "./ui/input";
+import {} from "./ui/input";
 import { Label } from "./ui/label";
 import { Loader2, Upload, File as FileIcon, X, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
@@ -30,7 +30,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadComplete, setUploadComplete] = useState(false);
-  const [uploadedPublicId, setUploadedPublicId] = useState<string | null>(null);
+  const [_uploadedPublicIdd, setUploadedPublicId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -108,7 +108,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     }
   };
 
-  const isVideo = folder === "trailers" || (accept && accept.includes("video"));
+  const _isVideoo = folder === "trailers" || (accept && accept.includes("video"));
 
   return (
     <div className="space-y-3 w-full">

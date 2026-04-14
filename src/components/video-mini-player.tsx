@@ -4,12 +4,12 @@ import { Button } from "@/components/ui/button";
 import { X, Play, Maximize2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import { cn } from "@/lib/utils";
+import {} from "@/lib/utils";
 
 export const VideoMiniPlayer = () => {
   const { t, i18n } = useTranslation();
   const { activeVideo, setActiveVideo, isJoined, promotionTrailer } = usePersistentLive();
-  const isAr = i18n.language === "ar";
+  const isArr = i18n.language === "ar";
 
   // 🛡️ PRIORITY GUARD: Live Classes > Promotion > Recorded Videos
   if (isJoined || promotionTrailer.url || !activeVideo.url) return null;

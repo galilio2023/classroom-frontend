@@ -3,9 +3,9 @@ import { useList, useNavigation } from "@refinedev/core";
 import {
   Tv,
   Search,
-  Sparkles,
-  Play,
-  Users,
+  // //   Sparkles,
+  // //   Play,
+  // //   Users,
   ArrowRight,
   TrendingUp,
   Loader2,
@@ -18,7 +18,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { motion, AnimatePresence } from "framer-motion";
 import { TeacherChannel, User } from "@/types";
 import { useTranslation } from "react-i18next";
-import { cn } from "@/lib/utils";
+import {} from "@/lib/utils";
 import { usePersistentLive } from "@/hooks/use-persistent-live";
 import { Helmet } from "react-helmet-async";
 

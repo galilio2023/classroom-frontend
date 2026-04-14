@@ -2,8 +2,6 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { useGetIdentity, useInvalidate, useNotification } from "@refinedev/core";
 import { User } from "@/types";
 import { socket, connectSocket } from "@/lib/socket";
-import axios from "axios";
-import { BACKEND_URL } from "@/config";
 
 interface SocketContextType {
   socket: typeof socket | null;

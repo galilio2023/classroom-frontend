@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Clock } from "lucide-react";
 import { SubmissionTiming } from "@/types/dashboard";
-import { cn } from "@/lib/utils";
+import {} from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface SubmissionTimingHeatmapProps {

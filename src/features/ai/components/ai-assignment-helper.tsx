@@ -1,0 +1,57 @@
+import React from "react";
+import { useAssignmentGeneration } from "@/features/ai/hooks/use-assignment-generation";
+import { AssignmentGeneratorForm } from "./assignment-generator-form";
+import { AssignmentPreview } from "./assignment-preview";
+import { AIFeatureDisabled } from "./ai-feature-disabled";
+import { useAiAccess } from "@/features/ai/hooks/use-ai-access";
+
+interface AIAssignmentHelperProps {
+  onUseContent?: (content: string) => void;
+}
+
+export const AIAssignmentHelper: React.FC<AIAssignmentHelperProps> = ({ onUseContent }) => {
+  const { isAiEnabled, isAllowed } = useAiAccess();
+  const {
+    subject,
+    setSubject,
+    topic,
+    setTopic,
+    difficulty,
+    setDifficulty,
+    tone,
+    setTone,
+    objectives,
+    setObjectives,
+    generatedContent,
+    handleGenerate,
+    isLoading,
+  } = useAssignmentGeneration();
+
+  // ðŸ›¡ï¸ PARENT GATING: AI interactive features are disabled for Parents
+  if (!isAllowed) return null;
+
+  // ðŸ›¡ï¸ Global Master Switch: Graceful Degradation
+  if (!isAiEnabled) {
+    return <AIFeatureDisabled title="AI Assignment Helper Offline" />;
+  }
+
+  return (
+    <div className="grid gap-6 lg:grid-cols-2">
+      <AssignmentGeneratorForm
+        subject={subject}
+        setSubject={setSubject}
+        topic={topic}
+        setTopic={setTopic}
+        difficulty={difficulty}
+        setDifficulty={setDifficulty}
+        tone={tone}
+        setTone={setTone}
+        objectives={objectives}
+        setObjectives={setObjectives}
+        handleGenerate={handleGenerate}
+        isLoading={isLoading}
+      />
+      <AssignmentPreview content={generatedContent} onUseContent={onUseContent} />
+    </div>
+  );
+};

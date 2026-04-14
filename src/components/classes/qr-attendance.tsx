@@ -6,9 +6,9 @@ import { QrCode, StopCircle, PlayCircle, Clock, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
-import { io } from "socket.io-client";
+import {} from "socket.io-client";
 import { useCustomMutation } from "@refinedev/core";
-import { SOCKET_URL } from "@/config";
+import {} from "@/config";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 

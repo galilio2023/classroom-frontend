@@ -30,7 +30,7 @@ import { useTranslation } from "react-i18next";
 import { CanAccess } from "@/components/auth/can-access";
 import { useUpdate } from "@refinedev/core";
 import { DraggableProvidedDragHandleProps } from "@hello-pangea/dnd";
-import { AiFeatureGuard } from "@/components/ai/AiFeatureGuard";
+import { AiFeatureGuard } from "@/features/ai/components/AiFeatureGuard";
 
 interface ModuleItemProps {
   module: Module;
@@ -77,7 +77,7 @@ export const ModuleItem = ({
       id: module.id,
       values: {
         isPublished: !module.isPublished,
-        version: module.version, // 🛡️ COMPLIANCE: Backend requires version for all updates
+        version: module.version, // ðŸ›¡ï¸ COMPLIANCE: Backend requires version for all updates
       },
       mutationMode: "optimistic",
     });

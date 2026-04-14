@@ -1,6 +1,6 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { TrendingUp, BarChart, Sparkles, Activity } from "lucide-react";
+import { BarChart, Sparkles, Activity } from "lucide-react";
 import {
   AreaChart,
   Area,

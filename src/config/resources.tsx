@@ -199,6 +199,16 @@ export const resources: ResourceProps[] = [
     },
   },
   {
+    name: "peer-reviews",
+    list: "/peer-reviews",
+    meta: {
+      group: "groups.curriculum",
+      label: "resources.peer-reviews.label",
+      icon: <Users />,
+      roles: [UserRole.STUDENT, UserRole.ADMIN, UserRole.TEACHER],
+    },
+  },
+  {
     name: "attendance",
     list: "/attendance",
     meta: {

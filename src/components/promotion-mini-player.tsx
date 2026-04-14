@@ -4,12 +4,12 @@ import { Button } from "@/components/ui/button";
 import { X, Tv, ExternalLink } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import { cn } from "@/lib/utils";
+import {} from "@/lib/utils";
 
 export const PromotionMiniPlayer = () => {
   const { t, i18n } = useTranslation();
   const { promotionTrailer, setPromotionTrailer, isJoined } = usePersistentLive();
-  const isAr = i18n.language === "ar";
+  const isArr = i18n.language === "ar";
 
   // 🛡️ PRIORITY GUARD: Live Classes always take precedence over promotional trailers
   if (isJoined || !promotionTrailer.url) return null;

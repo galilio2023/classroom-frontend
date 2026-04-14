@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import { Fragment, useMemo } from "react";
+import { useMemo } from "react";
 import { getSubjectIcon } from "@/lib/subject-icons";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";

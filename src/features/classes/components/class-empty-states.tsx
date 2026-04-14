@@ -3,7 +3,7 @@ import { EmptyState } from "@/components/empty-state";
 import { LayoutGrid, ClipboardCheck, Library, FileQuestion, Wand2, Sparkles } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import {} from "@/lib/utils";
 import { useDashboard } from "@/features/dashboard/hooks/use-dashboard";
 
 interface ClassEmptyStateProps {

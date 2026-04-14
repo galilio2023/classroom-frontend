@@ -4,7 +4,7 @@ import {
   Play,
   RotateCcw,
   Trophy,
-  Settings2,
+  // //   Settings2,
   Info,
   Rocket,
   Target,

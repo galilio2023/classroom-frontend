@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Cloud, CloudOff, RefreshCw, AlertCircle, CheckCircle2 } from "lucide-react";
+import { CloudOff, RefreshCw, AlertCircle, CheckCircle2 } from "lucide-react";
 import { offlineDB } from "@/lib/offline-db";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -17,7 +17,7 @@ interface SyncStatusBadgeProps {
  */
 export const SyncStatusBadge = ({ resource, id, className }: SyncStatusBadgeProps) => {
   const [status, setStatus] = useState<"synced" | "pending" | "offline" | "conflict">("synced");
-  const [isOnline, setIsOnline] = useState(true);
+  const [_isOnlinee, setIsOnline] = useState(true);
 
   const checkSyncStatus = async () => {
     if (!navigator.onLine) {

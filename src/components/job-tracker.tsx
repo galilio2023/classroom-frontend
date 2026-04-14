@@ -3,7 +3,7 @@ import { useJobs, BackgroundJob } from "@/contexts/job-context";
 import {
   Loader2,
   CheckCircle2,
-  XCircle,
+  // //   XCircle,
   ChevronDown,
   ChevronUp,
   Trash2,

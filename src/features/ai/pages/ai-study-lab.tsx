@@ -28,10 +28,10 @@ import { Label } from "@/components/ui/label";
 import { useTranslation } from "react-i18next";
 import { useCreate, useList, useNavigation, useCustomMutation } from "@refinedev/core";
 import { MemoryBoosterList } from "../components/memory-booster-list";
-import { SparkleLoader } from "@/components/ai/sparkle-loader";
-import { AIFeedback } from "@/components/ai/ai-feedback";
+import { SparkleLoader } from "@/features/ai/components/sparkle-loader";
+import { AIFeedback } from "@/features/ai/components/ai-feedback";
 import { Class } from "@/types";
-import { useAiAccess } from "@/hooks/use-ai-access";
+import { useAiAccess } from "@/features/ai/hooks/use-ai-access";
 import UnauthorizedPage from "@/pages/unauthorized";
 
 interface Flashcard {
@@ -132,15 +132,10 @@ const AIStudyLab = () => {
         setFlashcards((data as { flashcards: Flashcard[] }).flashcards);
         toast.success(t("aiHub.studyLab.toasts.flashcardsGenerated"));
       } else {
-        const prompt =
-          activeTool === "explain"
-            ? `Explain the following concept in simple terms for a student in ${isAr ? "Arabic" : "English"}: ${input}`
-            : `Summarize the following text into key bullet points in ${isAr ? "Arabic" : "English"}: ${input}`;
-
         const { data } = await mutateCustom({
           url: "/ai/generate-content",
           method: "post",
-          values: { prompt, classId: selectedClassId },
+          values: { tool: activeTool, input, classId: selectedClassId },
           meta: { signal: abortControllerRef.current.signal },
         });
         setResult((data as { content: string }).content);
@@ -338,7 +333,7 @@ const AIStudyLab = () => {
 
         {/* Main Content Area */}
         <div className="lg:col-span-8 space-y-8 md:space-y-12">
-          {/* 🧠 MEMORY MISSIONS */}
+          {/* MEMORY MISSIONS */}
           <MemoryBoosterList
             onSelectTopic={(topic) => {
               setInput(topic);
@@ -488,7 +483,7 @@ const AIStudyLab = () => {
                     <ReactMarkdown>{result}</ReactMarkdown>
                   </CardContent>
                   <div className="p-8 bg-ai-primary/2 border-t border-ai-primary/10 flex flex-col md:flex-row items-center justify-between gap-6">
-                    {/* 🔄 AI FEEDBACK LOOP */}
+                    {/* ðŸ”„ AI FEEDBACK LOOP */}
                     <AIFeedback
                       actionType={`studylab_${activeTool}`}
                       metadata={{

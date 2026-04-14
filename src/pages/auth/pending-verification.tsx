@@ -1,5 +1,3 @@
-import { useGetIdentity, useGo, useLogout } from "@refinedev/core";
-import { User, UserRole, VerificationStatus } from "@/types";
 import {
   CheckCircle2,
   Clock,
@@ -20,43 +18,17 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useEffect } from "react";
-import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 
+// Hook
+import { useVerificationLogic } from "@/features/auth/hooks/useVerificationLogic";
+
 const PendingVerificationPage = () => {
   const { t, i18n } = useTranslation();
-  const { data: identity, refetch, isLoading } = useGetIdentity<User>();
-  const { mutate: logout } = useLogout();
-  const go = useGo();
-
   const isAr = i18n.language === "ar";
 
-  useEffect(() => {
-    if (!isLoading && identity) {
-      const isVerified = identity.verificationStatus === VerificationStatus.VERIFIED;
-      const isAdmin = identity.role === UserRole.ADMIN;
-      const isStudent = identity.role === UserRole.STUDENT;
-
-      if (isVerified || isAdmin || isStudent) {
-        go({ to: "/" });
-      }
-    }
-  }, [identity, isLoading, go]);
-
-  const handleCheckStatus = async () => {
-    const { data } = await refetch();
-    if (data) {
-      const isVerified = data.verificationStatus === VerificationStatus.VERIFIED;
-      if (isVerified) {
-        toast.success(t("auth.pending.successToast"));
-        go({ to: "/" });
-      } else {
-        toast.info(t("auth.pending.infoToast"));
-      }
-    }
-  };
+  const { identity, isLoading, handleCheckStatus, logout } = useVerificationLogic();
 
   if (isLoading) {
     return (
@@ -105,18 +77,18 @@ const PendingVerificationPage = () => {
               <ShieldCheck className="h-6 w-6 text-amber-600 dark:text-amber-500" />
             </div>
             <div className="space-y-2">
-              <p className="font-black uppercase text-xs tracking-widest text-amber-700 dark:text-amber-400">
+              <p className="font-black uppercase text-xs tracking-widest text-amber-700 dark:text-amber-400 text-start">
                 {t("auth.pending.whyRequired")}
               </p>
-              <p className="text-sm font-medium text-amber-900/80 dark:text-amber-200/80 leading-relaxed">
+              <p className="text-sm font-medium text-amber-900/80 dark:text-amber-200/80 leading-relaxed text-start">
                 {t("auth.pending.reason")}
               </p>
             </div>
           </div>
 
           <div className="grid gap-6 sm:grid-cols-2">
-            <div className="bg-background/50 border rounded-3xl p-6 space-y-4 shadow-sm hover:shadow-md transition-shadow">
-              <div className="flex items-center gap-3">
+            <div className="bg-background/50 border rounded-3xl p-6 space-y-4 shadow-sm hover:shadow-md transition-shadow text-start">
+              <div className="flex items-center gap-3 text-start">
                 <div className="p-2 bg-primary/10 rounded-xl text-primary">
                   <FileText className="h-5 w-5" />
                 </div>
@@ -144,7 +116,7 @@ const PendingVerificationPage = () => {
               </div>
             </div>
 
-            <div className="bg-background/50 border rounded-3xl p-6 space-y-4 shadow-sm hover:shadow-md transition-shadow">
+            <div className="bg-background/50 border rounded-3xl p-6 space-y-4 shadow-sm hover:shadow-md transition-shadow text-start">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-green-500/10 rounded-xl text-green-600">
                   <CheckCircle2 className="h-5 w-5" />
@@ -153,7 +125,7 @@ const PendingVerificationPage = () => {
                   {t("auth.pending.estimatedTime")}
                 </span>
               </div>
-              <p className="text-xs text-muted-foreground font-medium leading-relaxed pt-1">
+              <p className="text-xs text-muted-foreground font-medium leading-relaxed pt-1 text-start">
                 {t("auth.pending.estimatedDescription", {
                   time: t("auth.pending.reviewWindow"),
                 })}
@@ -187,7 +159,7 @@ const PendingVerificationPage = () => {
           </div>
         </CardContent>
 
-        <CardFooter className="flex flex-col sm:flex-row items-center gap-6 bg-muted/30 py-8 px-8 md:px-12 border-t">
+        <CardFooter className="flex flex-col sm:flex-row items-center gap-6 bg-muted/30 py-8 px-8 md:px-12 border-t text-start">
           <Button
             variant="ghost"
             className="w-full sm:w-auto h-12 rounded-2xl gap-2 font-bold text-xs uppercase tracking-widest text-destructive hover:bg-destructive/10 hover:text-destructive"
@@ -201,7 +173,7 @@ const PendingVerificationPage = () => {
 
           <div className="flex items-center gap-3 px-4 py-2 bg-background rounded-2xl border shadow-sm w-full sm:w-auto justify-center sm:justify-start">
             <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-            <div className="flex flex-col">
+            <div className="flex flex-col text-start">
               <span className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-muted-foreground leading-none mb-0.5">
                 {t("auth.pending.loggedInAs")}
               </span>

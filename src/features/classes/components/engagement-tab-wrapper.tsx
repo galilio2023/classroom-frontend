@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { AnnouncementTab } from "../pages/announcement-tab";
 import { DiscussionTab } from "../pages/discussion-tab";
-import { LiveClassroom } from "@/components/classes/live-classroom";
+import {} from "@/components/classes/live-classroom";
 import { usePersistentLive } from "@/hooks/use-persistent-live";
 import { Button } from "@/components/ui/button";
 import { Megaphone, MessageSquare, Video } from "lucide-react";
@@ -64,7 +64,12 @@ export const EngagementTabWrapper: React.FC<EngagementTabWrapperProps> = ({
     },
   ];
 
-  const { isJoined, activeClassId, setActiveClassId, setIsJoined } = usePersistentLive();
+  const {
+    isJoined,
+    activeClassId: activeClassId,
+    setActiveClassId,
+    setIsJoined,
+  } = usePersistentLive();
 
   // 🚀 AUTO-JOIN LOGIC: If tab is active and class is live, ensure store knows we are joining
   useEffect(() => {

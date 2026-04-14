@@ -22,7 +22,7 @@ import {
   BrainCircuit,
   CheckCircle2,
   GraduationCap,
-  LayoutGrid,
+  // //   LayoutGrid,
   Loader2,
   MessageSquare,
   Sparkles,
@@ -34,9 +34,9 @@ import { GetListResponse, HttpError } from "@refinedev/core";
 import { UseQueryResult } from "@tanstack/react-query";
 import { Class } from "@/types";
 import { AnimatePresence, motion } from "framer-motion";
-import { AIFeatureDisabled } from "../../ai/ai-feature-disabled";
-import { AiFeatureGuard } from "@/components/ai/AiFeatureGuard";
-import { useAiAccess } from "@/hooks/use-ai-access";
+import {} from "@/features/ai/components/ai-feature-disabled";
+import { AiFeatureGuard } from "@/features/ai/components/AiFeatureGuard";
+import { useAiAccess } from "@/features/ai/hooks/use-ai-access";
 import { useJobs } from "@/contexts/job-context";
 import { cn } from "@/lib/utils";
 import {
@@ -44,7 +44,7 @@ import {
   MagicBuilderConfig,
   MagicBuilderLevel,
   MagicBuilderTone,
-} from "@/hooks/ai/use-magic-builder";
+} from "@/features/ai/hooks/use-magic-builder";
 
 interface MagicBuilderDialogProps {
   open: boolean;

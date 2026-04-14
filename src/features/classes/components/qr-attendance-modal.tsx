@@ -50,7 +50,7 @@ export const QRAttendanceModal = ({ isOpen, onClose, classId }: QRAttendanceModa
     method: "get",
     config: {
       query: {
-        _t: Date.now(),
+        t: Date.now(),
       },
     },
     queryOptions: {

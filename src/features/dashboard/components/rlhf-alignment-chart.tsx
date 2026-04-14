@@ -4,8 +4,8 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
+  // //   Tooltip,
+  // //   ResponsiveContainer,
   AreaChart,
   Area,
   LineChart,
@@ -20,7 +20,7 @@ import {
   ChartTooltipContent,
   ChartConfig,
 } from "@/components/ui/chart";
-import { cn } from "@/lib/utils";
+import {} from "@/lib/utils";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { useTranslation } from "react-i18next";

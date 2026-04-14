@@ -26,9 +26,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useQueryClient } from "@tanstack/react-query";
 import { BulkEnrollDialog } from "./bulk-enroll-dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { AIRiskBadge, AIRiskLevel } from "@/components/ai-risk-badge";
-import { AiFeatureGuard } from "../../ai/AiFeatureGuard";
-import { useAiAccess } from "@/hooks/use-ai-access";
+import { AIRiskBadge, AIRiskLevel } from "@/features/ai/components/ai-risk-badge";
+import { AiFeatureGuard } from "@/features/ai/components/AiFeatureGuard";
+import { useAiAccess } from "@/features/ai/hooks/use-ai-access";
 import dayjs from "dayjs";
 
 interface StudentsTabProps {
@@ -119,7 +119,7 @@ export const StudentsTab = ({
                     </AiFeatureGuard>
                   )}
 
-                  {/* 🧠 LEARNING DNA TOOLTIP (Staff Only) */}
+                  {/* LEARNING DNA TOOLTIP (Staff Only) */}
                   {isStaff && student.persona && (
                     <Tooltip>
                       <TooltipTrigger asChild>

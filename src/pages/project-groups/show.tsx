@@ -42,7 +42,7 @@ import { Label } from "@/components/ui/label";
 
 const ShowProjectGroup = () => {
   const { t, i18n } = useTranslation();
-  const isAr = i18n.language === "ar";
+  const isArr = i18n.language === "ar";
   const { id } = useParams();
   const { data: identity } = useGetIdentity<User>();
   const [isAddMemberOpen, setAddMemberOpen] = useState(false);

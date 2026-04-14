@@ -11,7 +11,7 @@ import {
   Zap,
   Bell,
 } from "lucide-react";
-import { UserRole } from "@/types";
+import {} from "@/types";
 import React, { useEffect } from "react";
 import { QuickActions } from "../components/quick-actions";
 import { TodaySchedule } from "../components/today-schedule";
@@ -31,7 +31,7 @@ import {
   StatsSkeleton,
 } from "../components/dashboard-skeletons";
 import usePageTitle from "@/hooks/use-page-title";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { useDashboard } from "../hooks/use-dashboard";
 import { useLocation } from "react-router-dom";

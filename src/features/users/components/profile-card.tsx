@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import {} from "framer-motion";
 import {
   Mail,
   Phone,
@@ -17,7 +17,7 @@ import { XPProgressBar } from "@/components/xp-progress-bar";
 import { getLevelProgress } from "@/lib/xp";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
-import { User, UserRole, VerificationStatus } from "@/types";
+import { User, VerificationStatus } from "@/types";
 
 interface Props {
   user: User;

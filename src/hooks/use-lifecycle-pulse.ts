@@ -53,7 +53,7 @@ export const useLifecyclePulse = () => {
 
     // 2. STAFF-ONLY PULSE (Audience: Teachers & Admins)
     socket.on("lifecycle:staff_pulse", (payload: any) => {
-      const { event, entityType, data } = payload;
+      const { event, _entityType: _dataityType, data: _data } = payload;
 
       if (event === "submission:received") {
         toast.info("New Submission", {

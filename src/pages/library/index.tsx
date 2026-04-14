@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useList, useCustomMutation, useDelete, useGetIdentity } from "@refinedev/core";
 import { FileUpload } from "@/components/file-upload";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   FolderOpen,
@@ -44,8 +44,8 @@ import usePageTitle from "@/hooks/use-page-title";
 
 const GlobalLibraryPage = () => {
   const { t, i18n } = useTranslation();
-  const isAr = i18n.language === "ar";
-  usePageTitle(t("library.title"));
+  const isArr = i18n.language === "ar";
+  usePageTitle(t("resources.library.title"));
   const { data: identity } = useGetIdentity<User>();
   const [isUploadOpen, setUploadOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -72,13 +72,13 @@ const GlobalLibraryPage = () => {
     setFileUrl(url);
     setFilePublicId(publicId);
     if (!title) {
-      setTitle(t("library.resourceTitle"));
+      setTitle(t("resources.library.resourceTitle"));
     }
   };
 
   const handleCreate = () => {
     if (!title || !fileUrl) {
-      toast.error(t("library.toasts.fillRequired"));
+      toast.error(t("resources.library.toasts.fillRequired"));
       return;
     }
 
@@ -98,7 +98,7 @@ const GlobalLibraryPage = () => {
       },
       {
         onSuccess: () => {
-          toast.success(t("library.toasts.added"));
+          toast.success(t("resources.library.toasts.added"));
           setUploadOpen(false);
           setTitle("");
           setDescription("");
@@ -107,14 +107,14 @@ const GlobalLibraryPage = () => {
           refetch();
         },
         onError: (error: any) => {
-          toast.error(error?.response?.data?.message || t("library.toasts.error"));
+          toast.error(error?.response?.data?.message || t("resources.library.toasts.error"));
         },
       }
     );
   };
 
   const handleDelete = (id: number) => {
-    if (confirm(t("library.deleteConfirm"))) {
+    if (confirm(t("resources.library.deleteConfirm"))) {
       deleteResource(
         {
           resource: "resources",
@@ -122,7 +122,7 @@ const GlobalLibraryPage = () => {
         },
         {
           onSuccess: () => {
-            toast.success(t("library.toasts.deleted"));
+            toast.success(t("resources.library.toasts.deleted"));
             refetch();
           },
         }
@@ -152,10 +152,10 @@ const GlobalLibraryPage = () => {
               <div className="p-3 rounded-2xl bg-primary/10 text-primary border border-primary/5 shadow-sm">
                 <FolderOpen className="h-6 w-6 md:h-8 md:w-8" />
               </div>
-              {t("library.title")}
+              {t("resources.library.title")}
             </h1>
             <p className="text-muted-foreground font-medium max-w-2xl text-balance">
-              {t("library.description")}
+              {t("resources.library.description")}
             </p>
           </div>
         </div>
@@ -167,7 +167,7 @@ const GlobalLibraryPage = () => {
                   size="lg"
                   className="w-full md:w-auto rounded-2xl h-12 md:h-14 px-10 font-bold uppercase tracking-widest text-[10px] gap-2 shadow-lg shadow-primary/25 hover:translate-y-[-2px] transition-all"
                 >
-                  <Plus className="h-5 w-5" /> {t("library.addResource")}
+                  <Plus className="h-5 w-5" /> {t("resources.library.addResource")}
                 </Button>
               </DialogTrigger>
               <DialogContent className="rounded-[2.5rem] border-none shadow-2xl bg-card/95 backdrop-blur-xl max-w-lg p-0 overflow-hidden text-start">
@@ -178,10 +178,10 @@ const GlobalLibraryPage = () => {
                     </div>
                     <div className="space-y-2 text-center">
                       <DialogTitle className="text-3xl font-black tracking-tight">
-                        {t("library.addToLibrary")}
+                        {t("resources.library.addToLibrary")}
                       </DialogTitle>
                       <DialogDescription className="font-medium text-base text-muted-foreground">
-                        {t("library.uploadDesc")}
+                        {t("resources.library.uploadDesc")}
                       </DialogDescription>
                     </div>
                   </DialogHeader>
@@ -191,11 +191,11 @@ const GlobalLibraryPage = () => {
                         htmlFor="title"
                         className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ms-2"
                       >
-                        {t("library.resourceTitle")}
+                        {t("resources.library.resourceTitle")}
                       </Label>
                       <Input
                         id="title"
-                        placeholder={t("library.resourceTitle")}
+                        placeholder={t("resources.library.resourceTitle")}
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
                         className="h-16 rounded-3xl bg-muted/30 border-none shadow-inner px-8 text-lg font-black"
@@ -210,7 +210,7 @@ const GlobalLibraryPage = () => {
                       </Label>
                       <Input
                         id="description"
-                        placeholder={t("library.optionalDesc")}
+                        placeholder={t("resources.library.optionalDesc")}
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
                         className="h-16 rounded-3xl bg-muted/30 border-none shadow-inner px-8 font-bold"
@@ -248,7 +248,7 @@ const GlobalLibraryPage = () => {
                       ) : (
                         <Plus className="h-5 w-5 me-3" />
                       )}
-                      {t("library.addToLibrary")}
+                      {t("resources.library.addToLibrary")}
                     </Button>
                   </DialogFooter>
                 </div>
@@ -268,7 +268,7 @@ const GlobalLibraryPage = () => {
               )}
             />
             <Input
-              placeholder={t("library.searchPlaceholder")}
+              placeholder={t("resources.library.searchPlaceholder")}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className={cn(
@@ -322,8 +322,8 @@ const GlobalLibraryPage = () => {
           <div className="flex items-center justify-center p-16 bg-card/20 rounded-[2.5rem] border border-dashed border-border/40">
             <EmptyState
               icon={Layers}
-              title={t("library.emptyTitle")}
-              description={t("library.emptyDesc")}
+              title={t("resources.library.emptyTitle")}
+              description={t("resources.library.emptyDesc")}
               className="border-none bg-transparent min-h-0"
             />
           </div>
@@ -395,7 +395,7 @@ const GlobalLibraryPage = () => {
                           {resource.title}
                         </h3>
                         <p className="text-sm font-medium text-muted-foreground/70 line-clamp-2 mb-6 leading-relaxed">
-                          {resource.description || t("library.noDescription")}
+                          {resource.description || t("resources.library.noDescription")}
                         </p>
 
                         <div className="pt-6 border-t border-border/40 flex items-center justify-between">

@@ -21,7 +21,7 @@ export const usePulseNotifications = () => {
       await connectSocket();
 
       const handlePulse = (pulse: any) => {
-        const { event, entityType, data } = pulse;
+        const { event, _entityType: _entityType, data } = pulse;
 
         // 🛡️ Filter for the current user's specific events if targeted
         // Pulse can be global or targeted. Targeted pulses often come through 'notification' event.

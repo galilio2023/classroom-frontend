@@ -14,9 +14,9 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useNotification, useCan } from "@refinedev/core";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useAILiveInteraction } from "@/hooks/use-ai-live-interaction";
+import { useAILiveInteraction } from "@/features/ai/hooks/use-ai-live-interaction";
 import { useDashboard } from "@/features/dashboard/hooks/use-dashboard";
-import { useAIAuthorization } from "@/hooks/use-ai-authorization";
+import { useAIAuthorization } from "@/features/ai/hooks/use-ai-authorization";
 import { AIVisualState } from "@/features/ai/types/ai";
 
 interface AILiveCompanionProps {
@@ -48,7 +48,7 @@ export const AILiveCompanion = ({
   const { coreData } = useDashboard();
   const { isParent, isStaff, isLoading: isAuthLoading } = useAIAuthorization();
 
-  // 🛡️ RBAC: Centralized access control via Refine patterns
+  // ðŸ›¡ï¸ RBAC: Centralized access control via Refine patterns
   const { data: canAccessAI, isLoading: isAccessLoading } = useCan({
     resource: "ai_features",
     action: "interact",
@@ -79,7 +79,7 @@ export const AILiveCompanion = ({
   const [isPermissionDenied, setIsPermissionDenied] = useState(false);
   const { open } = useNotification();
 
-  // 🛡️ NOTIFICATION: Trigger persistent toast on permission denial
+  // ðŸ›¡ï¸ NOTIFICATION: Trigger persistent toast on permission denial
   useEffect(() => {
     if (isPermissionDenied) {
       open?.({
@@ -91,17 +91,17 @@ export const AILiveCompanion = ({
     }
   }, [isPermissionDenied, open]);
 
-  // 🛡️ TAB VISIBILITY SAFETY: Stop mic/speech if user leaves tab
+  // ðŸ›¡ï¸ TAB VISIBILITY SAFETY: Stop mic/speech if user leaves tab
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === "hidden" && isJoined) {
         if (typeof window !== "undefined" && window.speechSynthesis) {
           window.speechSynthesis.cancel();
         }
-        // 🛡️ PRIVACY GUARD: Stop hardware microphone if tab is hidden
+        // ðŸ›¡ï¸ PRIVACY GUARD: Stop hardware microphone if tab is hidden
         if (isListening) {
           stopListening();
-          console.warn("🔒 Tab hidden: Microphone and Speech paused for privacy.");
+          console.warn("ðŸ”’ Tab hidden: Microphone and Speech paused for privacy.");
         }
       }
     };
@@ -109,10 +109,10 @@ export const AILiveCompanion = ({
     return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
   }, [isJoined, isListening, stopListening]);
 
-  // 🛡️ MASTER SWITCH: Global AI Kill-switch enforcement
+  // ðŸ›¡ï¸ MASTER SWITCH: Global AI Kill-switch enforcement
   const isAiEnabled = coreData?.globalConfig?.enableAiFeatures !== false;
 
-  // 🛡️ SSR SAFETY: Initialize browser-only features after mount
+  // ðŸ›¡ï¸ SSR SAFETY: Initialize browser-only features after mount
   useEffect(() => {
     const SpeechRecognition =
       (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -120,7 +120,7 @@ export const AILiveCompanion = ({
     setIsHydrated(true);
   }, []);
 
-  // 🛡️ AUTO-LEAVE: If AI is disabled mid-session, kick student out
+  // ðŸ›¡ï¸ AUTO-LEAVE: If AI is disabled mid-session, kick student out
   useEffect(() => {
     if (!isAiEnabled && isJoined) {
       setIsJoined(false);
@@ -136,7 +136,7 @@ export const AILiveCompanion = ({
     }
   }, [script, isJoined, speakText, currentScript, setCurrentScript]);
 
-  // 🧹 CLEANUP: Stop speaking on unmount
+  // ðŸ§¹ CLEANUP: Stop speaking on unmount
   useEffect(() => {
     return () => {
       if (typeof window !== "undefined" && window.speechSynthesis) {
@@ -147,7 +147,7 @@ export const AILiveCompanion = ({
 
   if (!isHydrated || isParent || isAccessLoading || canAccessAI?.can === false) return null;
 
-  // 🛡️ Global Master Switch: Graceful Degradation
+  // ðŸ›¡ï¸ Global Master Switch: Graceful Degradation
   if (!isAiEnabled) {
     return (
       <div className="w-full h-full min-h-[400px] flex flex-col items-center justify-center bg-black/60 border-white/10 rounded-3xl p-8 text-center border-4">
@@ -360,7 +360,7 @@ export const AILiveCompanion = ({
           </AnimatePresence>
         </div>
 
-        {/* 🛡️ RBAC: Only Students (non-staff) can raise hands to interact */}
+        {/* ðŸ›¡ï¸ RBAC: Only Students (non-staff) can raise hands to interact */}
         {!isStaff && (
           <div className="flex items-center gap-4 pt-6">
             <Button

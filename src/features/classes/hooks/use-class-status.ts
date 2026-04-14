@@ -1,6 +1,6 @@
 import { useOne } from "@refinedev/core";
 import { useEffect } from "react";
-import { socket, connectSocket } from "@/lib/socket";
+import { socket } from "@/lib/socket";
 
 export interface ClassStatus {
   isLive: boolean;

@@ -1,8 +1,3 @@
-import { HttpError, useRegister } from "@refinedev/core";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
-import { useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -24,8 +19,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { toast } from "sonner";
+import { Link } from "react-router-dom";
 import {
   ArrowLeft,
   ArrowRight,
@@ -36,126 +30,31 @@ import {
   Zap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import axios from "axios";
 import { RoleSelector } from "@/components/auth/role-selector";
 import { VerificationUpload } from "@/components/auth/verification-upload";
 import { AnimatePresence, motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 
+// Hook
+import { useRegisterForm } from "@/features/auth/hooks/useRegisterForm";
+
 const RegisterPage = () => {
   const { t, i18n } = useTranslation();
-  const { mutate: register, isPending } = useRegister();
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const inviteCode = searchParams.get("inviteCode");
-
-  const [step, setStep] = useState(1);
-  const [isGeneratingBio, setIsGeneratingBio] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
-
-  const registerSchema = z.object({
-    name: z.string().min(1, t("auth.register.nameRequired")),
-    email: z.string().email(t("auth.register.invalidEmail")),
-    password: z.string().min(8, t("auth.register.passwordMinLength")),
-    role: z.enum(["student", "teacher", "parent"]),
-    phoneNumber: z.string().optional(),
-    bio: z.string().optional(),
-    dateOfBirth: z.string().optional(),
-    parentName: z.string().optional(),
-    parentPhone: z.string().optional(),
-    childInviteCode: z.string().optional(), // 🆕 Quick link for parents
-    verificationDocumentUrl: z.string().optional(),
-    verificationDocumentCldPubId: z.string().optional(),
-  });
-
-  const form = useForm<z.infer<typeof registerSchema>>({
-    resolver: zodResolver(registerSchema),
-    defaultValues: {
-      name: "",
-      email: "",
-      password: "",
-      role: "student",
-      phoneNumber: "",
-      bio: "",
-      dateOfBirth: "",
-      parentName: "",
-      parentPhone: "",
-      childInviteCode: "",
-      verificationDocumentUrl: "",
-      verificationDocumentCldPubId: "",
-    },
-    shouldUnregister: false,
-  });
-
-  const role = form.watch("role");
-
-  useEffect(() => {
-    if (inviteCode) {
-      toast.info(t("classes.show.toast.inviteLinkDetected"), {
-        description: t("classes.show.toast.registerToJoin"),
-      });
-    }
-  }, [inviteCode, t]);
-
-  const generateAIBio = async () => {
-    const name = form.getValues("name");
-    if (!name) {
-      toast.error(t("auth.register.enterNameFirst"));
-      return;
-    }
-
-    setIsGeneratingBio(true);
-    try {
-      const response = await axios.post<{ content: string }>("/api/ai/generate-content", {
-        prompt: `Generate a professional bio for a ${role} named ${name}. Keywords: passionate, experienced, dedicated. Keep it under 50 words.`,
-        context: "User Registration Bio",
-      });
-
-      form.setValue("bio", response.data.content);
-      toast.success(t("auth.register.aiBioGenerated"));
-    } catch {
-      const fallbacks: Record<string, string> = {
-        teacher: `Hello, I'm ${name}. I am a dedicated educator committed to fostering a positive and engaging learning environment for all my students.`,
-        student: `Hi, I'm ${name}. I'm an enthusiastic student eager to learn and grow in my academic journey.`,
-        parent: `Hello, I'm ${name}. I am a supportive parent dedicated to my child's educational success and well-being.`,
-      };
-      form.setValue("bio", fallbacks[role as keyof typeof fallbacks] || `Hi, I'm ${name}.`);
-      toast.info(t("auth.register.aiBioFallback"));
-    } finally {
-      setIsGeneratingBio(false);
-    }
-  };
-
-  const nextStep = async () => {
-    const fieldsToValidate = ["name", "email", "password", "role"] as const;
-    const isValid = await form.trigger(fieldsToValidate as any);
-    if (isValid) setStep(2);
-  };
-
-  const handleFinalSubmit = () => {
-    form.handleSubmit((values) => {
-      register(
-        { ...values, inviteCode },
-        {
-          onSuccess: () => {
-            setIsSuccess(true);
-            // 🚀 The authProvider now handles auto-login, we just show cinematic success
-            setTimeout(() => {
-              navigate("/dashboard");
-            }, 3000);
-          },
-          onError: (err) => {
-            const error = err as HttpError;
-            const errorMessage =
-              (error as any)?.data?.message || error.message || t("auth.login.unknownError");
-            toast.error(errorMessage);
-          },
-        }
-      );
-    })();
-  };
-
   const isAr = i18n.language === "ar";
+
+  const {
+    form,
+    step,
+    nextStep,
+    prevStep,
+    isGeneratingBio,
+    generateAIBio,
+    handleFinalSubmit,
+    isPending,
+    isSuccess,
+    role,
+    inviteCode,
+  } = useRegisterForm();
 
   return (
     <div className="min-h-dvh bg-background flex flex-col items-center justify-center p-4 md:p-8 relative overflow-hidden">
@@ -180,7 +79,7 @@ const RegisterPage = () => {
               exit={{ opacity: 0, scale: 1.1 }}
               className="flex flex-col items-center justify-center text-center space-y-8 py-20"
             >
-              <div className="relative">
+              <div className="relative text-start">
                 <motion.div
                   initial={{ scale: 0, rotate: -20 }}
                   animate={{ scale: 1, rotate: 0 }}
@@ -341,7 +240,7 @@ const RegisterPage = () => {
                             transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
                             className="space-y-6 md:space-y-8"
                           >
-                            <div className="p-5 rounded-[1.5rem] bg-primary/5 border border-primary/10 shadow-sm">
+                            <div className="p-5 rounded-[1.5rem] bg-primary/5 border border-primary/10 shadow-sm text-start">
                               <p className="text-xs md:text-sm text-muted-foreground font-black uppercase tracking-widest leading-relaxed flex items-center gap-2">
                                 <Sparkles className="h-4 w-4 text-primary" />
                                 {t("auth.register.completeProfileTip")}
@@ -353,7 +252,7 @@ const RegisterPage = () => {
                                 control={form.control}
                                 name="phoneNumber"
                                 render={({ field }) => (
-                                  <FormItem className="space-y-3">
+                                  <FormItem className="space-y-3 text-start">
                                     <FormLabel className="font-black uppercase text-[10px] tracking-[0.2em] text-muted-foreground/60 ms-2">
                                       {t("auth.register.phoneNumberLabel")}
                                     </FormLabel>
@@ -373,7 +272,7 @@ const RegisterPage = () => {
                                   control={form.control}
                                   name="dateOfBirth"
                                   render={({ field }) => (
-                                    <FormItem className="space-y-3">
+                                    <FormItem className="space-y-3 text-start">
                                       <FormLabel className="font-black uppercase text-[10px] tracking-[0.2em] text-muted-foreground/60 ms-2">
                                         {t("auth.register.dobLabel")}
                                       </FormLabel>
@@ -395,7 +294,7 @@ const RegisterPage = () => {
                                     control={form.control}
                                     name="parentName"
                                     render={({ field }) => (
-                                      <FormItem className="space-y-3">
+                                      <FormItem className="space-y-3 text-start">
                                         <FormLabel className="font-black uppercase text-[10px] tracking-[0.2em] text-muted-foreground/60 ms-2">
                                           {t("auth.register.fullNameLabel")}
                                         </FormLabel>
@@ -414,7 +313,7 @@ const RegisterPage = () => {
                                     control={form.control}
                                     name="parentPhone"
                                     render={({ field }) => (
-                                      <FormItem className="space-y-3">
+                                      <FormItem className="space-y-3 text-start">
                                         <FormLabel className="font-black uppercase text-[10px] tracking-[0.2em] text-muted-foreground/60 ms-2">
                                           {t("auth.register.phoneNumberLabel")}
                                         </FormLabel>
@@ -433,7 +332,7 @@ const RegisterPage = () => {
                                     control={form.control}
                                     name="childInviteCode"
                                     render={({ field }) => (
-                                      <FormItem className="space-y-3 col-span-1 md:col-span-2">
+                                      <FormItem className="space-y-3 col-span-1 md:col-span-2 text-start">
                                         <div className="flex items-center gap-2 ms-2">
                                           <FormLabel className="font-black uppercase text-[10px] tracking-[0.2em] text-primary">
                                             Child's Invite Code
@@ -473,7 +372,7 @@ const RegisterPage = () => {
                                   control={form.control}
                                   name="bio"
                                   render={({ field }) => (
-                                    <FormItem className="space-y-3">
+                                    <FormItem className="space-y-3 text-start">
                                       <div className="flex justify-between items-center">
                                         <FormLabel className="font-black uppercase text-[10px] tracking-[0.2em] text-muted-foreground/60 ms-2">
                                           {t("auth.register.bioLabel")}
@@ -510,7 +409,7 @@ const RegisterPage = () => {
                                   control={form.control}
                                   name="verificationDocumentUrl"
                                   render={({ field }) => (
-                                    <FormItem className="space-y-3">
+                                    <FormItem className="space-y-3 text-start">
                                       <FormLabel className="font-black uppercase text-[10px] tracking-[0.2em] text-muted-foreground/60 ms-2">
                                         {t("auth.register.verification.uploadLabel")}
                                       </FormLabel>
@@ -547,7 +446,7 @@ const RegisterPage = () => {
                             variant="outline"
                             size="lg"
                             className="flex-1 h-14 md:h-16 rounded-2xl md:rounded-3xl font-black uppercase tracking-widest text-xs md:text-sm border-2 border-border/40 bg-background/50 shadow-sm"
-                            onClick={() => setStep(1)}
+                            onClick={prevStep}
                           >
                             <ArrowLeft
                               className={cn("h-4 w-4 me-2", isAr && "ms-2 me-0 rotate-180")}

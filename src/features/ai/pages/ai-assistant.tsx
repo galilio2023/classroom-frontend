@@ -1,7 +1,7 @@
 import React from "react";
-import { AIAssignmentHelper } from "@/components/ai-assignment-helper";
-import { AIQuizGenerator } from "@/components/ai-quiz-generator";
-import { AIVisionAssistant } from "@/components/ai-vision-assistant";
+import { AIAssignmentHelper } from "@/features/ai/components/ai-assignment-helper";
+import { AIQuizGenerator } from "@/features/ai/components/ai-quiz-generator";
+import { AIVisionAssistant } from "@/features/ai/components/ai-vision-assistant";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Sparkles, FileText, BrainCircuit, LayoutDashboard, Info, Camera } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -12,6 +12,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { useDashboard } from "@/features/dashboard/hooks/use-dashboard";
+import { AiFeatureGuard } from "@/features/ai/components/AiFeatureGuard";
 
 export const AIAssistantPage: React.FC = () => {
   const { t } = useTranslation();
@@ -100,11 +101,15 @@ export const AIAssistantPage: React.FC = () => {
                 transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
               >
                 <TabsContent value="assignment" className="mt-0 focus-visible:outline-none">
-                  <AIAssignmentHelper />
+                  <AiFeatureGuard>
+                    <AIAssignmentHelper />
+                  </AiFeatureGuard>
                 </TabsContent>
 
                 <TabsContent value="quiz" className="mt-0 focus-visible:outline-none">
-                  <AIQuizGenerator />
+                  <AiFeatureGuard>
+                    <AIQuizGenerator />
+                  </AiFeatureGuard>
                 </TabsContent>
 
                 <TabsContent value="vision" className="mt-0 focus-visible:outline-none">

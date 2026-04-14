@@ -1,17 +1,9 @@
 import React from "react";
-import {
-  TrendingUp,
-  Users,
-  MousePointer2,
-  UserPlus,
-  ArrowDown,
-  Sparkles,
-  Info,
-} from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Users, MousePointer2, UserPlus, ArrowDown, Sparkles, Info } from "lucide-react";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
+import {} from "framer-motion";
 
 interface FunnelData {
   impressions: number;

@@ -5,7 +5,7 @@ import Confetti from "react-confetti";
 import { useWindowSize } from "react-use";
 import { socket, connectSocket } from "@/lib/socket";
 import { useTranslation } from "react-i18next";
-import { cn } from "@/lib/utils";
+import {} from "@/lib/utils";
 import { useUserRole } from "@/hooks/use-user-role";
 
 interface XPEvent {

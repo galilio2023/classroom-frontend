@@ -1,8 +1,9 @@
 import { useCustom, useGetIdentity, useList } from "@refinedev/core";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
   Activity,
@@ -16,11 +17,12 @@ import {
   Target,
   TrendingUp,
   Trophy,
+  BrainCircuit,
 } from "lucide-react";
 import { User as UserType } from "@/types";
 import { XPProgressBar } from "@/components/xp-progress-bar";
 import { getLevelProgress } from "@/lib/xp";
-import { BadgeCard, BadgeData } from "@/components/ui/badge-card";
+import { BadgeCard } from "@/components/ui/badge-card";
 import { StudentAcademicJourney } from "@/features/dashboard/components/student-academic-journey";
 import { SubmissionHeatmap } from "@/features/dashboard/components/submission-heatmap";
 import { motion } from "framer-motion";
@@ -33,10 +35,12 @@ import { useMemo } from "react";
 const StudentPortfolio = () => {
   const { id } = useParams();
   const { data: identity } = useGetIdentity<UserType>();
+  const navigate = useNavigate();
   const { t, i18n } = useTranslation();
-  const isAr = i18n.language === "ar";
+  const isArr = i18n.language === "ar";
 
   const studentId = id || identity?.id;
+  const isSelf = studentId === identity?.id;
 
   const { query: userQuery } = useCustom<UserType>({
     url: `/users/${studentId}`,
@@ -204,6 +208,16 @@ const StudentPortfolio = () => {
               <Separator className="my-10 opacity-50" />
 
               <div className="w-full space-y-4 text-start">
+                {isSelf && (
+                  <Button
+                    variant="outline"
+                    className="w-full h-14 rounded-2xl font-black uppercase tracking-widest text-[10px] border-ai-primary/20 text-ai-primary hover:bg-ai-primary/5 gap-2 group mb-4 shadow-sm"
+                    onClick={() => navigate("/ai-personalization")}
+                  >
+                    <BrainCircuit className="h-4 w-4 group-hover:rotate-12 transition-transform" />
+                    AI Personalization
+                  </Button>
+                )}
                 <div className="flex items-center gap-4 p-4 rounded-2xl bg-background/50 border border-border/40 shadow-sm">
                   <div className="p-2.5 bg-primary/10 rounded-xl text-primary">
                     <Mail className="h-5 w-5" />

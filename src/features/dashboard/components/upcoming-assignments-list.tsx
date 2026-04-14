@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { UpcomingAssignment } from "@/types/dashboard";
 import { AssignmentItemCard } from "./assignment-item-card";
