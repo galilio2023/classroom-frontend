@@ -97,7 +97,7 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     try {
       // 🛡️ SECURITY: Use session helper instead of direct localStorage access
       const { data: session } = await getFreshSession();
-      const token = (session as any)?.token || localStorage.getItem("tablawy_auth_token");
+      const token = (session as any)?.token;
       if (!token) return;
 
       const response = await fetch(`${API_URL}/ai/jobs/sync`, {

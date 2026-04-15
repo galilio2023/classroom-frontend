@@ -181,10 +181,9 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
   // 2. 🧹 CLEANUP
   useEffect(() => {
     return () => {
-      if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
-      if (abortControllerRef.current) abortControllerRef.current.abort();
+      stopStreaming();
     };
-  }, []);
+  }, [stopStreaming]);
 
   const scrollToBottom = useCallback(() => {
     if (scrollAreaRef.current) {

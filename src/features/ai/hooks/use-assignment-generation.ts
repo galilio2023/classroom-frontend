@@ -6,11 +6,17 @@ interface AIJobResponse {
 }
 
 export const useAssignmentGeneration = () => {
-  const [subject, setSubject] = useState("");
-  const [topic, setTopic] = useState("");
-  const [difficulty, setDifficulty] = useState("intermediate");
-  const [tone, setTone] = useState("academic");
-  const [objectives, setObjectives] = useState("");
+  const [subject, _setSubject] = useState("");
+  const [topic, _setTopic] = useState("");
+  const [difficulty, _setDifficulty] = useState("intermediate");
+  const [tone, _setTone] = useState("academic");
+  const [objectives, _setObjectives] = useState("");
+
+  const setSubject = useCallback((val: string) => _setSubject(val), []);
+  const setTopic = useCallback((val: string) => _setTopic(val), []);
+  const setDifficulty = useCallback((val: string) => _setDifficulty(val), []);
+  const setTone = useCallback((val: string) => _setTone(val), []);
+  const setObjectives = useCallback((val: string) => _setObjectives(val), []);
   const [isProcessing, setIsProcessing] = useState(false);
   const [generatedContent, setGeneratedContent] = useState(() => {
     // 🧠 BRAVE PERSISTENCE: Restore from session if exists

@@ -52,6 +52,7 @@ export const ChatBubble = ({
       },
     ],
     pagination: {
+      mode: "server",
       current: currentPage,
       pageSize: pageSize,
     } as any,
@@ -67,8 +68,12 @@ export const ChatBubble = ({
     setCurrentPage(nextPage);
     const { data } = await loadMore();
     if (data?.data) {
-      // 🛡️ DATA GROWTH: Append rather than overwrite
-      setFullReplies((prev) => [...prev, ...(data.data as Discussion[])]);
+      // 🛡️ DATA GROWTH: Append and deduplicate by ID to prevent UI glitches
+      const newItems = data.data as unknown as Discussion[];
+      setFullReplies((prev) => {
+        const combined = [...prev, ...newItems];
+        return Array.from(new Map(combined.map((item) => [item.id, item])).values());
+      });
     }
   };
 
