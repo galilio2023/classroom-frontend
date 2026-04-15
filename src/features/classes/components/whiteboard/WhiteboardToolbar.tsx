@@ -11,6 +11,7 @@ import {
   AlertCircle,
   Save,
   Undo2,
+  BrainCircuit,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -119,7 +120,7 @@ export const WhiteboardToolbar = ({
               {isAnalyzing ? (
                 <Loader2 className="h-4 w-4 animate-spin me-1" />
               ) : (
-                <Sparkles className="h-4 w-4 me-1 group-hover:rotate-12 transition-transform" />
+                <BrainCircuit className="h-4 w-4 me-1 group-hover:rotate-12 transition-transform" />
               )}
               Analyze with AI
             </Button>

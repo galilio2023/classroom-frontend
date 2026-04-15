@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useState, useCallback, use
 import { useNotification } from "@refinedev/core";
 import { handleError } from "@/providers/utils/api-errors";
 import { getFreshSession } from "@/providers/auth";
-import axios from "axios";
+import { BASE_URL } from "@/constants/api";
 
 export interface BackgroundJob {
   id: string;
@@ -31,7 +31,6 @@ export const useJobs = () => {
 };
 
 const STORAGE_KEY = "classroom_active_jobs";
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
 
 export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [jobs, setJobs] = useState<BackgroundJob[]>([]);
@@ -100,7 +99,7 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const token = (session as any)?.token;
       if (!token) return;
 
-      const response = await fetch(`${API_URL}/ai/jobs/sync`, {
+      const response = await fetch(`${BASE_URL}/ai/jobs/sync`, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -150,15 +149,22 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [updateJob, open]);
 
   useEffect(() => {
-    const pollInterval = setInterval(() => {
+    let timeoutId: NodeJS.Timeout;
+
+    const poll = async () => {
       const activeAiJobs = jobsRef.current.filter((j) => j.status === "processing");
       if (activeAiJobs.length > 0) {
-        void syncJobs();
+        await syncJobs();
       }
-    }, 30000); // 🛡️ PERFORMANCE: Only poll if there are active jobs
+      // 🛡️ PERFORMANCE: Only poll if there are active jobs.
+      // Use recursive setTimeout to prevent overlapping requests if a sync takes longer than 30s.
+      timeoutId = setTimeout(poll, 30000);
+    };
+
+    poll();
 
     return () => {
-      clearInterval(pollInterval);
+      clearTimeout(timeoutId);
       if (abortControllerRef.current) abortControllerRef.current.abort();
     };
   }, [syncJobs]);

@@ -10,6 +10,7 @@ import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import { useGetIdentity, useList } from "@refinedev/core";
 import { useState, useEffect } from "react";
+import { useDiscussion } from "@/contexts/discussion-context";
 
 interface ChatBubbleProps {
   post: Discussion & { repliesCount?: number };
@@ -17,31 +18,26 @@ interface ChatBubbleProps {
   onDelete: (id: number) => void;
   onReply: (id: number) => void;
   onSolve?: (postId: number, solverId: string) => void;
-  isAdmin: boolean;
-  isStaff?: boolean;
 }
 
 /**
  * RECURSIVE PATTERN: ChatBubble renders its own children (replies).
  */
-export const ChatBubble = ({
-  post,
-  isOwn,
-  onDelete,
-  onReply,
-  onSolve,
-  isAdmin,
-  isStaff,
-}: ChatBubbleProps) => {
+export const ChatBubble = ({ post, isOwn, onDelete, onReply, onSolve }: ChatBubbleProps) => {
   const { t, i18n } = useTranslation();
   const { data: userIdentity } = useGetIdentity<User>();
+  const { isStaff, isAdmin } = useDiscussion();
   dayjs.locale(i18n.language);
 
   const [fullReplies, setFullReplies] = useState<Discussion[]>(post.replies || []);
 
   // 🛡️ RECOVERY: Sync state if prop updates from server (e.g. Socket.io or invalidation)
   useEffect(() => {
-    if (post.replies && JSON.stringify(post.replies) !== JSON.stringify(fullReplies)) {
+    // 🛡️ PERFORMANCE: Use reference or length checks instead of JSON.stringify for large threads
+    if (
+      post.replies &&
+      (post.replies !== fullReplies || post.replies.length !== fullReplies.length)
+    ) {
       setFullReplies(post.replies);
     }
   }, [post.replies, fullReplies]);
@@ -212,8 +208,6 @@ export const ChatBubble = ({
                 onDelete={onDelete}
                 onReply={onReply}
                 onSolve={onSolve}
-                isAdmin={isAdmin}
-                isStaff={isStaff}
               />
             ))}
 

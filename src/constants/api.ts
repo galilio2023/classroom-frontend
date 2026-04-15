@@ -2,6 +2,8 @@
  * 🛡️ SECURITY: Centralized API Endpoints for AI Interactions.
  * Following Refine v5 best practices for service-oriented architecture.
  */
+export const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+
 export const AI_API = {
   INTERACT: (classId: string | number) => `/live-session/${classId}/interact`,
   STUDY_BUDDY: "/ai/study-buddy",
