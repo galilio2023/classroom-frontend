@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useCustomMutation, useNotification, HttpError } from "@refinedev/core";
 
 interface AIJobResponse {
@@ -35,7 +35,7 @@ export const useAssignmentGeneration = () => {
     return () => window.removeEventListener("AI_ASSIGNMENT_READY", handleReady);
   }, []);
 
-  const handleGenerate = () => {
+  const handleGenerate = useCallback(() => {
     if (!subject || !topic) {
       open?.({
         type: "error",
@@ -77,7 +77,7 @@ export const useAssignmentGeneration = () => {
         },
       }
     );
-  };
+  }, [subject, topic, difficulty, tone, objectives, mutate, open]);
 
   return {
     subject,

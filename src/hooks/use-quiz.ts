@@ -1,5 +1,5 @@
-import { useState, useMemo, useEffect } from "react";
-import { useCreate, useNotification } from "@refinedev/core";
+import { useState, useMemo, useEffect, useRef } from "react";
+import { useCreate, useNotification, useCustomMutation, useCustom } from "@refinedev/core";
 import { parseQuizDescription, ParsedQuestion } from "@/lib/quiz-parser";
 import { useSocket } from "@/contexts/socket-context";
 import { toast } from "sonner";
@@ -29,9 +29,60 @@ export const useQuiz = ({ assignmentId, classId, description, onComplete }: UseQ
   const [isAnswered, setIsAnswered] = useState(false);
   const [score, setScore] = useState(0);
   const [isFinished, setIsFinished] = useState(false);
+  const [answers, setAnswers] = useState<Record<number, string>>({});
+  const [isResuming, setIsResuming] = useState(true);
 
   const currentQuestion = questions[currentStep];
   const progress = questions.length > 0 ? (currentStep / questions.length) * 100 : 0;
+
+  const { mutate: sendHeartbeat } = useCustomMutation();
+  const heartbeatTimer = useRef<NodeJS.Timeout | null>(null);
+
+  // --- RECOVERY LOGIC ---
+  const { query: recoveryQuery } = useCustom({
+    url: `/quizzes/${assignmentId}/results`,
+    method: "get",
+    queryOptions: {
+      enabled: !!assignmentId && isResuming,
+    },
+  });
+
+  useEffect(() => {
+    if (recoveryQuery.data) {
+      const data = recoveryQuery.data as any;
+      const active = data.data?.attempts?.find((a: any) => !a.completedAt);
+      if (active) {
+        setAnswers(active.answers || {});
+        const answeredCount = Object.keys(active.answers || {}).length;
+        setCurrentStep(Math.min(answeredCount, questions.length - 1));
+        toast.success(t("classes.quiz.resumed", "Resumed your progress."));
+      }
+      setIsResuming(false);
+    }
+  }, [recoveryQuery.data, questions.length, t]);
+
+  useEffect(() => {
+    if (recoveryQuery.isError) {
+      setIsResuming(false);
+    }
+  }, [recoveryQuery.isError]);
+
+  // --- HEARTBEAT SYNC ---
+  useEffect(() => {
+    if (isFinished || isResuming) return;
+
+    heartbeatTimer.current = setInterval(() => {
+      sendHeartbeat({
+        url: `/quizzes/${assignmentId}/heartbeat`,
+        method: "patch",
+        values: { answers },
+      });
+    }, 5000);
+
+    return () => {
+      if (heartbeatTimer.current) clearInterval(heartbeatTimer.current);
+    };
+  }, [answers, isFinished, isResuming, assignmentId, sendHeartbeat]);
 
   // --- LIVE ACTIVITY LOGIC ---
   useEffect(() => {
@@ -80,6 +131,11 @@ export const useQuiz = ({ assignmentId, classId, description, onComplete }: UseQ
   const handleOptionSelect = (option: string) => {
     if (isAnswered) return;
     setSelectedOption(option);
+
+    // 🛡️ HEARTBEAT: Store answer immediately for the next sync
+    if (currentQuestion) {
+      setAnswers((prev) => ({ ...prev, [currentStep]: option }));
+    }
   };
 
   const handleCheckAnswer = () => {
@@ -97,28 +153,24 @@ export const useQuiz = ({ assignmentId, classId, description, onComplete }: UseQ
       setIsAnswered(false);
     } else {
       setIsFinished(true);
-      const finalScore = Math.round((score / questions.length) * 100);
+      if (heartbeatTimer.current) clearInterval(heartbeatTimer.current);
 
       submitScore(
         {
-          resource: "submissions",
-          values: {
-            assignmentId,
-            content: `Completed AI Quiz. Final Score: ${finalScore}%`,
-            grade: finalScore,
-            feedback: `Automated grade from interactive quiz. Correct answers: ${score}/${questions.length}`,
-          },
+          resource: `quizzes/${assignmentId}/submit`,
+          values: { answers },
         },
         {
           onSuccess: () => {
             open?.({
               type: "success",
               message: t("classes.quiz.submittedTitle", "Quiz Submitted!"),
-              description: (t as any)("classes.quiz.submittedDesc", {
-                score: finalScore,
-              }),
+              description: t(
+                "classes.quiz.submittedDesc",
+                "Your quiz has been submitted successfully."
+              ),
             });
-            onComplete?.(finalScore);
+            onComplete?.(0); // Score calculation happens on backend
           },
         }
       );
@@ -134,7 +186,8 @@ export const useQuiz = ({ assignmentId, classId, description, onComplete }: UseQ
     score,
     isFinished,
     progress,
-    activeStudents, // Export live count
+    activeStudents,
+    isResuming,
     handleOptionSelect,
     handleCheckAnswer,
     handleNext,

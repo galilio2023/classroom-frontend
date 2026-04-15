@@ -1,4 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
+import { useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import {
   FileQuestion,
@@ -26,6 +27,7 @@ interface QuizActiveProps {
   timeLeft: number | null;
   onFinish: () => void;
   isSubmitting: boolean;
+  setAnswers: (answers: Record<number, string>) => void;
 }
 
 export const QuizActive = ({
@@ -37,8 +39,29 @@ export const QuizActive = ({
   timeLeft,
   onFinish,
   isSubmitting,
+  setAnswers,
 }: QuizActiveProps) => {
   const { t } = useTranslation();
+
+  // 🛡️ RESILIENCE: LocalStorage Recovery for Network Drops
+  const CACHE_KEY = `quiz_progress_${quiz.id}`;
+
+  useEffect(() => {
+    const cached = localStorage.getItem(CACHE_KEY);
+    if (cached && Object.keys(answers).length === 0) {
+      try {
+        setAnswers(JSON.parse(cached));
+      } catch (e) {
+        console.error("Failed to parse quiz cache", e);
+      }
+    }
+  }, [quiz.id]);
+
+  useEffect(() => {
+    if (Object.keys(answers).length > 0) {
+      localStorage.setItem(CACHE_KEY, JSON.stringify(answers));
+    }
+  }, [answers, CACHE_KEY]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);

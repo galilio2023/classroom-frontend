@@ -22,7 +22,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [isConnected, setIsConnected] = useState(socket.connected);
   const invalidate = useInvalidate();
   const { open } = useNotification();
-  const { updateJob, removeJob } = useJobs();
+  const { updateJob, removeJob, syncJobs } = useJobs();
 
   useEffect(() => {
     if (isLoading) return;
@@ -33,7 +33,10 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         // ... (Join class rooms) ...
       });
 
-      const onConnect = () => setIsConnected(true);
+      const onConnect = () => {
+        setIsConnected(true);
+        void syncJobs(); // 🚀 SRE: Instant recovery of missed AI events upon reconnection
+      };
       const onDisconnect = () => setIsConnected(false);
 
       socket.on("connect", onConnect);

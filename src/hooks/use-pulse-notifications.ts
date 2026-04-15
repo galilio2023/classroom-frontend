@@ -98,9 +98,17 @@ export const usePulseNotifications = () => {
       );
 
       // 🚀 GRADING GLOBAL PULSE: Instant Feedback
+      // 🛡️ SECURITY FIX: Enforce identity guard to prevent grade leaks
       socket.on(
         "submission:graded",
-        (data: { id: number; assignmentTitle?: string; requiresResubmission?: boolean }) => {
+        (data: {
+          id: number;
+          studentId?: string;
+          assignmentTitle?: string;
+          requiresResubmission?: boolean;
+        }) => {
+          if (data.studentId && data.studentId !== identity?.id) return;
+
           open?.({
             type: data.requiresResubmission ? "error" : "success",
             message: data.requiresResubmission

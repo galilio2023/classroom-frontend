@@ -478,6 +478,7 @@ export interface Discussion {
   solvedBy?: Pick<User, "id" | "name" | "image">;
   user: Pick<User, "id" | "name" | "image" | "role">;
   replies?: Discussion[];
+  repliesCount?: number; // 🛡️ DATA GROWTH: Virtual field for lazy loading
   version: number;
   createdAt: string;
   updatedAt: string;

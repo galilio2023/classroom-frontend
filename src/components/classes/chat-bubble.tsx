@@ -2,16 +2,17 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Discussion, User } from "@/types";
-import { Trash2, Reply, CheckCircle2, Trophy, Sparkles } from "lucide-react";
+import { Trash2, Reply, CheckCircle2, Trophy, Sparkles, MoreHorizontal } from "lucide-react";
 import dayjs from "dayjs";
 import { cn } from "@/lib/utils";
 import { MarkdownRenderer } from "@/components/ui/markdown-renderer";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
-import { useGetIdentity } from "@refinedev/core";
+import { useGetIdentity, useCustom } from "@refinedev/core";
+import { useState, useEffect } from "react";
 
 interface ChatBubbleProps {
-  post: Discussion;
+  post: Discussion & { repliesCount?: number };
   isOwn: boolean;
   onDelete: (id: number) => void;
   onReply: (id: number) => void;
@@ -22,8 +23,6 @@ interface ChatBubbleProps {
 
 /**
  * RECURSIVE PATTERN: ChatBubble renders its own children (replies).
- * PERFORMANCE NOTE: For extremely deep threads (>50 levels), consider
- * switching to a virtualized list or flattening the thread hierarchy.
  */
 export const ChatBubble = ({
   post,
@@ -37,6 +36,27 @@ export const ChatBubble = ({
   const { t, i18n } = useTranslation();
   const { data: userIdentity } = useGetIdentity<User>();
   dayjs.locale(i18n.language);
+
+  const [fullReplies, setFullReplies] = useState<Discussion[]>(post.replies || []);
+  const [hasLoadedAll, setHasLoadedAll] = useState(false);
+
+  // 🛡️ DATA GROWTH: Lazy load the rest of the replies if needed
+  const { query } = useCustom({
+    url: `/discussions/${post.id}/replies`,
+    method: "get",
+    queryOptions: {
+      enabled: false,
+    },
+  });
+
+  const { refetch: loadMore, isFetching } = query;
+
+  useEffect(() => {
+    if (query.data) {
+      setFullReplies((query.data as any).data);
+      setHasLoadedAll(true);
+    }
+  }, [query.data]);
 
   return (
     <div
@@ -152,12 +172,12 @@ export const ChatBubble = ({
         )}
 
         {/* Replies List */}
-        {post.replies && post.replies.length > 0 && (
+        {fullReplies.length > 0 && (
           <div className="flex flex-col gap-4 mt-4 w-full border-s-2 border-muted/30 ltr:ps-4 rtl:border-s-0 rtl:border-e-2 rtl:pe-4">
-            {post.replies.map((reply) => (
+            {fullReplies.map((reply) => (
               <ChatBubble
                 key={reply.id}
-                post={{ ...reply, solvedBy: post.solvedBy }}
+                post={{ ...reply, solvedBy: post.solvedBy } as any}
                 isOwn={reply.user?.id === userIdentity?.id}
                 onDelete={onDelete}
                 onReply={onReply}
@@ -166,6 +186,28 @@ export const ChatBubble = ({
                 isStaff={isStaff}
               />
             ))}
+
+            {!hasLoadedAll &&
+              post.repliesCount !== undefined &&
+              post.repliesCount > fullReplies.length && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="mt-2 text-[10px] font-black uppercase tracking-widest text-primary hover:bg-primary/5 gap-2 h-8 rounded-lg"
+                  onClick={() => loadMore()}
+                  disabled={isFetching}
+                >
+                  {isFetching ? (
+                    <Sparkles className="h-3 w-3 animate-spin" />
+                  ) : (
+                    <MoreHorizontal className="h-3.5 w-3.5" />
+                  )}
+                  {t("discussions.loadMoreReplies", {
+                    count: post.repliesCount - fullReplies.length,
+                    defaultValue: `View ${post.repliesCount - fullReplies.length} more replies`,
+                  })}
+                </Button>
+              )}
           </div>
         )}
       </div>
