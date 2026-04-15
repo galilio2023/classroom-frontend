@@ -105,6 +105,20 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
   const [streamingSources, setStreamingSources] = useState<ChatSource[] | null>(null);
   const [isDryRun, setIsDryRun] = useState(false);
 
+  const stopStreaming = useCallback(() => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+    setIsLoading(false);
+    setStreamingMessage("");
+    setStreamingSources(null);
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
+  }, []);
+
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const accumulatorRef = useRef("");
   const lineBufferRef = useRef("");
@@ -448,6 +462,7 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
     input,
     setInput,
     handleSend,
+    stopStreaming,
     isLoading: isLoading || historyQuery?.isLoading || isPermissionsLoading,
     scrollAreaRef,
     isDryRun,

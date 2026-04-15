@@ -1,15 +1,15 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Discussion, User, ListResponse } from "@/types";
+import { Discussion, User } from "@/types";
 import { Trash2, Reply, CheckCircle2, Trophy, Sparkles, MoreHorizontal } from "lucide-react";
 import dayjs from "dayjs";
 import { cn } from "@/lib/utils";
 import { MarkdownRenderer } from "@/components/ui/markdown-renderer";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
-import { useGetIdentity, useCustom, useNotification, type HttpError } from "@refinedev/core";
-import { useState, useEffect } from "react";
+import { useGetIdentity, useList } from "@refinedev/core";
+import { useState } from "react";
 
 interface ChatBubbleProps {
   post: Discussion & { repliesCount?: number };
@@ -35,46 +35,44 @@ export const ChatBubble = ({
 }: ChatBubbleProps) => {
   const { t, i18n } = useTranslation();
   const { data: userIdentity } = useGetIdentity<User>();
-  const { open } = useNotification();
   dayjs.locale(i18n.language);
 
   const [fullReplies, setFullReplies] = useState<Discussion[]>(post.replies || []);
-  const [hasLoadedAll, setHasLoadedAll] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 5;
 
-  // 🛡️ DATA GROWTH: Lazy load the rest of the replies if needed
-  const { query } = useCustom<ListResponse<Discussion>>({
-    url: `/discussions/${post.id}/replies`,
-    method: "get",
+  // 🛡️ REFINE PATTERN: Use useList with filters for better integration with state/cache
+  const { query } = useList<Discussion>({
+    resource: "discussions",
+    filters: [
+      {
+        field: "parentId",
+        operator: "eq",
+        value: post.id,
+      },
+    ],
+    pagination: {
+      current: currentPage,
+      pageSize: pageSize,
+    } as any,
     queryOptions: {
       enabled: false,
     },
   });
 
-  const {
-    data: repliesData,
-    isSuccess,
-    isError,
-    error: queryError,
-    refetch: loadMore,
-    isFetching,
-  } = query;
+  const { isFetching, refetch: loadMore } = query;
 
-  useEffect(() => {
-    if (isSuccess && repliesData) {
-      setFullReplies(repliesData.data.data);
-      setHasLoadedAll(true);
+  const handleLoadMore = async () => {
+    const nextPage = currentPage + 1;
+    setCurrentPage(nextPage);
+    const { data } = await loadMore();
+    if (data?.data) {
+      // 🛡️ DATA GROWTH: Append rather than overwrite
+      setFullReplies((prev) => [...prev, ...(data.data as Discussion[])]);
     }
-  }, [isSuccess, repliesData]);
+  };
 
-  useEffect(() => {
-    if (isError && queryError) {
-      open?.({
-        type: "error",
-        message: t("common.error"),
-        description: (queryError as HttpError).message || t("discussions.errors.loadRepliesFailed"),
-      });
-    }
-  }, [isError, queryError, open, t]);
+  const hasLoadedAll = fullReplies.length >= (post.repliesCount || 0);
 
   return (
     <div
@@ -213,8 +211,8 @@ export const ChatBubble = ({
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="mt-2 text-[10px] font-black uppercase tracking-widest text-primary hover:bg-primary/5 gap-2 h-8 rounded-lg"
-                  onClick={() => loadMore()}
+                  className="mt-2 text-xs font-black uppercase tracking-widest text-primary hover:bg-primary/5 gap-2 h-8 rounded-lg"
+                  onClick={() => handleLoadMore()}
                   disabled={isFetching}
                 >
                   {isFetching ? (

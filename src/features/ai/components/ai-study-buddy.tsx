@@ -24,22 +24,34 @@ interface AIStudyBuddyProps {
 const AIStudyBuddyContent = ({ subject, topic, assignment, classId }: AIStudyBuddyProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
+  const {
+    messages,
+    streamingMessage,
+    streamingSources,
+    input,
+    setInput,
+    handleSend,
+    stopStreaming,
+    isLoading,
+    scrollAreaRef,
+  } = useAIChat({
+    url: AI_API.STUDY_BUDDY,
+    classId,
+    context: { subject, topic, assignment },
+  });
+
   // 🛡️ HARDWARE PRIVACY & SAFETY: Stop activities if tab is hidden
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === "hidden") {
-        // If we had speech/mic, we would stop them here.
-        // For now, we abort any active streaming request.
-        if (isOpen) {
-          // This is a safety measure to ensure we don't waste tokens/bandwidth
-          // if the user is not looking at the screen.
-        }
+        // 🛡️ MANDATE: Stop AI streaming on tab hide to preserve bandwidth and privacy
+        stopStreaming();
       }
     };
 
     document.addEventListener("visibilitychange", handleVisibilityChange);
     return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
-  }, [isOpen]);
+  }, [stopStreaming]);
 
   useEffect(() => {
     const handleOpen = (data?: { classId?: string | number }) => {
@@ -54,21 +66,6 @@ const AIStudyBuddyContent = ({ subject, topic, assignment, classId }: AIStudyBud
     eventBus.on(UI_EVENTS.OPEN_STUDY_BUDDY, handleOpen);
     return () => eventBus.off(UI_EVENTS.OPEN_STUDY_BUDDY, handleOpen);
   }, [classId]);
-
-  const {
-    messages,
-    streamingMessage,
-    streamingSources,
-    input,
-    setInput,
-    handleSend,
-    isLoading,
-    scrollAreaRef,
-  } = useAIChat({
-    url: AI_API.STUDY_BUDDY,
-    classId,
-    context: { subject, topic, assignment },
-  });
 
   return (
     <div

@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from "react";
 import { useNotification } from "@refinedev/core";
 import { handleError } from "@/providers/utils/api-errors";
+import { getFreshSession } from "@/providers/auth";
 import axios from "axios";
 
 export interface BackgroundJob {
@@ -34,8 +35,14 @@ const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
 
 export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [jobs, setJobs] = useState<BackgroundJob[]>([]);
+  const jobsRef = useRef<BackgroundJob[]>([]);
   const { open } = useNotification();
   const abortControllerRef = useRef<AbortController | null>(null);
+
+  // Sync ref with state
+  useEffect(() => {
+    jobsRef.current = jobs;
+  }, [jobs]);
 
   // 1. Initial Load from LocalStorage
   useEffect(() => {
@@ -52,6 +59,7 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           return j.createdAt > hourAgo;
         });
         setJobs(valid);
+        jobsRef.current = valid;
       } catch (e) {
         console.error("Failed to load jobs from storage", e);
       }
@@ -78,7 +86,8 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // 🛡️ RECOVERY: Polling for AI jobs that might have finished while disconnected
   const syncJobs = useCallback(async () => {
-    const activeAiJobs = jobs.filter((j) => j.status === "processing");
+    // 🛡️ PERFORMANCE: Use ref to avoid re-creating this callback every time jobs change
+    const activeAiJobs = jobsRef.current.filter((j) => j.status === "processing");
     if (activeAiJobs.length === 0) return;
 
     if (abortControllerRef.current) abortControllerRef.current.abort();
@@ -86,7 +95,9 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     abortControllerRef.current = controller;
 
     try {
-      const token = localStorage.getItem("tablawy_auth_token");
+      // 🛡️ SECURITY: Use session helper instead of direct localStorage access
+      const { data: session } = await getFreshSession();
+      const token = (session as any)?.token || localStorage.getItem("tablawy_auth_token");
       if (!token) return;
 
       const response = await fetch(`${API_URL}/ai/jobs/sync`, {
@@ -105,7 +116,7 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
       if (data && Array.isArray(data)) {
         data.forEach((remoteJob: any) => {
-          const localJob = jobs.find(
+          const localJob = jobsRef.current.find(
             (j) =>
               j.status === "processing" &&
               j.type === remoteJob.topic &&
@@ -136,7 +147,7 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         abortControllerRef.current = null;
       }
     }
-  }, [jobs, updateJob, open]);
+  }, [updateJob, open]);
 
   useEffect(() => {
     const pollInterval = setInterval(() => void syncJobs(), 30000); // Backoff to 30s as socket trigger will handle the rest
