@@ -150,7 +150,13 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [updateJob, open]);
 
   useEffect(() => {
-    const pollInterval = setInterval(() => void syncJobs(), 30000); // Backoff to 30s as socket trigger will handle the rest
+    const pollInterval = setInterval(() => {
+      const activeAiJobs = jobsRef.current.filter((j) => j.status === "processing");
+      if (activeAiJobs.length > 0) {
+        void syncJobs();
+      }
+    }, 30000); // 🛡️ PERFORMANCE: Only poll if there are active jobs
+
     return () => {
       clearInterval(pollInterval);
       if (abortControllerRef.current) abortControllerRef.current.abort();

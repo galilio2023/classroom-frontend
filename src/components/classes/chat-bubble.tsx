@@ -41,10 +41,10 @@ export const ChatBubble = ({
 
   // 🛡️ RECOVERY: Sync state if prop updates from server (e.g. Socket.io or invalidation)
   useEffect(() => {
-    if (post.replies) {
+    if (post.replies && JSON.stringify(post.replies) !== JSON.stringify(fullReplies)) {
       setFullReplies(post.replies);
     }
-  }, [post.replies]);
+  }, [post.replies, fullReplies]);
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 5;
 
@@ -71,16 +71,16 @@ export const ChatBubble = ({
   const { isFetching, refetch: loadMore } = query;
 
   const handleLoadMore = async () => {
-    const nextPage = currentPage + 1;
-    setCurrentPage(nextPage);
     const { data } = await loadMore();
     if (data?.data) {
       // 🛡️ DATA GROWTH: Append and deduplicate by ID to prevent UI glitches
-      const newItems = data.data as unknown as Discussion[];
+      const newItems = data.data as Discussion[];
       setFullReplies((prev) => {
         const combined = [...prev, ...newItems];
         return Array.from(new Map(combined.map((item) => [item.id, item])).values());
       });
+      // 🛡️ SRE: Only increment page after successful load to prevent offset drift
+      setCurrentPage((prev) => prev + 1);
     }
   };
 
