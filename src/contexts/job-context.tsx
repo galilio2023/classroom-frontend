@@ -1,4 +1,6 @@
-import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
+import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from "react";
+import { useNotification } from "@refinedev/core";
+import { handleError } from "@/providers/utils/api-errors";
 import axios from "axios";
 
 export interface BackgroundJob {
@@ -32,6 +34,8 @@ const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
 
 export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [jobs, setJobs] = useState<BackgroundJob[]>([]);
+  const { open } = useNotification();
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   // 1. Initial Load from LocalStorage
   useEffect(() => {
@@ -77,16 +81,30 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const activeAiJobs = jobs.filter((j) => j.status === "processing");
     if (activeAiJobs.length === 0) return;
 
+    if (abortControllerRef.current) abortControllerRef.current.abort();
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("tablawy_auth_token");
       if (!token) return;
 
-      const { data } = await axios.get(`${API_URL}/ai/jobs/sync`, {
-        headers: { Authorization: `Bearer ${token}` },
+      const response = await fetch(`${API_URL}/ai/jobs/sync`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        signal: controller.signal,
       });
 
-      if (data.data && Array.isArray(data.data)) {
-        data.data.forEach((remoteJob: any) => {
+      if (!response.ok) {
+        throw await handleError(response);
+      }
+
+      const { data } = await response.json();
+
+      if (data && Array.isArray(data)) {
+        data.forEach((remoteJob: any) => {
           const localJob = jobs.find(
             (j) =>
               j.status === "processing" &&
@@ -104,14 +122,28 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           }
         });
       }
-    } catch (e) {
+    } catch (e: any) {
+      if (e.name === "AbortError") return;
+
       console.error("AI Job Sync failed:", e);
+      open?.({
+        type: "error",
+        message: "Sync Failed",
+        description: e.message || "Failed to synchronize background jobs.",
+      });
+    } finally {
+      if (abortControllerRef.current === controller) {
+        abortControllerRef.current = null;
+      }
     }
-  }, [jobs, updateJob]);
+  }, [jobs, updateJob, open]);
 
   useEffect(() => {
     const pollInterval = setInterval(() => void syncJobs(), 30000); // Backoff to 30s as socket trigger will handle the rest
-    return () => clearInterval(pollInterval);
+    return () => {
+      clearInterval(pollInterval);
+      if (abortControllerRef.current) abortControllerRef.current.abort();
+    };
   }, [syncJobs]);
 
   const removeJob = (id: string) => {

@@ -1,4 +1,30 @@
 {
+  "discussions": {
+    "title": "النقاشات",
+    "description": "تواصل مع زملائك ومعلميك في الوقت الفعلي.",
+    "start": "نقاش جديد",
+    "searchPlaceholder": "البحث في النقاشات...",
+    "filter": "تصفية",
+    "empty": {
+      "title": "لم يتم العثور على نقاشات",
+      "desc": "ابدأ المحادثة بنشر نقاش جديد."
+    },
+    "stats": {
+      "total": "إجمالي النقاشات",
+      "active": "المواضيع النشطة",
+      "replies": "إجمالي الردود"
+    },
+    "labels": {
+      "trending": "رائج",
+      "replies": "ردود",
+      "options": "خيارات",
+      "open": "فتح",
+      "follow": "متابعة"
+    },
+    "errors": {
+      "loadRepliesFailed": "فشل في تحميل الردود"
+    }
+  },
   "classes": {
     "classes": "الفصول الدراسية",
     "create": {

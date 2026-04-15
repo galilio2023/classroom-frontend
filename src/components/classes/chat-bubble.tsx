@@ -1,14 +1,14 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Discussion, User } from "@/types";
+import { Discussion, User, ListResponse } from "@/types";
 import { Trash2, Reply, CheckCircle2, Trophy, Sparkles, MoreHorizontal } from "lucide-react";
 import dayjs from "dayjs";
 import { cn } from "@/lib/utils";
 import { MarkdownRenderer } from "@/components/ui/markdown-renderer";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
-import { useGetIdentity, useCustom } from "@refinedev/core";
+import { useGetIdentity, useCustom, useNotification, type HttpError } from "@refinedev/core";
 import { useState, useEffect } from "react";
 
 interface ChatBubbleProps {
@@ -35,13 +35,14 @@ export const ChatBubble = ({
 }: ChatBubbleProps) => {
   const { t, i18n } = useTranslation();
   const { data: userIdentity } = useGetIdentity<User>();
+  const { open } = useNotification();
   dayjs.locale(i18n.language);
 
   const [fullReplies, setFullReplies] = useState<Discussion[]>(post.replies || []);
   const [hasLoadedAll, setHasLoadedAll] = useState(false);
 
   // 🛡️ DATA GROWTH: Lazy load the rest of the replies if needed
-  const { query } = useCustom({
+  const { query } = useCustom<ListResponse<Discussion>>({
     url: `/discussions/${post.id}/replies`,
     method: "get",
     queryOptions: {
@@ -49,14 +50,31 @@ export const ChatBubble = ({
     },
   });
 
-  const { refetch: loadMore, isFetching } = query;
+  const {
+    data: repliesData,
+    isSuccess,
+    isError,
+    error: queryError,
+    refetch: loadMore,
+    isFetching,
+  } = query;
 
   useEffect(() => {
-    if (query.data) {
-      setFullReplies((query.data as any).data);
+    if (isSuccess && repliesData) {
+      setFullReplies(repliesData.data.data);
       setHasLoadedAll(true);
     }
-  }, [query.data]);
+  }, [isSuccess, repliesData]);
+
+  useEffect(() => {
+    if (isError && queryError) {
+      open?.({
+        type: "error",
+        message: t("common.error"),
+        description: (queryError as HttpError).message || t("discussions.errors.loadRepliesFailed"),
+      });
+    }
+  }, [isError, queryError, open, t]);
 
   return (
     <div
@@ -104,7 +122,9 @@ export const ChatBubble = ({
             "relative p-3 rounded-2xl shadow-sm border transition-all duration-500",
             isOwn
               ? "bg-primary text-primary-foreground rounded-tr-none border-primary/20"
-              : "bg-card rounded-tl-none border-border/50",
+              : post.user?.role === "teacher" && isStaff
+                ? "bg-ai-primary text-white border-none rounded-tl-none shadow-[0_4px_20px_-5px_rgba(var(--ai-primary),0.3)]"
+                : "bg-card rounded-tl-none border-border/50",
             post.isSolved && !post.parentId
               ? "ring-2 ring-green-500/20 shadow-lg shadow-green-500/5"
               : ""
@@ -177,7 +197,7 @@ export const ChatBubble = ({
             {fullReplies.map((reply) => (
               <ChatBubble
                 key={reply.id}
-                post={{ ...reply, solvedBy: post.solvedBy } as any}
+                post={{ ...reply, solvedBy: post.solvedBy }}
                 isOwn={reply.user?.id === userIdentity?.id}
                 onDelete={onDelete}
                 onReply={onReply}

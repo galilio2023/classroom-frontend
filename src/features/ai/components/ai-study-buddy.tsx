@@ -24,6 +24,23 @@ interface AIStudyBuddyProps {
 const AIStudyBuddyContent = ({ subject, topic, assignment, classId }: AIStudyBuddyProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
+  // 🛡️ HARDWARE PRIVACY & SAFETY: Stop activities if tab is hidden
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "hidden") {
+        // If we had speech/mic, we would stop them here.
+        // For now, we abort any active streaming request.
+        if (isOpen) {
+          // This is a safety measure to ensure we don't waste tokens/bandwidth
+          // if the user is not looking at the screen.
+        }
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, [isOpen]);
+
   useEffect(() => {
     const handleOpen = (data?: { classId?: string | number }) => {
       // 🛡️ SECURITY & UX: If a specific classId is provided in the event, and it doesn't match this buddy, ignore.

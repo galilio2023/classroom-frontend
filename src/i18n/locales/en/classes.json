@@ -1,4 +1,30 @@
 {
+  "discussions": {
+    "title": "Discussions",
+    "description": "Engage with your classmates and teachers in real-time.",
+    "start": "New Discussion",
+    "searchPlaceholder": "Search discussions...",
+    "filter": "Filter",
+    "empty": {
+      "title": "No discussions found",
+      "desc": "Start the conversation by posting a new discussion."
+    },
+    "stats": {
+      "total": "Total Discussions",
+      "active": "Active Topics",
+      "replies": "Total Replies"
+    },
+    "labels": {
+      "trending": "Trending",
+      "replies": "Replies",
+      "options": "Options",
+      "open": "Open",
+      "follow": "Follow"
+    },
+    "errors": {
+      "loadRepliesFailed": "Failed to load replies"
+    }
+  },
   "classes": {
     "classes": "Classes",
     "create": {
