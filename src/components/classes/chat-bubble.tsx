@@ -9,7 +9,7 @@ import { MarkdownRenderer } from "@/components/ui/markdown-renderer";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import { useGetIdentity, useList } from "@refinedev/core";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface ChatBubbleProps {
   post: Discussion & { repliesCount?: number };
@@ -38,6 +38,13 @@ export const ChatBubble = ({
   dayjs.locale(i18n.language);
 
   const [fullReplies, setFullReplies] = useState<Discussion[]>(post.replies || []);
+
+  // 🛡️ RECOVERY: Sync state if prop updates from server (e.g. Socket.io or invalidation)
+  useEffect(() => {
+    if (post.replies) {
+      setFullReplies(post.replies);
+    }
+  }, [post.replies]);
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 5;
 
@@ -53,9 +60,9 @@ export const ChatBubble = ({
     ],
     pagination: {
       mode: "server",
-      current: currentPage,
+      currentPage: currentPage,
       pageSize: pageSize,
-    } as any,
+    },
     queryOptions: {
       enabled: false,
     },
