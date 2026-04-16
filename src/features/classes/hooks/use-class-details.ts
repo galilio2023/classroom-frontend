@@ -13,7 +13,7 @@ import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import debounce from "lodash/debounce";
 import { useQueryClient } from "@tanstack/react-query";
-import { useUserRole } from "@/hooks/use-user-role";
+import { useUserRole } from "@/features/users/hooks/use-user-role";
 
 export const useClassDetails = (classId: string) => {
   const { t } = useTranslation();

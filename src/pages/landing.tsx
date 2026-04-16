@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Zap, ChevronRight, Sparkles, Users, GraduationCap } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { LandingHero } from "@/components/landing/hero";
+import { LandingHero } from "@/features/landing/components/hero";
 import { cn } from "@/lib/utils";
 
 const LandingPage = () => {

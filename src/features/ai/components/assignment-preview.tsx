@@ -6,6 +6,7 @@ import ReactMarkdown from "react-markdown";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
+import { HagerModeExport } from "./hager-mode-export";
 
 interface AssignmentPreviewProps {
   content: string;
@@ -122,6 +123,7 @@ export const AssignmentPreview: React.FC<AssignmentPreviewProps> = ({ content, o
                   {t("buttons.createAssignment")}
                 </Button>
               )}
+              <HagerModeExport title="Generated Handout" content={content} />
               <Button variant="outline" size="icon" onClick={copyToClipboard} className="h-8 w-8">
                 {copied ? (
                   <Check className="h-3.5 w-3.5 text-success" />

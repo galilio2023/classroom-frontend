@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Star, Zap, Sparkles, Flame, BrainCircuit } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { XPProgressBar } from "@/components/xp-progress-bar";
+import { XPProgressBar } from "@/features/engagement/components/xp-progress-bar";
 import { useTranslation } from "react-i18next";
 
 interface MissionControlHeroProps {

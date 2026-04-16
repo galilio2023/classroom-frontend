@@ -25,7 +25,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import { useUserRole } from "@/hooks/use-user-role";
+import { useUserRole } from "@/features/users/hooks/use-user-role";
 
 interface RecentActivityProps {
   limit?: number;

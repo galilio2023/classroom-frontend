@@ -55,7 +55,7 @@ import { userFormSchema } from "@/schemas/user";
 import { UserRole, User, UserStatus, Department } from "@/types";
 import usePageTitle from "@/hooks/use-page-title";
 import { motion } from "framer-motion";
-import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
+import { Breadcrumb } from "@/components/refine/layout/breadcrumb";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
@@ -69,6 +69,10 @@ const UsersEdit = () => {
   const { data: identity } = useGetIdentity<User>();
   const isAdmin = identity?.role === "admin";
   const isStudent = identity?.role === "student";
+  const isParent = identity?.role === "parent";
+
+  // 🛡️ SECURITY: Global read-only enforcement for restricted roles
+  const isReadOnly = isParent;
 
   const {
     refineCore: { onFinish, formLoading, query },
@@ -451,29 +455,31 @@ const UsersEdit = () => {
                   </div>
                 </CardContent>
 
-                <CardFooter className="p-8 bg-primary/2 border-t border-primary/5 flex justify-end">
-                  <Button
-                    type="submit"
-                    size="lg"
-                    disabled={formLoading}
-                    className="h-14 px-10 rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl shadow-primary/20 group"
-                  >
-                    {formLoading ? (
-                      <Loader2 className="h-4 w-4 animate-spin me-2" />
-                    ) : (
-                      <Save className="h-4 w-4 me-2 group-hover:scale-110 transition-transform" />
-                    )}
-                    {formLoading ? t("profile.toasts.saving") : t("buttons.saveProfile")}
-                    {!formLoading && (
-                      <ArrowRight
-                        className={cn(
-                          "h-4 w-4 ms-2 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all",
-                          isAr && "rotate-180"
-                        )}
-                      />
-                    )}
-                  </Button>
-                </CardFooter>
+                {!isReadOnly && (
+                  <CardFooter className="p-8 bg-primary/2 border-t border-primary/5 flex justify-end">
+                    <Button
+                      type="submit"
+                      size="lg"
+                      disabled={formLoading}
+                      className="h-14 px-10 rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl shadow-primary/20 group"
+                    >
+                      {formLoading ? (
+                        <Loader2 className="h-4 w-4 animate-spin me-2" />
+                      ) : (
+                        <Pencil className="h-4 w-4 me-2 group-hover:scale-110 transition-transform" />
+                      )}
+                      {formLoading ? t("profile.toasts.saving") : t("buttons.saveProfile")}
+                      {!formLoading && (
+                        <ArrowRight
+                          className={cn(
+                            "h-4 w-4 ms-2 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all",
+                            isAr && "rotate-180"
+                          )}
+                        />
+                      )}
+                    </Button>
+                  </CardFooter>
+                )}
               </Card>
             </form>
           </Form>

@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { useUserRole } from "@/hooks/use-user-role";
+import { useUserRole } from "@/features/users/hooks/use-user-role";
 import { Assignment } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import { CanAccess } from "@/components/auth/can-access";
+import { CanAccess } from "@/features/auth/components/can-access";
 import "dayjs/locale/ar";
 
 dayjs.extend(relativeTime);

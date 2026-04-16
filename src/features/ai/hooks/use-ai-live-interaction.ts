@@ -3,9 +3,9 @@ import { useNotification, usePermissions } from "@refinedev/core";
 import { useTranslation } from "react-i18next";
 import { BACKEND_URL } from "@/config";
 import { BasePermissions, UserRole } from "@/types";
-import { usePersistentLive } from "@/hooks/use-persistent-live";
+import { usePersistentLive } from "@/features/classes/hooks/use-persistent-live";
 import { AI_API } from "@/constants/api";
-import { AIVisualState } from "@/features/ai/types/ai";
+import { AIVisualState } from "@/features/ai/types";
 import { useAiAccess } from "./use-ai-access";
 import { handleError } from "@/providers/utils/api-errors";
 

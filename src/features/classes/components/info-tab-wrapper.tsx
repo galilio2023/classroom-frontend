@@ -1,8 +1,8 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { DetailsTab } from "@/components/classes/show/details-tab";
-import { StaffTab } from "@/components/classes/show/staff-tab";
+import { DetailsTab } from "@/features/classes/components/show/details-tab";
+import { StaffTab } from "@/features/classes/components/show/staff-tab";
 import { Info, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Class } from "@/types";

@@ -4,7 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 import { registerSW } from "virtual:pwa-register";
-import { ThemeProvider } from "./components/refine-ui/theme/theme-provider";
+import { ThemeProvider } from "./components/refine/theme/theme-provider";
 import { HelmetProvider } from "react-helmet-async";
 
 // Handle Vite dynamic import errors (e.g., when a new version is deployed and old chunks are gone)

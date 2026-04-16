@@ -10,8 +10,8 @@ import {
 import { User, UserRole, Class } from "@/types";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
-import { usePersistentLive } from "@/hooks/use-persistent-live";
-import { useCapabilities } from "@/hooks/use-capabilities";
+import { usePersistentLive } from "@/features/classes/hooks/use-persistent-live";
+import { useCapabilities } from "@/features/users/hooks/use-capabilities";
 import { handleError } from "@/providers/utils/api-errors";
 
 interface UseLiveSessionReturn {

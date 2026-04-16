@@ -9,7 +9,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { CreateView } from "@/components/refine-ui/views/create-view";
+import { CreateView } from "@/components/refine/views/create-view";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AIQuizHelper } from "@/features/ai/components/ai-quiz-helper";
 import {

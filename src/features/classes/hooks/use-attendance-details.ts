@@ -4,7 +4,7 @@ import { useSearchParams } from "react-router-dom";
 import { format } from "date-fns";
 import { Enrollment, AttendanceStatus, Attendance } from "@/types";
 import { useTranslation } from "react-i18next";
-import { useUserRole } from "@/hooks/use-user-role";
+import { useUserRole } from "@/features/users/hooks/use-user-role";
 
 interface AttendanceHistoryGroup {
   date: string;

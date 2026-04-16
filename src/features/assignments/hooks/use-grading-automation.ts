@@ -12,7 +12,7 @@ interface UseGradingAutomationProps {
   isOpen: boolean;
   isStaff: boolean;
   isDraft?: boolean;
-  setValue: (name: string, value: any) => void;
+  setValue: (name: any, value: any) => void;
 }
 
 export const useGradingAutomation = ({

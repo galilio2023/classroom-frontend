@@ -4,7 +4,7 @@ import { User, Class } from "@/types";
 import { DashboardData } from "@/types/dashboard";
 import { useTerm } from "@/contexts/term-context";
 import { socket, connectSocket } from "@/lib/socket";
-import { useUserRole } from "@/hooks/use-user-role";
+import { useUserRole } from "@/features/users/hooks/use-user-role";
 
 export const useDashboard = () => {
   const { list, show } = useNavigation();
@@ -18,6 +18,8 @@ export const useDashboard = () => {
     isTeacher,
     isStudent,
     isParent,
+    isPlatformAdmin,
+    isSchoolAdmin,
   } = useUserRole();
 
   // Unified Dashboard Query (Merged Core + Analytics for better performance)
@@ -142,7 +144,15 @@ export const useDashboard = () => {
     coreData: dashboardData,
     analyticsData: dashboardData,
     selectedTerm,
-    roles: { isStaff, isAdmin, isTeacher, isStudent, isParent },
+    roles: {
+      isStaff,
+      isAdmin,
+      isTeacher,
+      isStudent,
+      isParent,
+      isPlatformAdmin,
+      isSchoolAdmin,
+    },
     navigation: {
       list,
       show,

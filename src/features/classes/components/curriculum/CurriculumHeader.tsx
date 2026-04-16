@@ -1,7 +1,7 @@
 import { BookOpen, Wand2, Sparkles, PlusCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { CanAccess } from "@/components/auth/can-access";
+import { CanAccess } from "@/features/auth/components/can-access";
 import { useTranslation } from "react-i18next";
 
 interface CurriculumHeaderProps {

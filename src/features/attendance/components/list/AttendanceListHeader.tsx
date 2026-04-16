@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb.tsx";
+import { Breadcrumb } from "@/components/refine/layout/breadcrumb.tsx";
 import { QrCode, ScanLine } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";

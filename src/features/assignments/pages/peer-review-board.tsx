@@ -18,10 +18,10 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { PeerReview } from "@/types";
-import { PeerReviewForm } from "@/components/peer-review-form";
+import { PeerReviewForm } from "@/features/assignments/components/peer-review-form";
 import {} from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
+import { Breadcrumb } from "@/components/refine/layout/breadcrumb";
 import usePageTitle from "@/hooks/use-page-title";
 
 const PeerReviewBoard = () => {

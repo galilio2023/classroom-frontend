@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { StudentAcademicJourney } from "./student-academic-journey";
 import { UpcomingAssignmentsList } from "./upcoming-assignments-list";
 import {} from "./recent-activity";
-import { ErrorBoundary } from "@/components/error-boundary";
+import { ErrorBoundary } from "@/components/guards/error-boundary";
 import { User, DashboardData } from "@/types";
 import { usePWAInstall } from "@/hooks/use-pwa-install";
 import { useTranslation } from "react-i18next";

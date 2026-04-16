@@ -16,15 +16,27 @@ When implementing or modifying AI streaming hooks (e.g., `useAIChat`, `useAILive
 - **Cleanup**: Every streaming request MUST be bound to an `AbortController`. Ensure `.abort()` is called on component unmount.
 - **Feedback**: Provide immediate visual feedback (e.g., updating a `currentScript` state) during the stream to ensure the UI feels responsive.
 
-### 2. Standardized Error Handling
+### 4. Rural Hardening (Offline-First)
+- **Mandate**: Core study features (Lessons, Quizzes) MUST function without internet.
+- **Action**: Use `Dexie` for IndexedDB persistence and implement the `useOfflineSync` hook to reconcile data when connection is restored.
+- **Why**: Essential for students in rural areas with unreliable data coverage.
+
+### 5. Standardized Error Handling
 - **Mandate**: NEVER use generic `Error` strings for API failures.
 - **Action**: Always import and use the `handleError` utility from `@/providers/utils/api-errors`.
 - **Why**: This ensures that 429 (Rate Limit) and 503 (Circuit Breaker) states are correctly reported to the user via Refine's notification system.
 
-### 3. Hardware Privacy & Safety
+### 6. Hardware Privacy & Safety
 - **Mandate**: Components using microphone or camera MUST implement "Tab Visibility Safety".
 - **Action**: Use a `visibilitychange` event listener to stop active speech synthesis or microphone recording if the user leaves the tab.
 
 ## 🎨 Visual Identifiers
 - AI features must use the `ai-primary` color gradient.
 - Use the `Sparkles` icon for generative features and `BrainCircuit` for analysis features.
+- **Offline Mode**: Use the `WifiOff` icon and a pulsing red badge for offline indicators.
+
+### 7. Hager Mode (High-Fidelity Handouts)
+- **Mandate**: Teachers MUST have a "one-click" high-fidelity PDF export for handouts.
+- **Precision**: PDFs MUST correctly render Arabic typography and LaTeX math formulas.
+- **Why**: Ensures the platform remains useful in traditional paper-based classroom settings.
+

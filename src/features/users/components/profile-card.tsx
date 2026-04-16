@@ -13,7 +13,7 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { XPProgressBar } from "@/components/xp-progress-bar";
+import { XPProgressBar } from "@/features/engagement/components/xp-progress-bar";
 import { getLevelProgress } from "@/lib/xp";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";

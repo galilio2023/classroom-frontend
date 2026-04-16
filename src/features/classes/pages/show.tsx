@@ -4,9 +4,9 @@ import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
 
-import { ClassBanner } from "@/components/classes/show/class-banner";
-import { ClassHeader } from "@/components/classes/show/class-header";
-import { useClassRealtime } from "@/hooks/use-class-realtime";
+import { ClassBanner } from "@/features/classes/components/show/class-banner";
+import { ClassHeader } from "@/features/classes/components/show/class-header";
+import { useClassRealtime } from "@/features/classes/hooks/use-class-realtime";
 
 // Modularized Components
 import { ContentTabWrapper } from "../components/content-tab-wrapper";

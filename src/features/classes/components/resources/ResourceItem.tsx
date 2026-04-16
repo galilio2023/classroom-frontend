@@ -14,6 +14,7 @@ import {
   Play,
   Pin,
   PinOff,
+  Download,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -24,7 +25,8 @@ import {
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
-import { usePersistentLive } from "@/hooks/use-persistent-live";
+import { usePersistentLive } from "@/features/classes/hooks/use-persistent-live";
+import { useOfflineSync } from "@/hooks/useOfflineSync";
 
 interface ResourceItemProps {
   res: Resource;
@@ -45,6 +47,7 @@ export const ResourceItem = ({
 }: ResourceItemProps) => {
   const { t, i18n } = useTranslation();
   const { setActiveVideo } = usePersistentLive();
+  const { downloadLesson } = useOfflineSync();
   const isAr = i18n.language === "ar";
 
   return (
@@ -148,40 +151,66 @@ export const ResourceItem = ({
         )}
 
         {res.type === "note" ? (
-          <Button
-            variant="ghost"
-            size="sm"
-            asChild
-            className="h-9 rounded-xl px-4 text-[10px] font-black uppercase tracking-widest gap-2 text-primary hover:bg-primary/10 transition-all"
-          >
-            <Link to={`/classes/${classId}/lessons/${res.id}`}>
-              <ExternalLink className="h-3.5 w-3.5" />
-              {t("buttons.openLesson")}
-              <ArrowRight
-                className={cn(
-                  "h-3 w-3 opacity-0 group-hover/item:opacity-100 transition-all",
-                  isAr
-                    ? "translate-x-2 group-hover:translate-x-0 rotate-180"
-                    : "-translate-x-2 group-hover:translate-x-0"
-                )}
-              />
-            </Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-9 w-9 rounded-xl text-muted-foreground hover:bg-primary/5 hover:text-primary transition-all"
+              onClick={(e) => {
+                e.stopPropagation();
+                downloadLesson(res);
+              }}
+            >
+              <Download className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              asChild
+              className="h-9 rounded-xl px-4 text-[10px] font-black uppercase tracking-widest gap-2 text-primary hover:bg-primary/10 transition-all"
+            >
+              <Link to={`/classes/${classId}/lessons/${res.id}`}>
+                <ExternalLink className="h-3.5 w-3.5" />
+                {t("buttons.openLesson")}
+                <ArrowRight
+                  className={cn(
+                    "h-3 w-3 opacity-0 group-hover/item:opacity-100 transition-all",
+                    isAr
+                      ? "translate-x-2 group-hover:translate-x-0 rotate-180"
+                      : "-translate-x-2 group-hover:translate-x-0"
+                  )}
+                />
+              </Link>
+            </Button>
+          </div>
         ) : res.type === "video" ? (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-9 rounded-xl px-4 text-[10px] font-black uppercase tracking-widest gap-2 text-blue-500 hover:bg-blue-500/10 transition-all"
-            onClick={(e) => {
-              e.stopPropagation();
-              if (res.url) {
-                setActiveVideo(res.url, res.title);
-              }
-            }}
-          >
-            <Play className="h-3.5 w-3.5 fill-blue-500" />
-            {t("buttons.watchNow")}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-9 w-9 rounded-xl text-muted-foreground hover:bg-primary/5 hover:text-primary transition-all"
+              onClick={(e) => {
+                e.stopPropagation();
+                downloadLesson(res);
+              }}
+            >
+              <Download className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-9 rounded-xl px-4 text-[10px] font-black uppercase tracking-widest gap-2 text-blue-500 hover:bg-blue-500/10 transition-all"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (res.url) {
+                  setActiveVideo(res.url, res.title);
+                }
+              }}
+            >
+              <Play className="h-3.5 w-3.5 fill-blue-500" />
+              {t("buttons.watchNow")}
+            </Button>
+          </div>
         ) : (
           <Button
             variant="ghost"

@@ -11,7 +11,7 @@ import {
   BrainCircuit,
   ShieldCheck,
   LayoutGrid,
-  FileText,
+  FileEdit,
   Send,
   CheckSquare,
   Library,
@@ -37,6 +37,8 @@ import {
   CalendarCheck,
   Award,
   Megaphone,
+  ScrollText,
+  UserCheck,
 } from "lucide-react";
 import { ResourceProps } from "@refinedev/core";
 import { UserRole } from "@/types";
@@ -50,6 +52,15 @@ export const resources: ResourceProps[] = [
       label: "resources.dashboard.label",
       icon: <Home />,
       roles: [UserRole.ADMIN, UserRole.TEACHER, UserRole.STUDENT, UserRole.PARENT],
+    },
+  },
+  {
+    name: "school-dashboard",
+    list: "/school/dashboard",
+    meta: {
+      label: "resources.school-dashboard.label",
+      icon: <Building2 />,
+      roles: [UserRole.ADMIN],
     },
   },
   {
@@ -101,10 +112,20 @@ export const resources: ResourceProps[] = [
 
   // --- AI HUB ---
   {
+    name: "ai-approvals",
+    list: "/ai/approvals",
+    meta: {
+      group: "groups.ai-hub",
+      label: "resources.ai-approvals.label",
+      icon: <UserCheck />,
+      roles: [UserRole.ADMIN, UserRole.TEACHER],
+    },
+  },
+  {
     name: "ai-assistant",
     list: "/ai-assistant",
     meta: {
-      group: "groups.ai-lab",
+      group: "groups.ai-hub",
       label: "resources.ai-assistant.label",
       icon: <Sparkles />,
       roles: [UserRole.ADMIN, UserRole.TEACHER],
@@ -114,7 +135,7 @@ export const resources: ResourceProps[] = [
     name: "ai-study-lab",
     list: "/ai-study-lab",
     meta: {
-      group: "groups.ai-lab",
+      group: "groups.ai-hub",
       label: "resources.ai-study-lab.label",
       icon: <BrainCircuit />,
       roles: [UserRole.ADMIN, UserRole.STUDENT],
@@ -124,18 +145,18 @@ export const resources: ResourceProps[] = [
     name: "memory-lab",
     list: "/memory-lab",
     meta: {
-      group: "groups.ai-lab",
+      group: "groups.ai-hub",
       label: "resources.memory-lab.label",
       icon: <Flame />,
       roles: [UserRole.ADMIN, UserRole.STUDENT],
     },
   },
   {
-    name: "study-planner",
+    name: "ai-history",
     list: "/ai-history",
     show: "/ai-history/show/:id",
     meta: {
-      group: "groups.ai-lab",
+      group: "groups.ai-hub",
       label: "resources.ai-history.label",
       icon: <History />,
       roles: [UserRole.ADMIN, UserRole.TEACHER, UserRole.STUDENT],
@@ -145,7 +166,7 @@ export const resources: ResourceProps[] = [
     name: "study-planner",
     list: "/study-planner",
     meta: {
-      group: "groups.ai-lab",
+      group: "groups.ai-hub",
       label: "resources.study-planner.label",
       icon: <CalendarDays />,
       roles: [UserRole.ADMIN, UserRole.STUDENT],
@@ -199,16 +220,6 @@ export const resources: ResourceProps[] = [
     },
   },
   {
-    name: "peer-reviews",
-    list: "/peer-reviews",
-    meta: {
-      group: "groups.curriculum",
-      label: "resources.peer-reviews.label",
-      icon: <Users />,
-      roles: [UserRole.STUDENT, UserRole.ADMIN, UserRole.TEACHER],
-    },
-  },
-  {
     name: "attendance",
     list: "/attendance",
     meta: {
@@ -216,16 +227,6 @@ export const resources: ResourceProps[] = [
       label: "resources.attendance.label",
       icon: <CheckSquare />,
       roles: [UserRole.ADMIN, UserRole.TEACHER, UserRole.STUDENT, UserRole.PARENT],
-    },
-  },
-  {
-    name: "peer-reviews",
-    list: "/peer-reviews",
-    meta: {
-      group: "groups.academic",
-      label: "resources.peer-reviews.label",
-      icon: <Users />,
-      roles: [UserRole.ADMIN, UserRole.TEACHER, UserRole.STUDENT],
     },
   },
   {
@@ -249,7 +250,7 @@ export const resources: ResourceProps[] = [
     meta: {
       group: "groups.curriculum",
       label: "resources.assignments.label",
-      icon: <FileText />,
+      icon: <FileEdit />,
       roles: [UserRole.ADMIN, UserRole.TEACHER, UserRole.STUDENT],
     },
   },
@@ -274,6 +275,16 @@ export const resources: ResourceProps[] = [
       label: "resources.submissions.label",
       icon: <Send />,
       roles: [UserRole.ADMIN, UserRole.TEACHER, UserRole.STUDENT],
+    },
+  },
+  {
+    name: "peer-reviews",
+    list: "/peer-reviews",
+    meta: {
+      group: "groups.curriculum",
+      label: "resources.peer-reviews.label",
+      icon: <Users />,
+      roles: [UserRole.STUDENT, UserRole.ADMIN, UserRole.TEACHER],
     },
   },
   {
@@ -348,7 +359,7 @@ export const resources: ResourceProps[] = [
     meta: {
       group: "groups.progress",
       label: "resources.report-card.label",
-      icon: <FileText />,
+      icon: <ScrollText />,
       roles: [UserRole.ADMIN, UserRole.TEACHER, UserRole.STUDENT, UserRole.PARENT],
     },
   },
@@ -494,6 +505,13 @@ export const resources: ResourceProps[] = [
       group: "groups.admin",
       label: "resources.ai-governance.label",
       icon: <ShieldCheck />,
+      roles: [UserRole.ADMIN],
+    },
+  },
+  {
+    name: "system_prompts",
+    meta: {
+      hide: true,
       roles: [UserRole.ADMIN],
     },
   },

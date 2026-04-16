@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
-import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
+import { Breadcrumb } from "@/components/refine/layout/breadcrumb";
 import { useTranslation } from "react-i18next";
 import { useUserProfile } from "../hooks/use-user-profile";
 import { ProfileCard } from "../components/profile-card";

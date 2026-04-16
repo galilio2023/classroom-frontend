@@ -1,6 +1,6 @@
 import { useDashboard } from "@/features/dashboard/hooks/use-dashboard";
-import { useUserRole } from "@/hooks/use-user-role";
-import { useGetIdentity } from "@refinedev/core";
+import { useUserRole } from "@/features/users/hooks/use-user-role";
+import { useGetIdentity, useCan } from "@refinedev/core";
 import { User } from "@/types";
 
 /**
@@ -12,11 +12,18 @@ export const useAiAccess = () => {
   const { isParent, isLoading: isRoleLoading } = useUserRole();
   const { data: user } = useGetIdentity<User>();
 
+  // 🛡️ RBAC: Secondary layer of defense via Refine accessControl
+  const { data: canAccess, isLoading: isCanLoading } = useCan({
+    resource: "ai_features",
+    action: "access",
+  });
+
   // 🛡️ Global Master Switch: Only enabled if coreData is loaded and explicitly true
   const isAiEnabled = !!coreData?.globalConfig && coreData.globalConfig.enableAiFeatures === true;
 
   // 🛡️ RBAC: AI interactive features are strictly disabled for the Parent role
-  const isAllowed = !isParent;
+  // We use both the simple role check AND the official access control result.
+  const isAllowed = !isParent && (canAccess?.can ?? true);
 
   // 📊 QUOTA: Check if user has exceeded their monthly token limit
   const isQuotaExceeded = user ? (user.aiTokensUsed || 0) >= (user.aiMonthlyLimit || 50000) : false;
@@ -25,6 +32,6 @@ export const useAiAccess = () => {
     isAiEnabled,
     isAllowed,
     isQuotaExceeded,
-    isLoading: isDashboardLoading || isRoleLoading,
+    isLoading: isDashboardLoading || isRoleLoading || isCanLoading,
   };
 };

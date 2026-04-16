@@ -5,7 +5,7 @@ import { AIVisionAssistant } from "@/features/ai/components/ai-vision-assistant"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Sparkles, FileText, BrainCircuit, LayoutDashboard, Info, Camera } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
+import { Breadcrumb } from "@/components/refine/layout/breadcrumb";
 import usePageTitle from "@/hooks/use-page-title";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";

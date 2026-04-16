@@ -3,7 +3,7 @@ import { useList, useCreate, useUpdate, useDelete, useCustomMutation } from "@re
 import { Announcement } from "@/types";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
-import { useUserRole } from "@/hooks/use-user-role";
+import { useUserRole } from "@/features/users/hooks/use-user-role";
 
 export const useAnnouncementTab = (classId: string) => {
   const { t } = useTranslation();

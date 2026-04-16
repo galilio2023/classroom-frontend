@@ -13,7 +13,7 @@ import { BasePermissions, UserRole, User } from "@/types";
 import { ChatSource, Message } from "@/types/ai";
 import { offlineDB } from "@/lib/offline-db";
 import { useAiAccess } from "./use-ai-access";
-import { handleError } from "@/providers/utils/api-errors";
+import { AiStreamClient } from "../lib/ai-stream-client";
 
 interface UseAIChatProps {
   url: string;
@@ -30,15 +30,6 @@ interface ChatHistoryItem {
 
 interface ChatHistoryResponse {
   data: ChatHistoryItem[];
-}
-
-interface StreamData {
-  text?: string;
-  sources?: ChatSource[];
-  done?: boolean;
-  metadata?: {
-    isDryRun?: boolean;
-  };
 }
 
 const MAX_INPUT_LENGTH = 4000;
@@ -273,17 +264,15 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
     lineBufferRef.current = "";
 
     const finalUrl = effectiveClassId && effectiveClassId !== "global" ? "/ai/study-buddy" : url;
-    const apiUrl = `${BACKEND_URL}${finalUrl}`;
 
     try {
-      const token = localStorage.getItem("tablawy_auth_token");
       const correlationId = crypto.randomUUID();
 
       // General Chat (Non-Streaming) - Use Refine's useCustomMutation
       if (!effectiveClassId || effectiveClassId === "global") {
         sendSimpleChat(
           {
-            url: apiUrl,
+            url: `${BACKEND_URL}${finalUrl}`,
             method: "post",
             values: {
               message: cleanInput,
@@ -334,79 +323,31 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
         return;
       }
 
-      const headers: Record<string, string> = {
-        "Content-Type": "application/json",
-        "X-Correlation-ID": correlationId,
-      };
-      if (token) headers["Authorization"] = `Bearer ${token}`;
-
-      /* eslint-disable-next-line no-restricted-globals */
-      const response = await fetch(apiUrl, {
-        method: "POST",
-        signal: controller.signal,
-        credentials: "include",
-        headers,
-        body: JSON.stringify({
+      // Study Buddy (Streaming) using AiStreamClient
+      const finalResponseText = await AiStreamClient.fetchStream(
+        finalUrl,
+        {
           message: cleanInput,
           history: messages.map((m) => ({ role: m.role, parts: m.parts })),
           context,
           classId: effectiveClassId,
           correlationId,
-        }),
-      });
-
-      if (!response.ok) {
-        throw await handleError(response);
-      }
-
-      // Study Buddy (Streaming)
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder();
-      if (!reader) throw new Error("STREAM_READER_UNAVAILABLE");
-
-      let streamBuffer = "";
-      let isStreamDone = false;
-
-      while (!isStreamDone) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        const chunk = decoder.decode(value, { stream: true });
-        streamBuffer += chunk;
-
-        const lines = streamBuffer.split("\n\n");
-        streamBuffer = lines.pop() || "";
-
-        for (const line of lines) {
-          if (line.startsWith("data: ")) {
-            try {
-              const rawData = line.replace("data: ", "").trim();
-              if (!rawData) continue;
-
-              const data = JSON.parse(rawData) as StreamData;
-              if (data.text) {
-                accumulatorRef.current += data.text;
-                updateStreamingUI();
-              }
-              if (data.sources) setStreamingSources(data.sources);
-              if (data.done) {
-                isStreamDone = true;
-                break;
-              }
-            } catch (e) {
-              console.error("Partial SSE JSON buffered or malformed:", e);
-            }
-          }
+        },
+        {
+          signal: controller.signal,
+          onChunk: (chunk) => {
+            accumulatorRef.current += chunk;
+            updateStreamingUI();
+          },
         }
-      }
+      );
 
       if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
-      const finalResponseText = accumulatorRef.current.trim();
 
-      if (finalResponseText.length > 0) {
+      if (finalResponseText.trim().length > 0) {
         const modelMessage: Message = {
           role: "model",
-          parts: [{ text: finalResponseText }],
+          parts: [{ text: finalResponseText.trim() }],
           sources: streamingSources || undefined,
         };
         const updatedMessages = [...messagesBeforeModel, modelMessage];

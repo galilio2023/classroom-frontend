@@ -28,7 +28,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { SyncStatusBadge } from "@/components/sync-status-badge";
+import { SyncStatusBadge } from "@/features/classes/components/sync-status-badge";
 import { useTranslation } from "react-i18next";
 import { ClassListItem, TeacherApplication, User } from "@/types";
 import { usePrefetch } from "@/hooks/use-prefetch";

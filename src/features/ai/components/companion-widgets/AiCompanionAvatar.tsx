@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { User as UserIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { AIVisualState } from "@/features/ai/types/ai";
+import { AIVisualState } from "@/features/ai/types";
 
 interface AiCompanionAvatarProps {
   photo: string | null;

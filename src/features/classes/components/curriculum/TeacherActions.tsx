@@ -1,6 +1,6 @@
-import { MagicBuilderDialog } from "@/components/classes/curriculum/magic-builder-dialog";
-import { CreateModuleDialog } from "@/components/classes/curriculum/create-module-dialog";
-import { AddResourceDialog } from "@/components/classes/curriculum/add-resource-dialog";
+import { MagicBuilderDialog } from "@/features/classes/components/curriculum/magic-builder-dialog";
+import { CreateModuleDialog } from "@/features/classes/components/curriculum/create-module-dialog";
+import { AddResourceDialog } from "@/features/classes/components/curriculum/add-resource-dialog";
 import { AiFeatureGuard } from "@/features/ai/components/AiFeatureGuard";
 import { MagicBuilderConfig } from "@/features/ai/hooks/use-magic-builder";
 
@@ -42,7 +42,7 @@ export const TeacherActions = ({
           open={isMagicModalOpen}
           onOpenChange={setIsMagicModalOpen}
           initialConfig={magicConfig}
-          onGenerate={(config) => {
+          onGenerate={(config: any) => {
             setMagicConfig(config);
             onMagicCreate();
           }}

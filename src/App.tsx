@@ -10,7 +10,7 @@ import routerBindings, {
 import { GraduationCap } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-import { useNotificationProvider } from "./components/refine-ui/notification/use-notification-provider";
+import { useNotificationProvider } from "./components/refine/notification/use-notification-provider";
 import { authProvider } from "./providers/auth";
 import { accessControlProvider } from "./providers/access-control";
 import { resources } from "./config/resources";
@@ -18,9 +18,9 @@ import { dataProvider } from "./providers/data";
 import { liveProvider } from "./providers/live";
 import { socket } from "./lib/socket";
 import { Toaster } from "./components/ui/sonner";
-import { ErrorBoundary } from "./components/error-boundary";
+import { ErrorBoundary } from "./components/guards/error-boundary";
 import { AppRouter } from "./routes";
-import { usePulseNotifications } from "./hooks/use-pulse-notifications";
+import { usePulseNotifications } from "./features/engagement/hooks/use-pulse-notifications";
 import { GlobalLiveOverlay } from "./features/classes/components/global-live-overlay";
 import { TooltipProvider } from "./components/ui/tooltip";
 import { HelmetProvider } from "react-helmet-async";
@@ -29,7 +29,8 @@ import "./App.css";
 import "@excalidraw/excalidraw/index.css";
 import "./i18n/i18n";
 
-import { XPCelebration } from "./components/xp-celebration";
+import { XPCelebration } from "./features/engagement/components/xp-celebration";
+import { SchoolThemeProvider } from "./contexts/school-theme-context";
 
 /**
  * 🚀 REAL-TIME BRIDGE: PulseProvider
@@ -147,7 +148,9 @@ function App() {
               }}
             >
               <PulseProvider>
-                <AppRouter />
+                <SchoolThemeProvider>
+                  <AppRouter />
+                </SchoolThemeProvider>
                 <UnsavedChangesNotifier />
                 <TitleManager />
                 <RefineKbar />

@@ -22,7 +22,7 @@ import {
   Reply,
 } from "lucide-react";
 import { toast } from "sonner";
-import { ChatBubble } from "@/components/classes/chat-bubble";
+import { ChatBubble } from "@/features/classes/components/chat-bubble";
 import { DiscussionProvider } from "@/contexts/discussion-context";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { MarkdownRenderer } from "@/components/ui/markdown-renderer";
@@ -32,7 +32,7 @@ import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { useTranslation } from "react-i18next";
-import { useUserRole } from "@/hooks/use-user-role";
+import { useUserRole } from "@/features/users/hooks/use-user-role";
 
 interface DiscussionTabProps {
   classId: string;

@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
+import { Breadcrumb } from "@/components/refine/layout/breadcrumb";
 import usePageTitle from "@/hooks/use-page-title";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";

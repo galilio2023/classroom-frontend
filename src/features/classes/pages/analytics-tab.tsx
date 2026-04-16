@@ -1,6 +1,7 @@
 import { useCustom } from "@refinedev/core";
 import { GradeDistributionChart } from "@/features/dashboard/components/grade-distribution-chart";
 import { AtRiskStudents } from "@/features/dashboard/components/at-risk-students";
+import { FrictionPointsCard } from "../components/friction-points-card";
 import { AssignmentCompletionChart } from "@/features/dashboard/components/assignment-completion-chart";
 import { SubmissionTimingHeatmap } from "@/features/dashboard/components/submission-timing-heatmap";
 import { StudentTrajectoryCard } from "@/features/dashboard/components/student-trajectory-card";
@@ -79,6 +80,11 @@ export const AnalyticsTab = ({ classId }: AnalyticsTabProps) => {
   const analytics = result?.data;
   const isLoading = query?.isLoading;
   const isError = query?.isError;
+
+  const { result: frictionResult, query: frictionQuery } = useCustom<any[]>({
+    url: `/stats/curriculum-friction/${classId}`,
+    method: "get",
+  });
 
   const handleExportPDF = () => {
     window.print();
@@ -206,6 +212,17 @@ export const AnalyticsTab = ({ classId }: AnalyticsTabProps) => {
             transition={{ delay: 0.2 }}
           >
             <AtRiskStudents students={analytics?.atRiskStudents ?? []} />
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, x: isAr ? -20 : 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.25 }}
+          >
+            <FrictionPointsCard
+              points={frictionResult?.data || []}
+              isLoading={frictionQuery?.isLoading}
+            />
           </motion.div>
 
           {analytics?.classComparison && analytics.classComparison.length > 0 && (

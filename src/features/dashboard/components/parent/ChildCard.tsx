@@ -13,8 +13,8 @@ import {
   MessageSquare,
   Activity,
 } from "lucide-react";
-import { XPProgressBar } from "@/components/xp-progress-bar";
-import { ErrorBoundary } from "@/components/error-boundary";
+import { XPProgressBar } from "@/features/engagement/components/xp-progress-bar";
+import { ErrorBoundary } from "@/components/guards/error-boundary";
 import { ChildSchedule } from "./ChildSchedule";
 import { cn } from "@/lib/utils";
 

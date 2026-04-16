@@ -30,10 +30,10 @@ import {
   CommandSeparator,
   CommandShortcut,
 } from "@/components/ui/command";
-import { useTheme } from "@/components/refine-ui/theme/theme-provider";
+import { useTheme } from "@/components/refine/theme/theme-provider";
 import { useDebounce } from "react-use";
 import { useTranslation } from "react-i18next";
-import { useUserRole } from "@/hooks/use-user-role";
+import { useUserRole } from "@/features/users/hooks/use-user-role";
 
 const RECENT_SEARCHES_KEY = "classroom_recent_searches";
 const MAX_RECENT_SEARCHES = 5;

@@ -12,6 +12,7 @@ import {
   HelpCircle,
   Plus,
   Minus,
+  Store,
 } from "lucide-react";
 import { User } from "@/types";
 import { toast } from "sonner";
@@ -19,6 +20,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { KioskPaymentModal } from "@/features/payments/components/KioskPaymentModal";
 
 const FAQItem = ({ question, answer }: { question: string; answer: string }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -67,7 +69,18 @@ const Pricing = () => {
   const { t } = useTranslation();
   const { data: identity } = useGetIdentity<User>();
   const { mutate: createCheckout } = useCustomMutation<{ url?: string }>();
+  const { mutate: createKioskOrder } = useCustomMutation<{
+    id: string;
+    referenceCode: string;
+    amount: number;
+  }>();
   const navigate = useNavigate();
+
+  const [kioskOrder, setKioskOrder] = useState<{
+    id: string;
+    referenceCode: string;
+    amount: number;
+  } | null>(null);
 
   const handleUpgrade = (priceId: string) => {
     if (!identity) {
@@ -89,6 +102,30 @@ const Pricing = () => {
           if (data.data.url) {
             window.location.href = data.data.url;
           }
+        },
+        onError: () => {
+          toast.error(t("pricing.toasts.checkoutError"));
+        },
+      }
+    );
+  };
+
+  const handleKioskUpgrade = (priceId: string) => {
+    if (!identity) {
+      toast.info(t("pricing.toasts.loginRequired"));
+      navigate("/register");
+      return;
+    }
+
+    createKioskOrder(
+      {
+        url: "/payments/create-order",
+        method: "post",
+        values: { provider: "fawry", amount: 20000, priceId }, // Hardcoded 200 EGP for Pro
+      },
+      {
+        onSuccess: (data) => {
+          setKioskOrder(data.data);
         },
         onError: () => {
           toast.error(t("pricing.toasts.checkoutError"));
@@ -276,7 +313,7 @@ const Pricing = () => {
                       </div>
                     </div>
 
-                    <div className="mt-12 pt-8 border-t border-border/40">
+                    <div className="mt-12 pt-8 border-t border-border/40 space-y-4">
                       <Button
                         onClick={() => handleUpgrade(plan.priceId)}
                         disabled={identity && plan.priceId === "free"}
@@ -291,6 +328,17 @@ const Pricing = () => {
                         {plan.cta}
                         <ArrowRight className="ms-3 h-5 w-5 rtl:rotate-180" />
                       </Button>
+
+                      {plan.priceId !== "free" && (
+                        <Button
+                          onClick={() => handleKioskUpgrade(plan.priceId)}
+                          variant="outline"
+                          className="w-full h-16 rounded-full font-black uppercase tracking-widest text-[10px] border-primary/20 hover:bg-primary/5 transition-all"
+                        >
+                          <Store className="me-2 h-4 w-4 text-primary" />
+                          {t("payments.kiosk.title")}
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </motion.div>
@@ -298,6 +346,18 @@ const Pricing = () => {
             </div>
           </div>
         </section>
+
+        <KioskPaymentModal
+          isOpen={!!kioskOrder}
+          onClose={() => setKioskOrder(null)}
+          orderId={kioskOrder?.id || null}
+          referenceCode={kioskOrder?.referenceCode || null}
+          amount={kioskOrder?.amount || 0}
+          onSuccess={() => {
+            toast.success(t("payments.success"));
+            navigate("/dashboard");
+          }}
+        />
 
         {/* Features Bento */}
         <section className="section-wrapper">

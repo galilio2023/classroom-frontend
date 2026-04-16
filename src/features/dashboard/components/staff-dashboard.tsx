@@ -4,7 +4,7 @@ import { AtRiskStudents } from "./at-risk-students";
 import { PlatformOverview } from "./platform-overview";
 import {} from "./recent-activity";
 import { RLHFAlignmentChart } from "./rlhf-alignment-chart";
-import { ErrorBoundary } from "@/components/error-boundary";
+import { ErrorBoundary } from "@/components/guards/error-boundary";
 import { DashboardData } from "@/types/dashboard";
 import { TeacherOnboarding } from "./teacher-onboarding";
 import { ActionCenter, ActionItem } from "./action-center";

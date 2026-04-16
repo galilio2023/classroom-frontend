@@ -84,8 +84,8 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, []);
 
   // 🛡️ RECOVERY: Polling for AI jobs that might have finished while disconnected
+  // 🛡️ PERFORMANCE: updateJob and open are stable, so syncJobs will only be created once.
   const syncJobs = useCallback(async () => {
-    // 🛡️ PERFORMANCE: Use ref to avoid re-creating this callback every time jobs change
     const activeAiJobs = jobsRef.current.filter((j) => j.status === "processing");
     if (activeAiJobs.length === 0) return;
 
@@ -123,12 +123,29 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           );
 
           if (localJob && remoteJob.status === "completed") {
+            const updatedMetadata = { ...localJob.metadata, ...remoteJob.result };
             updateJob(localJob.id, {
               status: "completed",
-              metadata: { ...localJob.metadata, ...remoteJob.result },
+              metadata: updatedMetadata,
             });
+
+            // 🚀 UI RE-HYDRATION: Notify components that a specific job is ready
+            window.dispatchEvent(
+              new CustomEvent(`JOB_COMPLETED_${localJob.type.toUpperCase()}`, {
+                detail: {
+                  jobId: localJob.id,
+                  metadata: updatedMetadata,
+                },
+              })
+            );
           } else if (localJob && remoteJob.status === "failed") {
             updateJob(localJob.id, { status: "failed" });
+
+            window.dispatchEvent(
+              new CustomEvent(`JOB_FAILED_${localJob.type.toUpperCase()}`, {
+                detail: { jobId: localJob.id },
+              })
+            );
           }
         });
       }

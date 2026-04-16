@@ -27,7 +27,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { PracticeModal } from "@/components/practice/practice-modal";
+import { PracticeModal } from "@/features/quizzes/components/practice-modal";
 import { NoChartData } from "./no-chart-data";
 import { AttendanceStatCard } from "./attendance-stat-card";
 import {

@@ -52,7 +52,7 @@ export const GlobalLiveOverlay = () => {
         initial={{ y: 100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: 100, opacity: 0 }}
-        className="fixed bottom-6 right-6 z-[9999] max-w-sm w-full"
+        className="fixed bottom-6 end-6 z-[9999] max-w-sm w-full"
       >
         <div className="bg-primary text-primary-foreground p-5 rounded-[2rem] shadow-2xl shadow-primary/40 relative overflow-hidden group">
           {/* Animated Background Pulse */}

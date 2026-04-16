@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { FileText, Share2, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
+import { Breadcrumb } from "@/components/refine/layout/breadcrumb";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { Assignment } from "@/types";

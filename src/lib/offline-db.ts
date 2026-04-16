@@ -1,75 +1,109 @@
 import Dexie, { type Table } from "dexie";
 import { Message } from "@/types/ai";
 
-export interface OfflineMutation {
+/**
+ * 📶 Tablawy Offline DB
+ * Powered by Dexie (IndexedDB) for high-performance offline learning.
+ * Hardened for Phase 4 scale-up and Law 151 compliance.
+ */
+
+export interface CachedLesson {
+  id: string;
+  classId: string;
+  title: string;
+  content: string;
+  attachments: unknown[];
+  cachedAt: number;
+}
+
+export interface PendingQuizSubmission {
+  id?: number; // Auto-incrementing
+  quizId: string;
+  userId: string;
+  answers: unknown;
+  submittedAt: number;
+}
+
+export interface UserNote {
+  id: string;
+  lessonId: string;
+  content: string;
+  updatedAt: number;
+  isSynced: boolean;
+}
+
+export interface PendingMutation {
   id?: number;
   resource: string;
   action: "create" | "update" | "delete";
-  variables: unknown;
+  variables: Record<string, unknown>;
   meta?: Record<string, unknown>;
-  timestamp: number;
+  createdAt: number;
 }
 
-export interface AIChatCache {
+export interface AiHistory {
   id?: number;
   userId: string;
-  classId: string; // 'general' or number
+  classId: string;
   messages: Message[];
   timestamp: number;
 }
 
-/**
- * 📦 Offline Outbox & Cache Database
- * Stores mission-critical mutations and performance-sensitive AI cache.
- */
 export class OfflineDB extends Dexie {
-  outbox!: Table<OfflineMutation>;
-  ai_history!: Table<AIChatCache>;
+  lessons!: Table<CachedLesson>;
+  quizzes!: Table<PendingQuizSubmission>;
+  notes!: Table<UserNote>;
+  mutations!: Table<PendingMutation>;
+  ai_history!: Table<AiHistory>;
 
   constructor() {
-    super("ClassroomOfflineDB");
-    this.version(2).stores({
-      outbox: "++id, resource, action, timestamp",
-      ai_history: "++id, [userId+classId], timestamp",
+    super("TablawyOfflineDB");
+    this.version(1).stores({
+      lessons: "id, classId",
+      quizzes: "++id, quizId, userId",
+      notes: "id, lessonId, isSynced",
+      mutations: "++id, resource, action",
+      ai_history: "++id, userId, classId, timestamp",
     });
   }
 
   /**
-   * Adds a mutation to the outbox for background synchronization.
+   * Queues a mutation for background sync.
    */
-  async queue(mutation: Omit<OfflineMutation, "id" | "timestamp">): Promise<number> {
-    return await this.outbox.add({
+  async queue(mutation: Omit<PendingMutation, "createdAt">): Promise<number> {
+    return await this.mutations.add({
       ...mutation,
-      timestamp: Date.now(),
-    });
+      createdAt: Date.now(),
+    } as PendingMutation);
   }
 
   /**
-   * Retrieves all pending mutations ordered by timestamp.
+   * Resolves (removes) a mutation after successful sync.
    */
-  async getPending(): Promise<OfflineMutation[]> {
-    return await this.outbox.orderBy("timestamp").toArray();
+  async resolve(id: number): Promise<void> {
+    return await this.mutations.delete(id);
   }
 
   /**
-   * Checks if a specific ID for a resource has a pending mutation.
+   * Gets all pending mutations.
+   */
+  async getPending(): Promise<PendingMutation[]> {
+    return await this.mutations.toArray();
+  }
+
+  /**
+   * Gets pending mutations for a specific resource/ID.
    */
   async getPendingById(
     resource: string,
     id: string | number
-  ): Promise<OfflineMutation | undefined> {
-    const allPending = await this.getPending();
-    return allPending.find((m) => {
-      const vars = m.variables as { id?: string | number };
-      return m.resource === resource && String(vars.id) === String(id);
-    });
-  }
-
-  /**
-   * Removes a processed mutation from the outbox.
-   */
-  async resolve(id: number): Promise<void> {
-    return await this.outbox.delete(id);
+  ): Promise<PendingMutation | undefined> {
+    const stringId = String(id);
+    return await this.mutations
+      .where("resource")
+      .equals(resource)
+      .filter((m) => String(m.variables?.id) === stringId)
+      .first();
   }
 }
 

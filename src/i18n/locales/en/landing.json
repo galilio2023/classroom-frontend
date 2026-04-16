@@ -210,5 +210,26 @@
       "desc": "Join thousands of educators and students transforming the future of learning today.",
       "start": "Get Started Today"
     }
+  },
+  "payments": {
+    "success": "Payment Successful!",
+    "failed": "Payment Failed",
+    "kiosk": {
+      "title": "Pay at Kiosk",
+      "description": "Hand the code below to any Masary, Aman, or Fawry outlet to activate your subscription.",
+      "refCode": "Reference Code",
+      "copied": "Code copied to clipboard!",
+      "waiting": "Waiting for payment...",
+      "instructions": "Go to any nearby kiosk and pay {{amount}} EGP using this reference code. Your subscription will activate instantly once paid.",
+      "activated": "Your subscription is now active!"
+    }
+  },
+  "offline": {
+    "downloadSuccess": "Lesson \"{{title}}\" downloaded for offline study.",
+    "downloadError": "Failed to download lesson. Check your connection.",
+    "quizSavedOffline": "Quiz saved offline. It will sync automatically when you're back online.",
+    "syncing": "Syncing {{count}} offline items...",
+    "mode": "Offline Mode",
+    "download": "Download Lesson"
   }
 }

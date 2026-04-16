@@ -20,14 +20,14 @@ import {
   BrainCircuit,
 } from "lucide-react";
 import { User as UserType } from "@/types";
-import { XPProgressBar } from "@/components/xp-progress-bar";
+import { XPProgressBar } from "@/features/engagement/components/xp-progress-bar";
 import { getLevelProgress } from "@/lib/xp";
 import { BadgeCard } from "@/components/ui/badge-card";
 import { StudentAcademicJourney } from "@/features/dashboard/components/student-academic-journey";
 import { SubmissionHeatmap } from "@/features/dashboard/components/submission-heatmap";
 import { motion } from "framer-motion";
 import usePageTitle from "@/hooks/use-page-title";
-import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
+import { Breadcrumb } from "@/components/refine/layout/breadcrumb";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 import { useMemo } from "react";
