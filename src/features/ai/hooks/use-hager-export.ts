@@ -1,7 +1,11 @@
 import { useState } from "react";
-import { useCustomMutation, useNotification } from "@refinedev/core";
+import { useCustomMutation, useNotification, BaseRecord, CreateResponse } from "@refinedev/core";
 import { useTranslation } from "react-i18next";
 import { AI_API } from "@/constants/api";
+
+interface HagerExportResponse extends BaseRecord {
+  url?: string;
+}
 
 /**
  * 👩‍🏫 useHagerExport Hook
@@ -12,8 +16,10 @@ import { AI_API } from "@/constants/api";
 export const useHagerExport = () => {
   const { t } = useTranslation();
   const { open } = useNotification();
-  const { mutate, isLoading } = useCustomMutation();
+  const { mutate, mutation } = useCustomMutation<HagerExportResponse>();
   const [isGenerating, setIsGenerating] = useState(false);
+
+  const isLoading = mutation.isPending;
 
   const exportPDF = async (options: {
     content: string;
@@ -22,7 +28,7 @@ export const useHagerExport = () => {
     classId?: string | number;
   }) => {
     setIsGenerating(true);
-    
+
     mutate(
       {
         url: AI_API.HAGER_EXPORT, // 🚀 MANDATE: Always use backend engine for PDFs
@@ -37,7 +43,7 @@ export const useHagerExport = () => {
         },
       },
       {
-        onSuccess: (data: any) => {
+        onSuccess: (data: CreateResponse<HagerExportResponse>) => {
           // 🛡️ SECURITY: Handle binary stream or signed S3/Cloudinary URL
           const downloadUrl = data.data?.url;
           if (downloadUrl) {
@@ -47,11 +53,14 @@ export const useHagerExport = () => {
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-            
+
             open?.({
               type: "success",
               message: t("common.export.success", "PDF Generated Successfully"),
-              description: t("common.export.hagerModeReady", "Your high-fidelity handout is ready."),
+              description: t(
+                "common.export.hagerModeReady",
+                "Your high-fidelity handout is ready."
+              ),
             });
           }
         },
@@ -60,7 +69,10 @@ export const useHagerExport = () => {
           open?.({
             type: "error",
             message: t("common.error", "Export Failed"),
-            description: t("aiHub.errors.pdfEngineOffline", "The high-fidelity PDF engine is currently unavailable."),
+            description: t(
+              "aiHub.errors.pdfEngineOffline",
+              "The high-fidelity PDF engine is currently unavailable."
+            ),
           });
         },
         onSettled: () => {

@@ -35,6 +35,7 @@ const AIStudyBuddyContent = ({ subject, topic, assignment, classId }: AIStudyBud
     stopStreaming,
     isLoading,
     scrollAreaRef,
+    isDryRun,
   } = useAIChat({
     url: AI_API.STUDY_BUDDY,
     classId,
@@ -80,7 +81,7 @@ const AIStudyBuddyContent = ({ subject, topic, assignment, classId }: AIStudyBud
             "w-full h-full md:w-[400px] md:h-[600px] rounded-none md:rounded-2xl bg-card/90 backdrop-blur-3xl"
           )}
         >
-          <ChatHeader onClose={() => setIsOpen(false)} />
+          <ChatHeader onClose={() => setIsOpen(false)} isDryRun={isDryRun} />
 
           <CardContent className="flex-1 p-0 overflow-hidden bg-dot-pattern min-h-0">
             <ScrollArea ref={scrollAreaRef} className="h-full p-4 md:p-6">

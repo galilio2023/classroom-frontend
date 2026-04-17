@@ -26,7 +26,7 @@ export const AIVisionAssistant = () => {
   const [copied, setCopied] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { analyzeWhiteboard, isLoading: isAnalyzing } = useAiVision();
+  const { analyzeWhiteboard, isLoading: isAnalyzing, isDryRun } = useAiVision();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -167,6 +167,15 @@ export const AIVisionAssistant = () => {
                     </Button>
                   )}
                 </div>
+
+                {isDryRun && (
+                  <div className="flex justify-center">
+                    <span className="bg-amber-500/10 text-amber-600 border border-amber-500/20 text-[10px] px-3 py-1 rounded-full font-black uppercase tracking-widest animate-pulse">
+                      Mock Mode Active
+                    </span>
+                  </div>
+                )}
+
                 <input
                   type="file"
                   ref={fileInputRef}

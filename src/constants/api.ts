@@ -17,4 +17,5 @@ export const AI_API = {
   MAGIC_BUILDER: (type: string) => `/ai/generate-${type}`,
   FEEDBACK: "/ai/feedback",
   GOVERNANCE: "/settings/global-settings",
+  HAGER_EXPORT: "/ai/hager-export",
 };

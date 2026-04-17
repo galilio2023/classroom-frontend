@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useCustomMutation } from "@refinedev/core";
 
 export interface AnalysisResponse {
@@ -15,6 +16,7 @@ export interface VisionVariables {
  */
 export const useAiVision = () => {
   const { mutate, mutation } = useCustomMutation<AnalysisResponse>();
+  const [isDryRun, setIsDryRun] = useState(false);
 
   const isPending = mutation.isPending;
 
@@ -25,6 +27,7 @@ export const useAiVision = () => {
       onError?: (error: unknown) => void;
     }
   ) => {
+    setIsDryRun(false);
     mutate(
       {
         url: "/ai/whiteboard-analyze",
@@ -34,8 +37,15 @@ export const useAiVision = () => {
       {
         onSuccess: (response) => {
           // 🛡️ ROBUSTNESS: Normalize Refine/Axios response structure
-          // Some providers wrap data in .data.data, others in .data
-          const r = response as { data?: { data?: AnalysisResponse } };
+          const r = response as {
+            data?: { data?: AnalysisResponse; metadata?: { isDryRun?: boolean } };
+            metadata?: { isDryRun?: boolean };
+          };
+
+          if (r.metadata?.isDryRun || r.data?.metadata?.isDryRun) {
+            setIsDryRun(true);
+          }
+
           const normalizedData =
             r.data?.data || (response as { data?: AnalysisResponse }).data || response;
           options?.onSuccess?.(normalizedData as AnalysisResponse);
@@ -50,5 +60,6 @@ export const useAiVision = () => {
   return {
     analyzeWhiteboard,
     isLoading: isPending,
+    isDryRun,
   };
 };
