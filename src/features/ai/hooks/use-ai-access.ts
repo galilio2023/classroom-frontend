@@ -19,7 +19,7 @@ export const useAiAccess = () => {
     method: "get",
     queryOptions: {
       refetchInterval: (data) => {
-        const health = (data as any)?.data?.data;
+        const health = (data as { data?: { data?: { isAvailable?: boolean } } })?.data?.data;
         // If degraded or unavailable, poll more slowly
         return health?.isAvailable === false ? 30000 : 60000;
       },

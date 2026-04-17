@@ -56,7 +56,7 @@ To support students in internet-unstable areas, Tablawy OS uses a "Learning with
 - **Background Sync**: The `useOfflineSync` hook monitors `online`/`offline` events. When connectivity is restored, it flushes any stored quiz attempts to the server automatically.
 - **Service Worker (`sw.ts`)**: Implements a "Curriculum-First" caching strategy. Assets once downloaded are served locally with zero network latency.
 - **Visual Feedback**: A pulsing "Offline Mode" badge and a specialized "Download Lesson" toggle provide clear state indicators to the user.
-- **Hager Mode (PDF Handouts)**: For Rule 7 (High-Fidelity Handouts), use `html2canvas` + `jspdf` for basic exports. For complex LaTeX or high-precision Arabic typography, delegate to the backend PDF engine to ensure print-grade fidelity.
+- **Hager Mode (PDF Handouts)**: For Rule 7 (High-Fidelity Handouts), use `html2canvas` + `jspdf` only for simple LTR snapshots. **Mandate**: For any document containing Arabic typography or LaTeX formulas, the frontend MUST delegate generation to the backend PDF engine. Client-side rendering of complex Arabic text shaping is brittle and forbidden for official high-fidelity handouts.
 
 ---
 

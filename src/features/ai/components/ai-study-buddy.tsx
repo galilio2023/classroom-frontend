@@ -41,17 +41,13 @@ const AIStudyBuddyContent = ({ subject, topic, assignment, classId }: AIStudyBud
   });
 
   // 🛡️ HARDWARE PRIVACY & SAFETY: Stop activities if tab is hidden
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === "hidden") {
-        // 🛡️ MANDATE: Stop AI streaming on tab hide to preserve bandwidth and privacy
-        stopStreaming();
-      }
-    };
-
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
-  }, [stopStreaming]);
+  useHardwareSafety({
+    onHidden: () => {
+      // 🛡️ MANDATE: Stop AI streaming on tab hide to preserve bandwidth and privacy
+      stopStreaming();
+    },
+    shouldStopSpeech: true,
+  });
 
   useEffect(() => {
     const handleOpen = (data?: { classId?: string | number }) => {
