@@ -29,7 +29,10 @@ export const useBandwidth = () => {
     return () => conn.removeEventListener("change", updateConnection);
   }, []);
 
-  const isPoorBandwidth = bandwidth.downlink < 1 || bandwidth.effectiveType.includes("2g") || bandwidth.effectiveType === "3g";
+  const isPoorBandwidth =
+    bandwidth.downlink < 1 ||
+    bandwidth.effectiveType.includes("2g") ||
+    bandwidth.effectiveType === "3g";
 
   return { ...bandwidth, isPoorBandwidth };
 };

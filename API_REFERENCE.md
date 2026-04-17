@@ -39,13 +39,12 @@ All streaming endpoints (`/study-buddy`, `/interact`) MUST follow the **JSON Lin
 4.  **Finalization:** The stream must end with a `data: {"done": true}` message.
 
 ### 🧠 Response Metadata
-All AI endpoints return a `metadata` block. Handle it in your hooks:
+All AI endpoints return a usage and metadata block. Handle it in your hooks:
 ```typescript
 interface AIResponse<T> {
   data: T;
-  metadata?: AIMetadata;
   usage?: AIUsageMetadata;
-  latencyMs?: number;
+  isDryRun?: boolean;
 }
 
 interface AIUsageMetadata {

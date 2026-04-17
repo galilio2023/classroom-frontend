@@ -56,6 +56,7 @@ To support students in internet-unstable areas, Tablawy OS uses a "Learning with
 - **Background Sync**: The `useOfflineSync` hook monitors `online`/`offline` events. When connectivity is restored, it flushes any stored quiz attempts to the server automatically.
 - **Service Worker (`sw.ts`)**: Implements a "Curriculum-First" caching strategy. Assets once downloaded are served locally with zero network latency.
 - **Visual Feedback**: A pulsing "Offline Mode" badge and a specialized "Download Lesson" toggle provide clear state indicators to the user.
+- **Hager Mode (PDF Handouts)**: For Rule 7 (High-Fidelity Handouts), use `html2canvas` + `jspdf` for basic exports. For complex LaTeX or high-precision Arabic typography, delegate to the backend PDF engine to ensure print-grade fidelity.
 
 ---
 
@@ -63,10 +64,12 @@ To support students in internet-unstable areas, Tablawy OS uses a "Learning with
 To maintain 99.9% availability during deployments:
 - **Unprivileged Docker**: Production Nginx images MUST run as a non-root user (port 8080) to mitigate container breakout risks.
 - **Zero-Downtime Migration**: Database changes are applied via a "Pre-Flight" migration container before traffic is shifted to the new build.
+
 ---
 
-## 8. Feature-Based Migration & Backward Compatibility
+## 9. Feature-Based Migration & Backward Compatibility
 The project is transitioning to a strictly feature-scoped directory structure (`src/features/`).
 - **Legacy Shims**: To prevent breaking existing imports, "shim" files are maintained in `src/hooks/` and `src/components/`. These files simply re-export the logic from its new feature-based home.
+- **Mandate**: All shim files MUST include a `@deprecated` JSDoc tag referencing the new feature path.
 - **Mandate**: New code MUST import directly from the `@/features/` path.
 - **Cleanup**: Shims should be incrementally removed as legacy components are refactored to use the new feature-scoped exports.
