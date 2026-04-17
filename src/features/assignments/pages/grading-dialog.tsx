@@ -80,6 +80,7 @@ export const GradingDialog = ({
   const [isSuccess, setIsSuccess] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [showAiAudit, setShowAiAudit] = useState(false);
+  const [hasReasoningBeenOpened, setHasReasoningBeenOpened] = useState(false);
 
   // 🛡️ TEACHER SHIELD STATE
   const [shieldCountdown, setShieldCountdown] = useState(0);
@@ -135,7 +136,13 @@ export const GradingDialog = ({
     );
   }, [watchedFeedback, originalAiFeedback]);
 
-  const isShieldActive = isAISuggested && shieldCountdown > 0 && !isSignificantEdit;
+  const isShieldActive = isAISuggested && (!hasReasoningBeenOpened || (shieldCountdown > 0 && !isSignificantEdit));
+
+  const handleToggleAudit = () => {
+    const newState = !showAiAudit;
+    setShowAiAudit(newState);
+    if (newState) setHasReasoningBeenOpened(true);
+  };
 
   // --- AI AUDIT DATA ---
   const { result: auditData, query: auditQuery } = useCustom<any>({
@@ -298,12 +305,13 @@ export const GradingDialog = ({
                                   type="button"
                                   variant="ghost"
                                   size="sm"
-                                  onClick={() => setShowAiAudit(!showAiAudit)}
+                                  onClick={handleToggleAudit}
                                   className={cn(
                                     "h-7 rounded-lg text-[9px] font-black uppercase tracking-widest gap-2",
                                     showAiAudit
                                       ? "bg-primary/10 text-primary"
-                                      : "hover:bg-primary/5 text-muted-foreground"
+                                      : "hover:bg-primary/5 text-muted-foreground",
+                                    !hasReasoningBeenOpened && isAISuggested && "animate-bounce ring-2 ring-primary/20"
                                   )}
                                 >
                                   <Dna className="h-3 w-3" />
@@ -457,7 +465,9 @@ export const GradingDialog = ({
                         {isShieldActive && (
                           <div className="flex items-center gap-2 p-3 rounded-xl bg-amber-500/10 text-amber-700 text-[10px] font-black uppercase tracking-widest border border-amber-500/20 animate-pulse">
                             <ShieldAlert className="h-3.5 w-3.5" />
-                            Review Required: Review AI feedback for {shieldCountdown}s or edit it
+                            {!hasReasoningBeenOpened 
+                              ? "Critical: You must expand 'AI Reasoning' before approving"
+                              : `Review Required: Review AI feedback for ${shieldCountdown}s or edit it`}
                           </div>
                         )}
                         <LoadingButton

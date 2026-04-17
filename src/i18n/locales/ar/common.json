@@ -528,6 +528,13 @@
     "parent": "ولي أمر",
     "admin": "مسؤول"
   },
+  "guardianPortal": {
+    "title": "مركز دعم الطالب",
+    "growthOpportunity": "فرصة نمو",
+    "supportRequired": "مطلوب دعم إجرائي",
+    "friendlySummary": "تحديث رحلة الإتقان",
+    "remediationTask": "نشاط عطلة نهاية الأسبوع المقترح"
+  },
   "status": {
     "active": "نشط",
     "inactive": "غير نشط",

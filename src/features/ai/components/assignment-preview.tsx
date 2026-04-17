@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 import { HagerModeExport } from "./hager-mode-export";
+import { AiDisclaimer } from "./ai-disclaimer";
 
 interface AssignmentPreviewProps {
   content: string;
@@ -137,7 +138,10 @@ export const AssignmentPreview: React.FC<AssignmentPreviewProps> = ({ content, o
       </CardHeader>
       <CardContent className="flex-1 overflow-auto pt-6 px-6 pb-8">
         {content ? (
-          renderStructuredContent(content)
+          <>
+            {renderStructuredContent(content)}
+            <AiDisclaimer />
+          </>
         ) : (
           <div className="flex flex-col items-center justify-center h-full min-h-100 text-muted-foreground space-y-4 opacity-50 bg-card rounded-2xl border border-dashed">
             <div className="p-4 bg-muted rounded-full animate-pulse">
