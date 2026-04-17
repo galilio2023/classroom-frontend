@@ -22,9 +22,15 @@ export function OfflineBanner() {
   if (!isOffline) return null;
 
   return (
-    <div className="bg-yellow-500 text-white py-2 px-4 flex items-center justify-center gap-2 text-sm font-medium animate-in fade-in slide-in-from-top-4">
-      <WifiOff className="h-4 w-4" />
-      <span>{t("common.offline")}</span>
+    <div className="bg-red-600 text-white py-2 px-4 flex items-center justify-center gap-3 text-sm font-semibold animate-in fade-in slide-in-from-top-4 relative z-50">
+      <div className="flex items-center gap-2">
+        <span className="relative flex h-2 w-2">
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+          <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+        </span>
+        <WifiOff className="h-4 w-4" />
+      </div>
+      <span>{t("common.offline", "Offline Mode: Learning without Limits")}</span>
     </div>
   );
 }
