@@ -5,6 +5,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sparkles, MessageCircle } from "lucide-react";
 import { ChatMessage } from "./chat-message";
 import { useAIChat } from "@/features/ai/hooks/use-ai-chat";
+import { useHardwareSafety } from "@/hooks/use-hardware-safety";
 import { ChatHeader } from "./chat-header";
 import { ChatEmptyState } from "./chat-empty-state";
 import { ChatInput } from "./chat-input";

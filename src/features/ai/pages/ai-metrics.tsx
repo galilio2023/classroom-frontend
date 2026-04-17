@@ -74,7 +74,9 @@ export default function AiMetricsPage() {
             <Zap className="h-4 w-4 text-amber-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{(metrics?.ai?.totalTokens || 0).toLocaleString()}</div>
+            <div className="text-2xl font-bold">
+              {(metrics?.ai?.totalTokens || 0).toLocaleString()}
+            </div>
             <p className="text-xs text-muted-foreground mt-1">Consumption (24h)</p>
           </CardContent>
         </Card>
