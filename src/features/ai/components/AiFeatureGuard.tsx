@@ -1,11 +1,10 @@
 import React from "react";
 import { useAiAccess } from "@/features/ai/hooks/use-ai-access";
-import { Lock, Clock, Sparkles, BrainCircuit } from "lucide-react";
+import { Lock, Clock, Sparkles, BrainCircuit, RefreshCcw, Loader2 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { useCan } from "@refinedev/core";
-import { RefreshCcw } from "lucide-react";
 
 interface AiFeatureGuardProps {
   children: React.ReactNode;
@@ -112,9 +111,14 @@ export const AiFeatureGuard: React.FC<AiFeatureGuardProps> = ({
               size="sm"
               className="w-fit h-8 rounded-lg font-black uppercase text-[10px] tracking-widest gap-2"
               onClick={() => void refetch()}
+              disabled={isAiLoading}
             >
-              <RefreshCcw className="h-3 w-3" />
-              Check Status Again
+              {isAiLoading ? (
+                <Loader2 className="h-3 w-3 animate-spin" />
+              ) : (
+                <RefreshCcw className="h-3 w-3" />
+              )}
+              {isAiLoading ? "Checking..." : "Check Status Again"}
             </Button>
           )}
         </AlertDescription>

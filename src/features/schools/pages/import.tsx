@@ -18,6 +18,16 @@ import { dataProvider } from "@/providers/data";
 import Papa from "papaparse";
 import { handleError, getCorrelationId } from "@/providers/utils/api-errors";
 import { getUUID } from "@/lib/utils";
+import * as z from "zod";
+
+const importRowSchema = z.object({
+  name: z.string().min(2, "Name too short"),
+  email: z.string().email("Invalid email"),
+  role: z.enum(["student", "teacher"]),
+  departmentId: z.string().optional().nullable(),
+  phoneNumber: z.string().optional().nullable(),
+  nationalId: z.string().optional().nullable(),
+});
 
 /**
  * 🚀 ADMIN IMPORT PAGE
@@ -28,6 +38,7 @@ const AdminImportPage = () => {
   const { t } = useTranslation();
   const [file, setFile] = useState<File | null>(null);
   const [data, setData] = useState<any[]>([]);
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const [isImporting, setIsImporting] = useState(false);
   const [result, setResult] = useState<any>(null);
 
@@ -48,7 +59,25 @@ const AdminImportPage = () => {
             toast.error("CSV file is empty or missing data.");
             return;
           }
-          setData(results.data);
+
+          // 🛡️ VALIDATION: Mandate Rule 4 - performance/security
+          const errors: string[] = [];
+          const validatedData = results.data.map((row: any, index) => {
+            const res = importRowSchema.safeParse(row);
+            if (!res.success) {
+              errors.push(`Row ${index + 2}: ${res.error.errors.map((e) => e.message).join(", ")}`);
+              return null;
+            }
+            return res.data;
+          });
+
+          if (errors.length > 0) {
+            setValidationErrors(errors);
+            toast.error("CSV contains validation errors. Please check the list below.");
+          } else {
+            setValidationErrors([]);
+            setData(validatedData.filter(Boolean));
+          }
         },
         error: (error) => {
           toast.error(`CSV Parsing Error: ${error.message}`);
@@ -92,6 +121,7 @@ const AdminImportPage = () => {
   const reset = () => {
     setFile(null);
     setData([]);
+    setValidationErrors([]);
     setResult(null);
   };
 
@@ -135,7 +165,21 @@ const AdminImportPage = () => {
               />
             </div>
 
-            {data.length > 0 && (
+            {validationErrors.length > 0 && (
+              <div className="mt-6 w-full p-4 rounded-xl bg-red-50 border border-red-100 space-y-2 text-start">
+                <h4 className="text-red-700 font-black uppercase text-[10px] tracking-widest flex items-center gap-2">
+                  <AlertCircle className="h-4 w-4" />
+                  Pre-Upload Validation Errors
+                </h4>
+                <div className="max-h-32 overflow-auto text-xs text-red-600 font-medium space-y-1">
+                  {validationErrors.map((err, i) => (
+                    <p key={i}>• {err}</p>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {data.length > 0 && validationErrors.length === 0 && (
               <div className="mt-8 w-full">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="font-bold flex items-center gap-2">

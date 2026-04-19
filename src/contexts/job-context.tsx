@@ -181,8 +181,6 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }, [updateJob, open]);
 
-  const pollRef = useRef<(() => Promise<void>) | null>(null);
-
   useEffect(() => {
     // 🛡️ RACE CONDITION PREVENTION: Ensure previous loops are killed immediately (Rule 6)
     if (timeoutIdRef.current) clearTimeout(timeoutIdRef.current);
@@ -223,8 +221,6 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setSyncDelay(POLLING_CONFIG.INITIAL_DELAY);
       }
     };
-
-    pollRef.current = poll;
 
     const activeJobsCount = jobsRef.current.filter((j) => j.status === "processing").length;
     if (activeJobsCount > 0) {

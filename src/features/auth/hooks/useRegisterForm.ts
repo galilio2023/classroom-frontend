@@ -55,8 +55,10 @@ export const useRegisterForm = () => {
     }),
   });
 
-  const form = useForm<z.infer<typeof registerSchema>>({
-    resolver: zodResolver(registerSchema) as any,
+  type RegisterFormValues = z.infer<typeof registerSchema>;
+
+  const form = useForm<RegisterFormValues>({
+    resolver: zodResolver(registerSchema),
     defaultValues: {
       name: "",
       email: "",
