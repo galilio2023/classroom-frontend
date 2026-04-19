@@ -199,26 +199,33 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
 
     const poll = async () => {
-      // 🛡️ RULE 6: Tab Visibility Safety. Pause polling when tab is hidden to save battery/data.
-      if (!isVisible) {
-        scheduleNext(POLLING_CONFIG.IDLE_POLL_INTERVAL);
-        return;
-      }
+      try {
+        // 🛡️ RULE 6: Tab Visibility Safety. Pause polling when tab is hidden to save battery/data.
+        if (!isVisible) {
+          scheduleNext(POLLING_CONFIG.IDLE_POLL_INTERVAL);
+          return;
+        }
 
-      const activeAiJobs = jobsRef.current.filter((j) => j.status === "processing");
-      if (activeAiJobs.length > 0) {
-        await syncJobs();
+        const activeAiJobs = jobsRef.current.filter((j) => j.status === "processing");
+        if (activeAiJobs.length > 0) {
+          await syncJobs();
 
-        // 🛡️ RESILIENCE: Jittered Exponential backoff (Mandate M-008)
-        setSyncDelay((prev) => {
-          const nextBase = Math.min(prev * 2, POLLING_CONFIG.MAX_DELAY);
-          const nextDelay = getJitteredDelay(nextBase, POLLING_CONFIG.JITTER_FACTOR);
-          scheduleNext(nextDelay);
-          return nextDelay;
-        });
-      } else {
-        // 🛡️ PERFORMANCE: Reset delay when pipe is empty
-        setSyncDelay(POLLING_CONFIG.INITIAL_DELAY);
+          // 🛡️ RESILIENCE: Jittered Exponential backoff (Mandate M-008)
+          setSyncDelay((prev) => {
+            const nextBase = Math.min(prev * 2, POLLING_CONFIG.MAX_DELAY);
+            const nextDelay = getJitteredDelay(nextBase, POLLING_CONFIG.JITTER_FACTOR);
+            scheduleNext(nextDelay);
+            return nextDelay;
+          });
+        } else {
+          // 🛡️ PERFORMANCE: Reset delay when pipe is empty
+          setSyncDelay(POLLING_CONFIG.INITIAL_DELAY);
+        }
+      } catch (pollErr) {
+        // 🛡️ ROBUSTNESS: Never allow the polling loop to die (Code Review #1)
+        console.error("Critical: AI Polling loop encountered an error:", pollErr);
+        // Retry after a safe interval even if it crashed
+        scheduleNext(POLLING_CONFIG.MAX_DELAY / 2);
       }
     };
 

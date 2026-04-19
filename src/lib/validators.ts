@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 /**
  * 🇪🇬 Egyptian National ID Validator
  * Validates the 14-digit Egyptian National ID according to:
@@ -12,10 +14,18 @@
  * 🛠️ NORMALIZATION: Converts Eastern Arabic numerals (٠-٩) to Western Arabic numerals (0-9).
  */
 export function normalizeArabicNumerals(input: string): string {
-  if (!input) return input;
+  if (!input) return "";
   const arabicNumbers = ["٠", "١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩"];
-  return input.replace(/[٠-٩]/g, (w) => arabicNumbers.indexOf(w).toString());
+  return String(input).replace(/[٠-٩]/g, (w) => {
+    const idx = arabicNumbers.indexOf(w);
+    return idx === -1 ? w : idx.toString();
+  });
 }
+
+/**
+ * 🛡️ REUSABLE ZOD FRAGMENT: Standard normalization for Egyptian numeric inputs (ID, Phone).
+ */
+export const egyptNumericSchema = z.string().transform((val) => normalizeArabicNumerals(val));
 
 export const validateEgyptianID = (
   id: string

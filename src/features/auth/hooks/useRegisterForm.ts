@@ -7,7 +7,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import axios from "axios";
 import { useTranslation } from "react-i18next";
-import { validateEgyptianID, normalizeArabicNumerals } from "@/lib/validators";
+import { validateEgyptianID, normalizeArabicNumerals, egyptNumericSchema } from "@/lib/validators";
 import { handleError, getCorrelationId } from "@/providers/utils/api-errors";
 import { SignUpPayload } from "@/types";
 import { getUUID } from "@/lib/utils";
@@ -33,21 +33,16 @@ export const useRegisterForm = () => {
       .string()
       .min(8, t("auth.register.passwordMin", "Password must be at least 8 characters")),
     role: z.enum(["student", "teacher", "parent"]),
-    phoneNumber: z
-      .string()
-      .min(10, t("auth.register.phoneRequired", "Phone number is required"))
-      .transform(normalizeArabicNumerals),
-    nationalId: z
-      .string()
-      .length(14, t("auth.register.nationalIdLength", "National ID must be 14 digits"))
-      .transform(normalizeArabicNumerals),
+    phoneNumber: egyptNumericSchema.pipe(
+      z.string().min(10, t("auth.register.phoneRequired", "Phone number is required"))
+    ),
+    nationalId: egyptNumericSchema.pipe(
+      z.string().length(14, t("auth.register.nationalIdLength", "National ID must be 14 digits"))
+    ),
     bio: z.string().optional(),
     dateOfBirth: z.string().optional(),
     parentName: z.string().optional(),
-    parentPhone: z
-      .string()
-      .optional()
-      .transform((val) => (val ? normalizeArabicNumerals(val) : val)),
+    parentPhone: egyptNumericSchema.optional().or(z.string().length(0)).or(z.null()),
     childInviteCode: z.string().optional(),
     verificationDocumentUrl: z.string().optional(),
     verificationDocumentCldPubId: z.string().optional(),
@@ -161,11 +156,18 @@ export const useRegisterForm = () => {
       {
         onSuccess: () => {
           setIsSuccess(true);
-          // Redirect logic based on role for "First Success"
+          // 🛡️ UX: Conditional redirection based on role AND invite context (Mandate Rule #3)
           setTimeout(() => {
-            if (values.role === "teacher") navigate("/ai/magic-builder");
-            else if (values.role === "student") navigate("/ai/chat");
-            else navigate("/dashboard");
+            if (inviteCode) {
+              // If joining via invite, redirect to class dashboard or specific class page
+              navigate(`/classes/join/${inviteCode}`);
+            } else if (values.role === "teacher") {
+              navigate("/ai/magic-builder");
+            } else if (values.role === "student") {
+              navigate("/ai/chat");
+            } else {
+              navigate("/dashboard");
+            }
           }, 3000);
         },
         onError: async (err) => {
