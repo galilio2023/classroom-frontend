@@ -184,6 +184,9 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
     const poll = async () => {
+      // 🛡️ RACE CONDITION PREVENTION: Ensure only one poll runs at a time
+      if (timeoutId) clearTimeout(timeoutId);
+
       // 🛡️ RULE 6: Tab Visibility Safety. Pause polling when tab is hidden to save battery/data.
       if (!isVisible) {
         // Slow down check but don't stop completely, just wait for visibility change

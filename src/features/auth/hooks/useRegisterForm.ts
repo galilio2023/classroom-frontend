@@ -161,7 +161,9 @@ export const useRegisterForm = () => {
       await axios.post("/api/auth/otp/send", { phoneNumber }, { headers: authHeaders });
       toast.success(t("auth.otp.sent", "OTP sent via WhatsApp!"));
     } catch (error) {
-      toast.error(t("auth.otp.sentError", "Failed to send OTP. Please try again."));
+      toast.error(t("auth.otp.sentError", "Failed to send OTP. Please try again."), {
+        description: `Trace ID: ${getCorrelationId(error)}. ${t("common.supportInfo", "Please contact support for assistance.")}`,
+      });
     } finally {
       setIsSendingOtp(false);
     }
@@ -180,7 +182,9 @@ export const useRegisterForm = () => {
         handleFinalSubmit();
       }
     } catch (error) {
-      toast.error(t("auth.otp.invalid", "Invalid verification code."));
+      toast.error(t("auth.otp.invalid", "Invalid verification code."), {
+        description: `Trace ID: ${getCorrelationId(error)}. ${t("common.supportInfo", "Please contact support for assistance.")}`,
+      });
     } finally {
       setIsVerifyingOtp(false);
     }

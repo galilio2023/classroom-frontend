@@ -59,6 +59,7 @@ export interface User {
   dateOfBirth: string | null;
   parentName: string | null;
   parentPhone: string | null;
+  inviteCode: string | null;
   verificationStatus: VerificationStatus;
   verificationDocumentUrl: string | null;
   verificationDocumentCldPubId: string | null;

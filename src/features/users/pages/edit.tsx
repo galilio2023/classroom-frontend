@@ -88,7 +88,7 @@ const UsersEdit = () => {
     },
   });
 
-  const handleOnFinish = async (values: any) => {
+  const handleOnFinish = async (values: z.infer<typeof userFormSchema>) => {
     const normalizedValues = {
       ...values,
       phoneNumber: values.phoneNumber
@@ -98,7 +98,7 @@ const UsersEdit = () => {
         ? normalizeArabicNumerals(values.parentPhone)
         : values.parentPhone,
     };
-    await onFinish(normalizedValues);
+    await onFinish(normalizedValues as any); // 🛡️ ATOMICITY: Casting for Refine variable compatibility
   };
 
   const { options: departmentOptions } = useSelect<Department>({
@@ -107,7 +107,7 @@ const UsersEdit = () => {
     optionValue: "id",
   });
 
-  const user = query?.data?.data as any;
+  const user = query?.data?.data as unknown as User;
 
   const handleCopyCode = () => {
     if (user?.inviteCode) {
