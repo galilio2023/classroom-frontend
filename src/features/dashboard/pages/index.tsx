@@ -24,6 +24,7 @@ import { ParentDashboard } from "../components/parent-dashboard";
 import { DashboardHeader } from "../components/dashboard-header";
 import { ErrorBoundary } from "@/components/guards/error-boundary";
 import { Button } from "@/components/ui/button";
+import { SchoolSetupWizard } from "@/features/schools/components/SchoolSetupWizard";
 import {
   WelcomeHeaderSkeleton,
   ChartSkeleton,
@@ -55,6 +56,15 @@ const Dashboard = () => {
     roles,
     navigation,
   } = useDashboard();
+
+  const [showSetup, setShowSetup] = React.useState(false);
+
+  useEffect(() => {
+    // 🏛️ ONBOARDING: Show wizard if branding is missing for School Admins
+    if (roles.isSchoolAdmin && coreData?.school && !coreData.school.brandingConfig?.primaryColor) {
+      setShowSetup(true);
+    }
+  }, [roles.isSchoolAdmin, coreData?.school]);
 
   // 🚀 MISSION CONTROL: Fetch next action for students
   const { query: missionQuery } = useOne<MissionAction>({
@@ -251,6 +261,16 @@ const Dashboard = () => {
   return (
     <div className="relative min-h-screen overflow-hidden">
       <div className="dashboard-glow" />
+
+      {showSetup && coreData?.school && (
+        <SchoolSetupWizard
+          school={coreData.school}
+          onComplete={() => {
+            setShowSetup(false);
+            void navigation.refetchCore();
+          }}
+        />
+      )}
 
       <div className="container mx-auto py-8 md:py-10 lg:py-12 px-4 md:px-6 lg:px-8 relative max-w-[1600px] z-10">
         <motion.div

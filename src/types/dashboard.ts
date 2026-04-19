@@ -195,6 +195,7 @@ export interface TransactionItem {
 }
 
 export interface DashboardData {
+  school?: any;
   todaySchedule: ScheduleItem[];
   stats?: DashboardStats;
   attendanceTrend?: AttendanceTrend[];
