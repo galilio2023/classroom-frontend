@@ -553,14 +553,16 @@
     "friendlySummary": "Mastery Journey Update",
     "remediationTask": "Suggested Weekend Activity"
   },
-  "status": {    "active": "Active",
+  "status": {
+    "active": "Active",
     "inactive": "Inactive",
     "suspended": "Suspended",
     "archived": "Archived",
     "upcoming": "Upcoming",
     "completed": "Completed",
     "published": "Published",
-    "draft": "Draft"
+    "draft": "Draft",
+    "failed": "Failed"
   },
   "days": {
     "Mon": "Mon",
@@ -1278,6 +1280,18 @@
     },
     "badges": {
       "label": "Badges"
+    },
+    "admin-import": {
+      "label": "Data Migration",
+      "title": "Bulk Data Import",
+      "description": "Securely onboard students and teachers using CSV or Excel rosters.",
+      "uploadTitle": "Roster Upload",
+      "uploadDesc": "Drag and drop your roster file here (CSV/XLSX).",
+      "preview": "Data Preview",
+      "importing": "Importing records...",
+      "success": "Onboarding complete!",
+      "failed": "Onboarding partially failed.",
+      "errors": "Import Errors"
     },
     "activity-log": {
       "label": "Activity Log"

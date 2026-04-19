@@ -538,12 +538,13 @@
   "status": {
     "active": "نشط",
     "inactive": "غير نشط",
-    "suspended": "معلق",
+    "suspended": "موقوف",
     "archived": "مؤرشف",
     "upcoming": "قادم",
     "completed": "مكتمل",
     "published": "منشور",
-    "draft": "مسودة"
+    "draft": "مسودة",
+    "failed": "فاشل"
   },
   "days": {
     "Mon": "إثنين",
@@ -1254,6 +1255,18 @@
     },
     "badges": {
       "label": "الأوسمة"
+    },
+    "admin-import": {
+      "label": "ترحيل البيانات",
+      "title": "استيراد البيانات بكميات كبيرة",
+      "description": "قم بضم الطلاب والمعلمين بأمان باستخدام كشوف CSV أو Excel.",
+      "uploadTitle": "رفع الكشوف",
+      "uploadDesc": "قم بسحب وإفلات ملف الكشف هنا (CSV/XLSX).",
+      "preview": "معاينة البيانات",
+      "importing": "جاري استيراد السجلات...",
+      "success": "اكتملت عملية الانضمام!",
+      "failed": "فشلت عملية الانضمام جزئيًا.",
+      "errors": "أخطاء الاستيراد"
     },
     "activity-log": {
       "label": "سجل النشاط"

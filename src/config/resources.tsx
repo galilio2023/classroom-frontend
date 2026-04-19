@@ -489,6 +489,16 @@ export const resources: ResourceProps[] = [
     },
   },
   {
+    name: "admin-import",
+    list: "/admin/import",
+    meta: {
+      group: "groups.admin",
+      label: "resources.admin-import.label",
+      icon: <UserPlus />,
+      roles: [UserRole.ADMIN],
+    },
+  },
+  {
     name: "activity-log",
     list: "/activity-log",
     meta: {
