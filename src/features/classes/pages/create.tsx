@@ -1,5 +1,5 @@
-import { CreateView } from "@/components/refine-ui/views/create-view";
-import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
+import { CreateView } from "@/components/refine/views/create-view";
+import { Breadcrumb } from "@/components/refine/layout/breadcrumb";
 import { useBack } from "@refinedev/core";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

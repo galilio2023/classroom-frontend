@@ -1,5 +1,5 @@
-import { ListView } from "@/components/refine-ui/views/list-view";
-import {} from "@/components/refine-ui/layout/breadcrumb";
+import { ListView } from "@/components/refine/views/list-view";
+import {} from "@/components/refine/layout/breadcrumb";
 import {
   Search,
   FileQuestion,

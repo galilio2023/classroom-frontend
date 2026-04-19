@@ -13,7 +13,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import { useCapabilities } from "@/hooks/use-capabilities";
+import { useCapabilities } from "@/features/users/hooks/use-capabilities";
 
 import { ResourcesEmptyState } from "../components/class-empty-states";
 import { ResourceHeader } from "../components/resources/ResourceHeader";

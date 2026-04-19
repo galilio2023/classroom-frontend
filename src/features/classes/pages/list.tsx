@@ -1,8 +1,8 @@
 import { Key, PlusCircle, Loader2, AlertCircle, Layers, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
-import { ListView } from "@/components/refine-ui/views/list-view";
-import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
+import { ListView } from "@/components/refine/views/list-view";
+import { Breadcrumb } from "@/components/refine/layout/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -27,7 +27,7 @@ import {
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/empty-state";
-import { TeacherDiscoveryList } from "@/components/classes/teacher-discovery-list";
+import { TeacherDiscoveryList } from "@/features/classes/components/teacher-discovery-list";
 import { ApplyTeacherDialog } from "./apply-teacher-dialog";
 import { useClassList } from "../hooks/use-class-list";
 import { ClassCard } from "../components/class-card";

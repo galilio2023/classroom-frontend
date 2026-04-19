@@ -3,7 +3,7 @@ import { PlatformOverview } from "./platform-overview";
 import { SystemHealthCard } from "./system-health-card";
 import { SystemVitalsCard } from "./system-vitals-card";
 import { RecentActivity } from "./recent-activity";
-import { ErrorBoundary } from "@/components/error-boundary";
+import { ErrorBoundary } from "@/components/guards/error-boundary";
 import { DashboardData } from "@/types/dashboard";
 import { motion } from "framer-motion";
 import {

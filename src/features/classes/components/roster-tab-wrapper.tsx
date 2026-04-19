@@ -1,7 +1,7 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { StudentsTab } from "@/components/classes/show/students-tab";
+import { StudentsTab } from "@/features/classes/components/show/students-tab";
 import { AttendanceTab } from "../pages/attendance-tab";
 import { Users, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";

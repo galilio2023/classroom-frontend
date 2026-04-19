@@ -18,10 +18,11 @@ import { TodaySchedule } from "../components/today-schedule";
 import { PromoCards } from "../components/promo-cards";
 import { StaffDashboard } from "../components/staff-dashboard";
 import { AdminDashboard } from "../components/admin-dashboard";
+import SchoolAdminDashboard from "@/features/schools/pages/dashboard";
 import { StudentDashboard } from "../components/student-dashboard";
 import { ParentDashboard } from "../components/parent-dashboard";
 import { DashboardHeader } from "../components/dashboard-header";
-import { ErrorBoundary } from "@/components/error-boundary";
+import { ErrorBoundary } from "@/components/guards/error-boundary";
 import { Button } from "@/components/ui/button";
 import {
   WelcomeHeaderSkeleton,
@@ -129,7 +130,7 @@ const Dashboard = () => {
             icon: Heart,
             heading: t("dashboard.cards.myChildren"),
             description: t("dashboard.cards.monitorProgress"),
-            resource: "users",
+            resource: "guardian-portal",
           },
           {
             title: t("dashboard.cards.calendar"),
@@ -143,7 +144,7 @@ const Dashboard = () => {
             icon: Bell,
             heading: t("dashboard.cards.notifications"),
             description: t("dashboard.cards.teacherUpdates"),
-            resource: "notifications",
+            resource: "messages",
           },
         ]
       : roles.isAdmin
@@ -270,7 +271,7 @@ const Dashboard = () => {
           )}
 
           <div className="space-y-16 md:space-y-24">
-            {roles.isAdmin && (
+            {roles.isPlatformAdmin && (
               <AdminDashboard
                 data={analyticsData}
                 isLoading={isAnalyticsLoading}
@@ -278,6 +279,7 @@ const Dashboard = () => {
                 show={navigation.show}
               />
             )}
+            {roles.isSchoolAdmin && <SchoolAdminDashboard />}
             {roles.isTeacher && (
               <StaffDashboard
                 data={analyticsData}
@@ -288,6 +290,7 @@ const Dashboard = () => {
             )}
             {roles.isStudent && (
               <StudentDashboard
+                identity={identity}
                 data={analyticsData}
                 isLoading={isAnalyticsLoading}
                 list={navigation.list}

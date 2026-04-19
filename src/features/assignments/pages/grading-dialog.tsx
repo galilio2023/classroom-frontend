@@ -1,4 +1,4 @@
-import { useForm } from "@refinedev/react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -19,7 +19,7 @@ import { Switch } from "@/components/ui/switch";
 import { useUpdate, HttpError, useCustom } from "@refinedev/core";
 import { Submission, Assignment } from "@/types";
 import { useEffect, useState, useMemo } from "react";
-import { Sparkles, Loader2, Check, Dna } from "lucide-react";
+import { Sparkles, Loader2, Check, Dna, ShieldAlert } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LoadingButton } from "@/components/ui/loading-button";
 import { SubmitHandler } from "react-hook-form";
@@ -30,8 +30,9 @@ import { Badge } from "@/components/ui/badge";
 import { useTranslation } from "react-i18next";
 import { TFunction } from "i18next";
 import { toast } from "sonner";
-import { useUserRole } from "@/hooks/use-user-role";
+import { useUserRole } from "@/features/users/hooks/use-user-role";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { formatGrade } from "@/lib/numeric";
 
 // --- NEW IMPORTS ---
 import { useGradingAutomation } from "../hooks/use-grading-automation";
@@ -79,6 +80,11 @@ export const GradingDialog = ({
   const [isSuccess, setIsSuccess] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [showAiAudit, setShowAiAudit] = useState(false);
+  const [hasReasoningBeenOpened, setHasReasoningBeenOpened] = useState(false);
+
+  // 🛡️ TEACHER SHIELD STATE
+  const [shieldCountdown, setShieldCountdown] = useState(0);
+  const [originalAiFeedback, setOriginalAiFeedback] = useState<string | null>(null);
 
   const form = useForm<GradingFormValues>({
     resolver: zodResolver(gradingSchema(t)) as any,
@@ -93,6 +99,9 @@ export const GradingDialog = ({
 
   const { handleSubmit, control, setValue, reset } = form;
 
+  // Watch feedback for the "10% edit" rule
+  const watchedFeedback = useWatch({ control, name: "feedback" }) || "";
+
   // --- AI AUTOMATION HOOK ---
   const { isAISuggested, isAILoading } = useGradingAutomation({
     submission,
@@ -101,6 +110,40 @@ export const GradingDialog = ({
     isDraft: submission?.isDraft,
     setValue,
   });
+
+  // 🛡️ SHIELD LOGIC: Start countdown when AI suggests a grade
+  useEffect(() => {
+    if (isAISuggested && shieldCountdown === 0 && !originalAiFeedback) {
+      setShieldCountdown(5);
+      setOriginalAiFeedback(form.getValues("feedback") || "");
+    }
+  }, [isAISuggested, originalAiFeedback]);
+
+  useEffect(() => {
+    if (shieldCountdown > 0) {
+      const timer = setInterval(() => setShieldCountdown((prev) => prev - 1), 1000);
+      return () => clearInterval(timer);
+    }
+  }, [shieldCountdown]);
+
+  // Determine if the shield is still active
+  const isSignificantEdit = useMemo(() => {
+    if (!originalAiFeedback) return false;
+    const diff = Math.abs(watchedFeedback.length - originalAiFeedback.length);
+    const threshold = originalAiFeedback.length * 0.1;
+    return (
+      diff > threshold || (watchedFeedback !== originalAiFeedback && watchedFeedback.length > 10)
+    );
+  }, [watchedFeedback, originalAiFeedback]);
+
+  const isShieldActive =
+    isAISuggested && (!hasReasoningBeenOpened || (shieldCountdown > 0 && !isSignificantEdit));
+
+  const handleToggleAudit = () => {
+    const newState = !showAiAudit;
+    setShowAiAudit(newState);
+    if (newState) setHasReasoningBeenOpened(true);
+  };
 
   // --- AI AUDIT DATA ---
   const { result: auditData, query: auditQuery } = useCustom<any>({
@@ -138,6 +181,8 @@ export const GradingDialog = ({
   useEffect(() => {
     if (isOpen) {
       setShowConfetti(false);
+      setShieldCountdown(0);
+      setOriginalAiFeedback(null);
       reset({
         grade: submission?.grade ?? 0,
         feedback: submission?.feedback ?? "",
@@ -158,7 +203,7 @@ export const GradingDialog = ({
   ]);
 
   const onSubmit: SubmitHandler<GradingFormValues> = async (values) => {
-    if (!isStaff || !submission?.id || submission?.isDraft) return;
+    if (!isStaff || !submission?.id || submission?.isDraft || isShieldActive) return;
 
     updateSubmission(
       {
@@ -261,12 +306,15 @@ export const GradingDialog = ({
                                   type="button"
                                   variant="ghost"
                                   size="sm"
-                                  onClick={() => setShowAiAudit(!showAiAudit)}
+                                  onClick={handleToggleAudit}
                                   className={cn(
                                     "h-7 rounded-lg text-[9px] font-black uppercase tracking-widest gap-2",
                                     showAiAudit
                                       ? "bg-primary/10 text-primary"
-                                      : "hover:bg-primary/5 text-muted-foreground"
+                                      : "hover:bg-primary/5 text-muted-foreground",
+                                    !hasReasoningBeenOpened &&
+                                      isAISuggested &&
+                                      "animate-bounce ring-2 ring-primary/20"
                                   )}
                                 >
                                   <Dna className="h-3 w-3" />
@@ -354,7 +402,10 @@ export const GradingDialog = ({
                                   <div className="pt-4 border-t border-primary/10 flex items-center justify-between text-[9px] font-bold text-muted-foreground/60 uppercase">
                                     <span>
                                       Confidence:{" "}
-                                      {Math.round((audit.metadata?.aiConfidenceScore || 0) * 100)}%
+                                      {formatGrade(
+                                        (audit.metadata?.aiConfidenceScore || 0) * 100,
+                                        0
+                                      )}
                                     </span>
                                     <span>v{audit.promptVersion || 1}</span>
                                   </div>
@@ -413,12 +464,24 @@ export const GradingDialog = ({
                         />
                       </div>
 
-                      <div className="flex gap-3 sticky bottom-0 bg-card pt-4 pb-2 mt-10">
+                      <div className="flex flex-col gap-3 sticky bottom-0 bg-card pt-4 pb-2 mt-10">
+                        {isShieldActive && (
+                          <div className="flex items-center gap-2 p-3 rounded-xl bg-amber-500/10 text-amber-700 text-[10px] font-black uppercase tracking-widest border border-amber-500/20 animate-pulse">
+                            <ShieldAlert className="h-3.5 w-3.5" />
+                            {!hasReasoningBeenOpened
+                              ? "Critical: You must expand 'AI Reasoning' before approving"
+                              : `Review Required: Review AI feedback for ${shieldCountdown}s or edit it`}
+                          </div>
+                        )}
                         <LoadingButton
                           type="submit"
                           isLoading={isUpdating}
                           isSuccess={isSuccess}
-                          className="w-full h-16 rounded-2xl font-black uppercase tracking-widest text-xs shadow-2xl shadow-primary/20"
+                          disabled={isShieldActive}
+                          className={cn(
+                            "w-full h-16 rounded-2xl font-black uppercase tracking-widest text-xs shadow-2xl transition-all",
+                            isShieldActive ? "opacity-50 grayscale" : "shadow-primary/20"
+                          )}
                         >
                           <Check className="h-5 w-5 me-2" />
                           {t("buttons.saveGrade")}

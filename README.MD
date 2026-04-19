@@ -66,3 +66,8 @@ src/
     ```bash
     npm run dev
     ```
+
+## 🧪 Testing & Quality
+*   **Unit Testing:** Powered by **Vitest**. Run with `npm run test` (if configured) or `npx vitest`.
+*   **Type Safety:** Strict TypeScript configuration. Run `npx tsc` for a full system check.
+*   **Linting:** ESLint with project-specific Refine v5 rules. Run `npm run lint`.

@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { CreateView } from "@/components/refine-ui/views/create-view";
+import { CreateView } from "@/components/refine/views/create-view";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AIAssignmentHelper } from "@/features/ai/components/ai-assignment-helper";
 import { FileUpload } from "@/components/file-upload";

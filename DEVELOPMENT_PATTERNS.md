@@ -50,8 +50,26 @@ Vite performs static replacement of `import.meta.env.VITE_*` variables during th
 
 ---
 
-## 7. Operational Resilience
+## 7. Rural Hardening (Offline-First Strategy)
+To support students in internet-unstable areas, Tablawy OS uses a "Learning without Limits" engine:
+- **Client-Side DB**: **Dexie (IndexedDB)** is used to store `cached_lessons` and `pending_quizzes`.
+- **Background Sync**: The `useOfflineSync` hook monitors `online`/`offline` events. When connectivity is restored, it flushes any stored quiz attempts to the server automatically.
+- **Service Worker (`sw.ts`)**: Implements a "Curriculum-First" caching strategy. Assets once downloaded are served locally with zero network latency.
+- **Visual Feedback**: A pulsing "Offline Mode" badge and a specialized "Download Lesson" toggle provide clear state indicators to the user.
+- **Hager Mode (PDF Handouts)**: For Rule 7 (High-Fidelity Handouts), use `html2canvas` + `jspdf` only for simple LTR snapshots. **Mandate**: For any document containing Arabic typography or LaTeX formulas, the frontend MUST delegate generation to the backend PDF engine. Client-side rendering of complex Arabic text shaping is brittle and forbidden for official high-fidelity handouts.
+
+---
+
+## 8. Operational Resilience
 To maintain 99.9% availability during deployments:
 - **Unprivileged Docker**: Production Nginx images MUST run as a non-root user (port 8080) to mitigate container breakout risks.
 - **Zero-Downtime Migration**: Database changes are applied via a "Pre-Flight" migration container before traffic is shifted to the new build.
-- **Healthchecks**: All services implement `/health` probes to ensure they are fully ready before receiving live student traffic.
+
+---
+
+## 9. Feature-Based Migration & Backward Compatibility
+The project is transitioning to a strictly feature-scoped directory structure (`src/features/`).
+- **Legacy Shims**: To prevent breaking existing imports, "shim" files are maintained in `src/hooks/` and `src/components/`. These files simply re-export the logic from its new feature-based home.
+- **Mandate**: All shim files MUST include a `@deprecated` JSDoc tag referencing the new feature path.
+- **Mandate**: New code MUST import directly from the `@/features/` path.
+- **Cleanup**: Shims should be incrementally removed as legacy components are refactored to use the new feature-scoped exports.

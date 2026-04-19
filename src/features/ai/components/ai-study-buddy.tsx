@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sparkles, MessageCircle } from "lucide-react";
 import { ChatMessage } from "./chat-message";
 import { useAIChat } from "@/features/ai/hooks/use-ai-chat";
+import { useHardwareSafety } from "@/hooks/use-hardware-safety";
 import { ChatHeader } from "./chat-header";
 import { ChatEmptyState } from "./chat-empty-state";
 import { ChatInput } from "./chat-input";
@@ -12,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { AI_API } from "@/constants/api";
 import { AiFeatureGuard } from "./AiFeatureGuard";
 import { AIErrorBoundary } from "./AIErrorBoundary";
+import { eventBus, UI_EVENTS } from "@/lib/event-bus";
 
 interface AIStudyBuddyProps {
   subject?: string;
@@ -30,13 +32,38 @@ const AIStudyBuddyContent = ({ subject, topic, assignment, classId }: AIStudyBud
     input,
     setInput,
     handleSend,
+    stopStreaming,
     isLoading,
     scrollAreaRef,
+    isDryRun,
   } = useAIChat({
     url: AI_API.STUDY_BUDDY,
     classId,
     context: { subject, topic, assignment },
   });
+
+  // 🛡️ HARDWARE PRIVACY & SAFETY: Stop activities if tab is hidden
+  useHardwareSafety({
+    onHidden: () => {
+      // 🛡️ MANDATE: Stop AI streaming on tab hide to preserve bandwidth and privacy
+      stopStreaming();
+    },
+    shouldStopSpeech: true,
+  });
+
+  useEffect(() => {
+    const handleOpen = (data?: { classId?: string | number }) => {
+      // 🛡️ SECURITY & UX: If a specific classId is provided in the event, and it doesn't match this buddy, ignore.
+      // If data.classId is missing, it's a general open request that should be honored by the active buddy.
+      if (data?.classId && classId) {
+        if (Number(data.classId) !== Number(classId)) return;
+      }
+      setIsOpen(true);
+    };
+
+    eventBus.on(UI_EVENTS.OPEN_STUDY_BUDDY, handleOpen);
+    return () => eventBus.off(UI_EVENTS.OPEN_STUDY_BUDDY, handleOpen);
+  }, [classId]);
 
   return (
     <div
@@ -54,7 +81,7 @@ const AIStudyBuddyContent = ({ subject, topic, assignment, classId }: AIStudyBud
             "w-full h-full md:w-[400px] md:h-[600px] rounded-none md:rounded-2xl bg-card/90 backdrop-blur-3xl"
           )}
         >
-          <ChatHeader onClose={() => setIsOpen(false)} />
+          <ChatHeader onClose={() => setIsOpen(false)} isDryRun={isDryRun} />
 
           <CardContent className="flex-1 p-0 overflow-hidden bg-dot-pattern min-h-0">
             <ScrollArea ref={scrollAreaRef} className="h-full p-4 md:p-6">

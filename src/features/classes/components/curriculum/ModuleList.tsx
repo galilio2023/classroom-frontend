@@ -2,7 +2,7 @@ import { Accordion } from "@/components/ui/accordion";
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
 import { motion, AnimatePresence } from "framer-motion";
 import { Module } from "@/types";
-import { ModuleItem } from "@/components/classes/curriculum/module-item";
+import { ModuleItem } from "@/features/classes/components/curriculum/module-item";
 
 interface ModuleListProps {
   modules: Module[];

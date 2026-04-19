@@ -77,6 +77,8 @@ const QuizShow = () => {
           setScore(data.data.score);
           setIsFinished(true);
           setIsStarted(false);
+          // 🧹 CLEANUP: Remove cached progress on success
+          localStorage.removeItem(`quiz_progress_${quiz.id}`);
           toast.success(t("classes.live.toasts.sessionStartedTeacher"));
         },
         onError: (error: any) => {
@@ -150,6 +152,7 @@ const QuizShow = () => {
         timeLeft={timeLeft}
         onFinish={handleFinish}
         isSubmitting={submitMutation.isPending}
+        setAnswers={setAnswers}
       />
     );
   }

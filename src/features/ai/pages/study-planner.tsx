@@ -19,7 +19,7 @@ import { Link } from "react-router-dom";
 import { useCustom, useCustomMutation, HttpError } from "@refinedev/core";
 import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
-import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
+import { Breadcrumb } from "@/components/refine/layout/breadcrumb";
 import usePageTitle from "@/hooks/use-page-title";
 
 interface StudyBlock {

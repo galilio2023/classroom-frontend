@@ -4,7 +4,7 @@ import { AtRiskStudents } from "./at-risk-students";
 import { PlatformOverview } from "./platform-overview";
 import {} from "./recent-activity";
 import { RLHFAlignmentChart } from "./rlhf-alignment-chart";
-import { ErrorBoundary } from "@/components/error-boundary";
+import { ErrorBoundary } from "@/components/guards/error-boundary";
 import { DashboardData } from "@/types/dashboard";
 import { TeacherOnboarding } from "./teacher-onboarding";
 import { ActionCenter, ActionItem } from "./action-center";
@@ -140,7 +140,10 @@ export const StaffDashboard = ({ data, isLoading, onRefresh, show }: StaffDashbo
 
       {/* Teacher TV Stats Row */}
       {data.channelStats && (
-        <TeacherTvStats stats={data.channelStats} onManageClick={() => show("channels", "me")} />
+        <TeacherTvStats
+          stats={data.channelStats}
+          onManageClick={() => show("teacher-channel", "me")}
+        />
       )}
 
       <div className="grid gap-12 lg:grid-cols-12 items-start">

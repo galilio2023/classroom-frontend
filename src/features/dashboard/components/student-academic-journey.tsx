@@ -27,7 +27,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { PracticeModal } from "@/components/practice/practice-modal";
+import { PracticeModal } from "@/features/quizzes/components/practice-modal";
 import { NoChartData } from "./no-chart-data";
 import { AttendanceStatCard } from "./attendance-stat-card";
 import {
@@ -41,6 +41,7 @@ import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { useTranslation } from "react-i18next";
+import { formatGrade } from "@/lib/numeric";
 
 interface StudentAcademicJourneyProps {
   gradeTrends: any[];
@@ -349,7 +350,7 @@ export const StudentAcademicJourney = ({
           },
           {
             label: t("classes.attendance.rate"),
-            value: `${attendanceRate}%`,
+            value: formatGrade(attendanceRate),
             icon: TrendingUp,
             color: "text-primary",
             bg: "bg-primary/10",

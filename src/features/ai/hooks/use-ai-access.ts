@@ -1,7 +1,8 @@
 import { useDashboard } from "@/features/dashboard/hooks/use-dashboard";
-import { useUserRole } from "@/hooks/use-user-role";
-import { useGetIdentity } from "@refinedev/core";
+import { useUserRole } from "@/features/users/hooks/use-user-role";
+import { useGetIdentity, useCan, useCustom } from "@refinedev/core";
 import { User } from "@/types";
+import { BACKEND_URL } from "@/config";
 
 /**
  * Centralized hook to manage AI feature access and gating.
@@ -12,19 +13,42 @@ export const useAiAccess = () => {
   const { isParent, isLoading: isRoleLoading } = useUserRole();
   const { data: user } = useGetIdentity<User>();
 
+  // 🛡️ CIRCUIT BREAKER: Monitor AI System Health
+  const { query: healthQuery } = useCustom({
+    url: `${BACKEND_URL}/ai/health`,
+    method: "get",
+    queryOptions: {
+      refetchInterval: (data) => {
+        const health = (data as { data?: { data?: { isAvailable?: boolean } } })?.data?.data;
+        // If degraded or unavailable, poll more slowly
+        return health?.isAvailable === false ? 30000 : 60000;
+      },
+    },
+  });
+
+  const health = healthQuery.data?.data;
+
+  // 🛡️ RBAC: Secondary layer of defense via Refine accessControl
+  const { data: canAccess, isLoading: isCanLoading } = useCan({
+    resource: "ai_features",
+    action: "access",
+  });
+
   // 🛡️ Global Master Switch: Only enabled if coreData is loaded and explicitly true
   const isAiEnabled = !!coreData?.globalConfig && coreData.globalConfig.enableAiFeatures === true;
 
   // 🛡️ RBAC: AI interactive features are strictly disabled for the Parent role
-  const isAllowed = !isParent;
+  const isAllowed = !isParent && (canAccess?.can ?? true);
 
   // 📊 QUOTA: Check if user has exceeded their monthly token limit
   const isQuotaExceeded = user ? (user.aiTokensUsed || 0) >= (user.aiMonthlyLimit || 50000) : false;
 
   return {
-    isAiEnabled,
+    isAiEnabled: isAiEnabled && health?.isAvailable !== false,
     isAllowed,
     isQuotaExceeded,
-    isLoading: isDashboardLoading || isRoleLoading,
+    isDegraded: health?.isDegraded || health?.isAvailable === false,
+    retryAfter: health?.maxRetryAfter,
+    isLoading: isDashboardLoading || isRoleLoading || isCanLoading || healthQuery.isLoading,
   };
 };

@@ -1,4 +1,4 @@
-import { ListView } from "@/components/refine-ui/views/list-view";
+import { ListView } from "@/components/refine/views/list-view";
 import { Layers } from "lucide-react";
 import {} from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";

@@ -1,4 +1,4 @@
-import { EditViewHeader } from "@/components/refine-ui/views/edit-view";
+import { EditViewHeader } from "@/components/refine/views/edit-view";
 import { useSelect, useOne, useCustomMutation } from "@refinedev/core";
 import { useParams } from "react-router-dom";
 import { Form } from "@/components/ui/form";
@@ -39,7 +39,7 @@ import {} from "@/lib/utils";
 import { Label } from "@/components/ui/label";
 import { useTranslation } from "react-i18next";
 import { useOptimisticVersion } from "@/hooks/use-optimistic-version";
-import { ConflictDialog } from "@/components/conflict-dialog";
+import { ConflictDialog } from "@/features/classes/components/conflict-dialog";
 import { useClassForm } from "../hooks/useClassForm";
 import {} from "sonner";
 

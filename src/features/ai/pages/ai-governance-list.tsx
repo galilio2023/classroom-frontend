@@ -8,7 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { DataTable } from "@/components/refine-ui/data-table/data-table";
+import { DataTable } from "@/components/refine/data-table/data-table";
 import { SparkleLoader } from "@/features/ai/components/sparkle-loader";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -27,7 +27,7 @@ import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
 import dayjs from "dayjs";
-import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
+import { Breadcrumb } from "@/components/refine/layout/breadcrumb";
 import usePageTitle from "@/hooks/use-page-title";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";

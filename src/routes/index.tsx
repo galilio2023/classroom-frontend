@@ -3,9 +3,9 @@ import { useTranslation } from "react-i18next";
 import { Authenticated } from "@refinedev/core";
 import { CatchAllNavigate, NavigateToResource } from "@refinedev/react-router";
 import { Outlet, Route, Routes } from "react-router-dom";
-import { Layout } from "@/components/refine-ui/layout/layout";
-import { AuthorizedRoute } from "@/components/authorized-route";
-import { VerificationGuard } from "@/components/verification-guard";
+import { Layout } from "@/components/refine/layout/layout";
+import { AuthorizedRoute } from "@/components/guards/authorized-route";
+import { VerificationGuard } from "@/components/guards/verification-guard";
 import { SocketProvider } from "@/contexts/socket-context";
 import { TermProvider } from "@/contexts/term-context";
 import { JobProvider } from "@/contexts/job-context";
@@ -13,9 +13,9 @@ import { Loader2 } from "lucide-react";
 
 // Lazy Load Pages
 const Dashboard = React.lazy(() => import("@/features/dashboard/pages/index"));
-const LoginPage = React.lazy(() => import("@/pages/auth/login"));
-const RegisterPage = React.lazy(() => import("@/pages/auth/register"));
-const PendingVerification = React.lazy(() => import("@/pages/auth/pending-verification"));
+const LoginPage = React.lazy(() => import("@/features/auth/pages/login"));
+const RegisterPage = React.lazy(() => import("@/features/auth/pages/register"));
+const PendingVerification = React.lazy(() => import("@/features/auth/pages/pending-verification"));
 const UnauthorizedPage = React.lazy(() => import("@/pages/unauthorized"));
 
 const ClassesList = React.lazy(() => import("@/features/classes/pages/list"));
@@ -38,65 +38,94 @@ const CreateAssignment = React.lazy(() =>
 );
 const AssignmentShow = React.lazy(() => import("@/features/assignments/pages/show"));
 
-const SubmissionsList = React.lazy(() => import("@/pages/submissions/list-page"));
-const SubmissionShow = React.lazy(() => import("@/pages/submissions/show"));
+const SubmissionsList = React.lazy(
+  () => import("@/features/assignments/pages/submissions/list-page")
+);
+const SubmissionShow = React.lazy(() => import("@/features/assignments/pages/submissions/show"));
 
-const AttendanceList = React.lazy(() => import("@/pages/attendance/list"));
-const EnrollmentList = React.lazy(() => import("@/pages/enrollments/list"));
-const DiscussionsList = React.lazy(() => import("@/pages/discussions/list"));
-const AnnouncementsList = React.lazy(() => import("@/pages/announcements/list"));
-const CreateAnnouncement = React.lazy(() => import("@/pages/announcements/create"));
+const AttendanceList = React.lazy(() => import("@/features/attendance/pages/list"));
+const EnrollmentList = React.lazy(() => import("@/features/classes/pages/enrollments/list"));
+const DiscussionsList = React.lazy(() => import("@/features/engagement/pages/discussions/list"));
+const AnnouncementsList = React.lazy(
+  () => import("@/features/engagement/pages/announcements/list")
+);
+const CreateAnnouncement = React.lazy(
+  () => import("@/features/engagement/pages/announcements/create")
+);
+const CalendarPage = React.lazy(() => import("@/features/engagement/pages/calendar"));
+const NotificationsPage = React.lazy(
+  () => import("@/features/engagement/pages/notifications/list")
+);
 
 const QuizzesList = React.lazy(() => import("@/features/quizzes/pages/list"));
 const CreateQuiz = React.lazy(() => import("@/features/quizzes/pages/create"));
 const QuizShow = React.lazy(() => import("@/features/quizzes/pages/show"));
 
-const ModulesList = React.lazy(() => import("@/pages/modules/list"));
-const ResourcesList = React.lazy(() => import("@/pages/resources/list"));
+const ModulesList = React.lazy(() => import("@/features/classes/pages/modules/list"));
+const ResourcesList = React.lazy(() => import("@/features/classes/pages/resources/list"));
 
-const DepartmentsList = React.lazy(() => import("@/pages/departments/list"));
-const CreateDepartment = React.lazy(() => import("@/pages/departments/create"));
-const EditDepartment = React.lazy(() => import("@/pages/departments/edit"));
+const DepartmentsList = React.lazy(() => import("@/features/academic/pages/departments/list"));
+const CreateDepartment = React.lazy(() => import("@/features/academic/pages/departments/create"));
+const EditDepartment = React.lazy(() => import("@/features/academic/pages/departments/edit"));
 
-const SubjectsList = React.lazy(() => import("@/pages/subjects/list"));
-const CreateSubject = React.lazy(() => import("@/pages/subjects/create"));
-const EditSubject = React.lazy(() => import("@/pages/subjects/edit"));
+const SubjectsList = React.lazy(() => import("@/features/academic/pages/subjects/list"));
+const CreateSubject = React.lazy(() => import("@/features/academic/pages/subjects/create"));
+const EditSubject = React.lazy(() => import("@/features/academic/pages/subjects/edit"));
 
-const CalendarPage = React.lazy(() => import("@/pages/calendar"));
-const NotificationsPage = React.lazy(() => import("@/pages/notifications/list"));
+const TermsList = React.lazy(() => import("@/features/academic/pages/terms/list"));
 const AiAssistantPage = React.lazy(() => import("@/features/ai/pages/ai-assistant"));
 const AiStudyLabPage = React.lazy(() => import("@/features/ai/pages/ai-study-lab"));
 const MemoryLabPage = React.lazy(() => import("@/features/ai/pages/memory-lab"));
 const AiHistoryList = React.lazy(() => import("@/features/ai/pages/history-list"));
 const AiHistoryShow = React.lazy(() => import("@/features/ai/pages/history-show"));
-const MessagesPage = React.lazy(() => import("@/pages/messages/index"));
-const ProjectGroupsPage = React.lazy(() => import("@/pages/project-groups/index"));
-const ShowProjectGroup = React.lazy(() => import("@/pages/project-groups/show"));
-const GlobalLibraryPage = React.lazy(() => import("@/pages/library/index"));
-const TermsList = React.lazy(() => import("@/pages/terms/list"));
-const ProfileRequestsList = React.lazy(() => import("@/pages/profile-requests/list"));
+const MessagesPage = React.lazy(() => import("@/features/engagement/pages/messages/index"));
+const ProjectGroupsPage = React.lazy(
+  () => import("@/features/engagement/pages/project-groups/index")
+);
+const ShowProjectGroup = React.lazy(
+  () => import("@/features/engagement/pages/project-groups/show")
+);
+const GlobalLibraryPage = React.lazy(() => import("@/features/academic/pages/library/index"));
+const ProfileRequestsList = React.lazy(
+  () => import("@/features/users/pages/profile-requests/list")
+);
 const StudyPlanner = React.lazy(() => import("@/features/ai/pages/study-planner"));
-const StudentPersonaSettings = React.lazy(() => import("@/pages/student/persona-settings"));
+const StudentPersonaSettings = React.lazy(
+  () => import("@/features/users/pages/student/persona-settings")
+);
 const PeerReviewBoard = React.lazy(() => import("@/features/assignments/pages/peer-review-board"));
-const TeacherApplicationsList = React.lazy(() => import("@/pages/teacher-applications/list"));
-const BadgesList = React.lazy(() => import("@/pages/badges/list"));
-const CreateBadge = React.lazy(() => import("@/pages/badges/create"));
-const ActivityLogPage = React.lazy(() => import("@/pages/dashboard/activity-log"));
+const TeacherApplicationsList = React.lazy(
+  () => import("@/features/users/pages/teacher-applications/list")
+);
+const BadgesList = React.lazy(() => import("@/features/users/pages/badges/list"));
+const CreateBadge = React.lazy(() => import("@/features/users/pages/badges/create"));
+const ActivityLogPage = React.lazy(() => import("@/features/dashboard/pages/activity-log"));
+const SchoolAdminDashboard = React.lazy(() => import("@/features/schools/pages/dashboard"));
 const AIGovernanceList = React.lazy(() => import("@/features/ai/pages/ai-governance-list"));
-const AiMetricsPage = React.lazy(() => import("@/features/ai/pages/ai-metrics"));
-const StudentReportCard = React.lazy(() => import("@/pages/student/report-card"));
-const StudentProgress = React.lazy(() => import("@/pages/progress/list"));
-const TeacherChannelPage = React.lazy(() => import("@/pages/teacher-channel/index"));
-const StudentPortfolio = React.lazy(() => import("@/features/users/pages/portfolio"));
-const SettingsEditPage = React.lazy(() => import("@/pages/settings/edit"));
-const MonetizationSettings = React.lazy(() => import("@/pages/settings/monetization"));
+const PendingApprovals = React.lazy(() => import("@/features/ai/pages/pending-approvals"));
+const AIMetrics = React.lazy(() => import("@/features/ai/pages/ai-metrics"));
 
-const TeacherSubscriptionsList = React.lazy(() => import("@/pages/teacher-subscriptions/list"));
-const MyTeachersList = React.lazy(() => import("@/pages/my-teachers/list"));
-const DiscoveryPage = React.lazy(() => import("@/pages/discovery/index"));
-const PublicClassesPage = React.lazy(() => import("@/pages/discovery/classes-list"));
+const StudentReportCard = React.lazy(() => import("@/features/users/pages/student/report-card"));
+const StudentProgress = React.lazy(() => import("@/features/users/pages/progress/list"));
+const TeacherChannelPage = React.lazy(() => import("@/features/users/pages/teacher-channel/index"));
+const StudentPortfolio = React.lazy(() => import("@/features/users/pages/portfolio"));
+const SettingsEditPage = React.lazy(() => import("@/features/users/pages/settings/edit"));
+const MonetizationSettings = React.lazy(
+  () => import("@/features/users/pages/settings/monetization")
+);
+
+const TeacherSubscriptionsList = React.lazy(
+  () => import("@/features/users/pages/teacher-subscriptions/list")
+);
+const MyTeachersList = React.lazy(() => import("@/features/users/pages/my-teachers/list"));
+const DiscoveryPage = React.lazy(() => import("@/features/academic/pages/discovery/index"));
+const PublicClassesPage = React.lazy(
+  () => import("@/features/academic/pages/discovery/classes-list")
+);
 const PublicClassPreview = React.lazy(() =>
-  import("@/pages/discovery/class-preview").then((m) => ({ default: m.PublicClassPreview }))
+  import("@/features/academic/pages/discovery/class-preview").then((m) => ({
+    default: m.PublicClassPreview,
+  }))
 );
 
 const ParentDashboard = React.lazy(() =>
@@ -109,7 +138,7 @@ const ChildRiskReport = React.lazy(() =>
 const LandingPage = React.lazy(() => import("@/pages/landing"));
 const PricingPage = React.lazy(() => import("@/pages/pricing"));
 const PublicLayout = React.lazy(() =>
-  import("@/components/public-ui/layout").then((m) => ({
+  import("@/features/engagement/components/layout").then((m) => ({
     default: m.PublicLayout,
   }))
 );
@@ -193,6 +222,14 @@ export const AppRouter = () => (
             element={
               <AuthorizedRoute resource="dashboard" action="list">
                 <Dashboard />
+              </AuthorizedRoute>
+            }
+          />
+          <Route
+            path="/school/dashboard"
+            element={
+              <AuthorizedRoute resource="school-dashboard" action="list">
+                <SchoolAdminDashboard />
               </AuthorizedRoute>
             }
           />
@@ -683,7 +720,7 @@ export const AppRouter = () => (
             path="/ai-metrics"
             element={
               <AuthorizedRoute resource="ai-metrics" action="list">
-                <AiMetricsPage />
+                <AIMetrics />
               </AuthorizedRoute>
             }
           />

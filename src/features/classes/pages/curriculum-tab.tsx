@@ -18,7 +18,7 @@ import { useDashboard } from "@/features/dashboard/hooks/use-dashboard";
 import { useJobs } from "@/contexts/job-context";
 import { DropResult } from "@hello-pangea/dnd";
 import { VersionSummaryModal } from "../components/version-summary-modal";
-import { useCapabilities } from "@/hooks/use-capabilities";
+import { useCapabilities } from "@/features/users/hooks/use-capabilities";
 
 // New sub-components
 import { CurriculumHeader } from "../components/curriculum/CurriculumHeader";

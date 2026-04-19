@@ -17,7 +17,7 @@ import React, { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { QuizAnalytics } from "@/components/classes/quiz-analytics";
+import { QuizAnalytics } from "@/features/classes/components/quiz-analytics";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const QuizResults = () => {

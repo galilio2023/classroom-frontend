@@ -10,6 +10,7 @@ declare const self: ServiceWorkerGlobalScope & {
 precacheAndRoute(self.__WB_MANIFEST || []);
 
 const CACHE_NAME = "classroom-v1";
+const CURRICULUM_CACHE = "curriculum-v1";
 const OFFLINE_URL = "/offline.html";
 
 // Assets to cache immediately on install
@@ -22,11 +23,26 @@ const STATIC_ASSETS = [
   "/favicon.ico",
 ];
 
+// --- BACKGROUND SYNC ---
+self.addEventListener("sync", (event: any) => {
+  if (event.tag === "sync-pending-quizzes") {
+    console.log("🔄 Background Sync: Syncing quizzes...");
+    // The actual sync logic is handled by the useOfflineSync hook in the app context,
+    // but the Service Worker can trigger a message to the clients to start syncing.
+    event.waitUntil(
+      self.clients.matchAll().then((clients) => {
+        clients.forEach((client) => client.postMessage({ type: "SYNC_OFFLINE_DATA" }));
+      })
+    );
+  }
+});
+
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(STATIC_ASSETS);
-    })
+    Promise.all([
+      caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS)),
+      caches.open(CURRICULUM_CACHE),
+    ])
   );
   self.skipWaiting();
 });
@@ -34,7 +50,11 @@ self.addEventListener("install", (event) => {
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
-      return Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key)));
+      return Promise.all(
+        keys
+          .filter((key) => key !== CACHE_NAME && key !== CURRICULUM_CACHE)
+          .map((key) => caches.delete(key))
+      );
     })
   );
   self.clients.claim();
@@ -45,17 +65,44 @@ self.addEventListener("fetch", (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // 1. Skip non-GET requests, API calls, and non-http/https schemes (e.g., chrome-extension://)
-  // Fixes: TypeError: Failed to execute 'put' on 'Cache': Request scheme 'chrome-extension' is unsupported
-  if (
-    request.method !== "GET" ||
-    url.pathname.startsWith("/api") ||
-    !["http:", "https:"].includes(url.protocol)
-  ) {
+  // 1. Skip non-GET requests and non-http/https schemes
+  if (request.method !== "GET" || !["http:", "https:"].includes(url.protocol)) {
     return;
   }
 
-  // 2. Stale-While-Revalidate for Static Assets & UI
+  // 2. 📚 CURRICULUM CACHE STRATEGY: Cache-First for class modules and resources
+  // Targeted at rural students with capped/unreliable data
+  if (url.pathname.includes("/api/classes/") && url.pathname.includes("/modules")) {
+    event.respondWith(
+      caches.open(CURRICULUM_CACHE).then((cache) => {
+        return cache.match(request).then((cachedResponse) => {
+          const fetchPromise = fetch(request).then((networkResponse) => {
+            cache.put(request, networkResponse.clone());
+            return networkResponse;
+          });
+          return cachedResponse || fetchPromise;
+        });
+      })
+    );
+    return;
+  }
+
+  // 3. UI & API STRATEGY: Stale-While-Revalidate for other API calls and assets
+  if (url.pathname.startsWith("/api")) {
+    // Standard API calls: Network-First (with timeout) fallback to cache
+    event.respondWith(
+      fetch(request)
+        .then((networkResponse) => {
+          const cloned = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(request, cloned));
+          return networkResponse;
+        })
+        .catch(() => caches.match(request))
+    );
+    return;
+  }
+
+  // 4. UI ASSETS: Stale-While-Revalidate
   event.respondWith(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.match(request).then((cachedResponse) => {

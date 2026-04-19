@@ -1,5 +1,5 @@
 import { useList, useGetIdentity } from "@refinedev/core";
-import { User, Class } from "@/types";
+import { User, Class, UserRole } from "@/types";
 import { AnimatePresence, motion } from "framer-motion";
 import { Radio, ArrowRight, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -52,7 +52,7 @@ export const GlobalLiveOverlay = () => {
         initial={{ y: 100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: 100, opacity: 0 }}
-        className="fixed bottom-6 right-6 z-[9999] max-w-sm w-full"
+        className="fixed bottom-6 end-6 z-[9999] max-w-sm w-full"
       >
         <div className="bg-primary text-primary-foreground p-5 rounded-[2rem] shadow-2xl shadow-primary/40 relative overflow-hidden group">
           {/* Animated Background Pulse */}
@@ -88,8 +88,14 @@ export const GlobalLiveOverlay = () => {
 
             <div className="space-y-3">
               {liveClasses.slice(0, 2).map((c) => (
-                <div key={c.id} className="p-3 bg-white/10 rounded-2xl border border-white/10">
-                  <p className="font-black text-xs truncate mb-2">{c.name}</p>
+                <div
+                  key={c.id}
+                  className="p-3 bg-white/10 rounded-2xl border border-white/10 space-y-3"
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="font-black text-xs truncate">{c.name}</p>
+                  </div>
+
                   <Button
                     asChild
                     size="sm"

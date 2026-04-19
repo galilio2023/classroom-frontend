@@ -7,6 +7,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import axios from "axios";
 import { useTranslation } from "react-i18next";
+import { validateEgyptianID } from "@/lib/validators";
 
 export const useRegisterForm = () => {
   const { t } = useTranslation();
@@ -18,13 +19,23 @@ export const useRegisterForm = () => {
   const [step, setStep] = useState(1);
   const [isGeneratingBio, setIsGeneratingBio] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
+  const [isSendingOtp, setIsSendingOtp] = useState(false);
 
   const registerSchema = z.object({
-    name: z.string().min(1, t("auth.register.nameRequired")),
-    email: z.string().email(t("auth.register.invalidEmail")),
-    password: z.string().min(8, t("auth.register.passwordMinLength")),
+    name: z.string().min(1, t("auth.register.nameRequired", "Name is required")),
+    email: z.string().email(t("auth.register.invalidEmail", "Invalid email")),
+    password: z
+      .string()
+      .min(8, t("auth.register.passwordMinLength", "Password must be at least 8 characters")),
     role: z.enum(["student", "teacher", "parent"]),
-    phoneNumber: z.string().optional(),
+    phoneNumber: z.string().min(10, t("auth.register.phoneRequired", "Phone number is required")),
+    nationalId: z
+      .string()
+      .length(14, t("auth.register.nationalIdLength", "National ID must be 14 digits")),
+    hasAiConsent: z.boolean().refine((val) => val === true, {
+      message: t("auth.register.consentRequired", "AI consent is required"),
+    }),
     bio: z.string().optional(),
     dateOfBirth: z.string().optional(),
     parentName: z.string().optional(),
@@ -44,6 +55,8 @@ export const useRegisterForm = () => {
       password: "",
       role: "student",
       phoneNumber: "",
+      nationalId: "",
+      hasAiConsent: false,
       bio: "",
       dateOfBirth: "",
       parentName: "",
@@ -95,12 +108,60 @@ export const useRegisterForm = () => {
   };
 
   const nextStep = async () => {
-    const fieldsToValidate = ["name", "email", "password", "role"] as const;
-    const isValid = await form.trigger(fieldsToValidate as any);
-    if (isValid) setStep(2);
+    let fieldsToValidate: any[] = [];
+    if (step === 1) {
+      fieldsToValidate = ["name", "email", "password", "role"];
+    } else if (step === 2) {
+      fieldsToValidate = ["phoneNumber", "nationalId"];
+      // Soft validation for Egyptian ID
+      const nationalId = form.getValues("nationalId");
+      const validation = validateEgyptianID(nationalId);
+      if (!validation.isValid) {
+        form.setError("nationalId", { message: validation.error });
+        return;
+      }
+    } else if (step === 3) {
+      fieldsToValidate = ["hasAiConsent"];
+    }
+
+    const isValid = await form.trigger(fieldsToValidate);
+    if (isValid) {
+      if (step === 3) {
+        await sendWhatsAppOtp();
+      }
+      setStep((prev) => prev + 1);
+    }
   };
 
-  const prevStep = () => setStep(1);
+  const prevStep = () => setStep((prev) => prev - 1);
+
+  const sendWhatsAppOtp = async () => {
+    const phoneNumber = form.getValues("phoneNumber");
+    setIsSendingOtp(true);
+    try {
+      await axios.post("/api/auth/otp/send", { phoneNumber });
+      toast.success(t("auth.otp.sentSuccess", "OTP sent via WhatsApp"));
+    } catch (error) {
+      toast.error(t("auth.otp.sentError", "Failed to send OTP. Please try again."));
+    } finally {
+      setIsSendingOtp(false);
+    }
+  };
+
+  const verifyOtp = async (code: string) => {
+    const phoneNumber = form.getValues("phoneNumber");
+    setIsVerifyingOtp(true);
+    try {
+      const response = await axios.post("/api/auth/otp/verify", { phoneNumber, code });
+      if (response.data.data.verified) {
+        handleFinalSubmit();
+      }
+    } catch (error) {
+      toast.error(t("auth.otp.invalid", "Invalid verification code."));
+    } finally {
+      setIsVerifyingOtp(false);
+    }
+  };
 
   const handleFinalSubmit = form.handleSubmit((values) => {
     register(
@@ -108,8 +169,11 @@ export const useRegisterForm = () => {
       {
         onSuccess: () => {
           setIsSuccess(true);
+          // Redirect logic based on role for "First Success"
           setTimeout(() => {
-            navigate("/dashboard");
+            if (values.role === "teacher") navigate("/ai/magic-builder");
+            else if (values.role === "student") navigate("/ai/chat");
+            else navigate("/dashboard");
           }, 3000);
         },
         onError: (err) => {
@@ -117,6 +181,7 @@ export const useRegisterForm = () => {
           const errorMessage =
             (error as any)?.data?.message || error.message || t("auth.login.unknownError");
           toast.error(errorMessage);
+          setStep(1); // Reset to first step on hard error
         },
       }
     );
@@ -134,5 +199,8 @@ export const useRegisterForm = () => {
     isSuccess,
     role,
     inviteCode,
+    verifyOtp,
+    isVerifyingOtp,
+    sendWhatsAppOtp,
   };
 };

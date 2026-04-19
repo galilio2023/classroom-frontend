@@ -259,7 +259,12 @@ export const dataProvider: DataProvider = {
 
   create: async ({ resource, variables, meta }) => {
     if (isOffline()) {
-      await offlineDB.queue({ resource, action: "create", variables, meta });
+      await offlineDB.queue({
+        resource,
+        action: "create",
+        variables: variables as any,
+        meta: meta as any,
+      });
       toast.warning(
         "📴 Offline: Your changes are saved locally and will sync when you're back online."
       );
@@ -280,7 +285,12 @@ export const dataProvider: DataProvider = {
       return { data: json.data ?? json };
     } catch (err) {
       if (err instanceof TypeError && err.message === "Failed to fetch") {
-        await offlineDB.queue({ resource, action: "create", variables, meta });
+        await offlineDB.queue({
+          resource,
+          action: "create",
+          variables: variables as any,
+          meta: meta as any,
+        });
         toast.warning("📴 Network failed: Mutation queued for retry.");
         return { data: { ...variables, id: `offline-${Date.now()}` } as any };
       }
@@ -290,7 +300,12 @@ export const dataProvider: DataProvider = {
 
   update: async ({ resource, id, variables, meta }) => {
     if (isOffline()) {
-      await offlineDB.queue({ resource, action: "update", variables: { ...variables, id }, meta });
+      await offlineDB.queue({
+        resource,
+        action: "update",
+        variables: { ...(variables as any), id },
+        meta: meta as any,
+      });
       toast.warning("📴 Offline: Edit saved locally.");
       return { data: { ...variables, id } as any };
     }
@@ -319,8 +334,8 @@ export const dataProvider: DataProvider = {
         await offlineDB.queue({
           resource,
           action: "update",
-          variables: { ...variables, id },
-          meta,
+          variables: { ...(variables as any), id },
+          meta: meta as any,
         });
         toast.warning("📴 Network failed: Update queued.");
         return { data: { ...variables, id } as any };
@@ -331,7 +346,12 @@ export const dataProvider: DataProvider = {
 
   deleteOne: async ({ resource, id, meta }) => {
     if (isOffline()) {
-      await offlineDB.queue({ resource, action: "delete", variables: { id }, meta });
+      await offlineDB.queue({
+        resource,
+        action: "delete",
+        variables: { id } as any,
+        meta: meta as any,
+      });
       toast.warning("📴 Offline: Delete will sync when online.");
       return { data: { id } as any };
     }
@@ -349,7 +369,12 @@ export const dataProvider: DataProvider = {
       return { data: json.data || { id } };
     } catch (err) {
       if (err instanceof TypeError && err.message === "Failed to fetch") {
-        await offlineDB.queue({ resource, action: "delete", variables: { id }, meta });
+        await offlineDB.queue({
+          resource,
+          action: "delete",
+          variables: { id } as any,
+          meta: meta as any,
+        });
         toast.warning("📴 Network failed: Delete queued.");
         return { data: { id } as any };
       }

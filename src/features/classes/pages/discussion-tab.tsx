@@ -22,7 +22,8 @@ import {
   Reply,
 } from "lucide-react";
 import { toast } from "sonner";
-import { ChatBubble } from "@/components/classes/chat-bubble";
+import { ChatBubble } from "@/features/classes/components/chat-bubble";
+import { DiscussionProvider } from "@/contexts/discussion-context";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { MarkdownRenderer } from "@/components/ui/markdown-renderer";
 import { RichTextEditor } from "@/components/ui/rich-text-editor";
@@ -31,7 +32,7 @@ import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { useTranslation } from "react-i18next";
-import { useUserRole } from "@/hooks/use-user-role";
+import { useUserRole } from "@/features/users/hooks/use-user-role";
 
 interface DiscussionTabProps {
   classId: string;
@@ -285,23 +286,29 @@ export const DiscussionTab = ({ classId }: DiscussionTabProps) => {
               <p className="text-sm font-medium">{t("classes.discussion.noMessages")}</p>
             </div>
           ) : (
-            discussions.map((discussion) => (
-              <ChatBubble
-                key={discussion.id}
-                post={discussion}
-                isOwn={discussion.user.id === identity?.id}
-                isAdmin={identity?.role === UserRole.ADMIN}
-                isStaff={isStaff}
-                onReply={(id) => {
-                  setReplyTo(id);
-                  // Scroll to editor
-                }}
-                onSolve={handleSolve}
-                onDelete={(id) => {
-                  deletePost({ resource: "discussions", id });
-                }}
-              />
-            ))
+            <DiscussionProvider
+              value={{
+                isStaff,
+                isAdmin: identity?.role === UserRole.ADMIN,
+                userId: identity?.id,
+              }}
+            >
+              {discussions.map((discussion) => (
+                <ChatBubble
+                  key={discussion.id}
+                  post={discussion}
+                  isOwn={discussion.user.id === identity?.id}
+                  onReply={(id) => {
+                    setReplyTo(id);
+                    // Scroll to editor
+                  }}
+                  onSolve={handleSolve}
+                  onDelete={(id) => {
+                    deletePost({ resource: "discussions", id });
+                  }}
+                />
+              ))}
+            </DiscussionProvider>
           )}
         </div>
       </ScrollArea>

@@ -1,3 +1,5 @@
+export * from "@/types/ai";
+
 export interface SystemHealthReport {
   id: number;
   reportDate: string;

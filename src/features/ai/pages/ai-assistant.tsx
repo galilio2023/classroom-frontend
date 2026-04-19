@@ -5,7 +5,7 @@ import { AIVisionAssistant } from "@/features/ai/components/ai-vision-assistant"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Sparkles, FileText, BrainCircuit, LayoutDashboard, Info, Camera } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
+import { Breadcrumb } from "@/components/refine/layout/breadcrumb";
 import usePageTitle from "@/hooks/use-page-title";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -13,6 +13,73 @@ import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { useDashboard } from "@/features/dashboard/hooks/use-dashboard";
 import { AiFeatureGuard } from "@/features/ai/components/AiFeatureGuard";
+
+/**
+ * 🛡️ PERFORMANCE FIX: Memoize the entire Tabs content to isolate it from
+ * the high-frequency 'useDashboard' coreData updates.
+ * This prevents the AI Hub from freezing when real-time pulse events occur.
+ */
+const MemoizedAiFeatures = React.memo(() => {
+  const { t } = useTranslation();
+
+  return (
+    <Tabs defaultValue="assignment" className="w-full space-y-8 md:space-y-12">
+      <div className="sticky top-20 z-40">
+        <div className="rounded-3xl border border-border/40 bg-background/40 backdrop-blur-3xl p-1.5 shadow-2xl shadow-black/5">
+          <TabsList className="grid w-full grid-cols-3 h-12 md:h-14 bg-muted/20 gap-1 rounded-[1.25rem]">
+            <TabsTrigger
+              value="assignment"
+              className="rounded-xl font-black uppercase tracking-widest text-[9px] md:text-[10px] gap-2 md:gap-3 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-xl transition-all duration-300"
+            >
+              <FileText className="h-4 w-4 md:h-5 md:w-5" />
+              {t("aiHub.assistant.architect")}
+            </TabsTrigger>
+            <TabsTrigger
+              value="quiz"
+              className="rounded-xl font-black uppercase tracking-widest text-[9px] md:text-[10px] gap-2 md:gap-3 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-xl transition-all duration-300"
+            >
+              <BrainCircuit className="h-4 w-4 md:h-5 md:w-5" />
+              {t("aiHub.assistant.generator")}
+            </TabsTrigger>
+            <TabsTrigger
+              value="vision"
+              className="rounded-xl font-black uppercase tracking-widest text-[9px] md:text-[10px] gap-2 md:gap-3 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-xl transition-all duration-300"
+            >
+              <Camera className="h-4 w-4 md:h-5 md:w-5" />
+              {t("aiHub.assistant.vision")}
+            </TabsTrigger>
+          </TabsList>
+        </div>
+      </div>
+
+      <AnimatePresence mode="wait">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
+        >
+          <TabsContent value="assignment" className="mt-0 focus-visible:outline-none">
+            <AiFeatureGuard>
+              <AIAssignmentHelper />
+            </AiFeatureGuard>
+          </TabsContent>
+
+          <TabsContent value="quiz" className="mt-0 focus-visible:outline-none">
+            <AiFeatureGuard>
+              <AIQuizGenerator />
+            </AiFeatureGuard>
+          </TabsContent>
+
+          <TabsContent value="vision" className="mt-0 focus-visible:outline-none">
+            <AIVisionAssistant />
+          </TabsContent>
+        </motion.div>
+      </AnimatePresence>
+    </Tabs>
+  );
+});
+MemoizedAiFeatures.displayName = "MemoizedAiFeatures";
 
 export const AIAssistantPage: React.FC = () => {
   const { t } = useTranslation();
@@ -64,60 +131,7 @@ export const AIAssistantPage: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12 items-start">
         {/* Main Content Area */}
         <div className="lg:col-span-8 space-y-10">
-          <Tabs defaultValue="assignment" className="w-full space-y-8 md:space-y-12">
-            <div className="sticky top-20 z-40">
-              <div className="rounded-3xl border border-border/40 bg-background/40 backdrop-blur-3xl p-1.5 shadow-2xl shadow-black/5">
-                <TabsList className="grid w-full grid-cols-3 h-12 md:h-14 bg-muted/20 gap-1 rounded-[1.25rem]">
-                  <TabsTrigger
-                    value="assignment"
-                    className="rounded-xl font-black uppercase tracking-widest text-[9px] md:text-[10px] gap-2 md:gap-3 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-xl transition-all duration-300"
-                  >
-                    <FileText className="h-4 w-4 md:h-5 md:w-5" />
-                    {t("aiHub.assistant.architect")}
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="quiz"
-                    className="rounded-xl font-black uppercase tracking-widest text-[9px] md:text-[10px] gap-2 md:gap-3 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-xl transition-all duration-300"
-                  >
-                    <BrainCircuit className="h-4 w-4 md:h-5 md:w-5" />
-                    {t("aiHub.assistant.generator")}
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="vision"
-                    className="rounded-xl font-black uppercase tracking-widest text-[9px] md:text-[10px] gap-2 md:gap-3 data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-xl transition-all duration-300"
-                  >
-                    <Camera className="h-4 w-4 md:h-5 md:w-5" />
-                    {t("aiHub.assistant.vision")}
-                  </TabsTrigger>
-                </TabsList>
-              </div>
-            </div>
-
-            <AnimatePresence mode="wait">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
-              >
-                <TabsContent value="assignment" className="mt-0 focus-visible:outline-none">
-                  <AiFeatureGuard>
-                    <AIAssignmentHelper />
-                  </AiFeatureGuard>
-                </TabsContent>
-
-                <TabsContent value="quiz" className="mt-0 focus-visible:outline-none">
-                  <AiFeatureGuard>
-                    <AIQuizGenerator />
-                  </AiFeatureGuard>
-                </TabsContent>
-
-                <TabsContent value="vision" className="mt-0 focus-visible:outline-none">
-                  <AIVisionAssistant />
-                </TabsContent>
-              </motion.div>
-            </AnimatePresence>
-          </Tabs>
+          <MemoizedAiFeatures />
         </div>
 
         {/* Sidebar Capabilities */}

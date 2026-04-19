@@ -1,9 +1,10 @@
 import { useList } from "@refinedev/core";
 import { ChildOverviewCard } from "../components/child-overview-card";
 import { LinkChildDialog } from "../components/link-child-dialog";
-import { ShieldCheck, HeartPulse, LayoutDashboard, Loader2, Info } from "lucide-react";
+import { ShieldCheck, HeartPulse, LayoutDashboard, Info } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import {} from "framer-motion";
+import { ChildCardSkeleton } from "../components/parent-skeletons";
 
 export const ParentDashboard = () => {
   const { t } = useTranslation();
@@ -14,17 +15,6 @@ export const ParentDashboard = () => {
 
   const { data, isLoading, isError } = query;
   const children = data?.data || [];
-
-  if (isLoading) {
-    return (
-      <div className="h-[60vh] flex flex-col items-center justify-center gap-4">
-        <Loader2 className="h-12 w-12 animate-spin text-primary opacity-20" />
-        <p className="text-sm font-black uppercase tracking-widest text-muted-foreground animate-pulse">
-          Synchronizing Family Data...
-        </p>
-      </div>
-    );
-  }
 
   return (
     <div className="max-w-7xl mx-auto space-y-12 pb-20 text-start">
@@ -61,7 +51,13 @@ export const ParentDashboard = () => {
           <LinkChildDialog />
         </div>
 
-        {children.length > 0 ? (
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[1, 2, 3].map((i) => (
+              <ChildCardSkeleton key={i} />
+            ))}
+          </div>
+        ) : children.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {children.map((child: any) => (
               <ChildOverviewCard key={child.id} child={child} />

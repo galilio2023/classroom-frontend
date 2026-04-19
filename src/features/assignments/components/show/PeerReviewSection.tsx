@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { PeerReviewForm } from "@/components/peer-review-form";
+import { PeerReviewForm } from "@/features/assignments/components/peer-review-form";
 import { Assignment, PeerReview } from "@/types";
 
 interface PeerReviewSectionProps {

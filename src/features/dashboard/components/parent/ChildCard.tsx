@@ -13,8 +13,8 @@ import {
   MessageSquare,
   Activity,
 } from "lucide-react";
-import { XPProgressBar } from "@/components/xp-progress-bar";
-import { ErrorBoundary } from "@/components/error-boundary";
+import { XPProgressBar } from "@/features/engagement/components/xp-progress-bar";
+import { ErrorBoundary } from "@/components/guards/error-boundary";
 import { ChildSchedule } from "./ChildSchedule";
 import { cn } from "@/lib/utils";
 
@@ -75,7 +75,7 @@ export const ChildCard = ({ child, index, isAr, show, onContact }: ChildCardProp
             variant="ghost"
             size="icon"
             className="rounded-2xl h-12 w-12 md:h-14 md:w-14 bg-muted/30 hover:bg-primary hover:text-white transition-all duration-500 shadow-sm shrink-0"
-            onClick={() => show("users", child.id)}
+            onClick={() => show("guardian-portal", child.id)}
           >
             <ArrowRight className={cn("h-6 w-6 md:h-7 md:w-7", isAr && "rotate-180")} />
           </Button>
@@ -149,7 +149,7 @@ export const ChildCard = ({ child, index, isAr, show, onContact }: ChildCardProp
               variant="outline"
               size="lg"
               className="flex-1 rounded-[1.25rem] lg:rounded-[1.5rem] font-black uppercase tracking-widest text-[9px] lg:text-[10px] h-14 lg:h-16 border-primary/20 bg-primary/5 hover:bg-primary/10 text-primary gap-3 shadow-sm"
-              onClick={() => show("users", child.id)}
+              onClick={() => show("guardian-portal", child.id)}
             >
               <Activity className="h-4.5 w-4.5 lg:h-5 lg:w-5" />
               {t("dashboard.parent.fullReport")}

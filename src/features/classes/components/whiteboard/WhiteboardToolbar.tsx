@@ -10,6 +10,8 @@ import {
   Trash2,
   AlertCircle,
   Save,
+  Undo2,
+  BrainCircuit,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -20,13 +22,17 @@ interface WhiteboardToolbarProps {
   onToggleLock: (checked: boolean) => void;
   isRemotePending: boolean;
   isAnalyzing: boolean;
+  isTidying: boolean;
   isHelpersLoading: boolean;
   onAnalyze: () => void;
+  onTidy: () => void;
   onClear: () => void;
   isSaving: boolean;
   isDirty: boolean;
   onSave: () => void;
   classId?: string;
+  canDiscardTidy?: boolean;
+  onDiscardTidy?: () => void;
 }
 
 export const WhiteboardToolbar = ({
@@ -36,13 +42,17 @@ export const WhiteboardToolbar = ({
   onToggleLock,
   isRemotePending,
   isAnalyzing,
+  isTidying,
   isHelpersLoading,
   onAnalyze,
+  onTidy,
   onClear,
   isSaving,
   isDirty,
   onSave,
   classId,
+  canDiscardTidy,
+  onDiscardTidy,
 }: WhiteboardToolbarProps) => {
   return (
     <div className="flex items-center justify-between p-2 border-b bg-muted/30">
@@ -75,6 +85,31 @@ export const WhiteboardToolbar = ({
       <div className="flex items-center gap-2">
         {isTeacher && (
           <>
+            {canDiscardTidy && onDiscardTidy && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onDiscardTidy}
+                className="h-8 border-destructive/30 hover:bg-destructive/5 text-destructive font-bold group transition-all"
+              >
+                <Undo2 className="h-4 w-4 me-1 group-hover:-translate-x-0.5 transition-transform" />
+                Undo Tidy
+              </Button>
+            )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onTidy}
+              disabled={isTidying || isHelpersLoading}
+              className="h-8 border-ai-secondary/30 hover:bg-ai-secondary/5 text-ai-secondary font-bold group transition-all"
+            >
+              {isTidying ? (
+                <Loader2 className="h-4 w-4 animate-spin me-1" />
+              ) : (
+                <Sparkles className="h-4 w-4 me-1 group-hover:scale-110 transition-transform" />
+              )}
+              AI Tidy
+            </Button>
             <Button
               variant="outline"
               size="sm"
@@ -85,7 +120,7 @@ export const WhiteboardToolbar = ({
               {isAnalyzing ? (
                 <Loader2 className="h-4 w-4 animate-spin me-1" />
               ) : (
-                <Sparkles className="h-4 w-4 me-1 group-hover:rotate-12 transition-transform" />
+                <BrainCircuit className="h-4 w-4 me-1 group-hover:rotate-12 transition-transform" />
               )}
               Analyze with AI
             </Button>

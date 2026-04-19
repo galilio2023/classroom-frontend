@@ -27,6 +27,9 @@
     "memory-lab": "Memory Lab",
     "label": "Memory Lab"
   },
+  "school-dashboard": {
+    "label": "School Admin"
+  },
   "study-planner": {
     "study-planner": "AI Study Planner",
     "label": "AI Study Planner"
@@ -367,6 +370,9 @@
     "back": "Back",
     "continue": "Continue",
     "addAssignment": "Add Assignment",
+    "manageStudents": "Manage Students",
+    "askStudyBuddy": "Ask Study Buddy",
+    "markAsStarted": "Mark as Started",
     "createQuiz": "Create Quiz",
     "completeJoin": "Complete Join",
     "aiAssist": "AI Assist",
@@ -540,8 +546,14 @@
     "parent": "Parent",
     "admin": "Admin"
   },
-  "status": {
-    "active": "Active",
+  "guardianPortal": {
+    "title": "Student Support Hub",
+    "growthOpportunity": "Growth Opportunity",
+    "supportRequired": "Actionable Support Required",
+    "friendlySummary": "Mastery Journey Update",
+    "remediationTask": "Suggested Weekend Activity"
+  },
+  "status": {    "active": "Active",
     "inactive": "Inactive",
     "suspended": "Suspended",
     "archived": "Archived",
@@ -643,6 +655,10 @@
       "description": "Your private space to practice, learn, and master any topic with AI assistance.",
       "studyTip": "Study Tip",
       "studyTipDesc": "Use the **Summarizer** first to get key points, then generate **Flashcards** from those points for the best retention.",
+      "categories": {
+        "creation": "Creation & Mastery",
+        "analysis": "Research & Analysis"
+      },
       "inputLabel": "Input Content",
       "placeholderNotes": "Paste your notes or textbook content here...",
       "aiResponse": "AI Response",
@@ -1057,6 +1073,14 @@
   "resources": {
     "teacher-subscriptions": {
       "label": "Teacher Subscriptions"
+    },
+    "school-dashboard": {
+      "label": "School Admin"
+    },
+    "schools": {
+      "label": "Schools",
+      "schools": "Schools",
+      "list": "Schools"
     },
     "dashboard": {
       "label": "Dashboard"

@@ -1,4 +1,8 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from "react";
+import { useNotification } from "@refinedev/core";
+import { handleError } from "@/providers/utils/api-errors";
+import { getFreshSession } from "@/providers/auth";
+import { BASE_URL } from "@/constants/api";
 
 export interface BackgroundJob {
   id: string;
@@ -15,6 +19,7 @@ interface JobContextType {
   updateJob: (id: string, updates: Partial<BackgroundJob>) => void;
   removeJob: (id: string) => void;
   clearCompleted: () => void;
+  syncJobs: () => Promise<void>;
 }
 
 const JobContext = createContext<JobContextType | undefined>(undefined);
@@ -29,6 +34,14 @@ const STORAGE_KEY = "classroom_active_jobs";
 
 export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [jobs, setJobs] = useState<BackgroundJob[]>([]);
+  const jobsRef = useRef<BackgroundJob[]>([]);
+  const { open } = useNotification();
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  // Sync ref with state
+  useEffect(() => {
+    jobsRef.current = jobs;
+  }, [jobs]);
 
   // 1. Initial Load from LocalStorage
   useEffect(() => {
@@ -45,6 +58,7 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           return j.createdAt > hourAgo;
         });
         setJobs(valid);
+        jobsRef.current = valid;
       } catch (e) {
         console.error("Failed to load jobs from storage", e);
       }
@@ -63,11 +77,114 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     ]);
   };
 
-  const updateJob = (id: string, updates: Partial<BackgroundJob>) => {
+  const updateJob = useCallback((id: string, updates: Partial<BackgroundJob>) => {
     setJobs((prev) =>
       prev.map((j) => (j.id === id || j.metadata?.jobId === id ? { ...j, ...updates } : j))
     );
-  };
+  }, []);
+
+  // 🛡️ RECOVERY: Polling for AI jobs that might have finished while disconnected
+  // 🛡️ PERFORMANCE: updateJob and open are stable, so syncJobs will only be created once.
+  const syncJobs = useCallback(async () => {
+    const activeAiJobs = jobsRef.current.filter((j) => j.status === "processing");
+    if (activeAiJobs.length === 0) return;
+
+    if (abortControllerRef.current) abortControllerRef.current.abort();
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
+    try {
+      // 🛡️ SECURITY: Use session helper instead of direct localStorage access
+      const { data: session } = await getFreshSession();
+      const token = (session as any)?.token;
+      if (!token) return;
+
+      const response = await fetch(`${BASE_URL}/ai/jobs/sync`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        signal: controller.signal,
+      });
+
+      if (!response.ok) {
+        throw await handleError(response);
+      }
+
+      const { data } = await response.json();
+
+      if (data && Array.isArray(data)) {
+        data.forEach((remoteJob: any) => {
+          const localJob = jobsRef.current.find(
+            (j) =>
+              j.status === "processing" &&
+              j.type === remoteJob.topic &&
+              j.metadata?.classId === remoteJob.classId
+          );
+
+          if (localJob && remoteJob.status === "completed") {
+            const updatedMetadata = { ...localJob.metadata, ...remoteJob.result };
+            updateJob(localJob.id, {
+              status: "completed",
+              metadata: updatedMetadata,
+            });
+
+            // 🚀 UI RE-HYDRATION: Notify components that a specific job is ready
+            window.dispatchEvent(
+              new CustomEvent(`JOB_COMPLETED_${localJob.type.toUpperCase()}`, {
+                detail: {
+                  jobId: localJob.id,
+                  metadata: updatedMetadata,
+                },
+              })
+            );
+          } else if (localJob && remoteJob.status === "failed") {
+            updateJob(localJob.id, { status: "failed" });
+
+            window.dispatchEvent(
+              new CustomEvent(`JOB_FAILED_${localJob.type.toUpperCase()}`, {
+                detail: { jobId: localJob.id },
+              })
+            );
+          }
+        });
+      }
+    } catch (e: any) {
+      if (e.name === "AbortError") return;
+
+      console.error("AI Job Sync failed:", e);
+      open?.({
+        type: "error",
+        message: "Sync Failed",
+        description: e.message || "Failed to synchronize background jobs.",
+      });
+    } finally {
+      if (abortControllerRef.current === controller) {
+        abortControllerRef.current = null;
+      }
+    }
+  }, [updateJob, open]);
+
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+
+    const poll = async () => {
+      const activeAiJobs = jobsRef.current.filter((j) => j.status === "processing");
+      if (activeAiJobs.length > 0) {
+        await syncJobs();
+      }
+      // 🛡️ PERFORMANCE: Only poll if there are active jobs.
+      // Use recursive setTimeout to prevent overlapping requests if a sync takes longer than 30s.
+      timeoutId = setTimeout(poll, 30000);
+    };
+
+    poll();
+
+    return () => {
+      clearTimeout(timeoutId);
+      if (abortControllerRef.current) abortControllerRef.current.abort();
+    };
+  }, [syncJobs]);
 
   const removeJob = (id: string) => {
     setJobs((prev) => prev.filter((j) => j.id !== id && j.metadata?.jobId !== id));
@@ -78,7 +195,7 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   return (
-    <JobContext.Provider value={{ jobs, addJob, updateJob, removeJob, clearCompleted }}>
+    <JobContext.Provider value={{ jobs, addJob, updateJob, removeJob, clearCompleted, syncJobs }}>
       {children}
     </JobContext.Provider>
   );

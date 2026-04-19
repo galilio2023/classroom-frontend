@@ -1,4 +1,30 @@
 {
+  "discussions": {
+    "title": "Discussions",
+    "description": "Engage with your classmates and teachers in real-time.",
+    "start": "New Discussion",
+    "searchPlaceholder": "Search discussions...",
+    "filter": "Filter",
+    "empty": {
+      "title": "No discussions found",
+      "desc": "Start the conversation by posting a new discussion."
+    },
+    "stats": {
+      "total": "Total Discussions",
+      "active": "Active Topics",
+      "replies": "Total Replies"
+    },
+    "labels": {
+      "trending": "Trending",
+      "replies": "Replies",
+      "options": "Options",
+      "open": "Open",
+      "follow": "Follow"
+    },
+    "errors": {
+      "loadRepliesFailed": "Failed to load replies"
+    }
+  },
   "classes": {
     "classes": "Classes",
     "create": {
@@ -598,19 +624,24 @@
       "notFoundDescription": "The assignment you are looking for does not exist or has been removed.",
       "assignmentDetails": "Assignment Details",
       "description": "Review instructions, submit work, and track feedback.",
+      "banner": {
+        "peerReviewActive": "Peer Review Active",
+        "aiQuizMode": "AI Quiz Mode",
+        "physicsLab": "Physics Lab",
+        "overdue": "Overdue",
+        "dueDate": "Due Date",
+        "maxPoints": "Max Points",
+        "timeEstimate": "Time Estimate",
+        "submissionsReceived": "Submissions Received",
+        "instructions": "Instructions",
+        "groupAssignment": "Group Assignment",
+        "due": "Due {{date}}"
+      },
       "toast": {
         "linkCopied": "Assignment link copied!",
         "peersSuccess": "Peers assigned successfully!",
         "peersError": "Failed to assign peers (need min 3 submissions)",
         "peersLoading": "Assigning peers..."
-      },
-      "banner": {
-        "peerReviewActive": "Peer Review Active",
-        "aiQuizMode": "AI Quiz Mode",
-        "physicsLab": "Physics Lab Mode",
-        "groupAssignment": "Group Assignment",
-        "due": "Due {{date}}",
-        "submissionsReceived": "{{count}} Submissions Received"
       },
       "interactiveQuiz": "Interactive Quiz Player",
       "quizContentActive": "Interactive AI quiz content is active below.",

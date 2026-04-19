@@ -7,9 +7,10 @@ import { cn } from "@/lib/utils";
 
 interface ChatHeaderProps {
   onClose: () => void;
+  isDryRun?: boolean;
 }
 
-export const ChatHeader: React.FC<ChatHeaderProps> = ({ onClose }) => {
+export const ChatHeader: React.FC<ChatHeaderProps> = ({ onClose, isDryRun }) => {
   const { t, i18n } = useTranslation();
   const isAr = i18n.language === "ar";
 
@@ -30,9 +31,16 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({ onClose }) => {
           <Sparkles className="h-5 w-5 md:h-6 md:w-6 animate-pulse text-white" />
         </div>
         <div className="flex flex-col text-start">
-          <CardTitle className="text-base md:text-xl font-black tracking-tight leading-none text-white">
-            {t("aiHub.studyLab.studyBuddy.title")}
-          </CardTitle>
+          <div className="flex items-center gap-2">
+            <CardTitle className="text-base md:text-xl font-black tracking-tight leading-none text-white">
+              {t("aiHub.studyLab.studyBuddy.title")}
+            </CardTitle>
+            {isDryRun && (
+              <span className="bg-amber-500/20 text-amber-200 border border-amber-500/30 text-[8px] md:text-[9px] px-2 py-0.5 rounded-full font-black uppercase tracking-widest animate-pulse">
+                Mock Mode
+              </span>
+            )}
+          </div>
           <p className="text-[9px] md:text-[10px] font-bold opacity-90 uppercase tracking-[0.2em] mt-1 text-white/80">
             {t("aiHub.studyLab.studyBuddy.poweredBy")}
           </p>

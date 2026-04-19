@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { Users as UsersIcon, UserPlus } from "lucide-react";
-import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
-import { CreateButton } from "@/components/refine-ui/buttons/create";
+import { Breadcrumb } from "@/components/refine/layout/breadcrumb";
+import { CreateButton } from "@/components/refine/buttons/create";
 import { useTranslation } from "react-i18next";
 
 interface UserListHeaderProps {

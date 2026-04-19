@@ -7,6 +7,7 @@ import { useCreate, useUpdate, useCustom, useCustomMutation } from "@refinedev/c
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { formatGrade } from "@/lib/numeric";
 
 // Sub-components
 import { AtRiskStudentDialog } from "./staff/at-risk/AtRiskStudentDialog";
@@ -223,7 +224,7 @@ export const AtRiskStudentItem: React.FC<AtRiskStudentItemProps> = ({ student })
             variant="destructive"
             className="text-[9px] font-black uppercase tracking-widest px-2.5 py-1 border-none bg-destructive/10 text-destructive shadow-sm"
           >
-            {student.value}
+            {formatGrade(student.value)}
           </Badge>
           <div className="p-2 rounded-full bg-muted/50 group-hover:bg-primary group-hover:text-primary-foreground transition-all opacity-0 group-hover:opacity-100">
             <Send className="h-3.5 w-3.5 rtl:rotate-180" />
