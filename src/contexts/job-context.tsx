@@ -174,7 +174,7 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const activeAiJobs = jobsRef.current.filter((j) => j.status === "processing");
       if (activeAiJobs.length > 0) {
         await syncJobs();
-        
+
         // 🛡️ RESILIENCE: Jittered Exponential backoff (Mandate M-008)
         // base * 2^n + random(0, 10% of base)
         setSyncDelay((prev) => {
@@ -188,9 +188,11 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
     };
 
-    // Only run the timeout if we have active jobs
-    const activeJobs = jobs.filter((j) => j.status === "processing");
-    if (activeJobs.length > 0) {
+    // 🛡️ PERFORMANCE: Only run the timeout if we have active jobs in the ref
+    // We remove 'jobs' from dependency to avoid loop. The effect will re-run
+    // when syncDelay changes (which happens after each poll).
+    const activeJobsCount = jobsRef.current.filter((j) => j.status === "processing").length;
+    if (activeJobsCount > 0) {
       timeoutId = setTimeout(poll, syncDelay);
     }
 
@@ -198,7 +200,7 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (timeoutId) clearTimeout(timeoutId);
       if (abortControllerRef.current) abortControllerRef.current.abort();
     };
-  }, [syncJobs, syncDelay, jobs]);
+  }, [syncJobs, syncDelay]);
 
   const removeJob = (id: string) => {
     setJobs((prev) => prev.filter((j) => j.id !== id && j.metadata?.jobId !== id));

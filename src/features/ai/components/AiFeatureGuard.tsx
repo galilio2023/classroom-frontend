@@ -1,6 +1,6 @@
 import React from "react";
 import { useAiAccess } from "@/features/ai/hooks/use-ai-access";
-import { Lock, AlertCircle, Clock } from "lucide-react";
+import { Lock, Clock, Sparkles, BrainCircuit } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCan } from "@refinedev/core";
@@ -29,7 +29,13 @@ export const AiFeatureGuard: React.FC<AiFeatureGuardProps> = ({
   silent = false,
   skeletonClassName = "w-full h-32 rounded-lg",
 }) => {
-  const { isAiEnabled, isQuotaExceeded, isDegraded, retryAfter, isLoading: isAiLoading } = useAiAccess();
+  const {
+    isAiEnabled,
+    isQuotaExceeded,
+    isDegraded,
+    retryAfter,
+    isLoading: isAiLoading,
+  } = useAiAccess();
   const { data: canAccess, isLoading: isCanLoading } = useCan({
     resource: "ai_features",
     action: "access",
@@ -50,22 +56,27 @@ export const AiFeatureGuard: React.FC<AiFeatureGuardProps> = ({
     if (fallback) return <>{fallback}</>;
 
     let title = "AI Feature Restricted";
-    let description = "Your current account role does not have permission to access interactive AI features.";
+    let description =
+      "Your current account role does not have permission to access interactive AI features.";
     let icon = <Lock className="h-4 w-4" />;
 
     if (isQuotaExceeded) {
       title = "Monthly Limit Reached";
-      description = "You have exhausted your AI token quota for this month. Your limit will reset on the 1st of next month.";
+      icon = <BrainCircuit className="h-4 w-4" />;
+      description =
+        "You have exhausted your AI token quota for this month. Your limit will reset on the 1st of next month.";
     } else if (isDegraded) {
       title = "AI System Offline";
-      icon = <AlertCircle className="h-4 w-4" />;
-      description = retryAfter 
+      // 🛡️ VISUAL IDENTITY: Rule 7 - Use Sparkles/BrainCircuit even in degraded state
+      icon = <Sparkles className="h-4 w-4 animate-pulse text-primary" />;
+      description = retryAfter
         ? `The AI co-teacher is currently cooling down due to high traffic. Estimated return in ${Math.ceil(retryAfter / 60)} minutes.`
         : "The AI system is temporarily unavailable due to upstream provider maintenance. Please try again later.";
     } else if (!isAiEnabled) {
       title = "AI Features Disabled";
       icon = <Clock className="h-4 w-4" />;
-      description = "Tablawy AI features are currently disabled by the administrator for this institution.";
+      description =
+        "Tablawy OS AI features are currently disabled by the administrator for this institution.";
     }
 
     return (

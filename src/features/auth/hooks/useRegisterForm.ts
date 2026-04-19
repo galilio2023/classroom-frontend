@@ -25,13 +25,19 @@ export const useRegisterForm = () => {
   const registerSchema = z.object({
     name: z.string().min(3, t("auth.register.nameMin", "Name must be at least 3 characters")),
     email: z.string().email(t("auth.register.emailInvalid", "Invalid email address")),
-    password: z.string().min(8, t("auth.register.passwordMin", "Password must be at least 8 characters")),
+    password: z
+      .string()
+      .min(8, t("auth.register.passwordMin", "Password must be at least 8 characters")),
     role: z.enum(["student", "teacher", "parent"]),
     phoneNumber: z.string().min(10, t("auth.register.phoneRequired", "Phone number is required")),
     nationalId: z
       .string()
       .length(14, t("auth.register.nationalIdLength", "National ID must be 14 digits")),
     bio: z.string().optional(),
+    dateOfBirth: z.string().optional(),
+    parentName: z.string().optional(),
+    parentPhone: z.string().optional(),
+    childInviteCode: z.string().optional(),
     hasAiConsent: z.boolean().refine((val) => val === true, {
       message: t("auth.register.consentRequired", "AI Consent is required"),
     }),
@@ -47,6 +53,10 @@ export const useRegisterForm = () => {
       phoneNumber: "",
       nationalId: "",
       bio: "",
+      dateOfBirth: "",
+      parentName: "",
+      parentPhone: "",
+      childInviteCode: "",
       hasAiConsent: false,
     },
   });
@@ -54,11 +64,8 @@ export const useRegisterForm = () => {
   const role = form.watch("role");
   const name = form.watch("name");
 
-  useEffect(() => {
-    if (inviteCode && step === 1) {
-      form.setValue("role", "student");
-    }
-  }, [inviteCode, step, form]);
+  // 🛡️ TRACEABILITY: Extract correlation ID from headers for support visibility (Mandate Rule 8)
+  const getTraceId = (error: any) => error?.response?.headers?.["x-correlation-id"] || "N/A";
 
   const generateAIBio = async () => {
     setIsGeneratingBio(true);
@@ -69,14 +76,30 @@ export const useRegisterForm = () => {
       });
       form.setValue("bio", response.data.bio);
       toast.success(t("auth.register.aiBioSuccess"));
-    } catch (error) {
+    } catch (error: any) {
+      const traceId = getTraceId(error);
       const fallbacks = {
-        student: `Hi, I'm ${name}, a student on Tablawy OS.`,
-        teacher: `Hi, I'm ${name}, an educator specialized in knowledge transfer.`,
-        parent: `Hi, I'm ${name}, supporting my child's learning journey.`,
+        student: t(
+          "auth.register.bioFallbackStudent",
+          `Hi, I'm {{name}}, a student on Tablawy OS.`,
+          { name }
+        ),
+        teacher: t(
+          "auth.register.bioFallbackTeacher",
+          `Hi, I'm {{name}}, an educator specialized in knowledge transfer.`,
+          { name }
+        ),
+        parent: t(
+          "auth.register.bioFallbackParent",
+          `Hi, I'm {{name}}, supporting my child's learning journey.`,
+          { name }
+        ),
       };
       form.setValue("bio", fallbacks[role as keyof typeof fallbacks] || `Hi, I'm ${name}.`);
-      toast.info(t("auth.register.aiBioFallback"));
+
+      toast.error(t("auth.register.aiBioError", "Bio generation failed"), {
+        description: `Trace ID: ${traceId}. ${t("common.supportInfo")}`,
+      });
     } finally {
       setIsGeneratingBio(false);
     }
@@ -87,11 +110,11 @@ export const useRegisterForm = () => {
     if (step === 1) {
       fieldsToValidate = ["name", "email", "password", "role"];
     } else if (step === 2) {
-      // 🛡️ NORMALIZATION: Ensure digits are Western Arabic before validation triggers
-      const currentPhone = form.getValues("phoneNumber");
-      const currentId = form.getValues("nationalId");
-      if (currentPhone) form.setValue("phoneNumber", normalizeArabicNumerals(currentPhone));
-      if (currentId) form.setValue("nationalId", normalizeArabicNumerals(currentId));
+      // 🛡️ NORMALIZATION: Immediate feedback (Mandate M-008)
+      const currentPhone = normalizeArabicNumerals(form.getValues("phoneNumber"));
+      const currentId = normalizeArabicNumerals(form.getValues("nationalId"));
+      form.setValue("phoneNumber", currentPhone);
+      form.setValue("nationalId", currentId);
 
       fieldsToValidate = ["phoneNumber", "nationalId"];
       // Soft validation for Egyptian ID
@@ -161,11 +184,11 @@ export const useRegisterForm = () => {
           else navigate("/dashboard");
         }, 3000);
       },
-      onError: (err) => {
-        const error = err as HttpError;
-        const errorMessage =
-          (error as any)?.data?.message || error.message || t("auth.login.unknownError");
-        toast.error(errorMessage);
+      onError: async (err) => {
+        const error = await handleError(err as any);
+        toast.error(error.message, {
+          description: `Trace ID: ${getTraceId(err)}. ${t("common.supportInfo")}`,
+        });
         setStep(1); // Reset to first step on hard error
       },
     });
