@@ -3,7 +3,9 @@ import { useAiAccess } from "@/features/ai/hooks/use-ai-access";
 import { Lock, Clock, Sparkles, BrainCircuit } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 import { useCan } from "@refinedev/core";
+import { RefreshCcw } from "lucide-react";
 
 interface AiFeatureGuardProps {
   children: React.ReactNode;
@@ -98,7 +100,20 @@ export const AiFeatureGuard: React.FC<AiFeatureGuardProps> = ({
       <Alert variant="destructive" className="border-dashed border-2">
         {guardContent.icon}
         <AlertTitle>{guardContent.title}</AlertTitle>
-        <AlertDescription>{guardContent.description}</AlertDescription>
+        <AlertDescription className="flex flex-col gap-4">
+          <span>{guardContent.description}</span>
+          {isDegraded && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-fit h-8 rounded-lg font-black uppercase text-[10px] tracking-widest gap-2"
+              onClick={() => window.location.reload()}
+            >
+              <RefreshCcw className="h-3 w-3" />
+              Check Status Again
+            </Button>
+          )}
+        </AlertDescription>
       </Alert>
     );
   }

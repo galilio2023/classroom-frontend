@@ -3,6 +3,7 @@ import { useNotification } from "@refinedev/core";
 import { handleError } from "@/providers/utils/api-errors";
 import { getFreshSession } from "@/providers/auth";
 import { BASE_URL } from "@/constants/api";
+import { getJitteredDelay } from "@/lib/jitter";
 
 export interface BackgroundJob {
   id: string;
@@ -210,8 +211,7 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         // 🛡️ RESILIENCE: Jittered Exponential backoff (Mandate M-008)
         setSyncDelay((prev) => {
           const nextBase = Math.min(prev * 2, POLLING_CONFIG.MAX_DELAY);
-          const jitter = Math.random() * (nextBase * POLLING_CONFIG.JITTER_FACTOR);
-          const nextDelay = nextBase + jitter;
+          const nextDelay = getJitteredDelay(nextBase, POLLING_CONFIG.JITTER_FACTOR);
           scheduleNext(nextDelay);
           return nextDelay;
         });

@@ -24,6 +24,13 @@ const AdminImportPage = () => {
   const [isImporting, setIsImporting] = useState(false);
   const [result, setResult] = useState<any>(null);
 
+  const getUUID = () => {
+    if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+      return crypto.randomUUID();
+    }
+    return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
@@ -53,7 +60,7 @@ const AdminImportPage = () => {
   const handleImport = async () => {
     if (data.length === 0) return;
     
-    const correlationId = `import-${crypto.randomUUID()}`;
+    const correlationId = `import-${getUUID()}`;
     setIsImporting(true);
     
     try {

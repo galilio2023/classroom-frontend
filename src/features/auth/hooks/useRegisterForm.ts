@@ -78,7 +78,7 @@ export const useRegisterForm = () => {
   const name = form.watch("name");
 
   const generateAIBio = async () => {
-    const correlationId = `bio-${crypto.randomUUID()}`;
+    const correlationId = `bio-${getUUID()}`;
     const headers = { "x-correlation-id": correlationId };
     
     setIsGeneratingBio(true);
@@ -153,8 +153,16 @@ export const useRegisterForm = () => {
 
   const prevStep = () => setStep((prev) => prev - 1);
 
+  const getUUID = () => {
+    if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+      return crypto.randomUUID();
+    }
+    // Fallback for older browsers
+    return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+  };
+
   const performFinalSubmit = (values: SignUpPayload) => {
-    const correlationId = `reg-${crypto.randomUUID()}`;
+    const correlationId = `reg-${getUUID()}`;
     const headers = { "x-correlation-id": correlationId };
 
     register(
@@ -186,7 +194,7 @@ export const useRegisterForm = () => {
 
   const sendWhatsAppOtp = async () => {
     const phoneNumber = normalizeArabicNumerals(form.getValues("phoneNumber"));
-    const correlationId = `otp-send-${crypto.randomUUID()}`;
+    const correlationId = `otp-send-${getUUID()}`;
     const headers = { "x-correlation-id": correlationId };
     
     setIsSendingOtp(true);
@@ -205,7 +213,7 @@ export const useRegisterForm = () => {
 
   const verifyOtp = async (code: string) => {
     const phoneNumber = normalizeArabicNumerals(form.getValues("phoneNumber"));
-    const correlationId = `otp-verify-${crypto.randomUUID()}`;
+    const correlationId = `otp-verify-${getUUID()}`;
     const headers = { "x-correlation-id": correlationId };
     
     setIsVerifyingOtp(true);
@@ -216,7 +224,9 @@ export const useRegisterForm = () => {
         { headers }
       );
       if (response.data.data.verified) {
-        performFinalSubmit(form.getValues());
+        // 🛡️ SECURITY: Use validated values from the form state at the time of submission
+        const values = form.getValues();
+        performFinalSubmit(values);
       }
     } catch (error) {
       const apiError = await handleError(error);
