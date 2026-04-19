@@ -22,6 +22,7 @@ export const useRegisterForm = () => {
   const [step, setStep] = useState(1);
   const [isGeneratingBio, setIsGeneratingBio] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [validatedValues, setValidatedValues] = useState<SignUpPayload | null>(null);
   const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
   const [isSendingOtp, setIsSendingOtp] = useState(false);
 
@@ -205,12 +206,9 @@ export const useRegisterForm = () => {
     setIsVerifyingOtp(true);
     try {
       const response = await axios.post("/api/auth/otp/verify", { phoneNumber, code }, { headers });
-      if (response.data.data.verified) {
-        // 🛡️ SECURITY: Use fresh, validated values from the form state
-        const isValid = await form.trigger();
-        if (isValid) {
-          performFinalSubmit(form.getValues() as SignUpPayload);
-        }
+      if (response.data.data.verified && validatedValues) {
+        // 🛡️ SECURITY: Use validated, transformed values from the original submission
+        performFinalSubmit(validatedValues);
       }
     } catch (error) {
       const apiError = await handleError(error);
@@ -225,6 +223,7 @@ export const useRegisterForm = () => {
   const handleFinalSubmit = form.handleSubmit((values) => {
     // 🛡️ NORMALIZATION: Automatically handled by Zod .transform() in the schema
     if (role === "student") {
+      setValidatedValues(values as SignUpPayload);
       setStep(4); // Move to OTP step
       return;
     }
