@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import axios from "axios";
 import { useTranslation } from "react-i18next";
 import { validateEgyptianID, normalizeArabicNumerals } from "@/lib/validators";
+import { handleError } from "@/providers/utils/api-errors";
 
 export const useRegisterForm = () => {
   const { t } = useTranslation();
@@ -38,6 +39,8 @@ export const useRegisterForm = () => {
     parentName: z.string().optional(),
     parentPhone: z.string().optional(),
     childInviteCode: z.string().optional(),
+    verificationDocumentUrl: z.string().optional(),
+    verificationDocumentCldPubId: z.string().optional(),
     hasAiConsent: z.boolean().refine((val) => val === true, {
       message: t("auth.register.consentRequired", "AI Consent is required"),
     }),
@@ -57,6 +60,8 @@ export const useRegisterForm = () => {
       parentName: "",
       parentPhone: "",
       childInviteCode: "",
+      verificationDocumentUrl: "",
+      verificationDocumentCldPubId: "",
       hasAiConsent: false,
     },
   });
@@ -75,7 +80,7 @@ export const useRegisterForm = () => {
         role,
       });
       form.setValue("bio", response.data.bio);
-      toast.success(t("auth.register.aiBioSuccess"));
+      toast.success(t("auth.register.aiBioSuccess", "AI Bio generated successfully!"));
     } catch (error: any) {
       const traceId = getTraceId(error);
       const fallbacks = {
@@ -98,7 +103,7 @@ export const useRegisterForm = () => {
       form.setValue("bio", fallbacks[role as keyof typeof fallbacks] || `Hi, I'm ${name}.`);
 
       toast.error(t("auth.register.aiBioError", "Bio generation failed"), {
-        description: `Trace ID: ${traceId}. ${t("common.supportInfo")}`,
+        description: `Trace ID: ${traceId}. ${t("common.supportInfo", "Please contact support for assistance.")}`,
       });
     } finally {
       setIsGeneratingBio(false);
@@ -187,7 +192,7 @@ export const useRegisterForm = () => {
       onError: async (err) => {
         const error = await handleError(err as any);
         toast.error(error.message, {
-          description: `Trace ID: ${getTraceId(err)}. ${t("common.supportInfo")}`,
+          description: `Trace ID: ${getTraceId(err)}. ${t("common.supportInfo", "Please contact support for assistance.")}`,
         });
         setStep(1); // Reset to first step on hard error
       },

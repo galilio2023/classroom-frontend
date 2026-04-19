@@ -35,6 +35,7 @@ const STORAGE_KEY = "classroom_active_jobs";
 export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [jobs, setJobs] = useState<BackgroundJob[]>([]);
   const [syncDelay, setSyncDelay] = useState(10000); // 🛡️ RESILIENCE: Initial 10s poll for 2G/3G stability
+  const [pollTick, setPollTick] = useState(0); // 🚀 UX: "Wake up" tick to trigger immediate poll
   const jobsRef = useRef<BackgroundJob[]>([]);
   const { open } = useNotification();
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -77,6 +78,7 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       { ...job, status: "processing", createdAt: Date.now() } as BackgroundJob,
     ]);
     setSyncDelay(10000); // 🚀 UX: Trigger immediate responsiveness for new jobs
+    setPollTick((prev) => prev + 1); // 🚀 WAKE UP: Force immediate poll
   };
 
   const updateJob = useCallback((id: string, updates: Partial<BackgroundJob>) => {
@@ -200,7 +202,7 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (timeoutId) clearTimeout(timeoutId);
       if (abortControllerRef.current) abortControllerRef.current.abort();
     };
-  }, [syncJobs, syncDelay]);
+  }, [syncJobs, syncDelay, pollTick]);
 
   const removeJob = (id: string) => {
     setJobs((prev) => prev.filter((j) => j.id !== id && j.metadata?.jobId !== id));
