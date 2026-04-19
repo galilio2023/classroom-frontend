@@ -7,19 +7,32 @@
  * - Governorate code (01-88)
  * - Checksum (Soft validation for pilot)
  */
+
+/**
+ * 🛠️ NORMALIZATION: Converts Eastern Arabic numerals (٠-٩) to Western Arabic numerals (0-9).
+ */
+export function normalizeArabicNumerals(input: string): string {
+  if (!input) return input;
+  const arabicNumbers = ["٠", "١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩"];
+  return input.replace(/[٠-٩]/g, (w) => arabicNumbers.indexOf(w).toString());
+}
+
 export const validateEgyptianID = (
   id: string
 ): { isValid: boolean; error?: string; birthDate?: Date; gender?: "male" | "female" } => {
-  if (!/^\d{14}$/.test(id)) {
+  // 🛡️ NORMALIZATION: Support both Western and Eastern Arabic numerals
+  const normalizedId = normalizeArabicNumerals(id);
+
+  if (!/^\d{14}$/.test(normalizedId)) {
     return { isValid: false, error: "Must be exactly 14 digits" };
   }
 
-  const centuryCode = parseInt(id[0]);
-  const year = parseInt(id.substring(1, 3));
-  const month = parseInt(id.substring(3, 5));
-  const day = parseInt(id.substring(5, 7));
-  const govCode = parseInt(id.substring(7, 9));
-  const genderCode = parseInt(id[12]);
+  const centuryCode = parseInt(normalizedId[0]);
+  const year = parseInt(normalizedId.substring(1, 3));
+  const month = parseInt(normalizedId.substring(3, 5));
+  const day = parseInt(normalizedId.substring(5, 7));
+  const govCode = parseInt(normalizedId.substring(7, 9));
+  const genderCode = parseInt(normalizedId[12]);
 
   // 1. Century validation (2 = 1900s, 3 = 2000s)
   if (centuryCode !== 2 && centuryCode !== 3) {

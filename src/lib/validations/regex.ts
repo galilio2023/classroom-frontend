@@ -6,8 +6,9 @@
 /**
  * Validates international phone numbers.
  * Supports: +1 234 567 8900, +12345678900, 0123456789, (012) 345-6789
+ * Supports both Western (0-9) and Eastern Arabic (٠-٩) numerals.
  */
-export const phoneRegex = /^\+?[\d\s-()]{7,20}$/;
+export const phoneRegex = /^\+?[\d\u0660-\u0669\s-()]{7,20}$/;
 
 /**
  * Validates 24-hour time format (HH:MM).

@@ -7,7 +7,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import axios from "axios";
 import { useTranslation } from "react-i18next";
-import { validateEgyptianID } from "@/lib/validators";
+import { validateEgyptianID, normalizeArabicNumerals } from "@/lib/validators";
 
 export const useRegisterForm = () => {
   const { t } = useTranslation();
@@ -23,31 +23,21 @@ export const useRegisterForm = () => {
   const [isSendingOtp, setIsSendingOtp] = useState(false);
 
   const registerSchema = z.object({
-    name: z.string().min(1, t("auth.register.nameRequired", "Name is required")),
-    email: z.string().email(t("auth.register.invalidEmail", "Invalid email")),
-    password: z
-      .string()
-      .min(8, t("auth.register.passwordMinLength", "Password must be at least 8 characters")),
+    name: z.string().min(3, t("auth.register.nameMin", "Name must be at least 3 characters")),
+    email: z.string().email(t("auth.register.emailInvalid", "Invalid email address")),
+    password: z.string().min(8, t("auth.register.passwordMin", "Password must be at least 8 characters")),
     role: z.enum(["student", "teacher", "parent"]),
     phoneNumber: z.string().min(10, t("auth.register.phoneRequired", "Phone number is required")),
     nationalId: z
       .string()
       .length(14, t("auth.register.nationalIdLength", "National ID must be 14 digits")),
-    hasAiConsent: z.boolean().refine((val) => val === true, {
-      message: t("auth.register.consentRequired", "AI consent is required"),
-    }),
     bio: z.string().optional(),
-    dateOfBirth: z.string().optional(),
-    parentName: z.string().optional(),
-    parentPhone: z.string().optional(),
-    childInviteCode: z.string().optional(),
-    verificationDocumentUrl: z.string().optional(),
-    verificationDocumentCldPubId: z.string().optional(),
+    hasAiConsent: z.boolean().refine((val) => val === true, {
+      message: t("auth.register.consentRequired", "AI Consent is required"),
+    }),
   });
 
-  type RegisterFormValues = z.infer<typeof registerSchema>;
-
-  const form = useForm<RegisterFormValues>({
+  const form = useForm<z.infer<typeof registerSchema>>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
       name: "",
@@ -56,49 +46,34 @@ export const useRegisterForm = () => {
       role: "student",
       phoneNumber: "",
       nationalId: "",
-      hasAiConsent: false,
       bio: "",
-      dateOfBirth: "",
-      parentName: "",
-      parentPhone: "",
-      childInviteCode: "",
-      verificationDocumentUrl: "",
-      verificationDocumentCldPubId: "",
+      hasAiConsent: false,
     },
-    shouldUnregister: false,
   });
 
   const role = form.watch("role");
+  const name = form.watch("name");
 
   useEffect(() => {
-    if (inviteCode) {
-      toast.info(t("classes.show.toast.inviteLinkDetected"), {
-        description: t("classes.show.toast.registerToJoin"),
-      });
+    if (inviteCode && step === 1) {
+      form.setValue("role", "student");
     }
-  }, [inviteCode, t]);
+  }, [inviteCode, step, form]);
 
   const generateAIBio = async () => {
-    const name = form.getValues("name");
-    if (!name) {
-      toast.error(t("auth.register.enterNameFirst"));
-      return;
-    }
-
     setIsGeneratingBio(true);
     try {
-      const response = await axios.post<{ content: string }>("/api/ai/generate-content", {
-        prompt: `Generate a professional bio for a ${role} named ${name}. Keywords: passionate, experienced, dedicated. Keep it under 50 words.`,
-        context: "User Registration Bio",
+      const response = await axios.post("/api/ai/generate-bio", {
+        name,
+        role,
       });
-
-      form.setValue("bio", response.data.content);
-      toast.success(t("auth.register.aiBioGenerated"));
-    } catch {
-      const fallbacks: Record<string, string> = {
-        teacher: `Hello, I'm ${name}. I am a dedicated educator committed to fostering a positive and engaging learning environment for all my students.`,
-        student: `Hi, I'm ${name}. I'm an enthusiastic student eager to learn and grow in my academic journey.`,
-        parent: `Hello, I'm ${name}. I am a supportive parent dedicated to my child's educational success and well-being.`,
+      form.setValue("bio", response.data.bio);
+      toast.success(t("auth.register.aiBioSuccess"));
+    } catch (error) {
+      const fallbacks = {
+        student: `Hi, I'm ${name}, a student on Tablawy OS.`,
+        teacher: `Hi, I'm ${name}, an educator specialized in knowledge transfer.`,
+        parent: `Hi, I'm ${name}, supporting my child's learning journey.`,
       };
       form.setValue("bio", fallbacks[role as keyof typeof fallbacks] || `Hi, I'm ${name}.`);
       toast.info(t("auth.register.aiBioFallback"));
@@ -112,6 +87,12 @@ export const useRegisterForm = () => {
     if (step === 1) {
       fieldsToValidate = ["name", "email", "password", "role"];
     } else if (step === 2) {
+      // 🛡️ NORMALIZATION: Ensure digits are Western Arabic before validation triggers
+      const currentPhone = form.getValues("phoneNumber");
+      const currentId = form.getValues("nationalId");
+      if (currentPhone) form.setValue("phoneNumber", normalizeArabicNumerals(currentPhone));
+      if (currentId) form.setValue("nationalId", normalizeArabicNumerals(currentId));
+
       fieldsToValidate = ["phoneNumber", "nationalId"];
       // Soft validation for Egyptian ID
       const nationalId = form.getValues("nationalId");
@@ -136,7 +117,7 @@ export const useRegisterForm = () => {
   const prevStep = () => setStep((prev) => prev - 1);
 
   const sendWhatsAppOtp = async () => {
-    const phoneNumber = form.getValues("phoneNumber");
+    const phoneNumber = normalizeArabicNumerals(form.getValues("phoneNumber"));
     setIsSendingOtp(true);
     try {
       await axios.post("/api/auth/otp/send", { phoneNumber });
@@ -149,7 +130,7 @@ export const useRegisterForm = () => {
   };
 
   const verifyOtp = async (code: string) => {
-    const phoneNumber = form.getValues("phoneNumber");
+    const phoneNumber = normalizeArabicNumerals(form.getValues("phoneNumber"));
     setIsVerifyingOtp(true);
     try {
       const response = await axios.post("/api/auth/otp/verify", { phoneNumber, code });
@@ -164,27 +145,30 @@ export const useRegisterForm = () => {
   };
 
   const handleFinalSubmit = form.handleSubmit((values) => {
-    register(
-      { ...values, inviteCode },
-      {
-        onSuccess: () => {
-          setIsSuccess(true);
-          // Redirect logic based on role for "First Success"
-          setTimeout(() => {
-            if (values.role === "teacher") navigate("/ai/magic-builder");
-            else if (values.role === "student") navigate("/ai/chat");
-            else navigate("/dashboard");
-          }, 3000);
-        },
-        onError: (err) => {
-          const error = err as HttpError;
-          const errorMessage =
-            (error as any)?.data?.message || error.message || t("auth.login.unknownError");
-          toast.error(errorMessage);
-          setStep(1); // Reset to first step on hard error
-        },
-      }
-    );
+    const normalizedValues = {
+      ...values,
+      phoneNumber: normalizeArabicNumerals(values.phoneNumber),
+      nationalId: normalizeArabicNumerals(values.nationalId),
+      inviteCode,
+    };
+    register(normalizedValues, {
+      onSuccess: () => {
+        setIsSuccess(true);
+        // Redirect logic based on role for "First Success"
+        setTimeout(() => {
+          if (values.role === "teacher") navigate("/ai/magic-builder");
+          else if (values.role === "student") navigate("/ai/chat");
+          else navigate("/dashboard");
+        }, 3000);
+      },
+      onError: (err) => {
+        const error = err as HttpError;
+        const errorMessage =
+          (error as any)?.data?.message || error.message || t("auth.login.unknownError");
+        toast.error(errorMessage);
+        setStep(1); // Reset to first step on hard error
+      },
+    });
   });
 
   return {

@@ -34,6 +34,7 @@ const STORAGE_KEY = "classroom_active_jobs";
 
 export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [jobs, setJobs] = useState<BackgroundJob[]>([]);
+  const [syncDelay, setSyncDelay] = useState(10000); // 🛡️ RESILIENCE: Initial 10s poll for 2G/3G stability
   const jobsRef = useRef<BackgroundJob[]>([]);
   const { open } = useNotification();
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -75,6 +76,7 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       ...prev,
       { ...job, status: "processing", createdAt: Date.now() } as BackgroundJob,
     ]);
+    setSyncDelay(10000); // 🚀 UX: Trigger immediate responsiveness for new jobs
   };
 
   const updateJob = useCallback((id: string, updates: Partial<BackgroundJob>) => {
@@ -172,19 +174,31 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const activeAiJobs = jobsRef.current.filter((j) => j.status === "processing");
       if (activeAiJobs.length > 0) {
         await syncJobs();
+        
+        // 🛡️ RESILIENCE: Jittered Exponential backoff (Mandate M-008)
+        // base * 2^n + random(0, 10% of base)
+        setSyncDelay((prev) => {
+          const nextBase = Math.min(prev * 2, 120000);
+          const jitter = Math.random() * (nextBase * 0.1);
+          return nextBase + jitter;
+        });
+      } else {
+        // 🛡️ PERFORMANCE: Reset delay when pipe is empty
+        setSyncDelay(10000);
       }
-      // 🛡️ PERFORMANCE: Only poll if there are active jobs.
-      // Use recursive setTimeout to prevent overlapping requests if a sync takes longer than 30s.
-      timeoutId = setTimeout(poll, 30000);
     };
 
-    poll();
+    // Only run the timeout if we have active jobs
+    const activeJobs = jobs.filter((j) => j.status === "processing");
+    if (activeJobs.length > 0) {
+      timeoutId = setTimeout(poll, syncDelay);
+    }
 
     return () => {
-      clearTimeout(timeoutId);
+      if (timeoutId) clearTimeout(timeoutId);
       if (abortControllerRef.current) abortControllerRef.current.abort();
     };
-  }, [syncJobs]);
+  }, [syncJobs, syncDelay, jobs]);
 
   const removeJob = (id: string) => {
     setJobs((prev) => prev.filter((j) => j.id !== id && j.metadata?.jobId !== id));

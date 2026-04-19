@@ -20,6 +20,8 @@ const fetcher = async (url: string, options?: RequestInit) => {
   const method = options?.method?.toUpperCase() || "GET";
   const headers: Record<string, string> = {
     ...(options?.headers as Record<string, string>),
+    // 🛡️ TRACEABILITY: Mandate M-011 - Global correlation ID for debugging
+    "x-correlation-id": `client-${crypto.randomUUID()}`,
   };
 
   const isFormData = options?.body instanceof FormData;
