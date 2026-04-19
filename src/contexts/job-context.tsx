@@ -184,6 +184,9 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const pollRef = useRef<(() => Promise<void>) | null>(null);
 
   useEffect(() => {
+    // 🛡️ RACE CONDITION PREVENTION: Ensure previous loops are killed immediately (Rule 6)
+    if (timeoutIdRef.current) clearTimeout(timeoutIdRef.current);
+
     const handleVisibilityChange = () => {
       setIsVisible(document.visibilityState === "visible");
       // If returning to tab, trigger an immediate check

@@ -10,6 +10,7 @@ import { useTranslation } from "react-i18next";
 import { validateEgyptianID, normalizeArabicNumerals } from "@/lib/validators";
 import { handleError, getCorrelationId } from "@/providers/utils/api-errors";
 import { SignUpPayload } from "@/types";
+import { getUUID } from "@/lib/utils";
 
 export const useRegisterForm = () => {
   const { t } = useTranslation();
@@ -21,6 +22,7 @@ export const useRegisterForm = () => {
   const [step, setStep] = useState(1);
   const [isGeneratingBio, setIsGeneratingBio] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [validatedValues, setValidatedValues] = useState<SignUpPayload | null>(null);
   const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
   const [isSendingOtp, setIsSendingOtp] = useState(false);
 
@@ -153,24 +155,12 @@ export const useRegisterForm = () => {
 
   const prevStep = () => setStep((prev) => prev - 1);
 
-  const getUUID = () => {
-    if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
-      return crypto.randomUUID();
-    }
-    // Fallback for older browsers
-    return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-  };
-
   const performFinalSubmit = (values: SignUpPayload) => {
     const correlationId = `reg-${getUUID()}`;
     const headers = { "x-correlation-id": correlationId };
 
     register(
-      { 
-        resource: "users",
-        values: { ...values, inviteCode },
-        meta: { headers }
-      },
+      { ...values, inviteCode },
       {
         onSuccess: () => {
           setIsSuccess(true);
@@ -193,7 +183,7 @@ export const useRegisterForm = () => {
   };
 
   const sendWhatsAppOtp = async () => {
-    const phoneNumber = normalizeArabicNumerals(form.getValues("phoneNumber"));
+    const phoneNumber = form.getValues("phoneNumber");
     const correlationId = `otp-send-${getUUID()}`;
     const headers = { "x-correlation-id": correlationId };
     
@@ -212,7 +202,7 @@ export const useRegisterForm = () => {
   };
 
   const verifyOtp = async (code: string) => {
-    const phoneNumber = normalizeArabicNumerals(form.getValues("phoneNumber"));
+    const phoneNumber = form.getValues("phoneNumber");
     const correlationId = `otp-verify-${getUUID()}`;
     const headers = { "x-correlation-id": correlationId };
     
@@ -223,10 +213,9 @@ export const useRegisterForm = () => {
         { phoneNumber, code },
         { headers }
       );
-      if (response.data.data.verified) {
-        // 🛡️ SECURITY: Use validated values from the form state at the time of submission
-        const values = form.getValues();
-        performFinalSubmit(values);
+      if (response.data.data.verified && validatedValues) {
+        // 🛡️ SECURITY: Use validated, transformed values from handleSubmit
+        performFinalSubmit(validatedValues);
       }
     } catch (error) {
       const apiError = await handleError(error);
@@ -241,10 +230,11 @@ export const useRegisterForm = () => {
   const handleFinalSubmit = form.handleSubmit((values) => {
     // 🛡️ NORMALIZATION: Automatically handled by Zod .transform() in the schema
     if (role === "student") {
+      setValidatedValues(values as SignUpPayload);
       setStep(4); // Move to OTP step
       return;
     }
-    performFinalSubmit(values);
+    performFinalSubmit(values as SignUpPayload);
   });
 
   return {

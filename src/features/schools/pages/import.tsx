@@ -10,7 +10,7 @@ import { useCustom } from "@refinedev/core";
 import { dataProvider } from "@/providers/data";
 import Papa from "papaparse";
 import { handleError, getCorrelationId } from "@/providers/utils/api-errors";
-import crypto from "node:crypto";
+import { getUUID } from "@/lib/utils";
 
 /**
  * 🚀 ADMIN IMPORT PAGE
@@ -23,13 +23,6 @@ const AdminImportPage = () => {
   const [data, setData] = useState<any[]>([]);
   const [isImporting, setIsImporting] = useState(false);
   const [result, setResult] = useState<any>(null);
-
-  const getUUID = () => {
-    if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
-      return crypto.randomUUID();
-    }
-    return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
