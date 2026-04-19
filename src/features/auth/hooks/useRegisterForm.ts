@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import axios from "axios";
 import { useTranslation } from "react-i18next";
 import { validateEgyptianID, normalizeArabicNumerals } from "@/lib/validators";
-import { handleError } from "@/providers/utils/api-errors";
+import { handleError, getCorrelationId } from "@/providers/utils/api-errors";
 
 export const useRegisterForm = () => {
   const { t } = useTranslation();
@@ -69,9 +69,6 @@ export const useRegisterForm = () => {
   const role = form.watch("role");
   const name = form.watch("name");
 
-  // 🛡️ TRACEABILITY: Extract correlation ID from headers for support visibility (Mandate Rule 8)
-  const getTraceId = (error: any) => error?.response?.headers?.["x-correlation-id"] || "N/A";
-
   const generateAIBio = async () => {
     setIsGeneratingBio(true);
     try {
@@ -82,7 +79,7 @@ export const useRegisterForm = () => {
       form.setValue("bio", response.data.bio);
       toast.success(t("auth.register.aiBioSuccess", "AI Bio generated successfully!"));
     } catch (error: any) {
-      const traceId = getTraceId(error);
+      const traceId = getCorrelationId(error);
       const fallbacks = {
         student: t(
           "auth.register.bioFallbackStudent",
@@ -192,7 +189,7 @@ export const useRegisterForm = () => {
       onError: async (err) => {
         const error = await handleError(err as any);
         toast.error(error.message, {
-          description: `Trace ID: ${getTraceId(err)}. ${t("common.supportInfo", "Please contact support for assistance.")}`,
+          description: `Trace ID: ${getCorrelationId(err)}. ${t("common.supportInfo", "Please contact support for assistance.")}`,
         });
         setStep(1); // Reset to first step on hard error
       },

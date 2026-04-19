@@ -1,10 +1,24 @@
 import { HttpError } from "@refinedev/core";
 
 /**
+ * 🛡️ TRACEABILITY: Extracts X-Correlation-ID from various error formats (Axios, Fetch, etc.)
+ */
+export const getCorrelationId = (err: any): string => {
+  return (
+    err?.response?.headers?.["x-correlation-id"] ||
+    err?.headers?.["x-correlation-id"] ||
+    err?.config?.headers?.["x-correlation-id"] ||
+    "N/A"
+  );
+};
+
+/**
  * Helper to handle API errors and return Refine-compatible HttpError
  */
 export const handleError = async (response: Response): Promise<HttpError> => {
   let json: Record<string, unknown> = {};
+  const correlationId = response.headers.get("x-correlation-id") || "N/A";
+
   try {
     const text = await response.text();
     if (text) {
@@ -84,7 +98,7 @@ export const handleError = async (response: Response): Promise<HttpError> => {
     message:
       (json.error as string) ||
       (json.message as string) ||
-      `HTTP error! status: ${response.status}`,
+      `HTTP error! status: ${response.status} (Trace: ${correlationId})`,
     statusCode: response.status,
   };
 };

@@ -84,21 +84,19 @@ const UsersEdit = () => {
       resource: "users",
       action: "edit",
       redirect: "list",
+      onFinish: (values: any) => {
+        return onFinish({
+          ...values,
+          phoneNumber: values.phoneNumber
+            ? normalizeArabicNumerals(values.phoneNumber)
+            : values.phoneNumber,
+          parentPhone: values.parentPhone
+            ? normalizeArabicNumerals(values.parentPhone)
+            : values.parentPhone,
+        });
+      },
     },
   });
-
-  const handleOnFinish = async (values: any) => {
-    const normalizedValues = {
-      ...values,
-      phoneNumber: values.phoneNumber
-        ? normalizeArabicNumerals(values.phoneNumber)
-        : values.phoneNumber,
-      parentPhone: values.parentPhone
-        ? normalizeArabicNumerals(values.parentPhone)
-        : values.parentPhone,
-    };
-    await onFinish(normalizedValues);
-  };
 
   const { options: departmentOptions } = useSelect<Department>({
     resource: "departments",
@@ -147,7 +145,7 @@ const UsersEdit = () => {
           className="lg:col-span-2"
         >
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleOnFinish)}>
+            <form onSubmit={form.handleSubmit(onFinish)}>
               <Card className="border-primary/10 shadow-xl shadow-primary/5 rounded-[2.5rem] overflow-hidden bg-card/50 backdrop-blur-sm">
                 <CardHeader className="p-8 pb-4 flex flex-row items-center gap-6">
                   <Avatar className="h-20 w-20 rounded-2xl border-4 border-background shadow-lg">
