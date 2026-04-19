@@ -18,7 +18,8 @@ export const getCorrelationId = (err: any): string => {
  */
 export const handleError = async (errorOrResponse: any): Promise<HttpError> => {
   // 1. Extract the raw response if possible (handles Axios, Refine, and raw fetch)
-  const response = errorOrResponse?.response || (errorOrResponse instanceof Response ? errorOrResponse : null);
+  const response =
+    errorOrResponse?.response || (errorOrResponse instanceof Response ? errorOrResponse : null);
 
   if (!response) {
     return {
@@ -29,7 +30,9 @@ export const handleError = async (errorOrResponse: any): Promise<HttpError> => {
 
   let json: Record<string, unknown> = {};
   const correlationId =
-    (typeof response.headers?.get === "function" ? response.headers.get("x-correlation-id") : null) ||
+    (typeof response.headers?.get === "function"
+      ? response.headers.get("x-correlation-id")
+      : null) ||
     response.headers?.["x-correlation-id"] ||
     "N/A";
 

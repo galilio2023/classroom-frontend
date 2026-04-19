@@ -41,7 +41,10 @@ export const useRegisterForm = () => {
     bio: z.string().optional(),
     dateOfBirth: z.string().optional(),
     parentName: z.string().optional(),
-    parentPhone: z.string().optional().transform((val) => (val ? normalizeArabicNumerals(val) : val)),
+    parentPhone: z
+      .string()
+      .optional()
+      .transform((val) => (val ? normalizeArabicNumerals(val) : val)),
     childInviteCode: z.string().optional(),
     verificationDocumentUrl: z.string().optional(),
     verificationDocumentCldPubId: z.string().optional(),
@@ -189,22 +192,23 @@ export const useRegisterForm = () => {
       { ...values, inviteCode },
       {
         onSuccess: () => {
-        setIsSuccess(true);
-        // Redirect logic based on role for "First Success"
-        setTimeout(() => {
-          if (values.role === "teacher") navigate("/ai/magic-builder");
-          else if (values.role === "student") navigate("/ai/chat");
-          else navigate("/dashboard");
-        }, 3000);
-      },
-      onError: async (err) => {
-        const error = await handleError(err as any);
-        toast.error(error.message, {
-          description: `Trace ID: ${getCorrelationId(err)}. ${t("common.supportInfo", "Please contact support for assistance.")}`,
-        });
-        setStep(1); // Reset to first step on hard error
-      },
-    });
+          setIsSuccess(true);
+          // Redirect logic based on role for "First Success"
+          setTimeout(() => {
+            if (values.role === "teacher") navigate("/ai/magic-builder");
+            else if (values.role === "student") navigate("/ai/chat");
+            else navigate("/dashboard");
+          }, 3000);
+        },
+        onError: async (err) => {
+          const error = await handleError(err as any);
+          toast.error(error.message, {
+            description: `Trace ID: ${getCorrelationId(err)}. ${t("common.supportInfo", "Please contact support for assistance.")}`,
+          });
+          setStep(1); // Reset to first step on hard error
+        },
+      }
+    );
   });
 
   return {
