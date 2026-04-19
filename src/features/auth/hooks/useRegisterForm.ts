@@ -30,14 +30,18 @@ export const useRegisterForm = () => {
       .string()
       .min(8, t("auth.register.passwordMin", "Password must be at least 8 characters")),
     role: z.enum(["student", "teacher", "parent"]),
-    phoneNumber: z.string().min(10, t("auth.register.phoneRequired", "Phone number is required")),
+    phoneNumber: z
+      .string()
+      .min(10, t("auth.register.phoneRequired", "Phone number is required"))
+      .transform(normalizeArabicNumerals),
     nationalId: z
       .string()
-      .length(14, t("auth.register.nationalIdLength", "National ID must be 14 digits")),
+      .length(14, t("auth.register.nationalIdLength", "National ID must be 14 digits"))
+      .transform(normalizeArabicNumerals),
     bio: z.string().optional(),
     dateOfBirth: z.string().optional(),
     parentName: z.string().optional(),
-    parentPhone: z.string().optional(),
+    parentPhone: z.string().optional().transform((val) => (val ? normalizeArabicNumerals(val) : val)),
     childInviteCode: z.string().optional(),
     verificationDocumentUrl: z.string().optional(),
     verificationDocumentCldPubId: z.string().optional(),
@@ -69,13 +73,19 @@ export const useRegisterForm = () => {
   const role = form.watch("role");
   const name = form.watch("name");
 
+  // 🛡️ TRACEABILITY: Shared headers for manual axios calls (Rule 8)
+  const authHeaders = {
+    "x-correlation-id": `client-${crypto.randomUUID()}`,
+  };
+
   const generateAIBio = async () => {
     setIsGeneratingBio(true);
     try {
-      const response = await axios.post("/api/ai/generate-bio", {
-        name,
-        role,
-      });
+      const response = await axios.post(
+        "/api/ai/generate-bio",
+        { name, role },
+        { headers: authHeaders }
+      );
       form.setValue("bio", response.data.bio);
       toast.success(t("auth.register.aiBioSuccess", "AI Bio generated successfully!"));
     } catch (error: any) {
@@ -145,8 +155,8 @@ export const useRegisterForm = () => {
     const phoneNumber = normalizeArabicNumerals(form.getValues("phoneNumber"));
     setIsSendingOtp(true);
     try {
-      await axios.post("/api/auth/otp/send", { phoneNumber });
-      toast.success(t("auth.otp.sentSuccess", "OTP sent via WhatsApp"));
+      await axios.post("/api/auth/otp/send", { phoneNumber }, { headers: authHeaders });
+      toast.success(t("auth.otp.sent", "OTP sent via WhatsApp!"));
     } catch (error) {
       toast.error(t("auth.otp.sentError", "Failed to send OTP. Please try again."));
     } finally {
@@ -158,7 +168,11 @@ export const useRegisterForm = () => {
     const phoneNumber = normalizeArabicNumerals(form.getValues("phoneNumber"));
     setIsVerifyingOtp(true);
     try {
-      const response = await axios.post("/api/auth/otp/verify", { phoneNumber, code });
+      const response = await axios.post(
+        "/api/auth/otp/verify",
+        { phoneNumber, code },
+        { headers: authHeaders }
+      );
       if (response.data.data.verified) {
         handleFinalSubmit();
       }
@@ -170,14 +184,11 @@ export const useRegisterForm = () => {
   };
 
   const handleFinalSubmit = form.handleSubmit((values) => {
-    const normalizedValues = {
-      ...values,
-      phoneNumber: normalizeArabicNumerals(values.phoneNumber),
-      nationalId: normalizeArabicNumerals(values.nationalId),
-      inviteCode,
-    };
-    register(normalizedValues, {
-      onSuccess: () => {
+    // 🛡️ NORMALIZATION: Automatically handled by Zod .transform() in the schema
+    register(
+      { ...values, inviteCode },
+      {
+        onSuccess: () => {
         setIsSuccess(true);
         // Redirect logic based on role for "First Success"
         setTimeout(() => {

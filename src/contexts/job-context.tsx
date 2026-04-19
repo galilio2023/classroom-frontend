@@ -169,6 +169,8 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }, [updateJob, open]);
 
+  const pollRef = useRef<(() => Promise<void>) | null>(null);
+
   useEffect(() => {
     let timeoutId: NodeJS.Timeout;
     let isVisible = document.visibilityState === "visible";
@@ -185,7 +187,7 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       // 🛡️ RULE 6: Tab Visibility Safety. Pause polling when tab is hidden to save battery/data.
       if (!isVisible) {
         // Slow down check but don't stop completely, just wait for visibility change
-        timeoutId = setTimeout(poll, 60000);
+        timeoutId = setTimeout(pollRef.current!, 60000);
         return;
       }
 
@@ -204,6 +206,8 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setSyncDelay(10000);
       }
     };
+
+    pollRef.current = poll;
 
     const activeJobsCount = jobsRef.current.filter((j) => j.status === "processing").length;
     if (activeJobsCount > 0) {

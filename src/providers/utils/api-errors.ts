@@ -34,12 +34,12 @@ export const handleError = async (errorOrResponse: any): Promise<HttpError> => {
     "N/A";
 
   try {
-    // Check if it's a fetch Response (has .text()) or an Axios response (has .data)
-    if (typeof response.text === "function") {
+    // 🛡️ RESILIENCE: Check for Axios data first to avoid consuming Fetch streams prematurely
+    if (response.data && typeof response.data === "object") {
+      json = response.data;
+    } else if (typeof response.text === "function") {
       const text = await response.text();
       if (text) json = JSON.parse(text);
-    } else if (response.data) {
-      json = response.data;
     }
   } catch {
     // Not JSON or empty
