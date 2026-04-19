@@ -163,7 +163,7 @@ export default function MonetizationSettings() {
           <div className="flex gap-4">
             <Card className="bg-success/5 border-success/20 px-6 py-3 rounded-2xl flex flex-col items-end shadow-sm">
               <span className="text-[10px] font-bold text-success/60 uppercase tracking-widest">
-                Available to Payout
+                {t("settings.monetization.availableToPayout", { defaultValue: "Available to Payout" })}
               </span>
               <span className="text-xl font-black text-success">
                 {balanceLoading ? (
@@ -183,10 +183,11 @@ export default function MonetizationSettings() {
             <Wand2 className="h-16 w-16" />
           </div>
           <div className="max-w-2xl mx-auto space-y-4">
-            <h2 className="text-4xl font-black tracking-tight">Unlock Your Earnings</h2>
+            <h2 className="text-4xl font-black tracking-tight">
+              {t("settings.monetization.unlockTitle", { defaultValue: "Unlock Your Earnings" })}
+            </h2>
             <p className="text-lg text-muted-foreground font-medium">
-              Start monetizing your knowledge. Connect your Stripe account to list paid classes on
-              the marketplace and receive automatic payouts.
+              {t("settings.monetization.unlockDesc", { defaultValue: "Start monetizing your knowledge. Connect your Stripe account to list paid classes on the marketplace and receive automatic payouts." })}
             </p>
           </div>
           <Button
@@ -200,7 +201,7 @@ export default function MonetizationSettings() {
             ) : (
               <Landmark className="h-5 w-5 me-3" />
             )}
-            Connect Stripe Account
+            {t("settings.monetization.connectStripe", { defaultValue: "Connect Stripe Account" })}
           </Button>
         </Card>
       ) : (
@@ -215,7 +216,7 @@ export default function MonetizationSettings() {
                     <Eye className="h-5 w-5" />
                   </div>
                   <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-                    Total Views
+                    {t("settings.monetization.totalViews", { defaultValue: "Total Views" })}
                   </p>
                   <p className="text-2xl font-black">{marketplaceStats?.data?.totalViews || 0}</p>
                 </CardContent>
@@ -227,7 +228,7 @@ export default function MonetizationSettings() {
                     <MousePointer2 className="h-5 w-5" />
                   </div>
                   <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-                    Preview Clicks
+                    {t("settings.monetization.previewClicks", { defaultValue: "Preview Clicks" })}
                   </p>
                   <p className="text-2xl font-black">
                     {marketplaceStats?.data?.totalPreviewClicks || 0}
@@ -241,7 +242,7 @@ export default function MonetizationSettings() {
                     <ShoppingBag className="h-5 w-5" />
                   </div>
                   <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-                    Enrollments
+                    {t("settings.monetization.enrollments", { defaultValue: "Enrollments" })}
                   </p>
                   <p className="text-2xl font-black">
                     {marketplaceStats?.data?.totalEnrollments || 0}
@@ -255,7 +256,7 @@ export default function MonetizationSettings() {
                     <Percent className="h-5 w-5" />
                   </div>
                   <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-                    Conv. Rate
+                    {t("settings.monetization.convRate", { defaultValue: "Conv. Rate" })}
                   </p>
                   <p className="text-2xl font-black">
                     {marketplaceStats?.data?.avgConversionRate || 0}%
@@ -268,7 +269,9 @@ export default function MonetizationSettings() {
             <Card className="rounded-[2.5rem] border-none shadow-2xl bg-card/50 backdrop-blur-xl overflow-hidden">
               <CardHeader className="p-8 pb-0 flex flex-row items-center justify-between">
                 <div className="text-start">
-                  <CardTitle className="text-2xl font-black tracking-tight">Growth Trend</CardTitle>
+                  <CardTitle className="text-2xl font-black tracking-tight">
+                    {t("settings.monetization.growthTrend", { defaultValue: "Growth Trend" })}
+                  </CardTitle>
                   <CardDescription className="font-bold uppercase text-[10px] tracking-widest">
                     Last 30 Days Marketplace Activity
                   </CardDescription>
@@ -337,7 +340,9 @@ export default function MonetizationSettings() {
             <Card className="rounded-[2.5rem] border-none shadow-2xl bg-card/50 backdrop-blur-xl overflow-hidden">
               <CardHeader className="p-8 pb-4 text-start flex flex-row items-center justify-between">
                 <div>
-                  <CardTitle className="text-xl font-black tracking-tight">Recent Sales</CardTitle>
+                  <CardTitle className="text-xl font-black tracking-tight">
+                    {t("settings.monetization.recentSales", { defaultValue: "Recent Sales" })}
+                  </CardTitle>
                   <CardDescription className="text-xs font-medium mt-1">
                     Your latest marketplace enrollments.
                   </CardDescription>
@@ -427,7 +432,7 @@ export default function MonetizationSettings() {
               </div>
               <CardHeader className="p-10 pb-0 relative z-10">
                 <p className="text-[10px] font-black uppercase tracking-[0.3em] opacity-60">
-                  Net Earnings (30d)
+                  {t("settings.monetization.netEarnings", { defaultValue: "Net Earnings (30d)" })}
                 </p>
                 <CardTitle className="text-5xl font-black tracking-tighter mt-2">
                   {formatPrice(marketplaceStats?.data?.netEarnings || 0)}
@@ -436,7 +441,7 @@ export default function MonetizationSettings() {
               <CardContent className="p-10 pt-6 relative z-10 space-y-6">
                 <div className="flex items-center justify-between text-white/80">
                   <span className="text-xs font-bold uppercase tracking-widest">
-                    Platform Fees (10%)
+                    {t("settings.monetization.platformFees", { defaultValue: "Platform Fees (10%)" })}
                   </span>
                   <span className="text-sm font-black">
                     {formatPrice(marketplaceStats?.data?.platformFees || 0)}
@@ -445,7 +450,7 @@ export default function MonetizationSettings() {
                 <div className="pt-6 border-t border-white/10 flex flex-col gap-4">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold uppercase tracking-widest">
-                      Gross Revenue
+                      {t("settings.monetization.grossRevenue", { defaultValue: "Gross Revenue" })}
                     </span>
                     <span className="text-lg font-black">
                       {formatPrice(marketplaceStats?.data?.totalRevenue || 0)}
@@ -460,7 +465,9 @@ export default function MonetizationSettings() {
                 <div className="p-3 rounded-2xl bg-primary/10 text-primary">
                   <Landmark className="h-6 w-6" />
                 </div>
-                <h3 className="text-xl font-black tracking-tight">Payout Settings</h3>
+                <h3 className="text-xl font-black tracking-tight">
+                  {t("settings.monetization.payoutSettings", { defaultValue: "Payout Settings" })}
+                </h3>
               </div>
 
               <div className="p-6 rounded-3xl bg-success/5 border border-success/20 space-y-4">
@@ -469,9 +476,11 @@ export default function MonetizationSettings() {
                     <CheckCircle2 className="h-6 w-6" />
                   </div>
                   <div>
-                    <p className="text-sm font-black text-success">Account Active</p>
+                    <p className="text-sm font-black text-success">
+                      {t("settings.monetization.accountActive", { defaultValue: "Account Active" })}
+                    </p>
                     <p className="text-[10px] font-bold text-success/60 uppercase">
-                      Verified via Stripe
+                      {t("settings.monetization.verifiedStripe", { defaultValue: "Verified via Stripe" })}
                     </p>
                   </div>
                 </div>
@@ -479,16 +488,18 @@ export default function MonetizationSettings() {
                   className="w-full h-12 rounded-xl font-black uppercase tracking-widest text-[9px] bg-success hover:bg-success/90"
                   onClick={handleConnectStripe}
                 >
-                  Manage Account <ExternalLink className="ms-2 h-3 w-3" />
+                  {t("settings.monetization.manageAccount", { defaultValue: "Manage Account" })} <ExternalLink className="ms-2 h-3 w-3" />
                 </Button>
               </div>
 
               <div className="space-y-4 pt-4">
                 <div className="flex items-center justify-between px-2">
                   <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
-                    Payout Cycle
+                    {t("settings.monetization.payoutCycle", { defaultValue: "Payout Cycle" })}
                   </span>
-                  <span className="text-xs font-black">Daily (Rolling)</span>
+                  <span className="text-xs font-black">
+                    {t("settings.monetization.dailyRolling", { defaultValue: "Daily (Rolling)" })}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between px-2">
                   <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
@@ -504,7 +515,7 @@ export default function MonetizationSettings() {
                 <Trophy className="h-16 w-16" />
               </div>
               <h3 className="text-xs font-black uppercase tracking-widest text-ai-primary/60 mb-2">
-                Teacher Perks
+                {t("settings.monetization.teacherPerks", { defaultValue: "Teacher Perks" })}
               </h3>
               <p className="text-sm font-bold leading-relaxed mb-6">
                 You've processed over 50 enrollments this month! You are eligible for the "Top
@@ -514,7 +525,7 @@ export default function MonetizationSettings() {
                 variant="outline"
                 className="rounded-full font-black uppercase tracking-widest text-[9px] border-ai-primary/20 text-ai-primary hover:bg-ai-primary/10 h-10"
               >
-                View Milestone Rewards
+                {t("settings.monetization.viewRewards", { defaultValue: "View Milestone Rewards" })}
               </Button>
             </Card>
           </div>
