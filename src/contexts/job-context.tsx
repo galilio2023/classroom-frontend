@@ -35,10 +35,10 @@ const STORAGE_KEY = "classroom_active_jobs";
 
 // 🛡️ POLLING CONFIGURATION (Mandate M-008)
 const POLLING_CONFIG = {
-  INITIAL_DELAY: 10000,   // 10s
-  MAX_DELAY: 120000,      // 2m
+  INITIAL_DELAY: 5000, // 5s (🚀 UX: Faster initial feedback)
+  MAX_DELAY: 120000, // 2m
   IDLE_POLL_INTERVAL: 60000, // 1m when tab is hidden
-  JITTER_FACTOR: 0.1,     // 10%
+  JITTER_FACTOR: 0.1, // 10%
 };
 
 export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -46,7 +46,7 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [syncDelay, setSyncDelay] = useState(POLLING_CONFIG.INITIAL_DELAY);
   const [pollTick, setPollTick] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
-  
+
   const jobsRef = useRef<BackgroundJob[]>([]);
   const timeoutIdRef = useRef<NodeJS.Timeout | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -89,7 +89,7 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       ...prev,
       { ...job, status: "processing", createdAt: Date.now() } as BackgroundJob,
     ]);
-    setSyncDelay(10000); // 🚀 UX: Trigger immediate responsiveness for new jobs
+    setSyncDelay(POLLING_CONFIG.INITIAL_DELAY); // 🚀 UX: Trigger immediate responsiveness for new jobs
     setPollTick((prev) => prev + 1); // 🚀 WAKE UP: Force immediate poll
   };
 

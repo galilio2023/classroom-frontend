@@ -32,9 +32,15 @@ export const StepBasic = ({ formData, setData, onSave, isUpdating }: StepBasicPr
           onChange={(e) => setData({ ...formData, slug: e.target.value })}
           placeholder="tablawy-uni"
         />
-        <p className="text-[10px] text-muted-foreground">{t("schools.setup.basic.schoolSlugHint")}</p>
+        <p className="text-[10px] text-muted-foreground">
+          {t("schools.setup.basic.schoolSlugHint")}
+        </p>
       </div>
-      <Button onClick={onSave} disabled={isUpdating} className="w-full mt-6 bg-indigo-600 hover:bg-indigo-700 text-white font-bold">
+      <Button
+        onClick={onSave}
+        disabled={isUpdating}
+        className="w-full mt-6 bg-indigo-600 hover:bg-indigo-700 text-white font-bold"
+      >
         {isUpdating ? <Loader2 className="animate-spin mr-2" /> : null}
         {t("buttons.continue")}
       </Button>

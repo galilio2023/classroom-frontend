@@ -13,7 +13,13 @@ interface StepDepartmentsProps {
   isCreatingDept: boolean;
 }
 
-export const StepDepartments = ({ formData, setData, onAdd, onNext, isCreatingDept }: StepDepartmentsProps) => {
+export const StepDepartments = ({
+  formData,
+  setData,
+  onAdd,
+  onNext,
+  isCreatingDept,
+}: StepDepartmentsProps) => {
   const { t } = useTranslation();
 
   return (
@@ -27,12 +33,19 @@ export const StepDepartments = ({ formData, setData, onAdd, onNext, isCreatingDe
             placeholder="e.g. Faculty of Science"
           />
           <Button onClick={onAdd} disabled={isCreatingDept} variant="outline">
-            {isCreatingDept ? <Loader2 className="animate-spin" /> : t("schools.setup.departments.addDept")}
+            {isCreatingDept ? (
+              <Loader2 className="animate-spin" />
+            ) : (
+              t("schools.setup.departments.addDept")
+            )}
           </Button>
         </div>
       </div>
       <div className="pt-8">
-        <Button onClick={onNext} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold">
+        <Button
+          onClick={onNext}
+          className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold"
+        >
           {t("buttons.continue")}
         </Button>
       </div>

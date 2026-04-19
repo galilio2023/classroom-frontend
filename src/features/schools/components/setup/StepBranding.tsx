@@ -57,12 +57,24 @@ export const StepBranding = ({ formData, setData, onSave, isUpdating }: StepBran
           placeholder="https://..."
         />
       </div>
-      <div className="p-4 rounded-xl border border-dashed mt-4 flex items-center justify-center gap-4" style={{ borderColor: formData.primaryColor }}>
-          <div className="w-12 h-12 rounded-lg" style={{ backgroundColor: formData.primaryColor }} />
-          <div className="w-12 h-12 rounded-lg" style={{ backgroundColor: formData.secondaryColor }} />
-          <span className="text-xs font-bold uppercase tracking-widest">{t("schools.setup.branding.preview")}</span>
+      <div
+        className="p-4 rounded-xl border border-dashed mt-4 flex items-center justify-center gap-4"
+        style={{ borderColor: formData.primaryColor }}
+      >
+        <div className="w-12 h-12 rounded-lg" style={{ backgroundColor: formData.primaryColor }} />
+        <div
+          className="w-12 h-12 rounded-lg"
+          style={{ backgroundColor: formData.secondaryColor }}
+        />
+        <span className="text-xs font-bold uppercase tracking-widest">
+          {t("schools.setup.branding.preview")}
+        </span>
       </div>
-      <Button onClick={onSave} disabled={isUpdating} className="w-full mt-6 bg-indigo-600 hover:bg-indigo-700 text-white font-bold">
+      <Button
+        onClick={onSave}
+        disabled={isUpdating}
+        className="w-full mt-6 bg-indigo-600 hover:bg-indigo-700 text-white font-bold"
+      >
         {isUpdating ? <Loader2 className="animate-spin mr-2" /> : null}
         {t("buttons.continue")}
       </Button>

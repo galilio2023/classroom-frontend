@@ -1,10 +1,5 @@
 import React from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { usePaymentStatus } from "../hooks/usePaymentStatus";
 import { Loader2, CheckCircle2, AlertCircle, CreditCard } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -97,7 +92,9 @@ export const PaymobCheckoutModal: React.FC<PaymobCheckoutModalProps> = ({
                     {t("payments.success")}
                   </h3>
                   <p className="text-muted-foreground font-medium text-lg">
-                    {t("payments.kiosk.activated", { defaultValue: "Payment confirmed. Your account is now active!" })}
+                    {t("payments.kiosk.activated", {
+                      defaultValue: "Payment confirmed. Your account is now active!",
+                    })}
                   </p>
                 </div>
               </motion.div>
@@ -125,11 +122,19 @@ export const PaymobCheckoutModal: React.FC<PaymobCheckoutModalProps> = ({
         </div>
 
         <div className="p-4 bg-slate-50 border-t flex items-center justify-center gap-6">
-           <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" alt="Visa" className="h-4 opacity-50 grayscale hover:grayscale-0 transition-all" />
-           <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="Mastercard" className="h-6 opacity-50 grayscale hover:grayscale-0 transition-all" />
-           <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40">
-             PCI-DSS Compliant • Powered by Paymob
-           </span>
+          <img
+            src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg"
+            alt="Visa"
+            className="h-4 opacity-50 grayscale hover:grayscale-0 transition-all"
+          />
+          <img
+            src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg"
+            alt="Mastercard"
+            className="h-6 opacity-50 grayscale hover:grayscale-0 transition-all"
+          />
+          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40">
+            PCI-DSS Compliant • Powered by Paymob
+          </span>
         </div>
       </DialogContent>
     </Dialog>

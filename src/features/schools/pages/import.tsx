@@ -3,7 +3,14 @@ import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { toast } from "sonner";
 import { Upload, FileSpreadsheet, CheckCircle2, AlertCircle, Loader2, X } from "lucide-react";
 import { useCustom } from "@refinedev/core";
@@ -32,7 +39,7 @@ const AdminImportPage = () => {
         return;
       }
       setFile(selectedFile);
-      
+
       Papa.parse(selectedFile, {
         header: true,
         skipEmptyLines: true,
@@ -45,17 +52,17 @@ const AdminImportPage = () => {
         },
         error: (error) => {
           toast.error(`CSV Parsing Error: ${error.message}`);
-        }
+        },
       });
     }
   };
 
   const handleImport = async () => {
     if (data.length === 0) return;
-    
+
     const correlationId = `import-${getUUID()}`;
     setIsImporting(true);
-    
+
     try {
       const { data: responseData } = await dataProvider.custom!({
         url: "/admin/import",
@@ -65,14 +72,18 @@ const AdminImportPage = () => {
           "x-correlation-id": correlationId,
         },
       });
-      
+
       setResult(responseData);
       toast.success(t("resources.admin-import.success", { defaultValue: "Onboarding complete!" }));
     } catch (error: any) {
       const apiError = await handleError(error);
-      toast.error(apiError.message || t("resources.admin-import.failed", { defaultValue: "Onboarding partially failed." }), {
-        description: `Trace ID: ${getCorrelationId(error) || correlationId}`,
-      });
+      toast.error(
+        apiError.message ||
+          t("resources.admin-import.failed", { defaultValue: "Onboarding partially failed." }),
+        {
+          description: `Trace ID: ${getCorrelationId(error) || correlationId}`,
+        }
+      );
     } finally {
       setIsImporting(false);
     }
@@ -92,7 +103,9 @@ const AdminImportPage = () => {
             {t("resources.admin-import.title", { defaultValue: "Bulk Data Import" })}
           </h1>
           <p className="text-slate-500 mt-1">
-            {t("resources.admin-import.description", { defaultValue: "Securely onboard students and teachers using CSV or Excel rosters." })}
+            {t("resources.admin-import.description", {
+              defaultValue: "Securely onboard students and teachers using CSV or Excel rosters.",
+            })}
           </p>
         </div>
       </div>
@@ -103,14 +116,20 @@ const AdminImportPage = () => {
             <div className="mx-auto bg-slate-50 p-4 rounded-full w-fit mb-4">
               <Upload className="h-10 w-10 text-slate-400" />
             </div>
-            <CardTitle>{t("resources.admin-import.uploadTitle", { defaultValue: "Roster Upload" })}</CardTitle>
-            <CardDescription>{t("resources.admin-import.uploadDesc", { defaultValue: "Drag and drop your roster file here (CSV/XLSX)." })}</CardDescription>
+            <CardTitle>
+              {t("resources.admin-import.uploadTitle", { defaultValue: "Roster Upload" })}
+            </CardTitle>
+            <CardDescription>
+              {t("resources.admin-import.uploadDesc", {
+                defaultValue: "Drag and drop your roster file here (CSV/XLSX).",
+              })}
+            </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col items-center">
             <div className="flex items-center gap-4 w-full max-w-md">
-              <Input 
-                type="file" 
-                accept=".csv" 
+              <Input
+                type="file"
+                accept=".csv"
                 onChange={handleFileChange}
                 className="cursor-pointer"
               />
@@ -121,19 +140,22 @@ const AdminImportPage = () => {
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="font-bold flex items-center gap-2">
                     <FileSpreadsheet className="h-5 w-5" />
-                    {t("resources.admin-import.preview", { defaultValue: "Data Preview" })} ({data.length} {t("common.table.rows", { count: data.length })})
+                    {t("resources.admin-import.preview", { defaultValue: "Data Preview" })} (
+                    {data.length} {t("common.table.rows", { count: data.length })})
                   </h3>
                   <Button variant="ghost" size="sm" onClick={reset}>
                     <X className="h-4 w-4 mr-2" /> {t("buttons.cancel")}
                   </Button>
                 </div>
-                
+
                 <div className="rounded-md border max-h-[400px] overflow-auto">
                   <Table>
                     <TableHeader className="bg-slate-50 sticky top-0 z-10">
                       <TableRow>
                         {Object.keys(data[0]).map((header) => (
-                          <TableHead key={header} className="font-bold">{header}</TableHead>
+                          <TableHead key={header} className="font-bold">
+                            {header}
+                          </TableHead>
                         ))}
                       </TableRow>
                     </TableHeader>
@@ -147,7 +169,10 @@ const AdminImportPage = () => {
                       ))}
                       {data.length > 10 && (
                         <TableRow>
-                          <TableCell colSpan={Object.keys(data[0]).length} className="text-center text-slate-400 italic py-4">
+                          <TableCell
+                            colSpan={Object.keys(data[0]).length}
+                            className="text-center text-slate-400 italic py-4"
+                          >
                             + {data.length - 10} more rows...
                           </TableCell>
                         </TableRow>
@@ -157,13 +182,18 @@ const AdminImportPage = () => {
                 </div>
 
                 <div className="mt-6 flex justify-end">
-                  <Button 
-                    onClick={handleImport} 
+                  <Button
+                    onClick={handleImport}
                     disabled={isImporting}
                     className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold"
                   >
                     {isImporting ? (
-                      <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> {t("resources.admin-import.importing", { defaultValue: "Importing records..." })}</>
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />{" "}
+                        {t("resources.admin-import.importing", {
+                          defaultValue: "Importing records...",
+                        })}
+                      </>
                     ) : (
                       t("buttons.continue")
                     )}
@@ -181,9 +211,12 @@ const AdminImportPage = () => {
                 <CheckCircle2 className="h-6 w-6 text-indigo-600" />
               </div>
               <div>
-                <CardTitle>{t("resources.admin-import.success", { defaultValue: "Onboarding complete!" })}</CardTitle>
+                <CardTitle>
+                  {t("resources.admin-import.success", { defaultValue: "Onboarding complete!" })}
+                </CardTitle>
                 <CardDescription>
-                  {result.success} {t("status.completed")}, {result.failed} {t("status.failed", { defaultValue: "Failed" })}
+                  {result.success} {t("status.completed")}, {result.failed}{" "}
+                  {t("status.failed", { defaultValue: "Failed" })}
                 </CardDescription>
               </div>
             </div>
@@ -209,7 +242,9 @@ const AdminImportPage = () => {
                         <TableRow key={i}>
                           <TableCell className="font-medium">{err.row}</TableCell>
                           <TableCell>{err.email}</TableCell>
-                          <TableCell className="text-red-600 text-sm font-medium">{err.error}</TableCell>
+                          <TableCell className="text-red-600 text-sm font-medium">
+                            {err.error}
+                          </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
@@ -217,7 +252,7 @@ const AdminImportPage = () => {
                 </div>
               </div>
             )}
-            
+
             <div className="mt-8 flex justify-center">
               <Button onClick={reset} variant="outline" className="px-8 font-bold">
                 {t("buttons.back")}

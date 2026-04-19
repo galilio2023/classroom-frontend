@@ -163,7 +163,9 @@ export default function MonetizationSettings() {
           <div className="flex gap-4">
             <Card className="bg-success/5 border-success/20 px-6 py-3 rounded-2xl flex flex-col items-end shadow-sm">
               <span className="text-[10px] font-bold text-success/60 uppercase tracking-widest">
-                {t("settings.monetization.availableToPayout", { defaultValue: "Available to Payout" })}
+                {t("settings.monetization.availableToPayout", {
+                  defaultValue: "Available to Payout",
+                })}
               </span>
               <span className="text-xl font-black text-success">
                 {balanceLoading ? (
@@ -187,7 +189,10 @@ export default function MonetizationSettings() {
               {t("settings.monetization.unlockTitle", { defaultValue: "Unlock Your Earnings" })}
             </h2>
             <p className="text-lg text-muted-foreground font-medium">
-              {t("settings.monetization.unlockDesc", { defaultValue: "Start monetizing your knowledge. Connect your Stripe account to list paid classes on the marketplace and receive automatic payouts." })}
+              {t("settings.monetization.unlockDesc", {
+                defaultValue:
+                  "Start monetizing your knowledge. Connect your Stripe account to list paid classes on the marketplace and receive automatic payouts.",
+              })}
             </p>
           </div>
           <Button
@@ -441,7 +446,9 @@ export default function MonetizationSettings() {
               <CardContent className="p-10 pt-6 relative z-10 space-y-6">
                 <div className="flex items-center justify-between text-white/80">
                   <span className="text-xs font-bold uppercase tracking-widest">
-                    {t("settings.monetization.platformFees", { defaultValue: "Platform Fees (10%)" })}
+                    {t("settings.monetization.platformFees", {
+                      defaultValue: "Platform Fees (10%)",
+                    })}
                   </span>
                   <span className="text-sm font-black">
                     {formatPrice(marketplaceStats?.data?.platformFees || 0)}
@@ -480,7 +487,9 @@ export default function MonetizationSettings() {
                       {t("settings.monetization.accountActive", { defaultValue: "Account Active" })}
                     </p>
                     <p className="text-[10px] font-bold text-success/60 uppercase">
-                      {t("settings.monetization.verifiedStripe", { defaultValue: "Verified via Stripe" })}
+                      {t("settings.monetization.verifiedStripe", {
+                        defaultValue: "Verified via Stripe",
+                      })}
                     </p>
                   </div>
                 </div>
@@ -488,7 +497,8 @@ export default function MonetizationSettings() {
                   className="w-full h-12 rounded-xl font-black uppercase tracking-widest text-[9px] bg-success hover:bg-success/90"
                   onClick={handleConnectStripe}
                 >
-                  {t("settings.monetization.manageAccount", { defaultValue: "Manage Account" })} <ExternalLink className="ms-2 h-3 w-3" />
+                  {t("settings.monetization.manageAccount", { defaultValue: "Manage Account" })}{" "}
+                  <ExternalLink className="ms-2 h-3 w-3" />
                 </Button>
               </div>
 

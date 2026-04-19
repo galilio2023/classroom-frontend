@@ -122,8 +122,8 @@ export const SchoolSetupWizard = ({ school, onComplete }: SchoolSetupWizardProps
       title: t("schools.setup.steps.basic"),
       icon: Building2,
       content: (
-        <StepBasic 
-          formData={formData} 
+        <StepBasic
+          formData={formData}
           setData={(data) => setData({ ...formData, ...data })}
           onSave={handleSaveBasic}
           isUpdating={isUpdating}
@@ -171,11 +171,11 @@ export const SchoolSetupWizard = ({ school, onComplete }: SchoolSetupWizardProps
     <Dialog open={true}>
       <DialogContent className="sm:max-w-[500px] overflow-hidden p-0 rounded-3xl border-none shadow-2xl">
         <div className="h-2 w-full bg-slate-100">
-           <motion.div 
-             className="h-full bg-indigo-600"
-             initial={{ width: "0%" }}
-             animate={{ width: `${(step / 4) * 100}%` }}
-           />
+          <motion.div
+            className="h-full bg-indigo-600"
+            initial={{ width: "0%" }}
+            animate={{ width: `${(step / 4) * 100}%` }}
+          />
         </div>
         <div className="p-8">
           <DialogHeader className="text-start pb-4">
@@ -187,7 +187,9 @@ export const SchoolSetupWizard = ({ school, onComplete }: SchoolSetupWizardProps
                 Step {step} of 4
               </span>
             </div>
-            <DialogTitle className="text-2xl font-black tracking-tight">{currentStep.title}</DialogTitle>
+            <DialogTitle className="text-2xl font-black tracking-tight">
+              {currentStep.title}
+            </DialogTitle>
             <DialogDescription className="text-slate-500 font-medium">
               {step === 1 ? t("schools.setup.description") : null}
             </DialogDescription>

@@ -22,7 +22,6 @@ export const useRegisterForm = () => {
   const [step, setStep] = useState(1);
   const [isGeneratingBio, setIsGeneratingBio] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [validatedValues, setValidatedValues] = useState<SignUpPayload | null>(null);
   const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
   const [isSendingOtp, setIsSendingOtp] = useState(false);
 
@@ -57,7 +56,7 @@ export const useRegisterForm = () => {
   });
 
   const form = useForm<z.infer<typeof registerSchema>>({
-    resolver: zodResolver(registerSchema),
+    resolver: zodResolver(registerSchema) as any,
     defaultValues: {
       name: "",
       email: "",
@@ -82,14 +81,10 @@ export const useRegisterForm = () => {
   const generateAIBio = async () => {
     const correlationId = `bio-${getUUID()}`;
     const headers = { "x-correlation-id": correlationId };
-    
+
     setIsGeneratingBio(true);
     try {
-      const response = await axios.post(
-        "/api/ai/generate-bio",
-        { name, role },
-        { headers }
-      );
+      const response = await axios.post("/api/ai/generate-bio", { name, role }, { headers });
       form.setValue("bio", response.data.bio);
       toast.success(t("auth.register.aiBioSuccess", "AI Bio generated successfully!"));
     } catch (error: any) {
@@ -157,10 +152,9 @@ export const useRegisterForm = () => {
 
   const performFinalSubmit = (values: SignUpPayload) => {
     const correlationId = `reg-${getUUID()}`;
-    const headers = { "x-correlation-id": correlationId };
 
     register(
-      { ...values, inviteCode },
+      { ...values, inviteCode, correlationId },
       {
         onSuccess: () => {
           setIsSuccess(true);
@@ -186,7 +180,7 @@ export const useRegisterForm = () => {
     const phoneNumber = form.getValues("phoneNumber");
     const correlationId = `otp-send-${getUUID()}`;
     const headers = { "x-correlation-id": correlationId };
-    
+
     setIsSendingOtp(true);
     try {
       await axios.post("/api/auth/otp/send", { phoneNumber }, { headers });
@@ -205,17 +199,16 @@ export const useRegisterForm = () => {
     const phoneNumber = form.getValues("phoneNumber");
     const correlationId = `otp-verify-${getUUID()}`;
     const headers = { "x-correlation-id": correlationId };
-    
+
     setIsVerifyingOtp(true);
     try {
-      const response = await axios.post(
-        "/api/auth/otp/verify",
-        { phoneNumber, code },
-        { headers }
-      );
-      if (response.data.data.verified && validatedValues) {
-        // 🛡️ SECURITY: Use validated, transformed values from handleSubmit
-        performFinalSubmit(validatedValues);
+      const response = await axios.post("/api/auth/otp/verify", { phoneNumber, code }, { headers });
+      if (response.data.data.verified) {
+        // 🛡️ SECURITY: Use fresh, validated values from the form state
+        const isValid = await form.trigger();
+        if (isValid) {
+          performFinalSubmit(form.getValues() as SignUpPayload);
+        }
       }
     } catch (error) {
       const apiError = await handleError(error);
@@ -230,7 +223,6 @@ export const useRegisterForm = () => {
   const handleFinalSubmit = form.handleSubmit((values) => {
     // 🛡️ NORMALIZATION: Automatically handled by Zod .transform() in the schema
     if (role === "student") {
-      setValidatedValues(values as SignUpPayload);
       setStep(4); // Move to OTP step
       return;
     }

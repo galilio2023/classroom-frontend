@@ -37,6 +37,7 @@ export const AiFeatureGuard: React.FC<AiFeatureGuardProps> = ({
     isDegraded,
     retryAfter,
     isLoading: isAiLoading,
+    refetch,
   } = useAiAccess();
   const { data: canAccess, isLoading: isCanLoading } = useCan({
     resource: "ai_features",
@@ -56,10 +57,11 @@ export const AiFeatureGuard: React.FC<AiFeatureGuardProps> = ({
       return {
         title: "Monthly Limit Reached",
         icon: <BrainCircuit className="h-4 w-4" />,
-        description: "You have exhausted your AI token quota for this month. Your limit will reset on the 1st of next month.",
+        description:
+          "You have exhausted your AI token quota for this month. Your limit will reset on the 1st of next month.",
       };
     }
-    
+
     if (isDegraded) {
       return {
         title: "AI System Offline",
@@ -75,7 +77,8 @@ export const AiFeatureGuard: React.FC<AiFeatureGuardProps> = ({
       return {
         title: "AI Features Disabled",
         icon: <Clock className="h-4 w-4" />,
-        description: "Tablawy OS AI features are currently disabled by the administrator for this institution.",
+        description:
+          "Tablawy OS AI features are currently disabled by the administrator for this institution.",
       };
     }
 
@@ -83,7 +86,8 @@ export const AiFeatureGuard: React.FC<AiFeatureGuardProps> = ({
       return {
         title: "AI Feature Restricted",
         icon: <Lock className="h-4 w-4" />,
-        description: "Your current account role does not have permission to access interactive AI features.",
+        description:
+          "Your current account role does not have permission to access interactive AI features.",
       };
     }
 
@@ -107,7 +111,7 @@ export const AiFeatureGuard: React.FC<AiFeatureGuardProps> = ({
               variant="outline"
               size="sm"
               className="w-fit h-8 rounded-lg font-black uppercase text-[10px] tracking-widest gap-2"
-              onClick={() => window.location.reload()}
+              onClick={() => void refetch()}
             >
               <RefreshCcw className="h-3 w-3" />
               Check Status Again

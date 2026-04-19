@@ -2,9 +2,25 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { toast } from "sonner";
-import { ShieldCheck, CheckCircle2, XCircle, Loader2, FileText, FileQuestion, LayoutGrid, Library } from "lucide-react";
+import {
+  ShieldCheck,
+  CheckCircle2,
+  XCircle,
+  Loader2,
+  FileText,
+  FileQuestion,
+  LayoutGrid,
+  Library,
+} from "lucide-react";
 import { useCustom, useCustomMutation } from "@refinedev/core";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
@@ -16,7 +32,7 @@ import { Badge } from "@/components/ui/badge";
  */
 const ApprovalsPage = () => {
   const { t } = useTranslation();
-  
+
   const { query } = useCustom<any[]>({
     url: "/admin/approvals/pending",
     method: "get",
@@ -36,7 +52,11 @@ const ApprovalsPage = () => {
       },
       {
         onSuccess: () => {
-          toast.success(status === "approved" ? t("resources.admin-approvals.success") : t("resources.admin-approvals.rejected"));
+          toast.success(
+            status === "approved"
+              ? t("resources.admin-approvals.success")
+              : t("resources.admin-approvals.rejected")
+          );
           refetch();
         },
         onError: (err: any) => {
@@ -48,11 +68,16 @@ const ApprovalsPage = () => {
 
   const getIcon = (type: string) => {
     switch (type) {
-      case "assignment": return <FileText className="h-4 w-4" />;
-      case "quiz": return <FileQuestion className="h-4 w-4" />;
-      case "module": return <LayoutGrid className="h-4 w-4" />;
-      case "resource": return <Library className="h-4 w-4" />;
-      default: return <ShieldCheck className="h-4 w-4" />;
+      case "assignment":
+        return <FileText className="h-4 w-4" />;
+      case "quiz":
+        return <FileQuestion className="h-4 w-4" />;
+      case "module":
+        return <LayoutGrid className="h-4 w-4" />;
+      case "resource":
+        return <Library className="h-4 w-4" />;
+      default:
+        return <ShieldCheck className="h-4 w-4" />;
     }
   };
 
@@ -73,12 +98,14 @@ const ApprovalsPage = () => {
           {isLoading ? (
             <div className="p-20 flex flex-col items-center justify-center gap-4">
               <Loader2 className="h-10 w-10 animate-spin text-indigo-600" />
-              <p className="text-xs font-black uppercase tracking-widest text-muted-foreground">Loading pending items...</p>
+              <p className="text-xs font-black uppercase tracking-widest text-muted-foreground">
+                Loading pending items...
+              </p>
             </div>
           ) : !data?.data || data.data.length === 0 ? (
             <div className="p-20 text-center flex flex-col items-center gap-6">
               <div className="h-20 w-20 rounded-full bg-emerald-50 flex items-center justify-center">
-                 <CheckCircle2 className="h-10 w-10 text-emerald-500" />
+                <CheckCircle2 className="h-10 w-10 text-emerald-500" />
               </div>
               <div className="space-y-1">
                 <h3 className="text-xl font-black">{t("resources.admin-approvals.empty")}</h3>
@@ -90,32 +117,47 @@ const ApprovalsPage = () => {
               <Table>
                 <TableHeader className="bg-slate-50/50">
                   <TableRow>
-                    <TableHead className="px-8 font-black uppercase text-[10px] tracking-widest">{t("resources.admin-approvals.entity")}</TableHead>
-                    <TableHead className="font-black uppercase text-[10px] tracking-widest">Title</TableHead>
-                    <TableHead className="font-black uppercase text-[10px] tracking-widest">{t("resources.admin-approvals.class")}</TableHead>
-                    <TableHead className="font-black uppercase text-[10px] tracking-widest">Date</TableHead>
-                    <TableHead className="px-8 text-end font-black uppercase text-[10px] tracking-widest">Actions</TableHead>
+                    <TableHead className="px-8 font-black uppercase text-[10px] tracking-widest">
+                      {t("resources.admin-approvals.entity")}
+                    </TableHead>
+                    <TableHead className="font-black uppercase text-[10px] tracking-widest">
+                      Title
+                    </TableHead>
+                    <TableHead className="font-black uppercase text-[10px] tracking-widest">
+                      {t("resources.admin-approvals.class")}
+                    </TableHead>
+                    <TableHead className="font-black uppercase text-[10px] tracking-widest">
+                      Date
+                    </TableHead>
+                    <TableHead className="px-8 text-end font-black uppercase text-[10px] tracking-widest">
+                      Actions
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {data.data.map((item: any) => (
-                    <TableRow key={`${item.entityType}-${item.id}`} className="hover:bg-muted/30 transition-colors">
+                    <TableRow
+                      key={`${item.entityType}-${item.id}`}
+                      className="hover:bg-muted/30 transition-colors"
+                    >
                       <TableCell className="px-8">
                         <div className="flex items-center gap-2">
-                           <div className="p-2 rounded-lg bg-slate-100 text-slate-600">
-                             {getIcon(item.entityType)}
-                           </div>
-                           <span className="text-xs font-black uppercase tracking-tighter opacity-60">
-                             {item.entityType}
-                           </span>
-                           {item.isAiGenerated && (
-                             <span className="bg-purple-100 text-purple-700 text-[8px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-widest">
-                               AI
-                             </span>
-                           )}
+                          <div className="p-2 rounded-lg bg-slate-100 text-slate-600">
+                            {getIcon(item.entityType)}
+                          </div>
+                          <span className="text-xs font-black uppercase tracking-tighter opacity-60">
+                            {item.entityType}
+                          </span>
+                          {item.isAiGenerated && (
+                            <span className="bg-purple-100 text-purple-700 text-[8px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-widest">
+                              AI
+                            </span>
+                          )}
                         </div>
                       </TableCell>
-                      <TableCell className="font-bold text-slate-900">{item.title || item.name}</TableCell>
+                      <TableCell className="font-bold text-slate-900">
+                        {item.title || item.name}
+                      </TableCell>
                       <TableCell className="text-sm font-medium text-slate-500">
                         {item.class?.name || "Shared"}
                       </TableCell>
@@ -124,9 +166,9 @@ const ApprovalsPage = () => {
                       </TableCell>
                       <TableCell className="px-8 text-end">
                         <div className="flex justify-end gap-2">
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
+                          <Button
+                            variant="outline"
+                            size="sm"
                             className="rounded-xl border-emerald-200 text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800 font-bold"
                             onClick={() => handleAction(item.entityType, item.id, "approved")}
                             disabled={isProcessing}
@@ -134,9 +176,9 @@ const ApprovalsPage = () => {
                             <CheckCircle2 className="h-4 w-4 mr-2" />
                             {t("resources.admin-approvals.approve")}
                           </Button>
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
+                          <Button
+                            variant="outline"
+                            size="sm"
                             className="rounded-xl border-red-200 text-red-700 hover:bg-red-50 hover:text-red-800 font-bold"
                             onClick={() => handleAction(item.entityType, item.id, "rejected")}
                             disabled={isProcessing}

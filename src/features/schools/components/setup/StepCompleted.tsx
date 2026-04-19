@@ -19,8 +19,11 @@ export const StepCompleted = ({ onComplete }: StepCompletedProps) => {
         <h3 className="text-xl font-black">{t("schools.setup.completed.title")}</h3>
         <p className="text-sm text-muted-foreground">{t("schools.setup.completed.desc")}</p>
       </div>
-      <Button onClick={onComplete} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold h-12 rounded-xl">
-         {t("schools.setup.completed.cta")}
+      <Button
+        onClick={onComplete}
+        className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold h-12 rounded-xl"
+      >
+        {t("schools.setup.completed.cta")}
       </Button>
     </div>
   );
