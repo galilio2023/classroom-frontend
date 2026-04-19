@@ -47,7 +47,7 @@ const PendingApprovalsPage = () => {
   const { query } = useList<Submission>({
     resource: "submissions",
     filters: [
-      { field: "aiApprovalStatus", operator: "eq", value: "pending" },
+      { field: "approvalStatus", operator: "eq", value: "pending" },
       { field: "aiStatus", operator: "eq", value: "completed" },
     ],
     meta: { populate: ["assignment", "student"] },
@@ -72,7 +72,7 @@ const PendingApprovalsPage = () => {
       values: {
         grade,
         feedback,
-        aiApprovalStatus: "approved",
+        approvalStatus: "approved",
         gradedAt: new Date().toISOString(),
       },
       successNotification: () => ({
@@ -100,7 +100,7 @@ const PendingApprovalsPage = () => {
     updateSubmission({
       resource: "submissions",
       id,
-      values: { aiApprovalStatus: "rejected" },
+      values: { approvalStatus: "rejected" },
       successNotification: () => ({
         type: "success",
         message: "AI Feedback Rejected",

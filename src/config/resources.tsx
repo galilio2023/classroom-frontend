@@ -499,6 +499,16 @@ export const resources: ResourceProps[] = [
     },
   },
   {
+    name: "admin-approvals",
+    list: "/admin/approvals",
+    meta: {
+      group: "groups.admin",
+      label: "resources.admin-approvals.label",
+      icon: <ShieldCheck />,
+      roles: [UserRole.ADMIN, UserRole.TEACHER],
+    },
+  },
+  {
     name: "activity-log",
     list: "/activity-log",
     meta: {

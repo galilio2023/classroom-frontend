@@ -1314,6 +1314,21 @@
       "failed": "Onboarding partially failed.",
       "errors": "Import Errors"
     },
+    "admin-approvals": {
+      "label": "Content Approvals",
+      "title": "Institutional Quality Control",
+      "description": "Review and approve AI-generated or teacher-submitted content before it reaches students.",
+      "empty": "No pending approvals. You're all caught up!",
+      "approve": "Approve",
+      "reject": "Reject",
+      "approving": "Approving...",
+      "rejecting": "Rejecting...",
+      "success": "Content approved and published.",
+      "rejected": "Content rejected.",
+      "entity": "Type",
+      "creator": "Created By",
+      "class": "Target Class"
+    },
     "activity-log": {
       "label": "Activity Log"
     },

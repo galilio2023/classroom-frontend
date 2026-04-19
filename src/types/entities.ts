@@ -183,7 +183,7 @@ export interface Submission {
   assignmentId: number;
   studentId: string;
   groupId?: number | null;
-  aiApprovalStatus?: "pending" | "approved" | "rejected";
+  approvalStatus?: "pending" | "approved" | "rejected";
   aiStatus: "idle" | "processing" | "completed" | "failed";
   aiError?: string | null;
   version: number;
@@ -227,6 +227,9 @@ export interface Assignment {
   maxPoints?: number;
   timeEstimate?: string;
   rubric: RubricItem[];
+  isAiGenerated: boolean;
+  approvalStatus: "pending" | "approved" | "rejected";
+  reviewedById: string | null;
 }
 
 export interface ProjectGroup {
@@ -295,6 +298,9 @@ export interface Module {
   resources?: Resource[];
   quizzes?: Quiz[];
   version: number;
+  isAiGenerated: boolean;
+  approvalStatus: "pending" | "approved" | "rejected";
+  reviewedById: string | null;
   createdAt: string;
   updatedAt: string;
   isUpdated?: boolean;
@@ -485,6 +491,9 @@ export interface Resource {
   isInternal: boolean;
   isRequired: boolean;
   isAiPinned: boolean;
+  isAiGenerated: boolean;
+  approvalStatus: "pending" | "approved" | "rejected";
+  reviewedById: string | null;
   version: number;
   createdAt: string;
   updatedAt: string;
