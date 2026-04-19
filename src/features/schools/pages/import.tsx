@@ -8,6 +8,9 @@ import { toast } from "sonner";
 import { Upload, FileSpreadsheet, CheckCircle2, AlertCircle, Loader2, X } from "lucide-react";
 import { useCustom } from "@refinedev/core";
 import { dataProvider } from "@/providers/data";
+import Papa from "papaparse";
+import { handleError, getCorrelationId } from "@/providers/utils/api-errors";
+import crypto from "node:crypto";
 
 /**
  * 🚀 ADMIN IMPORT PAGE
@@ -29,51 +32,47 @@ const AdminImportPage = () => {
         return;
       }
       setFile(selectedFile);
-      parseCSV(selectedFile);
-    }
-  };
-
-  const parseCSV = (file: File) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const text = e.target?.result as string;
-      const rows = text.split("\n").filter(row => row.trim());
-      if (rows.length < 2) {
-        toast.error("CSV file is empty or missing headers.");
-        return;
-      }
       
-      const headers = rows[0].split(",").map(h => h.trim());
-      
-      const parsedData = rows.slice(1).map(row => {
-        const values = row.split(",").map(v => v.trim());
-        const obj: any = {};
-        headers.forEach((header, i) => {
-          obj[header] = values[i];
-        });
-        return obj;
+      Papa.parse(selectedFile, {
+        header: true,
+        skipEmptyLines: true,
+        complete: (results) => {
+          if (results.data.length === 0) {
+            toast.error("CSV file is empty or missing data.");
+            return;
+          }
+          setData(results.data);
+        },
+        error: (error) => {
+          toast.error(`CSV Parsing Error: ${error.message}`);
+        }
       });
-      
-      setData(parsedData);
-    };
-    reader.readAsText(file);
+    }
   };
 
   const handleImport = async () => {
     if (data.length === 0) return;
     
+    const correlationId = `import-${crypto.randomUUID()}`;
     setIsImporting(true);
+    
     try {
       const { data: responseData } = await dataProvider.custom!({
         url: "/admin/import",
         method: "post",
         payload: { rows: data },
+        headers: {
+          "x-correlation-id": correlationId,
+        },
       });
       
       setResult(responseData);
       toast.success(t("resources.admin-import.success", { defaultValue: "Onboarding complete!" }));
     } catch (error: any) {
-      toast.error(error?.message || t("resources.admin-import.failed", { defaultValue: "Onboarding partially failed." }));
+      const apiError = await handleError(error);
+      toast.error(apiError.message || t("resources.admin-import.failed", { defaultValue: "Onboarding partially failed." }), {
+        description: `Trace ID: ${getCorrelationId(error) || correlationId}`,
+      });
     } finally {
       setIsImporting(false);
     }

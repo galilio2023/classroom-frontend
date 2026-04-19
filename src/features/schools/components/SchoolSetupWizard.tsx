@@ -7,13 +7,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useUpdate, useCreate } from "@refinedev/core";
 import { toast } from "sonner";
-import { Loader2, Rocket, Paintbrush, Building2, CheckCircle2 } from "lucide-react";
+import { Rocket, Paintbrush, Building2, CheckCircle2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+
+// Sub-components (Deconstructed for maintainability)
+import { StepBasic } from "./setup/StepBasic";
+import { StepBranding } from "./setup/StepBranding";
+import { StepDepartments } from "./setup/StepDepartments";
+import { StepCompleted } from "./setup/StepCompleted";
 
 interface SchoolSetupWizardProps {
   school: any;
@@ -49,6 +52,10 @@ export const SchoolSetupWizard = ({ school, onComplete }: SchoolSetupWizardProps
   };
 
   const handleSaveBasic = () => {
+    if (!formData.name.trim() || !formData.slug.trim()) {
+      toast.error("School name and slug are required.");
+      return;
+    }
     updateSchool(
       {
         resource: "schools",
@@ -115,29 +122,12 @@ export const SchoolSetupWizard = ({ school, onComplete }: SchoolSetupWizardProps
       title: t("schools.setup.steps.basic"),
       icon: Building2,
       content: (
-        <div className="space-y-4 pt-4">
-          <div className="space-y-2 text-start">
-            <Label>{t("schools.setup.basic.schoolName")}</Label>
-            <Input
-              value={formData.name}
-              onChange={(e) => setData({ ...formData, name: e.target.value })}
-              placeholder="e.g. Tablawy University"
-            />
-          </div>
-          <div className="space-y-2 text-start">
-            <Label>{t("schools.setup.basic.schoolSlug")}</Label>
-            <Input
-              value={formData.slug}
-              onChange={(e) => setData({ ...formData, slug: e.target.value })}
-              placeholder="tablawy-uni"
-            />
-            <p className="text-[10px] text-muted-foreground">{t("schools.setup.basic.schoolSlugHint")}</p>
-          </div>
-          <Button onClick={handleSaveBasic} disabled={isUpdating} className="w-full mt-6 bg-indigo-600 hover:bg-indigo-700 text-white font-bold">
-            {isUpdating ? <Loader2 className="animate-spin mr-2" /> : null}
-            {t("buttons.continue")}
-          </Button>
-        </div>
+        <StepBasic 
+          formData={formData} 
+          setData={(data) => setData({ ...formData, ...data })}
+          onSave={handleSaveBasic}
+          isUpdating={isUpdating}
+        />
       ),
     },
     {
@@ -145,57 +135,12 @@ export const SchoolSetupWizard = ({ school, onComplete }: SchoolSetupWizardProps
       title: t("schools.setup.steps.branding"),
       icon: Paintbrush,
       content: (
-        <div className="space-y-4 pt-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2 text-start">
-              <Label>{t("schools.setup.branding.primaryColor")}</Label>
-              <div className="flex gap-2">
-                <Input
-                  type="color"
-                  className="w-12 h-10 p-1"
-                  value={formData.primaryColor}
-                  onChange={(e) => setData({ ...formData, primaryColor: e.target.value })}
-                />
-                <Input
-                  value={formData.primaryColor}
-                  onChange={(e) => setData({ ...formData, primaryColor: e.target.value })}
-                />
-              </div>
-            </div>
-            <div className="space-y-2 text-start">
-              <Label>{t("schools.setup.branding.secondaryColor")}</Label>
-              <div className="flex gap-2">
-                <Input
-                  type="color"
-                  className="w-12 h-10 p-1"
-                  value={formData.secondaryColor}
-                  onChange={(e) => setData({ ...formData, secondaryColor: e.target.value })}
-                />
-                <Input
-                  value={formData.secondaryColor}
-                  onChange={(e) => setData({ ...formData, secondaryColor: e.target.value })}
-                />
-              </div>
-            </div>
-          </div>
-          <div className="space-y-2 text-start">
-            <Label>{t("schools.setup.branding.logoUrl")}</Label>
-            <Input
-              value={formData.logoUrl}
-              onChange={(e) => setData({ ...formData, logoUrl: e.target.value })}
-              placeholder="https://..."
-            />
-          </div>
-          <div className="p-4 rounded-xl border border-dashed mt-4 flex items-center justify-center gap-4" style={{ borderColor: formData.primaryColor }}>
-             <div className="w-12 h-12 rounded-lg" style={{ backgroundColor: formData.primaryColor }} />
-             <div className="w-12 h-12 rounded-lg" style={{ backgroundColor: formData.secondaryColor }} />
-             <span className="text-xs font-bold uppercase tracking-widest">{t("schools.setup.branding.preview")}</span>
-          </div>
-          <Button onClick={handleSaveBranding} disabled={isUpdating} className="w-full mt-6 bg-indigo-600 hover:bg-indigo-700 text-white font-bold">
-            {isUpdating ? <Loader2 className="animate-spin mr-2" /> : null}
-            {t("buttons.continue")}
-          </Button>
-        </div>
+        <StepBranding
+          formData={formData}
+          setData={(data) => setData({ ...formData, ...data })}
+          onSave={handleSaveBranding}
+          isUpdating={isUpdating}
+        />
       ),
     },
     {
@@ -203,46 +148,20 @@ export const SchoolSetupWizard = ({ school, onComplete }: SchoolSetupWizardProps
       title: t("schools.setup.steps.departments"),
       icon: Rocket,
       content: (
-        <div className="space-y-4 pt-4 text-start">
-          <div className="space-y-2">
-            <Label>{t("schools.setup.departments.deptName")}</Label>
-            <div className="flex gap-2">
-              <Input
-                value={formData.initialDept}
-                onChange={(e) => setData({ ...formData, initialDept: e.target.value })}
-                placeholder="e.g. Faculty of Science"
-              />
-              <Button onClick={handleAddDept} disabled={isCreatingDept} variant="outline">
-                {isCreatingDept ? <Loader2 className="animate-spin" /> : t("schools.setup.departments.addDept")}
-              </Button>
-            </div>
-          </div>
-          <div className="pt-8">
-            <Button onClick={handleNext} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold">
-              {t("buttons.continue")}
-            </Button>
-          </div>
-        </div>
+        <StepDepartments
+          formData={formData}
+          setData={(data) => setData({ ...formData, ...data })}
+          onAdd={handleAddDept}
+          onNext={handleNext}
+          isCreatingDept={isCreatingDept}
+        />
       ),
     },
     {
       id: 4,
       title: t("schools.setup.steps.completed"),
       icon: CheckCircle2,
-      content: (
-        <div className="text-center space-y-6 pt-8">
-          <div className="mx-auto w-20 h-20 rounded-full bg-emerald-100 flex items-center justify-center">
-            <CheckCircle2 className="w-10 h-10 text-emerald-600" />
-          </div>
-          <div className="space-y-2">
-            <h3 className="text-xl font-black">{t("schools.setup.completed.title")}</h3>
-            <p className="text-sm text-muted-foreground">{t("schools.setup.completed.desc")}</p>
-          </div>
-          <Button onClick={onComplete} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold h-12 rounded-xl">
-             {t("schools.setup.completed.cta")}
-          </Button>
-        </div>
-      ),
+      content: <StepCompleted onComplete={onComplete} />,
     },
   ];
 

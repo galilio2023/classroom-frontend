@@ -9,6 +9,7 @@ import axios from "axios";
 import { useTranslation } from "react-i18next";
 import { validateEgyptianID, normalizeArabicNumerals } from "@/lib/validators";
 import { handleError, getCorrelationId } from "@/providers/utils/api-errors";
+import { SignUpPayload } from "@/types";
 
 export const useRegisterForm = () => {
   const { t } = useTranslation();
@@ -76,18 +77,16 @@ export const useRegisterForm = () => {
   const role = form.watch("role");
   const name = form.watch("name");
 
-  // 🛡️ TRACEABILITY: Shared headers for manual axios calls (Rule 8)
-  const authHeaders = {
-    "x-correlation-id": `client-${crypto.randomUUID()}`,
-  };
-
   const generateAIBio = async () => {
+    const correlationId = `bio-${crypto.randomUUID()}`;
+    const headers = { "x-correlation-id": correlationId };
+    
     setIsGeneratingBio(true);
     try {
       const response = await axios.post(
         "/api/ai/generate-bio",
         { name, role },
-        { headers: authHeaders }
+        { headers }
       );
       form.setValue("bio", response.data.bio);
       toast.success(t("auth.register.aiBioSuccess", "AI Bio generated successfully!"));
@@ -154,46 +153,16 @@ export const useRegisterForm = () => {
 
   const prevStep = () => setStep((prev) => prev - 1);
 
-  const sendWhatsAppOtp = async () => {
-    const phoneNumber = normalizeArabicNumerals(form.getValues("phoneNumber"));
-    setIsSendingOtp(true);
-    try {
-      await axios.post("/api/auth/otp/send", { phoneNumber }, { headers: authHeaders });
-      toast.success(t("auth.otp.sent", "OTP sent via WhatsApp!"));
-    } catch (error) {
-      toast.error(t("auth.otp.sentError", "Failed to send OTP. Please try again."), {
-        description: `Trace ID: ${getCorrelationId(error)}. ${t("common.supportInfo", "Please contact support for assistance.")}`,
-      });
-    } finally {
-      setIsSendingOtp(false);
-    }
-  };
+  const performFinalSubmit = (values: SignUpPayload) => {
+    const correlationId = `reg-${crypto.randomUUID()}`;
+    const headers = { "x-correlation-id": correlationId };
 
-  const verifyOtp = async (code: string) => {
-    const phoneNumber = normalizeArabicNumerals(form.getValues("phoneNumber"));
-    setIsVerifyingOtp(true);
-    try {
-      const response = await axios.post(
-        "/api/auth/otp/verify",
-        { phoneNumber, code },
-        { headers: authHeaders }
-      );
-      if (response.data.data.verified) {
-        handleFinalSubmit();
-      }
-    } catch (error) {
-      toast.error(t("auth.otp.invalid", "Invalid verification code."), {
-        description: `Trace ID: ${getCorrelationId(error)}. ${t("common.supportInfo", "Please contact support for assistance.")}`,
-      });
-    } finally {
-      setIsVerifyingOtp(false);
-    }
-  };
-
-  const handleFinalSubmit = form.handleSubmit((values) => {
-    // 🛡️ NORMALIZATION: Automatically handled by Zod .transform() in the schema
     register(
-      { ...values, inviteCode },
+      { 
+        resource: "users",
+        values: { ...values, inviteCode },
+        meta: { headers }
+      },
       {
         onSuccess: () => {
           setIsSuccess(true);
@@ -207,12 +176,65 @@ export const useRegisterForm = () => {
         onError: async (err) => {
           const error = await handleError(err as any);
           toast.error(error.message, {
-            description: `Trace ID: ${getCorrelationId(err)}. ${t("common.supportInfo", "Please contact support for assistance.")}`,
+            description: `Trace ID: ${getCorrelationId(err) || correlationId}. ${t("common.supportInfo", "Please contact support for assistance.")}`,
           });
           setStep(1); // Reset to first step on hard error
         },
       }
     );
+  };
+
+  const sendWhatsAppOtp = async () => {
+    const phoneNumber = normalizeArabicNumerals(form.getValues("phoneNumber"));
+    const correlationId = `otp-send-${crypto.randomUUID()}`;
+    const headers = { "x-correlation-id": correlationId };
+    
+    setIsSendingOtp(true);
+    try {
+      await axios.post("/api/auth/otp/send", { phoneNumber }, { headers });
+      toast.success(t("auth.otp.sent", "OTP sent via WhatsApp!"));
+    } catch (error) {
+      const apiError = await handleError(error);
+      toast.error(apiError.message, {
+        description: `Trace ID: ${getCorrelationId(error) || correlationId}. ${t("common.supportInfo", "Please contact support for assistance.")}`,
+      });
+    } finally {
+      setIsSendingOtp(false);
+    }
+  };
+
+  const verifyOtp = async (code: string) => {
+    const phoneNumber = normalizeArabicNumerals(form.getValues("phoneNumber"));
+    const correlationId = `otp-verify-${crypto.randomUUID()}`;
+    const headers = { "x-correlation-id": correlationId };
+    
+    setIsVerifyingOtp(true);
+    try {
+      const response = await axios.post(
+        "/api/auth/otp/verify",
+        { phoneNumber, code },
+        { headers }
+      );
+      if (response.data.data.verified) {
+        performFinalSubmit(form.getValues());
+      }
+    } catch (error) {
+      const apiError = await handleError(error);
+      toast.error(apiError.message, {
+        description: `Trace ID: ${getCorrelationId(error) || correlationId}. ${t("common.supportInfo", "Please contact support for assistance.")}`,
+      });
+    } finally {
+      setIsVerifyingOtp(false);
+    }
+  };
+
+  const handleFinalSubmit = form.handleSubmit((values) => {
+    // 🛡️ NORMALIZATION: Automatically handled by Zod .transform() in the schema
+    if (role === "student") {
+      setStep(4); // Move to OTP step
+      return;
+    }
+    performFinalSubmit(values);
   });
 
   return {

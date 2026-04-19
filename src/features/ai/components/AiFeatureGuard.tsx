@@ -49,41 +49,56 @@ export const AiFeatureGuard: React.FC<AiFeatureGuardProps> = ({
 
   const isAllowed = canAccess?.can ?? false;
 
-  // 🛡️ Guard logic
-  if (!isAiEnabled || !isAllowed || isQuotaExceeded) {
-    if (silent) return null;
-
-    if (fallback) return <>{fallback}</>;
-
-    let title = "AI Feature Restricted";
-    let description =
-      "Your current account role does not have permission to access interactive AI features.";
-    let icon = <Lock className="h-4 w-4" />;
-
+  const getGuardContent = () => {
     if (isQuotaExceeded) {
-      title = "Monthly Limit Reached";
-      icon = <BrainCircuit className="h-4 w-4" />;
-      description =
-        "You have exhausted your AI token quota for this month. Your limit will reset on the 1st of next month.";
-    } else if (isDegraded) {
-      title = "AI System Offline";
-      // 🛡️ VISUAL IDENTITY: Rule 7 - Use Sparkles/BrainCircuit even in degraded state
-      icon = <Sparkles className="h-4 w-4 animate-pulse text-primary" />;
-      description = retryAfter
-        ? `The AI co-teacher is currently cooling down due to high traffic. Estimated return in ${Math.ceil(retryAfter / 60)} minutes.`
-        : "The AI system is temporarily unavailable due to upstream provider maintenance. Please try again later.";
-    } else if (!isAiEnabled) {
-      title = "AI Features Disabled";
-      icon = <Clock className="h-4 w-4" />;
-      description =
-        "Tablawy OS AI features are currently disabled by the administrator for this institution.";
+      return {
+        title: "Monthly Limit Reached",
+        icon: <BrainCircuit className="h-4 w-4" />,
+        description: "You have exhausted your AI token quota for this month. Your limit will reset on the 1st of next month.",
+      };
     }
+    
+    if (isDegraded) {
+      return {
+        title: "AI System Offline",
+        // 🛡️ VISUAL IDENTITY: Rule 7 - Use Sparkles/BrainCircuit even in degraded state
+        icon: <Sparkles className="h-4 w-4 animate-pulse text-primary" />,
+        description: retryAfter
+          ? `The AI co-teacher is currently cooling down due to high traffic. Estimated return in ${Math.ceil(retryAfter / 60)} minutes.`
+          : "The AI system is temporarily unavailable due to upstream provider maintenance. Please try again later.",
+      };
+    }
+
+    if (!isAiEnabled) {
+      return {
+        title: "AI Features Disabled",
+        icon: <Clock className="h-4 w-4" />,
+        description: "Tablawy OS AI features are currently disabled by the administrator for this institution.",
+      };
+    }
+
+    if (!isAllowed) {
+      return {
+        title: "AI Feature Restricted",
+        icon: <Lock className="h-4 w-4" />,
+        description: "Your current account role does not have permission to access interactive AI features.",
+      };
+    }
+
+    return null;
+  };
+
+  // 🛡️ Guard logic
+  const guardContent = getGuardContent();
+  if (guardContent) {
+    if (silent) return null;
+    if (fallback) return <>{fallback}</>;
 
     return (
       <Alert variant="destructive" className="border-dashed border-2">
-        {icon}
-        <AlertTitle>{title}</AlertTitle>
-        <AlertDescription>{description}</AlertDescription>
+        {guardContent.icon}
+        <AlertTitle>{guardContent.title}</AlertTitle>
+        <AlertDescription>{guardContent.description}</AlertDescription>
       </Alert>
     );
   }

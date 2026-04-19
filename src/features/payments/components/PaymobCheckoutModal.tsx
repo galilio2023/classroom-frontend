@@ -71,6 +71,7 @@ export const PaymobCheckoutModal: React.FC<PaymobCheckoutModalProps> = ({
                     className="w-full h-full border-none"
                     title="Paymob Checkout"
                     allow="payment"
+                    sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
                   />
                 ) : (
                   <div className="flex flex-col items-center justify-center h-full space-y-4">

@@ -32,13 +32,24 @@ export const useJobs = () => {
 
 const STORAGE_KEY = "classroom_active_jobs";
 
+// 🛡️ POLLING CONFIGURATION (Mandate M-008)
+const POLLING_CONFIG = {
+  INITIAL_DELAY: 10000,   // 10s
+  MAX_DELAY: 120000,      // 2m
+  IDLE_POLL_INTERVAL: 60000, // 1m when tab is hidden
+  JITTER_FACTOR: 0.1,     // 10%
+};
+
 export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [jobs, setJobs] = useState<BackgroundJob[]>([]);
-  const [syncDelay, setSyncDelay] = useState(10000); // 🛡️ RESILIENCE: Initial 10s poll for 2G/3G stability
-  const [pollTick, setPollTick] = useState(0); // 🚀 UX: "Wake up" tick to trigger immediate poll
+  const [syncDelay, setSyncDelay] = useState(POLLING_CONFIG.INITIAL_DELAY);
+  const [pollTick, setPollTick] = useState(0);
+  const [isVisible, setIsVisible] = useState(true);
+  
   const jobsRef = useRef<BackgroundJob[]>([]);
-  const { open } = useNotification();
+  const timeoutIdRef = useRef<NodeJS.Timeout | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
+  const { open } = useNotification();
 
   // Sync ref with state
   useEffect(() => {
@@ -172,25 +183,23 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const pollRef = useRef<(() => Promise<void>) | null>(null);
 
   useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
-    let isVisible = document.visibilityState === "visible";
-
     const handleVisibilityChange = () => {
-      isVisible = document.visibilityState === "visible";
+      setIsVisible(document.visibilityState === "visible");
       // If returning to tab, trigger an immediate check
-      if (isVisible) setPollTick((prev) => prev + 1);
+      if (document.visibilityState === "visible") setPollTick((prev) => prev + 1);
     };
 
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
-    const poll = async () => {
-      // 🛡️ RACE CONDITION PREVENTION: Ensure only one poll runs at a time
-      if (timeoutId) clearTimeout(timeoutId);
+    const scheduleNext = (delay: number) => {
+      if (timeoutIdRef.current) clearTimeout(timeoutIdRef.current);
+      timeoutIdRef.current = setTimeout(poll, delay);
+    };
 
+    const poll = async () => {
       // 🛡️ RULE 6: Tab Visibility Safety. Pause polling when tab is hidden to save battery/data.
       if (!isVisible) {
-        // Slow down check but don't stop completely, just wait for visibility change
-        timeoutId = setTimeout(pollRef.current!, 60000);
+        scheduleNext(POLLING_CONFIG.IDLE_POLL_INTERVAL);
         return;
       }
 
@@ -200,13 +209,15 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
         // 🛡️ RESILIENCE: Jittered Exponential backoff (Mandate M-008)
         setSyncDelay((prev) => {
-          const nextBase = Math.min(prev * 2, 120000);
-          const jitter = Math.random() * (nextBase * 0.1);
-          return nextBase + jitter;
+          const nextBase = Math.min(prev * 2, POLLING_CONFIG.MAX_DELAY);
+          const jitter = Math.random() * (nextBase * POLLING_CONFIG.JITTER_FACTOR);
+          const nextDelay = nextBase + jitter;
+          scheduleNext(nextDelay);
+          return nextDelay;
         });
       } else {
         // 🛡️ PERFORMANCE: Reset delay when pipe is empty
-        setSyncDelay(10000);
+        setSyncDelay(POLLING_CONFIG.INITIAL_DELAY);
       }
     };
 
@@ -214,15 +225,15 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     const activeJobsCount = jobsRef.current.filter((j) => j.status === "processing").length;
     if (activeJobsCount > 0) {
-      timeoutId = setTimeout(poll, syncDelay);
+      scheduleNext(syncDelay);
     }
 
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
-      if (timeoutId) clearTimeout(timeoutId);
+      if (timeoutIdRef.current) clearTimeout(timeoutIdRef.current);
       if (abortControllerRef.current) abortControllerRef.current.abort();
     };
-  }, [syncJobs, syncDelay, pollTick]);
+  }, [syncJobs, isVisible, pollTick]);
 
   const removeJob = (id: string) => {
     setJobs((prev) => prev.filter((j) => j.id !== id && j.metadata?.jobId !== id));
