@@ -33,6 +33,29 @@ export const useRegisterForm = () => {
   const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
   const [isSendingOtp, setIsSendingOtp] = useState(false);
 
+  // 🛡️ RURAL RESILIENCE: Persist partial state to sessionStorage (Mandate Rule #4)
+  useEffect(() => {
+    const saved = sessionStorage.getItem("registration_pending_values");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        setValidatedValues(parsed);
+        // If we have saved values, we were likely on the OTP step
+        setStep(REGISTER_STEPS.OTP_VERIFY);
+      } catch (e) {
+        sessionStorage.removeItem("registration_pending_values");
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (validatedValues) {
+      sessionStorage.setItem("registration_pending_values", JSON.stringify(validatedValues));
+    } else {
+      sessionStorage.removeItem("registration_pending_values");
+    }
+  }, [validatedValues]);
+
   const registerSchema = z.object({
     name: z.string().min(3, t("auth.register.nameMin", "Name must be at least 3 characters")),
     email: z.string().email(t("auth.register.emailInvalid", "Invalid email address")),

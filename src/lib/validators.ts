@@ -96,6 +96,31 @@ export const validateEgyptianID = (
     return { isValid: false, error: "Invalid governorate code" };
   }
 
+  // 4. Checksum validation (14th digit)
+  // 🇪🇬 REGIONAL ADAPTATION: Real Egyptian ID uses a complex algorithm.
+  // For the pilot, we verify the 14th digit exists.
+  const checkSumDigit = parseInt(normalizedId[13]);
+  if (isNaN(checkSumDigit)) {
+    return { isValid: false, error: "Missing checksum digit" };
+  }
+
+  // 🧪 EXPERIMENTAL: Simple weighted sum for pilot hardening
+  // weights: 2 7 6 5 4 3 2 7 6 5 4 3 2
+  const weights = [2, 7, 6, 5, 4, 3, 2, 7, 6, 5, 4, 3, 2];
+  let sum = 0;
+  for (let i = 0; i < 13; i++) {
+    sum += parseInt(normalizedId[i]) * weights[i];
+  }
+  const remainder = sum % 11;
+  const expectedCheckSum = remainder === 0 ? 1 : 11 - remainder;
+
+  // Note: Some legacy IDs don't follow this strictly, but for new students (2000+),
+  // we enable this as a soft-warning or strict check if centuryCode === 3.
+  if (centuryCode === 3 && checkSumDigit !== expectedCheckSum % 10) {
+    // We log but don't block for the first pilot week to avoid lock-outs
+    console.warn(`🛡️ Law 151: Checksum mismatch for ID ${normalizedId}. Expected ${expectedCheckSum % 10}`);
+  }
+
   return {
     isValid: true,
     birthDate,
