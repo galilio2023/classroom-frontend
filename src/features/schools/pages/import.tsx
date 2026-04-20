@@ -61,10 +61,23 @@ const AdminImportPage = () => {
             return;
           }
 
+          // 🛡️ SECURITY: CSV Injection Protection
+          // Strips leading =, @, +, - from all cells to prevent command execution in Excel/Sheets.
+          const sanitizeCsvValue = (val: any) => {
+            if (typeof val !== "string") return val;
+            return val.replace(/^([=@+-])/, "'$1"); // Add a single quote to neutralize
+          };
+
           // 🛡️ VALIDATION: Mandate Rule 4 - performance/security
           const errors: string[] = [];
           const validatedData = results.data.map((row: any, index) => {
-            const res = importRowSchema.safeParse(row);
+            // Sanitize all fields in the row
+            const sanitizedRow: any = {};
+            for (const key in row) {
+              sanitizedRow[key] = sanitizeCsvValue(row[key]);
+            }
+
+            const res = importRowSchema.safeParse(sanitizedRow);
             if (!res.success) {
               errors.push(`Row ${index + 2}: ${res.error.errors.map((e) => e.message).join(", ")}`);
               return null;

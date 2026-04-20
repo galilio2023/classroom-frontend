@@ -228,7 +228,12 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       open?.({
         type: "error",
         message: "AI Sync Error",
-        description: `${error.message}. Retrying in ${POLLING_CONFIG.RETRY_INTERVAL / 1000}s...`,
+        description: (
+          <div className="flex flex-col gap-2">
+            <p>{error.message}</p>
+            <p className="text-[10px] font-mono opacity-60">Trace: {error.correlationId || "N/A"}</p>
+          </div>
+        ),
       });
 
       // Retry after a safe interval even if it crashed
