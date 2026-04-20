@@ -7,11 +7,12 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import axios from "axios";
 import { useTranslation } from "react-i18next";
-import { validateEgyptianID, normalizeArabicNumerals, egyptNumericSchema } from "@/lib/validators";
+import { validateEgyptianID, normalizeArabicNumerals } from "@/lib/validators";
 import { handleError, getCorrelationId } from "@/providers/utils/api-errors";
 import { SignUpPayload } from "@/types";
 import { getUUID } from "@/lib/utils";
 import { AI_API, BASE_URL } from "@/constants/api";
+import { getRegisterSchema, type RegisterFormValues } from "../schemas/registration-schema";
 
 export const REGISTER_STEPS = {
   BASIC_INFO: 1,
@@ -70,32 +71,7 @@ export const useRegisterForm = () => {
     }
   }, [validatedValues, step]);
 
-  const registerSchema = z.object({
-    name: z.string().min(3, t("auth.register.nameMin", "Name must be at least 3 characters")),
-    email: z.string().email(t("auth.register.emailInvalid", "Invalid email address")),
-    password: z
-      .string()
-      .min(8, t("auth.register.passwordMin", "Password must be at least 8 characters")),
-    role: z.enum(["student", "teacher", "parent"]),
-    phoneNumber: egyptNumericSchema.pipe(
-      z.string().min(10, t("auth.register.phoneRequired", "Phone number is required"))
-    ),
-    nationalId: egyptNumericSchema.pipe(
-      z.string().length(14, t("auth.register.nationalIdLength", "National ID must be 14 digits"))
-    ),
-    bio: z.string().optional(),
-    dateOfBirth: z.string().optional(),
-    parentName: z.string().optional(),
-    parentPhone: egyptNumericSchema.optional().or(z.string().length(0)).or(z.null()),
-    childInviteCode: z.string().optional(),
-    verificationDocumentUrl: z.string().optional(),
-    verificationDocumentCldPubId: z.string().optional(),
-    hasAiConsent: z.boolean().refine((val) => val === true, {
-      message: t("auth.register.consentRequired", "AI Consent is required"),
-    }),
-  });
-
-  type RegisterFormValues = z.infer<typeof registerSchema>;
+  const registerSchema = getRegisterSchema(t);
 
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),

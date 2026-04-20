@@ -207,8 +207,8 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setSyncDelay((prev) => {
           const nextBase = Math.min(prev * 2, POLLING_CONFIG.MAX_DELAY);
           const nextDelay = getJitteredDelay(nextBase, POLLING_CONFIG.JITTER_FACTOR);
-          // 🚀 PERFORMANCE: Ensure delay never drops below 1s to prevent state-update-hell (Review #1)
-          const flooredDelay = Math.max(1000, nextDelay);
+          // 🚀 PERFORMANCE: Ensure delay doesn't drop below INITIAL_DELAY (Review #1)
+          const flooredDelay = Math.max(POLLING_CONFIG.INITIAL_DELAY, nextDelay);
           scheduleNext(flooredDelay);
           return flooredDelay;
         });
@@ -221,10 +221,11 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const error = await handleError(pollErr);
       console.error("Critical: AI Polling loop encountered an error:", error);
 
+      const retrySeconds = Math.round(POLLING_CONFIG.MAX_DELAY / 2000);
       open?.({
         type: "error",
         message: "AI Sync Error",
-        description: `${error.message}. retrying in ${POLLING_CONFIG.MAX_DELAY / 2000}s...`,
+        description: `${error.message}. Retrying in ${retrySeconds}s...`,
       });
 
       // Retry after a safe interval even if it crashed
