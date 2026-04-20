@@ -182,12 +182,47 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       isSyncingRef.current = false;
     }
-  }, [updateJob, open]);
+    }, [updateJob, open]);
+
+    const scheduleNext = useCallback((delay: number) => {
+    if (timeoutIdRef.current) clearTimeout(timeoutIdRef.current);
+    timeoutIdRef.current = setTimeout(() => {
+      setPollTick((prev) => prev + 1);
+    }, delay);
+    }, []);
+
+    const poll = useCallback(async () => {
+    try {
+      // 🛡️ RULE 6: Tab Visibility Safety. Pause polling when tab is hidden to save battery/data.
+      if (!isVisible) {
+        scheduleNext(POLLING_CONFIG.IDLE_POLL_INTERVAL);
+        return;
+      }
+
+      const activeAiJobs = jobsRef.current.filter((j) => j.status === "processing");
+      if (activeAiJobs.length > 0) {
+        await syncJobs();
+
+        // 🛡️ RESILIENCE: Jittered Exponential backoff (Mandate M-008)
+        setSyncDelay((prev) => {
+          const nextBase = Math.min(prev * 2, POLLING_CONFIG.MAX_DELAY);
+          const nextDelay = getJitteredDelay(nextBase, POLLING_CONFIG.JITTER_FACTOR);
+          scheduleNext(nextDelay);
+          return nextDelay;
+        });
+      } else {
+        // 🛡️ PERFORMANCE: Reset delay when pipe is empty
+        setSyncDelay(POLLING_CONFIG.INITIAL_DELAY);
+      }
+    } catch (pollErr) {
+      // 🛡️ ROBUSTNESS: Never allow the polling loop to die (Code Review #1)
+      console.error("Critical: AI Polling loop encountered an error:", pollErr);
+      // Retry after a safe interval even if it crashed
+      scheduleNext(POLLING_CONFIG.MAX_DELAY / 2);
+    }
+    }, [isVisible, syncJobs, scheduleNext]);
 
   useEffect(() => {
-    // 🛡️ RACE CONDITION PREVENTION: Ensure previous loops are killed immediately (Rule 6)
-    if (timeoutIdRef.current) clearTimeout(timeoutIdRef.current);
-
     const handleVisibilityChange = () => {
       setIsVisible(document.visibilityState === "visible");
       // If returning to tab, trigger an immediate check
@@ -195,54 +230,26 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
 
     document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, []);
 
-    const scheduleNext = (delay: number) => {
-      if (timeoutIdRef.current) clearTimeout(timeoutIdRef.current);
-      timeoutIdRef.current = setTimeout(poll, delay);
-    };
-
-    const poll = async () => {
-      try {
-        // 🛡️ RULE 6: Tab Visibility Safety. Pause polling when tab is hidden to save battery/data.
-        if (!isVisible) {
-          scheduleNext(POLLING_CONFIG.IDLE_POLL_INTERVAL);
-          return;
-        }
-
-        const activeAiJobs = jobsRef.current.filter((j) => j.status === "processing");
-        if (activeAiJobs.length > 0) {
-          await syncJobs();
-
-          // 🛡️ RESILIENCE: Jittered Exponential backoff (Mandate M-008)
-          setSyncDelay((prev) => {
-            const nextBase = Math.min(prev * 2, POLLING_CONFIG.MAX_DELAY);
-            const nextDelay = getJitteredDelay(nextBase, POLLING_CONFIG.JITTER_FACTOR);
-            scheduleNext(nextDelay);
-            return nextDelay;
-          });
-        } else {
-          // 🛡️ PERFORMANCE: Reset delay when pipe is empty
-          setSyncDelay(POLLING_CONFIG.INITIAL_DELAY);
-        }
-      } catch (pollErr) {
-        // 🛡️ ROBUSTNESS: Never allow the polling loop to die (Code Review #1)
-        console.error("Critical: AI Polling loop encountered an error:", pollErr);
-        // Retry after a safe interval even if it crashed
-        scheduleNext(POLLING_CONFIG.MAX_DELAY / 2);
-      }
-    };
+  useEffect(() => {
+    // 🛡️ RACE CONDITION PREVENTION: Ensure previous loops are killed immediately (Rule 6)
+    if (timeoutIdRef.current) clearTimeout(timeoutIdRef.current);
 
     const activeJobsCount = jobsRef.current.filter((j) => j.status === "processing").length;
     if (activeJobsCount > 0) {
-      scheduleNext(syncDelay);
+      // 🛡️ PERF: We use setPollTick to drive the next loop, so we don't call poll() directly here
+      // to avoid double-triggers. scheduleNext will handle the timing.
+      const timer = setTimeout(poll, syncDelay);
+      timeoutIdRef.current = timer;
     }
 
     return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
       if (timeoutIdRef.current) clearTimeout(timeoutIdRef.current);
       if (abortControllerRef.current) abortControllerRef.current.abort();
     };
-  }, [syncJobs, isVisible, pollTick]);
+  }, [pollTick, syncDelay, poll]);
 
   const removeJob = (id: string) => {
     setJobs((prev) => prev.filter((j) => j.id !== id && j.metadata?.jobId !== id));

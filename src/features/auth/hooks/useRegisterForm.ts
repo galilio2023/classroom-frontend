@@ -36,25 +36,36 @@ export const useRegisterForm = () => {
   // 🛡️ RURAL RESILIENCE: Persist partial state to sessionStorage (Mandate Rule #4)
   useEffect(() => {
     const saved = sessionStorage.getItem("registration_pending_values");
+    const savedStep = sessionStorage.getItem("registration_current_step");
+
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
         setValidatedValues(parsed);
-        // If we have saved values, we were likely on the OTP step
-        setStep(REGISTER_STEPS.OTP_VERIFY);
+
+        // 🛡️ SECURITY: Prevent step hijacking. Only restore step if we have minimal required data.
+        if (savedStep && parsed.phoneNumber) {
+          const stepNum = parseInt(savedStep, 10);
+          if (!isNaN(stepNum)) setStep(stepNum);
+        }
       } catch (e) {
         sessionStorage.removeItem("registration_pending_values");
+        sessionStorage.removeItem("registration_current_step");
       }
     }
   }, []);
 
   useEffect(() => {
     if (validatedValues) {
-      sessionStorage.setItem("registration_pending_values", JSON.stringify(validatedValues));
+      // 🛡️ SECURITY: Explicitly exclude sensitive data from sessionStorage
+      const { password, ...safeValues } = validatedValues;
+      sessionStorage.setItem("registration_pending_values", JSON.stringify(safeValues));
+      sessionStorage.setItem("registration_current_step", step.toString());
     } else {
       sessionStorage.removeItem("registration_pending_values");
+      sessionStorage.removeItem("registration_current_step");
     }
-  }, [validatedValues]);
+  }, [validatedValues, step]);
 
   const registerSchema = z.object({
     name: z.string().min(3, t("auth.register.nameMin", "Name must be at least 3 characters")),
@@ -152,8 +163,10 @@ export const useRegisterForm = () => {
       // 🛡️ NORMALIZATION: Immediate feedback (Mandate M-008)
       const currentPhone = normalizeArabicNumerals(form.getValues("phoneNumber"));
       const currentId = normalizeArabicNumerals(form.getValues("nationalId"));
-      form.setValue("phoneNumber", currentPhone);
-      form.setValue("nationalId", currentId);
+
+      // 🛡️ UI: Sync with validation state immediately
+      form.setValue("phoneNumber", currentPhone, { shouldValidate: true });
+      form.setValue("nationalId", currentId, { shouldValidate: true });
 
       fieldsToValidate = ["phoneNumber", "nationalId"];
       // Soft validation for Egyptian ID
