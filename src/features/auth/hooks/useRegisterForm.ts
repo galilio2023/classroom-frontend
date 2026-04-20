@@ -12,6 +12,13 @@ import { handleError, getCorrelationId } from "@/providers/utils/api-errors";
 import { SignUpPayload } from "@/types";
 import { getUUID } from "@/lib/utils";
 
+export const REGISTER_STEPS = {
+  BASIC_INFO: 1,
+  EGYPTIAN_ID: 2,
+  CONSENT: 3,
+  OTP_VERIFY: 4,
+} as const;
+
 export const useRegisterForm = () => {
   const { t } = useTranslation();
   const { mutate: register, isPending } = useRegister();
@@ -19,7 +26,7 @@ export const useRegisterForm = () => {
   const [searchParams] = useSearchParams();
   const inviteCode = searchParams.get("inviteCode");
 
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(REGISTER_STEPS.BASIC_INFO);
   const [isGeneratingBio, setIsGeneratingBio] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [validatedValues, setValidatedValues] = useState<SignUpPayload | null>(null);
@@ -116,9 +123,9 @@ export const useRegisterForm = () => {
 
   const nextStep = async () => {
     let fieldsToValidate: any[] = [];
-    if (step === 1) {
+    if (step === REGISTER_STEPS.BASIC_INFO) {
       fieldsToValidate = ["name", "email", "password", "role"];
-    } else if (step === 2) {
+    } else if (step === REGISTER_STEPS.EGYPTIAN_ID) {
       // 🛡️ NORMALIZATION: Immediate feedback (Mandate M-008)
       const currentPhone = normalizeArabicNumerals(form.getValues("phoneNumber"));
       const currentId = normalizeArabicNumerals(form.getValues("nationalId"));
@@ -133,20 +140,20 @@ export const useRegisterForm = () => {
         form.setError("nationalId", { message: validation.error });
         return;
       }
-    } else if (step === 3) {
+    } else if (step === REGISTER_STEPS.CONSENT) {
       fieldsToValidate = ["hasAiConsent"];
     }
 
     const isValid = await form.trigger(fieldsToValidate);
     if (isValid) {
-      if (step === 3) {
+      if (step === REGISTER_STEPS.CONSENT) {
         await sendWhatsAppOtp();
       }
-      setStep((prev) => prev + 1);
+      setStep((prev) => (prev + 1) as any);
     }
   };
 
-  const prevStep = () => setStep((prev) => prev - 1);
+  const prevStep = () => setStep((prev) => (prev - 1) as any);
 
   const performFinalSubmit = (values: SignUpPayload) => {
     const correlationId = `reg-${getUUID()}`;
@@ -229,7 +236,7 @@ export const useRegisterForm = () => {
     // 🛡️ NORMALIZATION: Automatically handled by Zod .transform() in the schema
     if (role === "student") {
       setValidatedValues(values as SignUpPayload);
-      setStep(4); // Move to OTP step
+      setStep(REGISTER_STEPS.OTP_VERIFY); // Move to OTP step
       return;
     }
     performFinalSubmit(values as SignUpPayload);

@@ -48,6 +48,7 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isVisible, setIsVisible] = useState(true);
 
   const jobsRef = useRef<BackgroundJob[]>([]);
+  const isSyncingRef = useRef(false);
   const timeoutIdRef = useRef<NodeJS.Timeout | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const { open } = useNotification();
@@ -103,8 +104,9 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // 🛡️ PERFORMANCE: updateJob and open are stable, so syncJobs will only be created once.
   const syncJobs = useCallback(async () => {
     const activeAiJobs = jobsRef.current.filter((j) => j.status === "processing");
-    if (activeAiJobs.length === 0) return;
+    if (activeAiJobs.length === 0 || isSyncingRef.current) return;
 
+    isSyncingRef.current = true;
     if (abortControllerRef.current) abortControllerRef.current.abort();
     const controller = new AbortController();
     abortControllerRef.current = controller;
@@ -178,6 +180,7 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (abortControllerRef.current === controller) {
         abortControllerRef.current = null;
       }
+      isSyncingRef.current = false;
     }
   }, [updateJob, open]);
 
