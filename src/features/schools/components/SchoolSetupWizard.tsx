@@ -7,7 +7,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useUpdate, useCreate } from "@refinedev/core";
+import { useUpdate, useCreate, useGetIdentity } from "@refinedev/core";
+import { User } from "@/types";
 import { toast } from "sonner";
 import { Rocket, Paintbrush, Building2, CheckCircle2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -30,6 +31,9 @@ interface SchoolSetupWizardProps {
  */
 export const SchoolSetupWizard = ({ school, onComplete }: SchoolSetupWizardProps) => {
   const { t } = useTranslation();
+  const { data: identity } = useGetIdentity<User>();
+  const isPrivateMode = identity?.planType === "basic";
+
   const [step, setStep] = useState(1);
   const [formData, setData] = useState({
     name: school?.name || "",
@@ -116,56 +120,76 @@ export const SchoolSetupWizard = ({ school, onComplete }: SchoolSetupWizardProps
     );
   };
 
-  const steps = [
-    {
-      id: 1,
-      title: t("schools.setup.steps.basic"),
-      icon: Building2,
-      content: (
-        <StepBasic
-          formData={formData}
-          setData={(data) => setData({ ...formData, ...data })}
-          onSave={handleSaveBasic}
-          isUpdating={isUpdating}
-        />
-      ),
-    },
-    {
-      id: 2,
-      title: t("schools.setup.steps.branding"),
-      icon: Paintbrush,
-      content: (
-        <StepBranding
-          formData={formData}
-          setData={(data) => setData({ ...formData, ...data })}
-          onSave={handleSaveBranding}
-          isUpdating={isUpdating}
-        />
-      ),
-    },
-    {
-      id: 3,
-      title: t("schools.setup.steps.departments"),
-      icon: Rocket,
-      content: (
-        <StepDepartments
-          formData={formData}
-          setData={(data) => setData({ ...formData, ...data })}
-          onAdd={handleAddDept}
-          onNext={handleNext}
-          isCreatingDept={isCreatingDept}
-        />
-      ),
-    },
-    {
-      id: 4,
-      title: t("schools.setup.steps.completed"),
-      icon: CheckCircle2,
-      content: <StepCompleted onComplete={onComplete} />,
-    },
-  ];
+  const steps = React.useMemo(() => {
+    const allSteps = [
+      {
+        id: 1,
+        title: t("schools.setup.steps.basic"),
+        icon: Building2,
+        content: (
+          <StepBasic
+            formData={formData}
+            setData={(data: any) => setData({ ...formData, ...data })}
+            onSave={handleSaveBasic}
+            isUpdating={isUpdating}
+          />
+        ),
+      },
+      {
+        id: 2,
+        title: t("schools.setup.steps.branding"),
+        icon: Paintbrush,
+        content: (
+          <StepBranding
+            formData={formData}
+            setData={(data: any) => setData({ ...formData, ...data })}
+            onSave={handleSaveBranding}
+            isUpdating={isUpdating}
+          />
+        ),
+      },
+      {
+        id: 3,
+        title: t("schools.setup.steps.departments"),
+        icon: Rocket,
+        content: (
+          <StepDepartments
+            formData={formData}
+            setData={(data: any) => setData({ ...formData, ...data })}
+            onAdd={handleAddDept}
+            onNext={handleNext}
+            isCreatingDept={isCreatingDept}
+          />
+        ),
+      },
+      {
+        id: 4,
+        title: t("schools.setup.steps.completed"),
+        icon: CheckCircle2,
+        content: <StepCompleted onComplete={onComplete} />,
+      },
+    ];
 
-  const currentStep = steps.find((s) => s.id === step)!;
+    // 🚀 MODE OPTIMIZATION: Private teachers skip institutional setup to save time (Mandate #B)
+    if (isPrivateMode) {
+      return [allSteps[0], allSteps[3]]; // Only Identity and Completion
+    }
+
+    return allSteps;
+  }, [isPrivateMode, formData, isUpdating, isCreatingDept, t]);
+
+  function handleNext() {
+    const currentIndex = steps.findIndex((s) => s.id === step);
+    if (currentIndex < steps.length - 1) {
+      setStep(steps[currentIndex + 1].id);
+    } else {
+      onComplete();
+    }
+  }
+
+  const currentStep = steps.find((s) => s.id === step) || steps[0];
+  const totalSteps = steps.length;
+  const currentStepNumber = steps.findIndex((s) => s.id === step) + 1;
 
   return (
     <Dialog open={true}>
@@ -174,7 +198,7 @@ export const SchoolSetupWizard = ({ school, onComplete }: SchoolSetupWizardProps
           <motion.div
             className="h-full bg-indigo-600"
             initial={{ width: "0%" }}
-            animate={{ width: `${(step / 4) * 100}%` }}
+            animate={{ width: `${(currentStepNumber / totalSteps) * 100}%` }}
           />
         </div>
         <div className="p-8">
@@ -184,14 +208,14 @@ export const SchoolSetupWizard = ({ school, onComplete }: SchoolSetupWizardProps
                 <currentStep.icon className="w-5 h-5" />
               </div>
               <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-                Step {step} of 4
+                Step {currentStepNumber} of {totalSteps}
               </span>
             </div>
             <DialogTitle className="text-2xl font-black tracking-tight">
               {currentStep.title}
             </DialogTitle>
             <DialogDescription className="text-slate-500 font-medium">
-              {step === 1 ? t("schools.setup.description") : null}
+              {currentStepNumber === 1 ? t("schools.setup.description") : null}
             </DialogDescription>
           </DialogHeader>
 

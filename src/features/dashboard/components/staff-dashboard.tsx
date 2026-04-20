@@ -1,4 +1,5 @@
 import { EngagementChart } from "./engagement-chart";
+import { JourneyFunnelChart } from "./journey-funnel-chart";
 import { PendingGradingList } from "./pending-grading-list";
 import { AtRiskStudents } from "./at-risk-students";
 import { PlatformOverview } from "./platform-overview";
@@ -168,6 +169,16 @@ export const StaffDashboard = ({ data, isLoading, onRefresh, show }: StaffDashbo
                 attendanceData={data.attendanceTrend ?? []}
                 gradeData={data.gradeDistribution ?? []}
               />
+            </motion.div>
+          </ErrorBoundary>
+
+          <ErrorBoundary>
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.12 }}
+            >
+              <JourneyFunnelChart data={data.journeyDistribution ?? []} />
             </motion.div>
           </ErrorBoundary>
 

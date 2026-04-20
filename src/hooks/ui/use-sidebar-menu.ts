@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { useMenu, useGetIdentity, type TreeMenuItem } from "@refinedev/core";
 import { User, UserRole } from "@/types";
+import { useCapabilities } from "@/features/users/hooks/use-capabilities";
 
 const ROLE_GROUP_PERMISSIONS: Record<string, UserRole[]> = {
   "groups.admin": [UserRole.ADMIN],
@@ -17,6 +18,7 @@ type GroupedMenuItems = Record<string, TreeMenuItem[]>;
 export const useSidebarMenu = () => {
   const { menuItems, selectedKey } = useMenu();
   const { data: identity, isLoading: identityLoading } = useGetIdentity<User>();
+  const { isInstitutional } = useCapabilities();
 
   const userRole = identity?.role;
   const isSidebarLoading = identityLoading && !identity;
@@ -29,7 +31,29 @@ export const useSidebarMenu = () => {
     menuItems.forEach((item) => {
       const groupName = item.meta?.group as string | undefined;
 
-      // 1. RBAC Group Check
+      // 1. Institutional Packaging (Phase B)
+      // Hide structural academic resources if not in School/Faculty Mode
+      if (!isInstitutional) {
+        // Teachers in Private Mode should not see structural admin tools
+        const institutionalOnly = [
+          "departments",
+          "subjects",
+          "academic-terms",
+          "admin-import",
+          "admin-approvals",
+          "ai-health-reports",
+          "ai-metrics",
+          "teacher-applications",
+          "ai-governance",
+          "activity-log",
+        ];
+        if (institutionalOnly.includes(item.name)) return;
+
+        // Hide administrative groups for non-admins in private mode
+        if (groupName === "groups.admin" && userRole !== UserRole.ADMIN) return;
+      }
+
+      // 2. RBAC Group Check
       if (groupName && userRole) {
         const allowedRoles = ROLE_GROUP_PERMISSIONS[groupName];
         if (allowedRoles && !allowedRoles.includes(userRole)) return;
@@ -82,7 +106,7 @@ export const useSidebarMenu = () => {
     });
 
     return groups;
-  }, [menuItems, userRole, isSidebarLoading]);
+  }, [menuItems, userRole, isSidebarLoading, isInstitutional]);
 
   return { groupedItems, selectedKey, isSidebarLoading };
 };

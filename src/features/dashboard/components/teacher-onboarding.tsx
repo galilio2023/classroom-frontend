@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 import { useNavigation } from "@refinedev/core";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
+import { useCapabilities } from "@/features/users/hooks/use-capabilities";
 
 interface OnboardingStep {
   id: string;
@@ -29,6 +30,7 @@ interface OnboardingStep {
 export const TeacherOnboarding = ({ stats }: { stats?: any }) => {
   const { t } = useTranslation();
   const { create, list } = useNavigation();
+  const { isPrivate } = useCapabilities();
   const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
@@ -53,15 +55,33 @@ export const TeacherOnboarding = ({ stats }: { stats?: any }) => {
       action: () => create("assignments"),
       completed: (stats?.totalAssignments || 0) > 0,
     },
-    {
+  ];
+
+  // 🚀 MODE-AWARE STEPS
+  if (isPrivate) {
+    // Private Teachers focus on AI Productivity
+    steps.push({
+      id: "ai-quiz",
+      title: t("dashboard.onboarding.teacher.steps.aiQuiz.title", "Generate AI Quiz"),
+      description: t(
+        "dashboard.onboarding.teacher.steps.aiQuiz.description",
+        "Save time by generating a quiz from your materials."
+      ),
+      icon: Sparkles,
+      action: () => list("ai-assistant"),
+      completed: (stats?.totalQuizzes || 0) > 0,
+    });
+  } else {
+    // Institutional Teachers focus on Student Management
+    steps.push({
       id: "invite-students",
       title: t("dashboard.onboarding.teacher.steps.inviteStudents.title"),
       description: t("dashboard.onboarding.teacher.steps.inviteStudents.description"),
       icon: UserPlus,
       action: () => list("users"),
       completed: (stats?.totalStudents || 0) > 0,
-    },
-  ];
+    });
+  }
 
   const completedSteps = steps.filter((step) => step.completed).length;
   const progress = (completedSteps / steps.length) * 100;

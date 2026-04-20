@@ -14,7 +14,15 @@ export const useCapabilities = () => {
 
   const role = identity?.role;
   const globalConfig = coreData?.globalConfig;
+  const school = coreData?.school;
   const isAiEnabled = globalConfig?.enableAiFeatures !== false;
+
+  // --- MODE PACKAGING (Phase A) ---
+  // Default to 'basic' (Private Teacher) if no school or plan specified.
+  const planType = school?.planType || "basic";
+  const isPrivateTeacherMode = planType === "basic";
+  const isFacultyMode = planType === "faculty";
+  const isSchoolMode = planType === "school";
 
   const isTeacher = role === UserRole.TEACHER;
   const isAdmin = role === UserRole.ADMIN;
@@ -25,6 +33,15 @@ export const useCapabilities = () => {
   return {
     identity,
     isLoading: isIdentityLoading || isConfigLoading,
+    school,
+
+    // --- MODE CAPABILITIES ---
+    currentMode: isSchoolMode ? "school" : isFacultyMode ? "faculty" : "private",
+    isPrivateTeacherMode,
+    isFacultyMode,
+    isSchoolMode,
+    isInstitutional: !isPrivateTeacherMode,
+    isPrivate: isPrivateTeacherMode,
 
     // --- IDENTITY CAPABILITIES ---
     isStudent,
@@ -43,8 +60,14 @@ export const useCapabilities = () => {
     canViewAnalytics: isStaff || isAdmin,
     canCreateSubjects: isTeacher || isAdmin,
 
+    // --- INSTITUTIONAL CAPABILITIES (Faculty/School Mode) ---
+    canManageDepartments: (isFacultyMode || isSchoolMode) && isAdmin,
+    canViewInstitutionalAudit: isSchoolMode && isAdmin,
+    canAccessPrincipalDashboard: isSchoolMode && isAdmin,
+    canManageSharedCurriculum: isFacultyMode || isSchoolMode,
+
     // --- PARENTAL CAPABILITIES ---
-    canViewChildProgress: isParent || isAdmin,
+    canViewChildProgress: isParent || isAdmin || (isSchoolMode && isTeacher),
 
     // --- STUDENT CAPABILITIES ---
     canSubmitAssignments: isStudent,
@@ -54,5 +77,6 @@ export const useCapabilities = () => {
     // --- SYSTEM CAPABILITIES ---
     canAccessAdminPanel: isAdmin,
     canManageSettings: isAdmin,
+    canConfigureBranding: isSchoolMode && isAdmin,
   };
 };

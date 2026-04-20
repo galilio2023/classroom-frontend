@@ -60,9 +60,12 @@ interface SubjectListItem extends Omit<Subject, "department"> {
   department?: Department;
 }
 
+import { useCapabilities } from "@/features/users/hooks/use-capabilities";
+
 const SubjectsList = () => {
   const { t, i18n } = useTranslation();
   const isAr = i18n.language === "ar";
+  const { isInstitutional } = useCapabilities();
 
   usePageTitle(t("subjects.title"));
   const { data: identity } = useGetIdentity<User>();
@@ -255,24 +258,26 @@ const SubjectsList = () => {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <div className="flex flex-wrap items-center gap-2 bg-background/50 px-3 py-1 rounded-2xl border border-border/40">
-              <Filter className="h-3.5 w-3.5 text-muted-foreground/60" />
-              <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
-                <SelectTrigger className="w-[180px] border-none h-10 focus:ring-0 shadow-none font-bold text-[10px] uppercase tracking-wider bg-transparent">
-                  <SelectValue placeholder={t("departments.filters.allDepartments")} />
-                </SelectTrigger>
-                <SelectContent className="rounded-2xl bg-white dark:bg-[#09090b] opacity-100 backdrop-blur-none border border-border/50 shadow-2xl">
-                  <SelectItem value="all" className="font-bold">
-                    {t("departments.filters.allDepartments")}
-                  </SelectItem>
-                  {departmentOptions.map(({ value, label }) => (
-                    <SelectItem value={String(value)} key={value} className="font-bold">
-                      {label}
+            {isInstitutional && (
+              <div className="flex flex-wrap items-center gap-2 bg-background/50 px-3 py-1 rounded-2xl border border-border/40">
+                <Filter className="h-3.5 w-3.5 text-muted-foreground/60" />
+                <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
+                  <SelectTrigger className="w-[180px] border-none h-10 focus:ring-0 shadow-none font-bold text-[10px] uppercase tracking-wider bg-transparent">
+                    <SelectValue placeholder={t("departments.filters.allDepartments")} />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-2xl bg-white dark:bg-[#09090b] opacity-100 backdrop-blur-none border border-border/50 shadow-2xl">
+                    <SelectItem value="all" className="font-bold">
+                      {t("departments.filters.allDepartments")}
                     </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+                    {departmentOptions.map(({ value, label }) => (
+                      <SelectItem value={String(value)} key={value} className="font-bold">
+                        {label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
         </Card>
 
@@ -355,6 +360,11 @@ const SubjectsList = () => {
                             {subject.name}
                           </h3>
                           <div className="flex items-center justify-center md:justify-start gap-2">
+                            {isInstitutional && (
+                              <Badge className="bg-indigo-500/10 text-indigo-600 border-none font-black px-3 py-0.5 rounded-full text-[10px] md:text-[11px] tracking-widest uppercase shadow-sm">
+                                {t("subjects.sharedCurriculum", "Shared")}
+                              </Badge>
+                            )}
                             <Badge
                               variant="outline"
                               className="text-[10px] md:text-[11px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full border-primary/10 shadow-sm"
@@ -369,20 +379,22 @@ const SubjectsList = () => {
                         </div>
 
                         <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 md:gap-6 mt-4">
-                          <div className="flex items-center gap-2.5 bg-background/40 px-3 py-1.5 rounded-full border border-border/20 shadow-sm">
-                            <div className="p-1.5 rounded-lg bg-primary/5 shrink-0">
-                              <Building2 className="h-3.5 w-3.5 text-primary" />
+                          {isInstitutional && (
+                            <div className="flex items-center gap-2.5 bg-background/40 px-3 py-1.5 rounded-full border border-border/20 shadow-sm">
+                              <div className="p-1.5 rounded-lg bg-primary/5 shrink-0">
+                                <Building2 className="h-3.5 w-3.5 text-primary" />
+                              </div>
+                              <div className="flex flex-col">
+                                <span className="text-[10px] md:text-[11px] uppercase font-bold text-muted-foreground/60 tracking-wider">
+                                  Department
+                                </span>
+                                <span className="text-[11px] font-black text-foreground truncate max-w-[150px]">
+                                  {subject.department?.name ||
+                                    t("subjects.filters.generalDepartment")}
+                                </span>
+                              </div>
                             </div>
-                            <div className="flex flex-col">
-                              <span className="text-[10px] md:text-[11px] uppercase font-bold text-muted-foreground/60 tracking-wider">
-                                Department
-                              </span>
-                              <span className="text-[11px] font-black text-foreground truncate max-w-[150px]">
-                                {subject.department?.name ||
-                                  t("subjects.filters.generalDepartment")}
-                              </span>
-                            </div>
-                          </div>
+                          )}
 
                           <div className="flex items-center gap-2.5 bg-background/40 px-3 py-1.5 rounded-full border border-border/20 shadow-sm">
                             <div className="p-1.5 rounded-lg bg-primary/5 shrink-0">

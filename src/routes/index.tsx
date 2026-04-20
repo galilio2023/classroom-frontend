@@ -164,10 +164,16 @@ const ErrorComponent = () => {
   );
 };
 
-export const AppRouter = () => (
-  <Suspense fallback={<Loading />}>
-    <Routes>
-      {/* PUBLIC ROUTES */}
+import { useCapabilities } from "@/features/users/hooks/use-capabilities";
+
+export const AppRouter = () => {
+  const { isSchoolMode, isFacultyMode, isStaff, isAdmin } = useCapabilities();
+  const isInstitutional = isSchoolMode || isFacultyMode;
+
+  return (
+    <Suspense fallback={<Loading />}>
+      <Routes>
+        {/* PUBLIC ROUTES */}
       <Route element={<PublicLayout />}>
         <Route path="/" element={<LandingPage />} />
         <Route path="/landing" element={<LandingPage />} />
@@ -608,140 +614,113 @@ export const AppRouter = () => (
             />
           </Route>
 
-          <Route path="/departments">
-            <Route
-              index
-              element={
-                <AuthorizedRoute resource="departments" action="list">
-                  <DepartmentsList />
-                </AuthorizedRoute>
-              }
-            />
-            <Route
-              path="create"
-              element={
-                <AuthorizedRoute resource="departments" action="create">
-                  <CreateDepartment />
-                </AuthorizedRoute>
-              }
-            />
-            <Route
-              path="edit/:id"
-              element={
-                <AuthorizedRoute resource="departments" action="edit">
-                  <EditDepartment />
-                </AuthorizedRoute>
-              }
-            />
-          </Route>
-          <Route path="/subjects">
-            <Route
-              index
-              element={
-                <AuthorizedRoute resource="subjects" action="list">
-                  <SubjectsList />
-                </AuthorizedRoute>
-              }
-            />
-            <Route
-              path="create"
-              element={
-                <AuthorizedRoute resource="subjects" action="create">
-                  <CreateSubject />
-                </AuthorizedRoute>
-              }
-            />
-            <Route
-              path="edit/:id"
-              element={
-                <AuthorizedRoute resource="subjects" action="edit">
-                  <EditSubject />
-                </AuthorizedRoute>
-              }
-            />
-          </Route>
-          <Route
-            path="/terms"
-            element={
-              <AuthorizedRoute resource="academic-terms" action="list">
-                <TermsList />
-              </AuthorizedRoute>
-            }
-          />
-          <Route
-            path="/profile-requests"
-            element={
-              <AuthorizedRoute resource="profile-requests" action="list">
-                <ProfileRequestsList />
-              </AuthorizedRoute>
-            }
-          />
-          <Route
-            path="/teacher-applications"
-            element={
-              <AuthorizedRoute resource="teacher-applications" action="list">
-                <TeacherApplicationsList />
-              </AuthorizedRoute>
-            }
-          />
-          <Route path="/badges">
-            <Route
-              index
-              element={
-                <AuthorizedRoute resource="badges" action="list">
-                  <BadgesList />
-                </AuthorizedRoute>
-              }
-            />
-            <Route
-              path="create"
-              element={
-                <AuthorizedRoute resource="badges" action="create">
-                  <CreateBadge />
-                </AuthorizedRoute>
-              }
-            />
-          </Route>
-          <Route
-            path="/activity-log"
-            element={
-              <AuthorizedRoute resource="activity-log" action="list">
-                <ActivityLogPage />
-              </AuthorizedRoute>
-            }
-          />
-          <Route
-            path="/admin/import"
-            element={
-              <AuthorizedRoute resource="admin-import" action="list">
-                <AdminImportPage />
-              </AuthorizedRoute>
-            }
-          />
-          <Route
-            path="/admin/approvals"
-            element={
-              <AuthorizedRoute resource="admin-approvals" action="list">
-                <ApprovalsPage />
-              </AuthorizedRoute>
-            }
-          />
-          <Route
-            path="/ai-governance"
-            element={
-              <AuthorizedRoute resource="ai-health-reports" action="list">
-                <AIGovernanceList />
-              </AuthorizedRoute>
-            }
-          />
-          <Route
-            path="/ai-metrics"
-            element={
-              <AuthorizedRoute resource="ai-metrics" action="list">
-                <AIMetrics />
-              </AuthorizedRoute>
-            }
-          />
+          {/* INSTITUTIONAL (School/Faculty Mode Only) */}
+          {isInstitutional ? (
+            <>
+              <Route path="/departments">
+                <Route
+                  index
+                  element={
+                    <AuthorizedRoute resource="departments" action="list">
+                      <DepartmentsList />
+                    </AuthorizedRoute>
+                  }
+                />
+                <Route
+                  path="create"
+                  element={
+                    <AuthorizedRoute resource="departments" action="create">
+                      <CreateDepartment />
+                    </AuthorizedRoute>
+                  }
+                />
+                <Route
+                  path="edit/:id"
+                  element={
+                    <AuthorizedRoute resource="departments" action="edit">
+                      <EditDepartment />
+                    </AuthorizedRoute>
+                  }
+                />
+              </Route>
+              <Route path="/subjects">
+                <Route
+                  index
+                  element={
+                    <AuthorizedRoute resource="subjects" action="list">
+                      <SubjectsList />
+                    </AuthorizedRoute>
+                  }
+                />
+                <Route
+                  path="create"
+                  element={
+                    <AuthorizedRoute resource="subjects" action="create">
+                      <CreateSubject />
+                    </AuthorizedRoute>
+                  }
+                />
+                <Route
+                  path="edit/:id"
+                  element={
+                    <AuthorizedRoute resource="subjects" action="edit">
+                      <EditSubject />
+                    </AuthorizedRoute>
+                  }
+                />
+              </Route>
+              <Route
+                path="/terms"
+                element={
+                  <AuthorizedRoute resource="academic-terms" action="list">
+                    <TermsList />
+                  </AuthorizedRoute>
+                }
+              />
+              <Route
+                path="/admin/import"
+                element={
+                  <AuthorizedRoute resource="admin-import" action="list">
+                    <AdminImportPage />
+                  </AuthorizedRoute>
+                }
+              />
+              <Route
+                path="/admin/approvals"
+                element={
+                  <AuthorizedRoute resource="admin-approvals" action="list">
+                    <ApprovalsPage />
+                  </AuthorizedRoute>
+                }
+              />
+              <Route
+                path="/ai-governance"
+                element={
+                  <AuthorizedRoute resource="ai-health-reports" action="list">
+                    <AIGovernanceList />
+                  </AuthorizedRoute>
+                }
+              />
+              <Route
+                path="/ai-metrics"
+                element={
+                  <AuthorizedRoute resource="ai-metrics" action="list">
+                    <AIMetrics />
+                  </AuthorizedRoute>
+                }
+              />
+            </>
+          ) : (
+            <>
+              <Route path="/departments" element={<CatchAllNavigate to="/dashboard" />} />
+              <Route path="/subjects" element={<CatchAllNavigate to="/dashboard" />} />
+              <Route path="/terms" element={<CatchAllNavigate to="/dashboard" />} />
+              <Route path="/admin/import" element={<CatchAllNavigate to="/dashboard" />} />
+              <Route path="/admin/approvals" element={<CatchAllNavigate to="/dashboard" />} />
+              <Route path="/ai-governance" element={<CatchAllNavigate to="/dashboard" />} />
+              <Route path="/ai-metrics" element={<CatchAllNavigate to="/dashboard" />} />
+            </>
+          )}
           <Route
             path="/student/report-card"
             element={
