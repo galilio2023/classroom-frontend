@@ -315,7 +315,28 @@
       "connected": "Active",
       "notTeacherTitle": "Not Available",
       "notTeacherDesc": "Only teachers can set up monetization for their classes.",
-      "error": "Failed to start Stripe onboarding."
+      "error": "Failed to start Stripe onboarding.",
+      "availableToPayout": "Available to Payout",
+      "netEarnings": "Net Earnings (30d)",
+      "platformFees": "Platform Fees (10%)",
+      "grossRevenue": "Gross Revenue",
+      "totalViews": "Total Views",
+      "previewClicks": "Preview Clicks",
+      "enrollments": "Enrollments",
+      "convRate": "Conv. Rate",
+      "recentSales": "Recent Sales",
+      "growthTrend": "Growth Trend",
+      "payoutSettings": "Payout Settings",
+      "payoutCycle": "Payout Cycle",
+      "dailyRolling": "Daily (Rolling)",
+      "accountActive": "Account Active",
+      "verifiedStripe": "Verified via Stripe",
+      "unlockTitle": "Unlock Your Earnings",
+      "unlockDesc": "Start monetizing your knowledge. Connect your Stripe account to list paid classes on the marketplace and receive automatic payouts.",
+      "connectStripe": "Connect Stripe Account",
+      "manageAccount": "Manage Account",
+      "viewRewards": "View Milestone Rewards",
+      "teacherPerks": "Teacher Perks"
     },
     "toasts": {
       "success": "Settings updated successfully!",
@@ -553,14 +574,16 @@
     "friendlySummary": "Mastery Journey Update",
     "remediationTask": "Suggested Weekend Activity"
   },
-  "status": {    "active": "Active",
+  "status": {
+    "active": "Active",
     "inactive": "Inactive",
     "suspended": "Suspended",
     "archived": "Archived",
     "upcoming": "Upcoming",
     "completed": "Completed",
     "published": "Published",
-    "draft": "Draft"
+    "draft": "Draft",
+    "failed": "Failed"
   },
   "days": {
     "Mon": "Mon",
@@ -1278,6 +1301,33 @@
     },
     "badges": {
       "label": "Badges"
+    },
+    "admin-import": {
+      "label": "Data Migration",
+      "title": "Bulk Data Import",
+      "description": "Securely onboard students and teachers using CSV or Excel rosters.",
+      "uploadTitle": "Roster Upload",
+      "uploadDesc": "Drag and drop your roster file here (CSV/XLSX).",
+      "preview": "Data Preview",
+      "importing": "Importing records...",
+      "success": "Onboarding complete!",
+      "failed": "Onboarding partially failed.",
+      "errors": "Import Errors"
+    },
+    "admin-approvals": {
+      "label": "Content Approvals",
+      "title": "Institutional Quality Control",
+      "description": "Review and approve AI-generated or teacher-submitted content before it reaches students.",
+      "empty": "No pending approvals. You're all caught up!",
+      "approve": "Approve",
+      "reject": "Reject",
+      "approving": "Approving...",
+      "rejecting": "Rejecting...",
+      "success": "Content approved and published.",
+      "rejected": "Content rejected.",
+      "entity": "Type",
+      "creator": "Created By",
+      "class": "Target Class"
     },
     "activity-log": {
       "label": "Activity Log"

@@ -16,7 +16,7 @@ interface Props {
 export const PerformanceCard = ({ assignment, submission, blendedGrade, isAr }: Props) => {
   const { t } = useTranslation();
 
-  const isAiPending = submission?.aiApprovalStatus === "pending" && !submission.grade;
+  const isAiPending = submission?.approvalStatus === "pending" && !submission.grade;
 
   return (
     <AnimatePresence>

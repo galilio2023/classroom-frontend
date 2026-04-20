@@ -1,0 +1,45 @@
+{
+  "setup": {
+    "title": "School Setup Wizard",
+    "description": "Welcome to Tablawy OS. Let's configure your institutional identity and structure.",
+    "steps": {
+      "basic": "Basic Info",
+      "branding": "Branding",
+      "departments": "Academic Structure",
+      "completed": "Ready to Launch"
+    },
+    "basic": {
+      "title": "Institutional Identity",
+      "desc": "How should your school be identified on the platform?",
+      "schoolName": "School Name",
+      "schoolSlug": "Platform Slug (URL)",
+      "schoolSlugHint": "e.g. oxford-academy"
+    },
+    "branding": {
+      "title": "Institutional Branding",
+      "desc": "Customize the look and feel of your digital campus.",
+      "primaryColor": "Primary Brand Color",
+      "secondaryColor": "Secondary Accent Color",
+      "logoUrl": "School Logo URL",
+      "preview": "Branding Preview"
+    },
+    "departments": {
+      "title": "Academic Departments",
+      "desc": "Create your initial departments or faculties.",
+      "addDept": "Add Department",
+      "deptName": "Department Name",
+      "deptCode": "Code (e.g. SCI, ART)"
+    },
+    "completed": {
+      "title": "Configuration Complete!",
+      "desc": "Your school is now ready for students and teachers. You can always adjust these settings later.",
+      "cta": "Enter Dashboard"
+    }
+  },
+  "dashboard": {
+    "actions": {
+      "bulk_onboard": "Bulk Onboard Students",
+      "manage_departments": "Manage Departments"
+    }
+  }
+}

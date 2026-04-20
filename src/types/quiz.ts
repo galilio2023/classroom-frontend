@@ -23,6 +23,9 @@ export interface Quiz {
   shuffleQuestions?: boolean;
   showCorrectAnswers?: boolean;
   totalMarks?: number;
+  isAiGenerated: boolean;
+  approvalStatus: "pending" | "approved" | "rejected";
+  reviewedById: string | null;
   createdAt: string;
   updatedAt: string;
   questions?: QuizQuestion[];

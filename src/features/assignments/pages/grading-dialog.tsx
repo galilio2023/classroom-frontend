@@ -48,7 +48,7 @@ const gradingSchema = (t: TFunction) =>
     feedback: z.string().optional(),
     requiresResubmission: z.boolean().default(false),
     teacherPrivateNotes: z.string().optional(),
-    aiApprovalStatus: z.string().optional(),
+    approvalStatus: z.string().optional(),
     version: z.number(), // 🛡️ ENFORCED: Support optimistic locking
   });
 
@@ -211,7 +211,7 @@ export const GradingDialog = ({
         id: submission.id,
         values: {
           ...values,
-          aiApprovalStatus: "approved",
+          approvalStatus: "approved",
           version: submission.version, // 🛡️ ENFORCE LOCKING
         },
       },

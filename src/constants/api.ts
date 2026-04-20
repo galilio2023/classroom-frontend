@@ -15,7 +15,10 @@ export const AI_API = {
   INTERACT: (classId: string | number) => `/live-session/${classId}/interact`,
   STUDY_BUDDY: "/ai/study-buddy",
   MAGIC_BUILDER: (type: string) => `/ai/generate-${type}`,
+  BIO: "/ai/generate-bio",
   FEEDBACK: "/ai/feedback",
   GOVERNANCE: "/settings/global-settings",
   HAGER_EXPORT: "/ai/hager-export",
+  OTP_SEND: "/auth/otp/send",
+  OTP_VERIFY: "/auth/otp/verify",
 };

@@ -91,7 +91,13 @@ export const authProvider: AuthProvider = {
 
       console.log("Attempting registration for:", sanitizedParams.email);
 
-      const { error } = await authClient.signUp.email(sanitizedParams as unknown as SignUpPayload);
+      const { correlationId, ...payload } = sanitizedParams as any;
+
+      const { error } = await authClient.signUp.email(payload as SignUpPayload, {
+        headers: {
+          "x-correlation-id": correlationId || `client-auth-${crypto.randomUUID()}`,
+        },
+      });
 
       if (error) {
         console.error("Registration error from Better Auth:", error);

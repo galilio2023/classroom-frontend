@@ -31,7 +31,7 @@ export const AIVisionAssistant = () => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // ðŸ›¡ï¸ SECURITY: Explicit MIME type validation
+      // 🛡️ SECURITY: Explicit MIME type validation
       if (!file.type.startsWith("image/")) {
         toast.error("File is not an image.");
         return;
@@ -108,7 +108,7 @@ export const AIVisionAssistant = () => {
                   variant="outline"
                   className="rounded-full font-black uppercase tracking-widest text-[10px] px-8 h-12"
                   onClick={(e) => {
-                    e.stopPropagation(); // ðŸ›¡ï¸ Fix event bubbling
+                    e.stopPropagation(); // 🛡️ Fix event bubbling
                     fileInputRef.current?.click();
                   }}
                 >

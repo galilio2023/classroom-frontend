@@ -50,5 +50,6 @@ export const useAiAccess = () => {
     isDegraded: health?.isDegraded || health?.isAvailable === false,
     retryAfter: health?.maxRetryAfter,
     isLoading: isDashboardLoading || isRoleLoading || isCanLoading || healthQuery.isLoading,
+    refetch: healthQuery.refetch,
   };
 };

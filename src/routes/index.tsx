@@ -104,6 +104,8 @@ const SchoolAdminDashboard = React.lazy(() => import("@/features/schools/pages/d
 const AIGovernanceList = React.lazy(() => import("@/features/ai/pages/ai-governance-list"));
 const PendingApprovals = React.lazy(() => import("@/features/ai/pages/pending-approvals"));
 const AIMetrics = React.lazy(() => import("@/features/ai/pages/ai-metrics"));
+const AdminImportPage = React.lazy(() => import("@/features/schools/pages/import"));
+const ApprovalsPage = React.lazy(() => import("@/features/schools/pages/approvals"));
 
 const StudentReportCard = React.lazy(() => import("@/features/users/pages/student/report-card"));
 const StudentProgress = React.lazy(() => import("@/features/users/pages/progress/list"));
@@ -705,6 +707,22 @@ export const AppRouter = () => (
             element={
               <AuthorizedRoute resource="activity-log" action="list">
                 <ActivityLogPage />
+              </AuthorizedRoute>
+            }
+          />
+          <Route
+            path="/admin/import"
+            element={
+              <AuthorizedRoute resource="admin-import" action="list">
+                <AdminImportPage />
+              </AuthorizedRoute>
+            }
+          />
+          <Route
+            path="/admin/approvals"
+            element={
+              <AuthorizedRoute resource="admin-approvals" action="list">
+                <ApprovalsPage />
               </AuthorizedRoute>
             }
           />

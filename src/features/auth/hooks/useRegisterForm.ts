@@ -7,7 +7,22 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import axios from "axios";
 import { useTranslation } from "react-i18next";
-import { validateEgyptianID } from "@/lib/validators";
+import { validateEgyptianID, normalizeArabicNumerals } from "@/lib/validators";
+import { handleError, getCorrelationId } from "@/providers/utils/api-errors";
+import { SignUpPayload } from "@/types";
+import { getUUID } from "@/lib/utils";
+import { AI_API, BASE_URL } from "@/constants/api";
+import { getRegisterSchema, type RegisterFormValues } from "../schemas/registration-schema";
+import { offlineDB } from "@/lib/offline-db";
+
+export const REGISTER_STEPS = {
+  BASIC_INFO: 1,
+  EGYPTIAN_ID: 2,
+  CONSENT: 3,
+  OTP_VERIFY: 4,
+} as const;
+
+export type RegisterStep = (typeof REGISTER_STEPS)[keyof typeof REGISTER_STEPS];
 
 export const useRegisterForm = () => {
   const { t } = useTranslation();
@@ -16,36 +31,54 @@ export const useRegisterForm = () => {
   const [searchParams] = useSearchParams();
   const inviteCode = searchParams.get("inviteCode");
 
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState<RegisterStep>(REGISTER_STEPS.BASIC_INFO);
   const [isGeneratingBio, setIsGeneratingBio] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [validatedValues, setValidatedValues] = useState<SignUpPayload | null>(null);
   const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
   const [isSendingOtp, setIsSendingOtp] = useState(false);
 
-  const registerSchema = z.object({
-    name: z.string().min(1, t("auth.register.nameRequired", "Name is required")),
-    email: z.string().email(t("auth.register.invalidEmail", "Invalid email")),
-    password: z
-      .string()
-      .min(8, t("auth.register.passwordMinLength", "Password must be at least 8 characters")),
-    role: z.enum(["student", "teacher", "parent"]),
-    phoneNumber: z.string().min(10, t("auth.register.phoneRequired", "Phone number is required")),
-    nationalId: z
-      .string()
-      .length(14, t("auth.register.nationalIdLength", "National ID must be 14 digits")),
-    hasAiConsent: z.boolean().refine((val) => val === true, {
-      message: t("auth.register.consentRequired", "AI consent is required"),
-    }),
-    bio: z.string().optional(),
-    dateOfBirth: z.string().optional(),
-    parentName: z.string().optional(),
-    parentPhone: z.string().optional(),
-    childInviteCode: z.string().optional(),
-    verificationDocumentUrl: z.string().optional(),
-    verificationDocumentCldPubId: z.string().optional(),
-  });
+  // 🛡️ RURAL RESILIENCE: Persist partial state to IndexedDB (Mandate Rule #4)
+  useEffect(() => {
+    const loadDraft = async () => {
+      const draft = await offlineDB.registration_drafts.get("current_registration");
 
-  type RegisterFormValues = z.infer<typeof registerSchema>;
+      if (draft) {
+        try {
+          const values = draft.values as SignUpPayload;
+          setValidatedValues(values);
+
+          // 🛡️ SECURITY: Prevent step hijacking. Only restore step if we have minimal required data.
+          if (values.phoneNumber) {
+            setStep(draft.step as RegisterStep);
+          }
+        } catch (e) {
+          await offlineDB.registration_drafts.delete("current_registration");
+        }
+      }
+    };
+    loadDraft();
+  }, []);
+
+  useEffect(() => {
+    const saveDraft = async () => {
+      if (validatedValues) {
+        // 🛡️ SECURITY: Explicitly exclude sensitive data from persistence
+        const { password, ...safeValues } = validatedValues;
+        await offlineDB.registration_drafts.put({
+          id: "current_registration",
+          step,
+          values: safeValues,
+          updatedAt: Date.now(),
+        });
+      } else {
+        await offlineDB.registration_drafts.delete("current_registration");
+      }
+    };
+    saveDraft();
+  }, [validatedValues, step]);
+
+  const registerSchema = getRegisterSchema(t);
 
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -56,7 +89,6 @@ export const useRegisterForm = () => {
       role: "student",
       phoneNumber: "",
       nationalId: "",
-      hasAiConsent: false,
       bio: "",
       dateOfBirth: "",
       parentName: "",
@@ -64,44 +96,46 @@ export const useRegisterForm = () => {
       childInviteCode: "",
       verificationDocumentUrl: "",
       verificationDocumentCldPubId: "",
+      hasAiConsent: false,
     },
-    shouldUnregister: false,
   });
 
   const role = form.watch("role");
-
-  useEffect(() => {
-    if (inviteCode) {
-      toast.info(t("classes.show.toast.inviteLinkDetected"), {
-        description: t("classes.show.toast.registerToJoin"),
-      });
-    }
-  }, [inviteCode, t]);
+  const name = form.watch("name");
 
   const generateAIBio = async () => {
-    const name = form.getValues("name");
-    if (!name) {
-      toast.error(t("auth.register.enterNameFirst"));
-      return;
-    }
+    const correlationId = `bio-${getUUID()}`;
+    const headers = { "x-correlation-id": correlationId };
 
     setIsGeneratingBio(true);
     try {
-      const response = await axios.post<{ content: string }>("/api/ai/generate-content", {
-        prompt: `Generate a professional bio for a ${role} named ${name}. Keywords: passionate, experienced, dedicated. Keep it under 50 words.`,
-        context: "User Registration Bio",
-      });
-
-      form.setValue("bio", response.data.content);
-      toast.success(t("auth.register.aiBioGenerated"));
-    } catch {
-      const fallbacks: Record<string, string> = {
-        teacher: `Hello, I'm ${name}. I am a dedicated educator committed to fostering a positive and engaging learning environment for all my students.`,
-        student: `Hi, I'm ${name}. I'm an enthusiastic student eager to learn and grow in my academic journey.`,
-        parent: `Hello, I'm ${name}. I am a supportive parent dedicated to my child's educational success and well-being.`,
+      const response = await axios.post(`${BASE_URL}${AI_API.BIO}`, { name, role }, { headers });
+      form.setValue("bio", response.data.bio);
+      toast.success(t("auth.register.aiBioSuccess", "AI Bio generated successfully!"));
+    } catch (error: any) {
+      const traceId = getCorrelationId(error);
+      const fallbacks = {
+        student: t(
+          "auth.register.bioFallbackStudent",
+          `Hi, I'm {{name}}, a student on Tablawy OS.`,
+          { name }
+        ),
+        teacher: t(
+          "auth.register.bioFallbackTeacher",
+          `Hi, I'm {{name}}, an educator specialized in knowledge transfer.`,
+          { name }
+        ),
+        parent: t(
+          "auth.register.bioFallbackParent",
+          `Hi, I'm {{name}}, supporting my child's learning journey.`,
+          { name }
+        ),
       };
       form.setValue("bio", fallbacks[role as keyof typeof fallbacks] || `Hi, I'm ${name}.`);
-      toast.info(t("auth.register.aiBioFallback"));
+
+      toast.error(t("auth.register.aiBioError", "Bio generation failed"), {
+        description: `Trace ID: ${traceId}. ${t("common.supportInfo", "Please contact support for assistance.")}`,
+      });
     } finally {
       setIsGeneratingBio(false);
     }
@@ -109,9 +143,17 @@ export const useRegisterForm = () => {
 
   const nextStep = async () => {
     let fieldsToValidate: any[] = [];
-    if (step === 1) {
+    if (step === REGISTER_STEPS.BASIC_INFO) {
       fieldsToValidate = ["name", "email", "password", "role"];
-    } else if (step === 2) {
+    } else if (step === REGISTER_STEPS.EGYPTIAN_ID) {
+      // 🛡️ NORMALIZATION: Immediate feedback (Mandate M-008)
+      const currentPhone = normalizeArabicNumerals(form.getValues("phoneNumber"));
+      const currentId = normalizeArabicNumerals(form.getValues("nationalId"));
+
+      // 🛡️ UI: Sync with validation state immediately
+      form.setValue("phoneNumber", currentPhone, { shouldValidate: true });
+      form.setValue("nationalId", currentId, { shouldValidate: true });
+
       fieldsToValidate = ["phoneNumber", "nationalId"];
       // Soft validation for Egyptian ID
       const nationalId = form.getValues("nationalId");
@@ -120,29 +162,71 @@ export const useRegisterForm = () => {
         form.setError("nationalId", { message: validation.error });
         return;
       }
-    } else if (step === 3) {
+    } else if (step === REGISTER_STEPS.CONSENT) {
       fieldsToValidate = ["hasAiConsent"];
     }
 
     const isValid = await form.trigger(fieldsToValidate);
     if (isValid) {
-      if (step === 3) {
+      if (step === REGISTER_STEPS.CONSENT) {
         await sendWhatsAppOtp();
       }
-      setStep((prev) => prev + 1);
+      setStep((prev) => (prev + 1) as RegisterStep);
     }
   };
 
-  const prevStep = () => setStep((prev) => prev - 1);
+  const prevStep = () => setStep((prev) => (prev - 1) as RegisterStep);
+
+  const performFinalSubmit = (values: SignUpPayload) => {
+    const correlationId = `reg-${getUUID()}`;
+
+    register(
+      { ...values, inviteCode, correlationId },
+      {
+        onSuccess: () => {
+          setIsSuccess(true);
+          // 🛡️ SECURITY: Clear sensitive values from state immediately after success
+          setValidatedValues(null);
+
+          // 🛡️ UX: Conditional redirection based on role AND invite context (Mandate Rule #3)
+          setTimeout(() => {
+            if (inviteCode) {
+              // If joining via invite, redirect to class dashboard or specific class page
+              navigate(`/classes/join/${inviteCode}`);
+            } else if (values.role === "teacher") {
+              navigate("/ai/magic-builder");
+            } else if (values.role === "student") {
+              navigate("/ai/chat");
+            } else {
+              navigate("/dashboard");
+            }
+          }, 3000);
+        },
+        onError: async (err) => {
+          const error = await handleError(err as any);
+          toast.error(error.message, {
+            description: `Trace ID: ${getCorrelationId(err) || correlationId}. ${t("common.supportInfo", "Please contact support for assistance.")}`,
+          });
+          // 🛡️ UX: Stay on current step to allow correction/retry instead of resetting to Step 1
+        },
+      }
+    );
+  };
 
   const sendWhatsAppOtp = async () => {
     const phoneNumber = form.getValues("phoneNumber");
+    const correlationId = `otp-send-${getUUID()}`;
+    const headers = { "x-correlation-id": correlationId };
+
     setIsSendingOtp(true);
     try {
-      await axios.post("/api/auth/otp/send", { phoneNumber });
-      toast.success(t("auth.otp.sentSuccess", "OTP sent via WhatsApp"));
+      await axios.post(`${BASE_URL}${AI_API.OTP_SEND}`, { phoneNumber }, { headers });
+      toast.success(t("auth.otp.sent", "OTP sent via WhatsApp!"));
     } catch (error) {
-      toast.error(t("auth.otp.sentError", "Failed to send OTP. Please try again."));
+      const apiError = await handleError(error);
+      toast.error(apiError.message, {
+        description: `Trace ID: ${getCorrelationId(error) || correlationId}. ${t("common.supportInfo", "Please contact support for assistance.")}`,
+      });
     } finally {
       setIsSendingOtp(false);
     }
@@ -150,41 +234,38 @@ export const useRegisterForm = () => {
 
   const verifyOtp = async (code: string) => {
     const phoneNumber = form.getValues("phoneNumber");
+    const correlationId = `otp-verify-${getUUID()}`;
+    const headers = { "x-correlation-id": correlationId };
+
     setIsVerifyingOtp(true);
     try {
-      const response = await axios.post("/api/auth/otp/verify", { phoneNumber, code });
-      if (response.data.data.verified) {
-        handleFinalSubmit();
+      const response = await axios.post(
+        `${BASE_URL}${AI_API.OTP_VERIFY}`,
+        { phoneNumber, code },
+        { headers }
+      );
+      if (response.data.data.verified && validatedValues) {
+        // 🛡️ SECURITY: Use validated, transformed values from the original submission
+        performFinalSubmit(validatedValues);
       }
     } catch (error) {
-      toast.error(t("auth.otp.invalid", "Invalid verification code."));
+      const apiError = await handleError(error);
+      toast.error(apiError.message, {
+        description: `Trace ID: ${getCorrelationId(error) || correlationId}. ${t("common.supportInfo", "Please contact support for assistance.")}`,
+      });
     } finally {
       setIsVerifyingOtp(false);
     }
   };
 
   const handleFinalSubmit = form.handleSubmit((values) => {
-    register(
-      { ...values, inviteCode },
-      {
-        onSuccess: () => {
-          setIsSuccess(true);
-          // Redirect logic based on role for "First Success"
-          setTimeout(() => {
-            if (values.role === "teacher") navigate("/ai/magic-builder");
-            else if (values.role === "student") navigate("/ai/chat");
-            else navigate("/dashboard");
-          }, 3000);
-        },
-        onError: (err) => {
-          const error = err as HttpError;
-          const errorMessage =
-            (error as any)?.data?.message || error.message || t("auth.login.unknownError");
-          toast.error(errorMessage);
-          setStep(1); // Reset to first step on hard error
-        },
-      }
-    );
+    // 🛡️ NORMALIZATION: Automatically handled by Zod .transform() in the schema
+    if (role === "student") {
+      setValidatedValues(values as unknown as SignUpPayload);
+      setStep(REGISTER_STEPS.OTP_VERIFY); // Move to OTP step
+      return;
+    }
+    performFinalSubmit(values as unknown as SignUpPayload);
   });
 
   return {

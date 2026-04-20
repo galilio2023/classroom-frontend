@@ -5,6 +5,7 @@ import { offlineDB } from "../lib/offline-db";
 import { toast } from "sonner";
 import { getResourcePath } from "./utils/resource-paths";
 import { handleError } from "./utils/api-errors";
+import { getUUID } from "@/lib/utils";
 
 const BACKEND_BASE_URL = BACKEND_URL;
 
@@ -20,6 +21,8 @@ const fetcher = async (url: string, options?: RequestInit) => {
   const method = options?.method?.toUpperCase() || "GET";
   const headers: Record<string, string> = {
     ...(options?.headers as Record<string, string>),
+    // 🛡️ TRACEABILITY: Mandate M-011 - Global correlation ID for debugging
+    "x-correlation-id": `client-${getUUID()}`,
   };
 
   const isFormData = options?.body instanceof FormData;

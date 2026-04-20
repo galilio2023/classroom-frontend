@@ -31,10 +31,10 @@ export const AIQuizGenerator: React.FC<AIQuizGeneratorProps> = ({ classId }) => 
   const { mutate: createAssignment, mutation: createMutation } = useCreate();
   const isSaving = createMutation.isPending;
 
-  // ðŸ›¡ï¸ PARENT GATING: AI interactive features are disabled for Parents
+  // 🛡️ PARENT GATING: AI interactive features are disabled for Parents
   if (!isAllowed) return null;
 
-  // ðŸ›¡ï¸ Global Master Switch: Graceful Degradation
+  // 🛡️ Global Master Switch: Graceful Degradation
   if (!isAiEnabled) {
     return <AIFeatureDisabled title="AI Quiz Generator Offline" />;
   }

@@ -1,8 +1,9 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from "react";
 import { useNotification } from "@refinedev/core";
-import { handleError } from "@/providers/utils/api-errors";
+import { handleError, getCorrelationId } from "@/providers/utils/api-errors";
 import { getFreshSession } from "@/providers/auth";
 import { BASE_URL } from "@/constants/api";
+import { getJitteredDelay } from "@/lib/jitter";
 
 export interface BackgroundJob {
   id: string;
@@ -32,11 +33,25 @@ export const useJobs = () => {
 
 const STORAGE_KEY = "classroom_active_jobs";
 
+// 🛡️ POLLING CONFIGURATION (Mandate M-008)
+const POLLING_CONFIG = {
+  INITIAL_DELAY: 5000, // 5s (🚀 UX: Faster initial feedback)
+  MAX_DELAY: 30000, // 30s (🚀 UX: More aggressive cap for active jobs)
+  RETRY_INTERVAL: 15000, // 15s (🚀 RESILIENCE: Standard retry delay)
+  IDLE_POLL_INTERVAL: 60000, // 1m when tab is hidden
+  JITTER_FACTOR: 0.1, // 10%
+};
+
 export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [jobs, setJobs] = useState<BackgroundJob[]>([]);
+  const [syncDelay, setSyncDelay] = useState(POLLING_CONFIG.INITIAL_DELAY);
+  const [isVisible, setIsVisible] = useState(true);
+
   const jobsRef = useRef<BackgroundJob[]>([]);
-  const { open } = useNotification();
+  const isSyncingRef = useRef(false);
+  const timeoutIdRef = useRef<NodeJS.Timeout | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
+  const { open } = useNotification();
 
   // Sync ref with state
   useEffect(() => {
@@ -70,13 +85,6 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.setItem(STORAGE_KEY, JSON.stringify(jobs));
   }, [jobs]);
 
-  const addJob = (job: Omit<BackgroundJob, "status" | "createdAt">) => {
-    setJobs((prev) => [
-      ...prev,
-      { ...job, status: "processing", createdAt: Date.now() } as BackgroundJob,
-    ]);
-  };
-
   const updateJob = useCallback((id: string, updates: Partial<BackgroundJob>) => {
     setJobs((prev) =>
       prev.map((j) => (j.id === id || j.metadata?.jobId === id ? { ...j, ...updates } : j))
@@ -84,17 +92,16 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, []);
 
   // 🛡️ RECOVERY: Polling for AI jobs that might have finished while disconnected
-  // 🛡️ PERFORMANCE: updateJob and open are stable, so syncJobs will only be created once.
   const syncJobs = useCallback(async () => {
     const activeAiJobs = jobsRef.current.filter((j) => j.status === "processing");
-    if (activeAiJobs.length === 0) return;
+    if (activeAiJobs.length === 0 || isSyncingRef.current) return;
 
     if (abortControllerRef.current) abortControllerRef.current.abort();
     const controller = new AbortController();
     abortControllerRef.current = controller;
 
     try {
-      // 🛡️ SECURITY: Use session helper instead of direct localStorage access
+      isSyncingRef.current = true;
       const { data: session } = await getFreshSession();
       const token = (session as any)?.token;
       if (!token) return;
@@ -129,18 +136,13 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               metadata: updatedMetadata,
             });
 
-            // 🚀 UI RE-HYDRATION: Notify components that a specific job is ready
             window.dispatchEvent(
               new CustomEvent(`JOB_COMPLETED_${localJob.type.toUpperCase()}`, {
-                detail: {
-                  jobId: localJob.id,
-                  metadata: updatedMetadata,
-                },
+                detail: { jobId: localJob.id, metadata: updatedMetadata },
               })
             );
           } else if (localJob && remoteJob.status === "failed") {
             updateJob(localJob.id, { status: "failed" });
-
             window.dispatchEvent(
               new CustomEvent(`JOB_FAILED_${localJob.type.toUpperCase()}`, {
                 detail: { jobId: localJob.id },
@@ -151,7 +153,6 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
     } catch (e: any) {
       if (e.name === "AbortError") return;
-
       console.error("AI Job Sync failed:", e);
       open?.({
         type: "error",
@@ -162,37 +163,125 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (abortControllerRef.current === controller) {
         abortControllerRef.current = null;
       }
+      isSyncingRef.current = false;
     }
   }, [updateJob, open]);
 
+  // 🛡️ CLEANUP: Prevent memory leaks and orphaned requests on unmount
   useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
+    return () => {
+      if (timeoutIdRef.current) clearTimeout(timeoutIdRef.current);
+      if (abortControllerRef.current) abortControllerRef.current.abort();
+    };
+  }, []);
 
-    const poll = async () => {
+  const scheduleNext = useCallback((delay: number) => {
+    if (timeoutIdRef.current) clearTimeout(timeoutIdRef.current);
+
+    timeoutIdRef.current = setTimeout(poll, delay);
+  }, []);
+
+  const poll = useCallback(async () => {
+    let nextDelay = syncDelay;
+    let shouldSchedule = false;
+
+    try {
+      // 🛡️ RULE 6: Tab Visibility Safety
+      if (!isVisible) {
+        nextDelay = POLLING_CONFIG.IDLE_POLL_INTERVAL;
+        shouldSchedule = true;
+        return;
+      }
+
       const activeAiJobs = jobsRef.current.filter((j) => j.status === "processing");
       if (activeAiJobs.length > 0) {
         await syncJobs();
+
+        // 🛡️ RESILIENCE: Jittered Exponential backoff
+        const nextBase = Math.min(syncDelay * 2, POLLING_CONFIG.MAX_DELAY);
+        const jittered = getJitteredDelay(nextBase, POLLING_CONFIG.JITTER_FACTOR);
+        nextDelay = Math.max(POLLING_CONFIG.INITIAL_DELAY, jittered);
+        setSyncDelay(nextDelay);
+        shouldSchedule = true;
+      } else {
+        // Stop the loop if no more processing jobs
+        setSyncDelay(POLLING_CONFIG.INITIAL_DELAY);
+        shouldSchedule = false;
+        if (timeoutIdRef.current) {
+          clearTimeout(timeoutIdRef.current);
+          timeoutIdRef.current = null;
+        }
       }
-      // 🛡️ PERFORMANCE: Only poll if there are active jobs.
-      // Use recursive setTimeout to prevent overlapping requests if a sync takes longer than 30s.
-      timeoutId = setTimeout(poll, 30000);
-    };
+    } catch (pollErr) {
+      const error = await handleError(pollErr);
+      const correlationId = getCorrelationId(pollErr);
+      console.error("Critical: AI Polling loop encountered an error:", error);
 
-    poll();
+      open?.({
+        type: "error",
+        message: "AI Sync Error",
+        description: `${error.message} (Trace: ${correlationId})`,
+      });
 
-    return () => {
-      clearTimeout(timeoutId);
-      if (abortControllerRef.current) abortControllerRef.current.abort();
-    };
-  }, [syncJobs]);
+      nextDelay = POLLING_CONFIG.RETRY_INTERVAL;
+      shouldSchedule = true;
+    } finally {
+      if (shouldSchedule) {
+        scheduleNext(nextDelay);
+      }
+    }
+  }, [isVisible, syncJobs, syncDelay, open, scheduleNext]);
+
+
+  const addJob = (job: Omit<BackgroundJob, "status" | "createdAt">) => {
+    setJobs((prev) => [
+      ...prev,
+      { ...job, status: "processing", createdAt: Date.now() } as BackgroundJob,
+    ]);
+    setSyncDelay(POLLING_CONFIG.INITIAL_DELAY);
+    // Wake up the loop immediately
+    scheduleNext(0);
+  };
 
   const removeJob = (id: string) => {
-    setJobs((prev) => prev.filter((j) => j.id !== id && j.metadata?.jobId !== id));
+    setJobs((prev) => {
+      const updated = prev.filter((j) => j.id !== id && j.metadata?.jobId !== id);
+      const stillProcessing = updated.some((j) => j.status === "processing");
+      if (!stillProcessing && timeoutIdRef.current) {
+        clearTimeout(timeoutIdRef.current);
+        timeoutIdRef.current = null;
+      }
+      return updated;
+    });
   };
 
   const clearCompleted = () => {
     setJobs((prev) => prev.filter((j) => j.status === "processing"));
   };
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      const visible = document.visibilityState === "visible";
+      setIsVisible(visible);
+      if (visible && jobsRef.current.some((j) => j.status === "processing")) {
+        scheduleNext(0);
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, [scheduleNext]);
+
+  // Bootstrapping the loop if there are initial jobs
+  useEffect(() => {
+    const hasInitialJobs = jobsRef.current.some((j) => j.status === "processing");
+    if (hasInitialJobs && !timeoutIdRef.current) {
+      scheduleNext(POLLING_CONFIG.INITIAL_DELAY);
+    }
+    return () => {
+      if (timeoutIdRef.current) clearTimeout(timeoutIdRef.current);
+    };
+  }, [scheduleNext]);
 
   return (
     <JobContext.Provider value={{ jobs, addJob, updateJob, removeJob, clearCompleted, syncJobs }}>

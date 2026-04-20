@@ -27,10 +27,10 @@ export const AIAssignmentHelper: React.FC<AIAssignmentHelperProps> = ({ onUseCon
     isLoading,
   } = useAssignmentGeneration();
 
-  // ðŸ›¡ï¸ PARENT GATING: AI interactive features are disabled for Parents
+  // 🛡️ PARENT GATING: AI interactive features are disabled for Parents
   if (!isAllowed) return null;
 
-  // ðŸ›¡ï¸ Global Master Switch: Graceful Degradation
+  // 🛡️ Global Master Switch: Graceful Degradation
   if (!isAiEnabled) {
     return <AIFeatureDisabled title="AI Assignment Helper Offline" />;
   }

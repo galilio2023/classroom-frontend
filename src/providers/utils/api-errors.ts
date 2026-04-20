@@ -1,14 +1,48 @@
 import { HttpError } from "@refinedev/core";
 
 /**
- * Helper to handle API errors and return Refine-compatible HttpError
+ * 🛡️ TRACEABILITY: Extracts X-Correlation-ID from various error formats (Axios, Fetch, etc.)
  */
-export const handleError = async (response: Response): Promise<HttpError> => {
+export const getCorrelationId = (err: any): string => {
+  return (
+    err?.response?.headers?.["x-correlation-id"] ||
+    err?.headers?.["x-correlation-id"] ||
+    err?.config?.headers?.["x-correlation-id"] ||
+    "N/A"
+  );
+};
+
+/**
+ * Helper to handle API errors and return Refine-compatible HttpError
+ * 🛡️ RESILIENCE: Now handles both raw Response objects and standard Error/Axios objects.
+ */
+export const handleError = async (errorOrResponse: any): Promise<HttpError> => {
+  // 1. Extract the raw response if possible (handles Axios, Refine, and raw fetch)
+  const response =
+    errorOrResponse?.response || (errorOrResponse instanceof Response ? errorOrResponse : null);
+
+  if (!response) {
+    return {
+      message: errorOrResponse?.message || "An unexpected error occurred.",
+      statusCode: errorOrResponse?.status || 500,
+    };
+  }
+
   let json: Record<string, unknown> = {};
+  const correlationId =
+    (typeof response.headers?.get === "function"
+      ? response.headers.get("x-correlation-id")
+      : null) ||
+    response.headers?.["x-correlation-id"] ||
+    "N/A";
+
   try {
-    const text = await response.text();
-    if (text) {
-      json = JSON.parse(text);
+    // 🛡️ RESILIENCE: Check for Axios data first to avoid consuming Fetch streams prematurely
+    if (response.data && typeof response.data === "object") {
+      json = response.data;
+    } else if (typeof response.text === "function") {
+      const text = await response.text();
+      if (text) json = JSON.parse(text);
     }
   } catch {
     // Not JSON or empty
@@ -84,7 +118,7 @@ export const handleError = async (response: Response): Promise<HttpError> => {
     message:
       (json.error as string) ||
       (json.message as string) ||
-      `HTTP error! status: ${response.status}`,
+      `HTTP error! status: ${response.status} (Trace: ${correlationId})`,
     statusCode: response.status,
   };
 };

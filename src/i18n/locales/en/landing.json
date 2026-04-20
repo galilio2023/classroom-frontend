@@ -222,6 +222,10 @@
       "waiting": "Waiting for payment...",
       "instructions": "Go to any nearby kiosk and pay {{amount}} EGP using this reference code. Your subscription will activate instantly once paid.",
       "activated": "Your subscription is now active!"
+    },
+    "card": {
+      "title": "Secure Card Payment",
+      "desc": "Pay instantly using your Debit or Credit card."
     }
   },
   "offline": {

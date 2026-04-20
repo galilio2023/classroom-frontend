@@ -31,10 +31,10 @@ export function Layout({ children }: PropsWithChildren) {
   const isStudent = identity?.role === UserRole.STUDENT;
   const { activeClassId, isJoined } = usePersistentLive();
 
-  // ðŸš€ GAMIFICATION: Activate listeners for XP, Levels, and Badges
+  // 🚀 GAMIFICATION: Activate listeners for XP, Levels, and Badges
   useGamificationToasts(identity?.id);
 
-  // ðŸš€ LIFECYCLE: Activate real-time pulse listeners
+  // 🚀 LIFECYCLE: Activate real-time pulse listeners
   useLifecyclePulse();
 
   // Extract classId from URL if present (supports /classes/show/:id or /assignments/show/:id)
@@ -52,13 +52,13 @@ export function Layout({ children }: PropsWithChildren) {
           {/* Global Live Signal */}
           {isStudent && <GlobalLiveIndicator />}
 
-          {/* ðŸ“£ GLOBAL PROMOTION TRAILER (PiP) */}
+          {/* 📢 GLOBAL PROMOTION TRAILER (PiP) */}
           {isStudent && <PromotionMiniPlayer />}
 
-          {/* ðŸŽžï¸ GLOBAL RECORDED LESSON (PiP) */}
+          {/* 🎞️ GLOBAL RECORDED LESSON (PiP) */}
           {isStudent && <VideoMiniPlayer />}
 
-          {/* ðŸš€ GLOBAL PERSISTENT LIVE SESSION (PiP) */}
+          {/* 🚀 GLOBAL PERSISTENT LIVE SESSION (PiP) */}
           {activeClassId && isJoined && (
             <LiveClassroom classId={activeClassId} isMiniMode={!isOnLiveTab} />
           )}

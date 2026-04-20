@@ -49,22 +49,35 @@ export interface AiHistory {
   timestamp: number;
 }
 
+export interface RegistrationDraft {
+  id: string; // "current_registration"
+  step: number;
+  values: Record<string, unknown>;
+  updatedAt: number;
+}
+
 export class OfflineDB extends Dexie {
   lessons!: Table<CachedLesson>;
   quizzes!: Table<PendingQuizSubmission>;
   notes!: Table<UserNote>;
   mutations!: Table<PendingMutation>;
   ai_history!: Table<AiHistory>;
+  registration_drafts!: Table<RegistrationDraft>;
 
   constructor() {
     super("TablawyOfflineDB");
-    this.version(1).stores({
-      lessons: "id, classId",
-      quizzes: "++id, quizId, userId",
-      notes: "id, lessonId, isSynced",
-      mutations: "++id, resource, action",
-      ai_history: "++id, userId, classId, timestamp",
-    });
+    this.version(2)
+      .stores({
+        lessons: "id, classId",
+        quizzes: "++id, quizId, userId",
+        notes: "id, lessonId, isSynced",
+        mutations: "++id, resource, action",
+        ai_history: "++id, userId, classId, timestamp",
+        registration_drafts: "id, step",
+      })
+      .upgrade((_tx) => {
+        // Version 2: Added registration_drafts
+      });
   }
 
   /**

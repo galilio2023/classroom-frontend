@@ -1,8 +1,9 @@
 import React from "react";
 import { useAiAccess } from "@/features/ai/hooks/use-ai-access";
-import { Lock } from "lucide-react";
+import { Lock, Clock, Sparkles, BrainCircuit, RefreshCcw, Loader2 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 import { useCan } from "@refinedev/core";
 
 interface AiFeatureGuardProps {
@@ -16,7 +17,7 @@ interface AiFeatureGuardProps {
 }
 
 /**
- * ðŸ›¡ï¸ ARCHITECTURAL COMPONENT: AiFeatureGuard
+ * 🛡️ ARCHITECTURAL COMPONENT: AiFeatureGuard
  * Wraps AI-powered features to ensure they only mount when:
  * 1. Global Master Switch (enableAiFeatures) is ON.
  * 2. User role (RBAC) allows AI interactions via useCan.
@@ -29,7 +30,14 @@ export const AiFeatureGuard: React.FC<AiFeatureGuardProps> = ({
   silent = false,
   skeletonClassName = "w-full h-32 rounded-lg",
 }) => {
-  const { isAiEnabled, isQuotaExceeded, isLoading: isAiLoading } = useAiAccess();
+  const {
+    isAiEnabled,
+    isQuotaExceeded,
+    isDegraded,
+    retryAfter,
+    isLoading: isAiLoading,
+    refetch,
+  } = useAiAccess();
   const { data: canAccess, isLoading: isCanLoading } = useCan({
     resource: "ai_features",
     action: "access",
@@ -43,24 +51,77 @@ export const AiFeatureGuard: React.FC<AiFeatureGuardProps> = ({
 
   const isAllowed = canAccess?.can ?? false;
 
-  // ðŸ›¡ï¸ Guard logic
-  if (!isAiEnabled || !isAllowed || isQuotaExceeded) {
+  const getGuardContent = () => {
+    if (isQuotaExceeded) {
+      return {
+        title: "Monthly Limit Reached",
+        icon: <BrainCircuit className="h-4 w-4" />,
+        description:
+          "You have exhausted your AI token quota for this month. Your limit will reset on the 1st of next month.",
+      };
+    }
+
+    if (isDegraded) {
+      return {
+        title: "AI System Offline",
+        // 🛡️ VISUAL IDENTITY: Rule 7 - Use Sparkles/BrainCircuit even in degraded state
+        icon: <Sparkles className="h-4 w-4 animate-pulse text-primary" />,
+        description: retryAfter
+          ? `The AI co-teacher is currently cooling down due to high traffic. Estimated return in ${Math.ceil(retryAfter / 60)} minutes.`
+          : "The AI system is temporarily unavailable due to upstream provider maintenance. Please try again later.",
+      };
+    }
+
+    if (!isAiEnabled) {
+      return {
+        title: "AI Features Disabled",
+        icon: <Clock className="h-4 w-4" />,
+        description:
+          "Tablawy OS AI features are currently disabled by the administrator for this institution.",
+      };
+    }
+
+    if (!isAllowed) {
+      return {
+        title: "AI Feature Restricted",
+        icon: <Lock className="h-4 w-4" />,
+        description:
+          "Your current account role does not have permission to access interactive AI features.",
+      };
+    }
+
+    return null;
+  };
+
+  // 🛡️ Guard logic
+  const guardContent = getGuardContent();
+  if (guardContent) {
     if (silent) return null;
-
     if (fallback) return <>{fallback}</>;
-
-    const title = isQuotaExceeded ? "Monthly Limit Reached" : "AI Feature Restricted";
-    const description = isQuotaExceeded
-      ? "You have exhausted your AI token quota for this month. Your limit will reset on the 1st of next month."
-      : !isAiEnabled
-        ? "Tablawy AI features are currently disabled by the administrator."
-        : "Your current account role does not have permission to access interactive AI features.";
 
     return (
       <Alert variant="destructive" className="border-dashed border-2">
-        <Lock className="h-4 w-4" />
-        <AlertTitle>{title}</AlertTitle>
-        <AlertDescription>{description}</AlertDescription>
+        {guardContent.icon}
+        <AlertTitle>{guardContent.title}</AlertTitle>
+        <AlertDescription className="flex flex-col gap-4">
+          <span>{guardContent.description}</span>
+          {isDegraded && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-fit h-8 rounded-lg font-black uppercase text-[10px] tracking-widest gap-2"
+              onClick={() => void refetch()}
+              disabled={isAiLoading}
+            >
+              {isAiLoading ? (
+                <Loader2 className="h-3 w-3 animate-spin" />
+              ) : (
+                <RefreshCcw className="h-3 w-3" />
+              )}
+              {isAiLoading ? "Checking..." : "Check Status Again"}
+            </Button>
+          )}
+        </AlertDescription>
       </Alert>
     );
   }

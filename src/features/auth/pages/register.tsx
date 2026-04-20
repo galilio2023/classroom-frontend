@@ -38,7 +38,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 
 // Hook
-import { useRegisterForm } from "@/features/auth/hooks/useRegisterForm";
+import { useRegisterForm, REGISTER_STEPS } from "@/features/auth/hooks/useRegisterForm";
 
 const RegisterPage = () => {
   const { t, i18n } = useTranslation();
@@ -147,12 +147,12 @@ const RegisterPage = () => {
                   </div>
                   <div className="space-y-2">
                     <CardTitle className="text-3xl md:text-4xl font-black tracking-tighter uppercase leading-tight">
-                      {step === 4
+                      {step === REGISTER_STEPS.OTP_VERIFY
                         ? t("auth.register.verifyTitle", "Verify Identity")
                         : t("auth.register.title")}
                     </CardTitle>
                     <CardDescription className="font-medium text-base md:text-lg px-4 md:px-8">
-                      {step === 4
+                      {step === REGISTER_STEPS.OTP_VERIFY
                         ? t("auth.register.verifyDesc", "One final step to secure your account.")
                         : t("auth.register.description")}
                     </CardDescription>
@@ -162,7 +162,7 @@ const RegisterPage = () => {
                   <Form {...form}>
                     <div className="space-y-6 md:space-y-8">
                       <AnimatePresence mode="wait">
-                        {step === 1 ? (
+                        {step === REGISTER_STEPS.BASIC_INFO ? (
                           <motion.div
                             key="step1"
                             initial={{ opacity: 0, x: isAr ? 20 : -20 }}
@@ -252,7 +252,7 @@ const RegisterPage = () => {
                               )}
                             />
                           </motion.div>
-                        ) : step === 2 ? (
+                        ) : step === REGISTER_STEPS.EGYPTIAN_ID ? (
                           <motion.div
                             key="step2"
                             initial={{ opacity: 0, x: isAr ? -20 : 20 }}
@@ -323,10 +323,12 @@ const RegisterPage = () => {
                                       <FormControl>
                                         <Input
                                           type="date"
-                                          className="h-14 md:h-16 rounded-2xl md:rounded-3xl bg-muted/30 border-none shadow-inner px-6 md:px-8 text-base md:text-lg font-black placeholder:text-muted-foreground/30 focus-visible:ring-primary/20"
+                                          className="h-14 md:h-16 rounded-2xl md:rounded-3xl bg-muted/30 border-none shadow-inner px-6 md:px-8 text-base md:text-lg font-black focus-visible:ring-primary/20 appearance-none"
                                           {...field}
+                                          value={field.value || ""}
                                         />
                                       </FormControl>
+
                                       <FormMessage className="ms-2 font-bold" />
                                     </FormItem>
                                   )}
@@ -347,6 +349,7 @@ const RegisterPage = () => {
                                             placeholder={t("auth.register.fullNamePlaceholder")}
                                             className="h-14 md:h-16 rounded-2xl md:rounded-3xl bg-muted/30 border-none shadow-inner px-6 md:px-8 text-base md:text-lg font-black placeholder:text-muted-foreground/30 focus-visible:ring-primary/20"
                                             {...field}
+                                            value={field.value || ""}
                                           />
                                         </FormControl>
                                         <FormMessage className="ms-2 font-bold" />
@@ -366,6 +369,7 @@ const RegisterPage = () => {
                                             placeholder={t("auth.register.phoneNumberPlaceholder")}
                                             className="h-14 md:h-16 rounded-2xl md:rounded-3xl bg-muted/30 border-none shadow-inner px-6 md:px-8 text-base md:text-lg font-black placeholder:text-muted-foreground/30 focus-visible:ring-primary/20"
                                             {...field}
+                                            value={field.value || ""}
                                           />
                                         </FormControl>
                                         <FormMessage className="ms-2 font-bold" />
@@ -393,6 +397,7 @@ const RegisterPage = () => {
                                             placeholder="e.g. STU-XXXX-XXXX"
                                             className="h-14 md:h-16 rounded-2xl md:rounded-3xl bg-primary/5 border-2 border-primary/10 px-6 md:px-8 text-base md:text-lg font-mono font-black placeholder:text-muted-foreground/30 focus-visible:ring-primary/20"
                                             {...field}
+                                            value={field.value || ""}
                                             onChange={(e) =>
                                               field.onChange(e.target.value.toUpperCase())
                                             }
@@ -442,6 +447,7 @@ const RegisterPage = () => {
                                           placeholder={t("auth.register.bioPlaceholder")}
                                           className="min-h-32 md:min-h-40 rounded-2xl md:rounded-3xl bg-muted/30 border-none shadow-inner px-6 md:px-8 text-base md:text-lg font-medium p-6 resize-none focus-visible:ring-primary/20 leading-relaxed italic"
                                           {...field}
+                                          value={field.value || ""}
                                         />
                                       </FormControl>
                                       <FormMessage className="ms-2 font-bold" />
@@ -480,7 +486,7 @@ const RegisterPage = () => {
                               </div>
                             )}
                           </motion.div>
-                        ) : step === 3 ? (
+                        ) : step === REGISTER_STEPS.CONSENT ? (
                           <motion.div
                             key="step3"
                             initial={{ opacity: 0, x: isAr ? -20 : 20 }}
@@ -553,14 +559,17 @@ const RegisterPage = () => {
                             </Button>
                           </Link>
                         )}
-                        {step < 4 ? (
+
+                        {step < REGISTER_STEPS.OTP_VERIFY ? (
                           <Button
                             type="button"
                             size="lg"
                             className="flex-1 h-14 md:h-16 rounded-2xl md:rounded-3xl font-black uppercase tracking-widest text-xs md:text-sm shadow-2xl shadow-primary/30 group"
                             onClick={nextStep}
                           >
-                            {step === 3 ? t("buttons.getOtp", "Get Code") : t("buttons.continue")}
+                            {step === REGISTER_STEPS.CONSENT
+                              ? t("buttons.getOtp", "Get Code")
+                              : t("buttons.continue")}
                             <ArrowRight
                               className={cn(
                                 "h-4 w-4 ms-2 group-hover:translate-x-1 transition-transform",

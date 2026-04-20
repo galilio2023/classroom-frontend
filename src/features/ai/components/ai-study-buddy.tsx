@@ -150,7 +150,7 @@ export const AIStudyBuddy = (props: AIStudyBuddyProps) => {
       silent
       skeletonClassName="fixed bottom-40 md:bottom-32 end-4 md:end-6 h-14 w-14 md:h-16 md:w-16 rounded-3xl md:rounded-4xl"
     >
-      {/* ðŸ›¡ï¸ SECURITY: Only mount the chat interface if classId is provided. 
+      {/* 🛡️ SECURITY: Only mount the chat interface if classId is provided. 
           The guard handles global AI availability and RBAC. */}
       <AIErrorBoundary name="StudyBuddy">
         <AIStudyBuddyContent {...props} />

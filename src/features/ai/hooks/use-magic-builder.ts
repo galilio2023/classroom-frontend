@@ -66,7 +66,7 @@ export const useMagicBuilder = ({
 
   const jobId = useMemo(() => `magic-builder-${classId}`, [classId]);
 
-  // ðŸ›¡ï¸ MEMORY SAFETY: AbortController for long-running AI tasks
+  // 🛡️ MEMORY SAFETY: AbortController for long-running AI tasks
   useEffect(() => {
     const controller = new AbortController();
     return () => controller.abort();
@@ -95,14 +95,24 @@ export const useMagicBuilder = ({
   const isCompleted = activeJob?.status === "completed";
 
   const isGenerating = useMemo(() => {
-    // ðŸ›¡ï¸ CONSOLIDATED STATE: Check background jobs, internal state, and external overrides
+    // 🛡️ CONSOLIDATED STATE: Check background jobs, internal state, and external overrides
     return externalIsGenerating || activeJob?.status === "processing" || internalIsGenerating;
   }, [externalIsGenerating, activeJob?.status, internalIsGenerating]);
 
   const handleStart = async () => {
-    // ðŸ›¡ï¸ SECURITY: Sanitize and truncate inputs
-    const cleanTopic = config.topic.trim().substring(0, 500);
-    const cleanObjectives = config.objectives.trim().substring(0, 1000);
+    // 🛡️ SECURITY: Sanitize and truncate inputs
+    // 🛡️ PROMPT INJECTION FILTERING: Strip keywords that attempt to override system instructions
+    const injectionPatterns =
+      /ignore\s+previous\s+instructions|disregard\s+the\s+above|you\s+are\s+now\s+a|new\s+rule/gi;
+
+    const cleanTopic = config.topic
+      .trim()
+      .substring(0, 500)
+      .replace(injectionPatterns, "[REDACTED]");
+    const cleanObjectives = config.objectives
+      .trim()
+      .substring(0, 1000)
+      .replace(injectionPatterns, "[REDACTED]");
 
     if (!cleanTopic || !classId) {
       toast.error(t("common.errors.fillRequired"));
@@ -155,7 +165,7 @@ export const useMagicBuilder = ({
 
   const reset = () => {
     setInternalIsGenerating(false);
-    // ðŸ›¡ï¸ Prune stale or completed jobs when the modal closes
+    // 🛡️ Prune stale or completed jobs when the modal closes
     if (isCompleted || activeJob?.status === "failed") {
       removeJob(jobId);
     }

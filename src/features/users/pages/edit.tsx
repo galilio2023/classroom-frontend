@@ -1,7 +1,7 @@
 import React from "react";
 import { useForm } from "@refinedev/react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useGetIdentity, useSelect } from "@refinedev/core";
+import { useGetIdentity, useSelect, HttpError } from "@refinedev/core";
 import { toast } from "sonner";
 import {
   Form,
@@ -59,6 +59,8 @@ import { Breadcrumb } from "@/components/refine/layout/breadcrumb";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
+import { normalizeArabicNumerals } from "@/lib/validators";
+import * as z from "zod";
 
 const UsersEdit = () => {
   const { t, i18n } = useTranslation();
@@ -77,8 +79,8 @@ const UsersEdit = () => {
   const {
     refineCore: { onFinish, formLoading, query },
     ...form
-  } = useForm({
-    resolver: zodResolver(userFormSchema),
+  } = useForm<z.infer<typeof userFormSchema>, HttpError, z.infer<typeof userFormSchema>>({
+    resolver: zodResolver(userFormSchema) as any,
     refineCoreProps: {
       resource: "users",
       action: "edit",
@@ -86,13 +88,26 @@ const UsersEdit = () => {
     },
   });
 
+  const handleOnFinish = async (values: z.infer<typeof userFormSchema>) => {
+    const normalizedValues = {
+      ...values,
+      phoneNumber: values.phoneNumber
+        ? normalizeArabicNumerals(values.phoneNumber)
+        : values.phoneNumber,
+      parentPhone: values.parentPhone
+        ? normalizeArabicNumerals(values.parentPhone)
+        : values.parentPhone,
+    };
+    await onFinish(normalizedValues as any); // 🛡️ ATOMICITY: Casting for Refine variable compatibility
+  };
+
   const { options: departmentOptions } = useSelect<Department>({
     resource: "departments",
     optionLabel: "name",
     optionValue: "id",
   });
 
-  const user = query?.data?.data;
+  const user = query?.data?.data as unknown as User;
 
   const handleCopyCode = () => {
     if (user?.inviteCode) {
@@ -133,7 +148,7 @@ const UsersEdit = () => {
           className="lg:col-span-2"
         >
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onFinish)}>
+            <form onSubmit={form.handleSubmit(handleOnFinish)}>
               <Card className="border-primary/10 shadow-xl shadow-primary/5 rounded-[2.5rem] overflow-hidden bg-card/50 backdrop-blur-sm">
                 <CardHeader className="p-8 pb-4 flex flex-row items-center gap-6">
                   <Avatar className="h-20 w-20 rounded-2xl border-4 border-background shadow-lg">

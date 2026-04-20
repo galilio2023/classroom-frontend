@@ -20,3 +20,14 @@ export function stripMarkdown(text: string): string {
     .replace(/[#*>-]/g, "") // List markers and headers
     .trim();
 }
+
+/**
+ * 🛠️ TRACEABILITY UTILITY: Generates a unique correlation ID.
+ * Uses crypto.randomUUID if available, with a safe fallback for older browsers.
+ */
+export function getUUID(): string {
+  if (typeof window !== "undefined" && window.crypto && window.crypto.randomUUID) {
+    return window.crypto.randomUUID();
+  }
+  return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+}

@@ -21,6 +21,7 @@ import { cn } from "@/lib/utils";
 import { useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { KioskPaymentModal } from "@/features/payments/components/KioskPaymentModal";
+import { PaymobCheckoutModal } from "@/features/payments/components/PaymobCheckoutModal";
 
 const FAQItem = ({ question, answer }: { question: string; answer: string }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -68,10 +69,10 @@ const FAQItem = ({ question, answer }: { question: string; answer: string }) => 
 const Pricing = () => {
   const { t } = useTranslation();
   const { data: identity } = useGetIdentity<User>();
-  const { mutate: createCheckout } = useCustomMutation<{ url?: string }>();
-  const { mutate: createKioskOrder } = useCustomMutation<{
+  const { mutate: createOrder } = useCustomMutation<{
     id: string;
-    referenceCode: string;
+    referenceCode?: string;
+    iframeUrl?: string;
     amount: number;
   }>();
   const navigate = useNavigate();
@@ -80,6 +81,11 @@ const Pricing = () => {
     id: string;
     referenceCode: string;
     amount: number;
+  } | null>(null);
+
+  const [cardOrder, setCardOrder] = useState<{
+    id: string;
+    iframeUrl: string;
   } | null>(null);
 
   const handleUpgrade = (priceId: string) => {
@@ -91,16 +97,19 @@ const Pricing = () => {
 
     if (priceId === "free") return;
 
-    createCheckout(
+    createOrder(
       {
-        url: "/subscriptions/checkout",
+        url: "/payments/create-order",
         method: "post",
-        values: { priceId },
+        values: { provider: "paymob", amount: 200, priceId }, // 200 EGP for Pro
       },
       {
-        onSuccess: (data) => {
-          if (data.data.url) {
-            window.location.href = data.data.url;
+        onSuccess: (data: any) => {
+          if (data.data.iframeUrl) {
+            setCardOrder({
+              id: data.data.id,
+              iframeUrl: data.data.iframeUrl,
+            });
           }
         },
         onError: () => {
@@ -117,14 +126,14 @@ const Pricing = () => {
       return;
     }
 
-    createKioskOrder(
+    createOrder(
       {
         url: "/payments/create-order",
         method: "post",
-        values: { provider: "fawry", amount: 20000, priceId }, // Hardcoded 200 EGP for Pro
+        values: { provider: "fawry", amount: 200, priceId }, // 200 EGP for Pro
       },
       {
-        onSuccess: (data) => {
+        onSuccess: (data: any) => {
           setKioskOrder(data.data);
         },
         onError: () => {
@@ -353,6 +362,17 @@ const Pricing = () => {
           orderId={kioskOrder?.id || null}
           referenceCode={kioskOrder?.referenceCode || null}
           amount={kioskOrder?.amount || 0}
+          onSuccess={() => {
+            toast.success(t("payments.success"));
+            navigate("/dashboard");
+          }}
+        />
+
+        <PaymobCheckoutModal
+          isOpen={!!cardOrder}
+          onClose={() => setCardOrder(null)}
+          orderId={cardOrder?.id || null}
+          iframeUrl={cardOrder?.iframeUrl || null}
           onSuccess={() => {
             toast.success(t("payments.success"));
             navigate("/dashboard");

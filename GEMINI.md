@@ -35,8 +35,9 @@ When implementing or modifying AI streaming hooks (e.g., `useAIChat`, `useAILive
 - Use the `Sparkles` icon for generative features and `BrainCircuit` for analysis features.
 - **Offline Mode**: Use the `WifiOff` icon and a pulsing red badge for offline indicators.
 
-### 7. Hager Mode (High-Fidelity Handouts)
-- **Mandate**: Teachers MUST have a "one-click" high-fidelity PDF export for handouts.
-- **Precision**: PDFs MUST correctly render Arabic typography and LaTeX math formulas.
-- **Why**: Ensures the platform remains useful in traditional paper-based classroom settings.
+### 8. Support Visibility (Traceability)
+- **Mandate**: Every AI-related error toast/notification MUST include the `X-Correlation-ID`.
+- **Action**: Use the `handleError` utility and ensure the error message or a "Support Info" accordion displays the unique ID.
+- **Why**: Allows students to report specific trace IDs to teachers/admins for high-fidelity debugging of hallucinations or provider failures.
+
 
