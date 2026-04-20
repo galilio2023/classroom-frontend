@@ -95,14 +95,18 @@ export const JourneyFunnelChart = ({ data }: JourneyFunnelChartProps) => {
             layout="vertical"
             margin={{ top: 5, right: 30, left: 40, bottom: 5 }}
           >
-            <CartesianGrid vertical={false} strokeDasharray="3 3" className="stroke-muted-foreground/10" />
+            <CartesianGrid
+              vertical={false}
+              strokeDasharray="3 3"
+              className="stroke-muted-foreground/10"
+            />
             <XAxis type="number" hide />
             <YAxis
               dataKey="stage"
               type="category"
               axisLine={false}
               tickLine={false}
-              tickFormatter={(val) => t(`dashboard.journey.stages.${val}`)}
+              tickFormatter={(val) => t(`dashboard.journey.stages.${val}` as any)}
               className="fill-muted-foreground/80 text-[10px] font-black uppercase tracking-widest"
               width={100}
               orientation={isArabic ? "right" : "left"}
@@ -115,7 +119,10 @@ export const JourneyFunnelChart = ({ data }: JourneyFunnelChartProps) => {
             />
             <Bar dataKey="count" radius={[0, 12, 12, 0]} barSize={40}>
               {sortedData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={COLORS[stageOrder.indexOf(entry.stage)] || COLORS[0]} />
+                <Cell
+                  key={`cell-${index}`}
+                  fill={COLORS[stageOrder.indexOf(entry.stage)] || COLORS[0]}
+                />
               ))}
               <LabelList
                 dataKey="count"

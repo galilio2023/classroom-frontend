@@ -60,6 +60,7 @@ export interface User {
   parentName: string | null;
   parentPhone: string | null;
   inviteCode: string | null;
+  planType: "basic" | "faculty" | "school";
   verificationStatus: VerificationStatus;
   verificationDocumentUrl: string | null;
   verificationDocumentCldPubId: string | null;

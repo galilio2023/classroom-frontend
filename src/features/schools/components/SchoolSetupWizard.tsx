@@ -50,11 +50,6 @@ export const SchoolSetupWizard = ({ school, onComplete }: SchoolSetupWizardProps
   const isUpdating = updateMutation.isPending;
   const isCreatingDept = createMutation.isPending;
 
-  const handleNext = () => {
-    if (step < 4) setStep(step + 1);
-    else onComplete();
-  };
-
   const handleSaveBasic = () => {
     if (!formData.name.trim() || !formData.slug.trim()) {
       toast.error("School name and slug are required.");

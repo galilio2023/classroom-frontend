@@ -77,6 +77,7 @@ export const useDashboard = () => {
       totalTeachers: 0,
       totalClasses: 0,
       totalAssignments: 0,
+      totalQuizzes: 0,
       pendingVerifications: 0,
     },
     attendanceTrend: [],

@@ -232,7 +232,6 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }, [isVisible, syncJobs, syncDelay, open, scheduleNext]);
 
-
   const addJob = (job: Omit<BackgroundJob, "status" | "createdAt">) => {
     setJobs((prev) => [
       ...prev,

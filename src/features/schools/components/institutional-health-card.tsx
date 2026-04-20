@@ -9,7 +9,7 @@ interface InstitutionalHealthProps {
 }
 
 export const InstitutionalHealthCard: React.FC<InstitutionalHealthProps> = ({ schoolId }) => {
-  const { data: healthQuery, isLoading } = useCustom({
+  const { query } = useCustom({
     url: `/schools/institutional-health/${schoolId}`,
     method: "get",
     queryOptions: {
@@ -17,7 +17,8 @@ export const InstitutionalHealthCard: React.FC<InstitutionalHealthProps> = ({ sc
     },
   });
 
-  const health = healthQuery?.data?.data;
+  const health = query.data?.data;
+  const isLoading = query.isLoading;
 
   if (isLoading) {
     return (
@@ -48,7 +49,9 @@ export const InstitutionalHealthCard: React.FC<InstitutionalHealthProps> = ({ sc
       <CardHeader>
         <div className="flex items-center justify-between">
           <div className="space-y-1">
-            <CardTitle className="text-xl font-black uppercase tracking-tight">Institutional Health</CardTitle>
+            <CardTitle className="text-xl font-black uppercase tracking-tight">
+              Institutional Health
+            </CardTitle>
             <CardDescription className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
               Real-time System Vitals & SLO Tracking
             </CardDescription>
@@ -63,7 +66,9 @@ export const InstitutionalHealthCard: React.FC<InstitutionalHealthProps> = ({ sc
           <div className="p-4 rounded-2xl bg-muted/30 border border-border/50">
             <div className="flex items-center gap-2 mb-2">
               {getStatusIcon(health?.overallScore || 0)}
-              <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Overall Health</span>
+              <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">
+                Overall Health
+              </span>
             </div>
             <p className={`text-2xl font-black ${getStatusColor(health?.overallScore || 0)}`}>
               {health?.overallScore || 0}%
@@ -72,21 +77,29 @@ export const InstitutionalHealthCard: React.FC<InstitutionalHealthProps> = ({ sc
           <div className="p-4 rounded-2xl bg-muted/30 border border-border/50">
             <div className="flex items-center gap-2 mb-2">
               <ShieldCheck className="h-4 w-4 text-primary" />
-              <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">SLO Attainment</span>
+              <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">
+                SLO Attainment
+              </span>
             </div>
-            <p className="text-2xl font-black text-primary">
-              {health?.sloAttainment || 0}%
-            </p>
+            <p className="text-2xl font-black text-primary">{health?.sloAttainment || 0}%</p>
           </div>
         </div>
 
         <div className="space-y-4">
-          <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Journey Reliability</h4>
+          <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
+            Journey Reliability
+          </h4>
           {health?.journeyStats?.map((stat: any) => (
             <div key={stat.journey} className="space-y-1">
               <div className="flex justify-between text-[9px] font-black uppercase tracking-widest">
-                <span className="truncate max-w-[150px]">{stat.journey.replace(/_/g, ' ')}</span>
-                <span className={stat.successRate < stat.target.successTarget ? "text-red-500" : "text-emerald-500"}>
+                <span className="truncate max-w-[150px]">{stat.journey.replace(/_/g, " ")}</span>
+                <span
+                  className={
+                    stat.successRate < stat.target.successTarget
+                      ? "text-red-500"
+                      : "text-emerald-500"
+                  }
+                >
                   {(stat.successRate * 100).toFixed(1)}%
                 </span>
               </div>
@@ -107,7 +120,7 @@ export const InstitutionalHealthCard: React.FC<InstitutionalHealthProps> = ({ sc
             <div className="text-start">
               <p className="text-xs font-black text-red-500 uppercase">Active Incidents</p>
               <p className="text-[10px] font-bold text-red-500/80 uppercase">
-                {health.activeIncidents} critical disruption(s) detected.
+                {health?.activeIncidents} critical disruption(s) detected.
               </p>
             </div>
           </div>
