@@ -36,7 +36,7 @@ const STORAGE_KEY = "classroom_active_jobs";
 // 🛡️ POLLING CONFIGURATION (Mandate M-008)
 const POLLING_CONFIG = {
   INITIAL_DELAY: 5000, // 5s (🚀 UX: Faster initial feedback)
-  MAX_DELAY: 120000, // 2m
+  MAX_DELAY: 30000, // 30s (🚀 UX: More aggressive cap for active jobs)
   IDLE_POLL_INTERVAL: 60000, // 1m when tab is hidden
   JITTER_FACTOR: 0.1, // 10%
 };

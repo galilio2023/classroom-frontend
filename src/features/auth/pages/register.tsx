@@ -323,10 +323,12 @@ const RegisterPage = () => {
                                       <FormControl>
                                         <Input
                                           type="date"
-                                          className="h-14 md:h-16 rounded-2xl md:rounded-3xl bg-muted/30 border-none shadow-inner px-6 md:px-8 text-base md:text-lg font-black placeholder:text-muted-foreground/30 focus-visible:ring-primary/20"
+                                          className="h-14 md:h-16 rounded-2xl md:rounded-3xl bg-muted/30 border-none shadow-inner px-6 md:px-8 text-base md:text-lg font-black focus-visible:ring-primary/20 appearance-none"
                                           {...field}
+                                          value={field.value || ""}
                                         />
                                       </FormControl>
+
                                       <FormMessage className="ms-2 font-bold" />
                                     </FormItem>
                                   )}
@@ -347,6 +349,7 @@ const RegisterPage = () => {
                                             placeholder={t("auth.register.fullNamePlaceholder")}
                                             className="h-14 md:h-16 rounded-2xl md:rounded-3xl bg-muted/30 border-none shadow-inner px-6 md:px-8 text-base md:text-lg font-black placeholder:text-muted-foreground/30 focus-visible:ring-primary/20"
                                             {...field}
+                                            value={field.value || ""}
                                           />
                                         </FormControl>
                                         <FormMessage className="ms-2 font-bold" />
@@ -366,6 +369,7 @@ const RegisterPage = () => {
                                             placeholder={t("auth.register.phoneNumberPlaceholder")}
                                             className="h-14 md:h-16 rounded-2xl md:rounded-3xl bg-muted/30 border-none shadow-inner px-6 md:px-8 text-base md:text-lg font-black placeholder:text-muted-foreground/30 focus-visible:ring-primary/20"
                                             {...field}
+                                            value={field.value || ""}
                                           />
                                         </FormControl>
                                         <FormMessage className="ms-2 font-bold" />
@@ -393,6 +397,7 @@ const RegisterPage = () => {
                                             placeholder="e.g. STU-XXXX-XXXX"
                                             className="h-14 md:h-16 rounded-2xl md:rounded-3xl bg-primary/5 border-2 border-primary/10 px-6 md:px-8 text-base md:text-lg font-mono font-black placeholder:text-muted-foreground/30 focus-visible:ring-primary/20"
                                             {...field}
+                                            value={field.value || ""}
                                             onChange={(e) =>
                                               field.onChange(e.target.value.toUpperCase())
                                             }
@@ -442,6 +447,7 @@ const RegisterPage = () => {
                                           placeholder={t("auth.register.bioPlaceholder")}
                                           className="min-h-32 md:min-h-40 rounded-2xl md:rounded-3xl bg-muted/30 border-none shadow-inner px-6 md:px-8 text-base md:text-lg font-medium p-6 resize-none focus-visible:ring-primary/20 leading-relaxed italic"
                                           {...field}
+                                          value={field.value || ""}
                                         />
                                       </FormControl>
                                       <FormMessage className="ms-2 font-bold" />

@@ -156,6 +156,9 @@ export const useRegisterForm = () => {
       {
         onSuccess: () => {
           setIsSuccess(true);
+          // 🛡️ SECURITY: Clear sensitive values from state immediately after success
+          setValidatedValues(null);
+
           // 🛡️ UX: Conditional redirection based on role AND invite context (Mandate Rule #3)
           setTimeout(() => {
             if (inviteCode) {
@@ -175,7 +178,7 @@ export const useRegisterForm = () => {
           toast.error(error.message, {
             description: `Trace ID: ${getCorrelationId(err) || correlationId}. ${t("common.supportInfo", "Please contact support for assistance.")}`,
           });
-          setStep(1); // Reset to first step on hard error
+          // 🛡️ UX: Stay on current step to allow correction/retry instead of resetting to Step 1
         },
       }
     );
