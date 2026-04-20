@@ -54,6 +54,7 @@ const AdminImportPage = () => {
       Papa.parse(selectedFile, {
         header: true,
         skipEmptyLines: true,
+        worker: true, // 🚀 PERFORMANCE: Use a web worker for large files (Review #1)
         complete: (results) => {
           if (results.data.length === 0) {
             toast.error("CSV file is empty or missing data.");

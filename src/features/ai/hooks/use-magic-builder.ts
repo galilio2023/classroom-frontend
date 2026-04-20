@@ -66,7 +66,7 @@ export const useMagicBuilder = ({
 
   const jobId = useMemo(() => `magic-builder-${classId}`, [classId]);
 
-  // ðŸ›¡ï¸ MEMORY SAFETY: AbortController for long-running AI tasks
+  // 🛡️ MEMORY SAFETY: AbortController for long-running AI tasks
   useEffect(() => {
     const controller = new AbortController();
     return () => controller.abort();
@@ -95,12 +95,12 @@ export const useMagicBuilder = ({
   const isCompleted = activeJob?.status === "completed";
 
   const isGenerating = useMemo(() => {
-    // ðŸ›¡ï¸ CONSOLIDATED STATE: Check background jobs, internal state, and external overrides
+    // 🛡️ CONSOLIDATED STATE: Check background jobs, internal state, and external overrides
     return externalIsGenerating || activeJob?.status === "processing" || internalIsGenerating;
   }, [externalIsGenerating, activeJob?.status, internalIsGenerating]);
 
   const handleStart = async () => {
-    // ðŸ›¡ï¸ SECURITY: Sanitize and truncate inputs
+    // 🛡️ SECURITY: Sanitize and truncate inputs
     const cleanTopic = config.topic.trim().substring(0, 500);
     const cleanObjectives = config.objectives.trim().substring(0, 1000);
 
@@ -155,7 +155,7 @@ export const useMagicBuilder = ({
 
   const reset = () => {
     setInternalIsGenerating(false);
-    // ðŸ›¡ï¸ Prune stale or completed jobs when the modal closes
+    // 🛡️ Prune stale or completed jobs when the modal closes
     if (isCompleted || activeJob?.status === "failed") {
       removeJob(jobId);
     }

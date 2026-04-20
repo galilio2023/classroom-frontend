@@ -13,6 +13,7 @@ import { SignUpPayload } from "@/types";
 import { getUUID } from "@/lib/utils";
 import { AI_API, BASE_URL } from "@/constants/api";
 import { getRegisterSchema, type RegisterFormValues } from "../schemas/registration-schema";
+import { offlineDB } from "@/lib/offline-db";
 
 export const REGISTER_STEPS = {
   BASIC_INFO: 1,
@@ -37,38 +38,44 @@ export const useRegisterForm = () => {
   const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
   const [isSendingOtp, setIsSendingOtp] = useState(false);
 
-  // 🛡️ RURAL RESILIENCE: Persist partial state to sessionStorage (Mandate Rule #4)
+  // 🛡️ RURAL RESILIENCE: Persist partial state to IndexedDB (Mandate Rule #4)
   useEffect(() => {
-    const saved = sessionStorage.getItem("registration_pending_values");
-    const savedStep = sessionStorage.getItem("registration_current_step");
+    const loadDraft = async () => {
+      const draft = await offlineDB.registration_drafts.get("current_registration");
 
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        setValidatedValues(parsed);
+      if (draft) {
+        try {
+          const values = draft.values as SignUpPayload;
+          setValidatedValues(values);
 
-        // 🛡️ SECURITY: Prevent step hijacking. Only restore step if we have minimal required data.
-        if (savedStep && parsed.phoneNumber) {
-          const stepNum = parseInt(savedStep, 10);
-          if (!isNaN(stepNum)) setStep(stepNum);
+          // 🛡️ SECURITY: Prevent step hijacking. Only restore step if we have minimal required data.
+          if (values.phoneNumber) {
+            setStep(draft.step as RegisterStep);
+          }
+        } catch (e) {
+          await offlineDB.registration_drafts.delete("current_registration");
         }
-      } catch (e) {
-        sessionStorage.removeItem("registration_pending_values");
-        sessionStorage.removeItem("registration_current_step");
       }
-    }
+    };
+    loadDraft();
   }, []);
 
   useEffect(() => {
-    if (validatedValues) {
-      // 🛡️ SECURITY: Explicitly exclude sensitive data from sessionStorage
-      const { password, ...safeValues } = validatedValues;
-      sessionStorage.setItem("registration_pending_values", JSON.stringify(safeValues));
-      sessionStorage.setItem("registration_current_step", step.toString());
-    } else {
-      sessionStorage.removeItem("registration_pending_values");
-      sessionStorage.removeItem("registration_current_step");
-    }
+    const saveDraft = async () => {
+      if (validatedValues) {
+        // 🛡️ SECURITY: Explicitly exclude sensitive data from persistence
+        const { password, ...safeValues } = validatedValues;
+        await offlineDB.registration_drafts.put({
+          id: "current_registration",
+          step,
+          values: safeValues,
+          updatedAt: Date.now(),
+        });
+      } else {
+        await offlineDB.registration_drafts.delete("current_registration");
+      }
+    };
+    saveDraft();
   }, [validatedValues, step]);
 
   const registerSchema = getRegisterSchema(t);
@@ -254,11 +261,11 @@ export const useRegisterForm = () => {
   const handleFinalSubmit = form.handleSubmit((values) => {
     // 🛡️ NORMALIZATION: Automatically handled by Zod .transform() in the schema
     if (role === "student") {
-      setValidatedValues(values as SignUpPayload);
+      setValidatedValues(values as unknown as SignUpPayload);
       setStep(REGISTER_STEPS.OTP_VERIFY); // Move to OTP step
       return;
     }
-    performFinalSubmit(values as SignUpPayload);
+    performFinalSubmit(values as unknown as SignUpPayload);
   });
 
   return {

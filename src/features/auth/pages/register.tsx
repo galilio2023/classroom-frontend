@@ -163,7 +163,6 @@ const RegisterPage = () => {
                     <div className="space-y-6 md:space-y-8">
                       <AnimatePresence mode="wait">
                         {step === REGISTER_STEPS.BASIC_INFO ? (
-
                           <motion.div
                             key="step1"
                             initial={{ opacity: 0, x: isAr ? 20 : -20 }}
@@ -254,7 +253,6 @@ const RegisterPage = () => {
                             />
                           </motion.div>
                         ) : step === REGISTER_STEPS.EGYPTIAN_ID ? (
-
                           <motion.div
                             key="step2"
                             initial={{ opacity: 0, x: isAr ? -20 : 20 }}
@@ -489,7 +487,6 @@ const RegisterPage = () => {
                             )}
                           </motion.div>
                         ) : step === REGISTER_STEPS.CONSENT ? (
-
                           <motion.div
                             key="step3"
                             initial={{ opacity: 0, x: isAr ? -20 : 20 }}
@@ -560,17 +557,19 @@ const RegisterPage = () => {
                               />
                               {t("buttons.signIn")}
                             </Button>
-                          {step > REGISTER_STEPS.BASIC_INFO && step < REGISTER_STEPS.OTP_VERIFY ? (
-                          ...
-                          {step < REGISTER_STEPS.OTP_VERIFY ? (
-                            <Button
-                              type="button"
-                              size="lg"
-                              className="flex-1 h-14 md:h-16 rounded-2xl md:rounded-3xl font-black uppercase tracking-widest text-xs md:text-sm shadow-2xl shadow-primary/30 group"
-                              onClick={nextStep}
-                            >
-                              {step === REGISTER_STEPS.CONSENT ? t("buttons.getOtp", "Get Code") : t("buttons.continue")}
+                          </Link>
+                        )}
 
+                        {step < REGISTER_STEPS.OTP_VERIFY ? (
+                          <Button
+                            type="button"
+                            size="lg"
+                            className="flex-1 h-14 md:h-16 rounded-2xl md:rounded-3xl font-black uppercase tracking-widest text-xs md:text-sm shadow-2xl shadow-primary/30 group"
+                            onClick={nextStep}
+                          >
+                            {step === REGISTER_STEPS.CONSENT
+                              ? t("buttons.getOtp", "Get Code")
+                              : t("buttons.continue")}
                             <ArrowRight
                               className={cn(
                                 "h-4 w-4 ms-2 group-hover:translate-x-1 transition-transform",

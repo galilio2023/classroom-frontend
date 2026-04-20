@@ -121,7 +121,9 @@ export const validateEgyptianID = (
   // we enable this as a soft-warning or strict check if centuryCode === 3.
   if (centuryCode === 3 && checkSumDigit !== expectedCheckSum % 10) {
     // We log but don't block for the first pilot week to avoid lock-outs
-    console.warn(`🛡️ Law 151: Checksum mismatch for ID ${normalizedId}. Expected ${expectedCheckSum % 10}`);
+    console.warn(
+      `🛡️ Law 151: Checksum mismatch for ID ${normalizedId}. Expected ${expectedCheckSum % 10}`
+    );
   }
 
   return {

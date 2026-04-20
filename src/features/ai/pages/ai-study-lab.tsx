@@ -467,7 +467,7 @@ const AIStudyLab = () => {
                     <ReactMarkdown>{result}</ReactMarkdown>
                   </CardContent>
                   <div className="p-8 bg-ai-primary/2 border-t border-ai-primary/10 flex flex-col md:flex-row items-center justify-between gap-6">
-                    {/* ðŸ”„ AI FEEDBACK LOOP */}
+                    {/* 🔄 AI FEEDBACK LOOP */}
                     <AIFeedback
                       actionType={`studylab_${activeTool}`}
                       metadata={{

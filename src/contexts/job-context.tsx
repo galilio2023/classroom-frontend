@@ -37,6 +37,7 @@ const STORAGE_KEY = "classroom_active_jobs";
 const POLLING_CONFIG = {
   INITIAL_DELAY: 5000, // 5s (🚀 UX: Faster initial feedback)
   MAX_DELAY: 30000, // 30s (🚀 UX: More aggressive cap for active jobs)
+  RETRY_INTERVAL: 15000, // 15s (🚀 RESILIENCE: Standard retry delay)
   IDLE_POLL_INTERVAL: 60000, // 1m when tab is hidden
   JITTER_FACTOR: 0.1, // 10%
 };
@@ -182,16 +183,16 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       isSyncingRef.current = false;
     }
-    }, [updateJob, open]);
+  }, [updateJob, open]);
 
-    const scheduleNext = useCallback((delay: number) => {
+  const scheduleNext = useCallback((delay: number) => {
     if (timeoutIdRef.current) clearTimeout(timeoutIdRef.current);
     timeoutIdRef.current = setTimeout(() => {
       setPollTick((prev) => prev + 1);
     }, delay);
-    }, []);
+  }, []);
 
-    const poll = useCallback(async () => {
+  const poll = useCallback(async () => {
     try {
       // 🛡️ RULE 6: Tab Visibility Safety. Pause polling when tab is hidden to save battery/data.
       if (!isVisible) {
@@ -204,14 +205,17 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         await syncJobs();
 
         // 🛡️ RESILIENCE: Jittered Exponential backoff (Mandate M-008)
+        let nextDelay = POLLING_CONFIG.INITIAL_DELAY;
         setSyncDelay((prev) => {
           const nextBase = Math.min(prev * 2, POLLING_CONFIG.MAX_DELAY);
-          const nextDelay = getJitteredDelay(nextBase, POLLING_CONFIG.JITTER_FACTOR);
+          const jittered = getJitteredDelay(nextBase, POLLING_CONFIG.JITTER_FACTOR);
           // 🚀 PERFORMANCE: Ensure delay doesn't drop below INITIAL_DELAY (Review #1)
-          const flooredDelay = Math.max(POLLING_CONFIG.INITIAL_DELAY, nextDelay);
-          scheduleNext(flooredDelay);
-          return flooredDelay;
+          nextDelay = Math.max(POLLING_CONFIG.INITIAL_DELAY, jittered);
+          return nextDelay;
         });
+
+        // 🛡️ BUG FIX: Side effects like scheduleNext must be outside state updaters (Review #1)
+        scheduleNext(nextDelay);
       } else {
         // 🛡️ PERFORMANCE: Reset delay when pipe is empty
         setSyncDelay(POLLING_CONFIG.INITIAL_DELAY);
@@ -221,17 +225,16 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const error = await handleError(pollErr);
       console.error("Critical: AI Polling loop encountered an error:", error);
 
-      const retrySeconds = Math.round(POLLING_CONFIG.MAX_DELAY / 2000);
       open?.({
         type: "error",
         message: "AI Sync Error",
-        description: `${error.message}. Retrying in ${retrySeconds}s...`,
+        description: `${error.message}. Retrying in ${POLLING_CONFIG.RETRY_INTERVAL / 1000}s...`,
       });
 
       // Retry after a safe interval even if it crashed
-      scheduleNext(POLLING_CONFIG.MAX_DELAY / 2);
+      scheduleNext(POLLING_CONFIG.RETRY_INTERVAL);
     }
-    }, [isVisible, syncJobs, scheduleNext]);
+  }, [isVisible, syncJobs, scheduleNext, open]);
 
   useEffect(() => {
     const handleVisibilityChange = () => {

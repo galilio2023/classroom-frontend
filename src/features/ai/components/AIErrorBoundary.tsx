@@ -31,7 +31,7 @@ class AIErrorBoundaryBase extends Component<InternalProps, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    // ðŸ›¡ï¸ SECURITY: Sanitize name to strictly alphanumeric to prevent log injection
+    // 🛡️ SECURITY: Sanitize name to strictly alphanumeric to prevent log injection
     const safeName = (this.props.name || "Unknown").replace(/[^a-z0-9]/gi, "");
     console.error(`[AIErrorBoundary:${safeName}]`, error, errorInfo);
   }

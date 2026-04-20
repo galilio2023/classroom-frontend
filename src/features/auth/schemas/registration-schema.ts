@@ -1,5 +1,5 @@
 import * as z from "zod";
-import { egyptNumericSchema, validateEgyptianID } from "@/lib/validators";
+import { egyptNumericSchema, validateEgyptianID, normalizeArabicNumerals } from "@/lib/validators";
 import { TFunction } from "i18next";
 
 /**
@@ -15,16 +15,26 @@ export const getRegisterSchema = (t: TFunction) =>
       .string()
       .min(8, t("auth.register.passwordMin", "Password must be at least 8 characters")),
     role: z.enum(["student", "teacher", "parent"]),
-    phoneNumber: egyptNumericSchema.pipe(
-      z.string().min(10, t("auth.register.phoneRequired", "Phone number is required"))
-    ),
-    nationalId: egyptNumericSchema.pipe(
-      z.string().length(14, t("auth.register.nationalIdLength", "National ID must be 14 digits"))
-    ),
+    phoneNumber: z
+      .string()
+      .min(1, t("auth.register.phoneRequired", "Phone number is required"))
+      .transform(normalizeArabicNumerals)
+      .pipe(z.string().min(10, t("auth.register.phoneInvalid", "Invalid phone number"))),
+    nationalId: z
+      .string()
+      .min(1, t("auth.register.nationalIdRequired", "National ID is required"))
+      .transform(normalizeArabicNumerals)
+      .pipe(
+        z.string().length(14, t("auth.register.nationalIdLength", "National ID must be 14 digits"))
+      ),
     bio: z.string().optional(),
     dateOfBirth: z.string().optional(),
     parentName: z.string().optional(),
-    parentPhone: egyptNumericSchema.optional().or(z.string().length(0)).or(z.null()),
+    parentPhone: z
+      .string()
+      .optional()
+      .transform((val) => (val ? normalizeArabicNumerals(val) : val))
+      .pipe(z.string().optional().or(z.literal(""))),
     childInviteCode: z.string().optional(),
     verificationDocumentUrl: z.string().optional(),
     verificationDocumentCldPubId: z.string().optional(),

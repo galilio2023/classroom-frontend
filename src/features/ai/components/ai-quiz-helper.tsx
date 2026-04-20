@@ -21,10 +21,10 @@ export const AIQuizHelper: React.FC<AIQuizHelperProps> = ({ onUseQuestions }) =>
     isLoading,
   } = useQuizGeneration(5);
 
-  // ðŸ›¡ï¸ PARENT GATING: AI interactive features are disabled for Parents
+  // 🛡️ PARENT GATING: AI interactive features are disabled for Parents
   if (!isAllowed) return null;
 
-  // ðŸ›¡ï¸ Global Master Switch: Graceful Degradation
+  // 🛡️ Global Master Switch: Graceful Degradation
   if (!isAiEnabled) {
     return <AIFeatureDisabled title="AI Quiz Helper Offline" />;
   }
