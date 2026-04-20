@@ -11,6 +11,7 @@ import { validateEgyptianID, normalizeArabicNumerals, egyptNumericSchema } from 
 import { handleError, getCorrelationId } from "@/providers/utils/api-errors";
 import { SignUpPayload } from "@/types";
 import { getUUID } from "@/lib/utils";
+import { AI_API, BASE_URL } from "@/constants/api";
 
 export const REGISTER_STEPS = {
   BASIC_INFO: 1,
@@ -19,6 +20,8 @@ export const REGISTER_STEPS = {
   OTP_VERIFY: 4,
 } as const;
 
+export type RegisterStep = (typeof REGISTER_STEPS)[keyof typeof REGISTER_STEPS];
+
 export const useRegisterForm = () => {
   const { t } = useTranslation();
   const { mutate: register, isPending } = useRegister();
@@ -26,7 +29,7 @@ export const useRegisterForm = () => {
   const [searchParams] = useSearchParams();
   const inviteCode = searchParams.get("inviteCode");
 
-  const [step, setStep] = useState(REGISTER_STEPS.BASIC_INFO);
+  const [step, setStep] = useState<RegisterStep>(REGISTER_STEPS.BASIC_INFO);
   const [isGeneratingBio, setIsGeneratingBio] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [validatedValues, setValidatedValues] = useState<SignUpPayload | null>(null);
@@ -123,7 +126,7 @@ export const useRegisterForm = () => {
 
     setIsGeneratingBio(true);
     try {
-      const response = await axios.post("/api/ai/generate-bio", { name, role }, { headers });
+      const response = await axios.post(`${BASE_URL}${AI_API.BIO}`, { name, role }, { headers });
       form.setValue("bio", response.data.bio);
       toast.success(t("auth.register.aiBioSuccess", "AI Bio generated successfully!"));
     } catch (error: any) {
@@ -185,11 +188,11 @@ export const useRegisterForm = () => {
       if (step === REGISTER_STEPS.CONSENT) {
         await sendWhatsAppOtp();
       }
-      setStep((prev) => (prev + 1) as any);
+      setStep((prev) => (prev + 1) as RegisterStep);
     }
   };
 
-  const prevStep = () => setStep((prev) => (prev - 1) as any);
+  const prevStep = () => setStep((prev) => (prev - 1) as RegisterStep);
 
   const performFinalSubmit = (values: SignUpPayload) => {
     const correlationId = `reg-${getUUID()}`;
@@ -234,7 +237,7 @@ export const useRegisterForm = () => {
 
     setIsSendingOtp(true);
     try {
-      await axios.post("/api/auth/otp/send", { phoneNumber }, { headers });
+      await axios.post(`${BASE_URL}${AI_API.OTP_SEND}`, { phoneNumber }, { headers });
       toast.success(t("auth.otp.sent", "OTP sent via WhatsApp!"));
     } catch (error) {
       const apiError = await handleError(error);
@@ -253,7 +256,11 @@ export const useRegisterForm = () => {
 
     setIsVerifyingOtp(true);
     try {
-      const response = await axios.post("/api/auth/otp/verify", { phoneNumber, code }, { headers });
+      const response = await axios.post(
+        `${BASE_URL}${AI_API.OTP_VERIFY}`,
+        { phoneNumber, code },
+        { headers }
+      );
       if (response.data.data.verified && validatedValues) {
         // 🛡️ SECURITY: Use validated, transformed values from the original submission
         performFinalSubmit(validatedValues);

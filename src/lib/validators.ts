@@ -25,7 +25,10 @@ export function normalizeArabicNumerals(input: string): string {
 /**
  * 🛡️ REUSABLE ZOD FRAGMENT: Standard normalization for Egyptian numeric inputs (ID, Phone).
  */
-export const egyptNumericSchema = z.string().transform((val) => normalizeArabicNumerals(val));
+export const egyptNumericSchema = z.preprocess(
+  (val) => (typeof val === "string" ? normalizeArabicNumerals(val) : val),
+  z.string()
+);
 
 export const validateEgyptianID = (
   id: string
