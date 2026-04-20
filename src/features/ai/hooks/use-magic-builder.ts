@@ -102,10 +102,17 @@ export const useMagicBuilder = ({
   const handleStart = async () => {
     // 🛡️ SECURITY: Sanitize and truncate inputs
     // 🛡️ PROMPT INJECTION FILTERING: Strip keywords that attempt to override system instructions
-    const injectionPatterns = /ignore\s+previous\s+instructions|disregard\s+the\s+above|you\s+are\s+now\s+a|new\s+rule/gi;
-    
-    const cleanTopic = config.topic.trim().substring(0, 500).replace(injectionPatterns, "[REDACTED]");
-    const cleanObjectives = config.objectives.trim().substring(0, 1000).replace(injectionPatterns, "[REDACTED]");
+    const injectionPatterns =
+      /ignore\s+previous\s+instructions|disregard\s+the\s+above|you\s+are\s+now\s+a|new\s+rule/gi;
+
+    const cleanTopic = config.topic
+      .trim()
+      .substring(0, 500)
+      .replace(injectionPatterns, "[REDACTED]");
+    const cleanObjectives = config.objectives
+      .trim()
+      .substring(0, 1000)
+      .replace(injectionPatterns, "[REDACTED]");
 
     if (!cleanTopic || !classId) {
       toast.error(t("common.errors.fillRequired"));

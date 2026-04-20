@@ -96,12 +96,12 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const activeAiJobs = jobsRef.current.filter((j) => j.status === "processing");
     if (activeAiJobs.length === 0 || isSyncingRef.current) return;
 
-    isSyncingRef.current = true;
     if (abortControllerRef.current) abortControllerRef.current.abort();
     const controller = new AbortController();
     abortControllerRef.current = controller;
 
     try {
+      isSyncingRef.current = true;
       const { data: session } = await getFreshSession();
       const token = (session as any)?.token;
       if (!token) return;
@@ -167,6 +167,14 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }, [updateJob, open]);
 
+  // 🛡️ CLEANUP: Prevent memory leaks and orphaned requests on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutIdRef.current) clearTimeout(timeoutIdRef.current);
+      if (abortControllerRef.current) abortControllerRef.current.abort();
+    };
+  }, []);
+
   const scheduleNext = useCallback((delay: number) => {
     if (timeoutIdRef.current) clearTimeout(timeoutIdRef.current);
 
@@ -175,11 +183,13 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const poll = useCallback(async () => {
     let nextDelay = syncDelay;
+    let shouldSchedule = false;
 
     try {
       // 🛡️ RULE 6: Tab Visibility Safety
       if (!isVisible) {
-        scheduleNext(POLLING_CONFIG.IDLE_POLL_INTERVAL);
+        nextDelay = POLLING_CONFIG.IDLE_POLL_INTERVAL;
+        shouldSchedule = true;
         return;
       }
 
@@ -192,10 +202,11 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         const jittered = getJitteredDelay(nextBase, POLLING_CONFIG.JITTER_FACTOR);
         nextDelay = Math.max(POLLING_CONFIG.INITIAL_DELAY, jittered);
         setSyncDelay(nextDelay);
-        scheduleNext(nextDelay);
+        shouldSchedule = true;
       } else {
         // Stop the loop if no more processing jobs
         setSyncDelay(POLLING_CONFIG.INITIAL_DELAY);
+        shouldSchedule = false;
         if (timeoutIdRef.current) {
           clearTimeout(timeoutIdRef.current);
           timeoutIdRef.current = null;
@@ -212,9 +223,15 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         description: `${error.message} (Trace: ${correlationId})`,
       });
 
-      scheduleNext(POLLING_CONFIG.RETRY_INTERVAL);
+      nextDelay = POLLING_CONFIG.RETRY_INTERVAL;
+      shouldSchedule = true;
+    } finally {
+      if (shouldSchedule) {
+        scheduleNext(nextDelay);
+      }
     }
   }, [isVisible, syncJobs, syncDelay, open, scheduleNext]);
+
 
   const addJob = (job: Omit<BackgroundJob, "status" | "createdAt">) => {
     setJobs((prev) => [
