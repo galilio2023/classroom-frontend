@@ -197,7 +197,12 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         await syncJobs();
 
         // 🛡️ RESILIENCE: Full Jitter Exponential backoff
-        const nextBase = Math.min(syncDelay * 2, POLLING_CONFIG.MAX_DELAY);
+        // Cap the attempt to prevent power overflow (Mandate Review #8)
+        const cappedAttempt = Math.min(jobs[0]?.retryCount || 0, 10);
+        const nextBase = Math.min(
+          POLLING_CONFIG.MAX_DELAY,
+          POLLING_CONFIG.INITIAL_DELAY * Math.pow(2, cappedAttempt)
+        );
         const jittered = getJitteredDelay(nextBase);
         nextDelay = Math.max(POLLING_CONFIG.INITIAL_DELAY, jittered);
         setSyncDelay(nextDelay);
