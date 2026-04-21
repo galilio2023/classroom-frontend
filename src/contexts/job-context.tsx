@@ -39,7 +39,6 @@ const POLLING_CONFIG = {
   MAX_DELAY: 30000, // 30s (🚀 UX: More aggressive cap for active jobs)
   RETRY_INTERVAL: 15000, // 15s (🚀 RESILIENCE: Standard retry delay)
   IDLE_POLL_INTERVAL: 60000, // 1m when tab is hidden
-  JITTER_FACTOR: 0.1, // 10%
 };
 
 export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -197,9 +196,9 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (activeAiJobs.length > 0) {
         await syncJobs();
 
-        // 🛡️ RESILIENCE: Jittered Exponential backoff
+        // 🛡️ RESILIENCE: Full Jitter Exponential backoff
         const nextBase = Math.min(syncDelay * 2, POLLING_CONFIG.MAX_DELAY);
-        const jittered = getJitteredDelay(nextBase, POLLING_CONFIG.JITTER_FACTOR);
+        const jittered = getJitteredDelay(nextBase);
         nextDelay = Math.max(POLLING_CONFIG.INITIAL_DELAY, jittered);
         setSyncDelay(nextDelay);
         shouldSchedule = true;
