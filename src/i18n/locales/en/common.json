@@ -185,6 +185,8 @@
       "remove": "Remove file",
       "tooLarge": "File too large",
       "tooLargeDesc": "Please select a file smaller than 10MB.",
+      "largeFileWarning": "Large File Detected",
+      "largeFileWarningDesc": "Standard uploads may be unstable on slow networks. Consider using a 4G/Wifi connection for best results.",
       "success": "File uploaded successfully!",
       "removeSuccess": "File removed successfully",
       "error": "Upload failed",

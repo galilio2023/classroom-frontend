@@ -220,7 +220,7 @@ const SubjectsList = () => {
               <p className="text-2xl md:text-3xl font-black text-indigo-600">
                 {isLoading
                   ? "..."
-                  : new Intl.NumberFormat(i18n.language).format(Number(stats.totalCredits))}
+                  : new Intl.NumberFormat(i18n.language).format(Number(stats.totalCredits || 0))}
               </p>
             </div>
           </Card>
@@ -235,7 +235,7 @@ const SubjectsList = () => {
               <p className="text-2xl md:text-3xl font-black text-green-600">
                 {isLoading
                   ? "..."
-                  : new Intl.NumberFormat(i18n.language).format(Number(stats.avgCredits))}
+                  : new Intl.NumberFormat(i18n.language).format(Number(stats.avgCredits || 0))}
               </p>
             </div>
           </Card>

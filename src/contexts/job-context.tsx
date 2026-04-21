@@ -12,6 +12,7 @@ export interface BackgroundJob {
   title: string;
   createdAt: number;
   metadata?: any;
+  retryCount?: number; // 🛡️ Mandate Review #8: Track retries for exponential backoff
 }
 
 interface JobContextType {
@@ -197,8 +198,10 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         await syncJobs();
 
         // 🛡️ RESILIENCE: Full Jitter Exponential backoff
-        // Cap the attempt to prevent power overflow (Mandate Review #8)
-        const cappedAttempt = Math.min(jobs[0]?.retryCount || 0, 10);
+        // Mandate Review #8: Use the max retry count across all active jobs for consistent backoff
+        const maxRetries = activeAiJobs.reduce((max, job) => Math.max(max, job.retryCount || 0), 0);
+        const cappedAttempt = Math.min(maxRetries, 10);
+
         const nextBase = Math.min(
           POLLING_CONFIG.MAX_DELAY,
           POLLING_CONFIG.INITIAL_DELAY * Math.pow(2, cappedAttempt)

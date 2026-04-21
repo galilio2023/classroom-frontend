@@ -101,14 +101,23 @@ export class AiStreamClient {
 
         options.signal?.addEventListener("abort", onAbort);
 
-        // Standard promise cleanup
-        const cleanup = () => {
+        // Standard promise cleanup helper
+        const finish = () => {
           clearTimeout(timeout);
           options.signal?.removeEventListener("abort", onAbort);
         };
 
-        // If promise resolves via timeout, we still need to remove the listener
-        setTimeout(cleanup, waitTime + 50);
+        // If promise resolves/rejects, we must remove the listener.
+        // We use a local try-finally inside the async wrapper or just handle it here.
+        // The most robust way is to wrap the timeout in a way that always cleans up.
+        (async () => {
+          try {
+            await new Promise((r) => setTimeout(r, waitTime));
+            resolve();
+          } finally {
+            finish();
+          }
+        })();
       }).catch((err) => {
         if (options.signal?.aborted) throw err;
         throw err;
