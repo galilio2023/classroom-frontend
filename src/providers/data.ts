@@ -15,35 +15,76 @@ const BACKEND_BASE_URL = BACKEND_URL;
 const isOffline = () => !navigator.onLine;
 
 /**
- * Smart Fetcher: Only adds Content-Type for methods with a body.
+ * 🚀 RESILIENT FETCH: Implements Exponential Backoff & Retry-After awareness.
+ * Mandate #2: Rural Egypt Resilience.
  */
-const fetcher = async (url: string, options?: RequestInit) => {
+const fetcherWithRetry = async (
+  url: string,
+  options?: RequestInit,
+  retries = 3,
+  backoff = 1000,
+  attempt = 0,
+): Promise<Response> => {
   const method = options?.method?.toUpperCase() || "GET";
   const headers: Record<string, string> = {
     ...(options?.headers as Record<string, string>),
-    // 🛡️ TRACEABILITY: Mandate M-011 - Global correlation ID for debugging
-    "x-correlation-id": `client-${getUUID()}`,
+    "x-correlation-id": (options?.headers as any)?.["x-correlation-id"] || `client-${getUUID()}`,
   };
 
   const isFormData = options?.body instanceof FormData;
-
   if (["POST", "PUT", "PATCH", "DELETE"].includes(method) && !isFormData) {
     if (!headers["Content-Type"]) {
       headers["Content-Type"] = "application/json";
     }
   }
 
-  // 🛡️ DUAL AUTH: Better Auth (Cookies) + Bearer Token (Authorization Header)
   const token = localStorage.getItem("tablawy_auth_token");
   if (token && !headers["Authorization"]) {
     headers["Authorization"] = `Bearer ${token}`;
   }
 
-  return fetch(url, {
-    ...options,
-    credentials: "include",
-    headers: headers,
-  });
+  try {
+    const response = await fetch(url, {
+      ...options,
+      credentials: "include",
+      headers,
+    });
+
+    // 🛡️ RATE LIMITING: Handle 429 with Retry-After Header (Mandate #2)
+    if (response.status === 429 && retries > 0) {
+      const retryAfterRaw = response.headers.get("Retry-After");
+      const retryAfterSeconds = retryAfterRaw ? parseInt(retryAfterRaw, 10) : 0;
+
+      /**
+       * 🚀 FULL JITTER BACKOFF (Mandate Review #8)
+       * Prevents thundering herds during rural network flaps.
+       * sleep = random(0, min(cap, base * 2^attempt))
+       */
+      const cap = 30000;
+      const baseDelay = backoff * Math.pow(2, attempt);
+      const jitterDelay = Math.floor(Math.random() * Math.min(cap, baseDelay));
+
+      const delayMs = retryAfterSeconds ? retryAfterSeconds * 1000 : jitterDelay;
+
+      console.warn(`[Rate Limit] Retrying in ${delayMs}ms... (${retries} retries left)`);
+
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+      return fetcherWithRetry(url, options, retries - 1, backoff, attempt + 1);
+    }
+
+    return response;
+  } catch (error) {
+    if (retries > 0 && error instanceof TypeError && error.message === "Failed to fetch") {
+      const cap = 30000;
+      const baseDelay = backoff * Math.pow(2, attempt);
+      const delayMs = Math.floor(Math.random() * Math.min(cap, baseDelay));
+
+      console.warn(`[Network Error] Retrying in ${delayMs}ms...`);
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+      return fetcherWithRetry(url, options, retries - 1, backoff, attempt + 1);
+    }
+    throw error;
+  }
 };
 
 /**
@@ -131,8 +172,6 @@ if (typeof window !== "undefined") {
 
 /**
  * Resource Filter Mappings
- * Standardized mappings for specific UI fields that don't match backend column names.
- * RESOURCES NO LONGER NEEDED HERE: departments, users, subjects, classes, resources.
  */
 export const resourceFilterMappings: Record<string, any> = {
   ...generatedMappings,
@@ -147,7 +186,6 @@ export const dataProvider: DataProvider = {
     const urlPath = getResourcePath(resource);
     const url = new URL(`${BACKEND_BASE_URL}/${urlPath}`);
 
-    // Relations: Support meta.with or meta.populate for dynamic embedding
     const withRelations = meta?.with || meta?.populate;
     if (withRelations) {
       if (typeof withRelations === "string") {
@@ -157,7 +195,6 @@ export const dataProvider: DataProvider = {
       }
     }
 
-    // Pagination: Map to _start and _end for backend compatibility
     if (pagination?.mode !== "off") {
       const current = (pagination as any)?.current ?? 1;
       const pageSize = (pagination as any)?.pageSize ?? 10;
@@ -167,12 +204,10 @@ export const dataProvider: DataProvider = {
       url.searchParams.append("_end", _end.toString());
     }
 
-    // Filtering: Support both flat and recursive (OR/AND) filters
     if (filters && filters.length > 0) {
       const hasComplexFilters = filters.some((f) => !("field" in f));
 
       if (hasComplexFilters) {
-        // 🚀 ADVANCED: Send all filters as a JSON string for the backend to parse recursively
         const mappedFilters = filters.map((filter) => {
           if ("field" in filter) {
             return {
@@ -184,7 +219,6 @@ export const dataProvider: DataProvider = {
         });
         url.searchParams.append("_filters", JSON.stringify(mappedFilters));
       } else {
-        // 🕵️ LEGACY/SIMPLE: Map operators to backend-compatible suffixes for flat query params
         filters.forEach((filter) => {
           if ("field" in filter) {
             const { field, operator, value } = filter as LogicalFilter;
@@ -215,13 +249,12 @@ export const dataProvider: DataProvider = {
       }
     }
 
-    // Sorting: Map to _sort and _order (single sort supported by current backend)
     if (sorters && sorters.length > 0) {
       url.searchParams.append("_sort", sorters[0].field);
       url.searchParams.append("_order", sorters[0].order);
     }
 
-    const response = await fetcher(url.toString());
+    const response = await fetcherWithRetry(url.toString());
 
     if (!response.ok) {
       throw await handleError(response);
@@ -238,7 +271,6 @@ export const dataProvider: DataProvider = {
     const urlPath = getResourcePath(resource);
     const url = new URL(`${BACKEND_BASE_URL}/${urlPath}/${id}`);
 
-    // Relations: Support meta.with or meta.populate for dynamic embedding
     const withRelations = meta?.with || meta?.populate;
     if (withRelations) {
       if (typeof withRelations === "string") {
@@ -248,7 +280,7 @@ export const dataProvider: DataProvider = {
       }
     }
 
-    const response = await fetcher(url.toString());
+    const response = await fetcherWithRetry(url.toString());
 
     if (!response.ok) {
       throw await handleError(response);
@@ -277,7 +309,7 @@ export const dataProvider: DataProvider = {
     const urlPath = getResourcePath(resource);
     const url = `${BACKEND_BASE_URL}/${urlPath}`;
     try {
-      const response = await fetcher(url, {
+      const response = await fetcherWithRetry(url, {
         method: "POST",
         body: JSON.stringify(variables),
       });
@@ -316,14 +348,13 @@ export const dataProvider: DataProvider = {
     const urlPath = getResourcePath(resource);
     const url = `${BACKEND_BASE_URL}/${urlPath}/${id}`;
 
-    // 🛡️ SECURITY: Auto-Inject 'version' if it's missing from variables but present in meta
     const finalVariables: any = { ...variables };
     if (finalVariables.version === undefined && meta?.version !== undefined) {
       finalVariables.version = meta.version;
     }
 
     try {
-      const response = await fetcher(url, {
+      const response = await fetcherWithRetry(url, {
         method: "PATCH",
         body: JSON.stringify(finalVariables),
       });
@@ -362,7 +393,7 @@ export const dataProvider: DataProvider = {
     const urlPath = getResourcePath(resource);
     const url = `${BACKEND_BASE_URL}/${urlPath}/${id}`;
     try {
-      const response = await fetcher(url, {
+      const response = await fetcherWithRetry(url, {
         method: "DELETE",
       });
 
@@ -394,7 +425,7 @@ export const dataProvider: DataProvider = {
       url.searchParams.append("id", String(id));
     });
 
-    const response = await fetcher(url.toString());
+    const response = await fetcherWithRetry(url.toString());
 
     if (!response.ok) {
       throw await handleError(response);
@@ -435,7 +466,7 @@ export const dataProvider: DataProvider = {
       requestUrl += `${separator}${searchParams.toString()}`;
     }
 
-    const response = await fetcher(requestUrl, {
+    const response = await fetcherWithRetry(requestUrl, {
       method: method ? method.toUpperCase() : "GET",
       body: payload instanceof FormData ? payload : payload ? JSON.stringify(payload) : undefined,
       headers: headers as Record<string, string>,

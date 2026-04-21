@@ -115,8 +115,7 @@ const PendingVerificationPage = () => {
                 </p>
               </div>
               <p className="text-sm font-medium text-foreground leading-relaxed">
-                {(identity as any)?.metadata?.rejectionReason ||
-                  t("auth.pending.defaultRejectionReason")}
+                {identity?.metadata?.rejectionReason || t("auth.pending.defaultRejectionReason")}
               </p>
               <div className="pt-4 border-t border-destructive/10">
                 <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-4">

@@ -7,7 +7,8 @@ import { usePersistentLive } from "@/features/classes/hooks/use-persistent-live"
 import { AI_API } from "@/constants/api";
 import { AIVisualState } from "@/features/ai/types";
 import { useAiAccess } from "./use-ai-access";
-import { handleError } from "@/providers/utils/api-errors";
+import { AiStreamClient } from "../lib/ai-stream-client";
+import { getCorrelationId, handleError } from "@/providers/utils/api-errors";
 
 interface UseAILiveInteractionProps {
   classId: string;
@@ -201,95 +202,38 @@ export const useAILiveInteraction = ({
       accumulatorRef.current = "";
       lineBufferRef.current = "";
 
-      const apiUrl = `${BACKEND_URL}${AI_API.INTERACT(classId)}`;
-
       try {
-        const token = localStorage.getItem("tablawy_auth_token");
         const correlationId = crypto.randomUUID();
-        const headers: Record<string, string> = {
-          "Content-Type": "application/json",
-          "X-Correlation-ID": correlationId,
-        };
-        if (token) headers["Authorization"] = `Bearer ${token}`;
+        const finalUrl = AI_API.INTERACT(classId);
 
-        /* eslint-disable-next-line no-restricted-globals */
-        const response = await fetch(apiUrl, {
-          method: "PATCH",
-          signal: controller.signal,
-          credentials: "include",
-          headers,
-          body: JSON.stringify({ question, language, correlationId }),
-        });
-
-        if (!response.ok) {
-          throw await handleError(response);
-        }
-
-        const reader = response.body?.getReader();
-        const decoder = new TextDecoder();
-        if (!reader) throw new Error("STREAM_READER_UNAVAILABLE");
-
-        let isStreamDone = false;
-        while (!isStreamDone) {
-          const { done, value } = await reader.read();
-          if (done) break;
-
-          const chunk = decoder.decode(value, { stream: true });
-          const combinedChunk = lineBufferRef.current + chunk;
-          const lines = combinedChunk.split("\n\n");
-
-          lineBufferRef.current = lines.pop() || "";
-
-          for (const line of lines) {
-            if (line.startsWith("data: ")) {
-              try {
-                const rawData = line.replace("data: ", "").trim();
-                if (!rawData) continue;
-
-                const data = JSON.parse(rawData) as LiveStreamData;
-                if (data.text) {
-                  accumulatorRef.current += data.text;
-                  // Update local UI script immediately for visual feedback
-                  updateUI(accumulatorRef.current);
-                }
-
-                // 📊 LOGGING: Performance Metadata
-                if (data.latencyMs) {
-                  console.debug(
-                    `[AI Co-Teacher] Latency: ${data.latencyMs}ms | Tokens:`,
-                    data.usage
-                  );
-                }
-
-                if (data.done) {
-                  isStreamDone = true;
-                  break;
-                }
-              } catch {
-                // Wait for buffer
-              }
-            }
+        const finalResponseText = await AiStreamClient.fetchStream(
+          finalUrl,
+          { question, language, correlationId },
+          {
+            signal: controller.signal,
+            onChunk: (chunk) => {
+              accumulatorRef.current += chunk;
+              updateUI(accumulatorRef.current);
+            },
           }
-        }
+        );
 
         // Finalize Interaction: Trigger Voice
-        if (isMounted.current && accumulatorRef.current) {
-          speakText(accumulatorRef.current);
+        if (isMounted.current && finalResponseText.trim().length > 0) {
+          speakText(finalResponseText.trim());
         }
       } catch (err: unknown) {
         if (err instanceof Error && err.name === "AbortError") return;
 
         console.error("Co-Teacher Error:", err);
+        const error = err as HttpError;
+        const correlationId = getCorrelationId(err);
 
-        const message = t("common.error");
-        let description = t("aiHub.errors.serviceUnavailable");
-
-        // Handle Refine HttpError
-        if (err && typeof err === "object" && "message" in err) {
-          description = (err as { message: string }).message;
-        }
-
-        open?.({ type: "error", message, description });
+        open?.({
+          type: "error",
+          message: t("common.error"),
+          description: `${error.message || t("aiHub.errors.serviceUnavailable")} (Trace: ${correlationId})`,
+        });
         setVisualState("talking");
       } finally {
         if (abortControllerRef.current === controller) {

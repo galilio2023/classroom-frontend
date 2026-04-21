@@ -104,15 +104,34 @@ export const handleError = async (errorOrResponse: any): Promise<HttpError> => {
       response.headers?.["Retry-After"] ||
       response.headers?.["retry-after"];
 
+    const scope =
+      (typeof response.headers?.get === "function"
+        ? response.headers.get("X-RateLimit-Scope")
+        : null) ||
+      response.headers?.["X-RateLimit-Scope"] ||
+      response.headers?.["x-ratelimit-scope"];
+
     const retryAfter = retryAfterRaw ? parseInt(retryAfterRaw, 10) : 30;
     // 🛡️ THUNDERING HERD: Add a randomized jitter (0-5s) to prevent concurrent retries
     const jitter = Math.floor(Math.random() * 5);
     const retryWithJitter = retryAfter + jitter;
 
+    let message =
+      (json.message as string) ||
+      `Rate limit reached. Please wait ~${retryWithJitter} seconds before retrying.`;
+
+    if (!json.message) {
+      if (scope === "school") {
+        message = `School-wide limit reached. Please contact your administrator or try again in ~${retryWithJitter}s.`;
+      } else if (scope === "global") {
+        message = `Platform-wide safety limit active. Please wait ~${retryWithJitter}s before retrying.`;
+      } else if (scope === "user") {
+        message = `You are personally rate-limited. Please take a small break (~${retryWithJitter}s).`;
+      }
+    }
+
     return {
-      message:
-        (json.message as string) ||
-        `Rate limit reached. Please wait ~${retryWithJitter} seconds before retrying.`,
+      message,
       statusCode: 429,
     } as HttpError;
   }

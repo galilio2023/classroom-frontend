@@ -78,10 +78,18 @@ export class AiStreamClient {
       // 🛡️ SIGNAL CHECK: Don't sleep if already aborted
       await new Promise((resolve, reject) => {
         const timeout = setTimeout(resolve, waitTime);
-        options.signal?.addEventListener("abort", () => {
+        const onAbort = () => {
           clearTimeout(timeout);
+          options.signal?.removeEventListener("abort", onAbort);
           reject(new Error("Stream aborted during backoff"));
-        });
+        };
+        options.signal?.addEventListener("abort", onAbort);
+
+        // Cleanup if timeout finishes normally
+        const cleanup = () => {
+          options.signal?.removeEventListener("abort", onAbort);
+        };
+        setTimeout(cleanup, waitTime + 100);
       }).catch((err) => {
         if (!options.signal?.aborted) throw err;
       });
