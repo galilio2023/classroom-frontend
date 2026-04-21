@@ -1,13 +1,4 @@
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Cell,
-  ResponsiveContainer,
-  LabelList,
-} from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Cell, LabelList } from "recharts";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   ChartConfig,
@@ -18,6 +9,16 @@ import {
 import { useTranslation } from "react-i18next";
 import { Compass, Sparkles } from "lucide-react";
 import { NoChartData } from "./no-chart-data";
+
+// 🛡️ TYPE SAFETY: Define valid journey stages as a union
+type JourneyStage =
+  | "onboarding"
+  | "planning"
+  | "learning"
+  | "assessing"
+  | "intervening"
+  | "reporting"
+  | "completed";
 
 interface JourneyFunnelChartProps {
   data: { stage: string; count: number }[];
@@ -32,7 +33,7 @@ export const JourneyFunnelChart = ({ data }: JourneyFunnelChartProps) => {
   }
 
   // Define logical order for stages
-  const stageOrder = [
+  const stageOrder: JourneyStage[] = [
     "onboarding",
     "planning",
     "learning",
@@ -42,8 +43,13 @@ export const JourneyFunnelChart = ({ data }: JourneyFunnelChartProps) => {
     "completed",
   ];
 
+  // 🛡️ SORTING FIX: Fallback for unknown stages to prevent them floating to top
   const sortedData = [...data].sort((a, b) => {
-    return stageOrder.indexOf(a.stage) - stageOrder.indexOf(b.stage);
+    const indexA = stageOrder.indexOf(a.stage as JourneyStage);
+    const indexB = stageOrder.indexOf(b.stage as JourneyStage);
+    const orderA = indexA === -1 ? 99 : indexA;
+    const orderB = indexB === -1 ? 99 : indexB;
+    return orderA - orderB;
   });
 
   const chartConfig = {
@@ -53,16 +59,19 @@ export const JourneyFunnelChart = ({ data }: JourneyFunnelChartProps) => {
     },
   } satisfies ChartConfig;
 
-  // Colors for each stage to represent the "flow"
-  const COLORS = [
-    "hsl(var(--muted-foreground))", // onboarding - gray
-    "hsl(var(--ai-primary))", // planning - purple
-    "hsl(var(--primary))", // learning - blue
-    "hsl(var(--orange-500))", // assessing - orange
-    "hsl(var(--destructive))", // intervening - red
-    "hsl(var(--info))", // reporting - info blue
-    "hsl(var(--success))", // completed - green
-  ];
+  // 🛡️ MAINTAINABILITY: Colors mapped specifically to stages
+  const STAGE_COLORS: Record<JourneyStage, string> = {
+    onboarding: "hsl(var(--muted-foreground))",
+    planning: "hsl(var(--ai-primary))",
+    learning: "hsl(var(--primary))",
+    assessing: "hsl(var(--orange-500))",
+    intervening: "hsl(var(--destructive))",
+    reporting: "hsl(var(--info))",
+    completed: "hsl(var(--success))",
+  };
+
+  const getStageColor = (stage: string) =>
+    STAGE_COLORS[stage as JourneyStage] || STAGE_COLORS.onboarding;
 
   return (
     <Card className="border-border/40 shadow-2xl overflow-hidden bg-card/50 backdrop-blur-xl rounded-[2.5rem] md:rounded-[3rem] group">
@@ -106,7 +115,7 @@ export const JourneyFunnelChart = ({ data }: JourneyFunnelChartProps) => {
               type="category"
               axisLine={false}
               tickLine={false}
-              tickFormatter={(val) => t(`dashboard.journey.stages.${val}` as any)}
+              tickFormatter={(val: JourneyStage) => t(`dashboard.journey.stages.${val}`)}
               className="fill-muted-foreground/80 text-[10px] font-black uppercase tracking-widest"
               width={100}
               orientation={isArabic ? "right" : "left"}
@@ -119,10 +128,7 @@ export const JourneyFunnelChart = ({ data }: JourneyFunnelChartProps) => {
             />
             <Bar dataKey="count" radius={[0, 12, 12, 0]} barSize={40}>
               {sortedData.map((entry, index) => (
-                <Cell
-                  key={`cell-${index}`}
-                  fill={COLORS[stageOrder.indexOf(entry.stage)] || COLORS[0]}
-                />
+                <Cell key={`cell-${index}`} fill={getStageColor(entry.stage)} />
               ))}
               <LabelList
                 dataKey="count"

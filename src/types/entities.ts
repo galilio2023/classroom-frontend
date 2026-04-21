@@ -74,6 +74,11 @@ export interface User {
   lastActiveAt: string | null;
   aiTokensUsed?: number;
   aiMonthlyLimit?: number;
+  metadata?: {
+    rejectionReason?: string;
+    rejectedAt?: string;
+    [key: string]: any;
+  };
   enrollments?: Enrollment[];
   teacherChannel?: TeacherChannel;
   persona?: {

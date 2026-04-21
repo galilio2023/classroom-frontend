@@ -2,7 +2,7 @@ import React from "react";
 import { Navigate } from "react-router-dom";
 import { VerificationStatus } from "@/types";
 import { Loader2 } from "lucide-react";
-import { useCapabilities } from "@/features/users/hooks/use-capabilities";
+import { useCapabilities } from "@/hooks/use-capabilities";
 
 const Loading = () => (
   <div className="flex h-dvh w-full items-center justify-center bg-background/50 backdrop-blur-sm">

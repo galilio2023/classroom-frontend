@@ -56,11 +56,11 @@ import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 import { ColumnDef } from "@tanstack/react-table";
 
+import { useCapabilities } from "@/hooks/use-capabilities";
+
 interface SubjectListItem extends Omit<Subject, "department"> {
   department?: Department;
 }
-
-import { useCapabilities } from "@/features/users/hooks/use-capabilities";
 
 const SubjectsList = () => {
   const { t, i18n } = useTranslation();
@@ -81,6 +81,9 @@ const SubjectsList = () => {
     resource: "departments",
     optionLabel: "name",
     optionValue: "name",
+    queryOptions: {
+      enabled: isInstitutional,
+    },
   });
 
   const columns = useMemo<ColumnDef<SubjectListItem>[]>(() => [], []);

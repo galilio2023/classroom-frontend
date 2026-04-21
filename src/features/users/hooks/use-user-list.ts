@@ -85,7 +85,9 @@ export const useUserList = () => {
           verificationStatus: isVerified
             ? VerificationStatus.VERIFIED
             : VerificationStatus.REJECTED,
-          metadata: !isVerified ? { rejectionReason: reason, rejectedAt: new Date().toISOString() } : undefined,
+          metadata: !isVerified
+            ? { rejectionReason: reason, rejectedAt: new Date().toISOString() }
+            : undefined,
         },
       },
       {

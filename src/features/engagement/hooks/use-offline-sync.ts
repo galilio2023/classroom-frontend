@@ -106,6 +106,14 @@ export const useOfflineSync = () => {
       });
 
       for (const quiz of pendingQuizzes) {
+        // 🛡️ BATTERY SAFETY: Limit retries for failed syncs
+        const retryCount = (quiz as any).retryCount || 0;
+        if (retryCount >= 5) {
+          console.error(`Sync failed for quiz ${quiz.quizId} after 5 attempts. Pruning.`);
+          if (quiz.id) await db.quizzes.delete(quiz.id);
+          continue;
+        }
+
         submitQuiz(
           {
             url: `/quizzes/${quiz.quizId}/submit`,
@@ -115,6 +123,11 @@ export const useOfflineSync = () => {
           {
             onSuccess: async () => {
               if (quiz.id) await db.quizzes.delete(quiz.id);
+            },
+            onError: async () => {
+              if (quiz.id) {
+                await db.quizzes.put({ ...quiz, retryCount: retryCount + 1 });
+              }
             },
           }
         );

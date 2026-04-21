@@ -383,6 +383,21 @@ export const useAILiveInteraction = ({
     [setIsJoined, setActiveClassId, classId]
   );
 
+  // 🛡️ HARDWARE PRIVACY & SAFETY: Stop speech/mic if user leaves the tab
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "hidden") {
+        if (isSpeaking) stopSpeaking();
+        if (isListening) stopListening();
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [isSpeaking, isListening, stopSpeaking, stopListening]);
+
   // 3. 🧹 CLEANUP
   useEffect(() => {
     return () => {

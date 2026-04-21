@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useMenu, useGetIdentity, type TreeMenuItem } from "@refinedev/core";
 import { User, UserRole } from "@/types";
-import { useCapabilities } from "@/features/users/hooks/use-capabilities";
+import { useCapabilities } from "@/hooks/use-capabilities";
 
 const ROLE_GROUP_PERMISSIONS: Record<string, UserRole[]> = {
   "groups.admin": [UserRole.ADMIN],

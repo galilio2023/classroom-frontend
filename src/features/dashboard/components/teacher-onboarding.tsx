@@ -16,7 +16,7 @@ import { cn } from "@/lib/utils";
 import { useNavigation } from "@refinedev/core";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
-import { useCapabilities } from "@/features/users/hooks/use-capabilities";
+import { useCapabilities } from "@/hooks/use-capabilities";
 
 interface OnboardingStep {
   id: string;

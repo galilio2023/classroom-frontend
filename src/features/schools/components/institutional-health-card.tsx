@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useCustom } from "@refinedev/core";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Activity, ShieldCheck, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { motion } from "framer-motion";
+import { handleError } from "@/providers/utils/api-errors";
 
 interface InstitutionalHealthProps {
   schoolId: string;
@@ -16,6 +17,12 @@ export const InstitutionalHealthCard: React.FC<InstitutionalHealthProps> = ({ sc
       enabled: !!schoolId,
     },
   });
+
+  useEffect(() => {
+    if (query.error) {
+      void handleError(query.error);
+    }
+  }, [query.error]);
 
   const health = query.data?.data;
   const isLoading = query.isLoading;

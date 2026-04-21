@@ -59,15 +59,35 @@ export class AiStreamClient {
     });
 
     // 🛡️ RETRY-AFTER: Handle 429 Rate Limits with exponential backoff and jitter
-    if (response.status === 429) {
+    // Mandate: Max 3 attempts to prevent battery drain (Rural Hardening)
+    let attempts = 1;
+    const maxAttempts = 3;
+
+    while (response.status === 429 && attempts < maxAttempts) {
+      if (options.signal?.aborted) break;
+
       const retryAfterRaw = response.headers.get("Retry-After");
       const retryAfter = retryAfterRaw ? parseInt(retryAfterRaw, 10) : 5;
       const jitter = Math.floor(Math.random() * 3); // 0-2s jitter
-      
-      console.warn(`Rate limit reached. Retrying after ${retryAfter + jitter}s...`);
-      
-      await new Promise((resolve) => setTimeout(resolve, (retryAfter + jitter) * 1000));
-      
+      const waitTime = (retryAfter + jitter) * 1000;
+
+      console.warn(
+        `Rate limit reached (Attempt ${attempts}/${maxAttempts}). Retrying after ${retryAfter + jitter}s...`
+      );
+
+      // 🛡️ SIGNAL CHECK: Don't sleep if already aborted
+      await new Promise((resolve, reject) => {
+        const timeout = setTimeout(resolve, waitTime);
+        options.signal?.addEventListener("abort", () => {
+          clearTimeout(timeout);
+          reject(new Error("Stream aborted during backoff"));
+        });
+      }).catch((err) => {
+        if (!options.signal?.aborted) throw err;
+      });
+
+      if (options.signal?.aborted) break;
+
       response = await fetch(`${BACKEND_URL}${endpoint}`, {
         method: "POST",
         headers,
@@ -75,6 +95,7 @@ export class AiStreamClient {
         body: JSON.stringify(body),
         signal: options.signal,
       });
+      attempts++;
     }
 
     if (!response.ok) {

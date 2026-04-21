@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useInvalidate, useNotification } from "@refinedev/core";
 import { socket } from "@/lib/socket";
-import { useCapabilities } from "@/features/users/hooks/use-capabilities";
+import { useCapabilities } from "@/hooks/use-capabilities";
 import { toast } from "sonner"; // For high-fidelity Lifecycle Pulse notifications
 
 /**

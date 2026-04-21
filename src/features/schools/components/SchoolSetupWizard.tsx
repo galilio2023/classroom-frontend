@@ -7,11 +7,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useUpdate, useCreate, useGetIdentity } from "@refinedev/core";
-import { User } from "@/types";
+import { useUpdate, useCreate } from "@refinedev/core";
 import { toast } from "sonner";
 import { Rocket, Paintbrush, Building2, CheckCircle2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useCapabilities } from "@/hooks/use-capabilities";
 
 // Sub-components (Deconstructed for maintainability)
 import { StepBasic } from "./setup/StepBasic";
@@ -31,8 +31,8 @@ interface SchoolSetupWizardProps {
  */
 export const SchoolSetupWizard = ({ school, onComplete }: SchoolSetupWizardProps) => {
   const { t } = useTranslation();
-  const { data: identity } = useGetIdentity<User>();
-  const isPrivateMode = identity?.planType === "basic";
+  const { isPrivate } = useCapabilities();
+  const isPrivateMode = isPrivate;
 
   const [step, setStep] = useState(1);
   const [formData, setData] = useState({
@@ -52,7 +52,7 @@ export const SchoolSetupWizard = ({ school, onComplete }: SchoolSetupWizardProps
 
   const handleSaveBasic = () => {
     if (!formData.name.trim() || !formData.slug.trim()) {
-      toast.error("School name and slug are required.");
+      toast.error(t("validation.schoolNameRequired"));
       return;
     }
     updateSchool(
@@ -66,7 +66,7 @@ export const SchoolSetupWizard = ({ school, onComplete }: SchoolSetupWizardProps
       },
       {
         onSuccess: () => {
-          toast.success("Identity saved.");
+          toast.success(t("schools.setup.toasts.identitySaved"));
           handleNext();
         },
       }
@@ -88,7 +88,7 @@ export const SchoolSetupWizard = ({ school, onComplete }: SchoolSetupWizardProps
       },
       {
         onSuccess: () => {
-          toast.success("Branding updated.");
+          toast.success(t("schools.setup.toasts.brandingUpdated"));
           handleNext();
         },
       }
@@ -108,7 +108,7 @@ export const SchoolSetupWizard = ({ school, onComplete }: SchoolSetupWizardProps
       },
       {
         onSuccess: () => {
-          toast.success("Department created.");
+          toast.success(t("schools.setup.toasts.departmentCreated"));
           setData({ ...formData, initialDept: "" });
         },
       }

@@ -164,7 +164,7 @@ const ErrorComponent = () => {
   );
 };
 
-import { useCapabilities } from "@/features/users/hooks/use-capabilities";
+import { useCapabilities } from "@/hooks/use-capabilities";
 
 export const AppRouter = () => {
   const { isSchoolMode, isFacultyMode, isStaff, isAdmin } = useCapabilities();

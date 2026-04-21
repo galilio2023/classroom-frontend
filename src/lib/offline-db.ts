@@ -22,6 +22,7 @@ export interface PendingQuizSubmission {
   userId: string;
   answers: unknown;
   submittedAt: number;
+  retryCount?: number;
 }
 
 export interface UserNote {

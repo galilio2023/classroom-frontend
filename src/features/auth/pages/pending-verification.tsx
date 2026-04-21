@@ -1,3 +1,4 @@
+import React from "react";
 import {
   CheckCircle2,
   Clock,
@@ -30,6 +31,9 @@ import { useVerificationLogic } from "@/features/auth/hooks/useVerificationLogic
 const PendingVerificationPage = () => {
   const { t, i18n } = useTranslation();
   const isAr = i18n.language === "ar";
+  const [uploadedDoc, setUploadedDoc] = React.useState<{ url: string; publicId: string } | null>(
+    null
+  );
 
   const { identity, isLoading, handleCheckStatus, logout, submitReverification } =
     useVerificationLogic();
@@ -111,13 +115,21 @@ const PendingVerificationPage = () => {
                 </p>
               </div>
               <p className="text-sm font-medium text-foreground leading-relaxed">
-                {identity?.metadata?.rejectionReason || t("auth.pending.defaultRejectionReason")}
+                {(identity as any)?.metadata?.rejectionReason ||
+                  t("auth.pending.defaultRejectionReason")}
               </p>
               <div className="pt-4 border-t border-destructive/10">
                 <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-4">
                   {t("auth.pending.reuploadAction")}
                 </p>
-                <VerificationUpload onUpload={submitReverification} onClear={() => {}} />
+                <VerificationUpload
+                  url={uploadedDoc?.url}
+                  onUpload={(url, publicId) => {
+                    setUploadedDoc({ url, publicId });
+                    submitReverification(url, publicId);
+                  }}
+                  onClear={() => setUploadedDoc(null)}
+                />
               </div>
             </div>
           ) : (

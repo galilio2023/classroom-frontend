@@ -411,6 +411,7 @@
     "enrollStudent": "تسجيل طالب",
     "sendBroadcast": "إرسال بث",
     "reject": "رفض",
+    "confirmRejection": "تأكيد الرفض",
     "approveStudent": "قبول الطالب",
     "invite": "دعوة",
     "copyCode": "نسخ الكود",
@@ -1848,6 +1849,15 @@
     "newBadge": "تم فتح وسام جديد!",
     "badges": {
       "juniorTeacher": "Junior Teacher Solution"
+    }
+  },
+  "schools": {
+    "setup": {
+      "toasts": {
+        "identitySaved": "تم حفظ الهوية المؤسسية بنجاح.",
+        "brandingUpdated": "تم تحديث تفضيلات العلامة التجارية.",
+        "departmentCreated": "تم إنشاء القسم بنجاح."
+      }
     }
   }
 }

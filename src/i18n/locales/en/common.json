@@ -427,6 +427,7 @@
     "enrollStudent": "Enroll Student",
     "sendBroadcast": "Send Broadcast",
     "reject": "Reject",
+    "confirmRejection": "Confirm Rejection",
     "approveStudent": "Approve Student",
     "invite": "Invite",
     "copyCode": "Copy Code",
@@ -1873,6 +1874,20 @@
     "newBadge": "New Badge Unlocked!",
     "badges": {
       "juniorTeacher": "Junior Teacher Solution"
+    }
+  },
+  "validation": {
+    "required": "Required",
+    "invalidEmail": "Invalid email address",
+    "schoolNameRequired": "School name and slug are required."
+  },
+  "schools": {
+    "setup": {
+      "toasts": {
+        "identitySaved": "Identity saved.",
+        "brandingUpdated": "Branding updated.",
+        "departmentCreated": "Department created."
+      }
     }
   }
 }

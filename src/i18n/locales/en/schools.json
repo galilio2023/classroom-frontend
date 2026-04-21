@@ -34,6 +34,11 @@
       "title": "Configuration Complete!",
       "desc": "Your school is now ready for students and teachers. You can always adjust these settings later.",
       "cta": "Enter Dashboard"
+    },
+    "toasts": {
+      "identitySaved": "Institutional identity saved successfully.",
+      "brandingUpdated": "Branding preferences updated.",
+      "departmentCreated": "Department created successfully."
     }
   },
   "dashboard": {
