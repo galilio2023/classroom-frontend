@@ -1055,7 +1055,9 @@
         "document": "Verification Document",
         "proofTitle": "Teaching Credentials Proof",
         "proofDesc": "Uploaded by teacher for verification",
-        "noDocument": "No document uploaded."
+        "noDocument": "No document uploaded.",
+        "rejectionReasonLabel": "Rejection Reason",
+        "rejectionReasonPlaceholder": "Explain why this document was rejected..."
       },
       "deleteDialog": {
         "title": "Are you absolutely sure?",

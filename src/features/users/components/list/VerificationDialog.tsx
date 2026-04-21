@@ -1,3 +1,4 @@
+import React from "react";
 import {
   Dialog,
   DialogContent,
@@ -11,11 +12,12 @@ import { Badge } from "@/components/ui/badge";
 import { ShieldCheck, FileText, ExternalLink, XCircle, CheckCircle2, Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { VerificationStatus, User } from "@/types";
+import { cn } from "@/lib/utils";
 
 interface VerificationDialogProps {
   target: User | null;
   onClose: () => void;
-  onVerify: (id: string, approved: boolean) => void;
+  onVerify: (id: string, approved: boolean, reason?: string) => void;
   isUpdating: boolean;
 }
 
@@ -26,9 +28,28 @@ export const VerificationDialog = ({
   isUpdating,
 }: VerificationDialogProps) => {
   const { t } = useTranslation();
+  const [rejectionReason, setRejectionReason] = React.useState("");
+  const [showRejectForm, setShowRejectForm] = React.useState(false);
+
+  const handleReject = () => {
+    if (!showRejectForm) {
+      setShowRejectForm(true);
+      return;
+    }
+    onVerify(target!.id, false, rejectionReason);
+  };
 
   return (
-    <Dialog open={target !== null} onOpenChange={(open) => !open && onClose()}>
+    <Dialog
+      open={target !== null}
+      onOpenChange={(open) => {
+        if (!open) {
+          onClose();
+          setShowRejectForm(false);
+          setRejectionReason("");
+        }
+      }}
+    >
       <DialogContent className="max-w-2xl overflow-hidden rounded-[2.5rem] border-none shadow-2xl bg-card/95 backdrop-blur-xl p-0">
         <div className="p-8 md:p-12 space-y-8">
           <DialogHeader className="space-y-4">
@@ -109,29 +130,54 @@ export const VerificationDialog = ({
             )}
           </div>
 
+          {showRejectForm && (
+            <div className="bg-destructive/5 p-6 rounded-3xl border border-destructive/20 space-y-4 animate-in fade-in slide-in-from-top-2">
+              <p className="text-xs font-black uppercase tracking-widest text-destructive">
+                {t("users.governance.verification.rejectionReasonLabel", "Rejection Reason")}
+              </p>
+              <textarea
+                className="w-full bg-background border-2 border-destructive/10 rounded-2xl p-4 text-sm font-medium focus:ring-destructive/20 focus:border-destructive/30 outline-hidden min-h-24 resize-none"
+                placeholder={t(
+                  "users.governance.verification.rejectionReasonPlaceholder",
+                  "Explain why this document was rejected..."
+                )}
+                value={rejectionReason}
+                onChange={(e) => setRejectionReason(e.target.value)}
+              />
+            </div>
+          )}
+
           <DialogFooter className="flex-col sm:flex-row gap-4 pt-8 border-t border-border/40">
             <Button
               variant="outline"
               size="lg"
-              className="text-destructive border-destructive/20 h-12 rounded-2xl"
-              onClick={() => onVerify(target!.id, false)}
+              className={cn(
+                "h-12 rounded-2xl transition-all",
+                showRejectForm
+                  ? "bg-destructive text-destructive-foreground hover:bg-destructive/90 w-full"
+                  : "text-destructive border-destructive/20"
+              )}
+              onClick={handleReject}
               disabled={isUpdating}
             >
-              <XCircle className="h-4 w-4 me-2" /> {t("buttons.reject")}
+              <XCircle className="h-4 w-4 me-2" />
+              {showRejectForm ? t("buttons.confirmRejection") : t("buttons.reject")}
             </Button>
-            <Button
-              size="lg"
-              className="h-12 rounded-2xl shadow-xl shadow-primary/20"
-              onClick={() => onVerify(target!.id, true)}
-              disabled={isUpdating}
-            >
-              {isUpdating ? (
-                <Loader2 className="h-4 w-4 animate-spin me-2" />
-              ) : (
-                <CheckCircle2 className="h-4 w-4 me-2" />
-              )}{" "}
-              {t("buttons.approveVerify")}
-            </Button>
+            {!showRejectForm && (
+              <Button
+                size="lg"
+                className="h-12 rounded-2xl shadow-xl shadow-primary/20 flex-1"
+                onClick={() => onVerify(target!.id, true)}
+                disabled={isUpdating}
+              >
+                {isUpdating ? (
+                  <Loader2 className="h-4 w-4 animate-spin me-2" />
+                ) : (
+                  <CheckCircle2 className="h-4 w-4 me-2" />
+                )}{" "}
+                {t("buttons.approveVerify")}
+              </Button>
+            )}
           </DialogFooter>
         </div>
       </DialogContent>

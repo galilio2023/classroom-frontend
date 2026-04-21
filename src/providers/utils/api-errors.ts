@@ -99,11 +99,21 @@ export const handleError = async (errorOrResponse: any): Promise<HttpError> => {
   }
 
   if (response.status === 429) {
-    const retryAfter = response.headers.get("Retry-After");
+    const retryAfterRaw =
+      (typeof response.headers?.get === "function" ? response.headers.get("Retry-After") : null) ||
+      response.headers?.["Retry-After"] ||
+      response.headers?.["retry-after"];
+
+    const retryAfter = retryAfterRaw ? parseInt(retryAfterRaw, 10) : 30;
+    // 🛡️ THUNDERING HERD: Add a randomized jitter (0-5s) to prevent concurrent retries
+    const jitter = Math.floor(Math.random() * 5);
+    const retryWithJitter = retryAfter + jitter;
+
     return {
-      message: (json.message as string) || "Too many requests. Please slow down.",
+      message:
+        (json.message as string) ||
+        `Rate limit reached. Please wait ~${retryWithJitter} seconds before retrying.`,
       statusCode: 429,
-      retryAfter: retryAfter ? parseInt(retryAfter, 10) : undefined,
     } as HttpError;
   }
 
