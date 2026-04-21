@@ -50,13 +50,32 @@ export class AiStreamClient {
     }
 
     // eslint-disable-next-line no-restricted-globals
-    const response = await fetch(`${BACKEND_URL}${endpoint}`, {
+    let response = await fetch(`${BACKEND_URL}${endpoint}`, {
       method: "POST",
       headers,
       credentials: "include",
       body: JSON.stringify(body),
       signal: options.signal,
     });
+
+    // 🛡️ RETRY-AFTER: Handle 429 Rate Limits with exponential backoff and jitter
+    if (response.status === 429) {
+      const retryAfterRaw = response.headers.get("Retry-After");
+      const retryAfter = retryAfterRaw ? parseInt(retryAfterRaw, 10) : 5;
+      const jitter = Math.floor(Math.random() * 3); // 0-2s jitter
+      
+      console.warn(`Rate limit reached. Retrying after ${retryAfter + jitter}s...`);
+      
+      await new Promise((resolve) => setTimeout(resolve, (retryAfter + jitter) * 1000));
+      
+      response = await fetch(`${BACKEND_URL}${endpoint}`, {
+        method: "POST",
+        headers,
+        credentials: "include",
+        body: JSON.stringify(body),
+        signal: options.signal,
+      });
+    }
 
     if (!response.ok) {
       throw await handleError(response);
