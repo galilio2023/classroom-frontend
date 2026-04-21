@@ -53,7 +53,6 @@ export const useVerificationLogic = () => {
       {
         onSuccess: async () => {
           toast.success(t("auth.pending.reverificationSuccess"));
-          await refetch();
         },
         onError: async (error) => {
           const apiError = await handleError(error);

@@ -23,7 +23,7 @@ const fetcherWithRetry = async (
   options?: RequestInit,
   retries = 3,
   backoff = 1000,
-  attempt = 0,
+  attempt = 0
 ): Promise<Response> => {
   const method = options?.method?.toUpperCase() || "GET";
   const headers: Record<string, string> = {

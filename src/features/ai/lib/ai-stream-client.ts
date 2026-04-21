@@ -10,6 +10,7 @@ import { handleError } from "@/providers/utils/api-errors";
 export interface AiStreamOptions {
   onChunk?: (chunk: string) => void;
   signal?: AbortSignal;
+  method?: "POST" | "PATCH" | "PUT";
 }
 
 export class AiStreamClient {
@@ -37,6 +38,7 @@ export class AiStreamClient {
     body: unknown,
     options: AiStreamOptions = {}
   ): Promise<string> {
+    const method = options.method || "POST";
     // 🛡️ BANDWIDTH DETECTION
     const conn = (
       navigator as unknown as { connection?: { effectiveType: string; downlink: number } }
@@ -51,7 +53,7 @@ export class AiStreamClient {
 
     // eslint-disable-next-line no-restricted-globals
     let response = await fetch(`${BACKEND_URL}${endpoint}`, {
-      method: "POST",
+      method,
       headers,
       credentials: "include",
       body: JSON.stringify(body),
@@ -67,7 +69,21 @@ export class AiStreamClient {
       if (options.signal?.aborted) break;
 
       const retryAfterRaw = response.headers.get("Retry-After");
-      const retryAfter = retryAfterRaw ? parseInt(retryAfterRaw, 10) : 5;
+      let retryAfter = 5;
+
+      if (retryAfterRaw) {
+        if (/^\d+$/.test(retryAfterRaw)) {
+          retryAfter = parseInt(retryAfterRaw, 10);
+        } else {
+          // 🛡️ HTTP SPEC: Retry-After can be a GMT date string
+          const retryDate = new Date(retryAfterRaw).getTime();
+          const now = Date.now();
+          if (!isNaN(retryDate) && retryDate > now) {
+            retryAfter = Math.ceil((retryDate - now) / 1000);
+          }
+        }
+      }
+
       const jitter = Math.floor(Math.random() * 3); // 0-2s jitter
       const waitTime = (retryAfter + jitter) * 1000;
 
@@ -76,28 +92,33 @@ export class AiStreamClient {
       );
 
       // 🛡️ SIGNAL CHECK: Don't sleep if already aborted
-      await new Promise((resolve, reject) => {
+      await new Promise<void>((resolve, reject) => {
         const timeout = setTimeout(resolve, waitTime);
         const onAbort = () => {
           clearTimeout(timeout);
-          options.signal?.removeEventListener("abort", onAbort);
-          reject(new Error("Stream aborted during backoff"));
+          reject(options.signal?.reason || new Error("Stream aborted during backoff"));
         };
+
         options.signal?.addEventListener("abort", onAbort);
 
-        // Cleanup if timeout finishes normally
+        // Standard promise cleanup
         const cleanup = () => {
+          clearTimeout(timeout);
           options.signal?.removeEventListener("abort", onAbort);
         };
-        setTimeout(cleanup, waitTime + 100);
+
+        // If promise resolves via timeout, we still need to remove the listener
+        setTimeout(cleanup, waitTime + 50);
       }).catch((err) => {
-        if (!options.signal?.aborted) throw err;
+        if (options.signal?.aborted) throw err;
+        throw err;
       });
 
-      if (options.signal?.aborted) break;
+      options.signal?.throwIfAborted();
 
+      // eslint-disable-next-line no-restricted-globals
       response = await fetch(`${BACKEND_URL}${endpoint}`, {
-        method: "POST",
+        method,
         headers,
         credentials: "include",
         body: JSON.stringify(body),

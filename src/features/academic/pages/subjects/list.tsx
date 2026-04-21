@@ -54,7 +54,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/empty-state";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
-import { ColumnDef } from "@tanstack/react-table";
 
 import { useCapabilities } from "@/hooks/use-capabilities";
 
@@ -86,12 +85,12 @@ const SubjectsList = () => {
     },
   });
 
-  const columns = useMemo<ColumnDef<SubjectListItem>[]>(() => [], []);
-
   const {
-    refineCore: { tableQuery: query, filters, setFilters },
+    filters,
+    setFilters,
+    tableQuery: query,
   } = useTable<SubjectListItem, HttpError>({
-    columns,
+    columns: [], // Required by @refinedev/react-table
     refineCoreProps: {
       resource: "subjects",
       pagination: { pageSize: 50, mode: "server" },
@@ -101,7 +100,7 @@ const SubjectsList = () => {
       },
       syncWithLocation: true,
     },
-  });
+  }).refineCore;
 
   const searchQuery =
     (filters.find((f) => "field" in f && f.field === "search") as any)?.value || "";
@@ -147,7 +146,7 @@ const SubjectsList = () => {
   // Stats calculation
   const stats = useMemo(() => {
     if (!subjects.length) return { total: 0, totalCredits: 0, avgCredits: 0 };
-    const totalCredits = subjects.reduce(
+    const totalCredits = (subjects as SubjectListItem[]).reduce(
       (acc: number, curr: SubjectListItem) => acc + (curr.credits || 0),
       0
     );
@@ -221,7 +220,7 @@ const SubjectsList = () => {
               <p className="text-2xl md:text-3xl font-black text-indigo-600">
                 {isLoading
                   ? "..."
-                  : new Intl.NumberFormat(i18n.language).format(stats.totalCredits)}
+                  : new Intl.NumberFormat(i18n.language).format(Number(stats.totalCredits))}
               </p>
             </div>
           </Card>
@@ -234,7 +233,9 @@ const SubjectsList = () => {
                 {t("subjects.stats.archived")}
               </p>
               <p className="text-2xl md:text-3xl font-black text-green-600">
-                {isLoading ? "..." : new Intl.NumberFormat(i18n.language).format(stats.avgCredits)}
+                {isLoading
+                  ? "..."
+                  : new Intl.NumberFormat(i18n.language).format(Number(stats.avgCredits))}
               </p>
             </div>
           </Card>
@@ -336,7 +337,9 @@ const SubjectsList = () => {
                       className={cn(
                         "group relative flex flex-col md:flex-row items-center p-5 md:p-6 rounded-4xl bg-card/50 backdrop-blur-sm border border-border/40 hover:border-primary/30 hover:bg-card/80 transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-primary/5 cursor-pointer"
                       )}
-                      onClick={() => show("subjects", subject.id)}
+                      onClick={() => {
+                        if (subject.id) show("subjects", subject.id);
+                      }}
                     >
                       {/* Status Line Accent */}
                       <div className="absolute start-0 top-1/2 -translate-y-1/2 w-1.5 h-12 bg-primary rounded-e-full transition-all group-hover:h-20" />
@@ -433,7 +436,7 @@ const SubjectsList = () => {
                                 className="h-11 w-11 rounded-2xl text-muted-foreground hover:text-primary hover:bg-primary/5 bg-muted/20"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  edit("subjects", subject.id);
+                                  if (subject.id) edit("subjects", subject.id);
                                 }}
                               >
                                 <Pencil className="h-5 w-5" />
@@ -444,7 +447,7 @@ const SubjectsList = () => {
                                 className="h-11 w-11 rounded-2xl text-destructive hover:bg-destructive/10 bg-muted/20"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  setDeleteTarget(subject.id);
+                                  if (subject.id) setDeleteTarget(Number(subject.id));
                                 }}
                               >
                                 <Trash2 className="h-5 w-5" />
@@ -483,7 +486,9 @@ const SubjectsList = () => {
                               {t("assignments.list.labels.options")}
                             </DropdownMenuLabel>
                             <DropdownMenuItem
-                              onClick={() => show("subjects", subject.id)}
+                              onClick={() => {
+                                if (subject.id) show("subjects", subject.id);
+                              }}
                               className="rounded-xl gap-3 py-3 cursor-pointer"
                             >
                               <div className="p-2 rounded-lg bg-primary/10 text-primary">
@@ -494,7 +499,9 @@ const SubjectsList = () => {
                             {isAdmin && (
                               <>
                                 <DropdownMenuItem
-                                  onClick={() => edit("subjects", subject.id)}
+                                  onClick={() => {
+                                    if (subject.id) edit("subjects", subject.id);
+                                  }}
                                   className="rounded-xl gap-3 py-3 cursor-pointer"
                                 >
                                   <div className="p-2 rounded-lg bg-primary/10 text-primary">
@@ -504,7 +511,9 @@ const SubjectsList = () => {
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator className="my-2 opacity-50" />
                                 <DropdownMenuItem
-                                  onClick={() => setDeleteTarget(subject.id)}
+                                  onClick={() => {
+                                    if (subject.id) setDeleteTarget(Number(subject.id));
+                                  }}
                                   className="rounded-xl gap-3 py-3 cursor-pointer text-destructive focus:bg-destructive/10"
                                 >
                                   <div className="p-2 rounded-lg bg-destructive/10 text-destructive">

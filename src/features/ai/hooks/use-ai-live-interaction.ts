@@ -1,14 +1,13 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { useNotification, usePermissions } from "@refinedev/core";
+import { useNotification, usePermissions, type HttpError } from "@refinedev/core";
 import { useTranslation } from "react-i18next";
-import { BACKEND_URL } from "@/config";
 import { BasePermissions, UserRole } from "@/types";
 import { usePersistentLive } from "@/features/classes/hooks/use-persistent-live";
 import { AI_API } from "@/constants/api";
 import { AIVisualState } from "@/features/ai/types";
 import { useAiAccess } from "./use-ai-access";
 import { AiStreamClient } from "../lib/ai-stream-client";
-import { getCorrelationId, handleError } from "@/providers/utils/api-errors";
+import { getCorrelationId } from "@/providers/utils/api-errors";
 
 interface UseAILiveInteractionProps {
   classId: string;
@@ -18,16 +17,9 @@ interface UseAILiveInteractionProps {
   onPermissionDenied?: () => void;
 }
 
-interface LiveStreamData {
-  text?: string;
-  latencyMs?: number;
-  usage?: unknown;
-  done?: boolean;
-}
-
 /**
  * 🦾 useAILiveInteraction Hook
- *
+...
  * Specialized for the AI Co-Teacher (AILiveCompanion).
  * Features:
  * - Hardened SSE Streaming (Line-buffered)
@@ -210,6 +202,7 @@ export const useAILiveInteraction = ({
           finalUrl,
           { question, language, correlationId },
           {
+            method: "PATCH",
             signal: controller.signal,
             onChunk: (chunk) => {
               accumulatorRef.current += chunk;
