@@ -124,7 +124,10 @@ const SubjectsList = () => {
     );
   };
 
-  const subjects = useMemo(() => query.data?.data || [], [query.data?.data]);
+  const subjects = useMemo<SubjectListItem[]>(
+    () => (query.data?.data as SubjectListItem[]) || [],
+    [query.data?.data]
+  );
   const isLoading = query.isPending;
   const hasData = subjects.length > 0;
 
@@ -146,7 +149,7 @@ const SubjectsList = () => {
   // Stats calculation
   const stats = useMemo(() => {
     if (!subjects.length) return { total: 0, totalCredits: 0, avgCredits: 0 };
-    const totalCredits = (subjects as SubjectListItem[]).reduce(
+    const totalCredits = subjects.reduce(
       (acc: number, curr: SubjectListItem) => acc + (curr.credits || 0),
       0
     );

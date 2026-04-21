@@ -51,8 +51,8 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       // 🛡️ RURAL RESILIENCE: Warn about large files on potentially slow networks
       const maxSyncSizeMb = Number(import.meta.env.VITE_MAX_SYNC_UPLOAD_SIZE_MB) || 5;
       if (selectedFile.size > maxSyncSizeMb * 1024 * 1024) {
-        toast.warning((t as any)("common.upload.largeFileWarning"), {
-          description: (t as any)("common.upload.largeFileWarningDesc"),
+        toast.warning(t("common.upload.largeFileWarning" as any), {
+          description: t("common.upload.largeFileWarningDesc" as any),
         });
       }
 
