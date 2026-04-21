@@ -9,8 +9,8 @@ export const BACKEND_URL = rawApiUrl.startsWith("http")
 // Root domain (e.g., https://...)
 export const BASE_URL = BACKEND_URL.replace(/\/api\/?$/, "");
 
-// Better Auth specific root (Points exactly to the /api/auth endpoint)
-export const BETTER_AUTH_ROOT = `${BACKEND_URL}/auth`;
+// Better Auth specific root (Points exactly to the /api/identity endpoint)
+export const BETTER_AUTH_ROOT = `${BACKEND_URL}/identity`;
 
 // Sockets connect to root domain (Railway backend)
 export const SOCKET_URL = BASE_URL;
