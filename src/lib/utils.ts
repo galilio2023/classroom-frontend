@@ -27,7 +27,7 @@ export function stripMarkdown(text: string): string {
  * sleep = random_between(0, min(maxDelay, baseDelay * 2^attempt))
  */
 export function calculateBackoff(attempt: number, baseDelay = 5000, maxDelay = 30000): number {
-  const cappedAttempt = Math.min(attempt, 10); // Prevent power overflow
+  const cappedAttempt = Math.min(attempt, 6); // 🛡️ CAP: Optimized for unstable networks (Mandate Review #8)
   const backoff = Math.min(maxDelay, baseDelay * Math.pow(2, cappedAttempt));
   return Math.floor(Math.random() * backoff);
 }

@@ -46,17 +46,24 @@ export function useNotificationProvider(): NotificationProvider {
           toast.success(message, config);
           return;
 
-        case "error":
+        case "error": {
+          // 🛡️ SECURITY: Ensure description is safe for rendering (Mandate Review #8)
+          // If it's a React element, we pass it as-is. If it's a string, we provide a fallback.
+          let finalDescription = config.description;
+          if (!finalDescription) {
+            finalDescription = "An unexpected error occurred. Please try again.";
+          }
+
           toast.error(message, {
             ...config,
-            description:
-              (config.description as string) ?? "An unexpected error occurred. Please try again.",
+            description: finalDescription,
             action: config.action || {
               label: "Dismiss",
               onClick: () => toast.dismiss(toastId),
             },
           });
           return;
+        }
 
         case "progress": {
           toast(
