@@ -55,6 +55,7 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         return parsed.filter((j: BackgroundJob) => j.createdAt > Date.now() - 86400000);
       } catch (e) {
         console.error("Failed to parse saved jobs", e);
+        localStorage.removeItem(STORAGE_KEYS.JOBS); // 🛡️ RESILIENCE: Clear corrupted state
         return [];
       }
     }
@@ -234,6 +235,7 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const scheduleNext = useCallback(async () => {
     if (timeoutIdRef.current) clearTimeout(timeoutIdRef.current);
+    if (isSyncingRef.current) return; // 🛡️ RACE GUARD: Wait for current sync to finish
 
     let nextDelay = POLLING_CONFIG.INITIAL_DELAY;
     let shouldSchedule = false;
@@ -277,7 +279,7 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return () => {
       if (timeoutIdRef.current) clearTimeout(timeoutIdRef.current);
     };
-  }, [scheduleNext]);
+  }, [scheduleNext, syncDelay]); // 🚀 UPDATED: Frequency updates when delay changes
 
   // Socket Listeners for Real-time completion
   useEffect(() => {

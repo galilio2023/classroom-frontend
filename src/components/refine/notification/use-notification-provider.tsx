@@ -68,7 +68,7 @@ export function useNotificationProvider(): NotificationProvider {
         }
       }
 
-      switch (type as string) {
+      switch (type) {
         case "success":
           toast.success(message, config);
           return;
@@ -89,11 +89,13 @@ export function useNotificationProvider(): NotificationProvider {
           return;
         }
 
-        case "info":
+        // 🛡️ EXTENSION: Handle types not strictly in Refine's base OpenNotificationParams
+        // but used via 'as any' or extended types in our app logic.
+        case "info" as any:
           toast.info(message, config);
           return;
 
-        case "warning":
+        case "warning" as any:
           toast.warning(message, config);
           return;
 

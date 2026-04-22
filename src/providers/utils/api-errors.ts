@@ -1,10 +1,11 @@
 import { HttpError } from "@refinedev/core";
+import { createCorrelationId } from "@/lib/traceability";
 
 /**
  * 🛡️ TRACEABILITY: Extracts X-Correlation-ID from various error formats (Axios, Fetch, etc.)
  */
 export const getCorrelationId = (err: unknown): string => {
-  if (!err) return "N/A";
+  if (!err) return createCorrelationId("local");
   const e = err as any;
 
   const traceId =
@@ -15,7 +16,7 @@ export const getCorrelationId = (err: unknown): string => {
       ? e.response.headers.get("x-correlation-id")
       : null);
 
-  return traceId || "N/A";
+  return traceId || createCorrelationId("local");
 };
 
 /**
