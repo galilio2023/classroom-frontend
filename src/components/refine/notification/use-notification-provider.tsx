@@ -140,11 +140,11 @@ export function useNotificationProvider(): NotificationProvider {
         }
 
         // 🛡️ EXTENSION: Handle types not strictly in Refine's base OpenNotificationParams
-        case "info" as any:
+        case "info":
           toast.info(message, config);
           return;
 
-        case "warning" as any:
+        case "warning":
           toast.warning(message, config);
           return;
 

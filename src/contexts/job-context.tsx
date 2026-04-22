@@ -4,10 +4,11 @@ import { handleError, getCorrelationId } from "@/providers/utils/api-errors";
 import { socket } from "@/lib/socket";
 import { useTranslation } from "react-i18next";
 import { getJitteredDelay, calculateBackoff } from "@/lib/jitter";
-import { BACKEND_URL, STORAGE_KEYS } from "@/config";
+import { BACKEND_URL } from "@/config";
 import { createCorrelationId } from "@/lib/traceability";
 import { pruneExpiredJobs } from "@/providers/utils/job-manager";
 import { offlineDB, BackgroundJobRecord } from "@/lib/offline-db";
+import { getAuthToken } from "@/lib/auth-helper";
 
 export type BackgroundJob = BackgroundJobRecord;
 
@@ -17,7 +18,7 @@ interface JobContextType {
   updateJob: (id: string, updates: Partial<BackgroundJob>) => void;
   removeJob: (id: string) => void;
   clearCompleted: () => void;
-  syncJobs: () => Promise<void>;
+  syncJobs: () => Promise<any>;
   isSafeMode: boolean; // 🛡️ Mandate Review #8: Inform UI of high system load
 }
 
@@ -98,7 +99,7 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
     };
 
-    if (jobs.length > 0) {
+    if (Array.isArray(jobs)) {
       void syncToIndexedDB();
     }
   }, [jobs]);
@@ -133,11 +134,15 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, []);
 
   const clearCompleted = useCallback(() => {
-    setJobs((prev) => prev.filter((job) => job.status === "processing"));
+    setJobs((prev) => {
+      const next = prev.filter((job) => job.status === "processing");
+      jobsRef.current = next;
+      return next;
+    });
   }, []);
 
   // 🛡️ SYNC CORE: Fetches current status of processing jobs from backend
-  const syncJobs = useCallback(async () => {
+  const syncJobs = useCallback(async (): Promise<number | undefined> => {
     if (isSyncingRef.current || !isVisible) return;
 
     const processingJobs = jobsRef.current.filter((j) => j.status === "processing");
@@ -154,7 +159,7 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     try {
       isSyncingRef.current = true;
       const minCreatedAt = Math.min(...processingJobs.map((j) => j.createdAt));
-      const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
+      const token = getAuthToken();
 
       const response = await fetch(
         `${BACKEND_URL}/ai/jobs/sync?since=${new Date(minCreatedAt).toISOString()}`,
@@ -207,42 +212,61 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         jobsRef.current = next;
         return next;
       });
-    } catch (error: unknown) {
-      if ((error as Error).name === "AbortError") return;
+    } catch (error: any) {
+      if (error.name === "AbortError") return;
 
       console.error("Job Sync Failed:", error);
 
       setConsecutiveFailures((prev) => prev + 1);
 
       open?.({
-        type: "error",
+        type: "error" as any,
         message: t("ai.jobs.syncError" as any),
-        meta: { correlationId },
+        meta: { correlationId, ...(error.meta || {}) },
       } as any);
+
+      // 🛡️ Mandate Review #9: Pass Retry-After back to the scheduler
+      if (error.statusCode === 429 && error.meta?.retryAfter) {
+        return error.meta.retryAfter;
+      }
     } finally {
       if (abortControllerRef.current === controller) {
         isSyncingRef.current = false;
       }
     }
+    return undefined;
   }, [open, t, isVisible]);
 
   // 🛡️ ADAPTIVE SCHEDULER: Failure-based backoff logic
-  const calculateNextPollDelay = useCallback(() => {
-    // 🛡️ FAST-FOLLOW: If there's a very fresh job (< 60s), poll every 10s (Mandate Review #9)
-    const newestJob = jobsRef.current.find((j) => j.status === "processing");
-    const isRecentlyQueued = newestJob && Date.now() - newestJob.createdAt < 60000;
+  const calculateNextPollDelay = useCallback(
+    (retryAfterSeconds?: number) => {
+      // 🛡️ MANDATE: Always respect server-provided Retry-After as the floor (Mandate Review #9)
+      const retryAfterMs = retryAfterSeconds ? retryAfterSeconds * 1000 : 0;
 
-    if (consecutiveFailures === 0) {
-      return isRecentlyQueued ? 10000 : POLLING_CONFIG.BASE_INTERVAL;
-    }
+      // 🛡️ FAST-FOLLOW: If there's a very fresh job (< 60s), poll every 10s (Mandate Review #9)
+      const newestJob = jobsRef.current.find((j) => j.status === "processing");
+      const isRecentlyQueued = newestJob && Date.now() - newestJob.createdAt < 60000;
 
-    // 🛡️ EXPONENTIAL BACKOFF: 2m -> 4m -> 8m -> 15m (Cap)
-    const backoff = POLLING_CONFIG.BASE_INTERVAL * Math.pow(2, consecutiveFailures);
-    return Math.min(backoff, POLLING_CONFIG.MAX_INTERVAL);
-  }, [consecutiveFailures]);
+      let baseDelay = POLLING_CONFIG.BASE_INTERVAL;
+      if (consecutiveFailures === 0 && isRecentlyQueued) {
+        baseDelay = 10000;
+      } else if (consecutiveFailures > 0) {
+        // 🛡️ EXPONENTIAL BACKOFF: 2m -> 4m -> 8m -> 15m (Cap)
+        baseDelay = Math.min(
+          POLLING_CONFIG.BASE_INTERVAL * Math.pow(2, consecutiveFailures),
+          POLLING_CONFIG.MAX_INTERVAL
+        );
+      }
+
+      // 🛡️ FULL JITTER: Apply entropy and respect the Retry-After floor
+      const jitteredDelay = Math.floor(Math.random() * baseDelay);
+      return Math.max(jitteredDelay, retryAfterMs);
+    },
+    [consecutiveFailures]
+  );
 
   const scheduleNext = useCallback(
-    async (delayOverride?: number) => {
+    async (delayOverride?: number, retryAfterSeconds?: number) => {
       if (timeoutIdRef.current) {
         clearTimeout(timeoutIdRef.current);
         timeoutIdRef.current = null;
@@ -253,11 +277,12 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const activeAiJobs = jobsRef.current.filter((j) => j.status === "processing");
       if (activeAiJobs.length === 0) return;
 
-      const nextDelay = delayOverride ?? calculateNextPollDelay();
+      const nextDelay = delayOverride ?? calculateNextPollDelay(retryAfterSeconds);
 
       timeoutIdRef.current = setTimeout(() => {
-        syncJobs().finally(() => {
-          scheduleNext().catch((err) => {
+        syncJobs().then((retryAfter) => {
+          // 🛡️ Mandate Review #9: Schedule next poll using retryAfter if provided
+          scheduleNext(undefined, retryAfter).catch((err) => {
             console.error("Critical error in job sync loop:", err);
             setConsecutiveFailures((prev) => prev + 1);
             void scheduleNext(POLLING_CONFIG.MAX_INTERVAL);

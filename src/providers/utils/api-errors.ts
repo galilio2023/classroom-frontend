@@ -140,6 +140,7 @@ export const handleError = async (errorOrResponse: unknown): Promise<HttpError> 
     return {
       message,
       statusCode: 429,
+      meta: { retryAfter: retryWithJitter, correlationId },
     } as HttpError;
   }
 
