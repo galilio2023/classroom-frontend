@@ -370,7 +370,8 @@ const SubjectsList = () => {
                           </h3>
                           <div className="flex items-center justify-center md:justify-start gap-2">
                             {isInstitutional && (
-                              <Badge className="bg-indigo-500/10 text-indigo-600 border-none font-black px-3 py-0.5 rounded-full text-[10px] md:text-[11px] tracking-widest uppercase shadow-sm">
+                              <Badge className="bg-indigo-500/10 text-indigo-600 border-none font-black px-3 py-1 rounded-full text-[10px] md:text-[11px] tracking-widest uppercase shadow-sm gap-1.5">
+                                <Building2 className="h-3 w-3" />
                                 {t("subjects.sharedCurriculum", "Shared")}
                               </Badge>
                             )}

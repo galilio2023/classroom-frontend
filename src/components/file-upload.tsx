@@ -1,9 +1,9 @@
 import React, { useState, useRef } from "react";
+import { useNotification } from "@refinedev/core";
 import { Button } from "./ui/button";
 import {} from "./ui/input";
 import { Label } from "./ui/label";
 import { Loader2, Upload, File as FileIcon, X, CheckCircle2 } from "lucide-react";
-import { toast } from "sonner";
 import { BACKEND_URL } from "@/config";
 import { useTranslation } from "react-i18next";
 
@@ -27,6 +27,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   maxSize = DEFAULT_MAX_FILE_SIZE,
 }) => {
   const { t } = useTranslation();
+  const { open } = useNotification();
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadComplete, setUploadComplete] = useState(false);
@@ -39,7 +40,9 @@ export const FileUpload: React.FC<FileUploadProps> = ({
 
       // Fix for truncated code in original diff
       if (selectedFile.size > maxSize) {
-        toast.error(t("common.upload.tooLarge"), {
+        open?.({
+          type: "error",
+          message: t("common.upload.tooLarge"),
           description: t("common.upload.tooLargeDesc", {
             size: (maxSize / (1024 * 1024)).toFixed(0),
           }),
@@ -51,8 +54,10 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       // 🛡️ RURAL RESILIENCE: Warn about large files on potentially slow networks
       const maxSyncSizeMb = Number(import.meta.env.VITE_MAX_SYNC_UPLOAD_SIZE_MB) || 5;
       if (selectedFile.size > maxSyncSizeMb * 1024 * 1024) {
-        toast.warning(t("common.upload.largeFileWarning" as any), {
-          description: t("common.upload.largeFileWarningDesc" as any),
+        open?.({
+          type: "error", // Refine core only supports success | error | progress
+          message: (t as any)("common.upload.largeFileWarning"),
+          description: (t as any)("common.upload.largeFileWarningDesc"),
         });
       }
 
@@ -82,7 +87,10 @@ export const FileUpload: React.FC<FileUploadProps> = ({
 
       if (!response.ok) {
         const errorData = await response.json();
-        toast.error(errorData.message || t("common.upload.error"));
+        open?.({
+          type: "error",
+          message: errorData.message || t("common.upload.error"),
+        });
         setIsUploading(false);
         return;
       }
@@ -91,11 +99,17 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       onUploadSuccess(result.data.url, result.data.publicId);
       setUploadedPublicId(result.data.publicId);
       setUploadComplete(true);
-      toast.success(t("common.upload.success"));
+      open?.({
+        type: "success",
+        message: t("common.upload.success"),
+      });
     } catch (error: any) {
       console.error("Upload Error:", error);
       const message = error instanceof Error ? error.message : t("common.upload.error");
-      toast.error(message);
+      open?.({
+        type: "error",
+        message,
+      });
     } finally {
       setIsUploading(false);
     }
