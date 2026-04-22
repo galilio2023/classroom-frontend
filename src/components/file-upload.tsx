@@ -36,6 +36,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   const [uploadedPublicId, setUploadedPublicId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
+  const uploadIdRef = useRef<string | null>(null);
 
   // 🛡️ CLEANUP: Ensure any pending upload is aborted on unmount (Mandate Review #8)
   React.useEffect(() => {
@@ -50,7 +51,6 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     if (e.target.files && e.target.files[0]) {
       const selectedFile = e.target.files[0];
 
-      // Fix for truncated code in original diff
       if (selectedFile.size > maxSize) {
         open?.({
           type: "error",
@@ -81,11 +81,15 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   const handleUpload = async () => {
     if (!file) return;
 
+    const currentUploadId = crypto.randomUUID();
+    uploadIdRef.current = currentUploadId;
+
     // 🛡️ CLEANUP: Cancel previous request if still pending
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
-    abortControllerRef.current = new AbortController();
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
 
     setIsUploading(true);
     const formData = new FormData();
@@ -96,11 +100,11 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     const correlationId = createCorrelationId("upload");
 
     try {
-      const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN); // Get token for authorization
+      const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
       const response = await fetch(`${BACKEND_URL}/assets/upload`, {
         method: "POST",
         body: formData,
-        signal: abortControllerRef.current.signal,
+        signal: controller.signal,
         headers: {
           "X-Correlation-ID": correlationId,
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -112,6 +116,10 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       }
 
       const result = await response.json();
+
+      // 🛡️ RACE GUARD: If a newer upload was started, ignore this one
+      if (uploadIdRef.current !== currentUploadId) return;
+
       onUploadSuccess(result.data.url, result.data.publicId);
       setUploadedPublicId(result.data.publicId);
       setUploadComplete(true);
@@ -120,18 +128,22 @@ export const FileUpload: React.FC<FileUploadProps> = ({
         message: t("common.upload.success"),
       });
     } catch (error: unknown) {
+      if ((error as Error).name === "AbortError") return;
+
       console.error("Upload Error:", error);
 
-      // 🛡️ TRACEABILITY: Show Correlation ID in error toast per Mandate #8
-      const correlationId = getCorrelationId(error);
+      // 🛡️ TRACEABILITY: Use meta field for correlation ID extraction (Mandate Review #8)
+      const errorCorrelationId = getCorrelationId(error);
 
       open?.({
         type: "error",
         message: (error as Error).message || t("common.upload.error"),
-        description: correlationId !== "N/A" ? `Trace ID: ${correlationId}` : undefined,
-      });
+        meta: { correlationId: errorCorrelationId },
+      } as any);
     } finally {
-      setIsUploading(false);
+      if (uploadIdRef.current === currentUploadId) {
+        setIsUploading(false);
+      }
     }
   };
 
@@ -144,7 +156,6 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   };
 
   const handleContainerClick = () => {
-    // Trigger file input click only if not uploading
     if (!isUploading && !file) {
       fileInputRef.current?.click();
     }

@@ -2,9 +2,15 @@ import { UndoableNotification } from "@/components/refine/notification/undoable-
 import type { NotificationProvider } from "@refinedev/core";
 import { useNavigate } from "react-router-dom";
 import { toast, type ExternalToast } from "sonner";
-import { MoveRight, Copy, Check } from "lucide-react";
+import { MoveRight } from "lucide-react";
 import { NotificationMetadata } from "@/types";
 import React from "react";
+
+/**
+ * 🛡️ TYPE SAFETY: Tablawy Notification Types
+ * Extends Refine's base types to support our full feature set.
+ */
+export type TablawyNotificationType = "success" | "error" | "info" | "warning" | "progress";
 
 /**
  * Refine Notification Provider using Sonner.
@@ -14,17 +20,29 @@ export function useNotificationProvider(): NotificationProvider {
   const navigate = useNavigate();
 
   return {
-    open: ({ key, type, message, description, undoableTimeout, cancelMutation }) => {
+    open: (params) => {
+      const { key, type, message, description, undoableTimeout, cancelMutation, meta } =
+        params as any;
       const toastId = key || Date.now().toString();
 
-      // 🛡️ TRACEABILITY: If description contains Trace ID, add a copy button (Mandate Review #8)
-      const finalDescription = description;
+      // 🛡️ TRACEABILITY: Prefer correlationId from meta, fallback to parsing description
+      const correlationId = meta?.correlationId || meta?.traceId;
+
       let extraAction: ExternalToast["action"] | undefined;
 
-      if (
+      if (correlationId) {
+        extraAction = {
+          label: "Copy ID",
+          onClick: () => {
+            void navigator.clipboard.writeText(correlationId);
+            toast.success("ID copied to clipboard", { duration: 2000 });
+          },
+        };
+      } else if (
         typeof description === "string" &&
         (description.includes("Trace ID:") || description.includes("Correlation ID:"))
       ) {
+        // Fallback for legacy calls that put ID in description
         const idMatch = description.match(/(?:Trace ID|Correlation ID): ([\w-]+)/);
         if (idMatch && idMatch[1]) {
           const id = idMatch[1];
@@ -40,7 +58,7 @@ export function useNotificationProvider(): NotificationProvider {
 
       const config: ExternalToast = {
         id: toastId,
-        description: finalDescription,
+        description,
         richColors: true,
         duration: type === "error" ? 8000 : 4000,
         action: extraAction,
@@ -52,8 +70,8 @@ export function useNotificationProvider(): NotificationProvider {
         description !== null &&
         !React.isValidElement(description)
       ) {
-        const meta = description as unknown as NotificationMetadata;
-        if (meta.link) {
+        const notificationMeta = description as unknown as NotificationMetadata;
+        if (notificationMeta.link) {
           config.action = {
             label: (
               <div className="flex items-center gap-1">
@@ -61,10 +79,10 @@ export function useNotificationProvider(): NotificationProvider {
               </div>
             ),
             onClick: () => {
-              navigate(meta.link!);
+              navigate(notificationMeta.link!);
             },
           };
-          config.description = meta.message || undefined;
+          config.description = notificationMeta.message || undefined;
         }
       }
 
@@ -90,7 +108,6 @@ export function useNotificationProvider(): NotificationProvider {
         }
 
         // 🛡️ EXTENSION: Handle types not strictly in Refine's base OpenNotificationParams
-        // but used via 'as any' or extended types in our app logic.
         case "info" as any:
           toast.info(message, config);
           return;

@@ -1,3 +1,4 @@
+import "@refinedev/core";
 import { User } from "./types";
 
 declare module "@refinedev/core" {
@@ -5,6 +6,19 @@ declare module "@refinedev/core" {
   // that the `getIdentity` method will return our custom `User` type.
   // This provides global type safety for the user object.
   interface AuthIdentity extends User {}
+
+  /**
+   * 🛡️ TRACEABILITY AUGMENTATION
+   * Adds 'meta' support to notifications for passing Correlation IDs and Trace IDs
+   * down to the NotificationProvider (Sonner).
+   */
+  interface OpenNotificationParams {
+    meta?: {
+      correlationId?: string;
+      traceId?: string;
+      [key: string]: any;
+    };
+  }
 }
 
 /**

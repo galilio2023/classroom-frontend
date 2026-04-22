@@ -154,7 +154,8 @@ export const handleError = async (errorOrResponse: unknown): Promise<HttpError> 
     message:
       (json.error as string) ||
       (json.message as string) ||
-      `HTTP error! status: ${response.status} (Trace: ${correlationId})`,
+      `HTTP error! status: ${response.status}`,
     statusCode: response.status,
+    meta: { correlationId },
   };
 };

@@ -7,6 +7,7 @@ import { getJitteredDelay } from "@/lib/jitter";
 import { calculateBackoff } from "@/lib/utils";
 import { BACKEND_URL, STORAGE_KEYS } from "@/config";
 import { createCorrelationId } from "@/lib/traceability";
+import { pruneExpiredJobs } from "@/providers/utils/job-manager";
 
 export interface BackgroundJob {
   id: string;
@@ -51,8 +52,8 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        // Only restore jobs from the last 24h to prevent clutter
-        return parsed.filter((j: BackgroundJob) => j.createdAt > Date.now() - 86400000);
+        // 🧹 MAINTENANCE: Use centralized pruning utility
+        return pruneExpiredJobs(parsed);
       } catch (e) {
         console.error("Failed to parse saved jobs", e);
         localStorage.removeItem(STORAGE_KEYS.JOBS); // 🛡️ RESILIENCE: Clear corrupted state
@@ -74,10 +75,17 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const { open } = useNotification();
   const { t } = useTranslation();
 
-  // Keep refs in sync for interval closures and PERSIST to localStorage
+  // 🛡️ PERFORMANCE: Debounce localStorage writes to prevent main-thread blocking (Mandate Review #8)
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      localStorage.setItem(STORAGE_KEYS.JOBS, JSON.stringify(jobs));
+    }, 1000); // 1s debounce
+    return () => clearTimeout(timeout);
+  }, [jobs]);
+
+  // Keep jobsRef in sync for interval closures
   useEffect(() => {
     jobsRef.current = jobs;
-    localStorage.setItem(STORAGE_KEYS.JOBS, JSON.stringify(jobs));
   }, [jobs]);
 
   useEffect(() => {
@@ -87,7 +95,7 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // 🛡️ MAINTENANCE: Prune old jobs from in-memory state every hour
   useEffect(() => {
     const cleanupInterval = setInterval(() => {
-      setJobs((prev) => prev.filter((j) => j.createdAt > Date.now() - 86400000));
+      setJobs((prev) => pruneExpiredJobs(prev));
     }, 3600000);
     return () => clearInterval(cleanupInterval);
   }, []);
@@ -217,8 +225,8 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       open?.({
         type: "error",
         message: t("ai.jobs.syncError" as any),
-        description: `Trace ID: ${correlationId}`,
-      });
+        meta: { correlationId },
+      } as any);
 
       // Increment retries on failure to trigger backoff
       setJobs((prev) => {
@@ -246,7 +254,6 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         await syncJobs();
 
         // 🛡️ RESILIENCE: Full Jitter Exponential backoff
-        // Mandate Review #8: Use the max retry count across all active jobs for consistent backoff
         const maxRetries = activeAiJobs.reduce((max, job) => Math.max(max, job.retryCount || 0), 0);
 
         nextDelay = Math.max(
@@ -279,7 +286,7 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return () => {
       if (timeoutIdRef.current) clearTimeout(timeoutIdRef.current);
     };
-  }, [scheduleNext, syncDelay]); // 🚀 UPDATED: Frequency updates when delay changes
+  }, [scheduleNext, syncDelay]);
 
   // Socket Listeners for Real-time completion
   useEffect(() => {
