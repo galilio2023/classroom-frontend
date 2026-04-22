@@ -9,6 +9,28 @@
     "refreshBtn": "Refresh Now",
     "overwriteBtn": "Overwrite"
   },
+  "ai": {
+    "jobs": {
+      "multiple_completed": "{{count}} AI tasks completed in background.",
+      "check_dashboard": "Check your notifications or the AI dashboard for details.",
+      "syncError": "Failed to sync background tasks. Retrying...",
+      "queued_title": "Processing in background",
+      "queued_desc": "We'll notify you when it's ready.",
+      "queued_safe_mode_desc": "System load is high. This may take longer than usual.",
+      "explain": {
+        "completed": "Explanation generated successfully",
+        "failed": "Failed to generate explanation"
+      },
+      "summary": {
+        "completed": "Summary ready",
+        "failed": "Failed to summarize content"
+      },
+      "bio": {
+        "completed": "Bio generated",
+        "failed": "Failed to generate bio"
+      }
+    }
+  },
   "attendance": "$t(resources.attendance.attendance)",
   "project-groups": "$t(resources.project-groups.project-groups)",
   "library": "$t(resources.library.title)",

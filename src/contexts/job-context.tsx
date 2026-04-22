@@ -81,15 +81,18 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     const syncToIndexedDB = async () => {
       try {
-        // Source of truth in memory -> Persist to DB
-        await offlineDB.background_jobs.bulkPut(jobs);
+        // 🛡️ RACE GUARD: Wrap in transaction to ensure atomic sync (Mandate Review #9)
+        await offlineDB.transaction("rw", [offlineDB.background_jobs], async () => {
+          // 1. Source of truth in memory -> Persist to DB
+          await offlineDB.background_jobs.bulkPut(jobs);
 
-        // Cleanup jobs that were removed from memory but still exist in IndexedDB
-        const allIds = jobs.map((j) => j.id);
-        await offlineDB.background_jobs
-          .toCollection()
-          .filter((j) => !allIds.includes(j.id))
-          .delete();
+          // 2. Cleanup jobs that were removed from memory but still exist in IndexedDB
+          const allIds = jobs.map((j) => j.id);
+          await offlineDB.background_jobs
+            .toCollection()
+            .filter((j) => !allIds.includes(j.id))
+            .delete();
+        });
       } catch (err) {
         console.error("Failed to sync jobs to Dexie:", err);
       }
@@ -225,7 +228,13 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // 🛡️ ADAPTIVE SCHEDULER: Failure-based backoff logic
   const calculateNextPollDelay = useCallback(() => {
-    if (consecutiveFailures === 0) return POLLING_CONFIG.BASE_INTERVAL;
+    // 🛡️ FAST-FOLLOW: If there's a very fresh job (< 60s), poll every 10s (Mandate Review #9)
+    const newestJob = jobsRef.current.find((j) => j.status === "processing");
+    const isRecentlyQueued = newestJob && Date.now() - newestJob.createdAt < 60000;
+
+    if (consecutiveFailures === 0) {
+      return isRecentlyQueued ? 10000 : POLLING_CONFIG.BASE_INTERVAL;
+    }
 
     // 🛡️ EXPONENTIAL BACKOFF: 2m -> 4m -> 8m -> 15m (Cap)
     const backoff = POLLING_CONFIG.BASE_INTERVAL * Math.pow(2, consecutiveFailures);

@@ -33,7 +33,6 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadComplete, setUploadComplete] = useState(false);
-  const [uploadedPublicId, setUploadedPublicId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const uploadIdRef = useRef<string | null>(null);
@@ -74,7 +73,6 @@ export const FileUpload: React.FC<FileUploadProps> = ({
 
       setFile(selectedFile);
       setUploadComplete(false);
-      setUploadedPublicId(null);
     }
   };
 
@@ -121,7 +119,6 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       if (uploadIdRef.current !== currentUploadId) return;
 
       onUploadSuccess(result.data.url, result.data.publicId);
-      setUploadedPublicId(result.data.publicId);
       setUploadComplete(true);
       open?.({
         type: "success",
@@ -150,7 +147,6 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   const clearFile = () => {
     setFile(null);
     setUploadComplete(false);
-    setUploadedPublicId(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
     onClear?.();
   };

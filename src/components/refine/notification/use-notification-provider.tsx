@@ -1,5 +1,5 @@
 import { UndoableNotification } from "@/components/refine/notification/undoable-notification";
-import type { NotificationProvider } from "@refinedev/core";
+import type { NotificationProvider, OpenNotificationParams } from "@refinedev/core";
 import { useNavigate } from "react-router-dom";
 import { toast, type ExternalToast } from "sonner";
 import { MoveRight } from "lucide-react";
@@ -13,17 +13,24 @@ import React from "react";
 export type TablawyNotificationType = "success" | "error" | "info" | "warning" | "progress";
 
 /**
+ * Augmented parameters for Tablawy notifications.
+ * Strictly uses the augmented OpenNotificationParams from refine.d.ts.
+ */
+export interface TablawyOpenNotificationParams extends OpenNotificationParams {}
+
+/**
  * Refine Notification Provider using Sonner.
+
  * Optimized for the new Service Layer backend.
  */
 export function useNotificationProvider(): NotificationProvider {
   const navigate = useNavigate();
 
   return {
-    open: (params) => {
+    open: (params: OpenNotificationParams) => {
       // 🛡️ Mandate Review #8: Explicit cast to handle augmented meta field
       const { key, type, message, description, undoableTimeout, cancelMutation, meta } =
-        params as any;
+        params as TablawyOpenNotificationParams;
       const toastId = key || Date.now().toString();
 
       // 🛡️ TRACEABILITY: Prefer correlationId from meta (Standard Mandate Review #8)
