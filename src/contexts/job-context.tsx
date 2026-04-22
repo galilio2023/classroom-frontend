@@ -47,7 +47,7 @@ const POLLING_CONFIG = {
 export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [jobs, setJobs] = useState<BackgroundJob[]>(() => {
     // 🛡️ PERSISTENCE: Restore jobs from localStorage on init (Mandate Review #8)
-    const saved = localStorage.getItem(STORAGE_KEYS.JOBS || "background_jobs");
+    const saved = localStorage.getItem(STORAGE_KEYS.JOBS);
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
@@ -76,12 +76,20 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Keep refs in sync for interval closures and PERSIST to localStorage
   useEffect(() => {
     jobsRef.current = jobs;
-    localStorage.setItem(STORAGE_KEYS.JOBS || "background_jobs", JSON.stringify(jobs));
+    localStorage.setItem(STORAGE_KEYS.JOBS, JSON.stringify(jobs));
   }, [jobs]);
 
   useEffect(() => {
     syncDelayRef.current = syncDelay;
   }, [syncDelay]);
+
+  // 🛡️ MAINTENANCE: Prune old jobs from in-memory state every hour
+  useEffect(() => {
+    const cleanupInterval = setInterval(() => {
+      setJobs((prev) => prev.filter((j) => j.createdAt > Date.now() - 86400000));
+    }, 3600000);
+    return () => clearInterval(cleanupInterval);
+  }, []);
 
   // Handle Tab Visibility to save mobile battery
   useEffect(() => {
@@ -164,13 +172,27 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
       const { data: updatedJobs } = (await response.json()) as { data: BackgroundJob[] };
 
+      // 🛡️ UX: Batch notifications if multiple jobs completed (Mandate Review #8)
+      const newlyFinished = updatedJobs.filter((u) => u.status !== "processing");
+      if (newlyFinished.length > 1) {
+        open?.({
+          type: "info" as any,
+          message: t("ai.jobs.multiple_completed" as any, { count: newlyFinished.length }),
+          description: t("ai.jobs.check_dashboard" as any),
+        });
+      }
+
       setJobs((prev) => {
         const next = prev.map((job) => {
           // 🛡️ MATCHING: Check for direct ID match OR correlationId (outbox ID)
           const update = updatedJobs.find((u) => u.id === job.id || u.correlationId === job.id);
           if (update) {
-            // If status changed to completed/failed, notify user
-            if (job.status === "processing" && update.status !== "processing") {
+            // If status changed to completed/failed, notify user (if not already batched)
+            if (
+              job.status === "processing" &&
+              update.status !== "processing" &&
+              newlyFinished.length <= 1
+            ) {
               const translationKey = `ai.jobs.${job.type}.${update.status}`;
               open?.({
                 type: update.status === "completed" ? "success" : "error",
@@ -290,11 +312,20 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
   }, [open, t, updateJob]);
 
-  return (
-    <JobContext.Provider value={{ jobs, addJob, updateJob, removeJob, clearCompleted, syncJobs }}>
-      {children}
-    </JobContext.Provider>
+  // 🛡️ PERFORMANCE: Memoize context value to prevent unnecessary re-renders (Mandate Review #8)
+  const contextValue = React.useMemo(
+    () => ({
+      jobs,
+      addJob,
+      updateJob,
+      removeJob,
+      clearCompleted,
+      syncJobs,
+    }),
+    [jobs, addJob, updateJob, removeJob, clearCompleted, syncJobs]
   );
+
+  return <JobContext.Provider value={contextValue}>{children}</JobContext.Provider>;
 };
 
 export const useJobs = () => {

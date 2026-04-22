@@ -35,6 +35,16 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   const [uploadComplete, setUploadComplete] = useState(false);
   const [_uploadedPublicId, setUploadedPublicId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  // 🛡️ CLEANUP: Ensure any pending upload is aborted on unmount (Mandate Review #8)
+  React.useEffect(() => {
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, []);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -71,6 +81,12 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   const handleUpload = async () => {
     if (!file) return;
 
+    // 🛡️ CLEANUP: Cancel previous request if still pending
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    abortControllerRef.current = new AbortController();
+
     setIsUploading(true);
     const formData = new FormData();
     formData.append("file", file);
@@ -84,6 +100,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       const response = await fetch(`${BACKEND_URL}/assets/upload`, {
         method: "POST",
         body: formData,
+        signal: abortControllerRef.current.signal,
         headers: {
           "X-Correlation-ID": correlationId,
           ...(token ? { Authorization: `Bearer ${token}` } : {}),

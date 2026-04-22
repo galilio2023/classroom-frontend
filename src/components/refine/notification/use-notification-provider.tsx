@@ -2,8 +2,9 @@ import { UndoableNotification } from "@/components/refine/notification/undoable-
 import type { NotificationProvider } from "@refinedev/core";
 import { useNavigate } from "react-router-dom";
 import { toast, type ExternalToast } from "sonner";
-import { MoveRight } from "lucide-react";
+import { MoveRight, Copy, Check } from "lucide-react";
 import { NotificationMetadata } from "@/types";
+import React from "react";
 
 /**
  * Refine Notification Provider using Sonner.
@@ -16,15 +17,41 @@ export function useNotificationProvider(): NotificationProvider {
     open: ({ key, type, message, description, undoableTimeout, cancelMutation }) => {
       const toastId = key || Date.now().toString();
 
+      // 🛡️ TRACEABILITY: If description contains Trace ID, add a copy button (Mandate Review #8)
+      const finalDescription = description;
+      let extraAction: ExternalToast["action"] | undefined;
+
+      if (
+        typeof description === "string" &&
+        (description.includes("Trace ID:") || description.includes("Correlation ID:"))
+      ) {
+        const idMatch = description.match(/(?:Trace ID|Correlation ID): ([\w-]+)/);
+        if (idMatch && idMatch[1]) {
+          const id = idMatch[1];
+          extraAction = {
+            label: "Copy ID",
+            onClick: () => {
+              void navigator.clipboard.writeText(id);
+              toast.success("ID copied to clipboard", { duration: 2000 });
+            },
+          };
+        }
+      }
+
       const config: ExternalToast = {
         id: toastId,
-        description,
+        description: finalDescription,
         richColors: true,
-        duration: type === "error" ? 6000 : 4000,
+        duration: type === "error" ? 8000 : 4000,
+        action: extraAction,
       };
 
       // 🚀 ACTIONABLE REDIRECTS: If there's a link, add a button
-      if (typeof description === "object" && description !== null) {
+      if (
+        typeof description === "object" &&
+        description !== null &&
+        !React.isValidElement(description)
+      ) {
         const meta = description as unknown as NotificationMetadata;
         if (meta.link) {
           config.action = {
@@ -41,22 +68,19 @@ export function useNotificationProvider(): NotificationProvider {
         }
       }
 
-      switch (type) {
+      switch (type as string) {
         case "success":
           toast.success(message, config);
           return;
 
         case "error": {
           // 🛡️ SECURITY: Ensure description is safe for rendering (Mandate Review #8)
-          // If it's a React element, we pass it as-is. If it's a string, we provide a fallback.
-          let finalDescription = config.description;
-          if (!finalDescription) {
-            finalDescription = "An unexpected error occurred. Please try again.";
+          if (!config.description) {
+            config.description = "An unexpected error occurred. Please try again.";
           }
 
           toast.error(message, {
             ...config,
-            description: finalDescription,
             action: config.action || {
               label: "Dismiss",
               onClick: () => toast.dismiss(toastId),
@@ -64,6 +88,14 @@ export function useNotificationProvider(): NotificationProvider {
           });
           return;
         }
+
+        case "info":
+          toast.info(message, config);
+          return;
+
+        case "warning":
+          toast.warning(message, config);
+          return;
 
         case "progress": {
           toast(
