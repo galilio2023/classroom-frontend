@@ -1,9 +1,10 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from "react";
 import { useNotification } from "@refinedev/core";
 import { handleError, getCorrelationId } from "@/providers/utils/api-errors";
-import { getFreshSession } from "@/providers/auth";
-import { BASE_URL } from "@/constants/api";
+import { socket } from "@/lib/socket";
+import { useTranslation } from "react-i18next";
 import { getJitteredDelay } from "@/lib/jitter";
+import { calculateBackoff } from "@/lib/utils";
 
 export interface BackgroundJob {
   id: string;
@@ -26,15 +27,6 @@ interface JobContextType {
 
 const JobContext = createContext<JobContextType | undefined>(undefined);
 
-export const useJobs = () => {
-  const context = useContext(JobContext);
-  if (!context) throw new Error("useJobs must be used within a JobProvider");
-  return context;
-};
-
-const STORAGE_KEY = "classroom_active_jobs";
-
-// 🛡️ POLLING CONFIGURATION (Mandate M-008)
 const POLLING_CONFIG = {
   INITIAL_DELAY: 5000, // 5s (🚀 UX: Faster initial feedback)
   MAX_DELAY: 30000, // 30s (🚀 UX: More aggressive cap for active jobs)
@@ -48,151 +40,108 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isVisible, setIsVisible] = useState(true);
 
   const jobsRef = useRef<BackgroundJob[]>([]);
-  const isSyncingRef = useRef(false);
+  const syncDelayRef = useRef(syncDelay);
   const timeoutIdRef = useRef<NodeJS.Timeout | null>(null);
-  const abortControllerRef = useRef<AbortController | null>(null);
-  const { open } = useNotification();
 
-  // Sync ref with state
+  const { open } = useNotification();
+  const { t } = useTranslation();
+
+  // Keep refs in sync for interval closures
   useEffect(() => {
     jobsRef.current = jobs;
   }, [jobs]);
 
-  // 1. Initial Load from LocalStorage
   useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        // 🛡️ AUTO-CLEANUP: Remove very old jobs (> 24h) or completed/failed jobs (> 1h)
-        const dayAgo = Date.now() - 24 * 60 * 60 * 1000;
-        const hourAgo = Date.now() - 60 * 60 * 1000;
+    syncDelayRef.current = syncDelay;
+  }, [syncDelay]);
 
-        const valid = parsed.filter((j: BackgroundJob) => {
-          if (j.status === "processing") return j.createdAt > dayAgo;
-          return j.createdAt > hourAgo;
-        });
-        setJobs(valid);
-        jobsRef.current = valid;
-      } catch (e) {
-        console.error("Failed to load jobs from storage", e);
-      }
-    }
+  // Handle Tab Visibility to save mobile battery
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      setIsVisible(document.visibilityState === "visible");
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
   }, []);
-
-  // 2. Sync to LocalStorage
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(jobs));
-  }, [jobs]);
 
   const updateJob = useCallback((id: string, updates: Partial<BackgroundJob>) => {
-    setJobs((prev) =>
-      prev.map((j) => (j.id === id || j.metadata?.jobId === id ? { ...j, ...updates } : j))
-    );
+    setJobs((prev) => prev.map((job) => (job.id === id ? { ...job, ...updates } : job)));
   }, []);
 
-  // 🛡️ RECOVERY: Polling for AI jobs that might have finished while disconnected
-  const syncJobs = useCallback(async () => {
-    const activeAiJobs = jobsRef.current.filter((j) => j.status === "processing");
-    if (activeAiJobs.length === 0 || isSyncingRef.current) return;
+  const addJob = useCallback((job: Omit<BackgroundJob, "status" | "createdAt">) => {
+    const newJob: BackgroundJob = {
+      ...job,
+      status: "processing",
+      createdAt: Date.now(),
+      retryCount: 0,
+    };
+    setJobs((prev) => [newJob, ...prev]);
+  }, []);
 
-    if (abortControllerRef.current) abortControllerRef.current.abort();
-    const controller = new AbortController();
-    abortControllerRef.current = controller;
+  const removeJob = useCallback((id: string) => {
+    setJobs((prev) => prev.filter((job) => job.id !== id));
+  }, []);
+
+  const clearCompleted = useCallback(() => {
+    setJobs((prev) => prev.filter((job) => job.status === "processing"));
+  }, []);
+
+  const syncJobs = useCallback(async () => {
+    const processingJobs = jobsRef.current.filter((j) => j.status === "processing");
+    if (processingJobs.length === 0) return;
 
     try {
-      isSyncingRef.current = true;
-      const { data: session } = await getFreshSession();
-      const token = (session as any)?.token;
-      if (!token) return;
-
-      const response = await fetch(`${BASE_URL}/ai/jobs/sync`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        signal: controller.signal,
-      });
+      const response = await fetch(
+        `/api/ai/jobs/sync?since=${new Date(Math.min(...processingJobs.map((j) => j.createdAt))).toISOString()}`,
+        {
+          headers: {
+            "X-Correlation-ID": `poll-${Date.now()}`,
+          },
+        }
+      );
 
       if (!response.ok) {
         throw await handleError(response);
       }
 
-      const { data } = await response.json();
+      const { data: updatedJobs } = await response.json();
 
-      if (data && Array.isArray(data)) {
-        data.forEach((remoteJob: any) => {
-          const localJob = jobsRef.current.find(
-            (j) =>
-              j.status === "processing" &&
-              j.type === remoteJob.topic &&
-              j.metadata?.classId === remoteJob.classId
-          );
-
-          if (localJob && remoteJob.status === "completed") {
-            const updatedMetadata = { ...localJob.metadata, ...remoteJob.result };
-            updateJob(localJob.id, {
-              status: "completed",
-              metadata: updatedMetadata,
-            });
-
-            window.dispatchEvent(
-              new CustomEvent(`JOB_COMPLETED_${localJob.type.toUpperCase()}`, {
-                detail: { jobId: localJob.id, metadata: updatedMetadata },
-              })
-            );
-          } else if (localJob && remoteJob.status === "failed") {
-            updateJob(localJob.id, { status: "failed" });
-            window.dispatchEvent(
-              new CustomEvent(`JOB_FAILED_${localJob.type.toUpperCase()}`, {
-                detail: { jobId: localJob.id },
-              })
-            );
+      setJobs((prev) => {
+        return prev.map((job) => {
+          const update = updatedJobs.find((u: any) => u.id === job.id);
+          if (update) {
+            // If status changed to completed/failed, notify user
+            if (job.status === "processing" && update.status !== "processing") {
+              open?.({
+                type: update.status === "completed" ? "success" : "error",
+                message: t(`ai.jobs.${job.type}.${update.status}`),
+                description: job.title,
+              });
+            }
+            return { ...job, ...update };
           }
+          return job;
         });
-      }
-    } catch (e: any) {
-      if (e.name === "AbortError") return;
-      console.error("AI Job Sync failed:", e);
-      open?.({
-        type: "error",
-        message: "Sync Failed",
-        description: e.message || "Failed to synchronize background jobs.",
       });
-    } finally {
-      if (abortControllerRef.current === controller) {
-        abortControllerRef.current = null;
-      }
-      isSyncingRef.current = false;
+    } catch (error) {
+      console.error("Job Sync Failed:", error);
+      // Increment retries on failure to trigger backoff
+      setJobs((prev) =>
+        prev.map((j) =>
+          j.status === "processing" ? { ...j, retryCount: (j.retryCount || 0) + 1 } : j
+        )
+      );
     }
-  }, [updateJob, open]);
+  }, [open, t]);
 
-  // 🛡️ CLEANUP: Prevent memory leaks and orphaned requests on unmount
-  useEffect(() => {
-    return () => {
-      if (timeoutIdRef.current) clearTimeout(timeoutIdRef.current);
-      if (abortControllerRef.current) abortControllerRef.current.abort();
-    };
-  }, []);
-
-  const scheduleNext = useCallback((delay: number) => {
+  const scheduleNext = useCallback(async () => {
     if (timeoutIdRef.current) clearTimeout(timeoutIdRef.current);
 
-    timeoutIdRef.current = setTimeout(poll, delay);
-  }, []);
-
-  const poll = useCallback(async () => {
-    let nextDelay = syncDelay;
+    let nextDelay = POLLING_CONFIG.INITIAL_DELAY;
     let shouldSchedule = false;
 
-    try {
-      // 🛡️ RULE 6: Tab Visibility Safety
-      if (!isVisible) {
-        nextDelay = POLLING_CONFIG.IDLE_POLL_INTERVAL;
-        shouldSchedule = true;
-        return;
-      }
-
+    if (isVisible) {
       const activeAiJobs = jobsRef.current.filter((j) => j.status === "processing");
       if (activeAiJobs.length > 0) {
         await syncJobs();
@@ -200,98 +149,74 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         // 🛡️ RESILIENCE: Full Jitter Exponential backoff
         // Mandate Review #8: Use the max retry count across all active jobs for consistent backoff
         const maxRetries = activeAiJobs.reduce((max, job) => Math.max(max, job.retryCount || 0), 0);
-        const cappedAttempt = Math.min(maxRetries, 10);
 
-        const nextBase = Math.min(
-          POLLING_CONFIG.MAX_DELAY,
-          POLLING_CONFIG.INITIAL_DELAY * Math.pow(2, cappedAttempt)
+        nextDelay = Math.max(
+          POLLING_CONFIG.INITIAL_DELAY,
+          calculateBackoff(maxRetries, POLLING_CONFIG.INITIAL_DELAY, POLLING_CONFIG.MAX_DELAY)
         );
-        const jittered = getJitteredDelay(nextBase);
-        nextDelay = Math.max(POLLING_CONFIG.INITIAL_DELAY, jittered);
         setSyncDelay(nextDelay);
         shouldSchedule = true;
       } else {
         // Stop the loop if no more processing jobs
         setSyncDelay(POLLING_CONFIG.INITIAL_DELAY);
         shouldSchedule = false;
-        if (timeoutIdRef.current) {
-          clearTimeout(timeoutIdRef.current);
-          timeoutIdRef.current = null;
-        }
+        return;
       }
-    } catch (pollErr) {
-      const error = await handleError(pollErr);
-      const correlationId = getCorrelationId(pollErr);
-      console.error("Critical: AI Polling loop encountered an error:", error);
-
-      open?.({
-        type: "error",
-        message: "AI Sync Error",
-        description: `${error.message} (Trace: ${correlationId})`,
-      });
-
-      nextDelay = POLLING_CONFIG.RETRY_INTERVAL;
+    } else {
+      // Tab backgrounded: Switch to idle poll
+      nextDelay = POLLING_CONFIG.IDLE_POLL_INTERVAL;
       shouldSchedule = true;
-    } finally {
-      if (shouldSchedule) {
-        scheduleNext(nextDelay);
-      }
     }
-  }, [isVisible, syncJobs, syncDelay, open, scheduleNext]);
 
-  const addJob = (job: Omit<BackgroundJob, "status" | "createdAt">) => {
-    setJobs((prev) => [
-      ...prev,
-      { ...job, status: "processing", createdAt: Date.now() } as BackgroundJob,
-    ]);
-    setSyncDelay(POLLING_CONFIG.INITIAL_DELAY);
-    // Wake up the loop immediately
-    scheduleNext(0);
-  };
-
-  const removeJob = (id: string) => {
-    setJobs((prev) => {
-      const updated = prev.filter((j) => j.id !== id && j.metadata?.jobId !== id);
-      const stillProcessing = updated.some((j) => j.status === "processing");
-      if (!stillProcessing && timeoutIdRef.current) {
-        clearTimeout(timeoutIdRef.current);
-        timeoutIdRef.current = null;
-      }
-      return updated;
-    });
-  };
-
-  const clearCompleted = () => {
-    setJobs((prev) => prev.filter((j) => j.status === "processing"));
-  };
+    if (shouldSchedule) {
+      timeoutIdRef.current = setTimeout(() => {
+        scheduleNext();
+      }, nextDelay);
+    }
+  }, [isVisible, syncJobs]);
 
   useEffect(() => {
-    const handleVisibilityChange = () => {
-      const visible = document.visibilityState === "visible";
-      setIsVisible(visible);
-      if (visible && jobsRef.current.some((j) => j.status === "processing")) {
-        scheduleNext(0);
-      }
-    };
-
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
-  }, [scheduleNext]);
-
-  // Bootstrapping the loop if there are initial jobs
-  useEffect(() => {
-    const hasInitialJobs = jobsRef.current.some((j) => j.status === "processing");
-    if (hasInitialJobs && !timeoutIdRef.current) {
-      scheduleNext(POLLING_CONFIG.INITIAL_DELAY);
-    }
+    scheduleNext();
     return () => {
       if (timeoutIdRef.current) clearTimeout(timeoutIdRef.current);
     };
   }, [scheduleNext]);
+
+  // Socket Listeners for Real-time completion
+  useEffect(() => {
+    const handleJobCompleted = (data: { jobId: string; status: string; result?: any }) => {
+      updateJob(data.jobId, {
+        status: data.status as any,
+        metadata: { ...data.result },
+      });
+
+      const job = jobsRef.current.find((j) => j.id === data.jobId);
+      if (job) {
+        open?.({
+          type: data.status === "completed" ? "success" : "error",
+          message: t(`ai.jobs.${job.type}.${data.status}`),
+          description: job.title,
+        });
+      }
+    };
+
+    socket.on("ai:job_completed", handleJobCompleted);
+    return () => {
+      socket.off("ai:job_completed", handleJobCompleted);
+    };
+  }, [open, t, updateJob]);
 
   return (
     <JobContext.Provider value={{ jobs, addJob, updateJob, removeJob, clearCompleted, syncJobs }}>
       {children}
     </JobContext.Provider>
   );
+};
+
+export const useJobs = () => {
+  const context = useContext(JobContext);
+  if (context === undefined) {
+    throw new Error("useJobs must be used within a JobProvider");
+  }
+  return context;
 };

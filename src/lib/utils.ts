@@ -20,9 +20,21 @@ export function stripMarkdown(text: string): string {
     .replace(/[#*>-]/g, "") // List markers and headers
     .trim();
 }
+/**
+ * 🛡️ RESILIENCE: Calculates a 'Full Jitter' exponential backoff delay.
+ * Mandate Review #8: Prevents 'thundering herds' by spreading retries across the window.
+ *
+ * sleep = random_between(0, min(maxDelay, baseDelay * 2^attempt))
+ */
+export function calculateBackoff(attempt: number, baseDelay = 5000, maxDelay = 30000): number {
+  const cappedAttempt = Math.min(attempt, 10); // Prevent power overflow
+  const backoff = Math.min(maxDelay, baseDelay * Math.pow(2, cappedAttempt));
+  return Math.floor(Math.random() * backoff);
+}
 
 /**
  * 🛠️ TRACEABILITY UTILITY: Generates a unique correlation ID.
+...
  * Uses crypto.randomUUID if available, with a safe fallback for older browsers.
  */
 export function getUUID(): string {

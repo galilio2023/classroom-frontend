@@ -85,12 +85,17 @@ const SubjectsList = () => {
     },
   });
 
+  /**
+   * 🏛️ HEADLESS CORE-ONLY IMPLEMENTATION
+   * Using useTable for state management (filters, pagination) only.
+   * Render is handled via custom card components for enhanced institution-grade UX.
+   */
   const {
     filters,
     setFilters,
     tableQuery: query,
   } = useTable<SubjectListItem, HttpError>({
-    columns: [], // Required by @refinedev/react-table
+    columns: [], // Required by @refinedev/react-table but unused in headless card view
     refineCoreProps: {
       resource: "subjects",
       pagination: { pageSize: 50, mode: "server" },
@@ -451,7 +456,7 @@ const SubjectsList = () => {
                                 className="h-11 w-11 rounded-2xl text-destructive hover:bg-destructive/10 bg-muted/20"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  if (subject.id) setDeleteTarget(Number(subject.id));
+                                  if (subject.id) setDeleteTarget(Number(subject.id as any));
                                 }}
                               >
                                 <Trash2 className="h-5 w-5" />
@@ -516,7 +521,7 @@ const SubjectsList = () => {
                                 <DropdownMenuSeparator className="my-2 opacity-50" />
                                 <DropdownMenuItem
                                   onClick={() => {
-                                    if (subject.id) setDeleteTarget(Number(subject.id));
+                                    if (subject.id) setDeleteTarget(Number(subject.id as any));
                                   }}
                                   className="rounded-xl gap-3 py-3 cursor-pointer text-destructive focus:bg-destructive/10"
                                 >
