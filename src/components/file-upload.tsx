@@ -8,6 +8,7 @@ import { BACKEND_URL, MAX_SYNC_UPLOAD_SIZE_MB, STORAGE_KEYS } from "@/config";
 import { useTranslation } from "react-i18next";
 import { handleError, getCorrelationId } from "@/providers/utils/api-errors";
 import { createCorrelationId } from "@/lib/traceability";
+import { mbToBytes, bytesToMb } from "@/lib/utils";
 
 interface FileUploadProps {
   onUploadSuccess: (url: string, publicId: string) => void;
@@ -18,7 +19,7 @@ interface FileUploadProps {
   maxSize?: number; // In bytes
 }
 
-const DEFAULT_MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+const DEFAULT_MAX_FILE_SIZE = mbToBytes(10); // 10MB
 
 export const FileUpload: React.FC<FileUploadProps> = ({
   onUploadSuccess,
@@ -55,7 +56,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
           type: "error",
           message: t("common.upload.tooLarge"),
           description: t("common.upload.tooLargeDesc", {
-            size: (maxSize / (1024 * 1024)).toFixed(0),
+            size: bytesToMb(maxSize).toFixed(0),
           }),
         });
         if (fileInputRef.current) fileInputRef.current.value = "";
@@ -63,7 +64,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       }
 
       // 🛡️ RURAL RESILIENCE: Warn about large files on potentially slow networks
-      if (selectedFile.size > MAX_SYNC_UPLOAD_SIZE_MB * 1024 * 1024) {
+      if (selectedFile.size > mbToBytes(MAX_SYNC_UPLOAD_SIZE_MB)) {
         open?.({
           type: "warning" as any,
           message: t("common.upload.largeFileWarning"),
@@ -179,7 +180,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
           </p>
           <p className="text-xs text-muted-foreground/60 mt-1">
             {t("common.upload.maxSize", {
-              size: (maxSize / (1024 * 1024)).toFixed(0),
+              size: bytesToMb(maxSize).toFixed(0),
             })}
           </p>
         </div>
@@ -195,7 +196,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
                   {file.name}
                 </span>
                 <span className="text-xs text-muted-foreground">
-                  {(file.size / (1024 * 1024)).toFixed(2)} MB
+                  {bytesToMb(file.size).toFixed(2)} MB
                 </span>
               </div>
             </div>

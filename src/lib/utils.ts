@@ -1,6 +1,12 @@
 import { ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
+/**
+ * 🛠️ Standard conversion utilities for file sizes.
+ */
+export const mbToBytes = (mb: number) => mb * 1024 * 1024;
+export const bytesToMb = (bytes: number) => bytes / (1024 * 1024);
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }

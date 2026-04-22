@@ -29,6 +29,9 @@
         "completed": "Bio generated",
         "failed": "Failed to generate bio"
       }
+    },
+    "notifications": {
+      "idCopied": "Correlation ID copied to clipboard"
     }
   },
   "attendance": "$t(resources.attendance.attendance)",

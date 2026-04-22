@@ -1,5 +1,9 @@
 import { UndoableNotification } from "@/components/refine/notification/undoable-notification";
-import type { NotificationProvider, OpenNotificationParams } from "@refinedev/core";
+import {
+  useTranslate,
+  type NotificationProvider,
+  type OpenNotificationParams,
+} from "@refinedev/core";
 import { useNavigate } from "react-router-dom";
 import { toast, type ExternalToast } from "sonner";
 import { MoveRight } from "lucide-react";
@@ -25,6 +29,7 @@ export interface TablawyOpenNotificationParams extends OpenNotificationParams {}
  */
 export function useNotificationProvider(): NotificationProvider {
   const navigate = useNavigate();
+  const t = useTranslate();
 
   return {
     open: (params: OpenNotificationParams) => {
@@ -43,7 +48,10 @@ export function useNotificationProvider(): NotificationProvider {
           label: "Copy ID",
           onClick: () => {
             void navigator.clipboard.writeText(correlationId);
-            toast.success("ID copied to clipboard", { duration: 2000 });
+            // 🛡️ UX: Silent feedback for copying (Mandate Review #9)
+            toast.info(t("common.notifications.idCopied", "Correlation ID copied to clipboard"), {
+              duration: 2000,
+            });
           },
         };
       }

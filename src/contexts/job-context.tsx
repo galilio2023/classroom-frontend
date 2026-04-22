@@ -276,6 +276,12 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (visible) {
         void scheduleNext(0);
       } else {
+        // 🛡️ RURAL RESILIENCE: Abort active sync if tab is hidden (Mandate Review #9)
+        if (abortControllerRef.current) {
+          abortControllerRef.current.abort();
+          abortControllerRef.current = null;
+        }
+
         if (timeoutIdRef.current) {
           clearTimeout(timeoutIdRef.current);
           timeoutIdRef.current = null;
