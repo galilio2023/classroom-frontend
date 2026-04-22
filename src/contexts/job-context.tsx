@@ -51,6 +51,7 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const jobsRef = useRef<BackgroundJob[]>([]);
   const syncDelayRef = useRef(syncDelay);
   const timeoutIdRef = useRef<NodeJS.Timeout | null>(null);
+  const isSyncingRef = useRef(false);
 
   const { open } = useNotification();
   const { t } = useTranslation();
@@ -97,10 +98,13 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, []);
 
   const syncJobs = useCallback(async () => {
+    if (isSyncingRef.current) return;
+
     const processingJobs = jobsRef.current.filter((j) => j.status === "processing");
     if (processingJobs.length === 0) return;
 
     try {
+      isSyncingRef.current = true;
       const minCreatedAt = Math.min(...processingJobs.map((j) => j.createdAt));
       const response = await fetch(
         `${BACKEND_URL}/ai/jobs/sync?since=${new Date(minCreatedAt).toISOString()}`,
@@ -145,6 +149,8 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           j.status === "processing" ? { ...j, retryCount: (j.retryCount || 0) + 1 } : j
         )
       );
+    } finally {
+      isSyncingRef.current = false;
     }
   }, [open, t]);
 

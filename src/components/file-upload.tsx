@@ -57,8 +57,8 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       if (selectedFile.size > maxSyncSizeMb * 1024 * 1024) {
         open?.({
           type: "error", // Refine core only supports success | error | progress
-          message: (t as any)("common.upload.largeFileWarning"),
-          description: (t as any)("common.upload.largeFileWarningDesc"),
+          message: t("common.upload.largeFileWarning"),
+          description: t("common.upload.largeFileWarningDesc"),
         });
       }
 
