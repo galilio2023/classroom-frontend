@@ -14,3 +14,6 @@ export const BETTER_AUTH_ROOT = `${BACKEND_URL}/identity`;
 
 // Sockets connect to root domain (Railway backend)
 export const SOCKET_URL = BASE_URL;
+
+// 🛡️ STORAGE & UPLOADS (Mandate Review #8)
+export const MAX_SYNC_UPLOAD_SIZE_MB = Number(import.meta.env.VITE_MAX_SYNC_UPLOAD_SIZE_MB) || 5;

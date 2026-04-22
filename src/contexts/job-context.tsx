@@ -103,14 +103,23 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const processingJobs = jobsRef.current.filter((j) => j.status === "processing");
     if (processingJobs.length === 0) return;
 
+    const controller = new AbortController();
+    const correlationId = `poll-${Date.now()}`;
+
     try {
       isSyncingRef.current = true;
       const minCreatedAt = Math.min(...processingJobs.map((j) => j.createdAt));
+      
+      // Get token for auth
+      const token = localStorage.getItem("auth_token");
+
       const response = await fetch(
         `${BACKEND_URL}/ai/jobs/sync?since=${new Date(minCreatedAt).toISOString()}`,
         {
+          signal: controller.signal,
           headers: {
-            "X-Correlation-ID": `poll-${Date.now()}`,
+            "X-Correlation-ID": correlationId,
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
           },
         }
       );
@@ -142,7 +151,17 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         });
       });
     } catch (error: any) {
+      if (error.name === "AbortError") return;
+
       console.error("Job Sync Failed:", error);
+      
+      // 🛡️ TRACEABILITY: Show Correlation ID in error toast per Mandate #8
+      open?.({
+        type: "error",
+        message: t("ai.jobs.syncError" as any),
+        description: `Trace ID: ${correlationId}`,
+      });
+
       // Increment retries on failure to trigger backoff
       setJobs((prev) =>
         prev.map((j) =>

@@ -4,9 +4,9 @@ import { Button } from "./ui/button";
 import {} from "./ui/input";
 import { Label } from "./ui/label";
 import { Loader2, Upload, File as FileIcon, X, CheckCircle2 } from "lucide-react";
-import { BACKEND_URL } from "@/config";
+import { BACKEND_URL, MAX_SYNC_UPLOAD_SIZE_MB } from "@/config";
 import { useTranslation } from "react-i18next";
-import { handleError } from "@/providers/utils/api-errors";
+import { handleError, getCorrelationId } from "@/providers/utils/api-errors";
 
 interface FileUploadProps {
   onUploadSuccess: (url: string, publicId: string) => void;
@@ -53,8 +53,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       }
 
       // 🛡️ RURAL RESILIENCE: Warn about large files on potentially slow networks
-      const maxSyncSizeMb = Number(import.meta.env.VITE_MAX_SYNC_UPLOAD_SIZE_MB) || 5;
-      if (selectedFile.size > maxSyncSizeMb * 1024 * 1024) {
+      if (selectedFile.size > MAX_SYNC_UPLOAD_SIZE_MB * 1024 * 1024) {
         open?.({
           type: "error", // Refine core only supports success | error | progress
           message: t("common.upload.largeFileWarning"),
@@ -78,10 +77,11 @@ export const FileUpload: React.FC<FileUploadProps> = ({
 
     try {
       const token = localStorage.getItem("tablawy_auth_token"); // Get token for authorization
-      const response = await fetch(`${BACKEND_URL}/upload`, {
+      const response = await fetch(`${BACKEND_URL}/assets/upload`, {
         method: "POST",
         body: formData,
         headers: {
+          "X-Correlation-ID": `upload-${Date.now()}`,
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
       });
@@ -100,9 +100,14 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       });
     } catch (error: any) {
       console.error("Upload Error:", error);
+      
+      // 🛡️ TRACEABILITY: Show Correlation ID in error toast per Mandate #8
+      const correlationId = getCorrelationId(error);
+
       open?.({
         type: "error",
         message: error.message || t("common.upload.error"),
+        description: correlationId !== "N/A" ? `Trace ID: ${correlationId}` : undefined,
       });
     } finally {
       setIsUploading(false);

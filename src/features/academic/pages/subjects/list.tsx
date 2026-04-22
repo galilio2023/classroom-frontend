@@ -90,11 +90,7 @@ const SubjectsList = () => {
    * Using useTable for state management (filters, pagination) only.
    * Render is handled via custom card components for enhanced institution-grade UX.
    */
-  const {
-    filters,
-    setFilters,
-    tableQuery: query,
-  } = useTable<SubjectListItem, HttpError>({
+  const table = useTable<SubjectListItem, HttpError>({
     columns: [], // Required by @refinedev/react-table but unused in headless card view
     refineCoreProps: {
       resource: "subjects",
@@ -105,7 +101,13 @@ const SubjectsList = () => {
       },
       syncWithLocation: true,
     },
-  }).refineCore;
+  });
+
+  const {
+    filters,
+    setFilters,
+    tableQuery: query,
+  } = table.refineCore;
 
   const searchQuery =
     (filters.find((f) => "field" in f && f.field === "search") as any)?.value || "";
@@ -153,7 +155,7 @@ const SubjectsList = () => {
 
   // Stats calculation
   const stats = useMemo(() => {
-    if (!subjects.length) return { total: 0, totalCredits: 0, avgCredits: 0 };
+    if (!subjects || subjects.length === 0) return { total: 0, totalCredits: 0, avgCredits: 0 };
     const totalCredits = subjects.reduce(
       (acc: number, curr: SubjectListItem) => acc + (curr.credits || 0),
       0
