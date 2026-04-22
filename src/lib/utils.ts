@@ -34,7 +34,31 @@ export function calculateBackoff(attempt: number, baseDelay = 5000, maxDelay = 3
 
 /**
  * 🛠️ TRACEABILITY UTILITY: Generates a unique correlation ID.
-...
+ * Mandate #8: Ensures every critical request is traceable across the stack.
+ */
+export function createCorrelationId(prefix: string): string {
+  return `${prefix}-${getUUID()}`;
+}
+
+/**
+ * 🛡️ PII NORMALIZATION (Mirroring SQL Trigger):
+ * Ensures Egyptian numerals and non-numeric characters are sanitized
+ * before being sent to the API, preventing indexing/audit mismatches.
+ */
+export function normalizeEgyNumerals(value: string, isPhone = false): string {
+  if (!value) return "";
+
+  // 1. Translate Eastern Arabic to Western
+  const normalized = value.replace(/[٠١٢٣٤٥٦٧٨٩]/g, (d) => (d.charCodeAt(0) - 1632).toString());
+
+  // 2. Strip non-numeric (Preserve '+' for phone if requested)
+  if (isPhone) {
+    return normalized.replace(/[^0-9+]/g, "");
+  }
+  return normalized.replace(/[^0-9]/g, "");
+}
+
+/**
  * Uses crypto.randomUUID if available, with a safe fallback for older browsers.
  */
 export function getUUID(): string {

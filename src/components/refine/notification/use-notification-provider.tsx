@@ -41,7 +41,7 @@ export function useNotificationProvider(): NotificationProvider {
         }
       }
 
-      switch (type as any) {
+      switch (type) {
         case "success":
           toast.success(message, config);
           return;
@@ -49,18 +49,12 @@ export function useNotificationProvider(): NotificationProvider {
         case "error":
           toast.error(message, {
             ...config,
-            description: config.description ?? "An unexpected error occurred. Please try again.",
+            description:
+              (config.description as string) ?? "An unexpected error occurred. Please try again.",
             action: config.action || {
               label: "Dismiss",
               onClick: () => toast.dismiss(toastId),
             },
-          });
-          return;
-
-        case "warning":
-          toast.warning(message, {
-            ...config,
-            description: config.description,
           });
           return;
 

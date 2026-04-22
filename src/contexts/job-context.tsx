@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { getJitteredDelay } from "@/lib/jitter";
 import { calculateBackoff } from "@/lib/utils";
 import { BACKEND_URL, STORAGE_KEYS } from "@/config";
+import { createCorrelationId } from "@/lib/traceability";
 
 export interface BackgroundJob {
   id: string;
@@ -77,7 +78,11 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, []);
 
   const updateJob = useCallback((id: string, updates: Partial<BackgroundJob>) => {
-    setJobs((prev) => prev.map((job) => (job.id === id ? { ...job, ...updates } : job)));
+    setJobs((prev) => {
+      const next = prev.map((job) => (job.id === id ? { ...job, ...updates } : job));
+      jobsRef.current = next;
+      return next;
+    });
   }, []);
 
   const addJob = useCallback((job: Omit<BackgroundJob, "status" | "createdAt">) => {
@@ -87,11 +92,19 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       createdAt: Date.now(),
       retryCount: 0,
     };
-    setJobs((prev) => [newJob, ...prev]);
+    setJobs((prev) => {
+      const next = [newJob, ...prev];
+      jobsRef.current = next;
+      return next;
+    });
   }, []);
 
   const removeJob = useCallback((id: string) => {
-    setJobs((prev) => prev.filter((job) => job.id !== id));
+    setJobs((prev) => {
+      const next = prev.filter((job) => job.id !== id);
+      jobsRef.current = next;
+      return next;
+    });
   }, []);
 
   const clearCompleted = useCallback(() => {
@@ -109,7 +122,7 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       abortControllerRef.current.abort();
     }
     abortControllerRef.current = new AbortController();
-    const correlationId = `poll-${Date.now()}`;
+    const correlationId = createCorrelationId("poll");
 
     try {
       isSyncingRef.current = true;
@@ -136,7 +149,7 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const { data: updatedJobs } = (await response.json()) as { data: BackgroundJob[] };
 
       setJobs((prev) => {
-        return prev.map((job) => {
+        const next = prev.map((job) => {
           // 🛡️ MATCHING: Check for direct ID match OR correlationId (outbox ID)
           const update = updatedJobs.find((u) => u.id === job.id || u.correlationId === job.id);
           if (update) {
@@ -153,6 +166,8 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           }
           return job;
         });
+        jobsRef.current = next;
+        return next;
       });
     } catch (error: unknown) {
       if ((error as Error).name === "AbortError") return;
@@ -167,11 +182,13 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       });
 
       // Increment retries on failure to trigger backoff
-      setJobs((prev) =>
-        prev.map((j) =>
+      setJobs((prev) => {
+        const next = prev.map((j) =>
           j.status === "processing" ? { ...j, retryCount: (j.retryCount || 0) + 1 } : j
-        )
-      );
+        );
+        jobsRef.current = next;
+        return next;
+      });
     } finally {
       isSyncingRef.current = false;
     }
