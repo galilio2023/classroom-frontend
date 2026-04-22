@@ -6,6 +6,7 @@ import { Label } from "./ui/label";
 import { Loader2, Upload, File as FileIcon, X, CheckCircle2 } from "lucide-react";
 import { BACKEND_URL } from "@/config";
 import { useTranslation } from "react-i18next";
+import { handleError } from "@/providers/utils/api-errors";
 
 interface FileUploadProps {
   onUploadSuccess: (url: string, publicId: string) => void;
@@ -86,13 +87,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        open?.({
-          type: "error",
-          message: errorData.message || t("common.upload.error"),
-        });
-        setIsUploading(false);
-        return;
+        throw await handleError(response);
       }
 
       const result = await response.json();
@@ -105,10 +100,9 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       });
     } catch (error: any) {
       console.error("Upload Error:", error);
-      const message = error instanceof Error ? error.message : t("common.upload.error");
       open?.({
         type: "error",
-        message,
+        message: error.message || t("common.upload.error"),
       });
     } finally {
       setIsUploading(false);

@@ -5,15 +5,24 @@ import { socket } from "@/lib/socket";
 import { useTranslation } from "react-i18next";
 import { getJitteredDelay } from "@/lib/jitter";
 import { calculateBackoff } from "@/lib/utils";
+import { BACKEND_URL } from "@/config";
 
 export interface BackgroundJob {
   id: string;
-  type: "summary" | "assignment" | "quiz" | "magic-builder" | "bulk-enroll";
+  type:
+    | "summary"
+    | "assignment"
+    | "quiz"
+    | "magic-builder"
+    | "bulk-enroll"
+    | "hager_export"
+    | "generate_bio";
   status: "processing" | "completed" | "failed";
   title: string;
   createdAt: number;
   metadata?: any;
   retryCount?: number; // 🛡️ Mandate Review #8: Track retries for exponential backoff
+  correlationId?: string; // 🛡️ Linkage for outbox vs aiJob IDs
 }
 
 interface JobContextType {
@@ -92,8 +101,9 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (processingJobs.length === 0) return;
 
     try {
+      const minCreatedAt = Math.min(...processingJobs.map((j) => j.createdAt));
       const response = await fetch(
-        `/api/ai/jobs/sync?since=${new Date(Math.min(...processingJobs.map((j) => j.createdAt))).toISOString()}`,
+        `${BACKEND_URL}/ai/jobs/sync?since=${new Date(minCreatedAt).toISOString()}`,
         {
           headers: {
             "X-Correlation-ID": `poll-${Date.now()}`,
@@ -109,13 +119,16 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
       setJobs((prev) => {
         return prev.map((job) => {
-          const update = updatedJobs.find((u: any) => u.id === job.id);
+          // 🛡️ MATCHING: Check for direct ID match OR correlationId (outbox ID)
+          const update = updatedJobs.find(
+            (u: any) => u.id === job.id || u.correlationId === job.id
+          );
           if (update) {
             // If status changed to completed/failed, notify user
             if (job.status === "processing" && update.status !== "processing") {
               open?.({
                 type: update.status === "completed" ? "success" : "error",
-                message: t(`ai.jobs.${job.type}.${update.status}`),
+                message: t(`ai.jobs.${job.type}.${update.status}` as any),
                 description: job.title,
               });
             }
@@ -124,7 +137,7 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           return job;
         });
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Job Sync Failed:", error);
       // Increment retries on failure to trigger backoff
       setJobs((prev) =>
@@ -184,18 +197,27 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Socket Listeners for Real-time completion
   useEffect(() => {
-    const handleJobCompleted = (data: { jobId: string; status: string; result?: any }) => {
-      updateJob(data.jobId, {
-        status: data.status as any,
-        metadata: { ...data.result },
-      });
+    const handleJobCompleted = (data: {
+      jobId: string;
+      status: string;
+      result?: any;
+      correlationId?: string;
+    }) => {
+      // 🛡️ MATCHING: Find job by ID OR correlationId
+      const targetJob = jobsRef.current.find(
+        (j) => j.id === data.jobId || (data.correlationId && j.id === data.correlationId)
+      );
 
-      const job = jobsRef.current.find((j) => j.id === data.jobId);
-      if (job) {
+      if (targetJob) {
+        updateJob(targetJob.id, {
+          status: data.status as any,
+          metadata: { ...data.result },
+        });
+
         open?.({
           type: data.status === "completed" ? "success" : "error",
-          message: t(`ai.jobs.${job.type}.${data.status}`),
-          description: job.title,
+          message: t(`ai.jobs.${targetJob.type}.${data.status}` as any),
+          description: targetJob.title,
         });
       }
     };
