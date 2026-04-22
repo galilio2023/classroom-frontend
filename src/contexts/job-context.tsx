@@ -38,14 +38,29 @@ interface JobContextType {
 const JobContext = createContext<JobContextType | undefined>(undefined);
 
 const POLLING_CONFIG = {
-  INITIAL_DELAY: 5000, // 5s (🚀 UX: Faster initial feedback)
+  INITIAL_DELAY: 1000, // 🚀 UX: Faster initial feedback (Mandate Review #8)
   MAX_DELAY: 30000, // 30s (🚀 UX: More aggressive cap for active jobs)
   RETRY_INTERVAL: 15000, // 15s (🚀 RESILIENCE: Standard retry delay)
   IDLE_POLL_INTERVAL: 60000, // 1m when tab is hidden
 };
 
 export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [jobs, setJobs] = useState<BackgroundJob[]>([]);
+  const [jobs, setJobs] = useState<BackgroundJob[]>(() => {
+    // 🛡️ PERSISTENCE: Restore jobs from localStorage on init (Mandate Review #8)
+    const saved = localStorage.getItem(STORAGE_KEYS.JOBS || "background_jobs");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        // Only restore jobs from the last 24h to prevent clutter
+        return parsed.filter((j: BackgroundJob) => j.createdAt > Date.now() - 86400000);
+      } catch (e) {
+        console.error("Failed to parse saved jobs", e);
+        return [];
+      }
+    }
+    return [];
+  });
+
   const [syncDelay, setSyncDelay] = useState(POLLING_CONFIG.INITIAL_DELAY);
   const [isVisible, setIsVisible] = useState(true);
 
@@ -58,9 +73,10 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const { open } = useNotification();
   const { t } = useTranslation();
 
-  // Keep refs in sync for interval closures
+  // Keep refs in sync for interval closures and PERSIST to localStorage
   useEffect(() => {
     jobsRef.current = jobs;
+    localStorage.setItem(STORAGE_KEYS.JOBS || "background_jobs", JSON.stringify(jobs));
   }, [jobs]);
 
   useEffect(() => {

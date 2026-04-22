@@ -24,4 +24,5 @@ export const STORAGE_KEYS = {
   USER: "user",
   LIVE_SESSION: "tablawy-live-session",
   TELEMETRY_ID: "tablawy_telemetry_id",
+  JOBS: "background_jobs", // 🛡️ PERSISTENCE: Tracking background jobs across sessions
 };

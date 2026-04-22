@@ -23,12 +23,22 @@ export function normalizeArabicNumerals(input: string): string {
 }
 
 /**
+ * 🛠️ NORMALIZATION: Strips all non-numeric characters except '+' for phone formatting.
+ * 🛡️ Mandate M-004: Ensures stability between application and DB triggers.
+ */
+export function stripNonNumeric(input: string): string {
+  if (!input) return "";
+  return input.replace(/[^0-9+]/g, "");
+}
+
+/**
  * 🛡️ REUSABLE ZOD FRAGMENT: Standard normalization for Egyptian numeric inputs (ID, Phone).
  */
-export const egyptNumericSchema = z.preprocess(
-  (val) => (typeof val === "string" ? normalizeArabicNumerals(val) : val),
-  z.string()
-);
+export const egyptNumericSchema = z.preprocess((val) => {
+  if (typeof val !== "string") return val;
+  const normalized = normalizeArabicNumerals(val);
+  return stripNonNumeric(normalized);
+}, z.string());
 
 export const validateEgyptianID = (
   id: string

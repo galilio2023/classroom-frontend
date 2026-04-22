@@ -7,6 +7,7 @@ import { Loader2, Upload, File as FileIcon, X, CheckCircle2 } from "lucide-react
 import { BACKEND_URL, MAX_SYNC_UPLOAD_SIZE_MB, STORAGE_KEYS } from "@/config";
 import { useTranslation } from "react-i18next";
 import { handleError, getCorrelationId } from "@/providers/utils/api-errors";
+import { createCorrelationId } from "@/lib/traceability";
 
 interface FileUploadProps {
   onUploadSuccess: (url: string, publicId: string) => void;
@@ -75,13 +76,16 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     formData.append("file", file);
     formData.append("folder", folder);
 
+    // 🛡️ TRACEABILITY: Use standardized utility for correlation IDs (Mandate Review #8)
+    const correlationId = createCorrelationId("upload");
+
     try {
       const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN); // Get token for authorization
       const response = await fetch(`${BACKEND_URL}/assets/upload`, {
         method: "POST",
         body: formData,
         headers: {
-          "X-Correlation-ID": `upload-${Date.now()}`,
+          "X-Correlation-ID": correlationId,
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
       });
