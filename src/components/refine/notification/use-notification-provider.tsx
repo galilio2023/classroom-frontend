@@ -17,12 +17,6 @@ import React from "react";
 export type TablawyNotificationType = "success" | "error" | "info" | "warning" | "progress";
 
 /**
- * Augmented parameters for Tablawy notifications.
- * Strictly uses the augmented OpenNotificationParams from refine.d.ts.
- */
-export interface TablawyOpenNotificationParams extends OpenNotificationParams {}
-
-/**
  * Refine Notification Provider using Sonner.
 
  * Optimized for the new Service Layer backend.
@@ -32,10 +26,9 @@ export function useNotificationProvider(): NotificationProvider {
   const t = useTranslate();
 
   return {
-    open: (params: OpenNotificationParams) => {
-      // 🛡️ Mandate Review #8: Explicit cast to handle augmented meta field
-      const { key, type, message, description, undoableTimeout, cancelMutation, meta } =
-        params as TablawyOpenNotificationParams;
+    open: (params: any) => {
+      // 🛡️ Mandate Review #8: Deconstruct from any to handle augmented fields and union types safely
+      const { key, type, message, description, undoableTimeout, cancelMutation, meta } = params;
       const toastId = key || Date.now().toString();
 
       // 🛡️ TRACEABILITY: Prefer correlationId from meta (Standard Mandate Review #8)
@@ -63,7 +56,7 @@ export function useNotificationProvider(): NotificationProvider {
         return (
           <div className="space-y-2">
             <div className="text-sm">
-              {typeof description === "string" ? description : "An unexpected error occurred."}
+              {description || t("common.errors.unexpected", "An unexpected error occurred.")}
             </div>
             <details className="text-[10px] opacity-70 cursor-pointer group">
               <summary className="hover:underline font-medium list-none flex items-center gap-1">

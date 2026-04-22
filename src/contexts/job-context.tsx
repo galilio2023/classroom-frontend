@@ -183,35 +183,36 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const newlyFinished = updatedJobs.filter((u) => u.status !== "processing");
       if (newlyFinished.length > 1) {
         open?.({
-          type: "info" as any,
+          type: "info",
           message: t("ai.jobs.multiple_completed" as any, { count: newlyFinished.length }),
           description: t("ai.jobs.check_dashboard" as any),
-        });
+        } as any);
       }
 
-      setJobs((prev) => {
-        const next = prev.map((job) => {
-          const update = updatedJobs.find((u) => u.id === job.id || u.correlationId === job.id);
-          if (update) {
-            if (
-              job.status === "processing" &&
-              update.status !== "processing" &&
-              newlyFinished.length <= 1
-            ) {
-              const translationKey = `ai.jobs.${job.type}.${update.status}`;
-              open?.({
-                type: (update.status === "completed" ? "success" : "error") as any,
-                message: t(translationKey as any),
-                description: job.title,
-              });
-            }
-            return { ...job, ...update, retryCount: 0 };
+      const nextJobs = jobsRef.current.map((job) => {
+        const update = updatedJobs.find((u) => u.id === job.id || u.correlationId === job.id);
+        if (update) {
+          if (
+            job.status === "processing" &&
+            update.status !== "processing" &&
+            newlyFinished.length <= 1
+          ) {
+            const translationKey = `ai.jobs.${job.type}.${update.status}`;
+            open?.({
+              type: update.status === "completed" ? "success" : "error",
+              message: t(translationKey as any),
+              description: job.title,
+            });
           }
-          return job;
-        });
-        jobsRef.current = next;
-        return next;
+          return { ...job, ...update, retryCount: 0 };
+        }
+        return job;
       });
+
+      // 🛡️ ATOMIC: Sync to memory and Dexie together (Mandate Review #9)
+      setJobs(nextJobs);
+      jobsRef.current = nextJobs;
+      void offlineDB.background_jobs.bulkPut(nextJobs);
     } catch (error: any) {
       if (error.name === "AbortError") return;
 
@@ -220,7 +221,7 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setConsecutiveFailures((prev) => prev + 1);
 
       open?.({
-        type: "error" as any,
+        type: "error",
         message: t("ai.jobs.syncError" as any),
         meta: { correlationId, ...(error.meta || {}) },
       } as any);
@@ -242,6 +243,12 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     (retryAfterSeconds?: number) => {
       // 🛡️ MANDATE: Always respect server-provided Retry-After as the floor (Mandate Review #9)
       const retryAfterMs = retryAfterSeconds ? retryAfterSeconds * 1000 : 0;
+
+      // 🛡️ RURAL RESILIENCE: Respect 'Save Data' mode (Mandate Review #9)
+      const isSaveDataMode = (navigator as any).connection?.saveData === true;
+      if (isSaveDataMode && !retryAfterSeconds) {
+        return POLLING_CONFIG.MAX_INTERVAL;
+      }
 
       // 🛡️ FAST-FOLLOW: If there's a very fresh job (< 60s), poll every 10s (Mandate Review #9)
       const newestJob = jobsRef.current.find((j) => j.status === "processing");
@@ -326,9 +333,11 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         createdAt: Date.now(),
         retryCount: 0,
       };
+
       setJobs((prev) => {
         const next = [newJob, ...prev];
         jobsRef.current = next;
+        void offlineDB.background_jobs.put(newJob);
         return next;
       });
 
@@ -336,14 +345,14 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       void scheduleNext(0);
 
       open?.({
-        type: "info" as any,
+        type: "info",
         message: t("ai.jobs.queued_title" as any, { defaultValue: "Processing in background" }),
         description: isSafeMode
           ? t("ai.jobs.queued_safe_mode_desc" as any, {
               defaultValue: "System load is high. This may take longer than usual.",
             })
           : t("ai.jobs.queued_desc" as any, { defaultValue: "We'll notify you when it's ready." }),
-      });
+      } as any);
     },
     [isSafeMode, open, t, scheduleNext]
   );
@@ -368,13 +377,16 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       );
 
       if (targetJob) {
-        updateJob(targetJob.id, {
+        const updates = {
           status: data.status as any,
           metadata: { ...data.result },
-        });
+        };
+
+        updateJob(targetJob.id, updates);
+        void offlineDB.background_jobs.update(targetJob.id, updates);
 
         open?.({
-          type: (data.status === "completed" ? "success" : "error") as any,
+          type: data.status === "completed" ? "success" : "error",
           message: t(`ai.jobs.${targetJob.type}.${data.status}` as any),
           description: targetJob.title,
         });

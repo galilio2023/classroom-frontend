@@ -66,10 +66,10 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       // 🛡️ RURAL RESILIENCE: Warn about large files on potentially slow networks
       if (selectedFile.size > mbToBytes(MAX_SYNC_UPLOAD_SIZE_MB)) {
         open?.({
-          type: "warning" as any,
+          type: "warning",
           message: t("common.upload.largeFileWarning"),
           description: t("common.upload.largeFileWarningDesc"),
-        });
+        } as any);
       }
 
       setFile(selectedFile);
@@ -127,6 +127,9 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       });
     } catch (error: unknown) {
       if ((error as Error).name === "AbortError") return;
+
+      // 🛡️ RACE GUARD: If a newer upload was started, ignore this error (Mandate Review #9)
+      if (uploadIdRef.current !== currentUploadId) return;
 
       console.error("Upload Error:", error);
 

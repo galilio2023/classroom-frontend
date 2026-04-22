@@ -7,16 +7,11 @@ declare module "@refinedev/core" {
 
   // 🛡️ TRACEABILITY: Augmenting the core interface to support extra notification metadata
   // Mandate Review #9: Added 'warning' and 'info' for better rural feedback.
-  export interface OpenNotificationParams {
-    key?: string;
-    message: string;
-    type: "success" | "error" | "progress" | "warning" | "info";
-    description?: React.ReactNode;
-    undoableTimeout?: number;
-    cancelMutation?: () => void;
+  interface OpenNotificationParams {
     meta?: {
       correlationId?: string;
       traceId?: string;
+      retryAfter?: number;
       [key: string]: any;
     };
   }
