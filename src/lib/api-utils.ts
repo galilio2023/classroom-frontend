@@ -1,4 +1,4 @@
-import { calculateBackoff } from "./utils";
+import { calculateBackoff } from "./jitter";
 
 /**
  * 🛡️ RESILIENCE: Standard fetch wrapper with exponential backoff and jitter.

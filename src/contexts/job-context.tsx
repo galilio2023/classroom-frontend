@@ -3,29 +3,13 @@ import { useNotification } from "@refinedev/core";
 import { handleError, getCorrelationId } from "@/providers/utils/api-errors";
 import { socket } from "@/lib/socket";
 import { useTranslation } from "react-i18next";
-import { getJitteredDelay } from "@/lib/jitter";
-import { calculateBackoff } from "@/lib/utils";
+import { getJitteredDelay, calculateBackoff } from "@/lib/jitter";
 import { BACKEND_URL, STORAGE_KEYS } from "@/config";
 import { createCorrelationId } from "@/lib/traceability";
 import { pruneExpiredJobs } from "@/providers/utils/job-manager";
+import { offlineDB, BackgroundJobRecord } from "@/lib/offline-db";
 
-export interface BackgroundJob {
-  id: string;
-  type:
-    | "summary"
-    | "assignment"
-    | "quiz"
-    | "magic-builder"
-    | "bulk-enroll"
-    | "hager_export"
-    | "generate_bio";
-  status: "processing" | "completed" | "failed";
-  title: string;
-  createdAt: number;
-  metadata?: any;
-  retryCount?: number; // 🛡️ Mandate Review #8: Track retries for exponential backoff
-  correlationId?: string; // 🛡️ Linkage for outbox vs aiJob IDs
-}
+export type BackgroundJob = BackgroundJobRecord;
 
 interface JobContextType {
   jobs: BackgroundJob[];
@@ -34,6 +18,7 @@ interface JobContextType {
   removeJob: (id: string) => void;
   clearCompleted: () => void;
   syncJobs: () => Promise<void>;
+  isSafeMode: boolean; // 🛡️ Mandate Review #8: Inform UI of high system load
 }
 
 const JobContext = createContext<JobContextType | undefined>(undefined);
@@ -46,25 +31,10 @@ const POLLING_CONFIG = {
 };
 
 export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [jobs, setJobs] = useState<BackgroundJob[]>(() => {
-    // 🛡️ PERSISTENCE: Restore jobs from localStorage on init (Mandate Review #8)
-    const saved = localStorage.getItem(STORAGE_KEYS.JOBS);
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        // 🧹 MAINTENANCE: Use centralized pruning utility
-        return pruneExpiredJobs(parsed);
-      } catch (e) {
-        console.error("Failed to parse saved jobs", e);
-        localStorage.removeItem(STORAGE_KEYS.JOBS); // 🛡️ RESILIENCE: Clear corrupted state
-        return [];
-      }
-    }
-    return [];
-  });
-
+  const [jobs, setJobs] = useState<BackgroundJob[]>([]);
   const [syncDelay, setSyncDelay] = useState(POLLING_CONFIG.INITIAL_DELAY);
   const [isVisible, setIsVisible] = useState(true);
+  const [isSafeMode, setIsSafeMode] = useState(false);
 
   const jobsRef = useRef<BackgroundJob[]>([]);
   const syncDelayRef = useRef(syncDelay);
@@ -75,12 +45,61 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const { open } = useNotification();
   const { t } = useTranslation();
 
-  // 🛡️ PERFORMANCE: Debounce localStorage writes to prevent main-thread blocking (Mandate Review #8)
+  // 🛡️ MONITORING: Poll AI Health for Safe Mode status (Mandate Review #8)
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      localStorage.setItem(STORAGE_KEYS.JOBS, JSON.stringify(jobs));
-    }, 1000); // 1s debounce
-    return () => clearTimeout(timeout);
+    const checkAiHealth = async () => {
+      try {
+        const response = await fetch(`${BACKEND_URL}/ai/health`);
+        if (response.ok) {
+          const { data } = await response.json();
+          setIsSafeMode(!!data.isSafeMode);
+        }
+      } catch (err) {
+        console.warn("Failed to check AI health", err);
+      }
+    };
+
+    void checkAiHealth();
+    const interval = setInterval(checkAiHealth, 120000); // Check every 2 mins
+    return () => clearInterval(interval);
+  }, []);
+
+  // 🛡️ INITIALIZATION: Restore jobs from Dexie (Mandate #4 - Rural Hardening)
+  useEffect(() => {
+    const initJobs = async () => {
+      try {
+        const savedJobs = await offlineDB.background_jobs.toArray();
+        const validJobs = pruneExpiredJobs(savedJobs);
+        setJobs(validJobs);
+        jobsRef.current = validJobs;
+      } catch (err) {
+        console.error("Failed to initialize jobs from Dexie:", err);
+      }
+    };
+    void initJobs();
+  }, []);
+
+  // 🛡️ PERSISTENCE: Sync memory state to Dexie (Mandate #4 - Rural Hardening)
+  useEffect(() => {
+    const syncToIndexedDB = async () => {
+      try {
+        // Source of truth in memory -> Persist to DB
+        await offlineDB.background_jobs.bulkPut(jobs);
+
+        // Cleanup jobs that were removed from memory but still exist in IndexedDB
+        const allIds = jobs.map((j) => j.id);
+        await offlineDB.background_jobs
+          .toCollection()
+          .filter((j) => !allIds.includes(j.id))
+          .delete();
+      } catch (err) {
+        console.error("Failed to sync jobs to Dexie:", err);
+      }
+    };
+
+    if (jobs.length > 0) {
+      void syncToIndexedDB();
+    }
   }, [jobs]);
 
   // Keep jobsRef in sync for interval closures
@@ -118,20 +137,6 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
   }, []);
 
-  const addJob = useCallback((job: Omit<BackgroundJob, "status" | "createdAt">) => {
-    const newJob: BackgroundJob = {
-      ...job,
-      status: "processing",
-      createdAt: Date.now(),
-      retryCount: 0,
-    };
-    setJobs((prev) => {
-      const next = [newJob, ...prev];
-      jobsRef.current = next;
-      return next;
-    });
-  }, []);
-
   const removeJob = useCallback((id: string) => {
     setJobs((prev) => {
       const next = prev.filter((job) => job.id !== id);
@@ -144,6 +149,7 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setJobs((prev) => prev.filter((job) => job.status === "processing"));
   }, []);
 
+  // 🛡️ SYNC CORE: Fetches current status of processing jobs from backend
   const syncJobs = useCallback(async () => {
     if (isSyncingRef.current) return;
 
@@ -154,7 +160,9 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
-    abortControllerRef.current = new AbortController();
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
     const correlationId = createCorrelationId("poll");
 
     try {
@@ -167,7 +175,7 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const response = await fetch(
         `${BACKEND_URL}/ai/jobs/sync?since=${new Date(minCreatedAt).toISOString()}`,
         {
-          signal: abortControllerRef.current.signal,
+          signal: controller.signal,
           headers: {
             "X-Correlation-ID": correlationId,
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -237,56 +245,104 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         return next;
       });
     } finally {
-      isSyncingRef.current = false;
+      // 🛡️ RACE GUARD: Only reset if this was the current active controller
+      if (abortControllerRef.current === controller) {
+        isSyncingRef.current = false;
+      }
     }
   }, [open, t]);
 
-  const scheduleNext = useCallback(async () => {
-    if (timeoutIdRef.current) clearTimeout(timeoutIdRef.current);
-    if (isSyncingRef.current) return; // 🛡️ RACE GUARD: Wait for current sync to finish
+  // 🛡️ SCHEDULER: Manages the polling loop with backoff and battery safety
+  const scheduleNext = useCallback(
+    async (delayOverride?: number) => {
+      if (timeoutIdRef.current) clearTimeout(timeoutIdRef.current);
+      if (isSyncingRef.current) return; // 🛡️ RACE GUARD: Wait for current sync to finish
 
-    let nextDelay = POLLING_CONFIG.INITIAL_DELAY;
-    let shouldSchedule = false;
+      let nextDelay = delayOverride ?? POLLING_CONFIG.INITIAL_DELAY;
+      let shouldSchedule = false;
 
-    if (isVisible) {
-      const activeAiJobs = jobsRef.current.filter((j) => j.status === "processing");
-      if (activeAiJobs.length > 0) {
-        await syncJobs();
+      if (isVisible) {
+        const activeAiJobs = jobsRef.current.filter((j) => j.status === "processing");
+        if (activeAiJobs.length > 0) {
+          if (delayOverride === undefined) {
+            await syncJobs();
+          }
 
-        // 🛡️ RESILIENCE: Full Jitter Exponential backoff
-        const maxRetries = activeAiJobs.reduce((max, job) => Math.max(max, job.retryCount || 0), 0);
+          // 🛡️ RESILIENCE: Full Jitter Exponential backoff
+          const maxRetries = activeAiJobs.reduce(
+            (max, job) => Math.max(max, job.retryCount || 0),
+            0
+          );
 
-        nextDelay = Math.max(
-          POLLING_CONFIG.INITIAL_DELAY,
-          calculateBackoff(maxRetries, POLLING_CONFIG.INITIAL_DELAY, POLLING_CONFIG.MAX_DELAY)
-        );
-        setSyncDelay(nextDelay);
-        shouldSchedule = true;
+          nextDelay = Math.max(
+            nextDelay,
+            calculateBackoff(maxRetries, POLLING_CONFIG.INITIAL_DELAY, POLLING_CONFIG.MAX_DELAY)
+          );
+          setSyncDelay(nextDelay);
+          shouldSchedule = true;
+        } else {
+          // Stop the loop if no more processing jobs
+          setSyncDelay(POLLING_CONFIG.INITIAL_DELAY);
+          shouldSchedule = false;
+          return;
+        }
       } else {
-        // Stop the loop if no more processing jobs
-        setSyncDelay(POLLING_CONFIG.INITIAL_DELAY);
-        shouldSchedule = false;
-        return;
+        // Tab backgrounded: Switch to idle poll
+        nextDelay = POLLING_CONFIG.IDLE_POLL_INTERVAL;
+        shouldSchedule = true;
       }
-    } else {
-      // Tab backgrounded: Switch to idle poll
-      nextDelay = POLLING_CONFIG.IDLE_POLL_INTERVAL;
-      shouldSchedule = true;
-    }
 
-    if (shouldSchedule) {
-      timeoutIdRef.current = setTimeout(() => {
-        scheduleNext();
-      }, nextDelay);
-    }
-  }, [isVisible, syncJobs]);
+      if (shouldSchedule) {
+        timeoutIdRef.current = setTimeout(() => {
+          // 🛡️ SAFETY: Wrap the async execution to prevent unhandled rejections (Mandate Review #8)
+          scheduleNext().catch((err) => {
+            console.error("Critical error in job sync loop:", err);
+            // 🚀 RESILIENCE: Attempt to recover by scheduling a retry after the maximum delay
+            timeoutIdRef.current = setTimeout(() => void scheduleNext(), POLLING_CONFIG.MAX_DELAY);
+          });
+        }, nextDelay);
+      }
+    },
+    [isVisible, syncJobs]
+  );
+
+  const addJob = useCallback(
+    (job: Omit<BackgroundJob, "status" | "createdAt">) => {
+      const newJob: BackgroundJob = {
+        ...job,
+        status: "processing",
+        createdAt: Date.now(),
+        retryCount: 0,
+      };
+      setJobs((prev) => {
+        const next = [newJob, ...prev];
+        jobsRef.current = next;
+        return next;
+      });
+
+      // 🚀 UX: Wake up the polling loop immediately if it was idle
+      void scheduleNext(0);
+
+      // 🛡️ UX: Inform user about background processing and potential load delays (Mandate Review #8)
+      open?.({
+        type: "info" as any,
+        message: t("ai.jobs.queued_title" as any, { defaultValue: "Processing in background" }),
+        description: isSafeMode
+          ? t("ai.jobs.queued_safe_mode_desc" as any, {
+              defaultValue: "System load is high. This may take longer than usual.",
+            })
+          : t("ai.jobs.queued_desc" as any, { defaultValue: "We'll notify you when it's ready." }),
+      } as any);
+    },
+    [isSafeMode, open, t, scheduleNext]
+  );
 
   useEffect(() => {
     scheduleNext();
     return () => {
       if (timeoutIdRef.current) clearTimeout(timeoutIdRef.current);
     };
-  }, [scheduleNext, syncDelay]);
+  }, [scheduleNext]);
 
   // Socket Listeners for Real-time completion
   useEffect(() => {
@@ -330,8 +386,9 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       removeJob,
       clearCompleted,
       syncJobs,
+      isSafeMode,
     }),
-    [jobs, addJob, updateJob, removeJob, clearCompleted, syncJobs]
+    [jobs, addJob, updateJob, removeJob, clearCompleted, syncJobs, isSafeMode]
   );
 
   return <JobContext.Provider value={contextValue}>{children}</JobContext.Provider>;

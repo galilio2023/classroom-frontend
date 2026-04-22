@@ -57,6 +57,17 @@ export interface RegistrationDraft {
   updatedAt: number;
 }
 
+export interface BackgroundJobRecord {
+  id: string; // Primary Key
+  type: string;
+  status: "processing" | "completed" | "failed";
+  title: string;
+  createdAt: number;
+  metadata?: Record<string, unknown>;
+  retryCount?: number;
+  correlationId?: string;
+}
+
 export class OfflineDB extends Dexie {
   lessons!: Table<CachedLesson>;
   quizzes!: Table<PendingQuizSubmission>;
@@ -64,10 +75,11 @@ export class OfflineDB extends Dexie {
   mutations!: Table<PendingMutation>;
   ai_history!: Table<AiHistory>;
   registration_drafts!: Table<RegistrationDraft>;
+  background_jobs!: Table<BackgroundJobRecord>;
 
   constructor() {
     super("TablawyOfflineDB");
-    this.version(2)
+    this.version(3)
       .stores({
         lessons: "id, classId",
         quizzes: "++id, quizId, userId",
@@ -75,9 +87,11 @@ export class OfflineDB extends Dexie {
         mutations: "++id, resource, action",
         ai_history: "++id, userId, classId, timestamp",
         registration_drafts: "id, step",
+        background_jobs: "id, type, status, createdAt",
       })
-      .upgrade((_tx) => {
-        // Version 2: Added registration_drafts
+      .upgrade((tx) => {
+        // Version 3: Added background_jobs
+        return tx.table("background_jobs").toCollection().count();
       });
   }
 
