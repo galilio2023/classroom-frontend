@@ -41,7 +41,7 @@ export function useNotificationProvider(): NotificationProvider {
         }
       }
 
-      switch (type) {
+      switch (type as any) {
         case "success":
           toast.success(message, config);
           return;
@@ -54,6 +54,13 @@ export function useNotificationProvider(): NotificationProvider {
               label: "Dismiss",
               onClick: () => toast.dismiss(toastId),
             },
+          });
+          return;
+
+        case "warning":
+          toast.warning(message, {
+            ...config,
+            description: config.description,
           });
           return;
 

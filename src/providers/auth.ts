@@ -1,6 +1,7 @@
 import type { AuthProvider, HttpError } from "@refinedev/core";
 import { User, SignUpPayload } from "@/types";
 import { authClient } from "@/lib/auth-client";
+import { STORAGE_KEYS } from "@/config";
 
 /**
  * Sanitizes the payload by converting empty strings to null.
@@ -26,9 +27,9 @@ const FAILED_TTL = 5000; // 5 seconds for failures
 
 // 🛡️ MOBILE STABILITY: Helper to ensure authClient has the token
 const syncToken = (token?: string | null) => {
-  const finalToken = token || localStorage.getItem("tablawy_auth_token");
+  const finalToken = token || localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
   if (finalToken) {
-    localStorage.setItem("tablawy_auth_token", finalToken);
+    localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, finalToken);
   }
 };
 
@@ -84,7 +85,7 @@ export const authProvider: AuthProvider = {
       const sanitizedParams = sanitizePayload(params);
 
       // 🚀 SESSION STITCHING: Include telemetry ID if available
-      const telemetryId = localStorage.getItem("tablawy_telemetry_id");
+      const telemetryId = localStorage.getItem(STORAGE_KEYS.TELEMETRY_ID);
       if (telemetryId) {
         (sanitizedParams as any).telemetrySessionId = telemetryId;
       }
@@ -176,7 +177,7 @@ export const authProvider: AuthProvider = {
             user.role === "admin" ||
             user.role === "student",
         };
-        localStorage.setItem("user", JSON.stringify(userWithVerified));
+        localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(userWithVerified));
       }
 
       // Fixed: Redirect to dashboard instead of landing page
@@ -198,18 +199,18 @@ export const authProvider: AuthProvider = {
       await authClient.signOut();
       cachedSessionData = null;
       lastFetchTime = 0;
-      localStorage.removeItem("user");
-      localStorage.removeItem("tablawy_auth_token");
-      localStorage.removeItem("tablawy-live-session");
-      localStorage.removeItem("tablawy_telemetry_id"); // 🛡️ SECURITY: Clear telemetry on logout
+      localStorage.removeItem(STORAGE_KEYS.USER);
+      localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
+      localStorage.removeItem(STORAGE_KEYS.LIVE_SESSION);
+      localStorage.removeItem(STORAGE_KEYS.TELEMETRY_ID); // 🛡️ SECURITY: Clear telemetry on logout
       return { success: true, redirectTo: "/login" };
     } catch {
       cachedSessionData = null;
       lastFetchTime = 0;
-      localStorage.removeItem("user");
-      localStorage.removeItem("tablawy_auth_token");
-      localStorage.removeItem("tablawy-live-session");
-      localStorage.removeItem("tablawy_telemetry_id");
+      localStorage.removeItem(STORAGE_KEYS.USER);
+      localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
+      localStorage.removeItem(STORAGE_KEYS.LIVE_SESSION);
+      localStorage.removeItem(STORAGE_KEYS.TELEMETRY_ID);
       return { success: true, redirectTo: "/login" };
     }
   },
@@ -221,12 +222,12 @@ export const authProvider: AuthProvider = {
       if (error || !session?.user) {
         // ... dev fallback ...
         if (import.meta.env.DEV) {
-          const localUser = localStorage.getItem("user");
+          const localUser = localStorage.getItem(STORAGE_KEYS.USER);
           if (localUser) return { authenticated: true };
         }
 
         // In production, if session check failed, try to clear potential stale token
-        localStorage.removeItem("tablawy_auth_token");
+        localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
       }
 
       if (session?.user) {
@@ -238,16 +239,16 @@ export const authProvider: AuthProvider = {
             user.role === "admin" ||
             user.role === "student",
         };
-        localStorage.setItem("user", JSON.stringify(userWithVerified));
+        localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(userWithVerified));
         return { authenticated: true };
       }
 
-      localStorage.removeItem("user");
+      localStorage.removeItem(STORAGE_KEYS.USER);
       return {
         authenticated: false,
       };
     } catch {
-      localStorage.removeItem("user");
+      localStorage.removeItem(STORAGE_KEYS.USER);
       return {
         authenticated: false,
       };
@@ -258,8 +259,8 @@ export const authProvider: AuthProvider = {
     if (error?.status === 401) {
       cachedSessionData = null;
       lastFetchTime = 0;
-      localStorage.removeItem("user");
-      localStorage.removeItem("tablawy_auth_token");
+      localStorage.removeItem(STORAGE_KEYS.USER);
+      localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
       return {
         logout: true,
         redirectTo: "/login",
@@ -273,7 +274,7 @@ export const authProvider: AuthProvider = {
     const { data: session } = await getFreshSession();
     const role =
       (session?.user as unknown as User)?.role ||
-      JSON.parse(localStorage.getItem("user") || "{}")?.role;
+      JSON.parse(localStorage.getItem(STORAGE_KEYS.USER) || "{}")?.role;
     return { role };
   },
 
@@ -284,7 +285,7 @@ export const authProvider: AuthProvider = {
       return session.user as unknown as User;
     }
 
-    const user = localStorage.getItem("user");
+    const user = localStorage.getItem(STORAGE_KEYS.USER);
     if (!user) return null;
     try {
       return JSON.parse(user) as User;

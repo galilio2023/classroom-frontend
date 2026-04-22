@@ -103,11 +103,7 @@ const SubjectsList = () => {
     },
   });
 
-  const {
-    filters,
-    setFilters,
-    tableQuery: query,
-  } = table.refineCore;
+  const { filters, setFilters, tableQuery: query } = table.refineCore;
 
   const searchQuery =
     (filters.find((f) => "field" in f && f.field === "search") as any)?.value || "";

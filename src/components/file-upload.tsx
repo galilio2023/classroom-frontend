@@ -4,7 +4,7 @@ import { Button } from "./ui/button";
 import {} from "./ui/input";
 import { Label } from "./ui/label";
 import { Loader2, Upload, File as FileIcon, X, CheckCircle2 } from "lucide-react";
-import { BACKEND_URL, MAX_SYNC_UPLOAD_SIZE_MB } from "@/config";
+import { BACKEND_URL, MAX_SYNC_UPLOAD_SIZE_MB, STORAGE_KEYS } from "@/config";
 import { useTranslation } from "react-i18next";
 import { handleError, getCorrelationId } from "@/providers/utils/api-errors";
 
@@ -32,7 +32,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadComplete, setUploadComplete] = useState(false);
-  const [_uploadedPublicIdd, setUploadedPublicId] = useState<string | null>(null);
+  const [_uploadedPublicId, setUploadedPublicId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -55,7 +55,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       // 🛡️ RURAL RESILIENCE: Warn about large files on potentially slow networks
       if (selectedFile.size > MAX_SYNC_UPLOAD_SIZE_MB * 1024 * 1024) {
         open?.({
-          type: "error", // Refine core only supports success | error | progress
+          type: "warning" as any,
           message: t("common.upload.largeFileWarning"),
           description: t("common.upload.largeFileWarningDesc"),
         });
@@ -76,7 +76,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     formData.append("folder", folder);
 
     try {
-      const token = localStorage.getItem("tablawy_auth_token"); // Get token for authorization
+      const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN); // Get token for authorization
       const response = await fetch(`${BACKEND_URL}/assets/upload`, {
         method: "POST",
         body: formData,
@@ -98,15 +98,15 @@ export const FileUpload: React.FC<FileUploadProps> = ({
         type: "success",
         message: t("common.upload.success"),
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Upload Error:", error);
-      
+
       // 🛡️ TRACEABILITY: Show Correlation ID in error toast per Mandate #8
       const correlationId = getCorrelationId(error);
 
       open?.({
         type: "error",
-        message: error.message || t("common.upload.error"),
+        message: (error as Error).message || t("common.upload.error"),
         description: correlationId !== "N/A" ? `Trace ID: ${correlationId}` : undefined,
       });
     } finally {
@@ -128,8 +128,6 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       fileInputRef.current?.click();
     }
   };
-
-  const _isVideoo = folder === "trailers" || (accept && accept.includes("video"));
 
   return (
     <div className="space-y-3 w-full">

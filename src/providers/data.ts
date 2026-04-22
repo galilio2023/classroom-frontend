@@ -1,5 +1,5 @@
 import { DataProvider, LogicalFilter } from "@refinedev/core";
-import { BACKEND_URL } from "@/config";
+import { BACKEND_URL, STORAGE_KEYS } from "@/config";
 import { resourceFilterMappings as generatedMappings } from "../generated/resource-metadata";
 import { offlineDB } from "../lib/offline-db";
 import { toast } from "sonner";
@@ -38,7 +38,7 @@ const fetcherWithRetry = async (
     }
   }
 
-  const token = localStorage.getItem("tablawy_auth_token");
+  const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
   if (token && !headers["Authorization"]) {
     headers["Authorization"] = `Bearer ${token}`;
   }

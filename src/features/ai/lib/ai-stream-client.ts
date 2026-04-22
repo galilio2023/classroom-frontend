@@ -1,4 +1,4 @@
-import { BACKEND_URL } from "@/config";
+import { BACKEND_URL, STORAGE_KEYS } from "@/config";
 import { handleError } from "@/providers/utils/api-errors";
 
 /**
@@ -15,7 +15,7 @@ export interface AiStreamOptions {
 
 export class AiStreamClient {
   private static getHeaders() {
-    const token = localStorage.getItem("tablawy_auth_token");
+    const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
       "X-Tablawy-Client": "Tablawy-Frontend",
@@ -35,7 +35,7 @@ export class AiStreamClient {
    */
   static async fetchStream(
     endpoint: string,
-    body: unknown,
+    body: Record<string, unknown> & { correlationId?: string },
     options: AiStreamOptions = {}
   ): Promise<string> {
     const method = options.method || "POST";
@@ -49,6 +49,11 @@ export class AiStreamClient {
     const headers = this.getHeaders();
     if (isPoorBandwidth) {
       headers["X-Tablawy-Bandwidth"] = "poor";
+    }
+
+    // 🛡️ TRACEABILITY: Ensure X-Correlation-ID header is passed per Mandate #8
+    if (body.correlationId) {
+      headers["X-Correlation-ID"] = body.correlationId;
     }
 
     // eslint-disable-next-line no-restricted-globals

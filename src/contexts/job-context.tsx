@@ -5,7 +5,7 @@ import { socket } from "@/lib/socket";
 import { useTranslation } from "react-i18next";
 import { getJitteredDelay } from "@/lib/jitter";
 import { calculateBackoff } from "@/lib/utils";
-import { BACKEND_URL } from "@/config";
+import { BACKEND_URL, STORAGE_KEYS } from "@/config";
 
 export interface BackgroundJob {
   id: string;
@@ -52,6 +52,7 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const syncDelayRef = useRef(syncDelay);
   const timeoutIdRef = useRef<NodeJS.Timeout | null>(null);
   const isSyncingRef = useRef(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const { open } = useNotification();
   const { t } = useTranslation();
@@ -103,20 +104,24 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const processingJobs = jobsRef.current.filter((j) => j.status === "processing");
     if (processingJobs.length === 0) return;
 
-    const controller = new AbortController();
+    // 🛡️ SECURITY: Cancel previous request if still pending to prevent race conditions
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    abortControllerRef.current = new AbortController();
     const correlationId = `poll-${Date.now()}`;
 
     try {
       isSyncingRef.current = true;
       const minCreatedAt = Math.min(...processingJobs.map((j) => j.createdAt));
-      
+
       // Get token for auth
-      const token = localStorage.getItem("auth_token");
+      const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
 
       const response = await fetch(
         `${BACKEND_URL}/ai/jobs/sync?since=${new Date(minCreatedAt).toISOString()}`,
         {
-          signal: controller.signal,
+          signal: abortControllerRef.current.signal,
           headers: {
             "X-Correlation-ID": correlationId,
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -128,20 +133,19 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         throw await handleError(response);
       }
 
-      const { data: updatedJobs } = await response.json();
+      const { data: updatedJobs } = (await response.json()) as { data: BackgroundJob[] };
 
       setJobs((prev) => {
         return prev.map((job) => {
           // 🛡️ MATCHING: Check for direct ID match OR correlationId (outbox ID)
-          const update = updatedJobs.find(
-            (u: any) => u.id === job.id || u.correlationId === job.id
-          );
+          const update = updatedJobs.find((u) => u.id === job.id || u.correlationId === job.id);
           if (update) {
             // If status changed to completed/failed, notify user
             if (job.status === "processing" && update.status !== "processing") {
+              const translationKey = `ai.jobs.${job.type}.${update.status}`;
               open?.({
                 type: update.status === "completed" ? "success" : "error",
-                message: t(`ai.jobs.${job.type}.${update.status}` as any),
+                message: t(translationKey as any),
                 description: job.title,
               });
             }
@@ -150,11 +154,11 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           return job;
         });
       });
-    } catch (error: any) {
-      if (error.name === "AbortError") return;
+    } catch (error: unknown) {
+      if ((error as Error).name === "AbortError") return;
 
       console.error("Job Sync Failed:", error);
-      
+
       // 🛡️ TRACEABILITY: Show Correlation ID in error toast per Mandate #8
       open?.({
         type: "error",

@@ -17,3 +17,11 @@ export const SOCKET_URL = BASE_URL;
 
 // 🛡️ STORAGE & UPLOADS (Mandate Review #8)
 export const MAX_SYNC_UPLOAD_SIZE_MB = Number(import.meta.env.VITE_MAX_SYNC_UPLOAD_SIZE_MB) || 5;
+
+// 🛡️ SECURITY: Standardized Storage Keys
+export const STORAGE_KEYS = {
+  AUTH_TOKEN: "tablawy_auth_token",
+  USER: "user",
+  LIVE_SESSION: "tablawy-live-session",
+  TELEMETRY_ID: "tablawy_telemetry_id",
+};

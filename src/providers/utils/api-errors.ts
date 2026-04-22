@@ -3,11 +3,12 @@ import { HttpError } from "@refinedev/core";
 /**
  * 🛡️ TRACEABILITY: Extracts X-Correlation-ID from various error formats (Axios, Fetch, etc.)
  */
-export const getCorrelationId = (err: any): string => {
+export const getCorrelationId = (err: unknown): string => {
+  const e = err as any;
   return (
-    err?.response?.headers?.["x-correlation-id"] ||
-    err?.headers?.["x-correlation-id"] ||
-    err?.config?.headers?.["x-correlation-id"] ||
+    e?.response?.headers?.["x-correlation-id"] ||
+    e?.headers?.["x-correlation-id"] ||
+    e?.config?.headers?.["x-correlation-id"] ||
     "N/A"
   );
 };
@@ -16,15 +17,15 @@ export const getCorrelationId = (err: any): string => {
  * Helper to handle API errors and return Refine-compatible HttpError
  * 🛡️ RESILIENCE: Now handles both raw Response objects and standard Error/Axios objects.
  */
-export const handleError = async (errorOrResponse: any): Promise<HttpError> => {
+export const handleError = async (errorOrResponse: unknown): Promise<HttpError> => {
+  const e = errorOrResponse as any;
   // 1. Extract the raw response if possible (handles Axios, Refine, and raw fetch)
-  const response =
-    errorOrResponse?.response || (errorOrResponse instanceof Response ? errorOrResponse : null);
+  const response = e?.response || (e instanceof Response ? e : null);
 
   if (!response) {
     return {
-      message: errorOrResponse?.message || "An unexpected error occurred.",
-      statusCode: errorOrResponse?.status || 500,
+      message: e?.message || "An unexpected error occurred.",
+      statusCode: e?.status || 500,
     };
   }
 

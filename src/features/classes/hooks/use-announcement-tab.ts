@@ -4,6 +4,7 @@ import { Announcement } from "@/types";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { useUserRole } from "@/features/users/hooks/use-user-role";
+import { STORAGE_KEYS } from "@/config";
 
 export const useAnnouncementTab = (classId: string) => {
   const { t } = useTranslation();
@@ -51,7 +52,7 @@ export const useAnnouncementTab = (classId: string) => {
         `${import.meta.env.VITE_API_URL}/upload/signature?folder=announcements`,
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("refine-auth")}`,
+            Authorization: `Bearer ${localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN)}`,
           },
         }
       );
