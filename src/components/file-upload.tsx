@@ -135,7 +135,8 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       console.error("Upload Error:", error);
 
       // 🛡️ TRACEABILITY: Use meta field for correlation ID extraction (Mandate Review #8)
-      const errorCorrelationId = getCorrelationId(error);
+      // Mandate Review #9: Fallback to local correlationId if extraction fails (e.g. network error)
+      const errorCorrelationId = getCorrelationId(error) || correlationId;
 
       open?.({
         type: "error",

@@ -1,4 +1,5 @@
 import { UndoableNotification } from "@/components/refine/notification/undoable-notification";
+import { ErrorNotificationContent } from "@/components/refine/notification/error-notification-content";
 import { useTranslate, type NotificationProvider } from "@refinedev/core";
 import { useNavigate } from "react-router-dom";
 import { toast, type ExternalToast } from "sonner";
@@ -65,41 +66,18 @@ export function useNotificationProvider(): NotificationProvider {
         };
       }
 
-      // 🛡️ Mandate Review #8: Unified Description Renderer with "Support Info" Accordion
-      const renderDescription = () => {
-        if (type !== "error" || !correlationId) return description;
-
-        return (
-          <div className="space-y-2">
-            <div className="text-sm">
-              {description || t("common.errors.unexpected", "An unexpected error occurred.")}
-            </div>
-            <details className="text-[10px] opacity-70 cursor-pointer group">
-              <summary className="hover:underline font-medium list-none flex items-center gap-1">
-                <span className="group-open:rotate-90 transition-transform duration-200">▶</span>
-                Support Info
-              </summary>
-              <div className="mt-1 p-2 bg-muted/50 rounded border border-border font-mono break-all select-all leading-tight">
-                ID: {correlationId}
-                {meta && Object.keys(meta).length > 1 && (
-                  <div className="mt-1 border-t border-border/50 pt-1">
-                    Meta:{" "}
-                    {JSON.stringify(
-                      { ...meta, correlationId: undefined, traceId: undefined },
-                      null,
-                      2
-                    )}
-                  </div>
-                )}
-              </div>
-            </details>
-          </div>
-        );
-      };
-
       const config: ExternalToast = {
         id: toastId,
-        description: renderDescription(),
+        description:
+          type === "error" ? (
+            <ErrorNotificationContent
+              description={description}
+              correlationId={correlationId}
+              meta={meta}
+            />
+          ) : (
+            description
+          ),
         richColors: true,
         duration: type === "error" ? 10000 : 4000, // 🚀 UX: Longer duration for error analysis
         action: extraAction,

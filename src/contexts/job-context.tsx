@@ -29,6 +29,7 @@ const POLLING_CONFIG = {
   BASE_INTERVAL: 120000, // 2 Minutes (Mandate Review #9 - Adaptive)
   MAX_INTERVAL: 900000, // 15 Minutes (Mandate Review #9 - Adaptive)
   HEALTH_CHECK_INTERVAL: 300000, // 5 Minutes
+  MAINTENANCE_CLEANUP_INTERVAL: 3600000, // 1 Hour
 };
 
 export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -36,6 +37,7 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [consecutiveFailures, setConsecutiveFailures] = useState(0);
   const [isVisible, setIsVisible] = useState(document.visibilityState === "visible");
   const [isSafeMode, setIsSafeMode] = useState(false);
+  const [isReady, setIsReady] = useState(false);
 
   const jobsRef = useRef<BackgroundJob[]>([]);
   const timeoutIdRef = useRef<NodeJS.Timeout | null>(null);
@@ -73,8 +75,10 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         const validJobs = pruneExpiredJobs(savedJobs);
         setJobs(validJobs);
         jobsRef.current = validJobs;
+        setIsReady(true);
       } catch (err) {
         console.error("Failed to initialize jobs from Dexie:", err);
+        setIsReady(true); // Fail open to allow new jobs
       }
     };
     void initJobs();
@@ -132,7 +136,7 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     const cleanupInterval = setInterval(() => {
       setJobs((prev) => pruneExpiredJobs(prev));
-    }, 3600000);
+    }, POLLING_CONFIG.MAINTENANCE_CLEANUP_INTERVAL);
     return () => clearInterval(cleanupInterval);
   }, []);
 
@@ -298,7 +302,7 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         timeoutIdRef.current = null;
       }
 
-      if (!isVisible || isSyncingRef.current) return;
+      if (!isVisible || isSyncingRef.current || !isReady) return;
 
       const activeAiJobs = jobsRef.current.filter((j) => j.status === "processing");
       if (activeAiJobs.length === 0) return;
