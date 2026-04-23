@@ -6,14 +6,9 @@ import { createCorrelationId } from "@/lib/traceability";
 import { bytesToMb, isFileTypeAllowed } from "@/lib/utils";
 import { calculateETA as calculateETAHelper, requestWithProgress } from "@/lib/api-utils";
 import { getAuthToken } from "@/lib/auth-helper";
-import {
-  BACKEND_URL,
-  MAX_SYNC_UPLOAD_SIZE_MB,
-  TUS_ENDPOINT,
-  INITIAL_RETRY_DELAY,
-  MAX_RETRY_DELAY,
-} from "@/config";
+import { BACKEND_URL, MAX_SYNC_UPLOAD_SIZE_MB, TUS_ENDPOINT } from "@/config";
 import { useTusUpload } from "@/hooks/use-tus-upload";
+import { UPLOAD_CONSTANTS } from "@/constants/upload";
 
 interface UseFileUploadLogicProps {
   onUploadSuccess: (url: string, publicId: string) => void;
@@ -55,6 +50,7 @@ export const useFileUploadLogic = ({
 
   const abortControllerRef = useRef<AbortController | null>(null);
   const uploadIdRef = useRef<string | null>(null);
+  const correlationIdRef = useRef<string | null>(null);
   const uploadStartTimeRef = useRef<number | null>(null);
 
   // 🚀 REACT 19 PERFORMANCE (Priority 2): Memoized ETA helper
@@ -105,6 +101,7 @@ export const useFileUploadLogic = ({
       setUploadProgress(100);
       setIsUploading(false);
       uploadIdRef.current = null;
+      correlationIdRef.current = null;
       open({
         type: "success",
         message: t("common.upload.success", "Resumable upload successful"),
@@ -145,8 +142,11 @@ export const useFileUploadLogic = ({
         open({
           type: "error",
           message: normalizedError.message,
-          meta: { correlationId: (normalizedError as any).meta?.correlationId },
+          meta: {
+            correlationId: (normalizedError as any).meta?.correlationId || correlationIdRef.current,
+          },
         });
+        correlationIdRef.current = null;
       })();
     }
   }, [tusStatus, isUploading, t, tusError, currentUploadId, file, open]);
@@ -204,6 +204,7 @@ export const useFileUploadLogic = ({
 
     // 🛡️ SYNC ABORT (Priority 1): Reset ID ONLY after abort signal is sent
     uploadIdRef.current = null;
+    correlationIdRef.current = null;
     uploadStartTimeRef.current = null;
 
     if (inputRef?.current) {
@@ -218,15 +219,15 @@ export const useFileUploadLogic = ({
 
     const activeUploadId = crypto.randomUUID();
     const controller = new AbortController();
+    const correlationId = createCorrelationId("upload");
 
     uploadIdRef.current = activeUploadId;
+    correlationIdRef.current = correlationId;
     abortControllerRef.current = controller;
     uploadStartTimeRef.current = Date.now();
 
     setIsUploading(true);
     setUploadProgress(0);
-
-    const correlationId = createCorrelationId("upload");
 
     try {
       // 🚀 HARDEN TUS FALLBACK (Priority 1)
@@ -287,6 +288,8 @@ export const useFileUploadLogic = ({
         setUploadComplete(true);
         setUploadProgress(100);
         setIsUploading(false);
+        uploadIdRef.current = null;
+        correlationIdRef.current = null;
         open({
           type: "success",
           message: t("common.upload.success", "Upload successful"),
@@ -303,6 +306,7 @@ export const useFileUploadLogic = ({
         message: normalizedError.message || t("common.upload.error", "Failed to upload file"),
         meta: { correlationId: (normalizedError as any).meta?.correlationId || correlationId },
       });
+      correlationIdRef.current = null;
     } finally {
       if (uploadIdRef.current === activeUploadId || uploadIdRef.current === null) {
         if (!isResumable) {
@@ -316,42 +320,51 @@ export const useFileUploadLogic = ({
   };
 
   const handleFileChange = async (selectedFile: File) => {
-    const isAllowed = await isFileTypeAllowed(selectedFile, accept || "");
-    if (!isAllowed) {
-      open({
-        type: "error",
-        message: t("common.upload.invalidType", "Invalid file type"),
-        description: t("common.upload.invalidTypeDesc", "This file format is not permitted."),
-      });
-      return;
-    }
+    try {
+      const isAllowed = await isFileTypeAllowed(selectedFile, accept || "");
+      if (!isAllowed) {
+        open({
+          type: "error",
+          message: t("common.upload.invalidType", "Invalid file type"),
+          description: t("common.upload.invalidTypeDesc", "This file format is not permitted."),
+        });
+        return;
+      }
 
-    if (maxSize && selectedFile.size > maxSize) {
-      open({
-        type: "error",
-        message: t("common.upload.tooLarge"),
-        description: t("common.upload.tooLargeDesc", {
-          size: bytesToMb(maxSize).toFixed(0),
-        }),
-      });
-      return;
-    }
+      if (maxSize && selectedFile.size > maxSize) {
+        open({
+          type: "error",
+          message: t("common.upload.tooLarge"),
+          description: t("common.upload.tooLargeDesc", {
+            size: bytesToMb(maxSize).toFixed(0),
+          }),
+        });
+        return;
+      }
 
-    if (bytesToMb(selectedFile.size) > MAX_SYNC_UPLOAD_SIZE_MB) {
-      open({
-        type: "warning",
-        message: t("common.upload.largeFileWarning", "Large file detected"),
-        description: t(
-          "common.upload.largeFileWarningDesc",
-          "This file is large and may take time to upload on slow connections."
-        ),
+      if (bytesToMb(selectedFile.size) > MAX_SYNC_UPLOAD_SIZE_MB) {
+        open({
+          type: "warning",
+          message: t("common.upload.largeFileWarning", "Large file detected"),
+          description: t(
+            "common.upload.largeFileWarningDesc",
+            "This file is large and may take time to upload on slow connections."
+          ),
+        });
+      }
+
+      setFile(selectedFile);
+      setUploadComplete(false);
+      setUploadProgress(0);
+      setTimeRemaining(null);
+    } catch (err) {
+      void handleError(err).then((normalizedError) => {
+        open({
+          type: "error",
+          message: normalizedError.message,
+        });
       });
     }
-
-    setFile(selectedFile);
-    setUploadComplete(false);
-    setUploadProgress(0);
-    setTimeRemaining(null);
   };
 
   return {

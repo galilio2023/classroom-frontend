@@ -41,6 +41,7 @@ export const ErrorNotificationContent: React.FC<ErrorNotificationContentProps> =
           className="hover:underline font-medium list-none flex items-center gap-1 focus-visible:ring-1 focus-visible:ring-primary rounded-sm outline-none"
           aria-expanded={isOpen}
           aria-controls="support-info-content"
+          aria-label={t("labels.toggleSupportInfo", "Toggle technical support details")}
           role="button"
           tabIndex={0}
           onKeyDown={(e) => {
@@ -57,14 +58,14 @@ export const ErrorNotificationContent: React.FC<ErrorNotificationContentProps> =
           <ChevronDown
             className={cn("h-3 w-3 transition-transform duration-200", isOpen ? "rotate-180" : "")}
           />
-          {t("common.labels.supportInfo", "Support Info")}
+          {t("labels.supportInfo", "Support Info")}
         </summary>
         <div
           id="support-info-content"
           className="mt-1 p-2 bg-muted/50 rounded border border-border font-mono break-all select-all leading-tight"
           onClick={(e) => e.stopPropagation()}
           role="region"
-          aria-label={t("common.labels.technicalDetails", "Technical support details")}
+          aria-label={t("labels.technicalDetails", "Technical support details")}
         >
           {typeof navigator !== "undefined" && !navigator.onLine ? (
             <div className="text-destructive font-bold flex items-center gap-1.5 uppercase tracking-widest text-[8px]">
@@ -90,7 +91,7 @@ export const ErrorNotificationContent: React.FC<ErrorNotificationContentProps> =
                 <button
                   className="px-2 py-1 bg-primary/10 hover:bg-primary/20 rounded transition-colors text-[9px] border border-primary/20 font-sans flex items-center gap-1.5"
                   aria-label={t(
-                    "common.notifications.copyCorrelationId",
+                    "ai.notifications.copyCorrelationId",
                     "Copy correlation ID for support"
                   )}
                   onClick={(e) => {

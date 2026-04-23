@@ -224,6 +224,8 @@
       "success": "File uploaded successfully!",
       "removeSuccess": "File removed successfully",
       "error": "Upload failed",
+      "failed": "Upload failed. Please try again.",
+      "change": "Change File",
       "removeError": "Failed to remove file from server",
       "video": {
         "maxSize": "Max size: 100MB (.mp4, .mov)",
@@ -1914,6 +1916,7 @@
   },
   "labels": {
     "supportInfo": "Support Info",
+    "toggleSupportInfo": "Toggle technical support details",
     "technicalDetails": "Technical support details",
     "technicalInfo": "Technical Info"
   },
