@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef } from "react";
 import * as tus from "tus-js-client";
-import { BACKEND_URL } from "@/config";
+import { TUS_ENDPOINT } from "@/config";
 
 /**
  * 🛰️ CUSTOM HOOK: useTusUpload
@@ -37,7 +37,7 @@ export const useTusUpload = () => {
       setProgress(0);
 
       const upload = new tus.Upload(file, {
-        endpoint: `${BACKEND_URL}/api/upload/resumable`,
+        endpoint: TUS_ENDPOINT,
         // 🛡️ Mandate Review #12: Full Jitter for Rural Resilience (Thundering Herd prevention)
         // Formula: random(0, min(cap, base * 2^attempt))
         retryDelays: [1000, 3000, 7000, 15000, 31000].map((base) => Math.random() * base),
@@ -58,6 +58,8 @@ export const useTusUpload = () => {
         onError: (err) => {
           setError(err);
           setStatus("error");
+          setCurrentUploadId(null);
+          window.removeEventListener("online", resumeHandler);
         },
         onProgress: (bytesUploaded, bytesTotal) => {
           const percentage = (bytesUploaded / bytesTotal) * 100;
@@ -71,18 +73,19 @@ export const useTusUpload = () => {
           // 🛡️ SECURITY: Generate a fallback UUID if identity is missing to prevent hardcoded collisions
           setTusPublicId(resourceId || crypto.randomUUID());
           setStatus("success");
+          window.removeEventListener("online", resumeHandler);
         },
       });
 
       uploadRef.current = upload;
 
       // 📡 NETWORK RESILIENCE: Listen for online events to resume
-      const resumeHandler = () => {
-        if (status === "uploading") {
+      function resumeHandler() {
+        if (uploadRef.current) {
           console.log("🌐 Network returned. Resuming TUS upload...");
-          upload.start();
+          uploadRef.current.start();
         }
-      };
+      }
       window.addEventListener("online", resumeHandler);
 
       upload.start();

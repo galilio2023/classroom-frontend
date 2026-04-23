@@ -17,6 +17,8 @@ export const SOCKET_URL = BASE_URL;
 
 // 🛡️ STORAGE & UPLOADS (Mandate Review #8)
 export const MAX_SYNC_UPLOAD_SIZE_MB = Number(import.meta.env.VITE_MAX_SYNC_UPLOAD_SIZE_MB) || 5;
+export const TUS_ENDPOINT =
+  import.meta.env.VITE_TUS_ENDPOINT || `${BACKEND_URL}/api/upload/resumable`;
 
 // 🛡️ SECURITY: Standardized Storage Keys
 export const STORAGE_KEYS = {

@@ -45,7 +45,7 @@ export const DropzoneArea: React.FC<DropzoneAreaProps> = ({
         <p className="text-sm font-black uppercase tracking-widest text-foreground/80 group-hover:text-primary transition-colors">
           {t("common.upload.clickOrDrag", "Click or drag to select a file")}
         </p>
-        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/50">
+        <p className="overline">
           {t("common.upload.maxSize", "Max size: {{size}}MB", {
             size: maxSizeMb,
           })}

@@ -2,8 +2,8 @@ import React, { useState, useRef, useEffect, useCallback, useMemo } from "react"
 import { useTablawyNotification } from "@/hooks/use-tablawy-notification";
 import { Button } from "./ui/button";
 import { Label } from "./ui/label";
-import { Loader2, AlertCircle } from "lucide-react";
-import { BACKEND_URL, MAX_SYNC_UPLOAD_SIZE_MB } from "@/config";
+import { Loader2, AlertCircle, Upload } from "lucide-react";
+import { BACKEND_URL, MAX_SYNC_UPLOAD_SIZE_MB, TUS_ENDPOINT } from "@/config";
 import { useTranslation } from "react-i18next";
 import { handleError } from "@/providers/utils/api-errors";
 import { createCorrelationId } from "@/lib/traceability";
@@ -63,8 +63,9 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   const uploadStartTimeRef = useRef<number | null>(null);
 
   // 🛡️ Mandate Review #13: Optimize resumability check
+  // Fallback to standard upload if TUS_ENDPOINT is explicitly disabled/missing
   const isResumable = useMemo(() => {
-    return file && bytesToMb(file.size) > MAX_SYNC_UPLOAD_SIZE_MB;
+    return file && bytesToMb(file.size) > MAX_SYNC_UPLOAD_SIZE_MB && !!TUS_ENDPOINT;
   }, [file]);
 
   // 🛡️ TUS PROGRESS SYNC
@@ -87,25 +88,43 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       tusUrl &&
       isUploading &&
       !uploadComplete &&
+      currentUploadId &&
       currentUploadId === uploadIdRef.current
     ) {
       onUploadSuccess(tusUrl, tusPublicId!);
       setUploadComplete(true);
       setUploadProgress(100);
       setIsUploading(false);
+      uploadIdRef.current = null; // 🛡️ RESET: Mark this attempt as finalized
       open({
         type: "success",
         message: t("common.upload.success", "Resumable upload successful"),
       });
     }
-  }, [tusStatus, tusUrl, tusPublicId, isUploading, uploadComplete, onUploadSuccess, t, open, currentUploadId]);
+  }, [
+    tusStatus,
+    tusUrl,
+    tusPublicId,
+    isUploading,
+    uploadComplete,
+    onUploadSuccess,
+    t,
+    open,
+    currentUploadId,
+  ]);
 
   // 🛡️ TUS ERROR SYNC (Hardened with ID verification)
   useEffect(() => {
-    if (tusStatus === "error" && isUploading && currentUploadId === uploadIdRef.current) {
+    if (
+      tusStatus === "error" &&
+      isUploading &&
+      currentUploadId &&
+      currentUploadId === uploadIdRef.current
+    ) {
       setIsUploading(false);
       setUploadProgress(0);
       setTimeRemaining(null);
+      uploadIdRef.current = null; // 🛡️ RESET: Allow retry logic to generate new ID
       handleError(tusError || new Error(t("common.upload.failed", "Resumable upload failed")));
     }
   }, [tusStatus, isUploading, t, tusError, currentUploadId]);
@@ -210,7 +229,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
 
     try {
       // 🚀 RURAL RESILIENCE (Review #13): Use TUS for resumable uploads > 5MB
-      if (bytesToMb(file.size) > MAX_SYNC_UPLOAD_SIZE_MB) {
+      if (bytesToMb(file.size) > MAX_SYNC_UPLOAD_SIZE_MB && !!TUS_ENDPOINT) {
         startTusUpload(file, { folder, correlationId });
         return; // Success effect will complete the flow
       }
@@ -299,7 +318,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
 
   return (
     <div className="space-y-3 w-full">
-      {label && <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 px-1">{label}</Label>}
+      {label && <Label className="overline px-1">{label}</Label>}
 
       {!file ? (
         <DropzoneArea
@@ -337,7 +356,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
                   handleUpload();
                 }}
                 disabled={isUploading}
-                className="w-full sm:w-auto rounded-2xl font-black uppercase tracking-widest text-[10px] h-12 md:h-14 px-8 md:px-10 shadow-lg shadow-primary/25"
+                className="w-full sm:w-auto min-w-[140px] rounded-2xl font-black uppercase tracking-widest text-[10px] h-12 md:h-14 px-8 md:px-10 shadow-lg shadow-primary/25"
               >
                 {isUploading ? (
                   <>
@@ -348,7 +367,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
                   </>
                 ) : (
                   <>
-                    <Loader2 className="me-2 h-4 w-4 hidden" /> {/* Placeholder for consistent sizing */}
+                    <Upload className="me-2 h-4 w-4" />
                     {t("common.upload.label", "Start Upload")}
                   </>
                 )}

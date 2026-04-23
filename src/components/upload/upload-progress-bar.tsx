@@ -18,7 +18,7 @@ export const UploadProgressBar: React.FC<UploadProgressBarProps> = ({
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest">
+      <div className="flex items-center justify-between overline">
         <div className="flex items-center gap-2 text-primary">
           <Loader2 className="h-3 w-3 animate-spin" />
           <span>{Math.round(progress)}%</span>

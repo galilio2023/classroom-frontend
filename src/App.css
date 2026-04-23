@@ -186,6 +186,11 @@
     @apply bg-clip-text text-transparent;
     background-image: var(--bg-ai-primary-gradient);
   }
+
+  /* 📏 UI Standard: Overline Label Style (Mandate Review #13) */
+  .overline {
+    @apply text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60;
+  }
 }
 
 @utility section-wrapper {

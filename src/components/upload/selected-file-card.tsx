@@ -30,12 +30,8 @@ export const SelectedFileCard: React.FC<SelectedFileCardProps> = ({
       </div>
 
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-black tracking-tight truncate uppercase">
-          {file.name}
-        </p>
-        <p className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-widest mt-0.5">
-          {bytesToMb(file.size).toFixed(2)} MB
-        </p>
+        <p className="text-sm font-black tracking-tight truncate uppercase">{file.name}</p>
+        <p className="overline mt-0.5">{bytesToMb(file.size).toFixed(2)} MB</p>
       </div>
 
       {!uploadComplete && !isUploading && (

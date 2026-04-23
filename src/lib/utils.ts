@@ -106,6 +106,11 @@ export async function isFileTypeAllowed(file: File, acceptString: string): Promi
     if (["jpg", "jpeg"].includes(fileExtension) || file.type === "image/jpeg") {
       return header.startsWith("ffd8ff");
     }
+
+    // DOCX/XLSX/PPTX (Zip-based): 50 4B 03 04
+    if (["docx", "xlsx", "pptx"].includes(fileExtension)) {
+      return header === "504b0304";
+    }
   } catch (err) {
     console.error("File header check failed:", err);
     return false; // Fail-closed on read error
