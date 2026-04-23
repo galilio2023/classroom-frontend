@@ -138,8 +138,13 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (newlyFinished.length > 1) {
         open?.({
           type: "info",
-          message: t("ai.jobs.multiple_completed", { count: newlyFinished.length }),
-          description: t("ai.jobs.check_dashboard"),
+          message: t("ai.jobs.multiple_completed", "{{count}} AI tasks completed in background.", {
+            count: newlyFinished.length,
+          }),
+          description: t(
+            "ai.jobs.check_dashboard",
+            "Check your notifications or the AI dashboard for details."
+          ),
           meta: {
             icon: (
               <div className="flex h-6 w-6 items-center justify-center rounded-full bg-ai-primary-gradient shadow-glow">
@@ -161,7 +166,9 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             const translationKey = `ai.jobs.${job.type}.${update.status}`;
             open?.({
               type: update.status === "completed" ? "success" : "error",
-              message: t(translationKey as any),
+              message: t(translationKey as any, {
+                defaultValue: update.status === "completed" ? "Task completed" : "Task failed",
+              }),
               description: job.title,
               meta: {
                 icon: getJobIcon(job.type),
@@ -187,7 +194,7 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
       open?.({
         type: "error",
-        message: t("ai.jobs.syncError"),
+        message: t("ai.jobs.syncError", "Failed to sync background tasks. Retrying..."),
         meta: { correlationId, ...(error.meta || {}) },
       } as any);
 
@@ -446,7 +453,9 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         void offlineDB.background_jobs.update(targetJob.id, updates);
         open?.({
           type: data.status === "completed" ? "success" : "error",
-          message: t(`ai.jobs.${targetJob.type}.${data.status}` as any),
+          message: t(`ai.jobs.${targetJob.type}.${data.status}` as any, {
+            defaultValue: data.status === "completed" ? "Task completed" : "Task failed",
+          }),
           description: targetJob.title,
           meta: {
             icon: getJobIcon(targetJob.type),

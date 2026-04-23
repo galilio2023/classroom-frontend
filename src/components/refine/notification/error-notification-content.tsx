@@ -25,7 +25,8 @@ export const ErrorNotificationContent: React.FC<ErrorNotificationContentProps> =
 
   const [isOpen, setIsOpen] = React.useState(false);
 
-  if (!correlationId) return <>{description}</>;
+  // 🛡️ TRACEABILITY: Always provide a fallback for support (Mandate Review #8)
+  const displayId = correlationId || "N/A";
 
   return (
     <div className="space-y-2">
@@ -47,10 +48,7 @@ export const ErrorNotificationContent: React.FC<ErrorNotificationContentProps> =
           }}
         >
           <ChevronDown
-            className={cn(
-              "h-3 w-3 transition-transform duration-200",
-              isOpen ? "rotate-180" : ""
-            )}
+            className={cn("h-3 w-3 transition-transform duration-200", isOpen ? "rotate-180" : "")}
           />
           {t("common.labels.supportInfo", "Support Info")}
         </summary>
@@ -61,7 +59,7 @@ export const ErrorNotificationContent: React.FC<ErrorNotificationContentProps> =
           role="region"
           aria-label={t("common.labels.technicalDetails", "Technical support details")}
         >
-          ID: {correlationId}
+          ID: {displayId}
           {meta && Object.keys(meta).length > 1 && (
             <div className="mt-1 border-t border-border/50 pt-1">
               Meta:{" "}
@@ -85,7 +83,8 @@ export const ErrorNotificationContent: React.FC<ErrorNotificationContentProps> =
               )}
               onClick={(e) => {
                 e.stopPropagation();
-                void navigator.clipboard.writeText(correlationId);
+                if (displayId === "N/A") return;
+                void navigator.clipboard.writeText(displayId);
                 setCopied(true);
                 setTimeout(() => setCopied(false), 2000);
               }}

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { useTablawyNotification } from "@/hooks/use-tablawy-notification";
 import { Button } from "./ui/button";
 import {} from "./ui/input";
@@ -53,6 +53,11 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   const uploadIdRef = useRef<string | null>(null);
   const uploadStartTimeRef = useRef<number | null>(null);
 
+  // 🛡️ Mandate Review #13: Optimize resumability check
+  const isResumable = useMemo(() => {
+    return file && file.size > MAX_SYNC_UPLOAD_SIZE_MB * 1024 * 1024;
+  }, [file]);
+
   // 🛡️ TUS PROGRESS SYNC & DURATION CALCULATION
   useEffect(() => {
     if (tusStatus === "uploading") {
@@ -80,6 +85,16 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       });
     }
   }, [tusStatus, tusUrl, tusPublicId, isUploading, uploadComplete, onUploadSuccess, t, open]);
+
+  // 🛡️ TUS ERROR SYNC (Mandate Review #13)
+  useEffect(() => {
+    if (tusStatus === "error" && isUploading) {
+      setIsUploading(false);
+      setUploadProgress(0);
+      setTimeRemaining(null);
+      handleError(new Error(t("common.upload.failed", "Resumable upload failed")));
+    }
+  }, [tusStatus, isUploading, t]);
 
   // 🛡️ CLEANUP: Ensure any pending upload is aborted on unmount
   useEffect(() => {
@@ -144,7 +159,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     // 🛡️ Mandate Review #13: Synchronous block for Controller + ID
     const currentUploadId = crypto.randomUUID();
     const controller = new AbortController();
-    
+
     uploadIdRef.current = currentUploadId;
     abortControllerRef.current = controller;
     uploadStartTimeRef.current = Date.now();
@@ -249,8 +264,6 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       fileInputRef.current?.click();
     }
   };
-
-  const isResumable = file && file.size > mbToBytes(UPLOAD_CONSTANTS.TUS_RESUMABLE_THRESHOLD_MB);
 
   return (
     <div className="space-y-3 w-full">
@@ -363,7 +376,9 @@ export const FileUpload: React.FC<FileUploadProps> = ({
                   {isUploading ? (
                     <>
                       <Loader2 className="me-2 h-4 w-4 animate-spin" />
-                      {tusStatus === "uploading" ? t("buttons.resuming", "Resuming...") : t("buttons.uploading")}
+                      {tusStatus === "uploading"
+                        ? t("buttons.resuming", "Resuming...")
+                        : t("buttons.uploading")}
                     </>
                   ) : (
                     <>
