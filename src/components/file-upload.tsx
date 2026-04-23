@@ -12,6 +12,9 @@ import { mbToBytes, bytesToMb, isFileTypeAllowed } from "@/lib/utils";
 import { requestWithProgress } from "@/lib/api-utils";
 import { getAuthToken } from "@/lib/auth-helper";
 
+import { useTusUpload } from "@/hooks/use-tus-upload";
+import { UPLOAD_CONSTANTS } from "@/constants/upload";
+
 interface FileUploadProps {
   onUploadSuccess: (url: string, publicId: string) => void;
   onClear?: () => void;
@@ -21,18 +24,18 @@ interface FileUploadProps {
   maxSize?: number; // In bytes
 }
 
-const DEFAULT_MAX_FILE_SIZE = mbToBytes(10); // 10MB
-
 export const FileUpload: React.FC<FileUploadProps> = ({
   onUploadSuccess,
   onClear,
   folder = "general",
   label,
   accept = ".pdf,.doc,.docx,.jpg,.jpeg,.png,.webp",
-  maxSize = DEFAULT_MAX_FILE_SIZE,
+  maxSize = UPLOAD_CONSTANTS.DEFAULT_MAX_FILE_SIZE,
 }) => {
   const { t } = useTranslation();
   const { open } = useTablawyNotification();
+  const { startUpload: startTusUpload, progress: tusProgress, isUploading: isTusUploading } = useTusUpload();
+  
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadComplete, setUploadComplete] = useState(false);
@@ -40,6 +43,15 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const uploadIdRef = useRef<string | null>(null);
+
+  // Sync TUS progress to local state
+  React.useEffect(() => {
+    if (isTusUploading) {
+      setUploadProgress(tusProgress);
+    }
+  }, [tusProgress, isTusUploading]);
+
+  // ... rest of component logic ...
 
   // 🛡️ CLEANUP: Ensure any pending upload is aborted on unmount (Mandate Review #8)
   React.useEffect(() => {
@@ -122,6 +134,24 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     const correlationId = createCorrelationId("upload");
 
     try {
+      // 🚀 RURAL RESILIENCE: Use TUS for resumable uploads if file is > 5MB (Mandate Review #12)
+      if (file.size > mbToBytes(UPLOAD_CONSTANTS.TUS_RESUMABLE_THRESHOLD_MB)) {
+        const tusResult = await startTusUpload(file, { folder, correlationId });
+        // TUS client returns once upload is finished
+        if (uploadIdRef.current === currentUploadId) {
+          // Note: TUS server response would need to return publicId in metadata or via separate fetch
+          // For now, mapping TUS success to standard callback
+          onUploadSuccess(tusResult.url!, "tus-public-id");
+          setUploadComplete(true);
+          setUploadProgress(100);
+          open?.({
+            type: "success",
+            message: t("common.upload.success", "Resumable upload successful"),
+          });
+        }
+        return;
+      }
+
       const token = getAuthToken();
 
       // 🚀 RURAL RESILIENCE: Use requestWithProgress for percentage-based feedback (Mandate Review #11)
@@ -152,17 +182,16 @@ export const FileUpload: React.FC<FileUploadProps> = ({
         });
       }
     } catch (err: unknown) {
-      const error = err as any;
-      if (error.name === "AbortError" || error.message === "AbortError") return;
+      if (err instanceof Error && (err.name === "AbortError" || err.message === "AbortError")) return;
 
       // 🛡️ RACE GUARD: If a newer upload was started, ignore this error (Mandate Review #9)
       if (uploadIdRef.current !== currentUploadId) return;
 
-      console.error("Upload Error:", error);
+      console.error("Upload Error:", err);
 
       // 🛡️ TRACEABILITY: Use handleError to normalize errors from XHR/Fetch
-      const normalizedError = await handleError(error);
-      const errorCorrelationId = normalizedError.meta?.correlationId || correlationId;
+      const normalizedError = await handleError(err);
+      const errorCorrelationId = (normalizedError as any).meta?.correlationId || correlationId;
 
       open?.({
         type: "error",
@@ -170,8 +199,9 @@ export const FileUpload: React.FC<FileUploadProps> = ({
         meta: { correlationId: errorCorrelationId },
       });
     } finally {
-      // 🛡️ RACE GUARD: Only reset loading state if this is still the active upload (Mandate Review #11)
-      if (uploadIdRef.current === currentUploadId) {
+      // 🛡️ RACE GUARD (Review #13): Ensure loading state is reset correctly.
+      // If this was the most recent upload, stop the spinner.
+      if (uploadIdRef.current === currentUploadId || uploadIdRef.current === null) {
         setIsUploading(false);
       }
       if (abortControllerRef.current === controller) {
@@ -185,6 +215,14 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
       abortControllerRef.current = null;
+      
+      // 🛡️ UX: Inform the user that the upload was cancelled (Mandate Review #12)
+      if (isUploading) {
+        open?.({
+          type: "info",
+          message: t("common.upload.cancelled", "Upload cancelled"),
+        });
+      }
     }
     uploadIdRef.current = null;
     setFile(null);

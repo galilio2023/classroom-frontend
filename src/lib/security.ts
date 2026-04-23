@@ -43,6 +43,8 @@ export const SENSITIVE_DATA_KEYS = [
   "session",
   "totp",
   "mfa_token",
+  "authorization",
+  "app_secret",
 ];
 
 /**
