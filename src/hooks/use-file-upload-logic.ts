@@ -179,10 +179,14 @@ export const useFileUploadLogic = ({
       // 🚀 HARDEN TUS FALLBACK (Priority 1)
       if (isResumable) {
         try {
+          const token = getAuthToken();
           // Quick pre-flight check if endpoint is reachable
           const healthCheck = await fetch(TUS_ENDPOINT, {
             method: "OPTIONS",
             signal: controller.signal,
+            headers: {
+              ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            },
           });
           if (!healthCheck.ok && healthCheck.status !== 405 && healthCheck.status !== 204) {
             throw new Error("TUS endpoint unreachable");

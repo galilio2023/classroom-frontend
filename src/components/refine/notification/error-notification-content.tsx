@@ -60,18 +60,17 @@ export const ErrorNotificationContent: React.FC<ErrorNotificationContentProps> =
           aria-label={t("common.labels.technicalDetails", "Technical support details")}
         >
           ID: {displayId}
-          {meta && Object.keys(meta).length > 1 && (
+          {meta && (
             <div className="mt-1 border-t border-border/50 pt-1">
-              Meta:{" "}
-              {JSON.stringify(
-                redactSensitiveData({
+              {(() => {
+                const redactedMeta = redactSensitiveData({
                   ...meta,
                   correlationId: undefined,
                   traceId: undefined,
-                }),
-                null,
-                2
-              )}
+                });
+                if (Object.keys(redactedMeta).length === 0) return null;
+                return <>Meta: {JSON.stringify(redactedMeta, null, 2)}</>;
+              })()}
             </div>
           )}
           <div className="mt-2 flex justify-end">

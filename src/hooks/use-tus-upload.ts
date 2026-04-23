@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef } from "react";
 import * as tus from "tus-js-client";
 import { TUS_ENDPOINT } from "@/config";
+import { getAuthToken } from "@/lib/auth-helper";
 
 /**
  * 🛰️ CUSTOM HOOK: useTusUpload
@@ -31,6 +32,8 @@ export const useTusUpload = () => {
   const startUpload = useCallback(
     (file: File, metadata: Record<string, string> = {}) => {
       const uploadId = crypto.randomUUID();
+      const token = getAuthToken();
+
       setCurrentUploadId(uploadId);
       setStatus("uploading");
       setError(null);
@@ -42,6 +45,9 @@ export const useTusUpload = () => {
         // Formula: random(0, min(cap, base * 2^attempt))
         retryDelays: [1000, 3000, 7000, 15000, 31000].map((base) => Math.random() * base),
         removeFingerprintOnSuccess: true,
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         metadata: {
           filename: file.name,
           filetype: file.type,
