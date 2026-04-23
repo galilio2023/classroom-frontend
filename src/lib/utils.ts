@@ -66,15 +66,17 @@ export function getUUID(): string {
 /**
  * 🛡️ SECURITY: Validates a file against an 'accept' attribute string.
  * Supports extensions (.pdf), MIME types (image/png), and wildcards (video/*).
+ * Mandate Review #13: Enhanced with magic number validation for core academic types.
  */
-export function isFileTypeAllowed(file: File, acceptString: string): boolean {
+export async function isFileTypeAllowed(file: File, acceptString: string): Promise<boolean> {
   if (!acceptString) return true;
 
   const fileName = file.name.toLowerCase();
   const fileExtension = fileName.split(".").pop() || "";
   const allowedPatterns = acceptString.split(",").map((p) => p.trim().toLowerCase());
 
-  return allowedPatterns.some((pattern) => {
+  // 1. Basic Extension/MIME check
+  const isPatternMatch = allowedPatterns.some((pattern) => {
     if (pattern.startsWith(".")) {
       return fileExtension === pattern.replace(".", "");
     }
@@ -83,5 +85,51 @@ export function isFileTypeAllowed(file: File, acceptString: string): boolean {
       return file.type.startsWith(`${mainType}/`);
     }
     return file.type === pattern;
+  });
+
+  if (!isPatternMatch) return false;
+
+  // 2. 🛡️ DEEP CHECK: Magic Number Validation (Mandate Review #13)
+  // Prevents extension-spoofing for common academic formats.
+  try {
+    const header = await readFileHeader(file, 4);
+
+    // PDF: %PDF (25 50 44 46)
+    if (fileExtension === "pdf" || file.type === "application/pdf") {
+      return header === "25504446";
+    }
+    // PNG: 89 50 4E 47
+    if (fileExtension === "png" || file.type === "image/png") {
+      return header === "89504e47";
+    }
+    // JPG/JPEG: FF D8 FF
+    if (["jpg", "jpeg"].includes(fileExtension) || file.type === "image/jpeg") {
+      return header.startsWith("ffd8ff");
+    }
+  } catch (err) {
+    console.error("File header check failed:", err);
+    return false; // Fail-closed on read error
+  }
+
+  return true;
+}
+
+/**
+ * Reads the first N bytes of a file and returns them as a hex string.
+ */
+async function readFileHeader(file: File, bytes: number): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const arrayBuffer = reader.result as ArrayBuffer;
+      const uint8Array = new Uint8Array(arrayBuffer);
+      let header = "";
+      for (let i = 0; i < uint8Array.length; i++) {
+        header += uint8Array[i].toString(16).padStart(2, "0");
+      }
+      resolve(header);
+    };
+    reader.onerror = reject;
+    reader.readAsArrayBuffer(file.slice(0, bytes));
   });
 }
