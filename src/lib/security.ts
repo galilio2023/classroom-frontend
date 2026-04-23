@@ -45,6 +45,9 @@ export const SENSITIVE_DATA_KEYS = [
   "mfa_token",
   "authorization",
   "app_secret",
+  "phone",
+  "nationalId",
+  "national_id",
 ];
 
 /**

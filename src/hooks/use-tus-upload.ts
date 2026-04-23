@@ -15,6 +15,7 @@ export const useTusUpload = () => {
   const [error, setError] = useState<Error | null>(null);
   const [uploadUrl, setUploadUrl] = useState<string | null>(null);
   const [tusPublicId, setTusPublicId] = useState<string | null>(null);
+  const [currentUploadId, setCurrentUploadId] = useState<string | null>(null);
 
   const uploadRef = useRef<tus.Upload | null>(null);
 
@@ -23,11 +24,14 @@ export const useTusUpload = () => {
       uploadRef.current.abort();
       uploadRef.current = null;
       setStatus("idle");
+      setCurrentUploadId(null);
     }
   }, []);
 
   const startUpload = useCallback(
     (file: File, metadata: Record<string, string> = {}) => {
+      const uploadId = crypto.randomUUID();
+      setCurrentUploadId(uploadId);
       setStatus("uploading");
       setError(null);
       setProgress(0);
@@ -41,6 +45,7 @@ export const useTusUpload = () => {
         metadata: {
           filename: file.name,
           filetype: file.type,
+          uploadId, // 🛡️ TRACEABILITY: Tie the request to a specific frontend session
           ...metadata,
         },
         onAfterResponse: (_req, res) => {
@@ -63,7 +68,8 @@ export const useTusUpload = () => {
           // 🛡️ Mandate Review #13: Extract storage identity from response headers
           // Fallback to the unique TUS resource ID from the URL.
           const resourceId = upload.url?.split("/").pop();
-          setTusPublicId(resourceId || null);
+          // 🛡️ SECURITY: Generate a fallback UUID if identity is missing to prevent hardcoded collisions
+          setTusPublicId(resourceId || crypto.randomUUID());
           setStatus("success");
         },
       });
@@ -93,5 +99,6 @@ export const useTusUpload = () => {
     error,
     uploadUrl,
     tusPublicId,
+    currentUploadId,
   };
 };
