@@ -4,18 +4,6 @@ import { User } from "./types";
 
 declare module "@refinedev/core" {
   interface AuthIdentity extends User {}
-
-  // 🛡️ TRACEABILITY: Augmenting the core interface to support extra notification metadata
-  // Mandate Review #9: Added 'warning' and 'info' for better rural feedback.
-  interface OpenNotificationParams {
-    meta?: {
-      correlationId?: string;
-      traceId?: string;
-      retryAfter?: number;
-      icon?: React.ReactNode;
-      [key: string]: any;
-    };
-  }
 }
 
 /**

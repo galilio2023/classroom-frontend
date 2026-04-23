@@ -59,6 +59,11 @@ export const ErrorNotificationContent: React.FC<ErrorNotificationContentProps> =
                   ssn: undefined,
                   creditCard: undefined,
                   auth: undefined,
+                  cvv: undefined,
+                  api_key: undefined,
+                  private_key: undefined,
+                  apiKey: undefined,
+                  privateKey: undefined,
                 },
                 null,
                 2

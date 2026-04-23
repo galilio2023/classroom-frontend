@@ -52,6 +52,34 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     if (e.target.files && e.target.files[0]) {
       const selectedFile = e.target.files[0];
 
+      // 🛡️ SECURITY: Strict file type validation (Mandate Review #9)
+      const fileName = selectedFile.name.toLowerCase();
+      const fileExtension = fileName.split(".").pop() || "";
+      const allowedPatterns = accept.split(",").map((p) => p.trim().toLowerCase());
+
+      const isAllowed = allowedPatterns.some((pattern) => {
+        if (pattern.startsWith(".")) {
+          return fileExtension === pattern.replace(".", "");
+        }
+        if (pattern.endsWith("/*")) {
+          return selectedFile.type.startsWith(pattern.replace("/*", ""));
+        }
+        return selectedFile.type === pattern;
+      });
+
+      if (!isAllowed) {
+        open?.({
+          type: "error",
+          message: t("common.upload.invalidType", "Invalid file type"),
+          description: t("common.upload.invalidTypeDesc", {
+            accept,
+            defaultValue: `Accepted formats: ${accept}`,
+          }),
+        });
+        if (fileInputRef.current) fileInputRef.current.value = "";
+        return;
+      }
+
       if (selectedFile.size > maxSize) {
         open?.({
           type: "error",
@@ -67,10 +95,10 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       // 🛡️ RURAL RESILIENCE: Warn about large files on potentially slow networks
       if (selectedFile.size > mbToBytes(MAX_SYNC_UPLOAD_SIZE_MB)) {
         open?.({
-          type: "warning",
+          type: "warning" as any,
           message: t("common.upload.largeFileWarning"),
           description: t("common.upload.largeFileWarningDesc"),
-        } as any);
+        });
       }
 
       setFile(selectedFile);
@@ -117,15 +145,15 @@ export const FileUpload: React.FC<FileUploadProps> = ({
 
       const result = await response.json();
 
-      // 🛡️ RACE GUARD: If a newer upload was started, ignore this one
-      if (uploadIdRef.current !== currentUploadId) return;
-
-      onUploadSuccess(result.data.url, result.data.publicId);
-      setUploadComplete(true);
-      open?.({
-        type: "success",
-        message: t("common.upload.success"),
-      });
+      // 🛡️ RACE GUARD: Only execute callback if this is still the active upload (Mandate Review #9)
+      if (uploadIdRef.current === currentUploadId) {
+        onUploadSuccess(result.data.url, result.data.publicId);
+        setUploadComplete(true);
+        open?.({
+          type: "success" as any,
+          message: t("common.upload.success"),
+        });
+      }
     } catch (error: unknown) {
       if ((error as Error).name === "AbortError") return;
 

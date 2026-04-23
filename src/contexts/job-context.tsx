@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from "react";
-import { useNotification } from "@refinedev/core";
+import { useNotification, type HttpError } from "@refinedev/core";
 import { handleError } from "@/providers/utils/api-errors";
 import { socket } from "@/lib/socket";
 import { useTranslation } from "react-i18next";
@@ -12,13 +12,20 @@ import { BrainCircuit } from "lucide-react";
 
 export type BackgroundJob = BackgroundJobRecord;
 
+interface JobCompletedEvent {
+  jobId: string;
+  status: string;
+  result?: Record<string, unknown>;
+  correlationId?: string;
+}
+
 interface JobContextType {
   jobs: BackgroundJob[];
   addJob: (job: Omit<BackgroundJob, "status" | "createdAt">) => void;
   updateJob: (id: string, updates: Partial<BackgroundJob>) => void;
   removeJob: (id: string) => void;
   clearCompleted: () => void;
-  syncJobs: () => Promise<any>;
+  syncJobs: () => Promise<number | undefined>;
   isSafeMode: boolean; // 🛡️ Mandate Review #8: Inform UI of high system load
 }
 
@@ -114,8 +121,8 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (newlyFinished.length > 1) {
         open?.({
           type: "info" as any,
-          message: t("ai.jobs.multiple_completed" as any, { count: newlyFinished.length }),
-          description: t("ai.jobs.check_dashboard" as any),
+          message: t("ai.jobs.multiple_completed", { count: newlyFinished.length }),
+          description: t("ai.jobs.check_dashboard"),
         });
       }
 
@@ -143,7 +150,8 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setJobs(nextJobs);
       jobsRef.current = nextJobs;
       void offlineDB.background_jobs.bulkPut(nextJobs);
-    } catch (error: any) {
+    } catch (err: unknown) {
+      const error = err as HttpError;
       if (error.name === "AbortError") return;
 
       console.error("Job Sync Failed:", error);
@@ -172,7 +180,9 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const calculateNextPollDelay = useCallback(
     (retryAfterSeconds?: number) => {
       const retryAfterMs = retryAfterSeconds ? retryAfterSeconds * 1000 : 0;
-      const isSaveDataMode = (navigator as any).connection?.saveData === true;
+      // 🛡️ DATA SAVER: Respect student's bandwidth (Mandate Review #9)
+      const nav = navigator as Navigator & { connection?: { saveData: boolean } };
+      const isSaveDataMode = nav.connection?.saveData === true;
 
       // 1. Mandatory Throttle: Always respect Retry-After from server (Review #9)
       if (retryAfterMs > 0) {
@@ -257,12 +267,12 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
       open?.({
         type: "info" as any,
-        message: t("ai.jobs.queued_title" as any, { defaultValue: "Processing in background" }),
+        message: t("ai.jobs.queued_title", { defaultValue: "Processing in background" }),
         description: isSafeMode
-          ? t("ai.jobs.queued_safe_mode_desc" as any, {
+          ? t("ai.jobs.queued_safe_mode_desc", {
               defaultValue: "System load is high. This may take longer than usual.",
             })
-          : t("ai.jobs.queued_desc" as any, { defaultValue: "We'll notify you when it's ready." }),
+          : t("ai.jobs.queued_desc", { defaultValue: "We'll notify you when it's ready." }),
       });
     },
     [isSafeMode, open, t, scheduleNext]
@@ -279,7 +289,7 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           },
         });
         if (response.ok) {
-          const { data } = await response.json();
+          const { data } = (await response.json()) as { data: { isSafeMode: boolean } };
           setIsSafeMode(!!data.isSafeMode);
         }
       } catch (err) {
@@ -332,7 +342,7 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     if (isSafeMode) {
       open?.({
-        type: "warning",
+        type: "warning" as any,
         message: t("ai.governance.safe_mode_active", "System Load is High"),
         description: t(
           "ai.governance.safe_mode_desc",
@@ -383,19 +393,14 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [scheduleNext]);
 
   useEffect(() => {
-    const handleJobCompleted = (data: {
-      jobId: string;
-      status: string;
-      result?: any;
-      correlationId?: string;
-    }) => {
+    const handleJobCompleted = (data: JobCompletedEvent) => {
       const targetJob = jobsRef.current.find(
         (j) => j.id === data.jobId || (data.correlationId && j.id === data.correlationId)
       );
 
       if (targetJob) {
         const updates = {
-          status: data.status as any,
+          status: data.status as BackgroundJob["status"],
           metadata: { ...data.result },
         };
         updateJob(targetJob.id, updates);

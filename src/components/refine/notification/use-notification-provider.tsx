@@ -33,6 +33,7 @@ export interface TablawyOpenNotificationParams {
     traceId?: string;
     retryAfter?: number;
     icon?: React.ReactNode;
+    link?: string;
     [key: string]: any;
   };
 }
@@ -96,12 +97,24 @@ export function useNotificationProvider(): NotificationProvider {
         icon: meta?.icon,
       };
 
-      // 🚀 ACTIONABLE REDIRECTS: If there's a link, add a button
-      if (
+      // 🚀 ACTIONABLE REDIRECTS: Prefer meta.link (Mandate Review #9)
+      if (meta?.link) {
+        config.action = {
+          label: (
+            <div className="flex items-center gap-1">
+              Go <MoveRight className="h-3 w-3" />
+            </div>
+          ),
+          onClick: () => {
+            navigate(meta.link!);
+          },
+        };
+      } else if (
         typeof description === "object" &&
         description !== null &&
         !React.isValidElement(description)
       ) {
+        // Fallback for legacy NotificationMetadata objects in description
         const notificationMeta = description as unknown as NotificationMetadata;
         if (notificationMeta.link) {
           config.action = {
