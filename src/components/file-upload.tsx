@@ -8,7 +8,7 @@ import { BACKEND_URL, MAX_SYNC_UPLOAD_SIZE_MB, STORAGE_KEYS } from "@/config";
 import { useTranslation } from "react-i18next";
 import { handleError, getCorrelationId } from "@/providers/utils/api-errors";
 import { createCorrelationId } from "@/lib/traceability";
-import { mbToBytes, bytesToMb } from "@/lib/utils";
+import { mbToBytes, bytesToMb, isFileTypeAllowed } from "@/lib/utils";
 import { getAuthToken } from "@/lib/auth-helper";
 
 interface FileUploadProps {
@@ -54,23 +54,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       const selectedFile = e.target.files[0];
 
       // 🛡️ SECURITY: Strict file type validation (Mandate Review #9)
-      const fileName = selectedFile.name.toLowerCase();
-      const fileExtension = fileName.split(".").pop() || "";
-      const allowedPatterns = (accept || "").split(",").map((p) => p.trim().toLowerCase());
-
-      const isAllowed =
-        allowedPatterns.length === 0 ||
-        allowedPatterns.some((pattern) => {
-          if (pattern.startsWith(".")) {
-            return fileExtension === pattern.replace(".", "");
-          }
-          if (pattern.endsWith("/*")) {
-            return selectedFile.type.startsWith(pattern.replace("/*", ""));
-          }
-          return selectedFile.type === pattern;
-        });
-
-      if (!isAllowed) {
+      if (!isFileTypeAllowed(selectedFile, accept)) {
         open?.({
           type: "error",
           message: t("common.upload.invalidType", "Invalid file type"),
@@ -158,25 +142,27 @@ export const FileUpload: React.FC<FileUploadProps> = ({
                 reject(new Error("Failed to parse response"));
               }
             } else {
-              // 🛡️ ERROR HANDLING: Wrap XHR error to match handleError utility
-              reject({
-                response: {
-                  status: xhr.status,
-                  statusText: xhr.statusText,
-                  headers: {
-                    get: (name: string) => xhr.getResponseHeader(name),
-                    "x-correlation-id": xhr.getResponseHeader("x-correlation-id"),
-                  },
-                  text: () => Promise.resolve(xhr.responseText),
-                  json: () => {
-                    try {
-                      return Promise.resolve(JSON.parse(xhr.responseText));
-                    } catch {
-                      return Promise.resolve({});
-                    }
-                  },
+              // 🛡️ ERROR HANDLING: Wrap XHR error to match handleError utility (Review #11)
+              // We create a duck-typed Response object that matches what handleError expects
+              const errorResponse = {
+                status: xhr.status,
+                statusText: xhr.statusText,
+                headers: {
+                  get: (name: string) => xhr.getResponseHeader(name),
+                  "x-correlation-id": xhr.getResponseHeader("x-correlation-id"),
                 },
-              });
+                text: async () => xhr.responseText,
+                json: async () => {
+                  try {
+                    return JSON.parse(xhr.responseText);
+                  } catch {
+                    return {};
+                  }
+                },
+                // Add axios-like properties just in case
+                data: null,
+              };
+              reject({ response: errorResponse });
             }
           });
 
@@ -225,7 +211,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
         meta: { correlationId: errorCorrelationId },
       } as any);
     } finally {
-      // 🛡️ RACE GUARD: Only reset loading state if this is still the active upload
+      // 🛡️ RACE GUARD: Only reset loading state if this is still the active upload (Mandate Review #11)
       if (uploadIdRef.current === currentUploadId) {
         setIsUploading(false);
       }
@@ -236,13 +222,16 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   };
 
   const clearFile = () => {
-    // 🛡️ CLEANUP: Abort any active upload request (Mandate Review #9)
+    // 🛡️ CLEANUP: Abort any active upload request and reset ID (Mandate Review #9)
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
       abortControllerRef.current = null;
     }
+    uploadIdRef.current = null;
+    uploadIdRef.current = null;
     setFile(null);
     setUploadComplete(false);
+    setUploadProgress(0);
     if (fileInputRef.current) fileInputRef.current.value = "";
     onClear?.();
   };
@@ -313,7 +302,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
 
           <div className="flex flex-col gap-2 pt-2 border-t mt-1">
             {isUploading && (
-              <div className="w-full space-y-1">
+              <div className="w-full space-y-1" aria-live="polite">
                 <div className="flex justify-between text-[10px] text-muted-foreground uppercase font-black tracking-tighter">
                   <span>{t("common.upload.progress", "Uploading...")}</span>
                   <span>{uploadProgress}%</span>

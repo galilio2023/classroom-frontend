@@ -62,3 +62,26 @@ export function getUUID(): string {
   }
   return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 }
+
+/**
+ * 🛡️ SECURITY: Validates a file against an 'accept' attribute string.
+ * Supports extensions (.pdf), MIME types (image/png), and wildcards (video/*).
+ */
+export function isFileTypeAllowed(file: File, acceptString: string): boolean {
+  if (!acceptString) return true;
+
+  const fileName = file.name.toLowerCase();
+  const fileExtension = fileName.split(".").pop() || "";
+  const allowedPatterns = acceptString.split(",").map((p) => p.trim().toLowerCase());
+
+  return allowedPatterns.some((pattern) => {
+    if (pattern.startsWith(".")) {
+      return fileExtension === pattern.replace(".", "");
+    }
+    if (pattern.endsWith("/*")) {
+      const mainType = pattern.split("/")[0];
+      return file.type.startsWith(`${mainType}/`);
+    }
+    return file.type === pattern;
+  });
+}

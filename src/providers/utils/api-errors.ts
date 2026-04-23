@@ -47,6 +47,9 @@ export const handleError = async (errorOrResponse: unknown): Promise<HttpError> 
     // 🛡️ RESILIENCE: Check for Axios data first to avoid consuming Fetch streams prematurely
     if (response.data && typeof response.data === "object") {
       json = response.data;
+    } else if (typeof response.json === "function") {
+      // Prioritize async json() method if available (standard Response or our duck-typed XHR)
+      json = await response.json();
     } else if (typeof response.text === "function") {
       const text = await response.text();
       if (text) json = JSON.parse(text);
