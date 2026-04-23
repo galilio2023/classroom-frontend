@@ -75,8 +75,14 @@ export const useFileUploadLogic = ({
         const eta = calculateETA(uploadStartTimeRef.current, tusProgress);
         setTimeRemaining(eta);
       }
+
+      // 🛰️ RURAL HARDENING: Persist uploadUrl to survive reloads/crashes
+      if (tusUrl && file) {
+        const fingerprint = `${file.name}-${file.size}-${file.type}`;
+        localStorage.setItem(`tus-upload-${fingerprint}`, tusUrl);
+      }
     }
-  }, [tusProgress, tusStatus, calculateETA]);
+  }, [tusProgress, tusStatus, calculateETA, tusUrl, file]);
 
   // 🛡️ TUS SUCCESS SYNC
   useEffect(() => {
@@ -90,6 +96,10 @@ export const useFileUploadLogic = ({
       currentUploadId &&
       currentUploadId === uploadIdRef.current
     ) {
+      // 🛰️ RURAL HARDENING: Cleanup persistence on success
+      const fingerprint = `${file.name}-${file.size}-${file.type}`;
+      localStorage.removeItem(`tus-upload-${fingerprint}`);
+
       onUploadSuccess(tusUrl, tusPublicId!);
       setUploadComplete(true);
       setUploadProgress(100);
@@ -127,9 +137,19 @@ export const useFileUploadLogic = ({
       setUploadProgress(0);
       setTimeRemaining(null);
       uploadIdRef.current = null;
-      handleError(tusError || new Error(t("common.upload.failed", "Resumable upload failed")));
+
+      void (async () => {
+        const normalizedError = await handleError(
+          tusError || new Error(t("common.upload.failed", "Resumable upload failed"))
+        );
+        open({
+          type: "error",
+          message: normalizedError.message,
+          meta: { correlationId: (normalizedError as any).meta?.correlationId },
+        });
+      })();
     }
-  }, [tusStatus, isUploading, t, tusError, currentUploadId, file]);
+  }, [tusStatus, isUploading, t, tusError, currentUploadId, file, open]);
 
   // 🛡️ TAB VISIBILITY SAFETY
   useEffect(() => {
@@ -165,6 +185,11 @@ export const useFileUploadLogic = ({
   }, [file, isUploading, uploadComplete]);
 
   const clearFile = useCallback(() => {
+    if (file) {
+      const fingerprint = `${file.name}-${file.size}-${file.type}`;
+      localStorage.removeItem(`tus-upload-${fingerprint}`);
+    }
+
     setFile(null);
     setUploadComplete(false);
     setUploadProgress(0);
@@ -186,7 +211,7 @@ export const useFileUploadLogic = ({
     }
 
     onClear?.();
-  }, [onClear, abortTusUpload, inputRef]);
+  }, [onClear, abortTusUpload, inputRef, file]);
 
   const handleUpload = async () => {
     if (!file || isUploading) return;
@@ -220,7 +245,15 @@ export const useFileUploadLogic = ({
             throw new Error("TUS endpoint unreachable");
           }
 
-          startTusUpload(file, { folder, correlationId });
+          // 🛰️ RURAL HARDENING: Try to resume from persisted URL
+          const fingerprint = `${file.name}-${file.size}-${file.type}`;
+          const persistedUrl = localStorage.getItem(`tus-upload-${fingerprint}`);
+
+          startTusUpload(file, {
+            folder,
+            correlationId,
+            ...(persistedUrl ? { uploadUrl: persistedUrl } : {}),
+          });
           return;
         } catch (tusErr) {
           console.warn("⚠️ TUS pre-flight failed, degrading to standard upload:", tusErr);

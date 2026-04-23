@@ -26,6 +26,7 @@ interface FileUploadProps {
  * Handled via useFileUploadLogic for React 19 performance and modularity.
  */
 export const FileUpload: React.FC<FileUploadProps> = (props) => {
+  const { label, accept, maxSize, onUploadSuccess, onClear, folder } = props;
   const { t } = useTranslation();
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -42,7 +43,14 @@ export const FileUpload: React.FC<FileUploadProps> = (props) => {
     clearFile,
     handleUpload,
     handleFileChange,
-  } = useFileUploadLogic({ ...props, inputRef: fileInputRef });
+  } = useFileUploadLogic({
+    onUploadSuccess,
+    onClear,
+    folder,
+    accept,
+    maxSize,
+    inputRef: fileInputRef,
+  });
 
   const onDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -64,7 +72,7 @@ export const FileUpload: React.FC<FileUploadProps> = (props) => {
 
   return (
     <div className="space-y-3 w-full">
-      {props.label && <Label className="overline px-1">{props.label}</Label>}
+      {label && <Label className="overline px-1">{label}</Label>}
 
       {!file ? (
         <DropzoneArea
@@ -73,8 +81,8 @@ export const FileUpload: React.FC<FileUploadProps> = (props) => {
           onDragLeave={onDragLeave}
           onDrop={onDrop}
           onClick={() => fileInputRef.current?.click()}
-          accept={props.accept}
-          maxSizeMb={bytesToMb(props.maxSize || UPLOAD_CONSTANTS.DEFAULT_MAX_FILE_SIZE)}
+          accept={accept}
+          maxSizeMb={bytesToMb(maxSize || UPLOAD_CONSTANTS.DEFAULT_MAX_FILE_SIZE)}
         />
       ) : (
         <div className="space-y-4">
@@ -131,7 +139,7 @@ export const FileUpload: React.FC<FileUploadProps> = (props) => {
           </div>
 
           {isResumable && !isUploading && !uploadComplete && (
-            <div className="flex items-center gap-2 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-[10px] font-black uppercase tracking-widest text-amber-600">
+            <div className="flex items-center gap-2 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 overline text-amber-600">
               <AlertCircle className="h-3.5 w-3.5" />
               {t(
                 "common.upload.largeFileWarningDesc",
@@ -146,7 +154,7 @@ export const FileUpload: React.FC<FileUploadProps> = (props) => {
         ref={fileInputRef}
         type="file"
         className="hidden"
-        accept={props.accept}
+        accept={accept}
         onChange={(e) => {
           if (e.target.files?.[0]) {
             void handleFileChange(e.target.files[0]);

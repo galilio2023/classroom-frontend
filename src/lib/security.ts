@@ -48,6 +48,8 @@ export const SENSITIVE_DATA_KEYS = [
   "phone",
   "nationalId",
   "national_id",
+  "cookie",
+  "set-cookie",
 ];
 
 /**
