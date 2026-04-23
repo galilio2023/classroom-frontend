@@ -60,7 +60,15 @@ To support students in internet-unstable areas, Tablawy OS uses a "Learning with
 
 ---
 
-## 8. Operational Resilience
+## 8. Premium UI Components
+Certain high-impact components (like FileUpload or AI Hub) use "Premium" styling that deviates from standard Radix/Shadcn sizes.
+- **Buttons**: Premium action buttons use `h-12 md:h-14` with `rounded-2xl` and `font-black`. 
+- **Typography**: Overline labels use `text-[10px] font-black uppercase tracking-[0.2em]`.
+- **Purpose**: To provide a distinct, high-quality look and feel for core platform interactions.
+
+---
+
+## 9. Operational Resilience
 To maintain 99.9% availability during deployments:
 - **Unprivileged Docker**: Production Nginx images MUST run as a non-root user (port 8080) to mitigate container breakout risks.
 - **Zero-Downtime Migration**: Database changes are applied via a "Pre-Flight" migration container before traffic is shifted to the new build.
