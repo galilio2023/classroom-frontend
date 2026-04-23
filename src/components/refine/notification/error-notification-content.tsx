@@ -38,10 +38,17 @@ export const ErrorNotificationContent: React.FC<ErrorNotificationContentProps> =
         onToggle={(e) => setIsOpen((e.target as HTMLDetailsElement).open)}
       >
         <summary
-          className="hover:underline font-medium list-none flex items-center gap-1"
+          className="hover:underline font-medium list-none flex items-center gap-1 focus-visible:ring-1 focus-visible:ring-primary rounded-sm outline-none"
           aria-expanded={isOpen}
           aria-controls="support-info-content"
           role="button"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              setIsOpen(!isOpen);
+            }
+          }}
           onClick={(e) => {
             // Prevent toast from dismissing when interacting with accordion
             e.stopPropagation();

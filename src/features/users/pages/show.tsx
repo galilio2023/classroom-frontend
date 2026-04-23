@@ -102,7 +102,7 @@ const UserShow = () => {
             <Button
               variant="outline"
               size="lg"
-              className="w-full md:w-auto rounded-2xl font-bold uppercase tracking-widest text-[10px] h-12 md:h-14 px-6 md:px-8 gap-2 border-primary/20 bg-primary/5 hover:bg-primary/10"
+              className="w-full md:w-auto rounded-2xl font-black uppercase tracking-widest text-[10px] h-12 md:h-14 px-6 md:px-8 gap-2 border-primary/20 bg-primary/5 hover:bg-primary/10"
               onClick={() => {
                 void navigator.clipboard.writeText(window.location.href);
                 toast.success(t("profile.toasts.linkCopied" as any));
@@ -113,7 +113,7 @@ const UserShow = () => {
             {(isSelf || isAdmin) && (
               <Button
                 size="lg"
-                className="w-full md:w-auto rounded-2xl font-bold uppercase tracking-widest text-[10px] h-12 md:h-14 px-8 md:px-10 shadow-lg shadow-primary/25"
+                className="w-full md:w-auto rounded-2xl font-black uppercase tracking-widest text-[10px] h-12 md:h-14 px-8 md:px-10 shadow-lg shadow-primary/25"
                 asChild
               >
                 <Link to={`/users/edit/${user.id}`}>{t("buttons.editProfile" as any)}</Link>

@@ -21,7 +21,7 @@ interface UseFileUploadLogicProps {
   folder?: string;
   accept?: string;
   maxSize?: number;
-  inputRef?: React.RefObject<HTMLInputElement>;
+  inputRef?: React.RefObject<HTMLInputElement | null>;
 }
 
 export const useFileUploadLogic = ({
@@ -142,6 +142,27 @@ export const useFileUploadLogic = ({
     document.addEventListener("visibilitychange", handleVisibilityChange);
     return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
   }, [isUploading, isResumable]);
+
+  // 🛡️ SYNC ABORT (Priority 1): Abort on unmount
+  useEffect(() => {
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      abortTusUpload();
+    };
+  }, [abortTusUpload]);
+
+  // 🚀 RURAL RESILIENCE (Review #9): Manual retry signal handler
+  useEffect(() => {
+    const handleRetry = () => {
+      if (file && !isUploading && !uploadComplete) {
+        void handleUpload();
+      }
+    };
+    window.addEventListener("tablawy:retry_job_sync", handleRetry);
+    return () => window.removeEventListener("tablawy:retry_job_sync", handleRetry);
+  }, [file, isUploading, uploadComplete]);
 
   const clearFile = useCallback(() => {
     setFile(null);
