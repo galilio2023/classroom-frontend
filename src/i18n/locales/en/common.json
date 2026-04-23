@@ -31,7 +31,16 @@
       }
     },
     "notifications": {
-      "idCopied": "Correlation ID copied to clipboard"
+      "idCopied": "Correlation ID copied to clipboard",
+      "copyCorrelationId": "Copy correlation ID for support",
+      "copyId": "Copy ID",
+      "copied": "Copied"
+    },
+    "errorBoundary": {
+      "title": "AI Assistant Offline",
+      "description": "Something went wrong while communicating with Gemini. This is usually temporary.",
+      "disabled": "This AI feature has been disabled by the administrator.",
+      "tryAgain": "Try Again"
     }
   },
   "attendance": "$t(resources.attendance.attendance)",
@@ -461,14 +470,6 @@
     "copied": "Copied!",
     "confirmUnenroll": "Confirm Unenroll",
     "processing": "Processing...",
-    "ai": {
-      "errorBoundary": {
-        "title": "AI Assistant Offline",
-        "description": "Something went wrong while communicating with Gemini. This is usually temporary.",
-        "disabled": "This AI feature has been disabled by the administrator.",
-        "tryAgain": "Try Again"
-      }
-    },
     "magicBuilder": "Magic Builder",
     "addModule": "Add Module",
     "aiMagicBuilder": "AI Magic Builder",
@@ -1907,14 +1908,6 @@
     "required": "Required",
     "invalidEmail": "Invalid email address",
     "schoolNameRequired": "School name and slug are required."
-  },
-  "ai": {
-    "notifications": {
-      "idCopied": "Correlation ID copied to clipboard",
-      "copyCorrelationId": "Copy correlation ID for support",
-      "copyId": "Copy ID",
-      "copied": "Copied"
-    }
   },
   "labels": {
     "supportInfo": "Support Info",

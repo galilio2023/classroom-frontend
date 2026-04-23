@@ -24,29 +24,35 @@ export const LandingAIHub = ({ isAr }: Props) => {
           >
             <div className="inline-flex items-center gap-3 px-4 py-1.5 rounded-xl bg-primary/10 text-primary text-[10px] md:text-xs font-black uppercase tracking-widest border border-primary/10">
               <BrainCircuit className="h-4 w-4" />
-              {t("landing.ai.poweredBy")}
+              {t("landing.landing_ai_hub.poweredBy", "Gemini 3 FLASH PREVIEW Powered", {})}
             </div>
             <h2 className="text-4xl md:text-7xl lg:text-8xl font-black uppercase leading-[0.95] md:leading-[0.85]">
-              {t("landing.ai.title1")} <br />
-              <span className="text-primary italic">{t("landing.ai.title2")}</span>
+              {t("landing.landing_ai_hub.title1", "AI-Powered", {})} <br />
+              <span className="text-primary italic">
+                {t("landing.landing_ai_hub.title2", "Study Hub", {})}
+              </span>
             </h2>
             <p className="text-lg md:text-xl text-muted-foreground font-medium leading-relaxed max-w-xl text-balance">
-              {t("landing.ai.desc")}
+              {t(
+                "landing.landing_ai_hub.desc",
+                "A cutting-edge learning companion that understands your curriculum.",
+                {}
+              )}
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
               {[
-                t("landing.ai.list.assistant"),
-                t("landing.ai.list.quiz"),
-                t("landing.ai.list.summary"),
-                t("landing.ai.list.paths"),
+                t("landing.landing_ai_hub.list.assistant", "24/7 AI Teaching Assistant", {}),
+                t("landing.landing_ai_hub.list.quiz", "Adaptive Quiz Generation", {}),
+                t("landing.landing_ai_hub.list.summary", "Smart Content Summarization", {}),
+                t("landing.landing_ai_hub.list.paths", "Personalized Learning Paths", {}),
               ].map((item, i) => (
                 <div key={i} className="flex items-center gap-3.5 group">
                   <div className="h-9 w-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all shadow-sm">
                     <CheckCircle2 className="h-5 w-5" />
                   </div>
                   <span className="font-black text-xs md:text-sm uppercase tracking-wider text-muted-foreground/70 group-hover:text-foreground transition-colors">
-                    {item}
+                    {item as React.ReactNode}
                   </span>
                 </div>
               ))}
@@ -58,7 +64,7 @@ export const LandingAIHub = ({ isAr }: Props) => {
               asChild
             >
               <Link to="/ai-study-lab">
-                {t("landing.ai.exploreButton")}
+                {t("landing.landing_ai_hub.exploreButton", "Explore AI Lab", {})}
                 <Sparkles className="ms-3 h-4 w-4 md:h-5 md:w-5" />
               </Link>
             </Button>
@@ -79,12 +85,12 @@ export const LandingAIHub = ({ isAr }: Props) => {
                   </div>
                   <div className="text-start">
                     <p className="text-xs md:text-sm font-black uppercase tracking-widest">
-                      {t("landing.ai.chat.header")}
+                      {t("landing.landing_ai_hub.chat.header", "AI Learning Assistant", {})}
                     </p>
                     <div className="flex items-center gap-2">
                       <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
                       <span className="text-[9px] font-black text-muted-foreground/60 uppercase tracking-widest">
-                        {t("landing.ai.activeNow")}
+                        {t("landing.landing_ai_hub.activeNow", "Active Now", {})}
                       </span>
                     </div>
                   </div>
@@ -98,7 +104,11 @@ export const LandingAIHub = ({ isAr }: Props) => {
                   className="bg-muted/40 p-5 md:p-6 rounded-[1.5rem] md:rounded-3xl rounded-ss-none max-w-[90%] border border-border/40 shadow-sm"
                 >
                   <p className="text-sm md:text-base font-bold leading-relaxed italic opacity-80">
-                    {t("landing.ai.chat.msg1")}
+                    {t(
+                      "landing.landing_ai_hub.chat.msg1",
+                      "Hey there! I noticed you have a Physics test coming up. Want to review Quantum Mechanics?",
+                      {}
+                    )}
                   </p>
                 </motion.div>
                 <motion.div
@@ -108,7 +118,11 @@ export const LandingAIHub = ({ isAr }: Props) => {
                   className="bg-primary p-5 md:p-6 rounded-[1.5rem] md:rounded-3xl rounded-ee-none max-w-[90%] ms-auto text-primary-foreground shadow-xl shadow-primary/20"
                 >
                   <p className="text-sm md:text-base font-bold leading-relaxed">
-                    {t("landing.ai.chat.msg2")}
+                    {t(
+                      "landing.landing_ai_hub.chat.msg2",
+                      "That would be great! Can you explain the Heisenberg Uncertainty Principle simply?",
+                      {}
+                    )}
                   </p>
                 </motion.div>
                 <motion.div
@@ -118,11 +132,17 @@ export const LandingAIHub = ({ isAr }: Props) => {
                   className="bg-muted/40 p-5 md:p-6 rounded-[1.5rem] md:rounded-3xl rounded-ss-none max-w-[95%] border border-border/40 shadow-sm"
                 >
                   <p className="text-sm md:text-base font-bold leading-relaxed italic opacity-80">
-                    {t("landing.ai.chat.msg3")}
+                    {t(
+                      "landing.landing_ai_hub.chat.msg3",
+                      "Absolutely! Imagine trying to take a photo of a speeding car. If you use a fast shutter speed to freeze its position, you can't tell how fast it's going...",
+                      {}
+                    )}
                   </p>
                   <div className="mt-6 space-y-3">
                     <div className="flex justify-between text-[9px] font-black uppercase tracking-widest text-primary">
-                      <span>{t("landing.ai.analysisProcessing")}</span>
+                      <span>
+                        {t("landing.landing_ai_hub.analysisProcessing", "Analysis Processing", {})}
+                      </span>
                       <span>84%</span>
                     </div>
                     <div className="h-1.5 w-full bg-primary/10 rounded-full overflow-hidden shadow-inner">

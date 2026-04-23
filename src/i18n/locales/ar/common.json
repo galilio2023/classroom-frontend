@@ -1,4 +1,38 @@
 {
+  "ai": {
+    "jobs": {
+      "multiple_completed": "تم إكمال {{count}} من مهام الذكاء الاصطناعي في الخلفية.",
+      "check_dashboard": "تحقق من إشعاراتك أو لوحة تحكم الذكاء الاصطناعي لمزيد من التفاصيل.",
+      "syncError": "فشل مزامنة مهام الخلفية. جاري إعادة المحاولة...",
+      "queued_title": "جاري المعالجة في الخلفية",
+      "queued_desc": "سنقوم بإخطارك عندما تكون جاهزة.",
+      "queued_safe_mode_desc": "حمولة النظام عالية. قد يستغرق هذا وقتاً أطول من المعتاد.",
+      "explain": {
+        "completed": "تم توليد الشرح بنجاح",
+        "failed": "فشل توليد الشرح"
+      },
+      "summary": {
+        "completed": "الملخص جاهز",
+        "failed": "فشل تلخيص المحتوى"
+      },
+      "bio": {
+        "completed": "تم توليد السيرة الذاتية",
+        "failed": "فشل توليد السيرة الذاتية"
+      }
+    },
+    "notifications": {
+      "idCopied": "تم نسخ معرف الارتباط إلى الحافظة",
+      "copyCorrelationId": "نسخ معرف الارتباط للدعم",
+      "copyId": "نسخ المعرف",
+      "copied": "تم النسخ"
+    },
+    "errorBoundary": {
+      "title": "مساعد الذكاء الاصطناعي غير متصل",
+      "description": "حدث خطأ أثناء التواصل مع جمناي. عادة ما يكون هذا مؤقتاً.",
+      "disabled": "تم تعطيل ميزة الذكاء الاصطناعي هذه من قبل المسؤول.",
+      "tryAgain": "حاول مرة أخرى"
+    }
+  },
   "attendance": "$t(resources.attendance.attendance)",
   "project-groups": "$t(resources.project-groups.project-groups)",
   "library": "$t(resources.library.title)",
@@ -420,14 +454,6 @@
     "copied": "تم النسخ!",
     "confirmUnenroll": "تأكيد إلغاء التسجيل",
     "processing": "جاري المعالجة...",
-    "ai": {
-      "errorBoundary": {
-        "title": "مساعد الذكاء الاصطناعي غير متصل",
-        "description": "حدث خطأ أثناء التواصل مع جمناي. عادة ما يكون هذا مؤقتاً.",
-        "disabled": "تم تعطيل ميزة الذكاء الاصطناعي هذه من قبل المسؤول.",
-        "tryAgain": "حاول مرة أخرى"
-      }
-    },
     "magicBuilder": "المنشئ السحري",
     "addModule": "إضافة وحدة",
     "aiMagicBuilder": "المنشئ السحري بالذكاء الاصطناعي",
@@ -1851,34 +1877,6 @@
     "newBadge": "تم فتح وسام جديد!",
     "badges": {
       "juniorTeacher": "Junior Teacher Solution"
-    }
-  },
-  "ai": {
-    "jobs": {
-      "multiple_completed": "تم إكمال {{count}} من مهام الذكاء الاصطناعي في الخلفية.",
-      "check_dashboard": "تحقق من إشعاراتك أو لوحة تحكم الذكاء الاصطناعي لمزيد من التفاصيل.",
-      "syncError": "فشل مزامنة مهام الخلفية. جاري إعادة المحاولة...",
-      "queued_title": "جاري المعالجة في الخلفية",
-      "queued_desc": "سنقوم بإخطارك عندما تكون جاهزة.",
-      "queued_safe_mode_desc": "حمولة النظام عالية. قد يستغرق هذا وقتاً أطول من المعتاد.",
-      "explain": {
-        "completed": "تم توليد الشرح بنجاح",
-        "failed": "فشل توليد الشرح"
-      },
-      "summary": {
-        "completed": "الملخص جاهز",
-        "failed": "فشل تلخيص المحتوى"
-      },
-      "bio": {
-        "completed": "تم توليد السيرة الذاتية",
-        "failed": "فشل توليد السيرة الذاتية"
-      }
-    },
-    "notifications": {
-      "idCopied": "تم نسخ معرف الارتباط إلى الحافظة",
-      "copyCorrelationId": "نسخ معرف الارتباط للدعم",
-      "copyId": "نسخ المعرف",
-      "copied": "تم النسخ"
     }
   },
   "labels": {

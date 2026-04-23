@@ -185,12 +185,12 @@ export const DetailsTab = ({
                   {copied ? (
                     <>
                       <Check className="h-4 w-4 md:h-5 md:w-5 text-success" />
-                      {t("buttons.copied")}
+                      {t("buttons.copied", "Copied!", {})}
                     </>
                   ) : (
                     <>
                       <Copy className="h-4 w-4 md:h-5 md:w-5 text-primary" />
-                      {t("buttons.copyCode")}
+                      {t("buttons.copyCode", "Copy Code", {})}
                     </>
                   )}
                 </Button>

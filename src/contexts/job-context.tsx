@@ -143,7 +143,8 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           }),
           description: t(
             "ai.jobs.check_dashboard",
-            "Check your notifications or the AI dashboard for details."
+            "Check your notifications or the AI dashboard for details.",
+            {}
           ),
           meta: {
             icon: (
@@ -166,9 +167,11 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             const translationKey = `ai.jobs.${job.type}.${update.status}`;
             open?.({
               type: update.status === "completed" ? "success" : "error",
-              message: t(translationKey as any, {
-                defaultValue: update.status === "completed" ? "Task completed" : "Task failed",
-              }),
+              message: t(
+                translationKey as any,
+                update.status === "completed" ? "Task completed" : "Task failed",
+                {}
+              ),
               description: job.title,
               meta: {
                 icon: getJobIcon(job.type),
@@ -194,7 +197,7 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
       open?.({
         type: "error",
-        message: t("ai.jobs.syncError", "Failed to sync background tasks. Retrying..."),
+        message: t("ai.jobs.syncError", "Failed to sync background tasks. Retrying...", {}),
         meta: { correlationId, ...(error.meta || {}) },
       } as any);
 
@@ -301,12 +304,14 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
       open?.({
         type: "info",
-        message: t("ai.jobs.queued_title", { defaultValue: "Processing in background" }),
+        message: t("ai.jobs.queued_title", "Processing in background", {}),
         description: isSafeMode
-          ? t("ai.jobs.queued_safe_mode_desc", {
-              defaultValue: "System load is high. This may take longer than usual.",
-            })
-          : t("ai.jobs.queued_desc", { defaultValue: "We'll notify you when it's ready." }),
+          ? t(
+              "ai.jobs.queued_safe_mode_desc",
+              "System load is high. This may take longer than usual.",
+              {}
+            )
+          : t("ai.jobs.queued_desc", "We'll notify you when it's ready.", {}),
         meta: {
           icon: getJobIcon(newJob.type),
         },
@@ -380,10 +385,11 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (isSafeMode) {
       open?.({
         type: "warning",
-        message: t("ai.governance.safe_mode_active", "System Load is High"),
+        message: t("ai.governance.safe_mode_active", "System Load is High", {}),
         description: t(
           "ai.governance.safe_mode_desc",
-          "AI features are currently prioritized. Tasks may take longer than usual."
+          "AI features are currently prioritized. Tasks may take longer than usual.",
+          {}
         ),
         meta: {
           icon: <BrainCircuit className="h-4 w-4 text-warning" />,
@@ -453,9 +459,11 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         void offlineDB.background_jobs.update(targetJob.id, updates);
         open?.({
           type: data.status === "completed" ? "success" : "error",
-          message: t(`ai.jobs.${targetJob.type}.${data.status}` as any, {
-            defaultValue: data.status === "completed" ? "Task completed" : "Task failed",
-          }),
+          message: t(
+            `ai.jobs.${targetJob.type}.${data.status}` as any,
+            data.status === "completed" ? "Task completed" : "Task failed",
+            {}
+          ),
           description: targetJob.title,
           meta: {
             icon: getJobIcon(targetJob.type),

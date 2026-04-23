@@ -34,12 +34,21 @@ export const useTusUpload = () => {
 
       const upload = new tus.Upload(file, {
         endpoint: `${BACKEND_URL}/api/upload/resumable`,
-        retryDelays: [0, 3000, 5000, 10000, 20000],
+        // 🛡️ Mandate Review #12: Full Jitter for Rural Resilience (Thundering Herd prevention)
+        // Formula: random(0, min(cap, base * 2^attempt))
+        retryDelays: [1000, 3000, 7000, 15000, 31000].map((base) => Math.random() * base),
         removeFingerprintOnSuccess: true,
         metadata: {
           filename: file.name,
           filetype: file.type,
           ...metadata,
+        },
+        onAfterResponse: (_req, res) => {
+          // 🛡️ Mandate Review #13: Extract storage identity from response headers
+          const publicId = res.getHeader("X-Public-ID");
+          if (publicId) {
+            setTusPublicId(publicId);
+          }
         },
         onError: (err) => {
           setError(err);
