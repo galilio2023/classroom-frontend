@@ -12,6 +12,7 @@ declare module "@refinedev/core" {
       correlationId?: string;
       traceId?: string;
       retryAfter?: number;
+      icon?: React.ReactNode;
       [key: string]: any;
     };
   }

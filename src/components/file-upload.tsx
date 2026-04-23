@@ -9,6 +9,7 @@ import { useTranslation } from "react-i18next";
 import { handleError, getCorrelationId } from "@/providers/utils/api-errors";
 import { createCorrelationId } from "@/lib/traceability";
 import { mbToBytes, bytesToMb } from "@/lib/utils";
+import { getAuthToken } from "@/lib/auth-helper";
 
 interface FileUploadProps {
   onUploadSuccess: (url: string, publicId: string) => void;
@@ -99,7 +100,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     const correlationId = createCorrelationId("upload");
 
     try {
-      const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
+      const token = getAuthToken();
       const response = await fetch(`${BACKEND_URL}/assets/upload`, {
         method: "POST",
         body: formData,
@@ -144,6 +145,9 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     } finally {
       if (uploadIdRef.current === currentUploadId) {
         setIsUploading(false);
+      }
+      if (abortControllerRef.current === controller) {
+        abortControllerRef.current = null;
       }
     }
   };

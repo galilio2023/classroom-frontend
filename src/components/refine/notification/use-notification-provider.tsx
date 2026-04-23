@@ -1,9 +1,5 @@
 import { UndoableNotification } from "@/components/refine/notification/undoable-notification";
-import {
-  useTranslate,
-  type NotificationProvider,
-  type OpenNotificationParams,
-} from "@refinedev/core";
+import { useTranslate, type NotificationProvider } from "@refinedev/core";
 import { useNavigate } from "react-router-dom";
 import { toast, type ExternalToast } from "sonner";
 import { MoveRight } from "lucide-react";
@@ -17,8 +13,27 @@ import React from "react";
 export type TablawyNotificationType = "success" | "error" | "info" | "warning" | "progress";
 
 /**
- * Refine Notification Provider using Sonner.
+ * 🛡️ TYPE SAFETY: Augmented parameters for Tablawy notifications.
+ * Mandate Review #9: Explicitly defines all fields to bypass library-level type conflicts.
+ */
+export interface TablawyOpenNotificationParams {
+  key?: string;
+  message: string;
+  type: TablawyNotificationType;
+  description?: React.ReactNode;
+  undoableTimeout?: number;
+  cancelMutation?: () => void;
+  meta?: {
+    correlationId?: string;
+    traceId?: string;
+    retryAfter?: number;
+    icon?: React.ReactNode;
+    [key: string]: any;
+  };
+}
 
+/**
+ * Refine Notification Provider using Sonner.
  * Optimized for the new Service Layer backend.
  */
 export function useNotificationProvider(): NotificationProvider {
@@ -27,8 +42,9 @@ export function useNotificationProvider(): NotificationProvider {
 
   return {
     open: (params: any) => {
-      // 🛡️ Mandate Review #8: Deconstruct from any to handle augmented fields and union types safely
-      const { key, type, message, description, undoableTimeout, cancelMutation, meta } = params;
+      // 🛡️ Mandate Review #8: Map params to our internal strict type
+      const { key, type, message, description, undoableTimeout, cancelMutation, meta } =
+        params as TablawyOpenNotificationParams;
       const toastId = key || Date.now().toString();
 
       // 🛡️ TRACEABILITY: Prefer correlationId from meta (Standard Mandate Review #8)
@@ -87,6 +103,7 @@ export function useNotificationProvider(): NotificationProvider {
         richColors: true,
         duration: type === "error" ? 10000 : 4000, // 🚀 UX: Longer duration for error analysis
         action: extraAction,
+        icon: meta?.icon,
       };
 
       // 🚀 ACTIONABLE REDIRECTS: If there's a link, add a button

@@ -9,6 +9,7 @@ import { createCorrelationId } from "@/lib/traceability";
 import { pruneExpiredJobs } from "@/providers/utils/job-manager";
 import { offlineDB, BackgroundJobRecord } from "@/lib/offline-db";
 import { getAuthToken } from "@/lib/auth-helper";
+import { BrainCircuit } from "lucide-react";
 
 export type BackgroundJob = BackgroundJobRecord;
 
@@ -68,6 +69,7 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const initJobs = async () => {
       try {
         const savedJobs = await offlineDB.background_jobs.toArray();
+        // 🛡️ Mandate Review #9: Prune expired jobs immediately on load to prevent UI flicker
         const validJobs = pruneExpiredJobs(savedJobs);
         setJobs(validJobs);
         jobsRef.current = validJobs;
@@ -77,6 +79,23 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
     void initJobs();
   }, []);
+
+  // 🛡️ MONITORING: Alert user when system load is high (Mandate Review #8)
+  useEffect(() => {
+    if (isSafeMode) {
+      open?.({
+        type: "warning" as any,
+        message: t("ai.governance.safe_mode_active", "System Load is High"),
+        description: t(
+          "ai.governance.safe_mode_desc",
+          "AI features are currently prioritized. Tasks may take longer than usual."
+        ),
+        meta: {
+          icon: <BrainCircuit className="h-4 w-4 text-warning" />,
+        },
+      } as any);
+    }
+  }, [isSafeMode, open, t]);
 
   // 🛡️ PERSISTENCE: Sync memory state to Dexie (Mandate #4 - Rural Hardening)
   useEffect(() => {
