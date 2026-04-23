@@ -79,6 +79,21 @@ export function useNotificationProvider(): NotificationProvider {
         };
       }
 
+      // 🚀 RURAL RESILIENCE: Provide manual retry for throttled/failed requests (Mandate Review #9)
+      if (meta?.retryAfter && type === "error") {
+        extraAction = {
+          label: `Retry (${meta.retryAfter}s)`,
+          onClick: () => {
+            // Trigger a manual sync/refresh if possible
+            // Note: This assumes the calling context can handle the retry signal
+            toast.dismiss(toastId);
+            window.dispatchEvent(
+              new CustomEvent("tablawy:retry_job_sync", { detail: { retryAfter: meta.retryAfter } })
+            );
+          },
+        };
+      }
+
       const config: ExternalToast = {
         id: toastId,
         description:

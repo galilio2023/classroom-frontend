@@ -110,12 +110,20 @@
   --color-ai-primary: var(--ai-primary);
   --color-ai-secondary: var(--ai-secondary);
 
+  --background-ai-primary-gradient: var(--bg-ai-primary-gradient);
+
   --radius-xl: 1rem;
   --radius-2xl: 1.5rem;
 
   --shadow-premium: 0 10px 30px -10px rgba(0, 0, 0, 0.05);
   --shadow-glow: 0 0 20px -5px var(--color-primary);
   --shadow-3xl: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+
+  --bg-ai-primary-gradient: linear-gradient(
+    135deg,
+    var(--color-ai-primary) 0%,
+    var(--color-primary) 100%
+  );
 }
 
 @layer base {
@@ -170,6 +178,15 @@
   }
   .text-popover-foreground {
     color: var(--popover-foreground) !important;
+  }
+
+  /* 🤖 Mandate Review #9: AI Visual Identifier Utilities */
+  .bg-ai-primary-gradient {
+    background: var(--bg-ai-primary-gradient);
+  }
+  .text-ai-primary-gradient {
+    @apply bg-clip-text text-transparent;
+    background-image: var(--bg-ai-primary-gradient);
   }
 }
 

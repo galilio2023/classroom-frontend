@@ -145,9 +145,16 @@ export const handleError = async (errorOrResponse: unknown): Promise<HttpError> 
   }
 
   if (response.status === 503) {
+    const retryAfterRaw =
+      (typeof response.headers?.get === "function" ? response.headers.get("Retry-After") : null) ||
+      response.headers?.["Retry-After"] ||
+      response.headers?.["retry-after"];
+    const retryAfter = retryAfterRaw ? parseInt(retryAfterRaw, 10) : 60; // Default 60s for 503
+
     return {
       message: "AI service is currently under maintenance or cooling off. Please try again later.",
       statusCode: 503,
+      meta: { retryAfter, correlationId },
     };
   }
 

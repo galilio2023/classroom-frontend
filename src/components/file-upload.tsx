@@ -35,6 +35,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadComplete, setUploadComplete] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const uploadIdRef = useRef<string | null>(null);
@@ -55,17 +56,19 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       // 🛡️ SECURITY: Strict file type validation (Mandate Review #9)
       const fileName = selectedFile.name.toLowerCase();
       const fileExtension = fileName.split(".").pop() || "";
-      const allowedPatterns = accept.split(",").map((p) => p.trim().toLowerCase());
+      const allowedPatterns = (accept || "").split(",").map((p) => p.trim().toLowerCase());
 
-      const isAllowed = allowedPatterns.some((pattern) => {
-        if (pattern.startsWith(".")) {
-          return fileExtension === pattern.replace(".", "");
-        }
-        if (pattern.endsWith("/*")) {
-          return selectedFile.type.startsWith(pattern.replace("/*", ""));
-        }
-        return selectedFile.type === pattern;
-      });
+      const isAllowed =
+        allowedPatterns.length === 0 ||
+        allowedPatterns.some((pattern) => {
+          if (pattern.startsWith(".")) {
+            return fileExtension === pattern.replace(".", "");
+          }
+          if (pattern.endsWith("/*")) {
+            return selectedFile.type.startsWith(pattern.replace("/*", ""));
+          }
+          return selectedFile.type === pattern;
+        });
 
       if (!isAllowed) {
         open?.({
@@ -103,6 +106,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
 
       setFile(selectedFile);
       setUploadComplete(false);
+      setUploadProgress(0);
     }
   };
 
@@ -120,6 +124,8 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     abortControllerRef.current = controller;
 
     setIsUploading(true);
+    setUploadProgress(0);
+
     const formData = new FormData();
     formData.append("file", file);
     formData.append("folder", folder);
@@ -129,49 +135,97 @@ export const FileUpload: React.FC<FileUploadProps> = ({
 
     try {
       const token = getAuthToken();
-      const response = await fetch(`${BACKEND_URL}/assets/upload`, {
-        method: "POST",
-        body: formData,
-        signal: controller.signal,
-        headers: {
-          "X-Correlation-ID": correlationId,
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-      });
 
-      if (!response.ok) {
-        throw await handleError(response);
-      }
+      // 🚀 RURAL RESILIENCE: Use XMLHttpRequest for progress tracking (Mandate Review #9)
+      const xhr = new XMLHttpRequest();
+      const promise = new Promise<{ data: { url: string; publicId: string } }>(
+        (resolve, reject) => {
+          xhr.upload.addEventListener("progress", (event) => {
+            if (event.lengthComputable) {
+              const progress = Math.round((event.loaded / event.total) * 100);
+              if (uploadIdRef.current === currentUploadId) {
+                setUploadProgress(progress);
+              }
+            }
+          });
 
-      const result = await response.json();
+          xhr.addEventListener("load", () => {
+            if (xhr.status >= 200 && xhr.status < 300) {
+              try {
+                const response = JSON.parse(xhr.responseText);
+                resolve(response);
+              } catch (e) {
+                reject(new Error("Failed to parse response"));
+              }
+            } else {
+              // 🛡️ ERROR HANDLING: Wrap XHR error to match handleError utility
+              reject({
+                response: {
+                  status: xhr.status,
+                  statusText: xhr.statusText,
+                  headers: {
+                    get: (name: string) => xhr.getResponseHeader(name),
+                    "x-correlation-id": xhr.getResponseHeader("x-correlation-id"),
+                  },
+                  text: () => Promise.resolve(xhr.responseText),
+                  json: () => {
+                    try {
+                      return Promise.resolve(JSON.parse(xhr.responseText));
+                    } catch {
+                      return Promise.resolve({});
+                    }
+                  },
+                },
+              });
+            }
+          });
+
+          xhr.addEventListener("error", () => reject(new Error("Network Error")));
+          xhr.addEventListener("abort", () => reject({ name: "AbortError" }));
+
+          xhr.open("POST", `${BACKEND_URL}/assets/upload`);
+          xhr.setRequestHeader("X-Correlation-ID", correlationId);
+          if (token) {
+            xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+          }
+          xhr.send(formData);
+
+          controller.signal.addEventListener("abort", () => xhr.abort());
+        }
+      );
+
+      const result = await promise;
 
       // 🛡️ RACE GUARD: Only execute callback if this is still the active upload (Mandate Review #9)
       if (uploadIdRef.current === currentUploadId) {
         onUploadSuccess(result.data.url, result.data.publicId);
         setUploadComplete(true);
+        setUploadProgress(100);
         open?.({
           type: "success" as any,
           message: t("common.upload.success"),
         });
       }
-    } catch (error: unknown) {
-      if ((error as Error).name === "AbortError") return;
+    } catch (err: unknown) {
+      const error = err as any;
+      if (error.name === "AbortError" || error.message === "AbortError") return;
 
       // 🛡️ RACE GUARD: If a newer upload was started, ignore this error (Mandate Review #9)
       if (uploadIdRef.current !== currentUploadId) return;
 
       console.error("Upload Error:", error);
 
-      // 🛡️ TRACEABILITY: Use meta field for correlation ID extraction (Mandate Review #8)
-      // Mandate Review #9: Fallback to local correlationId if extraction fails (e.g. network error)
-      const errorCorrelationId = getCorrelationId(error) || correlationId;
+      // 🛡️ TRACEABILITY: Use handleError to normalize errors from XHR/Fetch
+      const normalizedError = await handleError(error);
+      const errorCorrelationId = normalizedError.meta?.correlationId || correlationId;
 
       open?.({
         type: "error",
-        message: (error as Error).message || t("common.upload.error"),
+        message: normalizedError.message || t("common.upload.error"),
         meta: { correlationId: errorCorrelationId },
       } as any);
     } finally {
+      // 🛡️ RACE GUARD: Only reset loading state if this is still the active upload
       if (uploadIdRef.current === currentUploadId) {
         setIsUploading(false);
       }
@@ -257,35 +311,51 @@ export const FileUpload: React.FC<FileUploadProps> = ({
             </Button>
           </div>
 
-          <div className="flex justify-end pt-2 border-t mt-1">
-            {!uploadComplete ? (
-              <Button
-                size="sm"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleUpload();
-                }}
-                disabled={isUploading}
-                className="w-full sm:w-auto min-w-[100px]"
-              >
-                {isUploading ? (
-                  <>
-                    <Loader2 className="me-2 h-4 w-4 animate-spin" />
-                    {t("buttons.uploading")}
-                  </>
-                ) : (
-                  <>
-                    <Upload className="me-2 h-4 w-4" />
-                    {t("common.upload.label")}
-                  </>
-                )}
-              </Button>
-            ) : (
-              <div className="flex items-center gap-2 text-green-600 text-sm font-medium w-full justify-end bg-green-50/50 dark:bg-green-900/10 p-2 rounded">
-                <CheckCircle2 className="h-4 w-4" />
-                {t("common.upload.uploaded")}
+          <div className="flex flex-col gap-2 pt-2 border-t mt-1">
+            {isUploading && (
+              <div className="w-full space-y-1">
+                <div className="flex justify-between text-[10px] text-muted-foreground uppercase font-black tracking-tighter">
+                  <span>{t("common.upload.progress", "Uploading...")}</span>
+                  <span>{uploadProgress}%</span>
+                </div>
+                <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-primary transition-all duration-300 ease-out"
+                    style={{ width: `${uploadProgress}%` }}
+                  />
+                </div>
               </div>
             )}
+            <div className="flex justify-end">
+              {!uploadComplete ? (
+                <Button
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleUpload();
+                  }}
+                  disabled={isUploading}
+                  className="w-full sm:w-auto min-w-[100px]"
+                >
+                  {isUploading ? (
+                    <>
+                      <Loader2 className="me-2 h-4 w-4 animate-spin" />
+                      {t("buttons.uploading")}
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="me-2 h-4 w-4" />
+                      {t("common.upload.label")}
+                    </>
+                  )}
+                </Button>
+              ) : (
+                <div className="flex items-center gap-2 text-green-600 text-sm font-medium w-full justify-end bg-green-50/50 dark:bg-green-900/10 p-2 rounded">
+                  <CheckCircle2 className="h-4 w-4" />
+                  {t("common.upload.uploaded")}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}

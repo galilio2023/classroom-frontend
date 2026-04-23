@@ -8,9 +8,28 @@ import { createCorrelationId } from "@/lib/traceability";
 import { pruneExpiredJobs } from "@/providers/utils/job-manager";
 import { offlineDB, BackgroundJobRecord } from "@/lib/offline-db";
 import { getAuthToken } from "@/lib/auth-helper";
-import { BrainCircuit } from "lucide-react";
+import { BrainCircuit, Sparkles } from "lucide-react";
 
 export type BackgroundJob = BackgroundJobRecord;
+
+// 🛡️ VISUAL IDENTIFIERS: Map job types to mandated icons with premium gradients (Mandate Review #9)
+const getJobIcon = (type: string) => {
+  const generativeTypes = [
+    "magic_builder",
+    "quiz_generation",
+    "assignment_generation",
+    "bio_generation",
+  ];
+
+  const isGenerative = generativeTypes.includes(type);
+  const Icon = isGenerative ? Sparkles : BrainCircuit;
+
+  return (
+    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-ai-primary-gradient shadow-glow">
+      <Icon className="h-3.5 w-3.5 text-white" />
+    </div>
+  );
+};
 
 interface JobCompletedEvent {
   jobId: string;
@@ -97,17 +116,15 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       isSyncingRef.current = true;
       const minCreatedAt = Math.min(...processingJobs.map((j) => j.createdAt));
       const token = getAuthToken();
+      const sinceParam = encodeURIComponent(new Date(minCreatedAt).toISOString());
 
-      const response = await fetch(
-        `${BACKEND_URL}/ai/jobs/sync?since=${new Date(minCreatedAt).toISOString()}`,
-        {
-          signal: controller.signal,
-          headers: {
-            "X-Correlation-ID": correlationId,
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          },
-        }
-      );
+      const response = await fetch(`${BACKEND_URL}/ai/jobs/sync?since=${sinceParam}`, {
+        signal: controller.signal,
+        headers: {
+          "X-Correlation-ID": correlationId,
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      });
 
       if (!response.ok) {
         throw await handleError(response);
@@ -120,10 +137,17 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const newlyFinished = updatedJobs.filter((u) => u.status !== "processing");
       if (newlyFinished.length > 1) {
         open?.({
-          type: "info" as any,
+          type: "info",
           message: t("ai.jobs.multiple_completed", { count: newlyFinished.length }),
           description: t("ai.jobs.check_dashboard"),
-        });
+          meta: {
+            icon: (
+              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-ai-primary-gradient shadow-glow">
+                <BrainCircuit className="h-3.5 w-3.5 text-white" />
+              </div>
+            ),
+          },
+        } as any);
       }
 
       const nextJobs = jobsRef.current.map((job) => {
@@ -136,10 +160,13 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           ) {
             const translationKey = `ai.jobs.${job.type}.${update.status}`;
             open?.({
-              type: (update.status === "completed" ? "success" : "error") as any,
+              type: update.status === "completed" ? "success" : "error",
               message: t(translationKey as any),
               description: job.title,
-            });
+              meta: {
+                icon: getJobIcon(job.type),
+              },
+            } as any);
           }
           return { ...job, ...update, retryCount: 0 };
         }
@@ -266,14 +293,17 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       void scheduleNext(0);
 
       open?.({
-        type: "info" as any,
+        type: "info",
         message: t("ai.jobs.queued_title", { defaultValue: "Processing in background" }),
         description: isSafeMode
           ? t("ai.jobs.queued_safe_mode_desc", {
               defaultValue: "System load is high. This may take longer than usual.",
             })
           : t("ai.jobs.queued_desc", { defaultValue: "We'll notify you when it's ready." }),
-      });
+        meta: {
+          icon: getJobIcon(newJob.type),
+        },
+      } as any);
     },
     [isSafeMode, open, t, scheduleNext]
   );
@@ -342,7 +372,7 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     if (isSafeMode) {
       open?.({
-        type: "warning" as any,
+        type: "warning",
         message: t("ai.governance.safe_mode_active", "System Load is High"),
         description: t(
           "ai.governance.safe_mode_desc",
@@ -383,6 +413,15 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, []);
 
   useEffect(() => {
+    const handleRetryEvent = (e: any) => {
+      const retryAfter = e.detail?.retryAfter;
+      void scheduleNext(0, retryAfter);
+    };
+    window.addEventListener("tablawy:retry_job_sync" as any, handleRetryEvent);
+    return () => window.removeEventListener("tablawy:retry_job_sync" as any, handleRetryEvent);
+  }, [scheduleNext]);
+
+  useEffect(() => {
     scheduleNext();
     return () => {
       if (timeoutIdRef.current) {
@@ -406,10 +445,13 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         updateJob(targetJob.id, updates);
         void offlineDB.background_jobs.update(targetJob.id, updates);
         open?.({
-          type: (data.status === "completed" ? "success" : "error") as any,
+          type: data.status === "completed" ? "success" : "error",
           message: t(`ai.jobs.${targetJob.type}.${data.status}` as any),
           description: targetJob.title,
-        });
+          meta: {
+            icon: getJobIcon(targetJob.type),
+          },
+        } as any);
       }
     };
 
