@@ -61,6 +61,8 @@ src/
     ```
     VITE_API_URL=http://localhost:8000/api
     VITE_SOCKET_URL=http://localhost:8000
+    # Required for Rural Resilience (Resumable Uploads)
+    VITE_TUS_ENDPOINT=http://localhost:8000/api/upload/resumable
     ```
 3.  **Run:**
     ```bash

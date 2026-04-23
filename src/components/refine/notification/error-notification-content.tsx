@@ -1,6 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { ChevronDown, Copy, Check } from "lucide-react";
+import { ChevronDown, Copy, Check, WifiOff } from "lucide-react";
 import { redactSensitiveData } from "@/lib/security";
 import { cn } from "@/lib/utils";
 
@@ -42,14 +42,6 @@ export const ErrorNotificationContent: React.FC<ErrorNotificationContentProps> =
           aria-expanded={isOpen}
           aria-controls="support-info-content"
           aria-label={t("labels.toggleSupportInfo", "Toggle technical support details")}
-          role="button"
-          tabIndex={0}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") {
-              e.preventDefault();
-              (e.target as HTMLElement).click();
-            }
-          }}
           onClick={(e) => {
             // Prevent toast from dismissing when interacting with accordion
             e.stopPropagation();
@@ -69,6 +61,7 @@ export const ErrorNotificationContent: React.FC<ErrorNotificationContentProps> =
         >
           {typeof navigator !== "undefined" && !navigator.onLine ? (
             <div className="text-destructive font-bold flex items-center gap-1.5 uppercase tracking-widest text-[8px]">
+              <WifiOff className="h-3 w-3" />
               {t("common.notifications.offline", "Please check your network connection")}
             </div>
           ) : (
@@ -90,47 +83,57 @@ export const ErrorNotificationContent: React.FC<ErrorNotificationContentProps> =
                 </div>
               )}
               <div className="mt-2 flex justify-end">
-                <button
-                  className="px-2 py-1 bg-primary/10 hover:bg-primary/20 rounded transition-colors text-[9px] border border-primary/20 font-sans flex items-center gap-1.5"
-                  aria-label={t(
-                    "ai.notifications.copyCorrelationId",
-                    "Copy correlation ID for support"
-                  )}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (displayId === "N/A") return;
+                {typeof window !== "undefined" && !window.isSecureContext && displayId !== "N/A" ? (
+                  <input
+                    type="text"
+                    readOnly
+                    value={displayId}
+                    className="px-2 py-1 bg-primary/10 rounded transition-colors text-[9px] border border-primary/20 font-mono w-full outline-none focus:ring-1 focus:ring-primary cursor-text"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      (e.target as HTMLInputElement).select();
+                    }}
+                    title={t("common.notifications.manualCopy", "Manual copy required in non-secure contexts")}
+                  />
+                ) : (
+                  <button
+                    className="px-2 py-1 bg-primary/10 hover:bg-primary/20 rounded transition-colors text-[9px] border border-primary/20 font-sans flex items-center gap-1.5"
+                    aria-label={t(
+                      "common.notifications.copyCorrelationId",
+                      "Copy correlation ID for support"
+                    )}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (displayId === "N/A") return;
 
-                    const performCopy = async () => {
-                      try {
-                        if (window.isSecureContext && navigator.clipboard) {
-                          await navigator.clipboard.writeText(displayId);
-                          setCopied(true);
-                          setTimeout(() => setCopied(false), 2000);
-                        } else {
-                          console.warn(
-                            "Clipboard API not available in non-secure context. Manual copy required."
-                          );
+                      const performCopy = async () => {
+                        try {
+                          if (window.isSecureContext && navigator.clipboard) {
+                            await navigator.clipboard.writeText(displayId);
+                            setCopied(true);
+                            setTimeout(() => setCopied(false), 2000);
+                          }
+                        } catch (err) {
+                          console.error("Failed to copy ID", err);
                         }
-                      } catch (err) {
-                        console.error("Failed to copy ID", err);
-                      }
-                    };
+                      };
 
-                    void performCopy();
-                  }}
-                >
-                  {copied ? (
-                    <>
-                      <Check className="h-2.5 w-2.5" />
-                      {t("common.notifications.copied", "Copied")}
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="h-2.5 w-2.5" />
-                      {t("common.notifications.copyId", "Copy ID")}
-                    </>
-                  )}
-                </button>
+                      void performCopy();
+                    }}
+                  >
+                    {copied ? (
+                      <>
+                        <Check className="h-2.5 w-2.5" />
+                        {t("common.notifications.copied", "Copied")}
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="h-2.5 w-2.5" />
+                        {t("common.notifications.copyId", "Copy ID")}
+                      </>
+                    )}
+                  </button>
+                )}
               </div>
             </>
           )}
