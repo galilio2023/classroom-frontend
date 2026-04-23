@@ -107,7 +107,9 @@ export const ErrorNotificationContent: React.FC<ErrorNotificationContentProps> =
                           setCopied(true);
                           setTimeout(() => setCopied(false), 2000);
                         } else {
-                          console.warn("Clipboard API not available in non-secure context. Manual copy required.");
+                          console.warn(
+                            "Clipboard API not available in non-secure context. Manual copy required."
+                          );
                         }
                       } catch (err) {
                         console.error("Failed to copy ID", err);

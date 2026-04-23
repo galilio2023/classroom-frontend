@@ -2,6 +2,7 @@ import { useState, useCallback, useRef } from "react";
 import * as tus from "tus-js-client";
 import { TUS_ENDPOINT } from "@/config";
 import { getAuthToken } from "@/lib/auth-helper";
+import { calculateBackoff } from "@/lib/jitter";
 
 /**
  * 🛰️ CUSTOM HOOK: useTusUpload
@@ -43,7 +44,7 @@ export const useTusUpload = () => {
         endpoint: TUS_ENDPOINT,
         // 🛡️ Mandate Review #12: Full Jitter for Rural Resilience (Thundering Herd prevention)
         // Formula: random(0, min(cap, base * 2^attempt))
-        retryDelays: [1000, 3000, 7000, 15000, 31000].map((base) => Math.random() * base),
+        retryDelays: [0, 1, 2, 3, 4].map((attempt) => calculateBackoff(attempt, 1000, 31000)),
         removeFingerprintOnSuccess: true,
         headers: {
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
