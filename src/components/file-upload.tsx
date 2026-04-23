@@ -1,15 +1,15 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useTablawyNotification } from "@/hooks/use-tablawy-notification";
 import { Button } from "./ui/button";
 import {} from "./ui/input";
 import { Label } from "./ui/label";
-import { Loader2, Upload, File as FileIcon, X, CheckCircle2 } from "lucide-react";
-import { BACKEND_URL, MAX_SYNC_UPLOAD_SIZE_MB, STORAGE_KEYS } from "@/config";
+import { Loader2, Upload, File as FileIcon, X, CheckCircle2, Wifi, Zap } from "lucide-react";
+import { BACKEND_URL, MAX_SYNC_UPLOAD_SIZE_MB } from "@/config";
 import { useTranslation } from "react-i18next";
-import { handleError, getCorrelationId } from "@/providers/utils/api-errors";
+import { handleError } from "@/providers/utils/api-errors";
 import { createCorrelationId } from "@/lib/traceability";
 import { mbToBytes, bytesToMb, isFileTypeAllowed } from "@/lib/utils";
-import { requestWithProgress } from "@/lib/api-utils";
+import { calculateETA, requestWithProgress } from "@/lib/api-utils";
 import { getAuthToken } from "@/lib/auth-helper";
 
 import { useTusUpload } from "@/hooks/use-tus-upload";
@@ -38,7 +38,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     startUpload: startTusUpload,
     abortUpload: abortTusUpload,
     progress: tusProgress,
-    isUploading: isTusUploading,
+    status: tusStatus,
     uploadUrl: tusUrl,
     tusPublicId,
   } = useTusUpload();
@@ -55,38 +55,31 @@ export const FileUpload: React.FC<FileUploadProps> = ({
 
   // 🛡️ TUS PROGRESS SYNC & DURATION CALCULATION
   useEffect(() => {
-    if (isTusUploading) {
+    if (tusStatus === "uploading") {
       setUploadProgress(tusProgress);
 
-      if (uploadStartTimeRef.current && tusProgress > 0) {
-        const elapsed = (Date.now() - uploadStartTimeRef.current) / 1000;
-        const totalEstimated = elapsed / (tusProgress / 100);
-        const remaining = Math.max(0, totalEstimated - elapsed);
-
-        if (remaining > 60) {
-          setTimeRemaining(`${Math.ceil(remaining / 60)}m left`);
-        } else {
-          setTimeRemaining(`${Math.ceil(remaining)}s left`);
-        }
+      if (uploadStartTimeRef.current) {
+        const eta = calculateETA(uploadStartTimeRef.current, tusProgress);
+        setTimeRemaining(eta);
       }
     }
-  }, [tusProgress, isTusUploading]);
+  }, [tusProgress, tusStatus]);
 
   // 🛡️ TUS SUCCESS SYNC
   useEffect(() => {
-    if (tusUrl && isUploading && isTusUploading === false && !uploadComplete) {
+    if (tusStatus === "success" && tusUrl && isUploading && !uploadComplete) {
       // 🛡️ Mandate Review #13: Real identity from TUS response (Hook handles extraction)
       const publicId = tusPublicId || "tus-upload";
       onUploadSuccess(tusUrl, publicId);
       setUploadComplete(true);
       setUploadProgress(100);
       setIsUploading(false);
-      open?.({
+      open({
         type: "success",
         message: t("common.upload.success", "Resumable upload successful"),
       });
     }
-  }, [tusUrl, tusPublicId, isUploading, isTusUploading, uploadComplete, onUploadSuccess, t, open]);
+  }, [tusStatus, tusUrl, tusPublicId, isUploading, uploadComplete, onUploadSuccess, t, open]);
 
   // 🛡️ CLEANUP: Ensure any pending upload is aborted on unmount
   useEffect(() => {
@@ -98,26 +91,24 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     };
   }, [abortTusUpload]);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const selectedFile = e.target.files[0];
 
-      // 🛡️ SECURITY: Strict file type validation (Mandate Review #9)
-      if (!isFileTypeAllowed(selectedFile, accept)) {
-        open?.({
+      // 🛡️ SECURITY: Deep check file type validation (Mandate Review #13)
+      const isAllowed = await isFileTypeAllowed(selectedFile, accept);
+      if (!isAllowed) {
+        open({
           type: "error",
           message: t("common.upload.invalidType", "Invalid file type"),
-          description: t("common.upload.invalidTypeDesc", {
-            accept,
-            defaultValue: `Accepted formats: ${accept}`,
-          }),
+          description: t("common.upload.invalidTypeDesc", "This file format is not permitted."),
         });
         if (fileInputRef.current) fileInputRef.current.value = "";
         return;
       }
 
       if (selectedFile.size > maxSize) {
-        open?.({
+        open({
           type: "error",
           message: t("common.upload.tooLarge"),
           description: t("common.upload.tooLargeDesc", {
@@ -130,7 +121,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
 
       // 🛡️ RURAL RESILIENCE: Warn about large files on potentially slow networks
       if (selectedFile.size > mbToBytes(MAX_SYNC_UPLOAD_SIZE_MB)) {
-        open?.({
+        open({
           type: "warning",
           message: t("common.upload.largeFileWarning", "Large file detected"),
           description: t(
@@ -143,21 +134,20 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       setFile(selectedFile);
       setUploadComplete(false);
       setUploadProgress(0);
+      setTimeRemaining(null);
     }
   };
 
   const handleUpload = async () => {
-    if (!file) return;
+    if (!file || isUploading) return;
 
+    // 🛡️ Mandate Review #13: Synchronous block for Controller + ID
     const currentUploadId = crypto.randomUUID();
-    uploadIdRef.current = currentUploadId;
-
-    // 🛡️ CLEANUP: Cancel previous request if still pending
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
     const controller = new AbortController();
+    
+    uploadIdRef.current = currentUploadId;
     abortControllerRef.current = controller;
+    uploadStartTimeRef.current = Date.now();
 
     setIsUploading(true);
     setUploadProgress(0);
@@ -166,31 +156,16 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     formData.append("file", file);
     formData.append("folder", folder);
 
-    // 🛡️ TRACEABILITY: Use standardized utility for correlation IDs (Mandate Review #8)
     const correlationId = createCorrelationId("upload");
 
     try {
-      // 🚀 RURAL RESILIENCE: Use TUS for resumable uploads if file is > 5MB (Mandate Review #12)
+      // 🚀 RURAL RESILIENCE (Review #13): Use TUS for resumable uploads > 5MB
       if (file.size > mbToBytes(UPLOAD_CONSTANTS.TUS_RESUMABLE_THRESHOLD_MB)) {
-        const tusResult = await startTusUpload(file, { folder, correlationId });
-        // TUS client returns once upload is finished
-        if (uploadIdRef.current === currentUploadId) {
-          // Note: TUS server response would need to return publicId in metadata or via separate fetch
-          // For now, mapping TUS success to standard callback
-          onUploadSuccess(tusResult.url!, "tus-public-id");
-          setUploadComplete(true);
-          setUploadProgress(100);
-          open?.({
-            type: "success",
-            message: t("common.upload.success", "Resumable upload successful"),
-          });
-        }
-        return;
+        startTusUpload(file, { folder, correlationId });
+        return; // Success effect will complete the flow
       }
 
       const token = getAuthToken();
-
-      // 🚀 RURAL RESILIENCE: Use requestWithProgress for percentage-based feedback (Mandate Review #11)
       const result = await requestWithProgress<{ data: { url: string; publicId: string } }>({
         url: `${BACKEND_URL}/assets/upload`,
         method: "POST",
@@ -207,12 +182,12 @@ export const FileUpload: React.FC<FileUploadProps> = ({
         },
       });
 
-      // 🛡️ RACE GUARD: Only execute callback if this is still the active upload (Mandate Review #9)
       if (uploadIdRef.current === currentUploadId) {
         onUploadSuccess(result.data.url, result.data.publicId);
         setUploadComplete(true);
         setUploadProgress(100);
-        open?.({
+        setIsUploading(false);
+        open({
           type: "success",
           message: t("common.upload.success", "Upload successful"),
         });
@@ -220,41 +195,32 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     } catch (err: unknown) {
       if (err instanceof Error && (err.name === "AbortError" || err.message === "AbortError"))
         return;
-
-      // 🛡️ RACE GUARD: If a newer upload was started, ignore this error (Mandate Review #9)
       if (uploadIdRef.current !== currentUploadId) return;
 
       console.error("Upload Error:", err);
 
-      // 🛡️ TRACEABILITY: Use handleError to normalize errors from XHR/Fetch
       const normalizedError = await handleError(err);
       const errorCorrelationId = (normalizedError as any).meta?.correlationId || correlationId;
 
-      open?.({
+      open({
         type: "error",
         message: normalizedError.message || t("common.upload.error", "Failed to upload file"),
         meta: { correlationId: errorCorrelationId },
       });
     } finally {
-      // 🛡️ RACE GUARD: Reset loading state ONLY if we are still the active upload
-      // and not in TUS mode (TUS handles its own async completion via effects)
-      if (uploadIdRef.current === currentUploadId) {
+      // 🛡️ RACE GUARD (Review #13): Atomic check for ID or Null
+      if (uploadIdRef.current === currentUploadId || uploadIdRef.current === null) {
         if (file.size <= mbToBytes(UPLOAD_CONSTANTS.TUS_RESUMABLE_THRESHOLD_MB)) {
           setIsUploading(false);
         }
-      } else if (uploadIdRef.current === null) {
-        // If the upload was cleared manually, always stop the spinner
-        setIsUploading(false);
       }
-
       if (abortControllerRef.current === controller) {
         abortControllerRef.current = null;
       }
     }
   };
 
-  const clearFile = () => {
-    // 🛡️ CLEANUP: Abort any active upload request and reset ID (Mandate Review #9)
+  const clearFile = useCallback(() => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
       abortControllerRef.current = null;
@@ -262,9 +228,8 @@ export const FileUpload: React.FC<FileUploadProps> = ({
 
     abortTusUpload();
 
-    // 🛡️ UX: Inform the user that the upload was cancelled (Mandate Review #12)
     if (isUploading) {
-      open?.({
+      open({
         type: "info",
         message: t("common.upload.cancelled", "Upload cancelled"),
       });
@@ -277,13 +242,15 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     setTimeRemaining(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
     onClear?.();
-  };
+  }, [isUploading, abortTusUpload, open, t, onClear]);
 
   const handleContainerClick = () => {
     if (!isUploading && !file) {
       fileInputRef.current?.click();
     }
   };
+
+  const isResumable = file && file.size > mbToBytes(UPLOAD_CONSTANTS.TUS_RESUMABLE_THRESHOLD_MB);
 
   return (
     <div className="space-y-3 w-full">
@@ -312,19 +279,29 @@ export const FileUpload: React.FC<FileUploadProps> = ({
           </p>
         </div>
       ) : (
-        <div className="flex flex-col gap-3 p-4 border rounded-lg bg-background shadow-sm">
+        <div className="flex flex-col gap-3 p-4 border rounded-lg bg-background shadow-sm overflow-hidden">
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-center gap-3 min-w-0">
-              <div className="p-2 bg-primary/10 rounded-md shrink-0">
+              <div className="p-2 bg-primary/10 rounded-md shrink-0 relative">
                 <FileIcon className="h-5 w-5 text-primary" />
+                {isResumable && (
+                  <Zap className="h-3 w-3 text-amber-500 absolute -top-1 -right-1 fill-amber-500" />
+                )}
               </div>
               <div className="flex flex-col min-w-0">
                 <span className="text-sm font-medium truncate max-w-50 sm:max-w-xs block">
                   {file.name}
                 </span>
-                <span className="text-xs text-muted-foreground">
-                  {bytesToMb(file.size).toFixed(2)} MB
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground">
+                    {bytesToMb(file.size).toFixed(2)} MB
+                  </span>
+                  {isResumable && (
+                    <span className="flex items-center gap-1 text-[10px] bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wider">
+                      <Wifi className="h-2 w-2" /> Resumable
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -363,6 +340,11 @@ export const FileUpload: React.FC<FileUploadProps> = ({
                     aria-valuenow={uploadProgress}
                     aria-valuemin={0}
                     aria-valuemax={100}
+                    aria-valuetext={
+                      timeRemaining
+                        ? `${Math.round(uploadProgress)}%, ${timeRemaining}`
+                        : `${Math.round(uploadProgress)}%`
+                    }
                   />
                 </div>
               </div>
@@ -381,7 +363,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
                   {isUploading ? (
                     <>
                       <Loader2 className="me-2 h-4 w-4 animate-spin" />
-                      {t("buttons.uploading")}
+                      {tusStatus === "uploading" ? t("buttons.resuming", "Resuming...") : t("buttons.uploading")}
                     </>
                   ) : (
                     <>

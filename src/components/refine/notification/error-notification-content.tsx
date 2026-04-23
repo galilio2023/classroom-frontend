@@ -2,6 +2,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { ChevronDown, Copy, Check } from "lucide-react";
 import { redactSensitiveData } from "@/lib/security";
+import { cn } from "@/lib/utils";
 
 interface ErrorNotificationContentProps {
   description?: React.ReactNode;
@@ -22,6 +23,8 @@ export const ErrorNotificationContent: React.FC<ErrorNotificationContentProps> =
   const { t } = useTranslation();
   const [copied, setCopied] = React.useState(false);
 
+  const [isOpen, setIsOpen] = React.useState(false);
+
   if (!correlationId) return <>{description}</>;
 
   return (
@@ -29,20 +32,34 @@ export const ErrorNotificationContent: React.FC<ErrorNotificationContentProps> =
       <div className="text-sm">
         {description || t("common.errors.unexpected", "An unexpected error occurred.")}
       </div>
-      <details className="text-[10px] opacity-70 cursor-pointer group">
+      <details
+        className="text-[10px] opacity-70 cursor-pointer group"
+        onToggle={(e) => setIsOpen((e.target as HTMLDetailsElement).open)}
+      >
         <summary
           className="hover:underline font-medium list-none flex items-center gap-1"
+          aria-expanded={isOpen}
+          aria-controls="support-info-content"
+          role="button"
           onClick={(e) => {
             // Prevent toast from dismissing when interacting with accordion
             e.stopPropagation();
           }}
         >
-          <span className="group-open:rotate-90 transition-transform duration-200">▶</span>
+          <ChevronDown
+            className={cn(
+              "h-3 w-3 transition-transform duration-200",
+              isOpen ? "rotate-180" : ""
+            )}
+          />
           {t("common.labels.supportInfo", "Support Info")}
         </summary>
         <div
+          id="support-info-content"
           className="mt-1 p-2 bg-muted/50 rounded border border-border font-mono break-all select-all leading-tight"
           onClick={(e) => e.stopPropagation()}
+          role="region"
+          aria-label={t("common.labels.technicalDetails", "Technical support details")}
         >
           ID: {correlationId}
           {meta && Object.keys(meta).length > 1 && (

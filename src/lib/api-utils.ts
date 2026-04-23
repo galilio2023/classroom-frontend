@@ -1,6 +1,20 @@
 import { calculateBackoff } from "./jitter";
 
 /**
+ * 🛠️ UI UTILITY: calculateETA
+ * Mandate Review #13: Standardized ETA calculation for slow connections.
+ */
+export const calculateETA = (startTime: number, progress: number): string | null => {
+  if (progress <= 0 || progress >= 100) return null;
+  const elapsed = (Date.now() - startTime) / 1000;
+  const totalEstimated = elapsed / (progress / 100);
+  const remaining = Math.max(0, totalEstimated - elapsed);
+
+  if (remaining > 60) return `${Math.ceil(remaining / 60)}m left`;
+  return `${Math.ceil(remaining)}s left`;
+};
+
+/**
  * 🛡️ RESILIENCE: Standard fetch wrapper with exponential backoff and jitter.
  * Mandate Review #8: Prevents 'thundering herds' on unstable rural networks.
  */

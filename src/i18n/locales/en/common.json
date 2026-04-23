@@ -1908,8 +1908,18 @@
     "invalidEmail": "Invalid email address",
     "schoolNameRequired": "School name and slug are required."
   },
+  "ai": {
+    "notifications": {
+      "idCopied": "Correlation ID copied to clipboard",
+      "copyCorrelationId": "Copy correlation ID for support",
+      "copyId": "Copy ID",
+      "copied": "Copied"
+    }
+  },
   "labels": {
-    "supportInfo": "Support Info"
+    "supportInfo": "Support Info",
+    "technicalDetails": "Technical support details",
+    "technicalInfo": "Technical Info"
   },
   "schools": {
     "setup": {

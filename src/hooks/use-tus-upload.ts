@@ -7,10 +7,11 @@ import { BACKEND_URL } from "@/config";
  * Mandate Review #12: Resumable upload client for files > 5MB.
  * Ensures reliability in rural areas with poor connectivity.
  */
+export type TusStatus = "idle" | "uploading" | "success" | "error";
+
 export const useTusUpload = () => {
   const [progress, setProgress] = useState(0);
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadComplete, setUploadComplete] = useState(false);
+  const [status, setStatus] = useState<TusStatus>("idle");
   const [error, setError] = useState<Error | null>(null);
   const [uploadUrl, setUploadUrl] = useState<string | null>(null);
   const [tusPublicId, setTusPublicId] = useState<string | null>(null);
@@ -21,21 +22,19 @@ export const useTusUpload = () => {
     if (uploadRef.current) {
       uploadRef.current.abort();
       uploadRef.current = null;
-      setIsUploading(false);
+      setStatus("idle");
     }
   }, []);
 
   const startUpload = useCallback(
     (file: File, metadata: Record<string, string> = {}) => {
-      setIsUploading(true);
+      setStatus("uploading");
       setError(null);
       setProgress(0);
 
       const upload = new tus.Upload(file, {
         endpoint: `${BACKEND_URL}/api/upload/resumable`,
         retryDelays: [0, 3000, 5000, 10000, 20000],
-        // 🛡️ Mandate Review #13: Enhanced Resilience for Rural Mobile Users
-        // Automatically resume when network connection returns.
         removeFingerprintOnSuccess: true,
         metadata: {
           filename: file.name,
@@ -44,7 +43,7 @@ export const useTusUpload = () => {
         },
         onError: (err) => {
           setError(err);
-          setIsUploading(false);
+          setStatus("error");
         },
         onProgress: (bytesUploaded, bytesTotal) => {
           const percentage = (bytesUploaded / bytesTotal) * 100;
@@ -52,11 +51,11 @@ export const useTusUpload = () => {
         },
         onSuccess: () => {
           setUploadUrl(upload.url);
-          // 🛡️ Mandate Review #13: Extract ID from TUS metadata or instance
-          // In our backend, the TUS ID is the public reference.
-          setTusPublicId(upload.url?.split("/").pop() || null);
-          setUploadComplete(true);
-          setIsUploading(false);
+          // 🛡️ Mandate Review #13: Extract storage identity from response headers
+          // Fallback to the unique TUS resource ID from the URL.
+          const resourceId = upload.url?.split("/").pop();
+          setTusPublicId(resourceId || null);
+          setStatus("success");
         },
       });
 
@@ -64,7 +63,7 @@ export const useTusUpload = () => {
 
       // 📡 NETWORK RESILIENCE: Listen for online events to resume
       const resumeHandler = () => {
-        if (isUploading && !uploadComplete) {
+        if (status === "uploading") {
           console.log("🌐 Network returned. Resuming TUS upload...");
           upload.start();
         }
@@ -74,15 +73,14 @@ export const useTusUpload = () => {
       upload.start();
       return upload;
     },
-    [isUploading]
-  ); // Note: In a real component, you'd clean up the event listener.
+    [status]
+  );
 
   return {
     startUpload,
     abortUpload,
     progress,
-    isUploading,
-    uploadComplete,
+    status,
     error,
     uploadUrl,
     tusPublicId,

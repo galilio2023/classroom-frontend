@@ -1876,6 +1876,7 @@
     },
     "notifications": {
       "idCopied": "تم نسخ معرف الارتباط إلى الحافظة",
+      "copyCorrelationId": "نسخ معرف الارتباط للدعم",
       "copyId": "نسخ المعرف",
       "copied": "تم النسخ"
     }
