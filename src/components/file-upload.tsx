@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { useNotification } from "@refinedev/core";
+import { useTablawyNotification } from "@/hooks/use-tablawy-notification";
 import { Button } from "./ui/button";
 import {} from "./ui/input";
 import { Label } from "./ui/label";
@@ -32,7 +32,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   maxSize = DEFAULT_MAX_FILE_SIZE,
 }) => {
   const { t } = useTranslation();
-  const { open } = useNotification();
+  const { open } = useTablawyNotification();
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadComplete, setUploadComplete] = useState(false);
@@ -83,9 +83,12 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       // 🛡️ RURAL RESILIENCE: Warn about large files on potentially slow networks
       if (selectedFile.size > mbToBytes(MAX_SYNC_UPLOAD_SIZE_MB)) {
         open?.({
-          type: "warning" as any,
-          message: t("common.upload.largeFileWarning"),
-          description: t("common.upload.largeFileWarningDesc"),
+          type: "warning",
+          message: t("common.upload.largeFileWarning", "Large file detected"),
+          description: t(
+            "common.upload.largeFileWarningDesc",
+            "This file is large and may take time to upload on slow connections."
+          ),
         });
       }
 
@@ -144,8 +147,8 @@ export const FileUpload: React.FC<FileUploadProps> = ({
         setUploadComplete(true);
         setUploadProgress(100);
         open?.({
-          type: "success" as any,
-          message: t("common.upload.success"),
+          type: "success",
+          message: t("common.upload.success", "Upload successful"),
         });
       }
     } catch (err: unknown) {
@@ -163,9 +166,9 @@ export const FileUpload: React.FC<FileUploadProps> = ({
 
       open?.({
         type: "error",
-        message: normalizedError.message || t("common.upload.error"),
+        message: normalizedError.message || t("common.upload.error", "Failed to upload file"),
         meta: { correlationId: errorCorrelationId },
-      } as any);
+      });
     } finally {
       // 🛡️ RACE GUARD: Only reset loading state if this is still the active upload (Mandate Review #11)
       if (uploadIdRef.current === currentUploadId) {

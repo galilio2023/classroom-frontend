@@ -44,3 +44,27 @@ export const SENSITIVE_DATA_KEYS = [
   "totp",
   "mfa_token",
 ];
+
+/**
+ * 🛡️ SECURITY: Recursive redaction utility for nested objects.
+ * Mandate Review #8: Ensures sensitive keys are removed even in deeply nested structures.
+ */
+export const redactSensitiveData = (data: any): any => {
+  if (!data || typeof data !== "object") return data;
+
+  if (Array.isArray(data)) {
+    return data.map((item) => redactSensitiveData(item));
+  }
+
+  const redacted: Record<string, any> = {};
+  for (const [key, value] of Object.entries(data)) {
+    if (SENSITIVE_DATA_KEYS.some((k) => key.toLowerCase().includes(k.toLowerCase()))) {
+      redacted[key] = "[REDACTED]";
+    } else if (typeof value === "object" && value !== null) {
+      redacted[key] = redactSensitiveData(value);
+    } else {
+      redacted[key] = value;
+    }
+  }
+  return redacted;
+};

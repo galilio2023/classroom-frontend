@@ -1,7 +1,7 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { SENSITIVE_DATA_KEYS } from "@/lib/security";
+import { redactSensitiveData } from "@/lib/security";
 
 interface ErrorNotificationContentProps {
   description?: React.ReactNode;
@@ -48,13 +48,11 @@ export const ErrorNotificationContent: React.FC<ErrorNotificationContentProps> =
             <div className="mt-1 border-t border-border/50 pt-1">
               Meta:{" "}
               {JSON.stringify(
-                {
+                redactSensitiveData({
                   ...meta,
                   correlationId: undefined,
                   traceId: undefined,
-                  // 🛡️ Mandate Review #11: Use centralized redaction list
-                  ...Object.fromEntries(SENSITIVE_DATA_KEYS.map((k) => [k, undefined])),
-                },
+                }),
                 null,
                 2
               )}
