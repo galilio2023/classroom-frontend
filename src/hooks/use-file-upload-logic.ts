@@ -232,33 +232,37 @@ export const useFileUploadLogic = ({
     try {
       // 🚀 HARDEN TUS FALLBACK (Priority 1)
       if (isResumable) {
-        try {
-          const token = getAuthToken();
-          // Quick pre-flight check if endpoint is reachable
-          const healthCheck = await fetch(TUS_ENDPOINT, {
-            method: "OPTIONS",
-            signal: controller.signal,
-            headers: {
-              ...(token ? { Authorization: `Bearer ${token}` } : {}),
-            },
-          });
-          if (!healthCheck.ok && healthCheck.status !== 405 && healthCheck.status !== 204) {
-            throw new Error("TUS endpoint unreachable");
+        if (!TUS_ENDPOINT) {
+          console.warn("⚠️ TUS_ENDPOINT not configured, falling back to standard upload.");
+        } else {
+          try {
+            const token = getAuthToken();
+            // Quick pre-flight check if endpoint is reachable
+            const healthCheck = await fetch(TUS_ENDPOINT, {
+              method: "OPTIONS",
+              signal: controller.signal,
+              headers: {
+                ...(token ? { Authorization: `Bearer ${token}` } : {}),
+              },
+            });
+            if (!healthCheck.ok && healthCheck.status !== 405 && healthCheck.status !== 204) {
+              throw new Error("TUS endpoint unreachable");
+            }
+
+            // 🛰️ RURAL HARDENING: Try to resume from persisted URL
+            const fingerprint = `${file.name}-${file.size}-${file.type}`;
+            const persistedUrl = localStorage.getItem(`tus-upload-${fingerprint}`);
+
+            startTusUpload(file, {
+              folder,
+              correlationId,
+              ...(persistedUrl ? { uploadUrl: persistedUrl } : {}),
+            });
+            return;
+          } catch (tusErr) {
+            console.warn("⚠️ TUS pre-flight failed, degrading to standard upload:", tusErr);
+            // Fall through to standard upload
           }
-
-          // 🛰️ RURAL HARDENING: Try to resume from persisted URL
-          const fingerprint = `${file.name}-${file.size}-${file.type}`;
-          const persistedUrl = localStorage.getItem(`tus-upload-${fingerprint}`);
-
-          startTusUpload(file, {
-            folder,
-            correlationId,
-            ...(persistedUrl ? { uploadUrl: persistedUrl } : {}),
-          });
-          return;
-        } catch (tusErr) {
-          console.warn("⚠️ TUS pre-flight failed, degrading to standard upload:", tusErr);
-          // Fall through to standard upload
         }
       }
 

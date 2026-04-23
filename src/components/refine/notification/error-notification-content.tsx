@@ -47,7 +47,7 @@ export const ErrorNotificationContent: React.FC<ErrorNotificationContentProps> =
           onKeyDown={(e) => {
             if (e.key === "Enter" || e.key === " ") {
               e.preventDefault();
-              setIsOpen(!isOpen);
+              (e.target as HTMLElement).click();
             }
           }}
           onClick={(e) => {
