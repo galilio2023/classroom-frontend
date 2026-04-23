@@ -154,6 +154,11 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   };
 
   const clearFile = () => {
+    // 🛡️ CLEANUP: Abort any active upload request (Mandate Review #9)
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
     setFile(null);
     setUploadComplete(false);
     if (fileInputRef.current) fileInputRef.current.value = "";

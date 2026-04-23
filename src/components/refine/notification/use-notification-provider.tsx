@@ -37,6 +37,14 @@ export interface TablawyOpenNotificationParams {
   };
 }
 
+const NOTIFICATION_DURATIONS = {
+  DEFAULT: 4000,
+  ERROR: 10000,
+  SUCCESS: 4000,
+  INFO: 4000,
+  WARNING: 6000,
+};
+
 /**
  * Refine Notification Provider using Sonner.
  * Optimized for the new Service Layer backend.
@@ -83,7 +91,7 @@ export function useNotificationProvider(): NotificationProvider {
             description
           ),
         richColors: true,
-        duration: type === "error" ? 10000 : 4000, // 🚀 UX: Longer duration for error analysis
+        duration: type === "error" ? NOTIFICATION_DURATIONS.ERROR : NOTIFICATION_DURATIONS.DEFAULT, // 🚀 UX: Longer duration for error analysis
         action: extraAction,
         icon: meta?.icon,
       };

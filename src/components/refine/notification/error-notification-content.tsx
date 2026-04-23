@@ -51,10 +51,14 @@ export const ErrorNotificationContent: React.FC<ErrorNotificationContentProps> =
                   ...meta,
                   correlationId: undefined,
                   traceId: undefined,
+                  // 🛡️ Mandate Review #9: Harden sensitive data redaction
                   token: undefined,
                   password: undefined,
                   secret: undefined,
                   key: undefined,
+                  ssn: undefined,
+                  creditCard: undefined,
+                  auth: undefined,
                 },
                 null,
                 2
@@ -64,7 +68,10 @@ export const ErrorNotificationContent: React.FC<ErrorNotificationContentProps> =
           <div className="mt-2 flex justify-end">
             <button
               className="px-2 py-1 bg-primary/10 hover:bg-primary/20 rounded transition-colors text-[9px]"
-              aria-label={t("common.notifications.copyCorrelationId", "Copy correlation ID")}
+              aria-label={t(
+                "common.notifications.copyCorrelationId",
+                "Copy correlation ID for support"
+              )}
               onClick={(e) => {
                 e.stopPropagation();
                 void navigator.clipboard.writeText(correlationId);
