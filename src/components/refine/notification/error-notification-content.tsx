@@ -82,8 +82,10 @@ export const ErrorNotificationContent: React.FC<ErrorNotificationContentProps> =
                       correlationId: undefined,
                       traceId: undefined,
                     });
-                    if (Object.keys(redactedMeta).length === 0) return null;
-                    return <>Meta: {JSON.stringify(redactedMeta, null, 2)}</>;
+                    if (Object.keys(redactedMeta).length > 0) {
+                      return <>Meta: {JSON.stringify(redactedMeta, null, 2)}</>;
+                    }
+                    return null;
                   })()}
                 </div>
               )}
@@ -105,19 +107,7 @@ export const ErrorNotificationContent: React.FC<ErrorNotificationContentProps> =
                           setCopied(true);
                           setTimeout(() => setCopied(false), 2000);
                         } else {
-                          // Fallback for non-secure contexts
-                          const textArea = document.createElement("textarea");
-                          textArea.value = displayId;
-                          document.body.appendChild(textArea);
-                          textArea.select();
-                          try {
-                            document.execCommand("copy");
-                            setCopied(true);
-                            setTimeout(() => setCopied(false), 2000);
-                          } catch (err) {
-                            console.error("Fallback copy failed", err);
-                          }
-                          document.body.removeChild(textArea);
+                          console.warn("Clipboard API not available in non-secure context. Manual copy required.");
                         }
                       } catch (err) {
                         console.error("Failed to copy ID", err);
