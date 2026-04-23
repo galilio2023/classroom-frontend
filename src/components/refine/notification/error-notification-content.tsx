@@ -1,6 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
+import { ChevronDown, Copy, Check } from "lucide-react";
 import { redactSensitiveData } from "@/lib/security";
 
 interface ErrorNotificationContentProps {
@@ -61,7 +61,7 @@ export const ErrorNotificationContent: React.FC<ErrorNotificationContentProps> =
           )}
           <div className="mt-2 flex justify-end">
             <button
-              className="px-2 py-1 bg-primary/10 hover:bg-primary/20 rounded transition-colors text-[9px] border border-primary/20 font-sans"
+              className="px-2 py-1 bg-primary/10 hover:bg-primary/20 rounded transition-colors text-[9px] border border-primary/20 font-sans flex items-center gap-1.5"
               aria-label={t(
                 "common.notifications.copyCorrelationId",
                 "Copy correlation ID for support"
@@ -73,7 +73,17 @@ export const ErrorNotificationContent: React.FC<ErrorNotificationContentProps> =
                 setTimeout(() => setCopied(false), 2000);
               }}
             >
-              {copied ? "✓ Copied" : "Copy ID"}
+              {copied ? (
+                <>
+                  <Check className="h-2.5 w-2.5" />
+                  {t("common.notifications.copied", "Copied")}
+                </>
+              ) : (
+                <>
+                  <Copy className="h-2.5 w-2.5" />
+                  {t("common.notifications.copyId", "Copy ID")}
+                </>
+              )}
             </button>
           </div>
         </div>

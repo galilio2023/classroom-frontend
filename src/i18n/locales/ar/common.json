@@ -1875,11 +1875,15 @@
       }
     },
     "notifications": {
-      "idCopied": "تم نسخ معرف الارتباط إلى الحافظة"
+      "idCopied": "تم نسخ معرف الارتباط إلى الحافظة",
+      "copyId": "نسخ المعرف",
+      "copied": "تم النسخ"
     }
   },
   "labels": {
-    "supportInfo": "معلومات الدعم"
+    "supportInfo": "معلومات الدعم",
+    "technicalDetails": "تفاصيل الدعم الفني",
+    "technicalInfo": "معلومات تقنية"
   },
   "schools": {
     "setup": {

@@ -110,8 +110,6 @@
   --color-ai-primary: var(--ai-primary);
   --color-ai-secondary: var(--ai-secondary);
 
-  --background-ai-primary-gradient: var(--bg-ai-primary-gradient);
-
   --radius-xl: 1rem;
   --radius-2xl: 1.5rem;
 
@@ -121,8 +119,8 @@
 
   --bg-ai-primary-gradient: linear-gradient(
     135deg,
-    var(--color-ai-primary) 0%,
-    var(--color-primary) 100%
+    hsl(var(--ai-primary-hsl)) 0%,
+    hsl(var(--primary-hsl)) 100%
   );
 }
 

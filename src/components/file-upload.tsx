@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useTablawyNotification } from "@/hooks/use-tablawy-notification";
 import { Button } from "./ui/button";
 import {} from "./ui/input";
@@ -36,35 +36,67 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   const { open } = useTablawyNotification();
   const {
     startUpload: startTusUpload,
+    abortUpload: abortTusUpload,
     progress: tusProgress,
     isUploading: isTusUploading,
+    uploadUrl: tusUrl,
+    tusPublicId,
   } = useTusUpload();
 
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadComplete, setUploadComplete] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [timeRemaining, setTimeRemaining] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const uploadIdRef = useRef<string | null>(null);
+  const uploadStartTimeRef = useRef<number | null>(null);
 
-  // Sync TUS progress to local state
-  React.useEffect(() => {
+  // 🛡️ TUS PROGRESS SYNC & DURATION CALCULATION
+  useEffect(() => {
     if (isTusUploading) {
       setUploadProgress(tusProgress);
+
+      if (uploadStartTimeRef.current && tusProgress > 0) {
+        const elapsed = (Date.now() - uploadStartTimeRef.current) / 1000;
+        const totalEstimated = elapsed / (tusProgress / 100);
+        const remaining = Math.max(0, totalEstimated - elapsed);
+
+        if (remaining > 60) {
+          setTimeRemaining(`${Math.ceil(remaining / 60)}m left`);
+        } else {
+          setTimeRemaining(`${Math.ceil(remaining)}s left`);
+        }
+      }
     }
   }, [tusProgress, isTusUploading]);
 
-  // ... rest of component logic ...
+  // 🛡️ TUS SUCCESS SYNC
+  useEffect(() => {
+    if (tusUrl && isUploading && isTusUploading === false && !uploadComplete) {
+      // 🛡️ Mandate Review #13: Real identity from TUS response (Hook handles extraction)
+      const publicId = tusPublicId || "tus-upload";
+      onUploadSuccess(tusUrl, publicId);
+      setUploadComplete(true);
+      setUploadProgress(100);
+      setIsUploading(false);
+      open?.({
+        type: "success",
+        message: t("common.upload.success", "Resumable upload successful"),
+      });
+    }
+  }, [tusUrl, tusPublicId, isUploading, isTusUploading, uploadComplete, onUploadSuccess, t, open]);
 
-  // 🛡️ CLEANUP: Ensure any pending upload is aborted on unmount (Mandate Review #8)
-  React.useEffect(() => {
+  // 🛡️ CLEANUP: Ensure any pending upload is aborted on unmount
+  useEffect(() => {
     return () => {
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
       }
+      abortTusUpload();
     };
-  }, []);
+  }, [abortTusUpload]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -204,11 +236,17 @@ export const FileUpload: React.FC<FileUploadProps> = ({
         meta: { correlationId: errorCorrelationId },
       });
     } finally {
-      // 🛡️ RACE GUARD (Review #13): Ensure loading state is reset correctly.
-      // If this was the most recent upload, stop the spinner.
-      if (uploadIdRef.current === currentUploadId || uploadIdRef.current === null) {
+      // 🛡️ RACE GUARD: Reset loading state ONLY if we are still the active upload
+      // and not in TUS mode (TUS handles its own async completion via effects)
+      if (uploadIdRef.current === currentUploadId) {
+        if (file.size <= mbToBytes(UPLOAD_CONSTANTS.TUS_RESUMABLE_THRESHOLD_MB)) {
+          setIsUploading(false);
+        }
+      } else if (uploadIdRef.current === null) {
+        // If the upload was cleared manually, always stop the spinner
         setIsUploading(false);
       }
+
       if (abortControllerRef.current === controller) {
         abortControllerRef.current = null;
       }
@@ -220,19 +258,23 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
       abortControllerRef.current = null;
-
-      // 🛡️ UX: Inform the user that the upload was cancelled (Mandate Review #12)
-      if (isUploading) {
-        open?.({
-          type: "info",
-          message: t("common.upload.cancelled", "Upload cancelled"),
-        });
-      }
     }
+
+    abortTusUpload();
+
+    // 🛡️ UX: Inform the user that the upload was cancelled (Mandate Review #12)
+    if (isUploading) {
+      open?.({
+        type: "info",
+        message: t("common.upload.cancelled", "Upload cancelled"),
+      });
+    }
+
     uploadIdRef.current = null;
     setFile(null);
     setUploadComplete(false);
     setUploadProgress(0);
+    setTimeRemaining(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
     onClear?.();
   };
@@ -305,8 +347,13 @@ export const FileUpload: React.FC<FileUploadProps> = ({
             {isUploading && (
               <div className="w-full space-y-1" aria-live="polite">
                 <div className="flex justify-between text-[10px] text-muted-foreground uppercase font-black tracking-tighter">
-                  <span>{t("common.upload.progress", "Uploading...")}</span>
-                  <span>{uploadProgress}%</span>
+                  <div className="flex items-center gap-2">
+                    <span>{t("common.upload.progress", "Uploading...")}</span>
+                    {timeRemaining && (
+                      <span className="normal-case opacity-70">({timeRemaining})</span>
+                    )}
+                  </div>
+                  <span>{Math.round(uploadProgress)}%</span>
                 </div>
                 <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
                   <div
