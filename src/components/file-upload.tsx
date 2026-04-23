@@ -9,6 +9,7 @@ import { useTranslation } from "react-i18next";
 import { handleError, getCorrelationId } from "@/providers/utils/api-errors";
 import { createCorrelationId } from "@/lib/traceability";
 import { mbToBytes, bytesToMb, isFileTypeAllowed } from "@/lib/utils";
+import { requestWithProgress } from "@/lib/api-utils";
 import { getAuthToken } from "@/lib/auth-helper";
 
 interface FileUploadProps {
@@ -120,82 +121,22 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     try {
       const token = getAuthToken();
 
-      // 🚀 RURAL RESILIENCE: Use XMLHttpRequest for progress tracking (Mandate Review #9)
-      const xhr = new XMLHttpRequest();
-
-      const cleanupXhr = () => {
-        xhr.upload.onprogress = null;
-        xhr.onload = null;
-        xhr.onerror = null;
-        xhr.onabort = null;
-      };
-
-      const promise = new Promise<{ data: { url: string; publicId: string } }>(
-        (resolve, reject) => {
-          xhr.upload.addEventListener("progress", (event) => {
-            if (event.lengthComputable) {
-              const progress = Math.round((event.loaded / event.total) * 100);
-              if (uploadIdRef.current === currentUploadId) {
-                setUploadProgress(progress);
-              }
-            }
-          });
-
-          xhr.addEventListener("load", () => {
-            cleanupXhr();
-            if (xhr.status >= 200 && xhr.status < 300) {
-              try {
-                const response = JSON.parse(xhr.responseText);
-                resolve(response);
-              } catch (e) {
-                reject(new Error("Failed to parse response"));
-              }
-            } else {
-              // 🛡️ ERROR HANDLING: Wrap XHR error to match handleError utility (Review #11)
-              // We create a duck-typed Response object that matches what handleError expects
-              const errorResponse = {
-                status: xhr.status,
-                statusText: xhr.statusText,
-                headers: {
-                  get: (name: string) => xhr.getResponseHeader(name),
-                  "x-correlation-id": xhr.getResponseHeader("x-correlation-id"),
-                },
-                text: async () => xhr.responseText,
-                json: async () => {
-                  try {
-                    return JSON.parse(xhr.responseText);
-                  } catch {
-                    return {};
-                  }
-                },
-                // Add axios-like properties just in case
-                data: null,
-              };
-              reject({ response: errorResponse });
-            }
-          });
-
-          xhr.addEventListener("error", () => {
-            cleanupXhr();
-            reject(new Error("Network Error"));
-          });
-          xhr.addEventListener("abort", () => {
-            cleanupXhr();
-            reject({ name: "AbortError" });
-          });
-
-          xhr.open("POST", `${BACKEND_URL}/assets/upload`);
-          xhr.setRequestHeader("X-Correlation-ID", correlationId);
-          if (token) {
-            xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+      // 🚀 RURAL RESILIENCE: Use requestWithProgress for percentage-based feedback (Mandate Review #11)
+      const result = await requestWithProgress<{ data: { url: string; publicId: string } }>({
+        url: `${BACKEND_URL}/assets/upload`,
+        method: "POST",
+        body: formData,
+        signal: controller.signal,
+        headers: {
+          "X-Correlation-ID": correlationId,
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        onProgress: (percent) => {
+          if (uploadIdRef.current === currentUploadId) {
+            setUploadProgress(percent);
           }
-          xhr.send(formData);
-
-          controller.signal.addEventListener("abort", () => xhr.abort());
-        }
-      );
-
-      const result = await promise;
+        },
+      });
 
       // 🛡️ RACE GUARD: Only execute callback if this is still the active upload (Mandate Review #9)
       if (uploadIdRef.current === currentUploadId) {

@@ -1,6 +1,7 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
+import { SENSITIVE_DATA_KEYS } from "@/lib/security";
 
 interface ErrorNotificationContentProps {
   description?: React.ReactNode;
@@ -51,23 +52,8 @@ export const ErrorNotificationContent: React.FC<ErrorNotificationContentProps> =
                   ...meta,
                   correlationId: undefined,
                   traceId: undefined,
-                  // 🛡️ Mandate Review #9: Harden sensitive data redaction
-                  token: undefined,
-                  password: undefined,
-                  secret: undefined,
-                  key: undefined,
-                  ssn: undefined,
-                  creditCard: undefined,
-                  auth: undefined,
-                  cvv: undefined,
-                  cvc: undefined,
-                  api_key: undefined,
-                  private_key: undefined,
-                  secret_key: undefined,
-                  apiKey: undefined,
-                  privateKey: undefined,
-                  secretKey: undefined,
-                  session: undefined,
+                  // 🛡️ Mandate Review #11: Use centralized redaction list
+                  ...Object.fromEntries(SENSITIVE_DATA_KEYS.map((k) => [k, undefined])),
                 },
                 null,
                 2

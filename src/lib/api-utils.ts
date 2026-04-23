@@ -34,3 +34,100 @@ export async function fetchWithRetry(
 
   throw lastError;
 }
+
+/**
+ * 🚀 RURAL RESILIENCE: XMLHttpRequest wrapper for progress tracking.
+ * Standard fetch() does not provide upload progress, which is vital for students
+ * on low-bandwidth rural connections.
+ *
+ * Mandate Review #11: Extracted into reusable helper for cleaner components.
+ */
+export async function requestWithProgress<T>(options: {
+  url: string;
+  method?: string;
+  body?: Document | XMLHttpRequestBodyInit | null;
+  headers?: Record<string, string>;
+  onProgress?: (percent: number) => void;
+  signal?: AbortSignal;
+}): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    const { url, method = "POST", body, headers, onProgress, signal } = options;
+
+    xhr.open(method, url);
+
+    // Apply headers
+    if (headers) {
+      Object.entries(headers).forEach(([key, value]) => {
+        xhr.setRequestHeader(key, value);
+      });
+    }
+
+    // 📈 PROGRESS TRACKING
+    if (onProgress && xhr.upload) {
+      xhr.upload.addEventListener("progress", (event) => {
+        if (event.lengthComputable) {
+          const percent = Math.round((event.loaded / event.total) * 100);
+          onProgress(percent);
+        }
+      });
+    }
+
+    const cleanup = () => {
+      xhr.upload.onprogress = null;
+      xhr.onload = null;
+      xhr.onerror = null;
+      xhr.onabort = null;
+    };
+
+    xhr.addEventListener("load", () => {
+      cleanup();
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try {
+          const response = JSON.parse(xhr.responseText);
+          resolve(response);
+        } catch (e) {
+          reject(new Error("Failed to parse response from server"));
+        }
+      } else {
+        // 🛡️ COMPATIBILITY: Mimic fetch Response interface for handleError
+        const duckTypedResponse = {
+          status: xhr.status,
+          statusText: xhr.statusText,
+          headers: {
+            get: (name: string) => xhr.getResponseHeader(name),
+            "x-correlation-id": xhr.getResponseHeader("x-correlation-id"),
+          },
+          text: async () => xhr.responseText,
+          json: async () => {
+            try {
+              return JSON.parse(xhr.responseText);
+            } catch {
+              return {};
+            }
+          },
+          data: null,
+        };
+        reject({ response: duckTypedResponse });
+      }
+    });
+
+    xhr.addEventListener("error", () => {
+      cleanup();
+      reject(new Error("Network Error"));
+    });
+
+    xhr.addEventListener("abort", () => {
+      cleanup();
+      reject({ name: "AbortError", message: "AbortError" });
+    });
+
+    if (signal) {
+      signal.addEventListener("abort", () => {
+        xhr.abort();
+      });
+    }
+
+    xhr.send(body);
+  });
+}

@@ -19,3 +19,28 @@ export const getSafeUrl = (url: string | null | undefined): string | null => {
   }
   return null;
 };
+
+/**
+ * 🛡️ SECURITY: Standardized denylist for PII and sensitive credentials.
+ * Mandate Review #11: Centralized for consistent redaction across logs and UI.
+ */
+export const SENSITIVE_DATA_KEYS = [
+  "token",
+  "password",
+  "secret",
+  "key",
+  "ssn",
+  "creditCard",
+  "auth",
+  "cvv",
+  "cvc",
+  "api_key",
+  "private_key",
+  "secret_key",
+  "apiKey",
+  "privateKey",
+  "secretKey",
+  "session",
+  "totp",
+  "mfa_token",
+];
