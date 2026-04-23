@@ -1,6 +1,10 @@
 import { UndoableNotification } from "@/components/refine/notification/undoable-notification";
 import { ErrorNotificationContent } from "@/components/refine/notification/error-notification-content";
-import { useTranslate, type NotificationProvider } from "@refinedev/core";
+import {
+  useTranslate,
+  type NotificationProvider,
+  type OpenNotificationParams,
+} from "@refinedev/core";
 import { useNavigate } from "react-router-dom";
 import { toast, type ExternalToast } from "sonner";
 import { MoveRight } from "lucide-react";
@@ -42,7 +46,7 @@ export function useNotificationProvider(): NotificationProvider {
   const t = useTranslate();
 
   return {
-    open: (params: any) => {
+    open: (params: OpenNotificationParams & Partial<TablawyOpenNotificationParams>) => {
       // 🛡️ Mandate Review #8: Map params to our internal strict type
       const { key, type, message, description, undoableTimeout, cancelMutation, meta } =
         params as TablawyOpenNotificationParams;

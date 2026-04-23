@@ -383,7 +383,10 @@ export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     scheduleNext();
     return () => {
-      if (timeoutIdRef.current) clearTimeout(timeoutIdRef.current);
+      if (timeoutIdRef.current) {
+        clearTimeout(timeoutIdRef.current);
+        timeoutIdRef.current = null;
+      }
     };
   }, [scheduleNext]);
 

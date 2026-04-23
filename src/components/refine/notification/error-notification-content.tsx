@@ -46,12 +46,25 @@ export const ErrorNotificationContent: React.FC<ErrorNotificationContentProps> =
           {meta && Object.keys(meta).length > 1 && (
             <div className="mt-1 border-t border-border/50 pt-1">
               Meta:{" "}
-              {JSON.stringify({ ...meta, correlationId: undefined, traceId: undefined }, null, 2)}
+              {JSON.stringify(
+                {
+                  ...meta,
+                  correlationId: undefined,
+                  traceId: undefined,
+                  token: undefined,
+                  password: undefined,
+                  secret: undefined,
+                  key: undefined,
+                },
+                null,
+                2
+              )}
             </div>
           )}
           <div className="mt-2 flex justify-end">
             <button
               className="px-2 py-1 bg-primary/10 hover:bg-primary/20 rounded transition-colors text-[9px]"
+              aria-label={t("common.notifications.copyCorrelationId", "Copy correlation ID")}
               onClick={(e) => {
                 e.stopPropagation();
                 void navigator.clipboard.writeText(correlationId);
