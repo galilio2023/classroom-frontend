@@ -269,6 +269,10 @@ export const FileUpload: React.FC<FileUploadProps> = ({
                   <div
                     className="h-full bg-primary transition-all duration-300 ease-out"
                     style={{ width: `${uploadProgress}%` }}
+                    role="progressbar"
+                    aria-valuenow={uploadProgress}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
                   />
                 </div>
               </div>

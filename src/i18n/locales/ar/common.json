@@ -1853,6 +1853,34 @@
       "juniorTeacher": "Junior Teacher Solution"
     }
   },
+  "ai": {
+    "jobs": {
+      "multiple_completed": "تم إكمال {{count}} من مهام الذكاء الاصطناعي في الخلفية.",
+      "check_dashboard": "تحقق من إشعاراتك أو لوحة تحكم الذكاء الاصطناعي لمزيد من التفاصيل.",
+      "syncError": "فشل مزامنة مهام الخلفية. جاري إعادة المحاولة...",
+      "queued_title": "جاري المعالجة في الخلفية",
+      "queued_desc": "سنقوم بإخطارك عندما تكون جاهزة.",
+      "queued_safe_mode_desc": "حمولة النظام عالية. قد يستغرق هذا وقتاً أطول من المعتاد.",
+      "explain": {
+        "completed": "تم توليد الشرح بنجاح",
+        "failed": "فشل توليد الشرح"
+      },
+      "summary": {
+        "completed": "الملخص جاهز",
+        "failed": "فشل تلخيص المحتوى"
+      },
+      "bio": {
+        "completed": "تم توليد السيرة الذاتية",
+        "failed": "فشل توليد السيرة الذاتية"
+      }
+    },
+    "notifications": {
+      "idCopied": "تم نسخ معرف الارتباط إلى الحافظة"
+    }
+  },
+  "labels": {
+    "supportInfo": "معلومات الدعم"
+  },
   "schools": {
     "setup": {
       "toasts": {

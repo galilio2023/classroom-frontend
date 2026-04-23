@@ -20,6 +20,7 @@ export const ErrorNotificationContent: React.FC<ErrorNotificationContentProps> =
   meta,
 }) => {
   const { t } = useTranslation();
+  const [copied, setCopied] = React.useState(false);
 
   if (!correlationId) return <>{description}</>;
 
@@ -60,7 +61,7 @@ export const ErrorNotificationContent: React.FC<ErrorNotificationContentProps> =
           )}
           <div className="mt-2 flex justify-end">
             <button
-              className="px-2 py-1 bg-primary/10 hover:bg-primary/20 rounded transition-colors text-[9px]"
+              className="px-2 py-1 bg-primary/10 hover:bg-primary/20 rounded transition-colors text-[9px] border border-primary/20 font-sans"
               aria-label={t(
                 "common.notifications.copyCorrelationId",
                 "Copy correlation ID for support"
@@ -68,10 +69,11 @@ export const ErrorNotificationContent: React.FC<ErrorNotificationContentProps> =
               onClick={(e) => {
                 e.stopPropagation();
                 void navigator.clipboard.writeText(correlationId);
-                toast.info(t("common.notifications.idCopied", "ID copied"), { duration: 1500 });
+                setCopied(true);
+                setTimeout(() => setCopied(false), 2000);
               }}
             >
-              Copy ID
+              {copied ? "✓ Copied" : "Copy ID"}
             </button>
           </div>
         </div>

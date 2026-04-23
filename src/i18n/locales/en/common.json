@@ -1908,6 +1908,9 @@
     "invalidEmail": "Invalid email address",
     "schoolNameRequired": "School name and slug are required."
   },
+  "labels": {
+    "supportInfo": "Support Info"
+  },
   "schools": {
     "setup": {
       "toasts": {
