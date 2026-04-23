@@ -36,7 +36,7 @@ export const ErrorNotificationContent: React.FC<ErrorNotificationContentProps> =
           }}
         >
           <span className="group-open:rotate-90 transition-transform duration-200">▶</span>
-          Support Info
+          {t("common.labels.supportInfo", "Support Info")}
         </summary>
         <div
           className="mt-1 p-2 bg-muted/50 rounded border border-border font-mono break-all select-all leading-tight"

@@ -122,6 +122,14 @@ export const FileUpload: React.FC<FileUploadProps> = ({
 
       // 🚀 RURAL RESILIENCE: Use XMLHttpRequest for progress tracking (Mandate Review #9)
       const xhr = new XMLHttpRequest();
+
+      const cleanupXhr = () => {
+        xhr.upload.onprogress = null;
+        xhr.onload = null;
+        xhr.onerror = null;
+        xhr.onabort = null;
+      };
+
       const promise = new Promise<{ data: { url: string; publicId: string } }>(
         (resolve, reject) => {
           xhr.upload.addEventListener("progress", (event) => {
@@ -134,6 +142,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
           });
 
           xhr.addEventListener("load", () => {
+            cleanupXhr();
             if (xhr.status >= 200 && xhr.status < 300) {
               try {
                 const response = JSON.parse(xhr.responseText);
@@ -166,8 +175,14 @@ export const FileUpload: React.FC<FileUploadProps> = ({
             }
           });
 
-          xhr.addEventListener("error", () => reject(new Error("Network Error")));
-          xhr.addEventListener("abort", () => reject({ name: "AbortError" }));
+          xhr.addEventListener("error", () => {
+            cleanupXhr();
+            reject(new Error("Network Error"));
+          });
+          xhr.addEventListener("abort", () => {
+            cleanupXhr();
+            reject({ name: "AbortError" });
+          });
 
           xhr.open("POST", `${BACKEND_URL}/assets/upload`);
           xhr.setRequestHeader("X-Correlation-ID", correlationId);
@@ -227,7 +242,6 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       abortControllerRef.current.abort();
       abortControllerRef.current = null;
     }
-    uploadIdRef.current = null;
     uploadIdRef.current = null;
     setFile(null);
     setUploadComplete(false);
