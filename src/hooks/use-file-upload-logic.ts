@@ -21,6 +21,7 @@ interface UseFileUploadLogicProps {
   folder?: string;
   accept?: string;
   maxSize?: number;
+  inputRef?: React.RefObject<HTMLInputElement>;
 }
 
 export const useFileUploadLogic = ({
@@ -29,6 +30,7 @@ export const useFileUploadLogic = ({
   folder = "general",
   accept,
   maxSize,
+  inputRef,
 }: UseFileUploadLogicProps) => {
   const { t } = useTranslation();
   const { open } = useTablawyNotification();
@@ -157,8 +159,13 @@ export const useFileUploadLogic = ({
     // 🛡️ SYNC ABORT (Priority 1): Reset ID ONLY after abort signal is sent
     uploadIdRef.current = null;
     uploadStartTimeRef.current = null;
+
+    if (inputRef?.current) {
+      inputRef.current.value = "";
+    }
+
     onClear?.();
-  }, [onClear, abortTusUpload]);
+  }, [onClear, abortTusUpload, inputRef]);
 
   const handleUpload = async () => {
     if (!file || isUploading) return;

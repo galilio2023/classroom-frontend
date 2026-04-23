@@ -59,48 +59,81 @@ export const ErrorNotificationContent: React.FC<ErrorNotificationContentProps> =
           role="region"
           aria-label={t("common.labels.technicalDetails", "Technical support details")}
         >
-          ID: {displayId}
-          {meta && (
-            <div className="mt-1 border-t border-border/50 pt-1">
-              {(() => {
-                const redactedMeta = redactSensitiveData({
-                  ...meta,
-                  correlationId: undefined,
-                  traceId: undefined,
-                });
-                if (Object.keys(redactedMeta).length === 0) return null;
-                return <>Meta: {JSON.stringify(redactedMeta, null, 2)}</>;
-              })()}
+          {typeof navigator !== "undefined" && !navigator.onLine ? (
+            <div className="text-destructive font-bold flex items-center gap-1.5 uppercase tracking-widest text-[8px]">
+              {t("common.notifications.offline", "Please check your network connection")}
             </div>
+          ) : (
+            <>
+              ID: {displayId}
+              {meta && (
+                <div className="mt-1 border-t border-border/50 pt-1">
+                  {(() => {
+                    const redactedMeta = redactSensitiveData({
+                      ...meta,
+                      correlationId: undefined,
+                      traceId: undefined,
+                    });
+                    if (Object.keys(redactedMeta).length === 0) return null;
+                    return <>Meta: {JSON.stringify(redactedMeta, null, 2)}</>;
+                  })()}
+                </div>
+              )}
+              <div className="mt-2 flex justify-end">
+                <button
+                  className="px-2 py-1 bg-primary/10 hover:bg-primary/20 rounded transition-colors text-[9px] border border-primary/20 font-sans flex items-center gap-1.5"
+                  aria-label={t(
+                    "common.notifications.copyCorrelationId",
+                    "Copy correlation ID for support"
+                  )}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (displayId === "N/A") return;
+
+                    const performCopy = async () => {
+                      try {
+                        if (window.isSecureContext && navigator.clipboard) {
+                          await navigator.clipboard.writeText(displayId);
+                          setCopied(true);
+                          setTimeout(() => setCopied(false), 2000);
+                        } else {
+                          // Fallback for non-secure contexts
+                          const textArea = document.createElement("textarea");
+                          textArea.value = displayId;
+                          document.body.appendChild(textArea);
+                          textArea.select();
+                          try {
+                            document.execCommand("copy");
+                            setCopied(true);
+                            setTimeout(() => setCopied(false), 2000);
+                          } catch (err) {
+                            console.error("Fallback copy failed", err);
+                          }
+                          document.body.removeChild(textArea);
+                        }
+                      } catch (err) {
+                        console.error("Failed to copy ID", err);
+                      }
+                    };
+
+                    void performCopy();
+                  }}
+                >
+                  {copied ? (
+                    <>
+                      <Check className="h-2.5 w-2.5" />
+                      {t("common.notifications.copied", "Copied")}
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="h-2.5 w-2.5" />
+                      {t("common.notifications.copyId", "Copy ID")}
+                    </>
+                  )}
+                </button>
+              </div>
+            </>
           )}
-          <div className="mt-2 flex justify-end">
-            <button
-              className="px-2 py-1 bg-primary/10 hover:bg-primary/20 rounded transition-colors text-[9px] border border-primary/20 font-sans flex items-center gap-1.5"
-              aria-label={t(
-                "common.notifications.copyCorrelationId",
-                "Copy correlation ID for support"
-              )}
-              onClick={(e) => {
-                e.stopPropagation();
-                if (displayId === "N/A") return;
-                void navigator.clipboard.writeText(displayId);
-                setCopied(true);
-                setTimeout(() => setCopied(false), 2000);
-              }}
-            >
-              {copied ? (
-                <>
-                  <Check className="h-2.5 w-2.5" />
-                  {t("common.notifications.copied", "Copied")}
-                </>
-              ) : (
-                <>
-                  <Copy className="h-2.5 w-2.5" />
-                  {t("common.notifications.copyId", "Copy ID")}
-                </>
-              )}
-            </button>
-          </div>
         </div>
       </details>
     </div>

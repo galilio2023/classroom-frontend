@@ -27,6 +27,8 @@ interface FileUploadProps {
  */
 export const FileUpload: React.FC<FileUploadProps> = (props) => {
   const { t } = useTranslation();
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
   const {
     file,
     isUploading,
@@ -40,9 +42,7 @@ export const FileUpload: React.FC<FileUploadProps> = (props) => {
     clearFile,
     handleUpload,
     handleFileChange,
-  } = useFileUploadLogic(props);
-
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  } = useFileUploadLogic({ ...props, inputRef: fileInputRef });
 
   const onDragOver = (e: React.DragEvent) => {
     e.preventDefault();
