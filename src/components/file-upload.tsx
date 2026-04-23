@@ -34,8 +34,12 @@ export const FileUpload: React.FC<FileUploadProps> = ({
 }) => {
   const { t } = useTranslation();
   const { open } = useTablawyNotification();
-  const { startUpload: startTusUpload, progress: tusProgress, isUploading: isTusUploading } = useTusUpload();
-  
+  const {
+    startUpload: startTusUpload,
+    progress: tusProgress,
+    isUploading: isTusUploading,
+  } = useTusUpload();
+
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadComplete, setUploadComplete] = useState(false);
@@ -182,7 +186,8 @@ export const FileUpload: React.FC<FileUploadProps> = ({
         });
       }
     } catch (err: unknown) {
-      if (err instanceof Error && (err.name === "AbortError" || err.message === "AbortError")) return;
+      if (err instanceof Error && (err.name === "AbortError" || err.message === "AbortError"))
+        return;
 
       // 🛡️ RACE GUARD: If a newer upload was started, ignore this error (Mandate Review #9)
       if (uploadIdRef.current !== currentUploadId) return;
@@ -215,7 +220,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
       abortControllerRef.current = null;
-      
+
       // 🛡️ UX: Inform the user that the upload was cancelled (Mandate Review #12)
       if (isUploading) {
         open?.({
