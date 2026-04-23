@@ -82,6 +82,8 @@ export const FileUpload: React.FC<FileUploadProps> = ({
 
   // 🛡️ TUS SUCCESS SYNC (Hardened with ID verification)
   useEffect(() => {
+    if (!file) return; // 🛡️ RACE GUARD: Mandate Review #11
+
     // 🛡️ RACE CONDITION GUARD: Only trigger if the TUS success matches our current active upload ID
     if (
       tusStatus === "success" &&
@@ -111,10 +113,13 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     t,
     open,
     currentUploadId,
+    file,
   ]);
 
   // 🛡️ TUS ERROR SYNC (Hardened with ID verification)
   useEffect(() => {
+    if (!file) return; // 🛡️ RACE GUARD: Mandate Review #11
+
     if (
       tusStatus === "error" &&
       isUploading &&
@@ -127,7 +132,20 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       uploadIdRef.current = null; // 🛡️ RESET: Allow retry logic to generate new ID
       handleError(tusError || new Error(t("common.upload.failed", "Resumable upload failed")));
     }
-  }, [tusStatus, isUploading, t, tusError, currentUploadId]);
+  }, [tusStatus, isUploading, t, tusError, currentUploadId, file]);
+
+  // 🛡️ TAB VISIBILITY SAFETY: Pause/Resume or Notify on tab hide (Mandate Rule 6)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "hidden" && isUploading && isResumable) {
+        // TUS handles backgrounding well, but we can log or notify for SRE/Traceability
+        console.log("📑 Tab hidden during large upload. TUS persistence maintaining connection...");
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, [isUploading, isResumable]);
 
   // 🛡️ CLEANUP: Ensure any pending upload is aborted on unmount
   useEffect(() => {
