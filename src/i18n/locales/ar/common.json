@@ -400,6 +400,8 @@
     "show": "عرض",
     "copy": "نسخ",
     "tryAgain": "حاول مرة أخرى",
+    "uploading": "جاري الرفع...",
+    "resuming": "جاري الاستئناف...",
     "search": "البحث في السجل...",
     "uploadCredentials": "رفع الاعتمادات",
     "dismiss": "تجاهل",

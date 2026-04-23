@@ -20,7 +20,12 @@ export const MAX_SYNC_UPLOAD_SIZE_MB = Number(import.meta.env.VITE_MAX_SYNC_UPLO
 export const TUS_ENDPOINT =
   import.meta.env.VITE_TUS_ENDPOINT || `${BACKEND_URL}/api/upload/resumable`;
 
+// 🛡️ CIRCUIT BREAKING & RETRIES (Mandate Review #13)
+export const INITIAL_RETRY_DELAY = Number(import.meta.env.VITE_INITIAL_DELAY) || 1000;
+export const MAX_RETRY_DELAY = Number(import.meta.env.VITE_MAX_DELAY) || 30000;
+
 // 🛡️ SECURITY: Standardized Storage Keys
+
 export const STORAGE_KEYS = {
   AUTH_TOKEN: "tablawy_auth_token",
   USER: "user",

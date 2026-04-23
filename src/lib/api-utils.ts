@@ -1,4 +1,5 @@
 import { calculateBackoff } from "./jitter";
+import { INITIAL_RETRY_DELAY, MAX_RETRY_DELAY } from "@/config";
 
 /**
  * 🛠️ UI UTILITY: calculateETA
@@ -22,7 +23,7 @@ export async function fetchWithRetry(
   url: string,
   options: RequestInit = {},
   maxRetries = 3,
-  baseDelay = 1000
+  baseDelay = INITIAL_RETRY_DELAY
 ): Promise<Response> {
   let lastError: any;
 
@@ -41,7 +42,7 @@ export async function fetchWithRetry(
     }
 
     if (attempt < maxRetries) {
-      const delay = calculateBackoff(attempt, baseDelay);
+      const delay = calculateBackoff(attempt, baseDelay, MAX_RETRY_DELAY);
       await new Promise((resolve) => setTimeout(resolve, delay));
     }
   }
