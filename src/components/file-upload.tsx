@@ -84,8 +84,10 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     if (!isOnline && !isUploading) {
       return (
         <>
-          <WifiOff className="me-2 h-4 w-4" />
-          {t("common.notifications.offline", "Internet Connection Required")}
+          <WifiOff className="me-2 h-4 w-4" aria-hidden="true" />
+          <span title={t("common.notifications.checkConnection", "Check your internet connection")}>
+            {t("common.notifications.offline", "Internet Connection Required")}
+          </span>
         </>
       );
     }

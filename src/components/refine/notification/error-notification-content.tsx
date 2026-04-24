@@ -161,4 +161,3 @@ export const ErrorNotificationContent: React.FC<ErrorNotificationContentProps> =
     </div>
   );
 };
-

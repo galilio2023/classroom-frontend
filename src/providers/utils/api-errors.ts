@@ -178,4 +178,3 @@ export const handleError = async (errorOrResponse: unknown): Promise<HttpError> 
     },
   };
 };
-
