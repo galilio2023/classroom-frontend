@@ -204,6 +204,8 @@ export const FileUpload: React.FC<FileUploadProps> = ({
         onChange={(e) => {
           if (e.target.files?.[0]) {
             void handleFileChange(e.target.files[0]);
+            // 💡 UX: Reset input value to allow re-selection of the same file (Review #16)
+            e.target.value = "";
           }
         }}
       />

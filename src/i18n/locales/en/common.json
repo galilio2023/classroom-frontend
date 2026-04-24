@@ -298,9 +298,6 @@
       "nextPage": "Go to next page",
       "prevPage": "Go to previous page"
     },
-    "starting": "Starting AI engine...",
-    "completed": "Completed",
-    "loading": "Loading...",
     "errors": {
       "fillRequired": "Please fill in all required fields.",
       "aiFailed": "AI Generation failed. Please try again.",
@@ -309,12 +306,12 @@
     },
     "notifications": {
       "offline": "Internet Connection Required",
+      "checkConnection": "Please check your network connection",
       "manualCopy": "Manual copy required in non-secure contexts",
       "copyCorrelationId": "Copy correlation ID for support",
       "copyId": "Copy ID",
       "copied": "Copied",
-      "idCopied": "Correlation ID copied to clipboard",
-      "checkConnection": "Please check your network connection"
+      "idCopied": "Correlation ID copied to clipboard"
     }
   },
   "notifications": {
