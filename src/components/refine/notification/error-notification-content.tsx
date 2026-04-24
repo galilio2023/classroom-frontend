@@ -101,6 +101,7 @@ export const ErrorNotificationContent: React.FC<ErrorNotificationContentProps> =
                   />
                 ) : (
                   <button
+                    type="button"
                     className="px-2 py-1 bg-primary/10 hover:bg-primary/20 rounded transition-colors text-[9px] border border-primary/20 font-sans flex items-center gap-1.5"
                     aria-label={t(
                       "common.notifications.copyCorrelationId",
