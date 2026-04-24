@@ -35,7 +35,7 @@ export const ErrorNotificationContent: React.FC<ErrorNotificationContentProps> =
   const displayId = correlationId || "N/A";
 
   // 🛡️ SECURITY: Only show full meta in development or for admins (Review #15)
-  const shouldShowMeta = process.env.NODE_ENV === "development" || isAdmin;
+  const shouldShowMeta = import.meta.env.DEV || isAdmin;
 
   // 🛡️ PERFORMANCE: Memoize redacted meta to prevent expensive processing on re-renders
   const redactedMeta = React.useMemo(() => {

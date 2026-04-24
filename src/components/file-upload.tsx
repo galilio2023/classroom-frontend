@@ -15,6 +15,7 @@ import { useOfflineSync } from "@/hooks/useOfflineSync";
 
 interface FileUploadProps {
   onUploadSuccess: (url: string, publicId: string) => void;
+  onError?: (error: any) => void;
   onClear?: () => void;
   folder?: string;
   label?: string;
@@ -30,6 +31,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   label,
   accept = ".pdf,.doc,.docx,.jpg,.jpeg,.png,.webp",
   onUploadSuccess,
+  onError,
   onClear,
   folder = "general",
   maxSize = MAX_SYNC_UPLOAD_SIZE_MB * 1024 * 1024, // Set default from config
@@ -55,6 +57,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     handleFileChange,
   } = useFileUploadLogic({
     onUploadSuccess,
+    onError,
     onClear,
     folder,
     accept,
@@ -188,7 +191,10 @@ export const FileUpload: React.FC<FileUploadProps> = ({
 
           {isResumable && !isUploading && !uploadComplete && (
             <div className="flex items-center gap-2 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 overline text-amber-600">
-              <AlertCircle className="h-3.5 w-3.5" />
+              <div className="flex items-center gap-1.5">
+                <AlertCircle className="h-3.5 w-3.5" />
+                <WifiOff className="h-3 w-3 opacity-50" />
+              </div>
               {t(
                 "common.upload.largeFileWarningDesc",
                 "Large file detected. Resumable mode active for reliability."

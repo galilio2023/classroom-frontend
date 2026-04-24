@@ -14,6 +14,7 @@ import { UPLOAD_CONSTANTS } from "@/constants/upload";
 
 interface UseFileUploadLogicProps {
   onUploadSuccess: (url: string, publicId: string) => void;
+  onError?: (error: any) => void;
   onClear?: () => void;
   folder?: string;
   accept?: string;
@@ -23,6 +24,7 @@ interface UseFileUploadLogicProps {
 
 export const useFileUploadLogic = ({
   onUploadSuccess,
+  onError,
   onClear,
   folder = "general",
   accept,
@@ -138,6 +140,10 @@ export const useFileUploadLogic = ({
         return;
       if (uploadIdRef.current !== activeUploadId) return;
       const normalizedError = await handleError(err);
+
+      // 🛡️ Mandate Review #15: Optional callback for parent component
+      onError?.(normalizedError);
+
       open({
         type: "error",
         message: normalizedError.message || t("common.upload.error", "Failed to upload file"),
@@ -301,6 +307,11 @@ export const useFileUploadLogic = ({
       try {
         const isAllowed = await isFileTypeAllowed(selectedFile, accept || "");
         if (!isAllowed) {
+          // 🛡️ UX: Reset internal state if validation fails (Review #15)
+          setFile(null);
+          setUploadComplete(false);
+          setUploadProgress(0);
+
           open({
             type: "error",
             message: t("common.upload.invalidType", "Invalid file type"),
@@ -309,6 +320,11 @@ export const useFileUploadLogic = ({
           return;
         }
         if (maxSize && selectedFile.size > maxSize) {
+          // 🛡️ UX: Reset internal state if validation fails (Review #15)
+          setFile(null);
+          setUploadComplete(false);
+          setUploadProgress(0);
+
           open({
             type: "error",
             message: t("common.upload.tooLarge"),
