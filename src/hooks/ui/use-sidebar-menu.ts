@@ -37,13 +37,11 @@ export const useSidebarMenu = () => {
         // Teachers in Private Mode should not see structural admin tools
         const institutionalOnly = [
           "departments",
-          "subjects",
           "academic-terms",
           "admin-import",
           "admin-approvals",
           "ai-health-reports",
           "ai-metrics",
-          "teacher-applications",
           "ai-governance",
           "activity-log",
         ];

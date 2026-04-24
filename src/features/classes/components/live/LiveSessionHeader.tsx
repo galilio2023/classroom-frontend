@@ -12,6 +12,7 @@ interface LiveSessionHeaderProps {
   isJoined: boolean;
   studentCount: number;
   isDelegated: boolean;
+  isAiDegraded?: boolean;
   isLoading: boolean;
   roadmapTitle?: string;
   onDelegate: () => void;
@@ -28,6 +29,7 @@ export const LiveSessionHeader = React.memo(
     isJoined,
     studentCount,
     isDelegated,
+    isAiDegraded,
     isLoading,
     roadmapTitle,
     onDelegate,
@@ -58,6 +60,15 @@ export const LiveSessionHeader = React.memo(
               <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
               <Users className="h-3.5 w-3.5" />
               {studentCount} {t("classes.live.studentsPresent", "Live Now")}
+            </Badge>
+          )}
+          {isAiDegraded && (
+            <Badge
+              variant="destructive"
+              className="bg-destructive/10 text-destructive border-destructive/20 px-3 py-1.5 rounded-full font-black gap-2 animate-pulse"
+            >
+              <RotateCcw className="h-3.5 w-3.5" />
+              {t("classes.live.ai.degraded", "System Degraded")}
             </Badge>
           )}
         </div>

@@ -15,6 +15,7 @@ import { BarChart3, AlertCircle, LayoutDashboard, TrendingUp } from "lucide-reac
 import { useTranslation } from "react-i18next";
 import { useNavigation } from "@refinedev/core";
 import { usePWAInstall } from "@/hooks/use-pwa-install";
+import { useCapabilities } from "@/hooks/use-capabilities";
 
 // Sub-components
 import { TeacherTvStats } from "./staff/TeacherTvStats";
@@ -30,6 +31,7 @@ export const StaffDashboard = ({ data, isLoading, onRefresh, show }: StaffDashbo
   const { t } = useTranslation();
   const { list } = useNavigation();
   const { isInstallable, isStandalone, handleInstallClick } = usePWAInstall();
+  const { isSchoolMode } = useCapabilities();
 
   // Generate Action Items dynamically based on data
   const actions: ActionItem[] = [];
@@ -172,34 +174,38 @@ export const StaffDashboard = ({ data, isLoading, onRefresh, show }: StaffDashbo
             </motion.div>
           </ErrorBoundary>
 
-          <ErrorBoundary>
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.12 }}
-            >
-              <JourneyFunnelChart data={data.journeyDistribution ?? []} />
-            </motion.div>
-          </ErrorBoundary>
+          {isSchoolMode && (
+            <>
+              <ErrorBoundary>
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.12 }}
+                >
+                  <JourneyFunnelChart data={data.journeyDistribution ?? []} />
+                </motion.div>
+              </ErrorBoundary>
 
-          <ErrorBoundary>
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.15 }}
-            >
-              <div className="flex items-center gap-3 mb-8 px-2 text-start">
-                <div className="p-2 rounded-xl bg-ai-primary/10 text-ai-primary">
-                  <TrendingUp className="h-5 w-5" />
-                </div>
-                <h2 className="text-2xl font-black tracking-tight">
-                  {t("dashboard.staff.aiAlignment")}
-                </h2>
-                <div className="h-px flex-1 bg-linear-to-r from-ai-primary/20 to-transparent" />
-              </div>
-              <RLHFAlignmentChart data={data.rlhf ?? []} />
-            </motion.div>
-          </ErrorBoundary>
+              <ErrorBoundary>
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.15 }}
+                >
+                  <div className="flex items-center gap-3 mb-8 px-2 text-start">
+                    <div className="p-2 rounded-xl bg-ai-primary/10 text-ai-primary">
+                      <TrendingUp className="h-5 w-5" />
+                    </div>
+                    <h2 className="text-2xl font-black tracking-tight">
+                      {t("dashboard.staff.aiAlignment")}
+                    </h2>
+                    <div className="h-px flex-1 bg-linear-to-r from-ai-primary/20 to-transparent" />
+                  </div>
+                  <RLHFAlignmentChart data={data.rlhf ?? []} />
+                </motion.div>
+              </ErrorBoundary>
+            </>
+          )}
 
           <ErrorBoundary>
             <motion.div

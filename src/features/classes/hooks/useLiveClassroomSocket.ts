@@ -9,8 +9,9 @@ interface SocketHandlers {
   onBreakoutStarted: (data: any) => void;
   onBreakoutEnded: (data: any) => void;
   onTeacherDelegated: (data: any) => void;
-  onTeacherResumed: (data: any) => void;
+  onTeacherResumed: (data: { classId: string; reason?: string }) => void;
   onPulseUpdate: (data: { classId: number; count: number }) => void;
+  onLiveInit?: (data: any) => void;
 }
 
 export const useLiveClassroomSocket = (numericClassId: number, handlers: SocketHandlers) => {
@@ -41,6 +42,9 @@ export const useLiveClassroomSocket = (numericClassId: number, handlers: SocketH
       pulseUpdate: (data: any) => {
         if (Number(data.classId) === numericClassId) handlers.onPulseUpdate(data);
       },
+      liveInit: (data: any) => {
+        if (Number(data.classId) === numericClassId) handlers.onLiveInit?.(data);
+      },
     };
 
     socket.on("live_session_started", wrappedHandlers.sessionStarted);
@@ -50,6 +54,7 @@ export const useLiveClassroomSocket = (numericClassId: number, handlers: SocketH
     socket.on("teacher_delegated", wrappedHandlers.teacherDelegated);
     socket.on("teacher_resumed", wrappedHandlers.teacherResumed);
     socket.on("live_pulse_update", wrappedHandlers.pulseUpdate);
+    socket.on("live:init", wrappedHandlers.liveInit);
 
     return () => {
       socket.off("live_session_started", wrappedHandlers.sessionStarted);
@@ -59,6 +64,7 @@ export const useLiveClassroomSocket = (numericClassId: number, handlers: SocketH
       socket.off("teacher_delegated", wrappedHandlers.teacherDelegated);
       socket.off("teacher_resumed", wrappedHandlers.teacherResumed);
       socket.off("live_pulse_update", wrappedHandlers.pulseUpdate);
+      socket.off("live:init", wrappedHandlers.liveInit);
     };
   }, [numericClassId, handlers]);
 };

@@ -65,6 +65,8 @@ export const LiveClassroom = ({
     setActiveClassId,
   } = useLiveSession(classIdString);
 
+  const [isAiDegraded, setIsAiDegraded] = useState(false);
+
   const { mutate: getRoomToken } = useCustomMutation();
   const { mutate: saveRecording } = useCustomMutation();
   const { mutate: startLiveSession } = useCustomMutation(); // for AI delegation
@@ -168,8 +170,27 @@ export const LiveClassroom = ({
       startMeeting(roomTokenFetcher);
     },
     onTeacherDelegated: () => refetchClass(),
-    onTeacherResumed: () => refetchClass(),
+    onTeacherResumed: (data) => {
+      refetchClass();
+      if (data.reason === "ai_degraded") {
+        setIsAiDegraded(true);
+        toast.warning(
+          t("classes.live.ai.fallback", "AI Co-teacher is having trouble. Teacher has resumed control."),
+          { duration: 5000 }
+        );
+      } else {
+        setIsAiDegraded(false);
+      }
+    },
     onPulseUpdate: (data) => setStudentCount(data.count),
+    onLiveInit: (data) => {
+      // 🛡️ RECONNECTION RECOVERY: Sync session state without a full refetch if possible
+      // This ensures that students joining/reconnecting see the correct AI delegation state immediately
+      if (data.isAiDelegated !== classData?.isAiDelegated) {
+        refetchClass();
+      }
+      setIsBreakoutActive(!!data.isBreakoutActive);
+    },
   });
 
   useEffect(() => {
@@ -295,6 +316,7 @@ export const LiveClassroom = ({
           isJoined={isJoined}
           studentCount={studentCount}
           isDelegated={!!isDelegated}
+          isAiDegraded={isAiDegraded}
           isLoading={isLoading || isJitsiLoading}
           roadmapTitle={classData?.liveLessonRoadmap?.sessionTitle}
           onDelegate={handleDelegateToAI}

@@ -124,6 +124,7 @@ const LoginPage = () => {
                       <FormControl>
                         <Input
                           type="email"
+                          data-testid="email-input"
                           placeholder={t("auth.login.emailPlaceholder")}
                           className="h-14 md:h-16 rounded-2xl md:rounded-3xl bg-muted/30 border-none shadow-inner px-6 md:px-8 text-base md:text-lg font-black placeholder:text-muted-foreground/30 focus-visible:ring-primary/20"
                           {...field}
@@ -144,6 +145,7 @@ const LoginPage = () => {
                       <FormControl>
                         <Input
                           type="password"
+                          data-testid="password-input"
                           placeholder={t("auth.login.passwordPlaceholder")}
                           className="h-14 md:h-16 rounded-2xl md:rounded-3xl bg-muted/30 border-none shadow-inner px-6 md:px-8 text-base md:text-lg font-black placeholder:text-muted-foreground/30 focus-visible:ring-primary/20"
                           {...field}
@@ -155,6 +157,7 @@ const LoginPage = () => {
                 />
                 <Button
                   type="submit"
+                  data-testid="login-submit"
                   size="lg"
                   className="w-full h-16 md:h-20 rounded-[1.5rem] md:rounded-4xl font-black uppercase tracking-widest text-xs md:text-sm shadow-2xl shadow-primary/30 group transition-all duration-300"
                   disabled={isPending}
