@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCustomMutation } from "@refinedev/core";
-import { UserRole } from "@/types";
+import { UserRole, Class } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2, Users, Video, ExternalLink, MonitorUp, Sparkles } from "lucide-react";
@@ -26,7 +26,7 @@ import { LiveSessionHeader } from "@/features/classes/components/live/LiveSessio
 import { RoadmapDisplay } from "@/features/classes/components/live/RoadmapDisplay";
 
 interface LiveClassroomProps {
-  classId: string;
+  classId: string; // 🚀 Normalized to string for Layout consistency
   className?: string;
   isMiniMode?: boolean;
   onJoin?: () => void;
@@ -73,10 +73,18 @@ export const LiveClassroom = ({
   // 🛡️ RULE 6: Tab Visibility Safety (Privacy Mandate)
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.hidden && isJoined) {
-        // Stop any active AI speech or potentially mute mic
-        window.speechSynthesis?.cancel();
-        toast.info(t("classes.live.privacy.paused", "Privacy Safety: Interaction paused while tab is hidden."));
+      if (document.visibilityState === "hidden" && isJoined) {
+        // Stop any active AI speech (Rule 6)
+        if (typeof window !== "undefined" && window.speechSynthesis) {
+          window.speechSynthesis.cancel();
+        }
+        // Note: Microphone muting is handled inside AILiveCompanion via useHardwareSafety
+        toast.info(
+          t(
+            "classes.live.privacy.paused",
+            "Privacy Safety: Interaction paused while tab is hidden."
+          )
+        );
       }
     };
 
@@ -192,17 +200,21 @@ export const LiveClassroom = ({
       if (data.reason === "ai_degraded") {
         setIsAiDegraded(true);
         // 🛡️ RULE 8: Traceability (Enhanced error feedback)
+        const correlationId = crypto.randomUUID();
         void handleError({
           status: 503,
-          message: t("classes.live.ai.fallback", "AI Co-teacher is having trouble. Teacher has resumed control."),
+          message: t(
+            "classes.live.ai.fallback",
+            "AI Co-teacher is having trouble. Teacher has resumed control."
+          ),
           response: {
             headers: {
-              get: (key: string) => (key === "x-correlation-id" ? "socket-event-fallback" : null),
+              get: (key: string) => (key === "x-correlation-id" ? correlationId : null),
             },
           },
         }).then((err) => {
           toast.warning(err.message, {
-            description: t("classes.live.ai.supportInfo", "Support Info: AI degraded via socket signal."),
+            description: `${t("classes.live.ai.supportInfo", "Support Info: AI degraded via socket signal.")} (Trace: ${correlationId})`,
             duration: 8000,
           });
         });
@@ -214,7 +226,7 @@ export const LiveClassroom = ({
     onLiveInit: (data) => {
       // 🛡️ RECONNECTION OPTIMIZATION: Update local cache directly to avoid network flicker
       if (data.isAiDelegated !== classData?.isAiDelegated) {
-        queryClient.setQueryData(["classes", classIdString], (old: any) => {
+        queryClient.setQueryData(["classes", classIdString], (old: Class | undefined) => {
           if (!old) return old;
           return {
             ...old,
@@ -533,7 +545,7 @@ export const LiveClassroom = ({
                     photo={classData?.aiDelegationPhoto ?? null}
                     script={classData?.aiDelegationContext?.script ?? null}
                     visualCue={(classData?.aiDelegationContext?.visualCue as any) || "talking"}
-                    language={i18n.language === "ar" ? "Arabic" : "English"}
+                    language={(classData?.subject as any)?.language || "English"}
                     onFinished={handleCompanionFinished}
                   />
                 </div>
@@ -543,10 +555,7 @@ export const LiveClassroom = ({
 
             {!isMiniMode && activeTab === "whiteboard" && (
               <div className="h-162.5">
-                <Whiteboard
-                  classId={classIdString}
-                  roomId={currentGroupId ? `group-${currentGroupId}` : classIdString}
-                />
+                <Whiteboard classId={classIdString} />
               </div>
             )}
 
