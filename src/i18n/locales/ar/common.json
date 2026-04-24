@@ -1888,6 +1888,7 @@
   },
   "labels": {
     "supportInfo": "معلومات الدعم",
+    "toggleSupportInfo": "تبديل معلومات الدعم الفني",
     "technicalDetails": "تفاصيل الدعم الفني",
     "technicalInfo": "معلومات تقنية"
   },
