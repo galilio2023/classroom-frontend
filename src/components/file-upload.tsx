@@ -126,8 +126,8 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       <>
         <Loader2 className="me-2 h-4 w-4 animate-spin" />
         {isResumable
-          ? t("buttons.uploadingResumable", "Uploading...")
-          : t("buttons.uploading", "Uploading...")}
+          ? `${t("buttons.uploadingResumable", "Uploading...")} ${uploadProgress.toFixed(0)}%`
+          : `${t("buttons.uploading", "Uploading...")} ${uploadProgress.toFixed(0)}%`}
       </>
     );
   };
@@ -172,7 +172,9 @@ export const FileUpload: React.FC<FileUploadProps> = ({
                   e.stopPropagation();
                   void handleUpload();
                 }}
-                disabled={isUploading || !isOnline}
+                // 🛡️ Mandate Review #15: Allow button interaction if isUploading is true even if offline
+                // (TUS handles background retries, but we want the UI to remain interactive/abortable)
+                disabled={isUploading ? false : !isOnline}
                 className="w-full sm:w-auto min-w-[140px] rounded-2xl font-black uppercase tracking-widest text-[10px] h-12 md:h-14 px-8 md:px-10 shadow-lg shadow-primary/25"
               >
                 {renderButtonContent()}
