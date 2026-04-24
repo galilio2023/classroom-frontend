@@ -31,10 +31,12 @@
       }
     },
     "notifications": {
-      "idCopied": "Correlation ID copied to clipboard",
+      "offline": "Internet Connection Required",
+      "manualCopy": "Manual copy required in non-secure contexts",
       "copyCorrelationId": "Copy correlation ID for support",
       "copyId": "Copy ID",
-      "copied": "Copied"
+      "copied": "Copied",
+      "idCopied": "Correlation ID copied to clipboard"
     },
     "errorBoundary": {
       "title": "AI Assistant Offline",
@@ -302,7 +304,17 @@
     "errors": {
       "fillRequired": "Please fill in all required fields.",
       "aiFailed": "AI Generation failed. Please try again.",
-      "loadingFailed": "Failed to load classes"
+      "loadingFailed": "Failed to load classes",
+      "unexpected": "An unexpected error occurred. Please try again."
+    },
+    "notifications": {
+      "offline": "Internet Connection Required",
+      "manualCopy": "Manual copy required in non-secure contexts",
+      "copyCorrelationId": "Copy correlation ID for support",
+      "copyId": "Copy ID",
+      "copied": "Copied",
+      "idCopied": "Correlation ID copied to clipboard",
+      "checkConnection": "Please check your network connection"
     }
   },
   "notifications": {
@@ -417,7 +429,9 @@
     "copy": "Copy",
     "tryAgain": "Try Again",
     "uploading": "Uploading...",
+    "uploadingResumable": "Uploading (Resumable)...",
     "resuming": "Resuming...",
+    "reconnecting": "Reconnecting...",
     "search": "Search history...",
     "uploadCredentials": "Upload Credentials",
     "dismiss": "Dismiss",
@@ -561,7 +575,6 @@
     "generateQuiz": "Generate Quiz",
     "generateAssignment": "Generate Assignment",
     "addTask": "Add Task",
-    "uploading": "Uploading...",
     "addMembers": "Add Members",
     "viewDetailsAndMembers": "View Details & Members",
     "confirmDeleteGroup": "Are you sure you want to delete this group?",
@@ -595,6 +608,7 @@
     "notAccessBack": "Back to Safety",
     "submitEvaluation": "Submit Evaluation"
   },
+
   "roles": {
     "student": "Student",
     "teacher": "Teacher",

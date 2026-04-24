@@ -71,7 +71,7 @@ export const ErrorNotificationContent: React.FC<ErrorNotificationContentProps> =
           {typeof navigator !== "undefined" && !navigator.onLine ? (
             <div className="text-destructive font-bold flex items-center gap-1.5 uppercase tracking-widest text-[8px]">
               <WifiOff className="h-3 w-3" />
-              {t("common.notifications.offline", "Please check your network connection")}
+              {t("common.notifications.checkConnection", "Please check your network connection")}
             </div>
           ) : (
             <>
