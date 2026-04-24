@@ -28,6 +28,18 @@ export const ErrorNotificationContent: React.FC<ErrorNotificationContentProps> =
   // 🛡️ TRACEABILITY: Always provide a fallback for support (Mandate Review #8)
   const displayId = correlationId || "N/A";
 
+  // 🛡️ PERFORMANCE: Memoize redacted meta to prevent expensive processing on re-renders
+  const redactedMeta = React.useMemo(() => {
+    if (!meta) return null;
+    const redacted = redactSensitiveData({
+      ...meta,
+      correlationId: undefined,
+      traceId: undefined,
+    }) as Record<string, any>;
+
+    return Object.keys(redacted).length > 0 ? redacted : null;
+  }, [meta]);
+
   return (
     <div className="space-y-2">
       <div className="text-sm">
@@ -64,19 +76,9 @@ export const ErrorNotificationContent: React.FC<ErrorNotificationContentProps> =
           ) : (
             <>
               ID: {displayId}
-              {meta && (
+              {redactedMeta && (
                 <div className="mt-1 border-t border-border/50 pt-1">
-                  {(() => {
-                    const redactedMeta = redactSensitiveData({
-                      ...meta,
-                      correlationId: undefined,
-                      traceId: undefined,
-                    });
-                    if (Object.keys(redactedMeta).length > 0) {
-                      return <>Meta: {JSON.stringify(redactedMeta, null, 2)}</>;
-                    }
-                    return null;
-                  })()}
+                  Meta: {JSON.stringify(redactedMeta, null, 2)}
                 </div>
               )}
               <div className="mt-2 flex justify-end">
