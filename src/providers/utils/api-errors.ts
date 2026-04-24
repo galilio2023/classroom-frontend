@@ -1,5 +1,6 @@
 import { HttpError } from "@refinedev/core";
 import { createCorrelationId } from "@/lib/traceability";
+import { redactSensitiveData } from "@/lib/security";
 
 /**
  * 🛡️ TRACEABILITY: Extracts X-Correlation-ID from various error formats (Axios, Fetch, etc.)
@@ -57,6 +58,9 @@ export const handleError = async (errorOrResponse: unknown): Promise<HttpError> 
   } catch {
     // Not JSON or empty
   }
+
+  // 🛡️ SECURITY: Redact sensitive data from the parsed error response before using it in the UI
+  json = redactSensitiveData(json) as Record<string, unknown>;
 
   // 🛡️ SECURITY & UX: Provide meaningful messages for common errors
   if (response.status === 401) {

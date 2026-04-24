@@ -191,7 +191,7 @@ const AssignmentsListPage = () => {
               <Button
                 onClick={() => create("assignments")}
                 size="lg"
-                className="w-full md:w-auto rounded-2xl h-12 md:h-14 px-10 font-bold uppercase tracking-widest text-[10px] gap-2 shadow-lg shadow-primary/25 hover:translate-y-[-2px] transition-all"
+                className="w-full md:w-auto rounded-2xl h-12 md:h-14 px-10 font-black uppercase tracking-widest text-[10px] gap-2 shadow-lg shadow-primary/25 hover:translate-y-[-2px] transition-all"
               >
                 <PlusCircle className="h-5 w-5" />
                 {t("buttons.createAssignment")}

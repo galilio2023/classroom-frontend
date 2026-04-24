@@ -69,7 +69,7 @@ const UserShow = () => {
         <Button
           asChild
           size="lg"
-          className="rounded-2xl h-14 px-10 font-bold uppercase tracking-widest text-[10px]"
+          className="rounded-2xl h-14 px-10 font-black uppercase tracking-widest text-[10px]"
         >
           <Link to="/users">{t("buttons.goBack" as any)}</Link>
         </Button>

@@ -93,7 +93,10 @@ export const ErrorNotificationContent: React.FC<ErrorNotificationContentProps> =
                       e.stopPropagation();
                       (e.target as HTMLInputElement).select();
                     }}
-                    title={t("common.notifications.manualCopy", "Manual copy required in non-secure contexts")}
+                    title={t(
+                      "common.notifications.manualCopy",
+                      "Manual copy required in non-secure contexts"
+                    )}
                   />
                 ) : (
                   <button
