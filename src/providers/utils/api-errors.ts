@@ -171,6 +171,11 @@ export const handleError = async (errorOrResponse: unknown): Promise<HttpError> 
       (json.message as string) ||
       `HTTP error! status: ${response.status}`,
     statusCode: response.status,
-    meta: { correlationId },
+    meta: {
+      ...json,
+      correlationId,
+      statusCode: response.status,
+    },
   };
 };
+

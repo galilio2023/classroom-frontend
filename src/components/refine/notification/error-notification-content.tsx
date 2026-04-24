@@ -4,6 +4,8 @@ import { ChevronDown, Copy, Check, WifiOff } from "lucide-react";
 import { redactSensitiveData } from "@/lib/security";
 import { cn } from "@/lib/utils";
 import { useOfflineSync } from "@/hooks/useOfflineSync";
+import { useCapabilities } from "@/hooks/use-capabilities";
+import { toast } from "sonner";
 
 interface ErrorNotificationContentProps {
   description?: React.ReactNode;
@@ -23,6 +25,7 @@ export const ErrorNotificationContent: React.FC<ErrorNotificationContentProps> =
 }) => {
   const { t } = useTranslation();
   const { isOnline } = useOfflineSync();
+  const { isAdmin } = useCapabilities();
   const [copied, setCopied] = React.useState(false);
   const supportInfoId = React.useId();
 
@@ -31,9 +34,12 @@ export const ErrorNotificationContent: React.FC<ErrorNotificationContentProps> =
   // 🛡️ TRACEABILITY: Always provide a fallback for support (Mandate Review #8)
   const displayId = correlationId || "N/A";
 
+  // 🛡️ SECURITY: Only show full meta in development or for admins (Review #15)
+  const shouldShowMeta = process.env.NODE_ENV === "development" || isAdmin;
+
   // 🛡️ PERFORMANCE: Memoize redacted meta to prevent expensive processing on re-renders
   const redactedMeta = React.useMemo(() => {
-    if (!meta) return null;
+    if (!meta || !shouldShowMeta) return null;
     const redacted = redactSensitiveData({
       ...meta,
       correlationId: undefined,
@@ -41,7 +47,26 @@ export const ErrorNotificationContent: React.FC<ErrorNotificationContentProps> =
     }) as Record<string, any>;
 
     return Object.keys(redacted).length > 0 ? redacted : null;
-  }, [meta]);
+  }, [meta, shouldShowMeta]);
+
+  const handleCopyId = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (displayId === "N/A") return;
+
+    try {
+      if (window.isSecureContext && navigator.clipboard) {
+        await navigator.clipboard.writeText(displayId);
+        setCopied(true);
+        // 🛡️ UX: Use sonner toast for feedback as per project styles (Review #15)
+        toast.success(t("common.notifications.idCopied", "Correlation ID copied to clipboard"), {
+          duration: 2000,
+        });
+        setTimeout(() => setCopied(false), 2000);
+      }
+    } catch (err) {
+      console.error("Failed to copy ID", err);
+    }
+  };
 
   return (
     <div className="space-y-2">
@@ -57,12 +82,12 @@ export const ErrorNotificationContent: React.FC<ErrorNotificationContentProps> =
           className="hover:underline font-medium list-none flex items-center gap-1 focus-visible:ring-1 focus-visible:ring-primary rounded-sm outline-none"
           aria-expanded={isOpen}
           aria-controls={supportInfoId}
-          aria-label={t("labels.toggleSupportInfo", "Toggle technical support details")}
+          aria-label={t("labels.technicalDetails", "Technical support and debug information")}
         >
           <ChevronDown
             className={cn("h-3 w-3 transition-transform duration-200", isOpen ? "rotate-180" : "")}
           />
-          {t("labels.supportInfo", "Support Info")}
+          {t("labels.supportInfo", "Technical Support Info")}
         </summary>
         <div
           id={supportInfoId}
@@ -113,24 +138,7 @@ export const ErrorNotificationContent: React.FC<ErrorNotificationContentProps> =
                       "common.notifications.copyCorrelationId",
                       "Copy correlation ID for support"
                     )}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (displayId === "N/A") return;
-
-                      const performCopy = async () => {
-                        try {
-                          if (window.isSecureContext && navigator.clipboard) {
-                            await navigator.clipboard.writeText(displayId);
-                            setCopied(true);
-                            setTimeout(() => setCopied(false), 2000);
-                          }
-                        } catch (err) {
-                          console.error("Failed to copy ID", err);
-                        }
-                      };
-
-                      void performCopy();
-                    }}
+                    onClick={handleCopyId}
                   >
                     {copied ? (
                       <>
@@ -153,3 +161,4 @@ export const ErrorNotificationContent: React.FC<ErrorNotificationContentProps> =
     </div>
   );
 };
+
