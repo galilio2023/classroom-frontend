@@ -9,18 +9,21 @@ test.describe('Authentication Journey', () => {
     await expect(page).toHaveTitle(/Login/i);
 
     // Fill in credentials using data-testid for resilience
-    await page.fill('[data-testid="email-input"]', process.env.TEST_TEACHER_EMAIL || 'teacher@example.com');
-    await page.fill('[data-testid="password-input"]', process.env.TEST_TEACHER_PASSWORD || 'password123');
+    const email = process.env.TEST_TEACHER_EMAIL;
+    const password = process.env.TEST_TEACHER_PASSWORD;
+    
+    if (!email || !password) {
+      throw new Error('Missing TEST_TEACHER_EMAIL or TEST_TEACHER_PASSWORD environment variables');
+    }
+
+    await page.fill('[data-testid="email-input"]', email);
+    await page.fill('[data-testid="password-input"]', password);
 
     // Click the submit button
     await page.click('[data-testid="login-submit"]');
 
     // Check for successful login (redirect to dashboard)
-    // Adjust the URL expectation based on the actual post-login route
     await expect(page).toHaveURL(/dashboard/);
-    
-    // Check for a dashboard-specific element
-    // await expect(page.locator('text=Welcome')).toBeVisible();
   });
 
   test('should show an error for invalid credentials', async ({ page }) => {
@@ -31,9 +34,11 @@ test.describe('Authentication Journey', () => {
 
     await page.click('[data-testid="login-submit"]');
 
-    // Expect an error toast or message
-    // Note: 'sonner' toast might need a specific locator if it's not immediately visible
-    // For now, we just wait for the URL to NOT change to dashboard
+    // 🛡️ Assert that the standard 'handleError' notification appeared
+    // sonner toasts usually have 'role=status' or specific text
+    await expect(page.locator('text=Session expired or unauthorized')).toBeVisible();
+    
+    // Ensure we are still on the login page
     await expect(page).not.toHaveURL(/dashboard/);
   });
 });

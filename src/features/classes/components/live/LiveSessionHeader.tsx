@@ -1,5 +1,5 @@
 import React from "react";
-import { Video, Users, Bot, RotateCcw, Loader2, Grid } from "lucide-react";
+import { Video, Users, Bot, RotateCcw, Loader2, Grid, BrainCircuit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -65,10 +65,10 @@ export const LiveSessionHeader = React.memo(
           {isAiDegraded && (
             <Badge
               variant="destructive"
-              className="bg-destructive/10 text-destructive border-destructive/20 px-3 py-1.5 rounded-full font-black gap-2 animate-pulse"
+              className="bg-destructive/20 text-destructive border-ai-primary/50 border-2 px-3 py-1.5 rounded-full font-black gap-2 animate-pulse"
             >
-              <RotateCcw className="h-3.5 w-3.5" />
-              {t("classes.live.ai.degraded", "System Degraded")}
+              <BrainCircuit className="h-3.5 w-3.5 text-ai-primary" />
+              {t("classes.live.ai.degraded", "AI System Degraded")}
             </Badge>
           )}
         </div>

@@ -13,6 +13,8 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 import { AILiveCompanion } from "@/features/ai/components/AiLiveCompanion";
+import { useQueryClient } from "@tanstack/react-query";
+import { handleError } from "@/providers/utils/api-errors";
 
 // Hooks
 import { useLiveSession } from "@/features/classes/hooks/useLiveSession";
@@ -38,6 +40,7 @@ export const LiveClassroom = ({
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const isAr = i18n.language === "ar";
+  const queryClient = useQueryClient();
 
   const {
     identity,
@@ -66,6 +69,20 @@ export const LiveClassroom = ({
   } = useLiveSession(classIdString);
 
   const [isAiDegraded, setIsAiDegraded] = useState(false);
+
+  // 🛡️ RULE 6: Tab Visibility Safety (Privacy Mandate)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden && isJoined) {
+        // Stop any active AI speech or potentially mute mic
+        window.speechSynthesis?.cancel();
+        toast.info(t("classes.live.privacy.paused", "Privacy Safety: Interaction paused while tab is hidden."));
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, [isJoined, t]);
 
   const { mutate: getRoomToken } = useCustomMutation();
   const { mutate: saveRecording } = useCustomMutation();
@@ -174,20 +191,37 @@ export const LiveClassroom = ({
       refetchClass();
       if (data.reason === "ai_degraded") {
         setIsAiDegraded(true);
-        toast.warning(
-          t("classes.live.ai.fallback", "AI Co-teacher is having trouble. Teacher has resumed control."),
-          { duration: 5000 }
-        );
+        // 🛡️ RULE 8: Traceability (Enhanced error feedback)
+        void handleError({
+          status: 503,
+          message: t("classes.live.ai.fallback", "AI Co-teacher is having trouble. Teacher has resumed control."),
+          response: {
+            headers: {
+              get: (key: string) => (key === "x-correlation-id" ? "socket-event-fallback" : null),
+            },
+          },
+        }).then((err) => {
+          toast.warning(err.message, {
+            description: t("classes.live.ai.supportInfo", "Support Info: AI degraded via socket signal."),
+            duration: 8000,
+          });
+        });
       } else {
         setIsAiDegraded(false);
       }
     },
     onPulseUpdate: (data) => setStudentCount(data.count),
     onLiveInit: (data) => {
-      // 🛡️ RECONNECTION RECOVERY: Sync session state without a full refetch if possible
-      // This ensures that students joining/reconnecting see the correct AI delegation state immediately
+      // 🛡️ RECONNECTION OPTIMIZATION: Update local cache directly to avoid network flicker
       if (data.isAiDelegated !== classData?.isAiDelegated) {
-        refetchClass();
+        queryClient.setQueryData(["classes", classIdString], (old: any) => {
+          if (!old) return old;
+          return {
+            ...old,
+            isAiDelegated: data.isAiDelegated,
+            isBreakoutActive: data.isBreakoutActive,
+          };
+        });
       }
       setIsBreakoutActive(!!data.isBreakoutActive);
     },
