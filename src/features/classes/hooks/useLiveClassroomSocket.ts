@@ -54,7 +54,7 @@ export const useLiveClassroomSocket = (numericClassId: number, handlers: SocketH
     socket.on("teacher_delegated", wrappedHandlers.teacherDelegated);
     socket.on("teacher_resumed", wrappedHandlers.teacherResumed);
     socket.on("live_pulse_update", wrappedHandlers.pulseUpdate);
-    socket.on("live_init", wrappedHandlers.liveInit);
+    socket.on("live:init", wrappedHandlers.liveInit);
 
     return () => {
       socket.off("live_session_started", wrappedHandlers.sessionStarted);
@@ -64,7 +64,7 @@ export const useLiveClassroomSocket = (numericClassId: number, handlers: SocketH
       socket.off("teacher_delegated", wrappedHandlers.teacherDelegated);
       socket.off("teacher_resumed", wrappedHandlers.teacherResumed);
       socket.off("live_pulse_update", wrappedHandlers.pulseUpdate);
-      socket.off("live_init", wrappedHandlers.liveInit);
+      socket.off("live:init", wrappedHandlers.liveInit);
     };
   }, [numericClassId, handlers]);
 };
