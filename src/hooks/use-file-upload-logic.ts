@@ -1,7 +1,9 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { useTablawyNotification } from "@/hooks/use-tablawy-notification";
 import { useTranslation } from "react-i18next";
+import { useGetIdentity } from "@refinedev/core";
 import { getAuthToken } from "@/lib/auth-helper";
+import { User } from "@/types";
 import { handleError } from "@/providers/utils/api-errors";
 import { createCorrelationId } from "@/lib/traceability";
 import { bytesToMb, isFileTypeAllowed } from "@/lib/utils";
@@ -29,6 +31,7 @@ export const useFileUploadLogic = ({
 }: UseFileUploadLogicProps) => {
   const { t } = useTranslation();
   const { open } = useTablawyNotification();
+  const { data: identity } = useGetIdentity<User>();
 
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -94,6 +97,7 @@ export const useFileUploadLogic = ({
             startTusUpload(file, token, {
               folder,
               correlationId,
+              userId: identity?.id || "anonymous",
               ...(persistedUrl ? { uploadUrl: persistedUrl } : {}),
             });
             return;

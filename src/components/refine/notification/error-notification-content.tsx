@@ -62,7 +62,7 @@ export const ErrorNotificationContent: React.FC<ErrorNotificationContentProps> =
         </summary>
         <div
           id="support-info-content"
-          className="mt-1 p-2 bg-muted/50 rounded border border-border font-mono break-all select-all leading-tight"
+          className="mt-1 p-2 bg-muted/50 rounded border border-border font-mono break-all select-all leading-tight max-h-48 overflow-y-auto"
           onClick={(e) => e.stopPropagation()}
           role="region"
           aria-label={t("labels.technicalDetails", "Technical support details")}

@@ -11,6 +11,7 @@ import { DropzoneArea } from "./upload/dropzone-area";
 import { SelectedFileCard } from "./upload/selected-file-card";
 import { UploadProgressBar } from "./upload/upload-progress-bar";
 import { useFileUploadLogic } from "@/hooks/use-file-upload-logic";
+import { useOfflineSync } from "@/hooks/useOfflineSync";
 
 interface FileUploadProps {
   onUploadSuccess: (url: string, publicId: string) => void;
@@ -35,6 +36,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
 }) => {
   const { t } = useTranslation();
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const { isOnline } = useOfflineSync();
 
   const {
     file,
@@ -79,6 +81,15 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   };
 
   const renderButtonContent = () => {
+    if (!isOnline && !isUploading) {
+      return (
+        <>
+          <WifiOff className="me-2 h-4 w-4" />
+          {t("common.notifications.offline", "Offline")}
+        </>
+      );
+    }
+
     if (!isUploading) {
       return (
         <>
@@ -155,7 +166,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
                   e.stopPropagation();
                   void handleUpload();
                 }}
-                disabled={isUploading}
+                disabled={isUploading || !isOnline}
                 className="w-full sm:w-auto min-w-[140px] rounded-2xl font-black uppercase tracking-widest text-[10px] h-12 md:h-14 px-8 md:px-10 shadow-lg shadow-primary/25"
               >
                 {renderButtonContent()}
