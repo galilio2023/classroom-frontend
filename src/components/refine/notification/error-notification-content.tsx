@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { ChevronDown, Copy, Check, WifiOff } from "lucide-react";
 import { redactSensitiveData } from "@/lib/security";
 import { cn } from "@/lib/utils";
+import { useOfflineSync } from "@/hooks/useOfflineSync";
 
 interface ErrorNotificationContentProps {
   description?: React.ReactNode;
@@ -21,6 +22,7 @@ export const ErrorNotificationContent: React.FC<ErrorNotificationContentProps> =
   meta,
 }) => {
   const { t } = useTranslation();
+  const { isOnline } = useOfflineSync();
   const [copied, setCopied] = React.useState(false);
 
   const [isOpen, setIsOpen] = React.useState(false);
@@ -68,7 +70,7 @@ export const ErrorNotificationContent: React.FC<ErrorNotificationContentProps> =
           role="region"
           aria-label={t("labels.technicalDetails", "Technical support details")}
         >
-          {typeof navigator !== "undefined" && !navigator.onLine ? (
+          {!isOnline ? (
             <div className="text-destructive font-bold flex items-center gap-1.5 uppercase tracking-widest text-[8px]">
               <WifiOff className="h-3 w-3" />
               {t("common.notifications.checkConnection", "Please check your network connection")}

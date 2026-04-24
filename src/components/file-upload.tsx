@@ -28,10 +28,10 @@ interface FileUploadProps {
  */
 export const FileUpload: React.FC<FileUploadProps> = ({
   label,
-  accept,
+  accept = ".pdf,.doc,.docx,.jpg,.jpeg,.png,.webp",
   onUploadSuccess,
   onClear,
-  folder,
+  folder = "general",
   maxSize = MAX_SYNC_UPLOAD_SIZE_MB * 1024 * 1024, // Set default from config
 }) => {
   const { t } = useTranslation();
