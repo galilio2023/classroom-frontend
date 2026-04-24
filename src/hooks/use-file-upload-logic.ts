@@ -251,39 +251,50 @@ export const useFileUploadLogic = ({
     };
   }, [abortTusUpload]);
 
+  const handleRetry = useCallback(() => {
+    if (file && !isUploading && !uploadComplete) {
+      void handleUpload();
+    }
+  }, [file, isUploading, uploadComplete, handleUpload]);
+
   useEffect(() => {
-    const handleRetry = () => {
-      if (file && !isUploading && !uploadComplete) {
-        void handleUpload();
-      }
-    };
     window.addEventListener("tablawy:retry_job_sync", handleRetry);
     return () => window.removeEventListener("tablawy:retry_job_sync", handleRetry);
-  }, [file, isUploading, uploadComplete, handleUpload]);
+  }, [handleRetry]);
+
+  const abortUpload = useCallback(() => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    abortTusUpload();
+    setIsUploading(false);
+  }, [abortTusUpload]);
 
   const clearFile = useCallback(() => {
     if (file) {
       const fingerprint = `${file.name}-${file.size}-${file.type}`;
       localStorage.removeItem(`tus-upload-${fingerprint}`);
     }
+
     setFile(null);
     setUploadComplete(false);
     setUploadProgress(0);
     setTimeRemaining(null);
     setIsUploading(false);
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-      abortControllerRef.current = null;
-    }
-    abortTusUpload();
+
+    abortUpload();
+
+    // 🛡️ SYNC ABORT (Priority 1): Reset ID ONLY after abort signal is sent
     uploadIdRef.current = null;
     correlationIdRef.current = null;
     uploadStartTimeRef.current = null;
+
     if (inputRef?.current) {
       inputRef.current.value = "";
     }
+
     onClear?.();
-  }, [onClear, abortTusUpload, inputRef, file]);
+  }, [onClear, abortUpload, inputRef, file]);
 
   const handleFileChange = useCallback(
     async (selectedFile: File) => {
@@ -348,6 +359,7 @@ export const useFileUploadLogic = ({
     clearFile,
     handleUpload,
     handleFileChange,
+    abortUpload,
     setFile,
     setUploadComplete,
     setUploadProgress,
