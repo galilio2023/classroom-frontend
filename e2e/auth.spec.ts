@@ -13,7 +13,11 @@ test.describe('Authentication Journey', () => {
     const password = process.env.TEST_TEACHER_PASSWORD;
     
     if (!email || !password) {
-      throw new Error('Missing TEST_TEACHER_EMAIL or TEST_TEACHER_PASSWORD environment variables');
+      throw new Error(
+        'E2E Setup Error: TEST_TEACHER_EMAIL or TEST_TEACHER_PASSWORD is not set. ' +
+        'Please ensure you have a .env.test file or valid CI secrets. ' +
+        'See .env.example for required variables.'
+      );
     }
 
     await page.fill('[data-testid="email-input"]', email);

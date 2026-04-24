@@ -126,6 +126,7 @@ export interface Subject {
   department: Department;
   prerequisiteSubjectId: number | null;
   prerequisite?: Subject;
+  language?: string;
   version: number;
   createdAt: string;
   updatedAt: string;
@@ -381,8 +382,8 @@ export type Class = z.infer<typeof classFormSchema> & {
   isAiDelegated?: boolean;
   aiDelegationPhoto?: string | null;
   aiDelegationContext?: {
-    script?: string;
-    visualCue?: string;
+    script?: string | null;
+    visualCue?: "talking" | "thinking" | "listening" | "idle";
   };
   manifestVersion: number;
   automationRules?: AutomationRule[];

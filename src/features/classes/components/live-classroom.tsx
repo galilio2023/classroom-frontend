@@ -544,8 +544,8 @@ export const LiveClassroom = ({
                     classId={classIdString}
                     photo={classData?.aiDelegationPhoto ?? null}
                     script={classData?.aiDelegationContext?.script ?? null}
-                    visualCue={(classData?.aiDelegationContext?.visualCue as any) || "talking"}
-                    language={(classData?.subject as any)?.language || "English"}
+                    visualCue={classData?.aiDelegationContext?.visualCue || "idle"}
+                    language={classData?.subject?.language || "English"}
                     onFinished={handleCompanionFinished}
                   />
                 </div>
