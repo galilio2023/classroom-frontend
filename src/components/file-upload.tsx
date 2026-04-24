@@ -4,7 +4,7 @@ import { Loader2, Upload, AlertCircle, WifiOff } from "lucide-react";
 import { Button } from "./ui/button";
 import { Label } from "./ui/label";
 import { bytesToMb } from "@/lib/utils";
-import { UPLOAD_CONSTANTS } from "@/constants/upload";
+import { MAX_SYNC_UPLOAD_SIZE_MB } from "@/config";
 
 // 🏗️ DECONSTRUCTION: Extracted sub-components (Mandate Review #13)
 import { DropzoneArea } from "./upload/dropzone-area";
@@ -25,8 +25,14 @@ interface FileUploadProps {
  * 🚀 FILE UPLOAD COMPONENT
  * Handled via useFileUploadLogic for React 19 performance and modularity.
  */
-export const FileUpload: React.FC<FileUploadProps> = (props) => {
-  const { label, accept, maxSize, onUploadSuccess, onClear, folder } = props;
+export const FileUpload: React.FC<FileUploadProps> = ({
+  label,
+  accept,
+  onUploadSuccess,
+  onClear,
+  folder,
+  maxSize = MAX_SYNC_UPLOAD_SIZE_MB * 1024 * 1024, // Set default from config
+}) => {
   const { t } = useTranslation();
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -39,6 +45,7 @@ export const FileUpload: React.FC<FileUploadProps> = (props) => {
     timeRemaining,
     isResumable,
     isResuming,
+    isRetrying,
     tusStatus,
     setIsDragging,
     clearFile,
@@ -90,6 +97,15 @@ export const FileUpload: React.FC<FileUploadProps> = (props) => {
       );
     }
 
+    if (isRetrying) {
+      return (
+        <>
+          <Loader2 className="me-2 h-4 w-4 animate-spin" />
+          {t("buttons.reconnecting", "Reconnecting...")}
+        </>
+      );
+    }
+
     return (
       <>
         <Loader2 className="me-2 h-4 w-4 animate-spin" />
@@ -112,7 +128,7 @@ export const FileUpload: React.FC<FileUploadProps> = (props) => {
           onDrop={onDrop}
           onClick={() => fileInputRef.current?.click()}
           accept={accept}
-          maxSizeMb={bytesToMb(maxSize || UPLOAD_CONSTANTS.DEFAULT_MAX_FILE_SIZE)}
+          maxSizeMb={bytesToMb(maxSize)}
         />
       ) : (
         <div className="space-y-4">
