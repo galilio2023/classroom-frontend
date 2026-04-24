@@ -130,7 +130,8 @@ export const useFileUploadLogic = ({
         open({ type: "success", message: t("common.upload.success", "Upload successful") });
       }
     } catch (err: unknown) {
-      if (err instanceof Error && (err.name === "AbortError" || err.message === "AbortError")) return;
+      if (err instanceof Error && (err.name === "AbortError" || err.message === "AbortError"))
+        return;
       if (uploadIdRef.current !== activeUploadId) return;
       const normalizedError = await handleError(err);
       open({
@@ -147,16 +148,7 @@ export const useFileUploadLogic = ({
         abortControllerRef.current = null;
       }
     }
-  }, [
-    file,
-    isUploading,
-    isResumable,
-    startTusUpload,
-    folder,
-    onUploadSuccess,
-    open,
-    t,
-  ]);
+  }, [file, isUploading, isResumable, startTusUpload, folder, onUploadSuccess, open, t]);
 
   useEffect(() => {
     if (tusStatus === "uploading") {

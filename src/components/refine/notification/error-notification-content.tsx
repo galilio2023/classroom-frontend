@@ -28,19 +28,6 @@ export const ErrorNotificationContent: React.FC<ErrorNotificationContentProps> =
   // 🛡️ TRACEABILITY: Always provide a fallback for support (Mandate Review #8)
   const displayId = correlationId || "N/A";
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
-    // Allow keyboard users to toggle the accordion with Space or Enter
-    // without dismissing the toast notification.
-    if (e.key === " " || e.key === "Enter") {
-      e.preventDefault();
-      e.stopPropagation(); // Stop both default action and event bubbling
-      const details = e.currentTarget.parentElement as HTMLDetailsElement;
-      if (details) {
-        details.open = !details.open;
-      }
-    }
-  };
-
   return (
     <div className="space-y-2">
       <div className="text-sm">
@@ -48,6 +35,7 @@ export const ErrorNotificationContent: React.FC<ErrorNotificationContentProps> =
       </div>
       <details
         className="text-[10px] opacity-70 cursor-pointer group"
+        open={isOpen}
         onToggle={(e) => setIsOpen((e.target as HTMLDetailsElement).open)}
       >
         <summary
@@ -59,7 +47,13 @@ export const ErrorNotificationContent: React.FC<ErrorNotificationContentProps> =
             // Prevent toast from dismissing when interacting with accordion
             e.stopPropagation();
           }}
-          onKeyDown={handleKeyDown}
+          onKeyDown={(e) => {
+            if (e.key === " " || e.key === "Enter") {
+              e.preventDefault();
+              e.stopPropagation();
+              setIsOpen(!isOpen);
+            }
+          }}
         >
           <ChevronDown
             className={cn("h-3 w-3 transition-transform duration-200", isOpen ? "rotate-180" : "")}
