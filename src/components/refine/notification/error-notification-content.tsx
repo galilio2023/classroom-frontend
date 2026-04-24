@@ -24,6 +24,7 @@ export const ErrorNotificationContent: React.FC<ErrorNotificationContentProps> =
   const { t } = useTranslation();
   const { isOnline } = useOfflineSync();
   const [copied, setCopied] = React.useState(false);
+  const supportInfoId = React.useId();
 
   const [isOpen, setIsOpen] = React.useState(false);
 
@@ -55,7 +56,7 @@ export const ErrorNotificationContent: React.FC<ErrorNotificationContentProps> =
         <summary
           className="hover:underline font-medium list-none flex items-center gap-1 focus-visible:ring-1 focus-visible:ring-primary rounded-sm outline-none"
           aria-expanded={isOpen}
-          aria-controls="support-info-content"
+          aria-controls={supportInfoId}
           aria-label={t("labels.toggleSupportInfo", "Toggle technical support details")}
         >
           <ChevronDown
@@ -64,7 +65,7 @@ export const ErrorNotificationContent: React.FC<ErrorNotificationContentProps> =
           {t("labels.supportInfo", "Support Info")}
         </summary>
         <div
-          id="support-info-content"
+          id={supportInfoId}
           className="mt-1 p-2 bg-muted/50 rounded border border-border font-mono break-all select-all leading-tight max-h-48 overflow-y-auto"
           onClick={(e) => e.stopPropagation()}
           role="region"
