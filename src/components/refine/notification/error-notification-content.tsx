@@ -77,7 +77,12 @@ export const ErrorNotificationContent: React.FC<ErrorNotificationContentProps> =
             </div>
           ) : (
             <>
-              ID: {displayId}
+              <div className="flex items-center justify-between gap-4">
+                <span>ID: {displayId}</span>
+                {meta?.statusCode && (
+                  <span className="text-[8px] opacity-50">Status: {meta.statusCode}</span>
+                )}
+              </div>
               {redactedMeta && (
                 <div className="mt-1 border-t border-border/50 pt-1">
                   Meta: {JSON.stringify(redactedMeta, null, 2)}
