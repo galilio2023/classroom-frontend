@@ -18,6 +18,7 @@ export const useTusUpload = () => {
   const [uploadUrl, setUploadUrl] = useState<string | null>(null);
   const [tusPublicId, setTusPublicId] = useState<string | null>(null);
   const [currentUploadId, setCurrentUploadId] = useState<string | null>(null);
+  const [isResuming, setIsResuming] = useState(false);
 
   const uploadRef = useRef<tus.Upload | null>(null);
 
@@ -39,6 +40,7 @@ export const useTusUpload = () => {
       setStatus("uploading");
       setError(null);
       setProgress(0);
+      setIsResuming(false);
 
       const upload = new tus.Upload(file, {
         endpoint: TUS_ENDPOINT,
@@ -66,11 +68,16 @@ export const useTusUpload = () => {
           setError(err);
           setStatus("error");
           setCurrentUploadId(null);
+          setIsResuming(false);
           window.removeEventListener("online", resumeHandler);
         },
         onProgress: (bytesUploaded, bytesTotal) => {
           const percentage = (bytesUploaded / bytesTotal) * 100;
           setProgress(percentage);
+          // 💡 VISUAL FEEDBACK: Reset resume indicator on first progress tick
+          if (isResuming) {
+            setIsResuming(false);
+          }
         },
         onSuccess: () => {
           setUploadUrl(upload.url);
@@ -80,6 +87,7 @@ export const useTusUpload = () => {
           // 🛡️ SECURITY: Generate a fallback UUID if identity is missing to prevent hardcoded collisions
           setTusPublicId(resourceId || crypto.randomUUID());
           setStatus("success");
+          setIsResuming(false);
           window.removeEventListener("online", resumeHandler);
         },
       });
@@ -90,6 +98,8 @@ export const useTusUpload = () => {
       function resumeHandler() {
         if (uploadRef.current) {
           console.log("🌐 Network returned. Resuming TUS upload...");
+          // 💡 VISUAL FEEDBACK: Signal to UI that we are resuming from a network drop
+          setIsResuming(true);
           uploadRef.current.start();
         }
       }
@@ -98,7 +108,7 @@ export const useTusUpload = () => {
       upload.start();
       return upload;
     },
-    [status]
+    [status, isResuming]
   );
 
   return {
@@ -110,5 +120,6 @@ export const useTusUpload = () => {
     uploadUrl,
     tusPublicId,
     currentUploadId,
+    isResuming,
   };
 };

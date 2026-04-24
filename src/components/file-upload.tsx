@@ -1,6 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { Loader2, Upload, AlertCircle } from "lucide-react";
+import { Loader2, Upload, AlertCircle, WifiOff } from "lucide-react";
 import { Button } from "./ui/button";
 import { Label } from "./ui/label";
 import { bytesToMb } from "@/lib/utils";
@@ -38,6 +38,7 @@ export const FileUpload: React.FC<FileUploadProps> = (props) => {
     isDragging,
     timeRemaining,
     isResumable,
+    isResuming,
     tusStatus,
     setIsDragging,
     clearFile,
@@ -68,6 +69,35 @@ export const FileUpload: React.FC<FileUploadProps> = (props) => {
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       void handleFileChange(e.dataTransfer.files[0]);
     }
+  };
+
+  const renderButtonContent = () => {
+    if (!isUploading) {
+      return (
+        <>
+          <Upload className="me-2 h-4 w-4" />
+          {t("common.upload.label", "Start Upload")}
+        </>
+      );
+    }
+
+    if (isResuming) {
+      return (
+        <>
+          <WifiOff className="me-2 h-4 w-4 animate-pulse text-amber-400" />
+          {t("buttons.resuming", "Resuming...")}
+        </>
+      );
+    }
+
+    return (
+      <>
+        <Loader2 className="me-2 h-4 w-4 animate-spin" />
+        {isResumable
+          ? t("buttons.uploadingResumable", "Uploading...")
+          : t("buttons.uploading", "Uploading...")}
+      </>
+    );
   };
 
   return (
@@ -112,19 +142,7 @@ export const FileUpload: React.FC<FileUploadProps> = (props) => {
                 disabled={isUploading}
                 className="w-full sm:w-auto min-w-[140px] rounded-2xl font-black uppercase tracking-widest text-[10px] h-12 md:h-14 px-8 md:px-10 shadow-lg shadow-primary/25"
               >
-                {isUploading ? (
-                  <>
-                    <Loader2 className="me-2 h-4 w-4 animate-spin" />
-                    {tusStatus === "uploading"
-                      ? t("buttons.resuming", "Resuming...")
-                      : t("buttons.uploading", "Uploading...")}
-                  </>
-                ) : (
-                  <>
-                    <Upload className="me-2 h-4 w-4" />
-                    {t("common.upload.label", "Start Upload")}
-                  </>
-                )}
+                {renderButtonContent()}
               </Button>
             ) : (
               <Button

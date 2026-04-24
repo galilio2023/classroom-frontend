@@ -46,6 +46,7 @@ export const useFileUploadLogic = ({
     uploadUrl: tusUrl,
     tusPublicId,
     currentUploadId,
+    isResuming,
   } = useTusUpload();
 
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -379,6 +380,7 @@ export const useFileUploadLogic = ({
     isDragging,
     timeRemaining,
     isResumable,
+    isResuming,
     tusStatus,
     setIsDragging,
     clearFile,
