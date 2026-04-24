@@ -36,24 +36,13 @@ export const ErrorNotificationContent: React.FC<ErrorNotificationContentProps> =
       <details
         className="text-[10px] opacity-70 cursor-pointer group"
         open={isOpen}
-        onToggle={(e) => setIsOpen((e.target as HTMLDetailsElement).open)}
+        onToggle={(e) => setIsOpen(e.currentTarget.open)}
       >
         <summary
           className="hover:underline font-medium list-none flex items-center gap-1 focus-visible:ring-1 focus-visible:ring-primary rounded-sm outline-none"
           aria-expanded={isOpen}
           aria-controls="support-info-content"
           aria-label={t("labels.toggleSupportInfo", "Toggle technical support details")}
-          onClick={(e) => {
-            // Prevent toast from dismissing when interacting with accordion
-            e.stopPropagation();
-          }}
-          onKeyDown={(e) => {
-            if (e.key === " " || e.key === "Enter") {
-              e.preventDefault();
-              e.stopPropagation();
-              setIsOpen(!isOpen);
-            }
-          }}
         >
           <ChevronDown
             className={cn("h-3 w-3 transition-transform duration-200", isOpen ? "rotate-180" : "")}

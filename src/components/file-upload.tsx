@@ -161,6 +161,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
           <div className="flex justify-end pt-2">
             {!uploadComplete ? (
               <Button
+                type="button"
                 size="lg"
                 onClick={(e) => {
                   e.stopPropagation();
