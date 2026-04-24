@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { BACKEND_URL } from "@/config";
+import { BACKEND_URL, STORAGE_KEYS } from "@/config";
 import { useTranslation } from "react-i18next";
 
 interface VerificationUploadProps {
@@ -34,7 +34,7 @@ export const VerificationUpload = ({ url, onUpload, onClear }: VerificationUploa
     formData.append("folder", "verification");
 
     try {
-      const token = localStorage.getItem("tablawy_auth_token");
+      const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
       const response = await fetch(`${BACKEND_URL}/upload`, {
         method: "POST",
         body: formData,

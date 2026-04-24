@@ -9,6 +9,42 @@
     "refreshBtn": "Refresh Now",
     "overwriteBtn": "Overwrite"
   },
+  "ai": {
+    "jobs": {
+      "multiple_completed": "{{count}} AI tasks completed in background.",
+      "check_dashboard": "Check your notifications or the AI dashboard for details.",
+      "syncError": "Failed to sync background tasks. Retrying...",
+      "queued_title": "Processing in background",
+      "queued_desc": "We'll notify you when it's ready.",
+      "queued_safe_mode_desc": "System load is high. This may take longer than usual.",
+      "explain": {
+        "completed": "Explanation generated successfully",
+        "failed": "Failed to generate explanation"
+      },
+      "summary": {
+        "completed": "Summary ready",
+        "failed": "Failed to summarize content"
+      },
+      "bio": {
+        "completed": "Bio generated",
+        "failed": "Failed to generate bio"
+      }
+    },
+    "notifications": {
+      "offline": "Internet Connection Required",
+      "manualCopy": "Manual copy required in non-secure contexts",
+      "copyCorrelationId": "Copy correlation ID for support",
+      "copyId": "Copy ID",
+      "copied": "Copied",
+      "idCopied": "Correlation ID copied to clipboard"
+    },
+    "errorBoundary": {
+      "title": "AI Assistant Offline",
+      "description": "Something went wrong while communicating with Gemini. This is usually temporary.",
+      "disabled": "This AI feature has been disabled by the administrator.",
+      "tryAgain": "Try Again"
+    }
+  },
   "attendance": "$t(resources.attendance.attendance)",
   "project-groups": "$t(resources.project-groups.project-groups)",
   "library": "$t(resources.library.title)",
@@ -185,9 +221,13 @@
       "remove": "Remove file",
       "tooLarge": "File too large",
       "tooLargeDesc": "Please select a file smaller than 10MB.",
+      "largeFileWarning": "Large File Detected",
+      "largeFileWarningDesc": "Large file detected. Resumable mode (TUS) is active to ensure reliability on unstable connections.",
       "success": "File uploaded successfully!",
       "removeSuccess": "File removed successfully",
       "error": "Upload failed",
+      "failed": "Upload failed. Please try again.",
+      "change": "Change File",
       "removeError": "Failed to remove file from server",
       "video": {
         "maxSize": "Max size: 100MB (.mp4, .mov)",
@@ -264,7 +304,17 @@
     "errors": {
       "fillRequired": "Please fill in all required fields.",
       "aiFailed": "AI Generation failed. Please try again.",
-      "loadingFailed": "Failed to load classes"
+      "loadingFailed": "Failed to load classes",
+      "unexpected": "An unexpected error occurred. Please try again."
+    },
+    "notifications": {
+      "offline": "Internet Connection Required",
+      "checkConnection": "Please check your network connection",
+      "manualCopy": "Manual copy required in non-secure contexts",
+      "copyCorrelationId": "Copy correlation ID for support",
+      "copyId": "Copy ID",
+      "copied": "Copied",
+      "idCopied": "Correlation ID copied to clipboard"
     }
   },
   "notifications": {
@@ -377,7 +427,12 @@
     "create": "Create",
     "show": "Show",
     "copy": "Copy",
-    "tryAgain": "Try Again",    "search": "Search history...",
+    "tryAgain": "Try Again",
+    "uploading": "Uploading...",
+    "uploadingResumable": "Uploading (Resumable)...",
+    "resuming": "Resuming...",
+    "reconnecting": "Reconnecting...",
+    "search": "Search history...",
     "uploadCredentials": "Upload Credentials",
     "dismiss": "Dismiss",
     "getStarted": "Get Started",
@@ -427,20 +482,13 @@
     "enrollStudent": "Enroll Student",
     "sendBroadcast": "Send Broadcast",
     "reject": "Reject",
+    "confirmRejection": "Confirm Rejection",
     "approveStudent": "Approve Student",
     "invite": "Invite",
     "copyCode": "Copy Code",
     "copied": "Copied!",
     "confirmUnenroll": "Confirm Unenroll",
     "processing": "Processing...",
-    "ai": {
-      "errorBoundary": {
-        "title": "AI Assistant Offline",
-        "description": "Something went wrong while communicating with Gemini. This is usually temporary.",
-        "disabled": "This AI feature has been disabled by the administrator.",
-        "tryAgain": "Try Again"
-      }
-    },
     "magicBuilder": "Magic Builder",
     "addModule": "Add Module",
     "aiMagicBuilder": "AI Magic Builder",
@@ -527,7 +575,6 @@
     "generateQuiz": "Generate Quiz",
     "generateAssignment": "Generate Assignment",
     "addTask": "Add Task",
-    "uploading": "Uploading...",
     "addMembers": "Add Members",
     "viewDetailsAndMembers": "View Details & Members",
     "confirmDeleteGroup": "Are you sure you want to delete this group?",
@@ -561,6 +608,7 @@
     "notAccessBack": "Back to Safety",
     "submitEvaluation": "Submit Evaluation"
   },
+
   "roles": {
     "student": "Student",
     "teacher": "Teacher",
@@ -1055,7 +1103,9 @@
         "document": "Verification Document",
         "proofTitle": "Teaching Credentials Proof",
         "proofDesc": "Uploaded by teacher for verification",
-        "noDocument": "No document uploaded."
+        "noDocument": "No document uploaded.",
+        "rejectionReasonLabel": "Rejection Reason",
+        "rejectionReasonPlaceholder": "Explain why this document was rejected..."
       },
       "deleteDialog": {
         "title": "Are you absolutely sure?",
@@ -1871,6 +1921,26 @@
     "newBadge": "New Badge Unlocked!",
     "badges": {
       "juniorTeacher": "Junior Teacher Solution"
+    }
+  },
+  "validation": {
+    "required": "Required",
+    "invalidEmail": "Invalid email address",
+    "schoolNameRequired": "School name and slug are required."
+  },
+  "labels": {
+    "supportInfo": "Support Info",
+    "toggleSupportInfo": "Toggle technical support details",
+    "technicalDetails": "Technical support details",
+    "technicalInfo": "Technical Info"
+  },
+  "schools": {
+    "setup": {
+      "toasts": {
+        "identitySaved": "Identity saved.",
+        "brandingUpdated": "Branding updated.",
+        "departmentCreated": "Department created."
+      }
     }
   }
 }

@@ -246,7 +246,7 @@ const ProgressListPage = () => {
             <Button
               variant="outline"
               size="lg"
-              className="w-full md:w-auto rounded-2xl h-12 md:h-14 px-8 border-primary/20 bg-primary/5 hover:bg-primary/10 text-primary font-bold uppercase tracking-widest text-[10px] shadow-sm gap-2"
+              className="w-full md:w-auto rounded-2xl h-12 md:h-14 px-8 border-primary/20 bg-primary/5 hover:bg-primary/10 text-primary font-black uppercase tracking-widest text-[10px] shadow-sm gap-2"
             >
               <Award className="h-4 w-4" />
               {t("buttons.topPerformers")}

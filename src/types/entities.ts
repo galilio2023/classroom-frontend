@@ -60,6 +60,7 @@ export interface User {
   parentName: string | null;
   parentPhone: string | null;
   inviteCode: string | null;
+  planType: "basic" | "faculty" | "school";
   verificationStatus: VerificationStatus;
   verificationDocumentUrl: string | null;
   verificationDocumentCldPubId: string | null;
@@ -73,6 +74,11 @@ export interface User {
   lastActiveAt: string | null;
   aiTokensUsed?: number;
   aiMonthlyLimit?: number;
+  metadata?: {
+    rejectionReason?: string;
+    rejectedAt?: string;
+    [key: string]: any;
+  };
   enrollments?: Enrollment[];
   teacherChannel?: TeacherChannel;
   persona?: {

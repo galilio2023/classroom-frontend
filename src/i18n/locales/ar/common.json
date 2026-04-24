@@ -1,4 +1,41 @@
 {
+  "ai": {
+    "jobs": {
+      "multiple_completed": "تم إكمال {{count}} من مهام الذكاء الاصطناعي في الخلفية.",
+      "check_dashboard": "تحقق من إشعاراتك أو لوحة تحكم الذكاء الاصطناعي لمزيد من التفاصيل.",
+      "syncError": "فشل مزامنة مهام الخلفية. جاري إعادة المحاولة...",
+      "queued_title": "جاري المعالجة في الخلفية",
+      "queued_desc": "سنقوم بإخطارك عندما تكون جاهزة.",
+      "queued_safe_mode_desc": "حمولة النظام عالية. قد يستغرق هذا وقتاً أطول من المعتاد.",
+      "explain": {
+        "completed": "تم توليد الشرح بنجاح",
+        "failed": "فشل توليد الشرح"
+      },
+      "summary": {
+        "completed": "الملخص جاهز",
+        "failed": "فشل تلخيص المحتوى"
+      },
+      "bio": {
+        "completed": "تم توليد السيرة الذاتية",
+        "failed": "فشل توليد السيرة الذاتية"
+      }
+    },
+    "notifications": {
+      "offline": "الاتصال بالإنترنت مطلوب",
+      "manualCopy": "النسخ اليدوي مطلوب في البيئات غير الآمنة",
+      "copyCorrelationId": "نسخ معرف الارتباط للدعم",
+      "copyId": "نسخ المعرف",
+      "copied": "تم النسخ",
+      "idCopied": "تم نسخ معرف الارتباط إلى الحافظة",
+      "checkConnection": "يرجى التحقق من اتصالك بالشبكة"
+    },
+    "errorBoundary": {
+      "title": "مساعد الذكاء الاصطناعي غير متصل",
+      "description": "حدث خطأ أثناء التواصل مع جمناي. عادة ما يكون هذا مؤقتاً.",
+      "disabled": "تم تعطيل ميزة الذكاء الاصطناعي هذه من قبل المسؤول.",
+      "tryAgain": "حاول مرة أخرى"
+    }
+  },
   "attendance": "$t(resources.attendance.attendance)",
   "project-groups": "$t(resources.project-groups.project-groups)",
   "library": "$t(resources.library.title)",
@@ -171,6 +208,8 @@
       "remove": "إزالة الملف",
       "tooLarge": "الملف كبير جداً",
       "tooLargeDesc": "يرجى اختيار ملف أصغر من 10 ميجابايت.",
+      "largeFileWarning": "تم اكتشاف ملف كبير",
+      "largeFileWarningDesc": "قد تكون عمليات الرفع القياسية غير مستقرة على الشبكات البطيئة. يفضل استخدام اتصال 4G أو واي فاي لنتائج أفضل.",
       "success": "تم رفع الملف بنجاح!",
       "removeSuccess": "تم إزالة الملف بنجاح",
       "error": "فشل الرفع",
@@ -364,6 +403,10 @@
     "show": "عرض",
     "copy": "نسخ",
     "tryAgain": "حاول مرة أخرى",
+    "uploading": "جاري الرفع...",
+    "uploadingResumable": "جاري الرفع (قابل للاستئناف)...",
+    "resuming": "جاري الاستئناف...",
+    "reconnecting": "جاري إعادة الاتصال...",
     "search": "البحث في السجل...",
     "uploadCredentials": "رفع الاعتمادات",
     "dismiss": "تجاهل",
@@ -411,20 +454,13 @@
     "enrollStudent": "تسجيل طالب",
     "sendBroadcast": "إرسال بث",
     "reject": "رفض",
+    "confirmRejection": "تأكيد الرفض",
     "approveStudent": "قبول الطالب",
     "invite": "دعوة",
     "copyCode": "نسخ الكود",
     "copied": "تم النسخ!",
     "confirmUnenroll": "تأكيد إلغاء التسجيل",
     "processing": "جاري المعالجة...",
-    "ai": {
-      "errorBoundary": {
-        "title": "مساعد الذكاء الاصطناعي غير متصل",
-        "description": "حدث خطأ أثناء التواصل مع جمناي. عادة ما يكون هذا مؤقتاً.",
-        "disabled": "تم تعطيل ميزة الذكاء الاصطناعي هذه من قبل المسؤول.",
-        "tryAgain": "حاول مرة أخرى"
-      }
-    },
     "magicBuilder": "المنشئ السحري",
     "addModule": "إضافة وحدة",
     "aiMagicBuilder": "المنشئ السحري بالذكاء الاصطناعي",
@@ -1037,8 +1073,10 @@
         "document": "وثيقة التوثيق",
         "proofTitle": "إثبات اعتمادات التدريس",
         "proofDesc": "تم رفعه من قبل المعلم للتوثيق",
-        "noDocument": "لم يتم رفع أي وثيقة."
-      },
+        "noDocument": "لم يتم رفع أي مستند.",
+        "rejectionReasonLabel": "سبب الرفض",
+        "rejectionReasonPlaceholder": "اشرح سبب رفض هذا المستند..."
+        },
       "deleteDialog": {
         "title": "هل أنت متأكد تماماً؟",
         "description": "لا يمكن التراجع عن هذا الإجراء. سيؤدي ذلك إلى حذف حساب المستخدم وجميع البيانات المرتبطة به نهائياً من النظام."
@@ -1846,6 +1884,21 @@
     "newBadge": "تم فتح وسام جديد!",
     "badges": {
       "juniorTeacher": "Junior Teacher Solution"
+    }
+  },
+  "labels": {
+    "supportInfo": "معلومات الدعم",
+    "toggleSupportInfo": "تبديل معلومات الدعم الفني",
+    "technicalDetails": "تفاصيل الدعم الفني",
+    "technicalInfo": "معلومات تقنية"
+  },
+  "schools": {
+    "setup": {
+      "toasts": {
+        "identitySaved": "تم حفظ الهوية المؤسسية بنجاح.",
+        "brandingUpdated": "تم تحديث تفضيلات العلامة التجارية.",
+        "departmentCreated": "تم إنشاء القسم بنجاح."
+      }
     }
   }
 }

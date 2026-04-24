@@ -3,6 +3,7 @@ import { offlineDB as db } from "@/lib/offline-db";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { useCustomMutation, useLog } from "@refinedev/core";
+import { BACKEND_URL } from "@/config";
 
 /**
  * 📶 useOfflineSync Hook
@@ -24,6 +25,28 @@ export const useOfflineSync = () => {
     }
   };
 
+  /**
+   * 💓 HEARTBEAT: Checks for true internet connectivity beyond just the OS signal.
+   * Review #4: Crucial for detecting "captive portals" or high-latency rural drops.
+   */
+  const checkConnectivity = async () => {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5s timeout
+
+      const response = await fetch(`${BACKEND_URL}/health`, {
+        method: "HEAD",
+        mode: "no-cors", // Lightweight check
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+      return true; // If fetch completes (even no-cors opaque), server is reachable
+    } catch (e) {
+      return false;
+    }
+  };
+
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       if (event.data?.type === "SYNC_OFFLINE_DATA") {
@@ -31,17 +54,27 @@ export const useOfflineSync = () => {
       }
     };
 
-    const handleOnline = () => {
-      setIsOnline(true);
-      syncPendingData();
+    const handleOnline = async () => {
+      const realOnline = await checkConnectivity();
+      if (realOnline) {
+        setIsOnline(true);
+        syncPendingData();
+      }
     };
     const handleOffline = () => setIsOnline(false);
+
+    // 🛡️ Periodic Heartbeat (every 30s)
+    const interval = setInterval(async () => {
+      const onlineStatus = await checkConnectivity();
+      setIsOnline(onlineStatus);
+    }, 30000);
 
     window.addEventListener("online", handleOnline);
     window.addEventListener("offline", handleOffline);
     navigator.serviceWorker?.addEventListener("message", handleMessage);
 
     return () => {
+      clearInterval(interval);
       window.removeEventListener("online", handleOnline);
       window.removeEventListener("offline", handleOffline);
       navigator.serviceWorker?.removeEventListener("message", handleMessage);
@@ -106,6 +139,14 @@ export const useOfflineSync = () => {
       });
 
       for (const quiz of pendingQuizzes) {
+        // 🛡️ BATTERY SAFETY: Limit retries for failed syncs
+        const retryCount = (quiz as any).retryCount || 0;
+        if (retryCount >= 5) {
+          console.error(`Sync failed for quiz ${quiz.quizId} after 5 attempts. Pruning.`);
+          if (quiz.id) await db.quizzes.delete(quiz.id);
+          continue;
+        }
+
         submitQuiz(
           {
             url: `/quizzes/${quiz.quizId}/submit`,
@@ -115,6 +156,11 @@ export const useOfflineSync = () => {
           {
             onSuccess: async () => {
               if (quiz.id) await db.quizzes.delete(quiz.id);
+            },
+            onError: async () => {
+              if (quiz.id) {
+                await db.quizzes.put({ ...quiz, retryCount: retryCount + 1 });
+              }
             },
           }
         );

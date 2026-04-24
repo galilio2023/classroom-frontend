@@ -6,7 +6,7 @@ This document serves as the **Single Source of Truth** for frontend developers. 
 
 ## 🔐 Auth & Identity
 *   **Provider:** Better Auth
-*   **Base URL:** `/api/auth`
+*   **Base URL:** `/api/identity` (Legacy `/api/auth` is aliased)
 
 | Method | Endpoint | Recommended Hook | Description |
 | :--- | :--- | :--- | :--- |

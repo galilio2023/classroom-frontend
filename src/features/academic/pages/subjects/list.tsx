@@ -54,7 +54,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/empty-state";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
-import { ColumnDef } from "@tanstack/react-table";
+
+import { useCapabilities } from "@/hooks/use-capabilities";
 
 interface SubjectListItem extends Omit<Subject, "department"> {
   department?: Department;
@@ -63,6 +64,7 @@ interface SubjectListItem extends Omit<Subject, "department"> {
 const SubjectsList = () => {
   const { t, i18n } = useTranslation();
   const isAr = i18n.language === "ar";
+  const { isInstitutional } = useCapabilities();
 
   usePageTitle(t("subjects.title"));
   const { data: identity } = useGetIdentity<User>();
@@ -78,14 +80,18 @@ const SubjectsList = () => {
     resource: "departments",
     optionLabel: "name",
     optionValue: "name",
+    queryOptions: {
+      enabled: isInstitutional,
+    },
   });
 
-  const columns = useMemo<ColumnDef<SubjectListItem>[]>(() => [], []);
-
-  const {
-    refineCore: { tableQuery: query, filters, setFilters },
-  } = useTable<SubjectListItem, HttpError>({
-    columns,
+  /**
+   * 🏛️ HEADLESS CORE-ONLY IMPLEMENTATION
+   * Using useTable for state management (filters, pagination) only.
+   * Render is handled via custom card components for enhanced institution-grade UX.
+   */
+  const table = useTable<SubjectListItem, HttpError>({
+    columns: [], // Required by @refinedev/react-table but unused in headless card view
     refineCoreProps: {
       resource: "subjects",
       pagination: { pageSize: 50, mode: "server" },
@@ -96,6 +102,8 @@ const SubjectsList = () => {
       syncWithLocation: true,
     },
   });
+
+  const { filters, setFilters, tableQuery: query } = table.refineCore;
 
   const searchQuery =
     (filters.find((f) => "field" in f && f.field === "search") as any)?.value || "";
@@ -119,7 +127,10 @@ const SubjectsList = () => {
     );
   };
 
-  const subjects = useMemo(() => query.data?.data || [], [query.data?.data]);
+  const subjects = useMemo<SubjectListItem[]>(
+    () => (query.data?.data as SubjectListItem[]) || [],
+    [query.data?.data]
+  );
   const isLoading = query.isPending;
   const hasData = subjects.length > 0;
 
@@ -140,7 +151,7 @@ const SubjectsList = () => {
 
   // Stats calculation
   const stats = useMemo(() => {
-    if (!subjects.length) return { total: 0, totalCredits: 0, avgCredits: 0 };
+    if (!subjects || subjects.length === 0) return { total: 0, totalCredits: 0, avgCredits: 0 };
     const totalCredits = subjects.reduce(
       (acc: number, curr: SubjectListItem) => acc + (curr.credits || 0),
       0
@@ -215,7 +226,7 @@ const SubjectsList = () => {
               <p className="text-2xl md:text-3xl font-black text-indigo-600">
                 {isLoading
                   ? "..."
-                  : new Intl.NumberFormat(i18n.language).format(stats.totalCredits)}
+                  : new Intl.NumberFormat(i18n.language).format(Number(stats.totalCredits || 0))}
               </p>
             </div>
           </Card>
@@ -228,7 +239,9 @@ const SubjectsList = () => {
                 {t("subjects.stats.archived")}
               </p>
               <p className="text-2xl md:text-3xl font-black text-green-600">
-                {isLoading ? "..." : new Intl.NumberFormat(i18n.language).format(stats.avgCredits)}
+                {isLoading
+                  ? "..."
+                  : new Intl.NumberFormat(i18n.language).format(Number(stats.avgCredits || 0))}
               </p>
             </div>
           </Card>
@@ -255,24 +268,26 @@ const SubjectsList = () => {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <div className="flex flex-wrap items-center gap-2 bg-background/50 px-3 py-1 rounded-2xl border border-border/40">
-              <Filter className="h-3.5 w-3.5 text-muted-foreground/60" />
-              <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
-                <SelectTrigger className="w-[180px] border-none h-10 focus:ring-0 shadow-none font-bold text-[10px] uppercase tracking-wider bg-transparent">
-                  <SelectValue placeholder={t("departments.filters.allDepartments")} />
-                </SelectTrigger>
-                <SelectContent className="rounded-2xl bg-white dark:bg-[#09090b] opacity-100 backdrop-blur-none border border-border/50 shadow-2xl">
-                  <SelectItem value="all" className="font-bold">
-                    {t("departments.filters.allDepartments")}
-                  </SelectItem>
-                  {departmentOptions.map(({ value, label }) => (
-                    <SelectItem value={String(value)} key={value} className="font-bold">
-                      {label}
+            {isInstitutional && (
+              <div className="flex flex-wrap items-center gap-2 bg-background/50 px-3 py-1 rounded-2xl border border-border/40">
+                <Filter className="h-3.5 w-3.5 text-muted-foreground/60" />
+                <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
+                  <SelectTrigger className="w-[180px] border-none h-10 focus:ring-0 shadow-none font-bold text-[10px] uppercase tracking-wider bg-transparent">
+                    <SelectValue placeholder={t("departments.filters.allDepartments")} />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-2xl bg-white dark:bg-[#09090b] opacity-100 backdrop-blur-none border border-border/50 shadow-2xl">
+                    <SelectItem value="all" className="font-bold">
+                      {t("departments.filters.allDepartments")}
                     </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+                    {departmentOptions.map(({ value, label }) => (
+                      <SelectItem value={String(value)} key={value} className="font-bold">
+                        {label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
         </Card>
 
@@ -328,7 +343,9 @@ const SubjectsList = () => {
                       className={cn(
                         "group relative flex flex-col md:flex-row items-center p-5 md:p-6 rounded-4xl bg-card/50 backdrop-blur-sm border border-border/40 hover:border-primary/30 hover:bg-card/80 transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-primary/5 cursor-pointer"
                       )}
-                      onClick={() => show("subjects", subject.id)}
+                      onClick={() => {
+                        if (subject.id) show("subjects", subject.id);
+                      }}
                     >
                       {/* Status Line Accent */}
                       <div className="absolute start-0 top-1/2 -translate-y-1/2 w-1.5 h-12 bg-primary rounded-e-full transition-all group-hover:h-20" />
@@ -355,6 +372,12 @@ const SubjectsList = () => {
                             {subject.name}
                           </h3>
                           <div className="flex items-center justify-center md:justify-start gap-2">
+                            {isInstitutional && (
+                              <Badge className="bg-indigo-500/10 text-indigo-600 border-none font-black px-3 py-1 rounded-full text-[10px] md:text-[11px] tracking-widest uppercase shadow-sm gap-1.5">
+                                <Building2 className="h-3 w-3" />
+                                {t("subjects.sharedCurriculum", "Shared")}
+                              </Badge>
+                            )}
                             <Badge
                               variant="outline"
                               className="text-[10px] md:text-[11px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full border-primary/10 shadow-sm"
@@ -369,20 +392,22 @@ const SubjectsList = () => {
                         </div>
 
                         <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 md:gap-6 mt-4">
-                          <div className="flex items-center gap-2.5 bg-background/40 px-3 py-1.5 rounded-full border border-border/20 shadow-sm">
-                            <div className="p-1.5 rounded-lg bg-primary/5 shrink-0">
-                              <Building2 className="h-3.5 w-3.5 text-primary" />
+                          {isInstitutional && (
+                            <div className="flex items-center gap-2.5 bg-background/40 px-3 py-1.5 rounded-full border border-border/20 shadow-sm">
+                              <div className="p-1.5 rounded-lg bg-primary/5 shrink-0">
+                                <Building2 className="h-3.5 w-3.5 text-primary" />
+                              </div>
+                              <div className="flex flex-col">
+                                <span className="text-[10px] md:text-[11px] uppercase font-bold text-muted-foreground/60 tracking-wider">
+                                  Department
+                                </span>
+                                <span className="text-[11px] font-black text-foreground truncate max-w-[150px]">
+                                  {subject.department?.name ||
+                                    t("subjects.filters.generalDepartment")}
+                                </span>
+                              </div>
                             </div>
-                            <div className="flex flex-col">
-                              <span className="text-[10px] md:text-[11px] uppercase font-bold text-muted-foreground/60 tracking-wider">
-                                Department
-                              </span>
-                              <span className="text-[11px] font-black text-foreground truncate max-w-[150px]">
-                                {subject.department?.name ||
-                                  t("subjects.filters.generalDepartment")}
-                              </span>
-                            </div>
-                          </div>
+                          )}
 
                           <div className="flex items-center gap-2.5 bg-background/40 px-3 py-1.5 rounded-full border border-border/20 shadow-sm">
                             <div className="p-1.5 rounded-lg bg-primary/5 shrink-0">
@@ -418,7 +443,7 @@ const SubjectsList = () => {
                                 className="h-11 w-11 rounded-2xl text-muted-foreground hover:text-primary hover:bg-primary/5 bg-muted/20"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  edit("subjects", subject.id);
+                                  if (subject.id) edit("subjects", subject.id);
                                 }}
                               >
                                 <Pencil className="h-5 w-5" />
@@ -429,7 +454,7 @@ const SubjectsList = () => {
                                 className="h-11 w-11 rounded-2xl text-destructive hover:bg-destructive/10 bg-muted/20"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  setDeleteTarget(subject.id);
+                                  if (subject.id) setDeleteTarget(Number(subject.id as any));
                                 }}
                               >
                                 <Trash2 className="h-5 w-5" />
@@ -468,7 +493,9 @@ const SubjectsList = () => {
                               {t("assignments.list.labels.options")}
                             </DropdownMenuLabel>
                             <DropdownMenuItem
-                              onClick={() => show("subjects", subject.id)}
+                              onClick={() => {
+                                if (subject.id) show("subjects", subject.id);
+                              }}
                               className="rounded-xl gap-3 py-3 cursor-pointer"
                             >
                               <div className="p-2 rounded-lg bg-primary/10 text-primary">
@@ -479,7 +506,9 @@ const SubjectsList = () => {
                             {isAdmin && (
                               <>
                                 <DropdownMenuItem
-                                  onClick={() => edit("subjects", subject.id)}
+                                  onClick={() => {
+                                    if (subject.id) edit("subjects", subject.id);
+                                  }}
                                   className="rounded-xl gap-3 py-3 cursor-pointer"
                                 >
                                   <div className="p-2 rounded-lg bg-primary/10 text-primary">
@@ -489,7 +518,9 @@ const SubjectsList = () => {
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator className="my-2 opacity-50" />
                                 <DropdownMenuItem
-                                  onClick={() => setDeleteTarget(subject.id)}
+                                  onClick={() => {
+                                    if (subject.id) setDeleteTarget(Number(subject.id as any));
+                                  }}
                                   className="rounded-xl gap-3 py-3 cursor-pointer text-destructive focus:bg-destructive/10"
                                 >
                                   <div className="p-2 rounded-lg bg-destructive/10 text-destructive">

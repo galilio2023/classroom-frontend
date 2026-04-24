@@ -14,6 +14,7 @@ import { ChatSource, Message } from "@/types/ai";
 import { offlineDB } from "@/lib/offline-db";
 import { useAiAccess } from "./use-ai-access";
 import { AiStreamClient } from "../lib/ai-stream-client";
+import { getCorrelationId } from "@/providers/utils/api-errors";
 
 interface UseAIChatProps {
   url: string;
@@ -312,10 +313,11 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
               console.error("Simple Chat Error:", err);
               setIsLoading(false);
               const error = err as HttpError;
+              const correlationId = getCorrelationId(err);
               open?.({
                 type: "error",
                 message: t("common.error"),
-                description: error.message || t("aiHub.errors.serviceUnavailable"),
+                description: `${error.message || t("aiHub.errors.serviceUnavailable")} (Trace: ${correlationId})`,
               });
             },
           }
@@ -373,11 +375,12 @@ export const useAIChat = ({ url, context, classId }: UseAIChatProps) => {
 
       console.error("Tablawy AI Error:", err);
       const error = err as HttpError;
+      const correlationId = getCorrelationId(err);
 
       open?.({
         type: "error",
         message: t("common.error"),
-        description: error.message || t("aiHub.errors.serviceUnavailable"),
+        description: `${error.message || t("aiHub.errors.serviceUnavailable")} (Trace: ${correlationId})`,
       });
 
       setMessages((prev) => [

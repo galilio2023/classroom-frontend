@@ -5,7 +5,7 @@ import React from "react";
 
 type UndoableNotificationProps = {
   message: string;
-  description?: string;
+  description?: React.ReactNode;
   undoableTimeout?: number;
   cancelMutation?: () => void;
   onClose?: () => void;

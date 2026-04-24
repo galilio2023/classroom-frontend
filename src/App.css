@@ -116,6 +116,12 @@
   --shadow-premium: 0 10px 30px -10px rgba(0, 0, 0, 0.05);
   --shadow-glow: 0 0 20px -5px var(--color-primary);
   --shadow-3xl: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+
+  --bg-ai-primary-gradient: linear-gradient(
+    135deg,
+    hsl(var(--ai-primary-hsl)) 0%,
+    hsl(var(--primary-hsl)) 100%
+  );
 }
 
 @layer base {
@@ -170,6 +176,20 @@
   }
   .text-popover-foreground {
     color: var(--popover-foreground) !important;
+  }
+
+  /* 🤖 Mandate Review #9: AI Visual Identifier Utilities */
+  .bg-ai-primary-gradient {
+    background: var(--bg-ai-primary-gradient);
+  }
+  .text-ai-primary-gradient {
+    @apply bg-clip-text text-transparent;
+    background-image: var(--bg-ai-primary-gradient);
+  }
+
+  /* 📏 UI Standard: Overline Label Style (Mandate Review #13) */
+  .overline {
+    @apply text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60;
   }
 }
 

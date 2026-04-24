@@ -102,7 +102,7 @@ export const ClassHeader = ({ classId, isOwner }: ClassHeaderProps) => {
             onClick={handleCopyLink}
           >
             {copied ? <Check className="w-4 h-4 text-success" /> : <Share2 className="w-4 h-4" />}
-            {copied ? t("buttons.copied") : t("buttons.share")}
+            {copied ? t("buttons.copied", "Copied!", {}) : t("buttons.share", "Share", {})}
           </Button>
 
           <CanAccess resource="classes" action="edit" id={classId}>

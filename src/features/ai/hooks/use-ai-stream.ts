@@ -66,10 +66,14 @@ export function useAiStream<T = unknown>(
       abortControllerRef.current = new AbortController();
 
       try {
-        const fullContent = await AiStreamClient.fetchStream(endpoint, body, {
-          onChunk: options.onChunk,
-          signal: abortControllerRef.current.signal,
-        });
+        const fullContent = await AiStreamClient.fetchStream(
+          endpoint,
+          body as Record<string, unknown> & { correlationId?: string },
+          {
+            onChunk: options.onChunk,
+            signal: abortControllerRef.current.signal,
+          }
+        );
 
         // 🛡️ Validation: Ensure the final output matches our expected schema
         let finalData: T = fullContent as unknown as T;

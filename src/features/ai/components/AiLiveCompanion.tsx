@@ -7,7 +7,7 @@ import { useNotification } from "@refinedev/core";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAILiveInteraction } from "@/features/ai/hooks/use-ai-live-interaction";
 import { useDashboard } from "@/features/dashboard/hooks/use-dashboard";
-import { useCapabilities } from "@/features/users/hooks/use-capabilities";
+import { useCapabilities } from "@/hooks/use-capabilities";
 import { AIVisualState } from "@/features/ai/types";
 import { useHardwareSafety } from "@/hooks/use-hardware-safety";
 

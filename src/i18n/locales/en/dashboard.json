@@ -125,6 +125,17 @@
       "predictedFinal": "Predicted Final",
       "readyToSubmit": "Ready to submit"
     },
+    "journey": {
+      "stages": {
+        "onboarding": "Onboarding",
+        "planning": "Planning",
+        "learning": "Learning",
+        "assessing": "Assessing",
+        "intervening": "Intervening",
+        "reporting": "Reporting",
+        "completed": "Completed"
+      }
+    },
     "staff": {
       "actions": {
         "header": "What's Next?",
@@ -212,6 +223,11 @@
       "allGraded": "You've graded all recent submissions.",
       "greatJobTeacher": "Great job, Teacher!",
       "aiAlignment": "AI Alignment (RLHF)",
+      "journeyFunnel": "Student Journey Funnel",
+      "journeyFunnelDesc": "Distribution of students across the learning lifecycle.",
+      "lifecycleInsight": "Lifecycle Insight",
+      "noJourneyData": "No journey data available yet.",
+      "studentCount": "Students",
       "teacherTvStats": "Teacher TV Stats",
       "channelViews": "Channel Views",
       "lifetimeViews": "Lifetime Views",

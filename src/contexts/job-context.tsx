@@ -1,17 +1,41 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from "react";
-import { useNotification } from "@refinedev/core";
-import { handleError, getCorrelationId } from "@/providers/utils/api-errors";
-import { getFreshSession } from "@/providers/auth";
-import { BASE_URL } from "@/constants/api";
-import { getJitteredDelay } from "@/lib/jitter";
+import { useNotification, type HttpError } from "@refinedev/core";
+import { handleError } from "@/providers/utils/api-errors";
+import { socket } from "@/lib/socket";
+import { useTranslation } from "react-i18next";
+import { BACKEND_URL } from "@/config";
+import { createCorrelationId } from "@/lib/traceability";
+import { pruneExpiredJobs } from "@/providers/utils/job-manager";
+import { offlineDB, BackgroundJobRecord } from "@/lib/offline-db";
+import { getAuthToken } from "@/lib/auth-helper";
+import { BrainCircuit, Sparkles } from "lucide-react";
 
-export interface BackgroundJob {
-  id: string;
-  type: "summary" | "assignment" | "quiz" | "magic-builder" | "bulk-enroll";
-  status: "processing" | "completed" | "failed";
-  title: string;
-  createdAt: number;
-  metadata?: any;
+export type BackgroundJob = BackgroundJobRecord;
+
+// 🛡️ VISUAL IDENTIFIERS: Map job types to mandated icons with premium gradients (Mandate Review #9)
+const getJobIcon = (type: string) => {
+  const generativeTypes = [
+    "magic_builder",
+    "quiz_generation",
+    "assignment_generation",
+    "bio_generation",
+  ];
+
+  const isGenerative = generativeTypes.includes(type);
+  const Icon = isGenerative ? Sparkles : BrainCircuit;
+
+  return (
+    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-ai-primary-gradient shadow-glow">
+      <Icon className="h-3.5 w-3.5 text-white" />
+    </div>
+  );
+};
+
+interface JobCompletedEvent {
+  jobId: string;
+  status: string;
+  result?: Record<string, unknown>;
+  correlationId?: string;
 }
 
 interface JobContextType {
@@ -20,272 +44,460 @@ interface JobContextType {
   updateJob: (id: string, updates: Partial<BackgroundJob>) => void;
   removeJob: (id: string) => void;
   clearCompleted: () => void;
-  syncJobs: () => Promise<void>;
+  syncJobs: () => Promise<number | undefined>;
+  isSafeMode: boolean; // 🛡️ Mandate Review #8: Inform UI of high system load
 }
 
 const JobContext = createContext<JobContextType | undefined>(undefined);
 
-export const useJobs = () => {
-  const context = useContext(JobContext);
-  if (!context) throw new Error("useJobs must be used within a JobProvider");
-  return context;
-};
-
-const STORAGE_KEY = "classroom_active_jobs";
-
-// 🛡️ POLLING CONFIGURATION (Mandate M-008)
 const POLLING_CONFIG = {
-  INITIAL_DELAY: 5000, // 5s (🚀 UX: Faster initial feedback)
-  MAX_DELAY: 30000, // 30s (🚀 UX: More aggressive cap for active jobs)
-  RETRY_INTERVAL: 15000, // 15s (🚀 RESILIENCE: Standard retry delay)
-  IDLE_POLL_INTERVAL: 60000, // 1m when tab is hidden
-  JITTER_FACTOR: 0.1, // 10%
+  BASE_INTERVAL: 120000, // 2 Minutes (Mandate Review #9 - Adaptive)
+  MAX_INTERVAL: 900000, // 15 Minutes (Mandate Review #9 - Adaptive)
+  HEALTH_CHECK_INTERVAL: 300000, // 5 Minutes
+  MAINTENANCE_CLEANUP_INTERVAL: 3600000, // 1 Hour
 };
 
 export const JobProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [jobs, setJobs] = useState<BackgroundJob[]>([]);
-  const [syncDelay, setSyncDelay] = useState(POLLING_CONFIG.INITIAL_DELAY);
-  const [isVisible, setIsVisible] = useState(true);
+  const [consecutiveFailures, setConsecutiveFailures] = useState(0);
+  const [isVisible, setIsVisible] = useState(document.visibilityState === "visible");
+  const [isSafeMode, setIsSafeMode] = useState(false);
+  const [isReady, setIsReady] = useState(false);
 
   const jobsRef = useRef<BackgroundJob[]>([]);
-  const isSyncingRef = useRef(false);
   const timeoutIdRef = useRef<NodeJS.Timeout | null>(null);
+  const isSyncingRef = useRef(false);
   const abortControllerRef = useRef<AbortController | null>(null);
+
   const { open } = useNotification();
+  const { t } = useTranslation();
 
-  // Sync ref with state
-  useEffect(() => {
-    jobsRef.current = jobs;
-  }, [jobs]);
-
-  // 1. Initial Load from LocalStorage
-  useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        // 🛡️ AUTO-CLEANUP: Remove very old jobs (> 24h) or completed/failed jobs (> 1h)
-        const dayAgo = Date.now() - 24 * 60 * 60 * 1000;
-        const hourAgo = Date.now() - 60 * 60 * 1000;
-
-        const valid = parsed.filter((j: BackgroundJob) => {
-          if (j.status === "processing") return j.createdAt > dayAgo;
-          return j.createdAt > hourAgo;
-        });
-        setJobs(valid);
-        jobsRef.current = valid;
-      } catch (e) {
-        console.error("Failed to load jobs from storage", e);
-      }
-    }
-  }, []);
-
-  // 2. Sync to LocalStorage
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(jobs));
-  }, [jobs]);
-
+  // 🛡️ HELPERS
   const updateJob = useCallback((id: string, updates: Partial<BackgroundJob>) => {
-    setJobs((prev) =>
-      prev.map((j) => (j.id === id || j.metadata?.jobId === id ? { ...j, ...updates } : j))
-    );
+    setJobs((prev) => {
+      const next = prev.map((job) => (job.id === id ? { ...job, ...updates } : job));
+      jobsRef.current = next;
+      return next;
+    });
   }, []);
 
-  // 🛡️ RECOVERY: Polling for AI jobs that might have finished while disconnected
-  const syncJobs = useCallback(async () => {
-    const activeAiJobs = jobsRef.current.filter((j) => j.status === "processing");
-    if (activeAiJobs.length === 0 || isSyncingRef.current) return;
+  const removeJob = useCallback((id: string) => {
+    setJobs((prev) => {
+      const next = prev.filter((job) => job.id !== id);
+      jobsRef.current = next;
+      return next;
+    });
+  }, []);
 
-    if (abortControllerRef.current) abortControllerRef.current.abort();
+  const clearCompleted = useCallback(() => {
+    setJobs((prev) => {
+      const next = prev.filter((job) => job.status === "processing");
+      jobsRef.current = next;
+      return next;
+    });
+  }, []);
+
+  // 🛡️ SYNC CORE: Fetches current status of processing jobs from backend
+  const syncJobs = useCallback(async (): Promise<number | undefined> => {
+    if (isSyncingRef.current || !isVisible) return;
+
+    const processingJobs = jobsRef.current.filter((j) => j.status === "processing");
+    if (processingJobs.length === 0) return;
+
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
     const controller = new AbortController();
     abortControllerRef.current = controller;
 
+    const correlationId = createCorrelationId("poll");
+
     try {
       isSyncingRef.current = true;
-      const { data: session } = await getFreshSession();
-      const token = (session as any)?.token;
-      if (!token) return;
+      const minCreatedAt = Math.min(...processingJobs.map((j) => j.createdAt));
+      const token = getAuthToken();
+      const sinceParam = encodeURIComponent(new Date(minCreatedAt).toISOString());
 
-      const response = await fetch(`${BASE_URL}/ai/jobs/sync`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
+      const response = await fetch(`${BACKEND_URL}/ai/jobs/sync?since=${sinceParam}`, {
         signal: controller.signal,
+        headers: {
+          "X-Correlation-ID": correlationId,
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
       });
 
       if (!response.ok) {
         throw await handleError(response);
       }
 
-      const { data } = await response.json();
+      const { data: updatedJobs } = (await response.json()) as { data: BackgroundJob[] };
 
-      if (data && Array.isArray(data)) {
-        data.forEach((remoteJob: any) => {
-          const localJob = jobsRef.current.find(
-            (j) =>
-              j.status === "processing" &&
-              j.type === remoteJob.topic &&
-              j.metadata?.classId === remoteJob.classId
-          );
+      setConsecutiveFailures(0);
 
-          if (localJob && remoteJob.status === "completed") {
-            const updatedMetadata = { ...localJob.metadata, ...remoteJob.result };
-            updateJob(localJob.id, {
-              status: "completed",
-              metadata: updatedMetadata,
-            });
-
-            window.dispatchEvent(
-              new CustomEvent(`JOB_COMPLETED_${localJob.type.toUpperCase()}`, {
-                detail: { jobId: localJob.id, metadata: updatedMetadata },
-              })
-            );
-          } else if (localJob && remoteJob.status === "failed") {
-            updateJob(localJob.id, { status: "failed" });
-            window.dispatchEvent(
-              new CustomEvent(`JOB_FAILED_${localJob.type.toUpperCase()}`, {
-                detail: { jobId: localJob.id },
-              })
-            );
-          }
-        });
+      const newlyFinished = updatedJobs.filter((u) => u.status !== "processing");
+      if (newlyFinished.length > 1) {
+        open?.({
+          type: "info",
+          message: t("ai.jobs.multiple_completed", "{{count}} AI tasks completed in background.", {
+            count: newlyFinished.length,
+          }),
+          description: t(
+            "ai.jobs.check_dashboard",
+            "Check your notifications or the AI dashboard for details.",
+            {}
+          ),
+          meta: {
+            icon: (
+              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-ai-primary-gradient shadow-glow">
+                <BrainCircuit className="h-3.5 w-3.5 text-white" />
+              </div>
+            ),
+          },
+        } as any);
       }
-    } catch (e: any) {
-      if (e.name === "AbortError") return;
-      console.error("AI Job Sync failed:", e);
+
+      const nextJobs = jobsRef.current.map((job) => {
+        const update = updatedJobs.find((u) => u.id === job.id || u.correlationId === job.id);
+        if (update) {
+          if (
+            job.status === "processing" &&
+            update.status !== "processing" &&
+            newlyFinished.length <= 1
+          ) {
+            const translationKey = `ai.jobs.${job.type}.${update.status}`;
+            open?.({
+              type: update.status === "completed" ? "success" : "error",
+              message: t(
+                translationKey as any,
+                update.status === "completed" ? "Task completed" : "Task failed",
+                {}
+              ),
+              description: job.title,
+              meta: {
+                icon: getJobIcon(job.type),
+              },
+            } as any);
+          }
+          return { ...job, ...update, retryCount: 0 };
+        }
+        return job;
+      });
+
+      // 🛡️ ATOMIC: Sync to memory and Dexie together (Mandate Review #9)
+      setJobs(nextJobs);
+      jobsRef.current = nextJobs;
+      void offlineDB.background_jobs.bulkPut(nextJobs);
+    } catch (err: unknown) {
+      const error = err as HttpError;
+      if (error.name === "AbortError") return;
+
+      console.error("Job Sync Failed:", error);
+
+      setConsecutiveFailures((prev) => prev + 1);
+
       open?.({
         type: "error",
-        message: "Sync Failed",
-        description: e.message || "Failed to synchronize background jobs.",
-      });
+        message: t("ai.jobs.syncError", "Failed to sync background tasks. Retrying...", {}),
+        meta: { correlationId, ...(error.meta || {}) },
+      } as any);
+
+      // 🛡️ Mandate Review #9: Pass Retry-After back to the scheduler
+      if (error.statusCode === 429 && error.meta?.retryAfter) {
+        return error.meta.retryAfter;
+      }
     } finally {
       if (abortControllerRef.current === controller) {
-        abortControllerRef.current = null;
+        isSyncingRef.current = false;
       }
-      isSyncingRef.current = false;
     }
-  }, [updateJob, open]);
+    return undefined;
+  }, [open, t, isVisible]);
 
-  // 🛡️ CLEANUP: Prevent memory leaks and orphaned requests on unmount
-  useEffect(() => {
-    return () => {
-      if (timeoutIdRef.current) clearTimeout(timeoutIdRef.current);
-      if (abortControllerRef.current) abortControllerRef.current.abort();
-    };
-  }, []);
+  // 🛡️ ADAPTIVE SCHEDULER: Failure-based backoff logic with Full Jitter
+  const calculateNextPollDelay = useCallback(
+    (retryAfterSeconds?: number) => {
+      const retryAfterMs = retryAfterSeconds ? retryAfterSeconds * 1000 : 0;
+      // 🛡️ DATA SAVER: Respect student's bandwidth (Mandate Review #9)
+      const nav = navigator as Navigator & { connection?: { saveData: boolean } };
+      const isSaveDataMode = nav.connection?.saveData === true;
 
-  const scheduleNext = useCallback((delay: number) => {
-    if (timeoutIdRef.current) clearTimeout(timeoutIdRef.current);
-
-    timeoutIdRef.current = setTimeout(poll, delay);
-  }, []);
-
-  const poll = useCallback(async () => {
-    let nextDelay = syncDelay;
-    let shouldSchedule = false;
-
-    try {
-      // 🛡️ RULE 6: Tab Visibility Safety
-      if (!isVisible) {
-        nextDelay = POLLING_CONFIG.IDLE_POLL_INTERVAL;
-        shouldSchedule = true;
-        return;
+      // 1. Mandatory Throttle: Always respect Retry-After from server (Review #9)
+      if (retryAfterMs > 0) {
+        return retryAfterMs + Math.random() * 2000; // Add small jitter to server-suggested delay
       }
 
-      const activeAiJobs = jobsRef.current.filter((j) => j.status === "processing");
-      if (activeAiJobs.length > 0) {
-        await syncJobs();
+      // 2. Data Saver: Drop to max interval to respect student's bandwidth
+      if (isSaveDataMode) {
+        return POLLING_CONFIG.MAX_INTERVAL + Math.random() * 30000;
+      }
 
-        // 🛡️ RESILIENCE: Jittered Exponential backoff
-        const nextBase = Math.min(syncDelay * 2, POLLING_CONFIG.MAX_DELAY);
-        const jittered = getJitteredDelay(nextBase, POLLING_CONFIG.JITTER_FACTOR);
-        nextDelay = Math.max(POLLING_CONFIG.INITIAL_DELAY, jittered);
-        setSyncDelay(nextDelay);
-        shouldSchedule = true;
+      const newestJob = jobsRef.current.find((j) => j.status === "processing");
+      const isRecentlyQueued = newestJob && Date.now() - newestJob.createdAt < 60000;
+
+      let maxBackoff = POLLING_CONFIG.BASE_INTERVAL;
+
+      if (consecutiveFailures === 0) {
+        // High-frequency polling for newly started jobs
+        maxBackoff = isRecentlyQueued ? 15000 : POLLING_CONFIG.BASE_INTERVAL;
       } else {
-        // Stop the loop if no more processing jobs
-        setSyncDelay(POLLING_CONFIG.INITIAL_DELAY);
-        shouldSchedule = false;
-        if (timeoutIdRef.current) {
-          clearTimeout(timeoutIdRef.current);
-          timeoutIdRef.current = null;
-        }
+        // 🚀 FULL JITTER: Exponential backoff with random factor to prevent thundering herds
+        // Formula: random(0, min(cap, base * 2^retries))
+        maxBackoff = Math.min(
+          POLLING_CONFIG.BASE_INTERVAL * Math.pow(2, consecutiveFailures),
+          POLLING_CONFIG.MAX_INTERVAL
+        );
       }
-    } catch (pollErr) {
-      const error = await handleError(pollErr);
-      const correlationId = getCorrelationId(pollErr);
-      console.error("Critical: AI Polling loop encountered an error:", error);
 
-      open?.({
-        type: "error",
-        message: "AI Sync Error",
-        description: `${error.message} (Trace: ${correlationId})`,
-      });
+      // 🛡️ RURAL RESILIENCE: Floor of 2s to prevent rapid-fire loops during network flaps
+      const jitteredDelay = Math.max(2000, Math.floor(Math.random() * maxBackoff));
 
-      nextDelay = POLLING_CONFIG.RETRY_INTERVAL;
-      shouldSchedule = true;
-    } finally {
-      if (shouldSchedule) {
-        scheduleNext(nextDelay);
-      }
-    }
-  }, [isVisible, syncJobs, syncDelay, open, scheduleNext]);
+      return jitteredDelay;
+    },
+    [consecutiveFailures]
+  );
 
-
-  const addJob = (job: Omit<BackgroundJob, "status" | "createdAt">) => {
-    setJobs((prev) => [
-      ...prev,
-      { ...job, status: "processing", createdAt: Date.now() } as BackgroundJob,
-    ]);
-    setSyncDelay(POLLING_CONFIG.INITIAL_DELAY);
-    // Wake up the loop immediately
-    scheduleNext(0);
-  };
-
-  const removeJob = (id: string) => {
-    setJobs((prev) => {
-      const updated = prev.filter((j) => j.id !== id && j.metadata?.jobId !== id);
-      const stillProcessing = updated.some((j) => j.status === "processing");
-      if (!stillProcessing && timeoutIdRef.current) {
+  const scheduleNext = useCallback(
+    async (delayOverride?: number, retryAfterSeconds?: number) => {
+      if (timeoutIdRef.current) {
         clearTimeout(timeoutIdRef.current);
         timeoutIdRef.current = null;
       }
-      return updated;
-    });
-  };
 
-  const clearCompleted = () => {
-    setJobs((prev) => prev.filter((j) => j.status === "processing"));
-  };
+      if (!isVisible || isSyncingRef.current || !isReady) return;
+
+      const activeAiJobs = jobsRef.current.filter((j) => j.status === "processing");
+      if (activeAiJobs.length === 0) return;
+
+      const nextDelay = delayOverride ?? calculateNextPollDelay(retryAfterSeconds);
+
+      timeoutIdRef.current = setTimeout(() => {
+        syncJobs().then((retryAfter) => {
+          scheduleNext(undefined, retryAfter).catch((err) => {
+            console.error("Critical error in job sync loop:", err);
+            setConsecutiveFailures((prev) => prev + 1);
+            void scheduleNext(POLLING_CONFIG.MAX_INTERVAL);
+          });
+        });
+      }, nextDelay);
+    },
+    [isVisible, calculateNextPollDelay, syncJobs, isReady]
+  );
+
+  const addJob = useCallback(
+    (job: Omit<BackgroundJob, "status" | "createdAt">) => {
+      const newJob: BackgroundJob = {
+        ...job,
+        status: "processing",
+        createdAt: Date.now(),
+        retryCount: 0,
+      };
+
+      setJobs((prev) => {
+        const next = [newJob, ...prev];
+        jobsRef.current = next;
+        void offlineDB.background_jobs.put(newJob);
+        return next;
+      });
+
+      setConsecutiveFailures(0);
+      void scheduleNext(0);
+
+      open?.({
+        type: "info",
+        message: t("ai.jobs.queued_title", "Processing in background", {}),
+        description: isSafeMode
+          ? t(
+              "ai.jobs.queued_safe_mode_desc",
+              "System load is high. This may take longer than usual.",
+              {}
+            )
+          : t("ai.jobs.queued_desc", "We'll notify you when it's ready.", {}),
+        meta: {
+          icon: getJobIcon(newJob.type),
+        },
+      } as any);
+    },
+    [isSafeMode, open, t, scheduleNext]
+  );
+
+  // 🛡️ EFFECTS
+  useEffect(() => {
+    const checkAiHealth = async () => {
+      try {
+        const token = getAuthToken();
+        const response = await fetch(`${BACKEND_URL}/ai/health`, {
+          headers: {
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+        });
+        if (response.ok) {
+          const { data } = (await response.json()) as { data: { isSafeMode: boolean } };
+          setIsSafeMode(!!data.isSafeMode);
+        }
+      } catch (err) {
+        console.warn("Failed to check AI health", err);
+      }
+    };
+
+    void checkAiHealth();
+    const interval = setInterval(checkAiHealth, POLLING_CONFIG.HEALTH_CHECK_INTERVAL);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     const handleVisibilityChange = () => {
       const visible = document.visibilityState === "visible";
       setIsVisible(visible);
-      if (visible && jobsRef.current.some((j) => j.status === "processing")) {
-        scheduleNext(0);
+      if (visible) {
+        void scheduleNext(0);
+      } else {
+        if (abortControllerRef.current) {
+          abortControllerRef.current.abort();
+          abortControllerRef.current = null;
+        }
+        if (timeoutIdRef.current) {
+          clearTimeout(timeoutIdRef.current);
+          timeoutIdRef.current = null;
+        }
       }
     };
-
     document.addEventListener("visibilitychange", handleVisibilityChange);
     return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
   }, [scheduleNext]);
 
-  // Bootstrapping the loop if there are initial jobs
   useEffect(() => {
-    const hasInitialJobs = jobsRef.current.some((j) => j.status === "processing");
-    if (hasInitialJobs && !timeoutIdRef.current) {
-      scheduleNext(POLLING_CONFIG.INITIAL_DELAY);
+    const initJobs = async () => {
+      try {
+        const savedJobs = await offlineDB.background_jobs.toArray();
+        const validJobs = pruneExpiredJobs(savedJobs);
+        setJobs(validJobs);
+        jobsRef.current = validJobs;
+        setIsReady(true);
+      } catch (err) {
+        console.error("Failed to initialize jobs from Dexie:", err);
+        setIsReady(true);
+      }
+    };
+    void initJobs();
+  }, []);
+
+  useEffect(() => {
+    if (isSafeMode) {
+      open?.({
+        type: "warning",
+        message: t("ai.governance.safe_mode_active", "System Load is High", {}),
+        description: t(
+          "ai.governance.safe_mode_desc",
+          "AI features are currently prioritized. Tasks may take longer than usual.",
+          {}
+        ),
+        meta: {
+          icon: <BrainCircuit className="h-4 w-4 text-warning" />,
+        },
+      } as any);
     }
+  }, [isSafeMode, open, t]);
+
+  useEffect(() => {
+    const syncToIndexedDB = async () => {
+      try {
+        await offlineDB.transaction("rw", [offlineDB.background_jobs], async () => {
+          await offlineDB.background_jobs.bulkPut(jobs);
+          const allIds = jobs.map((j) => j.id);
+          await offlineDB.background_jobs
+            .toCollection()
+            .filter((j) => !allIds.includes(j.id))
+            .delete();
+        });
+      } catch (err) {
+        console.error("Failed to sync jobs to Dexie:", err);
+      }
+    };
+    if (isReady) {
+      void syncToIndexedDB();
+    }
+  }, [jobs, isReady]);
+
+  useEffect(() => {
+    const cleanupInterval = setInterval(() => {
+      setJobs((prev) => pruneExpiredJobs(prev));
+    }, POLLING_CONFIG.MAINTENANCE_CLEANUP_INTERVAL);
+    return () => clearInterval(cleanupInterval);
+  }, []);
+
+  useEffect(() => {
+    const handleRetryEvent = (e: any) => {
+      const retryAfter = e.detail?.retryAfter;
+      void scheduleNext(0, retryAfter);
+    };
+    window.addEventListener("tablawy:retry_job_sync" as any, handleRetryEvent);
+    return () => window.removeEventListener("tablawy:retry_job_sync" as any, handleRetryEvent);
+  }, [scheduleNext]);
+
+  useEffect(() => {
+    scheduleNext();
     return () => {
-      if (timeoutIdRef.current) clearTimeout(timeoutIdRef.current);
+      if (timeoutIdRef.current) {
+        clearTimeout(timeoutIdRef.current);
+        timeoutIdRef.current = null;
+      }
     };
   }, [scheduleNext]);
 
-  return (
-    <JobContext.Provider value={{ jobs, addJob, updateJob, removeJob, clearCompleted, syncJobs }}>
-      {children}
-    </JobContext.Provider>
+  useEffect(() => {
+    const handleJobCompleted = (data: JobCompletedEvent) => {
+      const targetJob = jobsRef.current.find(
+        (j) => j.id === data.jobId || (data.correlationId && j.id === data.correlationId)
+      );
+
+      if (targetJob) {
+        const updates = {
+          status: data.status as BackgroundJob["status"],
+          metadata: { ...data.result },
+        };
+        updateJob(targetJob.id, updates);
+        void offlineDB.background_jobs.update(targetJob.id, updates);
+        open?.({
+          type: data.status === "completed" ? "success" : "error",
+          message: t(
+            `ai.jobs.${targetJob.type}.${data.status}` as any,
+            data.status === "completed" ? "Task completed" : "Task failed",
+            {}
+          ),
+          description: targetJob.title,
+          meta: {
+            icon: getJobIcon(targetJob.type),
+          },
+        } as any);
+      }
+    };
+
+    socket.on("ai:job_completed", handleJobCompleted);
+    return () => {
+      socket.off("ai:job_completed", handleJobCompleted);
+    };
+  }, [open, t, updateJob]);
+
+  const contextValue = React.useMemo(
+    () => ({
+      jobs,
+      addJob,
+      updateJob,
+      removeJob,
+      clearCompleted,
+      syncJobs,
+      isSafeMode,
+    }),
+    [jobs, addJob, updateJob, removeJob, clearCompleted, syncJobs, isSafeMode]
   );
+
+  return <JobContext.Provider value={contextValue}>{children}</JobContext.Provider>;
+};
+
+export const useJobs = () => {
+  const context = useContext(JobContext);
+  if (context === undefined) {
+    throw new Error("useJobs must be used within a JobProvider");
+  }
+  return context;
 };

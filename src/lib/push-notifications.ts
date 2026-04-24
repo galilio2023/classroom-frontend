@@ -1,4 +1,4 @@
-import { BACKEND_URL } from "@/config";
+import { BACKEND_URL, STORAGE_KEYS } from "@/config";
 import { getFreshSession } from "@/providers/auth";
 
 const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY;
@@ -49,7 +49,7 @@ export async function subscribeToPush() {
 async function sendSubscriptionToBackend(subscription: PushSubscription) {
   // Use the authClient singleton to get the session reliably
   const { data: sessionData } = await getFreshSession();
-  const token = sessionData?.session?.token || localStorage.getItem("tablawy_auth_token");
+  const token = sessionData?.session?.token || localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
 
   if (!token) {
     console.warn("Attempted to subscribe to push notifications without an active session.");

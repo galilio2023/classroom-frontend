@@ -76,7 +76,7 @@ export const useUserList = () => {
     [users]
   );
 
-  const handleVerify = (id: string, isVerified: boolean) => {
+  const handleVerify = (id: string, isVerified: boolean, reason?: string) => {
     updateMutation(
       {
         resource: "users",
@@ -85,6 +85,9 @@ export const useUserList = () => {
           verificationStatus: isVerified
             ? VerificationStatus.VERIFIED
             : VerificationStatus.REJECTED,
+          metadata: !isVerified
+            ? { rejectionReason: reason, rejectedAt: new Date().toISOString() }
+            : undefined,
         },
       },
       {

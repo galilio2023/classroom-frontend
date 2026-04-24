@@ -1,14 +1,21 @@
-import React, { useState, useRef } from "react";
-import { Button } from "./ui/button";
-import {} from "./ui/input";
-import { Label } from "./ui/label";
-import { Loader2, Upload, File as FileIcon, X, CheckCircle2 } from "lucide-react";
-import { toast } from "sonner";
-import { BACKEND_URL } from "@/config";
+import React from "react";
 import { useTranslation } from "react-i18next";
+import { Loader2, Upload, AlertCircle, WifiOff } from "lucide-react";
+import { Button } from "./ui/button";
+import { Label } from "./ui/label";
+import { bytesToMb } from "@/lib/utils";
+import { MAX_SYNC_UPLOAD_SIZE_MB } from "@/config";
+
+// 🏗️ DECONSTRUCTION: Extracted sub-components (Mandate Review #13)
+import { DropzoneArea } from "./upload/dropzone-area";
+import { SelectedFileCard } from "./upload/selected-file-card";
+import { UploadProgressBar } from "./upload/upload-progress-bar";
+import { useFileUploadLogic } from "@/hooks/use-file-upload-logic";
+import { useOfflineSync } from "@/hooks/useOfflineSync";
 
 interface FileUploadProps {
   onUploadSuccess: (url: string, publicId: string) => void;
+  onError?: (error: any) => void;
   onClear?: () => void;
   folder?: string;
   label?: string;
@@ -16,190 +23,202 @@ interface FileUploadProps {
   maxSize?: number; // In bytes
 }
 
-const DEFAULT_MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-
+/**
+ * 🚀 FILE UPLOAD COMPONENT
+ * Handled via useFileUploadLogic for React 19 performance and modularity.
+ */
 export const FileUpload: React.FC<FileUploadProps> = ({
-  onUploadSuccess,
-  onClear,
-  folder = "general",
   label,
   accept = ".pdf,.doc,.docx,.jpg,.jpeg,.png,.webp",
-  maxSize = DEFAULT_MAX_FILE_SIZE,
+  onUploadSuccess,
+  onError,
+  onClear,
+  folder = "general",
+  maxSize = MAX_SYNC_UPLOAD_SIZE_MB * 1024 * 1024, // Set default from config
 }) => {
   const { t } = useTranslation();
-  const [file, setFile] = useState<File | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadComplete, setUploadComplete] = useState(false);
-  const [_uploadedPublicIdd, setUploadedPublicId] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const { isOnline } = useOfflineSync();
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const selectedFile = e.target.files[0];
+  const {
+    file,
+    isUploading,
+    uploadComplete,
+    uploadProgress,
+    isDragging,
+    timeRemaining,
+    isResumable,
+    isResuming,
+    isRetrying,
+    tusStatus,
+    setIsDragging,
+    clearFile,
+    handleUpload,
+    handleFileChange,
+  } = useFileUploadLogic({
+    onUploadSuccess,
+    onError,
+    onClear,
+    folder,
+    accept,
+    maxSize,
+    inputRef: fileInputRef,
+  });
 
-      // Fix for truncated code in original diff
-      if (selectedFile.size > maxSize) {
-        toast.error(t("common.upload.tooLarge"), {
-          description: t("common.upload.tooLargeDesc", {
-            size: (maxSize / (1024 * 1024)).toFixed(0),
-          }),
-        });
-        if (fileInputRef.current) fileInputRef.current.value = "";
-        return;
-      }
+  const onDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
 
-      setFile(selectedFile);
-      setUploadComplete(false);
-      setUploadedPublicId(null);
+  const onDragLeave = () => {
+    setIsDragging(false);
+  };
+
+  const onDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      void handleFileChange(e.dataTransfer.files[0]);
     }
   };
 
-  const handleUpload = async () => {
-    if (!file) return;
-
-    setIsUploading(true);
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("folder", folder);
-
-    try {
-      const token = localStorage.getItem("tablawy_auth_token"); // Get token for authorization
-      const response = await fetch(`${BACKEND_URL}/upload`, {
-        method: "POST",
-        body: formData,
-        headers: {
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        toast.error(errorData.message || t("common.upload.error"));
-        setIsUploading(false);
-        return;
-      }
-
-      const result = await response.json();
-      onUploadSuccess(result.data.url, result.data.publicId);
-      setUploadedPublicId(result.data.publicId);
-      setUploadComplete(true);
-      toast.success(t("common.upload.success"));
-    } catch (error: any) {
-      console.error("Upload Error:", error);
-      const message = error instanceof Error ? error.message : t("common.upload.error");
-      toast.error(message);
-    } finally {
-      setIsUploading(false);
+  const renderButtonContent = () => {
+    if (!isOnline && !isUploading) {
+      return (
+        <>
+          <WifiOff className="me-2 h-4 w-4" aria-hidden="true" />
+          <span title={t("common.notifications.checkConnection", "Check your internet connection")}>
+            {t("common.notifications.offline", "Internet Connection Required")}
+          </span>
+        </>
+      );
     }
-  };
 
-  const clearFile = () => {
-    setFile(null);
-    setUploadComplete(false);
-    setUploadedPublicId(null);
-    if (fileInputRef.current) fileInputRef.current.value = "";
-    onClear?.();
-  };
-
-  const handleContainerClick = () => {
-    // Trigger file input click only if not uploading
-    if (!isUploading && !file) {
-      fileInputRef.current?.click();
+    if (!isUploading) {
+      return (
+        <>
+          <Upload className="me-2 h-4 w-4" />
+          {t("common.upload.label", "Start Upload")}
+        </>
+      );
     }
-  };
 
-  const _isVideoo = folder === "trailers" || (accept && accept.includes("video"));
+    if (isResuming) {
+      return (
+        <>
+          <WifiOff className="me-2 h-4 w-4 animate-pulse text-amber-400" />
+          {t("buttons.resuming", "Resuming...")}
+        </>
+      );
+    }
+
+    if (isRetrying) {
+      return (
+        <>
+          <Loader2 className="me-2 h-4 w-4 animate-spin" />
+          {t("buttons.reconnecting", "Reconnecting...")}
+        </>
+      );
+    }
+
+    return (
+      <>
+        <Loader2 className="me-2 h-4 w-4 animate-spin" />
+        {isResumable
+          ? `${t("buttons.uploadingResumable", "Uploading...")} ${uploadProgress.toFixed(0)}%`
+          : `${t("buttons.uploading", "Uploading...")} ${uploadProgress.toFixed(0)}%`}
+      </>
+    );
+  };
 
   return (
     <div className="space-y-3 w-full">
-      {label && <Label className="text-sm font-medium">{label}</Label>}
+      {label && <Label className="overline px-1">{label}</Label>}
 
       {!file ? (
-        <div
-          onClick={handleContainerClick}
-          className="border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center bg-muted/20 hover:bg-muted/30 transition-colors cursor-pointer relative min-h-[120px]"
-        >
-          <input
-            ref={fileInputRef}
-            type="file"
-            className="hidden"
-            onChange={handleFileChange}
-            accept={accept}
-          />
-          <Upload className="h-8 w-8 text-muted-foreground mb-2" />
-          <p className="text-sm font-medium text-muted-foreground">
-            {t("common.upload.clickOrDrag")}
-          </p>
-          <p className="text-xs text-muted-foreground/60 mt-1">
-            {t("common.upload.maxSize", {
-              size: (maxSize / (1024 * 1024)).toFixed(0),
-            })}
-          </p>
-        </div>
+        <DropzoneArea
+          isDragging={isDragging}
+          onDragOver={onDragOver}
+          onDragLeave={onDragLeave}
+          onDrop={onDrop}
+          onClick={() => fileInputRef.current?.click()}
+          accept={accept}
+          maxSizeMb={bytesToMb(maxSize)}
+        />
       ) : (
-        <div className="flex flex-col gap-3 p-4 border rounded-lg bg-background shadow-sm">
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="p-2 bg-primary/10 rounded-md shrink-0">
-                <FileIcon className="h-5 w-5 text-primary" />
-              </div>
-              <div className="flex flex-col min-w-0">
-                <span className="text-sm font-medium truncate max-w-50 sm:max-w-xs block">
-                  {file.name}
-                </span>
-                <span className="text-xs text-muted-foreground">
-                  {(file.size / (1024 * 1024)).toFixed(2)} MB
-                </span>
-              </div>
-            </div>
+        <div className="space-y-4">
+          <SelectedFileCard
+            file={file}
+            uploadComplete={uploadComplete}
+            isUploading={isUploading}
+            onClear={clearFile}
+          />
 
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={(e) => {
-                e.stopPropagation();
-                clearFile();
-              }}
-              disabled={isUploading}
-              className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-              title={t("common.upload.remove")}
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
+          {isUploading && (
+            <UploadProgressBar
+              progress={uploadProgress}
+              timeRemaining={timeRemaining}
+              isResumable={isResumable || false}
+            />
+          )}
 
-          <div className="flex justify-end pt-2 border-t mt-1">
+          <div className="flex justify-end pt-2">
             {!uploadComplete ? (
               <Button
-                size="sm"
+                type="button"
+                size="lg"
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleUpload();
+                  void handleUpload();
                 }}
-                disabled={isUploading}
-                className="w-full sm:w-auto min-w-[100px]"
+                // 🛡️ Mandate Review #15: Allow button interaction if isUploading is true even if offline
+                // (TUS handles background retries, but we want the UI to remain interactive/abortable)
+                disabled={isUploading ? false : !isOnline}
+                className="w-full sm:w-auto min-w-[140px] rounded-2xl font-black uppercase tracking-widest text-[10px] h-12 md:h-14 px-8 md:px-10 shadow-lg shadow-primary/25"
               >
-                {isUploading ? (
-                  <>
-                    <Loader2 className="me-2 h-4 w-4 animate-spin" />
-                    {t("buttons.uploading")}
-                  </>
-                ) : (
-                  <>
-                    <Upload className="me-2 h-4 w-4" />
-                    {t("common.upload.label")}
-                  </>
-                )}
+                {renderButtonContent()}
               </Button>
             ) : (
-              <div className="flex items-center gap-2 text-green-600 text-sm font-medium w-full justify-end bg-green-50/50 dark:bg-green-900/10 p-2 rounded">
-                <CheckCircle2 className="h-4 w-4" />
-                {t("common.upload.uploaded")}
-              </div>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full rounded-2xl font-black uppercase tracking-widest text-[10px] h-12 md:h-14 px-8 md:px-10 border-success/20 text-success bg-success/5 hover:bg-success/10 transition-all"
+                onClick={clearFile}
+              >
+                {t("common.upload.change", "Change File")}
+              </Button>
             )}
           </div>
+
+          {isResumable && !isUploading && !uploadComplete && (
+            <div className="flex items-center gap-2 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 overline text-amber-600">
+              <div className="flex items-center gap-1.5">
+                <AlertCircle className="h-3.5 w-3.5" />
+                <WifiOff className="h-3 w-3 opacity-50" />
+              </div>
+              {t(
+                "common.upload.largeFileWarningDesc",
+                "Large file detected. Resumable mode active for reliability."
+              )}
+            </div>
+          )}
         </div>
       )}
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        className="hidden"
+        accept={accept}
+        onChange={(e) => {
+          if (e.target.files?.[0]) {
+            void handleFileChange(e.target.files[0]);
+            // 💡 UX: Reset input value to allow re-selection of the same file (Review #16)
+            e.target.value = "";
+          }
+        }}
+      />
     </div>
   );
 };

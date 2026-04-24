@@ -33,6 +33,7 @@ export interface DashboardStats {
   totalTeachers: number;
   totalClasses: number;
   totalAssignments: number;
+  totalQuizzes: number;
   pendingVerifications?: number;
 }
 
@@ -194,12 +195,18 @@ export interface TransactionItem {
   date: string;
 }
 
+export interface JourneyDistribution {
+  stage: string;
+  count: number;
+}
+
 export interface DashboardData {
   school?: any;
   todaySchedule: ScheduleItem[];
   stats?: DashboardStats;
   attendanceTrend?: AttendanceTrend[];
   gradeDistribution?: GradeDistribution[];
+  journeyDistribution?: JourneyDistribution[];
   pendingSubmissions?: PendingSubmission[];
   atRiskStudents?: AtRiskStudent[];
   upcomingAssignments?: UpcomingAssignment[];
