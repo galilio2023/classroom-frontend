@@ -16,10 +16,24 @@ export interface TeacherResumedPayload {
   reason?: "ai_degraded" | "manual";
 }
 
+export interface SessionStartedPayload {
+  classId: number;
+  startedBy: string;
+}
+
+export interface BreakoutStartedPayload {
+  classId: number;
+  groups: {
+    id: number;
+    name: string;
+    members: { userId: string }[];
+  }[];
+}
+
 interface SocketHandlers {
-  onSessionStarted: (data: { classId: number; startedBy: string }) => void;
+  onSessionStarted: (data: SessionStartedPayload) => void;
   onSessionEnded: (data: { classId: number }) => void;
-  onBreakoutStarted: (data: any) => void;
+  onBreakoutStarted: (data: BreakoutStartedPayload) => void;
   onBreakoutEnded: (data: { classId: number }) => void;
   onTeacherDelegated: (data: { classId: number }) => void;
   onTeacherResumed: (data: TeacherResumedPayload) => void;
@@ -34,13 +48,13 @@ export const useLiveClassroomSocket = (numericClassId: number, handlers: SocketH
     if (!socket.connected) socket.connect();
 
     const wrappedHandlers = {
-      sessionStarted: (data: { classId: number; startedBy: string }) => {
+      sessionStarted: (data: SessionStartedPayload) => {
         if (Number(data.classId) === numericClassId) handlers.onSessionStarted(data);
       },
       sessionEnded: (data: { classId: number }) => {
         if (Number(data.classId) === numericClassId) handlers.onSessionEnded(data);
       },
-      breakoutStarted: (data: any) => {
+      breakoutStarted: (data: BreakoutStartedPayload) => {
         if (Number(data.classId) === numericClassId) handlers.onBreakoutStarted(data);
       },
       breakoutEnded: (data: { classId: number }) => {

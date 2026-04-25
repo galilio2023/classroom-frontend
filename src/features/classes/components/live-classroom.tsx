@@ -23,6 +23,9 @@ import { useJitsi } from "@/features/classes/hooks/useJitsi";
 import {
   useLiveClassroomSocket,
   LiveInitPayload,
+  BreakoutStartedPayload,
+  SessionStartedPayload,
+  TeacherResumedPayload,
 } from "@/features/classes/hooks/useLiveClassroomSocket";
 
 // Sub-components
@@ -37,7 +40,7 @@ interface LiveClassroomProps {
 }
 
 export const LiveClassroom = ({
-  classId: classIdString,
+  classId: classIdString, // 🛡️ RENAMED destructuring for clarity vs ReferenceError risk
   isMiniMode = false,
   onJoin,
 }: LiveClassroomProps) => {
@@ -177,8 +180,6 @@ export const LiveClassroom = ({
     (data: LiveInitPayload) => {
       // 🛡️ RECONNECTION OPTIMIZATION: Update local cache directly with safe validation
       queryClient.setQueryData(["classes", classIdString], (old: Class | undefined) => {
-        // 🚀 RACE CONDITION GUARD: If initial data hasn't loaded yet, we can't merge.
-        // But we can create a partial object that will be merged by Refine later.
         if (!old) return old;
 
         return {
@@ -204,7 +205,7 @@ export const LiveClassroom = ({
 
   const socketHandlers = useMemo(
     () => ({
-      onSessionStarted: (data: { startedBy: string }) => {
+      onSessionStarted: (data: SessionStartedPayload) => {
         if (!isTeacher) {
           toast.info(t("classes.live.toasts.sessionStarted", { name: data.startedBy }), {
             action: {
@@ -219,13 +220,20 @@ export const LiveClassroom = ({
         disposeJitsi();
         toast.error(t("classes.live.toasts.sessionEnded"));
       },
-      onBreakoutStarted: () => {
+      onBreakoutStarted: (data: BreakoutStartedPayload) => {
         setIsBreakoutActive(true);
         toast.info(t("classes.live.toasts.breakoutStarted"));
-        if (!isTeacher && myGroup) {
-          toast.success(t("classes.live.toasts.joiningGroup", { name: myGroup.name }));
-          setCurrentGroupId(myGroup.id);
-          startMeeting(roomTokenFetcher, myGroup.id);
+
+        // 🛡️ STUDENT RE-ROUTING: Auto-join assigned group if student
+        if (!isTeacher) {
+          const myAssignedGroup = data.groups.find((g) =>
+            g.members.some((m) => m.userId === identity?.id)
+          );
+          if (myAssignedGroup) {
+            toast.success(t("classes.live.toasts.joiningGroup", { name: myAssignedGroup.name }));
+            setCurrentGroupId(myAssignedGroup.id);
+            startMeeting(roomTokenFetcher, myAssignedGroup.id);
+          }
         }
       },
       onBreakoutEnded: () => {
@@ -235,7 +243,7 @@ export const LiveClassroom = ({
         startMeeting(roomTokenFetcher);
       },
       onTeacherDelegated: () => refetchClass(),
-      onTeacherResumed: (data: { reason?: string }) => {
+      onTeacherResumed: (data: TeacherResumedPayload) => {
         refetchClass();
         if (data.reason === "ai_degraded") {
           setIsAiDegraded(true);
@@ -266,11 +274,11 @@ export const LiveClassroom = ({
       disposeJitsi,
       setIsJoined,
       setIsBreakoutActive,
-      myGroup,
       setCurrentGroupId,
       refetchClass,
       handleLiveInit,
       setStudentCount,
+      identity?.id,
     ]
   );
 
