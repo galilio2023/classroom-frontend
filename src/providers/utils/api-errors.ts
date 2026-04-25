@@ -26,7 +26,7 @@ export const getCorrelationId = (err: unknown): string => {
  */
 export const handleError = async (
   errorOrResponse: unknown,
-  manualCorrelationId?: string, // 🚀 RULE 8 Override
+  manualCorrelationId?: string // 🚀 RULE 8 Override
 ): Promise<HttpError> => {
   const e = errorOrResponse as any;
   // 1. Extract the raw response if possible (handles Axios, Refine, and raw fetch)
@@ -49,7 +49,9 @@ export const handleError = async (
       ? response.headers.get("x-correlation-id")
       : null) ||
     response.headers?.["x-correlation-id"] ||
-    "N/A";
+    (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+      ? crypto.randomUUID()
+      : `client-${Math.random().toString(36).substring(2, 11)}`); // 🚀 RULE 8 Fallback
 
   try {
     // 🛡️ RESILIENCE: Check for Axios data first to avoid consuming Fetch streams prematurely
