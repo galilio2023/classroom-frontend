@@ -17,11 +17,11 @@ export interface TeacherResumedPayload {
 }
 
 interface SocketHandlers {
-  onSessionStarted: (data: any) => void;
-  onSessionEnded: (data: any) => void;
+  onSessionStarted: (data: { classId: number; startedBy: string }) => void;
+  onSessionEnded: (data: { classId: number }) => void;
   onBreakoutStarted: (data: any) => void;
-  onBreakoutEnded: (data: any) => void;
-  onTeacherDelegated: (data: any) => void;
+  onBreakoutEnded: (data: { classId: number }) => void;
+  onTeacherDelegated: (data: { classId: number }) => void;
   onTeacherResumed: (data: TeacherResumedPayload) => void;
   onPulseUpdate: (data: { classId: number; count: number }) => void;
   onLiveInit?: (data: LiveInitPayload) => void;
@@ -34,28 +34,28 @@ export const useLiveClassroomSocket = (numericClassId: number, handlers: SocketH
     if (!socket.connected) socket.connect();
 
     const wrappedHandlers = {
-      sessionStarted: (data: any) => {
+      sessionStarted: (data: { classId: number; startedBy: string }) => {
         if (Number(data.classId) === numericClassId) handlers.onSessionStarted(data);
       },
-      sessionEnded: (data: any) => {
+      sessionEnded: (data: { classId: number }) => {
         if (Number(data.classId) === numericClassId) handlers.onSessionEnded(data);
       },
       breakoutStarted: (data: any) => {
         if (Number(data.classId) === numericClassId) handlers.onBreakoutStarted(data);
       },
-      breakoutEnded: (data: any) => {
+      breakoutEnded: (data: { classId: number }) => {
         if (Number(data.classId) === numericClassId) handlers.onBreakoutEnded(data);
       },
-      teacherDelegated: (data: any) => {
+      teacherDelegated: (data: { classId: number }) => {
         if (Number(data.classId) === numericClassId) handlers.onTeacherDelegated(data);
       },
-      teacherResumed: (data: any) => {
+      teacherResumed: (data: TeacherResumedPayload) => {
         if (Number(data.classId) === numericClassId) handlers.onTeacherResumed(data);
       },
-      pulseUpdate: (data: any) => {
+      pulseUpdate: (data: { classId: number; count: number }) => {
         if (Number(data.classId) === numericClassId) handlers.onPulseUpdate(data);
       },
-      liveInit: (data: any) => {
+      liveInit: (data: LiveInitPayload) => {
         if (Number(data.classId) === numericClassId) handlers.onLiveInit?.(data);
       },
     };

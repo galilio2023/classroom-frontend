@@ -46,6 +46,9 @@ export const LiveClassroom = ({
   const isAr = i18n.language === "ar";
   const queryClient = useQueryClient();
 
+  // 🚀 CONSOLIDATION: Perform normalization once to reduce Number() calls in handlers
+  const numericClassId = useMemo(() => Number(classIdString), [classIdString]);
+
   const {
     identity,
     isTeacher,
@@ -75,7 +78,6 @@ export const LiveClassroom = ({
   const [isAiDegraded, setIsAiDegraded] = useState(false);
 
   // 🛡️ RULE 6: Tab Visibility Safety (Privacy Mandate)
-  // Refactored into reusable hook for Component Deconstruction standards.
   useHardwareSafety({
     onHidden: () => {
       if (isJoined) {
@@ -100,7 +102,7 @@ export const LiveClassroom = ({
           {
             url: "/live-session/token",
             method: "post",
-            values: { classId: Number(classIdString), groupId },
+            values: { classId: numericClassId, groupId },
           },
           {
             onSuccess: (data: any) => resolve(data.data),
@@ -109,7 +111,7 @@ export const LiveClassroom = ({
         );
       });
     },
-    [getRoomToken, classIdString]
+    [getRoomToken, numericClassId]
   );
 
   const { jitsiContainerRef, apiRef, isJitsiLoading, startMeeting, disposeJitsi } = useJitsi(
@@ -125,7 +127,7 @@ export const LiveClassroom = ({
         markLiveAttendance({
           url: "/attendance/live",
           method: "post",
-          values: { classId: Number(classIdString) },
+          values: { classId: numericClassId },
         });
       }
     },
@@ -142,7 +144,7 @@ export const LiveClassroom = ({
           url: "/resources",
           method: "post",
           values: {
-            classId: Number(classIdString),
+            classId: numericClassId,
             title: `Live Session Recording - ${new Date().toLocaleDateString()}`,
             url: link,
             type: "video",
@@ -160,10 +162,9 @@ export const LiveClassroom = ({
     }
   }, [isTeacher, t]);
 
-  // 🚀 Memoize handlers to prevent socket listener churn on every render
   const socketHandlers = useMemo(
     () => ({
-      onSessionStarted: (data: any) => {
+      onSessionStarted: (data: { startedBy: string }) => {
         if (!isTeacher) {
           toast.info(t("classes.live.toasts.sessionStarted", { name: data.startedBy }), {
             action: {
@@ -194,11 +195,10 @@ export const LiveClassroom = ({
         startMeeting(roomTokenFetcher);
       },
       onTeacherDelegated: () => refetchClass(),
-      onTeacherResumed: (data: any) => {
+      onTeacherResumed: (data: { reason?: string }) => {
         refetchClass();
         if (data.reason === "ai_degraded") {
           setIsAiDegraded(true);
-          // 🛡️ RULE 8: Traceability (Enhanced error feedback)
           void handleError({
             status: 503,
             message: t(
@@ -217,18 +217,14 @@ export const LiveClassroom = ({
       },
       onPulseUpdate: (data: { count: number }) => setStudentCount(data.count),
       onLiveInit: (data: LiveInitPayload) => {
-        // 🛡️ RECONNECTION OPTIMIZATION: Update local cache directly with safe validation
         queryClient.setQueryData(["classes", classIdString], (old: Class | undefined) => {
           if (!old) return old;
-
-          // 🚀 SAFE MERGE: Preserve existing complex objects while updating live state
           return {
             ...old,
             isAiDelegated: data.isAiDelegated,
             isBreakoutActive: data.isBreakoutActive,
             aiDelegationPhoto: data.aiPhoto !== undefined ? data.aiPhoto : old.aiDelegationPhoto,
             aiDelegationContext: {
-              // Default to empty object if context is missing to prevent property access errors
               ...(old.aiDelegationContext || { visualCue: "idle" }),
               script:
                 data.currentScript !== undefined
@@ -259,7 +255,7 @@ export const LiveClassroom = ({
     ]
   );
 
-  useLiveClassroomSocket(Number(classIdString), socketHandlers);
+  useLiveClassroomSocket(numericClassId, socketHandlers);
 
   useEffect(() => {
     if (isJoined && !apiRef.current && !isLoading && !isJitsiLoading) {

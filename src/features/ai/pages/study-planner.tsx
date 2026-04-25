@@ -21,6 +21,7 @@ import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import { Breadcrumb } from "@/components/refine/layout/breadcrumb";
 import usePageTitle from "@/hooks/use-page-title";
+import { getCorrelationId } from "@/providers/utils/api-errors";
 
 interface StudyBlock {
   day: string;
@@ -76,17 +77,40 @@ const StudyPlanner = () => {
         url: "ai/generate-study-plan",
         method: "post",
         values: {},
-        successNotification: () => ({
-          message: t("studyPlanner.toasts.generated", {
-            defaultValue: "Study plan generated successfully!",
-          }),
-          type: "success",
-        }),
       },
       {
-        onSuccess: (data) => {
-          setPlan(data.data.plan);
-          setCompletedBlocks({});
+        onSuccess: (result: any) => {
+          // 🚀 RURAL HARDENING: Handle asynchronous background job (202 Accepted)
+          if (result.data?.statusCode === 202) {
+            toast.info(
+              t("studyPlanner.toasts.processing", {
+                defaultValue:
+                  "AI is crafting your study plan in the background. You'll be notified when it's ready!",
+              }),
+              {
+                icon: <Sparkles className="h-4 w-4 text-ai-primary" />,
+                duration: 6000,
+              }
+            );
+            return;
+          }
+
+          // Legacy/Immediate fallback support
+          if (result.data?.plan) {
+            setPlan(result.data.plan);
+            setCompletedBlocks({});
+            toast.success(
+              t("studyPlanner.toasts.generated", {
+                defaultValue: "Study plan generated successfully!",
+              })
+            );
+          }
+        },
+        onError: (err) => {
+          const correlationId = getCorrelationId(err);
+          toast.error(t("studyPlanner.errors.failed", "Failed to generate plan."), {
+            description: `Trace ID: ${correlationId}`,
+          });
         },
       }
     );
