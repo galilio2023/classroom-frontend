@@ -130,6 +130,16 @@ export interface CourseRoadmap {
 
 export type Roadmap = SessionRoadmap | CourseRoadmap;
 
+export interface BackgroundJobRecord {
+  id: string;
+  type: string;
+  title: string;
+  status: "idle" | "processing" | "completed" | "failed";
+  progress?: number;
+  message?: string;
+  createdAt: number;
+}
+
 export interface Department {
   id: number;
   name: string;

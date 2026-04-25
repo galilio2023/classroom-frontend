@@ -1,5 +1,7 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
-import { Zap, Sparkles, WifiOff } from "lucide-react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Zap, Sparkles, WifiOff, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCustom, useCustomMutation, HttpError } from "@refinedev/core";
@@ -33,7 +35,20 @@ interface StudyPlanResponse {
   statusCode?: number;
 }
 
-const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+interface JobSocketPayload {
+  topic?: string;
+  type?: string;
+}
+
+const DAYS = [
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+  "Sunday",
+] as const;
 
 const StudyPlanner = () => {
   const { t, i18n } = useTranslation();
@@ -41,6 +56,15 @@ const StudyPlanner = () => {
   usePageTitle(t("resources.study-planner.label"));
   const { addJob, jobs } = useJobs();
   const { isOnline } = useOfflineSync();
+  const isMounted = useRef(true);
+
+  // 🛡️ COMPONENT LIFECYCLE: Handle cleanup and race conditions
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   // --- FETCH CURRENT PLAN ---
   const { query: planQuery } = useCustom<StudyPlanResponse>({
@@ -51,12 +75,10 @@ const StudyPlanner = () => {
   const { data: initialData, isLoading: isFetching, refetch: refetchPlan } = planQuery;
 
   // 🚀 RULE 4 Hardening: Synchronized Source of Truth logic
-  const { 
-    plan, 
-    completedBlocks, 
-    setCompletedBlocks, 
-    isSyncingRef 
-  } = useStudyPlanSync(initialData, isFetching);
+  const { plan, completedBlocks, setCompletedBlocks, isSyncingRef } = useStudyPlanSync(
+    initialData,
+    isFetching
+  );
 
   // 🚀 BACKGROUND JOB STATUS
   const activeStudyPlanJob = useMemo(
@@ -68,9 +90,8 @@ const StudyPlanner = () => {
   useEffect(() => {
     const handleVisibility = () => {
       if (document.hidden && activeStudyPlanJob) {
-        // AI is generating but user left. We don't stop the job (backend owns it), 
-        // but we can pause local polling or non-critical UI feedback.
-        console.log("StudyPlanner: Preserving resources while hidden.");
+        // AI is generating but user left. We pause non-critical UI feedback to preserve resources.
+        console.log("StudyPlanner: Preserving resources while hidden (Rule 6).");
       }
     };
     document.addEventListener("visibilitychange", handleVisibility);
@@ -78,16 +99,21 @@ const StudyPlanner = () => {
   }, [activeStudyPlanJob]);
 
   // 🚀 REAL-TIME SYNC
-  const handleJobComplete = useCallback((data: unknown) => {
-    const typedData = data as { topic?: string; type?: string };
-    if (typedData.topic === "generate_study_plan" || typedData.type === "study_plan") {
-      refetchPlan();
-    }
-  }, [refetchPlan]);
+  const handleJobComplete = useCallback(
+    (data: JobSocketPayload) => {
+      if (!isMounted.current) return;
+      if (data.topic === "generate_study_plan" || data.type === "study_plan") {
+        refetchPlan();
+      }
+    },
+    [refetchPlan]
+  );
 
   useEffect(() => {
     socket.on("ai:job_completed", handleJobComplete);
-    return () => socket.off("ai:job_completed", handleJobComplete);
+    return () => {
+      socket.off("ai:job_completed", handleJobComplete);
+    };
   }, [handleJobComplete]);
 
   // --- MUTATIONS ---
@@ -96,19 +122,22 @@ const StudyPlanner = () => {
     HttpError
   >({
     mutationOptions: {
-      resource: "study-planner", // 🛡️ Refine v5 Audit Trail
       onError: (err) => {
-          // 🚀 RULE 8: Traceability Mandate
-          const correlationId = getCorrelationId(err);
-          handleError(err, correlationId);
+        // 🚀 RULE 8: Traceability Mandate
+        const correlationId = getCorrelationId(err);
+        handleError(err, correlationId);
       },
     },
   });
 
   const { mutate: toggleBlockMutation } = useCustomMutation({
     mutationOptions: {
-        resource: "study-planner", // 🛡️ Refine v5 Alignment
-    }
+      onError: (err) => {
+        // 🚀 Gap Fix: Add traceability to toggle failures
+        const correlationId = getCorrelationId(err);
+        handleError(err, correlationId);
+      },
+    },
   });
 
   const generatePlan = async () => {
@@ -124,12 +153,17 @@ const StudyPlanner = () => {
             addJob({
               id: data.data.jobId,
               type: "study_plan",
-              title: t("studyPlanner.notifications.generatingTitle"),
+              title: t("studyPlanner.notifications.generatingTitle" as any),
             });
-            toast.success(t("studyPlanner.notifications.generatingMessage"));
+            toast.success(t("studyPlanner.notifications.generatingMessage" as any));
           } else if ((data as any).statusCode === 202) {
-             // 🚀 Rule 202 Handling: Background processing without immediate jobId
-             toast.info(t("studyPlanner.notifications.queuedMessage", "Study plan is being prepared in the background."));
+            // 🚀 Rule 202 Handling: Background processing without immediate jobId
+            toast.info(
+              t(
+                "studyPlanner.notifications.queuedMessage" as any,
+                "Study plan is being prepared in the background."
+              )
+            );
           }
         },
       }
@@ -141,76 +175,85 @@ const StudyPlanner = () => {
     const newStatus = !completedBlocks[blockId];
     const newCompleted = { ...completedBlocks, [blockId]: newStatus };
     const now = Date.now();
-    
-    // 🚀 RULE 4: Immediate Offline Persistence
+
+    // 🚀 RULE 4: Immediate Offline Persistence (Optimistic UI)
     setCompletedBlocks(newCompleted);
 
-    await offlineDB.study_plans.update("current", { 
-        completedBlocks: newCompleted,
-        updatedAt: now
+    await offlineDB.study_plans.update("current", {
+      completedBlocks: newCompleted,
+      updatedAt: now,
     });
 
     // 🚀 GAMIFICATION: Local XP Event for immediate feedback
     if (newStatus) {
-        window.dispatchEvent(new CustomEvent("xp_gained_local", {
-            detail: { amount: 25, reason: "Study Task Completed" }
-        }));
+      window.dispatchEvent(
+        new CustomEvent("xp_gained_local", {
+          detail: { amount: 25, reason: "Study Task Completed" },
+        })
+      );
     }
 
-    toggleBlockMutation({
-      url: `study-planner/toggle-block/${blockId}`,
-      method: "post",
-      values: { isCompleted: newStatus },
-    }, {
+    toggleBlockMutation(
+      {
+        url: `study-planner/toggle-block/${blockId}`,
+        method: "post",
+        values: { isCompleted: newStatus },
+      },
+      {
         onSuccess: (res) => {
-           // 🚀 Hardening: Update local with precise server timestamp if available
-           const serverUpdate = (res as any).data?.updatedAt;
-           if (serverUpdate) {
-               void offlineDB.study_plans.update("current", { updatedAt: serverUpdate });
-           }
+          // 🚀 Hardening: Update local with precise server timestamp if available
+          const serverUpdate = (res as any).data?.updatedAt;
+          if (serverUpdate) {
+            void offlineDB.study_plans.update("current", { updatedAt: serverUpdate });
+          }
         },
         onSettled: () => {
+          if (isMounted.current) {
             isSyncingRef.current = false;
-        }
-    });
+          }
+        },
+      }
+    );
   };
 
   // 🚀 PERFORMANCE: O(N) grouping via useMemo
   const blocksByDay = useMemo(() => {
     const map: Record<string, StudyBlock[]> = {};
-    (plan || []).forEach(b => {
-        if (!map[b.day]) map[b.day] = [];
-        map[b.day].push(b);
+    (plan || []).forEach((b) => {
+      if (!map[b.day]) map[b.day] = [];
+      map[b.day].push(b);
     });
     return map;
   }, [plan]);
 
-  const completedCount = useMemo(() => 
-    Object.values(completedBlocks || {}).filter(Boolean).length, 
-  [completedBlocks]);
+  const completedCount = useMemo(
+    () => Object.values(completedBlocks || {}).filter(Boolean).length,
+    [completedBlocks]
+  );
 
-  const nextTask = useMemo(() => 
-    (plan || []).find((b) => !completedBlocks[`${b.day}-${b.timeSlot}`])?.task,
-  [plan, completedBlocks]);
+  const nextTask = useMemo(
+    () => (plan || []).find((b) => !completedBlocks[`${b.day}-${b.timeSlot}`])?.task,
+    [plan, completedBlocks]
+  );
 
   return (
     <div className="space-y-12 pb-24">
-      <StudyPlannerHeader 
-        onGenerate={generatePlan} 
-        isGenerating={generateMutation.isPending} 
-        activeJob={activeStudyPlanJob as any} 
+      <StudyPlannerHeader
+        onGenerate={generatePlan}
+        isGenerating={generateMutation.isPending}
+        activeJob={activeStudyPlanJob as any}
       />
 
       {/* 🚀 Rule 7: Offline Indicator Badge */}
       {!isOnline && (
-          <motion.div 
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex items-center gap-2 px-4 py-2 bg-destructive/10 text-destructive rounded-full w-fit mx-auto text-[10px] font-black uppercase tracking-widest border border-destructive/20"
-          >
-              <WifiOff className="h-3 w-3" />
-              {t("common.offlineMode", "Offline Mode - Progress will sync later")}
-          </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-center gap-2 px-4 py-2 bg-destructive/10 text-destructive rounded-full w-fit mx-auto text-[10px] font-black uppercase tracking-widest border border-destructive/20"
+        >
+          <WifiOff className="h-3 w-3" />
+          {t("common.offlineMode" as any, "Offline Mode - Progress will sync later")}
+        </motion.div>
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-7 gap-10">
@@ -223,18 +266,19 @@ const StudyPlanner = () => {
                 exit={{ opacity: 0, y: -20 }}
                 className="grid grid-cols-1 gap-6"
               >
-                {DAYS.map((day) => (
-                  blocksByDay[day] && (
-                    <StudyPlanDayCard 
-                      key={day}
-                      day={day}
-                      dayBlocks={blocksByDay[day]}
-                      completedBlocks={completedBlocks}
-                      onToggleBlock={toggleBlock}
-                      isAr={isAr}
-                    />
-                  )
-                ))}
+                {DAYS.map(
+                  (day) =>
+                    blocksByDay[day] && (
+                      <StudyPlanDayCard
+                        key={day}
+                        day={day}
+                        dayBlocks={blocksByDay[day]}
+                        completedBlocks={completedBlocks}
+                        onToggleBlock={toggleBlock}
+                        isAr={isAr}
+                      />
+                    )
+                )}
               </motion.div>
             ) : (
               <motion.div
@@ -246,14 +290,18 @@ const StudyPlanner = () => {
                   <Zap className="h-16 w-16" />
                 </div>
                 <h3 className="text-3xl font-black tracking-tighter uppercase mb-2">
-                  {t("studyPlanner.empty.title")}
+                  {t("studyPlanner.empty.title" as any)}
                 </h3>
                 <p className="text-muted-foreground font-medium max-w-sm mb-8">
-                  {t("studyPlanner.empty.description")}
+                  {t("studyPlanner.empty.description" as any)}
                 </p>
-                <Button onClick={generatePlan} size="lg" className="rounded-2xl px-10 h-14 bg-ai-primary font-black uppercase tracking-widest">
+                <Button
+                  onClick={generatePlan}
+                  size="lg"
+                  className="rounded-2xl px-10 h-14 bg-ai-primary font-black uppercase tracking-widest"
+                >
                   <Sparkles className="mr-3 h-5 w-5" />
-                  {t("studyPlanner.buttons.generateNow")}
+                  {t("studyPlanner.buttons.generateNow" as any)}
                 </Button>
               </motion.div>
             )}
@@ -261,10 +309,10 @@ const StudyPlanner = () => {
         </div>
 
         <div className="lg:col-span-2">
-          <StudyPlanStats 
-            completedCount={completedCount} 
-            totalCount={plan?.length || 0} 
-            nextTask={nextTask} 
+          <StudyPlanStats
+            completedCount={completedCount}
+            totalCount={plan?.length || 0}
+            nextTask={nextTask}
           />
         </div>
       </div>

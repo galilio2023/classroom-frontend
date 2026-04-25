@@ -213,7 +213,26 @@ export const useOfflineSync = () => {
     }
   };
 
-  return { isOnline, downloadLesson, saveQuizOffline, syncPendingData, getNextOfflineMission };
+  /**
+   * 🛡️ SECURITY Gap Fix: Clear study plan data on logout to prevent cross-session leakage.
+   */
+  const clearOfflineStudyPlan = async () => {
+    try {
+      await db.study_plans.clear();
+      console.log("Offline study plan cleared for security.");
+    } catch (err) {
+      console.error("Failed to clear offline study plan:", err);
+    }
+  };
+
+  return {
+    isOnline,
+    downloadLesson,
+    saveQuizOffline,
+    syncPendingData,
+    getNextOfflineMission,
+    clearOfflineStudyPlan, // 🚀 Exposed for logout logic
+  };
 };
 
 /**
@@ -234,7 +253,7 @@ export const useStudyPlanSync = (initialData: any, isFetching: boolean) => {
 
       try {
         const record = await db.study_plans.get("current");
-        
+
         // If network data is available and newer, synchronize
         if (initialData?.data) {
           const netUpdate = initialData.data.updatedAt || Date.now();
