@@ -289,7 +289,11 @@ export const LiveClassroom = ({
     if (isJoined && !apiRef.current && !isLoading && !isJitsiLoading) {
       startMeeting(roomTokenFetcher);
     }
-  }, [isJoined, isLoading, isJitsiLoading, startMeeting, roomTokenFetcher, apiRef]);
+    // 🛡️ HARDWARE SAFETY: Cleanup Jitsi on unmount
+    return () => {
+      disposeJitsi();
+    };
+  }, [isJoined, isLoading, isJitsiLoading, startMeeting, roomTokenFetcher, apiRef, disposeJitsi]);
 
   const [activeTab, setActiveTab] = useState("video");
 
