@@ -85,7 +85,8 @@ export const LiveClassroom = ({
     onHidden: () => {
       if (isJoined) {
         // 🚀 Mute active Jitsi audio (Rule 6 requirement)
-        if (apiRef.current) {
+        // 🛡️ Reference Safety: Ensure executeCommand exists before calling
+        if (apiRef.current && typeof apiRef.current.executeCommand === "function") {
           apiRef.current.executeCommand("muteAudio");
         }
         toast.info(
