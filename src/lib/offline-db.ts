@@ -68,6 +68,13 @@ export interface BackgroundJobRecord {
   correlationId?: string;
 }
 
+export interface StudyPlanRecord {
+  id: string; // "current"
+  plan: any[];
+  completedBlocks: Record<string, boolean>;
+  updatedAt: number;
+}
+
 export class OfflineDB extends Dexie {
   lessons!: Table<CachedLesson>;
   quizzes!: Table<PendingQuizSubmission>;
@@ -76,10 +83,11 @@ export class OfflineDB extends Dexie {
   ai_history!: Table<AiHistory>;
   registration_drafts!: Table<RegistrationDraft>;
   background_jobs!: Table<BackgroundJobRecord>;
+  study_plans!: Table<StudyPlanRecord>;
 
   constructor() {
     super("TablawyOfflineDB");
-    this.version(3)
+    this.version(4)
       .stores({
         lessons: "id, classId",
         quizzes: "++id, quizId, userId",
@@ -88,10 +96,11 @@ export class OfflineDB extends Dexie {
         ai_history: "++id, userId, classId, timestamp",
         registration_drafts: "id, step",
         background_jobs: "id, type, status, createdAt",
+        study_plans: "id",
       })
       .upgrade((tx) => {
-        // Version 3: Added background_jobs
-        return tx.table("background_jobs").toCollection().count();
+        // Version 4: Added study_plans
+        return tx.table("study_plans").toCollection().count();
       });
   }
 

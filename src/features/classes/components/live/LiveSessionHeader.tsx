@@ -1,5 +1,5 @@
 import React from "react";
-import { Video, Users, Bot, RotateCcw, Loader2, Grid } from "lucide-react";
+import { Video, Users, Bot, RotateCcw, Loader2, Grid, BrainCircuit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -12,6 +12,7 @@ interface LiveSessionHeaderProps {
   isJoined: boolean;
   studentCount: number;
   isDelegated: boolean;
+  isAiDegraded?: boolean;
   isLoading: boolean;
   roadmapTitle?: string;
   onDelegate: () => void;
@@ -28,6 +29,7 @@ export const LiveSessionHeader = React.memo(
     isJoined,
     studentCount,
     isDelegated,
+    isAiDegraded,
     isLoading,
     roadmapTitle,
     onDelegate,
@@ -58,6 +60,16 @@ export const LiveSessionHeader = React.memo(
               <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
               <Users className="h-3.5 w-3.5" />
               {studentCount} {t("classes.live.studentsPresent", "Live Now")}
+            </Badge>
+          )}
+          {isAiDegraded && (
+            <Badge
+              variant="destructive"
+              aria-live="polite"
+              className="bg-destructive/20 text-destructive border-ai-primary/50 border-2 px-3 py-1.5 rounded-full font-black gap-2 animate-pulse shadow-[0_0_10px_rgba(var(--ai-primary),0.3)]"
+            >
+              <BrainCircuit className="h-3.5 w-3.5 text-ai-primary" />
+              {t("classes.live.ai.degraded", "AI System Degraded")}
             </Badge>
           )}
         </div>

@@ -1,7 +1,7 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCustomMutation } from "@refinedev/core";
-import { UserRole } from "@/types";
+import { UserRole, Class } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2, Users, Video, ExternalLink, MonitorUp, Sparkles } from "lucide-react";
@@ -13,31 +13,41 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 import { AILiveCompanion } from "@/features/ai/components/AiLiveCompanion";
+import { useQueryClient } from "@tanstack/react-query";
+import { handleError } from "@/providers/utils/api-errors";
+import { useHardwareSafety } from "@/hooks/use-hardware-safety";
 
 // Hooks
 import { useLiveSession } from "@/features/classes/hooks/useLiveSession";
 import { useJitsi } from "@/features/classes/hooks/useJitsi";
-import { useLiveClassroomSocket } from "@/features/classes/hooks/useLiveClassroomSocket";
+import { useLiveClassroomSocket, LiveInitPayload, BreakoutStartedPayload, SessionStartedPayload, TeacherResumedPayload } from "@/features/classes/hooks/useLiveClassroomSocket";
 
 // Sub-components
 import { LiveSessionHeader } from "@/features/classes/components/live/LiveSessionHeader";
 import { RoadmapDisplay } from "@/features/classes/components/live/RoadmapDisplay";
 
 interface LiveClassroomProps {
-  classId: string;
+  classId: string; // 🚀 Normalized to string for Layout consistency
   className?: string;
   isMiniMode?: boolean;
   onJoin?: () => void;
 }
 
 export const LiveClassroom = ({
-  classId: classIdString,
+  classId: classIdString, // 🛡️ RENAMED destructuring for clarity vs ReferenceError risk
   isMiniMode = false,
   onJoin,
 }: LiveClassroomProps) => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const isAr = i18n.language === "ar";
+  const queryClient = useQueryClient();
+  
+  // 🚀 CONSOLIDATION: Perform normalization once to reduce Number() calls in handlers
+  const numericClassId = useMemo(() => {
+    const n = Number(classIdString);
+    return isNaN(n) ? 0 : n;
+  }, [classIdString]);
 
   const {
     identity,
@@ -65,6 +75,30 @@ export const LiveClassroom = ({
     setActiveClassId,
   } = useLiveSession(classIdString);
 
+  const [isAiDegraded, setIsAiDegraded] = useState(false);
+  const [isJitsiInitialized, setIsJitsiInitialized] = useState(false);
+
+  // 🛡️ RULE 6: Tab Visibility Safety (Privacy Mandate)
+  useHardwareSafety({
+    onHidden: () => {
+      if (isJoined) {
+        // 🚀 Mute active Jitsi audio (Rule 6 requirement)
+        // 🛡️ Reference Safety: Ensure executeCommand exists before calling
+        if (apiRef.current && typeof apiRef.current.executeCommand === "function") {
+          // Explicitly set mute to true for deterministic safety (Rule 6)
+          apiRef.current.executeCommand("setAudioMute", true);
+        }
+        toast.info(t("classes.live.privacy.paused", "Privacy Safety: Interaction paused while tab is hidden."));
+      }
+    },
+    onVisible: () => {
+      if (isJoined) {
+        // 🚀 UX Refinement: Remind user they are muted (Rule 6 follow-up)
+        toast.info(t("classes.live.privacy.returned", "Welcome back! You are still muted for your privacy."));
+      }
+    }
+  });
+
   const { mutate: getRoomToken } = useCustomMutation();
   const { mutate: saveRecording } = useCustomMutation();
   const { mutate: startLiveSession } = useCustomMutation(); // for AI delegation
@@ -76,7 +110,7 @@ export const LiveClassroom = ({
           {
             url: "/live-session/token",
             method: "post",
-            values: { classId: Number(classIdString), groupId },
+            values: { classId: numericClassId, groupId },
           },
           {
             onSuccess: (data: any) => resolve(data.data),
@@ -85,7 +119,7 @@ export const LiveClassroom = ({
         );
       });
     },
-    [getRoomToken, classIdString]
+    [getRoomToken, numericClassId]
   );
 
   const { jitsiContainerRef, apiRef, isJitsiLoading, startMeeting, disposeJitsi } = useJitsi(
@@ -96,12 +130,13 @@ export const LiveClassroom = ({
       setIsLoading(false);
       setIsJoined(true);
       setActiveClassId(classIdString);
+      setIsJitsiInitialized(true);
       onJoin?.();
       if (identity?.role === UserRole.STUDENT && !groupId) {
         markLiveAttendance({
           url: "/attendance/live",
           method: "post",
-          values: { classId: Number(classIdString) },
+          values: { classId: numericClassId },
         });
       }
     },
@@ -111,14 +146,22 @@ export const LiveClassroom = ({
     },
     () => {
       setIsJoined(false);
+      setIsJitsiInitialized(false);
     },
     (link) => {
+      // 🛡️ SECURITY: Basic URL validation before saving resource
+      if (!link || !/^https?:\/\//i.test(link)) {
+        // eslint-disable-next-line no-console
+        console.warn("Invalid recording link received. Skipping save.", { link });
+        return;
+      }
+
       saveRecording(
         {
           url: "/resources",
           method: "post",
           values: {
-            classId: Number(classIdString),
+            classId: numericClassId,
             title: `Live Session Recording - ${new Date().toLocaleDateString()}`,
             url: link,
             type: "video",
@@ -136,8 +179,28 @@ export const LiveClassroom = ({
     }
   }, [isTeacher, t]);
 
-  useLiveClassroomSocket(Number(classIdString), {
-    onSessionStarted: (data) => {
+  const handleLiveInit = useCallback((data: LiveInitPayload) => {
+    // 🛡️ RECONNECTION OPTIMIZATION: Update local cache directly with safe validation
+    queryClient.setQueryData(["classes", classIdString], (old: Class | undefined) => {
+      if (!old) return old;
+      
+      return {
+        ...old,
+        isAiDelegated: data.isAiDelegated,
+        isBreakoutActive: data.isBreakoutActive,
+        aiDelegationPhoto: data.aiPhoto !== undefined ? data.aiPhoto : old.aiDelegationPhoto,
+        aiDelegationContext: {
+          ...(old.aiDelegationContext || { visualCue: "idle" }),
+          script: data.currentScript !== undefined ? data.currentScript : old.aiDelegationContext?.script,
+          visualCue: data.visualCue !== undefined ? data.visualCue : old.aiDelegationContext?.visualCue,
+        }
+      };
+    });
+    setIsBreakoutActive(!!data.isBreakoutActive);
+  }, [classIdString, queryClient, setIsBreakoutActive]);
+
+  const socketHandlers = useMemo(() => ({
+    onSessionStarted: (data: SessionStartedPayload) => {
       if (!isTeacher) {
         toast.info(t("classes.live.toasts.sessionStarted", { name: data.startedBy }), {
           action: {
@@ -149,16 +212,24 @@ export const LiveClassroom = ({
     },
     onSessionEnded: () => {
       setIsJoined(false);
+      setIsJitsiInitialized(false);
       disposeJitsi();
       toast.error(t("classes.live.toasts.sessionEnded"));
     },
-    onBreakoutStarted: () => {
+    onBreakoutStarted: (data: BreakoutStartedPayload) => {
       setIsBreakoutActive(true);
       toast.info(t("classes.live.toasts.breakoutStarted"));
-      if (!isTeacher && myGroup) {
-        toast.success(t("classes.live.toasts.joiningGroup", { name: myGroup.name }));
-        setCurrentGroupId(myGroup.id);
-        startMeeting(roomTokenFetcher, myGroup.id);
+      
+      // 🛡️ STUDENT RE-ROUTING: Auto-join assigned group if student
+      if (!isTeacher) {
+        const myAssignedGroup = data.groups.find(g => 
+          g.members.some(m => m.userId === identity?.id)
+        );
+        if (myAssignedGroup) {
+          toast.success(t("classes.live.toasts.joiningGroup", { name: myAssignedGroup.name }));
+          setCurrentGroupId(myAssignedGroup.id);
+          startMeeting(roomTokenFetcher, myAssignedGroup.id);
+        }
       }
     },
     onBreakoutEnded: () => {
@@ -168,15 +239,43 @@ export const LiveClassroom = ({
       startMeeting(roomTokenFetcher);
     },
     onTeacherDelegated: () => refetchClass(),
-    onTeacherResumed: () => refetchClass(),
-    onPulseUpdate: (data) => setStudentCount(data.count),
-  });
+    onTeacherResumed: (data: TeacherResumedPayload) => {
+      refetchClass();
+      if (data.reason === "ai_degraded") {
+        setIsAiDegraded(true);
+        void handleError({
+          status: 503,
+          message: t("classes.live.ai.fallback", "AI Co-teacher is having trouble. Teacher has resumed control."),
+        }).then((err) => {
+          toast.warning(err.message, {
+            description: `${t("classes.live.ai.supportInfo", "Support Info: AI degraded via socket signal.")} (Trace: ${err.meta?.correlationId})`,
+            duration: 8000,
+          });
+        });
+      } else {
+        setIsAiDegraded(false);
+      }
+    },
+    onPulseUpdate: (data: { count: number }) => setStudentCount(data.count),
+    onLiveInit: handleLiveInit,
+  }), [
+    t, isTeacher, startMeeting, roomTokenFetcher, disposeJitsi, setIsJoined, 
+    setIsBreakoutActive, setCurrentGroupId, refetchClass, 
+    handleLiveInit, setStudentCount, identity?.id
+  ]);
+
+  useLiveClassroomSocket(numericClassId, socketHandlers);
 
   useEffect(() => {
-    if (isJoined && !apiRef.current && !isLoading && !isJitsiLoading) {
+    // 🛡️ RE-INITIALIZATION: Use a state-based trigger for stable effects
+    if (isJoined && !isJitsiInitialized && !isLoading && !isJitsiLoading) {
       startMeeting(roomTokenFetcher);
     }
-  }, [isJoined, isLoading, isJitsiLoading, startMeeting, roomTokenFetcher, apiRef]);
+    // 🛡️ HARDWARE SAFETY: Cleanup Jitsi on unmount (Rule 6)
+    return () => {
+      disposeJitsi();
+    };
+  }, [isJoined, isJitsiInitialized, isLoading, isJitsiLoading, startMeeting, roomTokenFetcher, disposeJitsi]);
 
   const [activeTab, setActiveTab] = useState("video");
 
@@ -295,6 +394,7 @@ export const LiveClassroom = ({
           isJoined={isJoined}
           studentCount={studentCount}
           isDelegated={!!isDelegated}
+          isAiDegraded={isAiDegraded}
           isLoading={isLoading || isJitsiLoading}
           roadmapTitle={classData?.liveLessonRoadmap?.sessionTitle}
           onDelegate={handleDelegateToAI}
@@ -362,7 +462,7 @@ export const LiveClassroom = ({
             </div>
             <div className="space-y-2 text-center">
               <h4 className="text-xl font-bold">{t("classes.live.readyToJoin")}</h4>
-              <p className="text-muted-foreground max-w-md mx-auto">
+              <p className="text-muted-foreground max-w-sm mx-auto">
                 {isBreakoutActive && !isTeacher
                   ? t("classes.live.breakoutDescription")
                   : classData?.isLive
@@ -476,8 +576,8 @@ export const LiveClassroom = ({
                     classId={classIdString}
                     photo={classData?.aiDelegationPhoto ?? null}
                     script={classData?.aiDelegationContext?.script ?? null}
-                    visualCue={(classData?.aiDelegationContext?.visualCue as any) || "talking"}
-                    language={i18n.language === "ar" ? "Arabic" : "English"}
+                    visualCue={classData?.aiDelegationContext?.visualCue || "idle"}
+                    language={classData?.subject?.language || "English"}
                     onFinished={handleCompanionFinished}
                   />
                 </div>

@@ -1,16 +1,44 @@
 import { useEffect } from "react";
 import { socket } from "@/lib/socket";
-import {} from "sonner";
 import { useTranslation } from "react-i18next";
 
+export interface LiveInitPayload {
+  classId: number;
+  isAiDelegated: boolean;
+  isBreakoutActive: boolean;
+  aiPhoto?: string | null;
+  currentScript?: string | null;
+  visualCue?: "talking" | "thinking" | "listening" | "idle";
+}
+
+export interface TeacherResumedPayload {
+  classId: number;
+  reason?: "ai_degraded" | "manual";
+}
+
+export interface SessionStartedPayload {
+  classId: number;
+  startedBy: string;
+}
+
+export interface BreakoutStartedPayload {
+  classId: number;
+  groups: {
+    id: number;
+    name: string;
+    members: { userId: string }[];
+  }[];
+}
+
 interface SocketHandlers {
-  onSessionStarted: (data: any) => void;
-  onSessionEnded: (data: any) => void;
-  onBreakoutStarted: (data: any) => void;
-  onBreakoutEnded: (data: any) => void;
-  onTeacherDelegated: (data: any) => void;
-  onTeacherResumed: (data: any) => void;
+  onSessionStarted: (data: SessionStartedPayload) => void;
+  onSessionEnded: (data: { classId: number }) => void;
+  onBreakoutStarted: (data: BreakoutStartedPayload) => void;
+  onBreakoutEnded: (data: { classId: number }) => void;
+  onTeacherDelegated: (data: { classId: number }) => void;
+  onTeacherResumed: (data: TeacherResumedPayload) => void;
   onPulseUpdate: (data: { classId: number; count: number }) => void;
+  onLiveInit?: (data: LiveInitPayload) => void;
 }
 
 export const useLiveClassroomSocket = (numericClassId: number, handlers: SocketHandlers) => {
@@ -20,26 +48,29 @@ export const useLiveClassroomSocket = (numericClassId: number, handlers: SocketH
     if (!socket.connected) socket.connect();
 
     const wrappedHandlers = {
-      sessionStarted: (data: any) => {
+      sessionStarted: (data: SessionStartedPayload) => {
         if (Number(data.classId) === numericClassId) handlers.onSessionStarted(data);
       },
-      sessionEnded: (data: any) => {
+      sessionEnded: (data: { classId: number }) => {
         if (Number(data.classId) === numericClassId) handlers.onSessionEnded(data);
       },
-      breakoutStarted: (data: any) => {
+      breakoutStarted: (data: BreakoutStartedPayload) => {
         if (Number(data.classId) === numericClassId) handlers.onBreakoutStarted(data);
       },
-      breakoutEnded: (data: any) => {
+      breakoutEnded: (data: { classId: number }) => {
         if (Number(data.classId) === numericClassId) handlers.onBreakoutEnded(data);
       },
-      teacherDelegated: (data: any) => {
+      teacherDelegated: (data: { classId: number }) => {
         if (Number(data.classId) === numericClassId) handlers.onTeacherDelegated(data);
       },
-      teacherResumed: (data: any) => {
+      teacherResumed: (data: TeacherResumedPayload) => {
         if (Number(data.classId) === numericClassId) handlers.onTeacherResumed(data);
       },
-      pulseUpdate: (data: any) => {
+      pulseUpdate: (data: { classId: number; count: number }) => {
         if (Number(data.classId) === numericClassId) handlers.onPulseUpdate(data);
+      },
+      liveInit: (data: LiveInitPayload) => {
+        if (Number(data.classId) === numericClassId) handlers.onLiveInit?.(data);
       },
     };
 
@@ -50,6 +81,7 @@ export const useLiveClassroomSocket = (numericClassId: number, handlers: SocketH
     socket.on("teacher_delegated", wrappedHandlers.teacherDelegated);
     socket.on("teacher_resumed", wrappedHandlers.teacherResumed);
     socket.on("live_pulse_update", wrappedHandlers.pulseUpdate);
+    socket.on("live:init", wrappedHandlers.liveInit);
 
     return () => {
       socket.off("live_session_started", wrappedHandlers.sessionStarted);
@@ -59,6 +91,7 @@ export const useLiveClassroomSocket = (numericClassId: number, handlers: SocketH
       socket.off("teacher_delegated", wrappedHandlers.teacherDelegated);
       socket.off("teacher_resumed", wrappedHandlers.teacherResumed);
       socket.off("live_pulse_update", wrappedHandlers.pulseUpdate);
+      socket.off("live:init", wrappedHandlers.liveInit);
     };
   }, [numericClassId, handlers]);
 };

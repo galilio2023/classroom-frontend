@@ -1,4 +1,4 @@
-export type AIVisualState = "talking" | "thinking" | "listening";
+export type AIVisualState = "talking" | "thinking" | "listening" | "idle";
 
 export interface AIUsageMetadata {
   promptTokens: number;
