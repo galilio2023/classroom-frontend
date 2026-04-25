@@ -20,13 +20,7 @@ import { useHardwareSafety } from "@/hooks/use-hardware-safety";
 // Hooks
 import { useLiveSession } from "@/features/classes/hooks/useLiveSession";
 import { useJitsi } from "@/features/classes/hooks/useJitsi";
-import {
-  useLiveClassroomSocket,
-  LiveInitPayload,
-  BreakoutStartedPayload,
-  SessionStartedPayload,
-  TeacherResumedPayload,
-} from "@/features/classes/hooks/useLiveClassroomSocket";
+import { useLiveClassroomSocket, LiveInitPayload, BreakoutStartedPayload, SessionStartedPayload, TeacherResumedPayload } from "@/features/classes/hooks/useLiveClassroomSocket";
 
 // Sub-components
 import { LiveSessionHeader } from "@/features/classes/components/live/LiveSessionHeader";
@@ -48,7 +42,7 @@ export const LiveClassroom = ({
   const navigate = useNavigate();
   const isAr = i18n.language === "ar";
   const queryClient = useQueryClient();
-
+  
   // 🚀 CONSOLIDATION: Perform normalization once to reduce Number() calls in handlers
   const numericClassId = useMemo(() => Number(classIdString), [classIdString]);
 
@@ -79,6 +73,7 @@ export const LiveClassroom = ({
   } = useLiveSession(classIdString);
 
   const [isAiDegraded, setIsAiDegraded] = useState(false);
+  const [isJitsiInitialized, setIsJitsiInitialized] = useState(false);
 
   // 🛡️ RULE 6: Tab Visibility Safety (Privacy Mandate)
   useHardwareSafety({
@@ -89,14 +84,15 @@ export const LiveClassroom = ({
         if (apiRef.current && typeof apiRef.current.executeCommand === "function") {
           apiRef.current.executeCommand("muteAudio");
         }
-        toast.info(
-          t(
-            "classes.live.privacy.paused",
-            "Privacy Safety: Interaction paused while tab is hidden."
-          )
-        );
+        toast.info(t("classes.live.privacy.paused", "Privacy Safety: Interaction paused while tab is hidden."));
       }
     },
+    onVisible: () => {
+      if (isJoined) {
+        // 🚀 UX Refinement: Remind user they are muted
+        toast.info(t("classes.live.privacy.returned", "Welcome back! You are still muted for your privacy."));
+      }
+    }
   });
 
   const { mutate: getRoomToken } = useCustomMutation();
@@ -130,6 +126,7 @@ export const LiveClassroom = ({
       setIsLoading(false);
       setIsJoined(true);
       setActiveClassId(classIdString);
+      setIsJitsiInitialized(true);
       onJoin?.();
       if (identity?.role === UserRole.STUDENT && !groupId) {
         markLiveAttendance({
@@ -145,6 +142,7 @@ export const LiveClassroom = ({
     },
     () => {
       setIsJoined(false);
+      setIsJitsiInitialized(false);
     },
     (link) => {
       // 🛡️ SECURITY: Basic URL validation before saving resource
@@ -177,123 +175,103 @@ export const LiveClassroom = ({
     }
   }, [isTeacher, t]);
 
-  const handleLiveInit = useCallback(
-    (data: LiveInitPayload) => {
-      // 🛡️ RECONNECTION OPTIMIZATION: Update local cache directly with safe validation
-      queryClient.setQueryData(["classes", classIdString], (old: Class | undefined) => {
-        if (!old) return old;
+  const handleLiveInit = useCallback((data: LiveInitPayload) => {
+    // 🛡️ RECONNECTION OPTIMIZATION: Update local cache directly with safe validation
+    queryClient.setQueryData(["classes", classIdString], (old: Class | undefined) => {
+      if (!old) return old;
+      
+      return {
+        ...old,
+        isAiDelegated: data.isAiDelegated,
+        isBreakoutActive: data.isBreakoutActive,
+        aiDelegationPhoto: data.aiPhoto !== undefined ? data.aiPhoto : old.aiDelegationPhoto,
+        aiDelegationContext: {
+          ...(old.aiDelegationContext || { visualCue: "idle" }),
+          script: data.currentScript !== undefined ? data.currentScript : old.aiDelegationContext?.script,
+          visualCue: data.visualCue !== undefined ? data.visualCue : old.aiDelegationContext?.visualCue,
+        }
+      };
+    });
+    setIsBreakoutActive(!!data.isBreakoutActive);
+  }, [classIdString, queryClient, setIsBreakoutActive]);
 
-        return {
-          ...old,
-          isAiDelegated: data.isAiDelegated,
-          isBreakoutActive: data.isBreakoutActive,
-          aiDelegationPhoto: data.aiPhoto !== undefined ? data.aiPhoto : old.aiDelegationPhoto,
-          aiDelegationContext: {
-            ...(old.aiDelegationContext || { visualCue: "idle" }),
-            script:
-              data.currentScript !== undefined
-                ? data.currentScript
-                : old.aiDelegationContext?.script,
-            visualCue:
-              data.visualCue !== undefined ? data.visualCue : old.aiDelegationContext?.visualCue,
+  const socketHandlers = useMemo(() => ({
+    onSessionStarted: (data: SessionStartedPayload) => {
+      if (!isTeacher) {
+        toast.info(t("classes.live.toasts.sessionStarted", { name: data.startedBy }), {
+          action: {
+            label: t("notifications.joinNow"),
+            onClick: () => startMeeting(roomTokenFetcher),
           },
-        };
-      });
-      setIsBreakoutActive(!!data.isBreakoutActive);
+        });
+      }
     },
-    [classIdString, queryClient, setIsBreakoutActive]
-  );
-
-  const socketHandlers = useMemo(
-    () => ({
-      onSessionStarted: (data: SessionStartedPayload) => {
-        if (!isTeacher) {
-          toast.info(t("classes.live.toasts.sessionStarted", { name: data.startedBy }), {
-            action: {
-              label: t("notifications.joinNow"),
-              onClick: () => startMeeting(roomTokenFetcher),
-            },
+    onSessionEnded: () => {
+      setIsJoined(false);
+      setIsJitsiInitialized(false);
+      disposeJitsi();
+      toast.error(t("classes.live.toasts.sessionEnded"));
+    },
+    onBreakoutStarted: (data: BreakoutStartedPayload) => {
+      setIsBreakoutActive(true);
+      toast.info(t("classes.live.toasts.breakoutStarted"));
+      
+      // 🛡️ STUDENT RE-ROUTING: Auto-join assigned group if student
+      if (!isTeacher) {
+        const myAssignedGroup = data.groups.find(g => 
+          g.members.some(m => m.userId === identity?.id)
+        );
+        if (myAssignedGroup) {
+          toast.success(t("classes.live.toasts.joiningGroup", { name: myAssignedGroup.name }));
+          setCurrentGroupId(myAssignedGroup.id);
+          startMeeting(roomTokenFetcher, myAssignedGroup.id);
+        }
+      }
+    },
+    onBreakoutEnded: () => {
+      setIsBreakoutActive(false);
+      setCurrentGroupId(null);
+      toast.info(t("classes.live.toasts.breakoutEnded"));
+      startMeeting(roomTokenFetcher);
+    },
+    onTeacherDelegated: () => refetchClass(),
+    onTeacherResumed: (data: TeacherResumedPayload) => {
+      refetchClass();
+      if (data.reason === "ai_degraded") {
+        setIsAiDegraded(true);
+        void handleError({
+          status: 503,
+          message: t("classes.live.ai.fallback", "AI Co-teacher is having trouble. Teacher has resumed control."),
+        }).then((err) => {
+          toast.warning(err.message, {
+            description: `${t("classes.live.ai.supportInfo", "Support Info: AI degraded via socket signal.")} (Trace: ${err.meta?.correlationId})`,
+            duration: 8000,
           });
-        }
-      },
-      onSessionEnded: () => {
-        setIsJoined(false);
-        disposeJitsi();
-        toast.error(t("classes.live.toasts.sessionEnded"));
-      },
-      onBreakoutStarted: (data: BreakoutStartedPayload) => {
-        setIsBreakoutActive(true);
-        toast.info(t("classes.live.toasts.breakoutStarted"));
-
-        // 🛡️ STUDENT RE-ROUTING: Auto-join assigned group if student
-        if (!isTeacher) {
-          const myAssignedGroup = data.groups.find((g) =>
-            g.members.some((m) => m.userId === identity?.id)
-          );
-          if (myAssignedGroup) {
-            toast.success(t("classes.live.toasts.joiningGroup", { name: myAssignedGroup.name }));
-            setCurrentGroupId(myAssignedGroup.id);
-            startMeeting(roomTokenFetcher, myAssignedGroup.id);
-          }
-        }
-      },
-      onBreakoutEnded: () => {
-        setIsBreakoutActive(false);
-        setCurrentGroupId(null);
-        toast.info(t("classes.live.toasts.breakoutEnded"));
-        startMeeting(roomTokenFetcher);
-      },
-      onTeacherDelegated: () => refetchClass(),
-      onTeacherResumed: (data: TeacherResumedPayload) => {
-        refetchClass();
-        if (data.reason === "ai_degraded") {
-          setIsAiDegraded(true);
-          void handleError({
-            status: 503,
-            message: t(
-              "classes.live.ai.fallback",
-              "AI Co-teacher is having trouble. Teacher has resumed control."
-            ),
-          }).then((err) => {
-            toast.warning(err.message, {
-              description: `${t("classes.live.ai.supportInfo", "Support Info: AI degraded via socket signal.")} (Trace: ${err.meta?.correlationId})`,
-              duration: 8000,
-            });
-          });
-        } else {
-          setIsAiDegraded(false);
-        }
-      },
-      onPulseUpdate: (data: { count: number }) => setStudentCount(data.count),
-      onLiveInit: handleLiveInit,
-    }),
-    [
-      t,
-      isTeacher,
-      startMeeting,
-      roomTokenFetcher,
-      disposeJitsi,
-      setIsJoined,
-      setIsBreakoutActive,
-      setCurrentGroupId,
-      refetchClass,
-      handleLiveInit,
-      setStudentCount,
-      identity?.id,
-    ]
-  );
+        });
+      } else {
+        setIsAiDegraded(false);
+      }
+    },
+    onPulseUpdate: (data: { count: number }) => setStudentCount(data.count),
+    onLiveInit: handleLiveInit,
+  }), [
+    t, isTeacher, startMeeting, roomTokenFetcher, disposeJitsi, setIsJoined, 
+    setIsBreakoutActive, setCurrentGroupId, refetchClass, 
+    handleLiveInit, setStudentCount, identity?.id
+  ]);
 
   useLiveClassroomSocket(numericClassId, socketHandlers);
 
   useEffect(() => {
-    if (isJoined && !apiRef.current && !isLoading && !isJitsiLoading) {
+    // 🛡️ RE-INITIALIZATION: Use a state-based trigger for stable effects
+    if (isJoined && !isJitsiInitialized && !isLoading && !isJitsiLoading) {
       startMeeting(roomTokenFetcher);
     }
     // 🛡️ HARDWARE SAFETY: Cleanup Jitsi on unmount
     return () => {
       disposeJitsi();
     };
-  }, [isJoined, isLoading, isJitsiLoading, startMeeting, roomTokenFetcher, apiRef, disposeJitsi]);
+  }, [isJoined, isJitsiInitialized, isLoading, isJitsiLoading, startMeeting, roomTokenFetcher, disposeJitsi]);
 
   const [activeTab, setActiveTab] = useState("video");
 

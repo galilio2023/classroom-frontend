@@ -2,6 +2,7 @@ import { useEffect } from "react";
 
 interface HardwareSafetyOptions {
   onHidden?: () => void;
+  onVisible?: () => void;
   shouldStopSpeech?: boolean;
 }
 
@@ -9,12 +10,13 @@ interface HardwareSafetyOptions {
  * 🛡️ HARDWARE PRIVACY & SAFETY HOOK
  * Automatically stops active speech synthesis and hardware inputs (mic/camera)
  * when the user leaves the tab to ensure privacy and safety.
- *
+ * 
  * Mandate Rule 6: Components using microphone or camera MUST implement "Tab Visibility Safety".
  */
-export const useHardwareSafety = ({
-  onHidden,
-  shouldStopSpeech = true,
+export const useHardwareSafety = ({ 
+  onHidden, 
+  onVisible,
+  shouldStopSpeech = true 
 }: HardwareSafetyOptions = {}) => {
   useEffect(() => {
     const handleVisibilityChange = () => {
@@ -26,6 +28,9 @@ export const useHardwareSafety = ({
 
         // 2. Trigger optional hardware muting callback
         onHidden?.();
+      } else if (document.visibilityState === "visible") {
+        // 🚀 Notification for user return (UX Refinement)
+        onVisible?.();
       }
     };
 
@@ -33,5 +38,5 @@ export const useHardwareSafety = ({
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, [onHidden, shouldStopSpeech]);
+  }, [onHidden, onVisible, shouldStopSpeech]);
 };
