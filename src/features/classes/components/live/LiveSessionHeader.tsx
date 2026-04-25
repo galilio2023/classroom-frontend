@@ -65,6 +65,7 @@ export const LiveSessionHeader = React.memo(
           {isAiDegraded && (
             <Badge
               variant="destructive"
+              aria-live="polite"
               className="bg-destructive/20 text-destructive border-ai-primary/50 border-2 px-3 py-1.5 rounded-full font-black gap-2 animate-pulse shadow-[0_0_10px_rgba(var(--ai-primary),0.3)]"
             >
               <BrainCircuit className="h-3.5 w-3.5 text-ai-primary" />

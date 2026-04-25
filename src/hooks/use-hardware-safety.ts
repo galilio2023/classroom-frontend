@@ -10,13 +10,13 @@ interface HardwareSafetyOptions {
  * 🛡️ HARDWARE PRIVACY & SAFETY HOOK
  * Automatically stops active speech synthesis and hardware inputs (mic/camera)
  * when the user leaves the tab to ensure privacy and safety.
- * 
+ *
  * Mandate Rule 6: Components using microphone or camera MUST implement "Tab Visibility Safety".
  */
-export const useHardwareSafety = ({ 
-  onHidden, 
+export const useHardwareSafety = ({
+  onHidden,
   onVisible,
-  shouldStopSpeech = true 
+  shouldStopSpeech = true,
 }: HardwareSafetyOptions = {}) => {
   useEffect(() => {
     const handleVisibilityChange = () => {

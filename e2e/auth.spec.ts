@@ -41,7 +41,11 @@ test.describe('Authentication Journey', () => {
     await page.click('[data-testid="login-submit"]');
 
     // 🛡️ Assert that the standard 'handleError' notification appeared with specific text
-    await expect(page.getByRole('status')).toContainText(/Session expired or unauthorized/i);
+    const toast = page.getByRole('status');
+    await expect(toast).toContainText(/Session expired or unauthorized/i);
+    
+    // 🚀 RULE 8: Verify Traceability (Trace ID/Correlation ID should be present)
+    await expect(toast).toContainText(/Trace/i);
     
     // Ensure we are still on the login page
     await expect(page).not.toHaveURL(/dashboard/);

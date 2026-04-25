@@ -12,7 +12,7 @@ export interface LiveInitPayload {
 }
 
 export interface TeacherResumedPayload {
-  classId: string;
+  classId: number;
   reason?: "ai_degraded" | "manual";
 }
 
