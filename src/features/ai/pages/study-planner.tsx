@@ -1,30 +1,19 @@
 import { useState, useEffect, useMemo } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import {
-  Calendar as CalendarIcon,
-  Sparkles,
-  Loader2,
-  CheckCircle2,
-  Clock,
-  BookOpen,
-  Zap,
-  ExternalLink,
-  Info,
-} from "lucide-react";
+import { Zap, Sparkles } from "lucide-react";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
-import { Link } from "react-router-dom";
 import { useCustom, useCustomMutation, HttpError } from "@refinedev/core";
 import { useTranslation } from "react-i18next";
-import { Badge } from "@/components/ui/badge";
-import { Breadcrumb } from "@/components/refine/layout/breadcrumb";
 import usePageTitle from "@/hooks/use-page-title";
 import { handleError } from "@/providers/utils/api-errors";
 import { offlineDB } from "@/lib/offline-db";
 import { useJobs } from "@/contexts/job-context";
 import { socket } from "@/lib/socket";
+
+// Deconstructed Components
+import { StudyPlannerHeader } from "./study-planner/StudyPlannerHeader";
+import { StudyPlanDayCard } from "./study-planner/StudyPlanDayCard";
+import { StudyPlanStats } from "./study-planner/StudyPlanStats";
 
 interface StudyBlock {
   day: string;
@@ -38,12 +27,11 @@ interface StudyPlanResponse {
   id: number;
   plan: StudyBlock[];
   completedBlocks: Record<string, boolean>;
-  statusCode?: number;
+  updatedAt?: number;
   jobId?: string;
 }
 
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-const TIME_SLOTS = ["Morning", "Afternoon", "Evening"];
 
 const StudyPlanner = () => {
   const { t, i18n } = useTranslation();
@@ -61,40 +49,53 @@ const StudyPlanner = () => {
 
   const [plan, setPlan] = useState<StudyBlock[]>([]);
   const [completedBlocks, setCompletedBlocks] = useState<Record<string, boolean>>({});
+  const [lastUpdated, setLastUpdate] = useState<number>(0);
 
-  // 🚀 BACKGROUND JOB STATUS: Check if a study plan is currently being generated
+  // 🚀 BACKGROUND JOB STATUS
   const activeStudyPlanJob = useMemo(
     () => jobs.find((j) => j.type === "study_plan" && j.status === "processing"),
     [jobs]
   );
 
-  // 🚀 RULE 4: Load from IndexedDB (Offline-First)
+  // 🚀 RULE 4 Hardening: Source of Truth logic
   useEffect(() => {
-    const loadOffline = async () => {
+    const loadAndSync = async () => {
       const record = await offlineDB.study_plans.get("current");
+
+      // If network data is available and newer, synchronize
+      if (initialData?.data) {
+        const netUpdate = initialData.data.updatedAt || Date.now();
+        const localUpdate = record?.updatedAt || 0;
+
+        if (netUpdate >= localUpdate) {
+          setPlan(initialData.data.plan || []);
+          setCompletedBlocks(initialData.data.completedBlocks || {});
+          setLastUpdate(netUpdate);
+          // Sync to local
+          void offlineDB.study_plans.put({
+            id: "current",
+            plan: initialData.data.plan || [],
+            completedBlocks: initialData.data.completedBlocks || {},
+            updatedAt: netUpdate,
+          });
+          return;
+        }
+      }
+
+      // Fallback to local if network is stale or missing
       if (record) {
-        setPlan(record.plan as any);
+        setPlan(record.plan as StudyBlock[]);
         setCompletedBlocks(record.completedBlocks);
+        setLastUpdate(record.updatedAt);
       }
     };
 
-    if (initialData?.data) {
-      setPlan(initialData.data.plan || []);
-      setCompletedBlocks(initialData.data.completedBlocks || {});
-      // Persist to offline storage
-      void offlineDB.study_plans.put({
-        id: "current",
-        plan: initialData.data.plan || [],
-        completedBlocks: initialData.data.completedBlocks || {},
-        updatedAt: Date.now(),
-      });
-    } else if (!isFetching) {
-      // 🚀 RACE CONDITION GUARD: Only load offline if the network request is NOT active
-      loadOffline();
+    if (!isFetching) {
+      loadAndSync();
     }
   }, [initialData, isFetching]);
 
-  // 🚀 BACKGROUND JOB REAL-TIME SYNC
+  // 🚀 REAL-TIME SYNC
   useEffect(() => {
     const handleJobComplete = (data: unknown) => {
       const typedData = data as { topic?: string; type?: string };
@@ -104,9 +105,7 @@ const StudyPlanner = () => {
     };
 
     socket.on("ai:job_completed", handleJobComplete);
-    return () => {
-      socket.off("ai:job_completed", handleJobComplete);
-    };
+    return () => socket.off("ai:job_completed", handleJobComplete);
   }, [refetchPlan]);
 
   // --- MUTATIONS ---
@@ -115,14 +114,15 @@ const StudyPlanner = () => {
     HttpError
   >({
     mutationOptions: {
-      onError: (err) => {
-        handleError(err); // 🚀 RULE 5: Standardized Error Handling
-      },
+      onError: (err) => handleError(err),
     },
   });
 
-  const isGenerating = generateMutation.isPending;
-  const { mutate: toggleBlockMutation } = useCustomMutation();
+  const { mutate: toggleBlockMutation } = useCustomMutation({
+    mutationOptions: {
+      resource: "study-planner", // 🛡️ Refine v5 Alignment
+    },
+  });
 
   const generatePlan = async () => {
     generatePlanMutation(
@@ -140,15 +140,39 @@ const StudyPlanner = () => {
               title: t("studyPlanner.notifications.generatingTitle" as any),
             });
             toast.success(t("studyPlanner.notifications.generatingMessage" as any));
+          } else if (data.statusCode === 202) {
+            // 🚀 Rule 202 Handling: Background processing without immediate jobId
+            toast.info(
+              t(
+                "studyPlanner.notifications.queuedMessage" as any,
+                "Study plan is being prepared in the background."
+              )
+            );
           }
         },
       }
     );
   };
 
-  const toggleBlock = (blockId: string) => {
+  const toggleBlock = async (blockId: string) => {
     const newStatus = !completedBlocks[blockId];
-    setCompletedBlocks((prev) => ({ ...prev, [blockId]: newStatus }));
+    const newCompleted = { ...completedBlocks, [blockId]: newStatus };
+
+    // 🚀 RULE 4: Immediate Offline Persistence
+    setCompletedBlocks(newCompleted);
+    await offlineDB.study_plans.update("current", {
+      completedBlocks: newCompleted,
+      updatedAt: Date.now(),
+    });
+
+    // 🚀 GAMIFICATION: Local XP Event for immediate feedback
+    if (newStatus) {
+      window.dispatchEvent(
+        new CustomEvent("xp_gained_local", {
+          detail: { amount: 25, reason: "Study Task Completed" },
+        })
+      );
+    }
 
     toggleBlockMutation({
       url: `study-planner/toggle-block/${blockId}`,
@@ -157,45 +181,35 @@ const StudyPlanner = () => {
     });
   };
 
+  // 🚀 PERFORMANCE: O(N) grouping via useMemo
+  const blocksByDay = useMemo(() => {
+    const map: Record<string, StudyBlock[]> = {};
+    plan.forEach((b) => {
+      if (!map[b.day]) map[b.day] = [];
+      map[b.day].push(b);
+    });
+    return map;
+  }, [plan]);
+
+  const completedCount = useMemo(
+    () => Object.values(completedBlocks).filter(Boolean).length,
+    [completedBlocks]
+  );
+
+  const nextTask = useMemo(
+    () => plan.find((b) => !completedBlocks[`${b.day}-${b.timeSlot}`])?.task,
+    [plan, completedBlocks]
+  );
+
   return (
     <div className="space-y-12 pb-24">
-      {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 px-2">
-        <div className="space-y-4">
-          <Breadcrumb />
-          <div className="space-y-1 text-start">
-            <h1 className="text-4xl md:text-6xl font-black tracking-tighter uppercase">
-              {t("studyPlanner.title" as any)}
-            </h1>
-            <p className="text-muted-foreground font-medium max-w-xl text-lg">
-              {t("studyPlanner.description" as any)}
-            </p>
-          </div>
-        </div>
+      <StudyPlannerHeader
+        onGenerate={generatePlan}
+        isGenerating={generateMutation.isPending}
+        activeJob={activeStudyPlanJob}
+      />
 
-        <Button
-          size="lg"
-          onClick={generatePlan}
-          disabled={isGenerating || !!activeStudyPlanJob}
-          className="h-16 px-8 rounded-2xl bg-ai-primary hover:opacity-90 transition-all group relative overflow-hidden"
-        >
-          <div className="absolute inset-0 bg-linear-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-          {isGenerating || activeStudyPlanJob ? (
-            <Loader2 className="mr-3 h-6 w-6 animate-spin" />
-          ) : (
-            <Sparkles className="mr-3 h-6 w-6" />
-          )}
-          <span className="font-black uppercase tracking-widest">
-            {isGenerating || activeStudyPlanJob
-              ? t("studyPlanner.buttons.generating" as any)
-              : t("studyPlanner.buttons.generate" as any)}
-          </span>
-        </Button>
-      </div>
-
-      {/* Main Content */}
       <div className="grid grid-cols-1 lg:grid-cols-7 gap-10">
-        {/* Weekly View */}
         <div className="lg:col-span-5 space-y-8">
           <AnimatePresence mode="wait">
             {plan.length > 0 ? (
@@ -205,90 +219,19 @@ const StudyPlanner = () => {
                 exit={{ opacity: 0, y: -20 }}
                 className="grid grid-cols-1 gap-6"
               >
-                {DAYS.map((day) => {
-                  const dayBlocks = plan.filter((b) => b.day === day);
-                  if (dayBlocks.length === 0) return null;
-
-                  return (
-                    <Card key={day} className="border-border/40 bg-card/50 backdrop-blur-xl rounded-3xl overflow-hidden text-start">
-                      <CardHeader className="border-b border-border/40 py-6 px-8 bg-muted/20">
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 rounded-xl bg-primary/10 text-primary">
-                            <CalendarIcon className="h-5 w-5" />
-                          </div>
-                          <CardTitle className="text-xl font-black uppercase tracking-tight">
-                            {t(`common.days.${day.toLowerCase()}` as any)}
-                          </CardTitle>
-                        </div>
-                      </CardHeader>
-                      <CardContent className="p-0">
-                        <div className="divide-y divide-border/40">
-                          {TIME_SLOTS.map((slot) => {
-                            const block = dayBlocks.find((b) => b.timeSlot === slot);
-                            if (!block) return null;
-                            const blockId = `${day}-${slot}`;
-                            const isCompleted = completedBlocks[blockId];
-
-                            return (
-                              <div
-                                key={slot}
-                                className={cn(
-                                  "flex items-center justify-between p-8 group transition-colors",
-                                  isCompleted ? "bg-emerald-500/5" : "hover:bg-muted/30"
-                                )}
-                              >
-                                <div className="flex items-start gap-6">
-                                  <button
-                                    onClick={() => toggleBlock(blockId)}
-                                    className={cn(
-                                      "mt-1 h-8 w-8 rounded-xl border-2 flex items-center justify-center transition-all shrink-0",
-                                      isCompleted
-                                        ? "bg-emerald-500 border-emerald-500 text-white"
-                                        : "border-border/60 hover:border-primary group-hover:scale-110"
-                                    )}
-                                  >
-                                    {isCompleted && <CheckCircle2 className="h-5 w-5" />}
-                                  </button>
-
-                                  <div className="space-y-1">
-                                    <div className="flex items-center gap-3">
-                                      <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
-                                        {t(`studyPlanner.slots.${slot.toLowerCase()}` as any)}
-                                      </span>
-                                      <Badge variant="outline" className="text-[10px] font-bold rounded-lg border-border/40">
-                                        {block.duration}
-                                      </Badge>
-                                    </div>
-                                    <h4 className={cn(
-                                      "text-xl font-black tracking-tight",
-                                      isAr ? "font-noto-arabic" : "font-sans",
-                                      isCompleted && "line-through text-muted-foreground/60"
-                                    )}>
-                                      {block.task}
-                                    </h4>
-                                  </div>
-                                </div>
-
-                                {block.assignmentId && (
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    asChild
-                                    className="rounded-xl hover:bg-primary/10 hover:text-primary transition-colors"
-                                  >
-                                    <Link to={`/assignments/show/${block.assignmentId}`}>
-                                      <ExternalLink className="h-5 w-5" />
-                                    </Link>
-                                  </Button>
-                                )}
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
+                {DAYS.map(
+                  (day) =>
+                    blocksByDay[day] && (
+                      <StudyPlanDayCard
+                        key={day}
+                        day={day}
+                        dayBlocks={blocksByDay[day]}
+                        completedBlocks={completedBlocks}
+                        onToggleBlock={toggleBlock}
+                        isAr={isAr}
+                      />
+                    )
+                )}
               </motion.div>
             ) : (
               <motion.div
@@ -305,7 +248,11 @@ const StudyPlanner = () => {
                 <p className="text-muted-foreground font-medium max-w-sm mb-8">
                   {t("studyPlanner.empty.description" as any)}
                 </p>
-                <Button onClick={generatePlan} size="lg" className="rounded-2xl px-10 h-14 bg-ai-primary font-black uppercase tracking-widest">
+                <Button
+                  onClick={generatePlan}
+                  size="lg"
+                  className="rounded-2xl px-10 h-14 bg-ai-primary font-black uppercase tracking-widest"
+                >
                   <Sparkles className="mr-3 h-5 w-5" />
                   {t("studyPlanner.buttons.generateNow" as any)}
                 </Button>
@@ -314,71 +261,12 @@ const StudyPlanner = () => {
           </AnimatePresence>
         </div>
 
-        {/* Sidebar / Stats */}
-        <div className="lg:col-span-2 space-y-8">
-          <Card className="border-border/40 bg-card/50 backdrop-blur-xl rounded-3xl overflow-hidden text-start">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-sm font-black uppercase tracking-[0.2em] text-muted-foreground/60">
-                {t("studyPlanner.stats.progressTitle" as any)}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-2">
-                <div className="flex justify-between items-end">
-                  <span className="text-3xl font-black tracking-tighter">
-                    {Object.values(completedBlocks).filter(Boolean).length} / {plan.length}
-                  </span>
-                  <span className="text-xs font-bold text-muted-foreground mb-1">
-                    {t("studyPlanner.stats.blocksLabel" as any)}
-                  </span>
-                </div>
-                <div className="h-3 w-full bg-muted/30 rounded-full overflow-hidden">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${(Object.values(completedBlocks).filter(Boolean).length / (plan.length || 1)) * 100}%` }}
-                    className="h-full bg-emerald-500 rounded-full"
-                  />
-                </div>
-              </div>
-
-              <div className="p-6 rounded-2xl bg-primary/5 border border-primary/10 flex items-start gap-4">
-                <div className="p-2 rounded-xl bg-primary/10 text-primary">
-                  <BookOpen className="h-5 w-5" />
-                </div>
-                <div className="space-y-1">
-                  <p className="text-xs font-black uppercase tracking-widest text-primary/60">
-                    {t("studyPlanner.stats.nextTask" as any)}
-                  </p>
-                  <p className="text-sm font-bold leading-tight">
-                    {plan.find((b) => !completedBlocks[`${b.day}-${b.timeSlot}`])?.task || t("studyPlanner.stats.allDone" as any)}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* AI Tip Box */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.3 }}
-          >
-            <Card className="border-border/40 bg-ai-primary/5 rounded-4xl overflow-hidden relative group">
-              <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-125 transition-transform">
-                <Sparkles className="h-24 w-24" />
-              </div>
-              <CardContent className="p-10 space-y-6 text-start">
-                <div className="space-y-4">
-                  <div className="p-3 rounded-2xl bg-ai-primary/20 text-ai-primary w-fit">
-                    <Info className="h-5 w-5" />
-                  </div>
-                  <p className="text-base md:text-xl font-medium text-muted-foreground leading-relaxed italic selection:bg-indigo-500/20">
-                    "{t("studyPlanner.labels.tipText" as any)}"
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
+        <div className="lg:col-span-2">
+          <StudyPlanStats
+            completedCount={completedCount}
+            totalCount={plan.length}
+            nextTask={nextTask}
+          />
         </div>
       </div>
     </div>

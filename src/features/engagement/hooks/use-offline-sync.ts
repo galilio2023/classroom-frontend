@@ -176,7 +176,9 @@ export const useOfflineSync = () => {
     try {
       const planRecord = await db.study_plans.get("current");
       if (planRecord && planRecord.plan && Array.isArray(planRecord.plan)) {
-        const nextBlock = planRecord.plan.find((b: any) => !planRecord.completedBlocks?.[b.id]) as any;
+        const nextBlock = planRecord.plan.find(
+          (b: any) => !planRecord.completedBlocks?.[b.id]
+        ) as any;
         if (nextBlock) {
           return {
             type: "study_block",
