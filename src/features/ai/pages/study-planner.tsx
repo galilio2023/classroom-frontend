@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,6 +22,9 @@ import { Badge } from "@/components/ui/badge";
 import { Breadcrumb } from "@/components/refine/layout/breadcrumb";
 import usePageTitle from "@/hooks/use-page-title";
 import { handleError } from "@/providers/utils/api-errors";
+import { offlineDB } from "@/lib/offline-db";
+import { useJobs } from "@/contexts/job-context";
+import { socket } from "@/lib/socket";
 
 interface StudyBlock {
   day: string;
@@ -36,6 +39,7 @@ interface StudyPlanResponse {
   plan: StudyBlock[];
   completedBlocks: Record<string, boolean>;
   statusCode?: number;
+  jobId?: string;
 }
 
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
@@ -45,6 +49,7 @@ const StudyPlanner = () => {
   const { t, i18n } = useTranslation();
   const isAr = i18n.language === "ar";
   usePageTitle(t("resources.study-planner.label"));
+  const { addJob } = useJobs();
 
   // --- FETCH CURRENT PLAN ---
   const { query: planQuery } = useCustom<StudyPlanResponse>({
@@ -52,25 +57,57 @@ const StudyPlanner = () => {
     method: "get",
   });
 
-  const { data: initialData, isLoading: isFetching } = planQuery;
+  const { data: initialData, isLoading: isFetching, refetch: refetchPlan } = planQuery;
 
   const [plan, setPlan] = useState<StudyBlock[]>([]);
   const [completedBlocks, setCompletedBlocks] = useState<Record<string, boolean>>({});
 
+  // 🚀 RULE 4: Load from IndexedDB if initialData is missing (Offline-First)
   useEffect(() => {
+    const loadOffline = async () => {
+      const record = await offlineDB.study_plans.get("current");
+      if (record) {
+        setPlan(record.plan);
+        setCompletedBlocks(record.completedBlocks);
+      }
+    };
+    
     if (initialData?.data) {
       setPlan(initialData.data.plan || []);
       setCompletedBlocks(initialData.data.completedBlocks || {});
+      // Persist to offline storage
+      void offlineDB.study_plans.put({
+        id: "current",
+        plan: initialData.data.plan || [],
+        completedBlocks: initialData.data.completedBlocks || {},
+        updatedAt: Date.now(),
+      });
+    } else {
+      loadOffline();
     }
   }, [initialData]);
+
+  // 🚀 BACKGROUND JOB REAL-TIME SYNC
+  useEffect(() => {
+    const handleJobComplete = (data: any) => {
+      // Topic usually includes the specific action or we check correlationId
+      if (data.topic === "generate_study_plan" || data.type === "study_plan") {
+        refetchPlan();
+      }
+    };
+
+    socket.on("ai:job_completed", handleJobComplete);
+    return () => {
+      socket.off("ai:job_completed", handleJobComplete);
+    };
+  }, [refetchPlan]);
 
   // --- MUTATIONS ---
   const { mutate: generatePlanMutation, mutation: generateMutation } = useCustomMutation<
     StudyPlanResponse,
     HttpError
   >();
-
-  // 🚀 REFINE PATTERN: Custom success logic handled in onSuccess
+  
   const isGenerating = generateMutation.isPending;
   const { mutate: toggleBlockMutation } = useCustomMutation();
 
@@ -80,12 +117,20 @@ const StudyPlanner = () => {
         url: "ai/generate-study-plan",
         method: "post",
         values: {},
-        successNotification: false, // 🛡️ Handled manually via toast.info/success
+        successNotification: false,
       },
       {
         onSuccess: (result) => {
           // 🚀 RURAL HARDENING: Handle asynchronous background job (202 Accepted)
-          if (result.data?.statusCode === 202) {
+          if (result.data?.statusCode === 202 && result.data?.jobId) {
+            // Register in the Job Tracker for global visibility
+            addJob({
+              id: result.data.jobId,
+              type: "study_plan",
+              title: t("studyPlanner.labels.jobTitle", "Creating Personalized Study Plan"),
+              metadata: { classId: "global" }
+            });
+
             toast.info(
               t("studyPlanner.toasts.processing", {
                 defaultValue:
@@ -99,7 +144,6 @@ const StudyPlanner = () => {
             return;
           }
 
-          // Legacy/Immediate fallback support
           if (result.data?.plan) {
             setPlan(result.data.plan);
             setCompletedBlocks({});
@@ -111,7 +155,7 @@ const StudyPlanner = () => {
           }
         },
         onError: (err) => {
-          void handleError(err); // 🛡️ RULE 5: Standardized error handling
+          void handleError(err);
         },
       }
     );
@@ -120,9 +164,13 @@ const StudyPlanner = () => {
   const toggleComplete = (day: string, slot: string) => {
     const key = `${day}-${slot}`;
     const isNowCompleted = !completedBlocks[key];
+    const newCompleted = { ...completedBlocks, [key]: isNowCompleted };
 
     // Optimistic Update
-    setCompletedBlocks((prev) => ({ ...prev, [key]: isNowCompleted }));
+    setCompletedBlocks(newCompleted);
+    
+    // Persist completion state offline immediately (Rule 4)
+    void offlineDB.study_plans.update("current", { completedBlocks: newCompleted });
 
     toggleBlockMutation({
       url: "study-planner/toggle",
