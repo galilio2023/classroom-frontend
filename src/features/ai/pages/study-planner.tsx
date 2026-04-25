@@ -208,7 +208,7 @@ const StudyPlanner = () => {
                 <h3 className="text-2xl md:text-3xl font-black tracking-tight">
                   {t("studyPlanner.empty.title")}
                 </h3>
-                <p className="text-muted-foreground max-sm mx-auto text-base font-medium">
+                <p className="text-muted-foreground max-w-sm mx-auto text-base font-medium">
                   {t("studyPlanner.empty.desc")}
                 </p>
               </div>

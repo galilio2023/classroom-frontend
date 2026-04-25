@@ -2,11 +2,11 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Authentication Journey', () => {
   // 🛡️ Fail fast with actionable guidance if environment is not configured correctly
-  const email = process.env.TEST_TEACHER_EMAIL;
-  const password = process.env.TEST_TEACHER_PASSWORD;
+  const email = process.env.TEST_TEACHER_EMAIL || 'test@example.com';
+  const password = process.env.TEST_TEACHER_PASSWORD || 'password123';
 
   test.beforeEach(({}, testInfo) => {
-    if (!email || !password) {
+    if (!process.env.TEST_TEACHER_EMAIL || !process.env.TEST_TEACHER_PASSWORD) {
       console.warn(
         `🚨 Skipping test "${testInfo.title}": TEST_TEACHER_EMAIL or TEST_TEACHER_PASSWORD is not set.`
       );
@@ -22,8 +22,8 @@ test.describe('Authentication Journey', () => {
     await expect(page).toHaveTitle(/Login/i);
 
     // Fill in credentials using data-testid for resilience
-    await page.fill('[data-testid="email-input"]', email!);
-    await page.fill('[data-testid="password-input"]', password!);
+    await page.fill('[data-testid="email-input"]', email);
+    await page.fill('[data-testid="password-input"]', password);
 
     // Click the submit button
     await page.click('[data-testid="login-submit"]');
