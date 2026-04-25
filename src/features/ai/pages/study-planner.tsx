@@ -69,6 +69,8 @@ const StudyPlanner = () => {
     StudyPlanResponse,
     HttpError
   >();
+
+  // 🚀 REFINE PATTERN: Custom success logic handled in onSuccess
   const isGenerating = generateMutation.isPending;
   const { mutate: toggleBlockMutation } = useCustomMutation();
 
@@ -78,6 +80,7 @@ const StudyPlanner = () => {
         url: "ai/generate-study-plan",
         method: "post",
         values: {},
+        successNotification: false, // 🛡️ Handled manually via toast.info/success
       },
       {
         onSuccess: (result) => {

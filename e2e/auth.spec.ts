@@ -40,9 +40,8 @@ test.describe('Authentication Journey', () => {
 
     await page.click('[data-testid="login-submit"]');
 
-    // 🛡️ Assert that the standard 'handleError' notification appeared
-    // sonner toasts usually have role="status"
-    await expect(page.getByRole('status')).toBeVisible();
+    // 🛡️ Assert that the standard 'handleError' notification appeared with specific text
+    await expect(page.getByRole('status')).toContainText(/Session expired or unauthorized/i);
     
     // Ensure we are still on the login page
     await expect(page).not.toHaveURL(/dashboard/);

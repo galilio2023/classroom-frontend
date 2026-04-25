@@ -20,7 +20,10 @@ import { useHardwareSafety } from "@/hooks/use-hardware-safety";
 // Hooks
 import { useLiveSession } from "@/features/classes/hooks/useLiveSession";
 import { useJitsi } from "@/features/classes/hooks/useJitsi";
-import { useLiveClassroomSocket, LiveInitPayload } from "@/features/classes/hooks/useLiveClassroomSocket";
+import {
+  useLiveClassroomSocket,
+  LiveInitPayload,
+} from "@/features/classes/hooks/useLiveClassroomSocket";
 
 // Sub-components
 import { LiveSessionHeader } from "@/features/classes/components/live/LiveSessionHeader";
@@ -42,7 +45,7 @@ export const LiveClassroom = ({
   const navigate = useNavigate();
   const isAr = i18n.language === "ar";
   const queryClient = useQueryClient();
-  
+
   // 🚀 CONSOLIDATION: Perform normalization once to reduce Number() calls in handlers
   const numericClassId = useMemo(() => Number(classIdString), [classIdString]);
 
@@ -82,9 +85,14 @@ export const LiveClassroom = ({
         if (apiRef.current) {
           apiRef.current.executeCommand("muteAudio");
         }
-        toast.info(t("classes.live.privacy.paused", "Privacy Safety: Interaction paused while tab is hidden."));
+        toast.info(
+          t(
+            "classes.live.privacy.paused",
+            "Privacy Safety: Interaction paused while tab is hidden."
+          )
+        );
       }
-    }
+    },
   });
 
   const { mutate: getRoomToken } = useCustomMutation();
@@ -135,6 +143,13 @@ export const LiveClassroom = ({
       setIsJoined(false);
     },
     (link) => {
+      // 🛡️ SECURITY: Basic URL validation before saving resource
+      if (!link || !/^https?:\/\//i.test(link)) {
+        // eslint-disable-next-line no-console
+        console.warn("Invalid recording link received. Skipping save.", { link });
+        return;
+      }
+
       saveRecording(
         {
           url: "/resources",
@@ -158,84 +173,106 @@ export const LiveClassroom = ({
     }
   }, [isTeacher, t]);
 
-  const handleLiveInit = useCallback((data: LiveInitPayload) => {
-    // 🛡️ RECONNECTION OPTIMIZATION: Update local cache directly with safe validation
-    queryClient.setQueryData(["classes", classIdString], (old: Class | undefined) => {
-      // 🚀 RACE CONDITION GUARD: If initial data hasn't loaded yet, we can't merge.
-      // But we can create a partial object that will be merged by Refine later.
-      if (!old) return old;
-      
-      return {
-        ...old,
-        isAiDelegated: data.isAiDelegated,
-        isBreakoutActive: data.isBreakoutActive,
-        aiDelegationPhoto: data.aiPhoto !== undefined ? data.aiPhoto : old.aiDelegationPhoto,
-        aiDelegationContext: {
-          ...(old.aiDelegationContext || { visualCue: "idle" }),
-          script: data.currentScript !== undefined ? data.currentScript : old.aiDelegationContext?.script,
-          visualCue: data.visualCue !== undefined ? data.visualCue : old.aiDelegationContext?.visualCue,
-        }
-      };
-    });
-    setIsBreakoutActive(!!data.isBreakoutActive);
-  }, [classIdString, queryClient, setIsBreakoutActive]);
+  const handleLiveInit = useCallback(
+    (data: LiveInitPayload) => {
+      // 🛡️ RECONNECTION OPTIMIZATION: Update local cache directly with safe validation
+      queryClient.setQueryData(["classes", classIdString], (old: Class | undefined) => {
+        // 🚀 RACE CONDITION GUARD: If initial data hasn't loaded yet, we can't merge.
+        // But we can create a partial object that will be merged by Refine later.
+        if (!old) return old;
 
-  const socketHandlers = useMemo(() => ({
-    onSessionStarted: (data: { startedBy: string }) => {
-      if (!isTeacher) {
-        toast.info(t("classes.live.toasts.sessionStarted", { name: data.startedBy }), {
-          action: {
-            label: t("notifications.joinNow"),
-            onClick: () => startMeeting(roomTokenFetcher),
+        return {
+          ...old,
+          isAiDelegated: data.isAiDelegated,
+          isBreakoutActive: data.isBreakoutActive,
+          aiDelegationPhoto: data.aiPhoto !== undefined ? data.aiPhoto : old.aiDelegationPhoto,
+          aiDelegationContext: {
+            ...(old.aiDelegationContext || { visualCue: "idle" }),
+            script:
+              data.currentScript !== undefined
+                ? data.currentScript
+                : old.aiDelegationContext?.script,
+            visualCue:
+              data.visualCue !== undefined ? data.visualCue : old.aiDelegationContext?.visualCue,
           },
-        });
-      }
+        };
+      });
+      setIsBreakoutActive(!!data.isBreakoutActive);
     },
-    onSessionEnded: () => {
-      setIsJoined(false);
-      disposeJitsi();
-      toast.error(t("classes.live.toasts.sessionEnded"));
-    },
-    onBreakoutStarted: () => {
-      setIsBreakoutActive(true);
-      toast.info(t("classes.live.toasts.breakoutStarted"));
-      if (!isTeacher && myGroup) {
-        toast.success(t("classes.live.toasts.joiningGroup", { name: myGroup.name }));
-        setCurrentGroupId(myGroup.id);
-        startMeeting(roomTokenFetcher, myGroup.id);
-      }
-    },
-    onBreakoutEnded: () => {
-      setIsBreakoutActive(false);
-      setCurrentGroupId(null);
-      toast.info(t("classes.live.toasts.breakoutEnded"));
-      startMeeting(roomTokenFetcher);
-    },
-    onTeacherDelegated: () => refetchClass(),
-    onTeacherResumed: (data: { reason?: string }) => {
-      refetchClass();
-      if (data.reason === "ai_degraded") {
-        setIsAiDegraded(true);
-        void handleError({
-          status: 503,
-          message: t("classes.live.ai.fallback", "AI Co-teacher is having trouble. Teacher has resumed control."),
-        }).then((err) => {
-          toast.warning(err.message, {
-            description: `${t("classes.live.ai.supportInfo", "Support Info: AI degraded via socket signal.")} (Trace: ${err.meta?.correlationId})`,
-            duration: 8000,
+    [classIdString, queryClient, setIsBreakoutActive]
+  );
+
+  const socketHandlers = useMemo(
+    () => ({
+      onSessionStarted: (data: { startedBy: string }) => {
+        if (!isTeacher) {
+          toast.info(t("classes.live.toasts.sessionStarted", { name: data.startedBy }), {
+            action: {
+              label: t("notifications.joinNow"),
+              onClick: () => startMeeting(roomTokenFetcher),
+            },
           });
-        });
-      } else {
-        setIsAiDegraded(false);
-      }
-    },
-    onPulseUpdate: (data: { count: number }) => setStudentCount(data.count),
-    onLiveInit: handleLiveInit,
-  }), [
-    t, isTeacher, startMeeting, roomTokenFetcher, disposeJitsi, setIsJoined, 
-    setIsBreakoutActive, myGroup, setCurrentGroupId, refetchClass, 
-    handleLiveInit, setStudentCount
-  ]);
+        }
+      },
+      onSessionEnded: () => {
+        setIsJoined(false);
+        disposeJitsi();
+        toast.error(t("classes.live.toasts.sessionEnded"));
+      },
+      onBreakoutStarted: () => {
+        setIsBreakoutActive(true);
+        toast.info(t("classes.live.toasts.breakoutStarted"));
+        if (!isTeacher && myGroup) {
+          toast.success(t("classes.live.toasts.joiningGroup", { name: myGroup.name }));
+          setCurrentGroupId(myGroup.id);
+          startMeeting(roomTokenFetcher, myGroup.id);
+        }
+      },
+      onBreakoutEnded: () => {
+        setIsBreakoutActive(false);
+        setCurrentGroupId(null);
+        toast.info(t("classes.live.toasts.breakoutEnded"));
+        startMeeting(roomTokenFetcher);
+      },
+      onTeacherDelegated: () => refetchClass(),
+      onTeacherResumed: (data: { reason?: string }) => {
+        refetchClass();
+        if (data.reason === "ai_degraded") {
+          setIsAiDegraded(true);
+          void handleError({
+            status: 503,
+            message: t(
+              "classes.live.ai.fallback",
+              "AI Co-teacher is having trouble. Teacher has resumed control."
+            ),
+          }).then((err) => {
+            toast.warning(err.message, {
+              description: `${t("classes.live.ai.supportInfo", "Support Info: AI degraded via socket signal.")} (Trace: ${err.meta?.correlationId})`,
+              duration: 8000,
+            });
+          });
+        } else {
+          setIsAiDegraded(false);
+        }
+      },
+      onPulseUpdate: (data: { count: number }) => setStudentCount(data.count),
+      onLiveInit: handleLiveInit,
+    }),
+    [
+      t,
+      isTeacher,
+      startMeeting,
+      roomTokenFetcher,
+      disposeJitsi,
+      setIsJoined,
+      setIsBreakoutActive,
+      myGroup,
+      setCurrentGroupId,
+      refetchClass,
+      handleLiveInit,
+      setStudentCount,
+    ]
+  );
 
   useLiveClassroomSocket(numericClassId, socketHandlers);
 
