@@ -44,7 +44,10 @@ export const LiveClassroom = ({
   const queryClient = useQueryClient();
   
   // 🚀 CONSOLIDATION: Perform normalization once to reduce Number() calls in handlers
-  const numericClassId = useMemo(() => Number(classIdString), [classIdString]);
+  const numericClassId = useMemo(() => {
+    const n = Number(classIdString);
+    return isNaN(n) ? 0 : n;
+  }, [classIdString]);
 
   const {
     identity,

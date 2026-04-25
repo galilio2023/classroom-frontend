@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -49,7 +49,7 @@ const StudyPlanner = () => {
   const { t, i18n } = useTranslation();
   const isAr = i18n.language === "ar";
   usePageTitle(t("resources.study-planner.label"));
-  const { addJob } = useJobs();
+  const { addJob, jobs } = useJobs();
 
   // --- FETCH CURRENT PLAN ---
   const { query: planQuery } = useCustom<StudyPlanResponse>({
@@ -62,7 +62,12 @@ const StudyPlanner = () => {
   const [plan, setPlan] = useState<StudyBlock[]>([]);
   const [completedBlocks, setCompletedBlocks] = useState<Record<string, boolean>>({});
 
-  // 🚀 RULE 4: Load from IndexedDB if initialData is missing (Offline-First)
+  // 🚀 BACKGROUND JOB STATUS: Check if a study plan is currently being generated
+  const activeStudyPlanJob = useMemo(() => 
+    jobs.find(j => j.type === "study_plan" && j.status === "processing"),
+  [jobs]);
+
+  // 🚀 RULE 4: Load from IndexedDB (Offline-First)
   useEffect(() => {
     const loadOffline = async () => {
       const record = await offlineDB.study_plans.get("current");
@@ -82,15 +87,15 @@ const StudyPlanner = () => {
         completedBlocks: initialData.data.completedBlocks || {},
         updatedAt: Date.now(),
       });
-    } else {
+    } else if (!isFetching) {
+      // 🚀 RACE CONDITION GUARD: Only load offline if the network request is NOT active
       loadOffline();
     }
-  }, [initialData]);
+  }, [initialData, isFetching]);
 
   // 🚀 BACKGROUND JOB REAL-TIME SYNC
   useEffect(() => {
     const handleJobComplete = (data: any) => {
-      // Topic usually includes the specific action or we check correlationId
       if (data.topic === "generate_study_plan" || data.type === "study_plan") {
         refetchPlan();
       }
@@ -123,7 +128,6 @@ const StudyPlanner = () => {
         onSuccess: (result) => {
           // 🚀 RURAL HARDENING: Handle asynchronous background job (202 Accepted)
           if (result.data?.statusCode === 202 && result.data?.jobId) {
-            // Register in the Job Tracker for global visibility
             addJob({
               id: result.data.jobId,
               type: "study_plan",
@@ -166,10 +170,7 @@ const StudyPlanner = () => {
     const isNowCompleted = !completedBlocks[key];
     const newCompleted = { ...completedBlocks, [key]: isNowCompleted };
 
-    // Optimistic Update
     setCompletedBlocks(newCompleted);
-    
-    // Persist completion state offline immediately (Rule 4)
     void offlineDB.study_plans.update("current", { completedBlocks: newCompleted });
 
     toggleBlockMutation({
@@ -198,7 +199,7 @@ const StudyPlanner = () => {
     return plan.find((b) => b.day === day && b.timeSlot === slot);
   };
 
-  const isLoading = isFetching || isGenerating;
+  const isLoading = isFetching || isGenerating || !!activeStudyPlanJob;
 
   return (
     <div
@@ -226,21 +227,43 @@ const StudyPlanner = () => {
               </p>
             </div>
           </div>
-          <Button
-            onClick={generatePlan}
-            disabled={isLoading}
-            size="lg"
-            className="w-full md:w-auto rounded-2xl h-12 md:h-14 px-10 font-bold uppercase tracking-widest text-[10px] gap-3 shadow-lg shadow-primary/25 hover:translate-y-[-2px] transition-all"
-          >
-            {isLoading ? (
-              <Loader2 className="h-5 w-5 animate-spin" />
-            ) : (
-              <Sparkles className="h-5 w-5" />
-            )}
-            {plan.length > 0
-              ? t("studyPlanner.buttons.regenerate")
-              : t("studyPlanner.buttons.generate")}
-          </Button>
+          
+          <div className="relative group">
+            {/* 🚀 RULE 7: Visual Feedback for background job */}
+            <AnimatePresence>
+              {activeStudyPlanJob && (
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  className="absolute -top-3 -right-3 z-10"
+                >
+                  <Badge className="bg-ai-primary-gradient text-white border-none animate-pulse px-2 py-0.5 text-[8px] font-black">
+                    PROCESSING
+                  </Badge>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <Button
+              onClick={generatePlan}
+              disabled={isLoading}
+              size="lg"
+              className={cn(
+                "w-full md:w-auto rounded-2xl h-12 md:h-14 px-10 font-bold uppercase tracking-widest text-[10px] gap-3 shadow-lg hover:translate-y-[-2px] transition-all",
+                activeStudyPlanJob ? "bg-ai-primary/20 text-ai-primary border border-ai-primary/30" : "shadow-primary/25"
+              )}
+            >
+              {isLoading ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <Sparkles className="h-5 w-5" />
+              )}
+              {plan.length > 0
+                ? t("studyPlanner.buttons.regenerate")
+                : t("studyPlanner.buttons.generate")}
+            </Button>
+          </div>
         </div>
       </motion.div>
 
@@ -276,7 +299,6 @@ const StudyPlanner = () => {
         </motion.div>
       ) : (
         <div className="px-2 space-y-10 md:space-y-16">
-          {/* Desktop Grid / Mobile List - Truly Adaptive */}
           <div className="grid grid-cols-1 md:grid-cols-7 gap-6 md:gap-4 items-start">
             <AnimatePresence mode="popLayout">
               {DAYS.map((day, dayIndex) => (
@@ -367,7 +389,6 @@ const StudyPlanner = () => {
                                 )}
                               </div>
 
-                              {/* Visual Completion Stamp */}
                               <AnimatePresence>
                                 {isCompleted && (
                                   <motion.div
@@ -407,7 +428,6 @@ const StudyPlanner = () => {
             </AnimatePresence>
           </div>
 
-          {/* AI Coach Tip Card */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
