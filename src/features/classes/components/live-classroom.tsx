@@ -643,7 +643,7 @@ export const LiveClassroom = ({
             )}
 
             {!isMiniMode && activeTab === "roadmap" && (
-              <RoadmapDisplay roadmap={classData?.liveLessonRoadmap} />
+              <RoadmapDisplay roadmap={classData?.liveLessonRoadmap as any} />
             )}
           </div>
         </div>

@@ -121,12 +121,6 @@ const StudyPlanner = () => {
     },
   });
 
-  const abortController = useMemo(() => new AbortController(), []); // 🚀 RULE 1: AbortController
-
-  useEffect(() => {
-    return () => abortController.abort(); // Rule 1: Cleanup on unmount
-  }, [abortController]);
-
   const isGenerating = generateMutation.isPending;
   const { mutate: toggleBlockMutation } = useCustomMutation();
 
@@ -136,9 +130,6 @@ const StudyPlanner = () => {
         url: "study-planner/generate",
         method: "post",
         values: {},
-        config: {
-          signal: abortController.signal,
-        },
       },
       {
         onSuccess: (data) => {
@@ -146,10 +137,9 @@ const StudyPlanner = () => {
             addJob({
               id: data.data.jobId,
               type: "study_plan",
-              title: t("studyPlanner.notifications.generatingTitle"),
-              status: "processing",
+              title: t("studyPlanner.notifications.generatingTitle" as any),
             });
-            toast.success(t("studyPlanner.notifications.generatingMessage"));
+            toast.success(t("studyPlanner.notifications.generatingMessage" as any));
           }
         },
       }
@@ -175,10 +165,10 @@ const StudyPlanner = () => {
           <Breadcrumb />
           <div className="space-y-1 text-start">
             <h1 className="text-4xl md:text-6xl font-black tracking-tighter uppercase">
-              {t("studyPlanner.title")}
+              {t("studyPlanner.title" as any)}
             </h1>
             <p className="text-muted-foreground font-medium max-w-xl text-lg">
-              {t("studyPlanner.description")}
+              {t("studyPlanner.description" as any)}
             </p>
           </div>
         </div>
@@ -197,8 +187,8 @@ const StudyPlanner = () => {
           )}
           <span className="font-black uppercase tracking-widest">
             {isGenerating || activeStudyPlanJob
-              ? t("studyPlanner.buttons.generating")
-              : t("studyPlanner.buttons.generate")}
+              ? t("studyPlanner.buttons.generating" as any)
+              : t("studyPlanner.buttons.generate" as any)}
           </span>
         </Button>
       </div>
@@ -220,17 +210,14 @@ const StudyPlanner = () => {
                   if (dayBlocks.length === 0) return null;
 
                   return (
-                    <Card
-                      key={day}
-                      className="border-border/40 bg-card/50 backdrop-blur-xl rounded-3xl overflow-hidden text-start"
-                    >
+                    <Card key={day} className="border-border/40 bg-card/50 backdrop-blur-xl rounded-3xl overflow-hidden text-start">
                       <CardHeader className="border-b border-border/40 py-6 px-8 bg-muted/20">
                         <div className="flex items-center gap-3">
                           <div className="p-2 rounded-xl bg-primary/10 text-primary">
                             <CalendarIcon className="h-5 w-5" />
                           </div>
                           <CardTitle className="text-xl font-black uppercase tracking-tight">
-                            {t(`common.days.${day.toLowerCase()}`)}
+                            {t(`common.days.${day.toLowerCase()}` as any)}
                           </CardTitle>
                         </div>
                       </CardHeader>
@@ -266,22 +253,17 @@ const StudyPlanner = () => {
                                   <div className="space-y-1">
                                     <div className="flex items-center gap-3">
                                       <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
-                                        {t(`studyPlanner.slots.${slot.toLowerCase()}`)}
+                                        {t(`studyPlanner.slots.${slot.toLowerCase()}` as any)}
                                       </span>
-                                      <Badge
-                                        variant="outline"
-                                        className="text-[10px] font-bold rounded-lg border-border/40"
-                                      >
+                                      <Badge variant="outline" className="text-[10px] font-bold rounded-lg border-border/40">
                                         {block.duration}
                                       </Badge>
                                     </div>
-                                    <h4
-                                      className={cn(
-                                        "text-xl font-black tracking-tight",
-                                        isAr ? "font-noto-arabic" : "font-sans",
-                                        isCompleted && "line-through text-muted-foreground/60"
-                                      )}
-                                    >
+                                    <h4 className={cn(
+                                      "text-xl font-black tracking-tight",
+                                      isAr ? "font-noto-arabic" : "font-sans",
+                                      isCompleted && "line-through text-muted-foreground/60"
+                                    )}>
                                       {block.task}
                                     </h4>
                                   </div>
@@ -318,18 +300,14 @@ const StudyPlanner = () => {
                   <Zap className="h-16 w-16" />
                 </div>
                 <h3 className="text-3xl font-black tracking-tighter uppercase mb-2">
-                  {t("studyPlanner.empty.title")}
+                  {t("studyPlanner.empty.title" as any)}
                 </h3>
                 <p className="text-muted-foreground font-medium max-w-sm mb-8">
-                  {t("studyPlanner.empty.description")}
+                  {t("studyPlanner.empty.description" as any)}
                 </p>
-                <Button
-                  onClick={generatePlan}
-                  size="lg"
-                  className="rounded-2xl px-10 h-14 bg-ai-primary font-black uppercase tracking-widest"
-                >
+                <Button onClick={generatePlan} size="lg" className="rounded-2xl px-10 h-14 bg-ai-primary font-black uppercase tracking-widest">
                   <Sparkles className="mr-3 h-5 w-5" />
-                  {t("studyPlanner.buttons.generateNow")}
+                  {t("studyPlanner.buttons.generateNow" as any)}
                 </Button>
               </motion.div>
             )}
@@ -341,7 +319,7 @@ const StudyPlanner = () => {
           <Card className="border-border/40 bg-card/50 backdrop-blur-xl rounded-3xl overflow-hidden text-start">
             <CardHeader className="pb-4">
               <CardTitle className="text-sm font-black uppercase tracking-[0.2em] text-muted-foreground/60">
-                {t("studyPlanner.stats.progressTitle")}
+                {t("studyPlanner.stats.progressTitle" as any)}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -351,15 +329,13 @@ const StudyPlanner = () => {
                     {Object.values(completedBlocks).filter(Boolean).length} / {plan.length}
                   </span>
                   <span className="text-xs font-bold text-muted-foreground mb-1">
-                    {t("studyPlanner.stats.blocksLabel")}
+                    {t("studyPlanner.stats.blocksLabel" as any)}
                   </span>
                 </div>
                 <div className="h-3 w-full bg-muted/30 rounded-full overflow-hidden">
                   <motion.div
                     initial={{ width: 0 }}
-                    animate={{
-                      width: `${(Object.values(completedBlocks).filter(Boolean).length / (plan.length || 1)) * 100}%`,
-                    }}
+                    animate={{ width: `${(Object.values(completedBlocks).filter(Boolean).length / (plan.length || 1)) * 100}%` }}
                     className="h-full bg-emerald-500 rounded-full"
                   />
                 </div>
@@ -371,11 +347,10 @@ const StudyPlanner = () => {
                 </div>
                 <div className="space-y-1">
                   <p className="text-xs font-black uppercase tracking-widest text-primary/60">
-                    {t("studyPlanner.stats.nextTask")}
+                    {t("studyPlanner.stats.nextTask" as any)}
                   </p>
                   <p className="text-sm font-bold leading-tight">
-                    {plan.find((b) => !completedBlocks[`${b.day}-${b.timeSlot}`])?.task ||
-                      t("studyPlanner.stats.allDone")}
+                    {plan.find((b) => !completedBlocks[`${b.day}-${b.timeSlot}`])?.task || t("studyPlanner.stats.allDone" as any)}
                   </p>
                 </div>
               </div>
@@ -398,7 +373,7 @@ const StudyPlanner = () => {
                     <Info className="h-5 w-5" />
                   </div>
                   <p className="text-base md:text-xl font-medium text-muted-foreground leading-relaxed italic selection:bg-indigo-500/20">
-                    "{t("studyPlanner.labels.tipText")}"
+                    "{t("studyPlanner.labels.tipText" as any)}"
                   </p>
                 </div>
               </CardContent>

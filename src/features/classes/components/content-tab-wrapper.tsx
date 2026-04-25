@@ -92,7 +92,7 @@ export const ContentTabWrapper: React.FC<ContentTabWrapperProps> = ({
 
         <TabsContent value="roadmap" className="mt-8">
           {activeSubTab === "roadmap" && (
-            <RoadmapDisplay roadmap={aClass?.liveLessonRoadmap} isCourseRoadmap={true} />
+            <RoadmapDisplay roadmap={aClass?.liveLessonRoadmap as any} isCourseRoadmap={true} />
           )}
         </TabsContent>
       </Tabs>
