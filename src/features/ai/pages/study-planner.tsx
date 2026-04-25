@@ -21,7 +21,7 @@ import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import { Breadcrumb } from "@/components/refine/layout/breadcrumb";
 import usePageTitle from "@/hooks/use-page-title";
-import { getCorrelationId } from "@/providers/utils/api-errors";
+import { handleError } from "@/providers/utils/api-errors";
 
 interface StudyBlock {
   day: string;
@@ -35,6 +35,7 @@ interface StudyPlanResponse {
   id: number;
   plan: StudyBlock[];
   completedBlocks: Record<string, boolean>;
+  statusCode?: number;
 }
 
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
@@ -79,7 +80,7 @@ const StudyPlanner = () => {
         values: {},
       },
       {
-        onSuccess: (result: any) => {
+        onSuccess: (result) => {
           // 🚀 RURAL HARDENING: Handle asynchronous background job (202 Accepted)
           if (result.data?.statusCode === 202) {
             toast.info(
@@ -107,10 +108,7 @@ const StudyPlanner = () => {
           }
         },
         onError: (err) => {
-          const correlationId = getCorrelationId(err);
-          toast.error(t("studyPlanner.errors.failed", "Failed to generate plan."), {
-            description: `Trace ID: ${correlationId}`,
-          });
+          void handleError(err); // 🛡️ RULE 5: Standardized error handling
         },
       }
     );
@@ -210,7 +208,7 @@ const StudyPlanner = () => {
                 <h3 className="text-2xl md:text-3xl font-black tracking-tight">
                   {t("studyPlanner.empty.title")}
                 </h3>
-                <p className="text-muted-foreground max-w-sm mx-auto text-base font-medium">
+                <p className="text-muted-foreground max-sm mx-auto text-base font-medium">
                   {t("studyPlanner.empty.desc")}
                 </p>
               </div>

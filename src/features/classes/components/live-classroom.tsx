@@ -81,6 +81,10 @@ export const LiveClassroom = ({
   useHardwareSafety({
     onHidden: () => {
       if (isJoined) {
+        // 🚀 Mute active Jitsi audio (Rule 6 requirement)
+        if (apiRef.current) {
+          apiRef.current.executeCommand("muteAudio");
+        }
         toast.info(
           t(
             "classes.live.privacy.paused",
