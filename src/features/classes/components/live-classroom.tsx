@@ -94,6 +94,12 @@ export const LiveClassroom = ({
           // Explicitly set mute to true for deterministic safety (Rule 6)
           apiRef.current.executeCommand("setAudioMute", true);
         }
+
+        // 🚀 MANDATE Rule 6: Cancel global speech synthesis (AI Speech)
+        if ("speechSynthesis" in window) {
+          window.speechSynthesis.cancel();
+        }
+
         toast.info(
           t(
             "classes.live.privacy.paused",
@@ -164,7 +170,6 @@ export const LiveClassroom = ({
     (link) => {
       // 🛡️ SECURITY: Basic URL validation before saving resource
       if (!link || !/^https?:\/\//i.test(link)) {
-        // eslint-disable-next-line no-console
         console.warn("Invalid recording link received. Skipping save.", { link });
         return;
       }

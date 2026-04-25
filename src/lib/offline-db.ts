@@ -70,7 +70,7 @@ export interface BackgroundJobRecord {
 
 export interface StudyPlanRecord {
   id: string; // "current"
-  plan: any[];
+  plan: unknown[];
   completedBlocks: Record<string, boolean>;
   updatedAt: number;
 }

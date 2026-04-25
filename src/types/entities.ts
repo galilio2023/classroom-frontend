@@ -104,6 +104,32 @@ export interface NotificationMetadata {
   [key: string]: any;
 }
 
+export interface SessionRoadmap {
+  sessionTitle: string;
+  icebreaker: string;
+  keyConcepts: string[];
+  outline: {
+    time: string;
+    topic: string;
+    goal: string;
+  }[];
+  studentWatchouts: string;
+}
+
+export interface CourseRoadmap {
+  title: string;
+  vision: string;
+  competencies: string[];
+  milestones: {
+    phase: string;
+    title: string;
+    description: string;
+  }[];
+  expectations: string;
+}
+
+export type Roadmap = SessionRoadmap | CourseRoadmap;
+
 export interface Department {
   id: number;
   name: string;

@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 import { useCustomMutation, useInvalidate } from "@refinedev/core";
 import { Skeleton } from "@/components/ui/skeleton";
+import { handleError } from "@/providers/utils/api-errors";
 
 export interface MissionAction {
   type: "assignment" | "lesson" | "quiz" | "study_block" | "live_session";
@@ -106,6 +107,11 @@ export const MissionControlHero = ({
           url: "/study-planner/complete-block",
           method: "patch",
           values: { blockId: mission.id },
+          config: {
+            headers: {
+              "X-Correlation-ID": `mission-complete-${crypto.randomUUID()}`, // 🚀 Traceability Mandate
+            },
+          },
         },
         {
           onSuccess: () => {
@@ -113,6 +119,9 @@ export const MissionControlHero = ({
               resource: "dashboard/mission",
               invalidates: ["detail"],
             });
+          },
+          onError: (err) => {
+            handleError(err); // 🚀 Rule 5: Standardized Error Handling
           },
         }
       );
