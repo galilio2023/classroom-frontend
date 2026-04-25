@@ -3,11 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Loader2, Sparkles } from "lucide-react";
 import { Breadcrumb } from "@/components/refine/layout/breadcrumb";
 import { useTranslation } from "react-i18next";
+import { BackgroundJobRecord } from "@/types";
 
 interface StudyPlannerHeaderProps {
   onGenerate: () => void;
   isGenerating: boolean;
-  activeJob?: any;
+  activeJob?: BackgroundJobRecord;
 }
 
 export const StudyPlannerHeader = ({
@@ -23,10 +24,10 @@ export const StudyPlannerHeader = ({
         <Breadcrumb />
         <div className="space-y-1 text-start">
           <h1 className="text-4xl md:text-6xl font-black tracking-tighter uppercase">
-            {t("studyPlanner.title" as any)}
+            {t("studyPlanner.title")}
           </h1>
           <p className="text-muted-foreground font-medium max-w-xl text-lg">
-            {t("studyPlanner.description" as any)}
+            {t("studyPlanner.description")}
           </p>
         </div>
       </div>
@@ -45,8 +46,8 @@ export const StudyPlannerHeader = ({
         )}
         <span className="font-black uppercase tracking-widest">
           {isGenerating || activeJob
-            ? t("studyPlanner.buttons.generating" as any)
-            : t("studyPlanner.buttons.generate" as any)}
+            ? t("studyPlanner.buttons.generating")
+            : t("studyPlanner.buttons.generate")}
         </span>
       </Button>
     </div>
