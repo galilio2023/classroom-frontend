@@ -1,5 +1,5 @@
-import { useState, useEffect, useMemo, useRef } from "react";
-import { Zap, Sparkles } from "lucide-react";
+import { useState, useEffect, useMemo, useCallback } from "react";
+import { Zap, Sparkles, WifiOff } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCustom, useCustomMutation, HttpError } from "@refinedev/core";
@@ -9,6 +9,7 @@ import { handleError, getCorrelationId } from "@/providers/utils/api-errors";
 import { offlineDB } from "@/lib/offline-db";
 import { useJobs } from "@/contexts/job-context";
 import { socket } from "@/lib/socket";
+import { useStudyPlanSync, useOfflineSync } from "@/features/engagement/hooks/use-offline-sync";
 
 // Deconstructed Components
 import { StudyPlannerHeader } from "./study-planner/StudyPlannerHeader";
@@ -29,6 +30,7 @@ interface StudyPlanResponse {
   completedBlocks: Record<string, boolean>;
   updatedAt?: number;
   jobId?: string;
+  statusCode?: number;
 }
 
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
@@ -38,6 +40,7 @@ const StudyPlanner = () => {
   const isAr = i18n.language === "ar";
   usePageTitle(t("resources.study-planner.label"));
   const { addJob, jobs } = useJobs();
+  const { isOnline } = useOfflineSync();
 
   // --- FETCH CURRENT PLAN ---
   const { query: planQuery } = useCustom<StudyPlanResponse>({
@@ -47,10 +50,13 @@ const StudyPlanner = () => {
 
   const { data: initialData, isLoading: isFetching, refetch: refetchPlan } = planQuery;
 
-  const [plan, setPlan] = useState<StudyBlock[]>([]);
-  const [completedBlocks, setCompletedBlocks] = useState<Record<string, boolean>>({});
-  const [lastUpdated, setLastUpdate] = useState<number>(0);
-  const isSyncingRef = useRef(false);
+  // 🚀 RULE 4 Hardening: Synchronized Source of Truth logic
+  const { 
+    plan, 
+    completedBlocks, 
+    setCompletedBlocks, 
+    isSyncingRef 
+  } = useStudyPlanSync(initialData, isFetching);
 
   // 🚀 BACKGROUND JOB STATUS
   const activeStudyPlanJob = useMemo(
@@ -58,59 +64,31 @@ const StudyPlanner = () => {
     [jobs]
   );
 
-  // 🚀 RULE 4 Hardening: Source of Truth logic
+  // 🚀 RULE 6: Resource Preserving Visibility Safety
   useEffect(() => {
-    const loadAndSync = async () => {
-      if (isSyncingRef.current) return;
-      
-      const record = await offlineDB.study_plans.get("current");
-      
-      // If network data is available and newer, synchronize
-      if (initialData?.data) {
-        const netUpdate = initialData.data.updatedAt || Date.now();
-        const localUpdate = record?.updatedAt || 0;
-
-        // Establish Source of Truth (Timestamp-based Rule 4)
-        if (netUpdate >= localUpdate) {
-            setPlan(initialData.data.plan || []);
-            setCompletedBlocks(initialData.data.completedBlocks || {});
-            setLastUpdate(netUpdate);
-            // Sync to local
-            void offlineDB.study_plans.put({
-                id: "current",
-                plan: initialData.data.plan || [],
-                completedBlocks: initialData.data.completedBlocks || {},
-                updatedAt: netUpdate,
-            });
-            return;
-        }
-      }
-
-      // Fallback to local if network is stale or missing
-      if (record) {
-        setPlan(record.plan as StudyBlock[]);
-        setCompletedBlocks(record.completedBlocks);
-        setLastUpdate(record.updatedAt);
+    const handleVisibility = () => {
+      if (document.hidden && activeStudyPlanJob) {
+        // AI is generating but user left. We don't stop the job (backend owns it), 
+        // but we can pause local polling or non-critical UI feedback.
+        console.log("StudyPlanner: Preserving resources while hidden.");
       }
     };
-
-    if (!isFetching) {
-        loadAndSync();
-    }
-  }, [initialData, isFetching]);
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => document.removeEventListener("visibilitychange", handleVisibility);
+  }, [activeStudyPlanJob]);
 
   // 🚀 REAL-TIME SYNC
-  useEffect(() => {
-    const handleJobComplete = (data: unknown) => {
-      const typedData = data as { topic?: string; type?: string };
-      if (typedData.topic === "generate_study_plan" || typedData.type === "study_plan") {
-        refetchPlan();
-      }
-    };
+  const handleJobComplete = useCallback((data: unknown) => {
+    const typedData = data as { topic?: string; type?: string };
+    if (typedData.topic === "generate_study_plan" || typedData.type === "study_plan") {
+      refetchPlan();
+    }
+  }, [refetchPlan]);
 
+  useEffect(() => {
     socket.on("ai:job_completed", handleJobComplete);
     return () => socket.off("ai:job_completed", handleJobComplete);
-  }, [refetchPlan]);
+  }, [handleJobComplete]);
 
   // --- MUTATIONS ---
   const { mutate: generatePlanMutation, mutation: generateMutation } = useCustomMutation<
@@ -118,6 +96,7 @@ const StudyPlanner = () => {
     HttpError
   >({
     mutationOptions: {
+      resource: "study-planner", // 🛡️ Refine v5 Audit Trail
       onError: (err) => {
           // 🚀 RULE 8: Traceability Mandate
           const correlationId = getCorrelationId(err);
@@ -148,7 +127,7 @@ const StudyPlanner = () => {
               title: t("studyPlanner.notifications.generatingTitle"),
             });
             toast.success(t("studyPlanner.notifications.generatingMessage"));
-          } else if (data.statusCode === 202) {
+          } else if ((data as any).statusCode === 202) {
              // 🚀 Rule 202 Handling: Background processing without immediate jobId
              toast.info(t("studyPlanner.notifications.queuedMessage", "Study plan is being prepared in the background."));
           }
@@ -165,7 +144,6 @@ const StudyPlanner = () => {
     
     // 🚀 RULE 4: Immediate Offline Persistence
     setCompletedBlocks(newCompleted);
-    setLastUpdate(now);
 
     await offlineDB.study_plans.update("current", { 
         completedBlocks: newCompleted,
@@ -184,6 +162,13 @@ const StudyPlanner = () => {
       method: "post",
       values: { isCompleted: newStatus },
     }, {
+        onSuccess: (res) => {
+           // 🚀 Hardening: Update local with precise server timestamp if available
+           const serverUpdate = (res as any).data?.updatedAt;
+           if (serverUpdate) {
+               void offlineDB.study_plans.update("current", { updatedAt: serverUpdate });
+           }
+        },
         onSettled: () => {
             isSyncingRef.current = false;
         }
@@ -193,7 +178,7 @@ const StudyPlanner = () => {
   // 🚀 PERFORMANCE: O(N) grouping via useMemo
   const blocksByDay = useMemo(() => {
     const map: Record<string, StudyBlock[]> = {};
-    plan.forEach(b => {
+    (plan || []).forEach(b => {
         if (!map[b.day]) map[b.day] = [];
         map[b.day].push(b);
     });
@@ -201,11 +186,11 @@ const StudyPlanner = () => {
   }, [plan]);
 
   const completedCount = useMemo(() => 
-    Object.values(completedBlocks).filter(Boolean).length, 
+    Object.values(completedBlocks || {}).filter(Boolean).length, 
   [completedBlocks]);
 
   const nextTask = useMemo(() => 
-    plan.find((b) => !completedBlocks[`${b.day}-${b.timeSlot}`])?.task,
+    (plan || []).find((b) => !completedBlocks[`${b.day}-${b.timeSlot}`])?.task,
   [plan, completedBlocks]);
 
   return (
@@ -213,13 +198,25 @@ const StudyPlanner = () => {
       <StudyPlannerHeader 
         onGenerate={generatePlan} 
         isGenerating={generateMutation.isPending} 
-        activeJob={activeStudyPlanJob} 
+        activeJob={activeStudyPlanJob as any} 
       />
+
+      {/* 🚀 Rule 7: Offline Indicator Badge */}
+      {!isOnline && (
+          <motion.div 
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center gap-2 px-4 py-2 bg-destructive/10 text-destructive rounded-full w-fit mx-auto text-[10px] font-black uppercase tracking-widest border border-destructive/20"
+          >
+              <WifiOff className="h-3 w-3" />
+              {t("common.offlineMode", "Offline Mode - Progress will sync later")}
+          </motion.div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-7 gap-10">
         <div className="lg:col-span-5 space-y-8">
           <AnimatePresence mode="wait">
-            {plan.length > 0 ? (
+            {plan && plan.length > 0 ? (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -266,7 +263,7 @@ const StudyPlanner = () => {
         <div className="lg:col-span-2">
           <StudyPlanStats 
             completedCount={completedCount} 
-            totalCount={plan.length} 
+            totalCount={plan?.length || 0} 
             nextTask={nextTask} 
           />
         </div>

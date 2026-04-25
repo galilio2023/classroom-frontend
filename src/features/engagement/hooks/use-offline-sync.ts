@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { offlineDB as db } from "@/lib/offline-db";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
@@ -214,4 +214,62 @@ export const useOfflineSync = () => {
   };
 
   return { isOnline, downloadLesson, saveQuizOffline, syncPendingData, getNextOfflineMission };
+};
+
+/**
+ * 🔄 useStudyPlanSync Hook
+ * Specialized for the Study Planner feature (Mandate Review Hardening V1.7)
+ * Implements Rule 4 timestamp-based reconciliation.
+ */
+export const useStudyPlanSync = (initialData: any, isFetching: boolean) => {
+  const [plan, setPlan] = useState<any[]>([]);
+  const [completedBlocks, setCompletedBlocks] = useState<Record<string, boolean>>({});
+  const [lastUpdated, setLastUpdated] = useState<number>(0);
+  const isSyncingRef = useRef(false);
+
+  useEffect(() => {
+    const loadAndSync = async () => {
+      if (isSyncingRef.current || isFetching) return;
+      isSyncingRef.current = true;
+
+      try {
+        const record = await db.study_plans.get("current");
+        
+        // If network data is available and newer, synchronize
+        if (initialData?.data) {
+          const netUpdate = initialData.data.updatedAt || Date.now();
+          const localUpdate = record?.updatedAt || 0;
+
+          if (netUpdate >= localUpdate) {
+            setPlan(initialData.data.plan || []);
+            setCompletedBlocks(initialData.data.completedBlocks || {});
+            setLastUpdated(netUpdate);
+            // Sync to local
+            await db.study_plans.put({
+              id: "current",
+              plan: initialData.data.plan || [],
+              completedBlocks: initialData.data.completedBlocks || {},
+              updatedAt: netUpdate,
+            });
+          } else if (record) {
+            // Local is newer (offline changes pending or faster local update)
+            setPlan(record.plan);
+            setCompletedBlocks(record.completedBlocks);
+            setLastUpdated(record.updatedAt);
+          }
+        } else if (record) {
+          // Fallback to local
+          setPlan(record.plan);
+          setCompletedBlocks(record.completedBlocks);
+          setLastUpdated(record.updatedAt);
+        }
+      } finally {
+        isSyncingRef.current = false;
+      }
+    };
+
+    loadAndSync();
+  }, [initialData, isFetching]);
+
+  return { plan, completedBlocks, lastUpdated, setPlan, setCompletedBlocks, isSyncingRef };
 };
