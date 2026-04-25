@@ -20,7 +20,13 @@ import { useHardwareSafety } from "@/hooks/use-hardware-safety";
 // Hooks
 import { useLiveSession } from "@/features/classes/hooks/useLiveSession";
 import { useJitsi } from "@/features/classes/hooks/useJitsi";
-import { useLiveClassroomSocket, LiveInitPayload, BreakoutStartedPayload, SessionStartedPayload, TeacherResumedPayload } from "@/features/classes/hooks/useLiveClassroomSocket";
+import {
+  useLiveClassroomSocket,
+  LiveInitPayload,
+  BreakoutStartedPayload,
+  SessionStartedPayload,
+  TeacherResumedPayload,
+} from "@/features/classes/hooks/useLiveClassroomSocket";
 
 // Sub-components
 import { LiveSessionHeader } from "@/features/classes/components/live/LiveSessionHeader";
@@ -42,7 +48,7 @@ export const LiveClassroom = ({
   const navigate = useNavigate();
   const isAr = i18n.language === "ar";
   const queryClient = useQueryClient();
-  
+
   // 🚀 CONSOLIDATION: Perform normalization once to reduce Number() calls in handlers
   const numericClassId = useMemo(() => {
     const n = Number(classIdString);
@@ -88,15 +94,22 @@ export const LiveClassroom = ({
           // Explicitly set mute to true for deterministic safety (Rule 6)
           apiRef.current.executeCommand("setAudioMute", true);
         }
-        toast.info(t("classes.live.privacy.paused", "Privacy Safety: Interaction paused while tab is hidden."));
+        toast.info(
+          t(
+            "classes.live.privacy.paused",
+            "Privacy Safety: Interaction paused while tab is hidden."
+          )
+        );
       }
     },
     onVisible: () => {
       if (isJoined) {
         // 🚀 UX Refinement: Remind user they are muted (Rule 6 follow-up)
-        toast.info(t("classes.live.privacy.returned", "Welcome back! You are still muted for your privacy."));
+        toast.info(
+          t("classes.live.privacy.returned", "Welcome back! You are still muted for your privacy.")
+        );
       }
-    }
+    },
   });
 
   const { mutate: getRoomToken } = useCustomMutation();
@@ -179,90 +192,112 @@ export const LiveClassroom = ({
     }
   }, [isTeacher, t]);
 
-  const handleLiveInit = useCallback((data: LiveInitPayload) => {
-    // 🛡️ RECONNECTION OPTIMIZATION: Update local cache directly with safe validation
-    queryClient.setQueryData(["classes", classIdString], (old: Class | undefined) => {
-      if (!old) return old;
-      
-      return {
-        ...old,
-        isAiDelegated: data.isAiDelegated,
-        isBreakoutActive: data.isBreakoutActive,
-        aiDelegationPhoto: data.aiPhoto !== undefined ? data.aiPhoto : old.aiDelegationPhoto,
-        aiDelegationContext: {
-          ...(old.aiDelegationContext || { visualCue: "idle" }),
-          script: data.currentScript !== undefined ? data.currentScript : old.aiDelegationContext?.script,
-          visualCue: data.visualCue !== undefined ? data.visualCue : old.aiDelegationContext?.visualCue,
-        }
-      };
-    });
-    setIsBreakoutActive(!!data.isBreakoutActive);
-  }, [classIdString, queryClient, setIsBreakoutActive]);
+  const handleLiveInit = useCallback(
+    (data: LiveInitPayload) => {
+      // 🛡️ RECONNECTION OPTIMIZATION: Update local cache directly with safe validation
+      queryClient.setQueryData(["classes", classIdString], (old: Class | undefined) => {
+        if (!old) return old;
 
-  const socketHandlers = useMemo(() => ({
-    onSessionStarted: (data: SessionStartedPayload) => {
-      if (!isTeacher) {
-        toast.info(t("classes.live.toasts.sessionStarted", { name: data.startedBy }), {
-          action: {
-            label: t("notifications.joinNow"),
-            onClick: () => startMeeting(roomTokenFetcher),
+        return {
+          ...old,
+          isAiDelegated: data.isAiDelegated,
+          isBreakoutActive: data.isBreakoutActive,
+          aiDelegationPhoto: data.aiPhoto !== undefined ? data.aiPhoto : old.aiDelegationPhoto,
+          aiDelegationContext: {
+            ...(old.aiDelegationContext || { visualCue: "idle" }),
+            script:
+              data.currentScript !== undefined
+                ? data.currentScript
+                : old.aiDelegationContext?.script,
+            visualCue:
+              data.visualCue !== undefined ? data.visualCue : old.aiDelegationContext?.visualCue,
           },
-        });
-      }
+        };
+      });
+      setIsBreakoutActive(!!data.isBreakoutActive);
     },
-    onSessionEnded: () => {
-      setIsJoined(false);
-      setIsJitsiInitialized(false);
-      disposeJitsi();
-      toast.error(t("classes.live.toasts.sessionEnded"));
-    },
-    onBreakoutStarted: (data: BreakoutStartedPayload) => {
-      setIsBreakoutActive(true);
-      toast.info(t("classes.live.toasts.breakoutStarted"));
-      
-      // 🛡️ STUDENT RE-ROUTING: Auto-join assigned group if student
-      if (!isTeacher) {
-        const myAssignedGroup = data.groups.find(g => 
-          g.members.some(m => m.userId === identity?.id)
-        );
-        if (myAssignedGroup) {
-          toast.success(t("classes.live.toasts.joiningGroup", { name: myAssignedGroup.name }));
-          setCurrentGroupId(myAssignedGroup.id);
-          startMeeting(roomTokenFetcher, myAssignedGroup.id);
-        }
-      }
-    },
-    onBreakoutEnded: () => {
-      setIsBreakoutActive(false);
-      setCurrentGroupId(null);
-      toast.info(t("classes.live.toasts.breakoutEnded"));
-      startMeeting(roomTokenFetcher);
-    },
-    onTeacherDelegated: () => refetchClass(),
-    onTeacherResumed: (data: TeacherResumedPayload) => {
-      refetchClass();
-      if (data.reason === "ai_degraded") {
-        setIsAiDegraded(true);
-        void handleError({
-          status: 503,
-          message: t("classes.live.ai.fallback", "AI Co-teacher is having trouble. Teacher has resumed control."),
-        }).then((err) => {
-          toast.warning(err.message, {
-            description: `${t("classes.live.ai.supportInfo", "Support Info: AI degraded via socket signal.")} (Trace: ${err.meta?.correlationId})`,
-            duration: 8000,
+    [classIdString, queryClient, setIsBreakoutActive]
+  );
+
+  const socketHandlers = useMemo(
+    () => ({
+      onSessionStarted: (data: SessionStartedPayload) => {
+        if (!isTeacher) {
+          toast.info(t("classes.live.toasts.sessionStarted", { name: data.startedBy }), {
+            action: {
+              label: t("notifications.joinNow"),
+              onClick: () => startMeeting(roomTokenFetcher),
+            },
           });
-        });
-      } else {
-        setIsAiDegraded(false);
-      }
-    },
-    onPulseUpdate: (data: { count: number }) => setStudentCount(data.count),
-    onLiveInit: handleLiveInit,
-  }), [
-    t, isTeacher, startMeeting, roomTokenFetcher, disposeJitsi, setIsJoined, 
-    setIsBreakoutActive, setCurrentGroupId, refetchClass, 
-    handleLiveInit, setStudentCount, identity?.id
-  ]);
+        }
+      },
+      onSessionEnded: () => {
+        setIsJoined(false);
+        setIsJitsiInitialized(false);
+        disposeJitsi();
+        toast.error(t("classes.live.toasts.sessionEnded"));
+      },
+      onBreakoutStarted: (data: BreakoutStartedPayload) => {
+        setIsBreakoutActive(true);
+        toast.info(t("classes.live.toasts.breakoutStarted"));
+
+        // 🛡️ STUDENT RE-ROUTING: Auto-join assigned group if student
+        if (!isTeacher) {
+          const myAssignedGroup = data.groups.find((g) =>
+            g.members.some((m) => m.userId === identity?.id)
+          );
+          if (myAssignedGroup) {
+            toast.success(t("classes.live.toasts.joiningGroup", { name: myAssignedGroup.name }));
+            setCurrentGroupId(myAssignedGroup.id);
+            startMeeting(roomTokenFetcher, myAssignedGroup.id);
+          }
+        }
+      },
+      onBreakoutEnded: () => {
+        setIsBreakoutActive(false);
+        setCurrentGroupId(null);
+        toast.info(t("classes.live.toasts.breakoutEnded"));
+        startMeeting(roomTokenFetcher);
+      },
+      onTeacherDelegated: () => refetchClass(),
+      onTeacherResumed: (data: TeacherResumedPayload) => {
+        refetchClass();
+        if (data.reason === "ai_degraded") {
+          setIsAiDegraded(true);
+          void handleError({
+            status: 503,
+            message: t(
+              "classes.live.ai.fallback",
+              "AI Co-teacher is having trouble. Teacher has resumed control."
+            ),
+          }).then((err) => {
+            toast.warning(err.message, {
+              description: `${t("classes.live.ai.supportInfo", "Support Info: AI degraded via socket signal.")} (Trace: ${err.meta?.correlationId})`,
+              duration: 8000,
+            });
+          });
+        } else {
+          setIsAiDegraded(false);
+        }
+      },
+      onPulseUpdate: (data: { count: number }) => setStudentCount(data.count),
+      onLiveInit: handleLiveInit,
+    }),
+    [
+      t,
+      isTeacher,
+      startMeeting,
+      roomTokenFetcher,
+      disposeJitsi,
+      setIsJoined,
+      setIsBreakoutActive,
+      setCurrentGroupId,
+      refetchClass,
+      handleLiveInit,
+      setStudentCount,
+      identity?.id,
+    ]
+  );
 
   useLiveClassroomSocket(numericClassId, socketHandlers);
 
@@ -275,7 +310,15 @@ export const LiveClassroom = ({
     return () => {
       disposeJitsi();
     };
-  }, [isJoined, isJitsiInitialized, isLoading, isJitsiLoading, startMeeting, roomTokenFetcher, disposeJitsi]);
+  }, [
+    isJoined,
+    isJitsiInitialized,
+    isLoading,
+    isJitsiLoading,
+    startMeeting,
+    roomTokenFetcher,
+    disposeJitsi,
+  ]);
 
   const [activeTab, setActiveTab] = useState("video");
 

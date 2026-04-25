@@ -9,6 +9,7 @@ import { ErrorBoundary } from "@/components/guards/error-boundary";
 import { DashboardData } from "@/types/dashboard";
 import { TeacherOnboarding } from "./teacher-onboarding";
 import { ActionCenter, ActionItem } from "./action-center";
+import { ClassHealthDashboard } from "./class-health-dashboard";
 import { MarketplaceOverview } from "./marketplace-overview";
 import { motion } from "framer-motion";
 import { BarChart3, AlertCircle, LayoutDashboard, TrendingUp } from "lucide-react";
@@ -147,6 +148,17 @@ export const StaffDashboard = ({ data, isLoading, onRefresh, show }: StaffDashbo
           stats={data.channelStats}
           onManageClick={() => show("teacher-channel", "me")}
         />
+      )}
+
+      {/* 🏥 Class Health Dashboard */}
+      {data.classHealth && data.classHealth.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.18 }}
+        >
+          <ClassHealthDashboard data={data.classHealth} />
+        </motion.div>
       )}
 
       <div className="grid gap-12 lg:grid-cols-12 items-start">

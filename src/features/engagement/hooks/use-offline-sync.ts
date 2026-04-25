@@ -168,5 +168,48 @@ export const useOfflineSync = () => {
     }
   };
 
-  return { isOnline, downloadLesson, saveQuizOffline, syncPendingData };
+  /**
+   * 🧠 OFFLINE INTELLIGENCE: Computes the next mission using local Dexie data.
+   * Mandate: Part of the "Human Layer" (Phase 1.1) to remove friction in low-bandwidth pockets.
+   */
+  const getNextOfflineMission = async () => {
+    try {
+      const planRecord = await db.study_plans.get("current");
+      if (planRecord && planRecord.plan && Array.isArray(planRecord.plan)) {
+        const nextBlock = planRecord.plan.find((b: any) => !planRecord.completedBlocks?.[b.id]);
+        if (nextBlock) {
+          return {
+            type: "study_block",
+            id: nextBlock.id,
+            title: nextBlock.topic || t("dashboard.student.nextMission.offlineTitle" as any),
+            context: t("dashboard.student.nextMission.offlineContext" as any),
+            urgency: "medium",
+            link: nextBlock.link || "/ai-study-lab",
+            source: "offline_cache",
+          };
+        }
+      }
+
+      // Fallback: Return first cached lesson
+      const cachedLessons = await db.lessons.toArray();
+      if (cachedLessons.length > 0) {
+        return {
+          type: "lesson",
+          id: cachedLessons[0].id,
+          title: cachedLessons[0].title,
+          context: t("dashboard.student.nextMission.offlineLessonContext" as any),
+          urgency: "low",
+          link: `/classes/${cachedLessons[0].classId}/lessons/${cachedLessons[0].id}`,
+          source: "offline_cache",
+        };
+      }
+
+      return null;
+    } catch (err) {
+      console.error("Failed to compute offline mission:", err);
+      return null;
+    }
+  };
+
+  return { isOnline, downloadLesson, saveQuizOffline, syncPendingData, getNextOfflineMission };
 };

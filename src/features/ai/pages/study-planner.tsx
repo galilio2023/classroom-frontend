@@ -63,9 +63,10 @@ const StudyPlanner = () => {
   const [completedBlocks, setCompletedBlocks] = useState<Record<string, boolean>>({});
 
   // 🚀 BACKGROUND JOB STATUS: Check if a study plan is currently being generated
-  const activeStudyPlanJob = useMemo(() => 
-    jobs.find(j => j.type === "study_plan" && j.status === "processing"),
-  [jobs]);
+  const activeStudyPlanJob = useMemo(
+    () => jobs.find((j) => j.type === "study_plan" && j.status === "processing"),
+    [jobs]
+  );
 
   // 🚀 RULE 4: Load from IndexedDB (Offline-First)
   useEffect(() => {
@@ -76,7 +77,7 @@ const StudyPlanner = () => {
         setCompletedBlocks(record.completedBlocks);
       }
     };
-    
+
     if (initialData?.data) {
       setPlan(initialData.data.plan || []);
       setCompletedBlocks(initialData.data.completedBlocks || {});
@@ -112,7 +113,7 @@ const StudyPlanner = () => {
     StudyPlanResponse,
     HttpError
   >();
-  
+
   const isGenerating = generateMutation.isPending;
   const { mutate: toggleBlockMutation } = useCustomMutation();
 
@@ -132,7 +133,7 @@ const StudyPlanner = () => {
               id: result.data.jobId,
               type: "study_plan",
               title: t("studyPlanner.labels.jobTitle", "Creating Personalized Study Plan"),
-              metadata: { classId: "global" }
+              metadata: { classId: "global" },
             });
 
             toast.info(
@@ -227,12 +228,12 @@ const StudyPlanner = () => {
               </p>
             </div>
           </div>
-          
+
           <div className="relative group">
             {/* 🚀 RULE 7: Visual Feedback for background job */}
             <AnimatePresence>
               {activeStudyPlanJob && (
-                <motion.div 
+                <motion.div
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.8 }}
@@ -251,7 +252,9 @@ const StudyPlanner = () => {
               size="lg"
               className={cn(
                 "w-full md:w-auto rounded-2xl h-12 md:h-14 px-10 font-bold uppercase tracking-widest text-[10px] gap-3 shadow-lg hover:translate-y-[-2px] transition-all",
-                activeStudyPlanJob ? "bg-ai-primary/20 text-ai-primary border border-ai-primary/30" : "shadow-primary/25"
+                activeStudyPlanJob
+                  ? "bg-ai-primary/20 text-ai-primary border border-ai-primary/30"
+                  : "shadow-primary/25"
               )}
             >
               {isLoading ? (

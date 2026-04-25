@@ -10,6 +10,8 @@ import { useOne } from "@refinedev/core";
 import { MissionControlHero } from "./mission-control-hero";
 import { QuickActions } from "./quick-actions";
 import { Calendar, Rocket, Sparkles, Trophy, Tv } from "lucide-react";
+import { useOfflineSync } from "@/features/engagement/hooks/use-offline-sync";
+import React, { useState, useEffect } from "react";
 
 interface Props {
   identity: User | undefined;
@@ -31,17 +33,25 @@ interface ActionItem {
 export const StudentDashboard = ({ identity, data, isLoading, list, show }: Props) => {
   const { t } = useTranslation();
   const { isInstallable, isStandalone, handleInstallClick } = usePWAInstall();
+  const { isOnline, getNextOfflineMission } = useOfflineSync();
+  const [offlineMission, setOfflineMission] = useState<any>(null);
 
   // 🚀 MISSION CONTROL: Fetch personalized next action and readiness score
   const { query: missionQuery } = useOne({
     resource: "dashboard/mission",
     id: identity?.id || "me",
     queryOptions: {
-      enabled: !!identity?.id,
+      enabled: !!identity?.id && isOnline,
     },
   });
 
-  const nextMission = missionQuery.data?.data;
+  const nextMission = isOnline ? missionQuery.data?.data : offlineMission;
+
+  useEffect(() => {
+    if (!isOnline) {
+      getNextOfflineMission().then(setOfflineMission);
+    }
+  }, [isOnline]);
 
   const currentXP = identity?.xp || 0;
   const level = identity?.level || 1;
@@ -106,7 +116,13 @@ export const StudentDashboard = ({ identity, data, isLoading, list, show }: Prop
         {/* Left Column: Mission Control & Academic Journey (8/12) */}
         <div className="lg:col-span-8 space-y-10 md:space-y-16">
           <ErrorBoundary>
-            <MissionControlHero mission={nextMission as any} isLoading={isLoading} />
+            <MissionControlHero
+              mission={nextMission as any}
+              isLoading={isLoading}
+              streak={currentStreak}
+              dailyLearningTime={data.dailyLearningTime}
+              dailyGoalMinutes={(identity as any)?.dailyGoalMinutes}
+            />
           </ErrorBoundary>
 
           <div className="space-y-8">
