@@ -1,14 +1,8 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Authentication Journey', () => {
-  test('should allow a teacher to login', async ({ page }) => {
-    // Go to the login page
-    await page.goto('/login');
-
-    // Check if we are on the login page
-    await expect(page).toHaveTitle(/Login/i);
-
-    // Fill in credentials using data-testid for resilience
+  test.beforeAll(() => {
+    // 🛡️ Fail fast if environment is not configured correctly
     const email = process.env.TEST_TEACHER_EMAIL;
     const password = process.env.TEST_TEACHER_PASSWORD;
     
@@ -19,7 +13,19 @@ test.describe('Authentication Journey', () => {
         'See .env.example for required variables.'
       );
     }
+  });
 
+  test('should allow a teacher to login', async ({ page }) => {
+    // Go to the login page
+    await page.goto('/login');
+
+    // Check if we are on the login page
+    await expect(page).toHaveTitle(/Login/i);
+
+    // Fill in credentials using data-testid for resilience
+    const email = process.env.TEST_TEACHER_EMAIL!;
+    const password = process.env.TEST_TEACHER_PASSWORD!;
+    
     await page.fill('[data-testid="email-input"]', email);
     await page.fill('[data-testid="password-input"]', password);
 

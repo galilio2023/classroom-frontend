@@ -1,7 +1,20 @@
 import { useEffect } from "react";
 import { socket } from "@/lib/socket";
-import {} from "sonner";
 import { useTranslation } from "react-i18next";
+
+export interface LiveInitPayload {
+  classId: number;
+  isAiDelegated: boolean;
+  isBreakoutActive: boolean;
+  aiPhoto?: string | null;
+  currentScript?: string | null;
+  visualCue?: "talking" | "thinking" | "listening" | "idle";
+}
+
+export interface TeacherResumedPayload {
+  classId: string;
+  reason?: "ai_degraded" | "manual";
+}
 
 interface SocketHandlers {
   onSessionStarted: (data: any) => void;
@@ -9,9 +22,9 @@ interface SocketHandlers {
   onBreakoutStarted: (data: any) => void;
   onBreakoutEnded: (data: any) => void;
   onTeacherDelegated: (data: any) => void;
-  onTeacherResumed: (data: { classId: string; reason?: string }) => void;
+  onTeacherResumed: (data: TeacherResumedPayload) => void;
   onPulseUpdate: (data: { classId: number; count: number }) => void;
-  onLiveInit?: (data: any) => void;
+  onLiveInit?: (data: LiveInitPayload) => void;
 }
 
 export const useLiveClassroomSocket = (numericClassId: number, handlers: SocketHandlers) => {
