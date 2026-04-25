@@ -200,19 +200,22 @@ export const LiveClassroom = ({
       if (data.reason === "ai_degraded") {
         setIsAiDegraded(true);
         // 🛡️ RULE 8: Traceability (Enhanced error feedback)
-        const correlationId = crypto.randomUUID();
-        void handleError({
-          status: 503,
-          message: t(
-            "classes.live.ai.fallback",
-            "AI Co-teacher is having trouble. Teacher has resumed control."
-          ),
-          response: {
-            headers: {
-              get: (key: string) => (key === "x-correlation-id" ? correlationId : null),
-            },
+        // 🚀 Generating a unique client-side UUID if server trace is missing (with fallback for older devices)
+        const correlationId =
+          typeof crypto.randomUUID === "function"
+            ? crypto.randomUUID()
+            : Math.random().toString(36).substring(2, 15);
+
+        void handleError(
+          {
+            status: 503,
+            message: t(
+              "classes.live.ai.fallback",
+              "AI Co-teacher is having trouble. Teacher has resumed control."
+            ),
           },
-        }).then((err) => {
+          correlationId
+        ).then((err) => {
           toast.warning(err.message, {
             description: `${t("classes.live.ai.supportInfo", "Support Info: AI degraded via socket signal.")} (Trace: ${correlationId})`,
             duration: 8000,

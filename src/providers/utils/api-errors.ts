@@ -24,7 +24,10 @@ export const getCorrelationId = (err: unknown): string => {
  * Helper to handle API errors and return Refine-compatible HttpError
  * 🛡️ RESILIENCE: Now handles both raw Response objects and standard Error/Axios objects.
  */
-export const handleError = async (errorOrResponse: unknown): Promise<HttpError> => {
+export const handleError = async (
+  errorOrResponse: unknown,
+  manualCorrelationId?: string, // 🚀 RULE 8 Override
+): Promise<HttpError> => {
   const e = errorOrResponse as any;
   // 1. Extract the raw response if possible (handles Axios, Refine, and raw fetch)
   const response = e?.response || (e instanceof Response ? e : null);
@@ -33,11 +36,15 @@ export const handleError = async (errorOrResponse: unknown): Promise<HttpError> 
     return {
       message: e?.message || "An unexpected error occurred.",
       statusCode: e?.status || 500,
+      meta: {
+        correlationId: manualCorrelationId || e?.correlationId || createCorrelationId("local"),
+      },
     };
   }
 
   let json: Record<string, unknown> = {};
   const correlationId =
+    manualCorrelationId ||
     (typeof response.headers?.get === "function"
       ? response.headers.get("x-correlation-id")
       : null) ||
