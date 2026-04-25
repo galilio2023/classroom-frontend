@@ -2,16 +2,18 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Authentication Journey', () => {
   test.beforeAll(() => {
-    // 🛡️ Fail fast if environment is not configured correctly
+    // 🛡️ Fail fast with actionable guidance if environment is not configured correctly
     const email = process.env.TEST_TEACHER_EMAIL;
     const password = process.env.TEST_TEACHER_PASSWORD;
     
     if (!email || !password) {
-      throw new Error(
-        'E2E Setup Error: TEST_TEACHER_EMAIL or TEST_TEACHER_PASSWORD is not set. ' +
-        'Please ensure you have a .env.test file or valid CI secrets. ' +
-        'See .env.example for required variables.'
-      );
+      const errorMsg = [
+        '🚨 E2E Setup Error: TEST_TEACHER_EMAIL or TEST_TEACHER_PASSWORD is not set.',
+        'Action: Please ensure you have a .env.test file or valid CI secrets.',
+        'Note: See .env.example for the list of required variables.',
+        'Command: copy .env.example .env.test (then fill in the values)'
+      ].join('\n');
+      throw new Error(errorMsg);
     }
   });
 
