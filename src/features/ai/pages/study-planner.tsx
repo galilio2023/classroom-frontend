@@ -20,8 +20,20 @@ import { StudyPlannerHeader } from "./study-planner/StudyPlannerHeader";
 import { StudyPlanDayCard } from "./study-planner/StudyPlanDayCard";
 import { StudyPlanStats } from "./study-planner/StudyPlanStats";
 
+export const DAYS = [
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+  "Sunday",
+] as const;
+
+export type DayName = (typeof DAYS)[number];
+
 interface StudyBlock {
-  day: string;
+  day: DayName;
   timeSlot: "Morning" | "Afternoon" | "Evening";
   task: string;
   assignmentId?: number;
@@ -39,6 +51,13 @@ interface StudyPlanResponse {
   updatedAt?: number;
   jobId?: string;
   statusCode?: number;
+  data?: {
+    id: number;
+    plan: StudyBlock[];
+    completedBlocks: Record<string, boolean>;
+    updatedAt: number;
+    jobId?: string;
+  };
 }
 
 type StudyPlanTopic = "generate_study_plan";
@@ -48,16 +67,6 @@ interface JobSocketPayload {
   type?: "study_plan";
   userId?: string;
 }
-
-const DAYS = [
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
-  "Sunday",
-] as const;
 
 const StudyPlanner = () => {
   const { t, i18n } = useTranslation();
@@ -238,58 +247,53 @@ const StudyPlanner = () => {
         dispatchStudyBlockXp();
       }
 
-      // 📶 OFFLINE MUTATION QUEUEING (Rule 4 Suggestion)
-      // Only dispatch network mutation if online. useOfflineSync handles reconciliation when coming back.
-      if (isOnline) {
-        toggleBlockMutation(
-          {
-            url: `study-planner/toggle-block/${blockId}`,
-            method: "post",
-            values: { isCompleted: newStatus },
-            successNotification: false,
+      // 📶 OFFLINE MUTATION QUEUEING (Rule 4 Hardening)
+      // toggleBlockMutation is handled by dataProvider which automatically queues when offline.
+      toggleBlockMutation(
+        {
+          url: `study-planner/toggle-block/${blockId}`,
+          method: "post",
+          values: { isCompleted: newStatus },
+          successNotification: false,
+        },
+        {
+          onSuccess: (res) => {
+            if (!isMounted.current) return;
+            const serverUpdate = res.data?.updatedAt;
+            if (serverUpdate) {
+              void offlineDB.study_plans.update("current", { updatedAt: serverUpdate });
+            }
           },
-          {
-            onSuccess: (res) => {
-              if (!isMounted.current) return;
-              const serverUpdate = res.data?.updatedAt;
-              if (serverUpdate) {
-                void offlineDB.study_plans.update("current", { updatedAt: serverUpdate });
+          onError: async (err) => {
+            if (!isMounted.current) return;
+
+            // 🛡️ SRE Visibility: Log rollback for production monitoring (Review #19)
+            console.warn(`[StudyPlanner] Toggle failed for ${blockId}. Rolling back.`, { error: err });
+
+            // 🛡️ ROLLBACK (Fixed Stale Closure & Deterministic Timestamp)
+            setCompletedBlocks((prev) => {
+              const rolledBack = { ...prev, [blockId]: previousStatus };
+              
+              try {
+                // 🚀 Hardening: Restore the PREVIOUS timestamp (or 0 if unknown), not a new one.
+                // This ensures "Freshest Copy Wins" logic doesn't treat the rollback as a fresh update.
+                void offlineDB.study_plans.update("current", {
+                  completedBlocks: rolledBack,
+                  updatedAt: previousUpdatedAt || 0,
+                });
+              } catch (rollbackDbErr) {
+                console.error("Rollback Offline DB update failed:", rollbackDbErr);
               }
-            },
-            onError: async (err) => {
-              if (!isMounted.current) return;
+              
+              return rolledBack;
+            });
 
-              // 🛡️ SRE Visibility: Log rollback for production monitoring (Review #19)
-              console.warn(`[StudyPlanner] Toggle failed for ${blockId}. Rolling back.`, { error: err });
-
-              // 🛡️ ROLLBACK (Fixed Stale Closure & Deterministic Timestamp)
-              setCompletedBlocks((prev) => {
-                const rolledBack = { ...prev, [blockId]: previousStatus };
-                
-                try {
-                  // 🚀 Hardening: Restore the PREVIOUS timestamp (or 0 if unknown), not a new one.
-                  // This ensures "Freshest Copy Wins" logic doesn't treat the rollback as a fresh update.
-                  void offlineDB.study_plans.update("current", {
-                    completedBlocks: rolledBack,
-                    updatedAt: previousUpdatedAt || 0,
-                  });
-                } catch (rollbackDbErr) {
-                  console.error("Rollback Offline DB update failed:", rollbackDbErr);
-                }
-                
-                return rolledBack;
-              });
-
-              toast.error(t("studyPlanner.notifications.rollbackError"));
-              const correlationId = getCorrelationId(err);
-              handleError(err, correlationId);
-            },
-          }
-        );
-      } else {
-        // If offline, release the sync lock immediately (Dexie update is already done)
-        isSyncingRef.current = false;
-      }
+            toast.error(t("studyPlanner.notifications.rollbackError"));
+            const correlationId = getCorrelationId(err);
+            handleError(err, correlationId);
+          },
+        }
+      );
     } catch (err) {
       console.error("Critical failure in toggleBlock:", err);
       // 🛡️ RACE CONDITION FIX: Ensure ref is reset even if setup fails
@@ -302,7 +306,7 @@ const StudyPlanner = () => {
   // 🚀 PERFORMANCE: O(N) grouping via useMemo
   // plan is memoized in useStudyPlanSync, ensuring this only runs when data truly changes.
   const blocksByDay = useMemo(() => {
-    const map: Record<string, StudyBlock[]> = {};
+    const map: Record<DayName, StudyBlock[]> = {} as any;
     (plan || []).forEach((b) => {
       if (!map[b.day]) map[b.day] = [];
       map[b.day].push(b);

@@ -6,9 +6,10 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { DAYS, DayName } from "../study-planner";
 
 interface StudyBlock {
-  day: string;
+  day: DayName;
   timeSlot: "Morning" | "Afternoon" | "Evening";
   task: string;
   assignmentId?: number;
@@ -16,7 +17,7 @@ interface StudyBlock {
 }
 
 interface StudyPlanDayCardProps {
-  day: string;
+  day: DayName;
   dayBlocks: StudyBlock[];
   completedBlocks: Record<string, boolean>;
   onToggleBlock: (blockId: string) => void;

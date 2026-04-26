@@ -479,7 +479,7 @@ export const dataProvider: DataProvider = {
       method: method ? method.toUpperCase() : "GET",
       body: payload instanceof FormData ? payload : payload ? JSON.stringify(payload) : undefined,
       headers: headers as Record<string, string>,
-      signal: meta?.signal,
+      signal: meta?.signal || meta?.abortSignal,
     });
 
     if (!response.ok) {
