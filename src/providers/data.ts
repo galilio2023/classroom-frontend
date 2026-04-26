@@ -254,7 +254,9 @@ export const dataProvider: DataProvider = {
       url.searchParams.append("_order", sorters[0].order);
     }
 
-    const response = await fetcherWithRetry(url.toString());
+    const response = await fetcherWithRetry(url.toString(), {
+      signal: meta?.signal || meta?.abortSignal,
+    });
 
     if (!response.ok) {
       throw await handleError(response);
@@ -280,7 +282,9 @@ export const dataProvider: DataProvider = {
       }
     }
 
-    const response = await fetcherWithRetry(url.toString());
+    const response = await fetcherWithRetry(url.toString(), {
+      signal: meta?.signal || meta?.abortSignal,
+    });
 
     if (!response.ok) {
       throw await handleError(response);
@@ -312,6 +316,7 @@ export const dataProvider: DataProvider = {
       const response = await fetcherWithRetry(url, {
         method: "POST",
         body: JSON.stringify(variables),
+        signal: meta?.signal || meta?.abortSignal,
       });
 
       if (!response.ok) throw await handleError(response);
@@ -357,6 +362,7 @@ export const dataProvider: DataProvider = {
       const response = await fetcherWithRetry(url, {
         method: "PATCH",
         body: JSON.stringify(finalVariables),
+        signal: meta?.signal || meta?.abortSignal,
       });
 
       if (!response.ok) throw await handleError(response);
@@ -395,6 +401,7 @@ export const dataProvider: DataProvider = {
     try {
       const response = await fetcherWithRetry(url, {
         method: "DELETE",
+        signal: meta?.signal || meta?.abortSignal,
       });
 
       if (!response.ok) throw await handleError(response);
@@ -418,14 +425,16 @@ export const dataProvider: DataProvider = {
 
   getApiUrl: () => BACKEND_BASE_URL,
 
-  getMany: async ({ resource, ids }) => {
+  getMany: async ({ resource, ids, meta }) => {
     const urlPath = getResourcePath(resource);
     const url = new URL(`${BACKEND_BASE_URL}/${urlPath}`);
     ids.forEach((id) => {
       url.searchParams.append("id", String(id));
     });
 
-    const response = await fetcherWithRetry(url.toString());
+    const response = await fetcherWithRetry(url.toString(), {
+      signal: meta?.signal || meta?.abortSignal,
+    });
 
     if (!response.ok) {
       throw await handleError(response);
