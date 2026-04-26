@@ -5,6 +5,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { useCan } from "@refinedev/core";
+import { ConsentBarrier } from "./ConsentBarrier";
 
 interface AiFeatureGuardProps {
   children: React.ReactNode;
@@ -21,6 +22,7 @@ interface AiFeatureGuardProps {
  * Wraps AI-powered features to ensure they only mount when:
  * 1. Global Master Switch (enableAiFeatures) is ON.
  * 2. User role (RBAC) allows AI interactions via useCan.
+ * 3. User has provided AI Governance Consent (Law 151 compliance).
  *
  * Prevents "if (isAiEnabled)" sprawl across the codebase.
  */
@@ -33,6 +35,7 @@ export const AiFeatureGuard: React.FC<AiFeatureGuardProps> = ({
   const {
     isAiEnabled,
     isQuotaExceeded,
+    requiresConsent,
     isDegraded,
     retryAfter,
     isLoading: isAiLoading,
@@ -47,6 +50,11 @@ export const AiFeatureGuard: React.FC<AiFeatureGuardProps> = ({
 
   if (isLoading) {
     return <Skeleton className={skeletonClassName} />;
+  }
+
+  // 🛡️ LAW 151: Consent Gating (Highest priority after availability)
+  if (requiresConsent) {
+    return <ConsentBarrier />;
   }
 
   const isAllowed = canAccess?.can ?? false;

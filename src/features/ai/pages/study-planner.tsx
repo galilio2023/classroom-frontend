@@ -19,6 +19,7 @@ import { dispatchStudyBlockXp } from "@/lib/gamification";
 import { StudyPlannerHeader } from "./study-planner/StudyPlannerHeader";
 import { StudyPlanDayCard } from "./study-planner/StudyPlanDayCard";
 import { StudyPlanStats } from "./study-planner/StudyPlanStats";
+import { AiFeatureGuard } from "../components/AiFeatureGuard";
 
 export const DAYS = [
   "Monday",
@@ -273,23 +274,20 @@ const StudyPlanner = () => {
             // 🛡️ SRE Visibility: Log rollback for production monitoring (Review #19)
             console.warn(`[StudyPlanner] Toggle failed for ${blockId}. Rolling back.`, { error: err });
 
-            // 🛡️ ROLLBACK (Fixed Stale Closure & Deterministic Timestamp)
-            setCompletedBlocks((prev) => {
-              const rolledBack = { ...prev, [blockId]: previousStatus };
-              
-              try {
-                // 🚀 Hardening: Restore the PREVIOUS timestamp (Review Suggestion)
-                // Using the precise timestamp captured right before the mutation started.
-                void offlineDB.study_plans.update("current", {
-                  completedBlocks: rolledBack,
-                  updatedAt: previousUpdatedAtPrecise,
-                });
-              } catch (rollbackDbErr) {
-                console.error("Rollback Offline DB update failed:", rollbackDbErr);
-              }
-              
-              return rolledBack;
-            });
+            // 🛡️ ROLLBACK (Fixed Stale Closure & Pure State Setter)
+            const rolledBackState = { ...completedBlocks, [blockId]: previousStatus };
+            setCompletedBlocks(rolledBackState);
+            
+            try {
+              // 🚀 Hardening: Restore the PREVIOUS timestamp (Review Suggestion)
+              // This side effect is now outside the state setter.
+              void offlineDB.study_plans.update("current", {
+                completedBlocks: rolledBackState,
+                updatedAt: previousUpdatedAtPrecise,
+              });
+            } catch (rollbackDbErr) {
+              console.error("Rollback Offline DB update failed:", rollbackDbErr);
+            }
 
             toast.error(t("studyPlanner.notifications.rollbackError"));
             const correlationId = getCorrelationId(err);
@@ -328,82 +326,84 @@ const StudyPlanner = () => {
   );
 
   return (
-    <div className="space-y-12 pb-24">
-      <StudyPlannerHeader
-        onGenerate={generatePlan}
-        isGenerating={generateMutation.isPending}
-        activeJob={activeStudyPlanJob}
-      />
-      {/* 🚀 Rule 7: Offline Indicator Badge */}
-      {!isOnline && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex items-center gap-2 px-4 py-2 bg-destructive/10 text-destructive rounded-full w-fit mx-auto text-[10px] font-black uppercase tracking-widest border border-destructive/20 animate-pulse"
-        >
-          <WifiOff className="h-3 w-3" />
-          {t("common.offline")}
-        </motion.div>
-      )}
-      <div className="grid grid-cols-1 lg:grid-cols-7 gap-10">
-        <div className="lg:col-span-5 space-y-8">
-          <AnimatePresence mode="wait">
-            {plan && plan.length > 0 ? (
-              <motion.div
-                key="schedule"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                className="space-y-8"
-              >
-                {DAYS.map((day) => (
-                  <StudyPlanDayCard
-                    key={day}
-                    day={day}
-                    dayBlocks={blocksByDay[day] || []}
-                    completedBlocks={completedBlocks}
-                    onToggleBlock={toggleBlock}
-                  />
-                ))}
-              </motion.div>
-            ) : (
-              <motion.div
-                key="empty"
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="flex flex-col items-center justify-center p-20 border-2 border-dashed border-border/40 rounded-4xl bg-muted/5 text-center"
-              >
-                <div className="p-8 rounded-3xl bg-ai-primary/10 text-ai-primary mb-8">
-                  <Zap className="h-16 w-16" />
-                </div>
-                <h3 className="text-3xl font-black tracking-tighter uppercase mb-2">
-                  {t("studyPlanner.empty.title")}
-                </h3>
-                <p className="text-muted-foreground font-medium max-w-sm mb-8">
-                  {t("studyPlanner.empty.description")}
-                </p>
-                <Button
-                  onClick={generatePlan}
-                  size="lg"
-                  className="rounded-2xl px-10 h-14 bg-ai-primary font-black uppercase tracking-widest"
+    <AiFeatureGuard>
+      <div className="space-y-12 pb-24" dir={isAr ? "rtl" : "ltr"}>
+        <StudyPlannerHeader
+          onGenerate={generatePlan}
+          isGenerating={generateMutation.isPending}
+          activeJob={activeStudyPlanJob}
+        />
+        {/* 🚀 Rule 7: Offline Indicator Badge */}
+        {!isOnline && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center gap-2 px-4 py-2 bg-destructive/10 text-destructive rounded-full w-fit mx-auto text-[10px] font-black uppercase tracking-widest border border-destructive/20 animate-pulse"
+          >
+            <WifiOff className="h-3 w-3" />
+            {t("common.offline")}
+          </motion.div>
+        )}
+        <div className="grid grid-cols-1 lg:grid-cols-7 gap-10">
+          <div className="lg:col-span-5 space-y-8">
+            <AnimatePresence mode="wait">
+              {plan && plan.length > 0 ? (
+                <motion.div
+                  key="schedule"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="space-y-8"
                 >
-                  <Sparkles className="mr-3 h-5 w-5" />
-                  {t("studyPlanner.buttons.generateNow")}
-                </Button>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+                  {DAYS.map((day) => (
+                    <StudyPlanDayCard
+                      key={day}
+                      day={day}
+                      dayBlocks={blocksByDay[day] || []}
+                      completedBlocks={completedBlocks}
+                      onToggleBlock={toggleBlock}
+                    />
+                  ))}
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="empty"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="flex flex-col items-center justify-center p-20 border-2 border-dashed border-border/40 rounded-4xl bg-muted/5 text-center"
+                >
+                  <div className="p-8 rounded-3xl bg-ai-primary/10 text-ai-primary mb-8">
+                    <Zap className="h-16 w-16" />
+                  </div>
+                  <h3 className="text-3xl font-black tracking-tighter uppercase mb-2">
+                    {t("studyPlanner.empty.title")}
+                  </h3>
+                  <p className="text-muted-foreground font-medium max-w-sm mb-8">
+                    {t("studyPlanner.empty.description")}
+                  </p>
+                  <Button
+                    onClick={generatePlan}
+                    size="lg"
+                    className="rounded-2xl px-10 h-14 bg-ai-primary font-black uppercase tracking-widest"
+                  >
+                    <Sparkles className="mr-3 h-5 w-5" />
+                    {t("studyPlanner.buttons.generateNow")}
+                  </Button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
 
-        <div className="lg:col-span-2">
-          <StudyPlanStats
-            completedCount={completedCount}
-            totalCount={plan?.length || 0}
-            nextTask={nextTask}
-          />
+          <div className="lg:col-span-2">
+            <StudyPlanStats
+              completedCount={completedCount}
+              totalCount={plan?.length || 0}
+              nextTask={nextTask}
+            />
+          </div>
         </div>
       </div>
-    </div>
+    </AiFeatureGuard>
   );
 };
 
