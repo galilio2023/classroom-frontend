@@ -9,4 +9,3 @@ export const AI_MODELS = {
 };
 
 export const AI_CONSENT_VERSION = "v1.2026-04";
-

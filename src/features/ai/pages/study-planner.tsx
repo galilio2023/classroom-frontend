@@ -100,13 +100,10 @@ const StudyPlanner = () => {
 
   // 🚀 RULE 4 Hardening: Synchronized Source of Truth logic
   // The useStudyPlanSync hook ensures "Freshest Copy Wins"
-  const {
-    plan,
-    completedBlocks,
-    setCompletedBlocks,
-    isSyncingRef,
-    lastUpdated: previousUpdatedAt,
-  } = useStudyPlanSync<StudyBlock>(initialData, isFetching);
+  const { plan, completedBlocks, setCompletedBlocks, isSyncingRef } = useStudyPlanSync<StudyBlock>(
+    initialData,
+    isFetching
+  );
 
   // 🚀 BACKGROUND JOB STATUS
   const activeStudyPlanJob = useMemo(
@@ -206,9 +203,9 @@ const StudyPlanner = () => {
       {
         onSuccess: (data) => {
           if (!isMounted.current) return;
-          const response = data as TablawyCreateResponse<StudyPlanResponse>;
-          const jobId = response.data?.jobId || (response as any).jobId;
-          
+          const response = data as TablawyCreateResponse<StudyPlanResponse> & { jobId?: string };
+          const jobId = response.data?.jobId || response.jobId;
+
           if (jobId) {
             addJob({
               id: jobId,
@@ -272,17 +269,24 @@ const StudyPlanner = () => {
             if (!isMounted.current) return;
 
             // 🛡️ SRE Visibility: Log rollback for production monitoring (Review #19)
-            console.warn(`[StudyPlanner] Toggle failed for ${blockId}. Rolling back.`, { error: err });
+            console.warn(`[StudyPlanner] Toggle failed for ${blockId}. Rolling back.`, {
+              error: err,
+            });
 
             // 🛡️ ROLLBACK (Fixed Stale Closure & Pure State Setter)
-            const rolledBackState = { ...completedBlocks, [blockId]: previousStatus };
-            setCompletedBlocks(rolledBackState);
-            
+            setCompletedBlocks((prev) => ({ ...prev, [blockId]: previousStatus }));
+
             try {
-              // 🚀 Hardening: Restore the PREVIOUS timestamp (Review Suggestion)
-              // This side effect is now outside the state setter.
+              // 🚀 Hardening: Restore the PREVIOUS state in Offline DB (Review Suggestion)
+              // Re-fetch latest local state to ensure we merge the rollback into the most current local data
+              const latestLocal = await offlineDB.study_plans.get("current");
+              const rolledBackCompleted = {
+                ...(latestLocal?.completedBlocks || {}),
+                [blockId]: previousStatus,
+              };
+
               void offlineDB.study_plans.update("current", {
-                completedBlocks: rolledBackState,
+                completedBlocks: rolledBackCompleted,
                 updatedAt: previousUpdatedAtPrecise,
               });
             } catch (rollbackDbErr) {
@@ -307,9 +311,17 @@ const StudyPlanner = () => {
   // 🚀 PERFORMANCE: O(N) grouping via useMemo
   // plan is memoized in useStudyPlanSync, ensuring this only runs when data truly changes.
   const blocksByDay = useMemo(() => {
-    const map: Record<DayName, StudyBlock[]> = {} as any;
+    const map = {
+      Monday: [],
+      Tuesday: [],
+      Wednesday: [],
+      Thursday: [],
+      Friday: [],
+      Saturday: [],
+      Sunday: [],
+    } as Record<DayName, StudyBlock[]>;
+
     (plan || []).forEach((b) => {
-      if (!map[b.day]) map[b.day] = [];
       map[b.day].push(b);
     });
     return map;

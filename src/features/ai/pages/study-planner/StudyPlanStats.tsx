@@ -10,11 +10,7 @@ interface StudyPlanStatsProps {
   nextTask?: string;
 }
 
-export const StudyPlanStats = ({
-  completedCount,
-  totalCount,
-  nextTask,
-}: StudyPlanStatsProps) => {
+export const StudyPlanStats = ({ completedCount, totalCount, nextTask }: StudyPlanStatsProps) => {
   const { t } = useTranslation();
   const progress = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
 
