@@ -20,6 +20,7 @@ export const ConsentBarrier: React.FC = () => {
   const isMounted = useRef(true);
   const [isConflicted, setIsConflicted] = useState(false);
   const [identityFetchTimedOut, setIdentityFetchTimedOut] = useState(false);
+  const [lastCorrelationId, setLastCorrelationId] = useState<string | null>(null);
   const {
     data: user,
     refetch: refetchIdentity,
@@ -90,6 +91,7 @@ export const ConsentBarrier: React.FC = () => {
           }
 
           const correlationId = getCorrelationId(err);
+          setLastCorrelationId(correlationId);
           const handledError = await handleError(err, correlationId);
           toast.error(handledError.message, {
             description: `ID: ${correlationId}`,
@@ -99,21 +101,42 @@ export const ConsentBarrier: React.FC = () => {
     );
   };
 
-  if (isIdentityLoading && !user) {
+  if (isIdentityLoading && !user && !identityFetchTimedOut) {
     return (
-      <div className="p-8 border-2 border-dashed border-primary/20 rounded-4xl bg-primary/5 flex flex-col items-center gap-6">
-        <Skeleton className="h-20 w-20 rounded-2xl" />
+      <div className="p-8 border-2 border-dashed border-primary/20 rounded-4xl bg-primary/5 flex flex-col items-center gap-8 min-h-[450px] justify-center">
+        <Skeleton className="h-24 w-24 rounded-2xl" />
         <div className="space-y-4 w-full max-w-md">
-          <Skeleton className="h-8 w-3/4 mx-auto" />
-          <Skeleton className="h-20 w-full" />
+          <Skeleton className="h-10 w-3/4 mx-auto" />
+          <Skeleton className="h-28 w-full" />
         </div>
-        {identityFetchTimedOut ? (
-          <Button variant="outline" onClick={() => refetchIdentity()}>
-            Retry
-          </Button>
-        ) : (
-          <Skeleton className="h-14 w-48 rounded-2xl" />
-        )}
+        <Skeleton className="h-14 w-48 rounded-2xl" />
+      </div>
+    );
+  }
+
+  if (identityFetchTimedOut && !user) {
+    return (
+      <div className="p-8 border-2 border-dashed border-destructive/20 rounded-4xl bg-destructive/5 flex flex-col items-center text-center gap-6 min-h-[450px] justify-center">
+        <div className="p-4 rounded-2xl bg-destructive/10 text-destructive">
+          <ShieldCheck className="h-12 w-12 opacity-50" />
+        </div>
+        <div className="space-y-2">
+          <h3 className="text-xl font-bold uppercase">Identity Fetch Timeout</h3>
+          <p className="text-muted-foreground text-sm max-w-xs">
+            We're having trouble reaching the identity provider. This may be due to a slow
+            connection.
+          </p>
+        </div>
+        <Button
+          variant="outline"
+          onClick={() => {
+            setIdentityFetchTimedOut(false);
+            refetchIdentity();
+          }}
+          className="rounded-xl px-8"
+        >
+          Retry Connection
+        </Button>
       </div>
     );
   }
@@ -164,6 +187,18 @@ export const ConsentBarrier: React.FC = () => {
           ? t("common.processing", { defaultValue: "Processing..." })
           : t("ai.consent.acceptButton", { defaultValue: "I Agree & Continue" })}
       </Button>
+
+      {lastCorrelationId && (
+        <button
+          onClick={() => {
+            navigator.clipboard.writeText(lastCorrelationId);
+            toast.success(t("ai.notifications.idCopied", { defaultValue: "ID Copied" }));
+          }}
+          className="text-[9px] font-bold text-muted-foreground/40 hover:text-primary transition-colors flex items-center gap-1 uppercase tracking-tighter"
+        >
+          Support ID: {lastCorrelationId}
+        </button>
+      )}
     </div>
   );
 };

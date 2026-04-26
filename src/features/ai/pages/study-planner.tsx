@@ -73,6 +73,7 @@ const StudyPlanner = () => {
   // 🛡️ ABORTION Hardening: Initialize immediately for initial fetch (Review #19)
   const abortControllerRef = useRef<AbortController>(new AbortController());
   const [syncingBlocks, setSyncingBlocks] = useState<Set<string>>(new Set());
+  const [lastCorrelationId, setLastCorrelationId] = useState<string | null>(null);
 
   // 🛡️ COMPONENT LIFECYCLE: Handle cleanup and race conditions
   useEffect(() => {
@@ -104,7 +105,7 @@ const StudyPlanner = () => {
   // 🛡️ ABORT HANDLING: Suppress global error toasts for intentional aborts (Review #21)
   useEffect(() => {
     if (isError && error) {
-      const err = error as Error & HttpError;
+      const err = error as unknown as Error & HttpError;
       if (err.name === "AbortError" || err.message?.toLowerCase().includes("abort")) {
         console.log("Initial plan fetch aborted.");
         return;
@@ -184,11 +185,12 @@ const StudyPlanner = () => {
   }, [handleJobComplete]);
 
   const generatePlan = async () => {
-    // 🛡️ ABORT PREVIOUS: Ensure no overlapping generation requests (Review #19)
+    // 🛡️ ABORT PREVIOUS: Ensure no overlapping generation requests (Review #21)
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
     abortControllerRef.current = new AbortController();
+    setLastCorrelationId(null);
 
     generatePlanMutation(
       {
@@ -218,6 +220,11 @@ const StudyPlanner = () => {
             // 🚀 Rule 202 Handling: Background processing without immediate jobId
             toast.info(t("studyPlanner.notifications.queuedMessage"));
           }
+        },
+        onError: (err) => {
+          if (!isMounted.current) return;
+          const correlationId = getCorrelationId(err);
+          setLastCorrelationId(correlationId);
         },
       }
     );
@@ -284,6 +291,7 @@ const StudyPlanner = () => {
             toast.error(t("studyPlanner.notifications.rollbackError"), {
               description: `ID: ${correlationId}`,
             });
+            setLastCorrelationId(correlationId);
             handleError(err, correlationId);
           },
           onSettled: () => {
@@ -348,16 +356,30 @@ const StudyPlanner = () => {
           activeJob={activeStudyPlanJob}
         />
         {/* 🚀 Rule 7: Offline Indicator Badge */}
-        {!isOnline && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex items-center gap-2 px-4 py-2 bg-destructive/10 text-destructive rounded-full w-fit mx-auto text-[10px] font-black uppercase tracking-widest border border-destructive/20 animate-pulse"
-          >
-            <WifiOff className="h-3 w-3" />
-            {t("common.offline")}
-          </motion.div>
-        )}
+        <div className="flex flex-col items-center gap-4">
+          {!isOnline && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex items-center gap-2 px-4 py-2 bg-destructive/10 text-destructive rounded-full w-fit mx-auto text-[10px] font-black uppercase tracking-widest border border-destructive/20 animate-pulse"
+            >
+              <WifiOff className="h-3 w-3" />
+              {t("common.offline")}
+            </motion.div>
+          )}
+
+          {lastCorrelationId && (
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText(lastCorrelationId);
+                toast.success(t("ai.notifications.idCopied", { defaultValue: "ID Copied" }));
+              }}
+              className="text-[9px] font-bold text-muted-foreground/40 hover:text-primary transition-colors flex items-center gap-1 uppercase tracking-tighter"
+            >
+              Support ID: {lastCorrelationId}
+            </button>
+          )}
+        </div>
         <div className="grid grid-cols-1 lg:grid-cols-7 gap-10">
           <div className="lg:col-span-5 space-y-8">
             <AnimatePresence mode="wait">

@@ -152,14 +152,16 @@ export const flushOutbox = async () => {
         });
       } else if (mutation.action === "custom") {
         const vars = mutation.variables as any;
-        response = await dataProvider.custom({
-          url: vars.url,
-          method: vars.method,
-          payload: vars.payload,
-          query: vars.query,
-          headers: vars.headers,
-          meta: vars.meta,
-        });
+        if (dataProvider.custom) {
+          response = await dataProvider.custom({
+            url: vars.url,
+            method: vars.method,
+            payload: vars.payload,
+            query: vars.query,
+            headers: vars.headers,
+            meta: vars.meta,
+          });
+        }
       }
 
       if (response) {
