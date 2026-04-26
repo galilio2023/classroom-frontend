@@ -18,6 +18,7 @@ import { dispatchStudyBlockXp } from "@/lib/gamification";
 // Deconstructed Components
 import { StudyPlannerHeader } from "./study-planner/StudyPlannerHeader";
 import { StudyPlanDayCard } from "./study-planner/StudyPlanDayCard";
+import { performStudyPlanRollback } from "../utils/offline-sync-utils";
 import { StudyPlanStats } from "./study-planner/StudyPlanStats";
 import { AiFeatureGuard } from "../components/AiFeatureGuard";
 
@@ -228,18 +229,19 @@ const StudyPlanner = () => {
     if (syncingBlocks.has(blockId)) return;
     setSyncingBlocks((prev: Set<string>) => new Set(prev).add(blockId));
 
-    try {
-      // 🚀 RULE 4 Hardening: Capture precise state from DB right before mutation (Review Suggestion)
-      const currentRecord = await offlineDB.study_plans.get("current");
-      const previousUpdatedAtPrecise = currentRecord?.updatedAt || 0;
-      const previousStatus = !!completedBlocks[blockId];
-      const newStatus = !previousStatus;
-      const now = Date.now();
+    // 🚀 RULE 4 Hardening: Capture precise state from DB right before mutation (Review Suggestion)
+    const currentRecord = await offlineDB.study_plans.get("current");
+    const previousUpdatedAtPrecise = currentRecord?.updatedAt || 0;
+    const previousStatus = !!completedBlocks[blockId];
+    const newStatus = !previousStatus;
+    const now = Date.now();
 
+    try {
       // 🚀 RULE 4 Hardening (Atomic Update): Update React state and Offline DB with the same object.
       const newCompleted = { ...completedBlocks, [blockId]: newStatus };
       setCompletedBlocks(newCompleted);
 
+      // 🛡️ Ensure local persistence before queuing network request (Review Suggestion)
       await offlineDB.study_plans.update("current", {
         completedBlocks: newCompleted,
         updatedAt: now,
@@ -251,7 +253,6 @@ const StudyPlanner = () => {
       }
 
       // 📶 OFFLINE MUTATION QUEUEING (Rule 4 Hardening)
-      // toggleBlockMutation is handled by dataProvider which automatically queues when offline.
       toggleBlockMutation(
         {
           url: `study-planner/toggle-block/${blockId}`,
@@ -271,29 +272,16 @@ const StudyPlanner = () => {
             if (!isMounted.current) return;
 
             const correlationId = getCorrelationId(err);
-            // 🛡️ SRE Visibility: Log to console for remote debugging (Review Suggestion)
             console.warn(`[StudyPlanner] Toggle failed for ${blockId}. CID: ${correlationId}`, {
               error: err,
             });
 
-            // 🛡️ ROLLBACK (Fixed Stale Closure & Pure State Setter)
-            setCompletedBlocks((prev) => ({ ...prev, [blockId]: previousStatus }));
-
-            try {
-              // 🚀 Hardening: Restore the PREVIOUS state in Offline DB (Review Suggestion)
-              // Using a transaction to ensure atomicity during the rollback
-              await offlineDB.transaction("rw", offlineDB.study_plans, async () => {
-                const latest = await offlineDB.study_plans.get("current");
-                if (latest) {
-                  await offlineDB.study_plans.update("current", {
-                    completedBlocks: { ...latest.completedBlocks, [blockId]: previousStatus },
-                    updatedAt: previousUpdatedAtPrecise,
-                  });
-                }
-              });
-            } catch (rollbackDbErr) {
-              console.error("Rollback Offline DB update failed:", rollbackDbErr);
-            }
+            // 🛡️ ATOMIC ROLLBACK: Use centralized utility (Review Suggestion)
+            await performStudyPlanRollback(setCompletedBlocks, {
+              blockId,
+              previousStatus,
+              previousUpdatedAt: previousUpdatedAtPrecise,
+            });
 
             toast.error(t("studyPlanner.notifications.rollbackError"), {
               description: `ID: ${correlationId}`,
@@ -313,6 +301,7 @@ const StudyPlanner = () => {
       );
     } catch (err) {
       console.error("Critical failure in toggleBlock:", err);
+      // Ensure sync lock is released even on initial failure
       if (isMounted.current) {
         setSyncingBlocks((prev: Set<string>) => {
           const next = new Set(prev);
