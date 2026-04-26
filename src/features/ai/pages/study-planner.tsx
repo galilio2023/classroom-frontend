@@ -13,7 +13,7 @@ import { socket } from "@/lib/socket";
 import { useStudyPlanSync, useOfflineSync } from "@/features/engagement/hooks/use-offline-sync";
 import { TablawyCreateResponse } from "@/types/refine-extensions.d";
 import { User } from "@/types";
-import { GAMIFICATION_CONFIG } from "@/config/gamification";
+import { dispatchStudyBlockXp } from "@/lib/gamification";
 
 // Deconstructed Components
 import { StudyPlannerHeader } from "./study-planner/StudyPlannerHeader";
@@ -85,6 +85,7 @@ const StudyPlanner = () => {
   const { data: initialData, isLoading: isFetching, refetch: refetchPlan } = planQuery;
 
   // 🚀 RULE 4 Hardening: Synchronized Source of Truth logic
+  // The useStudyPlanSync hook ensures "Freshest Copy Wins"
   const { plan, completedBlocks, setCompletedBlocks, isSyncingRef } = useStudyPlanSync(
     initialData,
     isFetching
@@ -108,6 +109,8 @@ const StudyPlanner = () => {
         if (window.speechSynthesis.speaking) {
           window.speechSynthesis.cancel();
         }
+        
+        // 🛡️ SRE Gap: Also pause any local polling here if added in future phases
       }
     };
     document.addEventListener("visibilitychange", handleVisibility);
@@ -202,6 +205,7 @@ const StudyPlanner = () => {
       const now = Date.now();
 
       // 🚀 RULE 4: Immediate Offline Persistence (Optimistic UI)
+      // Functional updater prevents stale closures (Review suggestion)
       setCompletedBlocks((prev) => ({ ...prev, [blockId]: newStatus }));
 
       await offlineDB.study_plans.update("current", {
@@ -209,16 +213,9 @@ const StudyPlanner = () => {
         updatedAt: now,
       });
 
-      // 🚀 GAMIFICATION: Local XP Event for immediate feedback
+      // 🚀 GAMIFICATION: Centralized XP helper
       if (newStatus) {
-        window.dispatchEvent(
-          new CustomEvent("xp_gained_local", {
-            detail: {
-              amount: GAMIFICATION_CONFIG.XP_STUDY_BLOCK,
-              reason: "Study Task Completed",
-            },
-          })
-        );
+        dispatchStudyBlockXp();
       }
 
       toggleBlockMutation(
@@ -265,6 +262,7 @@ const StudyPlanner = () => {
   };
 
   // 🚀 PERFORMANCE: O(N) grouping via useMemo
+  // plan is memoized in useStudyPlanSync, ensuring this only runs when data truly changes.
   const blocksByDay = useMemo(() => {
     const map: Record<string, StudyBlock[]> = {};
     (plan || []).forEach((b) => {
