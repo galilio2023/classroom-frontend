@@ -74,6 +74,7 @@ export interface User {
   lastActiveAt: string | null;
   aiTokensUsed?: number;
   aiMonthlyLimit?: number;
+  aiConsentVersion?: string;
   metadata?: {
     rejectionReason?: string;
     rejectedAt?: string;

@@ -7,3 +7,6 @@ export const AI_MODELS = {
   STABLE: "gemini-1.5-flash", // Fallback for specific operations
   EMBEDDING: "text-embedding-004",
 };
+
+export const AI_CONSENT_VERSION = "v1.2026-04";
+

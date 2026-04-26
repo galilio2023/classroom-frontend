@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Zap, Sparkles, WifiOff } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
-import { useCustom, useCustomMutation, HttpError } from "@refinedev/core";
+import { useCustom, useCustomMutation, HttpError, useGetIdentity } from "@refinedev/core";
 import { useTranslation } from "react-i18next";
 import usePageTitle from "@/hooks/use-page-title";
 import { handleError, getCorrelationId } from "@/providers/utils/api-errors";
@@ -12,15 +12,13 @@ import { useJobs, BackgroundJob } from "@/contexts/job-context";
 import { socket } from "@/lib/socket";
 import { useStudyPlanSync, useOfflineSync } from "@/features/engagement/hooks/use-offline-sync";
 import { TablawyCreateResponse } from "@/types/refine-extensions.d";
+import { User } from "@/types";
+import { GAMIFICATION_CONFIG } from "@/config/gamification";
 
 // Deconstructed Components
 import { StudyPlannerHeader } from "./study-planner/StudyPlannerHeader";
 import { StudyPlanDayCard } from "./study-planner/StudyPlanDayCard";
 import { StudyPlanStats } from "./study-planner/StudyPlanStats";
-
-const GAMIFICATION_CONFIG = {
-  XP_STUDY_BLOCK: 25,
-};
 
 interface StudyBlock {
   day: string;
@@ -48,6 +46,7 @@ type StudyPlanTopic = "generate_study_plan";
 interface JobSocketPayload {
   topic?: StudyPlanTopic;
   type?: "study_plan";
+  userId?: string;
 }
 
 const DAYS = [
@@ -63,9 +62,10 @@ const DAYS = [
 const StudyPlanner = () => {
   const { t, i18n } = useTranslation();
   const isAr = i18n.language === "ar";
-  usePageTitle(t("studyPlanner.title"));
+  usePageTitle(t("studyPlanner.title" as any));
   const { addJob, jobs } = useJobs();
   const { isOnline } = useOfflineSync();
+  const { data: user } = useGetIdentity<User>();
   const isMounted = useRef(true);
 
   // 🛡️ COMPONENT LIFECYCLE: Handle cleanup and race conditions
@@ -133,10 +133,8 @@ const StudyPlanner = () => {
 
   const { mutate: toggleBlockMutation } = useCustomMutation<StudyPlanResponse, HttpError>({
     mutationOptions: {
-      onError: (err) => {
-        if (!isMounted.current) return;
-        const correlationId = getCorrelationId(err);
-        handleError(err, correlationId);
+      onError: (_err) => {
+        // Handled in toggleBlock's own onError
       },
       onSettled: () => {
         if (isMounted.current) {
@@ -149,11 +147,14 @@ const StudyPlanner = () => {
   const handleJobComplete = useCallback(
     (data: JobSocketPayload) => {
       if (!isMounted.current) return;
+      // 🛡️ SOCKET SCOPING: Ensure we only refetch if the job belongs to the current user
+      if (data.userId && user?.id && data.userId !== user.id) return;
+
       if (data.topic === "generate_study_plan" || data.type === "study_plan") {
         refetchPlan();
       }
     },
-    [refetchPlan]
+    [refetchPlan, user?.id]
   );
 
   useEffect(() => {
@@ -179,12 +180,12 @@ const StudyPlanner = () => {
             addJob({
               id: response.data.jobId,
               type: "study_plan",
-              title: t("studyPlanner.notifications.generatingTitle"),
+              title: t("studyPlanner.notifications.generatingTitle" as any),
             });
-            toast.success(t("studyPlanner.notifications.generatingMessage"));
+            toast.success(t("studyPlanner.notifications.generatingMessage" as any));
           } else if (response.statusCode === 202) {
             // 🚀 Rule 202 Handling: Background processing without immediate jobId
-            toast.info(t("studyPlanner.notifications.queuedMessage"));
+            toast.info(t("studyPlanner.notifications.queuedMessage" as any));
           }
         },
       }
@@ -195,73 +196,72 @@ const StudyPlanner = () => {
     if (isSyncingRef.current) return;
     isSyncingRef.current = true;
 
-    const previousStatus = completedBlocks[blockId];
-    const newStatus = !previousStatus;
-    const newCompleted = { ...completedBlocks, [blockId]: newStatus };
-    const now = Date.now();
-
-    // 🚀 RULE 4: Immediate Offline Persistence (Optimistic UI)
-    setCompletedBlocks(newCompleted);
-
     try {
+      const previousStatus = completedBlocks[blockId];
+      const newStatus = !previousStatus;
+      const now = Date.now();
+
+      // 🚀 RULE 4: Immediate Offline Persistence (Optimistic UI)
+      setCompletedBlocks((prev) => ({ ...prev, [blockId]: newStatus }));
+
       await offlineDB.study_plans.update("current", {
-        completedBlocks: newCompleted,
+        completedBlocks: { ...completedBlocks, [blockId]: newStatus },
         updatedAt: now,
       });
-    } catch (dbErr) {
-      console.error("Offline DB update failed:", dbErr);
-    }
 
-    // 🚀 GAMIFICATION: Local XP Event for immediate feedback
-    if (newStatus) {
-      window.dispatchEvent(
-        new CustomEvent("xp_gained_local", {
-          detail: {
-            amount: GAMIFICATION_CONFIG.XP_STUDY_BLOCK,
-            reason: "Study Task Completed",
-          },
-        })
-      );
-    }
-
-    toggleBlockMutation(
-      {
-        url: `study-planner/toggle-block/${blockId}`,
-        method: "post",
-        values: { isCompleted: newStatus },
-        successNotification: false,
-      },
-      {
-        onSuccess: (res) => {
-          if (!isMounted.current) return;
-          // 🚀 Hardening: Update local with precise server timestamp if available
-          const serverUpdate = res.data?.updatedAt;
-          if (serverUpdate) {
-            void offlineDB.study_plans.update("current", { updatedAt: serverUpdate });
-          }
-        },
-        onError: async (err) => {
-          if (!isMounted.current) return;
-          // 🛡️ ROLLBACK: Revert to previous state on failure
-          console.warn("Toggle block failed. Rolling back optimistic update.");
-          const rolledBackCompleted = { ...completedBlocks, [blockId]: previousStatus };
-          setCompletedBlocks(rolledBackCompleted);
-
-          try {
-            await offlineDB.study_plans.update("current", {
-              completedBlocks: rolledBackCompleted,
-              updatedAt: Date.now(),
-            });
-          } catch (rollbackDbErr) {
-            console.error("Rollback Offline DB update failed:", rollbackDbErr);
-          }
-
-          toast.error(t("studyPlanner.notifications.rollbackError"));
-          const correlationId = getCorrelationId(err);
-          handleError(err, correlationId);
-        },
+      // 🚀 GAMIFICATION: Local XP Event for immediate feedback
+      if (newStatus) {
+        window.dispatchEvent(
+          new CustomEvent("xp_gained_local", {
+            detail: {
+              amount: GAMIFICATION_CONFIG.XP_STUDY_BLOCK,
+              reason: "Study Task Completed",
+            },
+          })
+        );
       }
-    );
+
+      toggleBlockMutation(
+        {
+          url: `study-planner/toggle-block/${blockId}`,
+          method: "post",
+          values: { isCompleted: newStatus },
+          successNotification: false,
+        },
+        {
+          onSuccess: (res) => {
+            if (!isMounted.current) return;
+            const serverUpdate = res.data?.updatedAt;
+            if (serverUpdate) {
+              void offlineDB.study_plans.update("current", { updatedAt: serverUpdate });
+            }
+          },
+          onError: async (err) => {
+            if (!isMounted.current) return;
+            // 🛡️ ROLLBACK (Fixed Stale Closure): Revert using functional updater
+            console.warn("Toggle block failed. Rolling back optimistic update.");
+            setCompletedBlocks((prev) => ({ ...prev, [blockId]: previousStatus }));
+
+            try {
+              await offlineDB.study_plans.update("current", {
+                completedBlocks: { ...completedBlocks, [blockId]: previousStatus },
+                updatedAt: Date.now(),
+              });
+            } catch (rollbackDbErr) {
+              console.error("Rollback Offline DB update failed:", rollbackDbErr);
+            }
+
+            toast.error(t("studyPlanner.notifications.rollbackError" as any));
+            const correlationId = getCorrelationId(err);
+            handleError(err, correlationId);
+          },
+        }
+      );
+    } catch (err) {
+      console.error("Critical failure in toggleBlock:", err);
+      // 🛡️ RACE CONDITION FIX: Ensure ref is reset even if setup fails
+      isSyncingRef.current = false;
+    }
   };
 
   // 🚀 PERFORMANCE: O(N) grouping via useMemo
@@ -299,7 +299,7 @@ const StudyPlanner = () => {
           className="flex items-center gap-2 px-4 py-2 bg-destructive/10 text-destructive rounded-full w-fit mx-auto text-[10px] font-black uppercase tracking-widest border border-destructive/20 animate-pulse"
         >
           <WifiOff className="h-3 w-3" />
-          {t("common.offline")}
+          {t("common.offline" as any)}
         </motion.div>
       )}
       <div className="grid grid-cols-1 lg:grid-cols-7 gap-10">
@@ -334,10 +334,10 @@ const StudyPlanner = () => {
                   <Zap className="h-16 w-16" />
                 </div>
                 <h3 className="text-3xl font-black tracking-tighter uppercase mb-2">
-                  {t("studyPlanner.empty.title")}
+                  {t("studyPlanner.empty.title" as any)}
                 </h3>
                 <p className="text-muted-foreground font-medium max-w-sm mb-8">
-                  {t("studyPlanner.empty.description")}
+                  {t("studyPlanner.empty.description" as any)}
                 </p>
                 <Button
                   onClick={generatePlan}
@@ -345,7 +345,7 @@ const StudyPlanner = () => {
                   className="rounded-2xl px-10 h-14 bg-ai-primary font-black uppercase tracking-widest"
                 >
                   <Sparkles className="mr-3 h-5 w-5" />
-                  {t("studyPlanner.buttons.generateNow")}
+                  {t("studyPlanner.buttons.generateNow" as any)}
                 </Button>
               </motion.div>
             )}
