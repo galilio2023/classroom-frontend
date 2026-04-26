@@ -63,7 +63,7 @@ const DAYS = [
 const StudyPlanner = () => {
   const { t, i18n } = useTranslation();
   const isAr = i18n.language === "ar";
-  usePageTitle(t("resources.study-planner.label" as any));
+  usePageTitle(t("studyPlanner.title"));
   const { addJob, jobs } = useJobs();
   const { isOnline } = useOfflineSync();
   const isMounted = useRef(true);
@@ -113,6 +113,7 @@ const StudyPlanner = () => {
     document.addEventListener("visibilitychange", handleVisibility);
     return () => document.removeEventListener("visibilitychange", handleVisibility);
   }, []);
+
   // --- MUTATIONS ---
   const { mutate: generatePlanMutation, mutation: generateMutation } = useCustomMutation<
     StudyPlanResponse,
@@ -178,12 +179,12 @@ const StudyPlanner = () => {
             addJob({
               id: response.data.jobId,
               type: "study_plan",
-              title: t("studyPlanner.notifications.generatingTitle" as any),
+              title: t("studyPlanner.notifications.generatingTitle"),
             });
-            toast.success(t("studyPlanner.notifications.generatingMessage" as any));
+            toast.success(t("studyPlanner.notifications.generatingMessage"));
           } else if (response.statusCode === 202) {
             // 🚀 Rule 202 Handling: Background processing without immediate jobId
-            toast.info(t("studyPlanner.notifications.queuedMessage" as any));
+            toast.info(t("studyPlanner.notifications.queuedMessage"));
           }
         },
       }
@@ -255,7 +256,7 @@ const StudyPlanner = () => {
             console.error("Rollback Offline DB update failed:", rollbackDbErr);
           }
 
-          toast.error(t("studyPlanner.notifications.rollbackError" as any, "Failed to sync change. Reverted to previous state."));
+          toast.error(t("studyPlanner.notifications.rollbackError"));
           const correlationId = getCorrelationId(err);
           handleError(err, correlationId);
         },
@@ -298,7 +299,7 @@ const StudyPlanner = () => {
           className="flex items-center gap-2 px-4 py-2 bg-destructive/10 text-destructive rounded-full w-fit mx-auto text-[10px] font-black uppercase tracking-widest border border-destructive/20 animate-pulse"
         >
           <WifiOff className="h-3 w-3" />
-          {t("common.offlineMode", "Offline Mode - Progress will sync later")}
+          {t("common.offline")}
         </motion.div>
       )}
       <div className="grid grid-cols-1 lg:grid-cols-7 gap-10">
@@ -306,39 +307,37 @@ const StudyPlanner = () => {
           <AnimatePresence mode="wait">
             {plan && plan.length > 0 ? (
               <motion.div
+                key="schedule"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
-                className="grid grid-cols-1 gap-6"
+                className="space-y-8"
               >
-                {DAYS.map(
-                  (day) =>
-                    blocksByDay[day] && (
-                      <StudyPlanDayCard
-                        key={day}
-                        day={day}
-                        dayBlocks={blocksByDay[day]}
-                        completedBlocks={completedBlocks}
-                        onToggleBlock={toggleBlock}
-                        isAr={isAr}
-                      />
-                    )
-                )}
+                {DAYS.map((day) => (
+                  <StudyPlanDayCard
+                    key={day}
+                    day={day}
+                    dayBlocks={blocksByDay[day] || []}
+                    completedBlocks={completedBlocks}
+                    onToggleBlock={toggleBlock}
+                  />
+                ))}
               </motion.div>
             ) : (
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="h-[600px] flex flex-col items-center justify-center text-center p-12 border-2 border-dashed border-border/40 rounded-4xl bg-card/20"
+                key="empty"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="flex flex-col items-center justify-center p-20 border-2 border-dashed border-border/40 rounded-4xl bg-muted/5 text-center"
               >
-                <div className="p-8 rounded-full bg-ai-primary/10 text-ai-primary mb-6 animate-pulse">
+                <div className="p-8 rounded-3xl bg-ai-primary/10 text-ai-primary mb-8">
                   <Zap className="h-16 w-16" />
                 </div>
                 <h3 className="text-3xl font-black tracking-tighter uppercase mb-2">
-                  {t("studyPlanner.empty.title" as any)}
+                  {t("studyPlanner.empty.title")}
                 </h3>
                 <p className="text-muted-foreground font-medium max-w-sm mb-8">
-                  {t("studyPlanner.empty.description" as any)}
+                  {t("studyPlanner.empty.description")}
                 </p>
                 <Button
                   onClick={generatePlan}
@@ -346,7 +345,7 @@ const StudyPlanner = () => {
                   className="rounded-2xl px-10 h-14 bg-ai-primary font-black uppercase tracking-widest"
                 >
                   <Sparkles className="mr-3 h-5 w-5" />
-                  {t("studyPlanner.buttons.generateNow" as any)}
+                  {t("studyPlanner.buttons.generateNow")}
                 </Button>
               </motion.div>
             )}

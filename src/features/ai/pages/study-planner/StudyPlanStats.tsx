@@ -15,8 +15,9 @@ export const StudyPlanStats = ({ completedCount, totalCount, nextTask }: StudyPl
   const progress = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
 
   return (
-    <div className="space-y-8">
-      <Card className="border-border/40 bg-card/50 backdrop-blur-xl rounded-3xl overflow-hidden text-start">
+    <div className="space-y-8 sticky top-32">
+      {/* Overall Progress Card */}
+      <Card className="border-border/40 bg-card/50 backdrop-blur-xl rounded-4xl overflow-hidden">
         <CardHeader className="pb-4">
           <CardTitle className="text-sm font-black uppercase tracking-[0.2em] text-muted-foreground/60">
             {t("studyPlanner.stats.progressTitle" as any)}

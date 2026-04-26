@@ -859,14 +859,29 @@
     }
   },
   "studyPlanner": {
+    "title": "Study Planner",
     "description": "Your personalized weekly study schedule, powered by AI.",
-    "buttons": {
-      "generate": "Generate My Plan",
-      "regenerate": "Regenerate Plan"
+    "notifications": {
+      "generatingTitle": "AI is generating your plan...",
+      "generatingMessage": "This may take a moment based on your curriculum.",
+      "queuedMessage": "Generation queued. We'll notify you when it's ready.",
+      "rollbackError": "Failed to sync change. Reverted to previous state."
     },
     "empty": {
       "title": "No Study Plan Yet",
-      "desc": "Click the button above to let AI analyze your upcoming assignments and create a custom schedule for you."
+      "description": "Click the button below to let AI analyze your upcoming assignments and create a custom schedule for you."
+    },
+    "stats": {
+      "progressTitle": "Weekly Progress",
+      "blocksLabel": "Blocks Completed",
+      "nextTask": "Next Task",
+      "allDone": "All tasks completed!"
+    },
+    "buttons": {
+      "generate": "Generate My Plan",
+      "generating": "Generating...",
+      "generateNow": "Generate My Plan Now",
+      "regenerate": "Regenerate Plan"
     },
     "slots": {
       "morning": "Morning",
