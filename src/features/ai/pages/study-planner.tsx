@@ -37,6 +37,10 @@ interface StudyPlanResponse {
   updatedAt?: number;
   jobId?: string;
   statusCode?: number;
+  data?: {
+    jobId?: string;
+    updatedAt?: number;
+  };
 }
 
 type StudyPlanTopic = "generate_study_plan";
@@ -165,6 +169,7 @@ const StudyPlanner = () => {
       {
         onSuccess: (data) => {
           if (!isMounted.current) return;
+          const response = data as any;
           if (data.data?.jobId) {
             addJob({
               id: data.data.jobId,
@@ -172,7 +177,7 @@ const StudyPlanner = () => {
               title: t("studyPlanner.notifications.generatingTitle" as any),
             });
             toast.success(t("studyPlanner.notifications.generatingMessage" as any));
-          } else if ((data as any).statusCode === 202) {
+          } else if (response.statusCode === 202) {
             // 🚀 Rule 202 Handling: Background processing without immediate jobId
             toast.info(t("studyPlanner.notifications.queuedMessage" as any));
           }
@@ -185,17 +190,22 @@ const StudyPlanner = () => {
     if (isSyncingRef.current) return;
     isSyncingRef.current = true;
 
-    const newStatus = !completedBlocks[blockId];
+    const previousStatus = completedBlocks[blockId];
+    const newStatus = !previousStatus;
     const newCompleted = { ...completedBlocks, [blockId]: newStatus };
     const now = Date.now();
 
     // 🚀 RULE 4: Immediate Offline Persistence (Optimistic UI)
     setCompletedBlocks(newCompleted);
 
-    await offlineDB.study_plans.update("current", {
-      completedBlocks: newCompleted,
-      updatedAt: now,
-    });
+    try {
+      await offlineDB.study_plans.update("current", {
+        completedBlocks: newCompleted,
+        updatedAt: now,
+      });
+    } catch (dbErr) {
+      console.error("Offline DB update failed:", dbErr);
+    }
 
     // 🚀 GAMIFICATION: Local XP Event for immediate feedback
     if (newStatus) {
@@ -224,6 +234,25 @@ const StudyPlanner = () => {
           if (serverUpdate) {
             void offlineDB.study_plans.update("current", { updatedAt: serverUpdate });
           }
+        },
+        onError: async (err) => {
+          if (!isMounted.current) return;
+          // 🛡️ ROLLBACK: Revert to previous state on failure
+          console.warn("Toggle block failed. Rolling back optimistic update.");
+          const rolledBackCompleted = { ...completedBlocks, [blockId]: previousStatus };
+          setCompletedBlocks(rolledBackCompleted);
+
+          try {
+            await offlineDB.study_plans.update("current", {
+              completedBlocks: rolledBackCompleted,
+              updatedAt: Date.now(),
+            });
+          } catch (rollbackDbErr) {
+            console.error("Rollback Offline DB update failed:", rollbackDbErr);
+          }
+
+          const correlationId = getCorrelationId(err);
+          handleError(err, correlationId);
         },
       }
     );
