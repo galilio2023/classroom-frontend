@@ -11,6 +11,7 @@ import { getAuthToken } from "@/lib/auth-helper";
 import { BrainCircuit, Sparkles } from "lucide-react";
 
 export type BackgroundJob = BackgroundJobRecord;
+export type Job = BackgroundJob;
 
 // 🛡️ VISUAL IDENTIFIERS: Map job types to mandated icons with premium gradients (Mandate Review #9)
 const getJobIcon = (type: string) => {

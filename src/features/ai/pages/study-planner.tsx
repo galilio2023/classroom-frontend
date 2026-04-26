@@ -3,14 +3,15 @@ import { Button } from "@/components/ui/button";
 import { Zap, Sparkles, WifiOff } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
-import { useCustom, useCustomMutation, HttpError, CreateResponse } from "@refinedev/core";
+import { useCustom, useCustomMutation, HttpError } from "@refinedev/core";
 import { useTranslation } from "react-i18next";
 import usePageTitle from "@/hooks/use-page-title";
 import { handleError, getCorrelationId } from "@/providers/utils/api-errors";
 import { offlineDB } from "@/lib/offline-db";
-import { useJobs, Job } from "@/contexts/job-context";
+import { useJobs, BackgroundJob } from "@/contexts/job-context";
 import { socket } from "@/lib/socket";
 import { useStudyPlanSync, useOfflineSync } from "@/features/engagement/hooks/use-offline-sync";
+import { TablawyCreateResponse } from "@/types/refine-extensions.d";
 
 // Deconstructed Components
 import { StudyPlannerHeader } from "./study-planner/StudyPlannerHeader";
@@ -42,11 +43,6 @@ interface StudyPlanResponse {
   };
 }
 
-// 🛡️ EXTENSION: Refine CreateResponse doesn't always expose statusCode in its base type
-interface TablawyCreateResponse<T> extends CreateResponse<T> {
-  statusCode?: number;
-}
-
 type StudyPlanTopic = "generate_study_plan";
 
 interface JobSocketPayload {
@@ -67,7 +63,7 @@ const DAYS = [
 const StudyPlanner = () => {
   const { t, i18n } = useTranslation();
   const isAr = i18n.language === "ar";
-  usePageTitle(t("resources.study-planner.label"));
+  usePageTitle(t("resources.study-planner.label" as any));
   const { addJob, jobs } = useJobs();
   const { isOnline } = useOfflineSync();
   const isMounted = useRef(true);
@@ -96,7 +92,10 @@ const StudyPlanner = () => {
 
   // 🚀 BACKGROUND JOB STATUS
   const activeStudyPlanJob = useMemo(
-    () => jobs.find((j) => j.type === "study_plan" && j.status === "processing") as Job | undefined,
+    () =>
+      jobs.find((j) => j.type === "study_plan" && j.status === "processing") as
+        | BackgroundJob
+        | undefined,
     [jobs]
   );
 
@@ -121,7 +120,8 @@ const StudyPlanner = () => {
   >({
     mutationOptions: {
       onSuccess: () => {
-        refetchPlan();
+        // 🚀 SUCCESS TIMING: Generation is async (202). refetchPlan here is premature.
+        // Rely on socket.on("ai:job_completed") for the real refetch.
       },
       onError: (err) => {
         const correlationId = getCorrelationId(err);
@@ -178,12 +178,12 @@ const StudyPlanner = () => {
             addJob({
               id: response.data.jobId,
               type: "study_plan",
-              title: t("studyPlanner.notifications.generatingTitle"),
+              title: t("studyPlanner.notifications.generatingTitle" as any),
             });
-            toast.success(t("studyPlanner.notifications.generatingMessage"));
+            toast.success(t("studyPlanner.notifications.generatingMessage" as any));
           } else if (response.statusCode === 202) {
             // 🚀 Rule 202 Handling: Background processing without immediate jobId
-            toast.info(t("studyPlanner.notifications.queuedMessage"));
+            toast.info(t("studyPlanner.notifications.queuedMessage" as any));
           }
         },
       }
@@ -255,6 +255,7 @@ const StudyPlanner = () => {
             console.error("Rollback Offline DB update failed:", rollbackDbErr);
           }
 
+          toast.error(t("studyPlanner.notifications.rollbackError" as any, "Failed to sync change. Reverted to previous state."));
           const correlationId = getCorrelationId(err);
           handleError(err, correlationId);
         },
@@ -334,10 +335,10 @@ const StudyPlanner = () => {
                   <Zap className="h-16 w-16" />
                 </div>
                 <h3 className="text-3xl font-black tracking-tighter uppercase mb-2">
-                  {t("studyPlanner.empty.title")}
+                  {t("studyPlanner.empty.title" as any)}
                 </h3>
                 <p className="text-muted-foreground font-medium max-w-sm mb-8">
-                  {t("studyPlanner.empty.description")}
+                  {t("studyPlanner.empty.description" as any)}
                 </p>
                 <Button
                   onClick={generatePlan}
@@ -345,7 +346,7 @@ const StudyPlanner = () => {
                   className="rounded-2xl px-10 h-14 bg-ai-primary font-black uppercase tracking-widest"
                 >
                   <Sparkles className="mr-3 h-5 w-5" />
-                  {t("studyPlanner.buttons.generateNow")}
+                  {t("studyPlanner.buttons.generateNow" as any)}
                 </Button>
               </motion.div>
             )}

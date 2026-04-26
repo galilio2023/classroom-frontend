@@ -19,7 +19,7 @@ export const StudyPlanStats = ({ completedCount, totalCount, nextTask }: StudyPl
       <Card className="border-border/40 bg-card/50 backdrop-blur-xl rounded-3xl overflow-hidden text-start">
         <CardHeader className="pb-4">
           <CardTitle className="text-sm font-black uppercase tracking-[0.2em] text-muted-foreground/60">
-            {t("studyPlanner.stats.progressTitle")}
+            {t("studyPlanner.stats.progressTitle" as any)}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -29,7 +29,7 @@ export const StudyPlanStats = ({ completedCount, totalCount, nextTask }: StudyPl
                 {completedCount} / {totalCount}
               </span>
               <span className="text-xs font-bold text-muted-foreground mb-1">
-                {t("studyPlanner.stats.blocksLabel")}
+                {t("studyPlanner.stats.blocksLabel" as any)}
               </span>
             </div>
             <div className="h-3 w-full bg-muted/30 rounded-full overflow-hidden">
@@ -47,10 +47,10 @@ export const StudyPlanStats = ({ completedCount, totalCount, nextTask }: StudyPl
             </div>
             <div className="space-y-1">
               <p className="text-xs font-black uppercase tracking-widest text-primary/60">
-                {t("studyPlanner.stats.nextTask")}
+                {t("studyPlanner.stats.nextTask" as any)}
               </p>
               <p className="text-sm font-bold leading-tight">
-                {nextTask || t("studyPlanner.stats.allDone")}
+                {nextTask || t("studyPlanner.stats.allDone" as any)}
               </p>
             </div>
           </div>
@@ -73,7 +73,7 @@ export const StudyPlanStats = ({ completedCount, totalCount, nextTask }: StudyPl
                 <BrainCircuit className="h-5 w-5" />
               </div>
               <p className="text-base md:text-xl font-medium text-muted-foreground leading-relaxed italic selection:bg-indigo-500/20">
-                "{t("studyPlanner.labels.tipText")}"
+                "{t("studyPlanner.labels.tipText" as any)}"
               </p>
             </div>
           </CardContent>
