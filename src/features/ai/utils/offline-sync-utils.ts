@@ -1,5 +1,4 @@
 import { offlineDB } from "@/lib/offline-db";
-import { User } from "@/types";
 
 type RollbackParams = {
   blockId: string;

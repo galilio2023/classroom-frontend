@@ -104,7 +104,9 @@ export const ConsentBarrier: React.FC = () => {
           <Skeleton className="h-20 w-full" />
         </div>
         {identityFetchTimedOut ? (
-          <Button variant="outline" onClick={() => refetchIdentity()}>Retry</Button>
+          <Button variant="outline" onClick={() => refetchIdentity()}>
+            Retry
+          </Button>
         ) : (
           <Skeleton className="h-14 w-48 rounded-2xl" />
         )}
@@ -123,14 +125,15 @@ export const ConsentBarrier: React.FC = () => {
           {t("ai.consent.title", { defaultValue: "AI Governance & Privacy" })}
         </h3>
         <p className="text-muted-foreground font-medium max-w-md">
-          {t("ai.consent.description", { 
-            defaultValue: "To provide AI-powered insights while complying with Law 151/2020, we need your consent to process academic data through our secure AI partner (Google Gemini)." 
+          {t("ai.consent.description", {
+            defaultValue:
+              "To provide AI-powered insights while complying with Law 151/2020, we need your consent to process academic data through our secure AI partner (Google Gemini).",
           })}
           {/* TODO: Add a link to a "What's New" modal */}
           <a href="#" className="text-primary font-bold ml-2 underline">
             What's New?
           </a>
-          </p>
+        </p>
       </div>
 
       <Alert className="max-w-md bg-background/50 border-primary/10">

@@ -14,6 +14,7 @@ import { useStudyPlanSync, useOfflineSync } from "@/features/engagement/hooks/us
 import { TablawyCreateResponse } from "@/types/refine-extensions.d";
 import { User } from "@/types";
 import { dispatchStudyBlockXp } from "@/lib/gamification";
+import { useVisibilitySafety } from "@/hooks/use-visibility-safety";
 
 // Deconstructed Components
 import { StudyPlannerHeader } from "./study-planner/StudyPlannerHeader";
@@ -74,6 +75,7 @@ const StudyPlanner = () => {
   const { t, i18n } = useTranslation();
   const isAr = i18n.language === "ar";
   usePageTitle(t("studyPlanner.title"));
+  useVisibilitySafety(); // 🚀 RULE 6: Hardware Privacy & Safety
   const { addJob, jobs } = useJobs();
   const { isOnline } = useOfflineSync();
   const { data: user } = useGetIdentity<User>();
@@ -96,23 +98,34 @@ const StudyPlanner = () => {
   const { query: planQuery } = useCustom<StudyPlanResponse>({
     url: "study-planner",
     method: "get",
-    queryOptions: {
-      // 🛡️ ABORT HANDLING: Suppress global error toasts for intentional aborts (Review #21)
-      onError: (err: any) => {
-        if (err.name === 'AbortError') {
-          console.log("Initial plan fetch aborted.");
-          return;
-        }
-        const correlationId = getCorrelationId(err);
-        handleError(err, correlationId);
-      }
-    },
+    errorNotification: false,
     meta: {
       abortSignal: abortControllerRef.current.signal,
     },
   });
 
-  const { data: initialData, isLoading: isFetching, refetch: refetchPlan } = planQuery;
+  const {
+    data: initialData,
+    isLoading: isFetching,
+    refetch: refetchPlan,
+    isError,
+    error,
+  } = planQuery;
+
+  // 🛡️ ABORT HANDLING: Suppress global error toasts for intentional aborts (Review #21)
+  useEffect(() => {
+    if (isError && error) {
+      const err = error as Error & HttpError;
+      if (err.name === "AbortError" || err.message?.toLowerCase().includes("abort")) {
+        console.log("Initial plan fetch aborted.");
+        return;
+      }
+      const correlationId = getCorrelationId(err);
+      handleError(err, correlationId).then((handled) => {
+        toast.error(handled.message, { description: `ID: ${correlationId}` });
+      });
+    }
+  }, [isError, error]);
 
   // 🚀 RULE 4 Hardening: Synchronized Source of Truth logic
   // The useStudyPlanSync hook ensures "Freshest Copy Wins"
@@ -130,20 +143,7 @@ const StudyPlanner = () => {
     [jobs]
   );
 
-  // 🚀 RULE 6: Resource Preserving Visibility Safety
-  useEffect(() => {
-    const handleVisibility = () => {
-      if (document.hidden) {
-        // AI is generating or interacting but user left. Stop sound/heavy polling (Mandate Rule 6).
-        console.log("StudyPlanner: Preserved resources (Rule 6).");
-        if (window.speechSynthesis.speaking) {
-          window.speechSynthesis.cancel();
-        }
-      }
-    };
-    document.addEventListener("visibilitychange", handleVisibility);
-    return () => document.removeEventListener("visibilitychange", handleVisibility);
-  }, []);
+  // 🚀 RULE 6: Resource Preserving Visibility Safety - Logic moved to useVisibilitySafety hook.
 
   // --- MUTATIONS ---
   const { mutate: generatePlanMutation, mutation: generateMutation } = useCustomMutation<
