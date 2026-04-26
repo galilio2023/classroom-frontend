@@ -229,6 +229,9 @@ const StudyPlanner = () => {
     isSyncingRef.current = true;
 
     try {
+      // 🚀 RULE 4 Hardening: Capture precise state from DB right before mutation (Review Suggestion)
+      const currentRecord = await offlineDB.study_plans.get("current");
+      const previousUpdatedAtPrecise = currentRecord?.updatedAt || 0;
       const previousStatus = !!completedBlocks[blockId];
       const newStatus = !previousStatus;
       const now = Date.now();
@@ -275,11 +278,11 @@ const StudyPlanner = () => {
               const rolledBack = { ...prev, [blockId]: previousStatus };
               
               try {
-                // 🚀 Hardening: Restore the PREVIOUS timestamp (or 0 if unknown), not a new one.
-                // This ensures "Freshest Copy Wins" logic doesn't treat the rollback as a fresh update.
+                // 🚀 Hardening: Restore the PREVIOUS timestamp (Review Suggestion)
+                // Using the precise timestamp captured right before the mutation started.
                 void offlineDB.study_plans.update("current", {
                   completedBlocks: rolledBack,
-                  updatedAt: previousUpdatedAt || 0,
+                  updatedAt: previousUpdatedAtPrecise,
                 });
               } catch (rollbackDbErr) {
                 console.error("Rollback Offline DB update failed:", rollbackDbErr);
