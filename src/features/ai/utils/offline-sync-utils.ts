@@ -1,4 +1,5 @@
 import { offlineDB } from "@/lib/offline-db";
+import { User } from "@/types";
 
 type RollbackParams = {
   blockId: string;
@@ -33,4 +34,16 @@ export const performStudyPlanRollback = async (
   } catch (err) {
     console.error("Critical failure during Dexie rollback transaction:", err);
   }
+};
+
+/**
+ * 🛡️ Utility: Compare Refine Identity with Socket/DB IDs
+ * Prevents type mismatch bugs (e.g., 123 === "123" is false)
+ */
+export const compareIds = (
+  refineId: string | number | undefined,
+  externalId: string | number | undefined
+): boolean => {
+  if (refineId === undefined || externalId === undefined) return false;
+  return String(refineId) === String(externalId);
 };

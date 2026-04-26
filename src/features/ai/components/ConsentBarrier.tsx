@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { ShieldCheck, Sparkles, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -18,6 +18,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 export const ConsentBarrier: React.FC = () => {
   const { t } = useTranslation();
   const isMounted = useRef(true);
+  const [isConflicted, setIsConflicted] = useState(false);
   const {
     data: user,
     refetch: refetchIdentity,
@@ -60,23 +61,26 @@ export const ConsentBarrier: React.FC = () => {
         },
         onError: async (err) => {
           if (!isMounted.current) return;
-          console.error("Failed to update AI consent:", err);
+          onError: async (err) => {
+                    if (!isMounted.current) return;
+                    console.error("Failed to update AI consent:", err);
 
-          if (err.statusCode === 409) {
-            // 🛡️ OPTIMISTIC LOCKING: Handle background version mismatch gracefully for metadata (Review #19)
-            toast.info(
-              t("ai.consent.versionConflict", {
-                defaultValue: "State synchronized. Please try agreeing again.",
-              })
-            );
-            void refetchIdentity();
-            return;
-          }
+                    if (err.statusCode === 409) {
+                      // 🛡️ OPTIMISTIC LOCKING: Handle background version mismatch gracefully (Review #21)
+                      toast.info(t("ai.consent.versionConflict", { defaultValue: "Your session updated. Please try again." }));
+                      setIsConflicted(true);
+                      void refetchIdentity().then(() => {
+                        if(isMounted.current) setTimeout(() => setIsConflicted(false), 1500); // UI cooldown
+                      });
+                      return;
+                    }
 
-          const correlationId = getCorrelationId(err);
-          const handledError = await handleError(err, correlationId);
-          toast.error(handledError.message, {
-            description: `ID: ${correlationId}`,
+                    const correlationId = getCorrelationId(err);
+                    const handledError = await handleError(err, correlationId);
+                    toast.error(handledError.message, {
+                      description: `ID: ${correlationId}`,
+                    });
+                  },
           });
         },
       }
@@ -107,10 +111,12 @@ export const ConsentBarrier: React.FC = () => {
           {t("ai.consent.title", { defaultValue: "AI Governance & Privacy" })}
         </h3>
         <p className="text-muted-foreground font-medium max-w-md">
-          {t("ai.consent.description", {
-            defaultValue:
-              "To provide AI-powered insights while complying with Law 151/2020, we need your consent to process academic data through our secure AI partner (Google Gemini).",
+          {t("ai.consent.description", { 
+            defaultValue: "To provide AI-powered insights while complying with Law 151/2020, we need your consent to process academic data through our secure AI partner (Google Gemini)." 
           })}
+          {/* TODO: Add a link to a "What's New" modal */}
+          <a href="#" className="text-primary font-bold ml-2 underline">What's New?</a>
+          </p>
         </p>
       </div>
 
@@ -131,7 +137,7 @@ export const ConsentBarrier: React.FC = () => {
         size="lg"
         className="rounded-2xl px-12 h-14 bg-ai-primary font-black uppercase tracking-widest gap-3"
         onClick={handleAccept}
-        disabled={isLoading || !user || isIdentityLoading}
+        disabled={isLoading || !user || isIdentityLoading || isConflicted}
       >
         <Sparkles className="h-5 w-5" />
         {isLoading

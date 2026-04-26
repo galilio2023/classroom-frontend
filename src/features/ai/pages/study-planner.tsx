@@ -18,7 +18,7 @@ import { dispatchStudyBlockXp } from "@/lib/gamification";
 // Deconstructed Components
 import { StudyPlannerHeader } from "./study-planner/StudyPlannerHeader";
 import { StudyPlanDayCard } from "./study-planner/StudyPlanDayCard";
-import { performStudyPlanRollback } from "../utils/offline-sync-utils";
+import { performStudyPlanRollback, compareIds } from "../utils/offline-sync-utils";
 import { StudyPlanStats } from "./study-planner/StudyPlanStats";
 import { AiFeatureGuard } from "../components/AiFeatureGuard";
 
@@ -96,6 +96,17 @@ const StudyPlanner = () => {
   const { query: planQuery } = useCustom<StudyPlanResponse>({
     url: "study-planner",
     method: "get",
+    queryOptions: {
+      // 🛡️ ABORT HANDLING: Suppress global error toasts for intentional aborts (Review #21)
+      onError: (err: any) => {
+        if (err.name === 'AbortError') {
+          console.log("Initial plan fetch aborted.");
+          return;
+        }
+        const correlationId = getCorrelationId(err);
+        handleError(err, correlationId);
+      }
+    },
     meta: {
       abortSignal: abortControllerRef.current.signal,
     },
@@ -166,10 +177,8 @@ const StudyPlanner = () => {
   const handleJobComplete = useCallback(
     (data: JobSocketPayload) => {
       if (!isMounted.current) return;
-      // 🛡️ SOCKET SCOPING: Ensure we only refetch if the job belongs to the current user
-      // Cast user.id to string to prevent comparison mismatches (Review #19)
-      const currentUserId = user?.id ? String(user.id) : null;
-      if (data.userId && currentUserId && String(data.userId) !== currentUserId) return;
+      // 🛡️ SOCKET SCOPING: Ensure we only refetch if the job belongs to the current user (Review #21)
+      if (data.userId && user?.id && !compareIds(user.id, data.userId)) return;
 
       if (data.topic === "generate_study_plan" || data.type === "study_plan") {
         refetchPlan();
