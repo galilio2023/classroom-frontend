@@ -22,18 +22,7 @@ import { StudyPlanDayCard } from "./study-planner/StudyPlanDayCard";
 import { performStudyPlanRollback, compareIds } from "../utils/offline-sync-utils";
 import { StudyPlanStats } from "./study-planner/StudyPlanStats";
 import { AiFeatureGuard } from "../components/AiFeatureGuard";
-
-export const DAYS = [
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
-  "Sunday",
-] as const;
-
-export type DayName = (typeof DAYS)[number];
+import { DAYS, DayName } from "@/constants/calendar";
 
 interface StudyBlock {
   day: DayName;
@@ -238,14 +227,14 @@ const StudyPlanner = () => {
     if (syncingBlocks.has(blockId)) return;
     setSyncingBlocks((prev: Set<string>) => new Set(prev).add(blockId));
 
-    // 🚀 RULE 4 Hardening: Capture precise state from DB right before mutation (Review Suggestion)
-    const currentRecord = await offlineDB.study_plans.get("current");
-    const previousUpdatedAtPrecise = currentRecord?.updatedAt || 0;
-    const previousStatus = !!completedBlocks[blockId];
-    const newStatus = !previousStatus;
-    const now = Date.now();
-
     try {
+      // 🚀 RULE 4 Hardening: Capture precise state from DB right before mutation (Review Suggestion)
+      const currentRecord = await offlineDB.study_plans.get("current");
+      const previousUpdatedAtPrecise = currentRecord?.updatedAt || 0;
+      const previousStatus = !!completedBlocks[blockId];
+      const newStatus = !previousStatus;
+      const now = Date.now();
+
       // 🚀 RULE 4 Hardening (Atomic Update): Update React state and Offline DB with the same object.
       const newCompleted = { ...completedBlocks, [blockId]: newStatus };
       setCompletedBlocks(newCompleted);
@@ -424,6 +413,7 @@ const StudyPlanner = () => {
               completedCount={completedCount}
               totalCount={plan?.length || 0}
               nextTask={nextTask}
+              isLoading={isFetching}
             />
           </div>
         </div>

@@ -3,12 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Loader2, Sparkles } from "lucide-react";
 import { Breadcrumb } from "@/components/refine/layout/breadcrumb";
 import { useTranslation } from "react-i18next";
-import { Job } from "@/contexts/job-context";
+import { BackgroundJob } from "@/contexts/job-context";
 
 interface StudyPlannerHeaderProps {
   onGenerate: () => void;
   isGenerating: boolean;
-  activeJob?: Job;
+  activeJob?: BackgroundJob;
 }
 
 export const StudyPlannerHeader = React.memo(

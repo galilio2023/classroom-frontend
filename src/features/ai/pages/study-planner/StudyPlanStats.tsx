@@ -4,16 +4,47 @@ import { BookOpen, BrainCircuit, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 
+import { Skeleton } from "@/components/ui/skeleton";
+
 interface StudyPlanStatsProps {
   completedCount: number;
   totalCount: number;
   nextTask?: string;
+  isLoading?: boolean;
 }
 
 export const StudyPlanStats = React.memo(
-  ({ completedCount, totalCount, nextTask }: StudyPlanStatsProps) => {
+  ({ completedCount, totalCount, nextTask, isLoading }: StudyPlanStatsProps) => {
     const { t } = useTranslation();
     const progress = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
+
+    if (isLoading) {
+      return (
+        <div className="space-y-8 sticky top-32">
+          <Card className="border-border/40 bg-card/50 backdrop-blur-xl rounded-4xl overflow-hidden">
+            <CardHeader className="pb-4">
+              <Skeleton className="h-4 w-1/3" />
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-2">
+                <div className="flex justify-between items-end">
+                  <Skeleton className="h-8 w-16" />
+                  <Skeleton className="h-4 w-12 mb-1" />
+                </div>
+                <Skeleton className="h-3 w-full rounded-full" />
+              </div>
+              <div className="p-6 rounded-2xl bg-primary/5 border border-primary/10 flex items-start gap-4">
+                <Skeleton className="h-9 w-9 rounded-xl shrink-0" />
+                <div className="space-y-2 w-full">
+                  <Skeleton className="h-3 w-1/4" />
+                  <Skeleton className="h-4 w-3/4" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      );
+    }
 
     return (
       <div className="space-y-8 sticky top-32">

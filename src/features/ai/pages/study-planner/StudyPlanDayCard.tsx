@@ -6,7 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { DayName, getBlockId } from "../study-planner";
+import { getBlockId } from "../study-planner";
+import { DayName } from "@/constants/calendar";
 
 interface StudyBlock {
   day: DayName;

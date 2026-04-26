@@ -44,9 +44,11 @@ export const ConsentBarrier: React.FC = () => {
   const isLoading = mutation.isPending;
 
   const handleAccept = () => {
-    if (!user) {
+    if (!user || isIdentityLoading) {
       toast.error(
-        t("ai.consent.sessionExpired", { defaultValue: "Session expired. Please log in again." })
+        t("ai.consent.sessionExpired", {
+          defaultValue: "Session expired or loading. Please log in again.",
+        })
       );
       return;
     }
