@@ -42,7 +42,9 @@ export const StudyPlanDayCard = React.memo(
               <CalendarIcon className="h-6 w-6" />
             </div>
             <CardTitle className="text-xl font-black uppercase tracking-tight">
-              {t(`common.days.${day.toLowerCase()}` as `common.days.${Lowercase<DayName>}`)}
+              {t(`common.days.${day.toLowerCase()}` as `common.days.${Lowercase<DayName>}`, {
+                defaultValue: day,
+              })}
             </CardTitle>{" "}
           </div>
         </CardHeader>
@@ -79,7 +81,8 @@ export const StudyPlanDayCard = React.memo(
                       <div className="flex items-center gap-3">
                         <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
                           {t(
-                            `studyPlanner.slots.${slot.toLowerCase()}` as `studyPlanner.slots.${Lowercase<typeof slot>}`
+                            `studyPlanner.slots.${slot.toLowerCase()}` as `studyPlanner.slots.${Lowercase<typeof slot>}`,
+                            { defaultValue: slot }
                           )}
                         </span>
                         <Badge
