@@ -44,21 +44,14 @@ interface StudyBlock {
 /**
  * 🛡️ StudyPlanResponse Interface
  * Standardized structure for AI-generated study plans.
+ * Optimized for Refine v5 dataProvider (Review #19)
  */
 interface StudyPlanResponse {
   id: number;
   plan: StudyBlock[];
   completedBlocks: Record<string, boolean>;
-  updatedAt?: number;
+  updatedAt: number;
   jobId?: string;
-  statusCode?: number;
-  data?: {
-    id: number;
-    plan: StudyBlock[];
-    completedBlocks: Record<string, boolean>;
-    updatedAt: number;
-    jobId?: string;
-  };
 }
 
 type StudyPlanTopic = "generate_study_plan";
@@ -94,6 +87,9 @@ const StudyPlanner = () => {
   const { query: planQuery } = useCustom<StudyPlanResponse>({
     url: "study-planner",
     method: "get",
+    meta: {
+      abortSignal: abortControllerRef.current?.signal,
+    },
   });
 
   const { data: initialData, isLoading: isFetching, refetch: refetchPlan } = planQuery;

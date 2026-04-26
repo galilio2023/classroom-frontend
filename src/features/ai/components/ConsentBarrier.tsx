@@ -60,6 +60,14 @@ export const ConsentBarrier: React.FC = () => {
         onError: async (err) => {
           if (!isMounted.current) return;
           console.error("Failed to update AI consent:", err);
+          
+          if (err.statusCode === 409) {
+            // 🛡️ OPTIMISTIC LOCKING: Handle background version mismatch gracefully for metadata (Review #19)
+            toast.info(t("ai.consent.versionConflict", { defaultValue: "State synchronized. Please try agreeing again." }));
+            void refetchIdentity();
+            return;
+          }
+
           const correlationId = getCorrelationId(err);
           const handledError = await handleError(err, correlationId);
           toast.error(handledError.message, {
