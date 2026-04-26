@@ -122,9 +122,10 @@ const StudyPlanner = () => {
     },
   });
 
-  const { mutate: toggleBlockMutation } = useCustomMutation({
+  const { mutate: toggleBlockMutation } = useCustomMutation<StudyPlanResponse, HttpError>({
     mutationOptions: {
       onError: (err) => {
+        if (!isMounted.current) return;
         const correlationId = getCorrelationId(err);
         handleError(err, correlationId);
       },
@@ -163,6 +164,7 @@ const StudyPlanner = () => {
       },
       {
         onSuccess: (data) => {
+          if (!isMounted.current) return;
           if (data.data?.jobId) {
             addJob({
               id: data.data.jobId,
@@ -216,6 +218,7 @@ const StudyPlanner = () => {
       },
       {
         onSuccess: (res) => {
+          if (!isMounted.current) return;
           // 🚀 Hardening: Update local with precise server timestamp if available
           const serverUpdate = (res as any).data?.updatedAt;
           if (serverUpdate) {
@@ -258,7 +261,7 @@ const StudyPlanner = () => {
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center gap-2 px-4 py-2 bg-destructive/10 text-destructive rounded-full w-fit mx-auto text-[10px] font-black uppercase tracking-widest border border-destructive/20"
+          className="flex items-center gap-2 px-4 py-2 bg-destructive/10 text-destructive rounded-full w-fit mx-auto text-[10px] font-black uppercase tracking-widest border border-destructive/20 animate-pulse"
         >
           <WifiOff className="h-3 w-3" />
           {t("common.offlineMode" as any, "Offline Mode - Progress will sync later")}
