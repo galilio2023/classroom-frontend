@@ -67,12 +67,16 @@ const StudyPlanner = () => {
   const { isOnline } = useOfflineSync();
   const { data: user } = useGetIdentity<User>();
   const isMounted = useRef(true);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   // 🛡️ COMPONENT LIFECYCLE: Handle cleanup and race conditions
   useEffect(() => {
     isMounted.current = true;
     return () => {
       isMounted.current = false;
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
     };
   }, []);
 
@@ -129,6 +133,7 @@ const StudyPlanner = () => {
         // Rely on socket.on("ai:job_completed") for the real refetch.
       },
       onError: (err) => {
+        if (!isMounted.current) return;
         const correlationId = getCorrelationId(err);
         handleError(err, correlationId);
       },
@@ -152,7 +157,9 @@ const StudyPlanner = () => {
     (data: JobSocketPayload) => {
       if (!isMounted.current) return;
       // 🛡️ SOCKET SCOPING: Ensure we only refetch if the job belongs to the current user
-      if (data.userId && user?.id && data.userId !== user.id) return;
+      // Cast user.id to string to prevent comparison mismatches (Review #19)
+      const currentUserId = user?.id ? String(user.id) : null;
+      if (data.userId && currentUserId && data.userId !== currentUserId) return;
 
       if (data.topic === "generate_study_plan" || data.type === "study_plan") {
         refetchPlan();
@@ -169,12 +176,22 @@ const StudyPlanner = () => {
   }, [handleJobComplete]);
 
   const generatePlan = async () => {
+    // 🛡️ ABORT PREVIOUS: Ensure no overlapping generation requests (Review #19)
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    abortControllerRef.current = new AbortController();
+
     generatePlanMutation(
       {
         url: "study-planner/generate",
         method: "post",
         values: {},
         successNotification: false,
+        // Pass signal to underlying axios/fetch call
+        meta: {
+          abortSignal: abortControllerRef.current.signal,
+        },
       },
       {
         onSuccess: (data) => {
@@ -240,7 +257,7 @@ const StudyPlanner = () => {
             onError: async (err) => {
               if (!isMounted.current) return;
 
-              // 🛡️ SRE Visibility: Log rollback for production monitoring
+              // 🛡️ SRE Visibility: Log rollback for production monitoring (Review #19)
               console.warn(`[StudyPlanner] Toggle failed for ${blockId}. Rolling back.`, { error: err });
 
               // 🛡️ ROLLBACK (Fixed Stale Closure & Deterministic Timestamp)
@@ -270,7 +287,9 @@ const StudyPlanner = () => {
     } catch (err) {
       console.error("Critical failure in toggleBlock:", err);
       // 🛡️ RACE CONDITION FIX: Ensure ref is reset even if setup fails
-      isSyncingRef.current = false;
+      if (isMounted.current) {
+        isSyncingRef.current = false;
+      }
     }
   };
 
