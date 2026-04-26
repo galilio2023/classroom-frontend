@@ -240,8 +240,8 @@ export const useOfflineSync = () => {
  * Specialized for the Study Planner feature (Mandate Review Hardening V1.7)
  * Implements Rule 4 timestamp-based reconciliation.
  */
-export const useStudyPlanSync = (initialData: any, isFetching: boolean) => {
-  const [plan, setPlan] = useState<any[]>([]);
+export const useStudyPlanSync = <T = any>(initialData: any, isFetching: boolean) => {
+  const [plan, setPlan] = useState<T[]>([]);
   const [completedBlocks, setCompletedBlocks] = useState<Record<string, boolean>>({});
   const [lastUpdated, setLastUpdated] = useState<number>(0);
   const isSyncingRef = useRef(false);
@@ -260,7 +260,7 @@ export const useStudyPlanSync = (initialData: any, isFetching: boolean) => {
           const localUpdate = record?.updatedAt || 0;
 
           if (netUpdate >= localUpdate) {
-            setPlan(initialData.data.plan || []);
+            setPlan((initialData.data.plan as T[]) || []);
             setCompletedBlocks(initialData.data.completedBlocks || {});
             setLastUpdated(netUpdate);
             // Sync to local
@@ -272,13 +272,13 @@ export const useStudyPlanSync = (initialData: any, isFetching: boolean) => {
             });
           } else if (record) {
             // Local is newer (offline changes pending or faster local update)
-            setPlan(record.plan);
+            setPlan(record.plan as T[]);
             setCompletedBlocks(record.completedBlocks);
             setLastUpdated(record.updatedAt);
           }
         } else if (record) {
           // Fallback to local
-          setPlan(record.plan);
+          setPlan(record.plan as T[]);
           setCompletedBlocks(record.completedBlocks);
           setLastUpdated(record.updatedAt);
         }

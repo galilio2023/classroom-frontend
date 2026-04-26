@@ -105,7 +105,7 @@ const StudyPlanner = () => {
     setCompletedBlocks,
     isSyncingRef,
     lastUpdated: previousUpdatedAt,
-  } = useStudyPlanSync(initialData, isFetching);
+  } = useStudyPlanSync<StudyBlock>(initialData, isFetching);
 
   // 🚀 BACKGROUND JOB STATUS
   const activeStudyPlanJob = useMemo(
