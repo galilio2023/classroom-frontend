@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useCallback, useRef } from "react";
+import { useEffect, useMemo, useCallback, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Zap, Sparkles, WifiOff } from "lucide-react";
 import { toast } from "sonner";
@@ -62,6 +62,13 @@ interface JobSocketPayload {
   userId?: string;
 }
 
+/**
+ * 🛡️ Utility: Standardized Block ID Generator
+ * Prevents key-mismatch bugs between UI and Mutation URLs (Review #19)
+ */
+export const getBlockId = (day: DayName, slot: string) =>
+  `${day.toLowerCase()}-${slot.toLowerCase()}`;
+
 const StudyPlanner = () => {
   const { t, i18n } = useTranslation();
   const isAr = i18n.language === "ar";
@@ -70,7 +77,9 @@ const StudyPlanner = () => {
   const { isOnline } = useOfflineSync();
   const { data: user } = useGetIdentity<User>();
   const isMounted = useRef(true);
-  const abortControllerRef = useRef<AbortController | null>(null);
+
+  // 🛡️ ABORTION Hardening: Initialize immediately for initial fetch (Review #19)
+  const abortControllerRef = useRef<AbortController>(new AbortController());
   const [syncingBlocks, setSyncingBlocks] = useState<Set<string>>(new Set());
 
   // 🛡️ COMPONENT LIFECYCLE: Handle cleanup and race conditions
@@ -78,9 +87,7 @@ const StudyPlanner = () => {
     isMounted.current = true;
     return () => {
       isMounted.current = false;
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
+      abortControllerRef.current.abort();
     };
   }, []);
 
@@ -89,7 +96,7 @@ const StudyPlanner = () => {
     url: "study-planner",
     method: "get",
     meta: {
-      abortSignal: abortControllerRef.current?.signal,
+      abortSignal: abortControllerRef.current.signal,
     },
   });
 
@@ -219,7 +226,7 @@ const StudyPlanner = () => {
 
   const toggleBlock = async (blockId: string) => {
     if (syncingBlocks.has(blockId)) return;
-    setSyncingBlocks((prev) => new Set(prev).add(blockId));
+    setSyncingBlocks((prev: Set<string>) => new Set(prev).add(blockId));
 
     try {
       // 🚀 RULE 4 Hardening: Capture precise state from DB right before mutation (Review Suggestion)
@@ -295,7 +302,7 @@ const StudyPlanner = () => {
           },
           onSettled: () => {
             if (isMounted.current) {
-              setSyncingBlocks((prev) => {
+              setSyncingBlocks((prev: Set<string>) => {
                 const next = new Set(prev);
                 next.delete(blockId);
                 return next;
@@ -307,7 +314,7 @@ const StudyPlanner = () => {
     } catch (err) {
       console.error("Critical failure in toggleBlock:", err);
       if (isMounted.current) {
-        setSyncingBlocks((prev) => {
+        setSyncingBlocks((prev: Set<string>) => {
           const next = new Set(prev);
           next.delete(blockId);
           return next;
@@ -341,7 +348,7 @@ const StudyPlanner = () => {
   );
 
   const nextTask = useMemo(
-    () => (plan || []).find((b) => !completedBlocks[`${b.day}-${b.timeSlot}`])?.task,
+    () => (plan || []).find((b) => !completedBlocks[getBlockId(b.day, b.timeSlot)])?.task,
     [plan, completedBlocks]
   );
 

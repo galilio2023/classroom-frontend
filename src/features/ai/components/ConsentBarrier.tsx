@@ -8,6 +8,7 @@ import { User } from "@/types";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { handleError, getCorrelationId } from "@/providers/utils/api-errors";
+import { Skeleton } from "@/components/ui/skeleton";
 
 /**
  * 🛡️ LAW 151: ConsentBarrier Component
@@ -60,10 +61,14 @@ export const ConsentBarrier: React.FC = () => {
         onError: async (err) => {
           if (!isMounted.current) return;
           console.error("Failed to update AI consent:", err);
-          
+
           if (err.statusCode === 409) {
             // 🛡️ OPTIMISTIC LOCKING: Handle background version mismatch gracefully for metadata (Review #19)
-            toast.info(t("ai.consent.versionConflict", { defaultValue: "State synchronized. Please try agreeing again." }));
+            toast.info(
+              t("ai.consent.versionConflict", {
+                defaultValue: "State synchronized. Please try agreeing again.",
+              })
+            );
             void refetchIdentity();
             return;
           }

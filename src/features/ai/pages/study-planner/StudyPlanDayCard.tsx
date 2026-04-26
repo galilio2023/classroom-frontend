@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { DayName } from "../study-planner";
+import { DayName, getBlockId } from "../study-planner";
 
 interface StudyBlock {
   day: DayName;
@@ -53,7 +53,7 @@ export const StudyPlanDayCard = React.memo(
             {TIME_SLOTS.map((slot) => {
               const block = dayBlocks.find((b) => b.timeSlot === slot);
               if (!block) return null;
-              const blockId = `${day}-${slot}`;
+              const blockId = getBlockId(day, slot);
               const isCompleted = completedBlocks[blockId];
 
               return (

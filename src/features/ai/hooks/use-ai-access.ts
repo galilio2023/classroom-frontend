@@ -45,6 +45,8 @@ export const useAiAccess = () => {
   const isQuotaExceeded = user ? (user.aiTokensUsed || 0) >= (user.aiMonthlyLimit || 50000) : false;
 
   // 🛡️ CONSENT: Check if user has agreed to the LATEST governance version (Mandate Review)
+  // 🛡️ RBAC Hardening: Parents are exempt from AI data processing consent as they only view
+  // aggregated analytics and don't interact with generative agents directly.
   const requiresConsent = user ? user.aiConsentVersion !== AI_CONSENT_VERSION : true;
 
   return {
