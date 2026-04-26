@@ -74,11 +74,13 @@ export const ConsentBarrier: React.FC = () => {
           console.error("Failed to update AI consent:", err);
 
           if (err.statusCode === 409) {
+            const correlationId = getCorrelationId(err);
             // 🛡️ OPTIMISTIC LOCKING: Handle background version mismatch gracefully (Review #21)
             toast.info(
               t("ai.consent.versionConflict", {
                 defaultValue: "Your session updated. Please try again.",
-              })
+              }),
+              { description: `ID: ${correlationId}` }
             );
             setIsConflicted(true);
             void refetchIdentity().then(() => {
@@ -133,7 +135,7 @@ export const ConsentBarrier: React.FC = () => {
           })}
           {/* TODO: Add a link to a "What's New" modal */}
           <a href="#" className="text-primary font-bold ml-2 underline">
-            What's New?
+            {t("ai.consent.whatsNew", { defaultValue: "What's New?" })}
           </a>
         </p>
       </div>

@@ -36,7 +36,7 @@ export interface UserNote {
 export interface PendingMutation {
   id?: number;
   resource: string;
-  action: "create" | "update" | "delete";
+  action: "create" | "update" | "delete" | "custom";
   variables: Record<string, unknown>;
   meta?: Record<string, unknown>;
   createdAt: number;

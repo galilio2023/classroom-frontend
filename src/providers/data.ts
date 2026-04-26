@@ -150,6 +150,16 @@ export const flushOutbox = async () => {
           resource: mutation.resource,
           id: vars.id,
         });
+      } else if (mutation.action === "custom") {
+        const vars = mutation.variables as any;
+        response = await dataProvider.custom({
+          url: vars.url,
+          method: vars.method,
+          payload: vars.payload,
+          query: vars.query,
+          headers: vars.headers,
+          meta: vars.meta,
+        });
       }
 
       if (response) {
@@ -456,6 +466,17 @@ export const dataProvider: DataProvider = {
   },
 
   custom: async ({ url, method, payload, query, headers, meta }) => {
+    if (isOffline() && method && method.toUpperCase() !== "GET") {
+      await offlineDB.queue({
+        resource: "custom",
+        action: "custom",
+        variables: { url, method, payload, query, headers, meta } as any,
+        meta: meta as any,
+      });
+      toast.warning("📴 Offline: Action saved locally.");
+      return { data: {} as any };
+    }
+
     let requestUrl = url;
 
     if (!url.startsWith("http")) {

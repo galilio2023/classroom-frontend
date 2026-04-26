@@ -25,6 +25,10 @@ export const useVisibilitySafety = () => {
 
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
+      // 🛡️ UNMOUNT Hardening: Ensure audio stops if the component is removed
+      if (window.speechSynthesis.speaking) {
+        window.speechSynthesis.cancel();
+      }
     };
   }, []);
 };
