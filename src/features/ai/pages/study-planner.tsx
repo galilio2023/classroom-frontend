@@ -18,6 +18,10 @@ import { StudyPlannerHeader } from "./study-planner/StudyPlannerHeader";
 import { StudyPlanDayCard } from "./study-planner/StudyPlanDayCard";
 import { StudyPlanStats } from "./study-planner/StudyPlanStats";
 
+const GAMIFICATION_CONFIG = {
+  XP_STUDY_BLOCK: 25,
+};
+
 interface StudyBlock {
   day: string;
   timeSlot: "Morning" | "Afternoon" | "Evening";
@@ -35,9 +39,11 @@ interface StudyPlanResponse {
   statusCode?: number;
 }
 
+type StudyPlanTopic = "generate_study_plan";
+
 interface JobSocketPayload {
-  topic?: string;
-  type?: string;
+  topic?: StudyPlanTopic;
+  type?: "study_plan";
 }
 
 const DAYS = [
@@ -89,16 +95,47 @@ const StudyPlanner = () => {
   // 🚀 RULE 6: Resource Preserving Visibility Safety
   useEffect(() => {
     const handleVisibility = () => {
-      if (document.hidden && activeStudyPlanJob) {
-        // AI is generating but user left. We pause non-critical UI feedback to preserve resources.
-        console.log("StudyPlanner: Preserving resources while hidden (Rule 6).");
+      if (document.hidden) {
+        // AI is generating or interacting but user left. Stop sound/heavy polling (Mandate Rule 6).
+        console.log("StudyPlanner: Preserved resources (Rule 6).");
+        if (window.speechSynthesis.speaking) {
+          window.speechSynthesis.cancel();
+        }
       }
     };
     document.addEventListener("visibilitychange", handleVisibility);
     return () => document.removeEventListener("visibilitychange", handleVisibility);
-  }, [activeStudyPlanJob]);
+  }, []);
+  // --- MUTATIONS ---
+  const { mutate: generatePlanMutation, mutation: generateMutation } = useCustomMutation<
+    StudyPlanResponse,
+    HttpError
+  >({
+    mutationOptions: {
+      onSuccess: () => {
+        refetchPlan();
+      },
+      onError: (err) => {
+        const correlationId = getCorrelationId(err);
+        handleError(err, correlationId);
+      },
+    },
+  });
 
-  // 🚀 REAL-TIME SYNC
+  const { mutate: toggleBlockMutation } = useCustomMutation({
+    mutationOptions: {
+      onError: (err) => {
+        const correlationId = getCorrelationId(err);
+        handleError(err, correlationId);
+      },
+      onSettled: () => {
+        if (isMounted.current) {
+          isSyncingRef.current = false;
+        }
+      },
+    },
+  });
+
   const handleJobComplete = useCallback(
     (data: JobSocketPayload) => {
       if (!isMounted.current) return;
@@ -116,36 +153,13 @@ const StudyPlanner = () => {
     };
   }, [handleJobComplete]);
 
-  // --- MUTATIONS ---
-  const { mutate: generatePlanMutation, mutation: generateMutation } = useCustomMutation<
-    StudyPlanResponse,
-    HttpError
-  >({
-    mutationOptions: {
-      onError: (err) => {
-        // 🚀 RULE 8: Traceability Mandate
-        const correlationId = getCorrelationId(err);
-        handleError(err, correlationId);
-      },
-    },
-  });
-
-  const { mutate: toggleBlockMutation } = useCustomMutation({
-    mutationOptions: {
-      onError: (err) => {
-        // 🚀 Gap Fix: Add traceability to toggle failures
-        const correlationId = getCorrelationId(err);
-        handleError(err, correlationId);
-      },
-    },
-  });
-
   const generatePlan = async () => {
     generatePlanMutation(
       {
         url: "study-planner/generate",
         method: "post",
         values: {},
+        successNotification: false,
       },
       {
         onSuccess: (data) => {
@@ -158,12 +172,7 @@ const StudyPlanner = () => {
             toast.success(t("studyPlanner.notifications.generatingMessage" as any));
           } else if ((data as any).statusCode === 202) {
             // 🚀 Rule 202 Handling: Background processing without immediate jobId
-            toast.info(
-              t(
-                "studyPlanner.notifications.queuedMessage" as any,
-                "Study plan is being prepared in the background."
-              )
-            );
+            toast.info(t("studyPlanner.notifications.queuedMessage" as any));
           }
         },
       }
@@ -171,7 +180,9 @@ const StudyPlanner = () => {
   };
 
   const toggleBlock = async (blockId: string) => {
+    if (isSyncingRef.current) return;
     isSyncingRef.current = true;
+
     const newStatus = !completedBlocks[blockId];
     const newCompleted = { ...completedBlocks, [blockId]: newStatus };
     const now = Date.now();
@@ -188,7 +199,10 @@ const StudyPlanner = () => {
     if (newStatus) {
       window.dispatchEvent(
         new CustomEvent("xp_gained_local", {
-          detail: { amount: 25, reason: "Study Task Completed" },
+          detail: {
+            amount: GAMIFICATION_CONFIG.XP_STUDY_BLOCK,
+            reason: "Study Task Completed",
+          },
         })
       );
     }
@@ -198,6 +212,7 @@ const StudyPlanner = () => {
         url: `study-planner/toggle-block/${blockId}`,
         method: "post",
         values: { isCompleted: newStatus },
+        successNotification: false,
       },
       {
         onSuccess: (res) => {
@@ -205,11 +220,6 @@ const StudyPlanner = () => {
           const serverUpdate = (res as any).data?.updatedAt;
           if (serverUpdate) {
             void offlineDB.study_plans.update("current", { updatedAt: serverUpdate });
-          }
-        },
-        onSettled: () => {
-          if (isMounted.current) {
-            isSyncingRef.current = false;
           }
         },
       }
@@ -242,8 +252,7 @@ const StudyPlanner = () => {
         onGenerate={generatePlan}
         isGenerating={generateMutation.isPending}
         activeJob={activeStudyPlanJob as any}
-      />
-
+      />{" "}
       {/* 🚀 Rule 7: Offline Indicator Badge */}
       {!isOnline && (
         <motion.div
@@ -255,7 +264,6 @@ const StudyPlanner = () => {
           {t("common.offlineMode" as any, "Offline Mode - Progress will sync later")}
         </motion.div>
       )}
-
       <div className="grid grid-cols-1 lg:grid-cols-7 gap-10">
         <div className="lg:col-span-5 space-y-8">
           <AnimatePresence mode="wait">

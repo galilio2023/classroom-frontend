@@ -177,13 +177,13 @@ export const useOfflineSync = () => {
       const planRecord = await db.study_plans.get("current");
       if (planRecord && planRecord.plan && Array.isArray(planRecord.plan)) {
         const nextBlock = planRecord.plan.find(
-          (b: any) => !planRecord.completedBlocks?.[b.id]
+          (b: any) => !planRecord.completedBlocks?.[`${b.day}-${b.timeSlot}`]
         ) as any;
         if (nextBlock) {
           return {
             type: "study_block",
-            id: nextBlock.id,
-            title: nextBlock.topic || t("dashboard.student.nextMission.offlineTitle" as any),
+            id: `${nextBlock.day}-${nextBlock.timeSlot}`,
+            title: nextBlock.task || t("dashboard.student.nextMission.offlineTitle" as any),
             context: t("dashboard.student.nextMission.offlineContext" as any),
             urgency: "medium",
             link: nextBlock.link || "/ai-study-lab",
