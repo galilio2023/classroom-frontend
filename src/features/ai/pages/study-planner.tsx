@@ -203,10 +203,10 @@ const StudyPlanner = () => {
     try {
       const previousStatus = completedBlocks[blockId];
       const newStatus = !previousStatus;
-      const newCompleted = { ...completedBlocks, [blockId]: newStatus };
       const now = Date.now();
 
       // 🚀 RULE 4 Hardening (Atomic Update): Update React state and Offline DB with the same object.
+      const newCompleted = { ...completedBlocks, [blockId]: newStatus };
       setCompletedBlocks(newCompleted);
 
       await offlineDB.study_plans.update("current", {
@@ -219,46 +219,54 @@ const StudyPlanner = () => {
         dispatchStudyBlockXp();
       }
 
-      toggleBlockMutation(
-        {
-          url: `study-planner/toggle-block/${blockId}`,
-          method: "post",
-          values: { isCompleted: newStatus },
-          successNotification: false,
-        },
-        {
-          onSuccess: (res) => {
-            if (!isMounted.current) return;
-            const serverUpdate = res.data?.updatedAt;
-            if (serverUpdate) {
-              void offlineDB.study_plans.update("current", { updatedAt: serverUpdate });
-            }
+      // 📶 OFFLINE MUTATION QUEUEING (Rule 4 Suggestion)
+      // Only dispatch network mutation if online. useOfflineSync handles reconciliation when coming back.
+      if (isOnline) {
+        toggleBlockMutation(
+          {
+            url: `study-planner/toggle-block/${blockId}`,
+            method: "post",
+            values: { isCompleted: newStatus },
+            successNotification: false,
           },
-          onError: async (err) => {
-            if (!isMounted.current) return;
+          {
+            onSuccess: (res) => {
+              if (!isMounted.current) return;
+              const serverUpdate = res.data?.updatedAt;
+              if (serverUpdate) {
+                void offlineDB.study_plans.update("current", { updatedAt: serverUpdate });
+              }
+            },
+            onError: async (err) => {
+              if (!isMounted.current) return;
 
-            // 🛡️ ROLLBACK (Fixed Stale Closure & Deterministic Timestamp)
-            console.warn("Toggle block failed. Rolling back optimistic update.");
-            const rolledBackCompleted = { ...completedBlocks, [blockId]: previousStatus };
-            setCompletedBlocks(rolledBackCompleted);
+              // 🛡️ SRE Visibility: Log rollback for production monitoring
+              console.warn(`[StudyPlanner] Toggle failed for ${blockId}. Rolling back.`, { error: err });
 
-            try {
-              // 🚀 Hardening: Restore the PREVIOUS timestamp (or 0 if unknown), not a new one.
-              // This ensures "Freshest Copy Wins" logic doesn't treat the rollback as a fresh update.
-              await offlineDB.study_plans.update("current", {
-                completedBlocks: rolledBackCompleted,
-                updatedAt: previousUpdatedAt || 0,
-              });
-            } catch (rollbackDbErr) {
-              console.error("Rollback Offline DB update failed:", rollbackDbErr);
-            }
+              // 🛡️ ROLLBACK (Fixed Stale Closure & Deterministic Timestamp)
+              setCompletedBlocks((prev) => ({ ...prev, [blockId]: previousStatus }));
 
-            toast.error(t("studyPlanner.notifications.rollbackError"));
-            const correlationId = getCorrelationId(err);
-            handleError(err, correlationId);
-          },
-        }
-      );
+              try {
+                // 🚀 Hardening: Restore the PREVIOUS timestamp (or 0 if unknown), not a new one.
+                // This ensures "Freshest Copy Wins" logic doesn't treat the rollback as a fresh update.
+                await offlineDB.study_plans.update("current", {
+                  completedBlocks: { ...completedBlocks, [blockId]: previousStatus },
+                  updatedAt: previousUpdatedAt || 0,
+                });
+              } catch (rollbackDbErr) {
+                console.error("Rollback Offline DB update failed:", rollbackDbErr);
+              }
+
+              toast.error(t("studyPlanner.notifications.rollbackError"));
+              const correlationId = getCorrelationId(err);
+              handleError(err, correlationId);
+            },
+          }
+        );
+      } else {
+        // If offline, release the sync lock immediately (Dexie update is already done)
+        isSyncingRef.current = false;
+      }
     } catch (err) {
       console.error("Critical failure in toggleBlock:", err);
       // 🛡️ RACE CONDITION FIX: Ensure ref is reset even if setup fails
