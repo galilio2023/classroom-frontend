@@ -62,7 +62,7 @@ const DAYS = [
 const StudyPlanner = () => {
   const { t, i18n } = useTranslation();
   const isAr = i18n.language === "ar";
-  usePageTitle(t("studyPlanner.title" as any));
+  usePageTitle(t("studyPlanner.title"));
   const { addJob, jobs } = useJobs();
   const { isOnline } = useOfflineSync();
   const { data: user } = useGetIdentity<User>();
@@ -86,10 +86,13 @@ const StudyPlanner = () => {
 
   // 🚀 RULE 4 Hardening: Synchronized Source of Truth logic
   // The useStudyPlanSync hook ensures "Freshest Copy Wins"
-  const { plan, completedBlocks, setCompletedBlocks, isSyncingRef } = useStudyPlanSync(
-    initialData,
-    isFetching
-  );
+  const {
+    plan,
+    completedBlocks,
+    setCompletedBlocks,
+    isSyncingRef,
+    lastUpdated: previousUpdatedAt,
+  } = useStudyPlanSync(initialData, isFetching);
 
   // 🚀 BACKGROUND JOB STATUS
   const activeStudyPlanJob = useMemo(
@@ -240,9 +243,11 @@ const StudyPlanner = () => {
             setCompletedBlocks((prev) => ({ ...prev, [blockId]: previousStatus }));
 
             try {
+              // 🚀 Hardening: Restore the PREVIOUS timestamp, not a new one.
+              // This ensures "Freshest Copy Wins" logic doesn't accidentally think the rollback is a fresh update.
               await offlineDB.study_plans.update("current", {
                 completedBlocks: { ...completedBlocks, [blockId]: previousStatus },
-                updatedAt: Date.now(),
+                updatedAt: previousUpdatedAt || Date.now(),
               });
             } catch (rollbackDbErr) {
               console.error("Rollback Offline DB update failed:", rollbackDbErr);
