@@ -78,6 +78,19 @@ export const ConsentBarrier: React.FC = () => {
     );
   };
 
+  if (isIdentityLoading && !user) {
+    return (
+      <div className="p-8 border-2 border-dashed border-primary/20 rounded-4xl bg-primary/5 flex flex-col items-center gap-6">
+        <Skeleton className="h-20 w-20 rounded-2xl" />
+        <div className="space-y-4 w-full max-w-md">
+          <Skeleton className="h-8 w-3/4 mx-auto" />
+          <Skeleton className="h-20 w-full" />
+        </div>
+        <Skeleton className="h-14 w-48 rounded-2xl" />
+      </div>
+    );
+  }
+
   return (
     <div className="p-8 border-2 border-dashed border-primary/20 rounded-4xl bg-primary/5 flex flex-col items-center text-center gap-6">
       <div className="p-4 rounded-2xl bg-primary/10 text-primary">

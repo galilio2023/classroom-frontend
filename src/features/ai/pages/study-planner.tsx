@@ -71,6 +71,7 @@ const StudyPlanner = () => {
   const { data: user } = useGetIdentity<User>();
   const isMounted = useRef(true);
   const abortControllerRef = useRef<AbortController | null>(null);
+  const [syncingBlocks, setSyncingBlocks] = useState<Set<string>>(new Set());
 
   // 🛡️ COMPONENT LIFECYCLE: Handle cleanup and race conditions
   useEffect(() => {
@@ -96,7 +97,7 @@ const StudyPlanner = () => {
 
   // 🚀 RULE 4 Hardening: Synchronized Source of Truth logic
   // The useStudyPlanSync hook ensures "Freshest Copy Wins"
-  const { plan, completedBlocks, setCompletedBlocks, isSyncingRef } = useStudyPlanSync<StudyBlock>(
+  const { plan, completedBlocks, setCompletedBlocks } = useStudyPlanSync<StudyBlock>(
     initialData,
     isFetching
   );
@@ -149,9 +150,7 @@ const StudyPlanner = () => {
         // Handled in toggleBlock's own onError
       },
       onSettled: () => {
-        if (isMounted.current) {
-          isSyncingRef.current = false;
-        }
+        // Handled per block in toggleBlock
       },
     },
   });
@@ -219,8 +218,8 @@ const StudyPlanner = () => {
   };
 
   const toggleBlock = async (blockId: string) => {
-    if (isSyncingRef.current) return;
-    isSyncingRef.current = true;
+    if (syncingBlocks.has(blockId)) return;
+    setSyncingBlocks((prev) => new Set(prev).add(blockId));
 
     try {
       // 🚀 RULE 4 Hardening: Capture precise state from DB right before mutation (Review Suggestion)
@@ -264,8 +263,9 @@ const StudyPlanner = () => {
           onError: async (err) => {
             if (!isMounted.current) return;
 
-            // 🛡️ SRE Visibility: Log rollback for production monitoring (Review #19)
-            console.warn(`[StudyPlanner] Toggle failed for ${blockId}. Rolling back.`, {
+            const correlationId = getCorrelationId(err);
+            // 🛡️ SRE Visibility: Log to console for remote debugging (Review Suggestion)
+            console.warn(`[StudyPlanner] Toggle failed for ${blockId}. CID: ${correlationId}`, {
               error: err,
             });
 
@@ -274,32 +274,44 @@ const StudyPlanner = () => {
 
             try {
               // 🚀 Hardening: Restore the PREVIOUS state in Offline DB (Review Suggestion)
-              // Re-fetch latest local state to ensure we merge the rollback into the most current local data
-              const latestLocal = await offlineDB.study_plans.get("current");
-              const rolledBackCompleted = {
-                ...(latestLocal?.completedBlocks || {}),
-                [blockId]: previousStatus,
-              };
-
-              void offlineDB.study_plans.update("current", {
-                completedBlocks: rolledBackCompleted,
-                updatedAt: previousUpdatedAtPrecise,
+              // Using a transaction to ensure atomicity during the rollback
+              await offlineDB.transaction("rw", offlineDB.study_plans, async () => {
+                const latest = await offlineDB.study_plans.get("current");
+                if (latest) {
+                  await offlineDB.study_plans.update("current", {
+                    completedBlocks: { ...latest.completedBlocks, [blockId]: previousStatus },
+                    updatedAt: previousUpdatedAtPrecise,
+                  });
+                }
               });
             } catch (rollbackDbErr) {
               console.error("Rollback Offline DB update failed:", rollbackDbErr);
             }
 
-            toast.error(t("studyPlanner.notifications.rollbackError"));
-            const correlationId = getCorrelationId(err);
+            toast.error(t("studyPlanner.notifications.rollbackError"), {
+              description: `ID: ${correlationId}`,
+            });
             handleError(err, correlationId);
+          },
+          onSettled: () => {
+            if (isMounted.current) {
+              setSyncingBlocks((prev) => {
+                const next = new Set(prev);
+                next.delete(blockId);
+                return next;
+              });
+            }
           },
         }
       );
     } catch (err) {
       console.error("Critical failure in toggleBlock:", err);
-      // 🛡️ RACE CONDITION FIX: Ensure ref is reset even if setup fails
       if (isMounted.current) {
-        isSyncingRef.current = false;
+        setSyncingBlocks((prev) => {
+          const next = new Set(prev);
+          next.delete(blockId);
+          return next;
+        });
       }
     }
   };
