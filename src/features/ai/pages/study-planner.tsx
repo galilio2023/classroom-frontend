@@ -112,8 +112,6 @@ const StudyPlanner = () => {
         if (window.speechSynthesis.speaking) {
           window.speechSynthesis.cancel();
         }
-        
-        // 🛡️ SRE Gap: Also pause any local polling here if added in future phases
       }
     };
     document.addEventListener("visibilitychange", handleVisibility);
@@ -186,12 +184,12 @@ const StudyPlanner = () => {
             addJob({
               id: response.data.jobId,
               type: "study_plan",
-              title: t("studyPlanner.notifications.generatingTitle" as any),
+              title: t("studyPlanner.notifications.generatingTitle"),
             });
-            toast.success(t("studyPlanner.notifications.generatingMessage" as any));
+            toast.success(t("studyPlanner.notifications.generatingMessage"));
           } else if (response.statusCode === 202) {
             // 🚀 Rule 202 Handling: Background processing without immediate jobId
-            toast.info(t("studyPlanner.notifications.queuedMessage" as any));
+            toast.info(t("studyPlanner.notifications.queuedMessage"));
           }
         },
       }
@@ -205,14 +203,14 @@ const StudyPlanner = () => {
     try {
       const previousStatus = completedBlocks[blockId];
       const newStatus = !previousStatus;
+      const newCompleted = { ...completedBlocks, [blockId]: newStatus };
       const now = Date.now();
 
-      // 🚀 RULE 4: Immediate Offline Persistence (Optimistic UI)
-      // Functional updater prevents stale closures (Review suggestion)
-      setCompletedBlocks((prev) => ({ ...prev, [blockId]: newStatus }));
+      // 🚀 RULE 4 Hardening (Atomic Update): Update React state and Offline DB with the same object.
+      setCompletedBlocks(newCompleted);
 
       await offlineDB.study_plans.update("current", {
-        completedBlocks: { ...completedBlocks, [blockId]: newStatus },
+        completedBlocks: newCompleted,
         updatedAt: now,
       });
 
@@ -238,22 +236,24 @@ const StudyPlanner = () => {
           },
           onError: async (err) => {
             if (!isMounted.current) return;
-            // 🛡️ ROLLBACK (Fixed Stale Closure): Revert using functional updater
+
+            // 🛡️ ROLLBACK (Fixed Stale Closure & Deterministic Timestamp)
             console.warn("Toggle block failed. Rolling back optimistic update.");
-            setCompletedBlocks((prev) => ({ ...prev, [blockId]: previousStatus }));
+            const rolledBackCompleted = { ...completedBlocks, [blockId]: previousStatus };
+            setCompletedBlocks(rolledBackCompleted);
 
             try {
-              // 🚀 Hardening: Restore the PREVIOUS timestamp, not a new one.
-              // This ensures "Freshest Copy Wins" logic doesn't accidentally think the rollback is a fresh update.
+              // 🚀 Hardening: Restore the PREVIOUS timestamp (or 0 if unknown), not a new one.
+              // This ensures "Freshest Copy Wins" logic doesn't treat the rollback as a fresh update.
               await offlineDB.study_plans.update("current", {
-                completedBlocks: { ...completedBlocks, [blockId]: previousStatus },
-                updatedAt: previousUpdatedAt || Date.now(),
+                completedBlocks: rolledBackCompleted,
+                updatedAt: previousUpdatedAt || 0,
               });
             } catch (rollbackDbErr) {
               console.error("Rollback Offline DB update failed:", rollbackDbErr);
             }
 
-            toast.error(t("studyPlanner.notifications.rollbackError" as any));
+            toast.error(t("studyPlanner.notifications.rollbackError"));
             const correlationId = getCorrelationId(err);
             handleError(err, correlationId);
           },
@@ -302,7 +302,7 @@ const StudyPlanner = () => {
           className="flex items-center gap-2 px-4 py-2 bg-destructive/10 text-destructive rounded-full w-fit mx-auto text-[10px] font-black uppercase tracking-widest border border-destructive/20 animate-pulse"
         >
           <WifiOff className="h-3 w-3" />
-          {t("common.offline" as any)}
+          {t("common.offline")}
         </motion.div>
       )}
       <div className="grid grid-cols-1 lg:grid-cols-7 gap-10">
@@ -337,10 +337,10 @@ const StudyPlanner = () => {
                   <Zap className="h-16 w-16" />
                 </div>
                 <h3 className="text-3xl font-black tracking-tighter uppercase mb-2">
-                  {t("studyPlanner.empty.title" as any)}
+                  {t("studyPlanner.empty.title")}
                 </h3>
                 <p className="text-muted-foreground font-medium max-w-sm mb-8">
-                  {t("studyPlanner.empty.description" as any)}
+                  {t("studyPlanner.empty.description")}
                 </p>
                 <Button
                   onClick={generatePlan}
@@ -348,7 +348,7 @@ const StudyPlanner = () => {
                   className="rounded-2xl px-10 h-14 bg-ai-primary font-black uppercase tracking-widest"
                 >
                   <Sparkles className="mr-3 h-5 w-5" />
-                  {t("studyPlanner.buttons.generateNow" as any)}
+                  {t("studyPlanner.buttons.generateNow")}
                 </Button>
               </motion.div>
             )}
