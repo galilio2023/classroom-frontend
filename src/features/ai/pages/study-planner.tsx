@@ -215,8 +215,8 @@ const StudyPlanner = () => {
       {
         onSuccess: (data) => {
           if (!isMounted.current) return;
-          const response = data as TablawyCreateResponse<StudyPlanResponse> & { jobId?: string };
-          const jobId = response.data?.jobId || response.jobId;
+          const response = data as TablawyCreateResponse<StudyPlanResponse>;
+          const jobId = response.data?.jobId;
 
           if (jobId) {
             addJob({

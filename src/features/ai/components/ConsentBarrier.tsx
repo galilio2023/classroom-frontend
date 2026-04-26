@@ -19,6 +19,7 @@ export const ConsentBarrier: React.FC = () => {
   const { t } = useTranslation();
   const isMounted = useRef(true);
   const [isConflicted, setIsConflicted] = useState(false);
+  const [identityFetchTimedOut, setIdentityFetchTimedOut] = useState(false);
   const {
     data: user,
     refetch: refetchIdentity,
@@ -28,10 +29,17 @@ export const ConsentBarrier: React.FC = () => {
 
   useEffect(() => {
     isMounted.current = true;
+    const timer = setTimeout(() => {
+      if (isIdentityLoading && isMounted.current) {
+        setIdentityFetchTimedOut(true);
+      }
+    }, 8000); // 8-second timeout
+
     return () => {
       isMounted.current = false;
+      clearTimeout(timer);
     };
-  }, []);
+  }, [isIdentityLoading]);
 
   const isLoading = mutation.isPending;
 
@@ -61,26 +69,26 @@ export const ConsentBarrier: React.FC = () => {
         },
         onError: async (err) => {
           if (!isMounted.current) return;
-          onError: async (err) => {
-                    if (!isMounted.current) return;
-                    console.error("Failed to update AI consent:", err);
+          console.error("Failed to update AI consent:", err);
 
-                    if (err.statusCode === 409) {
-                      // 🛡️ OPTIMISTIC LOCKING: Handle background version mismatch gracefully (Review #21)
-                      toast.info(t("ai.consent.versionConflict", { defaultValue: "Your session updated. Please try again." }));
-                      setIsConflicted(true);
-                      void refetchIdentity().then(() => {
-                        if(isMounted.current) setTimeout(() => setIsConflicted(false), 1500); // UI cooldown
-                      });
-                      return;
-                    }
+          if (err.statusCode === 409) {
+            // 🛡️ OPTIMISTIC LOCKING: Handle background version mismatch gracefully (Review #21)
+            toast.info(
+              t("ai.consent.versionConflict", {
+                defaultValue: "Your session updated. Please try again.",
+              })
+            );
+            setIsConflicted(true);
+            void refetchIdentity().then(() => {
+              if (isMounted.current) setTimeout(() => setIsConflicted(false), 1500); // UI cooldown
+            });
+            return;
+          }
 
-                    const correlationId = getCorrelationId(err);
-                    const handledError = await handleError(err, correlationId);
-                    toast.error(handledError.message, {
-                      description: `ID: ${correlationId}`,
-                    });
-                  },
+          const correlationId = getCorrelationId(err);
+          const handledError = await handleError(err, correlationId);
+          toast.error(handledError.message, {
+            description: `ID: ${correlationId}`,
           });
         },
       }
@@ -95,7 +103,11 @@ export const ConsentBarrier: React.FC = () => {
           <Skeleton className="h-8 w-3/4 mx-auto" />
           <Skeleton className="h-20 w-full" />
         </div>
-        <Skeleton className="h-14 w-48 rounded-2xl" />
+        {identityFetchTimedOut ? (
+          <Button variant="outline" onClick={() => refetchIdentity()}>Retry</Button>
+        ) : (
+          <Skeleton className="h-14 w-48 rounded-2xl" />
+        )}
       </div>
     );
   }
@@ -115,9 +127,10 @@ export const ConsentBarrier: React.FC = () => {
             defaultValue: "To provide AI-powered insights while complying with Law 151/2020, we need your consent to process academic data through our secure AI partner (Google Gemini)." 
           })}
           {/* TODO: Add a link to a "What's New" modal */}
-          <a href="#" className="text-primary font-bold ml-2 underline">What's New?</a>
+          <a href="#" className="text-primary font-bold ml-2 underline">
+            What's New?
+          </a>
           </p>
-        </p>
       </div>
 
       <Alert className="max-w-md bg-background/50 border-primary/10">
