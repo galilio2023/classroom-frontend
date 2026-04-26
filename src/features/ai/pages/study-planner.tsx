@@ -1,15 +1,14 @@
-import { useState, useEffect, useMemo, useCallback, useRef } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useEffect, useMemo, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Zap, Sparkles, WifiOff, Loader2 } from "lucide-react";
+import { Zap, Sparkles, WifiOff } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
-import { useCustom, useCustomMutation, HttpError } from "@refinedev/core";
+import { useCustom, useCustomMutation, HttpError, CreateResponse } from "@refinedev/core";
 import { useTranslation } from "react-i18next";
 import usePageTitle from "@/hooks/use-page-title";
 import { handleError, getCorrelationId } from "@/providers/utils/api-errors";
 import { offlineDB } from "@/lib/offline-db";
-import { useJobs } from "@/contexts/job-context";
+import { useJobs, Job } from "@/contexts/job-context";
 import { socket } from "@/lib/socket";
 import { useStudyPlanSync, useOfflineSync } from "@/features/engagement/hooks/use-offline-sync";
 
@@ -41,6 +40,11 @@ interface StudyPlanResponse {
     jobId?: string;
     updatedAt?: number;
   };
+}
+
+// 🛡️ EXTENSION: Refine CreateResponse doesn't always expose statusCode in its base type
+interface TablawyCreateResponse<T> extends CreateResponse<T> {
+  statusCode?: number;
 }
 
 type StudyPlanTopic = "generate_study_plan";
@@ -92,7 +96,7 @@ const StudyPlanner = () => {
 
   // 🚀 BACKGROUND JOB STATUS
   const activeStudyPlanJob = useMemo(
-    () => jobs.find((j) => j.type === "study_plan" && j.status === "processing"),
+    () => jobs.find((j) => j.type === "study_plan" && j.status === "processing") as Job | undefined,
     [jobs]
   );
 
@@ -169,17 +173,17 @@ const StudyPlanner = () => {
       {
         onSuccess: (data) => {
           if (!isMounted.current) return;
-          const response = data as any;
-          if (data.data?.jobId) {
+          const response = data as TablawyCreateResponse<StudyPlanResponse>;
+          if (response.data?.jobId) {
             addJob({
-              id: data.data.jobId,
+              id: response.data.jobId,
               type: "study_plan",
-              title: t("studyPlanner.notifications.generatingTitle" as any),
+              title: t("studyPlanner.notifications.generatingTitle"),
             });
-            toast.success(t("studyPlanner.notifications.generatingMessage" as any));
+            toast.success(t("studyPlanner.notifications.generatingMessage"));
           } else if (response.statusCode === 202) {
             // 🚀 Rule 202 Handling: Background processing without immediate jobId
-            toast.info(t("studyPlanner.notifications.queuedMessage" as any));
+            toast.info(t("studyPlanner.notifications.queuedMessage"));
           }
         },
       }
@@ -230,7 +234,7 @@ const StudyPlanner = () => {
         onSuccess: (res) => {
           if (!isMounted.current) return;
           // 🚀 Hardening: Update local with precise server timestamp if available
-          const serverUpdate = (res as any).data?.updatedAt;
+          const serverUpdate = res.data?.updatedAt;
           if (serverUpdate) {
             void offlineDB.study_plans.update("current", { updatedAt: serverUpdate });
           }
@@ -283,8 +287,8 @@ const StudyPlanner = () => {
       <StudyPlannerHeader
         onGenerate={generatePlan}
         isGenerating={generateMutation.isPending}
-        activeJob={activeStudyPlanJob as any}
-      />{" "}
+        activeJob={activeStudyPlanJob}
+      />
       {/* 🚀 Rule 7: Offline Indicator Badge */}
       {!isOnline && (
         <motion.div
@@ -293,7 +297,7 @@ const StudyPlanner = () => {
           className="flex items-center gap-2 px-4 py-2 bg-destructive/10 text-destructive rounded-full w-fit mx-auto text-[10px] font-black uppercase tracking-widest border border-destructive/20 animate-pulse"
         >
           <WifiOff className="h-3 w-3" />
-          {t("common.offlineMode" as any, "Offline Mode - Progress will sync later")}
+          {t("common.offlineMode", "Offline Mode - Progress will sync later")}
         </motion.div>
       )}
       <div className="grid grid-cols-1 lg:grid-cols-7 gap-10">
@@ -330,10 +334,10 @@ const StudyPlanner = () => {
                   <Zap className="h-16 w-16" />
                 </div>
                 <h3 className="text-3xl font-black tracking-tighter uppercase mb-2">
-                  {t("studyPlanner.empty.title" as any)}
+                  {t("studyPlanner.empty.title")}
                 </h3>
                 <p className="text-muted-foreground font-medium max-w-sm mb-8">
-                  {t("studyPlanner.empty.description" as any)}
+                  {t("studyPlanner.empty.description")}
                 </p>
                 <Button
                   onClick={generatePlan}
@@ -341,7 +345,7 @@ const StudyPlanner = () => {
                   className="rounded-2xl px-10 h-14 bg-ai-primary font-black uppercase tracking-widest"
                 >
                   <Sparkles className="mr-3 h-5 w-5" />
-                  {t("studyPlanner.buttons.generateNow" as any)}
+                  {t("studyPlanner.buttons.generateNow")}
                 </Button>
               </motion.div>
             )}

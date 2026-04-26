@@ -42,7 +42,7 @@ export const StudyPlanDayCard = ({
             <CalendarIcon className="h-5 w-5" />
           </div>
           <CardTitle className="text-xl font-black uppercase tracking-tight">
-            {t(`common.days.${day.toLowerCase()}` as any)}
+            {t(`common.days.${day.toLowerCase()}`)}
           </CardTitle>
         </div>
       </CardHeader>
@@ -78,7 +78,7 @@ export const StudyPlanDayCard = ({
                   <div className="space-y-1">
                     <div className="flex items-center gap-3">
                       <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
-                        {t(`studyPlanner.slots.${slot.toLowerCase()}` as any)}
+                        {t(`studyPlanner.slots.${slot.toLowerCase()}`)}
                       </span>
                       <Badge
                         variant="outline"

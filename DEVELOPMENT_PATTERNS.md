@@ -54,6 +54,7 @@ Vite performs static replacement of `import.meta.env.VITE_*` variables during th
 To support students in internet-unstable areas, Tablawy OS uses a "Learning without Limits" engine:
 - **Client-Side DB**: **Dexie (IndexedDB)** is used to store `cached_lessons` and `pending_quizzes`.
 - **Background Sync**: The `useOfflineSync` hook monitors `online`/`offline` events. When connectivity is restored, it flushes any stored quiz attempts to the server automatically.
+- **Synchronized State**: For AI-generated assets (like Study Plans), use the `useStudyPlanSync` pattern. This pattern reconciles server data with local Dexie state on component mount and job completion, using an `updatedAt` timestamp to ensure the "Freshest Copy Wins."
 - **Service Worker (`sw.ts`)**: Implements a "Curriculum-First" caching strategy. Assets once downloaded are served locally with zero network latency.
 - **Visual Feedback**: A pulsing "Offline Mode" badge and a specialized "Download Lesson" toggle provide clear state indicators to the user.
 - **Hager Mode (PDF Handouts)**: For Rule 7 (High-Fidelity Handouts), use `html2canvas` + `jspdf` only for simple LTR snapshots. **Mandate**: For any document containing Arabic typography or LaTeX formulas, the frontend MUST delegate generation to the backend PDF engine. Client-side rendering of complex Arabic text shaping is brittle and forbidden for official high-fidelity handouts.
