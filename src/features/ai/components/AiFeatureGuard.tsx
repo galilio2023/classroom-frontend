@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useAiAccess } from "@/features/ai/hooks/use-ai-access";
 import { Lock, Clock, Sparkles, BrainCircuit, RefreshCcw, Loader2 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -6,6 +6,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { useCan } from "@refinedev/core";
 import { ConsentBarrier } from "./ConsentBarrier";
+import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 interface AiFeatureGuardProps {
   children: React.ReactNode;
@@ -32,6 +34,7 @@ export const AiFeatureGuard: React.FC<AiFeatureGuardProps> = ({
   silent = false,
   skeletonClassName = "w-full h-32 rounded-lg",
 }) => {
+  const { t } = useTranslation();
   const {
     isAiEnabled,
     isQuotaExceeded,
@@ -42,6 +45,30 @@ export const AiFeatureGuard: React.FC<AiFeatureGuardProps> = ({
     isClientLagging,
     refetch,
   } = useAiAccess();
+
+  // 🛡️ LOOP PROTECTION Hardening: Reset reload counter if client is now up-to-date (Review #25 Fix)
+  useEffect(() => {
+    if (!isAiLoading && !isClientLagging) {
+      sessionStorage.removeItem("ai_governance_reload_count");
+    }
+  }, [isAiLoading, isClientLagging]);
+
+  // 🚀 UX Hardening: Trigger non-intrusive toast for stale bundles (Review #25 Suggestion)
+  useEffect(() => {
+    if (isClientLagging) {
+      toast.info(
+        t("ai.notifications.staleClient", {
+          defaultValue:
+            "A platform update is available. Some AI features may be limited until you refresh.",
+        }),
+        {
+          duration: 10000,
+          id: "stale-client-toast",
+        }
+      );
+    }
+  }, [isClientLagging, t]);
+
   const { data: canAccess, isLoading: isCanLoading } = useCan({
     resource: "ai_features",
     action: "access",
