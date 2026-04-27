@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect } from "react";
 import { useList, useGo, type HttpError } from "@refinedev/core";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -18,6 +18,9 @@ import { useTranslation } from "react-i18next";
 import { useCapabilities } from "@/hooks/use-capabilities";
 import { Badge } from "@/components/ui/badge";
 import { DAYS_SHORT, VACATION_INDEX } from "@/constants/calendar";
+import { handleError } from "@/providers/utils/api-errors";
+import { toast } from "sonner";
+import { formatTime } from "@/lib/date-utils";
 
 export interface TimetableSlot {
   id: string;
@@ -47,9 +50,27 @@ export default function DeptSemesterPlannerPage() {
 
   const slots = listResult?.data?.data || [];
   const isLoading = listResult?.isLoading;
+  const isError = listResult?.isError;
+  const error = listResult?.error;
 
   /**
-   * 🚀 OPTIMIZATION (Review #5): Group slots by day to reduce O(N*M) complexity in the grid render.
+   * 🛡️ RULE 5: Standardized Error Handling
+   */
+  useEffect(() => {
+    if (isError && error) {
+      handleError(error).then((httpError) => {
+        toast.error(httpError.message, {
+          description: t("errors.trace_id", { 
+            defaultValue: `Trace ID: ${httpError.meta?.correlationId || "N/A"}`,
+            id: httpError.meta?.correlationId 
+          }),
+        });
+      });
+    }
+  }, [isError, error, t]);
+
+  /**
+   * 🚀 OPTIMIZATION (Review #5 + #8): Group slots by day to reduce O(N*M) complexity in the grid render.
    */
   const slotsByDay = useMemo(() => {
     return (slots as TimetableSlot[]).reduce((acc: Record<number, TimetableSlot[]>, slot: TimetableSlot) => {
@@ -136,13 +157,13 @@ export default function DeptSemesterPlannerPage() {
           )}
         </AnimatePresence>
 
-        <div className="grid grid-cols-1 md:grid-cols-7 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-7 gap-6 overflow-x-auto pb-4 custom-scrollbar">
           {DAYS_SHORT.map((day: string, idx: number) => {
             const isVacation = idx === VACATION_INDEX;
             const daySlots = slotsByDay[idx] || [];
 
             return (
-              <div key={idx} className={cn("space-y-4 rounded-3xl p-1 transition-colors", isVacation && "bg-muted/5")}>
+              <div key={idx} className={cn("space-y-4 rounded-3xl p-1 transition-colors min-w-[200px]", isVacation && "bg-muted/5")}>
                 <header className="py-2 border-b border-border/40 mb-4 flex items-center justify-between px-2">
                   <h4 className={cn("text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60", isVacation && "text-primary/40")}>
                     {day}
@@ -186,7 +207,7 @@ export default function DeptSemesterPlannerPage() {
                               slot.hasConflict ? "text-destructive" : "text-purple-600"
                             )}
                           >
-                            {slot.startTime.slice(0, 5)} - {slot.endTime.slice(0, 5)}
+                            {formatTime(slot.startTime)} - {formatTime(slot.endTime)}
                           </span>
                           <div className="space-y-1 min-w-0 w-full">
                             <div className="flex items-center gap-1.5 min-w-0">

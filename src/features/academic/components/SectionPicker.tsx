@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils";
 import { handleError } from "@/providers/utils/api-errors";
 import { DAYS_SHORT } from "@/constants/calendar";
 import { useTranslation } from "react-i18next";
+import { formatTime } from "@/lib/date-utils";
 
 export interface Section {
   id: string;
@@ -77,9 +78,7 @@ export const SectionPicker: React.FC<SectionPickerProps> = ({
       },
       {
         onSuccess: () => {
-          toast.success(
-            t("timetable.section_picker.success", "Lecture section selected successfully!")
-          );
+          toast.success(t("timetable.section_picker.success", "Lecture section selected successfully!"));
           onSuccess?.();
           // Programmatic navigation to dashboard
           go({ to: "/dashboard" });
@@ -88,9 +87,9 @@ export const SectionPicker: React.FC<SectionPickerProps> = ({
           const httpError = await handleError(err);
           // 🚀 RULE 8: Surface Trace ID for high-stakes errors
           toast.error(httpError.message, {
-            description: t("errors.trace_id", {
+            description: t("errors.trace_id", { 
               defaultValue: `Trace ID: ${httpError.meta?.correlationId || "N/A"}`,
-              id: httpError.meta?.correlationId,
+              id: httpError.meta?.correlationId 
             }),
           });
         },
@@ -117,10 +116,7 @@ export const SectionPicker: React.FC<SectionPickerProps> = ({
           {t("timetable.section_picker.title", "Choose Your Section")}
         </h3>
         <p className="text-sm text-muted-foreground font-medium">
-          {t(
-            "timetable.section_picker.description",
-            "Select a preferred timeframe and location for your lectures."
-          )}
+          {t("timetable.section_picker.description", "Select a preferred timeframe and location for your lectures.")}
         </p>
       </div>
 
@@ -161,14 +157,11 @@ export const SectionPicker: React.FC<SectionPickerProps> = ({
                           <div className="flex items-center gap-3 text-xs font-bold text-muted-foreground uppercase tracking-widest">
                             <span className="flex items-center gap-1">
                               <Clock className="w-3 h-3" />
-                              {DAYS_SHORT[section.dayOfWeek] ||
-                                t("common.unknown", "Unknown")} • {section.startTime.slice(0, 5)} -{" "}
-                              {section.endTime.slice(0, 5)}
+                              {(DAYS_SHORT[section.dayOfWeek] || t("common.unknown", "Unknown"))} • {formatTime(section.startTime)} - {formatTime(section.endTime)}
                             </span>
                             <span className="flex items-center gap-1">
                               <MapPin className="w-3 h-3" />
-                              {section.roomId ||
-                                t("timetable.section_picker.hall_fallback", "Global Hall")}
+                              {section.roomId || t("timetable.section_picker.hall_fallback", "Global Hall")}
                             </span>
                           </div>
                         </div>
@@ -202,14 +195,9 @@ export const SectionPicker: React.FC<SectionPickerProps> = ({
                 <Layers className="w-12 h-12 text-muted-foreground/20" />
               </div>
               <div className="space-y-1">
-                <h3 className="font-black uppercase tracking-tight">
-                  {t("timetable.section_picker.empty_title", "No Sections Available")}
-                </h3>
+                <h3 className="font-black uppercase tracking-tight">{t("timetable.section_picker.empty_title", "No Sections Available")}</h3>
                 <p className="text-sm text-muted-foreground max-w-xs">
-                  {t(
-                    "timetable.section_picker.empty_description",
-                    "This course currently has no active lecture slots. Please contact the registrar."
-                  )}
+                  {t("timetable.section_picker.empty_description", "This course currently has no active lecture slots. Please contact the registrar.")}
                 </p>
               </div>
             </div>
