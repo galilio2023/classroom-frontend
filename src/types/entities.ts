@@ -84,6 +84,7 @@ export interface User {
   };
   enrollments?: Enrollment[];
   teacherChannel?: TeacherChannel;
+  school?: School;
   persona?: {
     learningDNA: string;
     preferredTone: string;

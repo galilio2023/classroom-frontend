@@ -23,7 +23,7 @@ export const SchoolThemeProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const { suiteType } = useCapabilities();
 
   const theme = useMemo(() => {
-    const config = (identity as any)?.school?.brandingConfig || {};
+    const config = identity?.school?.brandingConfig || {};
     const fallbackColor =
       SUITE_COLORS[suiteType as keyof typeof SUITE_COLORS] || SUITE_COLORS.private;
 

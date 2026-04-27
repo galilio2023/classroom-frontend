@@ -130,7 +130,7 @@ export default function DeptSemesterPlannerPage() {
 
         {/* CONFLICT SUMMARY ALERT */}
         <AnimatePresence>
-          {(slots as TimetableSlot[]).some((s) => s.hasConflict) && (
+          {(slots as TimetableSlot[]).some((s: TimetableSlot) => s.hasConflict) && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
@@ -177,7 +177,7 @@ export default function DeptSemesterPlannerPage() {
                 <div className="space-y-3">
                   {daySlots.length === 0 ? (
                     <div className={cn("h-20 rounded-3xl border border-dashed border-border/40 flex items-center justify-center", isVacation ? "opacity-5" : "opacity-10")}>
-                      <span className="text-[8px] font-bold">
+                      <span className="text-[10px] font-black uppercase tracking-widest opacity-40">
                         {isVacation ? t("status.off", "Off") : t("timetable.deptPlanner.noLectures", "No Lectures")}
                       </span>
                     </div>

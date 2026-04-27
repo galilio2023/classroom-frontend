@@ -60,8 +60,8 @@ export const SectionPicker: React.FC<SectionPickerProps> = ({
     },
   }) as any;
 
-  const sections = listResult?.data?.data || [];
-  const isLoading = listResult?.isLoading;
+  const sections = listResult.data?.data || [];
+  const isLoading = listResult.isLoading;
 
   const mutationResult = useCustomMutation<SectionSelectionResponse, HttpError>() as any;
   const updateSection = mutationResult.mutate;
