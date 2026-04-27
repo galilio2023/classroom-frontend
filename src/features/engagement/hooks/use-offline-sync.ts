@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { offlineDB as db } from "@/lib/offline-db";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
@@ -168,5 +168,127 @@ export const useOfflineSync = () => {
     }
   };
 
-  return { isOnline, downloadLesson, saveQuizOffline, syncPendingData };
+  /**
+   * 🧠 OFFLINE INTELLIGENCE: Computes the next mission using local Dexie data.
+   * Mandate: Part of the "Human Layer" (Phase 1.1) to remove friction in low-bandwidth pockets.
+   */
+  const getNextOfflineMission = async () => {
+    try {
+      const planRecord = await db.study_plans.get("current");
+      if (planRecord && planRecord.plan && Array.isArray(planRecord.plan)) {
+        const nextBlock = planRecord.plan.find(
+          (b: any) => !planRecord.completedBlocks?.[`${b.day}-${b.timeSlot}`]
+        ) as any;
+        if (nextBlock) {
+          return {
+            type: "study_block",
+            id: `${nextBlock.day}-${nextBlock.timeSlot}`,
+            title: nextBlock.task || t("dashboard.student.nextMission.offlineTitle" as any),
+            context: t("dashboard.student.nextMission.offlineContext" as any),
+            urgency: "medium",
+            link: nextBlock.link || "/ai-study-lab",
+            source: "offline_cache",
+          };
+        }
+      }
+
+      // Fallback: Return first cached lesson
+      const cachedLessons = await db.lessons.toArray();
+      if (cachedLessons.length > 0) {
+        return {
+          type: "lesson",
+          id: cachedLessons[0].id,
+          title: cachedLessons[0].title,
+          context: t("dashboard.student.nextMission.offlineLessonContext" as any),
+          urgency: "low",
+          link: `/classes/${cachedLessons[0].classId}/lessons/${cachedLessons[0].id}`,
+          source: "offline_cache",
+        };
+      }
+
+      return null;
+    } catch (err) {
+      console.error("Failed to compute offline mission:", err);
+      return null;
+    }
+  };
+
+  /**
+   * 🛡️ SECURITY Gap Fix: Clear study plan data on logout to prevent cross-session leakage.
+   */
+  const clearOfflineStudyPlan = async () => {
+    try {
+      await db.study_plans.clear();
+      console.log("Offline study plan cleared for security.");
+    } catch (err) {
+      console.error("Failed to clear offline study plan:", err);
+    }
+  };
+
+  return {
+    isOnline,
+    downloadLesson,
+    saveQuizOffline,
+    syncPendingData,
+    getNextOfflineMission,
+    clearOfflineStudyPlan, // 🚀 Exposed for logout logic
+  };
+};
+
+/**
+ * 🔄 useStudyPlanSync Hook
+ * Specialized for the Study Planner feature (Mandate Review Hardening V1.7)
+ * Implements Rule 4 timestamp-based reconciliation.
+ */
+export const useStudyPlanSync = <T = any>(initialData: any, isFetching: boolean) => {
+  const [plan, setPlan] = useState<T[]>([]);
+  const [completedBlocks, setCompletedBlocks] = useState<Record<string, boolean>>({});
+  const [lastUpdated, setLastUpdated] = useState<number>(0);
+  const isSyncingRef = useRef(false);
+
+  useEffect(() => {
+    const loadAndSync = async () => {
+      if (isSyncingRef.current || isFetching) return;
+      isSyncingRef.current = true;
+
+      try {
+        const record = await db.study_plans.get("current");
+
+        // If network data is available and newer, synchronize
+        if (initialData?.data) {
+          const netUpdate = initialData.data.updatedAt || Date.now();
+          const localUpdate = record?.updatedAt || 0;
+
+          if (netUpdate >= localUpdate) {
+            setPlan((initialData.data.plan as T[]) || []);
+            setCompletedBlocks(initialData.data.completedBlocks || {});
+            setLastUpdated(netUpdate);
+            // Sync to local
+            await db.study_plans.put({
+              id: "current",
+              plan: initialData.data.plan || [],
+              completedBlocks: initialData.data.completedBlocks || {},
+              updatedAt: netUpdate,
+            });
+          } else if (record) {
+            // Local is newer (offline changes pending or faster local update)
+            setPlan(record.plan as T[]);
+            setCompletedBlocks(record.completedBlocks);
+            setLastUpdated(record.updatedAt);
+          }
+        } else if (record) {
+          // Fallback to local
+          setPlan(record.plan as T[]);
+          setCompletedBlocks(record.completedBlocks);
+          setLastUpdated(record.updatedAt);
+        }
+      } finally {
+        isSyncingRef.current = false;
+      }
+    };
+
+    loadAndSync();
+  }, [initialData, isFetching]);
+
+  return { plan, completedBlocks, lastUpdated, setPlan, setCompletedBlocks, isSyncingRef };
 };

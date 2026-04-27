@@ -74,6 +74,7 @@ export interface User {
   lastActiveAt: string | null;
   aiTokensUsed?: number;
   aiMonthlyLimit?: number;
+  aiConsentVersion?: string;
   metadata?: {
     rejectionReason?: string;
     rejectedAt?: string;
@@ -102,6 +103,42 @@ export interface NotificationMetadata {
   link?: string;
   message?: string;
   [key: string]: any;
+}
+
+export interface SessionRoadmap {
+  sessionTitle: string;
+  icebreaker: string;
+  keyConcepts: string[];
+  outline: {
+    time: string;
+    topic: string;
+    goal: string;
+  }[];
+  studentWatchouts: string;
+}
+
+export interface CourseRoadmap {
+  title: string;
+  vision: string;
+  competencies: string[];
+  milestones: {
+    phase: string;
+    title: string;
+    description: string;
+  }[];
+  expectations: string;
+}
+
+export type Roadmap = SessionRoadmap | CourseRoadmap;
+
+export interface BackgroundJobRecord {
+  id: string;
+  type: string;
+  title: string;
+  status: "idle" | "processing" | "completed" | "failed";
+  progress?: number;
+  message?: string;
+  createdAt: number;
 }
 
 export interface Department {

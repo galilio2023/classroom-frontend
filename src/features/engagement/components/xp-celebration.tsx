@@ -7,10 +7,10 @@ import { socket, connectSocket } from "@/lib/socket";
 import { useTranslation } from "react-i18next";
 import {} from "@/lib/utils";
 import { useUserRole } from "@/features/users/hooks/use-user-role";
-
 interface XPEvent {
   amount: number;
   reason: string;
+  isExcellent?: boolean; // 🚀 Gap 4: Trigger for top-tier analysis
   totalXP: number;
   level: number;
 }
@@ -46,6 +46,10 @@ export const XPCelebration = () => {
 
     const handleXPGained = (data: XPEvent) => {
       setActiveXP(data);
+      if (data.amount > 100 || data.isExcellent) {
+        setShowConfetti(true);
+        setTimeout(() => setShowConfetti(false), 5000);
+      }
       setTimeout(() => setActiveXP(null), 4000);
     };
 
@@ -68,11 +72,13 @@ export const XPCelebration = () => {
     };
 
     socket.on("xp_gained", handleXPGained);
+    socket.on("excellent_analysis", handleXPGained);
     socket.on("level_up", handleLevelUp);
     socket.on("badge_earned", handleBadgeEarned);
 
     return () => {
       socket.off("xp_gained", handleXPGained);
+      socket.off("excellent_analysis", handleXPGained);
       socket.off("level_up", handleLevelUp);
       socket.off("badge_earned", handleBadgeEarned);
     };

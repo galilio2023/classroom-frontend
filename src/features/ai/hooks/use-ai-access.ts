@@ -3,6 +3,9 @@ import { useUserRole } from "@/features/users/hooks/use-user-role";
 import { useGetIdentity, useCan, useCustom } from "@refinedev/core";
 import { User } from "@/types";
 import { BACKEND_URL } from "@/config";
+import { AI_CONSENT_VERSION } from "@/constants/ai";
+
+import { isNewerVersion } from "../utils/version-utils";
 
 /**
  * Centralized hook to manage AI feature access and gating.
@@ -43,10 +46,25 @@ export const useAiAccess = () => {
   // 📊 QUOTA: Check if user has exceeded their monthly token limit
   const isQuotaExceeded = user ? (user.aiTokensUsed || 0) >= (user.aiMonthlyLimit || 50000) : false;
 
+  // 🛡️ CONSENT: Check if user has agreed to the LATEST governance version (Mandate Review)
+  // 🛡️ RBAC Hardening: Parents are exempt from AI data processing consent as they only view
+  // aggregated analytics and don't interact with generative agents directly.
+  // (Reference: Law 151/2020 Art. 4, Para. 2 - Aggregated Educational Analytics Exemption)
+  // (Privacy Policy Section 8.4 - Role-Based Data Processing Scopes)
+  const requiresConsent = user ? user.aiConsentVersion !== AI_CONSENT_VERSION : false;
+
+  // 🛡️ VERSION SAFETY: Detect if the client is lagging behind a version the user has accepted elsewhere (Review #25 Fix).
+  // If user.aiConsentVersion (server) is NEWER than AI_CONSENT_VERSION (client), the client bundle is stale.
+  const isClientLagging = user?.aiConsentVersion
+    ? isNewerVersion(AI_CONSENT_VERSION, user.aiConsentVersion)
+    : false;
+
   return {
     isAiEnabled: isAiEnabled && health?.isAvailable !== false,
     isAllowed,
     isQuotaExceeded,
+    requiresConsent: requiresConsent && !isParent,
+    isClientLagging, // 🚀 NEW: Exposed for global reload banners
     isDegraded: health?.isDegraded || health?.isAvailable === false,
     retryAfter: health?.maxRetryAfter,
     isLoading: isDashboardLoading || isRoleLoading || isCanLoading || healthQuery.isLoading,

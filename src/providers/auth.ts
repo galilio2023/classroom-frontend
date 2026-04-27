@@ -2,6 +2,7 @@ import type { AuthProvider, HttpError } from "@refinedev/core";
 import { User, SignUpPayload } from "@/types";
 import { authClient } from "@/lib/auth-client";
 import { STORAGE_KEYS } from "@/config";
+import { offlineDB } from "@/lib/offline-db";
 
 /**
  * Sanitizes the payload by converting empty strings to null.
@@ -196,6 +197,9 @@ export const authProvider: AuthProvider = {
 
   logout: async () => {
     try {
+      // 🛡️ SECURITY Gap Fix: Clear sensitive offline data on logout
+      await offlineDB.study_plans.clear();
+
       await authClient.signOut();
       cachedSessionData = null;
       lastFetchTime = 0;
@@ -205,6 +209,8 @@ export const authProvider: AuthProvider = {
       localStorage.removeItem(STORAGE_KEYS.TELEMETRY_ID); // 🛡️ SECURITY: Clear telemetry on logout
       return { success: true, redirectTo: "/login" };
     } catch {
+      // Still attempt cleanup even if network signOut fails
+      await offlineDB.study_plans.clear();
       cachedSessionData = null;
       lastFetchTime = 0;
       localStorage.removeItem(STORAGE_KEYS.USER);

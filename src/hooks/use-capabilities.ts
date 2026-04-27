@@ -1,82 +1,59 @@
 import { useGetIdentity } from "@refinedev/core";
-import { User, UserRole } from "@/types";
-import { useDashboard } from "@/features/dashboard/hooks/use-dashboard";
+import { User } from "@/types";
 
 /**
- * 🛡️ CAPABILITY ARCHITECTURE
- * Abstract roles and global config into a flat set of permissions.
- * Instead of: if (user.role === 'teacher')
- * Use: const { canManageCurriculum } = useCapabilities();
+ * 🛡️ CAPABILITY-BASED UI HOOK
+ * Mandate Gap 5: Centralized Mode-Policy Enforcement
+ *
+ * Replaces direct role/plan checks with semantic capabilities.
+ * Synchronized with 'mode-policy-matrix.md'
  */
 export const useCapabilities = () => {
-  const { data: identity, isLoading: isIdentityLoading } = useGetIdentity<User>();
-  const { coreData, isCoreLoading: isConfigLoading } = useDashboard();
+  const { data: identity, isLoading } = useGetIdentity<User>();
+  const plan = identity?.planType || "basic";
+  const role = identity?.role || "student";
 
-  const role = identity?.role;
-  const globalConfig = coreData?.globalConfig;
-  const school = coreData?.school;
-  const isAiEnabled = globalConfig?.enableAiFeatures !== false;
-
-  // --- MODE PACKAGING (Phase A) ---
-  // Default to 'basic' (Private Teacher) if no school or plan specified.
-  const planType = school?.planType || "basic";
-  const isPrivateTeacherMode = planType === "basic";
-  const isFacultyMode = planType === "faculty";
-  const isSchoolMode = planType === "school";
-
-  const isTeacher = role === UserRole.TEACHER;
-  const isAdmin = role === UserRole.ADMIN;
-  const isStudent = role === UserRole.STUDENT;
-  const isParent = role === UserRole.PARENT;
-  const isStaff = isTeacher || isAdmin;
+  const isFaculty = plan === "faculty" || plan === "school";
+  const isInstitutional = plan === "faculty" || plan === "school";
+  const isSchool = plan === "school";
+  const isAdmin = role === "admin";
+  const isTeacher = role === "teacher";
+  const isStudent = role === "student";
+  const isParent = role === "parent";
+  const isStaff = isAdmin || isTeacher || role === "ta";
 
   return {
     identity,
-    isLoading: isIdentityLoading || isConfigLoading,
-    school,
-
-    // --- MODE CAPABILITIES ---
-    currentMode: isSchoolMode ? "school" : isFacultyMode ? "faculty" : "private",
-    isPrivateTeacherMode,
-    isFacultyMode,
-    isSchoolMode,
-    isInstitutional: !isPrivateTeacherMode,
-    isPrivate: isPrivateTeacherMode,
-
-    // --- IDENTITY CAPABILITIES ---
-    isStudent,
-    isTeacher,
+    isLoading,
     isStaff,
     isAdmin,
+    isTeacher,
+    isStudent,
     isParent,
+    isPrivate: plan === "basic",
+    isInstitutional,
 
-    // --- FEATURE CAPABILITIES ---
-    canAccessAi: isAiEnabled,
-    canInteractWithAiCompanion: isAiEnabled && !isParent,
-    canManageClasses: isStaff,
-    canManageLiveSession: isStaff,
-    canManageCurriculum: isStaff,
-    canGradeSubmissions: isStaff,
-    canViewAnalytics: isStaff || isAdmin,
-    canCreateSubjects: isTeacher || isAdmin,
+    // Academic Capabilities
+    canManageDepartments: isFaculty && (isAdmin || isTeacher),
+    canManageTerms: isFaculty && isAdmin,
+    canManageCurriculum: isTeacher || isAdmin,
 
-    // --- INSTITUTIONAL CAPABILITIES (Faculty/School Mode) ---
-    canManageDepartments: (isFacultyMode || isSchoolMode) && isAdmin,
-    canViewInstitutionalAudit: isSchoolMode && isAdmin,
-    canAccessPrincipalDashboard: isSchoolMode && isAdmin,
-    canManageSharedCurriculum: isFacultyMode || isSchoolMode,
+    // Institutional Capabilities
+    canAccessInstitutionalStats: isSchool && isAdmin,
+    canAccessCompliance: isSchool && isAdmin,
+    canBulkImport: isFaculty && isAdmin,
 
-    // --- PARENTAL CAPABILITIES ---
-    canViewChildProgress: isParent || isAdmin || (isSchoolMode && isTeacher),
+    // Engagement Capabilities
+    canViewParentalMonitoring: isSchool && (isAdmin || isTeacher),
+    canInteractWithAiCompanion: true,
 
-    // --- STUDENT CAPABILITIES ---
-    canSubmitAssignments: isStudent,
-    canParticipateInQuizzes: isStudent,
-    canEarnXP: isStudent,
+    // Branding
+    canCustomBrand: isSchool,
 
-    // --- SYSTEM CAPABILITIES ---
-    canAccessAdminPanel: isAdmin,
-    canManageSettings: isAdmin,
-    canConfigureBranding: isSchoolMode && isAdmin,
+    // Plan Info
+    plan,
+    isPrivateMode: plan === "basic",
+    isFacultyMode: plan === "faculty",
+    isSchoolMode: plan === "school",
   };
 };

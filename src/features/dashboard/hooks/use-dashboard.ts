@@ -33,8 +33,8 @@ export const useDashboard = () => {
     config: {
       query: {
         sections: isStaff
-          ? `schedule,stats,attendanceTrend,gradeDistribution,pendingSubmissions,atRiskStudents,rlhf,notifications,myClasses${isTeacher ? ",channelStats" : ""}`
-          : "schedule,upcomingAssignments,gradeTrends,subjectMastery,attendanceSummary,resubmissions,notifications,myClasses",
+          ? `schedule,stats,attendanceTrend,gradeDistribution,pendingSubmissions,atRiskStudents,rlhf,notifications,myClasses,classHealth${isTeacher ? ",channelStats" : ""}`
+          : "schedule,upcomingAssignments,gradeTrends,subjectMastery,attendanceSummary,resubmissions,notifications,myClasses,dailyGoal",
         termId: selectedTerm?.id,
         ...(isTeacher ? { teacherId: identity?.id } : {}),
       },

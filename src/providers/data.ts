@@ -150,6 +150,18 @@ export const flushOutbox = async () => {
           resource: mutation.resource,
           id: vars.id,
         });
+      } else if (mutation.action === "custom") {
+        const vars = mutation.variables as any;
+        if (dataProvider.custom) {
+          response = await dataProvider.custom({
+            url: vars.url,
+            method: vars.method,
+            payload: vars.payload,
+            query: vars.query,
+            headers: vars.headers,
+            meta: vars.meta,
+          });
+        }
       }
 
       if (response) {
@@ -254,7 +266,9 @@ export const dataProvider: DataProvider = {
       url.searchParams.append("_order", sorters[0].order);
     }
 
-    const response = await fetcherWithRetry(url.toString());
+    const response = await fetcherWithRetry(url.toString(), {
+      signal: meta?.signal || meta?.abortSignal,
+    });
 
     if (!response.ok) {
       throw await handleError(response);
@@ -280,7 +294,9 @@ export const dataProvider: DataProvider = {
       }
     }
 
-    const response = await fetcherWithRetry(url.toString());
+    const response = await fetcherWithRetry(url.toString(), {
+      signal: meta?.signal || meta?.abortSignal,
+    });
 
     if (!response.ok) {
       throw await handleError(response);
@@ -312,6 +328,7 @@ export const dataProvider: DataProvider = {
       const response = await fetcherWithRetry(url, {
         method: "POST",
         body: JSON.stringify(variables),
+        signal: meta?.signal || meta?.abortSignal,
       });
 
       if (!response.ok) throw await handleError(response);
@@ -357,6 +374,7 @@ export const dataProvider: DataProvider = {
       const response = await fetcherWithRetry(url, {
         method: "PATCH",
         body: JSON.stringify(finalVariables),
+        signal: meta?.signal || meta?.abortSignal,
       });
 
       if (!response.ok) throw await handleError(response);
@@ -395,6 +413,7 @@ export const dataProvider: DataProvider = {
     try {
       const response = await fetcherWithRetry(url, {
         method: "DELETE",
+        signal: meta?.signal || meta?.abortSignal,
       });
 
       if (!response.ok) throw await handleError(response);
@@ -418,14 +437,16 @@ export const dataProvider: DataProvider = {
 
   getApiUrl: () => BACKEND_BASE_URL,
 
-  getMany: async ({ resource, ids }) => {
+  getMany: async ({ resource, ids, meta }) => {
     const urlPath = getResourcePath(resource);
     const url = new URL(`${BACKEND_BASE_URL}/${urlPath}`);
     ids.forEach((id) => {
       url.searchParams.append("id", String(id));
     });
 
-    const response = await fetcherWithRetry(url.toString());
+    const response = await fetcherWithRetry(url.toString(), {
+      signal: meta?.signal || meta?.abortSignal,
+    });
 
     if (!response.ok) {
       throw await handleError(response);
@@ -447,6 +468,17 @@ export const dataProvider: DataProvider = {
   },
 
   custom: async ({ url, method, payload, query, headers, meta }) => {
+    if (isOffline() && method && method.toUpperCase() !== "GET") {
+      await offlineDB.queue({
+        resource: "custom",
+        action: "custom",
+        variables: { url, method, payload, query, headers, meta } as any,
+        meta: meta as any,
+      });
+      toast.warning("📴 Offline: Action saved locally.");
+      return { data: {} as any };
+    }
+
     let requestUrl = url;
 
     if (!url.startsWith("http")) {
@@ -470,7 +502,7 @@ export const dataProvider: DataProvider = {
       method: method ? method.toUpperCase() : "GET",
       body: payload instanceof FormData ? payload : payload ? JSON.stringify(payload) : undefined,
       headers: headers as Record<string, string>,
-      signal: meta?.signal,
+      signal: meta?.signal || meta?.abortSignal,
     });
 
     if (!response.ok) {

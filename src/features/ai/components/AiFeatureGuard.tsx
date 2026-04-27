@@ -1,10 +1,14 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useAiAccess } from "@/features/ai/hooks/use-ai-access";
 import { Lock, Clock, Sparkles, BrainCircuit, RefreshCcw, Loader2 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { useCan } from "@refinedev/core";
+import { ConsentBarrier } from "./ConsentBarrier";
+import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
+import { cn } from "@/lib/utils";
 
 interface AiFeatureGuardProps {
   children: React.ReactNode;
@@ -21,6 +25,7 @@ interface AiFeatureGuardProps {
  * Wraps AI-powered features to ensure they only mount when:
  * 1. Global Master Switch (enableAiFeatures) is ON.
  * 2. User role (RBAC) allows AI interactions via useCan.
+ * 3. User has provided AI Governance Consent (Law 151 compliance).
  *
  * Prevents "if (isAiEnabled)" sprawl across the codebase.
  */
@@ -30,14 +35,43 @@ export const AiFeatureGuard: React.FC<AiFeatureGuardProps> = ({
   silent = false,
   skeletonClassName = "w-full h-32 rounded-lg",
 }) => {
+  const { t } = useTranslation();
+  const [isUpdating, setIsUpdating] = useState(false);
   const {
     isAiEnabled,
     isQuotaExceeded,
+    requiresConsent,
     isDegraded,
     retryAfter,
     isLoading: isAiLoading,
+    isClientLagging,
     refetch,
   } = useAiAccess();
+
+  // 🛡️ LOOP PROTECTION Hardening: Reset reload counter if client is now up-to-date (Review #25 Fix)
+  useEffect(() => {
+    if (!isAiLoading && !isClientLagging) {
+      sessionStorage.removeItem("ai_governance_reload_count");
+      sessionStorage.removeItem("ai_governance_last_reload");
+    }
+  }, [isAiLoading, isClientLagging]);
+
+  // 🚀 UX Hardening: Trigger non-intrusive toast for stale bundles (Review #25 Suggestion)
+  useEffect(() => {
+    if (isClientLagging) {
+      toast.info(
+        t("ai.notifications.staleClient", {
+          defaultValue:
+            "A platform update is available. Some AI features may be limited until you refresh.",
+        }),
+        {
+          duration: 10000,
+          id: "stale-client-toast",
+        }
+      );
+    }
+  }, [isClientLagging, t]);
+
   const { data: canAccess, isLoading: isCanLoading } = useCan({
     resource: "ai_features",
     action: "access",
@@ -47,6 +81,91 @@ export const AiFeatureGuard: React.FC<AiFeatureGuardProps> = ({
 
   if (isLoading) {
     return <Skeleton className={skeletonClassName} />;
+  }
+
+  // 🛡️ VERSION SAFETY: Force refresh if client is outdated (Review #25)
+  if (isClientLagging) {
+    const handleHardRefresh = async () => {
+      if (isUpdating) return;
+      setIsUpdating(true);
+
+      // 🚀 LOOP PREVENTION: Limit automatic reloads (Review #25 Suggestion)
+      const reloadKey = "ai_governance_reload_count";
+      const lastReloadKey = "ai_governance_last_reload";
+      const reloadCount = parseInt(sessionStorage.getItem(reloadKey) || "0", 10);
+      const lastReload = parseInt(sessionStorage.getItem(lastReloadKey) || "0", 10);
+      const now = Date.now();
+
+      // If reloaded twice in last 60 seconds, stop to prevent infinite loops
+      if (reloadCount >= 2 && now - lastReload < 60000) {
+        console.warn("AI Governance update failed after 2 attempts. Halting auto-refresh.");
+        setIsUpdating(false);
+        return;
+      }
+
+      sessionStorage.setItem(reloadKey, (reloadCount + 1).toString());
+      sessionStorage.setItem(lastReloadKey, now.toString());
+
+      // 🚀 CACHE BUSTING: Check for updates and force reload without destroying the whole cache
+      if ("serviceWorker" in navigator) {
+        try {
+          const registrations = await navigator.serviceWorker.getRegistrations();
+          for (const registration of registrations) {
+            // Tell the SW to update itself immediately
+            await registration.update();
+            if (registration.waiting) {
+              registration.waiting.postMessage({ type: "SKIP_WAITING" });
+            }
+          }
+        } catch (err) {
+          console.error("SW Update failed:", err);
+        }
+      }
+
+      // Use a cache-busting query param to ensure we get fresh index.html/JS
+      window.location.href = `/?update=${Date.now()}`;
+    };
+
+    // If we've already tried twice recently, show a manual instruction
+    const reloadCount = parseInt(sessionStorage.getItem("ai_governance_reload_count") || "0", 10);
+    const lastReload = parseInt(sessionStorage.getItem("ai_governance_last_reload") || "0", 10);
+    const isLooping = reloadCount >= 2 && Date.now() - lastReload < 60000;
+
+    return (
+      <Alert variant="destructive" className="border-2 border-dashed bg-destructive/5">
+        <RefreshCcw className={cn("h-4 w-4", isUpdating && "animate-spin")} />
+        <AlertTitle className="uppercase font-black tracking-widest">
+          {isLooping ? "Update Failed" : "Platform Update Required"}
+        </AlertTitle>
+        <AlertDescription className="flex flex-col gap-4">
+          <span>
+            {isLooping
+              ? "A critical system update failed to apply. Please clear your browser cache or contact support if the issue persists."
+              : "A new AI Governance update has been deployed. Please refresh your browser to ensure continued access to AI features."}
+          </span>
+          {!isLooping && (
+            <Button
+              size="sm"
+              className="w-fit h-9 rounded-xl font-bold gap-2"
+              onClick={handleHardRefresh}
+              disabled={isUpdating}
+            >
+              {isUpdating ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <RefreshCcw className="h-4 w-4" />
+              )}
+              {isUpdating ? "Checking for updates..." : "Refresh Now"}
+            </Button>
+          )}
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
+  // 🛡️ LAW 151: Consent Gating (Highest priority after availability)
+  if (requiresConsent) {
+    return <ConsentBarrier />;
   }
 
   const isAllowed = canAccess?.can ?? false;

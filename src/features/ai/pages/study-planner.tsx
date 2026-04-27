@@ -1,470 +1,434 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useEffect, useMemo, useCallback, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Calendar as CalendarIcon,
-  Sparkles,
-  Loader2,
-  CheckCircle2,
-  Clock,
-  BookOpen,
-  Zap,
-  ExternalLink,
-  Info,
-} from "lucide-react";
+import { Zap, Sparkles, WifiOff } from "lucide-react";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
-import { Link } from "react-router-dom";
-import { useCustom, useCustomMutation, HttpError } from "@refinedev/core";
+import { useCustom, useCustomMutation, HttpError, useGetIdentity } from "@refinedev/core";
 import { useTranslation } from "react-i18next";
-import { Badge } from "@/components/ui/badge";
-import { Breadcrumb } from "@/components/refine/layout/breadcrumb";
 import usePageTitle from "@/hooks/use-page-title";
-import { handleError } from "@/providers/utils/api-errors";
+import { handleError, getCorrelationId } from "@/providers/utils/api-errors";
 import { offlineDB } from "@/lib/offline-db";
-import { useJobs } from "@/contexts/job-context";
+import { useJobs, BackgroundJob } from "@/contexts/job-context";
 import { socket } from "@/lib/socket";
+import { useStudyPlanSync, useOfflineSync } from "@/features/engagement/hooks/use-offline-sync";
+import { User, StudyBlock, StudyPlanTopic } from "@/types";
+import { dispatchStudyBlockXp } from "@/lib/gamification";
+import { useVisibilitySafety } from "@/hooks/use-visibility-safety";
 
-interface StudyBlock {
-  day: string;
-  timeSlot: "Morning" | "Afternoon" | "Evening";
-  task: string;
-  assignmentId?: number;
-  duration: string;
-}
+// Deconstructed Components
+import { StudyPlannerHeader } from "./study-planner/StudyPlannerHeader";
+import { StudyPlanDayCard } from "./study-planner/StudyPlanDayCard";
+import { performStudyPlanRollback, compareIds } from "../utils/offline-sync-utils";
+import { getBlockId } from "../utils/ids";
+import { StudyPlanStats } from "./study-planner/StudyPlanStats";
+import { AiFeatureGuard } from "../components/AiFeatureGuard";
+import { DAYS, DayName } from "@/constants/calendar";
 
+/**
+ * 🛡️ StudyPlanResponse Interface
+ * Standardized structure for AI-generated study plans.
+ * Optimized for Refine v5 dataProvider (Review #19)
+ */
 interface StudyPlanResponse {
   id: number;
   plan: StudyBlock[];
   completedBlocks: Record<string, boolean>;
-  statusCode?: number;
+  updatedAt: number;
   jobId?: string;
 }
 
-const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-const TIME_SLOTS = ["Morning", "Afternoon", "Evening"];
+interface JobSocketPayload {
+  topic?: StudyPlanTopic;
+  type?: "study_plan";
+  userId?: string;
+}
 
 const StudyPlanner = () => {
   const { t, i18n } = useTranslation();
   const isAr = i18n.language === "ar";
-  usePageTitle(t("resources.study-planner.label"));
+  usePageTitle(t("studyPlanner.title"));
+  useVisibilitySafety(); // 🚀 RULE 6: Hardware Privacy & Safety
   const { addJob, jobs } = useJobs();
+  const { isOnline } = useOfflineSync();
+  const { data: user } = useGetIdentity<User>();
+  const isMounted = useRef(true);
+
+  // 🛡️ ABORTION Hardening: Consolidated Controller management (Review #25 Fix)
+  const controllersRef = useRef<Record<string, AbortController>>({
+    fetch: new AbortController(),
+    mutation: new AbortController(),
+  });
+
+  const [syncingBlocks, setSyncingBlocks] = useState<Set<string>>(new Set());
+  const [lastCorrelationId, setLastCorrelationId] = useState<string | null>(null);
+
+  const getSignal = useCallback((key: "fetch" | "mutation") => {
+    if (controllersRef.current[key].signal.aborted) {
+      controllersRef.current[key] = new AbortController();
+    }
+    return controllersRef.current[key].signal;
+  }, []);
+
+  // 🛡️ COMPONENT LIFECYCLE: Handle cleanup and race conditions
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+      Object.values(controllersRef.current).forEach((c) => c.abort());
+    };
+  }, []);
 
   // --- FETCH CURRENT PLAN ---
   const { query: planQuery } = useCustom<StudyPlanResponse>({
     url: "study-planner",
     method: "get",
+    errorNotification: false,
+    meta: {
+      get abortSignal() {
+        return getSignal("fetch");
+      },
+    },
   });
 
-  const { data: initialData, isLoading: isFetching, refetch: refetchPlan } = planQuery;
+  const {
+    data: initialData,
+    isLoading: isFetching,
+    refetch: refetchPlan,
+    isError,
+    error,
+  } = planQuery;
 
-  const [plan, setPlan] = useState<StudyBlock[]>([]);
-  const [completedBlocks, setCompletedBlocks] = useState<Record<string, boolean>>({});
-
-  // 🚀 BACKGROUND JOB STATUS: Check if a study plan is currently being generated
-  const activeStudyPlanJob = useMemo(() => 
-    jobs.find(j => j.type === "study_plan" && j.status === "processing"),
-  [jobs]);
-
-  // 🚀 RULE 4: Load from IndexedDB (Offline-First)
-  useEffect(() => {
-    const loadOffline = async () => {
-      const record = await offlineDB.study_plans.get("current");
-      if (record) {
-        setPlan(record.plan);
-        setCompletedBlocks(record.completedBlocks);
-      }
-    };
-    
-    if (initialData?.data) {
-      setPlan(initialData.data.plan || []);
-      setCompletedBlocks(initialData.data.completedBlocks || {});
-      // Persist to offline storage
-      void offlineDB.study_plans.put({
-        id: "current",
-        plan: initialData.data.plan || [],
-        completedBlocks: initialData.data.completedBlocks || {},
-        updatedAt: Date.now(),
-      });
-    } else if (!isFetching) {
-      // 🚀 RACE CONDITION GUARD: Only load offline if the network request is NOT active
-      loadOffline();
-    }
-  }, [initialData, isFetching]);
-
-  // 🚀 BACKGROUND JOB REAL-TIME SYNC
-  useEffect(() => {
-    const handleJobComplete = (data: any) => {
-      if (data.topic === "generate_study_plan" || data.type === "study_plan") {
-        refetchPlan();
-      }
-    };
-
-    socket.on("ai:job_completed", handleJobComplete);
-    return () => {
-      socket.off("ai:job_completed", handleJobComplete);
-    };
+  // 🛡️ ABORT Hardening: Explicit wrapper to cancel previous fetches (Review #25 Fix)
+  const handleRefetch = useCallback(() => {
+    controllersRef.current.fetch.abort();
+    void refetchPlan();
   }, [refetchPlan]);
+
+  // 🛡️ ABORT HANDLING: Suppress global error toasts for intentional aborts (Review #21)
+  useEffect(() => {
+    if (isError && error) {
+      const err = error as unknown as Error & HttpError;
+      if (err.name === "AbortError" || err.message?.toLowerCase().includes("abort")) {
+        console.log("Initial plan fetch aborted.");
+        return;
+      }
+      const correlationId = getCorrelationId(err);
+      handleError(err, correlationId).then((handled) => {
+        toast.error(handled.message, { description: `ID: ${correlationId}` });
+      });
+    }
+  }, [isError, error]);
+
+  // 🚀 RULE 4 Hardening: Synchronized Source of Truth logic
+  const { plan, completedBlocks, setCompletedBlocks } = useStudyPlanSync<StudyBlock>(
+    initialData,
+    isFetching
+  );
+
+  // 🚀 BACKGROUND JOB STATUS
+  const activeStudyPlanJob = useMemo(
+    () =>
+      jobs.find((j) => j.type === "study_plan" && j.status === "processing") as
+        | BackgroundJob
+        | undefined,
+    [jobs]
+  );
 
   // --- MUTATIONS ---
   const { mutate: generatePlanMutation, mutation: generateMutation } = useCustomMutation<
     StudyPlanResponse,
     HttpError
-  >();
-  
-  const isGenerating = generateMutation.isPending;
-  const { mutate: toggleBlockMutation } = useCustomMutation();
+  >({
+    mutationOptions: {
+      onSuccess: () => {
+        // 🚀 SUCCESS TIMING: Generation is async (202). refetchPlan here is premature.
+      },
+      onError: (err) => {
+        if (!isMounted.current) return;
+        const correlationId = getCorrelationId(err);
+        handleError(err, correlationId);
+      },
+    },
+  });
+
+  const { mutate: toggleBlockMutation } = useCustomMutation<StudyPlanResponse, HttpError>({
+    mutationOptions: {
+      onError: (_err) => {
+        // Handled in toggleBlock's own onError
+      },
+      onSettled: () => {
+        // Handled per block in toggleBlock
+      },
+    },
+  });
+
+  const handleJobComplete = useCallback(
+    (data: JobSocketPayload) => {
+      if (!isMounted.current) return;
+      if (data.userId && user?.id && !compareIds(user.id, data.userId)) return;
+
+      if (data.topic === "generate_study_plan" || data.type === "study_plan") {
+        handleRefetch();
+      }
+    },
+    [handleRefetch, user?.id]
+  );
+
+  useEffect(() => {
+    socket.on("ai:job_completed", handleJobComplete);
+    return () => {
+      socket.off("ai:job_completed", handleJobComplete);
+    };
+  }, [handleJobComplete]);
 
   const generatePlan = async () => {
+    // 🛡️ ABORT PREVIOUS: Ensure no overlapping generation requests (Review #25 Fix)
+    controllersRef.current.mutation.abort();
+    setLastCorrelationId(null);
+
     generatePlanMutation(
       {
-        url: "ai/generate-study-plan",
+        url: "study-planner/generate",
         method: "post",
         values: {},
         successNotification: false,
+        meta: {
+          get abortSignal() {
+            return getSignal("mutation");
+          },
+        },
       },
       {
-        onSuccess: (result) => {
-          // 🚀 RURAL HARDENING: Handle asynchronous background job (202 Accepted)
-          if (result.data?.statusCode === 202 && result.data?.jobId) {
+        onSuccess: (response) => {
+          if (!isMounted.current) return;
+          const jobId = response.data?.jobId;
+
+          if (jobId) {
             addJob({
-              id: result.data.jobId,
+              id: jobId,
               type: "study_plan",
-              title: t("studyPlanner.labels.jobTitle", "Creating Personalized Study Plan"),
-              metadata: { classId: "global" }
+              title: t("studyPlanner.notifications.generatingTitle"),
             });
-
-            toast.info(
-              t("studyPlanner.toasts.processing", {
-                defaultValue:
-                  "AI is crafting your study plan in the background. You'll be notified when it's ready!",
-              }),
-              {
-                icon: <Sparkles className="h-4 w-4 text-ai-primary" />,
-                duration: 6000,
-              }
-            );
-            return;
-          }
-
-          if (result.data?.plan) {
-            setPlan(result.data.plan);
-            setCompletedBlocks({});
-            toast.success(
-              t("studyPlanner.toasts.generated", {
-                defaultValue: "Study plan generated successfully!",
-              })
-            );
+            toast.success(t("studyPlanner.notifications.generatingMessage"));
+          } else if (response.statusCode === 202) {
+            toast.info(t("studyPlanner.notifications.queuedMessage"));
           }
         },
         onError: (err) => {
-          void handleError(err);
+          if (!isMounted.current) return;
+          const correlationId = getCorrelationId(err);
+          setLastCorrelationId(correlationId);
         },
       }
     );
   };
 
-  const toggleComplete = (day: string, slot: string) => {
-    const key = `${day}-${slot}`;
-    const isNowCompleted = !completedBlocks[key];
-    const newCompleted = { ...completedBlocks, [key]: isNowCompleted };
+  const toggleBlock = async (blockId: string) => {
+    if (syncingBlocks.has(blockId)) return;
+    setSyncingBlocks((prev: Set<string>) => new Set(prev).add(blockId));
 
-    setCompletedBlocks(newCompleted);
-    void offlineDB.study_plans.update("current", { completedBlocks: newCompleted });
+    // 🛡️ ABORT PREVIOUS: (Review #25 Fix)
+    controllersRef.current.mutation.abort();
 
-    toggleBlockMutation({
-      url: "study-planner/toggle",
-      method: "post",
-      values: { day, timeSlot: slot },
-    });
+    try {
+      const currentRecord = await offlineDB.study_plans.get("current");
+      const previousUpdatedAtPrecise = currentRecord?.updatedAt || 0;
+      const previousStatus = !!completedBlocks[blockId];
+      const newStatus = !previousStatus;
+      const now = Date.now();
 
-    if (isNowCompleted) {
-      toast.success(t("studyPlanner.toasts.completed", { defaultValue: "Block completed!" }), {
-        icon: <Zap className="h-4 w-4 text-yellow-500 fill-yellow-500" />,
+      const newCompleted = { ...completedBlocks, [blockId]: newStatus };
+      setCompletedBlocks(newCompleted);
+
+      await offlineDB.study_plans.update("current", {
+        completedBlocks: newCompleted,
+        updatedAt: now,
       });
-      const event = new CustomEvent("xp_gained_local", {
-        detail: {
-          amount: 20,
-          reason: t("studyPlanner.labels.blockCompleted", {
-            defaultValue: "Study block completed",
-          }),
+
+      if (newStatus) {
+        dispatchStudyBlockXp();
+      }
+
+      toggleBlockMutation(
+        {
+          url: `study-planner/toggle-block/${blockId}`,
+          method: "post",
+          values: { isCompleted: newStatus },
+          successNotification: false,
+          meta: {
+            get abortSignal() {
+              return getSignal("mutation");
+            },
+          },
         },
-      });
-      window.dispatchEvent(event);
+        {
+          onSuccess: (res) => {
+            if (!isMounted.current) return;
+            const serverUpdate = res.data?.updatedAt;
+            if (serverUpdate) {
+              void offlineDB.study_plans.update("current", { updatedAt: serverUpdate });
+            }
+          },
+          onError: async (err) => {
+            if (!isMounted.current) return;
+            const correlationId = getCorrelationId(err);
+
+            await performStudyPlanRollback(setCompletedBlocks, {
+              blockId,
+              previousStatus,
+              previousUpdatedAt: previousUpdatedAtPrecise,
+            });
+
+            toast.error(t("studyPlanner.notifications.rollbackError"), {
+              description: `ID: ${correlationId}`,
+            });
+            setLastCorrelationId(correlationId);
+            handleError(err, correlationId);
+          },
+          onSettled: () => {
+            if (isMounted.current) {
+              setSyncingBlocks((prev: Set<string>) => {
+                const next = new Set(prev);
+                next.delete(blockId);
+                return next;
+              });
+            }
+          },
+        }
+      );
+    } catch (err) {
+      console.error("Critical failure in toggleBlock:", err);
+      if (isMounted.current) {
+        setSyncingBlocks((prev: Set<string>) => {
+          const next = new Set(prev);
+          next.delete(blockId);
+          return next;
+        });
+      }
     }
   };
 
-  const getBlock = (day: string, slot: string) => {
-    return plan.find((b) => b.day === day && b.timeSlot === slot);
-  };
+  const blocksByDay = useMemo(() => {
+    const map = {
+      Monday: [],
+      Tuesday: [],
+      Wednesday: [],
+      Thursday: [],
+      Friday: [],
+      Saturday: [],
+      Sunday: [],
+    } as Record<DayName, StudyBlock[]>;
 
-  const isLoading = isFetching || isGenerating || !!activeStudyPlanJob;
+    (plan || []).forEach((b) => {
+      map[b.day].push(b);
+    });
+    return map;
+  }, [plan]);
+
+  const completedCount = useMemo(
+    () => Object.values(completedBlocks || {}).filter(Boolean).length,
+    [completedBlocks]
+  );
+
+  const nextTask = useMemo(
+    () => (plan || []).find((b) => !completedBlocks[getBlockId(b.day, b.timeSlot)])?.task,
+    [plan, completedBlocks]
+  );
 
   return (
-    <div
-      className="space-y-10 md:space-y-16 pb-20 max-w-screen-2xl mx-auto"
-      dir={isAr ? "rtl" : "ltr"}
-    >
-      {/* Header Section */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="space-y-4 md:space-y-6 text-start px-2"
-      >
-        <Breadcrumb />
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="flex items-center gap-4">
-            <div className="p-3 rounded-2xl bg-primary/10 text-primary border border-primary/5 shadow-sm">
-              <CalendarIcon className="h-6 w-6 md:h-8 md:w-8" />
-            </div>
-            <div>
-              <h1 className="text-3xl md:text-4xl lg:text-5xl font-black tracking-tight text-balance">
-                {t("resources.study-planner.label")}
-              </h1>
-              <p className="text-muted-foreground font-medium max-w-xl text-balance">
-                {t("studyPlanner.description")}
-              </p>
-            </div>
-          </div>
-          
-          <div className="relative group">
-            {/* 🚀 RULE 7: Visual Feedback for background job */}
-            <AnimatePresence>
-              {activeStudyPlanJob && (
-                <motion.div 
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.8 }}
-                  className="absolute -top-3 -right-3 z-10"
-                >
-                  <Badge className="bg-ai-primary-gradient text-white border-none animate-pulse px-2 py-0.5 text-[8px] font-black">
-                    PROCESSING
-                  </Badge>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            <Button
-              onClick={generatePlan}
-              disabled={isLoading}
-              size="lg"
-              className={cn(
-                "w-full md:w-auto rounded-2xl h-12 md:h-14 px-10 font-bold uppercase tracking-widest text-[10px] gap-3 shadow-lg hover:translate-y-[-2px] transition-all",
-                activeStudyPlanJob ? "bg-ai-primary/20 text-ai-primary border border-ai-primary/30" : "shadow-primary/25"
-              )}
+    <AiFeatureGuard>
+      <div className="space-y-12 pb-24" dir={isAr ? "rtl" : "ltr"}>
+        <StudyPlannerHeader
+          onGenerate={generatePlan}
+          isGenerating={generateMutation.isPending}
+          activeJob={activeStudyPlanJob}
+          isOnline={isOnline}
+        />
+        <div className="flex flex-col items-center gap-4">
+          {!isOnline && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex items-center gap-2 px-4 py-2 bg-destructive/10 text-destructive rounded-full w-fit mx-auto text-[10px] font-black uppercase tracking-widest border border-destructive/20 animate-pulse"
             >
-              {isLoading ? (
-                <Loader2 className="h-5 w-5 animate-spin" />
-              ) : (
-                <Sparkles className="h-5 w-5" />
-              )}
-              {plan.length > 0
-                ? t("studyPlanner.buttons.regenerate")
-                : t("studyPlanner.buttons.generate")}
-            </Button>
-          </div>
-        </div>
-      </motion.div>
+              <WifiOff className="h-3 w-3" />
+              {t("common.offline")}
+            </motion.div>
+          )}
 
-      {plan.length === 0 && !isLoading ? (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.98 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="px-2"
-        >
-          <Card className="border-2 border-dashed border-border/40 bg-card/20 rounded-[2.5rem] md:rounded-[3.5rem] overflow-hidden">
-            <CardContent className="flex flex-col items-center justify-center py-20 md:py-32 text-center space-y-6">
-              <div className="p-8 rounded-4xl bg-primary/5 text-primary/30">
-                <BookOpen className="h-16 w-16" />
-              </div>
-              <div className="space-y-2">
-                <h3 className="text-2xl md:text-3xl font-black tracking-tight">
-                  {t("studyPlanner.empty.title")}
-                </h3>
-                <p className="text-muted-foreground max-w-sm mx-auto text-base font-medium">
-                  {t("studyPlanner.empty.desc")}
-                </p>
-              </div>
-              <Button
-                size="lg"
-                onClick={generatePlan}
-                className="rounded-2xl h-14 px-10 font-black uppercase tracking-widest text-[10px] shadow-xl shadow-primary/20 mt-4"
-              >
-                <Sparkles className="h-4 w-4 me-2" />
-                {t("studyPlanner.buttons.generate")}
-              </Button>
-            </CardContent>
-          </Card>
-        </motion.div>
-      ) : (
-        <div className="px-2 space-y-10 md:space-y-16">
-          <div className="grid grid-cols-1 md:grid-cols-7 gap-6 md:gap-4 items-start">
-            <AnimatePresence mode="popLayout">
-              {DAYS.map((day, dayIndex) => (
+          {lastCorrelationId && (
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText(lastCorrelationId);
+                toast.success(t("ai.notifications.idCopied", { defaultValue: "ID Copied" }));
+              }}
+              className="text-[9px] font-bold text-muted-foreground/40 hover:text-primary transition-colors flex items-center gap-1 uppercase tracking-tighter"
+            >
+              Support ID: {lastCorrelationId}
+            </button>
+          )}
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-7 gap-10">
+          <div className="lg:col-span-5 space-y-8">
+            <AnimatePresence mode="wait">
+              {plan && plan.length > 0 ? (
                 <motion.div
-                  key={day}
+                  key="schedule"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: dayIndex * 0.05 }}
-                  className="space-y-4 md:space-y-6"
+                  exit={{ opacity: 0, y: -20 }}
+                  className="space-y-8"
                 >
-                  <div className="flex items-center gap-3 md:justify-center px-4">
-                    <div className="h-8 w-8 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-sm border border-primary/5">
-                      <span className="text-[10px] font-black">{day[0]}</span>
-                    </div>
-                    <h3 className="font-black text-sm uppercase tracking-[0.2em] text-muted-foreground/60">
-                      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                      {t(`days.${day.substring(0, 3)}` as any)}
-                    </h3>
-                  </div>
-
-                  <div className="grid grid-cols-1 gap-4">
-                    {TIME_SLOTS.map((slot) => {
-                      const block = getBlock(day, slot);
-                      const isCompleted = completedBlocks[`${day}-${slot}`];
-
-                      return (
-                        <Card
-                          key={slot}
-                          className={cn(
-                            "group relative overflow-hidden transition-all duration-500 border border-border/40 shadow-sm rounded-[1.5rem] md:rounded-4xl bg-card/50 backdrop-blur-3xl cursor-default",
-                            block
-                              ? "min-h-[12rem] hover:shadow-xl hover:shadow-primary/5 hover:border-primary/20"
-                              : "h-24 opacity-30 bg-muted/10 border-dashed",
-                            isCompleted &&
-                              "bg-primary/3 border-primary/20 shadow-none grayscale-[0.5]"
-                          )}
-                        >
-                          {block ? (
-                            <CardContent className="p-5 md:p-6 flex flex-col h-full space-y-4">
-                              <div className="flex justify-between items-start">
-                                <Badge
-                                  variant="ai"
-                                  className="px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest shadow-sm"
-                                >
-                                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                                  {t(`studyPlanner.slots.${slot.toLowerCase()}` as any)}
-                                </Badge>
-                                <button
-                                  onClick={() => toggleComplete(day, slot)}
-                                  className={cn(
-                                    "size-10 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-sm",
-                                    isCompleted
-                                      ? "bg-primary text-primary-foreground shadow-lg scale-110"
-                                      : "bg-muted/50 text-muted-foreground hover:bg-primary hover:text-white"
-                                  )}
-                                >
-                                  <CheckCircle2 className="h-5 w-5" />
-                                </button>
-                              </div>
-
-                              <p
-                                className={cn(
-                                  "text-sm md:text-base font-black leading-relaxed flex-grow text-start transition-all duration-500",
-                                  isCompleted
-                                    ? "opacity-40 line-through decoration-primary/30"
-                                    : "text-foreground group-hover:text-primary"
-                                )}
-                              >
-                                {block.task}
-                              </p>
-
-                              <div className="pt-4 border-t border-border/40 flex flex-col gap-3">
-                                <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
-                                  <div className="p-1.5 rounded-lg bg-primary/5 text-primary">
-                                    <Clock className="h-3.5 w-3.5" />
-                                  </div>
-                                  {block.duration}
-                                </div>
-
-                                {block.assignmentId && (
-                                  <Link
-                                    to={`/assignments/show/${block.assignmentId}`}
-                                    className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary hover:underline group/link"
-                                  >
-                                    <ExternalLink className="h-3.5 w-3.5 transition-transform group-hover/link:translate-x-0.5" />
-                                    {t("assignments.show.assignmentDetails")}
-                                  </Link>
-                                )}
-                              </div>
-
-                              <AnimatePresence>
-                                {isCompleted && (
-                                  <motion.div
-                                    initial={{
-                                      scale: 0.5,
-                                      opacity: 0,
-                                      rotate: -45,
-                                    }}
-                                    animate={{
-                                      scale: 1,
-                                      opacity: 1,
-                                      rotate: 0,
-                                    }}
-                                    exit={{ scale: 0.5, opacity: 0 }}
-                                    className="absolute top-1/2 start-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
-                                  >
-                                    <div className="p-4 rounded-full bg-background/80 backdrop-blur-md shadow-2xl border border-primary/20 text-primary opacity-20">
-                                      <CheckCircle2 className="h-16 w-16" />
-                                    </div>
-                                  </motion.div>
-                                )}
-                              </AnimatePresence>
-                            </CardContent>
-                          ) : (
-                            <CardContent className="p-5 flex items-center justify-center h-full">
-                              <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/20">
-                                {t("studyPlanner.labels.free")}
-                              </span>
-                            </CardContent>
-                          )}
-                        </Card>
-                      );
-                    })}
-                  </div>
+                  {DAYS.map((day) => (
+                    <StudyPlanDayCard
+                      key={day}
+                      day={day}
+                      dayBlocks={blocksByDay[day] || []}
+                      completedBlocks={completedBlocks}
+                      onToggleBlock={toggleBlock}
+                    />
+                  ))}
                 </motion.div>
-              ))}
+              ) : (
+                <motion.div
+                  key="empty"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="flex flex-col items-center justify-center p-20 border-2 border-dashed border-border/40 rounded-4xl bg-muted/5 text-center"
+                >
+                  <div className="p-8 rounded-3xl bg-ai-primary/10 text-ai-primary mb-8">
+                    <Zap className="h-16 w-16" />
+                  </div>
+                  <h3 className="text-3xl font-black tracking-tighter uppercase mb-2">
+                    {t("studyPlanner.empty.title")}
+                  </h3>
+                  <p className="text-muted-foreground font-medium max-w-sm mb-8">
+                    {t("studyPlanner.empty.description")}
+                  </p>
+                  <Button
+                    onClick={generatePlan}
+                    size="lg"
+                    className="rounded-2xl px-10 h-14 bg-ai-primary font-black uppercase tracking-widest"
+                  >
+                    <Sparkles className="mr-3 h-5 w-5" />
+                    {t("studyPlanner.buttons.generateNow")}
+                  </Button>
+                </motion.div>
+              )}
             </AnimatePresence>
           </div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="flex justify-center"
-          >
-            <Card className="border-border/40 shadow-2xl rounded-[2.5rem] md:rounded-[3rem] bg-indigo-500/3 backdrop-blur-3xl max-w-3xl w-full overflow-hidden border-2 border-dashed">
-              <CardHeader className="p-8 md:p-10 pb-4 border-b border-indigo-500/10 text-start bg-indigo-500/5">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 rounded-2xl bg-indigo-500/10 text-indigo-600 border border-indigo-500/20 shadow-sm">
-                    <Sparkles className="h-6 w-6" />
-                  </div>
-                  <div className="flex flex-col">
-                    <CardTitle className="text-xl md:text-2xl font-black tracking-tight leading-none">
-                      {t("studyPlanner.labels.coachTip")}
-                    </CardTitle>
-                    <span className="text-[10px] font-bold text-indigo-600/60 uppercase tracking-[0.2em] mt-1.5">
-                      Learning Strategies
-                    </span>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="p-8 md:p-10 text-start">
-                <div className="flex gap-6 items-start">
-                  <div className="p-2.5 rounded-xl bg-indigo-500/5 text-indigo-400 h-fit shrink-0 mt-1">
-                    <Info className="h-5 w-5" />
-                  </div>
-                  <p className="text-base md:text-xl font-medium text-muted-foreground leading-relaxed italic selection:bg-indigo-500/20">
-                    "{t("studyPlanner.labels.tipText")}"
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
+          <div className="lg:col-span-2">
+            <StudyPlanStats
+              completedCount={completedCount}
+              totalCount={plan?.length || 0}
+              nextTask={nextTask}
+              isLoading={isFetching}
+            />
+          </div>
         </div>
-      )}
-    </div>
+      </div>
+    </AiFeatureGuard>
   );
 };
 

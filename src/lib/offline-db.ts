@@ -36,7 +36,7 @@ export interface UserNote {
 export interface PendingMutation {
   id?: number;
   resource: string;
-  action: "create" | "update" | "delete";
+  action: "create" | "update" | "delete" | "custom";
   variables: Record<string, unknown>;
   meta?: Record<string, unknown>;
   createdAt: number;
@@ -70,9 +70,16 @@ export interface BackgroundJobRecord {
 
 export interface StudyPlanRecord {
   id: string; // "current"
-  plan: any[];
+  plan: unknown[];
   completedBlocks: Record<string, boolean>;
   updatedAt: number;
+}
+
+export interface PendingXpGain {
+  id?: number;
+  amount: number;
+  reason: string;
+  createdAt: number;
 }
 
 export class OfflineDB extends Dexie {
@@ -84,10 +91,11 @@ export class OfflineDB extends Dexie {
   registration_drafts!: Table<RegistrationDraft>;
   background_jobs!: Table<BackgroundJobRecord>;
   study_plans!: Table<StudyPlanRecord>;
+  pending_xp!: Table<PendingXpGain>;
 
   constructor() {
     super("TablawyOfflineDB");
-    this.version(4)
+    this.version(5)
       .stores({
         lessons: "id, classId",
         quizzes: "++id, quizId, userId",
@@ -97,10 +105,11 @@ export class OfflineDB extends Dexie {
         registration_drafts: "id, step",
         background_jobs: "id, type, status, createdAt",
         study_plans: "id",
+        pending_xp: "++id",
       })
       .upgrade((tx) => {
-        // Version 4: Added study_plans
-        return tx.table("study_plans").toCollection().count();
+        // Version 5: Added pending_xp
+        return tx.table("pending_xp").toCollection().count();
       });
   }
 

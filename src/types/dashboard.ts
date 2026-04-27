@@ -200,6 +200,21 @@ export interface JourneyDistribution {
   count: number;
 }
 
+export interface ClassHealth {
+  classId: string;
+  className: string;
+  score: number;
+  status: "Green" | "Yellow" | "Red";
+  label: string;
+  studentCount: number;
+  distribution: {
+    low: number;
+    medium: number;
+    high: number;
+    critical: number;
+  };
+}
+
 export interface DashboardData {
   school?: any;
   todaySchedule: ScheduleItem[];
@@ -224,4 +239,6 @@ export interface DashboardData {
   rlhf?: RLHFDataPoint[];
   marketplaceEarnings?: MarketplaceEarnings;
   recentTransactions?: TransactionItem[];
+  classHealth?: ClassHealth[];
+  dailyLearningTime?: number;
 }

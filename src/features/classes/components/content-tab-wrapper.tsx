@@ -3,7 +3,8 @@ import { useTranslation } from "react-i18next";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { CurriculumTab } from "../pages/curriculum-tab";
 import { ResourceTab } from "../pages/resource-tab";
-import { LayoutGrid, Library } from "lucide-react";
+import { RoadmapDisplay } from "./live/RoadmapDisplay";
+import { LayoutGrid, Library, Map } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Class } from "@/types";
 
@@ -47,6 +48,11 @@ export const ContentTabWrapper: React.FC<ContentTabWrapperProps> = ({
       label: t("classes.show.tabs.resources"),
       icon: Library,
     },
+    {
+      id: "roadmap",
+      label: t("classes.show.tabs.roadmap", "Roadmap"),
+      icon: Map,
+    },
   ];
 
   return (
@@ -82,6 +88,12 @@ export const ContentTabWrapper: React.FC<ContentTabWrapperProps> = ({
 
         <TabsContent value="resources" className="mt-8">
           {activeSubTab === "resources" && <ResourceTab classId={classId} />}
+        </TabsContent>
+
+        <TabsContent value="roadmap" className="mt-8">
+          {activeSubTab === "roadmap" && (
+            <RoadmapDisplay roadmap={aClass?.liveLessonRoadmap as any} isCourseRoadmap={true} />
+          )}
         </TabsContent>
       </Tabs>
     </div>

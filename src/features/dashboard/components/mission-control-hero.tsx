@@ -8,6 +8,7 @@ import {
   Radio,
   CheckCircle2,
   Sparkles,
+  Flame,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -17,6 +18,7 @@ import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 import { useCustomMutation, useInvalidate } from "@refinedev/core";
 import { Skeleton } from "@/components/ui/skeleton";
+import { handleError } from "@/providers/utils/api-errors";
 
 export interface MissionAction {
   type: "assignment" | "lesson" | "quiz" | "study_block" | "live_session";
@@ -32,9 +34,18 @@ export interface MissionAction {
 interface Props {
   mission: MissionAction | null;
   isLoading: boolean;
+  streak?: number;
+  dailyLearningTime?: number;
+  dailyGoalMinutes?: number;
 }
 
-export const MissionControlHero = ({ mission, isLoading }: Props) => {
+export const MissionControlHero = ({
+  mission,
+  isLoading,
+  streak,
+  dailyLearningTime = 0,
+  dailyGoalMinutes = 30,
+}: Props) => {
   const { t } = useTranslation();
   const { mutate: completeBlock } = useCustomMutation();
   const invalidate = useInvalidate();
@@ -87,6 +98,8 @@ export const MissionControlHero = ({ mission, isLoading }: Props) => {
 
   const Icon = IconMap[mission.type] || Rocket;
 
+  const dailyProgress = Math.min((dailyLearningTime / dailyGoalMinutes) * 100, 100);
+
   const handleLaunchMission = () => {
     if (mission.type === "study_block") {
       completeBlock(
@@ -94,6 +107,11 @@ export const MissionControlHero = ({ mission, isLoading }: Props) => {
           url: "/study-planner/complete-block",
           method: "patch",
           values: { blockId: mission.id },
+          config: {
+            headers: {
+              "X-Correlation-ID": `mission-complete-${crypto.randomUUID()}`, // 🚀 Traceability Mandate
+            },
+          },
         },
         {
           onSuccess: () => {
@@ -101,6 +119,9 @@ export const MissionControlHero = ({ mission, isLoading }: Props) => {
               resource: "dashboard/mission",
               invalidates: ["detail"],
             });
+          },
+          onError: (err) => {
+            handleError(err); // 🚀 Rule 5: Standardized Error Handling
           },
         }
       );
@@ -146,6 +167,36 @@ export const MissionControlHero = ({ mission, isLoading }: Props) => {
                     Mission <br />
                     Control
                   </h3>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                {streak !== undefined && streak > 0 && (
+                  <div className="flex items-center gap-2 text-orange-600 bg-orange-500/10 px-3 py-1.5 rounded-xl w-fit">
+                    <Flame className="h-4 w-4 fill-current" />
+                    <span className="text-sm font-black">
+                      {streak} {t("common.dayStreak", "Day Streak")}
+                    </span>
+                  </div>
+                )}
+
+                <div className="space-y-1.5 px-1 text-start">
+                  <div className="flex justify-between items-end">
+                    <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">
+                      {t("dashboard.student.dailyGoal", "Daily Goal")}
+                    </span>
+                    <span className="text-[10px] font-black text-primary">
+                      {dailyLearningTime}/{dailyGoalMinutes} min
+                    </span>
+                  </div>
+                  <div className="h-1.5 w-full bg-primary/10 rounded-full overflow-hidden">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${dailyProgress}%` }}
+                      transition={{ duration: 1, ease: "easeOut" }}
+                      className="h-full bg-primary"
+                    />
+                  </div>
                 </div>
               </div>
 
