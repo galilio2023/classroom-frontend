@@ -1,12 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
-import {
-  ShieldAlert,
-  Clock,
-  Building2,
-  Calendar,
-  AlertTriangle,
-} from "lucide-react";
+import { ShieldAlert, Clock, Building2, Calendar, AlertTriangle } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -63,7 +57,10 @@ export const CollisionModal: React.FC<CollisionModalProps> = ({
                 <AlertDialogDescription className="text-base font-medium">
                   {conflicts.length === 1
                     ? t("timetable.collision.single", "A double-booking has been detected for this teacher.")
-                    : t("timetable.collision.multiple", { count: conflicts.length }, `We detected ${conflicts.length} scheduling conflicts for this teacher.`)}
+                    : t("timetable.collision.multiple" as any, { 
+                        count: conflicts.length,
+                        defaultValue: `We detected ${conflicts.length} scheduling conflicts for this teacher.` 
+                      })}
                 </AlertDialogDescription>
               </div>
             </div>
@@ -117,7 +114,11 @@ export const CollisionModal: React.FC<CollisionModalProps> = ({
           <div className="bg-amber-500/5 border border-amber-500/10 rounded-2xl p-4 flex gap-4">
             <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
             <p className="text-[10px] font-medium leading-relaxed">
-              <strong>{t("timetable.collision.industrialRule", "Industrial Rule")}:</strong> {t("timetable.collision.industrialRuleDesc", "A teacher's time is physically finite. Double-booking across suites will cause session failures. Please choose a different timeframe.")}
+              <strong>{t("timetable.collision.industrialRule", "Industrial Rule")}:</strong>{" "}
+              {t(
+                "timetable.collision.industrialRuleDesc",
+                "A teacher's time is physically finite. Double-booking across suites will cause session failures. Please choose a different timeframe."
+              )}
             </p>
           </div>
 

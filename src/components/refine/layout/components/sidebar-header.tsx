@@ -52,7 +52,7 @@ export function SidebarHeader() {
       </AnimatePresence>
 
       {!open && !isMobile && (
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
           <div className="pointer-events-auto">
             <SuiteIdentityBadge />
           </div>

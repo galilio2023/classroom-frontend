@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useList, useCustomMutation } from "@refinedev/core";
+import { useList, useCustomMutation, useGo } from "@refinedev/core";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { handleError } from "@/providers/utils/api-errors";
@@ -42,6 +42,7 @@ export const SectionPicker: React.FC<SectionPickerProps> = ({
   onSuccess,
 }) => {
   const [selectedClassId, setSelectedClassId] = React.useState<string | null>(null);
+  const go = useGo();
 
   // 🚀 RULE 4: Use useList to leverage Dexie/IndexedDB offline cache
   const { data: queryData, isLoading } = useList<Section>({
@@ -49,11 +50,11 @@ export const SectionPicker: React.FC<SectionPickerProps> = ({
     queryOptions: {
       staleTime: 10 * 60 * 1000, // 10 mins cache
     },
-  });
+  }) as any;
 
-  const sections = queryData?.data || [];
+  const sections = (queryData?.data as Section[]) || [];
 
-  const { mutate: updateSection, isLoading: isUpdating } = useCustomMutation() as any;
+  const { mutate: updateSection, isLoading: isUpdating } = useCustomMutation<{ success: boolean }>() as any;
 
   const handleConfirm = async () => {
     if (!selectedClassId) return;
@@ -68,6 +69,8 @@ export const SectionPicker: React.FC<SectionPickerProps> = ({
         onSuccess: () => {
           toast.success("Lecture section selected successfully!");
           onSuccess?.();
+          // Programmatic navigation to dashboard
+          go({ to: "/dashboard" });
         },
         onError: async (err: any) => {
           const httpError = await handleError(err);
@@ -106,7 +109,7 @@ export const SectionPicker: React.FC<SectionPickerProps> = ({
       <div className="grid gap-4">
         <AnimatePresence mode="popLayout">
           {sections.length > 0 ? (
-            sections.map((section, idx) => (
+            sections.map((section: Section, idx: number) => (
               <motion.div
                 key={section.id}
                 initial={{ opacity: 0, y: 10 }}
@@ -140,7 +143,7 @@ export const SectionPicker: React.FC<SectionPickerProps> = ({
                           <div className="flex items-center gap-3 text-xs font-bold text-muted-foreground uppercase tracking-widest">
                             <span className="flex items-center gap-1">
                               <Clock className="w-3 h-3" />
-                              {DAYS_SHORT[section.dayOfWeek] || "Unknown"} • {section.startTime.slice(0, 5)} - {section.endTime.slice(0, 5)}
+                              {(DAYS_SHORT[section.dayOfWeek] || "Unknown")} • {section.startTime.slice(0, 5)} - {section.endTime.slice(0, 5)}
                             </span>
                             <span className="flex items-center gap-1">
                               <MapPin className="w-3 h-3" />

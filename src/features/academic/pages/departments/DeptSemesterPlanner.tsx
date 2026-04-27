@@ -1,17 +1,22 @@
-import { useCustom, useNavigation } from "@refinedev/core";
+import { useList, useGo } from "@refinedev/core";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { BookOpen, AlertTriangle, Layers, ShieldAlert, ArrowRight } from "lucide-react";
+import {
+  BookOpen,
+  AlertTriangle,
+  Layers,
+  ShieldAlert,
+  ArrowRight,
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import usePageTitle from "@/hooks/use-page-title";
 import { Breadcrumb } from "@/components/refine/layout/breadcrumb";
 import { ListView } from "@/components/refine/views/list-view";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
-import { useList, useNavigation } from "@refinedev/core";
-...
+import { useCapabilities } from "@/hooks/use-capabilities";
 import { Badge } from "@/components/ui/badge";
-import { DAYS } from "@/constants/calendar";
+import { DAYS_SHORT, VACATION_INDEX } from "@/constants/calendar";
 
 export interface TimetableSlot {
   id: string;
@@ -27,7 +32,7 @@ export interface TimetableSlot {
 export default function DeptSemesterPlannerPage() {
   const { t } = useTranslation();
   const { isFacultySuite } = useCapabilities();
-  const { push } = useNavigation() as any;
+  const go = useGo();
 
   usePageTitle(t("timetable.deptPlanner.title", "Dept Semester Planner"));
 
@@ -37,9 +42,10 @@ export default function DeptSemesterPlannerPage() {
     queryOptions: {
       staleTime: 5 * 60 * 1000, // 5 mins
     },
-  });
+  }) as any;
 
-  const slots = queryData?.data || [];
+  const slots = (queryData?.data as TimetableSlot[]) || [];
+
   if (!isFacultySuite) {
     return (
       <div className="flex items-center justify-center p-20">
@@ -76,7 +82,10 @@ export default function DeptSemesterPlannerPage() {
             </p>
           </div>
           <div className="flex gap-4">
-            <Button className="rounded-2xl h-12 px-8 font-black uppercase tracking-widest text-[10px] gap-2 shadow-xl shadow-purple-500/20 bg-purple-600">
+            <Button 
+              onClick={() => go({ to: "/reports" })}
+              className="rounded-2xl h-12 px-8 font-black uppercase tracking-widest text-[10px] gap-2 shadow-xl shadow-purple-500/20 bg-purple-600"
+            >
               Generate Reports
               <ArrowRight className="w-4 h-4" />
             </Button>
@@ -85,7 +94,7 @@ export default function DeptSemesterPlannerPage() {
 
         {/* CONFLICT SUMMARY ALERT */}
         <AnimatePresence>
-          {slots.some((s) => s.hasConflict) && (
+          {slots.some((s: TimetableSlot) => s.hasConflict) && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
@@ -106,30 +115,35 @@ export default function DeptSemesterPlannerPage() {
                   </p>
                 </div>
                 <Badge variant="destructive" className="rounded-full h-8 px-4 font-black uppercase">
-                  {slots.filter((s) => s.hasConflict).length} Conflicts
+                  {slots.filter((s: TimetableSlot) => s.hasConflict).length} Conflicts
                 </Badge>
               </div>
             </motion.div>
           )}
-        import { DAYS_SHORT } from "@/constants/calendar";
-        ...
-                <div className="grid grid-cols-1 md:grid-cols-7 gap-6">
-                  {DAYS_SHORT.map((day, idx) => {
-                    const daySlots = slots.filter((s) => s.dayOfWeek === idx);
-                    return (
-                      <div key={idx} className="space-y-4">
-                        <header className="py-2 border-b border-border/40 mb-4">
-                          <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-center text-muted-foreground/60">
-                            {day}
-                          </h4>
-                        </header>
+        </AnimatePresence>
+
+        <div className="grid grid-cols-1 md:grid-cols-7 gap-6">
+          {DAYS_SHORT.map((day: string, idx: number) => {
+            const isVacation = idx === VACATION_INDEX;
+            const daySlots = slots.filter((s: TimetableSlot) => s.dayOfWeek === idx);
+
+            return (
+              <div key={idx} className={cn("space-y-4 rounded-3xl p-1 transition-colors", isVacation && "bg-muted/5")}>
+                <header className="py-2 border-b border-border/40 mb-4 flex items-center justify-between px-2">
+                  <h4 className={cn("text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60", isVacation && "text-primary/40")}>
+                    {day}
+                  </h4>
+                  {isVacation && (
+                    <span className="text-[7px] font-black uppercase tracking-widest text-primary/30">Vacation</span>
+                  )}
+                </header>
                 <div className="space-y-3">
                   {daySlots.length === 0 ? (
-                    <div className="h-20 rounded-3xl border border-dashed border-border/40 flex items-center justify-center opacity-10">
-                      <span className="text-[8px] font-bold">No Lectures</span>
+                    <div className={cn("h-20 rounded-3xl border border-dashed border-border/40 flex items-center justify-center", isVacation ? "opacity-5" : "opacity-10")}>
+                      <span className="text-[8px] font-bold">{isVacation ? "Off" : "No Lectures"}</span>
                     </div>
                   ) : (
-                    daySlots.map((slot) => (
+                    daySlots.map((slot: TimetableSlot) => (
                       <Card
                         key={slot.id}
                         className={cn(
