@@ -217,7 +217,10 @@ export default function LectureSchedulePage() {
                   <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                     <div className="space-y-2">
                       <Label>Course Section</Label>
-                      <Select onValueChange={(v) => form.setValue("classId", v)}>
+                      <Select
+                        value={form.watch("classId")}
+                        onValueChange={(v) => form.setValue("classId", v)}
+                      >
                         <SelectTrigger className="rounded-2xl bg-muted/30 border-none h-12 px-4 text-start">
                           <SelectValue placeholder="Select Section" />
                         </SelectTrigger>
@@ -234,7 +237,10 @@ export default function LectureSchedulePage() {
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label>Academic Year</Label>
-                        <Select onValueChange={(v) => form.setValue("academicYearId", v)}>
+                        <Select
+                          value={form.watch("academicYearId")}
+                          onValueChange={(v) => form.setValue("academicYearId", v)}
+                        >
                           <SelectTrigger className="rounded-2xl bg-muted/30 border-none h-12 px-4">
                             <SelectValue placeholder="Year" />
                           </SelectTrigger>
@@ -249,7 +255,10 @@ export default function LectureSchedulePage() {
                       </div>
                       <div className="space-y-2">
                         <Label>Day of Week</Label>
-                        <Select onValueChange={(v) => form.setValue("dayOfWeek", v)}>
+                        <Select
+                          value={form.watch("dayOfWeek")}
+                          onValueChange={(v) => form.setValue("dayOfWeek", v)}
+                        >
                           <SelectTrigger className="rounded-2xl bg-muted/30 border-none h-12 px-4">
                             <SelectValue placeholder="Day" />
                           </SelectTrigger>

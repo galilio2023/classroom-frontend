@@ -231,7 +231,10 @@ export default function TermsList() {
                         <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ms-2">
                           {t("terms.form.year")}
                         </Label>
-                        <Select onValueChange={(val) => form.setValue("academicYearId", val)}>
+                        <Select
+                          value={form.watch("academicYearId")}
+                          onValueChange={(val) => form.setValue("academicYearId", val)}
+                        >
                           <SelectTrigger className="h-16 rounded-3xl bg-muted/30 border-none shadow-inner px-8 text-lg font-black">
                             <SelectValue placeholder={t("terms.form.selectYear")} />
                           </SelectTrigger>

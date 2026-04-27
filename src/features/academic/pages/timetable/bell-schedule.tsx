@@ -219,7 +219,10 @@ export default function BellSchedulePage() {
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label>Academic Year</Label>
-                        <Select onValueChange={(v) => form.setValue("academicYearId", v)}>
+                        <Select
+                          value={form.watch("academicYearId")}
+                          onValueChange={(v) => form.setValue("academicYearId", v)}
+                        >
                           <SelectTrigger className="rounded-2xl bg-muted/30 border-none h-12 px-4">
                             <SelectValue placeholder="Select Year" />
                           </SelectTrigger>
@@ -234,7 +237,10 @@ export default function BellSchedulePage() {
                       </div>
                       <div className="space-y-2">
                         <Label>Day of Week</Label>
-                        <Select onValueChange={(v) => form.setValue("dayOfWeek", v)}>
+                        <Select
+                          value={form.watch("dayOfWeek")}
+                          onValueChange={(v) => form.setValue("dayOfWeek", v)}
+                        >
                           <SelectTrigger className="rounded-2xl bg-muted/30 border-none h-12 px-4">
                             <SelectValue placeholder="Select Day" />
                           </SelectTrigger>

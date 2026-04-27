@@ -12,9 +12,10 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useCustom, useUpdate } from "@refinedev/core";
+import { useCustom, useCustomMutation } from "@refinedev/core";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { handleError } from "@/providers/utils/api-errors";
 
 interface SectionPickerProps {
   subjectId: string;
@@ -38,15 +39,15 @@ export const SectionPicker: React.FC<SectionPickerProps> = ({
 
   const sections = (queryData?.data as any[]) || [];
 
-  const { mutate: updateSection, isPending: isUpdating } = useUpdate() as any;
+  const { mutate: updateSection, isLoading: isUpdating } = useCustomMutation() as any;
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     if (!selectedClassId) return;
 
     updateSection(
       {
-        resource: `timetable/enrollment/${enrollmentId}/select-section`,
-        id: "", // Not needed for custom route
+        url: `${import.meta.env.VITE_API_URL}/timetable/enrollment/${enrollmentId}/select-section`,
+        method: "post",
         values: { classId: selectedClassId },
       },
       {
@@ -54,7 +55,10 @@ export const SectionPicker: React.FC<SectionPickerProps> = ({
           toast.success("Lecture section selected successfully!");
           onSuccess?.();
         },
-        onError: (err: any) => toast.error(err?.message || "Selection failed."),
+        onError: async (err: any) => {
+          const httpError = await handleError(err);
+          toast.error(httpError.message);
+        },
       }
     );
   };
@@ -93,90 +97,95 @@ export const SectionPicker: React.FC<SectionPickerProps> = ({
                 transition={{ delay: idx * 0.05 }}
               >
                 <Card
+                  onClick={() => setSelectedClassId(section.classId)}
                   className={cn(
                     "cursor-pointer transition-all duration-300 border-2 rounded-3xl overflow-hidden group relative",
                     selectedClassId === section.classId
                       ? "border-purple-500 bg-purple-500/5 ring-1 ring-purple-500/10 shadow-lg"
                       : "border-border/40 hover:border-purple-500/20 bg-background/40 hover:bg-background/60"
                   )}
-                  onClick={() => setSelectedClassId(section.classId)}
                 >
-                  <CardContent className="p-5 flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-5 flex-1 min-w-0">
-                      <div className="bg-muted/10 p-3 rounded-2xl shrink-0 group-hover:scale-110 transition-transform duration-500">
-                        <Calendar
+                  <CardContent className="p-6">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                      <div className="flex items-center gap-4">
+                        <div
                           className={cn(
-                            "w-5 h-5",
+                            "p-3 rounded-2xl border transition-colors",
                             selectedClassId === section.classId
-                              ? "text-purple-500"
-                              : "text-muted-foreground"
+                              ? "bg-purple-500 text-white border-purple-400"
+                              : "bg-muted/10 text-muted-foreground border-border/40 group-hover:bg-purple-500/10 group-hover:text-purple-500"
                           )}
-                        />
-                      </div>
-
-                      <div className="space-y-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <h4 className="font-black text-base truncate">
-                            Section {section.section?.name || "A"}
-                          </h4>
-                          <Badge
-                            variant="secondary"
-                            className="h-5 px-2 rounded-full text-[8px] font-black uppercase bg-purple-500/10 text-purple-500 border-none"
-                          >
-                            {DAYS[section.dayOfWeek]}
-                          </Badge>
+                        >
+                          <Calendar className="w-6 h-6" />
                         </div>
-
-                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-muted-foreground font-medium text-[10px]">
-                          <div className="flex items-center gap-1">
-                            <Clock className="w-3 h-3 opacity-40" />
-                            <span>
+                        <div className="space-y-1">
+                          <h4 className="font-black text-lg">{section.className}</h4>
+                          <div className="flex items-center gap-3 text-xs font-bold text-muted-foreground uppercase tracking-widest">
+                            <span className="flex items-center gap-1">
+                              <Clock className="w-3 h-3" />
+                              {DAYS[section.dayOfWeek] || "Unknown"} •{" "}
                               {section.startTime.slice(0, 5)} - {section.endTime.slice(0, 5)}
                             </span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <MapPin className="w-3 h-3 opacity-40" />
-                            <span>{section.roomId || "Main Hall"}</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <UserIcon className="w-3 h-3 opacity-40" />
-                            <span className="truncate">{section.teacher?.name}</span>
+                            <span className="flex items-center gap-1">
+                              <MapPin className="w-3 h-3" />
+                              {section.roomId || "Global Hall"}
+                            </span>
                           </div>
                         </div>
                       </div>
-                    </div>
 
-                    {selectedClassId === section.classId && (
-                      <div className="shrink-0 animate-in zoom-in duration-300">
-                        <CheckCircle2 className="w-6 h-6 text-purple-500" />
+                      <div className="flex items-center gap-4">
+                        <div className="text-end hidden md:block">
+                          <p className="text-[10px] font-black uppercase tracking-tighter text-muted-foreground opacity-50 mb-1">
+                            Lecturer
+                          </p>
+                          <div className="flex items-center gap-2 justify-end">
+                            <span className="text-sm font-black">{section.teacherName}</span>
+                            <UserIcon className="w-4 h-4 text-primary" />
+                          </div>
+                        </div>
+
+                        {selectedClassId === section.classId && (
+                          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }}>
+                            <CheckCircle2 className="w-6 h-6 text-purple-500" />
+                          </motion.div>
+                        )}
                       </div>
-                    )}
+                    </div>
                   </CardContent>
                 </Card>
               </motion.div>
             ))
           ) : (
-            <div className="p-12 text-center border-2 border-dashed border-border/40 rounded-[2.5rem] opacity-60">
-              <p className="text-xs font-bold text-muted-foreground italic uppercase">
-                No active sections found for this course.
-              </p>
+            <div className="py-12 flex flex-col items-center justify-center text-center space-y-4 bg-muted/5 rounded-[2.5rem] border border-dashed border-border/60">
+              <div className="p-4 rounded-full bg-muted/10">
+                <Layers className="w-12 h-12 text-muted-foreground/20" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="font-black uppercase tracking-tight">No Sections Available</h3>
+                <p className="text-sm text-muted-foreground max-w-xs">
+                  This course currently has no active lecture slots. Please contact the registrar.
+                </p>
+              </div>
             </div>
           )}
         </AnimatePresence>
       </div>
 
-      <div className="pt-4">
+      <div className="pt-4 border-t border-border/40 flex justify-end gap-3">
         <Button
           onClick={handleConfirm}
           disabled={!selectedClassId || isUpdating}
-          className="w-full h-14 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-xl shadow-purple-500/20 bg-purple-600 hover:bg-purple-700 transition-all active:scale-95"
+          className="h-14 px-8 rounded-2xl font-black uppercase tracking-widest text-xs gap-2 shadow-xl shadow-purple-500/20 bg-purple-600 hover:bg-purple-700"
         >
           {isUpdating ? (
-            <Loader2 className="w-4 h-4 animate-spin mr-2" />
+            <Loader2 className="w-4 h-4 animate-spin" />
           ) : (
-            <CheckCircle2 className="w-4 h-4 mr-2" />
+            <>
+              Confirm Selection
+              <CheckCircle2 className="w-4 h-4" />
+            </>
           )}
-          Confirm Section Selection
         </Button>
       </div>
     </div>

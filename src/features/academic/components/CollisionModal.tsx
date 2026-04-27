@@ -1,14 +1,6 @@
 import React from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import {
-  ShieldAlert,
-  X,
-  Clock,
-  Building2,
-  Calendar,
-  AlertCircle,
-  AlertTriangle,
-} from "lucide-react";
+import { motion } from "framer-motion";
+import { ShieldAlert, Clock, Building2, Calendar, AlertTriangle } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -19,7 +11,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
+import dayjs from "dayjs";
 
 interface CollisionModalProps {
   open: boolean;
@@ -40,6 +33,12 @@ export const CollisionModal: React.FC<CollisionModalProps> = ({
   onOpenChange,
   conflicts,
 }) => {
+  const { t } = useTranslation();
+
+  const formatTime = (timeStr: string) => {
+    return dayjs(`2020-01-01T${timeStr}`).format("HH:mm");
+  };
+
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent className="rounded-[2.5rem] border-destructive/20 bg-card/95 backdrop-blur-3xl shadow-2xl p-0 overflow-hidden max-w-xl">
@@ -51,12 +50,19 @@ export const CollisionModal: React.FC<CollisionModalProps> = ({
               </div>
               <div>
                 <AlertDialogTitle className="text-3xl font-black uppercase tracking-tight text-destructive">
-                  Schedule Collision
+                  {t("timetable.collision.title", "Schedule Collision")}
                 </AlertDialogTitle>
                 <AlertDialogDescription className="text-base font-medium">
                   {conflicts.length === 1
-                    ? "A double-booking has been detected for this teacher."
-                    : `We detected ${conflicts.length} scheduling conflicts for this teacher.`}
+                    ? t(
+                        "timetable.collision.single",
+                        "A double-booking has been detected for this teacher."
+                      )
+                    : t(
+                        "timetable.collision.multiple",
+                        { count: conflicts.length },
+                        `We detected ${conflicts.length} scheduling conflicts for this teacher.`
+                      )}
                 </AlertDialogDescription>
               </div>
             </div>
@@ -64,7 +70,7 @@ export const CollisionModal: React.FC<CollisionModalProps> = ({
 
           <div className="space-y-4">
             <div className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ms-2">
-              Conflicting Assignments
+              {t("timetable.collision.assignments", "Conflicting Assignments")}
             </div>
             <div className="grid gap-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
               {conflicts.map((conflict, i) => (
@@ -93,12 +99,12 @@ export const CollisionModal: React.FC<CollisionModalProps> = ({
                   <div className="flex flex-wrap gap-x-6 gap-y-2">
                     <div className="flex items-center gap-2 text-muted-foreground font-medium text-[10px]">
                       <Calendar className="w-3.5 h-3.5 opacity-40" />
-                      <span>{DAYS[conflict.dayOfWeek]}</span>
+                      <span>{DAYS[conflict.dayOfWeek] || "Unknown"}</span>
                     </div>
                     <div className="flex items-center gap-2 text-muted-foreground font-medium text-[10px]">
                       <Clock className="w-3.5 h-3.5 opacity-40" />
                       <span>
-                        {conflict.startTime.slice(0, 5)} - {conflict.endTime.slice(0, 5)}
+                        {formatTime(conflict.startTime)} - {formatTime(conflict.endTime)}
                       </span>
                     </div>
                   </div>
@@ -110,9 +116,11 @@ export const CollisionModal: React.FC<CollisionModalProps> = ({
           <div className="bg-amber-500/5 border border-amber-500/10 rounded-2xl p-4 flex gap-4">
             <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
             <p className="text-[10px] font-medium leading-relaxed">
-              <strong>Industrial Rule:</strong> A teacher's time is physically finite.
-              Double-booking across suites will cause session failures. Please choose a different
-              timeframe.
+              <strong>{t("timetable.collision.industrialRule", "Industrial Rule")}:</strong>{" "}
+              {t(
+                "timetable.collision.industrialRuleDesc",
+                "A teacher's time is physically finite. Double-booking across suites will cause session failures. Please choose a different timeframe."
+              )}
             </p>
           </div>
 
@@ -121,7 +129,7 @@ export const CollisionModal: React.FC<CollisionModalProps> = ({
               onClick={() => onOpenChange(false)}
               className="w-full h-14 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-xl shadow-destructive/20 bg-destructive hover:bg-destructive/90"
             >
-              Adjust My Schedule
+              {t("timetable.collision.adjust", "Adjust My Schedule")}
             </Button>
           </AlertDialogFooter>
         </div>

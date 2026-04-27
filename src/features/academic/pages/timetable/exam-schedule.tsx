@@ -279,7 +279,10 @@ export default function ExamSchedulePage() {
 
                     <div className="space-y-2">
                       <Label>Invigilator / Teacher</Label>
-                      <Select onValueChange={(v) => form.setValue("teacherId", v)}>
+                      <Select
+                        value={form.watch("teacherId")}
+                        onValueChange={(v) => form.setValue("teacherId", v)}
+                      >
                         <SelectTrigger className="rounded-2xl bg-muted/30 border-none h-12 px-4">
                           <SelectValue placeholder="Assign Staff" />
                         </SelectTrigger>
@@ -304,7 +307,10 @@ export default function ExamSchedulePage() {
 
                     <div className="space-y-2">
                       <Label>Academic Year</Label>
-                      <Select onValueChange={(v) => form.setValue("academicYearId", v)}>
+                      <Select
+                        value={form.watch("academicYearId")}
+                        onValueChange={(v) => form.setValue("academicYearId", v)}
+                      >
                         <SelectTrigger className="rounded-2xl bg-muted/30 border-none h-12 px-4">
                           <SelectValue placeholder="Year" />
                         </SelectTrigger>

@@ -1,20 +1,8 @@
 import { useCustom, useNavigation } from "@refinedev/core";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
-import {
-  Calendar,
-  Clock,
-  TrendingUp,
-  MapPin,
-  AlertTriangle,
-  Layers,
-  BookOpen,
-  ChevronRight,
-  ShieldAlert,
-  ArrowRight,
-} from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { BookOpen, AlertTriangle, Layers, ShieldAlert, ArrowRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import dayjs from "dayjs";
 import usePageTitle from "@/hooks/use-page-title";
 import { Breadcrumb } from "@/components/refine/layout/breadcrumb";
 import { ListView } from "@/components/refine/views/list-view";
@@ -27,7 +15,7 @@ const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 export default function DeptSemesterPlannerPage() {
   const { t } = useTranslation();
-  const { isFacultySuite, isAdmin, isTeacher } = useCapabilities();
+  const { isFacultySuite } = useCapabilities();
   const { push } = useNavigation() as any;
 
   usePageTitle(t("timetable.deptPlanner.title", "Dept Semester Planner"));
@@ -117,9 +105,11 @@ export default function DeptSemesterPlannerPage() {
             const daySlots = slots.filter((s) => s.dayOfWeek === idx);
             return (
               <div key={idx} className="space-y-4">
-                <div className="text-[10px] font-black uppercase tracking-[0.2em] text-center text-muted-foreground/60 py-2 border-b border-border/40 mb-4">
-                  {day}
-                </div>
+                <header className="py-2 border-b border-border/40 mb-4">
+                  <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-center text-muted-foreground/60">
+                    {day}
+                  </h4>
+                </header>
                 <div className="space-y-3">
                   {daySlots.length === 0 ? (
                     <div className="h-20 rounded-3xl border border-dashed border-border/40 flex items-center justify-center opacity-10">
@@ -161,9 +151,9 @@ export default function DeptSemesterPlannerPage() {
                                   slot.hasConflict ? "text-destructive" : "text-purple-500"
                                 )}
                               />
-                              <h4 className="text-[10px] font-black truncate">
+                              <h5 className="text-[10px] font-black truncate">
                                 Sec {slot.section?.name}
-                              </h4>
+                              </h5>
                             </div>
                             <div className="flex items-center gap-1.5 opacity-60">
                               <BookOpen className="w-2.5 h-2.5 text-blue-500 shrink-0" />
