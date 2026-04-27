@@ -19,6 +19,7 @@ import { useVisibilitySafety } from "@/hooks/use-visibility-safety";
 import { StudyPlannerHeader } from "./study-planner/StudyPlannerHeader";
 import { StudyPlanDayCard } from "./study-planner/StudyPlanDayCard";
 import { performStudyPlanRollback, compareIds } from "../utils/offline-sync-utils";
+import { getBlockId } from "../utils/ids";
 import { StudyPlanStats } from "./study-planner/StudyPlanStats";
 import { AiFeatureGuard } from "../components/AiFeatureGuard";
 import { DAYS, DayName } from "@/constants/calendar";
@@ -41,13 +42,6 @@ interface JobSocketPayload {
   type?: "study_plan";
   userId?: string;
 }
-
-/**
- * 🛡️ Utility: Standardized Block ID Generator
- * Prevents key-mismatch bugs between UI and Mutation URLs (Review #19)
- */
-export const getBlockId = (day: DayName, slot: string) =>
-  `${day.toLowerCase()}-${slot.toLowerCase()}`;
 
 const StudyPlanner = () => {
   const { t, i18n } = useTranslation();

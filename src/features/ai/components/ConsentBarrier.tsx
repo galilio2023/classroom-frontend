@@ -89,7 +89,13 @@ export const ConsentBarrier: React.FC = () => {
             );
             setIsConflicted(true);
             void refetchIdentity().then(() => {
-              if (isMounted.current) setTimeout(() => setIsConflicted(false), 1500); // UI cooldown
+              if (isMounted.current) {
+                setTimeout(() => {
+                  if (isMounted.current) {
+                    setIsConflicted(false);
+                  }
+                }, 1500); // UI cooldown
+              }
             });
             return;
           }
