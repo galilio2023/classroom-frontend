@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { handleError, getCorrelationId } from "@/providers/utils/api-errors";
 import { Skeleton } from "@/components/ui/skeleton";
+import { motion } from "framer-motion";
 
 /**
  * 🛡️ LAW 151: ConsentBarrier Component
@@ -20,6 +21,7 @@ export const ConsentBarrier: React.FC = () => {
   const isMounted = useRef(true);
   const [isConflicted, setIsConflicted] = useState(false);
   const [identityFetchTimedOut, setIdentityFetchTimedOut] = useState(false);
+  const [showWhatsNew, setShowWhatsNew] = useState(false);
   const [lastCorrelationId, setLastCorrelationId] = useState<string | null>(null);
   const {
     data: user,
@@ -28,13 +30,20 @@ export const ConsentBarrier: React.FC = () => {
   } = useGetIdentity<User>();
   const { mutate: updateConsent, mutation } = useCustomMutation<User, HttpError>();
 
+  // 🛡️ TIMEOUT Hardening: Reset timeout state if user data resolves (Review #25 Fix)
+  useEffect(() => {
+    if (user) {
+      setIdentityFetchTimedOut(false);
+    }
+  }, [user]);
+
   useEffect(() => {
     isMounted.current = true;
-    let timer: NodeJS.Timeout;
+    let timer: ReturnType<typeof setTimeout>; // 🛡️ TIMER: Use browser-safe type (Review #25)
 
-    if (isIdentityLoading) {
+    if (isIdentityLoading && !user) {
       timer = setTimeout(() => {
-        if (isMounted.current) {
+        if (isMounted.current && !user) {
           setIdentityFetchTimedOut(true);
         }
       }, 8000);
@@ -44,7 +53,7 @@ export const ConsentBarrier: React.FC = () => {
       isMounted.current = false;
       if (timer) clearTimeout(timer);
     };
-  }, [isIdentityLoading]);
+  }, [isIdentityLoading, user]);
 
   const isLoading = mutation.isPending;
 
@@ -195,15 +204,28 @@ export const ConsentBarrier: React.FC = () => {
           <Button
             variant="link"
             className="text-primary font-bold h-auto p-0 ml-2 underline hover:text-primary/80"
-            onClick={(e) => {
-              e.preventDefault();
-              // TODO: Trigger "What's New" modal
-              toast.info("Coming soon: Detailed Governance Changelog");
-            }}
+            onClick={() => setShowWhatsNew(!showWhatsNew)}
           >
             {t("ai.consent.whatsNew", { defaultValue: "What's New?" })}
           </Button>
         </p>
+
+        {showWhatsNew && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            className="text-left text-xs bg-muted/50 p-4 rounded-xl space-y-2 border border-border/40"
+          >
+            <p className="font-bold uppercase tracking-wider text-[10px] text-primary">
+              Governance Updates (v1.2026-04):
+            </p>
+            <ul className="list-disc pl-4 space-y-1 text-muted-foreground">
+              <li>Strict PII Anonymization (Names/IDs scrubbed)</li>
+              <li>Audit non-repudiation via telemetry session IDs</li>
+              <li>Compliance with Law 151/2020 Data Sovereignty</li>
+            </ul>
+          </motion.div>
+        )}
       </div>
 
       <Alert className="max-w-md bg-background/50 border-primary/10">

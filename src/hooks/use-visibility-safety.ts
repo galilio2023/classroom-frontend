@@ -11,21 +11,26 @@ import { useEffect } from "react";
  */
 export const useVisibilitySafety = () => {
   useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.hidden) {
-        // Cancel active speech synthesis if the tab becomes hidden
+    const handleSafetyTrigger = (event: Event) => {
+      // 🛡️ UNMOUNT/HIDDEN Hardening: Ensure audio stops (Rule #6)
+      // If it's a visibilitychange, only fire if hidden. If it's pagehide, always fire.
+      const shouldTrigger = event.type === "pagehide" || document.hidden;
+
+      if (shouldTrigger) {
         if (window.speechSynthesis.speaking) {
           window.speechSynthesis.cancel();
-          console.log("useVisibilitySafety: Halted speech synthesis due to tab change (Rule #6).");
+          console.log(`useVisibilitySafety: Halted speech synthesis via ${event.type} (Rule #6).`);
         }
       }
     };
 
-    document.addEventListener("visibilitychange", handleVisibilityChange);
+    document.addEventListener("visibilitychange", handleSafetyTrigger);
+    window.addEventListener("pagehide", handleSafetyTrigger); // 📱 Mobile compatibility
 
     return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-      // 🛡️ UNMOUNT Hardening: Ensure audio stops if the component is removed
+      document.removeEventListener("visibilitychange", handleSafetyTrigger);
+      window.removeEventListener("pagehide", handleSafetyTrigger);
+
       if (window.speechSynthesis.speaking) {
         window.speechSynthesis.cancel();
       }

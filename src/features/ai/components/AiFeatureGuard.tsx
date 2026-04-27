@@ -56,6 +56,17 @@ export const AiFeatureGuard: React.FC<AiFeatureGuardProps> = ({
   // 🛡️ VERSION SAFETY: Force refresh if client is outdated (Review #25)
   if (isClientLagging) {
     const handleHardRefresh = () => {
+      // 🚀 LOOP PREVENTION: Limit automatic reloads (Review #25 Suggestion)
+      const reloadKey = "ai_governance_reload_count";
+      const reloadCount = parseInt(sessionStorage.getItem(reloadKey) || "0", 10);
+
+      if (reloadCount >= 2) {
+        console.warn("AI Governance update failed after 2 attempts. Halting auto-refresh.");
+        return;
+      }
+
+      sessionStorage.setItem(reloadKey, (reloadCount + 1).toString());
+
       // 🚀 CACHE BUSTING: Check for updates and force reload without destroying the whole cache
       if ("serviceWorker" in navigator) {
         navigator.serviceWorker.getRegistrations().then((registrations) => {
@@ -72,25 +83,32 @@ export const AiFeatureGuard: React.FC<AiFeatureGuardProps> = ({
       window.location.href = `/?update=${Date.now()}`;
     };
 
+    // If we've already tried twice, show a manual instruction instead of an automatic loop
+    const isLooping =
+      parseInt(sessionStorage.getItem("ai_governance_reload_count") || "0", 10) >= 2;
+
     return (
       <Alert variant="destructive" className="border-2 border-dashed bg-destructive/5">
         <RefreshCcw className="h-4 w-4" />
         <AlertTitle className="uppercase font-black tracking-widest">
-          Platform Update Required
+          {isLooping ? "Update Failed" : "Platform Update Required"}
         </AlertTitle>
         <AlertDescription className="flex flex-col gap-4">
           <span>
-            A new AI Governance update has been deployed. Please refresh your browser to ensure
-            continued access to AI features.
+            {isLooping
+              ? "A critical system update failed to apply. Please clear your browser cache or contact support if the issue persists."
+              : "A new AI Governance update has been deployed. Please refresh your browser to ensure continued access to AI features."}
           </span>
-          <Button
-            size="sm"
-            className="w-fit h-9 rounded-xl font-bold gap-2"
-            onClick={handleHardRefresh}
-          >
-            <RefreshCcw className="h-4 w-4" />
-            Refresh Now
-          </Button>
+          {!isLooping && (
+            <Button
+              size="sm"
+              className="w-fit h-9 rounded-xl font-bold gap-2"
+              onClick={handleHardRefresh}
+            >
+              <RefreshCcw className="h-4 w-4" />
+              Refresh Now
+            </Button>
+          )}
         </AlertDescription>
       </Alert>
     );
