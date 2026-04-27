@@ -27,6 +27,7 @@ export const ConsentBarrier: React.FC = () => {
     data: user,
     refetch: refetchIdentity,
     isLoading: isIdentityLoading,
+    isError: isIdentityError,
   } = useGetIdentity<User>();
   const { mutate: updateConsent, mutation } = useCustomMutation<User, HttpError>();
 
@@ -97,13 +98,14 @@ export const ConsentBarrier: React.FC = () => {
               { description: `ID: ${correlationId}` }
             );
             setIsConflicted(true);
-            void refetchIdentity().then(() => {
+
+            // 🛡️ REFETCH Hardening: Use onSettled logic for better UI sync (Review #25 Improvement)
+            void refetchIdentity().finally(() => {
               if (isMounted.current) {
+                // Keep the button disabled for a tiny moment to ensure state reconciliation
                 setTimeout(() => {
-                  if (isMounted.current) {
-                    setIsConflicted(false);
-                  }
-                }, 1500); // UI cooldown
+                  if (isMounted.current) setIsConflicted(false);
+                }, 500);
               }
             });
             return;
@@ -134,7 +136,8 @@ export const ConsentBarrier: React.FC = () => {
   }
 
   // 🛡️ AUTH HARDENING: Handle cases where loading finished but user is still null (Review #25)
-  if (!isIdentityLoading && !user) {
+  // This takes precedence over the timeout UI to avoid misleading messages.
+  if ((!isIdentityLoading && !user) || isIdentityError) {
     return (
       <div className="p-8 border-2 border-dashed border-destructive/20 rounded-4xl bg-destructive/5 flex flex-col items-center text-center gap-6 min-h-[450px] justify-center">
         <div className="p-4 rounded-2xl bg-destructive/10 text-destructive">
@@ -221,12 +224,24 @@ export const ConsentBarrier: React.FC = () => {
             className="text-left text-xs bg-muted/50 p-4 rounded-xl space-y-2 border border-border/40"
           >
             <p className="font-bold uppercase tracking-wider text-[10px] text-primary">
-              Governance Updates (v1.2026-04):
+              {t("ai.consent.whatsNewTitle", { defaultValue: "Governance Updates (v1.2026-04):" })}
             </p>
             <ul className="list-disc pl-4 space-y-1 text-muted-foreground">
-              <li>Strict PII Anonymization (Names/IDs scrubbed)</li>
-              <li>Audit non-repudiation via telemetry session IDs</li>
-              <li>Compliance with Law 151/2020 Data Sovereignty</li>
+              <li>
+                {t("ai.consent.updates.pii", {
+                  defaultValue: "Strict PII Anonymization (Names/IDs scrubbed)",
+                })}
+              </li>
+              <li>
+                {t("ai.consent.updates.audit", {
+                  defaultValue: "Audit non-repudiation via telemetry session IDs",
+                })}
+              </li>
+              <li>
+                {t("ai.consent.updates.law151", {
+                  defaultValue: "Compliance with Law 151/2020 Data Sovereignty",
+                })}
+              </li>
             </ul>
           </motion.div>
         )}
