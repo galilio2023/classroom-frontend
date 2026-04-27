@@ -166,10 +166,14 @@ export const ConsentBarrier: React.FC = () => {
           <ShieldCheck className="h-12 w-12 opacity-50" />
         </div>
         <div className="space-y-2">
-          <h3 className="text-xl font-bold uppercase">Identity Fetch Timeout</h3>
+          <h3 className="text-xl font-bold uppercase">
+            {t("common.notifications.identityTimeout", { defaultValue: "Identity Fetch Timeout" })}
+          </h3>
           <p className="text-muted-foreground text-sm max-w-xs">
-            We're having trouble reaching the identity provider. This may be due to a slow
-            connection.
+            {t("common.notifications.identityTimeoutDesc", {
+              defaultValue:
+                "We're having trouble reaching the identity provider. This may be due to a slow connection.",
+            })}
           </p>
         </div>
         <Button
@@ -180,7 +184,7 @@ export const ConsentBarrier: React.FC = () => {
           }}
           className="rounded-xl px-8"
         >
-          Retry Connection
+          {t("common.notifications.retryConnection", { defaultValue: "Retry Connection" })}
         </Button>
       </div>
     );

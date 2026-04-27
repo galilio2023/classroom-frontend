@@ -314,7 +314,10 @@
       "copyCorrelationId": "Copy correlation ID for support",
       "copyId": "Copy ID",
       "copied": "Copied",
-      "idCopied": "Correlation ID copied to clipboard"
+      "idCopied": "Correlation ID copied to clipboard",
+      "identityTimeout": "Identity Fetch Timeout",
+      "identityTimeoutDesc": "We're having trouble reaching the identity provider. This may be due to a slow connection.",
+      "retryConnection": "Retry Connection"
     }
   },
   "notifications": {

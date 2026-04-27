@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useAiAccess } from "@/features/ai/hooks/use-ai-access";
 import { Lock, Clock, Sparkles, BrainCircuit, RefreshCcw, Loader2 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -8,6 +8,7 @@ import { useCan } from "@refinedev/core";
 import { ConsentBarrier } from "./ConsentBarrier";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
+import { cn } from "@/lib/utils";
 
 interface AiFeatureGuardProps {
   children: React.ReactNode;
@@ -35,6 +36,7 @@ export const AiFeatureGuard: React.FC<AiFeatureGuardProps> = ({
   skeletonClassName = "w-full h-32 rounded-lg",
 }) => {
   const { t } = useTranslation();
+  const [isUpdating, setIsUpdating] = useState(false);
   const {
     isAiEnabled,
     isQuotaExceeded,
@@ -50,6 +52,7 @@ export const AiFeatureGuard: React.FC<AiFeatureGuardProps> = ({
   useEffect(() => {
     if (!isAiLoading && !isClientLagging) {
       sessionStorage.removeItem("ai_governance_reload_count");
+      sessionStorage.removeItem("ai_governance_last_reload");
     }
   }, [isAiLoading, isClientLagging]);
 
@@ -82,41 +85,55 @@ export const AiFeatureGuard: React.FC<AiFeatureGuardProps> = ({
 
   // 🛡️ VERSION SAFETY: Force refresh if client is outdated (Review #25)
   if (isClientLagging) {
-    const handleHardRefresh = () => {
+    const handleHardRefresh = async () => {
+      if (isUpdating) return;
+      setIsUpdating(true);
+
       // 🚀 LOOP PREVENTION: Limit automatic reloads (Review #25 Suggestion)
       const reloadKey = "ai_governance_reload_count";
+      const lastReloadKey = "ai_governance_last_reload";
       const reloadCount = parseInt(sessionStorage.getItem(reloadKey) || "0", 10);
+      const lastReload = parseInt(sessionStorage.getItem(lastReloadKey) || "0", 10);
+      const now = Date.now();
 
-      if (reloadCount >= 2) {
+      // If reloaded twice in last 60 seconds, stop to prevent infinite loops
+      if (reloadCount >= 2 && now - lastReload < 60000) {
         console.warn("AI Governance update failed after 2 attempts. Halting auto-refresh.");
+        setIsUpdating(false);
         return;
       }
 
       sessionStorage.setItem(reloadKey, (reloadCount + 1).toString());
+      sessionStorage.setItem(lastReloadKey, now.toString());
 
       // 🚀 CACHE BUSTING: Check for updates and force reload without destroying the whole cache
       if ("serviceWorker" in navigator) {
-        navigator.serviceWorker.getRegistrations().then((registrations) => {
+        try {
+          const registrations = await navigator.serviceWorker.getRegistrations();
           for (const registration of registrations) {
             // Tell the SW to update itself immediately
-            registration.update();
+            await registration.update();
             if (registration.waiting) {
               registration.waiting.postMessage({ type: "SKIP_WAITING" });
             }
           }
-        });
+        } catch (err) {
+          console.error("SW Update failed:", err);
+        }
       }
+
       // Use a cache-busting query param to ensure we get fresh index.html/JS
       window.location.href = `/?update=${Date.now()}`;
     };
 
-    // If we've already tried twice, show a manual instruction instead of an automatic loop
-    const isLooping =
-      parseInt(sessionStorage.getItem("ai_governance_reload_count") || "0", 10) >= 2;
+    // If we've already tried twice recently, show a manual instruction
+    const reloadCount = parseInt(sessionStorage.getItem("ai_governance_reload_count") || "0", 10);
+    const lastReload = parseInt(sessionStorage.getItem("ai_governance_last_reload") || "0", 10);
+    const isLooping = reloadCount >= 2 && Date.now() - lastReload < 60000;
 
     return (
       <Alert variant="destructive" className="border-2 border-dashed bg-destructive/5">
-        <RefreshCcw className="h-4 w-4" />
+        <RefreshCcw className={cn("h-4 w-4", isUpdating && "animate-spin")} />
         <AlertTitle className="uppercase font-black tracking-widest">
           {isLooping ? "Update Failed" : "Platform Update Required"}
         </AlertTitle>
@@ -131,9 +148,14 @@ export const AiFeatureGuard: React.FC<AiFeatureGuardProps> = ({
               size="sm"
               className="w-fit h-9 rounded-xl font-bold gap-2"
               onClick={handleHardRefresh}
+              disabled={isUpdating}
             >
-              <RefreshCcw className="h-4 w-4" />
-              Refresh Now
+              {isUpdating ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <RefreshCcw className="h-4 w-4" />
+              )}
+              {isUpdating ? "Checking for updates..." : "Refresh Now"}
             </Button>
           )}
         </AlertDescription>

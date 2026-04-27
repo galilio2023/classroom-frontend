@@ -98,6 +98,12 @@ const StudyPlanner = () => {
     error,
   } = planQuery;
 
+  // 🛡️ ABORT Hardening: Explicit wrapper to cancel previous fetches (Review #25 Fix)
+  const handleRefetch = useCallback(() => {
+    controllersRef.current.fetch.abort();
+    void refetchPlan();
+  }, [refetchPlan]);
+
   // 🛡️ ABORT HANDLING: Suppress global error toasts for intentional aborts (Review #21)
   useEffect(() => {
     if (isError && error) {
@@ -114,7 +120,6 @@ const StudyPlanner = () => {
   }, [isError, error]);
 
   // 🚀 RULE 4 Hardening: Synchronized Source of Truth logic
-  // The useStudyPlanSync hook ensures "Freshest Copy Wins"
   const { plan, completedBlocks, setCompletedBlocks } = useStudyPlanSync<StudyBlock>(
     initialData,
     isFetching
@@ -129,8 +134,6 @@ const StudyPlanner = () => {
     [jobs]
   );
 
-  // 🚀 RULE 6: Resource Preserving Visibility Safety - Logic moved to useVisibilitySafety hook.
-
   // --- MUTATIONS ---
   const { mutate: generatePlanMutation, mutation: generateMutation } = useCustomMutation<
     StudyPlanResponse,
@@ -139,7 +142,6 @@ const StudyPlanner = () => {
     mutationOptions: {
       onSuccess: () => {
         // 🚀 SUCCESS TIMING: Generation is async (202). refetchPlan here is premature.
-        // Rely on socket.on("ai:job_completed") for the real refetch.
       },
       onError: (err) => {
         if (!isMounted.current) return;
@@ -163,14 +165,13 @@ const StudyPlanner = () => {
   const handleJobComplete = useCallback(
     (data: JobSocketPayload) => {
       if (!isMounted.current) return;
-      // 🛡️ SOCKET SCOPING: Ensure we only refetch if the job belongs to the current user (Review #21)
       if (data.userId && user?.id && !compareIds(user.id, data.userId)) return;
 
       if (data.topic === "generate_study_plan" || data.type === "study_plan") {
-        refetchPlan();
+        handleRefetch();
       }
     },
-    [refetchPlan, user?.id]
+    [handleRefetch, user?.id]
   );
 
   useEffect(() => {
@@ -181,7 +182,7 @@ const StudyPlanner = () => {
   }, [handleJobComplete]);
 
   const generatePlan = async () => {
-    // 🛡️ ABORT PREVIOUS: Ensure no overlapping generation requests (Review #21)
+    // 🛡️ ABORT PREVIOUS: Ensure no overlapping generation requests (Review #25 Fix)
     controllersRef.current.mutation.abort();
     setLastCorrelationId(null);
 
@@ -191,7 +192,6 @@ const StudyPlanner = () => {
         method: "post",
         values: {},
         successNotification: false,
-        // Pass signal to underlying axios/fetch call
         meta: {
           get abortSignal() {
             return getSignal("mutation");
@@ -211,7 +211,6 @@ const StudyPlanner = () => {
             });
             toast.success(t("studyPlanner.notifications.generatingMessage"));
           } else if (response.statusCode === 202) {
-            // 🚀 Rule 202 Handling: Background processing without immediate jobId
             toast.info(t("studyPlanner.notifications.queuedMessage"));
           }
         },
@@ -228,36 +227,39 @@ const StudyPlanner = () => {
     if (syncingBlocks.has(blockId)) return;
     setSyncingBlocks((prev: Set<string>) => new Set(prev).add(blockId));
 
+    // 🛡️ ABORT PREVIOUS: (Review #25 Fix)
+    controllersRef.current.mutation.abort();
+
     try {
-      // 🚀 RULE 4 Hardening: Capture precise state from DB right before mutation (Review Suggestion)
       const currentRecord = await offlineDB.study_plans.get("current");
       const previousUpdatedAtPrecise = currentRecord?.updatedAt || 0;
       const previousStatus = !!completedBlocks[blockId];
       const newStatus = !previousStatus;
       const now = Date.now();
 
-      // 🚀 RULE 4 Hardening (Atomic Update): Update React state and Offline DB with the same object.
       const newCompleted = { ...completedBlocks, [blockId]: newStatus };
       setCompletedBlocks(newCompleted);
 
-      // 🛡️ Ensure local persistence before queuing network request (Review Suggestion)
       await offlineDB.study_plans.update("current", {
         completedBlocks: newCompleted,
         updatedAt: now,
       });
 
-      // 🚀 GAMIFICATION: Centralized XP helper
       if (newStatus) {
         dispatchStudyBlockXp();
       }
 
-      // 📶 OFFLINE MUTATION QUEUEING (Rule 4 Hardening)
       toggleBlockMutation(
         {
           url: `study-planner/toggle-block/${blockId}`,
           method: "post",
           values: { isCompleted: newStatus },
           successNotification: false,
+          meta: {
+            get abortSignal() {
+              return getSignal("mutation");
+            },
+          },
         },
         {
           onSuccess: (res) => {
@@ -269,13 +271,8 @@ const StudyPlanner = () => {
           },
           onError: async (err) => {
             if (!isMounted.current) return;
-
             const correlationId = getCorrelationId(err);
-            console.warn(`[StudyPlanner] Toggle failed for ${blockId}. CID: ${correlationId}`, {
-              error: err,
-            });
 
-            // 🛡️ ATOMIC ROLLBACK: Use centralized utility (Review Suggestion)
             await performStudyPlanRollback(setCompletedBlocks, {
               blockId,
               previousStatus,
@@ -301,7 +298,6 @@ const StudyPlanner = () => {
       );
     } catch (err) {
       console.error("Critical failure in toggleBlock:", err);
-      // Ensure sync lock is released even on initial failure
       if (isMounted.current) {
         setSyncingBlocks((prev: Set<string>) => {
           const next = new Set(prev);
@@ -312,8 +308,6 @@ const StudyPlanner = () => {
     }
   };
 
-  // 🚀 PERFORMANCE: O(N) grouping via useMemo
-  // plan is memoized in useStudyPlanSync, ensuring this only runs when data truly changes.
   const blocksByDay = useMemo(() => {
     const map = {
       Monday: [],
@@ -350,7 +344,6 @@ const StudyPlanner = () => {
           activeJob={activeStudyPlanJob}
           isOnline={isOnline}
         />
-        {/* 🚀 Rule 7: Offline Indicator Badge */}
         <div className="flex flex-col items-center gap-4">
           {!isOnline && (
             <motion.div
