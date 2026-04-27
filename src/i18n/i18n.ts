@@ -15,6 +15,7 @@ import enDashboard from "./locales/en/dashboard.json";
 import enLanding from "./locales/en/landing.json";
 import enOnboarding from "./locales/en/onboarding.json";
 import enSchools from "./locales/en/schools.json";
+import enTimetable from "./locales/en/timetable.json";
 
 import arAuth from "./locales/ar/auth.json";
 import arClasses from "./locales/ar/classes.json";
@@ -23,6 +24,7 @@ import arDashboard from "./locales/ar/dashboard.json";
 import arLanding from "./locales/ar/landing.json";
 import arOnboarding from "./locales/ar/onboarding.json";
 import arSchools from "./locales/ar/schools.json";
+import arTimetable from "./locales/ar/timetable.json";
 
 export const defaultNS = "translation";
 
@@ -37,6 +39,7 @@ export const resources = {
       ...enLanding,
       ...enOnboarding,
       schools: enSchools,
+      timetable: enTimetable,
     },
     zod: zodEn,
   },
@@ -49,6 +52,7 @@ export const resources = {
       ...arLanding,
       ...arOnboarding,
       schools: arSchools,
+      timetable: arTimetable,
     },
     zod: zodAr,
   },

@@ -1,0 +1,33 @@
+{
+  "collision": {
+    "title": "Schedule Collision",
+    "single": "A double-booking has been detected for this teacher.",
+    "multiple": "We detected {{count}} scheduling conflicts for this teacher.",
+    "assignments": "Conflicting Assignments",
+    "industrialRule": "Industrial Rule",
+    "industrialRuleDesc": "A teacher's time is physically finite. Double-booking across suites will cause session failures. Please choose a different timeframe.",
+    "adjust": "Adjust My Schedule"
+  },
+  "deptPlanner": {
+    "title": "Dept Semester Planner",
+    "gridTitle": "Semester Grid",
+    "gridDescription": "Manage all departmental sections and resolve timetable overlaps before student registration.",
+    "generateReports": "Generate Reports",
+    "collisionsDetected": "Timetable Collisions Detected",
+    "collisionsDescription": "Multiple lecture sections have overlapping times or rooms. Resolve these to prevent registration blocks.",
+    "conflictsCount": "{{count}} Conflicts",
+    "loading": "Loading Planner Grid...",
+    "noLectures": "No Lectures"
+  },
+  "section_picker": {
+    "success": "Lecture section selected successfully!",
+    "loading": "Fetching Available Sections...",
+    "title": "Choose Your Section",
+    "description": "Select a preferred timeframe and location for your lectures.",
+    "lecturer": "Lecturer",
+    "empty_title": "No Sections Available",
+    "empty_description": "This course currently has no active lecture slots. Please contact the registrar.",
+    "confirm": "Confirm Selection",
+    "hall_fallback": "Global Hall"
+  }
+}

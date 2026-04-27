@@ -1,6 +1,12 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { ShieldAlert, Clock, Building2, Calendar, AlertTriangle } from "lucide-react";
+import {
+  ShieldAlert,
+  Clock,
+  Building2,
+  Calendar,
+  AlertTriangle,
+} from "lucide-react";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -12,8 +18,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useTranslation } from "react-i18next";
-import dayjs from "dayjs";
 import { DAYS } from "@/constants/calendar";
+import { formatTime } from "@/lib/date-utils";
 
 export interface ConflictDetail {
   tenantName: string;
@@ -36,11 +42,6 @@ export const CollisionModal: React.FC<CollisionModalProps> = ({
 }) => {
   const { t } = useTranslation();
 
-  const formatTime = (timeStr: string) => {
-    // 🚀 Resilience: Handle both HH:mm:ss and full ISO strings
-    return dayjs(timeStr.includes("T") ? timeStr : `2020-01-01T${timeStr}`).format("HH:mm");
-  };
-
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent className="rounded-[2.5rem] border-destructive/20 bg-card/95 backdrop-blur-3xl shadow-2xl p-0 overflow-hidden max-w-xl">
@@ -56,13 +57,10 @@ export const CollisionModal: React.FC<CollisionModalProps> = ({
                 </AlertDialogTitle>
                 <AlertDialogDescription className="text-base font-medium">
                   {conflicts.length === 1
-                    ? t(
-                        "timetable.collision.single",
-                        "A double-booking has been detected for this teacher."
-                      )
-                    : t("timetable.collision.multiple" as any, {
+                    ? t("timetable.collision.single", "A double-booking has been detected for this teacher.")
+                    : t("timetable.collision.multiple", { 
                         count: conflicts.length,
-                        defaultValue: `We detected ${conflicts.length} scheduling conflicts for this teacher.`,
+                        defaultValue: `We detected ${conflicts.length} scheduling conflicts for this teacher.` 
                       })}
                 </AlertDialogDescription>
               </div>
@@ -117,11 +115,7 @@ export const CollisionModal: React.FC<CollisionModalProps> = ({
           <div className="bg-amber-500/5 border border-amber-500/10 rounded-2xl p-4 flex gap-4">
             <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
             <p className="text-[10px] font-medium leading-relaxed">
-              <strong>{t("timetable.collision.industrialRule", "Industrial Rule")}:</strong>{" "}
-              {t(
-                "timetable.collision.industrialRuleDesc",
-                "A teacher's time is physically finite. Double-booking across suites will cause session failures. Please choose a different timeframe."
-              )}
+              <strong>{t("timetable.collision.industrialRule", "Industrial Rule")}:</strong> {t("timetable.collision.industrialRuleDesc", "A teacher's time is physically finite. Double-booking across suites will cause session failures. Please choose a different timeframe.")}
             </p>
           </div>
 
