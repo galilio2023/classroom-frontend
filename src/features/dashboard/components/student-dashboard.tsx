@@ -12,6 +12,10 @@ import { QuickActions } from "./quick-actions";
 import { Calendar, Rocket, Sparkles, Trophy, Tv } from "lucide-react";
 import { useOfflineSync } from "@/features/engagement/hooks/use-offline-sync";
 import React, { useState, useEffect } from "react";
+import { useCapabilities } from "@/hooks/use-capabilities";
+import { TodayLessonsWidget } from "./TodayLessonsWidget";
+import { TodayLecturesWidget } from "./TodayLecturesWidget";
+import { GpaPreviewWidget } from "./GpaPreviewWidget";
 
 interface Props {
   identity: User | undefined;
@@ -32,6 +36,7 @@ interface ActionItem {
 
 export const StudentDashboard = ({ identity, data, isLoading, list, show }: Props) => {
   const { t } = useTranslation();
+  const { isSchoolSuite, isFacultySuite } = useCapabilities();
   const { isInstallable, isStandalone, handleInstallClick } = usePWAInstall();
   const { isOnline, getNextOfflineMission } = useOfflineSync();
   const [offlineMission, setOfflineMission] = useState<any>(null);
@@ -112,6 +117,24 @@ export const StudentDashboard = ({ identity, data, isLoading, list, show }: Prop
 
   return (
     <div className="space-y-10 md:space-y-16 pb-20">
+      {/* 🛡️ HUB TODAY SECTION */}
+      <div className="">
+        {isFacultySuite ? (
+          <div className="grid gap-6 lg:grid-cols-3">
+            <div className="lg:col-span-2">
+              <TodayLecturesWidget />
+            </div>
+            <div className="lg:col-span-1">
+              <GpaPreviewWidget />
+            </div>
+          </div>
+        ) : isSchoolSuite ? (
+          <div className="max-w-4xl">
+            <TodayLessonsWidget />
+          </div>
+        ) : null}
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 md:gap-16">
         {/* Left Column: Mission Control & Academic Journey (8/12) */}
         <div className="lg:col-span-8 space-y-10 md:space-y-16">

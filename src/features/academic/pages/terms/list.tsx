@@ -18,7 +18,7 @@ import {
   Trash2,
   Layers,
 } from "lucide-react";
-import { AcademicTerm, User, UserRole } from "@/types";
+import { AcademicTerm, AcademicYear, User, UserRole } from "@/types";
 import { useMemo, useState } from "react";
 import {
   Dialog,
@@ -29,6 +29,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useForm } from "react-hook-form";
@@ -66,6 +73,7 @@ export default function TermsList() {
     () =>
       z.object({
         name: z.string().min(1, t("terms.form.nameRequired")),
+        academicYearId: z.string().min(1, t("terms.form.yearRequired", "Year is required")),
         startDate: z.string().min(1, t("terms.form.startRequired")),
         endDate: z.string().min(1, t("terms.form.endRequired")),
       }),
@@ -161,6 +169,11 @@ export default function TermsList() {
     );
   };
 
+  const { query: yearsQuery } = useList<AcademicYear>({
+    resource: "academic-years",
+  });
+  const years = yearsQuery.data?.data || [];
+
   const stats = getTermStats(terms);
 
   return (
@@ -214,6 +227,28 @@ export default function TermsList() {
                       </div>
                     </DialogHeader>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                      <div className="space-y-3">
+                        <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ms-2">
+                          {t("terms.form.year")}
+                        </Label>
+                        <Select onValueChange={(val) => form.setValue("academicYearId", val)}>
+                          <SelectTrigger className="h-16 rounded-3xl bg-muted/30 border-none shadow-inner px-8 text-lg font-black">
+                            <SelectValue placeholder={t("terms.form.selectYear")} />
+                          </SelectTrigger>
+                          <SelectContent className="rounded-3xl border-none shadow-2xl">
+                            {years.map((y) => (
+                              <SelectItem key={y.id} value={y.id.toString()}>
+                                {y.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        {form.formState.errors.academicYearId && (
+                          <p className="text-xs font-bold text-destructive ms-2">
+                            {form.formState.errors.academicYearId.message}
+                          </p>
+                        )}
+                      </div>
                       <div className="space-y-3">
                         <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ms-2">
                           {t("terms.form.name")}

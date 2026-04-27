@@ -13,14 +13,25 @@ export const useCapabilities = () => {
   const plan = identity?.planType || "basic";
   const role = identity?.role || "student";
 
-  const isFaculty = plan === "faculty" || plan === "school";
-  const isInstitutional = plan === "faculty" || plan === "school";
-  const isSchool = plan === "school";
+  // 🛡️ HUB SUITE IDENTITY
+  const suiteType = identity?.suiteType || (plan === "basic" ? "private" : (plan as any));
+  const isPrivateSuite = suiteType === "private";
+  const isSchoolSuite = suiteType === "school";
+  const isFacultySuite = suiteType === "faculty";
+  const isCorporateSuite = suiteType === "corporate";
+
+  const isFaculty = isFacultySuite || isSchoolSuite;
+  const isInstitutional = isFacultySuite || isSchoolSuite;
+  const isSchool = isSchoolSuite;
   const isAdmin = role === "admin";
   const isTeacher = role === "teacher";
   const isStudent = role === "student";
   const isParent = role === "parent";
   const isStaff = isAdmin || isTeacher || role === "ta";
+
+  // 🛡️ SCHOOL OWNERSHIP (Admin role in their own school)
+  const isOwner = isAdmin;
+  const suiteOnboardingComplete = identity?.suiteOnboardingComplete ?? true;
 
   return {
     identity,
@@ -30,18 +41,39 @@ export const useCapabilities = () => {
     isTeacher,
     isStudent,
     isParent,
-    isPrivate: plan === "basic",
+    isOwner,
+    suiteOnboardingComplete,
+    isPrivate: isPrivateSuite,
     isInstitutional,
 
+    // Hub Suite Identity
+    suiteType,
+    isPrivateSuite,
+    isSchoolSuite,
+    isFacultySuite,
+    isCorporateSuite,
+
+    // Hub Navigation
+    canUpgradeSuite: !isCorporateSuite,
+    canSeeSuiteHome: true,
+
+    // Scheduling Capabilities
+    bellTimetable: isSchoolSuite,
+    lectureSchedule: isFacultySuite,
+
+    // Assessment Capabilities
+    gpaPreview: isFacultySuite,
+    examMode: true, // Available in all suites
+
     // Academic Capabilities
-    canManageDepartments: isFaculty && (isAdmin || isTeacher),
-    canManageTerms: isFaculty && isAdmin,
+    canManageDepartments: isInstitutional && (isAdmin || isTeacher),
+    canManageTerms: isInstitutional && isAdmin,
     canManageCurriculum: isTeacher || isAdmin,
 
     // Institutional Capabilities
     canAccessInstitutionalStats: isSchool && isAdmin,
     canAccessCompliance: isSchool && isAdmin,
-    canBulkImport: isFaculty && isAdmin,
+    canBulkImport: isInstitutional && isAdmin,
 
     // Engagement Capabilities
     canViewParentalMonitoring: isSchool && (isAdmin || isTeacher),
@@ -50,10 +82,10 @@ export const useCapabilities = () => {
     // Branding
     canCustomBrand: isSchool,
 
-    // Plan Info
+    // Plan Info (Legacy Support)
     plan,
-    isPrivateMode: plan === "basic",
-    isFacultyMode: plan === "faculty",
-    isSchoolMode: plan === "school",
+    isPrivateMode: isPrivateSuite,
+    isFacultyMode: isFacultySuite,
+    isSchoolMode: isSchoolSuite,
   };
 };

@@ -2,6 +2,7 @@ import { EngagementChart } from "./engagement-chart";
 import { JourneyFunnelChart } from "./journey-funnel-chart";
 import { PendingGradingList } from "./pending-grading-list";
 import { AtRiskStudents } from "./at-risk-students";
+import { AtRiskGradeWidget } from "./AtRiskGradeWidget";
 import { PlatformOverview } from "./platform-overview";
 import {} from "./recent-activity";
 import { RLHFAlignmentChart } from "./rlhf-alignment-chart";
@@ -32,7 +33,7 @@ export const StaffDashboard = ({ data, isLoading, onRefresh, show }: StaffDashbo
   const { t } = useTranslation();
   const { list } = useNavigation();
   const { isInstallable, isStandalone, handleInstallClick } = usePWAInstall();
-  const { isSchoolMode } = useCapabilities();
+  const { isSchoolMode, isFacultyMode } = useCapabilities();
 
   // Generate Action Items dynamically based on data
   const actions: ActionItem[] = [];
@@ -170,6 +171,11 @@ export const StaffDashboard = ({ data, isLoading, onRefresh, show }: StaffDashbo
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.1 }}
             >
+              {(isSchoolMode || isFacultyMode) && (
+                <div className="mb-16">
+                  <AtRiskGradeWidget />
+                </div>
+              )}
               <div className="flex items-center gap-3 mb-8 px-2 text-start">
                 <div className="p-2 rounded-xl bg-primary/10 text-primary">
                   <BarChart3 className="h-5 w-5" />

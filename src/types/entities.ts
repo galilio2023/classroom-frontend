@@ -61,6 +61,8 @@ export interface User {
   parentPhone: string | null;
   inviteCode: string | null;
   planType: "basic" | "faculty" | "school";
+  suiteType: "private" | "school" | "faculty" | "corporate";
+  suiteOnboardingComplete: boolean;
   verificationStatus: VerificationStatus;
   verificationDocumentUrl: string | null;
   verificationDocumentCldPubId: string | null;
@@ -89,6 +91,55 @@ export interface User {
   };
   stripeAccountId?: string | null;
   stripeOnboardingComplete?: boolean;
+}
+
+export interface School extends BaseRecord {
+  id: string;
+  name: string;
+  slug: string;
+  brandingConfig: any;
+  planType: "basic" | "faculty" | "school";
+  suiteType: "private" | "school" | "faculty" | "corporate";
+  suiteActivatedAt?: string;
+  previousSuiteType?: string;
+  suiteUpgradedAt?: string;
+  suiteOnboardingComplete: boolean;
+  ownerId: string | null;
+  isActive: boolean;
+  aiTokensUsed: string;
+  aiMonthlyLimit: string;
+  version: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AcademicYear extends BaseRecord {
+  id: number;
+  tenantId: string;
+  name: string;
+  startDate: string;
+  endDate: string;
+  status: "active" | "inactive";
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TimetableSlot extends BaseRecord {
+  id: number;
+  tenantId: string;
+  academicYearId: number;
+  termId?: number;
+  scheduleType: "bell" | "lecture" | "exam";
+  classId?: number;
+  subjectId?: number;
+  teacherId: string;
+  dayOfWeek: number;
+  startTime: string;
+  endTime: string;
+  roomId?: string;
+  status: "active" | "inactive";
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface PresenceUser {

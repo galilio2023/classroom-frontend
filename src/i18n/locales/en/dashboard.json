@@ -35,6 +35,68 @@
     "quickActions": "Quick Actions",
     "todaySchedule": "Today's Schedule",
     "welcomeBack": "Welcome back, {{name}}!",
+    "welcome": {
+      "private": "Welcome to your Studio, {{name}}",
+      "private.desc": "Your private AI-powered teaching space is ready. Manage your classes and students with industrial precision.",
+      "school": "School Command Center",
+      "school.desc": "Oversee your entire school infrastructure from one unified hub. Performance, attendance, and growth metrics.",
+      "faculty": "Academic Faculty Portal",
+      "faculty.desc": "Higher education management redefined. Track credit hours, GPA distributions, and lecture synchronization.",
+      "corporate": "Enterprise Training Hub",
+      "corporate.desc": "Monitor workforce compliance and professional growth. Real-time certificate tracking and manager oversight."
+    },
+    "empty": {
+      "private": {
+        "title": "Ready to Start Teaching?",
+        "desc": "Create your first class and invite students to start your AI-powered journey.",
+        "action": "Create First Class"
+      },
+      "school": {
+        "title": "School Infrastructure Ready",
+        "desc": "Add your departments and staff to begin managing your school hierarchy.",
+        "action": "Add Department"
+      },
+      "faculty": {
+        "title": "Academic Portal Active",
+        "desc": "Set up your credit hours and lecture sections to enable student enrollment.",
+        "action": "Setup Sections"
+      },
+      "corporate": {
+        "title": "Compliance Dashboard Live",
+        "desc": "Upload your training programs and employee directory to start monitoring.",
+        "action": "Import Employees"
+      }
+    },
+    "widget": {
+      "comingSoon": "Syncing real-time data..."
+    },
+    "tour": "Take the Hub Tour",
+    "teacher": {
+      "schedule": "My Schedule",
+      "weeklyAgenda": "Weekly Agenda",
+      "scheduleDesc": "View and start your scheduled lessons.",
+      "lecturePlanner": "Lecture Planner",
+      "myLectures": "My Lectures",
+      "lecturePlannerDesc": "Schedule and manage your course sections.",
+      "weeklySchedule": "My Weekly Schedule",
+      "weeklyScheduleDesc": "View your lecture sections across the week.",
+      "deptPlanner": "Semester Planner",
+      "deptOversight": "Dept Oversight",
+      "deptPlannerDesc": "Resolve department conflicts."
+    },
+    "admin": {
+      "exams": "Exam Schedule",
+      "assessment": "Assessments",
+      "examsDesc": "Manage formal exam slots and venues.",
+      "planner": "Academic Planner",
+      "infrastructure": "Infrastructure",
+      "plannerDesc": "Heatmaps and term oversight."
+    },
+    "timetable": {
+      "lecturer": {
+        "weeklyTitle": "My Lecture Schedule"
+      }
+    },
     "summary": {
       "student": "You have {{count}} assignments due soon. Next up: {{next}}.",
       "teacher": "You have {{count}} submissions to grade. {{active}} classes are live now.",
@@ -58,8 +120,11 @@
       "noClassesChild": "No classes for {{name}} today.",
       "viewFull": "View Full Schedule",
       "today": "Today's Schedule",
+      "todayLectures": "Today's Lectures",
       "classesCount": "{{count}} Classes",
+      "lecturesCount": "{{count}} Lectures",
       "freeDay": "Free Day!",
+      "noLectures": "No Lectures Today",
       "enjoyTimeOff": "Enjoy your time off",
       "clickClass": "Click a class to enter the room"
     },

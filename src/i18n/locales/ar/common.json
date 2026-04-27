@@ -1144,6 +1144,12 @@
     "teacher-subscriptions": {
       "label": "اشتراكات المعلم"
     },
+    "academic-years": {
+      "label": "السنوات الأكاديمية"
+    },
+    "timetable": {
+      "label": "جدول الحصص"
+    },
     "dashboard": {
       "label": "لوحة التحكم"
     },

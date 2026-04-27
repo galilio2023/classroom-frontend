@@ -7,6 +7,7 @@ import {
   useSidebar as useShadcnSidebar,
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
+import { SuiteIdentityBadge } from "@/features/onboarding/components/SuiteIdentityBadge";
 
 export function SidebarHeader() {
   const { title } = useRefineOptions();
@@ -41,9 +42,23 @@ export function SidebarHeader() {
                 </span>
               </div>
             </RouterLink>
+            {(open || isMobile) && (
+              <div className="mt-4 px-1">
+                <SuiteIdentityBadge />
+              </div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
+
+      {!open && !isMobile && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <div className="pointer-events-auto">
+            <SuiteIdentityBadge />
+          </div>
+        </div>
+      )}
+
       <ShadcnSidebarTrigger
         className={cn(
           "text-muted-foreground/60 hover:text-primary transition-all duration-300 shrink-0 opacity-100 pointer-events-auto",

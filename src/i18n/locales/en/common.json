@@ -1168,6 +1168,12 @@
     "school-dashboard": {
       "label": "School Admin"
     },
+    "academic-years": {
+      "label": "Academic Years"
+    },
+    "timetable": {
+      "label": "Bell Schedule"
+    },
     "schools": {
       "label": "Schools",
       "schools": "Schools",

@@ -575,6 +575,80 @@
       "criticalDesc": "Urgent: Student is at risk of failing this class."
     }
   },
+  "years": {
+    "title": "Academic Years",
+    "description": "Define the primary academic cycles for your organization.",
+    "create": "Create Academic Year",
+    "newTitle": "New Academic Year",
+    "newDesc": "Set up a new timeframe for your organization's operations.",
+    "stats": {
+      "total": "Total Years",
+      "active": "Currently Active",
+      "upcoming": "Upcoming Cycles"
+    },
+    "form": {
+      "name": "Year Name",
+      "namePlaceholder": "e.g. 2025–2026",
+      "start": "Start Date",
+      "end": "End Date",
+      "nameRequired": "Name is required",
+      "startRequired": "Start date is required",
+      "endRequired": "End date is required"
+    },
+    "empty": {
+      "title": "No Academic Years",
+      "desc": "Create your first academic year to begin structuring your terms and schedules."
+    },
+    "toasts": {
+      "created": "Academic year created successfully!",
+      "updated": "Academic year updated.",
+      "deleted": "Academic year deleted.",
+      "error": "Operation failed."
+    }
+  },
+  "terms": {
+    "title": "Academic Terms",
+    "description": "Manage semesters, trimesters or quarterly blocks.",
+    "create": "Create Term",
+    "newTitle": "New Term",
+    "newDesc": "Add a new academic block to your schedule.",
+    "stats": {
+      "total": "Total Terms",
+      "active": "Active Now",
+      "upcoming": "Upcoming"
+    },
+    "form": {
+      "name": "Term Name",
+      "namePlaceholder": "e.g. Fall 2025",
+      "start": "Start Date",
+      "end": "End Date",
+      "nameRequired": "Name is required",
+      "startRequired": "Start date is required",
+      "endRequired": "End date is required",
+      "year": "Academic Year",
+      "selectYear": "Select year"
+    },
+    "empty": {
+      "title": "No Academic Terms",
+      "desc": "Organize your curriculum by creating academic terms."
+    },
+    "relative": {
+      "starts": "Starts {{time}}",
+      "ends": "Ends {{time}}",
+      "completed": "Completed"
+    },
+    "toasts": {
+      "created": "Term created successfully!",
+      "activated": "Term activated.",
+      "archived": "Term archived.",
+      "deleted": "Term deleted.",
+      "error": "Operation failed."
+    },
+    "deleteDialog": {
+      "title": "Delete Term?",
+      "description": "This will remove the term and all its associations. Confirm?"
+    }
+  },
   "assignments": {
     "list": {
       "title": "Assignments",
