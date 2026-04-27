@@ -1,16 +1,16 @@
 /**
- * 📅 Calendar Constants
- * Single source of truth for calendar-related data structures to ensure i18n consistency.
+ * 📅 CALENDAR CONSTANTS
+ * Mandate: Single Source of Truth for time/date representations.
  */
 
 export const DAYS = [
+  "Sunday",
   "Monday",
   "Tuesday",
   "Wednesday",
   "Thursday",
   "Friday",
-  "Saturday",
-  "Sunday",
-] as const;
+  "Saturday"
+];
 
-export type DayName = (typeof DAYS)[number];
+export const DAYS_SHORT = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];

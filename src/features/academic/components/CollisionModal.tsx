@@ -1,6 +1,12 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { ShieldAlert, Clock, Building2, Calendar, AlertTriangle } from "lucide-react";
+import {
+  ShieldAlert,
+  Clock,
+  Building2,
+  Calendar,
+  AlertTriangle,
+} from "lucide-react";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -13,20 +19,21 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useTranslation } from "react-i18next";
 import dayjs from "dayjs";
+import { DAYS } from "@/constants/calendar";
+
+export interface ConflictDetail {
+  tenantName: string;
+  dayOfWeek: number;
+  startTime: string;
+  endTime: string;
+  scheduleType: string;
+}
 
 interface CollisionModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  conflicts: {
-    tenantName: string;
-    dayOfWeek: number;
-    startTime: string;
-    endTime: string;
-    scheduleType: string;
-  }[];
+  conflicts: ConflictDetail[];
 }
-
-const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
 export const CollisionModal: React.FC<CollisionModalProps> = ({
   open,
@@ -36,7 +43,8 @@ export const CollisionModal: React.FC<CollisionModalProps> = ({
   const { t } = useTranslation();
 
   const formatTime = (timeStr: string) => {
-    return dayjs(`2020-01-01T${timeStr}`).format("HH:mm");
+    // 🚀 Resilience: Handle both HH:mm:ss and full ISO strings
+    return dayjs(timeStr.includes("T") ? timeStr : `2020-01-01T${timeStr}`).format("HH:mm");
   };
 
   return (
@@ -54,15 +62,8 @@ export const CollisionModal: React.FC<CollisionModalProps> = ({
                 </AlertDialogTitle>
                 <AlertDialogDescription className="text-base font-medium">
                   {conflicts.length === 1
-                    ? t(
-                        "timetable.collision.single",
-                        "A double-booking has been detected for this teacher."
-                      )
-                    : t(
-                        "timetable.collision.multiple",
-                        { count: conflicts.length },
-                        `We detected ${conflicts.length} scheduling conflicts for this teacher.`
-                      )}
+                    ? t("timetable.collision.single", "A double-booking has been detected for this teacher.")
+                    : t("timetable.collision.multiple", { count: conflicts.length }, `We detected ${conflicts.length} scheduling conflicts for this teacher.`)}
                 </AlertDialogDescription>
               </div>
             </div>
@@ -99,7 +100,7 @@ export const CollisionModal: React.FC<CollisionModalProps> = ({
                   <div className="flex flex-wrap gap-x-6 gap-y-2">
                     <div className="flex items-center gap-2 text-muted-foreground font-medium text-[10px]">
                       <Calendar className="w-3.5 h-3.5 opacity-40" />
-                      <span>{DAYS[conflict.dayOfWeek] || "Unknown"}</span>
+                      <span>{DAYS[conflict.dayOfWeek] || t("common.unknown", "Unknown")}</span>
                     </div>
                     <div className="flex items-center gap-2 text-muted-foreground font-medium text-[10px]">
                       <Clock className="w-3.5 h-3.5 opacity-40" />
@@ -116,11 +117,7 @@ export const CollisionModal: React.FC<CollisionModalProps> = ({
           <div className="bg-amber-500/5 border border-amber-500/10 rounded-2xl p-4 flex gap-4">
             <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
             <p className="text-[10px] font-medium leading-relaxed">
-              <strong>{t("timetable.collision.industrialRule", "Industrial Rule")}:</strong>{" "}
-              {t(
-                "timetable.collision.industrialRuleDesc",
-                "A teacher's time is physically finite. Double-booking across suites will cause session failures. Please choose a different timeframe."
-              )}
+              <strong>{t("timetable.collision.industrialRule", "Industrial Rule")}:</strong> {t("timetable.collision.industrialRuleDesc", "A teacher's time is physically finite. Double-booking across suites will cause session failures. Please choose a different timeframe.")}
             </p>
           </div>
 

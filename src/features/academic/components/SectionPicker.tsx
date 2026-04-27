@@ -11,19 +11,30 @@ import {
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { useCustom, useCustomMutation } from "@refinedev/core";
+import { useList, useCustomMutation } from "@refinedev/core";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { handleError } from "@/providers/utils/api-errors";
+import { DAYS_SHORT } from "@/constants/calendar";
+
+export interface Section {
+  id: string;
+  classId: string;
+  className: string;
+  subjectId: string;
+  teacherId: string;
+  teacherName: string;
+  dayOfWeek: number;
+  startTime: string;
+  endTime: string;
+  roomId?: string;
+}
 
 interface SectionPickerProps {
   subjectId: string;
   enrollmentId: string;
   onSuccess?: () => void;
 }
-
-const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 export const SectionPicker: React.FC<SectionPickerProps> = ({
   subjectId,
@@ -32,12 +43,15 @@ export const SectionPicker: React.FC<SectionPickerProps> = ({
 }) => {
   const [selectedClassId, setSelectedClassId] = React.useState<string | null>(null);
 
-  const { data: queryData, isLoading } = useCustom({
-    url: `${import.meta.env.VITE_API_URL}/timetable/available-sections/${subjectId}`,
-    method: "get",
-  } as any) as any;
+  // 🚀 RULE 4: Use useList to leverage Dexie/IndexedDB offline cache
+  const { data: queryData, isLoading } = useList<Section>({
+    resource: `timetable/available-sections/${subjectId}`,
+    queryOptions: {
+      staleTime: 10 * 60 * 1000, // 10 mins cache
+    },
+  });
 
-  const sections = (queryData?.data as any[]) || [];
+  const sections = queryData?.data || [];
 
   const { mutate: updateSection, isLoading: isUpdating } = useCustomMutation() as any;
 
@@ -57,7 +71,10 @@ export const SectionPicker: React.FC<SectionPickerProps> = ({
         },
         onError: async (err: any) => {
           const httpError = await handleError(err);
-          toast.error(httpError.message);
+          // 🚀 RULE 8: Surface Trace ID for high-stakes errors
+          toast.error(httpError.message, {
+            description: `Trace ID: ${httpError.meta?.correlationId || "N/A"}`,
+          });
         },
       }
     );
@@ -123,8 +140,7 @@ export const SectionPicker: React.FC<SectionPickerProps> = ({
                           <div className="flex items-center gap-3 text-xs font-bold text-muted-foreground uppercase tracking-widest">
                             <span className="flex items-center gap-1">
                               <Clock className="w-3 h-3" />
-                              {DAYS[section.dayOfWeek] || "Unknown"} •{" "}
-                              {section.startTime.slice(0, 5)} - {section.endTime.slice(0, 5)}
+                              {DAYS_SHORT[section.dayOfWeek] || "Unknown"} • {section.startTime.slice(0, 5)} - {section.endTime.slice(0, 5)}
                             </span>
                             <span className="flex items-center gap-1">
                               <MapPin className="w-3 h-3" />

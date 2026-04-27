@@ -8,10 +8,21 @@ import { Breadcrumb } from "@/components/refine/layout/breadcrumb";
 import { ListView } from "@/components/refine/views/list-view";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
-import { useCapabilities } from "@/hooks/use-capabilities";
+import { useList, useNavigation } from "@refinedev/core";
+...
 import { Badge } from "@/components/ui/badge";
+import { DAYS } from "@/constants/calendar";
 
-const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+export interface TimetableSlot {
+  id: string;
+  dayOfWeek: number;
+  startTime: string;
+  endTime: string;
+  hasConflict?: boolean;
+  section?: { name: string };
+  subject?: { name: string };
+  conflictDetails?: { with: string; reason: string };
+}
 
 export default function DeptSemesterPlannerPage() {
   const { t } = useTranslation();
@@ -20,13 +31,15 @@ export default function DeptSemesterPlannerPage() {
 
   usePageTitle(t("timetable.deptPlanner.title", "Dept Semester Planner"));
 
-  const { data: queryData, isLoading } = useCustom({
-    url: `${import.meta.env.VITE_API_URL}/timetable/dept-planner`,
-    method: "get",
-  } as any) as any;
+  // 🚀 RULE 4: Use useList to leverage Dexie/IndexedDB offline cache (Rural Pocket Hardening)
+  const { data: queryData, isLoading } = useList<TimetableSlot>({
+    resource: "timetable/dept-planner",
+    queryOptions: {
+      staleTime: 5 * 60 * 1000, // 5 mins
+    },
+  });
 
-  const slots = (queryData?.data as any[]) || [];
-
+  const slots = queryData?.data || [];
   if (!isFacultySuite) {
     return (
       <div className="flex items-center justify-center p-20">
@@ -98,18 +111,18 @@ export default function DeptSemesterPlannerPage() {
               </div>
             </motion.div>
           )}
-        </AnimatePresence>
-
-        <div className="grid grid-cols-1 md:grid-cols-7 gap-6">
-          {DAYS.map((day, idx) => {
-            const daySlots = slots.filter((s) => s.dayOfWeek === idx);
-            return (
-              <div key={idx} className="space-y-4">
-                <header className="py-2 border-b border-border/40 mb-4">
-                  <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-center text-muted-foreground/60">
-                    {day}
-                  </h4>
-                </header>
+        import { DAYS_SHORT } from "@/constants/calendar";
+        ...
+                <div className="grid grid-cols-1 md:grid-cols-7 gap-6">
+                  {DAYS_SHORT.map((day, idx) => {
+                    const daySlots = slots.filter((s) => s.dayOfWeek === idx);
+                    return (
+                      <div key={idx} className="space-y-4">
+                        <header className="py-2 border-b border-border/40 mb-4">
+                          <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-center text-muted-foreground/60">
+                            {day}
+                          </h4>
+                        </header>
                 <div className="space-y-3">
                   {daySlots.length === 0 ? (
                     <div className="h-20 rounded-3xl border border-dashed border-border/40 flex items-center justify-center opacity-10">
