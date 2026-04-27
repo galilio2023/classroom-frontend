@@ -30,15 +30,19 @@ export const ConsentBarrier: React.FC = () => {
 
   useEffect(() => {
     isMounted.current = true;
-    const timer = setTimeout(() => {
-      if (isIdentityLoading && isMounted.current) {
-        setIdentityFetchTimedOut(true);
-      }
-    }, 8000); // 8-second timeout
+    let timer: NodeJS.Timeout;
+
+    if (isIdentityLoading) {
+      timer = setTimeout(() => {
+        if (isMounted.current) {
+          setIdentityFetchTimedOut(true);
+        }
+      }, 8000);
+    }
 
     return () => {
       isMounted.current = false;
-      clearTimeout(timer);
+      if (timer) clearTimeout(timer);
     };
   }, [isIdentityLoading]);
 

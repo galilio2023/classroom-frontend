@@ -55,6 +55,18 @@ export const AiFeatureGuard: React.FC<AiFeatureGuardProps> = ({
 
   // 🛡️ VERSION SAFETY: Force refresh if client is outdated (Review #25)
   if (isClientLagging) {
+    const handleHardRefresh = () => {
+      // 🚀 CACHE BUSTING: Force a hard reload and tell the service worker to skip wait/reload
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.getRegistrations().then((registrations) => {
+          for (const registration of registrations) {
+            registration.unregister();
+          }
+        });
+      }
+      window.location.href = `/?update=${Date.now()}`;
+    };
+
     return (
       <Alert variant="destructive" className="border-2 border-dashed bg-destructive/5">
         <RefreshCcw className="h-4 w-4" />
@@ -69,7 +81,7 @@ export const AiFeatureGuard: React.FC<AiFeatureGuardProps> = ({
           <Button
             size="sm"
             className="w-fit h-9 rounded-xl font-bold gap-2"
-            onClick={() => window.location.reload()}
+            onClick={handleHardRefresh}
           >
             <RefreshCcw className="h-4 w-4" />
             Refresh Now
