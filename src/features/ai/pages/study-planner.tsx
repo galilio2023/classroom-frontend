@@ -60,19 +60,28 @@ const StudyPlanner = () => {
   const { data: user } = useGetIdentity<User>();
   const isMounted = useRef(true);
 
-  // 🛡️ ABORTION Hardening: Separate controllers for Fetch and Mutation (Review #25)
-  const fetchAbortControllerRef = useRef<AbortController>(new AbortController());
-  const mutationAbortControllerRef = useRef<AbortController>(new AbortController());
+  // 🛡️ ABORTION Hardening: Consolidated Controller management (Review #25 Fix)
+  const controllersRef = useRef<Record<string, AbortController>>({
+    fetch: new AbortController(),
+    mutation: new AbortController(),
+  });
+
   const [syncingBlocks, setSyncingBlocks] = useState<Set<string>>(new Set());
   const [lastCorrelationId, setLastCorrelationId] = useState<string | null>(null);
+
+  const getSignal = useCallback((key: "fetch" | "mutation") => {
+    if (controllersRef.current[key].signal.aborted) {
+      controllersRef.current[key] = new AbortController();
+    }
+    return controllersRef.current[key].signal;
+  }, []);
 
   // 🛡️ COMPONENT LIFECYCLE: Handle cleanup and race conditions
   useEffect(() => {
     isMounted.current = true;
     return () => {
       isMounted.current = false;
-      fetchAbortControllerRef.current.abort();
-      mutationAbortControllerRef.current.abort();
+      Object.values(controllersRef.current).forEach((c) => c.abort());
     };
   }, []);
 
@@ -83,11 +92,7 @@ const StudyPlanner = () => {
     errorNotification: false,
     meta: {
       get abortSignal() {
-        // 🛡️ REFRESH Hardening: Ensure we use a fresh controller if the previous one was aborted (Review #25 Fix)
-        if (fetchAbortControllerRef.current.signal.aborted) {
-          fetchAbortControllerRef.current = new AbortController();
-        }
-        return fetchAbortControllerRef.current.signal;
+        return getSignal("fetch");
       },
     },
   });
@@ -184,10 +189,7 @@ const StudyPlanner = () => {
 
   const generatePlan = async () => {
     // 🛡️ ABORT PREVIOUS: Ensure no overlapping generation requests (Review #21)
-    if (mutationAbortControllerRef.current) {
-      mutationAbortControllerRef.current.abort();
-    }
-    mutationAbortControllerRef.current = new AbortController();
+    controllersRef.current.mutation.abort();
     setLastCorrelationId(null);
 
     generatePlanMutation(
@@ -198,7 +200,9 @@ const StudyPlanner = () => {
         successNotification: false,
         // Pass signal to underlying axios/fetch call
         meta: {
-          abortSignal: mutationAbortControllerRef.current.signal,
+          get abortSignal() {
+            return getSignal("mutation");
+          },
         },
       },
       {

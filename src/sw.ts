@@ -37,6 +37,13 @@ self.addEventListener("sync", (event: any) => {
   }
 });
 
+// 🚀 SERVICE WORKER UPDATE: Listen for SKIP_WAITING message (Review #25 Fix)
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "SKIP_WAITING") {
+    self.skipWaiting();
+  }
+});
+
 self.addEventListener("install", (event) => {
   event.waitUntil(
     Promise.all([

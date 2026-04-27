@@ -65,7 +65,7 @@ export const ConsentBarrier: React.FC = () => {
         values: {
           aiConsentVersion: AI_CONSENT_VERSION,
           aiConsent: true,
-          version: user.version + 1, // 🛡️ OPTIMISTIC LOCKING: Explicit Increment (Review #25 Fix)
+          version: user.version, // 🛡️ OPTIMISTIC LOCKING: Send current version (Review #25 Fix)
         },
       },
       {

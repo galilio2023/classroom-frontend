@@ -53,7 +53,8 @@ export const useAiAccess = () => {
   // (Privacy Policy Section 8.4 - Role-Based Data Processing Scopes)
   const requiresConsent = user ? user.aiConsentVersion !== AI_CONSENT_VERSION : false;
 
-  // 🛡️ VERSION SAFETY: Detect if the client is lagging behind a critical server-side update.
+  // 🛡️ VERSION SAFETY: Detect if the client is lagging behind a version the user has accepted elsewhere (Review #25 Fix).
+  // If user.aiConsentVersion (server) is NEWER than AI_CONSENT_VERSION (client), the client bundle is stale.
   const isClientLagging = user?.aiConsentVersion
     ? isNewerVersion(AI_CONSENT_VERSION, user.aiConsentVersion)
     : false;
