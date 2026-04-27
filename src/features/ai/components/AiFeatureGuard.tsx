@@ -56,14 +56,19 @@ export const AiFeatureGuard: React.FC<AiFeatureGuardProps> = ({
   // 🛡️ VERSION SAFETY: Force refresh if client is outdated (Review #25)
   if (isClientLagging) {
     const handleHardRefresh = () => {
-      // 🚀 CACHE BUSTING: Force a hard reload and tell the service worker to skip wait/reload
+      // 🚀 CACHE BUSTING: Check for updates and force reload without destroying the whole cache
       if ("serviceWorker" in navigator) {
         navigator.serviceWorker.getRegistrations().then((registrations) => {
           for (const registration of registrations) {
-            registration.unregister();
+            // Tell the SW to update itself immediately
+            registration.update();
+            if (registration.waiting) {
+              registration.waiting.postMessage({ type: "SKIP_WAITING" });
+            }
           }
         });
       }
+      // Use a cache-busting query param to ensure we get fresh index.html/JS
       window.location.href = `/?update=${Date.now()}`;
     };
 

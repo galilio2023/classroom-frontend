@@ -82,7 +82,13 @@ const StudyPlanner = () => {
     method: "get",
     errorNotification: false,
     meta: {
-      abortSignal: fetchAbortControllerRef.current.signal,
+      get abortSignal() {
+        // 🛡️ REFRESH Hardening: Ensure we use a fresh controller if the previous one was aborted (Review #25 Fix)
+        if (fetchAbortControllerRef.current.signal.aborted) {
+          fetchAbortControllerRef.current = new AbortController();
+        }
+        return fetchAbortControllerRef.current.signal;
+      },
     },
   });
 

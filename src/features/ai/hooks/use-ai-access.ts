@@ -5,6 +5,8 @@ import { User } from "@/types";
 import { BACKEND_URL } from "@/config";
 import { AI_CONSENT_VERSION } from "@/constants/ai";
 
+import { isNewerVersion } from "../utils/version-utils";
+
 /**
  * Centralized hook to manage AI feature access and gating.
  * Adheres to Tablawy OS Rule #2 regarding Adaptive UI and Parent Gating.
@@ -50,25 +52,6 @@ export const useAiAccess = () => {
   // (Reference: Law 151/2020 Art. 4, Para. 2 - Aggregated Educational Analytics Exemption)
   // (Privacy Policy Section 8.4 - Role-Based Data Processing Scopes)
   const requiresConsent = user ? user.aiConsentVersion !== AI_CONSENT_VERSION : false;
-
-  /**
-   * 🛡️ VERSION COMPARISON: Simple semver-like comparison for consent versions.
-   * (Review #25 Fix): Prevents lexicographical bugs (v1.10 < v1.2)
-   */
-  const isNewerVersion = (current: string, latest: string) => {
-    if (!current) return true;
-    const parse = (v: string) => v.replace(/^v/, "").split(/[-.]/).map(Number);
-    const v1 = parse(current);
-    const v2 = parse(latest);
-    const len = Math.max(v1.length, v2.length);
-    for (let i = 0; i < len; i++) {
-      const a = v1[i] || 0;
-      const b = v2[i] || 0;
-      if (a > b) return false;
-      if (b > a) return true;
-    }
-    return false;
-  };
 
   // 🛡️ VERSION SAFETY: Detect if the client is lagging behind a critical server-side update.
   const isClientLagging = user?.aiConsentVersion
