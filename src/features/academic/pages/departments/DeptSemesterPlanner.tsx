@@ -4,23 +4,23 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
   BookOpen,
-  AlertTriangle,
-  Layers,
   ShieldAlert,
   ArrowRight,
+  Layers,
+  WifiOff,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import usePageTitle from "@/hooks/use-page-title";
 import { Breadcrumb } from "@/components/refine/layout/breadcrumb";
 import { ListView } from "@/components/refine/views/list-view";
-import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 import { useCapabilities } from "@/hooks/use-capabilities";
 import { Badge } from "@/components/ui/badge";
 import { DAYS_SHORT, VACATION_INDEX } from "@/constants/calendar";
 import { handleError } from "@/providers/utils/api-errors";
 import { toast } from "sonner";
-import { formatTime } from "@/lib/date-utils";
+import { useOfflineSync } from "@/features/engagement/hooks/use-offline-sync";
+import { PlannerDayColumn } from "../../components/PlannerDayColumn";
 
 export interface TimetableSlot {
   id: string;
@@ -37,21 +37,19 @@ export default function DeptSemesterPlannerPage() {
   const { t } = useTranslation();
   const { isFacultySuite } = useCapabilities();
   const go = useGo();
+  const { isOnline } = useOfflineSync();
 
   usePageTitle(t("timetable.deptPlanner.title", "Dept Semester Planner"));
 
   // 🚀 RULE 4: Use useList to leverage Dexie/IndexedDB offline cache (Rural Pocket Hardening)
-  const listResult = useList<TimetableSlot, HttpError>({
+  const { data, isLoading, isError, error } = useList<TimetableSlot, HttpError>({
     resource: "timetable/dept-planner",
     queryOptions: {
       staleTime: 5 * 60 * 1000, // 5 mins
     },
   }) as any;
 
-  const slots = listResult?.data?.data || [];
-  const isLoading = listResult?.isLoading;
-  const isError = listResult?.isError;
-  const error = listResult?.error;
+  const slots = data?.data || [];
 
   /**
    * 🛡️ RULE 5: Standardized Error Handling
@@ -60,9 +58,9 @@ export default function DeptSemesterPlannerPage() {
     if (isError && error) {
       handleError(error).then((httpError) => {
         toast.error(httpError.message, {
-          description: t("errors.trace_id", { 
+          description: t("errors.trace_id", {
             defaultValue: `Trace ID: ${httpError.meta?.correlationId || "N/A"}`,
-            id: httpError.meta?.correlationId 
+            id: httpError.meta?.correlationId,
           }),
         });
       });
@@ -72,11 +70,22 @@ export default function DeptSemesterPlannerPage() {
   /**
    * 🚀 OPTIMIZATION (Review #5 + #8): Group slots by day to reduce O(N*M) complexity in the grid render.
    */
-  const slotsByDay = useMemo(() => {
-    return (slots as TimetableSlot[]).reduce((acc: Record<number, TimetableSlot[]>, slot: TimetableSlot) => {
-      acc[slot.dayOfWeek] = [...(acc[slot.dayOfWeek] || []), slot];
-      return acc;
-    }, {} as Record<number, TimetableSlot[]>);
+  const { slotsByDay, hasConflicts, conflictCount } = useMemo(() => {
+    const grouped = (slots as TimetableSlot[]).reduce(
+      (acc: Record<number, TimetableSlot[]>, slot: TimetableSlot) => {
+        acc[slot.dayOfWeek] = [...(acc[slot.dayOfWeek] || []), slot];
+        return acc;
+      },
+      {} as Record<number, TimetableSlot[]>
+    );
+
+    const conflicts = (slots as TimetableSlot[]).filter((s) => s.hasConflict);
+
+    return {
+      slotsByDay: grouped,
+      hasConflicts: conflicts.length > 0,
+      conflictCount: conflicts.length,
+    };
   }, [slots]);
 
   if (!isFacultySuite) {
@@ -84,9 +93,14 @@ export default function DeptSemesterPlannerPage() {
       <div className="flex items-center justify-center p-20">
         <Card className="max-w-md p-8 text-center space-y-4 rounded-[2.5rem] border-border/40 shadow-2xl">
           <Layers className="w-12 h-12 text-muted-foreground/20 mx-auto" />
-          <h2 className="text-xl font-black italic">{t("timetable.deptPlanner.facultyLogicRequired", "Faculty Logic Required")}</h2>
+          <h2 className="text-xl font-black italic">
+            {t("timetable.deptPlanner.facultyLogicRequired", "Faculty Logic Required")}
+          </h2>
           <p className="text-muted-foreground font-medium">
-            {t("timetable.deptPlanner.facultyLogicDesc", "The Department Planner is a specialized tool for the Tablawy Faculty suite.")}
+            {t(
+              "timetable.deptPlanner.facultyLogicDesc",
+              "The Department Planner is a specialized tool for the Tablawy Faculty suite."
+            )}
           </p>
         </Card>
       </div>
@@ -94,7 +108,11 @@ export default function DeptSemesterPlannerPage() {
   }
 
   if (isLoading) {
-     return <div className="p-20 text-center animate-pulse">{t("timetable.deptPlanner.loading", "Loading Planner Grid...")}</div>;
+    return (
+      <div className="p-20 text-center animate-pulse">
+        {t("timetable.deptPlanner.loading", "Loading Planner Grid...")}
+      </div>
+    );
   }
 
   return (
@@ -112,13 +130,22 @@ export default function DeptSemesterPlannerPage() {
                 <BookOpen className="h-8 w-8" />
               </div>
               {t("timetable.deptPlanner.gridTitle", "Semester Grid")}
+              {!isOnline && (
+                <Badge variant="destructive" className="ml-4 rounded-full h-8 px-3 font-black uppercase gap-2 animate-pulse shadow-lg shadow-destructive/20">
+                  <WifiOff className="w-4 h-4" />
+                  {t("status.offline", "Offline Mode")}
+                </Badge>
+              )}
             </h1>
             <p className="text-muted-foreground font-medium max-w-2xl text-lg">
-              {t("timetable.deptPlanner.gridDescription", "Manage all departmental sections and resolve timetable overlaps before student registration.")}
+              {t(
+                "timetable.deptPlanner.gridDescription",
+                "Manage all departmental sections and resolve timetable overlaps before student registration."
+              )}
             </p>
           </div>
           <div className="flex gap-4">
-            <Button 
+            <Button
               onClick={() => go({ to: "/reports" })}
               className="rounded-2xl h-12 px-8 font-black uppercase tracking-widest text-[10px] gap-2 shadow-xl shadow-purple-500/20 bg-purple-600"
             >
@@ -130,7 +157,7 @@ export default function DeptSemesterPlannerPage() {
 
         {/* CONFLICT SUMMARY ALERT */}
         <AnimatePresence>
-          {(slots as TimetableSlot[]).some((s: TimetableSlot) => s.hasConflict) && (
+          {hasConflicts && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
@@ -146,11 +173,16 @@ export default function DeptSemesterPlannerPage() {
                     {t("timetable.deptPlanner.collisionsDetected", "Timetable Collisions Detected")}
                   </h3>
                   <p className="text-sm font-medium text-destructive/80">
-                    {t("timetable.deptPlanner.collisionsDescription", "Multiple lecture sections have overlapping times or rooms. Resolve these to prevent registration blocks.")}
+                    {t(
+                      "timetable.deptPlanner.collisionsDescription",
+                      "Multiple lecture sections have overlapping times or rooms. Resolve these to prevent registration blocks."
+                    )}
                   </p>
                 </div>
                 <Badge variant="destructive" className="rounded-full h-8 px-4 font-black uppercase">
-                  {t("timetable.deptPlanner.conflictsCount", { count: (slots as TimetableSlot[]).filter((s) => s.hasConflict).length })}
+                  {t("timetable.deptPlanner.conflictsCount", {
+                    count: conflictCount,
+                  })}
                 </Badge>
               </div>
             </motion.div>
@@ -163,89 +195,12 @@ export default function DeptSemesterPlannerPage() {
             const daySlots = slotsByDay[idx] || [];
 
             return (
-              <div key={idx} className={cn("space-y-4 rounded-3xl p-1 transition-colors min-w-[200px]", isVacation && "bg-muted/5")}>
-                <header className="py-2 border-b border-border/40 mb-4 flex items-center justify-between px-2">
-                  <h4 className={cn("text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60", isVacation && "text-primary/40")}>
-                    {day}
-                  </h4>
-                  {isVacation && (
-                    <span className="text-[7px] font-black uppercase tracking-widest text-primary/30">
-                      {t("status.vacation", "Vacation")}
-                    </span>
-                  )}
-                </header>
-                <div className="space-y-3">
-                  {daySlots.length === 0 ? (
-                    <div className={cn("h-20 rounded-3xl border border-dashed border-border/40 flex items-center justify-center", isVacation ? "opacity-5" : "opacity-10")}>
-                      <span className="text-[10px] font-black uppercase tracking-widest opacity-40">
-                        {isVacation ? t("status.off", "Off") : t("timetable.deptPlanner.noLectures", "No Lectures")}
-                      </span>
-                    </div>
-                  ) : (
-                    daySlots.map((slot: TimetableSlot) => (
-                      <Card
-                        key={slot.id}
-                        className={cn(
-                          "p-4 rounded-3xl transition-all group relative overflow-hidden text-start",
-                          slot.hasConflict
-                            ? "border-destructive/40 bg-destructive/5 shadow-destructive/10"
-                            : "border-border/40 bg-card/60 backdrop-blur-xl shadow-sm hover:shadow-lg"
-                        )}
-                      >
-                        <div className="flex flex-col items-start gap-2">
-                          {slot.hasConflict && (
-                            <Badge
-                              variant="destructive"
-                              className="h-5 px-2 rounded-full text-[7px] font-black uppercase tracking-widest gap-1 animate-pulse"
-                            >
-                              <AlertTriangle className="w-2 h-2" /> {t("timetable.collision.title", "Collision")}
-                            </Badge>
-                          )}
-                          <span
-                            className={cn(
-                              "text-[10px] font-black tracking-tight",
-                              slot.hasConflict ? "text-destructive" : "text-purple-600"
-                            )}
-                          >
-                            {formatTime(slot.startTime)} - {formatTime(slot.endTime)}
-                          </span>
-                          <div className="space-y-1 min-w-0 w-full">
-                            <div className="flex items-center gap-1.5 min-w-0">
-                              <Layers
-                                className={cn(
-                                  "w-3 h-3 shrink-0",
-                                  slot.hasConflict ? "text-destructive" : "text-purple-500"
-                                )}
-                              />
-                              <h5 className="text-[10px] font-black truncate">
-                                Sec {slot.section?.name}
-                              </h5>
-                            </div>
-                            <div className="flex items-center gap-1.5 opacity-60">
-                              <BookOpen className="w-2.5 h-2.5 text-blue-500 shrink-0" />
-                              <span className="text-[9px] font-bold truncate">
-                                {slot.subject?.name}
-                              </span>
-                            </div>
-                          </div>
-
-                          {slot.hasConflict && (
-                            <div className="mt-2 pt-2 border-t border-destructive/10 w-full">
-                              <p className="text-[8px] font-black text-destructive uppercase leading-tight italic">
-                                {t("timetable.deptPlanner.conflictWith", { 
-                                  name: slot.conflictDetails?.with,
-                                  defaultValue: `Conflict with ${slot.conflictDetails?.with}`
-                                })}:<br />
-                                {slot.conflictDetails?.reason}
-                              </p>
-                            </div>
-                          )}
-                        </div>
-                      </Card>
-                    ))
-                  )}
-                </div>
-              </div>
+              <PlannerDayColumn
+                key={idx}
+                dayName={day}
+                isVacation={isVacation}
+                slots={daySlots}
+              />
             );
           })}
         </div>

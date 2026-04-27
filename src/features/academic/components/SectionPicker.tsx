@@ -8,6 +8,7 @@ import {
   Loader2,
   Calendar,
   Layers,
+  WifiOff,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,8 @@ import { handleError } from "@/providers/utils/api-errors";
 import { DAYS_SHORT } from "@/constants/calendar";
 import { useTranslation } from "react-i18next";
 import { formatTime } from "@/lib/date-utils";
+import { useOfflineSync } from "@/features/engagement/hooks/use-offline-sync";
+import { Badge } from "@/components/ui/badge";
 
 export interface Section {
   id: string;
@@ -51,6 +54,7 @@ export const SectionPicker: React.FC<SectionPickerProps> = ({
   const { t } = useTranslation();
   const [selectedClassId, setSelectedClassId] = React.useState<string | null>(null);
   const go = useGo();
+  const { isOnline } = useOfflineSync();
 
   // 🚀 RULE 4: Use useList to leverage Dexie/IndexedDB offline cache
   const listResult = useList<Section, HttpError>({
@@ -78,7 +82,9 @@ export const SectionPicker: React.FC<SectionPickerProps> = ({
       },
       {
         onSuccess: () => {
-          toast.success(t("timetable.section_picker.success", "Lecture section selected successfully!"));
+          toast.success(
+            t("timetable.section_picker.success", "Lecture section selected successfully!")
+          );
           onSuccess?.();
           // Programmatic navigation to dashboard
           go({ to: "/dashboard" });
@@ -87,9 +93,9 @@ export const SectionPicker: React.FC<SectionPickerProps> = ({
           const httpError = await handleError(err);
           // 🚀 RULE 8: Surface Trace ID for high-stakes errors
           toast.error(httpError.message, {
-            description: t("errors.trace_id", { 
+            description: t("errors.trace_id", {
               defaultValue: `Trace ID: ${httpError.meta?.correlationId || "N/A"}`,
-              id: httpError.meta?.correlationId 
+              id: httpError.meta?.correlationId,
             }),
           });
         },
@@ -114,9 +120,18 @@ export const SectionPicker: React.FC<SectionPickerProps> = ({
         <h3 className="text-xl font-black uppercase tracking-tight flex items-center gap-2">
           <Layers className="w-5 h-5 text-purple-500" />
           {t("timetable.section_picker.title", "Choose Your Section")}
+          {!isOnline && (
+            <Badge variant="destructive" className="ml-3 rounded-full h-5 px-2 font-black uppercase gap-1 animate-pulse shadow-lg shadow-destructive/20 text-[8px]">
+              <WifiOff className="w-3 h-3" />
+              {t("status.offline", "Offline Mode")}
+            </Badge>
+          )}
         </h3>
         <p className="text-sm text-muted-foreground font-medium">
-          {t("timetable.section_picker.description", "Select a preferred timeframe and location for your lectures.")}
+          {t(
+            "timetable.section_picker.description",
+            "Select a preferred timeframe and location for your lectures."
+          )}
         </p>
       </div>
 
@@ -157,11 +172,14 @@ export const SectionPicker: React.FC<SectionPickerProps> = ({
                           <div className="flex items-center gap-3 text-xs font-bold text-muted-foreground uppercase tracking-widest">
                             <span className="flex items-center gap-1">
                               <Clock className="w-3 h-3" />
-                              {(DAYS_SHORT[section.dayOfWeek] || t("common.unknown", "Unknown"))} • {formatTime(section.startTime)} - {formatTime(section.endTime)}
+                              {DAYS_SHORT[section.dayOfWeek] ||
+                                t("common.unknown", "Unknown")} • {formatTime(section.startTime)} -{" "}
+                              {formatTime(section.endTime)}
                             </span>
                             <span className="flex items-center gap-1">
                               <MapPin className="w-3 h-3" />
-                              {section.roomId || t("timetable.section_picker.hall_fallback", "Global Hall")}
+                              {section.roomId ||
+                                t("timetable.section_picker.hall_fallback", "Global Hall")}
                             </span>
                           </div>
                         </div>
@@ -195,9 +213,14 @@ export const SectionPicker: React.FC<SectionPickerProps> = ({
                 <Layers className="w-12 h-12 text-muted-foreground/20" />
               </div>
               <div className="space-y-1">
-                <h3 className="font-black uppercase tracking-tight">{t("timetable.section_picker.empty_title", "No Sections Available")}</h3>
+                <h3 className="font-black uppercase tracking-tight">
+                  {t("timetable.section_picker.empty_title", "No Sections Available")}
+                </h3>
                 <p className="text-sm text-muted-foreground max-w-xs">
-                  {t("timetable.section_picker.empty_description", "This course currently has no active lecture slots. Please contact the registrar.")}
+                  {t(
+                    "timetable.section_picker.empty_description",
+                    "This course currently has no active lecture slots. Please contact the registrar."
+                  )}
                 </p>
               </div>
             </div>
