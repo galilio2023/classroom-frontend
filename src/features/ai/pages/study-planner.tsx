@@ -12,7 +12,7 @@ import { useJobs, BackgroundJob } from "@/contexts/job-context";
 import { socket } from "@/lib/socket";
 import { useStudyPlanSync, useOfflineSync } from "@/features/engagement/hooks/use-offline-sync";
 import { TablawyCreateResponse } from "@/types/refine-extensions.d";
-import { User } from "@/types";
+import { User, StudyBlock, StudyPlanTopic } from "@/types";
 import { dispatchStudyBlockXp } from "@/lib/gamification";
 import { useVisibilitySafety } from "@/hooks/use-visibility-safety";
 
@@ -23,14 +23,6 @@ import { performStudyPlanRollback, compareIds } from "../utils/offline-sync-util
 import { StudyPlanStats } from "./study-planner/StudyPlanStats";
 import { AiFeatureGuard } from "../components/AiFeatureGuard";
 import { DAYS, DayName } from "@/constants/calendar";
-
-interface StudyBlock {
-  day: DayName;
-  timeSlot: "Morning" | "Afternoon" | "Evening";
-  task: string;
-  assignmentId?: number;
-  duration: string;
-}
 
 /**
  * 🛡️ StudyPlanResponse Interface
@@ -44,8 +36,6 @@ interface StudyPlanResponse {
   updatedAt: number;
   jobId?: string;
 }
-
-type StudyPlanTopic = "generate_study_plan";
 
 interface JobSocketPayload {
   topic?: StudyPlanTopic;
@@ -70,8 +60,9 @@ const StudyPlanner = () => {
   const { data: user } = useGetIdentity<User>();
   const isMounted = useRef(true);
 
-  // 🛡️ ABORTION Hardening: Initialize immediately for initial fetch (Review #19)
-  const abortControllerRef = useRef<AbortController>(new AbortController());
+  // 🛡️ ABORTION Hardening: Separate controllers for Fetch and Mutation (Review #25)
+  const fetchAbortControllerRef = useRef<AbortController>(new AbortController());
+  const mutationAbortControllerRef = useRef<AbortController>(new AbortController());
   const [syncingBlocks, setSyncingBlocks] = useState<Set<string>>(new Set());
   const [lastCorrelationId, setLastCorrelationId] = useState<string | null>(null);
 
@@ -80,7 +71,8 @@ const StudyPlanner = () => {
     isMounted.current = true;
     return () => {
       isMounted.current = false;
-      abortControllerRef.current.abort();
+      fetchAbortControllerRef.current.abort();
+      mutationAbortControllerRef.current.abort();
     };
   }, []);
 
@@ -90,7 +82,7 @@ const StudyPlanner = () => {
     method: "get",
     errorNotification: false,
     meta: {
-      abortSignal: abortControllerRef.current.signal,
+      abortSignal: fetchAbortControllerRef.current.signal,
     },
   });
 
@@ -186,10 +178,10 @@ const StudyPlanner = () => {
 
   const generatePlan = async () => {
     // 🛡️ ABORT PREVIOUS: Ensure no overlapping generation requests (Review #21)
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
+    if (mutationAbortControllerRef.current) {
+      mutationAbortControllerRef.current.abort();
     }
-    abortControllerRef.current = new AbortController();
+    mutationAbortControllerRef.current = new AbortController();
     setLastCorrelationId(null);
 
     generatePlanMutation(
@@ -200,7 +192,7 @@ const StudyPlanner = () => {
         successNotification: false,
         // Pass signal to underlying axios/fetch call
         meta: {
-          abortSignal: abortControllerRef.current.signal,
+          abortSignal: mutationAbortControllerRef.current.signal,
         },
       },
       {
@@ -354,6 +346,7 @@ const StudyPlanner = () => {
           onGenerate={generatePlan}
           isGenerating={generateMutation.isPending}
           activeJob={activeStudyPlanJob}
+          isOnline={isOnline}
         />
         {/* 🚀 Rule 7: Offline Indicator Badge */}
         <div className="flex flex-col items-center gap-4">

@@ -1,3 +1,5 @@
+import { DayName } from "@/constants/calendar";
+
 export type AIVisualState = "talking" | "thinking" | "listening" | "idle";
 
 export interface AIUsageMetadata {
@@ -32,6 +34,16 @@ export interface ChatSource {
   title: string;
   url: string;
   type: string;
+}
+
+export type StudyPlanTopic = "generate_study_plan";
+
+export interface StudyBlock {
+  day: DayName;
+  timeSlot: "Morning" | "Afternoon" | "Evening";
+  task: string;
+  assignmentId?: number;
+  duration: string;
 }
 
 export interface Message {

@@ -61,7 +61,7 @@ export const ConsentBarrier: React.FC = () => {
         values: {
           aiConsentVersion: AI_CONSENT_VERSION,
           aiConsent: true,
-          version: user.version, // 🛡️ OPTIMISTIC LOCKING
+          version: user.version + 1, // 🛡️ OPTIMISTIC LOCKING: Explicit Increment (Review #25 Fix)
         },
       },
       {
@@ -110,6 +110,32 @@ export const ConsentBarrier: React.FC = () => {
           <Skeleton className="h-28 w-full" />
         </div>
         <Skeleton className="h-14 w-48 rounded-2xl" />
+      </div>
+    );
+  }
+
+  // 🛡️ AUTH HARDENING: Handle cases where loading finished but user is still null (Review #25)
+  if (!isIdentityLoading && !user) {
+    return (
+      <div className="p-8 border-2 border-dashed border-destructive/20 rounded-4xl bg-destructive/5 flex flex-col items-center text-center gap-6 min-h-[450px] justify-center">
+        <div className="p-4 rounded-2xl bg-destructive/10 text-destructive">
+          <AlertCircle className="h-12 w-12 opacity-50" />
+        </div>
+        <div className="space-y-2">
+          <h3 className="text-xl font-bold uppercase">{t("common.error")}</h3>
+          <p className="text-muted-foreground text-sm max-w-xs">
+            {t("ai.consent.sessionExpired", {
+              defaultValue: "Session expired or unauthorized. Please log in again.",
+            })}
+          </p>
+        </div>
+        <Button
+          variant="outline"
+          onClick={() => window.location.reload()}
+          className="rounded-xl px-8"
+        >
+          {t("common.buttons.refresh", { defaultValue: "Refresh Page" })}
+        </Button>
       </div>
     );
   }

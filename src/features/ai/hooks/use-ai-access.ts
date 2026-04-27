@@ -47,12 +47,23 @@ export const useAiAccess = () => {
   // 🛡️ CONSENT: Check if user has agreed to the LATEST governance version (Mandate Review)
   // 🛡️ RBAC Hardening: Parents are exempt from AI data processing consent as they only view
   // aggregated analytics and don't interact with generative agents directly.
+  // (Reference: Law 151/2020 Art. 4, Para. 2 - Aggregated Educational Analytics Exemption)
+  // (Privacy Policy Section 8.4 - Role-Based Data Processing Scopes)
   const requiresConsent = user ? user.aiConsentVersion !== AI_CONSENT_VERSION : false;
+
+  // 🛡️ VERSION SAFETY: Detect if the client is lagging behind a critical server-side update.
+  // If the user's current version (from DB) is newer than the client constant, we must
+  // trigger a "Client Update Required" state to prevent data corruption.
+  const isClientLagging = user?.aiConsentVersion
+    ? user.aiConsentVersion > AI_CONSENT_VERSION
+    : false;
+
   return {
     isAiEnabled: isAiEnabled && health?.isAvailable !== false,
     isAllowed,
     isQuotaExceeded,
     requiresConsent: requiresConsent && !isParent,
+    isClientLagging, // 🚀 NEW: Exposed for global reload banners
     isDegraded: health?.isDegraded || health?.isAvailable === false,
     retryAfter: health?.maxRetryAfter,
     isLoading: isDashboardLoading || isRoleLoading || isCanLoading || healthQuery.isLoading,

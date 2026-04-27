@@ -7,15 +7,8 @@ import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { getBlockId } from "../study-planner";
+import { StudyBlock } from "@/types";
 import { DayName } from "@/constants/calendar";
-
-interface StudyBlock {
-  day: DayName;
-  timeSlot: "Morning" | "Afternoon" | "Evening";
-  task: string;
-  assignmentId?: number;
-  duration: string;
-}
 
 interface StudyPlanDayCardProps {
   day: DayName;

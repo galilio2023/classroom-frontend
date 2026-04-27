@@ -39,6 +39,7 @@ export const AiFeatureGuard: React.FC<AiFeatureGuardProps> = ({
     isDegraded,
     retryAfter,
     isLoading: isAiLoading,
+    isClientLagging,
     refetch,
   } = useAiAccess();
   const { data: canAccess, isLoading: isCanLoading } = useCan({
@@ -50,6 +51,32 @@ export const AiFeatureGuard: React.FC<AiFeatureGuardProps> = ({
 
   if (isLoading) {
     return <Skeleton className={skeletonClassName} />;
+  }
+
+  // 🛡️ VERSION SAFETY: Force refresh if client is outdated (Review #25)
+  if (isClientLagging) {
+    return (
+      <Alert variant="destructive" className="border-2 border-dashed bg-destructive/5">
+        <RefreshCcw className="h-4 w-4" />
+        <AlertTitle className="uppercase font-black tracking-widest">
+          Platform Update Required
+        </AlertTitle>
+        <AlertDescription className="flex flex-col gap-4">
+          <span>
+            A new AI Governance update has been deployed. Please refresh your browser to ensure
+            continued access to AI features.
+          </span>
+          <Button
+            size="sm"
+            className="w-fit h-9 rounded-xl font-bold gap-2"
+            onClick={() => window.location.reload()}
+          >
+            <RefreshCcw className="h-4 w-4" />
+            Refresh Now
+          </Button>
+        </AlertDescription>
+      </Alert>
+    );
   }
 
   // 🛡️ LAW 151: Consent Gating (Highest priority after availability)
