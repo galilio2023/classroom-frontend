@@ -1,13 +1,7 @@
-import { useList, useGo } from "@refinedev/core";
+import { useList, useGo, type HttpError } from "@refinedev/core";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import {
-  BookOpen,
-  AlertTriangle,
-  Layers,
-  ShieldAlert,
-  ArrowRight,
-} from "lucide-react";
+import { BookOpen, AlertTriangle, Layers, ShieldAlert, ArrowRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import usePageTitle from "@/hooks/use-page-title";
 import { Breadcrumb } from "@/components/refine/layout/breadcrumb";
@@ -37,14 +31,15 @@ export default function DeptSemesterPlannerPage() {
   usePageTitle(t("timetable.deptPlanner.title", "Dept Semester Planner"));
 
   // 🚀 RULE 4: Use useList to leverage Dexie/IndexedDB offline cache (Rural Pocket Hardening)
-  const { data: queryData, isLoading } = useList<TimetableSlot>({
+  const listResult = useList<TimetableSlot, HttpError>({
     resource: "timetable/dept-planner",
     queryOptions: {
       staleTime: 5 * 60 * 1000, // 5 mins
     },
   }) as any;
 
-  const slots = (queryData?.data as TimetableSlot[]) || [];
+  const slots = (listResult?.data?.data as TimetableSlot[]) || [];
+  const isLoading = listResult?.isLoading;
 
   if (!isFacultySuite) {
     return (
@@ -58,6 +53,10 @@ export default function DeptSemesterPlannerPage() {
         </Card>
       </div>
     );
+  }
+
+  if (isLoading) {
+    return <div className="p-20 text-center animate-pulse">Loading Planner Grid...</div>;
   }
 
   return (
@@ -82,7 +81,7 @@ export default function DeptSemesterPlannerPage() {
             </p>
           </div>
           <div className="flex gap-4">
-            <Button 
+            <Button
               onClick={() => go({ to: "/reports" })}
               className="rounded-2xl h-12 px-8 font-black uppercase tracking-widest text-[10px] gap-2 shadow-xl shadow-purple-500/20 bg-purple-600"
             >
@@ -128,19 +127,39 @@ export default function DeptSemesterPlannerPage() {
             const daySlots = slots.filter((s: TimetableSlot) => s.dayOfWeek === idx);
 
             return (
-              <div key={idx} className={cn("space-y-4 rounded-3xl p-1 transition-colors", isVacation && "bg-muted/5")}>
+              <div
+                key={idx}
+                className={cn(
+                  "space-y-4 rounded-3xl p-1 transition-colors",
+                  isVacation && "bg-muted/5"
+                )}
+              >
                 <header className="py-2 border-b border-border/40 mb-4 flex items-center justify-between px-2">
-                  <h4 className={cn("text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60", isVacation && "text-primary/40")}>
+                  <h4
+                    className={cn(
+                      "text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60",
+                      isVacation && "text-primary/40"
+                    )}
+                  >
                     {day}
                   </h4>
                   {isVacation && (
-                    <span className="text-[7px] font-black uppercase tracking-widest text-primary/30">Vacation</span>
+                    <span className="text-[7px] font-black uppercase tracking-widest text-primary/30">
+                      Vacation
+                    </span>
                   )}
                 </header>
                 <div className="space-y-3">
                   {daySlots.length === 0 ? (
-                    <div className={cn("h-20 rounded-3xl border border-dashed border-border/40 flex items-center justify-center", isVacation ? "opacity-5" : "opacity-10")}>
-                      <span className="text-[8px] font-bold">{isVacation ? "Off" : "No Lectures"}</span>
+                    <div
+                      className={cn(
+                        "h-20 rounded-3xl border border-dashed border-border/40 flex items-center justify-center",
+                        isVacation ? "opacity-5" : "opacity-10"
+                      )}
+                    >
+                      <span className="text-[8px] font-bold">
+                        {isVacation ? "Off" : "No Lectures"}
+                      </span>
                     </div>
                   ) : (
                     daySlots.map((slot: TimetableSlot) => (

@@ -195,6 +195,20 @@ export const resources: ResourceProps[] = [
     },
   },
   {
+    name: "timetable/dept-planner",
+    meta: {
+      hide: true,
+      roles: [UserRole.ADMIN, UserRole.TEACHER],
+    },
+  },
+  {
+    name: "timetable/available-sections",
+    meta: {
+      hide: true,
+      roles: [UserRole.STUDENT],
+    },
+  },
+  {
     name: "academic-terms",
     list: "/terms",
     meta: {

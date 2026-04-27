@@ -56,10 +56,13 @@ export const CollisionModal: React.FC<CollisionModalProps> = ({
                 </AlertDialogTitle>
                 <AlertDialogDescription className="text-base font-medium">
                   {conflicts.length === 1
-                    ? t("timetable.collision.single", "A double-booking has been detected for this teacher.")
-                    : t("timetable.collision.multiple" as any, { 
+                    ? t(
+                        "timetable.collision.single",
+                        "A double-booking has been detected for this teacher."
+                      )
+                    : t("timetable.collision.multiple" as any, {
                         count: conflicts.length,
-                        defaultValue: `We detected ${conflicts.length} scheduling conflicts for this teacher.` 
+                        defaultValue: `We detected ${conflicts.length} scheduling conflicts for this teacher.`,
                       })}
                 </AlertDialogDescription>
               </div>
