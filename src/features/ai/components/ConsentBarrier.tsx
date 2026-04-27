@@ -186,10 +186,17 @@ export const ConsentBarrier: React.FC = () => {
             defaultValue:
               "To provide AI-powered insights while complying with Law 151/2020, we need your consent to process academic data through our secure AI partner (Google Gemini).",
           })}
-          {/* TODO: Add a link to a "What's New" modal */}
-          <a href="#" className="text-primary font-bold ml-2 underline">
+          <Button
+            variant="link"
+            className="text-primary font-bold h-auto p-0 ml-2 underline hover:text-primary/80"
+            onClick={(e) => {
+              e.preventDefault();
+              // TODO: Trigger "What's New" modal
+              toast.info("Coming soon: Detailed Governance Changelog");
+            }}
+          >
             {t("ai.consent.whatsNew", { defaultValue: "What's New?" })}
-          </a>
+          </Button>
         </p>
       </div>
 

@@ -11,7 +11,6 @@ import { offlineDB } from "@/lib/offline-db";
 import { useJobs, BackgroundJob } from "@/contexts/job-context";
 import { socket } from "@/lib/socket";
 import { useStudyPlanSync, useOfflineSync } from "@/features/engagement/hooks/use-offline-sync";
-import { TablawyCreateResponse } from "@/types/refine-extensions.d";
 import { User, StudyBlock, StudyPlanTopic } from "@/types";
 import { dispatchStudyBlockXp } from "@/lib/gamification";
 import { useVisibilitySafety } from "@/hooks/use-visibility-safety";
@@ -206,9 +205,8 @@ const StudyPlanner = () => {
         },
       },
       {
-        onSuccess: (data) => {
+        onSuccess: (response) => {
           if (!isMounted.current) return;
-          const response = data as TablawyCreateResponse<StudyPlanResponse>;
           const jobId = response.data?.jobId;
 
           if (jobId) {
