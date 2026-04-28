@@ -52,12 +52,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { EmptyState } from "@/components/empty-state";
 import { useTranslation } from "react-i18next";
-import { handleError } from "@/providers/utils/api-errors";
+import { useNotifyError } from "@/hooks/use-notify-error";
 
 dayjs.extend(relativeTime);
 
 export default function AcademicYearsList() {
   const { t, i18n } = useTranslation();
+  const { notifyError } = useNotifyError();
 
   const yearSchema = useMemo(
     () =>
@@ -103,13 +104,7 @@ export default function AcademicYearsList() {
       {
         onSuccess: () => toast.success(t("years.toasts.updated")),
         onError: async (err) => {
-          const httpError = await handleError(err);
-          toast.error(httpError.message, {
-            description: t("errors.trace_id", {
-              defaultValue: `Trace ID: ${httpError.meta?.correlationId || "N/A"}`,
-              id: httpError.meta?.correlationId,
-            }),
-          });
+          notifyError(err);
         },
       }
     );
@@ -125,13 +120,7 @@ export default function AcademicYearsList() {
         {
           onSuccess: () => toast.success(t("years.toasts.deleted")),
           onError: async (err) => {
-            const httpError = await handleError(err);
-            toast.error(httpError.message, {
-              description: t("errors.trace_id", {
-                defaultValue: `Trace ID: ${httpError.meta?.correlationId || "N/A"}`,
-                id: httpError.meta?.correlationId,
-              }),
-            });
+            notifyError(err);
           },
         }
       );
@@ -154,13 +143,7 @@ export default function AcademicYearsList() {
           form.reset();
         },
         onError: async (err) => {
-          const httpError = await handleError(err);
-          toast.error(httpError.message, {
-            description: t("errors.trace_id", {
-              defaultValue: `Trace ID: ${httpError.meta?.correlationId || "N/A"}`,
-              id: httpError.meta?.correlationId,
-            }),
-          });
+          notifyError(err);
         },
       }
     );

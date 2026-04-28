@@ -23,16 +23,7 @@ import { ListView } from "@/components/refine/views/list-view";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 import { useCapabilities } from "@/hooks/use-capabilities";
-
-const DAYS = [
-  { id: 0, label: "Sunday" },
-  { id: 1, label: "Monday" },
-  { id: 2, label: "Tuesday" },
-  { id: 3, label: "Wednesday" },
-  { id: 4, label: "Thursday" },
-  { id: 5, label: "Friday" },
-  { id: 6, label: "Saturday" },
-];
+import { DAYS } from "@/constants/calendar";
 
 export default function TeacherSchedulePage() {
   const { t } = useTranslation();
@@ -110,13 +101,13 @@ export default function TeacherSchedulePage() {
 
           <TabsContent value="lessons" className="mt-0 outline-none">
             <div className="grid grid-cols-1 md:grid-cols-7 gap-6">
-              {DAYS.map((day) => {
-                const daySlots = lessons.filter((s) => s.dayOfWeek === day.id);
-                const isToday = dayjs().get("day") === day.id;
+              {DAYS.map((label, idx) => {
+                const daySlots = lessons.filter((s) => s.dayOfWeek === idx);
+                const isToday = dayjs().get("day") === idx;
 
                 return (
                   <div
-                    key={day.id}
+                    key={idx}
                     className={cn(
                       "space-y-4 p-2 rounded-[2rem] transition-colors duration-500",
                       isToday ? "bg-primary/5 ring-1 ring-primary/10" : ""
@@ -128,7 +119,7 @@ export default function TeacherSchedulePage() {
                         isToday ? "text-primary" : "text-muted-foreground/60"
                       )}
                     >
-                      {day.label}
+                      {label}
                       {isToday && <div className="w-1 h-1 rounded-full bg-primary animate-pulse" />}
                     </div>
                     <div className="space-y-3">
@@ -185,12 +176,12 @@ export default function TeacherSchedulePage() {
 
           <TabsContent value="exams" className="mt-0 outline-none">
             <div className="grid grid-cols-1 md:grid-cols-7 gap-6">
-              {DAYS.map((day) => {
-                const dayExams = exams.filter((s) => s.dayOfWeek === day.id);
+              {DAYS.map((label, idx) => {
+                const dayExams = exams.filter((s) => s.dayOfWeek === idx);
                 return (
-                  <div key={day.id} className="space-y-4">
+                  <div key={idx} className="space-y-4">
                     <div className="text-[10px] font-black uppercase tracking-[0.2em] text-center py-2 border-b border-border/40 mb-4 text-destructive">
-                      {day.label}
+                      {label}
                     </div>
                     <div className="space-y-3">
                       {dayExams.length === 0 ? (

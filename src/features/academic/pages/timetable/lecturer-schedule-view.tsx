@@ -22,18 +22,9 @@ import { ListView } from "@/components/refine/views/list-view";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 import { useCapabilities } from "@/hooks/use-capabilities";
+import { DAYS } from "@/constants/calendar";
 
-const DAYS = [
-  { id: 0, label: "Sunday" },
-  { id: 1, label: "Monday" },
-  { id: 2, label: "Tuesday" },
-  { id: 3, label: "Wednesday" },
-  { id: 4, label: "Thursday" },
-  { id: 5, label: "Friday" },
-  { id: 6, label: "Saturday" },
-];
-
-export default function LecturerWeeklySchedulePage() {
+export default function LecturerScheduleViewPage() {
   const { t } = useTranslation();
   const { isFacultySuite, isTeacher, isAdmin } = useCapabilities();
   const { push } = useNavigation() as any;
@@ -85,13 +76,13 @@ export default function LecturerWeeklySchedulePage() {
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-7 gap-6">
-          {DAYS.map((day) => {
-            const daySlots = slots.filter((s) => s.dayOfWeek === day.id);
-            const isToday = dayjs().get("day") === day.id;
+          {DAYS.map((label, idx) => {
+            const daySlots = slots.filter((s) => s.dayOfWeek === idx);
+            const isToday = dayjs().get("day") === idx;
 
             return (
               <div
-                key={day.id}
+                key={idx}
                 className={cn(
                   "space-y-4 p-2 rounded-[2rem] transition-colors duration-500",
                   isToday ? "bg-purple-500/5 ring-1 ring-purple-500/10" : ""
@@ -100,10 +91,10 @@ export default function LecturerWeeklySchedulePage() {
                 <div
                   className={cn(
                     "text-[10px] font-black uppercase tracking-[0.2em] text-center py-2 border-b border-border/40 mb-4 flex flex-col items-center gap-1",
-                    isToday ? "text-purple-600" : "text-muted-foreground/60"
+                    isToday ? "text-purple-500" : "text-muted-foreground/60"
                   )}
                 >
-                  {day.label}
+                  {label}
                   {isToday && <div className="w-1 h-1 rounded-full bg-purple-600 animate-pulse" />}
                 </div>
                 <div className="space-y-3">

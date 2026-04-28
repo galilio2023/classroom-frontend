@@ -60,16 +60,7 @@ import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 import { useCapabilities } from "@/hooks/use-capabilities";
 import { CollisionModal } from "../../components/CollisionModal";
-
-const DAYS = [
-  { id: 0, label: "Sunday" },
-  { id: 1, label: "Monday" },
-  { id: 2, label: "Tuesday" },
-  { id: 3, label: "Wednesday" },
-  { id: 4, label: "Thursday" },
-  { id: 5, label: "Friday" },
-  { id: 6, label: "Saturday" },
-];
+import { DAYS } from "@/constants/calendar";
 
 export default function ExamSchedulePage() {
   const { t } = useTranslation();
@@ -248,9 +239,9 @@ export default function ExamSchedulePage() {
                             <SelectValue placeholder="Select Day" />
                           </SelectTrigger>
                           <SelectContent>
-                            {DAYS.map((d) => (
-                              <SelectItem key={d.id} value={d.id.toString()}>
-                                {d.label}
+                            {DAYS.map((label, idx) => (
+                              <SelectItem key={idx} value={idx.toString()}>
+                                {label}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -341,12 +332,12 @@ export default function ExamSchedulePage() {
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-7 gap-6">
-          {DAYS.map((day) => {
-            const daySlots = slots.filter((s) => s.dayOfWeek === day.id);
+          {DAYS.map((label, idx) => {
+            const daySlots = slots.filter((s) => s.dayOfWeek === idx);
             return (
-              <div key={day.id} className="space-y-4">
+              <div key={idx} className="space-y-4">
                 <div className="text-[10px] font-black uppercase tracking-[0.2em] text-center text-muted-foreground/60 py-2 border-b border-border/40 mb-4">
-                  {day.label}
+                  {label}
                 </div>
                 <div className="space-y-3">
                   {daySlots.length === 0 ? (

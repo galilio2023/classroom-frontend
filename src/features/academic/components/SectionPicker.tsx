@@ -17,12 +17,12 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useList, useCustomMutation, useGo, type HttpError } from "@refinedev/core";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { handleError } from "@/providers/utils/api-errors";
 import { DAYS_SHORT } from "@/constants/calendar";
 import { useTranslation } from "react-i18next";
 import { formatTime } from "@/lib/date-utils";
 import { useOfflineSync } from "@/features/engagement/hooks/use-offline-sync";
 import { Badge } from "@/components/ui/badge";
+import { useNotifyError } from "@/hooks/use-notify-error";
 
 export interface Section {
   id: string;
@@ -57,6 +57,7 @@ export const SectionPicker: React.FC<SectionPickerProps> = ({
   const [selectedClassId, setSelectedClassId] = React.useState<string | null>(null);
   const go = useGo();
   const { isOnline } = useOfflineSync();
+  const { notifyError } = useNotifyError();
 
   // 🚀 RULE 4: Use useList to leverage Dexie/IndexedDB offline cache
   const { query } = useList<Section, HttpError>({
@@ -81,18 +82,11 @@ export const SectionPicker: React.FC<SectionPickerProps> = ({
     const errorKey = error ? `${error.statusCode}-${error.message}` : null;
     if (isError && error && lastErrorRef.current !== errorKey) {
       lastErrorRef.current = errorKey;
-      handleError(error).then((httpError) => {
-        toast.error(httpError.message, {
-          description: t("errors.trace_id", {
-            defaultValue: `Trace ID: ${httpError.meta?.correlationId || "N/A"}`,
-            id: httpError.meta?.correlationId,
-          }),
-        });
-      });
+      notifyError(error);
     } else if (!isError) {
       lastErrorRef.current = null;
     }
-  }, [isError, error, t]);
+  }, [isError, error, notifyError]);
 
   const { mutate: updateSection, mutation } = useCustomMutation<
     SectionSelectionResponse,
@@ -118,18 +112,12 @@ export const SectionPicker: React.FC<SectionPickerProps> = ({
             );
           }
           onSuccess?.();
-          // Programmatic navigation to dashboard
-          go({ to: "/dashboard" });
+          // 🚀 Programmatic navigation to dashboard using resource-based pattern (Review #15)
+          go({ to: { resource: "dashboard", action: "list" } });
         },
         onError: async (err: unknown) => {
-          const httpError = await handleError(err);
-          // 🚀 RULE 8: Surface Trace ID for high-stakes errors
-          toast.error(httpError.message, {
-            description: t("errors.trace_id", {
-              defaultValue: `Trace ID: ${httpError.meta?.correlationId || "N/A"}`,
-              id: httpError.meta?.correlationId,
-            }),
-          });
+          // 🚀 RULE 8: Surface Trace ID for high-stakes errors via centralized hook
+          notifyError(err);
         },
       }
     );

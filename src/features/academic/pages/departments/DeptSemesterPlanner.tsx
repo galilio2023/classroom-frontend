@@ -11,10 +11,9 @@ import { useTranslation } from "react-i18next";
 import { useCapabilities } from "@/hooks/use-capabilities";
 import { Badge } from "@/components/ui/badge";
 import { DAYS_SHORT, VACATION_INDEX } from "@/constants/calendar";
-import { handleError } from "@/providers/utils/api-errors";
-import { toast } from "sonner";
 import { useOfflineSync } from "@/features/engagement/hooks/use-offline-sync";
 import { PlannerDayColumn } from "../../components/PlannerDayColumn";
+import { useNotifyError } from "@/hooks/use-notify-error";
 
 export interface TimetableSlot {
   id: string;
@@ -32,6 +31,7 @@ export default function DeptSemesterPlannerPage() {
   const { isFacultySuite } = useCapabilities();
   const go = useGo();
   const { isOnline } = useOfflineSync();
+  const { notifyError } = useNotifyError();
 
   usePageTitle(t("timetable.deptPlanner.title", "Dept Semester Planner"));
 
@@ -50,16 +50,9 @@ export default function DeptSemesterPlannerPage() {
    */
   useEffect(() => {
     if (isError && error) {
-      handleError(error).then((httpError) => {
-        toast.error(httpError.message, {
-          description: t("errors.trace_id", {
-            defaultValue: `Trace ID: ${httpError.meta?.correlationId || "N/A"}`,
-            id: httpError.meta?.correlationId,
-          }),
-        });
-      });
+      notifyError(error);
     }
-  }, [isError, error, t]);
+  }, [isError, error, notifyError]);
 
   /**
    * 🚀 OPTIMIZATION (Review #5 + #8): Group slots by day to reduce O(N*M) complexity in the grid render.
@@ -144,7 +137,7 @@ export default function DeptSemesterPlannerPage() {
           </div>
           <div className="flex gap-4">
             <Button
-              onClick={() => go({ to: "/reports" })}
+              onClick={() => go({ to: { resource: "reports", action: "list" } })}
               className="rounded-2xl h-12 px-8 font-black uppercase tracking-widest text-[10px] gap-2 shadow-xl shadow-purple-500/20 bg-purple-600"
             >
               {t("timetable.deptPlanner.generateReports", "Generate Reports")}

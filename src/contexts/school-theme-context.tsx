@@ -45,7 +45,8 @@ export const SchoolThemeProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
       // 🛡️ VALIDATION: Only append alpha if it's a valid 6-digit hex string (Review #15)
       const isValidHex = /^[0-9A-Fa-f]{6}$/i.test(hex);
-      const normalizedColor = isValidHex ? `#${hex}` : theme.primaryColor;
+      // 🚀 FALLBACK: Use a safe indigo constant if the institutional color is malformed
+      const normalizedColor = isValidHex ? `#${hex}` : "#6366f1";
 
       document.documentElement.style.setProperty("--primary", normalizedColor);
 
