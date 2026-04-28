@@ -25,6 +25,7 @@ import { useOnlineStatus } from "@/hooks/use-online-status";
 import { useSchoolTheme } from "@/contexts/school-theme-context";
 import { toast } from "sonner";
 import { QUERY_SETTINGS } from "@/constants/api";
+import { offlineDB } from "@/lib/offline-db";
 
 interface Section {
   id: string;
@@ -80,8 +81,28 @@ export const SectionPicker: React.FC<SectionPickerProps> = ({ enrollmentId, onSu
   const { mutate, mutation } = useCustomMutation<SectionSelectionResponse>();
   const isUpdating = mutation.isPending;
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     if (!selectedClassId) return;
+
+    if (!isOnline) {
+      // 🛡️ RULE 4 (Rural Hardening): Queue mutation for background sync
+      await offlineDB.queue({
+        resource: "timetable/enrollment/select-section",
+        action: "custom",
+        variables: { enrollmentId, classId: selectedClassId },
+        meta: { method: "patch" },
+      });
+
+      toast.success(
+        t(
+          "status.offline_save_success",
+          "Selection saved offline. It will sync when you are back online."
+        )
+      );
+      onSuccess?.();
+      go({ to: { resource: "dashboard", action: "list" } });
+      return;
+    }
 
     mutate(
       {

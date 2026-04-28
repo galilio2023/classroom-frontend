@@ -765,7 +765,7 @@ export const AppRouter = () => {
                   }
                 />
                 <Route
-                  path="/terms"
+                  path="/academic-terms"
                   element={
                     <AuthorizedRoute resource="academic-terms" action="list">
                       <TermsList />

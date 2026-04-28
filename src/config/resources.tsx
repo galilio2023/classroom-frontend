@@ -212,7 +212,7 @@ export const resources: ResourceProps[] = [
   },
   {
     name: "academic-terms",
-    list: "/terms",
+    list: "/academic-terms",
     meta: {
       group: "groups.academic",
       label: "resources.academic-terms.label",

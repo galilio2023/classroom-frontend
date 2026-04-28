@@ -23,8 +23,9 @@ export const normalizeHex = (color: string | null | undefined): string | null =>
       .join("");
   }
 
-  // Validate 6-digit hex
-  const isValidHex = /^[0-9A-Fa-f]{6}$/i.test(hex);
+  // 🛡️ SECURITY: Strict validation against Hex format (Review #15 Hardening)
+  // Prevents malicious CSS injection via branding strings.
+  const isValidHex = /^([A-Fa-f0-9]{6})$/.test(hex);
   return isValidHex ? `#${hex.toLowerCase()}` : null;
 };
 
