@@ -29,5 +29,16 @@
     "empty_description": "This course currently has no active lecture slots. Please contact the registrar.",
     "confirm": "Confirm Selection",
     "hall_fallback": "Global Hall"
+  },
+  "calendar": {
+    "days": {
+      "sunday": "Sunday",
+      "monday": "Monday",
+      "tuesday": "Tuesday",
+      "wednesday": "Wednesday",
+      "thursday": "Thursday",
+      "friday": "Friday",
+      "saturday": "Saturday"
+    }
   }
 }

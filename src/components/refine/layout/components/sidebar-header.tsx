@@ -56,7 +56,19 @@ export function SidebarHeader() {
           "ms-auto": !isCollapsed,
         })}
       >
-        {isCollapsed && <SuiteIdentityBadge />}
+        <AnimatePresence mode="wait">
+          {isCollapsed && (
+            <motion.div
+              key="badge-collapsed"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              transition={{ duration: 0.2 }}
+            >
+              <SuiteIdentityBadge />
+            </motion.div>
+          )}
+        </AnimatePresence>
         <ShadcnSidebarTrigger className="text-muted-foreground/60 hover:text-primary transition-all duration-300 shrink-0" />
       </div>
     </ShadcnSidebarHeader>

@@ -34,7 +34,7 @@ export const PlannerDayColumn: React.FC<PlannerDayColumnProps> = ({
             isVacation && "text-primary/40"
           )}
         >
-          {dayName}
+          {t(`timetable.calendar.days.${dayName.toLowerCase()}`, { defaultValue: dayName })}
         </h4>
         {isVacation && (
           <span className="text-[7px] font-black uppercase tracking-widest text-primary/30">

@@ -17,20 +17,25 @@ export const SchoolThemeProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const { data: identity } = useGetIdentity<User>();
   const { suiteType } = useCapabilities();
 
+  // 🛡️ SECURITY: Pre-calculate fallback color for both useMemo and useEffect (Review #15)
+  const suiteFallback = useMemo(
+    () => SUITE_COLORS[suiteType as SuiteType] || SUITE_COLORS.private,
+    [suiteType]
+  );
+
   const theme = useMemo((): SchoolTheme => {
     const branding = identity?.school?.brandingConfig;
-    const fallbackColor = SUITE_COLORS[suiteType as SuiteType] || SUITE_COLORS.private;
 
     return {
-      primaryColor: branding?.primaryColor || fallbackColor,
+      primaryColor: branding?.primaryColor || suiteFallback,
       logoUrl: branding?.logoUrl || null,
       schoolName: identity?.schoolName || null,
     };
-  }, [identity, suiteType]);
+  }, [identity, suiteFallback]);
 
   useEffect(() => {
     // 🛡️ SECURITY: Normalize hex color before injecting into CSS variables (Review #15)
-    const normalizedColor = normalizeHex(theme.primaryColor) || "#6366f1"; // Fallback to Indigo
+    const normalizedColor = normalizeHex(theme.primaryColor) || suiteFallback;
 
     document.documentElement.style.setProperty("--primary", normalizedColor);
 
@@ -42,7 +47,7 @@ export const SchoolThemeProvider: React.FC<{ children: React.ReactNode }> = ({ c
       // Fallback if withAlpha failed for some reason
       document.documentElement.style.setProperty("--primary-muted", `${normalizedColor}22`);
     }
-  }, [theme.primaryColor]);
+  }, [theme.primaryColor, suiteFallback]);
 
   return <SchoolThemeContext.Provider value={theme}>{children}</SchoolThemeContext.Provider>;
 };

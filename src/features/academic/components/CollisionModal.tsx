@@ -105,7 +105,14 @@ export const CollisionModal: React.FC<CollisionModalProps> = ({
                   <div className="flex flex-wrap gap-x-6 gap-y-2">
                     <div className="flex items-center gap-2 text-muted-foreground font-medium text-[10px]">
                       <Calendar className="w-3.5 h-3.5 opacity-40" />
-                      <span>{DAYS[conflict.dayOfWeek] || t("common.unknown", "Unknown")}</span>
+                      <span>
+                        {t(
+                          `timetable.calendar.days.${(DAYS[conflict.dayOfWeek] || "").toLowerCase()}`,
+                          {
+                            defaultValue: DAYS[conflict.dayOfWeek],
+                          }
+                        ) || t("common.unknown", "Unknown")}
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 text-muted-foreground font-medium text-[10px]">
                       <Clock className="w-3.5 h-3.5 opacity-40" />

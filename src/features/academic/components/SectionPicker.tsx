@@ -75,16 +75,13 @@ export const SectionPicker: React.FC<SectionPickerProps> = ({
 
   /**
    * 🛡️ RULE 5: Standardized Error Handling
+   * Mandate Review #15: Encapsulated deduplication inside useNotifyError.
    */
-  const lastErrorRef = React.useRef<string | null>(null);
   React.useEffect(() => {
-    // 🛡️ OPTIMIZATION: Use error details for change detection instead of full JSON.stringify (Review #15)
-    const errorKey = error ? `${error.statusCode}-${error.message}` : null;
-    if (isError && error && lastErrorRef.current !== errorKey) {
-      lastErrorRef.current = errorKey;
+    if (isError && error) {
       notifyError(error);
     } else if (!isError) {
-      lastErrorRef.current = null;
+      notifyError(null); // Reset deduplication ref
     }
   }, [isError, error, notifyError]);
 
