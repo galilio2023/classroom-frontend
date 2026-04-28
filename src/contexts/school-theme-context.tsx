@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useMemo } from "react";
 import { useGetIdentity } from "@refinedev/core";
-import { User } from "@/types";
+import { User, BrandingConfig } from "@/types";
 import { useCapabilities } from "@/hooks/use-capabilities";
 
 interface SchoolTheme {
@@ -11,25 +11,28 @@ interface SchoolTheme {
 
 const SchoolThemeContext = createContext<SchoolTheme | undefined>(undefined);
 
-const SUITE_COLORS = {
-  private: "#6366f1", // Indigo
-  school: "#3b82f6", // Blue
-  faculty: "#8b5cf6", // Purple
-  corporate: "#10b981", // Emerald
+/**
+ * 🎨 SUITE BRANDING DEFAULTS
+ * Mandate Review #14: Ensure these align with CSS variables for suite-specific UI.
+ */
+const SUITE_COLORS: Record<string, string> = {
+  private: "#6366f1", // Indigo-500
+  school: "#3b82f6", // Blue-500
+  faculty: "#8b5cf6", // Purple-500
+  corporate: "#10b981", // Emerald-500
 };
 
 export const SchoolThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { data: identity } = useGetIdentity<User>();
   const { suiteType } = useCapabilities();
 
-  const theme = useMemo(() => {
-    const config = identity?.school?.brandingConfig || {};
-    const fallbackColor =
-      SUITE_COLORS[suiteType as keyof typeof SUITE_COLORS] || SUITE_COLORS.private;
+  const theme = useMemo((): SchoolTheme => {
+    const branding = identity?.school?.brandingConfig;
+    const fallbackColor = SUITE_COLORS[suiteType as string] || SUITE_COLORS.private;
 
     return {
-      primaryColor: config.primaryColor || fallbackColor,
-      logoUrl: config.logoUrl || null,
+      primaryColor: branding?.primaryColor || fallbackColor,
+      logoUrl: branding?.logoUrl || null,
       schoolName: identity?.schoolName || null,
     };
   }, [identity, suiteType]);
@@ -37,7 +40,7 @@ export const SchoolThemeProvider: React.FC<{ children: React.ReactNode }> = ({ c
   useEffect(() => {
     if (theme.primaryColor) {
       document.documentElement.style.setProperty("--primary", theme.primaryColor);
-      // Generate a subtle glow/muted version for glassmorphism
+      // 🚀 RULE: Generate a subtle glow/muted version for glassmorphism without transparency issues
       document.documentElement.style.setProperty("--primary-muted", `${theme.primaryColor}22`);
     }
   }, [theme.primaryColor]);

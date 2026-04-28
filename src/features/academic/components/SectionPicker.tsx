@@ -57,19 +57,37 @@ export const SectionPicker: React.FC<SectionPickerProps> = ({
   const { isOnline } = useOfflineSync();
 
   // 🚀 RULE 4: Use useList to leverage Dexie/IndexedDB offline cache
-  const listResult = useList<Section, HttpError>({
+  const { query } = useList<Section, HttpError>({
     resource: `timetable/available-sections/${subjectId}`,
     queryOptions: {
       staleTime: 10 * 60 * 1000, // 10 mins cache
     },
-  }) as any;
+  });
 
-  const sections = listResult.data?.data || [];
-  const isLoading = listResult.isLoading;
+  const { data, isLoading, isError, error } = query;
+  const sections = data?.data || [];
 
-  const mutationResult = useCustomMutation<SectionSelectionResponse, HttpError>() as any;
-  const updateSection = mutationResult.mutate;
-  const isUpdating = mutationResult.isLoading;
+  /**
+   * 🛡️ RULE 5: Standardized Error Handling
+   */
+  React.useEffect(() => {
+    if (isError && error) {
+      handleError(error).then((httpError) => {
+        toast.error(httpError.message, {
+          description: t("errors.trace_id", {
+            defaultValue: `Trace ID: ${httpError.meta?.correlationId || "N/A"}`,
+            id: httpError.meta?.correlationId,
+          }),
+        });
+      });
+    }
+  }, [isError, error, t]);
+
+  const { mutate: updateSection, mutation } = useCustomMutation<
+    SectionSelectionResponse,
+    HttpError
+  >();
+  const isUpdating = mutation.isPending;
 
   const handleConfirm = async () => {
     if (!selectedClassId) return;
@@ -121,7 +139,10 @@ export const SectionPicker: React.FC<SectionPickerProps> = ({
           <Layers className="w-5 h-5 text-purple-500" />
           {t("timetable.section_picker.title", "Choose Your Section")}
           {!isOnline && (
-            <Badge variant="destructive" className="ml-3 rounded-full h-5 px-2 font-black uppercase gap-1 animate-pulse shadow-lg shadow-destructive/20 text-[8px]">
+            <Badge
+              variant="destructive"
+              className="ml-3 rounded-full h-5 px-2 font-black uppercase gap-1 animate-pulse shadow-lg shadow-destructive/20 text-[8px]"
+            >
               <WifiOff className="w-3 h-3" />
               {t("status.offline", "Offline Mode")}
             </Badge>

@@ -2,13 +2,7 @@ import React, { useMemo, useEffect } from "react";
 import { useList, useGo, type HttpError } from "@refinedev/core";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import {
-  BookOpen,
-  ShieldAlert,
-  ArrowRight,
-  Layers,
-  WifiOff,
-} from "lucide-react";
+import { BookOpen, ShieldAlert, ArrowRight, Layers, WifiOff } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import usePageTitle from "@/hooks/use-page-title";
 import { Breadcrumb } from "@/components/refine/layout/breadcrumb";
@@ -42,13 +36,14 @@ export default function DeptSemesterPlannerPage() {
   usePageTitle(t("timetable.deptPlanner.title", "Dept Semester Planner"));
 
   // 🚀 RULE 4: Use useList to leverage Dexie/IndexedDB offline cache (Rural Pocket Hardening)
-  const { data, isLoading, isError, error } = useList<TimetableSlot, HttpError>({
+  const { query } = useList<TimetableSlot, HttpError>({
     resource: "timetable/dept-planner",
     queryOptions: {
       staleTime: 5 * 60 * 1000, // 5 mins
     },
-  }) as any;
+  });
 
+  const { data, isLoading, isError, error } = query;
   const slots = data?.data || [];
 
   /**
@@ -131,7 +126,10 @@ export default function DeptSemesterPlannerPage() {
               </div>
               {t("timetable.deptPlanner.gridTitle", "Semester Grid")}
               {!isOnline && (
-                <Badge variant="destructive" className="ml-4 rounded-full h-8 px-3 font-black uppercase gap-2 animate-pulse shadow-lg shadow-destructive/20">
+                <Badge
+                  variant="destructive"
+                  className="ml-4 rounded-full h-8 px-3 font-black uppercase gap-2 animate-pulse shadow-lg shadow-destructive/20"
+                >
                   <WifiOff className="w-4 h-4" />
                   {t("status.offline", "Offline Mode")}
                 </Badge>
@@ -195,12 +193,7 @@ export default function DeptSemesterPlannerPage() {
             const daySlots = slotsByDay[idx] || [];
 
             return (
-              <PlannerDayColumn
-                key={idx}
-                dayName={day}
-                isVacation={isVacation}
-                slots={daySlots}
-              />
+              <PlannerDayColumn key={idx} dayName={day} isVacation={isVacation} slots={daySlots} />
             );
           })}
         </div>

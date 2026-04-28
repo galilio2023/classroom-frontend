@@ -94,11 +94,18 @@ export interface User {
   stripeOnboardingComplete?: boolean;
 }
 
+export interface BrandingConfig {
+  primaryColor?: string;
+  logoUrl?: string;
+  theme?: "light" | "dark" | "system";
+  accentColor?: string;
+}
+
 export interface School extends BaseRecord {
   id: string;
   name: string;
   slug: string;
-  brandingConfig: any;
+  brandingConfig: BrandingConfig;
   planType: "basic" | "faculty" | "school";
   suiteType: "private" | "school" | "faculty" | "corporate";
   suiteActivatedAt?: string;
