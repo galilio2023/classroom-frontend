@@ -252,11 +252,19 @@ export const SectionPicker: React.FC<SectionPickerProps> = ({
       <div className="pt-4 border-t border-border/40 flex justify-end gap-3">
         <Button
           onClick={handleConfirm}
-          disabled={!selectedClassId || isUpdating}
+          disabled={!selectedClassId || isUpdating || !isOnline}
           className="h-14 px-8 rounded-2xl font-black uppercase tracking-widest text-xs gap-2 shadow-xl shadow-purple-500/20 bg-purple-600 hover:bg-purple-700"
         >
           {isUpdating ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              {t("common.saving", "Saving...")}
+            </>
+          ) : !isOnline ? (
+            <>
+              <WifiOff className="w-4 h-4" />
+              {t("status.offline_waiting", "Offline")}
+            </>
           ) : (
             <>
               {t("timetable.section_picker.confirm", "Confirm Selection")}

@@ -14,14 +14,6 @@ export interface AIResponse<T> {
 
 export type SignUpPayload = z.infer<typeof signUpFormSchema>;
 
-export enum UserRole {
-  ADMIN = "admin",
-  TEACHER = "teacher",
-  TA = "ta",
-  STUDENT = "student",
-  PARENT = "parent",
-}
-
 export enum UserStatus {
   ACTIVE = "active",
   INACTIVE = "inactive",
@@ -92,6 +84,20 @@ export interface User {
   };
   stripeAccountId?: string | null;
   stripeOnboardingComplete?: boolean;
+}
+
+export type SuiteType = "private" | "school" | "faculty" | "corporate";
+
+export enum UserRole {
+  STUDENT = "student",
+  TEACHER = "teacher",
+  TA = "ta",
+  ADMIN = "admin",
+  PARENT = "parent",
+  PRINCIPAL = "principal",
+  DEPT_HEAD = "deptHead",
+  REGISTRAR = "registrar",
+  MANAGER = "manager",
 }
 
 export interface BrandingConfig {
