@@ -38,7 +38,7 @@ export const SchoolThemeProvider: React.FC<{ children: React.ReactNode }> = ({ c
   }, [identity, suiteType]);
 
   useEffect(() => {
-    if (theme.primaryColor) {
+    if (theme.primaryColor && typeof theme.primaryColor === "string") {
       // 🛡️ SECURITY: Normalize hex color to 6 digits before adding alpha (Review #15)
       let hex = theme.primaryColor;
       if (hex.startsWith("#")) {

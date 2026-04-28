@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useList, useCustomMutation, useGo, type HttpError } from "@refinedev/core";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -130,11 +131,28 @@ export const SectionPicker: React.FC<SectionPickerProps> = ({
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center p-12 gap-4">
-        <Loader2 className="h-8 w-8 animate-spin text-primary opacity-20" />
-        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground animate-pulse">
-          {t("timetable.section_picker.loading", "Fetching Available Sections...")}
-        </p>
+      <div className="space-y-8 text-start">
+        <div className="space-y-3">
+          <Skeleton className="h-6 w-48 rounded-full" />
+          <Skeleton className="h-4 w-full rounded-full" />
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <Card key={i} className="rounded-3xl border-border/40 overflow-hidden">
+              <div className="p-6 space-y-6">
+                <div className="flex justify-between">
+                  <Skeleton className="h-10 w-24 rounded-2xl" />
+                  <Skeleton className="h-8 w-16 rounded-full" />
+                </div>
+                <div className="space-y-3">
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-3/4" />
+                </div>
+                <Skeleton className="h-12 w-full rounded-2xl" />
+              </div>
+            </Card>
+          ))}
+        </div>
       </div>
     );
   }
