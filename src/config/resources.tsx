@@ -196,6 +196,7 @@ export const resources: ResourceProps[] = [
   },
   {
     name: "timetable/dept-planner",
+    list: "/timetable/dept-planner",
     meta: {
       hide: true,
       roles: [UserRole.ADMIN, UserRole.TEACHER],
@@ -203,6 +204,7 @@ export const resources: ResourceProps[] = [
   },
   {
     name: "timetable/available-sections",
+    list: "/timetable/available-sections",
     meta: {
       hide: true,
       roles: [UserRole.STUDENT],

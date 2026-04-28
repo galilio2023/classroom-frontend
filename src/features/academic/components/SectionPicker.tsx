@@ -73,8 +73,10 @@ export const SectionPicker: React.FC<SectionPickerProps> = ({
    */
   const lastErrorRef = React.useRef<string | null>(null);
   React.useEffect(() => {
-    if (isError && error && lastErrorRef.current !== JSON.stringify(error)) {
-      lastErrorRef.current = JSON.stringify(error);
+    // 🛡️ OPTIMIZATION: Use error details for change detection instead of full JSON.stringify (Review #15)
+    const errorKey = error ? `${error.statusCode}-${error.message}` : null;
+    if (isError && error && lastErrorRef.current !== errorKey) {
+      lastErrorRef.current = errorKey;
       handleError(error).then((httpError) => {
         toast.error(httpError.message, {
           description: t("errors.trace_id", {

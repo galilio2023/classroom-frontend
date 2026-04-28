@@ -82,6 +82,13 @@ export interface PendingXpGain {
   createdAt: number;
 }
 
+export interface ResourceCache {
+  key: string; // resource-name:filters:pagination:sort
+  data: unknown;
+  total?: number;
+  updatedAt: number;
+}
+
 export class OfflineDB extends Dexie {
   lessons!: Table<CachedLesson>;
   quizzes!: Table<PendingQuizSubmission>;
@@ -92,10 +99,11 @@ export class OfflineDB extends Dexie {
   background_jobs!: Table<BackgroundJobRecord>;
   study_plans!: Table<StudyPlanRecord>;
   pending_xp!: Table<PendingXpGain>;
+  resource_cache!: Table<ResourceCache>;
 
   constructor() {
     super("TablawyOfflineDB");
-    this.version(5)
+    this.version(6)
       .stores({
         lessons: "id, classId",
         quizzes: "++id, quizId, userId",
@@ -106,10 +114,11 @@ export class OfflineDB extends Dexie {
         background_jobs: "id, type, status, createdAt",
         study_plans: "id",
         pending_xp: "++id",
+        resource_cache: "key",
       })
       .upgrade((tx) => {
-        // Version 5: Added pending_xp
-        return tx.table("pending_xp").toCollection().count();
+        // Version 6: Added resource_cache
+        return tx.table("resource_cache").toCollection().count();
       });
   }
 

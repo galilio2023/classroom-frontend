@@ -51,12 +51,14 @@ export const SchoolThemeProvider: React.FC<{ children: React.ReactNode }> = ({ c
           .join("");
       }
 
-      const normalizedColor = `#${hex}`;
+      // 🛡️ VALIDATION: Only append alpha if it's a valid hex string (Review #15)
+      const isValidHex = /^[0-9A-Fa-f]{6}$/i.test(hex);
+      const normalizedColor = isValidHex ? `#${hex}` : theme.primaryColor;
+
       document.documentElement.style.setProperty("--primary", normalizedColor);
 
       // 🚀 RULE: Generate a subtle glow/muted version for glassmorphism without transparency issues
-      // Only append alpha if we have a valid 6-digit hex
-      const alphaHex = hex.length === 6 ? `${normalizedColor}22` : `${normalizedColor}40`;
+      const alphaHex = isValidHex ? `${normalizedColor}22` : normalizedColor;
       document.documentElement.style.setProperty("--primary-muted", alphaHex);
     }
   }, [theme.primaryColor]);

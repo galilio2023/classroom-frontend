@@ -52,6 +52,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { EmptyState } from "@/components/empty-state";
 import { useTranslation } from "react-i18next";
+import { handleError } from "@/providers/utils/api-errors";
 
 dayjs.extend(relativeTime);
 
@@ -101,7 +102,15 @@ export default function AcademicYearsList() {
       },
       {
         onSuccess: () => toast.success(t("years.toasts.updated")),
-        onError: () => toast.error(t("years.toasts.error")),
+        onError: async (err) => {
+          const httpError = await handleError(err);
+          toast.error(httpError.message, {
+            description: t("errors.trace_id", {
+              defaultValue: `Trace ID: ${httpError.meta?.correlationId || "N/A"}`,
+              id: httpError.meta?.correlationId,
+            }),
+          });
+        },
       }
     );
   };
@@ -115,7 +124,15 @@ export default function AcademicYearsList() {
         },
         {
           onSuccess: () => toast.success(t("years.toasts.deleted")),
-          onError: () => toast.error(t("years.toasts.error")),
+          onError: async (err) => {
+            const httpError = await handleError(err);
+            toast.error(httpError.message, {
+              description: t("errors.trace_id", {
+                defaultValue: `Trace ID: ${httpError.meta?.correlationId || "N/A"}`,
+                id: httpError.meta?.correlationId,
+              }),
+            });
+          },
         }
       );
     }
@@ -136,7 +153,15 @@ export default function AcademicYearsList() {
           setIsCreateOpen(false);
           form.reset();
         },
-        onError: () => toast.error(t("years.toasts.error")),
+        onError: async (err) => {
+          const httpError = await handleError(err);
+          toast.error(httpError.message, {
+            description: t("errors.trace_id", {
+              defaultValue: `Trace ID: ${httpError.meta?.correlationId || "N/A"}`,
+              id: httpError.meta?.correlationId,
+            }),
+          });
+        },
       }
     );
   };
