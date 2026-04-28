@@ -17,6 +17,7 @@ import { formatTime } from "@/lib/date-utils";
 import { cn } from "@/lib/utils";
 
 export interface ConflictDetail {
+  id?: string | number;
   tenantName: string;
   dayOfWeek: number;
   startTime: string;
@@ -78,7 +79,10 @@ export const CollisionModal: React.FC<CollisionModalProps> = ({
             <div className="grid gap-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
               {conflicts.map((conflict, idx) => (
                 <motion.div
-                  key={`${conflict.tenantName}-${conflict.dayOfWeek}-${conflict.startTime}-${idx}`}
+                  key={
+                    conflict.id ||
+                    `${conflict.tenantName}-${conflict.dayOfWeek}-${conflict.startTime}-${idx}`
+                  }
                   initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.3 }}

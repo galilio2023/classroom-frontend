@@ -11,7 +11,7 @@ import { validateEgyptianID, normalizeArabicNumerals } from "@/lib/validators";
 import { handleError, getCorrelationId } from "@/providers/utils/api-errors";
 import { SignUpPayload } from "@/types";
 import { getUUID } from "@/lib/utils";
-import { AI_API, BASE_URL } from "@/constants/api";
+import { AI_API, BASE_URL, OTP_API } from "@/constants/api";
 import { getRegisterSchema, type RegisterFormValues } from "../schemas/registration-schema";
 import { offlineDB } from "@/lib/offline-db";
 
@@ -220,7 +220,7 @@ export const useRegisterForm = () => {
 
     setIsSendingOtp(true);
     try {
-      await axios.post(`${BASE_URL}${AI_API.OTP_SEND}`, { phoneNumber }, { headers });
+      await axios.post(`${BASE_URL}${OTP_API.SEND}`, { phoneNumber }, { headers });
       toast.success(t("auth.otp.sent", "OTP sent via WhatsApp!"));
     } catch (error) {
       const apiError = await handleError(error);
@@ -240,7 +240,7 @@ export const useRegisterForm = () => {
     setIsVerifyingOtp(true);
     try {
       const response = await axios.post(
-        `${BASE_URL}${AI_API.OTP_VERIFY}`,
+        `${BASE_URL}${OTP_API.VERIFY}`,
         { phoneNumber, code },
         { headers }
       );

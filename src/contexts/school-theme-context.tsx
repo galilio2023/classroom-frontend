@@ -23,15 +23,17 @@ export const SchoolThemeProvider: React.FC<{ children: React.ReactNode }> = ({ c
     [suiteType]
   );
 
-  const theme = useMemo((): SchoolTheme => {
-    const branding = identity?.school?.brandingConfig;
+  const primaryColor = identity?.school?.brandingConfig?.primaryColor;
+  const logoUrl = identity?.school?.brandingConfig?.logoUrl;
+  const schoolName = identity?.schoolName;
 
+  const theme = useMemo((): SchoolTheme => {
     return {
-      primaryColor: branding?.primaryColor || suiteFallback,
-      logoUrl: branding?.logoUrl || null,
-      schoolName: identity?.schoolName || null,
+      primaryColor: primaryColor || suiteFallback,
+      logoUrl: logoUrl || null,
+      schoolName: schoolName || null,
     };
-  }, [identity, suiteFallback]);
+  }, [primaryColor, logoUrl, schoolName, suiteFallback]);
 
   useEffect(() => {
     // 🛡️ SECURITY: Normalize hex color before injecting into CSS variables (Review #15)
@@ -41,11 +43,13 @@ export const SchoolThemeProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
     // 🚀 RULE: Generate a subtle glow/muted version for glassmorphism
     const alphaHex = withAlpha(normalizedColor, "22");
-    if (alphaHex) {
+
+    // 🛡️ HARDENING: Ensure we only set the muted variable if we have a valid 8-digit hex (+ hash)
+    if (alphaHex && alphaHex.length === 9) {
       document.documentElement.style.setProperty("--primary-muted", alphaHex);
     } else {
-      // Fallback if withAlpha failed for some reason
-      document.documentElement.style.setProperty("--primary-muted", `${normalizedColor}22`);
+      // Fallback: Use the original color without alpha to avoid invalid CSS
+      document.documentElement.style.setProperty("--primary-muted", normalizedColor);
     }
   }, [theme.primaryColor, suiteFallback]);
 

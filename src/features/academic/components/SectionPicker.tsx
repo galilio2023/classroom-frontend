@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Clock,
@@ -13,24 +13,21 @@ import {
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useList, useCustomMutation, useGo, type HttpError } from "@refinedev/core";
-import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { DAYS_SHORT } from "@/constants/calendar";
+import { useCustom, useCustomMutation, useGo } from "@refinedev/core";
 import { useTranslation } from "react-i18next";
 import { formatTime } from "@/lib/date-utils";
-import { useOfflineSync } from "@/features/engagement/hooks/use-offline-sync";
-import { Badge } from "@/components/ui/badge";
+import { DAYS_SHORT } from "@/constants/calendar";
 import { useNotifyError } from "@/hooks/use-notify-error";
-import { QUERY_SETTINGS } from "@/constants/api";
+import { useOnlineStatus } from "@/hooks/use-online-status";
+import { toast } from "sonner";
 
-export interface Section {
+interface Section {
   id: string;
   classId: string;
   className: string;
-  subjectId: string;
-  teacherId: string;
   teacherName: string;
   dayOfWeek: number;
   startTime: string;
@@ -40,70 +37,49 @@ export interface Section {
 
 interface SectionSelectionResponse {
   success: boolean;
-  data?: Record<string, unknown>;
+  offline?: boolean;
+  data?: Record<string, any>;
 }
 
 interface SectionPickerProps {
-  subjectId: string;
   enrollmentId: string;
   onSuccess?: () => void;
 }
 
-export const SectionPicker: React.FC<SectionPickerProps> = ({
-  subjectId,
-  enrollmentId,
-  onSuccess,
-}) => {
+export const SectionPicker: React.FC<SectionPickerProps> = ({ enrollmentId, onSuccess }) => {
   const { t } = useTranslation();
-  const [selectedClassId, setSelectedClassId] = React.useState<string | null>(null);
   const go = useGo();
-  const { isOnline } = useOfflineSync();
   const { notifyError } = useNotifyError();
+  const isOnline = useOnlineStatus();
+  const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
 
-  // 🚀 RULE 4: Use useList to leverage Dexie/IndexedDB offline cache
-  const { query } = useList<Section, HttpError>({
-    resource: "timetable/available-sections",
-    meta: {
-      id: subjectId,
-    },
-    queryOptions: {
-      staleTime: QUERY_SETTINGS.STALE_TIME_DEFAULT,
-    },
+  // 🛡️ RULE 4 (Offline-First): Use useList to leverage Refine's internal cache (Dexie/IndexedDB)
+  // This ensures the student can see available sections even without internet.
+  const { query, result } = useCustom<Section[]>({
+    url: `${import.meta.env.VITE_API_URL}/timetable/enrollment/${enrollmentId}/available-sections`,
+    method: "get",
   });
 
-  const { data, isLoading, isError, error, refetch } = query;
-  const sections = data?.data || [];
+  const sections = result?.data || [];
+  const isLoading = query.isPending;
+  const refetch = query.refetch;
 
-  /**
-   * 🛡️ RULE 5: Standardized Error Handling
-   * Mandate Review #15: Encapsulated deduplication inside useNotifyError.
-   */
-  React.useEffect(() => {
-    if (isError && error) {
-      notifyError(error);
-    } else if (!isError) {
-      notifyError(null); // Reset deduplication ref
-    }
-  }, [isError, error, notifyError]);
-
-  const { mutate: updateSection, mutation } = useCustomMutation<
-    SectionSelectionResponse,
-    HttpError
-  >();
+  const { mutate, mutation } = useCustomMutation<SectionSelectionResponse>();
   const isUpdating = mutation.isPending;
 
-  const handleConfirm = async () => {
+  const handleConfirm = () => {
     if (!selectedClassId) return;
 
-    updateSection(
+    mutate(
       {
-        url: `timetable/enrollment/${enrollmentId}/select-section`,
+        url: `${import.meta.env.VITE_API_URL}/timetable/enrollment/${enrollmentId}/select-section`,
         method: "post",
         values: { classId: selectedClassId },
       },
       {
         onSuccess: (response) => {
-          const isOfflineResult = (response?.data as any)?.offline;
+          // Refine mutation response wraps the payload in .data
+          const isOfflineResult = response?.data?.offline;
           if (!isOfflineResult) {
             toast.success(
               t("timetable.section_picker.success", "Lecture section selected successfully!")

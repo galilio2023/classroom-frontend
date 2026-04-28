@@ -1,4 +1,4 @@
-import { useCustom, useNavigation } from "@refinedev/core";
+import { useCustom, useGo } from "@refinedev/core";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -25,19 +25,27 @@ import { useTranslation } from "react-i18next";
 import { useCapabilities } from "@/hooks/use-capabilities";
 import { DAYS, VACATION_INDEX } from "@/constants/calendar";
 
+interface YearPlannerData {
+  density: { day: number; count: number }[];
+  exams: any[];
+  terms: any[];
+  years: any[];
+}
+
 export default function AcademicYearPlannerPage() {
   const { t } = useTranslation();
-  const { isSchoolSuite, isAdmin } = useCapabilities();
-  const { push } = useNavigation() as any;
+  const { isSchoolSuite } = useCapabilities();
+  const go = useGo();
 
   usePageTitle(t("timetable.planner.title", "Principal Year Planner"));
 
-  const { data: queryData, isLoading } = useCustom({
+  const { query, result } = useCustom<YearPlannerData>({
     url: `${import.meta.env.VITE_API_URL}/timetable/year-planner`,
     method: "get",
-  } as any) as any;
+  });
 
-  const data = (queryData?.data as any) || { density: [], exams: [], terms: [], years: [] };
+  const isLoading = query.isLoading;
+  const data = result?.data || { density: [], exams: [], terms: [], years: [] };
 
   const getHeatmapColor = (count: number, isVacation: boolean) => {
     if (isVacation) return "bg-primary/5 text-primary/40 border border-dashed border-primary/20";
@@ -131,7 +139,9 @@ export default function AcademicYearPlannerPage() {
                         </span>
                       </div>
                       <div className="text-[8px] font-black uppercase tracking-widest text-center text-muted-foreground/60">
-                        {t(`timetable.calendar.days.${day.toLowerCase()}`).slice(0, 3)}
+                        {String(
+                          t(`timetable.calendar.days.${day.toLowerCase()}`, { defaultValue: day })
+                        ).slice(0, 3)}
                       </div>
                     </div>
                   );
@@ -186,7 +196,7 @@ export default function AcademicYearPlannerPage() {
                   ))
                 ) : (
                   <p className="text-[10px] font-bold text-muted-foreground italic text-center py-4">
-                    No exams scheduled this week.
+                    {t("timetable.planner.no_exams", "No exams scheduled this week.")}
                   </p>
                 )}
               </CardContent>
@@ -198,7 +208,7 @@ export default function AcademicYearPlannerPage() {
         <section className="space-y-6">
           <h2 className="text-2xl font-black uppercase tracking-tight flex items-center gap-3 ms-2">
             <Clock className="w-6 h-6 text-primary" />
-            Academic Terms Overview
+            {t("timetable.planner.terms_overview", "Academic Terms Overview")}
           </h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {data.years.map((year: any) => (
@@ -215,16 +225,17 @@ export default function AcademicYearPlannerPage() {
                 </CardHeader>
                 <CardContent className="px-6 pb-8 space-y-4">
                   <div className="flex items-center justify-between text-xs font-bold text-muted-foreground">
-                    <span>Cycle Status</span>
+                    <span>{t("timetable.planner.cycle_status", "Cycle Status")}</span>
                     <Badge className="bg-primary/10 text-primary border-none rounded-full h-5 text-[8px] font-black uppercase">
                       {year.status}
                     </Badge>
                   </div>
                   <Button
+                    onClick={() => go({ to: { resource: "academic-years", action: "show", id: year.id } })}
                     variant="ghost"
                     className="w-full h-10 rounded-xl text-[9px] font-black uppercase tracking-widest border border-dashed border-border/60 hover:bg-primary/5 hover:text-primary transition-all"
                   >
-                    Review All Terms
+                    {t("timetable.planner.review_terms", "Review All Terms")}
                   </Button>
                 </CardContent>
               </Card>
