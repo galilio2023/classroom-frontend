@@ -52,19 +52,23 @@ export function SidebarHeader() {
       </AnimatePresence>
 
       {!open && !isMobile && (
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
-          <div className="pointer-events-auto">
-            <SuiteIdentityBadge />
-          </div>
+        <div className="flex flex-col items-center gap-2">
+          <SuiteIdentityBadge />
+          <ShadcnSidebarTrigger
+            className={cn(
+              "text-muted-foreground/60 hover:text-primary transition-all duration-300 shrink-0 opacity-100 pointer-events-auto"
+            )}
+          />
         </div>
       )}
 
-      <ShadcnSidebarTrigger
-        className={cn(
-          "text-muted-foreground/60 hover:text-primary transition-all duration-300 shrink-0 opacity-100 pointer-events-auto",
-          { "me-0": !open && !isMobile }
-        )}
-      />
+      {(open || isMobile) && (
+        <ShadcnSidebarTrigger
+          className={cn(
+            "text-muted-foreground/60 hover:text-primary transition-all duration-300 shrink-0 opacity-100 pointer-events-auto"
+          )}
+        />
+      )}
     </ShadcnSidebarHeader>
   );
 }

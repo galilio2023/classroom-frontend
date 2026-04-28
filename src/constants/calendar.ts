@@ -11,9 +11,9 @@ export const DAYS = [
   "Thursday",
   "Friday", // 🕋 Vacation Day
   "Saturday", // 🏥 Optional Weekend
-];
+] as const;
 
-export const DAYS_SHORT = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+export const DAYS_SHORT = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const;
 
 export type DayName = (typeof DAYS)[number];
 

@@ -9,6 +9,7 @@ import {
   Calendar,
   Layers,
   WifiOff,
+  RefreshCw,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -64,14 +65,16 @@ export const SectionPicker: React.FC<SectionPickerProps> = ({
     },
   });
 
-  const { data, isLoading, isError, error } = query;
+  const { data, isLoading, isError, error, refetch } = query;
   const sections = data?.data || [];
 
   /**
    * 🛡️ RULE 5: Standardized Error Handling
    */
+  const lastErrorRef = React.useRef<string | null>(null);
   React.useEffect(() => {
-    if (isError && error) {
+    if (isError && error && lastErrorRef.current !== JSON.stringify(error)) {
+      lastErrorRef.current = JSON.stringify(error);
       handleError(error).then((httpError) => {
         toast.error(httpError.message, {
           description: t("errors.trace_id", {
@@ -80,6 +83,8 @@ export const SectionPicker: React.FC<SectionPickerProps> = ({
           }),
         });
       });
+    } else if (!isError) {
+      lastErrorRef.current = null;
     }
   }, [isError, error, t]);
 
@@ -147,6 +152,15 @@ export const SectionPicker: React.FC<SectionPickerProps> = ({
               {t("status.offline", "Offline Mode")}
             </Badge>
           )}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 rounded-full ms-auto"
+            onClick={() => refetch()}
+            disabled={!isOnline || isLoading}
+          >
+            <RefreshCw className={cn("w-3 h-3", isLoading && "animate-spin")} />
+          </Button>
         </h3>
         <p className="text-sm text-muted-foreground font-medium">
           {t(
