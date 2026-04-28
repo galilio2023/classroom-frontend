@@ -23,6 +23,7 @@ import { formatTime } from "@/lib/date-utils";
 import { useOfflineSync } from "@/features/engagement/hooks/use-offline-sync";
 import { Badge } from "@/components/ui/badge";
 import { useNotifyError } from "@/hooks/use-notify-error";
+import { QUERY_SETTINGS } from "@/constants/api";
 
 export interface Section {
   id: string;
@@ -66,7 +67,7 @@ export const SectionPicker: React.FC<SectionPickerProps> = ({
       id: subjectId,
     },
     queryOptions: {
-      staleTime: 10 * 60 * 1000, // 10 mins cache
+      staleTime: QUERY_SETTINGS.STALE_TIME_DEFAULT,
     },
   });
 

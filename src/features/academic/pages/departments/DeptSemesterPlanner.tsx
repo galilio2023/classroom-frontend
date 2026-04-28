@@ -14,6 +14,7 @@ import { DAYS_SHORT, VACATION_INDEX } from "@/constants/calendar";
 import { useOfflineSync } from "@/features/engagement/hooks/use-offline-sync";
 import { PlannerDayColumn } from "../../components/PlannerDayColumn";
 import { useNotifyError } from "@/hooks/use-notify-error";
+import { QUERY_SETTINGS } from "@/constants/api";
 
 export interface TimetableSlot {
   id: string;
@@ -39,7 +40,7 @@ export default function DeptSemesterPlannerPage() {
   const { query } = useList<TimetableSlot, HttpError>({
     resource: "timetable/dept-planner",
     queryOptions: {
-      staleTime: 5 * 60 * 1000, // 5 mins
+      staleTime: QUERY_SETTINGS.STALE_TIME_HIGH_STAKES,
     },
   });
 

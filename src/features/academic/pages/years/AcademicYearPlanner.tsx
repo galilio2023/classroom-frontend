@@ -23,6 +23,7 @@ import { ListView } from "@/components/refine/views/list-view";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 import { useCapabilities } from "@/hooks/use-capabilities";
+import { DAYS, VACATION_INDEX } from "@/constants/calendar";
 
 export default function AcademicYearPlannerPage() {
   const { t } = useTranslation();
@@ -38,9 +39,8 @@ export default function AcademicYearPlannerPage() {
 
   const data = (queryData?.data as any) || { density: [], exams: [], terms: [], years: [] };
 
-  const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-
-  const getHeatmapColor = (count: number) => {
+  const getHeatmapColor = (count: number, isVacation: boolean) => {
+    if (isVacation) return "bg-primary/5 text-primary/40 border border-dashed border-primary/20";
     if (count === 0) return "bg-muted/10";
     if (count < 5) return "bg-blue-500/20 text-blue-700";
     if (count < 10) return "bg-blue-500/40 text-blue-900";
@@ -114,21 +114,24 @@ export default function AcademicYearPlannerPage() {
               <div className="grid grid-cols-7 gap-4">
                 {DAYS.map((day, idx) => {
                   const count = data.density.find((d: any) => d.day === idx)?.count || 0;
+                  const isVacation = idx === VACATION_INDEX;
                   return (
                     <div key={idx} className="space-y-3">
                       <div
                         className={cn(
                           "h-32 rounded-3xl flex flex-col items-center justify-center transition-all duration-500 group-hover:scale-[1.02]",
-                          getHeatmapColor(count)
+                          getHeatmapColor(count, isVacation)
                         )}
                       >
-                        <span className="text-2xl font-black">{count}</span>
+                        <span className={cn("text-2xl font-black", isVacation && "opacity-20")}>
+                          {count}
+                        </span>
                         <span className="text-[8px] font-black uppercase tracking-widest opacity-60">
-                          Periods
+                          {isVacation ? t("status.off", "Off") : "Periods"}
                         </span>
                       </div>
                       <div className="text-[8px] font-black uppercase tracking-widest text-center text-muted-foreground/60">
-                        {day.slice(0, 3)}
+                        {t(`timetable.calendar.days.${day.toLowerCase()}`).slice(0, 3)}
                       </div>
                     </div>
                   );
