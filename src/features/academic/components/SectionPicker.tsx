@@ -16,13 +16,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import { useCustom, useCustomMutation, useGo } from "@refinedev/core";
+import { useList, useCustomMutation, useGo } from "@refinedev/core";
 import { useTranslation } from "react-i18next";
 import { formatTime } from "@/lib/date-utils";
 import { DAYS_SHORT } from "@/constants/calendar";
 import { useNotifyError } from "@/hooks/use-notify-error";
 import { useOnlineStatus } from "@/hooks/use-online-status";
 import { toast } from "sonner";
+import { QUERY_SETTINGS } from "@/constants/api";
 
 interface Section {
   id: string;
@@ -55,13 +56,16 @@ export const SectionPicker: React.FC<SectionPickerProps> = ({ enrollmentId, onSu
 
   // 🛡️ RULE 4 (Offline-First): Use useList to leverage Refine's internal cache (Dexie/IndexedDB)
   // This ensures the student can see available sections even without internet.
-  const { query, result } = useCustom<Section[]>({
-    url: `${import.meta.env.VITE_API_URL}/timetable/enrollment/${enrollmentId}/available-sections`,
-    method: "get",
+  const { query, result } = useList<Section>({
+    resource: `timetable/enrollment/${enrollmentId}/available-sections`,
+    queryOptions: {
+      staleTime: QUERY_SETTINGS.STALE_TIME_DEFAULT,
+      gcTime: QUERY_SETTINGS.CACHE_TIME_PERSISTENT,
+    },
   });
 
   const sections = result?.data || [];
-  const isLoading = query.isPending;
+  const isLoading = query.isLoading;
   const refetch = query.refetch;
 
   const { mutate, mutation } = useCustomMutation<SectionSelectionResponse>();

@@ -31,20 +31,12 @@ export const normalizeHex = (color: string | null | undefined): string | null =>
 /**
  * Appends alpha transparency to a hex color.
  * 💡 FUTURE: Consider migrating to HSL/RGB variables for native CSS opacity support.
- * @param hex Normalized 6-digit hex string (e.g., #ffffff)
+ * @param hex Normalized hex string (supports shorthand or full hex)
  * @param alpha Hex alpha value (e.g., 22 for ~13%)
  */
 export const withAlpha = (hex: string | null | undefined, alpha: string = "22"): string | null => {
-  if (!hex || typeof hex !== "string") return null;
+  const base = normalizeHex(hex);
+  if (!base) return hex || null;
 
-  // Ensure we have a hash
-  const base = hex.startsWith("#") ? hex : `#${hex}`;
-
-  // If it's a valid 6-digit hex + hash, append alpha
-  if (/^#[0-9A-Fa-f]{6}$/.test(base)) {
-    return `${base}${alpha}`;
-  }
-
-  // Fallback: Return original if we can't safely append alpha
-  return hex;
+  return `${base}${alpha}`;
 };

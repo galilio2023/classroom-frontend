@@ -231,7 +231,9 @@ export default function AcademicYearPlannerPage() {
                     </Badge>
                   </div>
                   <Button
-                    onClick={() => go({ to: { resource: "academic-years", action: "show", id: year.id } })}
+                    onClick={() =>
+                      go({ to: { resource: "academic-years", action: "show", id: year.id } })
+                    }
                     variant="ghost"
                     className="w-full h-10 rounded-xl text-[9px] font-black uppercase tracking-widest border border-dashed border-border/60 hover:bg-primary/5 hover:text-primary transition-all"
                   >
