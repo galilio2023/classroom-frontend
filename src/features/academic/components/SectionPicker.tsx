@@ -68,7 +68,7 @@ export const SectionPicker: React.FC<SectionPickerProps> = ({ enrollmentId, onSu
       },
     ],
     queryOptions: {
-      staleTime: QUERY_SETTINGS.STALE_TIME_DEFAULT,
+      staleTime: 5 * 60 * 1000, // 🛡️ HUB HARDENING: Reduced to 5 mins for high-traffic enrollment (Review #15)
       gcTime: QUERY_SETTINGS.CACHE_TIME_PERSISTENT,
     },
   });

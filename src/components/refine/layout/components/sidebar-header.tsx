@@ -69,7 +69,12 @@ export function SidebarHeader() {
             </motion.div>
           )}
         </AnimatePresence>
-        <ShadcnSidebarTrigger className="text-muted-foreground/60 hover:text-primary transition-all duration-300 shrink-0" />
+        <ShadcnSidebarTrigger
+          className={cn(
+            "text-muted-foreground/60 hover:text-primary transition-all duration-300 shrink-0",
+            { "me-0": isCollapsed }
+          )}
+        />
       </div>
     </ShadcnSidebarHeader>
   );
