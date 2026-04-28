@@ -44,7 +44,6 @@ export default function DeptSemesterPlannerPage() {
   });
 
   const { data, isLoading, isError, error } = query;
-  const slots = data?.data || [];
 
   /**
    * 🛡️ RULE 5: Standardized Error Handling
@@ -66,6 +65,7 @@ export default function DeptSemesterPlannerPage() {
    * 🚀 OPTIMIZATION (Review #5 + #8): Group slots by day to reduce O(N*M) complexity in the grid render.
    */
   const { slotsByDay, hasConflicts, conflictCount } = useMemo(() => {
+    const slots = data?.data || [];
     const grouped = (slots as TimetableSlot[]).reduce(
       (acc: Record<number, TimetableSlot[]>, slot: TimetableSlot) => {
         acc[slot.dayOfWeek] = [...(acc[slot.dayOfWeek] || []), slot];
@@ -81,7 +81,7 @@ export default function DeptSemesterPlannerPage() {
       hasConflicts: conflicts.length > 0,
       conflictCount: conflicts.length,
     };
-  }, [slots]);
+  }, [data]);
 
   if (!isFacultySuite) {
     return (

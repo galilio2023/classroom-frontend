@@ -39,9 +39,25 @@ export const SchoolThemeProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
   useEffect(() => {
     if (theme.primaryColor) {
-      document.documentElement.style.setProperty("--primary", theme.primaryColor);
+      // 🛡️ SECURITY: Normalize hex color to 6 digits before adding alpha (Review #15)
+      let hex = theme.primaryColor;
+      if (hex.startsWith("#")) {
+        hex = hex.slice(1);
+      }
+      if (hex.length === 3) {
+        hex = hex
+          .split("")
+          .map((c) => c + c)
+          .join("");
+      }
+
+      const normalizedColor = `#${hex}`;
+      document.documentElement.style.setProperty("--primary", normalizedColor);
+
       // 🚀 RULE: Generate a subtle glow/muted version for glassmorphism without transparency issues
-      document.documentElement.style.setProperty("--primary-muted", `${theme.primaryColor}22`);
+      // Only append alpha if we have a valid 6-digit hex
+      const alphaHex = hex.length === 6 ? `${normalizedColor}22` : `${normalizedColor}40`;
+      document.documentElement.style.setProperty("--primary-muted", alphaHex);
     }
   }, [theme.primaryColor]);
 

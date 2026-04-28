@@ -38,7 +38,7 @@ export interface Section {
 
 interface SectionSelectionResponse {
   success: boolean;
-  data?: any;
+  data?: Record<string, unknown>;
 }
 
 interface SectionPickerProps {
@@ -112,7 +112,7 @@ export const SectionPicker: React.FC<SectionPickerProps> = ({
           // Programmatic navigation to dashboard
           go({ to: "/dashboard" });
         },
-        onError: async (err: any) => {
+        onError: async (err: unknown) => {
           const httpError = await handleError(err);
           // 🚀 RULE 8: Surface Trace ID for high-stakes errors
           toast.error(httpError.message, {

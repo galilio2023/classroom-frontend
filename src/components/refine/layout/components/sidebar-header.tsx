@@ -13,15 +13,17 @@ export function SidebarHeader() {
   const { title } = useRefineOptions();
   const { open, isMobile } = useShadcnSidebar();
 
+  const isCollapsed = !open && !isMobile;
+
   return (
     <ShadcnSidebarHeader
       className={cn(
         "p-0 h-20 border-b border-border/40 flex items-center overflow-hidden bg-transparent transition-all duration-300",
-        !open && !isMobile ? "justify-center" : "flex-row justify-between px-6"
+        isCollapsed ? "justify-center" : "flex-row justify-between px-6"
       )}
     >
       <AnimatePresence mode="wait">
-        {(open || isMobile) && (
+        {!isCollapsed && (
           <motion.div
             key="logo-full"
             initial={{ opacity: 0, x: -20, filter: "blur(10px)" }}
@@ -38,37 +40,25 @@ export function SidebarHeader() {
                   {title.text}
                 </h2>
                 <span className="text-[10px] text-muted-foreground/60 font-medium tracking-wide">
-                  {open ? "Learning Management" : ""}
+                  Learning Management
                 </span>
               </div>
             </RouterLink>
-            {(open || isMobile) && (
-              <div className="mt-4 px-1">
-                <SuiteIdentityBadge />
-              </div>
-            )}
+            <div className="mt-4 px-1">
+              <SuiteIdentityBadge />
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {!open && !isMobile && (
-        <div className="flex flex-col items-center gap-2">
-          <SuiteIdentityBadge />
-          <ShadcnSidebarTrigger
-            className={cn(
-              "text-muted-foreground/60 hover:text-primary transition-all duration-300 shrink-0 opacity-100 pointer-events-auto"
-            )}
-          />
-        </div>
-      )}
-
-      {(open || isMobile) && (
-        <ShadcnSidebarTrigger
-          className={cn(
-            "text-muted-foreground/60 hover:text-primary transition-all duration-300 shrink-0 opacity-100 pointer-events-auto"
-          )}
-        />
-      )}
+      <div
+        className={cn("flex flex-col items-center gap-2 transition-all", {
+          "ms-auto": !isCollapsed,
+        })}
+      >
+        {isCollapsed && <SuiteIdentityBadge />}
+        <ShadcnSidebarTrigger className="text-muted-foreground/60 hover:text-primary transition-all duration-300 shrink-0" />
+      </div>
     </ShadcnSidebarHeader>
   );
 }

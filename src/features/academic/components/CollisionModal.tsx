@@ -1,5 +1,5 @@
 import React from "react";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { ShieldAlert, Clock, Building2, Calendar, AlertTriangle } from "lucide-react";
 import {
   AlertDialog,
@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { useTranslation } from "react-i18next";
 import { DAYS } from "@/constants/calendar";
 import { formatTime } from "@/lib/date-utils";
+import { cn } from "@/lib/utils";
 
 export interface ConflictDetail {
   tenantName: string;
@@ -35,6 +36,7 @@ export const CollisionModal: React.FC<CollisionModalProps> = ({
   conflicts,
 }) => {
   const { t } = useTranslation();
+  const shouldReduceMotion = useReducedMotion();
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
@@ -42,7 +44,12 @@ export const CollisionModal: React.FC<CollisionModalProps> = ({
         <div className="p-8 md:p-12 space-y-8">
           <AlertDialogHeader className="text-start space-y-4">
             <div className="flex items-center gap-4">
-              <div className="p-4 rounded-2xl bg-destructive/10 text-destructive animate-pulse">
+              <div
+                className={cn(
+                  "p-4 rounded-2xl bg-destructive/10 text-destructive",
+                  !shouldReduceMotion && "animate-pulse"
+                )}
+              >
                 <ShieldAlert className="w-8 h-8" />
               </div>
               <div>
@@ -72,7 +79,7 @@ export const CollisionModal: React.FC<CollisionModalProps> = ({
               {conflicts.map((conflict, i) => (
                 <motion.div
                   key={i}
-                  initial={{ opacity: 0, x: -10 }}
+                  initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: i * 0.05 }}
                   className="p-5 rounded-3xl bg-destructive/5 border border-destructive/10 space-y-3 relative group"
