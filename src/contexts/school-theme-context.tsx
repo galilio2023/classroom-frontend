@@ -38,6 +38,9 @@ export const SchoolThemeProvider: React.FC<{ children: React.ReactNode }> = ({ c
     const alphaHex = withAlpha(normalizedColor, "22");
     if (alphaHex) {
       document.documentElement.style.setProperty("--primary-muted", alphaHex);
+    } else {
+      // Fallback if withAlpha failed for some reason
+      document.documentElement.style.setProperty("--primary-muted", `${normalizedColor}22`);
     }
   }, [theme.primaryColor]);
 

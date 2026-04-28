@@ -76,12 +76,12 @@ export const CollisionModal: React.FC<CollisionModalProps> = ({
               {t("timetable.collision.assignments", "Conflicting Assignments")}
             </div>
             <div className="grid gap-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-              {conflicts.map((conflict, i) => (
+              {conflicts.map((conflict) => (
                 <motion.div
-                  key={i}
+                  key={`${conflict.tenantName}-${conflict.dayOfWeek}-${conflict.startTime}`}
                   initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.05 }}
+                  transition={{ duration: 0.3 }}
                   className="p-5 rounded-3xl bg-destructive/5 border border-destructive/10 space-y-3 relative group"
                 >
                   <div className="flex items-center justify-between">
