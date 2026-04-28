@@ -57,7 +57,14 @@ export const SectionPicker: React.FC<SectionPickerProps> = ({ enrollmentId, onSu
   // 🛡️ RULE 4 (Offline-First): Use useList to leverage Refine's internal cache (Dexie/IndexedDB)
   // This ensures the student can see available sections even without internet.
   const { query, result } = useList<Section>({
-    resource: `timetable/enrollment/${enrollmentId}/available-sections`,
+    resource: "timetable/available-sections",
+    filters: [
+      {
+        field: "enrollmentId",
+        operator: "eq",
+        value: enrollmentId,
+      },
+    ],
     queryOptions: {
       staleTime: QUERY_SETTINGS.STALE_TIME_DEFAULT,
       gcTime: QUERY_SETTINGS.CACHE_TIME_PERSISTENT,
@@ -76,8 +83,8 @@ export const SectionPicker: React.FC<SectionPickerProps> = ({ enrollmentId, onSu
 
     mutate(
       {
-        url: `${import.meta.env.VITE_API_URL}/timetable/enrollment/${enrollmentId}/select-section`,
-        method: "post",
+        url: `timetable/enrollment/${enrollmentId}/select-section`,
+        method: "patch", // 🛡️ Backend uses PATCH for this route
         values: { classId: selectedClassId },
       },
       {
