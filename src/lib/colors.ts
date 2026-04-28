@@ -15,7 +15,7 @@ export const normalizeHex = (color: string | null | undefined): string | null =>
     hex = hex.slice(1);
   }
 
-  // Handle 3-digit shorthand
+  // Handle 3-digit shorthand (#f00 -> ff0000)
   if (hex.length === 3) {
     hex = hex
       .split("")

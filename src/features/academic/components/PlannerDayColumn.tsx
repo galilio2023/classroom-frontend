@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 import { formatTime } from "@/lib/date-utils";
 import { type TimetableSlot } from "../pages/departments/DeptSemesterPlanner";
+import { useSchoolTheme } from "@/contexts/school-theme-context";
 
 interface PlannerDayColumnProps {
   dayName: string;
@@ -19,6 +20,7 @@ export const PlannerDayColumn: React.FC<PlannerDayColumnProps> = ({
   slots,
 }) => {
   const { t } = useTranslation();
+  const { primaryColor } = useSchoolTheme();
 
   return (
     <div
@@ -78,20 +80,16 @@ export const PlannerDayColumn: React.FC<PlannerDayColumnProps> = ({
                   </Badge>
                 )}
                 <span
-                  className={cn(
-                    "text-[10px] font-black tracking-tight",
-                    slot.hasConflict ? "text-destructive" : "text-purple-600"
-                  )}
+                  className={cn("text-[10px] font-black tracking-tight")}
+                  style={{ color: slot.hasConflict ? undefined : primaryColor }}
                 >
                   {formatTime(slot.startTime)} - {formatTime(slot.endTime)}
                 </span>
                 <div className="space-y-1 min-w-0 w-full">
                   <div className="flex items-center gap-1.5 min-w-0">
                     <Layers
-                      className={cn(
-                        "w-3 h-3 shrink-0",
-                        slot.hasConflict ? "text-destructive" : "text-purple-500"
-                      )}
+                      className={cn("w-3 h-3 shrink-0")}
+                      style={{ color: slot.hasConflict ? undefined : primaryColor }}
                     />
                     <h5 className="text-[10px] font-black truncate">Sec {slot.section?.name}</h5>
                   </div>

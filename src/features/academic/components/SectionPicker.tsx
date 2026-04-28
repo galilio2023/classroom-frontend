@@ -22,6 +22,7 @@ import { formatTime } from "@/lib/date-utils";
 import { DAYS_SHORT } from "@/constants/calendar";
 import { useNotifyError } from "@/hooks/use-notify-error";
 import { useOnlineStatus } from "@/hooks/use-online-status";
+import { useSchoolTheme } from "@/contexts/school-theme-context";
 import { toast } from "sonner";
 import { QUERY_SETTINGS } from "@/constants/api";
 
@@ -52,6 +53,7 @@ export const SectionPicker: React.FC<SectionPickerProps> = ({ enrollmentId, onSu
   const go = useGo();
   const { notifyError } = useNotifyError();
   const isOnline = useOnlineStatus();
+  const { primaryColor } = useSchoolTheme();
   const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
 
   // 🛡️ RULE 4 (Offline-First): Use useList to leverage Refine's internal cache (Dexie/IndexedDB)
@@ -140,7 +142,7 @@ export const SectionPicker: React.FC<SectionPickerProps> = ({ enrollmentId, onSu
     <div className="space-y-8 text-start">
       <div className="space-y-1">
         <h3 className="text-xl font-black uppercase tracking-tight flex items-center gap-2">
-          <Layers className="w-5 h-5 text-purple-500" />
+          <Layers className="w-5 h-5" style={{ color: primaryColor }} />
           {t("timetable.section_picker.title", "Choose Your Section")}
           {!isOnline && (
             <Badge
@@ -184,9 +186,12 @@ export const SectionPicker: React.FC<SectionPickerProps> = ({ enrollmentId, onSu
                   className={cn(
                     "cursor-pointer transition-all duration-300 border-2 rounded-3xl overflow-hidden group relative",
                     selectedClassId === section.classId
-                      ? "border-purple-500 bg-purple-500/5 ring-1 ring-purple-500/10 shadow-lg"
-                      : "border-border/40 hover:border-purple-500/20 bg-background/40 hover:bg-background/60"
+                      ? "bg-primary/5 ring-1 ring-primary/10 shadow-lg"
+                      : "border-border/40 hover:border-primary/20 bg-background/40 hover:bg-background/60"
                   )}
+                  style={{
+                    borderColor: selectedClassId === section.classId ? primaryColor : undefined,
+                  }}
                 >
                   <CardContent className="p-6">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -195,9 +200,15 @@ export const SectionPicker: React.FC<SectionPickerProps> = ({ enrollmentId, onSu
                           className={cn(
                             "p-3 rounded-2xl border transition-colors",
                             selectedClassId === section.classId
-                              ? "bg-purple-500 text-white border-purple-400"
-                              : "bg-muted/10 text-muted-foreground border-border/40 group-hover:bg-purple-500/10 group-hover:text-purple-500"
+                              ? "text-white border-transparent"
+                              : "bg-muted/10 text-muted-foreground border-border/40 group-hover:bg-primary/10 group-hover:text-primary"
                           )}
+                          style={{
+                            backgroundColor:
+                              selectedClassId === section.classId ? primaryColor : undefined,
+                            borderColor:
+                              selectedClassId === section.classId ? primaryColor : undefined,
+                          }}
                         >
                           <Calendar className="w-6 h-6" />
                         </div>
@@ -232,7 +243,7 @@ export const SectionPicker: React.FC<SectionPickerProps> = ({ enrollmentId, onSu
 
                         {selectedClassId === section.classId && (
                           <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }}>
-                            <CheckCircle2 className="w-6 h-6 text-purple-500" />
+                            <CheckCircle2 className="w-6 h-6" style={{ color: primaryColor }} />
                           </motion.div>
                         )}
                       </div>
@@ -268,10 +279,11 @@ export const SectionPicker: React.FC<SectionPickerProps> = ({ enrollmentId, onSu
           disabled={!selectedClassId || isUpdating}
           className={cn(
             "h-14 px-8 rounded-2xl font-black uppercase tracking-widest text-xs gap-2 shadow-xl transition-all",
-            !isOnline
-              ? "bg-amber-600 hover:bg-amber-700 shadow-amber-500/20"
-              : "bg-purple-600 hover:bg-purple-700 shadow-purple-500/20"
+            !isOnline ? "bg-amber-600 hover:bg-amber-700 shadow-amber-500/20" : "shadow-primary/20"
           )}
+          style={{
+            backgroundColor: isOnline ? primaryColor : undefined,
+          }}
         >
           {isUpdating ? (
             <>
