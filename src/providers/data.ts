@@ -219,7 +219,13 @@ export const dataProvider: DataProvider = {
       throw new Error("No offline data available for this request.");
     }
 
-    const urlPath = getResourcePath(resource);
+    let urlPath = getResourcePath(resource);
+
+    // 🚀 DYNAMIC PATHS: Support /resource/:id sub-resource lists (Review #15)
+    if (meta?.id) {
+      urlPath = `${urlPath}/${meta.id}`;
+    }
+
     const url = new URL(`${BACKEND_BASE_URL}/${urlPath}`);
 
     const withRelations = meta?.with || meta?.populate;
@@ -525,7 +531,7 @@ export const dataProvider: DataProvider = {
         meta: meta as any,
       });
       toast.warning("📴 Offline: Action saved locally.");
-      return { data: {} as any };
+      return { data: { offline: true } as any };
     }
 
     let requestUrl = url;

@@ -60,7 +60,10 @@ export const SectionPicker: React.FC<SectionPickerProps> = ({
 
   // 🚀 RULE 4: Use useList to leverage Dexie/IndexedDB offline cache
   const { query } = useList<Section, HttpError>({
-    resource: `timetable/available-sections/${subjectId}`,
+    resource: "timetable/available-sections",
+    meta: {
+      id: subjectId,
+    },
     queryOptions: {
       staleTime: 10 * 60 * 1000, // 10 mins cache
     },
@@ -107,10 +110,13 @@ export const SectionPicker: React.FC<SectionPickerProps> = ({
         values: { classId: selectedClassId },
       },
       {
-        onSuccess: () => {
-          toast.success(
-            t("timetable.section_picker.success", "Lecture section selected successfully!")
-          );
+        onSuccess: (response) => {
+          const isOfflineResult = (response?.data as any)?.offline;
+          if (!isOfflineResult) {
+            toast.success(
+              t("timetable.section_picker.success", "Lecture section selected successfully!")
+            );
+          }
           onSuccess?.();
           // Programmatic navigation to dashboard
           go({ to: "/dashboard" });
@@ -286,8 +292,13 @@ export const SectionPicker: React.FC<SectionPickerProps> = ({
       <div className="pt-4 border-t border-border/40 flex justify-end gap-3">
         <Button
           onClick={handleConfirm}
-          disabled={!selectedClassId || isUpdating || !isOnline}
-          className="h-14 px-8 rounded-2xl font-black uppercase tracking-widest text-xs gap-2 shadow-xl shadow-purple-500/20 bg-purple-600 hover:bg-purple-700"
+          disabled={!selectedClassId || isUpdating}
+          className={cn(
+            "h-14 px-8 rounded-2xl font-black uppercase tracking-widest text-xs gap-2 shadow-xl transition-all",
+            !isOnline
+              ? "bg-amber-600 hover:bg-amber-700 shadow-amber-500/20"
+              : "bg-purple-600 hover:bg-purple-700 shadow-purple-500/20"
+          )}
         >
           {isUpdating ? (
             <>
@@ -297,7 +308,7 @@ export const SectionPicker: React.FC<SectionPickerProps> = ({
           ) : !isOnline ? (
             <>
               <WifiOff className="w-4 h-4" />
-              {t("status.offline_waiting", "Offline")}
+              {t("status.offline_queue", "Save Offline")}
             </>
           ) : (
             <>

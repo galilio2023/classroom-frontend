@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useMemo } from "react";
 import { useGetIdentity } from "@refinedev/core";
 import { User, SuiteType } from "@/types";
 import { useCapabilities } from "@/hooks/use-capabilities";
+import { SUITE_COLORS } from "@/constants/theme";
 
 interface SchoolTheme {
   primaryColor: string;
@@ -10,17 +11,6 @@ interface SchoolTheme {
 }
 
 const SchoolThemeContext = createContext<SchoolTheme | undefined>(undefined);
-
-/**
- * 🎨 SUITE BRANDING DEFAULTS
- * Mandate Review #14: Ensure these align with CSS variables for suite-specific UI.
- */
-const SUITE_COLORS: Record<SuiteType, string> = {
-  private: "#6366f1", // Indigo-500
-  school: "#3b82f6", // Blue-500
-  faculty: "#8b5cf6", // Purple-500
-  corporate: "#10b981", // Emerald-500
-};
 
 export const SchoolThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { data: identity } = useGetIdentity<User>();
@@ -40,24 +30,28 @@ export const SchoolThemeProvider: React.FC<{ children: React.ReactNode }> = ({ c
   useEffect(() => {
     if (theme.primaryColor && typeof theme.primaryColor === "string") {
       // 🛡️ SECURITY: Normalize hex color to 6 digits before adding alpha (Review #15)
-      let hex = theme.primaryColor;
+      let hex = theme.primaryColor.trim();
+
+      // If it's a hex color, try to normalize it
       if (hex.startsWith("#")) {
         hex = hex.slice(1);
-      }
-      if (hex.length === 3) {
-        hex = hex
-          .split("")
-          .map((c) => c + c)
-          .join("");
+        if (hex.length === 3) {
+          hex = hex
+            .split("")
+            .map((c) => c + c)
+            .join("");
+        }
       }
 
-      // 🛡️ VALIDATION: Only append alpha if it's a valid hex string (Review #15)
+      // 🛡️ VALIDATION: Only append alpha if it's a valid 6-digit hex string (Review #15)
       const isValidHex = /^[0-9A-Fa-f]{6}$/i.test(hex);
       const normalizedColor = isValidHex ? `#${hex}` : theme.primaryColor;
 
       document.documentElement.style.setProperty("--primary", normalizedColor);
 
-      // 🚀 RULE: Generate a subtle glow/muted version for glassmorphism without transparency issues
+      // 🚀 RULE: Generate a subtle glow/muted version for glassmorphism
+      // If not a hex color (e.g. rgb/hsl), we just use it as is for the muted version
+      // or rely on CSS opacity where possible.
       const alphaHex = isValidHex ? `${normalizedColor}22` : normalizedColor;
       document.documentElement.style.setProperty("--primary-muted", alphaHex);
     }

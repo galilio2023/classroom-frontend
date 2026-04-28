@@ -93,7 +93,10 @@ export const CollisionModal: React.FC<CollisionModalProps> = ({
                     </div>
                     <Badge
                       variant="outline"
-                      className="h-5 px-2 rounded-full text-[8px] font-black uppercase border-destructive/20 text-destructive"
+                      className={cn(
+                        "h-5 px-2 rounded-full text-[8px] font-black uppercase border-destructive/20 text-destructive",
+                        !shouldReduceMotion && "group-hover:animate-pulse"
+                      )}
                     >
                       {conflict.scheduleType}
                     </Badge>
