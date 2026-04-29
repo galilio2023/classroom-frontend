@@ -124,7 +124,7 @@ export const SchoolGradebook: React.FC<SchoolGradebookProps> = ({
                   <th className="p-6 text-center text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
                     {t("classes.gradebook.columns.average", { defaultValue: "Average" })}
                   </th>
-                  {students.length > 0 ? (
+                  {students.length > 0 && students[0]?.subjects ? (
                     students[0].subjects.map((sub: any) => (
                       <th
                         key={sub.name}

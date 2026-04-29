@@ -39,7 +39,6 @@ export const useQuiz = ({ assignmentId, classId, description, onComplete }: UseQ
   const [isAnswered, setIsAnswered] = useState(false);
   const [score, setScore] = useState(0);
   const [isFinished, setIsFinished] = useState(false);
-  const [examMode, setExamMode] = useState(false);
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [isResuming, setIsResuming] = useState(true);
 
@@ -63,11 +62,7 @@ export const useQuiz = ({ assignmentId, classId, description, onComplete }: UseQ
     method: "get",
   });
 
-  useEffect(() => {
-    if (quizDetailQuery.data) {
-      setExamMode((quizDetailQuery.data as any).data?.examMode || false);
-    }
-  }, [quizDetailQuery.data]);
+  const examMode = (quizDetailQuery.data as any)?.data?.examMode || false;
 
   useEffect(() => {
     if (recoveryQuery.data) {

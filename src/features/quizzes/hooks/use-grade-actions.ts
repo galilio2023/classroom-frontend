@@ -36,7 +36,11 @@ export const useGradeActions = (
         },
         onError: async (err) => {
           const httpError = await handleError(err);
-          toast.error(httpError.message);
+          toast.error(httpError.message, {
+            description: httpError.meta?.correlationId
+              ? `Trace ID: ${httpError.meta.correlationId}`
+              : undefined,
+          });
         },
       }
     );
