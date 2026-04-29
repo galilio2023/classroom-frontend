@@ -62,7 +62,7 @@ export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({
           {
             duration: 10000,
             icon: "🛡️",
-          }
+          },
         );
 
         // 🚀 TELEMETRY: Use sendBeacon for reliability (ensures log reaches server even on tab close)
@@ -72,22 +72,13 @@ export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({
         });
         navigator.sendBeacon(
           `${import.meta.env.VITE_API_URL}/quizzes/${assignmentId}/telemetry`,
-          telemetryData
+          telemetryData,
         );
 
         // 🛡️ RULE 6: Stop active speech synthesis (Mandate)
         if (window.speechSynthesis) window.speechSynthesis.cancel();
-
-        // 🛡️ HARDWARE SAFETY: Stop all active tracks if any media is active
-        // Note: This enforces the mandate globally within the exam context
-        navigator.mediaDevices
-          ?.getUserMedia({ audio: true, video: true })
-          .then((stream) => {
-            stream.getTracks().forEach((track) => track.stop());
-          })
-          .catch(() => {
-            /* No active streams to stop */
-          });
+        
+        // 🚀 AUDIT: Telemetry sent via beacon to ensure persistence
       }
     };
 
@@ -99,6 +90,7 @@ export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({
       if (window.speechSynthesis) window.speechSynthesis.cancel();
     };
   }, [examMode, isFinished, t, assignmentId]); // logTelemetry removed (redundant)
+
   if (questions.length === 0) return null;
 
   if (isFinished) {

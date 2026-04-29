@@ -201,13 +201,11 @@ const QuizCreate = () => {
                           <div className="space-y-0.5">
                             <FormLabel className="text-xs font-black uppercase tracking-widest flex items-center gap-2">
                               <ShieldAlert className="h-3.5 w-3.5 text-primary" />
-                              {t("classes.quiz.examMode", "Exam Mode")}
+                              <Sparkles className="h-3.5 w-3.5 text-primary animate-pulse" />
+                              {t("classes.quiz.examMode", { defaultValue: "Exam Mode" })}
                             </FormLabel>
                             <p className="text-[10px] font-medium text-muted-foreground">
-                              {t(
-                                "classes.quiz.examModeDesc",
-                                "Hardened integrity: Tab-switch detection & no AI assistance."
-                              )}
+                              {t("classes.quiz.examModeDesc", { defaultValue: "Hardened integrity: AI-proctoring, tab-switch detection & no AI assistance." })}
                             </p>
                           </div>
                           <FormControl>
